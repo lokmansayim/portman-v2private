@@ -7,7 +7,8 @@ sorusu).
   olabilir. O commit mühürün geçmişinde olmalı; eklemeler projenin kaydını değiştirmez (hakem eklenebilir bölümlerde değişmeyi durdurur),
   kalan alanlar aynı olmalı (`muhur_commit_denetle`).
 - Kaynaksız koşuda kaydın kendisi denetlenir: listemizin bugünkü commit'ine bağlı, mühürdeki kıyas listesinin özetini taşıyor, kör ya da
-  kapalı projede `main`'e giren açılış kaydı var, fark yalnız kapı geçtiyse yazılı, tutanlar yalnız bizim adedimizi taşıyor.
+  kapalı projede `main`'e giren açılış kaydı var, fark yalnız kapı geçtiyse yazılı, tutanlar yalnız bizim adedimizi taşıyor; okuyucunun
+  liste uyarısı (İE-16 PR-5) yalnız varsa yazılı ve okuyucunun bildiği uyarılardan.
 """
 from __future__ import annotations
 
@@ -22,6 +23,7 @@ import pytest
 KOK = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(KOK))
 from testler.celik import kiyas  # noqa: E402
+from testler.celik.oku import TOPLAM_BIR_SATIR_EKSIK  # noqa: E402
 from testler.kor.kiyas import kayitli_mi  # noqa: E402
 
 BURADA = Path(__file__).resolve().parent
@@ -76,6 +78,8 @@ def test_sonuc_kaydinin_kendisi(yol):
     kapi = s["celik_kg_kapisi"]
     assert kapi["sonuc"] in ("geçti", "geçmedi") and kapi["pay_yuzde"] == 3.0
     assert (kapi["fark_yuzde"] is None) == (kapi["sonuc"] != "geçti"), "fark yalnız kapı geçtiyse yazılır"
+    if "liste_uyarilari" in s:                   # PR-5: yalnız varsa
+        assert s["liste_uyarilari"] and set(s["liste_uyarilari"]) <= {TOPLAM_BIR_SATIR_EKSIK}
     assert s["sayilar"]["aynı"] == len(s["tutanlar"])
     assert all(set(t) == {"grup", "ad", "olcu", "adet"} for t in s["tutanlar"])
     assert all(set(t) == {"tur", "adet"} for t in s["celik_turleri_tutan"])

@@ -5,18 +5,18 @@
  "kip": "pafta",
  "kapi": true,
  "not": "Hedef örnek (PR-2c'den beri).",
- "tarih": "2026-10-24",
- "kiyas_commit": "a9b8cde1af5422a233d26440a93189a16d9ae136",
+ "tarih": "2026-10-29",
+ "kiyas_commit": "a90fbd52d2ed8de2c554be1cd6377ed2fb7dc638",
  "bizim_liste": {
   "yol": "testler/kor/projeler/PK07/bizim_liste.json",
-  "commit": "8f361f481ad711c3f71a0870a558ee5cbcc7ce4b",
-  "uretici_surum": "1.5 (22 Ekim 2026; kör test üreteci 7.3, kurallar kural kitabında; orta iniş 9 m, kitapla farklı on yedi kalemde kitap; PK-07 hedef örnek; T76 cevapları; 100'lük duvar omegası kirişlerin de üstünde; elektrik oda kuralı)"
+  "commit": "a90fbd52d2ed8de2c554be1cd6377ed2fb7dc638",
+  "uretici_surum": "1.7 (29 Ekim 2026; baş makas omegası saçak ucundan saçak ucuna, taşan verandanın dış kirişindeki dahil; 100'lük iç duvarın üstü ayrı satırda, 60'lık ölçüde sırt 10,5 (Lokman 29 Ekim 13:12, D-32); 1.6, 28 Ekim: vitrifiye banyo başına (İE-13 PR-2; Lokman onayı 28 Ekim, PR-3); nişin ağzındaki kiriş (BK-14 ek); taşan verandanın dış kirişi kolonun dış yüzünden dış yüzüne (Lokman, kart 28 Ekim); 1.5, 22 Ekim: kör test üreteci 7.3, kurallar kural kitabında; orta iniş 9 m, kitapla farklı on yedi kalemde kitap; PK-07 hedef örnek; T76 cevapları; 100'lük duvar omegası kirişlerin de üstünde; elektrik oda kuralı)"
  },
  "muhur": {
   "sha256": "985c3a209bd736eb68fe46cab9964569ca85b41ab7cb8cfb68fe29af7ce78086",
   "bayt": 240638,
   "durum": "acik",
-  "muhur_commit": "9f13755bf9f60ccd472260f9aa847af55b9688a5"
+  "muhur_commit": "9e2b9bedb98857f499ae6eeb7340eff053a5719c"
  },
  "sozluk": {
   "surum": "2 (23 Ekim 2026; açık sekiz projenin adlarıyla; yok gruplarında ölçü kümesi)",
@@ -24,10 +24,10 @@
   "acilistan_sonra_degisti": null
  },
  "sayilar": {
-  "aynı": 89,
+  "aynı": 92,
   "ayrım": 7,
   "pafta": 0,
-  "aday": 6,
+  "aday": 3,
   "farklı": 21,
   "bizde yok": 11,
   "bizde fazla": 4,
@@ -81,7 +81,7 @@
   {"grup": null, "ad": "100LÜK DUVAR OMEGASI", "b_anahtar": "100X2500", "eslesme": "anahtar", "deger": 10, "sonuc": "aynı", "bizim": [{"kalem": "100'lük duvar omegası", "olcu": "100 × 2500"}]},
   {"grup": "Saçak sacı", "ad": null, "b_anahtar": null, "eslesme": "toplam", "deger": 9, "sonuc": "aynı", "bizim": [{"kalem": "Saçak sacı (30'luk, 3'ü menfezli)", "olcu": "300 × 2500"}]},
   {"grup": "Özel büküm saçak sacı", "ad": null, "b_anahtar": null, "eslesme": "toplam", "deger": 2, "sonuc": "aynı", "bizim": [{"kalem": "Özel büküm saçak sacı", "olcu": "L 2500"}]},
-  {"grup": null, "ad": "BAŞ MAKAS OMEGASI", "b_anahtar": "2500", "eslesme": "anahtar", "deger": 7, "sonuc": "aynı", "bizim": [{"kalem": "Baş makas omegası", "olcu": "L 2500"}]},
+  {"grup": null, "ad": "BAŞ MAKAS OMEGASI", "b_anahtar": "2500", "eslesme": "anahtar", "deger": 7, "sonuc": "aday", "bizim": [{"kalem": "Baş makas omegası", "olcu": "L 2500"}]},
   {"grup": null, "ad": "BAŞ MAKAS ZSİ", "b_anahtar": "2800", "eslesme": "anahtar", "deger": 8, "sonuc": "aynı", "bizim": [{"kalem": "Baş makas Z'si", "olcu": "L 2800"}]},
   {"grup": null, "ad": "BAŞ MAKAS BETOPANI", "b_anahtar": "1250X2500", "eslesme": "anahtar", "deger": 7, "sonuc": "aynı", "bizim": [{"kalem": "Baş makas betopanı", "olcu": "1250 × 2500"}]},
   {"grup": null, "ad": "100LÜK ALT ÇERÇEVE", "b_anahtar": "100X3750", "eslesme": "anahtar", "deger": 16, "sonuc": "aynı", "bizim": [{"kalem": "100'lük alt çerçeve", "olcu": "100 × 3750"}]},
@@ -134,10 +134,10 @@
   {"grup": null, "ad": "MAŞON 20MM", "b_anahtar": "ADET", "eslesme": "anahtar", "deger": 15, "sonuc": "aynı", "bizim": [{"kalem": "Maşon 20 mm", "olcu": "adet"}]},
   {"grup": null, "ad": "İÇ DİŞLİ T 20MM", "b_anahtar": "ADET", "eslesme": "anahtar", "deger": 6, "sonuc": "aynı", "bizim": [{"kalem": "İç dişli T 20 mm", "olcu": "adet"}]},
   {"grup": null, "ad": "ATLAMA PARÇASI YARIM PARMAK", "b_anahtar": "ADET", "eslesme": "anahtar", "deger": 3, "sonuc": "aynı", "bizim": [{"kalem": "Atlama parçası yarım parmak", "olcu": "adet"}]},
-  {"grup": "Vitrifiye ve batarya", "ad": null, "b_anahtar": null, "eslesme": "her_satir", "deger": 1, "sonuc": "aday", "bizim": [{"kalem": "Vitrifiye ve batarya (duş teknesi, klozet, lavabo, batarya grubu)", "olcu": "takım"}]},
-  {"grup": "Vitrifiye ve batarya", "ad": null, "b_anahtar": null, "eslesme": "her_satir", "deger": 1, "sonuc": "aday", "bizim": [{"kalem": "Vitrifiye ve batarya (duş teknesi, klozet, lavabo, batarya grubu)", "olcu": "takım"}]},
-  {"grup": "Vitrifiye ve batarya", "ad": null, "b_anahtar": null, "eslesme": "her_satir", "deger": 1, "sonuc": "aday", "bizim": [{"kalem": "Vitrifiye ve batarya (duş teknesi, klozet, lavabo, batarya grubu)", "olcu": "takım"}]},
-  {"grup": "Vitrifiye ve batarya", "ad": null, "b_anahtar": null, "eslesme": "her_satir", "deger": 1, "sonuc": "aday", "bizim": [{"kalem": "Vitrifiye ve batarya (duş teknesi, klozet, lavabo, batarya grubu)", "olcu": "takım"}]},
+  {"grup": "Vitrifiye ve batarya", "ad": null, "b_anahtar": null, "eslesme": "her_satir", "deger": 1, "sonuc": "aynı", "bizim": [{"kalem": "Vitrifiye ve batarya (duş teknesi, klozet, lavabo, batarya grubu)", "olcu": "takım"}]},
+  {"grup": "Vitrifiye ve batarya", "ad": null, "b_anahtar": null, "eslesme": "her_satir", "deger": 1, "sonuc": "aynı", "bizim": [{"kalem": "Vitrifiye ve batarya (duş teknesi, klozet, lavabo, batarya grubu)", "olcu": "takım"}]},
+  {"grup": "Vitrifiye ve batarya", "ad": null, "b_anahtar": null, "eslesme": "her_satir", "deger": 1, "sonuc": "aynı", "bizim": [{"kalem": "Vitrifiye ve batarya (duş teknesi, klozet, lavabo, batarya grubu)", "olcu": "takım"}]},
+  {"grup": "Vitrifiye ve batarya", "ad": null, "b_anahtar": null, "eslesme": "her_satir", "deger": 1, "sonuc": "aynı", "bizim": [{"kalem": "Vitrifiye ve batarya (duş teknesi, klozet, lavabo, batarya grubu)", "olcu": "takım"}]},
   {"grup": "Dış cephe boya", "ad": null, "b_anahtar": null, "eslesme": "toplam", "deger": 2, "sonuc": "aynı", "bizim": [{"kalem": "Dış cephe boya (17,5 kg kova)", "olcu": "kova"}]},
   {"grup": "İç cephe boya", "ad": null, "b_anahtar": null, "eslesme": "toplam", "deger": 2, "sonuc": "aynı", "bizim": [{"kalem": "İç cephe boya (17,5 kg kova)", "olcu": "kova"}]},
   {"grup": "Kenarlar için boya", "ad": null, "b_anahtar": null, "eslesme": "toplam", "deger": 1, "sonuc": "aynı", "bizim": [{"kalem": "Kenarlar için boya", "olcu": "10 kg"}]},

@@ -196,7 +196,8 @@ def test_sacak_duvarinda_izgara_disi_ek_esit_aralik(tmp_path):
 @pytest.mark.parametrize("boy", [1016, 1018, 1020])
 def test_160_100_duvarda_yedek_liste_sayisinda_ve_uc_duvar_ekseninde(boy, tmp_path):
     """Geometri hakemi 2. tur: 160 / 100 duvarlı PK-01 türevi (D-12 müşteri seçeneği), saçak duvarında 200x120. Yedek, eski
-    sabitlerle (boy − 10, uçlar 5) listeden bir fazla makas veriyordu; artık liste sayısında ve baş makaslar 8'de (uç duvar ekseni)."""
+    sabitlerle (boy − 10, uçlar 5) listeden bir fazla makas veriyordu; artık liste sayısında ve baş makaslar 8'de (uç duvar ekseni).
+    D-30 (Lokman, 29 Ekim 2026): 1018'de son pano 123,5 cm (≥ 122) olduğu için dış ölçü tam panoya büyür (1020); 1016'da (121,5) kesim kalır."""
     ie = _oku(PK01)
     X = {10: 16, 590: 584, 198.25: 204.25, 261: 267, 386.5: 392.5}
     Y = {5: 8, 995: boy - 8, 256: 259, 381.5: 384.5, 795: 798}
@@ -206,6 +207,7 @@ def test_160_100_duvarda_yedek_liste_sayisinda_ve_uc_duvar_ekseninde(boy, tmp_pa
     next(a for a in ie["acikliklar"] if a["tur"] == "pencere" and a["mahal"] == "YATAK ODASI 1" and a["duvar"] == "sol")["olcu"] = "200x120"
     c = I.uret(ie, tmp_path / "kalin.ifc")["cati"]
     assert c["makas"] == PL.liste(PL.model_motor(ie))["girdi_ozeti"]["makas"] == len(c["makas_y_cm"])
-    assert c["makas_y_cm"][0] == 8 and c["makas_y_cm"][-1] == boy - 8
+    son = {1016: 1016, 1018: 1020, 1020: 1020}[boy]                                                  # D-30
+    assert c["makas_y_cm"][0] == 8 and c["makas_y_cm"][-1] == son - 8
     assert len({round(b - a, 2) for a, b in zip(c["makas_y_cm"], c["makas_y_cm"][1:])}) == 1          # eşit aralık
     assert c["uyari"][-1].endswith(f"; eşit aralıklı {c['makas']} makas")

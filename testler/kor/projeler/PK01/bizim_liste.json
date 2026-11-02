@@ -1,8 +1,8 @@
 {
  "is_emri_no": "PM-PK01-60M2",
  "kod": "PK-01",
- "uretici_surum": "1.5 (22 Ekim 2026; kör test üreteci 7.3, kurallar kural kitabında; orta iniş 9 m, kitapla farklı on yedi kalemde kitap; PK-07 hedef örnek; T76 cevapları; 100'lük duvar omegası kirişlerin de üstünde; elektrik oda kuralı)",
- "uretildi": "2026-10-23 21:47:29 UTC",
+ "uretici_surum": "1.7 (29 Ekim 2026; baş makas omegası saçak ucundan saçak ucuna, taşan verandanın dış kirişindeki dahil; 100'lük iç duvarın üstü ayrı satırda, 60'lık ölçüde sırt 10,5 (Lokman 29 Ekim 13:12, D-32); 1.6, 28 Ekim: vitrifiye banyo başına (İE-13 PR-2; Lokman onayı 28 Ekim, PR-3); nişin ağzındaki kiriş (BK-14 ek); taşan verandanın dış kirişi kolonun dış yüzünden dış yüzüne (Lokman, kart 28 Ekim); 1.5, 22 Ekim: kör test üreteci 7.3, kurallar kural kitabında; orta iniş 9 m, kitapla farklı on yedi kalemde kitap; PK-07 hedef örnek; T76 cevapları; 100'lük duvar omegası kirişlerin de üstünde; elektrik oda kuralı)",
+ "uretildi": "2026-10-29 21:24:12 UTC",
  "kural_seti": {
   "prefabrik": "portman.prefabrik_liste/1.0",
   "ortak": "portman.yukleme_kurallari/0.19-taslak",
@@ -568,8 +568,8 @@
    "dayanak": "Şablon formülü (Portatifev)",
    "formul": "(oda içi hatlar 42,70 m [10 hat, her 125,5 cm'de bir] + iç duvar üstleri 21,88 m) ÷ 3,65 + 5",
    "kaynak": "PK-01'de formül 21, girilen 8 (soru 1)",
-   "pafta": 20,
-   "pafta_notu": "tavan omega planı okuması: 365 × 8, 243, 240,5, 249, 190 × 6 (veranda), 166 × 2, 50 — adetler yeniden sayılacak (okuma kaydı)",
+   "pafta": 24,
+   "pafta_notu": "tavan omega planı (s. 6) kodla okuması, 24 parça, 58,46 m: 365 × 8, 190 × 6 (veranda), 166 × 2, 249, 248, 243, 240,5, 200,5, 182,25, 50, 40,5 (İE-15 KH-2 ön okuması, mühürlü pafta SHA 492c7613…, 24 Ekim 2026). 13 Ekim elle okumasında 20 parçaydı; 248, 200,5, 182,25 ve 40,5 eksikti (BK-12)",
    "aday": 18,
    "aday_notu": "Şablon B (PK-02 16 ✓): \"+5\" eklenmeden"
   },
@@ -638,15 +638,15 @@
    "grup_adi": "Metal aksam",
    "kalem": "Baş makas omegası",
    "olcu": "L 2500",
-   "adet": 5,
+   "adet": 6,
    "birim": "adet",
-   "dayanak": "Kural (Portatifev)",
-   "formul": "baş makasların altı 12,00 m ÷ 2,5 (PK-01 dersi 5)",
-   "kaynak": "PK-06 7 tuttu (N1)",
+   "dayanak": "Kural (Lokman 29.10 13:12, D-32)",
+   "formul": "baş makasların boyu saçak ucundan saçak ucuna 13,20 m ÷ 2,5",
+   "kaynak": "Şablon B: PK-02 7 tuttu",
    "pafta": null,
    "pafta_notu": "",
-   "aday": 6,
-   "aday_notu": "Şablon B (PK-02 7 ✓): saçaklı makas boyu 13,20 m ÷ 2,5"
+   "aday": 5,
+   "aday_notu": "önceki kural: baş makasların altındaki duvar 12,00 m ÷ 2,5 (PK-01 dersi 5, PK-06 7)"
   },
   {
    "grup": "1002",

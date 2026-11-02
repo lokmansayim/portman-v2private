@@ -1,0 +1,735 @@
+{
+ "sema": "portman.yapi_tanimi/0.5-taslak",
+ "kod": "Ç8801D",
+ "ad": "Tek kat çelik, 2+1, 88 m² (Ç8801'in çatı varyantı D: tam kırma, dört omuz)",
+ "aile": "tek_kat_celik",
+ "paket": "baz",
+ "birim": "cm",
+ "kat": "zemin",
+ "kaynak": {
+  "cizim": "PortatifEv arşivi: TEK KAT ÇELİK planlar DWG'sindeki Ç8801 planı ve katalog paftası PORT-Ç8801.jpg; çatı ve veranda üstü katalog görsellerinden (ç_8801_1_R_Photo 1, 2, 5). Karkas modeli, montaj paftası ve yükleme listesi arşivde yok.",
+  "koordinat": "Köken binanın sol-alt dış köşesi (verandanın güneybatı köşesi); +x doğu, +y kuzey; DWG'den (60, 29) düşülür.",
+  "cati": "Çatı varyantı (İE-09 atölyesi, 2026-10-17): Lokman, 15 Ekim 2026 23:41: örnek Ç8801'in çatı tipleri; ilk model tam kırma (plan onayı 16 Ekim 21:31)"
+ },
+ "kat_yuksekligi": 270,
+ "duvar_panelleri": "tahmin",
+ "yuz_kaplamalari": {
+  "dis": {
+   "kalinlik": 1.25,
+   "malzeme": [
+    "boardex"
+   ]
+  },
+  "ic": {
+   "kalinlik": 1.25,
+   "malzeme": [
+    "alcipan"
+   ]
+  }
+ },
+ "duvar_siniflari": {
+  "dis": {
+   "ad": "dış duvar (DIS-80)",
+   "profil": "80x45x1,2",
+   "yalitim": true,
+   "yuz": {
+    "ic": "ic",
+    "dis": "dis",
+    "veranda": "dis"
+   }
+  },
+  "ic": {
+   "ad": "iç duvar (IC-80)",
+   "profil": "80x45x1,2",
+   "yalitim": true,
+   "yuz": {
+    "ic": "ic"
+   }
+  }
+ },
+ "duvarlar": [
+  {
+   "ad": "DK",
+   "sinif": "dis",
+   "kutu": [
+    1.25,
+    850.75,
+    1022.75,
+    858.75
+   ],
+   "yukseklik": 270,
+   "not": "kuzey dış duvar"
+  },
+  {
+   "ad": "DB",
+   "sinif": "dis",
+   "kutu": [
+    1.25,
+    229.25,
+    9.25,
+    850.75
+   ],
+   "yukseklik": 270,
+   "not": "batı dış duvar"
+  },
+  {
+   "ad": "DG",
+   "sinif": "dis",
+   "kutu": [
+    1.25,
+    221.25,
+    625.25,
+    229.25
+   ],
+   "yukseklik": 270,
+   "not": "batı bloğun güney dış duvarı (verandaya bakar)"
+  },
+  {
+   "ad": "DKB",
+   "sinif": "dis",
+   "kutu": [
+    625.25,
+    9.25,
+    633.25,
+    229.25
+   ],
+   "yukseklik": 270,
+   "not": "doğu kanadın batı dış duvarı (verandaya bakar)"
+  },
+  {
+   "ad": "DKG",
+   "sinif": "dis",
+   "kutu": [
+    625.25,
+    1.25,
+    1022.75,
+    9.25
+   ],
+   "yukseklik": 270,
+   "not": "doğu kanadın güney dış duvarı"
+  },
+  {
+   "ad": "DD",
+   "sinif": "dis",
+   "kutu": [
+    1014.75,
+    9.25,
+    1022.75,
+    850.75
+   ],
+   "yukseklik": 270,
+   "not": "doğu dış duvar"
+  },
+  {
+   "ad": "I1",
+   "sinif": "ic",
+   "kutu": [
+    356.5,
+    229.25,
+    364.5,
+    850.75
+   ],
+   "yukseklik": 270,
+   "not": "yaşam alanı ile mutfak ve hol arası (TV ve mutfak dolabı bu duvarda)"
+  },
+  {
+   "ad": "I2",
+   "sinif": "ic",
+   "kutu": [
+    364.5,
+    454.5,
+    758.5,
+    462.5
+   ],
+   "yukseklik": 270,
+   "not": "hol ile mutfak ve yatak odası 1 arası"
+  },
+  {
+   "ad": "I3",
+   "sinif": "ic",
+   "kutu": [
+    627.5,
+    462.5,
+    635.5,
+    850.75
+   ],
+   "yukseklik": 270,
+   "not": "mutfak ile yatak odası 1 arası"
+  },
+  {
+   "ad": "I4",
+   "sinif": "ic",
+   "kutu": [
+    635.5,
+    323.5,
+    1014.75,
+    331.5
+   ],
+   "yukseklik": 270,
+   "not": "hol ve banyo ile yatak odası 2 arası"
+  },
+  {
+   "ad": "I5",
+   "sinif": "ic",
+   "kutu": [
+    758.5,
+    331.5,
+    766.5,
+    532.5
+   ],
+   "yukseklik": 270,
+   "not": "hol ile banyo arası"
+  },
+  {
+   "ad": "I6",
+   "sinif": "ic",
+   "kutu": [
+    627.5,
+    229.25,
+    635.5,
+    331.5
+   ],
+   "yukseklik": 270,
+   "not": "hol ile yatak odası 2 arası"
+  },
+  {
+   "ad": "I7",
+   "sinif": "ic",
+   "kutu": [
+    766.5,
+    524.5,
+    1014.75,
+    532.5
+   ],
+   "yukseklik": 270,
+   "not": "banyo ile yatak odası 1 arası"
+  }
+ ],
+ "mahaller": [
+  {
+   "ad": "Yaşam Alanı",
+   "nokta": [
+    180,
+    540
+   ],
+   "islev": [
+    "salon"
+   ],
+   "sinif": "ic",
+   "etiket_m2": 21.0
+  },
+  {
+   "ad": "Mutfak",
+   "nokta": [
+    495,
+    650
+   ],
+   "islev": [
+    "mutfak"
+   ],
+   "sinif": "ic",
+   "etiket_m2": 10.0
+  },
+  {
+   "ad": "Hol",
+   "nokta": [
+    495,
+    340
+   ],
+   "islev": [
+    "hol"
+   ],
+   "sinif": "ic",
+   "etiket_m2": 7.3
+  },
+  {
+   "ad": "Yatak Odası 1",
+   "nokta": [
+    830,
+    700
+   ],
+   "islev": [
+    "yatak_odasi"
+   ],
+   "sinif": "ic",
+   "etiket_m2": 12.6
+  },
+  {
+   "ad": "Yatak Odası 2",
+   "nokta": [
+    830,
+    170
+   ],
+   "islev": [
+    "yatak_odasi"
+   ],
+   "sinif": "ic",
+   "etiket_m2": 11.6
+  },
+  {
+   "ad": "Banyo",
+   "nokta": [
+    890,
+    430
+   ],
+   "islev": [
+    "banyo"
+   ],
+   "sinif": "ic",
+   "islak": true,
+   "etiket_m2": 4.7
+  },
+  {
+   "ad": "Veranda",
+   "sinif": "veranda",
+   "islev": [
+    "veranda"
+   ],
+   "poligon": [
+    [
+     0,
+     0
+    ],
+    [
+     624,
+     0
+    ],
+    [
+     624,
+     220
+    ],
+    [
+     0,
+     220
+    ]
+   ],
+   "nokta": [
+    312,
+    110
+   ],
+   "etiket_m2": 13.8,
+   "ortu": "pergola",
+   "not": "çatısız: üstünde ahşap pergola, kenarında ahşap korkuluk (katalog görselleri); ikisi de modelde ve listede yok (Lokman'a soruldu)"
+  }
+ ],
+ "acikliklar": [
+  {
+   "ad": "P1",
+   "tur": "pencere",
+   "duvar": "DG",
+   "bas": 124,
+   "en": 120,
+   "yuk": 180,
+   "alt": 20,
+   "etiket": "120/180",
+   "mahal": "Yaşam Alanı",
+   "acilim": "ust"
+  },
+  {
+   "ad": "P2",
+   "tur": "pencere",
+   "duvar": "DG",
+   "bas": 521,
+   "en": 80,
+   "yuk": 180,
+   "alt": 20,
+   "etiket": "80/180",
+   "mahal": "Hol",
+   "acilim": "ust"
+  },
+  {
+   "ad": "P3",
+   "tur": "pencere",
+   "duvar": "DB",
+   "bas": 633.5,
+   "en": 120,
+   "yuk": 120,
+   "alt": 80,
+   "etiket": "120/120",
+   "mahal": "Yaşam Alanı",
+   "acilim": "ust"
+  },
+  {
+   "ad": "P4",
+   "tur": "pencere",
+   "duvar": "DB",
+   "bas": 326.5,
+   "en": 120,
+   "yuk": 120,
+   "alt": 80,
+   "etiket": "120/120",
+   "mahal": "Yaşam Alanı",
+   "acilim": "ust"
+  },
+  {
+   "ad": "P5",
+   "tur": "pencere",
+   "duvar": "DK",
+   "bas": 436,
+   "en": 120,
+   "yuk": 180,
+   "alt": 20,
+   "etiket": "120/180",
+   "mahal": "Mutfak",
+   "acilim": "ust"
+  },
+  {
+   "ad": "P6",
+   "tur": "pencere",
+   "duvar": "DD",
+   "bas": 633.5,
+   "en": 120,
+   "yuk": 120,
+   "alt": 80,
+   "etiket": "120/120",
+   "mahal": "Yatak Odası 1",
+   "acilim": "ust"
+  },
+  {
+   "ad": "P7",
+   "tur": "pencere",
+   "duvar": "DD",
+   "bas": 343,
+   "en": 60,
+   "yuk": 40,
+   "alt": 160,
+   "etiket": "60/40",
+   "mahal": "Banyo",
+   "acilim": "ust"
+  },
+  {
+   "ad": "P8",
+   "tur": "pencere",
+   "duvar": "DD",
+   "bas": 107.5,
+   "en": 120,
+   "yuk": 120,
+   "alt": 80,
+   "etiket": "120/120",
+   "mahal": "Yatak Odası 2",
+   "acilim": "ust"
+  },
+  {
+   "ad": "P9",
+   "tur": "pencere",
+   "duvar": "DKG",
+   "bas": 764,
+   "en": 120,
+   "yuk": 180,
+   "alt": 20,
+   "etiket": "120/180",
+   "mahal": "Yatak Odası 2",
+   "acilim": "ust"
+  },
+  {
+   "ad": "K1",
+   "tur": "dis_kapi",
+   "duvar": "DG",
+   "bas": 398.5,
+   "en": 95,
+   "yuk": 210,
+   "giris": true,
+   "mentese": "son",
+   "acilim": "ust",
+   "not": "çizimde 100 cm; dış kapı boşluğu 95 × 210 (mühendis, 4 Ekim 2026)"
+  },
+  {
+   "ad": "K2",
+   "tur": "ic_kapi",
+   "duvar": "I1",
+   "bas": 243,
+   "en": 90,
+   "yuk": 214,
+   "mentese": "bas",
+   "kanat": [
+    80,
+    200
+   ],
+   "not": "Yaşam Alanı",
+   "acilim": "sol"
+  },
+  {
+   "ad": "K3",
+   "tur": "ic_kapi",
+   "duvar": "I2",
+   "bas": 526,
+   "en": 90,
+   "yuk": 214,
+   "mentese": "son",
+   "kanat": [
+    80,
+    200
+   ],
+   "not": "Mutfak",
+   "acilim": "ust"
+  },
+  {
+   "ad": "K4",
+   "tur": "ic_kapi",
+   "duvar": "I2",
+   "bas": 647,
+   "en": 90,
+   "yuk": 214,
+   "mentese": "bas",
+   "kanat": [
+    80,
+    200
+   ],
+   "not": "Yatak Odası 1",
+   "acilim": "ust"
+  },
+  {
+   "ad": "K5",
+   "tur": "ic_kapi",
+   "duvar": "I4",
+   "bas": 647,
+   "en": 90,
+   "yuk": 214,
+   "mentese": "bas",
+   "kanat": [
+    80,
+    200
+   ],
+   "not": "Yatak Odası 2",
+   "acilim": "alt"
+  },
+  {
+   "ad": "K6",
+   "tur": "ic_kapi",
+   "duvar": "I5",
+   "bas": 343,
+   "en": 90,
+   "yuk": 214,
+   "mentese": "bas",
+   "kanat": [
+    80,
+    200
+   ],
+   "not": "Banyo",
+   "acilim": "sag"
+  }
+ ],
+ "kirisler": [],
+ "lento": 70,
+ "osb_takviye": {
+  "duvarlar": [
+   {
+    "mahal": "Yaşam Alanı",
+    "duvar": "I1",
+    "duvar_adi": "yaşam alanı ile mutfak arası duvar",
+    "neden": "TV ünitesi"
+   },
+   {
+    "mahal": "Mutfak",
+    "duvar": "I1",
+    "duvar_adi": "yaşam alanı ile mutfak arası duvar",
+    "neden": "mutfak dolabı ve eviye"
+   }
+  ],
+  "teyit": "plan (katalog paftasındaki TV ünitesi ve mutfak dolabı)"
+ },
+ "cati": {
+  "tip": "kirma",
+  "tip_adi": "tam kırma: dört yanı omuzlu (dört omuz), kalkan yok; cumba (doğu kanadın güney ucu) da omuzlu",
+  "tip_kaynak": "İE-09 atölyesi (16 Ekim 2026): Lokman'ın örneği 'Ç8801'in çatı tipleri'; katalog (2. versiyon), K ve L'nin yanına dördüncü çatı. Saçak çizgisinin düz iskeleti: bütün yüzler %33, batı ucu, doğu ucu ve cumbanın güney ucu omuz",
+  "sacak": 30,
+  "topuk": 10,
+  "duvar_ustu": 270,
+  "panel_kalinligi": 8,
+  "duzlemler": [
+   {
+    "ad": "ana güney",
+    "plan": [
+     [
+      -30.0,
+      190.0
+     ],
+     [
+      594.0,
+      190.0
+     ],
+     [
+      824.0,
+      420.0
+     ],
+     [
+      704.0,
+      540.0
+     ],
+     [
+      320.0,
+      540.0
+     ]
+    ],
+    "yukari": [
+     0,
+     1
+    ],
+    "egim": 0.33,
+    "sacak_kotu": 280.0,
+    "sacak": {
+     "y": 190.0
+    },
+    "ust_pay": 8.424,
+    "not": "ana çatının güney yüzü; saçağı verandanın arkasında; cumbayla vadi, doğu yüzüyle kırma, batı omzuyla kırma"
+   },
+   {
+    "ad": "ana kuzey",
+    "plan": [
+     [
+      -30.0,
+      890.0
+     ],
+     [
+      320.0,
+      540.0
+     ],
+     [
+      704.0,
+      540.0
+     ],
+     [
+      1054.0,
+      890.0
+     ]
+    ],
+    "yukari": [
+     0,
+     -1
+    ],
+    "egim": 0.33,
+    "sacak_kotu": 280.0,
+    "sacak": {
+     "y": 890.0
+    },
+    "ust_pay": 8.424,
+    "not": "ana çatının kuzey yüzü; kuzey cephede saçak boydan boya"
+   },
+   {
+    "ad": "batı omzu",
+    "plan": [
+     [
+      -30.0,
+      190.0
+     ],
+     [
+      320.0,
+      540.0
+     ],
+     [
+      -30.0,
+      890.0
+     ]
+    ],
+    "yukari": [
+     1,
+     0
+    ],
+    "egim": 0.33,
+    "sacak_kotu": 280.0,
+    "sacak": {
+     "x": -30.0
+    },
+    "ust_pay": 8.424,
+    "not": "ana çatının batı ucu (omuz); batı cephede saçak boydan boya"
+   },
+   {
+    "ad": "doğu",
+    "plan": [
+     [
+      1054.0,
+      -30.0
+     ],
+     [
+      1054.0,
+      890.0
+     ],
+     [
+      704.0,
+      540.0
+     ],
+     [
+      824.0,
+      420.0
+     ],
+     [
+      824.0,
+      200.0
+     ]
+    ],
+    "yukari": [
+     -1,
+     0
+    ],
+    "egim": 0.33,
+    "sacak_kotu": 280.0,
+    "sacak": {
+     "x": 1054.0
+    },
+    "ust_pay": 8.424,
+    "not": "doğu yüzü: ana çatının doğu omzu ve cumbanın doğu yüzü aynı düzlem; doğu cephede saçak boydan boya"
+   },
+   {
+    "ad": "cumba batı",
+    "plan": [
+     [
+      594.0,
+      -30.0
+     ],
+     [
+      824.0,
+      200.0
+     ],
+     [
+      824.0,
+      420.0
+     ],
+     [
+      594.0,
+      190.0
+     ]
+    ],
+    "yukari": [
+     1,
+     0
+    ],
+    "egim": 0.33,
+    "sacak_kotu": 280.0,
+    "sacak": {
+     "x": 594.0
+    },
+    "ust_pay": 8.424,
+    "not": "cumbanın batı yüzü; saçağı verandanın üstünde; ana çatının güney yüzüyle vadi"
+   },
+   {
+    "ad": "cumba güney omzu",
+    "plan": [
+     [
+      594.0,
+      -30.0
+     ],
+     [
+      1054.0,
+      -30.0
+     ],
+     [
+      824.0,
+      200.0
+     ]
+    ],
+    "yukari": [
+     0,
+     1
+    ],
+    "egim": 0.33,
+    "sacak_kotu": 280.0,
+    "sacak": {
+     "y": -30.0
+    },
+    "ust_pay": 8.424,
+    "not": "cumbanın güney ucu (omuz); güney cephede kanadın saçağı"
+   }
+  ],
+  "kalkanlar": []
+ }
+}

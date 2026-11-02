@@ -1,0 +1,49 @@
+{
+ "aciklama": "Çelik hakeminin sonucu (İE-16). Yalnız tutanlar: çelik kg kapısının sonucu (farkı yalnız geçtiyse), adedi tutan çelik türleri ve adedi tutan öteki satırlar (anahtar ve bizim adedimiz). Tutmayan satırların gerçek değeri depoya girmez; sayilar kıyasın özetidir.",
+ "kod": "ÇP-20",
+ "tarih": "2026-10-28",
+ "kiyas_commit": "be55c8341beedc52e293ef2784f4da094bca1ed9",
+ "bizim_liste": {
+  "yol": "testler/celik/projeler/CP20/bizim_liste.json",
+  "commit": "d05f00f6d17bf2376f03f27f224fcb0a0059de45"
+ },
+ "muhur": {
+  "sha256": "03ca18cb78fa6293dd4e6ea70e8948bbb12ec2aaee2e8f27a13cecbc38caf1bb",
+  "bayt": 26225,
+  "durum": "kor",
+  "kayit_durumu": "kor",
+  "liste_sayfasi": 0,
+  "muhur_commit": "558dfc49b54370cf15bb7c1d533d9246b96abdd6"
+ },
+ "celik_kg_kapisi": {
+  "sonuc": "geçmedi",
+  "pay_yuzde": 3.0,
+  "kapi_disi": [
+   "c_profil"
+  ],
+  "kapi_disi_bizim_kg": 30.0,
+  "fark_yuzde": null
+ },
+ "celik_turleri_tutan": [],
+ "sayilar": {
+  "aynı": 12,
+  "farklı": 15,
+  "adet okunamadı": 0,
+  "bizde yok": 47,
+  "bizde fazla": 55
+ },
+ "tutanlar": [
+  {"grup": "KAPI VE PENCERE", "ad": "MELAMIN KAPI 80 LIK KANAT", "olcu": [90.0, 214.0], "adet": 4},
+  {"grup": "ELEKTRIK", "ad": "UYDU KABLO", "olcu": [], "adet": 25},
+  {"grup": "ELEKTRIK", "ad": "BESLEME KABLOSU SIGORTA KUTULARI ARASI", "olcu": [], "adet": 5},
+  {"grup": "ELEKTRIK", "ad": "BESLEME KABLO BORUSU", "olcu": [], "adet": 5},
+  {"grup": "ELEKTRIK", "ad": "ZIL", "olcu": [], "adet": 1},
+  {"grup": "ELEKTRIK", "ad": "SIGORTA KUTUSU", "olcu": [12.0], "adet": 1},
+  {"grup": "ELEKTRIK", "ad": "IZOLE BANT", "olcu": [], "adet": 6},
+  {"grup": "VIDA", "ad": "ALCIPAN VIDASI 3 5 X 35", "olcu": [], "adet": 5500},
+  {"grup": "VIDA", "ad": "5 5 X 60 TRAPEZ VIDA TRAPEZ SAC METAL KIREMIT", "olcu": [], "adet": 250},
+  {"grup": "VIDA", "ad": "5 5X 110 TRAPEZ VIDA SANDVIC PANEL", "olcu": [], "adet": 750},
+  {"grup": "VIDA", "ad": "SASE PUL", "olcu": [], "adet": 40},
+  {"grup": "VIDA", "ad": "CIRPI IPI", "olcu": [], "adet": 1}
+ ]
+}

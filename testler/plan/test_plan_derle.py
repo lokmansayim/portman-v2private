@@ -155,8 +155,10 @@ def test_genel_motor_cizer_ve_bayi_ciktilarinda_yazi_cakismaz(ad):
         return asil_fig(self, fname, *a, **k)
 
     def pdf_savefig(self, figure=None, **k):
-        n = sum(1 for x in rap if x.startswith("pafta_sayfa_")) + 1
-        rap[f"pafta_sayfa_{n}"] = YC.denetle(figure, "x")
+        dosya = Path(str(getattr(self, "_filename", "") or "")).name      # yalnız şablon paftası "pafta_sayfa_N" (İE-23 PR-2b)
+        on = "pafta_sayfa_" if not dosya or dosya.endswith("_pafta.pdf") else f"{dosya}#"
+        n = sum(1 for x in rap if x.startswith(on)) + 1
+        rap[f"{on}{n}"] = YC.denetle(figure, "x")
         return asil_pdf(self, figure, **k)
 
     matplotlib.figure.Figure.savefig, PdfPages.savefig = fig_savefig, pdf_savefig

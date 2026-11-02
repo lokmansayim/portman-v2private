@@ -20,6 +20,7 @@ Ortak kurallar yukarıdaki `AGENTS.md`'den gelir; burada yalnız Claude'a özgü
 | `/is-emri <KOD> <başlık>` | Dal + iş emri belgesi + plan; onay için durur |
 | `/kapanis` | Doğrulama → kanıt → DURUM → commit/push → `/code-review` → PR özeti |
 | `/sahip-ozeti` | Lokman için 10 satırlık durum: canlıda ne var, bekleyen onaylar, açık riskler |
+| `/atolye <KOD> <istek>` | Model atölyesi (İE-09): kart, tanım, çizim, kontrol sayfası, düzeltme, kabul, gün sonu |
 
 Hakemler (`.claude/agents/`): `geometri-hakemi` (Motor/İş Emri değişikliklerini kurallara karşı inceler), `kvkk-denetcisi` (diff'te sır ve kişisel veri arar). Kapanışta ikisi de koşturulur. **Lokman (16 Ekim 2026):** `kvkk-denetcisi` şimdilik yalnız **sır taraması** olarak koşar (anahtar, parola, token; "anahtar ve parola hiçbir yere yazılmaz" kuralının otomatik freni); KVKK maddelerini (telefon, kişi ve bayi adı) raporlamaz. Mevcut maskeleme kodu olduğu gibi kalır; pilottan önce, gerçek bayi verisi gelmeden bir kez toplu bakılır.
 
@@ -28,6 +29,7 @@ Hakemler (`.claude/agents/`): `geometri-hakemi` (Motor/İş Emri değişiklikler
 - `sir_koruma.py` — sır ve canlı durum dosyaları ile dondurulmuş kayıtlar düzenlenemez; sır içeren yazım engellenir; telefon numarasına benzeyen içerik sorar.
 - `komut_koruma.py` — `ssh/scp/sftp/rsync`, `vps_komut`, `main`'e push ve zorla push engellenir; `main`'deyken birleştirme engellenir; silme, ağ ve veritabanı komutları sorar.
 - `hizli_kontrol.py` — her `.py/.sh/.json` düzenlemesinden sonra sözdizimi denetimi; hata varsa düzeltmeden devam edilmez.
+- `muhur_koruma.py` — mühürlü konular (`AGENTS.md` › Mühürlü konular, `KARARLAR/muhurlu.json`): oturum başında listeyi okutur; mühürlü bir kilidi değiştiren düzenleme ve komut "Patron onayı gerekir" diye engellenir; komuttan sonra kilitler denetlenir; mühür açma (`ac`) Lokman'a sorar.
 
 Hook'lar talimat değil koddur: kuralı yorumlayarak aşılamaz. Bir hook'u değiştirmek ya da kapatmak Lokman'ın onayını gerektirir.
 

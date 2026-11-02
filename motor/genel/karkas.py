@@ -342,6 +342,11 @@ def gruplar(kk: dict, y: dict, t: dict, k: dict, kg_m: dict) -> dict:
             if len(pr) > 1:
                 raise SystemExit(f"Karkas kuralı: çatı panellerinde birden çok profil ({', '.join(sorted(pr))}); listede çatı panelinin tek satırı var")
             out["cati_paneli"] = kayit(len(ck["cati_panelleri"]), sum(x["profil_boyu_m"] for x in ck["cati_panelleri"]), pr.pop())
+        if ck.get("ara_panelleri"):      # kırma ucunun ara panelleri (İE-16 PR-6b, B1): ayrı satır
+            pr = {x["profil"] for x in ck["ara_panelleri"]}
+            if len(pr) > 1:
+                raise SystemExit(f"Karkas kuralı: ara panellerde birden çok profil ({', '.join(sorted(pr))}); listede ara panelin tek satırı var")
+            out["ara_paneli"] = kayit(len(ck["ara_panelleri"]), sum(x["profil_boyu_m"] for x in ck["ara_panelleri"]), pr.pop())
         for grup, anahtar in (("ust_paneli", "ust_panelleri"), ("tavan_paneli", "tavan_panelleri")):
             if ck.get(anahtar):
                 out[grup] = kayit(len(ck[anahtar]), sum(x["profil_boyu_m"] for x in ck[anahtar]), None)

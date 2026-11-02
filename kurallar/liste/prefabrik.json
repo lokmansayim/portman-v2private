@@ -104,7 +104,12 @@
   "veranda_kirisi_eksik_cm": {
    "deger": 10,
    "durum": "pafta",
-   "kaynak": "Veranda kirişi açık kenarın dış ölçüsü − 10 cm (PK-01'de tuttu)."
+   "kaynak": "Veranda kirişi açık kenarın dış ölçüsü − 10 cm (PK-01'de tuttu). Taşan verandanın (BK-14) iki kolon arasındaki dış kirişi bu kurala değil `tasan_veranda_dis_kirisi_eksik_cm`'ye uyar; yan kirişleri buna uyar. D-38 (Lokman, 31 Ekim 2026 15:08: \"kirişlerin birleştiği yerde kolon gelir … hiçbir zaman kirişler askıda kalmaz\"): gövdenin içindeki açık mahalin (balkon, köşe verandası) iki açık kenarının birleştiği köşeye Motor dikme koyar (`geometry._kose_kolonlari`), kirişleri de bu kuralla sayılır (TK-03 balkonu L 3037,5 ve 1832,5; P6001 verandası L 4292,5 ve 2410). D-35'in kolonsuz köşe kirişi (`kose_kirisi_eksik_cm` 0, dış ölçü) kalktı."
+  },
+  "tasan_veranda_dis_kirisi_eksik_cm": {
+   "deger": 0,
+   "durum": "lokman",
+   "kaynak": "Lokman, 28 Ekim 2026, kart \"Veranda kirişi kolona nasıl oturuyor\": A, dış yüzden dış yüze. Taşan verandanın (BK-14) iki kolon arasındaki dış kirişi kolonların dış yüzünden dış yüzüne uzanır, açık kenar boyu kadar (TK-01: 386 ve 261 cm). Verandanın iki yan kirişi ve gövdenin içindeki veranda `veranda_kirisi_eksik_cm`'de kalır (PK-01'in gerçek listesi 324 ve 190)."
   },
   "cektirme_u_100": {
    "deger": 2,
@@ -162,7 +167,7 @@
   "bas_makas_omegasi_bolen_m": {
    "deger": 2.5,
    "durum": "excel",
-   "kaynak": "Baş makasların altı ÷ 2,5 (PK-01 dersi 5; PK-06 7)."
+   "kaynak": "Baş makasların boyu saçak ucundan saçak ucuna ÷ 2,5: her baş makasta açıklık + 2 × saçak; taşan verandanın dış kirişine oturan baş makas da (Lokman, 29 Ekim 13:12: \"baş makas omegalarını saçağın sonuna kadar uzat hem ana makas hem veranda makaslar aynı şekilde\"; D-32; Şablon B PK-02 7). Önceki kural baş makasların altındaki duvardı (PK-01 dersi 5; PK-06 7), aday sütununda."
   },
   "bas_makas_betopani": {
    "deger": {
@@ -240,10 +245,10 @@
    "durum": "aday",
    "kaynak": "Şablon B (PK-02, PK-03): 3."
   },
-  "asik_mahya_payi_m": {
-   "deger": 0.2,
+  "asik_sacak_esigi_m": {
+   "deger": 0.3,
    "durum": "pafta",
-   "kaynak": "P2 ve O13: beşikte yüz başına (eğik − 0,20) ÷ aralık en yakın + 1 sıra (PK-06, PK-07 paftaları 8)."
+   "kaynak": "Karar C'nin saçak sırası (Lokman, 24 Ekim 2026 \"Mahyadan 60\"): son aralık sırasından saçağa bu boydan az kalırsa o sıra konmaz, saçak sırası onun yerini alır. Dört aşık planının yedi çatısı 0,30 m ile tutuyor: PK-01 ana çatı 7 sıra (eğik 347,5 cm, saçağa 47,5 kalıyor), PK-03 ana çatı 8 (434,9; 14,9) ve veranda 6 (308,6; 8,6), PK-06 ana çatı 8 (439,9; 19,9) ve veranda 4 (207,2; 27,2), PK-07 ana çatı 8 (444,8; 24,8) ve cumba 5 (237,7; 57,7) (`testler/kor/projeler/*/pafta_katmani.json › asik.not`, PK-01 s. 8). Eşik 27,2 ile 47,5 cm arasında; 0,30 aralığın yarısıdır. 0,10 m'de (kart modelinin parça artığı `en_kisa_cm`'si) yedi çatının dördü bir sıra fazla çıkıyordu (geometri hakemi, BK-19, 31 Ekim 2026). Beşikte liste üretecinin ve kart modelinin sıraları bu değerle aynı işlevden (`prefabrik_liste.asik_mesafeleri`)."
   },
   "asik_aday": {
    "deger": {
@@ -430,6 +435,11 @@
    "durum": "aday",
    "kaynak": "\"VİDA BİLGİ\" sayfası (PK-06): 8'lik trapez uç ve PH2 uç = inox taş ÷ 2, aşağı (yalnız PK-06 4 tuttu; PK-01…05 4–6)."
   },
+  "vitrifiye_banyo_basina": {
+   "deger": 1,
+   "durum": "lokman",
+   "kaynak": "Lokman, 27 Ekim 2026 22:00 (TK-01 teklifi): \"evet 2 takım olacak\" (banyo ve E. banyo); genellemesi banyo türündeki her hacme bir takım (duş teknesi, klozet, lavabo, batarya). Ayrı WC ya da lavabo hacmi tam takım değildir: o evde satırın adedi \"Kural yok\" kalır, aday banyo sayısı. Genelleme İE-13 PR-2'de yazıldı (varsayım); Lokman 28 Ekim 2026 13:27 \"ne varsa onaylıyorum\" ile onayladı, durum lokman (İE-13 PR-3)."
+  },
   "vitrifiye_aday": {
    "deger": 1,
    "durum": "aday",
@@ -569,7 +579,7 @@
    ],
    "tur": "yontem",
    "karar_bekliyor": false,
-   "not": "Takımın adetleri kitaptan. Prefabrik ev başına bir takım yazar (O17; PK-03, PK-05, PK-07 birebir), kitap ıslak hacim başına. Vitrifiye prefabrikte \"Kural yok\" (aday 1 takım), kitapta dört satır; kitabın taharet musluğu (vitrifiye listedeyse ıslak hacim × 4, Lokman, 10 Ekim) bu yüzden prefabrikte yok."
+   "not": "Takımın adetleri kitaptan. Prefabrik ev başına bir takım yazar (O17; PK-03, PK-05, PK-07 birebir), kitap ıslak hacim başına. Vitrifiye prefabrikte banyo başına bir takım (`vitrifiye_banyo_basina`, Lokman 27 Ekim; ayrı WC ya da lavabo hacmi olan evde \"Kural yok\"), kitapta dört satır; kitabın taharet musluğu (vitrifiye listedeyse ıslak hacim × 4, Lokman, 10 Ekim) prefabrikte ayrı satır değil: prefabrik vitrifiye takımının batarya grubu taharet musluğunu içerir (87 m² yükleme listesi, 14 Ekim: \"BANYO BATARYA GRUBU (LAVABO BATARYASI, BANYO BATARYASI, DUŞ BAŞLIĞI, TAHARET MUSLUĞU)\"; fiyat defterinde vitrifiye satırının kaynak kalemi)."
   },
   {
    "konu": "Kapı boşlukları",
@@ -612,7 +622,7 @@
    "kitap": "bas_makas_z.kenar_kenar",
    "tur": "kapsam",
    "karar_bekliyor": false,
-   "not": "Parça boyu (L 2800) kitaptan. Prefabrik yalnız ana çatının alın kenarlarına yazar (O7; PK-02, PK-06, PK-07 8), kitap her alın kenarına ayrı (uydurma)."
+   "not": "Parça boyu (L 2800) kitaptan. Prefabrik ana çatının alın kenarlarına yazar (O7; PK-02, PK-06, PK-07 8), kitap her alın kenarına ayrı (uydurma). 30 Ekim'den beri taşan verandanın kirişli kalkanında da (kalkan betopanlı, D-32 madde 2; K5b TK-01 kıyası, CIO onayı 30 Ekim 14:20); kirişsiz açık parça sayılmaz (N1)."
   },
   {
    "konu": "Çatı yüzeyi",

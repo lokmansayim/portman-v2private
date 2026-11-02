@@ -737,4 +737,6 @@ def aciklama(op: dict, adaylar: list[dict] | None = None) -> str:
         return op.get("aciklama") or f"çatı {op.get('kod')}"
     if op.get("op") == "dis_karkas_140":
         return "dış duvarlar 140'lık karkas (16,5 cm)"
+    if op.get("op") in ("oda_buyut", "oda_kucult"):              # İE-23 PR-2a: kısa anlatım karar uygularken yazılır (tanim_germe)
+        return op.get("aciklama") or f"{op.get('mahal')} {op.get('cm')} cm {'büyütme' if op['op'] == 'oda_buyut' else 'küçültme'}"
     return str(op.get("op"))

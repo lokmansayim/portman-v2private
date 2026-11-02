@@ -25,7 +25,7 @@ import matplotlib.pyplot as plt  # noqa: E402
 from matplotlib.backends.backend_pdf import PdfPages  # noqa: E402
 from matplotlib.gridspec import GridSpec  # noqa: E402
 from matplotlib.patches import Polygon as MplPolygon  # noqa: E402
-from shapely.geometry import box  # noqa: E402
+from shapely.geometry import Polygon as SPolygon, box  # noqa: E402
 
 from . import cati_genel, ciz_genel, girdi_genel, karkas, kural, makas, yapi  # noqa: E402
 
@@ -34,6 +34,8 @@ TUR_CIZGI = {"makas": dict(color="#14365e", lw=2.0, ls="-"), "kisa": dict(color=
              "capraz": dict(color="#a33a00", lw=1.4, ls="--")}
 KENAR_CIZGI = {"mahya": dict(color="#555", lw=0.9, ls="-"), "kirma": dict(color="#777", lw=0.7, ls="-"), "vadi": dict(color="#777", lw=0.7, ls=":")}
 CATI_PANELI_RENGI = ("#f3dcc4", "#e8c29c")
+ARA_PANEL_RENGI = ("#dcefd9", "#c3e2bd")          # kırma ucunun ara panelleri (İE-16 PR-6b)
+BOLGE_ADI = {"kirma_yuzu": "kırma yüzü", "uc_seridi": "uç şeridi", "kose": "köşe"}
 BACA_RENGI = "#bdbdbd"
 
 
@@ -77,7 +79,12 @@ def cati_paneli_planlari(c: dict, k: dict | None = None, y: dict | None = None) 
     return out
 
 
-def plan(ax, y: dict, c: dict, ms: list[dict], cps: list[dict], kk: dict) -> None:
+def ara_panel_planlari(ck: dict) -> list[dict]:
+    """Ara paneller (İE-16 PR-6b) kuralın sırasıyla A01…; planları kuralın kaydından (`makas.ara_panelleri` › `plan`)."""
+    return [{**x, "ad": f"A{j:02d}"} for j, x in enumerate(ck.get("ara_panelleri") or [], 1)]
+
+
+def plan(ax, y: dict, c: dict, ms: list[dict], cps: list[dict], kk: dict, aps: list[dict] = ()) -> None:
     for b in y["bolgeler"].values():                          # mahaller soluk
         if b["sinif"] == "dis":
             continue
@@ -95,6 +102,8 @@ def plan(ax, y: dict, c: dict, ms: list[dict], cps: list[dict], kk: dict) -> Non
         r = x["cokgen"].representative_point()
         ax.text(r.x, r.y, x["ad"], ha="center", va="center", fontsize=6.4, color="#6a3a00", weight="bold", zorder=9,
                 bbox=dict(fc="white", ec="none", pad=0.5, alpha=0.85))
+    for i, x in enumerate(aps):                               # ara paneller: makasların altında, soluk yeşil
+        ax.add_patch(MplPolygon(x["plan"], closed=True, fc=ARA_PANEL_RENGI[i % 2], ec="#3f7a35", lw=0.5, hatch="\\\\", zorder=3.4))
     for e in c["kenarlar"]:
         if e["tur"] in KENAR_CIZGI and e.get("p") and e.get("q"):
             ax.plot([e["p"][0], e["q"][0]], [e["p"][1], e["q"][1]], zorder=4, **KENAR_CIZGI[e["tur"]])
@@ -103,6 +112,11 @@ def plan(ax, y: dict, c: dict, ms: list[dict], cps: list[dict], kk: dict) -> Non
         ax.add_patch(MplPolygon([(x0, y0), (x1, y0), (x1, y1), (x0, y1)], closed=True, fc=BACA_RENGI, ec="#333", lw=0.8, zorder=6))
         ax.text((x0 + x1) / 2, (y0 + y1) / 2, f"B{j:02d}", ha="center", va="center", fontsize=6.0, weight="bold", zorder=9)
     konan: list[tuple[float, float]] = []
+    for x in aps:                                             # ara panelin adı makasın adından önce yerleşir
+        r = SPolygon(x["plan"]).representative_point()
+        konan.append((r.x, r.y))
+        ax.text(r.x, r.y, x["ad"], ha="center", va="center", fontsize=5.0, color="#2f5f28", zorder=8.5,
+                bbox=dict(fc="white", ec="none", pad=0.3, alpha=0.8))
     for x in ms:
         (px, py), (qx, qy) = x["p"], x["q"]
         ax.plot([px, qx], [py, qy], zorder=5, solid_capstyle="butt", **TUR_CIZGI[x["tur"]])
@@ -125,7 +139,7 @@ def plan(ax, y: dict, c: dict, ms: list[dict], cps: list[dict], kk: dict) -> Non
     ax.axis("off")
 
 
-def tablo(ax, ms: list[dict], cps: list[dict], ck: dict, kk: dict, profil: str) -> None:
+def tablo(ax, ms: list[dict], cps: list[dict], ck: dict, kk: dict, profil: str, aps: list[dict] = ()) -> None:
     ax.axis("off")
     tr = ciz_genel.tr
     kalin = [x for x in ms if x.get("et") not in (None, profil.rsplit("x", 1)[-1])]   # tek açıklığı sınırı aşan makas (`makas_eti`, İE-16 PR-3c)
@@ -141,6 +155,13 @@ def tablo(ax, ms: list[dict], cps: list[dict], ck: dict, kk: dict, profil: str) 
         for x, r in zip(cps, ck["cati_panelleri"]):
             sat.append(f"{x['ad']:4s} {r['duzlem'][:14]:14s} {r['profil'].replace('x', ' × '):14s} "
                        f"{ciz_genel.sade(r['olcu_cm'][0]) + ' × ' + ciz_genel.sade(r['olcu_cm'][1]):>15s} {tr(r['profil_boyu_m'], 2) + ' m':>11s}")
+    if aps:                                                   # ara paneller (İE-16 PR-6b): bölge bölge sayı ve profil boyu
+        say = {}
+        for x in aps:
+            say.setdefault(x["bolge"], []).append(x)
+        sat += [""] + textwrap.wrap(f"Ara panel {len(aps)} ({aps[0]['ad']}–{aps[-1]['ad']}; kırma ucu: "
+                                    f"{', '.join(f'{BOLGE_ADI[b]} {len(v)}' for b, v in say.items())}) · profil "
+                                    f"{aps[0]['profil'].replace('x', ' × ')} · toplam {tr(sum(x['profil_boyu_m'] for x in aps), 1)} m", 78)
     if kk["bacalar"]:
         sat.append("")
         for j, b in enumerate(kk["bacalar"], 1):
@@ -174,6 +195,7 @@ def ciz(t: dict, hedef: Path, kod: str, kural_k: dict | None = None, yontem: str
     c = cati_genel.cati_kur(t["cati"])
     ms = adlar(ck)
     cps = cati_paneli_planlari(c, k, y)
+    aps = ara_panel_planlari(ck)
     if len(cps) != len(ck["cati_panelleri"]):
         raise SystemExit(f"Makas yerleşim planı: çatı panelinin plandaki bölmesi ({len(cps)}) kuralınkiyle ({len(ck['cati_panelleri'])}) aynı değil")
     profil = f"80x45x{kur['celik']['et_kalinligi_varsayilan']['deger']['cati']}"     # makasın profili tanımda yazmaz (`girdi_genel`)
@@ -184,11 +206,12 @@ def ciz(t: dict, hedef: Path, kod: str, kural_k: dict | None = None, yontem: str
     fig = plt.figure(figsize=(16.5, 11.7), dpi=140)                    # A3 yatay
     try:                                                               # hata olsa da şekil kapanır (uret uzun ömürlü işçide koşar)
         gs = GridSpec(1, 2, figure=fig, width_ratios=[2.2, 1.0], wspace=0.02)
-        plan(fig.add_subplot(gs[0, 0]), y, c, ms, cps, kk)
-        tablo(fig.add_subplot(gs[0, 1]), ms, cps, ck, kk, profil)
+        plan(fig.add_subplot(gs[0, 0]), y, c, ms, cps, kk, aps)
+        tablo(fig.add_subplot(gs[0, 1]), ms, cps, ck, kk, profil, aps)
         fig.suptitle(f"{t['kod']} · MAKAS YERLEŞİM PLANI   —   TASLAK · makas dizilimi karkas kuralından · üretim projesi değildir",
                      fontsize=12, weight="bold", x=0.02, ha="left", y=0.975)
-        fig.text(0.02, 0.945, f"Makas {len(ms)} ({ozet}); çatı paneli {len(cps)}; baca {len(kk['bacalar'])}. Ölçüler cm; makasın konumu ortası. "
+        fig.text(0.02, 0.945, f"Makas {len(ms)} ({ozet}); çatı paneli {len(cps)}; " + (f"ara panel {len(aps)}; " if aps else "")
+                 + f"baca {len(kk['bacalar'])}. Ölçüler cm; makasın konumu ortası. "
                  f"Kural: {kk['kural']['yol']} (sha {kk['kural']['sha256'][:12]}).", fontsize=8.4, ha="left")
         fig.savefig(hedef / png_ad, facecolor="white")
         with PdfPages(hedef / pdf_ad, metadata={"Title": f"{t['kod']} makaslar", "Creator": "Portman", "Producer": "Portman",
@@ -196,8 +219,8 @@ def ciz(t: dict, hedef: Path, kod: str, kural_k: dict | None = None, yontem: str
             pp.savefig(fig, facecolor="white")
     finally:
         plt.close(fig)
-    return {"png": png_ad, "pdf": pdf_ad, "makas": say, "cati_paneli": len(cps), "baca": len(kk["bacalar"]), "uyari": len(ck["uyarilar"]),
-            "kural": kk["kural"]}
+    return {"png": png_ad, "pdf": pdf_ad, "makas": say, "cati_paneli": len(cps), **({"ara_paneli": len(aps)} if "ara_panelleri" in ck else {}),
+            "baca": len(kk["bacalar"]), "uyari": len(ck["uyarilar"]), "kural": kk["kural"]}
 
 
 def main() -> int:

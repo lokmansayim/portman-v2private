@@ -427,8 +427,9 @@ def test_kor19_ve_ap10_acilis_kaydi_olmadan_reddedilir(muhur):
 
 
 def test_cizim_icin_pafta_gorulen_kor_liste_kapali(muhur):
-    # CIO 27 Ekim 22:43: AP-13 ve AP-16'nın montaj paftası İE-17 çizimine kullanıldı; kör listelerinin kaydında not, liste kapalı
-    for kod in ("AP-13", "AP-16"):
+    # CIO 27 Ekim 22:43: AP-13 ve AP-16'nın montaj paftası İE-17 çizimine kullanıldı; kör listelerinin kaydında not, liste kapalı.
+    # İE-17 PR-2 (1 Kasım 2026): AP-09, AP-15, AP-22 de (AP-03'ün listesi 13 Ekim'den beri açık)
+    for kod in ("AP-13", "AP-16", "AP-09", "AP-15", "AP-22"):
         r = [r for r in muhur["dosyalar"] if kod in r["kod"]]
         assert {(x["tur"], x["durum"]) for x in r} == {("montaj paftası", "kaynak"), (K.LISTE, "kor")}, kod
         liste = next(x for x in r if x["tur"] == K.LISTE)

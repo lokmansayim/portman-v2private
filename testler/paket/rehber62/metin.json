@@ -1,0 +1,76 @@
+{
+ "_not": "62 m² rehberinin (6b899b4, deneme/2026-10-25_rehber_62m2/rehber/sahne.js) adım ve oda yazıları; kod dışına aynen alındı. {N} adım sayısı.",
+ "oda": {
+  "yatak1": "Dizilim arka sol köşe direğinden başlar. Sol dış duvar (120/120 pencereli pano), arka duvarın sol kısmı, banyo ve holle ortak iç duvar (kapılı pano) ve salon tarafındaki iç duvar bu odayla kurulur. Arka duvardaki T birleşimine 3’lü H girer; salon tarafındaki iç duvar sol dış duvara pano ortasında çektirme U’suyla bağlanır.",
+  "banyo": "Arka duvarda 60/60 vasistaslı pano. Yatak odası 2 ile ortak iç duvar ve hol tarafında kapılı pano (banyo kapısı). İç duvar T’lerine 3’lü standart H girer.",
+  "hol": "Yatak odası 2’nin kapılı panosu ve holün salon köşesindeki 6’lık köşe direği. Holün salona bakan tarafı açıktır.",
+  "yatak2": "Arka duvarın sağ kısmı, arka sağ köşe direği, sağ dış duvar (120/120 pencereli pano) ve salon tarafındaki iç duvar. İç duvar sağ dış duvara çektirme U’suyla bağlanır.",
+  "salon": "Sol dış duvar (120/80 sürgülü pencereli pano), veranda köşesindeki özel köşe direği A, ön duvar ve sağ dış duvarın ön kısmı. Ön duvarda iki betopan kaplı çelik karkas duvar (DVR01, DVR02; 180/180 pencereli) ve karkaslı çelik kapı panosu var; veranda kirişleri iki özel H’ya (C) bağlanacak. Dizilim bu odada kapanır."
+ },
+ "adim": [
+  {
+   "t": "Bitmiş bina ve malzeme listesi",
+   "p": "__PROJE__ prefabrik konut: 900 × 600 cm, beşik çatı ve verandanın üstünde cumba. Dış cephe fugalı (38 cm’de bir 2 cm fuga), çatıda trapez sac doğrudan aşıkların üstünde. Montaj paftasından kurulan 3D model; her parça kimlik kartına bağlı (kartı olmayanlarda yükleme listesindeki adı yazar). Bir parçaya dokunun, kartı açılır. Oynat’a basınca montaj oda oda, {N} adımda gösterilir."
+  },
+  {
+   "t": "Alt çerçeve",
+   "p": "Zemin hazır olduktan sonra 100’lük alt çerçeve dış duvar hattına, 60’lık alt çerçeve iç duvar hattına serilip sabitlenir. Kapı boşluklarında çerçeve kesilir. Panolar bu çerçeveye oturur."
+  },
+  {
+   "t": "Veranda kolon ve kirişleri",
+   "p": "Verandanın iki ön köşesine ve ortasına flanşlı kutu profil kolon (100 × 100 × 2400, 3 mm) dikilir; üstlerine 574,75 cm’lik ön kiriş (B) bağlanır. Üç kısa kiriş (140 cm, 4 mm) ön kirişi binaya bağlar: soldaki özel köşe direği A’ya, öbür ikisi ön duvardaki özel H’lara (C). Cumba makasları bu kirişlere oturur."
+  },
+  {
+   "t": "Saçak, duvar ve baş makas omegası",
+   "p": "Makasların oturacağı hatlara omega geçirilir. 100’lük omegalar 10,5 cm’dir (100 mm pano + iki yanda 2 mm H kanadı): dış kanat dışarıda tam yaslanır, içte kalan aralıklara silikonize mastik sıkılır. Arka duvar, ön duvarın sağ kısmı ve veranda yan kirişleri üstüne 100’lük saçak omegası (içte 3 cm kanat ve ayak, dışta 3 cm kanat ve eğik dudak); ön duvarın cumba altında kalan kısmına 100’lük duvar omegası; üç baş makasın altına baş makas omegası (fabrikada hazırlanır): 10,5 cm, dış kanadı duvara tam yaslı, 3 cm derinlik, içte 3 cm açık yanak, dışta baş makas betopanının gireceği 1 cm U yanak. İç duvarların üstüne 60’lık duvar omegası geçirilir (6,5 cm açıklık, 3 cm derinlik, 3 cm kulaklar); kapı üstlerinden kesintisiz geçer."
+  },
+  {
+   "t": "Ana çatı ve cumba makasları",
+   "p": "Ana çatı: 8 makas (MKS01–08) 125,5 cm aralıkla, her biri bir kulaklı H ya da DVR karkası hizasında: iki uçta baş makas (MKS01, MKS08), arada 6 orta makas. Açıklık 660 cm (2 × 30 saçak), eğim 18,2°, tepe 118,5 cm. Alpha Mini düzeni: 10 cm topuk, duvar hizasında dikme, Warren zikzak. Ön uçları cumbanın altında kalır. Cumba, verandanın üstünden ana çatıya dik uzanan ikinci beşiktir; mahyası ana mahyayla aynı yükseklikte. MKS09 veranda ön kirişine (cumbanın baş makası), MKS10 yan kirişlere oturur. MKS11 ve MKS12 ara makaslardır: ana makasların üst başlıklarına oturur ve iki yüzün kesiştiği dere (vadi) hattına doğru kısalır."
+  },
+  {
+   "t": "Baş makas betopanı ve Z",
+   "p": "Üç kalkan var: ana çatının iki ucu (MKS01, MKS08) ve cumbanın önü (MKS09). Her kalkanın dış yüzü iki 125 × 250 betopanla kapatılır: betopan (8 mm) makasa dayanır, alt ucu baş makas omegasının dış U yanağına girer; aralıklara silikon mastik sıkılır. Betopanların eğimle kesilen artanı iki uçtaki makas uçlarına döşenir. Üstüne baş makas Z’si gelir: makasın ve betopanın üstünden geçer, betopanın dış yüzünden 3 cm iner ve dışarı kıvrılır; alın sacının tırnağı buna girer."
+  },
+  {
+   "t": "Tavan omegaları",
+   "p": "Ters tavan için omegalar makas alt başlıklarının altına, şapkası aşağı bağlanır: odalarda 60 cm aralıkla makaslara dik, verandada 60 cm aralıkla cumba makaslarına dik. Kesit 110 × 35 mm, sac 1 mm."
+  },
+  {
+   "t": "Ters tavan alçıpanı",
+   "p": "Tavan omegalarından sonra ters tavan kaplanır: 12,5 mm alçıpan levhalar (120 × 250) uzun kenarı omegalara dik olacak biçimde alttan vidalanır. Banyoda yeşil (ıslak hacim) alçıpan kullanılır. Verandanın tavanı boardex (120 × 240), kirişlerin arasında."
+  },
+  {
+   "t": "Çatı izolasyonu (10 cm rulo cam yünü)",
+   "p": "Aşıklardan önce, ters tavanın üstüne 10 cm rulo cam yünü (Izocam) serilir. Her makas aralığına bir şerit gelir: rulo ön duvarın üstünden başlar, açılarak arka duvara kadar serilir. Rulo eni 120 cm, makas aralığı 125,5 cm. Cumbanın (verandanın) üstü de boş kalmaz: orada makas yönünde, yatay serilir."
+  },
+  {
+   "t": "Omega aşıklar",
+   "p": "Aşıklar 60 cm aralıkla makasların üst başlıklarına vidalanır; iki yüzün mahya aşıkları arasında 20 cm. Ana çatının arka yüzünde 7 sıra (410 + 410 + 140), ön yüzde cumbanın iki yanında; cumbanın her yüzünde 7 sıra, dere hattında kesilir. Kalkan saçaklarında aşık uçları C kapamayla kapatılır."
+  },
+  {
+   "t": "Saçak sacı",
+   "p": "Aşıklardan sonra takılır. 3 cm tırnağı saçak omegasının üstüne, makasın altına girer; 30 cm saçak altı, 13 cm alın ve makasa doğru 10 cm kıvrım. Dört saçak var: arka, ön (cumbanın sağı) ve cumbanın iki yanı; cumbanın sağında ön saçakla iç köşe yapar. Saçak altı baş makasın hizasında kesilir; alın ve kıvrım köşeye, alın sacına kadar devam eder."
+  },
+  {
+   "t": "Dere ve inişler",
+   "p": "Dört saçağa K kesitli galvaniz dere asılır: sırtı saçak sacının alnına; cumbanın sağında ön dereyle iç köşe yapar. 7 iniş borusu: köşelerde ağız borunun hizasında, kaz boynu duvara (cumbada veranda kolonuna) dik döner, boru köşe direği kaplamasının yanından kelepçeyle iner."
+  },
+  {
+   "t": "Ters mahya",
+   "p": "Trapez saclardan önce iki dere (vadi) hattına, cumbanın ana çatıyla birleştiği yere ters mahya döşenir: iki yüzün suyu bu oluğa toplanıp ön dereye akar."
+  },
+  {
+   "t": "Trapez sac ve mahya",
+   "p": "Ters mahyadan sonra ana çatıya 350’lik, cumbaya 340’lık antrasit 27/200 trapez sac (0,5 mm; hadve 27 mm, adım 200 mm; 100 cm kapatır) doğrudan aşıkların üstüne serilip vidalanır (bu projede OSB ve nem bariyeri yok); dere hattında açıyla kesilir. Levhalar kalkan kenarından başlayarak dizilir; paftadaki dizilim 80’lik levhaya göre çizildiği için model 100’lük levhayla yeniden dizildi. Mahyalar trapez sac mahyasıyla kapatılır."
+  },
+  {
+   "t": "Alın sacları",
+   "p": "Alın sacı (antrasit) üç kalkanın eğik kenarlarına, trapezden sonra takılır: tırnağı baş makas Z’sine girer, saçak altı kolu aşıkların altını kapatır ve makasın topuğunda kesilir; üstte trapezin kenar hadvesini kavrar. Alın yüzü dereyi de içine alacak kadar geniştir: köşede saçak sacının alnıyla birleşir ve derenin ucunu kapatır (ayrı parça yok)."
+  },
+  {
+   "t": "Kapı ve pencereler",
+   "p": "Antrasit gri (RAL 7016) PVC pencereler (2 × 120/120 çift açılım, 1 × 120/80 sürgülü, 2 × 180/180 çift açılım, 1 × 60/60 vasistas) ve prefabrik çelik dış kapı (90 × 200, sağ) yerine konur. İç kapılar alıcıya ait; modelde yerlerini ve açılış yönlerini göstermek için çizildi. Bu adımda çatı, tavan ve izolasyon gizlenir; düğmeyle geri açılır. Bu adımda kanatlar ve kapılar sırayla açılıp kapanır: 180/180’lerde iki yan bölme sabit, ortadaki iki kanat içe açılır; sürgülü kanat kayar, vasistas içe devrilir."
+  }
+ ]
+}

@@ -1,7 +1,7 @@
 {
  "sema": "portman.urun_kartlari/1",
- "surum": "4",
- "aciklama": "Ürün kimlik kartları (İE-15 K1, K2, K3 ve K3b, D-24). Kart bir ürünü tanımlar; modelde IFC tür nesnesidir, parça (örnek) türüne bağlanır. Okuyan `motor/kart_model.py`. Kod kalıcıdır: bir kod başka ürüne verilmez, ürün kalkarsa kod boş kalır (`testler/kimlik/veri/kart_kodlari.json` kilidi). Kart kodu boy ve projeyle değişmez; bugünkü malzeme kataloğunun kodu (D01, D09…) boya göre ve projede yeni boy çıktıkça verilir, parçada `KatalogKodu` olarak kalır. Bu yüzden kart kodu tirelidir (D-01). Ailelerin harfi katalogla aynıdır. Kartı düzeltmek için bu dosya düzeltilir, model yeniden üretilir; Bonsai'de yapılan değişiklik geri okunmaz.",
+ "surum": "11",
+ "aciklama": "Ürün kimlik kartları (İE-15 K1, K2, K3, K3b, K5, K5b ve K5b-2, D-24). Kart bir ürünü tanımlar; modelde IFC tür nesnesidir, parça (örnek) türüne bağlanır. Okuyan `motor/kart_model.py`. Kod kalıcıdır: bir kod başka ürüne verilmez, ürün kalkarsa kod boş kalır (`testler/kimlik/veri/kart_kodlari.json` kilidi). Kart kodu boy ve projeyle değişmez; bugünkü malzeme kataloğunun kodu (D01, D09…) boya göre ve projede yeni boy çıktıkça verilir, parçada `KatalogKodu` olarak kalır. Bu yüzden kart kodu tirelidir (D-01). Ailelerin harfi katalogla aynıdır. Kartı düzeltmek için bu dosya düzeltilir, model yeniden üretilir; Bonsai'de yapılan değişiklik geri okunmaz.",
  "alanlar": {
   "kod": "Kalıcı kod, `<aile>-<nn>`",
   "ad": "Ürünün adı; listedeki adı ya da ona en yakın ad",
@@ -15,7 +15,8 @@
   "pafta_dis_ic": "Duvarın dış ya da iç olmasına göre parçaya eklenen anahtar (`Pset_WallCommon.IsExternal`); kart ürünü tanımlar, duvarın dış ya da iç olduğu parçanın bilgisidir",
   "pafta_tavan": "Tavanın türüne göre (asma dizme / ters; İş Emri'nin `Tavan` özelliği, liste üreteciyle aynı okuma) parçaya eklenen anahtar: aynı ürün paftada ve listede tavana göre başka adla sayılır",
   "pafta_bilgi": "Parçanın kuraldan aldığı bir bilginin (`alan`) değeriyle kurulan anahtar (`<onek>.<değer>`); ör. omeganın yeri (`ayrinti.omega.konum.ara`)",
-  "bugunku_ifc": "Bugünkü IFC'de (`motor.ifc_uret`) bu kartın parçasını tanıyan eşleme: IFC sınıfı, ad deseni, özellik koşulları (`[set, özellik, desen]`), duvarın boşluk türleri (`bosluk`, sıralı ve virgülle), yerleşim kuralının sonucu (`kural`) ve geçerli olduğu çatı tipleri (`cati_tipleri`; eşlemede ya da uyguladığı kuralda; ikisinde de yazılıysa ikisi de sağlanır). Bugünkü IFC çatıyı hep beşik çizer; İş Emri'nin çatısı bu tiplerden değilse parça \"kural yok\" yazar. Bir parça tam bir karta uymalı; ikiye uyarsa model üretilmez, hiçbirine uymazsa \"kural yok\" yazar. Kartta `bugunku_ifc`, `yerlesim` ya da `sabit`'ten tam biri olur",
+  "pafta_disi": "Paftada sayılmayan parça: kuralın parçaya yazdığı bilgiler (`bilgi`) bunlarsa parça pafta anahtarı almaz, nedeni `neden`'de (K5b-2: açık mahale bakan dış duvarın omegası PK-01 paftasının tavan omega planında yok)",
+  "bugunku_ifc": "Bugünkü IFC'de (`motor.ifc_uret`) bu kartın parçasını tanıyan eşleme: IFC sınıfı, ad deseni, özellik koşulları (`[set, özellik, desen]`), duvarın boşluk türleri (`bosluk`, sıralı ve virgülle), yerleşim kuralının sonucu (`kural`), evin iç duvar kalınlığı (`ic_duvar_cm`, desen; bugünkü IFC'deki iç panoların kalınlıkları, sıralı ve virgülle; BK-18'den beri iç duvar 100'lük de olabilir) ve geçerli olduğu çatı tipleri (`cati_tipleri`; eşlemede ya da uyguladığı kuralda; ikisinde de yazılıysa ikisi de sağlanır). Bugünkü IFC çatıyı hep beşik çizer; İş Emri'nin çatısı bu tiplerden değilse parça \"kural yok\" yazar. Bir parça tam bir karta uymalı; ikiye uyarsa model üretilmez, hiçbirine uymazsa \"kural yok\" yazar. Kartta `bugunku_ifc`, `yerlesim` ya da `sabit`'ten tam biri olur",
   "yerlesim": "K2: parçayı bugünkü IFC değil yerleşim kuralı kurar (`motor/yerlesim/`; kural `kurallar/yerlesim/prefabrik.json`'da). Eşleme: kuralın adı (`kural`), parçanın çeşidi (`parca`), kuralın parçaya yazdığı bilgiler (`bilgi`, isteğe bağlı; hepsi aynı olmalı) ve parçanın IFC sınıfı (`sinif`). Kuralın kurduğu parça tam bir karta uymalı; hiçbirine uymazsa \"kural yok\" yazar, ikisine uyarsa model üretilmez",
   "sabit": "Sabit paket: adet modelden değil liste kuralından okunur (`okunan`); modelde parçası yoktur",
   "kaynak": "Kaynak ve durum: `lokman`, `muhendis` ya da `varsayim`; tarih ve dayanak"
@@ -37,13 +38,15 @@
   "SR": "Sabit paketle sayılan bağlantı parçası",
   "EL": "Elektrik: nokta (duy, glop, anahtar, priz), zil, sigorta kutusu ve kablo",
   "AC": "Alt çerçeve",
-  "CK": "Çatı kenarı ve mahya: saçak omegası, saçak sacı, alın sacı, baş makas Z'si, C kapama, mahya"
+  "CK": "Çatı kenarı ve mahya: saçak omegası, saçak sacı, alın sacı, baş makas Z'si, C kapama, mahya",
+  "AL": "Alçıpan levha",
+  "IZ": "Isı yalıtımı (çatı şiltesi)"
  },
  "birimler": ["adet", "boy", "paket", "rulo", "m", "m2", "takım"],
  "sayim_yollari": {
   "yerlesen_adet": "Modelde yerleşen parça sayısı",
   "boy_kesim": "Parçalar stok boyuna kesim planıyla (K2); K3b'nin kartlarında liste üretecinin yoluyla: hatların toplamı ya da kenar başına (kuralın `yontem`'i)",
-  "alan": "Levha ya da paket, alandan; levha modelde yerleşir (K2)",
+  "alan": "Levha ya da paket, alandan; levha modelde yerleşir (K2). K5b-2: modelde levhadan kesilen göz ya da paketten açılan şerit yerleşir; levha ve paket kesim planında (kuralın `levha_cm`'i ya da `paket_m2`'si)",
   "turev": "Başka kartın adedinden",
   "sabit_paket": "Sabit paket",
   "aliciya_ait": "Alıcıya ait: satır kalır, adet 0",
@@ -123,6 +126,34 @@
    "pafta_dis_ic": {"dis": "ayrinti.montaj.pano.dis", "ic": "ayrinti.montaj.pano.ic"},
    "bugunku_ifc": [{"sinif": "IfcWall", "bosluk": "^dis_kapi$"}],
    "kaynak": {"durum": "muhendis", "tarih": "2026-10-19", "dayanak": "PK-01 gerçek listesinin satır adı (PR #28)"}
+  },
+  {
+   "kod": "D-06",
+   "ad": "100'lük karkaslı + kasalı pano",
+   "liste": {"grup": "1001", "satirlar": ["100'lük karkaslı + kasalı pano"]},
+   "olcu": "100 × boy × 2500; boy parçada",
+   "birim": "adet",
+   "nerede": "İç duvarı 100'lük evde, iç kapının panosu (60'lık evde I-02)",
+   "sayim": "yerlesen_adet",
+   "ifc": {"sinif": "IfcWallType", "alt_tur": "SOLIDWALL"},
+   "pafta": ["ayrinti.montaj.pano.adet"],
+   "pafta_dis_ic": {"dis": "ayrinti.montaj.pano.dis", "ic": "ayrinti.montaj.pano.ic"},
+   "bugunku_ifc": [{"sinif": "IfcWall", "kosul": [["PortatifEv_Pano", "Kalinlik_cm", "^10(\\.0+)?$"]], "bosluk": "^ic_kapi$"}],
+   "kaynak": {"durum": "varsayim", "tarih": "2026-10-29", "dayanak": "Lokman 28 Ekim (TK-02): \"içlerde 100'lük\"; satır adı liste üretecinden (`motor/prefabrik_liste.py`, iç duvar kalınlığıyla; BK-18), gerçek listede henüz yok"}
+  },
+  {
+   "kod": "D-07",
+   "ad": "100'lük geçişli pano",
+   "liste": {"grup": "1001", "satirlar": ["100'lük geçişli pano"]},
+   "olcu": "100 × boy × 2500; boy parçada",
+   "birim": "adet",
+   "nerede": "İç duvarı 100'lük evde, kapısız geçişin panosu (60'lık evde I-03)",
+   "sayim": "yerlesen_adet",
+   "ifc": {"sinif": "IfcWallType", "alt_tur": "SOLIDWALL"},
+   "pafta": ["ayrinti.montaj.pano.adet"],
+   "pafta_dis_ic": {"dis": "ayrinti.montaj.pano.dis", "ic": "ayrinti.montaj.pano.ic"},
+   "bugunku_ifc": [{"sinif": "IfcWall", "kosul": [["PortatifEv_Pano", "Kalinlik_cm", "^10(\\.0+)?$"]], "bosluk": "^gecis$"}],
+   "kaynak": {"durum": "varsayim", "tarih": "2026-10-29", "dayanak": "Lokman 28 Ekim (TK-02): \"içlerde 100'lük\"; satır adı liste üretecinden (`motor/prefabrik_liste.py`, iç duvar kalınlığıyla; BK-18), gerçek listede henüz yok"}
   },
   {
    "kod": "I-01",
@@ -237,11 +268,12 @@
    "liste": {"grup": "1002", "satirlar": ["10'luk köşe direği 100 × 100"]},
    "olcu": "100 × 100 × 2500; kanat 13 × 13 cm (duvar + 3 cm; iç kanat 12,5; montaj rehberi, varsayım)",
    "birim": "adet",
-   "nerede": "Dış duvarın köşesinde (malzeme kataloğu B02: dış köşeler ve veranda iç köşesi)",
+   "nerede": "Dış duvarın köşesinde (malzeme kataloğu B02: dış köşeler ve veranda iç köşesi); iç duvarı 100'lük evde iç köşede de (liste aynı satırda sayar)",
    "sayim": "yerlesen_adet",
    "ifc": {"sinif": "IfcMemberType", "alt_tur": "STUD"},
    "pafta": ["ayrinti.montaj.kose"],
-   "bugunku_ifc": [{"sinif": "IfcMember", "kosul": [["PortatifEv_Kapsam", "Blok", "^BOM_B02_DIS_KOSE_"]]}],
+   "bugunku_ifc": [{"sinif": "IfcMember", "kosul": [["PortatifEv_Kapsam", "Blok", "^BOM_B02_DIS_KOSE_"]]},
+                   {"sinif": "IfcMember", "kosul": [["PortatifEv_Kapsam", "Blok", "^BOM_B\\d+_IC_KOSE_100x50$"]]}],
    "kaynak": {"durum": "muhendis", "tarih": "2026-10-19", "dayanak": "PK-01 gerçek listesinin satır adı (PR #28)"}
   },
   {
@@ -319,7 +351,7 @@
    "sayim": "yerlesen_adet",
    "ifc": {"sinif": "IfcMemberType", "alt_tur": "STUD"},
    "pafta": ["h_plani.h_standart", "ayrinti.h_plani.turler.standart"],
-   "bugunku_ifc": [{"sinif": "IfcMember", "ad": "^H_PANO_EKI_IC_"}],
+   "bugunku_ifc": [{"sinif": "IfcMember", "ad": "^H_PANO_EKI_IC_", "ic_duvar_cm": "^6(\\.0+)?$"}],
    "kaynak": {"durum": "muhendis", "tarih": "2026-10-13", "dayanak": "PK-07 H planı lejantı; PK-01 gerçek listesinin satır adı (PR #28)"}
   },
   {
@@ -362,6 +394,58 @@
    "kaynak": {"durum": "muhendis", "tarih": "2026-10-13", "dayanak": "PK-07 H planı lejantı; PK-01 gerçek listesinin satır adı (PR #28)"}
   },
   {
+   "kod": "H-07",
+   "ad": "H standart 100 (iç pano eki)",
+   "liste": {"grup": "1002", "satirlar": ["H standart 100 (iç pano eki)"]},
+   "olcu": "100 × 100 × 2500",
+   "birim": "adet",
+   "nerede": "İç duvarı 100'lük evde, iç duvarda pano eki (60'lık evde H-03)",
+   "sayim": "yerlesen_adet",
+   "ifc": {"sinif": "IfcMemberType", "alt_tur": "STUD"},
+   "pafta": ["h_plani.h_standart", "ayrinti.h_plani.turler.standart"],
+   "bugunku_ifc": [{"sinif": "IfcMember", "ad": "^H_PANO_EKI_IC_", "ic_duvar_cm": "^10(\\.0+)?$"}],
+   "kaynak": {"durum": "varsayim", "tarih": "2026-10-29", "dayanak": "Lokman 28 Ekim (TK-02): \"içlerde 100'lük\"; satır adı liste üretecinden (`motor/prefabrik_liste.py`, iç duvar kalınlığıyla; BK-18), gerçek listede henüz yok"}
+  },
+  {
+   "kod": "H-08",
+   "ad": "3'lü H 100 × 100 × 100 dübelli & kulaklı (dış duvar T'si)",
+   "liste": {"grup": "1002", "satirlar": ["3'lü H 100 × 100 × 100 (dış duvar T'si)"]},
+   "olcu": "L 2500",
+   "birim": "adet",
+   "nerede": "İç duvarı 100'lük evde, iç duvarın dış duvara geldiği T'de, makasa denk gelen (kural `h_turu`; 60'lık evde H-04)",
+   "sayim": "yerlesen_adet",
+   "ifc": {"sinif": "IfcMemberType", "alt_tur": "STUD"},
+   "pafta": ["h_plani.uclu_dis", "ayrinti.h_plani.turler.uclu_dubelli_kulakli"],
+   "bugunku_ifc": [{"sinif": "IfcMember", "kosul": [["PortatifEv_Kapsam", "Blok", "^BOM_B\\d+_UCLU_H_DIS_100x100$"]], "kural": {"ad": "h_turu", "deger": "dubelli_kulakli"}}],
+   "kaynak": {"durum": "varsayim", "tarih": "2026-10-29", "dayanak": "Lokman 28 Ekim (TK-02): \"içlerde 100'lük\"; satır adı liste üretecinden (`motor/prefabrik_liste.py`, iç duvar kalınlığıyla; BK-18), gerçek listede henüz yok"}
+  },
+  {
+   "kod": "H-09",
+   "ad": "3'lü H 100 × 100 × 100 dübelli (dış duvar T'si)",
+   "liste": {"grup": "1002", "satirlar": ["3'lü H 100 × 100 × 100 (dış duvar T'si)"]},
+   "olcu": "L 2500",
+   "birim": "adet",
+   "nerede": "İç duvarı 100'lük evde, iç duvarın dış duvara geldiği T'de, makasa denk gelmeyen (60'lık evde H-05)",
+   "sayim": "yerlesen_adet",
+   "ifc": {"sinif": "IfcMemberType", "alt_tur": "STUD"},
+   "pafta": ["h_plani.uclu_dis", "ayrinti.h_plani.turler.uclu_dubelli"],
+   "bugunku_ifc": [{"sinif": "IfcMember", "kosul": [["PortatifEv_Kapsam", "Blok", "^BOM_B\\d+_UCLU_H_DIS_100x100$"]], "kural": {"ad": "h_turu", "deger": "dubelli"}}],
+   "kaynak": {"durum": "varsayim", "tarih": "2026-10-29", "dayanak": "Lokman 28 Ekim (TK-02): \"içlerde 100'lük\"; satır adı liste üretecinden (`motor/prefabrik_liste.py`, iç duvar kalınlığıyla; BK-18), gerçek listede henüz yok"}
+  },
+  {
+   "kod": "H-10",
+   "ad": "3'lü H standart 100 (iç T)",
+   "liste": {"grup": "1002", "satirlar": ["3'lü H standart 100 (iç T)"]},
+   "olcu": "L 2500",
+   "birim": "adet",
+   "nerede": "İç duvarı 100'lük evde, iki iç duvarın T birleşiminde (60'lık evde H-06)",
+   "sayim": "yerlesen_adet",
+   "ifc": {"sinif": "IfcMemberType", "alt_tur": "STUD"},
+   "pafta": ["h_plani.uclu_standart", "ayrinti.h_plani.turler.uclu_standart"],
+   "bugunku_ifc": [{"sinif": "IfcMember", "kosul": [["PortatifEv_Kapsam", "Blok", "^BOM_B\\d+_UCLU_H_100$"]]}],
+   "kaynak": {"durum": "varsayim", "tarih": "2026-10-29", "dayanak": "Lokman 28 Ekim (TK-02): \"içlerde 100'lük\"; satır adı liste üretecinden (`motor/prefabrik_liste.py`, iç duvar kalınlığıyla; BK-18), gerçek listede henüz yok"}
+  },
+  {
    "kod": "MA-01",
    "ad": "Makas (baş)",
    "liste": {"grup": "1005", "satirlar": ["Makas (baş)"]},
@@ -388,6 +472,19 @@
    "kaynak": {"durum": "muhendis", "tarih": "2026-10-19", "dayanak": "PK-01 gerçek listesinin satır adı (PR #28)"}
   },
   {
+   "kod": "MA-03",
+   "ad": "Yavru makas",
+   "liste": {"grup": "1005", "satirlar": ["Yavru makas"]},
+   "olcu": "Açıklık parçada (veranda çatısının açıklığı + iki saçak; TK-01 önde 4460, arkada 3210)",
+   "birim": "adet",
+   "nerede": "Gövdeden taşan verandanın çatısında (BK-14): ilki dış kirişin üstünde, sonuncusu gövde duvarının dibinde, aralarında eşit aralık (`veranda_catisi`); sayı liste kuralından (J8)",
+   "sayim": "yerlesen_adet",
+   "ifc": {"sinif": "IfcElementAssemblyType", "alt_tur": "TRUSS"},
+   "pafta": [],
+   "yerlesim": {"kural": "veranda_catisi", "parca": "yavru_makas", "sinif": "IfcElementAssembly"},
+   "kaynak": {"durum": "varsayim", "tarih": "2026-10-30", "dayanak": "Liste kuralı J8 (`motor/prefabrik_liste.py`: ek çatı parçasının pano koşusu ÷ 125,5 yukarı + 1; PK-03 yavru makas 3); yer montaj rehberindeki gibi dış kirişten duvara eşit aralık (İE-18, varsayım); kesit 3B gösterim"}
+  },
+  {
    "kod": "OM-01",
    "ad": "60'lık tavan omegası L 3750",
    "liste": {"grup": "1002", "satirlar": ["60'lık duvar omegası (asma dizme tavan)", "60'lık tavan omegası (ters tavan)"]},
@@ -399,8 +496,25 @@
    "pafta": [],
    "pafta_tavan": {"asma": "duvar_omegasi_asma", "ters": "tavan_omegasi"},
    "pafta_bilgi": {"alan": "Yer", "onek": "ayrinti.omega.konum"},
-   "yerlesim": {"kural": "tavan_omegasi_yerlesimi", "parca": "omega", "sinif": "IfcMember"},
-   "kaynak": {"durum": "lokman", "tarih": "2026-10-24", "dayanak": "Karar B (Lokman, kart 24 Ekim 06:17 \"Türe göre\"); PK-01 tavan omega planı (s. 6, 24 parça). Listede tavanın türüne göre iki ad, ürün aynı (kitap `parca_boyu_m.tavan_omegasi`, L 3750)"}
+   "yerlesim": {"kural": "tavan_omegasi_yerlesimi", "parca": "omega", "sinif": "IfcMember", "bilgi": {"Sirt_cm": null}},
+   "kaynak": {"durum": "lokman", "tarih": "2026-10-24", "dayanak": "Karar B (Lokman, kart 24 Ekim 06:17 \"Türe göre\"); PK-01 tavan omega planı (s. 6, 24 parça). Listede tavanın türüne göre iki ad, ürün aynı (kitap `parca_boyu_m.tavan_omegasi`, L 3750). Sırtı geniş parça (`Sirt_cm` bilgisi olan) bu kartta değil, OM-02'de"}
+  },
+  {
+   "kod": "OM-02",
+   "ad": "100'lük duvar omegası L 2500",
+   "liste": {"grup": "1002", "satirlar": ["100'lük duvar omegası"]},
+   "olcu": "100 × 2500; iç duvarın üstünde sırtı 10,5 cm (100 mm pano + iki yanda 2 mm H kanadı + 1 mm), öteki ölçüleri 60'lık omeganın; parça boyu parçada (tam parça 250, kesim planında)",
+   "birim": "adet",
+   "nerede": "İç duvarı 100'lük evde, asma dizme tavanda iç duvarların ekseninde, duvar boyunca (60'lık evde OM-01); çatı kenarına gelmeyen dış duvarın (açık mahale bakan: ana çatının altındaki veranda, giriş nişi) ekseninde, ortak sınır boyunca, tavanın türüne bakmadan (K5b-2, `tavan_omegasi_yerlesimi.dis_duvar`). Listedeki satırı çatı kenarında olmayan kirişleri de sayar; o parçalar ve ters tavanda 100'lük iç duvarın üstü modelde yerleşmez",
+   "sayim": "boy_kesim",
+   "ifc": {"sinif": "IfcMemberType", "alt_tur": "MEMBER"},
+   "pafta": [],
+   "pafta_tavan": {"asma": "duvar_omegasi_asma", "ters": "tavan_omegasi"},
+   "pafta_bilgi": {"alan": "Yer", "onek": "ayrinti.omega.konum"},
+   "pafta_disi": {"bilgi": {"Duvar": "dis"}, "neden": "Açık mahale bakan dış duvarın omegası PK-01 paftasının tavan omega planında yok (24 parça: duvar ekseninde 9, duvar yüzünde 1, arada 14); hakem saymaz"},
+   "yerlesim": {"kural": "tavan_omegasi_yerlesimi", "parca": "omega", "sinif": "IfcMember", "bilgi": {"Yer": "duvar_ekseni", "Sirt_cm": 10.5},
+                "kesim": {"parca_boyu": "parca_boyu_100", "pay": "pay_100"}},
+   "kaynak": {"durum": "lokman", "tarih": "2026-10-30", "dayanak": "Lokman, 30 Ekim 07:04: \"iç duvar üstü omegası diğer adı 100'lük duvar omegası yani listede var\" (D-32 ek; ad düzeltmesi, gerekçe İE-18 › R1 ek 5). Sırt: Lokman, 29 Ekim 13:12 \"60'lık omega ile tüm ölçüleri doğru ama sırt genişliği 10.5 cm olacak diğer omegalar gibi\" (D-32), kural `kurallar/yerlesim/prefabrik.json › tavan_omegasi_yerlesimi.sirt_100`; boy ve satır liste üretecinden (`duvar_omegasi_100_bolen_m`). Açık mahale bakan dış duvar: Lokman, 21 Ekim 16:22 (BK-12 PR-2e; liste üretecinin `ic_kalan_dis_duvar_m`); model atölyesi 30 Ekim: giriş nişine bakan duvar modele eklenir (K5b-2)"}
   },
   {
    "kod": "AS-01",
@@ -408,7 +522,7 @@
    "liste": {"grup": "1005", "satirlar": ["Aşık"]},
    "olcu": "L 4200; parça boyu parçada (tam parça 410, kesim planında); omega kesit 87 × 30 mm, üst 35, sac 1 mm (montaj rehberi)",
    "birim": "adet",
-   "nerede": "Çatı yüzünde mahyaya paralel sıralar: mahyadan 60 cm arayla, saçağa 60'tan az kalınca saçakta bir sıra (`asik_sirasi`, karar C)",
+   "nerede": "Çatı yüzünde mahyaya paralel sıralar: mahyadan 60 cm arayla, saçağa 60'tan az kalınca saçakta bir sıra, saçağa 30 cm'den az kalan sıra konmaz (`asik_sirasi`, karar C)",
    "sayim": "boy_kesim",
    "ifc": {"sinif": "IfcMemberType", "alt_tur": "PURLIN"},
    "pafta": ["asik"],
@@ -421,7 +535,7 @@
    "liste": {"grup": "1006", "satirlar": ["Sandviç panel (100 cm kapatır)"]},
    "olcu": "100 cm kapatır; boy parçada (eğik boy + 5 cm, 10 mm'ye yukarı)",
    "birim": "adet",
-   "nerede": "Çatı yüzünde mahyadan saçağa şeritler; dizilimin başladığı uçtan, son şerit yüzün ucunda kesilir (`cati_kaplamasi`)",
+   "nerede": "Çatı yüzünde mahyadan saçağa şeritler; dizilimin başladığı uçtan, son şerit yüzün öteki ucundan taşar, kesilmez (`cati_kaplamasi`)",
    "sayim": "yerlesen_adet",
    "ifc": {"sinif": "IfcCoveringType", "alt_tur": "ROOFING"},
    "pafta": ["sandvic_panel"],
@@ -429,12 +543,25 @@
    "kaynak": {"durum": "muhendis", "tarih": "2026-10-24", "dayanak": "PK-01 çatı kaplaması planı (s. 9, 22 panel); kapatma ve boy kural kitabından (Lokman 4 ve 7 Ekim)"}
   },
   {
+   "kod": "KP-02",
+   "ad": "Tek kat çatı paneli",
+   "liste": {"grup": "1006", "satirlar": ["Tek kat çatı paneli"]},
+   "olcu": "100 cm kapatır (kitap `tek_kat_panel_kapatma_m`); boy parçada (eğik boy + 5 cm, 10 mm'ye yukarı)",
+   "birim": "adet",
+   "nerede": "Çatı yüzünde mahyadan saçağa şeritler; ana çatıda yüz başına, taşan verandanın çatısında iki yüz birlikte, iki yüzün artan şeritleri bir panele sığıyorsa bir panelden (`cati_kaplamasi`)",
+   "sayim": "yerlesen_adet",
+   "ifc": {"sinif": "IfcCoveringType", "alt_tur": "ROOFING"},
+   "pafta": [],
+   "yerlesim": {"kural": "cati_kaplamasi", "parca": "panel", "sinif": "IfcCovering", "bilgi": {"Kaplama": "tek kat"}},
+   "kaynak": {"durum": "lokman", "tarih": "2026-10-30", "dayanak": "Liste kuralı P3, O9 (`motor/prefabrik_liste.py`: ana çatıda yüz başına ⌈mahya boyu ÷ kapatma⌉, ek çatı parçasında ⌈iki yüz × mahya boyu ÷ kapatma⌉); kapatma kitaptan (Lokman, 4 Ekim 15:18: tek kat panel 100 cm kapatır); İş Emri'nde kaplama yazılı değilse liste üretecinin okuması tek kat panel"}
+  },
+  {
    "kod": "BT-01",
    "ad": "Baş makas betopanı 1250 × 2500",
    "liste": {"grup": "1002", "satirlar": ["Baş makas betopanı"]},
    "olcu": "1250 × 2500 (3,125 m²)",
    "birim": "adet",
-   "nerede": "Baş makasların dış yüzünde, yatık, mahyaya ortalı (`bas_makas_betopani_yerlesimi`); sayı liste kuralından (H5)",
+   "nerede": "Baş makasların dış yüzünde (`bas_makas_betopani_yerlesimi`): üçgen 125 cm'yi geçmezse yatık, mahyaya ortalı; 125–250 cm'de dikey 125 × 250, mahyadan dışa, uçlar artan parçalarla (PK-07 s. 10; K5b); taşan verandanın dış kalkanında da (K5b). Sayı liste kuralından (H5)",
    "sayim": "alan",
    "ifc": {"sinif": "IfcPlateType", "alt_tur": "SHEET"},
    "pafta": ["bas_makas_betopan"],
@@ -447,7 +574,7 @@
    "liste": {"grup": "1011", "satirlar": ["Metal dere"]},
    "olcu": "L 4000; hattın boyu parçada (kesim planında 20 cm bindirmeyle); K kesit ~15 × 11,4 cm, 38'lik açınım (montaj rehberi)",
    "birim": "adet",
-   "nerede": "Beşikte her saçak kenarı boyunca bir hat (`dere_hatti`)",
+   "nerede": "Beşikte her saçak kenarı boyunca bir hat; taşan verandanın çatısında da saçak kenarı başına bir hat (`dere_hatti`; K5b)",
    "sayim": "boy_kesim",
    "ifc": {"sinif": "IfcPipeSegmentType", "alt_tur": "GUTTER"},
    "pafta": ["dere"],
@@ -460,7 +587,7 @@
    "liste": {"grup": "1011", "satirlar": ["Metal dere inişi aparatı"]},
    "olcu": "İniş başına bir",
    "birim": "adet",
-   "nerede": "Dere hattının iki ucunda; 9 m'yi geçen hattın ortasında bir tane daha (`dere_hatti`; Lokman 13 ve 18 Ekim)",
+   "nerede": "Ana çatıda dere hattının iki ucunda; 9 m'yi geçen hattın ortasında bir tane daha (`dere_hatti`; Lokman 13 ve 18 Ekim). Taşan verandanın çatısında hat başına bir, dış uçta (liste kuralı: ek çatı parçası başına; K5b)",
    "sayim": "yerlesen_adet",
    "ifc": {"sinif": "IfcPipeFittingType", "alt_tur": "TRANSITION"},
    "pafta": ["inis"],
@@ -655,12 +782,12 @@
    "liste": {"grup": "1002", "satirlar": ["100'lük saçak omegası"]},
    "olcu": "Ters U: içte ~6 cm kanat ve 4 cm ayak, dışta eğik ~6 cm kanat, sac 1 mm (montaj rehberi, ölçüler yaklaşık); L 2500; hattın boyu parçada",
    "birim": "adet",
-   "nerede": "İki saçak duvarının üstünde, makasın altında; verandanın tarafında kirişin üstünde (`sacak_omegasi_yerlesimi`)",
+   "nerede": "İki saçak duvarının üstünde, makasın altında, duvar boyunca (saçağa uzamaz); verandanın tarafında kirişin üstünde; baş makas betopanında kesilir (`sacak_omegasi_yerlesimi`)",
    "sayim": "boy_kesim",
    "ifc": {"sinif": "IfcMemberType", "alt_tur": "MEMBER"},
    "pafta": [],
    "yerlesim": {"kural": "sacak_omegasi_yerlesimi", "parca": "sacak_omegasi", "sinif": "IfcMember"},
-   "kaynak": {"durum": "varsayim", "tarih": "2026-10-25", "dayanak": "Montaj rehberi (Lokman, 24 Ekim çizimleri): yüz başına 4 × 250 cm, duvar boyu; Lokman 25 Ekim 17:47 \"Uygula\" (rehber). Liste üreteci saçak boyunu sayar (PK-01 9; model 8): fark 6e'ye not"}
+   "kaynak": {"durum": "varsayim", "tarih": "2026-10-25", "dayanak": "Montaj rehberi (Lokman, 24 Ekim çizimleri): kesit ve 250 cm parça; Lokman 25 Ekim 17:47 \"Uygula\" (rehber). Sayı: Lokman, 31 Ekim 2026 13:40 \"gerçek listeye uy\": saçak boyundan, gerçek listeler ve liste üreteci gibi (PK-01 9). Yer: duvar boyu, saçağa uzamaz (Lokman, 1 Kasım 2026 15:19; D-41)"}
   },
   {
    "kod": "CK-02",
@@ -668,7 +795,7 @@
    "liste": {"grup": "1002", "satirlar": ["Saçak sacı (30'luk, 3'ü menfezli)"]},
    "olcu": "300 × 2500; profil tırnak 3 → saçak altı 30 → alın 13 → kıvrım 10 cm (açınım ≈ 56 cm), sac 1 mm (montaj rehberi; kıvrım varsayım); kenarın boyu parçada",
    "birim": "adet",
-   "nerede": "İki saçak kenarı boyunca, saçak ucundan ucuna; tırnağı saçak omegasının üstüne girer, makasın altında sıkışır (`sacak_saci_yerlesimi`)",
+   "nerede": "İki saçak kenarı boyunca (taşan verandanın çatısında da), saçak ucundan ucuna; tırnağı saçak omegasının üstüne girer, makasın altında sıkışır (`sacak_saci_yerlesimi`)",
    "sayim": "boy_kesim",
    "ifc": {"sinif": "IfcCoveringType", "alt_tur": "CLADDING"},
    "pafta": [],
@@ -681,7 +808,7 @@
    "liste": {"grup": "1002", "satirlar": ["Alın sacı (30'luk)"]},
    "olcu": "300 × 2500; saçak sacının profili ve kenar hadvesini kavrayan kıvrım, sac 1 mm (montaj rehberi; alt ucun kesimi varsayım); kenarın boyu parçada",
    "birim": "adet",
-   "nerede": "Kalkanların iki eğik kenarında; tırnağı baş makas Z'sine girer, makas üstünün 3 cm altından başlar, alt ucu derenin önüne iner (`alin_saci_yerlesimi`)",
+   "nerede": "Kalkanların iki eğik kenarında (ana çatının baş makasları ve taşan verandanın dış kalkanı); tırnağı baş makas Z'sine girer (verandanın kirişli kalkanında da; 30 Ekim); makas üstünün 3 cm altından başlar, alt ucu derenin önüne iner (`alin_saci_yerlesimi`)",
    "sayim": "boy_kesim",
    "ifc": {"sinif": "IfcCoveringType", "alt_tur": "CLADDING"},
    "pafta": [],
@@ -694,7 +821,7 @@
    "liste": {"grup": "1002", "satirlar": ["Baş makas Z'si"]},
    "olcu": "Z: üst kanat makas ve betopan üstünde, 3 cm çentik, 3 cm dış kanat, sac 1 mm (montaj rehberi); L 2800; kenarın boyu parçada",
    "birim": "adet",
-   "nerede": "Her baş makasın iki eğik kenarında, betopanın üstünden geçer (`bas_makas_z_yerlesimi`)",
+   "nerede": "Ana çatının her baş makasının ve taşan verandanın kirişli dış kalkanının iki eğik kenarında, betopanın üstünden geçer (`bas_makas_z_yerlesimi`; verandada kalkan betopanlı, D-32 madde 2; K5b TK-01 kıyası, 30 Ekim)",
    "sayim": "boy_kesim",
    "ifc": {"sinif": "IfcMemberType", "alt_tur": "MEMBER"},
    "pafta": [],
@@ -707,7 +834,7 @@
    "liste": {"grup": "1002", "satirlar": [], "yok": "Listede satırı yok (rehberde var); listeye satır eklemek 6e'nin ve Lokman'ın kararı. Listedeki \"Sandviç panel kapaması\" başka parçadır (kitaba göre dere boyunca)"},
    "olcu": "C: gövde ~6 cm, kanatlar 2 cm içeri, sac 1 mm (montaj rehberi); stok boyu bilinmiyor, kenarın boyu parçada",
    "birim": "m",
-   "nerede": "Kalkan saçağında aşık uçlarında, aşık üstünden alın sacının saçak altına; alın sacı önüne gelir (`c_kapama_yerlesimi`)",
+   "nerede": "Kalkan saçağında aşık uçlarında, aşık üstünden alın sacının saçak altına; alın sacı önüne gelir (`c_kapama_yerlesimi`). Ana çatının iki kalkanında ve taşan verandanın dış kalkanında (montaj rehberi: dört kalkan; K5b)",
    "sayim": "metre",
    "ifc": {"sinif": "IfcCoveringType", "alt_tur": "CLADDING"},
    "pafta": [],
@@ -726,10 +853,62 @@
    "pafta": [],
    "yerlesim": {"kural": "mahya_yerlesimi", "parca": "mahya", "sinif": "IfcCovering"},
    "kaynak": {"durum": "muhendis", "tarih": "2026-10-25", "dayanak": "Liste kuralı O10 (PK-01, PK-02, PK-06, PK-07 listelerinde tuttu; parça boyu ve bindirme kitaptan); yer ve kanat montaj rehberinden (Lokman, 24 Ekim çizimleri)"}
+  },
+  {
+   "kod": "H-11",
+   "ad": "Tavan H'ı L 1185",
+   "liste": {"grup": "1004", "satirlar": ["Tavan H'ı L 1185 (asma dizme tavan)"]},
+   "olcu": "L 1185; boy parçada (sütunun eni: omega sırtından sırtına ya da duvar yüzüne)",
+   "birim": "adet",
+   "nerede": "Asma dizme tavanda omegalara dik, her sütunda odanın arka kenarından 62,5 cm'de bir (`dizme_tavan`); ters tavanda yok. Sayı parça adedidir: her parça bir H (L 1185); parçanın boyu sütunun net açıklığıdır, kesim boyu değil (kısa sütunun parçası da bir H; iki kısa parçanın bir H'tan çıkması sayılmaz)",
+   "sayim": "yerlesen_adet",
+   "ifc": {"sinif": "IfcMemberType", "alt_tur": "MEMBER"},
+   "pafta": [],
+   "yerlesim": {"kural": "dizme_tavan", "parca": "tavan_h", "sinif": "IfcMember"},
+   "kaynak": {"durum": "varsayim", "tarih": "2026-10-30", "dayanak": "Liste satırı ve aralık liste kuralından (`tavan_h_aralik_m`: PK-01 şablonu, duvar omegalarına dik 62,5 cm'de bir); dizilim montaj rehberinden (asma tavanın H'ı), İE-15 K5b planı (CIO, 27 Ekim). Liste alandan sayar (net tavan ÷ (1,255 × 0,625) + 5), model yerleşen H'ı"}
+  },
+  {
+   "kod": "AL-01",
+   "ad": "Tavan beyaz alçıpan 1200 × 2500",
+   "liste": {"grup": "1004", "satirlar": ["Tavan beyaz alçıpan"]},
+   "olcu": "1200 × 2500 (3 m²); göz ölçüsü parçada; levhadan raflarla kesilir, 62,5'lik gözde levha başına 4 raf, dar gözler rafta yan yana (kesim planında)",
+   "birim": "adet",
+   "nerede": "Asma dizme tavanın kuru odalarında gözler: omegalar ve tavan H'ları arası (`dizme_tavan`). Ters tavanın alçıpanı modelde yerleşmez (dizilim kuralı yok); listede alandan",
+   "sayim": "alan",
+   "ifc": {"sinif": "IfcCoveringType", "alt_tur": "CEILING"},
+   "pafta": [],
+   "yerlesim": {"kural": "dizme_tavan", "parca": "goz", "sinif": "IfcCovering", "bilgi": {"Renk": "beyaz"}},
+   "kaynak": {"durum": "varsayim", "tarih": "2026-10-30", "dayanak": "Liste satırı H6 (kuru tavan × 1,05 ÷ 3 + 2, aşağı); göz dizilimi montaj rehberinden (asma tavanın gözü), İE-15 K5b planı (CIO, 27 Ekim: \"dizme alçıpan gözleri\"); levha 1200 × 2500 (kitap `levha_m2.alcipan`)"}
+  },
+  {
+   "kod": "AL-02",
+   "ad": "Tavan yeşil alçıpan 1200 × 2500",
+   "liste": {"grup": "1004", "satirlar": ["Tavan yeşil alçıpan"]},
+   "olcu": "1200 × 2500 (3 m²); göz ölçüsü parçada; levhadan raflarla kesilir, 62,5'lik gözde levha başına 4 raf, dar gözler rafta yan yana (kesim planında)",
+   "birim": "adet",
+   "nerede": "Asma dizme tavanın ıslak hacimlerinde (banyo, WC; liste kuralı `islak_hacim`) gözler (`dizme_tavan`). Ters tavanın ve açık mahalin (ana çatının altındaki veranda; kitap `veranda_tavani.prefabrik`) yeşil alçıpanı modelde yerleşmez (dizilim kuralı yok); listede alandan",
+   "sayim": "alan",
+   "ifc": {"sinif": "IfcCoveringType", "alt_tur": "CEILING"},
+   "pafta": [],
+   "yerlesim": {"kural": "dizme_tavan", "parca": "goz", "sinif": "IfcCovering", "bilgi": {"Renk": "yesil"}},
+   "kaynak": {"durum": "varsayim", "tarih": "2026-10-30", "dayanak": "Liste satırı H6 (ıslak hacim ve veranda tavanı × 1,05 ÷ 3 + 1, aşağı); ıslak hacim Lokman, 13 Ekim (banyo ve WC, mutfak kuru); göz dizilimi montaj rehberinden, İE-15 K5b planı (CIO, 27 Ekim)"}
+  },
+  {
+   "kod": "IZ-01",
+   "ad": "Çatı şiltesi / izolasyonu",
+   "liste": {"grup": "1004", "satirlar": ["Çatı şiltesi / izolasyonu"]},
+   "olcu": "Cam yünü şilte 80 mm (kitap; Lokman, 7 Ekim); paket 9,6 m² (kitap `silte_adet_m2`); şeridin ölçüsü parçada",
+   "birim": "paket",
+   "nerede": "Tavanın üstünde, aşıklardan önce: ana çatının her makas aralığında bir şerit, dış dikdörtgenin dış duvarlarının iç yüzleri arasında; gömme veranda ve niş dahil (`cati_izolasyonu`; montaj rehberiyle aynı)",
+   "sayim": "alan",
+   "ifc": {"sinif": "IfcCoveringType", "alt_tur": "INSULATION"},
+   "pafta": [],
+   "yerlesim": {"kural": "cati_izolasyonu", "parca": "serit", "sinif": "IfcCovering"},
+   "kaynak": {"durum": "varsayim", "tarih": "2026-10-30", "dayanak": "Liste satırı (brüt bina ÷ 9,6; aday: saçaklı çatı tabanı ÷ 9,6); şerit montaj rehberinden (\"her makas aralığına bir şerit\"), İE-15 K5b planı (CIO, 27 Ekim: \"çatı cam yünü (makas aralığı başına)\")"}
   }
  ],
  "gorunum": [
-  {"sinif": "IfcMember", "ad": "^H_UCLU_(DIS|IC)_", "asil": {"sinif": "IfcMember", "kosul": [["PortatifEv_Kapsam", "Blok", "^BOM_B0[35]_UCLU_H_"]]},
+  {"sinif": "IfcMember", "ad": "^H_UCLU_(DIS|IC)_", "asil": {"sinif": "IfcMember", "kosul": [["PortatifEv_Kapsam", "Blok", "^BOM_B\\d+_UCLU_H_"]]},
    "pay_cm": 10, "neden": "3'lü H'nin yüz görünümü (bugünkü IFC); sayılan parça aynı yerdeki 3'lü H bağlantısıdır"}
  ],
  "bilesen": "Bir `IfcElementAssembly`'nin parçası (makasın çubukları) ayrıca sayılmaz; kartı birleşimdedir",
@@ -737,7 +916,11 @@
   {"sinif": "IfcSlab", "ad": "^CATI_", "neden": "Çatı yüzü (bugünkü IFC'nin trapez sac gösterimi); kaplama K2'de kartlı parçalarla (KP-01), bu yüz sayılmaz"},
   {"sinif": "IfcPlate", "ad": "^ALIN_", "neden": "Çatı alın dolgusu (bugünkü IFC'nin gösterimi); baş makasın betopanı K2'de kartlı levhalarla (BT-01), bu dolgu sayılmaz"},
   {"sinif": "IfcSlab", "ad": "^ZEMIN_BETONU$", "neden": "Kapsam dışı (bayi ya da saha)"},
+  {"sinif": "IfcSlab", "ad": "^VERANDA_ZEMINI_\\d+$", "neden": "Kapsam dışı (bayi ya da saha); gövdeden taşan verandanın zemini (BK-14), ana zemin gibi (K5)"},
+  {"sinif": "IfcSlab", "ad": "^VERANDA_CATI_\\d+_\\d+$", "neden": "Gövdeden taşan verandanın çatı yüzü (BK-14; bugünkü IFC'nin trapez sac gösterimi); kaplama, aşık, yavru makas, kenarlar, dere ve iniş K5b'de kartlı parçalarla (BK-14'ün düzlemlerinden), bu yüz sayılmaz"},
+  {"sinif": "IfcPlate", "ad": "^VERANDA_ALIN_\\d+$", "neden": "Gövdeden taşan verandanın alın dolgusu (BK-14; bugünkü IFC'nin gösterimi); kalkanın betopanı K5b'de kartlı levhalarla (BT-01), bu dolgu sayılmaz"},
   {"sinif": "IfcRoof", "neden": "Çatının kabı; parçaları ayrı sayılır"},
   {"sinif": "IfcOpeningElement", "neden": "Boşluk; ürün değil, doğraması ayrı parça"}
- ]
+ ],
+ "kural_yok": []
 }

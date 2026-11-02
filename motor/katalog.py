@@ -105,7 +105,7 @@ class Katalog:
         """tur: 'ic_kose' (30×60) | 'dis_kose' (100×50) | 'uclu_h' | 'dikme'"""
         td, ti = round(self.t_dis_cm * 10, 1), round(self.t_ic_cm * 10, 1)
         keys = {"ic_kose": ("B", (ti / 2, ti)), "dis_kose": ("B", (td / 2, td)), "uclu_h": ("B", (ti,)), "dikme": ("B", (100.0, 100.0)),
-                "uclu_h_dis": ("B", tuple(sorted((td, ti))))}   # İE-11: dış duvardaki T (3'lü H dış); anahtar `_key_of` gibi sıralı (60, 100)
+                "uclu_h_dis": ("B", tuple(sorted((td, ti))) if td != ti else (td, ti, "uclu_h_dis"))}   # İE-11: dış duvardaki T (3'lü H dış); anahtar `_key_of` gibi sıralı (60, 100); BK-18: eşit kalınlıkta (100, 100) dikmenin anahtarı olur, ayrı anahtar
         key = keys[tur]
         if key in self._index: return self._index[key]
         labels = {"ic_kose": (f"{ti:g}×{ti / 2:g} iç köşe bağlantısı", [ti / 2, ti, None]), "dis_kose": (f"{td:g}×{td / 2:g} köşe bağlantısı", [td / 2, td, None]),

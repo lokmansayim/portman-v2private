@@ -79,7 +79,8 @@ def sahne_kur(y: dict, c: dict) -> list[dict]:
                 on = 0.4
                 s2 = sabit + on * (n[1] if eks == "x" else n[0])
                 tur_a = {"pencere": "pencere", "dis_kapi": "kapi", "ic_kapi": "kapi", "gecit": "gecit"}[ac["tur"]]
-                ekle(_dikdortgen(eks, s2, b0, b1, ac["z0"], ac["z1"], None, None, n), tur_a, ac["ad"], 2, en=ac["en"], bolge=f["bolge"])
+                ekle(_dikdortgen(eks, s2, b0, b1, ac["z0"], ac["z1"], None, None, n), tur_a, ac["ad"], 2, en=ac["en"], bolge=f["bolge"],
+                     **({"acilis": ac["acilis"]} if ac.get("acilis") else {}))       # sürgülü pencere (Lokman, 30 Ekim 2026); yoksa öğe aynı
 
     # ── kirişler (veranda): açıkta kalan kısımlarının yan yüzleri ────────────
     kd = kap["dis"]["kalinlik"]

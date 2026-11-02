@@ -11,9 +11,15 @@ liste üretecinin `dis_cevre_m`'si), iç hat bir iç duvarın bitişik panoları
 boşluklar arasındaki kısmıdır; hattın tamamı `HatBoyu_cm`'de, sayı hatların toplamından (kesilen parça artık).
 
 Çatı kenarları K2'nin çatısıyla aynı çerçevede (`cati.cerceve`) ve yalnız beşik çatıda; başka çatı tipinde "kural yok". Saçak omegası iki
-saçak duvarının üstünde binanın boyunca, saçak sacı saçak kenarında saçak ucundan ucuna, mahya kaplamanın üstünde saçak ucundan ucuna;
-her baş makasın iki eğik kenarında Z, alın sacı ve C kapama (boyu eğik boy). Parça hat ya da kenar başına birdir; stok boyları kesim
+saçak duvarının üstünde duvar boyunca, dışarı uzamaz (Lokman, 25 Ekim 17:47 ve 1 Kasım 15:19; D-41); baş makas betopanında ve aynı hatta
+devam eden veranda omegasında kesilir; sayı saçak boyundan, gerçek listeler gibi (Lokman, 31 Ekim "gerçek listeye uy"; duvarın dışında kalan
+kısım fire). Saçak sacı saçak kenarında saçak ucundan ucuna, mahya kaplamanın üstünde saçak ucundan ucuna; her baş makasın iki eğik kenarında Z, alın sacı ve C kapama (boyu eğik boy). Parça hat ya da kenar başına birdir; stok boyları kesim
 planındadır. Kesitler yalnız gösterimdir (`kenar_gosterim`); sayı, boy ve metre onlardan çıkmaz.
+
+Taşan verandanın çatısında (K5b, `veranda.py`) aynı işlevler verandanın çerçevesiyle: saçak omegası yan kirişlerin üstünde kiriş boyunca,
+saçak sacı ve mahya saçak ucundan ucuna, dış kalkanın iki eğik kenarında alın sacı, Z ve C kapama (montaj rehberi C kapamayı dört kalkanda
+yazar; model atölyesi doğru kabul etti, 30 Ekim; Z: kalkan betopanlı, kenar detayı ana çatınınki, liste üreteci O7'yi kirişli kalkanda da
+sayar, K5b TK-01 kıyası). Parçalar `Cati` bilgisini ve `VERANDA_` önekini taşır.
 
 `katman(ie, g, D, kesit, K)` döner: {parcalar, kural_yok, uyarilar, hatlar}. Parçalar K2'ninkilerle aynı biçimdedir ({kural, parca, boy_cm, geo,
 bilgi, aciklama}); kartı kart modelinde bulunur (`motor/kart_model.py`).
@@ -24,13 +30,14 @@ import copy
 
 from shapely.geometry import Point, Polygon
 
-from . import cati, girdi
+from . import cati, girdi, veranda
 
 ALT_CERCEVE = "alt_cerceve_yerlesimi"
 CATI_KENARLARI = (("sacak_omegasi_yerlesimi", "saçak omegası", "IfcMember"), ("sacak_saci_yerlesimi", "saçak sacı", "IfcCovering"),
                   ("alin_saci_yerlesimi", "alın sacı", "IfcCovering"), ("bas_makas_z_yerlesimi", "baş makas Z'si", "IfcMember"),
                   ("c_kapama_yerlesimi", "C kapama", "IfcCovering"), ("mahya_yerlesimi", "mahya", "IfcCovering"))
 KENAR = (ALT_CERCEVE,) + tuple(ad for ad, _a, _s in CATI_KENARLARI)
+CATI_ADI = {ad: adi for ad, adi, _s in CATI_KENARLARI}         # kural → kural yokta parçanın adı (kart modeli "kurulmadı" kartlarını bulur; K5)
 GOSTERIM = "kenar_gosterim"
 KATMAN = "alt çerçeve ve çatı kenarları"
 ESIK = 1e-6
@@ -142,21 +149,53 @@ def _bant(F: dict, u0: float, u1: float, dz0: float, dz1: float) -> list[list[fl
     return [[u0, cati._ust(F, u0) + dz0], [u1, cati._ust(F, u1) + dz0], [u1, cati._ust(F, u1) + dz1], [u0, cati._ust(F, u0) + dz1]]
 
 
-def sacak_omegasi(g: dict, G_: dict) -> list[dict]:
-    F = cati.cerceve(g)
-    w, h = G_["sacak_omegasi"]
+def kesen_araliklar(engeller: list[dict], geo: dict) -> list[tuple[float, float]]:
+    """Kesiti (`u`–`z`) `geo`'nun kesitinin zarfıyla kesişen engellerin (prizma ya da çoklu prizma) `v` aralıkları. Saçak omegası baş makas
+    betopanında kesilir, levha geçer (CIO onayı 31 Ekim 2026 16:58, seçenek a; geometri hakemi BK-19: dikey levhanın ucu omeganın kesitine
+    iner); ana çatının omegası, aynı hatta devam eden taşan veranda omegasının üstüne binmez (kalkan saçağında iki omega üst üste düşmez)."""
+    P = Polygon(geo["noktalar"]).envelope
     out = []
-    for yuz, u0 in (("sol", 0.0), ("sag", F["aciklik"] - w)):
-        out.append({"kural": "sacak_omegasi_yerlesimi", "parca": "sacak_omegasi", "boy_cm": _r(F["boy"]),
-                    "geo": cati._prizma(F, _u(u0, u0 + w, g["duvar_h"], h, G_["sac"], ters=True), 0.0, F["boy"]),
-                    "bilgi": {"Yuz": yuz}, "aciklama": f"{yuz} saçak duvarının üstü, {F['boy']:g} cm"})
+    for p in engeller:
+        for q in p["geo"]["parcalar"] if p["geo"]["tip"] == "coklu" else [p["geo"]]:
+            if q["tip"] == "prizma" and q["duzlem"] == geo["duzlem"] and Polygon(q["noktalar"]).intersection(P).area > ESIK:
+                out.append((q["a0"], q["a1"]))
     return out
 
 
-def sacak_saci(g: dict, G_: dict) -> list[dict]:
+def sacak_omegasi(g: dict, G_: dict, F: dict | None = None, engeller: list[dict] | None = None, yuz_: str | None = None,
+                  duvar: list[tuple[float, float]] | None = None) -> list[dict]:
+    """Saçak duvarlarının üstünde duvar boyunca (ana çatıda `0`..`boy`), taşan verandada (`F`, K5b) yan kirişlerin üstünde kiriş boyunca
+    (`w0`..`w1`); saçağa uzamaz, saçaktan saçağa yalnız baş makas omegası gider (Lokman, 25 Ekim 17:47 "duvar boyu" ve 1 Kasım 2026 15:19;
+    D-41). Sayı saçak boyundan (`v0`..`v1`), gerçek Portatifev listeleri gibi (Lokman, 31 Ekim 13:40 "gerçek listeye uy"; D-39): her parça
+    hattın (`Hat`, `HatBoyu_cm` = saçak boyu) parçasıdır, duvarın dışında kalan kısım fire. Kesitine baş makas betopanı ya da verandanın
+    omegası (`engeller`) iniyorsa hat orada kesilir (`kesen_araliklar`). Girintili gövdenin şerit çatısında (`serit.py`, İE-24) `F` saçak
+    kenarının çerçevesidir (`v0`..`v1` kenarın uçları), `duvar` kenarın altındaki duvar aralıkları ve `yuz_` o kenarın yüzü (öteki yüz
+    kurulmaz)."""
+    F = F or cati.cerceve(g)
+    w, h = G_["sacak_omegasi"]
+    v0, v1 = F["v0"], F["v1"]
+    duvar = duvar or [(F.get("w0", 0.0), F.get("w1", F["boy"]))]
+    ne = "kirişin" if "kiris" in F else "duvarının"                    # taşan verandanın çerçevesinde dış kiriş var (`veranda.cerceveler`)
+    out = []
+    for yuz, u0 in (("sol", 0.0), ("sag", F["aciklik"] - w)):
+        if yuz_ is not None and yuz != yuz_:
+            continue
+        uz = _u(u0, u0 + w, g["duvar_h"], h, G_["sac"], ters=True)
+        kes = [k for d0, d1 in duvar for k in _kesikler(d0, d1, kesen_araliklar(engeller or [], cati._prizma(F, uz, d0, d1)))]
+        for j, (a0, a1) in enumerate(kes, 1):
+            bilgi = {"Yuz": yuz, "Hat": yuz, "HatBoyu_cm": _r(v1 - v0), "Parca": j}
+            aciklama = f"{yuz} saçak {ne} üstü, {a1 - a0:g} cm ({'kiriş' if 'kiris' in F else 'duvar'} boyunca; sayı saçak boyundan, {v1 - v0:g} cm)"
+            if len(kes) > 1:
+                aciklama += f", {j}. parça {a0:g}–{a1:g}"
+            out.append({"kural": "sacak_omegasi_yerlesimi", "parca": "sacak_omegasi", "boy_cm": _r(a1 - a0),
+                        "geo": cati._prizma(F, uz, a0, a1), "bilgi": bilgi, "aciklama": aciklama})
+    return out
+
+
+def sacak_saci(g: dict, G_: dict, F: dict | None = None) -> list[dict]:
     """Tırnak saçak omegasının üstünde, saçak altı omeganın üstü kotunda saçak ucuna, alın saçak ucunda yukarı, kıvrım alnın üstünden dışarı
     (dereye)."""
-    F = cati.cerceve(g)
+    F = F or cati.cerceve(g)
     S, t = G_["sacak_saci"], G_["sac"]
     zo = g["duvar_h"] + G_["sacak_omegasi"][1]
     out = []
@@ -170,8 +209,8 @@ def sacak_saci(g: dict, G_: dict) -> list[dict]:
     return out
 
 
-def mahya(g: dict, G_: dict, kesit: dict) -> list[dict]:
-    F = cati.cerceve(g)
+def mahya(g: dict, G_: dict, kesit: dict, F: dict | None = None) -> list[dict]:
+    F = F or cati.cerceve(g)
     t, w = G_["sac"], G_["mahya"]["kanat"] * F["kos"]
     dz = kesit["asik"][0] + kesit["kaplama"]
     L, M, R = ([u, cati._ust(F, u) + dz] for u in (F["um"] - w, F["um"], F["um"] + w))
@@ -180,40 +219,51 @@ def mahya(g: dict, G_: dict, kesit: dict) -> list[dict]:
              "bilgi": {}, "aciklama": f"mahya, {F['v1'] - F['v0']:g} cm (saçak ucundan ucuna)"}]
 
 
-def kalkan_kenarlari(g: dict, G_: dict, kesit: dict, kurallar: set[str]) -> list[dict]:
+def ana_kalkanlar(g: dict, F: dict, kesit: dict) -> list[dict]:
+    """Ana çatının kalkanları (baş makaslar): adı, dışarı yönü, betopanın dış yüzü ve kalkan saçağının ucu (`v`)."""
+    out = []
+    for m in sorted((m for m in g["makaslar"] if m["rol"] == "bas"), key=lambda m: m["konum"]):
+        on = m["konum"] < F["boy"] / 2
+        out.append({"ad": m["ad"], "on": on, "v_dis": -kesit["betopan"] if on else F["boy"] + kesit["betopan"], "v_uc": F["v0"] if on else F["v1"]})
+    return out
+
+
+def kalkan_kenarlari(g: dict, G_: dict, kesit: dict, kurallar: set[str], F: dict | None = None,
+                     kalkanlar: list[dict] | None = None, yuzler: list[tuple] | None = None) -> list[dict]:
     """Her baş makasın iki eğik kenarında (saçak ucundan mahyaya) Z, alın sacı ve C kapama. Kalkanın dışı uç duvarın dış yüzündeki
     betopanın dışıdır; kalkan saçağı oradan saçak ucuna (aşık uçlarına). Z makasın üstünden betopanın dışına iner; alın sacının saçak altı
     makas üstünün `makas_ustunden` altında, tırnağı Z'de; C kapama aşık uçlarında aşığın üstünden alın sacının saçak altına; alın sacının
-    alnı en önde, kıvrımı kaplamanın kenarını kavrar."""
-    F = cati.cerceve(g)
+    alnı en önde, kıvrımı kaplamanın kenarını kavrar. `kalkanlar` ({ad, on, v_dis, v_uc}) verilmezse ana çatının baş makasları
+    (`ana_kalkanlar`); taşan verandada dış kalkan (`veranda.kalkan`, K5b). `yuzler` ([(yüz, u0, u1)]) verilirse yalnız o eğik kenar parçaları
+    (İE-24, girintili gövde: ana çatının cumba üstünde kalan kısa alın kenarı; boyu u aralığının eğik boyu); verilmezse iki eğik kenarın tamamı."""
+    F = F or cati.cerceve(g)
     t = G_["sac"]
     Z, A, C = G_["bas_makas_z"], G_["alin_saci"], G_["c_kapama"]
     a = kesit["asik"][0]
     out = []
-    for m in sorted((m for m in g["makaslar"] if m["rol"] == "bas"), key=lambda m: m["konum"]):
-        on = m["konum"] < F["boy"] / 2
-        s = -1 if on else 1                                                   # kalkanın dışarı yönü (v)
-        v_dis = -kesit["betopan"] if on else F["boy"] + kesit["betopan"]       # betopanın dış yüzü
-        v_uc = F["v0"] if on else F["v1"]                                     # kalkan saçağının ucu (aşık uçları)
+    for m in (kalkanlar if kalkanlar is not None else ana_kalkanlar(g, F, kesit)):
+        s = -1 if m["on"] else 1                                              # kalkanın dışarı yönü (v)
+        v_dis, v_uc = m["v_dis"], m["v_uc"]                                   # betopanın dış yüzü, kalkan saçağının ucu (aşık uçları)
 
         def v(a_, b_):                                                        # dışarı yönde a_..b_ (v_dis'ten ölçü değil, mutlak)
             return min(a_, b_), max(a_, b_)
-        for yuz, u0, u1 in (("sol", -F["s"], F["um"]), ("sag", F["um"], F["aciklik"] + F["s"])):
+        for yuz, u0, u1 in (yuzler or (("sol", -F["s"], F["um"]), ("sag", F["um"], F["aciklik"] + F["s"]))):
             bilgi = {"Makas": m["ad"], "Yuz": yuz}
-            ortak = {"boy_cm": _r(F["egik"]), "bilgi": bilgi}
+            egik = F["egik"] if yuzler is None else (u1 - u0) / F["kos"]
+            ortak = {"boy_cm": _r(egik), "bilgi": bilgi}
             if "bas_makas_z_yerlesimi" in kurallar:
                 kes = [(_bant(F, u0, u1, 0.0, t), *v(v_dis, v_dis - s * Z["ust_kanat"])),
                        (_bant(F, u0, u1, -Z["centik"], t), *v(v_dis, v_dis + s * t)),
                        (_bant(F, u0, u1, -Z["centik"], -Z["centik"] + t), *v(v_dis, v_dis + s * Z["dis_kanat"]))]
                 out.append({"kural": "bas_makas_z_yerlesimi", "parca": "bas_makas_z", "geo": _coklu(F, kes), **ortak,
-                            "aciklama": f"{m['ad']}, {yuz} eğik kenar, {F['egik']:.1f} cm"})
+                            "aciklama": f"{m['ad']}, {yuz} eğik kenar, {egik:.1f} cm"})
             if "c_kapama_yerlesimi" in kurallar:
                 z0 = a - C["govde"]
                 kes = [(_bant(F, u0, u1, z0, a), *v(v_uc, v_uc + s * t)),
                        (_bant(F, u0, u1, a - t, a), *v(v_uc + s * t, v_uc - s * C["kanat"])),
                        (_bant(F, u0, u1, z0, z0 + t), *v(v_uc + s * t, v_uc - s * C["kanat"]))]
                 out.append({"kural": "c_kapama_yerlesimi", "parca": "c_kapama", "geo": _coklu(F, kes), **ortak,
-                            "aciklama": f"{m['ad']}, {yuz} eğik kenar, aşık uçlarında, {F['egik']:.1f} cm"})
+                            "aciklama": f"{m['ad']}, {yuz} eğik kenar, aşık uçlarında, {egik:.1f} cm"})
             if "alin_saci_yerlesimi" in kurallar:
                 z0 = -A["makas_ustunden"]
                 on_yuz = v_uc + s * t                                         # C kapamanın önü
@@ -221,8 +271,22 @@ def kalkan_kenarlari(g: dict, G_: dict, kesit: dict, kurallar: set[str]) -> list
                        (_bant(F, u0, u1, z0, z0 + A["alin"]), *v(on_yuz, on_yuz + s * t)),
                        (_bant(F, u0, u1, z0 + A["alin"] - t, z0 + A["alin"]), *v(on_yuz + s * t, on_yuz + s * t - s * A["kivrim"]))]
                 out.append({"kural": "alin_saci_yerlesimi", "parca": "alin_saci", "geo": _coklu(F, kes), **ortak,
-                            "aciklama": f"{m['ad']}, {yuz} eğik kenar, {F['egik']:.1f} cm"})
+                            "aciklama": f"{m['ad']}, {yuz} eğik kenar, {egik:.1f} cm"})
     return out
+
+
+def _levhalar(g: dict, D: dict, kesit: dict, K: dict, F: dict | None = None) -> list[dict]:
+    """Çatı katmanının kurduğu baş makas betopanı levhaları (ana çatı ya da taşan verandanın dış kalkanı; aynı işlev ve değerler,
+    `cati.betopan_degerleri`); kural o çatı tipinde yoksa ya da levha kurulamıyorsa ("kural yok") boş."""
+    ad = "bas_makas_betopani_yerlesimi"
+    izin = K[ad].get("cati_tipleri")
+    if izin and g["cati_tipi"] not in izin:
+        return []
+    if g.get("cati_serit") and F is None:                           # İE-24: girintili gövdenin her parçasının baş makasları (`serit.betopan`)
+        from . import serit
+        return serit.betopan(g, cati.betopan_degerleri(D[ad], kesit), kesit["betopan"])[0]
+    kalkanlar = [veranda.kalkan(F, kesit["betopan"])] if F else None
+    return cati.betopan(g, cati.betopan_degerleri(D[ad], kesit), F, kalkanlar)[0]
 
 
 def katman(ie: dict, g: dict, D: dict, kesit: dict, K: dict) -> dict:
@@ -230,6 +294,11 @@ def katman(ie: dict, g: dict, D: dict, kesit: dict, K: dict) -> dict:
     (`motor.yerlesim.degerler`); `kesit`: K2'nin gösterim kesitleri (aşığın yüksekliği, kaplama ve betopan kalınlığı); `K`: yerleşim
     kuralları (`cati_tipleri` kuralın kendisinden okunur, K2'deki gibi: yazılı değilse her çatı)."""
     G_ = D[GOSTERIM]["kesit_cm"]
+    from . import kaplama_kalinlasma, kaplama_turu
+    dk = kaplama_kalinlasma(D["cati_kaplamasi"], kaplama_turu(g, D["cati_kaplamasi"])[0])
+    if dk:                                      # D-40: sandviç panelde kaplama kalınlaşır, alın sacının alnı o kadar genişler; başka parça değişmez
+        kesit = {**kesit, "kaplama": kesit["kaplama"] + dk}
+        G_ = {**G_, "alin_saci": {**G_["alin_saci"], "alin": G_["alin_saci"]["alin"] + dk}}
     parcalar, kural_yok, uyarilar = [], [], []
     ac, hatlar = alt_cerceve(ie, D[ALT_CERCEVE], G_)
     parcalar += ac
@@ -237,8 +306,7 @@ def katman(ie: dict, g: dict, D: dict, kesit: dict, K: dict) -> dict:
     for ad, adi, sinif in CATI_KENARLARI:
         izin = K[ad].get("cati_tipleri")
         if izin and g["cati_tipi"] not in izin:
-            kural_yok.append({"parca": adi, "sinif": sinif, "neden": f"İş Emri'nin çatısı \"{g['cati_tipi']}\"; {ad} yalnız "
-                                                                      f"{', '.join(izin)} çatıda (bugünkü IFC çatıyı hep beşik çizer)"})
+            kural_yok.append({"parca": adi, "sinif": sinif, "neden": girdi.cati_disi(g["cati_tipi"], ad, izin), "cati": g["cati_tipi"]})
             continue
         if ad == "mahya_yerlesimi":
             yazili = girdi.kucuk(next((v for k, v in g["ozellikler"].items() if girdi.kucuk(k) == "çatı kaplaması"), ""))
@@ -250,11 +318,33 @@ def katman(ie: dict, g: dict, D: dict, kesit: dict, K: dict) -> dict:
             kural_yok.append({"parca": adi, "sinif": sinif, "neden": f"{ad}: bugünkü IFC'de baş makas yok (kalkan kenarı kurulamaz)"})
             continue
         kurulan.add(ad)
-    if "sacak_omegasi_yerlesimi" in kurulan:
-        parcalar += sacak_omegasi(g, G_)
-    if "sacak_saci_yerlesimi" in kurulan:
-        parcalar += sacak_saci(g, G_)
-    parcalar += kalkan_kenarlari(g, G_, kesit, kurulan)
-    if "mahya_yerlesimi" in kurulan:
-        parcalar += mahya(g, G_, kesit)
+    verandalar = veranda.cerceveler(g)[0] if g["dis_verandalar"] and g["cati_tipi"] in K[veranda.KURAL]["cati_tipleri"] else []
+    omega = "sacak_omegasi_yerlesimi" in kurulan
+    serit_ = g.get("cati_serit")
+    # D-39: saçak omegası betopan levhasında ve devam eden veranda omegasında kesilir (`kesen_araliklar`); girintili gövdede de
+    levhalar = (_levhalar(g, D, kesit, K) + [q for F in verandalar for q in _levhalar(g, D, kesit, K, F)]) if omega else []
+    if serit_:                                                       # İE-24: girintili gövde (ana çatı + paralel cumba; `serit.py`)
+        from motor.genel import cati_genel
+
+        from . import serit
+        parcalar += serit.kenarlar(g, cati_genel.cati_kur(serit_), G_, kesit, kurulan, levhalar)
+    v_omega = [sacak_omegasi(g, G_, F, levhalar) if omega else [] for F in verandalar]
+    if not serit_:
+        if omega:
+            parcalar += sacak_omegasi(g, G_, engeller=levhalar + [q for vo in v_omega for q in vo])
+        if "sacak_saci_yerlesimi" in kurulan:
+            parcalar += sacak_saci(g, G_)
+        parcalar += kalkan_kenarlari(g, G_, kesit, kurulan)
+        if "mahya_yerlesimi" in kurulan:
+            parcalar += mahya(g, G_, kesit)
+    # K5b: taşan verandaların çatı kenarları (çerçeveyi kuramayan verandanın "kural yok"u yerleşimin çatı katmanlarında yazılı)
+    for F, vo in zip(verandalar, v_omega):
+        vp = list(vo)
+        if "sacak_saci_yerlesimi" in kurulan:
+            vp += sacak_saci(g, G_, F)
+        vp += kalkan_kenarlari(g, G_, kesit, kurulan & {"alin_saci_yerlesimi", "bas_makas_z_yerlesimi", "c_kapama_yerlesimi"}, F,
+                               [veranda.kalkan(F, kesit["betopan"])])
+        if "mahya_yerlesimi" in kurulan:
+            vp += mahya(g, G_, kesit, F)
+        parcalar += veranda.isaretle(vp, F)
     return {"parcalar": parcalar, "kural_yok": kural_yok, "uyarilar": uyarilar, "hatlar": hatlar}

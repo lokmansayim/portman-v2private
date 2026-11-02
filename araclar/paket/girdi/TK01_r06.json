@@ -1,0 +1,352 @@
+{
+ "is_emri_no": "PM-TK01-80M2",
+ "revizyon": 6,
+ "talep": {
+  "bayi": {
+   "kod": "TK01",
+   "ad": "Bayi TK-01"
+  },
+  "musteri_adi": "TK-01",
+  "metin": "Bayi çizimi (27 Ekim 2026): tek katlı prefabrik, 3 yatak odası, salon, mutfak, banyo, ebeveyn banyosu, hol; gövde 898 × 888 cm, arkada 261 × 130 ve önde 386 × 181 veranda, beşik çatı, duvar 250 cm."
+ },
+ "yapi": {
+  "sistem": "prefabrik",
+  "kat_sayisi": 1,
+  "duvar_yuksekligi_cm": 250,
+  "duvar_kalinligi_cm": {
+   "dis": 10,
+   "ic": 6
+  },
+  "olcu_kaynagi": "dis_olcu",
+  "dis_olcu_cm": {
+   "x": 898,
+   "y": 888
+  },
+  "referans_model": "TK-01",
+  "grid": {
+   "x_pano": 7,
+   "y_pano": 7
+  },
+  "kisa_kenar": "x",
+  "giris_cephesi": "on",
+  "dis_dusey_duvar": "cevre_aks_disinda",
+  "dizilim": {
+   "baslangic": "arka-sol",
+   "hiza": "izgara",
+   "dis_duvar_t_bolme": true,
+   "pencere": "oda_ortasi",
+   "kapi": "mantik",
+   "kose": "oda"
+  },
+  "ek_akslar_cm": {
+   "x": [],
+   "y": []
+  }
+ },
+ "mahaller": [
+  {
+   "ad": "YATAK ODASI 1",
+   "tur": "yatak_odasi",
+   "konum_cm": [
+    [
+     10,
+     5,
+     261,
+     381.5
+    ],
+    [
+     261,
+     256,
+     386.5,
+     381.5
+    ]
+   ]
+  },
+  {
+   "ad": "E. BANYO",
+   "tur": "banyo",
+   "konum_cm": [
+    [
+     261,
+     5,
+     386.5,
+     256
+    ]
+   ]
+  },
+  {
+   "ad": "BANYO",
+   "tur": "banyo",
+   "konum_cm": [
+    [
+     386.5,
+     5,
+     574.75,
+     256
+    ]
+   ]
+  },
+  {
+   "ad": "YATAK ODASI 2",
+   "tur": "yatak_odasi",
+   "konum_cm": [
+    [
+     574.75,
+     5,
+     888,
+     256
+    ],
+    [
+     512,
+     256,
+     888,
+     381.5
+    ]
+   ]
+  },
+  {
+   "ad": "HOL",
+   "tur": "antre_hol",
+   "konum_cm": [
+    [
+     386.5,
+     256,
+     512,
+     758
+    ]
+   ]
+  },
+  {
+   "ad": "GİRİŞ",
+   "tur": "veranda",
+   "konum_cm": [
+    [
+     386.5,
+     758,
+     512,
+     883
+    ]
+   ]
+  },
+  {
+   "ad": "SALON",
+   "tur": "salon",
+   "konum_cm": [
+    [
+     10,
+     381.5,
+     386.5,
+     883
+    ]
+   ]
+  },
+  {
+   "ad": "YATAK ODASI 3",
+   "tur": "yatak_odasi",
+   "konum_cm": [
+    [
+     512,
+     381.5,
+     888,
+     632.5
+    ]
+   ]
+  },
+  {
+   "ad": "MUTFAK",
+   "tur": "mutfak",
+   "konum_cm": [
+    [
+     512,
+     632.5,
+     888,
+     883
+    ]
+   ]
+  }
+ ],
+ "acik_sinirlar": [],
+ "acikliklar": [
+  {
+   "tur": "pencere",
+   "olcu": "120x180",
+   "mahal": "YATAK ODASI 1",
+   "duvar": "arka"
+  },
+  {
+   "tur": "pencere",
+   "olcu": "60x40",
+   "mahal": "E. BANYO",
+   "duvar": "arka"
+  },
+  {
+   "tur": "pencere",
+   "olcu": "60x40",
+   "mahal": "BANYO",
+   "duvar": "arka"
+  },
+  {
+   "tur": "pencere",
+   "olcu": "120x120",
+   "mahal": "YATAK ODASI 2",
+   "duvar": "sag"
+  },
+  {
+   "tur": "pencere",
+   "olcu": "120x120",
+   "mahal": "YATAK ODASI 3",
+   "duvar": "sag"
+  },
+  {
+   "tur": "pencere",
+   "olcu": "120x180",
+   "mahal": "SALON",
+   "duvar": "sol"
+  },
+  {
+   "tur": "pencere",
+   "olcu": "120x180",
+   "mahal": "SALON",
+   "duvar": "on"
+  },
+  {
+   "tur": "pencere",
+   "olcu": "120x180",
+   "mahal": "MUTFAK",
+   "duvar": "on"
+  },
+  {
+   "tur": "dis_kapi",
+   "olcu": 90,
+   "arasi": [
+    "GİRİŞ",
+    "HOL"
+   ]
+  },
+  {
+   "tur": "ic_kapi",
+   "olcu": 82,
+   "arasi": [
+    "HOL",
+    "BANYO"
+   ]
+  },
+  {
+   "tur": "ic_kapi",
+   "olcu": 82,
+   "arasi": [
+    "HOL",
+    "YATAK ODASI 1"
+   ]
+  },
+  {
+   "tur": "ic_kapi",
+   "olcu": 82,
+   "arasi": [
+    "HOL",
+    "YATAK ODASI 2"
+   ]
+  },
+  {
+   "tur": "ic_kapi",
+   "olcu": 82,
+   "arasi": [
+    "HOL",
+    "YATAK ODASI 3"
+   ]
+  },
+  {
+   "tur": "ic_kapi",
+   "olcu": 82,
+   "arasi": [
+    "HOL",
+    "SALON"
+   ]
+  },
+  {
+   "tur": "ic_kapi",
+   "olcu": 82,
+   "arasi": [
+    "HOL",
+    "MUTFAK"
+   ]
+  },
+  {
+   "tur": "ic_kapi",
+   "olcu": 82,
+   "arasi": [
+    "YATAK ODASI 1",
+    "E. BANYO"
+   ]
+  }
+ ],
+ "cati": {
+  "tip": "besik",
+  "egim_yuzde": 33,
+  "sacak_cm": 30,
+  "topuk_cm": 10,
+  "makas_yonu": "kisa_kenar",
+  "makas_ekseni": "x"
+ },
+ "cikti": {
+  "pdf": true,
+  "dxf": true,
+  "pafta": "A2",
+  "icerik": [
+   "aksli_plan",
+   "alanli_kopya",
+   "montaj_kopyasi",
+   "on_gorunus",
+   "cati_profili",
+   "ozellik_tablosu"
+  ]
+ },
+ "ozellikler": {
+  "Çatı Şekli": "Beşik",
+  "Çatı Kaplaması": "Tek Kat Panel",
+  "Çatı Kaplama Rengi": "Antrasit",
+  "Tavan": "Asma"
+ },
+ "alici_ait": {
+  "kalemler": [],
+  "kaynak": "Patron 27 Ekim 13:49: hepsi bize ait"
+ },
+ "pafta_uyarilari": [],
+ "varsayimlar": [
+  "Ölçüler bayi çiziminden: gövde 898 × 888 cm, 7 × 7 pano (son panolar 0,5 cm kesik); oda sınırları çizimdeki zincirlerle 125,5 akslarına oturuyor.",
+  "Yatak odası 1 (11,5 m²) ve yatak odası 2 (13 m²) L biçimli: banyoların altında kalan parça odaya dahil (alanlar çizimle tutuyor).",
+  "Dış kapı bir pano içeride (Patron 28 Ekim 08:01: \"dış kapı 1 pano içeride\"): holün başında, ön duvardan 125,5 cm içeride; öndeki pano açık giriş nişi (GİRİŞ, iki yanı salon ve mutfak duvarı, önü veranda). r05'te kapı ön duvara alınmıştı (yanlış okuma); r04'teki ANTRE ve ANTRE–HOL iç kapısı yok.",
+  "Çatı eğimi %33: kural kitabı (kurallar/plan/oda_kurallari.json, çatı eğimi 33; saçak 30, topuk 10). r03'teki %27,5 bayi görünüşündeki 142 cm'den okunmuştu; Patron 27 Ekim 16:43 reddetti.",
+  "Yatak odası 1'in arka duvarındaki 120x180 pencere olarak çizildi (arka verandaya açılan kapı değil).",
+  "Dış kapı 90, iç kapılar 82 (çalışma kabulü); kapıların panodaki yeri motorun kuralından.",
+  "Verandalar bayi çiziminden: önde 386 × 181 (gövdenin solundan 256–642), arkada 261 × 130 (solda 0–261); dış köşelerde 10 × 10 iki kolon, üç açık kenarda kiriş (BK-14).",
+  "İki veranda çatısı da ana çatıya paralel küçük beşik, %33 (kitap), saçak 30 (ön görünüşteki gibi; arkanınki aynı varsayıldı).",
+  "Çatı kaplaması Tek Kat Panel, antrasit; tavan asma (ters tavanlı liste ayrıca); hiçbir kalem alıcıya ait değil (Patron, 27 Ekim 13:49)."
+ ],
+ "eksikler": [],
+ "dikmeler": [],
+ "verandalar": [
+  {
+   "ad": "ÖN VERANDA",
+   "cephe": "on",
+   "bas_cm": 256,
+   "bit_cm": 642,
+   "derinlik_cm": 181,
+   "cati": {
+    "tip": "besik",
+    "egim_yuzde": 33
+   }
+  },
+  {
+   "ad": "ARKA VERANDA",
+   "cephe": "arka",
+   "bas_cm": 0,
+   "bit_cm": 261,
+   "derinlik_cm": 130,
+   "cati": {
+    "tip": "besik",
+    "egim_yuzde": 33
+   }
+  }
+ ]
+}

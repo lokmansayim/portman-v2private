@@ -144,6 +144,7 @@ def zarf(aday: dict, bayi: dict, gonderen: str | None, ts: dict, son_is_emri: di
           "eksikler": []}
     oz, kalan = ozellikleri_esle(ts.get("bina_ozellikleri"))
     ie["bilgi"] = {"bayi_adi": bayi_adi(bayi), "bayi_telefonu": bayi_telefonu(bayi, gonderen),
+                   "musteri_adi": numarasiz((ts.get("musteri") or {}).get("ad") or ""),     # D-33: antetin PROJE ADI'nda, herkeste görünür
                    "sevk_adresi": numarasiz((ts.get("musteri") or {}).get("sevk_adresi") or ""), "ozellikler": {k: numarasiz(v) for k, v in oz.items()},
                    "ozel_istekler": [numarasiz(str(x)) for x in list(ts.get("ozel_istekler") or []) + kalan], "cizen": "Portman", "kontrol": "Portman", "onay": "Portman"}
     return ie

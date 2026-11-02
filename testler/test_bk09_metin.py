@@ -28,11 +28,15 @@ def test_m1_uygulanan_degisiklikte_llm_ozeti_yazilmaz(tmp_path):
     assert k.mesaj.endswith("Ön onay planınız hazır; plan görseli ve PDF ektedir.")
 
 
-def test_m1_degisiklik_yoksa_ozet_durur(tmp_path):
+def test_m1_degisiklik_yoksa_da_llm_ozeti_yazilmaz(tmp_path):
+    # BK-10 (pano satır 15; canlı v2026.10.16 Ç8801K r01 "netleştirmeniz gerekiyor"): değişiklik yokken de LLM özeti mesaja ve PDF
+    # başlığına girmez; ikisi de kodun okuması (model, çatı, m², oda). Eski beklenti "özet durur" idi (gerekçe BK-10.md › Değişiklik).
     s = Sohbet(tmp_path)
     k = s.yaz("Ç8801K", katalog_kodu="Ç8801K", yapi_turu="celik", ozet="Bayi Ç8801K modelini istiyor")
-    assert k.eylem == "is_emri" and "Bayi Ç8801K modelini istiyor." in k.mesaj and "Uygulanan" not in k.mesaj
-    assert k.is_emri["talep"]["metin"] == "Bayi Ç8801K modelini istiyor"
+    assert k.eylem == "is_emri" and "modelini istiyor" not in k.mesaj and "Uygulanan" not in k.mesaj
+    metin = k.is_emri["talep"]["metin"]
+    assert metin.startswith("Ç8801-K") and " m², " in metin and k.is_emri["talep"]["metin_koddan"] is True
+    assert k.mesaj == f"{metin}. Ön onay planınız hazır; plan görseli ve PDF ektedir."
 
 
 def _aday(kod, m2, yapi="celik", **ek):

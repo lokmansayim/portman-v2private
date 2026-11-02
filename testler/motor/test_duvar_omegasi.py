@@ -75,7 +75,8 @@ def test_motor_pk01(N, kurallar):
 
 def test_motor_duvarsiz_sinir_kiris(N, kurallar):
     """ALTIN 6×8'de salonla mutfak arası duvarsız, L biçimli (125,5 + 125,5 cm): iki kiriş satırı ve duvar omegası 3 → 4. TEST02'de hol–salon
-    üç düz parça (5,02 m). PK-01'de duvarsız sınır yok. Pafta biçimine taşınınca aynı adet, uyarı yok."""
+    üç düz parça (5,02 m). PK-01'de duvarsız sınır yok. Pafta biçimine taşınınca aynı adet, uyarı yok. Köşe verandasının iki kirişi (köşesine
+    Motor kolon koyar, D-38; kolonlu verandanın kuralıyla L 3715 ve 2410) çatının kenarında: duvar omegasına girmez."""
     N6 = PL.model_motor(_oku(KOK / "is_emri" / "ALTIN_2plus1_6x8.json"))
     L = PL.liste(copy.deepcopy(N6), kurallar)
     s = _satir(L, OMEGA)
@@ -83,6 +84,7 @@ def test_motor_duvarsiz_sinir_kiris(N, kurallar):
     assert (s["adet"], s["formul"]) == (4, "çatı kenarına gelmeyen dış duvarlar 6,33 m + çatı kenarında olmayan kirişler 2,51 m ÷ 2,5")
     ic = [x for x in L["satirlar"] if x["kalem"] == KIRIS and x["formul"].startswith("duvarsız sınırın boyu")]
     assert [(x["olcu"], x["adet"]) for x in ic] == [("L 1255", 1), ("L 1255", 1)]
+    assert N6["veranda_kenarlari_cm"] == [381.5, 251.0] and N6["kose_kolonlari"] == 1
     assert sum(x["kalem"] == KIRIS for x in L["satirlar"]) == len(N6["veranda_kenarlari_cm"]) + 2
     sp = _satir(PL.liste(PL.model_pafta(_pafta(N6)), kurallar), OMEGA)
     assert (sp["adet"], sp["formul"]) == (4, s["formul"])
@@ -174,8 +176,10 @@ def test_ic_kirisler_gecersiz(ik):
 
 
 def test_kaynak_yazilari(kurallar):
-    """CIO notu (PR #32 kıyası): baş makas omegasının kaynağı "kalkan" demez; duvar omegasının kaynağı kiriş terimini ve dayanağını söyler."""
+    """CIO notu (PR #32 kıyası): baş makas omegasının kaynağı "kalkan" demez; duvar omegasının kaynağı kiriş terimini ve dayanağını söyler.
+    D-32 (Lokman, 29 Ekim 13:12): baş makas omegası saçak ucundan saçak ucuna; kaynağın başı "altı"ndan "boyu"na döndü."""
     k = kurallar["prefabrik"]["kurallar"]
-    assert k["bas_makas_omegasi_bolen_m"]["kaynak"].startswith("Baş makasların altı ÷ 2,5")
+    assert k["bas_makas_omegasi_bolen_m"]["kaynak"].startswith("Baş makasların boyu saçak ucundan saçak ucuna ÷ 2,5")
+    assert "kalkan" not in k["bas_makas_omegasi_bolen_m"]["kaynak"] and "13:12" in k["bas_makas_omegasi_bolen_m"]["kaynak"]
     assert "kirişler" in k["duvar_omegasi_100_bolen_m"]["kaynak"] and "16:22" in k["duvar_omegasi_100_bolen_m"]["kaynak"]
     assert k["duvar_omegasi_100_bolen_m"]["deger"] == 2.5

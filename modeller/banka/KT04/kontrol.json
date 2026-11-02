@@ -1,0 +1,133 @@
+{
+ "sema": "portman.banka_kontrol/0.1",
+ "kod": "KT04",
+ "tanim_sha256": "9ff2f05bb7e6fb0c2545790b2a9486f68fa9f8b9830c2b1e726ef39366cc8405",
+ "kural_seti": "testler/celik/projeler/setler/a01cbf2a810c8e7f.json",
+ "kural_seti_sha256": "a01cbf2a810c8e7fcede59dcf2ed9b86c31b815977456b8753da8afbaae506ea",
+ "karkas_kurali": "testler/celik/projeler/setler/4baf8aa0acb81d2f.json",
+ "karkas_kurali_sha256": "4baf8aa0acb81d2fa6f93a41bfdcd051d046a2b1a61e244e3a7842d688651060",
+ "hizli": {
+  "dis_olcu_cm": [
+   1562.0,
+   802.0
+  ],
+  "oturum_m2": 123.78,
+  "veranda_m2": 17.5,
+  "odalar": {
+   "Yatak Odası 1": 12.2,
+   "Banyo": 7.65,
+   "Yatak Odası 2": 9.66,
+   "Yatak Odası 3": 9.96,
+   "Salon - Mutfak": 28.45,
+   "Yatak Odası 4": 13.32,
+   "Hol": 11.27,
+   "Veranda": 17.5
+  },
+  "oda_programi": "4+1",
+  "pencere": 11,
+  "kapi": 7,
+  "acikliklar": [
+   "dis_kapi Hol",
+   "ic_kapi Banyo",
+   "ic_kapi Salon - Mutfak",
+   "ic_kapi Yatak Odası 1",
+   "ic_kapi Yatak Odası 2",
+   "ic_kapi Yatak Odası 3",
+   "ic_kapi Yatak Odası 4",
+   "pencere Banyo 50/50/170",
+   "pencere Hol 120/100/90",
+   "pencere Hol 120/100/90",
+   "pencere Salon - Mutfak 120/100/100",
+   "pencere Salon - Mutfak 120/100/100",
+   "pencere Salon - Mutfak 120/100/100",
+   "pencere Salon - Mutfak 200/180/10",
+   "pencere Yatak Odası 1 120/100/100",
+   "pencere Yatak Odası 2 120/100/100",
+   "pencere Yatak Odası 3 120/100/100",
+   "pencere Yatak Odası 4 200/180/10"
+  ],
+  "cati": {
+   "tip": "besik_cumba",
+   "duzlem": 11,
+   "yuzey_m2": 149.56,
+   "kenar_cm": {
+    "alin": 3241.0,
+    "duvar_dibi": 1868.1,
+    "mahya": 2608.0,
+    "sacak": 4048.0,
+    "vadi": 1401.3
+   }
+  },
+  "liste": {
+   "satir": 103,
+   "celik_kg": 4248.52,
+   "iz": "4b386f7a650e470ce001162c03954c742ee91cef5fbddcde4fc5654e9bec184b",
+   "gruplar": {
+    "Çelik panel": {
+     "satir": 10,
+     "kg": 4248.52
+    },
+    "Metal aksam": {
+     "satir": 7,
+     "kg": 0.0
+    },
+    "Dış cephe kaplama": {
+     "satir": 2,
+     "kg": 0.0
+    },
+    "İç cephe kaplama": {
+     "satir": 6,
+     "kg": 0.0
+    },
+    "Çatı kaplamaları": {
+     "satir": 12,
+     "kg": 0.0
+    },
+    "Dere": {
+     "satir": 8,
+     "kg": 0.0
+    },
+    "Kapı ve pencere": {
+     "satir": 6,
+     "kg": 0.0
+    },
+    "Elektrik": {
+     "satir": 19,
+     "kg": 0.0
+    },
+    "Vida": {
+     "satir": 14,
+     "kg": 0.0
+    },
+    "Sıhhi tesisat": {
+     "satir": 12,
+     "kg": 0.0
+    },
+    "Boya": {
+     "satir": 7,
+     "kg": 0.0
+    }
+   }
+  },
+  "kural_seti": "a01cbf2a810c8e7f.json"
+ },
+ "tam": {
+  "KT04.ifc": "0f545236962b1597865701b0f661f4822723ae26d3dfba47e3290578860065f4",
+  "KT04.ozet.json": "08c2d44bb241fedc3888ac9b1a50af596c434e0778ba90d9465cad890877cd92",
+  "KT04_bayi_gorsel.png": "a2a9dcfe262b7301eacfb15a217f1e7b46aa7514d82d158d8afde99471dc8e56",
+  "KT04_cizim.dxf": "532a86edce689af54dac17e41f52d8c070073e4c9911792f457a65ded6efda2a",
+  "KT04_duvar_panelleri.pdf": "f53ffef4f5d3c9f26623127827165dfbc697317752f800ef71929cc9b854445c",
+  "KT04_duvar_panelleri.png": "032a7f30365ba81f444c8df25710c55dcc87bc5efaa4d44f53a50ecdfe356c8d",
+  "KT04_girdi.json": "a161e41a54eb8edf18b88a476d95c09d7f30847c20e7106bda7e9d9f828984ba",
+  "KT04_gorunusler.png": "adc035070bb473abd0687b2ae51aae4bc879b5b25f7ca8dfe5984bd07ed84eb7",
+  "KT04_makaslar.pdf": "1ca4e6c8a618bf80a6e7704ce976066b01539c8e15978be848e4558573ea381a",
+  "KT04_makaslar.png": "4904f249984259464ed3956abe78695543bb926661c43982bb79af3d402c9228",
+  "KT04_pafta.pdf": "4d087ef67f6943e8fd9d976be26d770a2378603d0a5f78831eede80d926ad2b7",
+  "KT04_pafta.png": "4dc3716e3839ee216c608557358f220ddc0d80df0986f46a110406f88f9adb23",
+  "KT04_pafta_ozet.json": "f32f9130e91957b96c82bb4ed6eee00259d8057fce2f10e10dfac6b34dac47ed",
+  "KT04_pafta_sablon.png": "3b661e268cc0fee6fbdbaf3e368be33f9fbad3b64ac6ca7309b48656d11c65cd",
+  "KT04_plan.png": "d920293cbab8fd61d0f62346c9961a9e1d1ea5d8b95f361431fb57ee496d05d4",
+  "KT04_plan_bayi.png": "e55531c3be247bde03984acb8f354c17b58789a1434bb4a4154ac0f0d8565902",
+  "KT04_yukleme.json": "4b386f7a650e470ce001162c03954c742ee91cef5fbddcde4fc5654e9bec184b"
+ }
+}

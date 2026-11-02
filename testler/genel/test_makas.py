@@ -125,10 +125,12 @@ def test_acik_projelerde_dizilim(kod, beklenen):
 
 def test_uyarilar():
     """Kuralın yedeğe düştüğü ya da bir şey koymadığı yer sessiz geçmez. Açık beşte (listelerin yöntemiyle): ÇP-03'te altı uyarı (uzanım
-    ucunda iki ailede 15,2 cm'lik çizgi, makas yok; iki ailenin arasındaki iki kırma çizgisinde çapraz yok, biri 487,2 cm; 11 tavan paneli
+    ucunda iki ailede 15,2 cm'lik çizgi, makas yok; iki ailenin arasındaki iki kırma çizgisinde çapraz yok, biri 487,2 cm; 8 tavan paneli
     başka makasların alt başlığını kesiyor; salonda kısa kenarı 15,5 cm tavan paneli), ÇP-07'de iki (kanat birleşiminde 35,4 ve 127,4 cm'lik
     kırma çizgisi, çapraz yok); öteki üçünde uyarı yok (kod incelemesi: iki aile arasındaki kırma ve makası kesen tavan paneli sessizdi).
-    Mahyaya varmayan beşik makas kısa."""
+    Mahyaya varmayan beşik makas kısa. PR-6b (beyan): ara panelli kırma ucunda kırma çaprazı yalnız uç şeridinde, bu yüzden ÇP-03'te makası
+    kesen tavan paneli 11'den 8'e (40 kesişmeden 32'ye) iner; `ara_paneli` anahtarı olmayan kuralla 11 ve 40 aynen sınanır."""
+    eski_k = {a: v for a, v in KURAL.items() if a != "ara_paneli"}
     for kod in TANIMLAR:
         t, c, y = _yukle(PROJELER / TANIMLAR[kod])
         u = makas.kur(t, y, KURAL, "panel" if kod == "CP03" else None)["uyarilar"]
@@ -139,7 +141,9 @@ def test_uyarilar():
             assert u == [], (kod, u)
         else:
             assert len(u) == 6 and sum("15.2 cm (en kısa 40): makas yok" in x for x in u) == 2 and capraz_yok == ["56.4", "487.2"], u
-            assert "kısa kenarı 15.5 cm" in u[4] and "tavan paneli: 11 panel başka makasların alt başlığını kesiyor (toplam 40 kesişme)" in u[5], u
+            assert "kısa kenarı 15.5 cm" in u[4] and "tavan paneli: 8 panel başka makasların alt başlığını kesiyor (toplam 32 kesişme)" in u[5], u
+            u_eski = makas.kur(t, y, eski_k, "panel")["uyarilar"]
+            assert "tavan paneli: 11 panel başka makasların alt başlığını kesiyor (toplam 40 kesişme)" in u_eski[5], u_eski
     t, c, y = _yukle(PROJELER / TANIMLAR["CP03"])
     m = makas.makaslar(t, c, y, KURAL)
     besik = {f["aile"] for f in m["aileler"] if f["tur"] == "besik"}

@@ -1,0 +1,79 @@
+{
+  "is_emri_no": "IE17-AP09",
+  "revizyon": 1,
+  "talep": {
+    "bayi": {"kod": "AP09", "ad": "Bayi AP-09"},
+    "musteri_adi": "AP-09",
+    "metin": "İE-17 PR-2 açılan ev: AP-09 (70 m², beşik + paralel cumba, verandada tek yön panel çatı) montaj paftasından okundu (1 Kasım 2026). Konumlar cm, aks; x sol dış yüzden; dizilim arka-sol olduğundan mahallerin y'si arka dış yüzden (Motor'un kuralı), açıklıkların cepheleri gerçek çerçevede (ön: veranda ve giriş)."
+  },
+  "yapi": {
+    "sistem": "prefabrik",
+    "kat_sayisi": 1,
+    "duvar_yuksekligi_cm": 250,
+    "duvar_kalinligi_cm": {"dis": 10, "ic": 6},
+    "olcu_kaynagi": "dis_olcu",
+    "dis_olcu_cm": {"x": 740, "y": 944.5},
+    "referans_model": "AP-09",
+    "grid": {"x_pano": 6, "y_pano": 7.5},
+    "kisa_kenar": "x",
+    "giris_cephesi": "on",
+    "dis_dusey_duvar": "cevre_aks_disinda",
+    "dizilim": {
+      "baslangic": "arka-sol",
+      "hiza": "tam_izgara",
+      "dis_duvar_t_bolme": false,
+      "pencere": "pano",
+      "kapi": "mantik",
+      "kose": "oda",
+      "son_pano": "kosu",
+      "kapi_yeri": "ortada",
+      "genis_pencere": "yarim_pano"
+    },
+    "ek_akslar_cm": {"x": [], "y": []}
+  },
+  "mahaller": [
+    {"ad": "ODA 1", "tur": "yatak_odasi", "konum_cm": [[10, 5, 261, 381.5]]},
+    {"ad": "BANYO", "tur": "banyo", "konum_cm": [[261, 5, 449.25, 193.25]]},
+    {"ad": "ODA 2", "tur": "yatak_odasi", "konum_cm": [[449.25, 5, 730, 193.25], [386.5, 193.25, 730, 381.5]]},
+    {"ad": "SALON+MUTFAK", "tur": "salon", "konum_cm": [[261, 193.25, 386.5, 381.5], [10, 381.5, 386.5, 695.25], [386.5, 381.5, 730, 939.5]]},
+    {"ad": "VERANDA", "tur": "veranda", "konum_cm": [[10, 695.25, 386.5, 939.5]]}
+  ],
+  "acik_sinirlar": [],
+  "acikliklar": [
+    {"tur": "pencere", "olcu": "120x120", "mahal": "ODA 1", "duvar": "sol", "pano": 1},
+    {"tur": "pencere", "olcu": "60x40", "mahal": "BANYO", "duvar": "arka", "pano": 0},
+    {"tur": "pencere", "olcu": "120x120", "mahal": "ODA 2", "duvar": "sag", "pano": 1},
+    {"tur": "pencere", "olcu": "120x70", "mahal": "SALON+MUTFAK", "duvar": "sol", "pano": 0, "acilis": "surgulu"},
+    {"tur": "pencere", "olcu": "120x120", "mahal": "SALON+MUTFAK", "duvar": "sag", "pano": 1},
+    {"tur": "pencere", "olcu": "150x180", "mahal": "SALON+MUTFAK", "duvar": "on", "pano": 0, "acilis": "surgulu"},
+    {"tur": "pencere", "olcu": "170x180", "mahal": "SALON+MUTFAK", "duvar": "on", "pano": 4, "acilis": "surgulu"},
+    {"tur": "dis_kapi", "olcu": 90, "arasi": ["VERANDA", "SALON+MUTFAK"], "pano": 2},
+    {"tur": "ic_kapi", "olcu": 82, "arasi": ["SALON+MUTFAK", "BANYO"], "pano": 0, "kapi_yeri": "mentese_ucu"},
+    {"tur": "ic_kapi", "olcu": 82, "arasi": ["SALON+MUTFAK", "ODA 1"], "pano": 2},
+    {"tur": "ic_kapi", "olcu": 82, "arasi": ["SALON+MUTFAK", "ODA 2"], "pano": 0}
+  ],
+  "dikmeler": [[0, 0], [381.5, 0]],
+  "cati": {
+    "tip": "besik",
+    "egim_yuzde": 32.88,
+    "sacak_cm": 30,
+    "topuk_cm": 10,
+    "makas_yonu": "kisa_kenar",
+    "makas_ekseni": "x",
+    "mahal_catilari": [{"mahal": "VERANDA", "tip": "tek_yon", "egim_yuzde": 10, "yuksek_yan": "arka", "sacak_cm": 0}]
+  },
+  "cikti": {
+    "pdf": true,
+    "dxf": true,
+    "pafta": "A2",
+    "icerik": ["aksli_plan", "alanli_kopya", "montaj_kopyasi", "on_gorunus", "cati_profili", "ozellik_tablosu"]
+  },
+  "varsayimlar": [
+    "Köşe ve ızgara (İE-17 kuralı; paftada aynı): makas x'i geçer (kesit 800 = 740 + 2 × 30 saçak), kısa kenar x. Makasın oturduğu sol ve sağ duvar köşeden geçer, y ızgarası duvar ekseninden (5 + 125,5k); ön ve arka duvar araya girer, x ızgarası iç yüzden (10 + 125,5k).",
+    "Gövde 740 × 944,5 dikdörtgen; veranda gövdenin içinde ön-solda (paftada 382 × 244), sol ve ön açık, ön iki köşesinde 10 × 10 dikme paftadaki yerinde (dikmeler, gerçek çerçevede; sağdaki salon duvarının hizasında, 381,5–391,5); sağ dikmede köşe parçası yok, salon duvarı dikmenin yüzünden başlar (paftada ilk pano 10,1–60,6). Paftanın mimari sayfasında salon ve mutfak tek mahal (32,51 m²): arka odaların önündeki hol ve sağ öndeki bölüm salonun parçası; aralarında duvar yok.",
+    "Pencereler paftadaki panoda; verandaya ve öne bakan 150/180 ile 170/180 ve soldaki 120/70 paftada sürgülü yazılı. Ön duvardaki 170/180'in yanında tam pano yok: odanın duvar parçası paftadaki gibi 62,75 + 213 + 62,75 (dizilim.genis_pencere: yarim_pano). Paftanın öteki standart dışı pencereli panoları (veranda arka duvarında 371,5'lik, sol duvarda pencereye ortalı olmayan 251'lik) Motor'da pencere kuralıyla (251'lik pano ızgarada): bu iki pencere paftadakinden kayık (kıyas testinde bilinen fark).",
+    "Kapılar panoda ortada (dizilim.kapi_yeri: ortada; holdeki iki oda kapısı paftada panonun ortasından 5 cm kayık); banyo kapısı menteşe ucunda (kapi_yeri: mentese_ucu, paftada kavşaktan 10 cm). Kapı genişlikleri paftada yazılı değil: dış kapı 90, iç kapı 82 (Motor'un ölçüsü).",
+    "Çatı (paftanın makas, aşık ve kaplama sayfaları): ana beşik makas x'i geçer, mahya y boyunca (141,51 = 10 topuk + 400 × 0,3288), verandanın arka duvarından arkaya (kaplama 421,07 × 760,26); sağ öndeki bölümün üstünde paralel cumba (açıklık 358,5, kaplama 220,27 × 273,75, mahya 78,8); eğim %32,88 (18,2°; paftanın kesitinde 18,2°), topuk 10, saçak 30. Verandada kendi çatısı (`mahal_catilari`): paftada P1 panel 381,5 × 245,48, eğim yazılı değil; panelin boyundan %10 (244,25 × √1,01 = 245,47), saçaksız, arka duvara dayanır. Kotları paftada yok: yüksek kenarı duvar üstünde (250), alçak kenarı öne 24,4 iner (225,6; paftanın A profilinde veranda profilinin vidası 213'te, profilin üstü 223), ana çatının ve cumbanın saçağının (260) altında. Makas: ana çatıda 7 (paftada M1–M7, aynı); cumbada Motor 2 eşit aralık (uyarıyla), paftada M8–M11 dört makas: liste aşamasında (PR-1b/K7) bakılır."
+  ],
+  "eksikler": []
+}

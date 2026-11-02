@@ -1,0 +1,42 @@
+{
+ "aciklama": "Çelik hakeminin sonucu (İE-16). Yalnız tutanlar: çelik kg kapısının sonucu (farkı yalnız geçtiyse), adedi tutan çelik türleri ve adedi tutan öteki satırlar (anahtar ve bizim adedimiz). Tutmayan satırların gerçek değeri depoya girmez; sayilar kıyasın özetidir.",
+ "kod": "ÇP-19",
+ "tarih": "2026-10-28",
+ "kiyas_commit": "dba00028797423a183f7802e20a3d27c2be74251",
+ "bizim_liste": {
+  "yol": "testler/celik/projeler/CP19/acik/bizim_liste.json",
+  "commit": "8155cb12ac1316afa28d9077f1187c0ce4b18ce1"
+ },
+ "muhur": {
+  "sha256": "47f86cbd7c05925acbfeddd6d824fd0c3a7ccad5ffe2d7a75c245229cb0ad3ac",
+  "bayt": 185910,
+  "durum": "acildi",
+  "kayit_durumu": "kor",
+  "liste_sayfasi": 0,
+  "muhur_commit": "558dfc49b54370cf15bb7c1d533d9246b96abdd6"
+ },
+ "celik_kg_kapisi": {
+  "sonuc": "geçti",
+  "pay_yuzde": 3.0,
+  "kapi_disi": [
+   "c_profil"
+  ],
+  "kapi_disi_bizim_kg": 30.0,
+  "fark_yuzde": 0.98
+ },
+ "celik_turleri_tutan": [],
+ "sayilar": {
+  "aynı": 5,
+  "farklı": 8,
+  "adet okunamadı": 5,
+  "bizde yok": 51,
+  "bizde fazla": 58
+ },
+ "tutanlar": [
+  {"grup": "KAPI VE PENCERE", "ad": "MELAMIN KAPI 80 LIK KANAT", "olcu": [90.0, 214.0], "adet": 3},
+  {"grup": "ELEKTRIK", "ad": "UYDU KABLO", "olcu": [], "adet": 25},
+  {"grup": "ELEKTRIK", "ad": "BESLEME KABLOSU SIGORTA KUTULARI ARASI", "olcu": [], "adet": 5},
+  {"grup": "ELEKTRIK", "ad": "BESLEME KABLO BORUSU", "olcu": [], "adet": 5},
+  {"grup": "VIDA", "ad": "CIRPI IPI", "olcu": [], "adet": 1}
+ ]
+}

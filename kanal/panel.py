@@ -9,6 +9,10 @@ panelin yerine; karar 4). Sunucu tarafı HTML, JavaScript yok.
   GET      /panel/bayiler             bayi kimlik kartları
   GET/POST /panel/bayi/yeni           yeni kart (numara, kod, ad, hitap, firma, bolge, rol, aktif)
   GET/POST /panel/bayi/<numara>       düzenleme (numara değişmez; aktif kapatılır)
+  POST     /panel/konusma/<numara>/kayit_onay | kayit_red | kayit_geri_al   İE-22: WhatsApp'tan gelen kayıt talebine karar (yedek yol)
+  POST     /panel/kontrol/<id>/fiyat  İE-08 8b: Patron fiyatı verdi (hatırlatmalar durur)
+  POST     /panel/kontrol/<id>/ac     BK-10 (D-19): zaman aşımına düşen mühendis kontrolünü yeniden aç (mühendise bildirim şablonu)
+  GET      /panel/kontrol/<id>/liste  BK-10: kontrolün sunucuda üretilen yükleme listesi (Excel; yalnız data/projects altındaki yol)
   GET      /panel/stil.css
 
 Güvenlik: yalnız HTTPS (nginx); imzalı oturum çerezi (HMAC-SHA256, 12 saat; HttpOnly, Secure, SameSite=Strict); her POST'ta CSRF
@@ -40,6 +44,7 @@ for _yol in (KOD.parent, KOD):
         sys.path.insert(0, str(_yol))
 
 import ayarlar as AY                                  # noqa: E402
+import kayit as KY                                    # noqa: E402  (İE-22)
 from depo import Depo, maske                          # noqa: E402
 
 SURUM = "kanal-v2.0"
@@ -53,8 +58,10 @@ PENCERE_SN = 86400                 # Meta 24 saat serbest cevap penceresi (kanal
 SCRYPT_N, SCRYPT_R, SCRYPT_P = 16384, 8, 1
 ROLLER = ("bayi", "patron", "muhendis", "test")    # test: kuru koşunun sahte kartı (İE-07; vps/kuru_kosu.sh), gerçek numara değil
 _NUMARA = re.compile(r"[1-9][0-9]{7,14}")
-_KONTROL_FIYAT = re.compile(r"/panel/kontrol/([0-9]{1,12})/fiyat")      # İE-08 8b
-KONUSMA_ISLEMLERI = ("gonder", "sablon", "karsilama", "bilgi")
+_KONTROL_FIYAT = re.compile(r"/panel/kontrol/([0-9]{1,12})/(fiyat|ac)")     # İE-08 8b: Fiyat verildi; BK-10: zaman aşımından yeniden aç
+_KONTROL_LISTE = re.compile(r"/panel/kontrol/([0-9]{1,12})/liste")            # BK-10: sunucunun Excel'i
+XLSX = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+KONUSMA_ISLEMLERI = ("gonder", "sablon", "karsilama", "bilgi", "kayit_onay", "kayit_red", "kayit_geri_al")    # İE-22: kayit_*
 _DOSYA_ADI = re.compile(r"[^A-Za-z0-9._-]+")
 e = html.escape
 
@@ -239,6 +246,12 @@ def gelen_kutusu(p: Panel, oturum: dict) -> str:
     durum = (f'<p class="durum">kanal: <b>{"açık" if ayar.get("enabled") is True else "KAPALI"}</b> · dry_run: {"evet" if ayar.get("dry_run") is True else "hayır"}'
              f' · mod: {e(str(ayar.get("mode") or "-"))} · açık iş: {say.get("acik_is", "-")} · bekleyen giden: {say.get("bekleyen_giden", "-")}'
              f' · son 24 saat gelen: {say.get("gelen_24s", "-")} · aktif bayi: {say.get("aktif_bayi", "-")}</p>')
+    try:
+        kayit_n = p.depo.kayit_bekleyen_sayisi()          # İE-22: WhatsApp'tan gelen, onay bekleyen kayıt talepleri
+    except Exception:
+        kayit_n = 0
+    if kayit_n:
+        durum += f'<p class="bilgi">Onay bekleyen bayi kaydı: <b>{kayit_n}</b> (aşağıda kayıtsız numaranın konuşma sayfasında).</p>'
     satirlar = []
     for k in p.depo.konusma_listesi():
         kim = f'{e(k["ad"] or "")} ({e(k["kod"] or "")}, {e(k["rol"] or "")})' if k.get("kod") or k.get("ad") else "<i>kayıtsız</i>"
@@ -324,6 +337,29 @@ def ilk_temas_formu(p: Panel, oturum: dict, numara: str, b: dict | None, yazdi: 
     return out
 
 
+def kayit_karti(p: Panel, oturum: dict, numara: str, kart_var: bool = False) -> str:
+    """İE-22: numaranın WhatsApp'tan gelen son kayıt talebi; onay bekliyorsa [Onayla] [Reddet], reddedildiyse [Reddi geri al]. Kart
+    sonradan elle açıldıysa (kart_var) yalnız onay bekleyen talep gösterilir: Onayla talebi kapatır, karşılama gitmez."""
+    t = p.depo.son_kayit_talebi(numara)
+    if t is None or (kart_var and t["durum"] != "onay_bekliyor"):
+        return ""
+    csrf = p.csrf(oturum["n"])
+    out = (f'<p class="durum">Kayıt talebi <b>{e(KY.kimlik(t["id"]))}</b> · {e(KY.DURUM_ADI.get(t["durum"], t["durum"]))} · ad: <b>{e(t["ad"] or "-")}</b>'
+           f' · firma: <b>{e(t["firma"] or "-")}</b> · {zaman(t["t_olusturuldu"])}'
+           + (f' · karar: {e(t["karar_kaynagi"] or "-")}, {zaman(t["t_karar"])}' if t.get("karar_zamani") else "") + '</p>')
+
+    def dugme(islem: str, etiket: str, aciklama: str) -> str:
+        return (f'<form class="kart" method="post" action="/panel/konusma/{e(numara)}/{islem}"><input type="hidden" name="csrf" value="{csrf}">'
+                f'<input type="hidden" name="talep" value="{int(t["id"])}"><button>{e(etiket)}</button> <span class="durum">{e(aciklama)}</span></form>')
+    if t["durum"] == "onay_bekliyor":
+        out += dugme("kayit_onay", "Onayla", "Kart zaten var: talep kapanır, karşılama gitmez." if kart_var else
+                     "Bayi kartı açılır (aktif), bayiye karşılama şablonu gider (ücretli).")
+        out += dugme("kayit_red", "Reddet", f"Kart açılmaz; bu numara {KY.RED_BEKLEME_GUN} gün yeni kayıt talebi açmaz.")
+    elif t["durum"] == "reddedildi":
+        out += dugme("kayit_geri_al", "Reddi geri al", "Talep yeniden onay bekler; sonra buradan ya da WhatsApp'tan onaylayabilirsiniz.")
+    return out
+
+
 def kontrol_tablosu(p: Panel, oturum: dict, bayi: str | None = None) -> str:
     """İE-08 8b M2/M3: mühendis teknik kontrolleri (durum, not, liste sürümleri, Patron hatırlatmaları) ve 'Fiyat verildi'."""
     try:
@@ -333,20 +369,53 @@ def kontrol_tablosu(p: Panel, oturum: dict, bayi: str | None = None) -> str:
     if not kontroller:
         return ""
     csrf = p.csrf(oturum["n"]); satirlar = []
-    durum_adi = {"bekliyor": "mühendiste", "patrona_gonderildi": "mühendis onayladı", "duzeltme": "düzeltme istendi", "kart_yok": "mühendis kartı yok"}
+    durum_adi = {"bekliyor": "mühendiste", "patrona_gonderildi": "mühendis onayladı", "duzeltme": "düzeltme istendi", "kart_yok": "mühendis kartı yok",
+                 "zaman_asimi": "zaman aşımı (24 saat)", "plan_degisti": "plan değişti"}
     for k in kontroller:
-        surumler = [int(x.get("surum") or 0) for x in (k.get("listeler") or []) if x.get("kaynak") == "muhendis"]
         fiyat = ""
         if k["patron_durum"] == "bekliyor":
             fiyat = (f'<form method="post" action="/panel/kontrol/{k["id"]}/fiyat"><input type="hidden" name="csrf" value="{csrf}">'
                      f'<button>Fiyat verildi</button></form>')
+        if k["durum"] == "zaman_asimi" and k.get("t_plan_degisti") is None and k.get("muhendis"):          # BK-10 (D-19)
+            fiyat += (f'<form method="post" action="/panel/kontrol/{k["id"]}/ac"><input type="hidden" name="csrf" value="{csrf}">'
+                      f'<button>Yeniden aç</button></form>')
         patron = {"yok": "-", "bekliyor": f'fiyat bekleniyor (hatırlatma {k["patron_hatirlatma_sayisi"]}/3)', "fiyat_verildi": "fiyat verildi",
-                  "durdu": "durdu (panelden gönderim)"}.get(k["patron_durum"], k["patron_durum"])
+                  "durdu": "durdu"}.get(k["patron_durum"], k["patron_durum"])
+        durum = durum_adi.get(k["durum"], k["durum"]) + (" · plan değişti" if k.get("t_plan_degisti") is not None and k["durum"] != "plan_degisti" else "")
         satirlar.append(f'<tr><td>{zaman(k["t_olusturuldu"])}</td><td><a href="/panel/konusma/{e(k["bayi"])}">{e(k["is_emri_no"])} r{int(k["rev"]):02d}</a></td>'
-                        f'<td>{e(k["bayi_kod"] or "")}</td><td>{e(durum_adi.get(k["durum"], k["durum"]))}</td><td>{k["hatirlatma_sayisi"]}</td>'
-                        f'<td>{e(", ".join(f"s{n}" for n in surumler) or "-")}</td><td>{e(k.get("not_") or "")}</td><td>{e(patron)}</td><td>{fiyat}</td></tr>')
-    return ('<h2>Mühendis kontrolleri</h2><table><tr><th>Onay</th><th>İş</th><th>Bayi</th><th>Durum</th><th>Hatırlatma</th><th>Mühendisin listesi</th>'
+                        f'<td>{e(k["bayi_kod"] or "")}</td><td>{e(durum)}</td><td>{k["hatirlatma_sayisi"]}</td>'
+                        f'<td>{liste_baglantilari(p, k)}</td><td>{e(k.get("not_") or "")}</td><td>{e(patron)}</td><td>{fiyat}</td></tr>')
+    return ('<h2>Mühendis kontrolleri</h2><table><tr><th>Onay</th><th>İş</th><th>Bayi</th><th>Durum</th><th>Hatırlatma</th><th>Excel</th>'
             '<th>Not</th><th>Patron</th><th></th></tr>' + "".join(satirlar) + "</table>")
+
+
+def liste_baglantilari(p: Panel, k: dict) -> str:
+    """BK-10 (8b devri, madde 3): Patron'un penceresi kapalıyken Excel WhatsApp'tan gitmez (yalnız şablon); panelde indirme bağlantısı.
+    s1 sunucunun listesi (`/panel/kontrol/<id>/liste`), s2… mühendisin gönderdikleri (indirildiyse `/panel/dosya/<id>`)."""
+    parca = []
+    if sunucu_listesi(p, k) is not None:
+        parca.append(f'<a href="/panel/kontrol/{int(k["id"])}/liste">s1 sunucu</a>')
+    for x in k.get("listeler") or []:
+        if x.get("kaynak") != "muhendis":
+            continue
+        n = int(x.get("surum") or 0)
+        try:
+            d = p.depo.mesajin_dosyasi(str(x.get("mesaj_id") or ""))
+        except Exception:
+            d = None
+        parca.append(f'<a href="/panel/dosya/{int(d["id"])}">s{n} mühendis</a>' if d and d.get("yol") else f"s{n} mühendis (indirilmedi)")
+    return " · ".join(parca) or "-"
+
+
+def sunucu_listesi(p: Panel, k: dict) -> Path | None:
+    """Kontrolün revizyonunda sunucunun ürettiği Excel (D-17); yalnız veri dizinindeki projects/ altında ve varsa."""
+    try:
+        rv = p.depo.revizyon_kaydi(k["is_emri_no"], int(k["rev"])) or {}
+        yol = Path(str(((rv.get("ekler") or {}).get("excel") or {}).get("dosya") or "")).resolve(strict=True)
+    except (OSError, TypeError, ValueError):
+        return None
+    kok = (p.veri / "projects").resolve()
+    return yol if kok in yol.parents and yol.is_file() and yol.suffix.lower() == ".xlsx" else None
 
 
 def sablon_engeli(p: Panel, numara: str, b: dict | None) -> str | None:
@@ -368,9 +437,9 @@ def konusma_sayfasi(p: Panel, oturum: dict, numara: str, hata: str | None = None
     b = p.depo.bayi_oku(numara)
     if b:
         kart = (f'<p class="durum">Bayi: <b>{e(b["ad"] or "-")}</b> · kod {e(b["kod"] or "-")} · {e(b["rol"])} · {e(b["firma"] or "-")}'
-                f' · {"aktif" if b["aktif"] else "PASİF"} · <a href="/panel/bayi/{e(numara)}">düzenle</a></p>')
+                f' · {"aktif" if b["aktif"] else "PASİF"} · <a href="/panel/bayi/{e(numara)}">düzenle</a></p>') + kayit_karti(p, oturum, numara, kart_var=True)
     else:
-        kart = f'<p class="durum">Kayıtsız numara · <a href="/panel/bayi/yeni?numara={e(numara)}">bayi olarak ekle</a></p>'
+        kart = f'<p class="durum">Kayıtsız numara · <a href="/panel/bayi/yeni?numara={e(numara)}">bayi olarak ekle</a></p>' + kayit_karti(p, oturum, numara)
     ogeler = []
     for m in p.depo.konusma_mesajlari(numara):
         giden = m["yon"] == "giden"
@@ -662,11 +731,49 @@ def konusma_ilk_temas(p: Panel, oturum: dict, numara: str, tur: str) -> tuple:
     return _yonlendir(f"/panel/konusma/{numara}")
 
 
+def konusma_kayit(p: Panel, oturum: dict, i: Istek, numara: str, islem: str) -> tuple:
+    """İE-22: POST /panel/konusma/<numara>/kayit_onay | kayit_red | kayit_geri_al. Formdaki talep, numaranın son talebi olmalı (sayfa
+    açıldıktan sonra yeni talep açıldıysa karar verilmez). Karar ve bayiye giden satır tek işlemde (depo.kayit_karari_yaz)."""
+    t = p.depo.son_kayit_talebi(numara)
+    if t is None or str(i.form().get("talep", "")) != str(t["id"]):
+        return _html(400, konusma_sayfasi(p, oturum, numara, hata="Kayıt talebi değişti; sayfayı yenileyip yeniden deneyin."))
+    if islem == "kayit_geri_al":
+        if p.depo.kayit_reddi_geri_al(t["id"]) is None:
+            return _html(400, konusma_sayfasi(p, oturum, numara, hata="Ret geri alınamadı (talep reddedilmiş değil, kart ya da açık talep var)."))
+        log("kayıt reddi geri alındı", maske(numara), KY.kimlik(t["id"]))
+        return _yonlendir(f"/panel/konusma/{numara}")
+    karar = "onay" if islem == "kayit_onay" else "red"
+    r = p.depo.kayit_karari_yaz(t["id"], karar, lambda tt, k, kart_var: KY.karar_satirlari(tt, k, kart_var, kaynak="panel"))
+    if r["sonuc"] not in ("onaylandi", "reddedildi"):
+        return _html(400, konusma_sayfasi(p, oturum, numara, hata=f"{KY.kimlik(t['id'])} zaten karara bağlandı."))
+    log("kayıt kararı (panel)", maske(numara), KY.kimlik(t["id"]), r["sonuc"], "kart açıldı" if r["kart_acildi"] else "")
+    return _yonlendir(f"/panel/konusma/{numara}")
+
+
 def kontrol_fiyat(p: Panel, oturum: dict, kid: int) -> tuple:
     """İE-08 8b M3: POST /panel/kontrol/<id>/fiyat — Patron fiyatı verdi; hatırlatmalar durur."""
     p.depo.fiyat_verildi(kid)
     log("fiyat verildi", kid)
     return _yonlendir("/panel/")
+
+
+def kontrol_ac(p: Panel, oturum: dict, kid: int) -> tuple:
+    """BK-10 (D-19): POST /panel/kontrol/<id>/ac — zaman aşımına düşen kontrol yeniden açılır; mühendise bildirim şablonu (bayinin onay
+    mesajına bağlı, kaynak panel), 24 saat ve cevap süresi bu andan sayılır."""
+    import sablonlar as S
+    acildi = p.depo.kontrol_yeniden_ac(kid, lambda k: [S.muhendis_kontrol_satiri(k["onay_mesaj_id"], 0, k["is_emri_no"], int(k["rev"]), kaynak="panel")])
+    log("kontrol yeniden açıldı" if acildi else "kontrol açılmadı (zaman aşımında değil)", kid)
+    return _yonlendir("/panel/")
+
+
+def kontrol_listesi(p: Panel, kid: int) -> tuple:
+    """BK-10: GET /panel/kontrol/<id>/liste — sunucunun ürettiği yükleme listesi (Excel)."""
+    k = p.depo.kontrol(kid)
+    yol = sunucu_listesi(p, k) if k else None
+    if yol is None:
+        return 404, b"yok", "text/plain; charset=utf-8", []
+    ad = _DOSYA_ADI.sub("_", yol.name).strip("._")[:120] or "liste.xlsx"
+    return 200, yol.read_bytes(), XLSX, [("Content-Disposition", f'attachment; filename="{ad}"')]
 
 
 def isle(p: Panel, i: Istek) -> tuple:
@@ -732,9 +839,15 @@ def isle(p: Panel, i: Istek) -> tuple:
             return konusma_sablon(p, oturum, i, numara) if i.metod == "POST" else (405, b"method", "text/plain; charset=utf-8", [])
         if islem in ("karsilama", "bilgi"):
             return konusma_ilk_temas(p, oturum, numara, islem) if i.metod == "POST" else (405, b"method", "text/plain; charset=utf-8", [])
+        if islem in ("kayit_onay", "kayit_red", "kayit_geri_al"):
+            return konusma_kayit(p, oturum, i, numara, islem) if i.metod == "POST" else (405, b"method", "text/plain; charset=utf-8", [])
         return _html(200, konusma_sayfasi(p, oturum, numara))
     if kontrol_post:
-        return kontrol_fiyat(p, oturum, int(kontrol_post.group(1))) if i.metod == "POST" else (405, b"method", "text/plain; charset=utf-8", [])
+        if i.metod != "POST":
+            return 405, b"method", "text/plain; charset=utf-8", []
+        return (kontrol_fiyat if kontrol_post.group(2) == "fiyat" else kontrol_ac)(p, oturum, int(kontrol_post.group(1)))
+    if (kl := _KONTROL_LISTE.fullmatch(i.yol)):
+        return kontrol_listesi(p, int(kl.group(1)))
     if i.yol.startswith("/panel/dosya/"):
         kimlik = i.yol[len("/panel/dosya/"):]
         if not kimlik.isdigit() or len(kimlik) > 12:

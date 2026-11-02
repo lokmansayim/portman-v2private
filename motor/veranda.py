@@ -128,9 +128,13 @@ def izdusum(taraf: str):
 
 
 def gorunus_parcalari(plan: G.Plan, ie: dict, taraf: str) -> list[dict]:
-    """`taraf` (on | arka | sol | sag) görünüşündeki veranda parçaları: [{"tur": kolon | kiris | cati | alin, "u": [(u, z), ...], "derinlik": d}].
-    u görünüşün yatay ekseni (bakanın soldan sağa), z kot; `derinlik` bakana uzaklık sırası için (büyük = uzak). Kolon 0 … duvar üstü − 10,
-    kiriş duvar üstü − 10 … duvar üstü (IFC ile aynı)."""
+    """`taraf` (on | arka | sol | sag) görünüşündeki veranda parçaları: [{"tur": kolon | kiris | cati | sacak | topuk, "u": [(u, z), ...],
+    "derinlik": d}]. u görünüşün yatay ekseni (bakanın soldan sağa), z kot; `derinlik` bakana uzaklık sırası için (büyük = uzak). Kolon 0 … duvar
+    üstü − 10, kiriş duvar üstü − 10 … duvar üstü (IFC ile aynı). `sacak` ve `topuk` açık çizgidir (`acik`): ana çatının görünüşündeki gibi
+    saçak altı çizgisi duvar üstünde saçak ucundan saçak ucuna, iki uçta topuk duvar üstünden saçak kotuna (BK-18 ek; Lokman, 29 Ekim 2026).
+    Kalkanın alın dolgusu (kolon yüzlerinden çatıya dikey kenarlı çerçeve) görünüşte çizilmez: veranda çatısı ana çatı gibi saçak, topuk ve iki
+    eğimle görünür (D-31; Lokman, 29 Ekim 2026 11:07–11:09: "saçaklardan yukarı doğru çıkan çizgiler var olmamalı", "veranda çatısının
+    makaslarını ayrı çizmiştin onu da çizim kuralından kaldır"); IFC'nin alın dolgusu aynen."""
     H0 = duvar_ustu(ie)
     kutu_u = izdusum(taraf)
     u_of = kutu_u.u
@@ -148,12 +152,12 @@ def gorunus_parcalari(plan: G.Plan, ie: dict, taraf: str) -> list[dict]:
         u0, u1, dd = kutu_u(X0, Y0, X1, Y1)
         zs, zm = C["sacak_kotu"], C["mahya_kotu"]
         boyuna = (v["cephe"] in ("on", "arka")) == (taraf in ("on", "arka"))   # bakış mahyaya paralel: kalkan görünür
+        out.append({"tur": "sacak", "u": [(u0, H0), (u1, H0)], "acik": True, "derinlik": dd - 0.1, "veranda": v["ad"]})
+        if zs > H0 + 1e-6:
+            out += [{"tur": "topuk", "u": [(u, H0), (u, zs)], "acik": True, "derinlik": dd - 0.1, "veranda": v["ad"]} for u in (u0, u1)]
         if C["tip"] == "besik":
             if boyuna:
                 um = (u0 + u1) / 2
-                zk = zs + C["sacak"] * C["egim"]                # kolon yüzünde çatı çizgisi (saçak ucunda zs); IFC'nin alın dolgusuyla aynı
-                out.append({"tur": "alin", "u": [(u0 + C["sacak"], H0), (u1 - C["sacak"], H0), (u1 - C["sacak"], zk), (um, zm), (u0 + C["sacak"], zk)],
-                            "derinlik": dd, "veranda": v["ad"]})
                 out.append({"tur": "cati", "u": [(u0, zs), (um, zm), (u1, zs)], "kalkan": True, "derinlik": dd - 0.1, "veranda": v["ad"]})
             else:
                 out.append({"tur": "cati", "u": [(u0, zs), (u1, zs), (u1, zm), (u0, zm)], "derinlik": dd, "veranda": v["ad"]})

@@ -11,7 +11,8 @@ D-11'in (13 Ekim 2026) iki düzenlenebilir biçimi: `*_cizim.dxf` (plan + dört 
 `*_yukleme.xlsx` (yükleme listesi; openpyxl yalnız yerelde, sunucuda yok). İkisi de çıktıdır, kaynak değil: düzeltme tanıma ya da kural
 kitabına işlenir, paket yeniden üretilir.
 Üstte `README.md`: model indeksi, kısa parça sayıları, kabul formu (kod listesi + not). Tanımlar `beyin/veri/adaylar.json`'dan
-(yoksa `modeller/`). Çizim kural setiyle (`--set`; yoksa güncel `kurallar.json`)."""
+(yoksa `modeller/`) ve İE-09'dan beri model bankasının kabul edilen modellerinden (`modeller/banka/`, `beyin/banka.py`). Çizim kural setiyle (`--set`; yoksa güncel `kurallar.json`);
+atölye modeli kendi pimiyle (kural seti ve karkas kuralı; `atolye.cizim_kurallari`, kontrol dosyasıyla aynı), `--set` ona uygulanmaz."""
 from __future__ import annotations
 import argparse, json, shutil, sys, time
 from pathlib import Path
@@ -56,6 +57,8 @@ def main(argv: list[str] | None = None) -> int:
             print("DUR: openpyxl yok; Excel yükleme listesi üretilemez (yerel: pip install -r araclar/gereksinimler.txt)"); return 2
     adaylar_yolu = KOK / "beyin" / "veri" / "adaylar.json"
     adaylar = [x for x in json.loads(adaylar_yolu.read_text(encoding="utf-8")) if x.get("motor") == "genel"] if adaylar_yolu.exists() else []
+    from beyin import banka                                                # İE-09 (D-20): atölyede kabul edilen modeller de (kod çakışması alınmaz)
+    adaylar += [x for x in banka.kayitlar() if x.get("motor") == "genel" and x["kod"] not in {y["kod"] for y in adaylar}]
     from beyin.katalog import Katalog
     istenen = {Katalog.kod_normalize(k) for k in a.kodlar.split(",") if k.strip()}
     if istenen:
@@ -66,14 +69,19 @@ def main(argv: list[str] | None = None) -> int:
     satirlar = []
     for x in adaylar:
         kod = str(x["kod"]); gosterim = x.get("gosterim") or kod
-        klasor = kod.replace("Ç", "C")                                      # klasör adı ASCII (Mac/zip uyumu)
+        klasor = banka.dosya_adi(kod)                                       # klasör adı ASCII (Mac/zip uyumu; çekirdek kodlarda eskisiyle aynı)
         tanim = KOK / x["tanim"]
         gecici = cikti / f".calisma_{klasor}"
         if gecici.exists():
             shutil.rmtree(gecici)
         t0 = time.time()
-        m = U.uret(tanim, gecici, is_emri_no=None, revizyon=None, set_yolu=a.set, yontem="panel", perspektif=not a.perspektifsiz, bayi=True,
-                   kaynak=f"Yapı Tanımı 0.5 ({tanim.name})")          # revizyon None: kartta "TASLAK" (seçimden önce r01 yok)
+        set_yolu, karkas_yolu = a.set, None
+        if x.get("banka"):                                                  # atölye modeli: Lokman'ın onayladığı çizimin pimiyle (kontrol dosyasıyla aynı)
+            from araclar import atolye
+            kart = json.loads((banka.BANKA_DIR / klasor / "kart.json").read_text(encoding="utf-8"))
+            set_yolu, karkas_yolu = atolye.cizim_kurallari(kart, json.loads(tanim.read_text(encoding="utf-8")))
+        m = U.uret(tanim, gecici, is_emri_no=None, revizyon=None, set_yolu=set_yolu, yontem="panel", perspektif=not a.perspektifsiz, bayi=True,
+                   kaynak=f"Yapı Tanımı 0.5 ({tanim.name})", karkas_yolu=karkas_yolu)   # revizyon None: kartta "TASLAK" (seçimden önce r01 yok)
         v = json.loads((gecici / "validation.json").read_text(encoding="utf-8"))
         hedef = cikti / klasor; hedef.mkdir(parents=True, exist_ok=True)
         gk = U.kod_govde(json.loads(tanim.read_text(encoding="utf-8")))

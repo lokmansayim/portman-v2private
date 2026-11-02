@@ -73,6 +73,11 @@ def metin_satiri(gelen: dict, metin: str, sira: int, alici: str, tur: str) -> di
             "created_at": simdi, "updated_at": simdi}
 
 
+def kod_turet(numara, rol: str = "bayi") -> str:
+    """Kodu boş kartın türetilen kodu: patron → 'PATRON', değilse 'B' + son 4 hane (feature.php pm_kanal_bayi ile aynı; İE-22 kayıt da kullanır)."""
+    return "PATRON" if rol == "patron" else "B" + str(numara or "")[-4:]
+
+
 class Cakisma(Exception):
     """Konuşma okunduktan sonra başka bir yazma oldu; sonuç yazılmadı (iş yeniden sıraya girer)."""
 
@@ -211,10 +216,12 @@ class Depo:
             c.execute("INSERT INTO isler (mesaj_id, gonderen) VALUES (%s, %s)", (mid, str(gelen["sender"])))
             return True
 
-    def kayitsiz_mesaj_kaydet(self, gelen: dict, cevap_metni: str | None, sinir_sn: int = 86400, kaynak: str = "vps") -> dict:
+    def kayitsiz_mesaj_kaydet(self, gelen: dict, cevap_metni: str | None, sinir_sn: int = 86400, kaynak: str = "vps", kayit=None) -> dict:
         """İE-06: sahiplenilmeyen mesaj (kayıtsız gönderen ya da modun işlemediği kayıtlı gönderen). Mesaj panelde görünsün diye
         yazılır; iş açılmaz (isler satırı 'bitti', eylem 'kayitsiz'); varsa sabit cevap satırı yazılır, gönderen başına sinir_sn'de bir.
-        Dönen: {"yeni": bool, "cevap": bool}."""
+        İE-22: kayit verilirse (kanal/kayit.py::Adim; ayar bayi_kaydi açık) ve numaranın hiç kartı yoksa mesaj kayıt akışına girer: talep,
+        cevap ve Patron satırları aynı işlemde yazılır (eylem 'kayit'). Dönen: {"yeni": bool, "cevap": bool}; kayıt akışında ayrıca "kayit":
+        talebin durumu."""
         gelen = _nulsuz(gelen)
         mid = str(gelen.get("id") or "")
         if not mid or len(mid) > 300:
@@ -231,6 +238,10 @@ class Depo:
             sonuc = {"eylem": "kayitsiz", "gerekce": "sahiplenilmedi: " + str(gelen.get("neden") or "kayıtsız gönderen")}
             j = c.execute("INSERT INTO isler (mesaj_id, gonderen, durum, sonuc, basladi, bitti) VALUES (%s, %s, 'bitti', %s, now(), now()) RETURNING id",
                           (mid, gonderen, Jsonb(sonuc))).fetchone()
+            if kayit is not None:
+                k = self._kayit_adimi(c, gelen, j["id"], kayit)
+                if k is not None:
+                    return {"yeni": True, "cevap": k["cevap"], "kayit": k["durum"]}
             if cevap_metni and str(cevap_metni).strip():
                 son = c.execute("SELECT son FROM kayitsiz_cevaplar WHERE gonderen = %s FOR UPDATE", (gonderen,)).fetchone()
                 yeni_cevap = son is None or c.execute("SELECT %s < now() - make_interval(secs => %s) AS g", (son["son"], sinir_sn)).fetchone()["g"]
@@ -352,6 +363,13 @@ class Depo:
             j = c.execute("SELECT * FROM isler WHERE id = %s FOR UPDATE", (is_kaydi["id"],)).fetchone()
             if j is None or j["durum"] != "isleniyor" or j["sahip"] != sahip:
                 raise KiraKaybi(f"iş {is_kaydi['id']}: artık bu işleyicide değil ({j['durum'] if j else 'yok'})")
+            ak = cikti.get("acik_is_kapanisi")         # BK-10 / D-19 (b): bayinin son mesajından 24 saat sonra açık iş kapanır; kayıt silinmez
+            if ak:
+                c.execute("UPDATE sorular SET durum = 'dustu', cevap_mesaj_id = %s, kapandi = now() WHERE gonderen = %s AND durum = 'acik'",
+                          (gelen["id"], gelen["sender"]))
+                c.execute("UPDATE secenek_setleri SET durum = 'dustu', kapandi = now() WHERE gonderen = %s AND durum = 'acik'", (gelen["sender"],))
+                if ak.get("proje_id"):
+                    c.execute("UPDATE revizyonlar SET durum = 'zaman_asimi' WHERE proje_id = %s AND durum = 'onay_bekliyor'", (ak["proje_id"],))
             # proje ve revizyon
             proje_id = d_yeni.get("proje_id")          # konusma sıfırlandıysa (yeni talep) yok: yeni proje açılır
             revizyon_id = None
@@ -420,6 +438,11 @@ class Depo:
                           (sonuc["is_emri_no"], yeni_kod, yeni_kod, yeni_kod))      # seçilen yeni plan (iki aday varsa ikincisi de)
             for kid, alanlar in cikti.get("kontrol_guncelle") or []:
                 self._kontrol_guncelle(c, kid, alanlar)
+            kk = cikti.get("kayit_karari")              # İE-22: Patron'un kayıt kararı (kanal/kayit.py); kart, talep ve karşılama bu işle aynı işlemde
+            if kk:
+                r = self._kayit_karari(c, int(kk["id"]), kk["islem"], "whatsapp", gelen["id"])
+                if r["sonuc"] in ("zaten", "yok") or r["kart_var"] != bool(kk.get("kart_var")) or r["kart_acildi"] != (kk["islem"] == "onay" and not kk.get("kart_var")):
+                    raise Cakisma(f"kayıt talebi {kk['id']}: karar yazılırken durum değişti ({r['sonuc']})")
             for cs in cikti.get("cipa_satirlari") or []:
                 self._cipa_satir_yaz(c, cs["mesaj_id"], cs["satirlar"])
             c.execute("UPDATE isler SET durum = %s, sonuc = %s, hata = %s, bitti = now(), sahip = NULL, kira_bitis = NULL WHERE id = %s",
@@ -469,14 +492,18 @@ class Depo:
         acik = c.execute("SELECT * FROM secenek_setleri WHERE gonderen = %s AND durum = 'acik' FOR UPDATE", (gelen["sender"],)).fetchone()
         yeni = d_yeni.get("secenek_seti") or None
         if acik is not None and (yeni is None or yeni.get("id") != acik["id"] or yeni.get("durum") != "acik"):
+            kapanan = yeni
             if yeni is not None and yeni.get("id") == acik["id"] and yeni.get("durum") in ("secildi", "dustu", "eskidi"):
                 kapanis = yeni["durum"]
             elif yeni is not None and yeni.get("id") != acik["id"] and yeni.get("durum") == "acik":
-                kapanis = "eskidi"
+                # İE-25: setten seçim aynı işte yeni bir set açtıysa (alan setinden Ç8801 seçildi → çatı seti) eski set konuşmanın `eski_setler`inde
+                # "secildi" durur; kayıtta da seçilen kodla kapanır ("eskidi" değil)
+                kapanan = next((s for s in d_yeni.get("eski_setler") or [] if s.get("id") == acik["id"] and s.get("durum") == "secildi"), None)
+                kapanis = "secildi" if kapanan else "eskidi"
             else:
                 kapanis = "dustu"
             c.execute("UPDATE secenek_setleri SET durum = %s, secilen_kod = %s, secim_mesaj_id = %s, kapandi = now() WHERE id = %s",
-                      (kapanis, (yeni or {}).get("secilen_kod") if kapanis == "secildi" else None, gelen["id"] if kapanis == "secildi" else None, acik["id"]))
+                      (kapanis, (kapanan or {}).get("secilen_kod") if kapanis == "secildi" else None, gelen["id"] if kapanis == "secildi" else None, acik["id"]))
             acik = None
         if yeni is not None and yeni.get("durum") == "acik" and acik is None:
             c.execute("INSERT INTO secenek_setleri (id, gonderen, proje_id, kaynak_mesaj_id, adaylar, agirliklar) VALUES (%s, %s, %s, %s, %s, %s) "
@@ -721,7 +748,7 @@ class Depo:
             raise ValueError("numara geçersiz: yalnız rakam, ülke koduyla 8–15 hane")
         if rol not in self.ROLLER:
             raise ValueError(f"rol geçersiz: {rol!r}")
-        kod = (str(kod or "").strip() or ("PATRON" if rol == "patron" else "B" + numara[-4:]))[:40]
+        kod = (str(kod or "").strip() or kod_turet(numara, rol))[:40]
         alanlar = (numara, kod, str(ad or "").strip()[:120], str(hitap or "").strip()[:40], str(firma or "").strip()[:120], str(bolge or "").strip()[:80],
                    rol, bool(aktif), kaynak)
         with self.baglan() as c, c.transaction():
@@ -787,9 +814,108 @@ class Depo:
             if not b or not b["aktif"]:
                 return None
             v = self._varsayilanlar(c, numara)      # İE-20 PR-2: talep formunun seçili değerleri (yalnız tanımlıysa); aynı bağlantı
-        kart = {"kod": b["kod"] or ("PATRON" if b["rol"] == "patron" else "B" + str(numara)[-4:]), "ad": b["ad"] or str(numara),
+        kart = {"kod": b["kod"] or kod_turet(numara, b["rol"]), "ad": b["ad"] or str(numara),
                 "firma": b["firma"] or "", "rol": b["rol"], "numara": str(b["numara"]), "hitap": b["hitap"] or ""}     # İE-08 8b M5: hitap (D-06)
         return {**kart, "varsayilanlar": v} if v else kart
+
+    # ───────────────────────── İE-22: WhatsApp'tan bayi kaydı (göç 010; akış kanal/kayit.py) ─────────────────────────
+    _KAYIT_SEC = ("SELECT t.*, extract(epoch FROM now() - t.guncellendi)::float8 AS yas_sn, extract(epoch FROM now() - t.karar_zamani)::float8 AS karar_yas_sn, "
+                  "extract(epoch FROM now() - t.hatirlatildi)::float8 AS hatirlatma_yas_sn, "
+                  "extract(epoch FROM t.olusturuldu)::float8 AS t_olusturuldu, extract(epoch FROM t.karar_zamani)::float8 AS t_karar FROM kayit_talepleri t ")
+    _KAYIT_YENI_24S = "SELECT count(*) AS n FROM kayit_talepleri WHERE olusturuldu > now() - interval '24 hours'"
+
+    def _kayit_adimi(self, c, gelen: dict, is_id: int, kayit) -> dict | None:
+        """kayitsiz_mesaj_kaydet'in işlemi içinde: numaranın hiç kartı yoksa kayıt adımı (kayit.karar → talep → kayit.satirlar). None: mesaj
+        bugünkü sabit cevap yolundan geçer (kart var, pasif dahil; ret beklemesi; günlük tavan). Aynı numaranın eşzamanlı mesajları sıraya
+        girer; yeni talep açılırken günlük tavan ortak kilitle yeniden sayılır (farklı numaralar aynı anda yazsa da tavan aşılmaz)."""
+        numara = str(gelen["sender"]); mid = str(gelen["id"])
+        c.execute("SELECT pg_advisory_xact_lock(7401002, hashtext(%s))", (numara,))
+        if c.execute("SELECT 1 FROM bayiler WHERE numara = %s", (numara,)).fetchone():
+            return None
+        t = c.execute(self._KAYIT_SEC + "WHERE t.numara = %s ORDER BY t.id DESC LIMIT 1 FOR UPDATE OF t", (numara,)).fetchone()
+        cevap_24s = c.execute("SELECT count(*) AS n FROM giden WHERE alici = %s AND tur = 'kayit' AND olusturuldu > now() - interval '24 hours'",
+                              (numara,)).fetchone()["n"]
+        k = kayit.karar({"talep": t, "cevap_24s": cevap_24s, "yeni_24s": c.execute(self._KAYIT_YENI_24S).fetchone()["n"],
+                         "gunluk_en_cok": kayit.gunluk_en_cok}, gelen)
+        if k["islem"] == "sabit":
+            return None
+        if k["islem"] == "sus":                          # cevap sınırı: talep olduğu gibi kalır, cevap yok
+            c.execute("UPDATE isler SET sonuc = %s WHERE id = %s", (Jsonb({"eylem": "kayit", "gerekce": f"kayıt talebi: {t['durum']} (cevap sınırı)",
+                                                                           "kayit": {"id": t["id"], "durum": t["durum"]}}), is_id))
+            return {"durum": t["durum"], "talep_id": t["id"], "cevap": False}
+        if k["islem"] == "yeni":
+            c.execute("SELECT pg_advisory_xact_lock(7401003, 0)")          # günlük tavan: numara kilidinden sonra, hep aynı sırayla
+            if c.execute(self._KAYIT_YENI_24S).fetchone()["n"] >= kayit.gunluk_en_cok:
+                return None
+            if k.get("kapat"):
+                c.execute("UPDATE kayit_talepleri SET durum = 'zaman_asimi', guncellendi = now() WHERE id = %s", (int(k["kapat"]),))
+            t = c.execute("INSERT INTO kayit_talepleri (numara, durum, ilk_mesaj_id, son_mesaj_id) VALUES (%s, 'ad', %s, %s) RETURNING *",
+                          (numara, mid, mid)).fetchone()
+        else:                                            # "onay bekliyor" hatırlatması talebin kendi zamanıyla (sabit cevabın sayacı ayrı)
+            t = c.execute("UPDATE kayit_talepleri SET durum = %s, ad = coalesce(%s, ad), firma = coalesce(%s, firma), son_mesaj_id = %s, "
+                          "guncellendi = now(), hatirlatildi = CASE WHEN %s THEN now() ELSE hatirlatildi END WHERE id = %s RETURNING *",
+                          (k["durum"], k.get("ad"), k.get("firma"), mid, k["islem"] == "bekliyor" and bool(k.get("cevap")), t["id"])).fetchone()
+        satirlar = kayit.satirlar(gelen, t, k)
+        for s in satirlar:
+            c.execute("INSERT INTO giden (id, is_id, mesaj_id, sira, alici, tur, kind, govde, satir) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)",
+                      (s["id"], is_id, mid, int(s["seq"]), s["to"], s.get("tur") or "cevap", s.get("kind") or "text", s.get("body") or "", Jsonb(s)))
+        c.execute("UPDATE isler SET sonuc = %s WHERE id = %s",
+                  (Jsonb({"eylem": "kayit", "gerekce": f"kayıt talebi: {t['durum']}", "kayit": {"id": t["id"], "durum": t["durum"]}}), is_id))
+        return {"durum": t["durum"], "talep_id": t["id"], "cevap": any(s["to"] == numara for s in satirlar)}
+
+    def kayit_talebi(self, talep_id: int) -> dict | None:
+        with self.baglan() as c:
+            return c.execute(self._KAYIT_SEC + "WHERE t.id = %s", (int(talep_id),)).fetchone()
+
+    def son_kayit_talebi(self, numara) -> dict | None:
+        """Panel: numaranın en son kayıt talebi (yoksa None)."""
+        with self.baglan() as c:
+            return c.execute(self._KAYIT_SEC + "WHERE t.numara = %s ORDER BY t.id DESC LIMIT 1", (str(numara or ""),)).fetchone()
+
+    def kayit_bekleyen_sayisi(self) -> int:
+        with self.baglan() as c:
+            return c.execute("SELECT count(*) AS n FROM kayit_talepleri WHERE durum = 'onay_bekliyor'").fetchone()["n"]
+
+    def _kayit_karari(self, c, talep_id: int, islem: str, kaynak: str, karar_mesaj_id: str | None = None) -> dict:
+        """Onay: kart yoksa açılır (aktif, rol bayi, kaynak whatsapp; kod depo.bayi_yaz gibi türetilir) ve talep 'onaylandi'; red: 'reddedildi'.
+        Kart karardan önce (elle) açıldıysa ezilmez, talep yine kapanır. Talep onay beklemiyorsa hiçbir şey yazılmaz. Dönen: {"sonuc":
+        onaylandi | reddedildi | zaten | yok, "kart_var": karardan önce kart vardı, "kart_acildi", "talep"}."""
+        if islem not in ("onay", "red"):
+            raise ValueError(f"kayıt işlemi: {islem!r}")
+        t = c.execute("SELECT * FROM kayit_talepleri WHERE id = %s FOR UPDATE", (int(talep_id),)).fetchone()
+        if t is None or t["durum"] != "onay_bekliyor":
+            return {"sonuc": "yok" if t is None else "zaten", "kart_var": False, "kart_acildi": False, "talep": t}
+        kart_var = c.execute("SELECT 1 FROM bayiler WHERE numara = %s", (t["numara"],)).fetchone() is not None
+        kart_acildi = False
+        if islem == "onay" and not kart_var:
+            kart_acildi = c.execute(
+                "INSERT INTO bayiler (numara, kod, ad, firma, rol, aktif, kaynak) VALUES (%s, %s, %s, %s, 'bayi', true, 'whatsapp') "
+                "ON CONFLICT (numara) DO NOTHING RETURNING numara", (t["numara"], kod_turet(t["numara"])[:40], t["ad"][:120], t["firma"][:120])).fetchone() is not None
+        t = c.execute("UPDATE kayit_talepleri SET durum = %s, karar_kaynagi = %s, karar_mesaj_id = %s, karar_zamani = now(), guncellendi = now() "
+                      "WHERE id = %s RETURNING *", ("onaylandi" if islem == "onay" else "reddedildi", kaynak, karar_mesaj_id, int(talep_id))).fetchone()
+        return {"sonuc": t["durum"], "kart_var": kart_var, "kart_acildi": kart_acildi, "talep": t}
+
+    def kayit_karari_yaz(self, talep_id: int, islem: str, satir_uret=None) -> dict:
+        """Panel (yedek): Patron'un kararı tek işlemde; satir_uret(talep, islem, kart_var) → bayinin son mesajına bağlanacak satırlar
+        (kanal/kayit.py::karar_satirlari: karşılama ya da red metni)."""
+        with self.baglan() as c, c.transaction():
+            r = self._kayit_karari(c, talep_id, islem, "panel")
+            if r["sonuc"] in ("onaylandi", "reddedildi") and satir_uret is not None:
+                satirlar = satir_uret(r["talep"], islem, r["kart_var"])
+                if satirlar:
+                    self._cipa_satir_yaz(c, r["talep"]["son_mesaj_id"], satirlar)
+            return r
+
+    def kayit_reddi_geri_al(self, talep_id: int) -> dict | None:
+        """Panel: reddedilen talep yeniden onay bekler (CIO, 29.10: ret kalıcı engel değildir). Numaranın açık talebi ya da kartı varsa None."""
+        try:
+            with self.baglan() as c, c.transaction():
+                return c.execute(
+                    "UPDATE kayit_talepleri t SET durum = 'onay_bekliyor', karar_kaynagi = NULL, karar_mesaj_id = NULL, karar_zamani = NULL, "
+                    "guncellendi = now() WHERE t.id = %s AND t.durum = 'reddedildi' AND NOT EXISTS (SELECT 1 FROM bayiler b WHERE b.numara = t.numara) "
+                    "RETURNING t.*", (int(talep_id),)).fetchone()
+        except psycopg.errors.UniqueViolation:                    # numaranın açık bir talebi var (kayit_talepleri_acik)
+            return None
 
     # ───────────────────────── İE-06: webhook olayları, durum bildirimi, gönderim yardımcıları ─────────────────────────
     def olay_kaydet(self, anahtar: str, tur: str) -> bool:
@@ -953,11 +1079,13 @@ class Depo:
             r = c.execute("SELECT is_emri_no FROM revizyonlar WHERE gonderen = %s AND dogrulandi ORDER BY id DESC LIMIT 1", (str(numara),)).fetchone()
         return str(r["is_emri_no"]) if r and r.get("is_emri_no") else None
 
-    def kardes_metin_durumu(self, mesaj_id: str, alici: str, sira: int) -> str | None:
-        """Şablon satırına eşlik eden metin satırının durumu (aynı mesaj ve alıcı, daha küçük sıra, en yakını). Yoksa None."""
+    def kardes_metin_durumu(self, mesaj_id: str, alici: str, sira: int, dugmeli: bool = False) -> str | None:
+        """Şablon satırına eşlik eden metin satırının durumu (aynı mesaj ve alıcı, daha küçük sıra, en yakını). Yoksa None. dugmeli: şablon
+        satırı düğmeli mesaja eşlik ediyor (İE-22 kayıt talebi; satırda kardes_dugmeli); yalnız o zaman düğmeli satır da sayılır."""
+        turler = ["text", "interactive"] if dugmeli else ["text"]
         with self.baglan() as c:
-            r = c.execute("SELECT durum FROM giden WHERE mesaj_id = %s AND alici = %s AND kind = 'text' AND sira < %s ORDER BY sira DESC LIMIT 1",
-                          (mesaj_id, alici, sira)).fetchone()
+            r = c.execute("SELECT durum FROM giden WHERE mesaj_id = %s AND alici = %s AND kind = ANY(%s) AND sira < %s "
+                          "ORDER BY sira DESC LIMIT 1", (mesaj_id, alici, turler, sira)).fetchone()
         return r["durum"] if r else None
 
     def gelen_dosyalari(self, numara: str) -> list[dict]:
@@ -993,11 +1121,15 @@ class Depo:
     _KONTROL_SEC = ("SELECT k.*, extract(epoch FROM k.olusturuldu)::float8 AS t_olusturuldu, extract(epoch FROM k.sure_baslangici)::float8 AS t_baslangic, "
                     "extract(epoch FROM k.dosya_gonderildi)::float8 AS t_dosya, extract(epoch FROM k.karar_zamani)::float8 AS t_karar, "
                     "extract(epoch FROM k.son_hatirlatma)::float8 AS t_son_hatirlatma, extract(epoch FROM k.gecikme_bildirildi)::float8 AS t_gecikme, "
-                    "extract(epoch FROM k.patron_son_hatirlatma)::float8 AS t_patron_son FROM muhendis_kontrolleri k ")
+                    "extract(epoch FROM k.patron_son_hatirlatma)::float8 AS t_patron_son, "
+                    "extract(epoch FROM k.zaman_asimi)::float8 AS t_zaman_asimi, extract(epoch FROM k.yeniden_acildi)::float8 AS t_yeniden, "
+                    "extract(epoch FROM k.plan_degisti)::float8 AS t_plan_degisti FROM muhendis_kontrolleri k ")
     _KONTROL_ALANLARI = {"durum", "dosya_gonderildi", "karar_zamani", "son_hatirlatma", "hatirlatma_sayisi", "gecikme_bildirildi", "bekleyen",
-                         "not_", "listeler", "patron_durum", "patron_hatirlatma_sayisi", "patron_son_hatirlatma"}
+                         "not_", "listeler", "patron_durum", "patron_hatirlatma_sayisi", "patron_son_hatirlatma",
+                         "zaman_asimi", "yeniden_acildi", "plan_degisti", "sure_baslangici"}      # BK-10 (göç 011)
     SIMDI = "__simdi__"            # güncellemede zaman alanı için: veritabanının now()'u
-    _KONTROL_ZAMANLARI = {"dosya_gonderildi", "karar_zamani", "son_hatirlatma", "gecikme_bildirildi", "patron_son_hatirlatma"}
+    _KONTROL_ZAMANLARI = {"dosya_gonderildi", "karar_zamani", "son_hatirlatma", "gecikme_bildirildi", "patron_son_hatirlatma",
+                          "zaman_asimi", "yeniden_acildi", "plan_degisti", "sure_baslangici"}
 
     def muhendis_numarasi(self) -> str | None:
         """Aktif mühendis kartı (rol = muhendis; birden çoksa ilk girilen). Yoksa None: bildirim gitmez, Patron'a söylenir."""
@@ -1067,6 +1199,47 @@ class Depo:
             return c.execute(self._KONTROL_SEC + "WHERE k.muhendis = %s AND k.durum IN ('bekliyor', 'duzeltme') "
                              "AND (%s::text IS NULL OR k.bekleyen = %s) ORDER BY coalesce(k.dosya_gonderildi, k.olusturuldu) DESC, k.id DESC LIMIT 1",
                              (str(numara), bekleyen, bekleyen)).fetchone()
+
+    def onceki_mesajdan_gecen(self, gonderen: str, mesaj_id: str) -> float | None:
+        """D-19 (b): bu mesajla göndericinin bir önceki mesajı arasındaki süre (sn; WhatsApp gönderim anları); önceki mesaj yoksa None."""
+        with self.baglan() as c:
+            r = c.execute("SELECT extract(epoch FROM m.wa_zamani - max(o.wa_zamani))::float8 AS sn FROM mesajlar m "
+                          "JOIN mesajlar o ON o.gonderen = m.gonderen AND o.id <> m.id AND o.wa_zamani <= m.wa_zamani "
+                          "WHERE m.id = %s AND m.gonderen = %s GROUP BY m.wa_zamani", (mesaj_id, gonderen)).fetchone()
+        return float(r["sn"]) if r and r["sn"] is not None else None
+
+    def muhendisin_son_karari(self, numara: str, en_cok_sn: float) -> dict | None:
+        """BK-10: mühendisin "Patron'a gönder" dediği en son kontrol (karar en_cok_sn içinde verildiyse; plan değişmediyse). Karardan sonra
+        gelen Excel buna bağlanır."""
+        with self.baglan() as c:
+            return c.execute(self._KONTROL_SEC + "WHERE k.muhendis = %s AND k.durum = 'patrona_gonderildi' AND k.plan_degisti IS NULL "
+                             "AND k.karar_zamani > now() - make_interval(secs => %s) ORDER BY k.karar_zamani DESC, k.id DESC LIMIT 1",
+                             (str(numara), float(en_cok_sn))).fetchone()
+
+    def projenin_kontrolleri(self, proje_id: int, rev: int) -> list[dict]:
+        """BK-10 (rehber §4: plan değişirse önceki onaylar düşer): projenin rev'den önceki revizyonlarına açılmış, plan değişikliği henüz
+        işlenmemiş kontroller."""
+        with self.baglan() as c:
+            return c.execute(self._KONTROL_SEC + "WHERE k.plan_degisti IS NULL AND k.rev < %s AND EXISTS (SELECT 1 FROM revizyonlar r "
+                             "WHERE r.proje_id = %s AND r.is_emri_no = k.is_emri_no AND r.rev = k.rev) ORDER BY k.id",
+                             (int(rev), int(proje_id))).fetchall()
+
+    def kontrol(self, kid: int) -> dict | None:
+        with self.baglan() as c:
+            return c.execute(self._KONTROL_SEC + "WHERE k.id = %s", (int(kid),)).fetchone()
+
+    def kontrol_yeniden_ac(self, kid: int, satir_uret) -> bool:
+        """BK-10 (D-19): Patron zaman aşımına düşen kontrolü panelden yeniden açar. Kontrol 'bekliyor'a döner, hatırlatma sayaçları sıfırlanır,
+        24 saat ve cevap süresi bu andan sayılır; mühendise bildirim şablonu bayinin onay mesajına bağlanır (satir_uret(kontrol) → satırlar).
+        Hepsi tek işlemde; kontrol zaman aşımında değilse (ya da plan değiştiyse) hiçbir şey yazılmaz."""
+        with self.baglan() as c, c.transaction():
+            k = c.execute(self._KONTROL_SEC + "WHERE k.id = %s FOR UPDATE", (int(kid),)).fetchone()
+            if k is None or k["durum"] != "zaman_asimi" or k["plan_degisti"] is not None or not k["muhendis"]:
+                return False
+            self._kontrol_guncelle(c, kid, {"durum": "bekliyor", "yeniden_acildi": self.SIMDI, "sure_baslangici": self.SIMDI,
+                                            "hatirlatma_sayisi": 0, "son_hatirlatma": None, "gecikme_bildirildi": None})
+            self._cipa_satir_yaz(c, k["onay_mesaj_id"], satir_uret(k))
+            return True
 
     def hatirlatma_adaylari(self) -> list[dict]:
         with self.baglan() as c:

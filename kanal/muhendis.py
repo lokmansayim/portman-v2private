@@ -13,6 +13,12 @@ Akış (Lokman, 14 Ekim 2026; CIO plan sayfası › Görev 4b):
      başlar; 3 saat dolunca Patron'a bir kez. Patron'a fiyat için 2 saatte bir, en çok 3 kez; panelde "Fiyat verildi" ya da panelden o
      bayiye gönderim durdurur. Her hatırlatma ücretlidir (şablon).
 
+  5. BK-10 (göç 011): D-19 (Lokman 14.10 23:56, "tüm iş 24 saat sonra kapansın"): kontrol açıldıktan (ya da Patron panelden yeniden
+     açtıktan) 24 saat sonra mühendis karar vermediyse hatırlatmalar durur, kontrol 'zaman_asimi' olur, Patron'a tek bildirim. Rehber §4
+     (plan değişirse önceki onaylar düşer): bayi onaydan sonra yeni revizyon isterse karar bekleyen kontrol 'plan_degisti' olur, mühendise
+     "plan değişti" yazılır; mühendis kararını vermişse Patron'a söylenir, fiyat hatırlatması durur. Karardan sonra 24 saat içinde gelen
+     Excel son kararın yeni liste sürümü olur ve Patron'a gider.
+
 LLM çağrılmaz. Mühendisin ve bayinin numarası günlüğe ve Patron metnine yazılmaz (bayi kodu yazılır). Satırlar ve kontrol güncellemesi
 işle aynı işlemde yazılır (`depo._isi_bitir`: `muhendis_kontrolu`, `kontrol_guncelle`, `cipa_satirlari`).
 """
@@ -41,6 +47,14 @@ NOT_EN_COK = 600
 NOTLAR_GOVDEDE_EN_COK = 6            # kısa parça notu bundan çoksa düğmeli mesajda sayı, notların hepsi ayrı metinde (D-10: hepsi gösterilir)
 DUZELTME_NOTU = "duzeltme_notu"
 BAYI_KONTROL_SURUYOR = "Planınızın teknik kontrolü sürüyor; revizyon hakkınız düşmez. Sonucu size bildireceğiz."
+ZAMAN_ASIMI_SN = 24 * SAAT            # D-19 (BK-10): kontrol açıldıktan 24 saat sonra karar yoksa kapanır; mesai saati değil, duvar saati
+KARARSIZ = ("bekliyor", "duzeltme")   # mühendisin kararı beklenen durumlar
+# BK-10: kapanmış kontrolün düğmesine basan mühendise (zaman aşımı, plan değişti)
+KAPALI_METNI = {"zaman_asimi": "{e} için kontrol 24 saat içinde cevaplanmadığı için kapandı; Patron'a bildirildi. Patron yeniden açarsa yeni "
+                               "bildirim gelir.",
+                "plan_degisti": "{e} için kontrol kapandı: bayi onaydan sonra planı değiştirdi, bu dosyaları kullanmayın. Yeni plan onaylanınca "
+                                "yeni bildirim gelir."}
+DXF_NOTU = "WhatsApp bu dosyanın adına .txt ekleyebilir; indirdikten sonra adının sonundaki .txt'yi silin."
 
 
 def mesaide_mi(t: float) -> bool:
@@ -144,9 +158,12 @@ def isle(depo: Depo, gelen: dict) -> dict:
         if k is None or str(k.get("muhendis") or "") != sender:
             c.metin("Bu düğmenin işini bulamadım. Açık işler için son bildirimdeki Gönder düğmesini kullanın.")
             c.sonuc["gerekce"] = "kontrol bulunamadı"
+        elif k["durum"] in KAPALI_METNI:
+            c.metin(KAPALI_METNI[k["durum"]].format(e=_etiket(no, rev)))
+            c.sonuc["gerekce"] = f"kontrol kapalı ({k['durum']})"
         elif islem == "gonder":
             _dosyalar(depo, c, k)
-        elif k["durum"] not in ("bekliyor", "duzeltme"):
+        elif k["durum"] not in KARARSIZ:
             c.metin(f"{_etiket(no, rev)} için kararınız kaydedildi; Patron'a iletildi.")
             c.sonuc["gerekce"] = "karar zaten verildi"
         elif islem == "patron":
@@ -248,7 +265,8 @@ def _dosyalar(depo: Depo, c: _Cikti, k: dict) -> None:
         eksik.append("Excel")
     dxf = ekler.get("dxf") or {}
     if dxf.get("dosya") and Path(dxf["dosya"]).is_file():
-        _belge(c, Path(dxf["dosya"]), f"Portman_{no}_r{rev:02d}.dxf", f"{_etiket(no, rev)} · düzenlenebilir çizim (DXF)", S_DXF, no, rev, dxf.get("sha256"))
+        _belge(c, Path(dxf["dosya"]), f"Portman_{no}_r{rev:02d}.dxf", f"{_etiket(no, rev)} · düzenlenebilir çizim (DXF). {DXF_NOTU}", S_DXF, no, rev,
+               dxf.get("sha256"))
     else:
         eksik.append("DXF")
     notlar = kontrol_notlari(rv.get("pdf_yolu"))
@@ -266,7 +284,7 @@ def _dosyalar(depo: Depo, c: _Cikti, k: dict) -> None:
         govde += f" {dg}"
     elif dg:
         c.metin(f"{_etiket(no, rev)} · {dg}")
-    if k["durum"] in ("bekliyor", "duzeltme"):
+    if k["durum"] in KARARSIZ:
         govde += (" Listeyi düzelttiyseniz Excel'i bu sohbete gönderin, sonra Patron'a gönder'e basın. Ciddi düzeltme gerekiyorsa "
                   "Düzeltme iste'ye basıp notunuzu yazın.")
         c.ekle(W.giden_etkilesim(c.gelen, govde, 0, butonlar=[(S.muhendis_yuku("patron", no, rev), "Patron'a gönder"),
@@ -340,6 +358,9 @@ def _not(c: _Cikti, k: dict, metin: str) -> None:
 
 def _liste_surumu(depo: Depo, c: _Cikti, sender: str) -> None:
     k = depo.muhendisin_acik_kontrolu(sender)
+    gec = k is None
+    if gec:                                                       # BK-10: "Patron'a gönder"den sonra gelen Excel son karara bağlanır
+        k = depo.muhendisin_son_karari(sender, ZAMAN_ASIMI_SN)
     ad = str(c.gelen.get("filename") or "")
     if k is None:
         c.metin("Bu dosyayı bir işe bağlayamadım: teknik kontrol bekleyen iş yok. Dosya panelde duruyor.")
@@ -354,17 +375,74 @@ def _liste_surumu(depo: Depo, c: _Cikti, sender: str) -> None:
     surum = max((int(s.get("surum") or 0) for s in listeler), default=1) + 1      # sürüm 1 sunucunun listesi
     listeler.append({"surum": surum, "kaynak": "muhendis", "mesaj_id": c.gelen["id"], "dosya_adi": ad[:120], "zaman": int(time.time())})
     c.guncelle.append((k["id"], {"listeler": listeler}))
+    if gec:
+        _gec_liste(depo, c, {**k, "listeler": listeler}, surum)
+        return
     c.ekle(W.giden_etkilesim(c.gelen, f"Excel alındı: {_etiket(no, rev)}, liste sürümü {surum}. Hazırsa Patron'a gönder'e basın.", 0,
                              butonlar=[(S.muhendis_yuku("patron", no, rev), "Patron'a gönder"), (S.muhendis_yuku("duzeltme", no, rev), "Düzeltme iste")],
                              is_emri_no=no, revizyon=rev))
     c.sonuc.update(gerekce="liste sürümü", is_emri_no=no, revizyon=rev)
 
 
+def _gec_liste(depo: Depo, c: _Cikti, k: dict, surum: int) -> None:
+    """BK-10 (8b devri, madde 2): karar verildikten sonra gelen Excel. Kontrolün durumu değişmez (karar verildi); yeni sürüm Patron'a
+    metin + şablon + dosya (indirildiyse; indirilmediyse panelde) olarak gider."""
+    no, rev = k["is_emri_no"], int(k["rev"])
+    yol, _ = _son_muhendis_exceli(depo, k)
+    liste = "ektedir." if yol is not None else "henüz indirilmedi; panelde görünür."
+    c.metin(f"Portman: {_etiket(no, rev)} ({_bayi_kodu(k)}) için mühendis kararından sonra düzeltilmiş liste gönderdi (sürüm {surum}); {liste} "
+            "Fiyatı verdiyseniz bu listeyle karşılaştırın.", "PATRON", "bildirim")
+    c.ekle(_patron_sablonu(c.gelen["id"], k))
+    if yol is not None:
+        r = W.giden_belge(c.gelen, yol, yol.name, f"{_etiket(no, rev)} · yükleme listesi (mühendis, sürüm {surum})", 0, no, rev, W._sha(yol))
+        r.update(to="PATRON", tur="bildirim", mime=S_XLSX)
+        c.ekle(r)
+    c.metin(f"Excel alındı: {_etiket(no, rev)}, liste sürümü {surum}. Kararınız verilmişti; yeni listeyi Patron'a ilettim.")
+    c.sonuc.update(gerekce="liste sürümü (karardan sonra): Patron'a", is_emri_no=no, revizyon=rev)
+
+
+# ───────────────────────── 5 · plan değişti (BK-10) ─────────────────────────
+def plan_degisti_kancasi(depo: Depo, gelen: dict, d: dict | None, cikti: dict) -> None:
+    """kalici.bir_is: bayinin mesajı aynı projede yeni revizyon (r02+) çizdiyse, önceki revizyonlara açılmış kontroller kapanır (rehber §4:
+    plan değişirse önceki onaylar düşer). Karar bekleyen kontrol 'plan_degisti' olur, mühendise metin gider (penceresi kapalıysa gitmez;
+    eski düğmesine basarsa söylenir); mühendisin kararı Patron'a ulaşmışsa Patron'a metin + şablon, fiyat hatırlatması durur. Her kontrol
+    bir kez işlenir (`plan_degisti` zamanı). Satırlar ve güncelleme işle aynı işlemde."""
+    sonuc = cikti.get("sonuc") or {}
+    proje_id = (d or {}).get("proje_id")
+    if sonuc.get("eylem") != "is_emri" or not sonuc.get("is_emri_no") or int(sonuc.get("revizyon") or 1) < 2 or not proje_id:
+        return
+    yeni = _etiket(sonuc["is_emri_no"], int(sonuc["revizyon"]))
+    satirlar = cikti["satirlar"]
+    sira = max((int(s.get("seq") or 0) for s in satirlar), default=0)
+
+    def ekle(r: dict) -> None:
+        nonlocal sira
+        sira += 1; r.update(seq=sira, id=W.satir_id(gelen["id"], sira)); satirlar.append(r)
+
+    for k in depo.projenin_kontrolleri(int(proje_id), int(sonuc["revizyon"])):
+        no, rev = k["is_emri_no"], int(k["rev"])
+        alan: dict = {"plan_degisti": Depo.SIMDI}
+        if k["durum"] in KARARSIZ + ("kart_yok", "zaman_asimi"):
+            alan.update(durum="plan_degisti", bekleyen=None)
+            if k["durum"] in KARARSIZ and k.get("muhendis"):
+                ekle(W.giden_metin(gelen, f"Portman: {_etiket(no, rev)} için plan değişti: bayi onaydan sonra yeni revizyon istedi ({yeni}). Bu kontrol "
+                                          "kapandı, dosyalarını kullanmayın; yeni plan onaylanınca yeni bildirim gelir.", 0, "MUHENDIS", "bildirim"))
+        elif k["durum"] == "patrona_gonderildi":
+            ekle(W.giden_metin(gelen, f"Portman: {_etiket(no, rev)} ({_bayi_kodu(k)}) için bayi onaydan sonra planı değiştirdi ({yeni}); önceki onay ve "
+                                      "mühendis kararı bu plana ait değil." + (" Fiyat hatırlatması durdu." if k["patron_durum"] == "bekliyor" else ""),
+                               0, "PATRON", "bildirim"))
+            ekle(_patron_sablonu(gelen["id"], k))
+            if k["patron_durum"] == "bekliyor":
+                alan["patron_durum"] = "durdu"
+        cikti.setdefault("kontrol_guncelle", []).append((k["id"], alan))
+        sonuc.setdefault("plan_degisti", []).append(_etiket(no, rev))
+
+
 # ───────────────────────── 4 · hatırlatmalar ─────────────────────────
 def hatirlatma_turu(depo: Depo, simdi: float | None = None) -> dict:
     """Ajan döngüsünden dakikada bir. Her kontrol için satırlar ve sayaç güncellemesi tek işlemde (depo.kontrol_satir_ekle)."""
     simdi = time.time() if simdi is None else simdi
-    say = {"muhendis": 0, "gecikme": 0, "patron": 0, "hata": 0}
+    say = {"muhendis": 0, "gecikme": 0, "patron": 0, "zaman_asimi": 0, "hata": 0}
     if not mesaide_mi(simdi):
         return say
     testler = set(depo.test_kartlari())                          # kuru koşu kartının onayı hatırlatma doğurmaz (satırlar zaten tutulur)
@@ -386,7 +464,14 @@ def _hatirlatmalar(k: dict, simdi: float, say: dict) -> tuple[list[dict], dict]:
     no, rev = k["is_emri_no"], int(k["rev"])
     cipa = {"id": k["onay_mesaj_id"], "sender": k["bayi"]}
     satirlar: list[dict] = []; guncelle: dict = {}
-    if k["durum"] == "bekliyor" and k.get("muhendis") and simdi >= float(k["t_baslangic"]):
+    acilis = k.get("t_yeniden") or k.get("t_olusturuldu")
+    if k["durum"] == "bekliyor" and k.get("muhendis") and acilis is not None and simdi - float(acilis) >= ZAMAN_ASIMI_SN:
+        # BK-10 · D-19: 24 saat doldu, karar yok → hatırlatmalar durur, kontrol kapanır, Patron'a tek bildirim (mesai içinde; gece dolarsa 08:00'de)
+        satirlar.append(W.giden_metin(cipa, f"Portman: {_etiket(no, rev)} ({_bayi_kodu(k)}) için mühendis 24 saatte karar vermedi; kontrol kapandı "
+                                            "(zaman aşımı), hatırlatmalar durdu. Panelden yeniden açabilirsiniz.", 0, "PATRON", "bildirim"))
+        satirlar.append(_patron_sablonu(k["onay_mesaj_id"], k))
+        guncelle.update(durum="zaman_asimi", zaman_asimi=simdi, bekleyen=None); say["zaman_asimi"] += 1
+    elif k["durum"] == "bekliyor" and k.get("muhendis") and simdi >= float(k["t_baslangic"]):
         gecen = mesai_suresi(float(k["t_baslangic"]), simdi)      # gece sayılmaz
         n = int(k.get("hatirlatma_sayisi") or 0)
         son = k.get("t_son_hatirlatma")

@@ -32,7 +32,7 @@
   "A07": true,
   "A08": true,
   "A09": false,
-  "B01": false,
+  "B01": true,
   "C01": true,
   "C02": true,
   "D01": true,
@@ -44,7 +44,7 @@
   "F01": true,
   "F02": true,
   "F03": true,
-  "E01": false,
+  "E01": true,
   "E02": true,
   "G01": true,
   "G02": false,
@@ -82,10 +82,7 @@
   "K01": false,
   "K02": true
  },
- "guvenlik": [
-  "B01",
-  "E01"
- ],
+ "guvenlik": [],
  "okuma": {
   "tam": [
    66,

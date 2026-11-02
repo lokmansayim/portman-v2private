@@ -32,6 +32,14 @@ from shapely.geometry import Polygon
 
 from . import cati_genel, yapi
 from . import kural as kurallar_oku
+from .bayi_gorseli import musteri_projesi, sahip_adi
+
+
+def bina_adi(t: dict) -> str:
+    """IFC'deki proje ve bina adı: modelin tarifi; müşteri projesinde (KT-xx) sahibinin adı yazılıysa tarif yerine o (D-33).
+    Adı yazılı olmayan modelin IFC'si değişmez."""
+    return (sahip_adi(t) if musteri_projesi(t) else "") or t["ad"]
+
 
 BURADA = Path(__file__).resolve().parent
 CM = 0.01
@@ -63,7 +71,7 @@ class Uretici:
         model = api("context.add_context", f, context_type="Model")
         self.body = api("context.add_context", f, context_type="Model", context_identifier="Body", target_view="MODEL_VIEW", parent=model)
         self.site = api("root.create_entity", f, ifc_class="IfcSite", name="Parsel")
-        self.bina = api("root.create_entity", f, ifc_class="IfcBuilding", name=tanim["ad"])
+        self.bina = api("root.create_entity", f, ifc_class="IfcBuilding", name=bina_adi(tanim))
         self.kat = api("root.create_entity", f, ifc_class="IfcBuildingStorey", name="Zemin Kat")
         api("aggregate.assign_object", f, relating_object=self.proje, products=[self.site])
         api("aggregate.assign_object", f, relating_object=self.site, products=[self.bina])
@@ -430,7 +438,7 @@ def main() -> int:
     if a.yontem:
         t["cati"]["yontem"] = a.yontem
     kur = kurallar_oku.oku()
-    u = Uretici(t, kur, f"Portman — {t['kod']} · {t['ad']}")
+    u = Uretici(t, kur, f"Portman — {t['kod']} · {bina_adi(t)}")
     cikti.parent.mkdir(parents=True, exist_ok=True)
     u.calistir(cikti)
     d = dogrula(cikti)

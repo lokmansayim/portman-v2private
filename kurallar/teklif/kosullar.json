@@ -1,0 +1,9 @@
+{
+ "sema": "portman.teklif_kosullari/1",
+ "aciklama": "Teklifin koşulları (İE-13 PR-2, araclar/teklif.py). Değer yalnız Patron'dan; uydurulmaz. Boş değer teklifte sarı 'Patron'dan' yazar. Projeye özel değer teklif komutuna --kosullar ile aynı biçimde verilir.",
+ "dayanak": "Patron 28 Ekim 2026 06:51 (altın set kartı): bayi teslim süresini ya da ödeme şeklini sorarsa Portman 'teklifle birlikte bildirilir' der; bu yüzden teklifte iki satır bulunur.",
+ "kosullar": {
+  "Teslim süresi": null,
+  "Ödeme şekli": null
+ }
+}

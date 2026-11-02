@@ -22,8 +22,9 @@ sys.path.insert(0, str(KOK))
 from testler.altin import kos as A  # noqa: E402
 
 ADIMLAR = {"selam_soru", "kayitsiz_kapsam", "eksik_bilgi", "bilgi_tam", "katalog_kodu", "secim", "revizyon", "onay_eski"}
-# İE-19 planı (27 Ekim): 78 yeni vaka rehberin adımlarına göre; kör 20 oranla, açık 58
-YENI = {"selam_soru": 6, "kayitsiz_kapsam": 6, "eksik_bilgi": 14, "bilgi_tam": 12, "katalog_kodu": 10, "secim": 8, "revizyon": 16, "onay_eski": 6}
+# İE-19 planı (27 Ekim): 78 yeni vaka rehberin adımlarına göre; kör 20 oranla, açık 58. İE-25 (1 Kasım, Lokman: çatı plandan sonra):
+# açık B01, E01, X08 artık dört bilgisi tam talep (eksik_bilgi → bilgi_tam); vaka sayısı ve kör dilim aynı
+YENI = {"selam_soru": 6, "kayitsiz_kapsam": 6, "eksik_bilgi": 11, "bilgi_tam": 15, "katalog_kodu": 10, "secim": 8, "revizyon": 16, "onay_eski": 6}
 KOR = {"selam_soru": 2, "kayitsiz_kapsam": 1, "eksik_bilgi": 4, "bilgi_tam": 3, "katalog_kodu": 3, "secim": 2, "revizyon": 4, "onay_eski": 1}
 KARAR_ALANLARI = {"eylem", "soru_alani", "gerekce", "plan_uretimi", "secenek", "secenek_icerir", "plan_kodu", "revizyon", "degisiklikler",
                   "mesaj_icerir", "mesaj_icermez"}

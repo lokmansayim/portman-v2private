@@ -86,6 +86,8 @@ def plan_gorseli(ie: dict, yol: Path, v: dict | None = None, genislik_px: int = 
                             fontsize=7, color=PENCERE, rotation=90, zorder=5)
             else:
                 ax.add_patch(Rectangle((x0, y0), x1 - x0, y1 - y0, facecolor="white", edgecolor="white", linewidth=0.5, zorder=4))
+                if p.acilim.tur == "gecis":                 # İE-24: kapısız geçiş (merdiven ağzı) boşluktur, kanat yayı çizilmez (DXF'te de "OPEN")
+                    continue
                 w = p.acilim.genislik
                 if d.yon == "x":
                     yon = 1 if (p.acilim.icine_normal or "+y").endswith("y") and (p.acilim.icine_normal or "+y").startswith("+") else -1

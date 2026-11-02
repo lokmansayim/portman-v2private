@@ -28,8 +28,18 @@ def oda_programi(t: dict) -> str:
 
 
 def musteri_projesi(t: dict) -> bool:
-    """Müşteri projesi (kör test, KT-xx) mi: bayiye adsız sunulur (kod, m², oda programı; D-08). Katalog kodları `[PÇ]\\d{4}[A-Z]?`."""
+    """Müşteri projesi (kör test, KT-xx) mi. Katalog kodları `[PÇ]\\d{4}[A-Z]?`. Müşteri projesinde modelin tarifi (`ad`) yazılmaz;
+    sahibinin adı yazılıysa o görünür (`sahip_adi`, D-33), yazılı değilse kod, m² ve oda programı (D-08)."""
     return bool(t.get("musteri_projesi")) or str(t.get("kod", "")).upper().startswith("KT")
+
+
+def sahip_adi(t: dict, bilgi: dict | None = None) -> str:
+    """Projenin sahibinin adı (D-33; Lokman 30 Ekim 2026 13:24 "herkeste görünsün çünkü bayiden proje o isimle geliyor", 1 Kasım karar
+    kartı "Projenin sahibinin adı"). Önce zarfın `musteri_adi`'sı (bayinin mesajındaki müşteri), yoksa tanımın `musteri_adi`'sı (banka
+    modelinin sahibi); ikisi de yoksa boş. Ada karışan rakam dizisi (telefon numarası) yazılmaz: yerine "…" (D-09)."""
+    import re
+    ad = str((bilgi or {}).get("musteri_adi") or t.get("musteri_adi") or "").strip()
+    return re.sub(r"\+?\d[\d\s().-]{5,}\d", "…", ad)
 
 
 def _bayi_duzelt(fig, ax, y: dict, sinir: tuple[float, float, float, float]) -> None:
@@ -128,7 +138,7 @@ def plan_bayi(t: dict, hedef: Path, kod: str, is_emri_no: str | None = None, rev
     W, H = bx1 - bx0, by1 - by0
     hedef = Path(hedef); hedef.mkdir(parents=True, exist_ok=True)
     baslik = sunum or f"{t['kod']} · {oturum:.0f} m² · {oda_programi(t)}"
-    ad = "" if musteri_projesi(t) else t.get("ad", "")        # müşteri projeleri bayiye adsız (D-08)
+    ad = sahip_adi(t) if musteri_projesi(t) else t.get("ad", "")      # müşteri projesinde tarif yerine sahibinin adı, yoksa boş (D-33)
     taslak = "TASLAK" + (f" · r{int(revizyon):02d}" if revizyon is not None else "") + (f" · {is_emri_no}" if is_emri_no else "")
     yol = hedef / f"{kod}_plan_bayi.png"
 

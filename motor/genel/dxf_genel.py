@@ -293,10 +293,15 @@ def gorunus_ciz(C: _Cizer, S: list[dict], taraf: str, duvar_h: float, ox: float,
         katman = GORUNUS_KATMANI.get(tur, "duvar")
         kenar = geo.boundary
         C.geo(kenar if ortu.is_empty else kenar.difference(ortu.buffer(0.05)), katman, dx, dy)
-        if tur == "pencere" and s.get("en", 0) >= 100:             # kayıt (orta kayıt) çizgisi, görünüşteki gibi
+        if tur == "pencere" and (s.get("en", 0) >= 100 or s.get("acilis") == "surgulu"):   # kayıt (orta kayıt) çizgisi, görünüşteki gibi
             u_ = [p[0] for p in s["k2"]]; z_ = [p[1] for p in s["k2"]]
             orta = LineString([((min(u_) + max(u_)) / 2, min(z_)), ((min(u_) + max(u_)) / 2, max(z_))])
             C.geo(orta if ortu.is_empty else orta.difference(ortu.buffer(0.05)), "aciklik", dx, dy)
+        if tur == "pencere" and s.get("acilis") == "surgulu":             # sürgülü yön oku (ciz_genel.surgulu_oku; Lokman, 30 Ekim 2026)
+            from .ciz_genel import surgulu_oku
+            for a, b in surgulu_oku(s["k2"]):
+                ok = LineString([a, b])
+                C.geo(ok if ortu.is_empty else ok.difference(ortu.buffer(0.05)), "aciklik", dx, dy)
         ortu = unary_union([ortu, geo])
     us = [p[0] for s in yz for p in s["k2"]]
     C.cizgi([(min(us) - 40, 0.0), (max(us) + 40, 0.0)], "duvar", dx=dx, dy=dy)               # zemin
@@ -315,14 +320,15 @@ def ciz(t: dict, kur: dict, cikti: Path, K: dict | None = None) -> dict:
     """Plan + dört görünüş → `cikti` (DXF). Dönen: {dosya, denetim_hatasi, katmanlar: {ad: varlık sayısı}, olcu}."""
     import ezdxf
     from . import cati_genel, sahne as sahne_m, yapi
-    from .bayi_gorseli import musteri_projesi
+    from .bayi_gorseli import musteri_projesi, sahip_adi
     K = K or katmanlar(kurallar())
     y = yapi.kur(t)
     c = cati_genel.cati_kur(t["cati"], kur)
     S = sahne_m.sahne_kur(y, c)
     doc = _belge(K)
     C = _Cizer(doc.modelspace(), K)
-    ad = "" if musteri_projesi(t) else f" · {t.get('ad', '')}"            # müşteri projesi adsız (D-08)
+    ad = ((f" · {s}" if (s := sahip_adi(t)) else "") if musteri_projesi(t)      # müşteri projesinde tarif yok, sahibinin adı varsa o (D-33)
+          else f" · {t.get('ad', '')}")
     px0, py0, px1, _ = plan_ciz(C, y, [f"PLAN · {t['kod']}{ad}",
                                        "Ölçüler cm · TASLAK, üretim projesi değildir · DXF çıktıdır, kaynak değil: düzeltme tanıma ya da kural kitabına işlenir, yeniden üretilir (D-11)"])
     # görünüşler planın altında 2 × 2: üstte ön ve arka, altta sol ve sağ

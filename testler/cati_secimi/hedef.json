@@ -1,0 +1,89 @@
+{
+ "onay": {
+  "kim": "Lokman",
+  "tarih": "2026-11-01T12:18:49Z",
+  "dayanak": "Proje thread'i \"Çatı seçenek adımını kurmak\" (pano 41), mesaj cmsg_01UAFvcnfVuTR1wfFux5fQPPV6DaRxoejgtwBbbusVqjrR: \"onaylıyorum\". Soru: \"Çatı seti görselini (2.) çatı seçiminin hedef örneği olarak onaylıyor musunuz?\"; aynı mesajda alan seti (1.) ve Ç8801-K r01 görseli (3.) de gösterildi. Aday: PF Portman_Proje_Dosyalari/Cati_Secimi/C8801/.",
+  "komut": "python -m testler.cati_secimi.ornek <klasör> [--r01]",
+  "kod": "dal claude/project-thread-91gav7, 18469e7 (İE-25)",
+  "karar": "İE-25 (docs/is_emirleri/IE-25.md); D-28 madde 2-3; yeniden dondurma yalnız Lokman'ın onayıyla ve gerekçeli kararla (D-02)"
+ },
+ "ozet": {
+  "talep": "88 m² 2+1 tek kat çelik",
+  "alan_seti": {
+   "tur": "alan",
+   "adaylar": [
+    "Ç8801",
+    "KT02",
+    "KT03",
+    "Ç8201"
+   ],
+   "mesaj": "88 m² civarı 2+1 için seçenekler. Kurallardan geçen 4 seçenek var.\n\n1. Ç8801 · 88 m² katalog, kapalı 74.33, veranda 13.73 · puan 100 (kesinti yok)\n2. KT-02 · 92 m² katalog, kapalı 73.22, veranda 19.05 · puan 91 (alan farkı %5 → −9)\n3. KT-03 · 94 m² katalog, kapalı 79.52, veranda 14.29 · puan 86 (alan farkı %7 → −14)\n\nBirini seçin ya da yazın (örn. \"Ç8801 olsun\"); ölçü değişikliği de yazabilirsiniz.",
+   "dugmeler": [
+    [
+     "s:{set}:Ç8801",
+     "1. Ç8801"
+    ],
+    [
+     "s:{set}:KT02",
+     "2. KT-02"
+    ],
+    [
+     "s:{set}:KT03",
+     "3. KT-03"
+    ]
+   ],
+   "gorsel_izi": "6f9857deb3e72b80779f4742c79b19dca87418063a912b6f8ff80c21630d4a7e"
+  },
+  "cati_seti": {
+   "tur": "cati_varyanti",
+   "adaylar": [
+    "Ç8801",
+    "Ç8801K",
+    "Ç8801L"
+   ],
+   "mesaj": "Ç8801 için 3 çatı seçeneği. Plan üçünde aynı (88 m², 2+1); fark çatıda.\n\n1. Ç8801 · katalog çatısı (Beşik + cumba)\n2. Ç8801-K · çatı K (Beşik + cumba, doğu ucu kırma)\n3. Ç8801-L · çatı L (L beşik (beşik + cumba))\n\nBirini seçin ya da yazın (örn. \"çatı K olsun\").",
+   "dugmeler": [
+    [
+     "s:{set}:Ç8801",
+     "1. Ç8801"
+    ],
+    [
+     "s:{set}:Ç8801K",
+     "2. Ç8801-K"
+    ],
+    [
+     "s:{set}:Ç8801L",
+     "3. Ç8801-L"
+    ]
+   ],
+   "gorsel_izi": "ce5d5d54d78da3f89e2ca7ace636f807d6ecb4b93c43a4d9aef2a60d1b80341b"
+  },
+  "alan_seti_kapanis": {
+   "durum": "secildi",
+   "secilen_kod": "Ç8801"
+  },
+  "r01": {
+   "Ç8801": {
+    "kod": "Ç8801",
+    "revizyon": 1,
+    "tanim": "modeller/C8801.json",
+    "tanim_sha256": "a8ca2f1910ee33b9de7af39c73b71914584f7703c240e4c10f8ab7c9b57f58ff",
+    "mesaj": "Ç8801 (Beşik + cumba) · 88 m², 2+1. Ön onay planınız hazır; plan görseli ve PDF ektedir."
+   },
+   "Ç8801K": {
+    "kod": "Ç8801K",
+    "revizyon": 1,
+    "tanim": "modeller/C8801K.json",
+    "tanim_sha256": "9a6fbf851f10bf0c01c7424fe9385e21e793144afdbd8b59ea9dcc1f0b1cbf64",
+    "mesaj": "Ç8801-K (Beşik + cumba, doğu ucu kırma) · 88 m², 2+1. Ön onay planınız hazır; plan görseli ve PDF ektedir."
+   },
+   "Ç8801L": {
+    "kod": "Ç8801L",
+    "revizyon": 1,
+    "tanim": "modeller/C8801L.json",
+    "tanim_sha256": "5d7850745e6fe78aa24250ad00b7be41cf786ed6b0e4e6caffa3bc7926ccf2a5",
+    "mesaj": "Ç8801-L (L beşik (beşik + cumba)) · 88 m², 2+1. Ön onay planınız hazır; plan görseli ve PDF ektedir."
+   }
+  }
+ }
+}

@@ -30,6 +30,7 @@ import ayarlar as AY                                  # noqa: E402
 import meta_api as M                                  # noqa: E402
 import nabiz as NB                                    # noqa: E402
 import talep_formu as TF                              # noqa: E402
+import kayit as KY                                    # noqa: E402  (İE-22: WhatsApp'tan bayi kaydı)
 from depo import Depo, kimlik_izi, maske             # noqa: E402
 
 SURUM = "kanal-v2.0"
@@ -115,8 +116,11 @@ def mesaj_isle(k: Kanal, m: dict, adlar: dict, ayar: dict, simdi: int) -> str:
         sonuc = "eski" if k.depo.kayitsiz_mesaj_kaydet(satir, None)["yeni"] else "tekrar"
     else:
         satir["neden"] = "kayıtsız gönderen" if bayi is None else f"mod {mode}: bu gönderen işlenmiyor"
-        r = k.depo.kayitsiz_mesaj_kaydet(satir, None if eski else ayar.get("kayitsiz_cevap"))
-        sonuc = ("kayitsiz" + ("+cevap" if r["cevap"] else "")) if r["yeni"] else "tekrar"
+        # İE-22: ayar bayi_kaydi açıkken kartı hiç olmayan numaraya ad ve firma sorulur (kanal/kayit.py; depo kartı ve talebi işlemde denetler)
+        adim = KY.adim(ayar) if bayi is None and not eski else None
+        r = k.depo.kayitsiz_mesaj_kaydet(satir, None if eski else ayar.get("kayitsiz_cevap"), kayit=adim)
+        etiket = ("kayit:" + r["kayit"]) if r.get("kayit") else "kayitsiz"
+        sonuc = (etiket + ("+cevap" if r["cevap"] else "")) if r["yeni"] else "tekrar"
     # Medya: yalnız görsel ve belge indirilir (video, ses, çıkartma yalnız kayıt). Kayıtsız gönderen için 24 saatte en çok
     # KAYITSIZ_MEDYA_SINIRI dosya (disk ve Meta indirme kotası; hattı bilen herkes dosya yollayabilir).
     dosyalar = [(medya_id, dosya_adi, mime)] if medya_id and tur in MEDYA_INDIRILEN else []

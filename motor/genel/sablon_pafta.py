@@ -172,11 +172,17 @@ def _centik(x: float, y: float):
     return LineString([(x - 4.2, y + 4.2), (x + 4.2, y - 4.2)]).buffer(0.78 + 0.5)
 
 
+UZAK_PT = (-2.5, -3.5)     # çentiğe değen sığan sayı: çizgiden ek uzaklık (pt; `Sayfa.olcu` ust/sol tarafında eksi = çizgiden uzak)
+
+
 def _dar_sayilari_yerlestir(parcalar: list[tuple], metinler: list[str], dar: list[bool], kaydir: list[float], taraf: str,
                             genel_cizgi: tuple, genel_metin: str, plan_kutu, adaylar: tuple[float, ...]) -> list[float]:
     """BK-09: dönüşümlü sırada çizgide kalan (kaydırmasız) dar sayı uçtaki eğik çentiğe değiyorsa (G1'den sonra KT-03 sağ zincirde "35")
     `adaylar` sırayla denenir (önce zincirin dış yanı, sonra ikinci iç sıra): kutusu çentiklere, genel ölçünün çizgisine ve sayısına, plan
-    alanına ve öteki sayılara değmeyen ilk yer seçilir; hiçbiri boş değilse sayı ilk adaya gider. Başka sayıya dokunulmaz."""
+    alanına ve öteki sayılara değmeyen ilk yer seçilir; hiçbiri boş değilse sayı ilk adaya gider. Başka sayıya dokunulmaz.
+    İE-23 PR-2b: parçaya sığan (dar olmayan) sayı da parçayı neredeyse dolduruyorsa bir uçtaki eğik çentiğin kolu yazıya değer (KT-04 "65",
+    "62"; germede Ç8201 "45"): önce çizgiden biraz uzağa (`UZAK_PT`; çentiğin kolu çizgiden 4,2 pt çıkar), olmazsa `adaylar`; hiçbiri boş
+    değilse yerinde kalır. Çentiğe değmeyen sayı yerinde kalır (referans paftaları aynı)."""
     from shapely.geometry import LineString
     kaydir = list(kaydir)
     uclar = [(p[0], p[1]) for p in parcalar] + [(p[2], p[3]) for p in parcalar] + [genel_cizgi[:2], genel_cizgi[2:]]
@@ -185,11 +191,11 @@ def _dar_sayilari_yerlestir(parcalar: list[tuple], metinler: list[str], dar: lis
     sabit = unary_union([centik, plan_kutu, _olcu_yazi_kutusu(*genel_cizgi, genel_metin, taraf),
                          LineString([genel_cizgi[:2], genel_cizgi[2:]]).buffer(0.36 + 0.5)])
     for i in range(len(parcalar)):
-        if not dar[i] or kaydir[i] != 0 or not kutular[i].intersects(centik):
+        if kaydir[i] != 0 or not kutular[i].intersects(centik):
             continue
         engel = unary_union([sabit] + [k for j, k in enumerate(kutular) if j != i])
-        secilen = adaylar[0]
-        for aday in adaylar:
+        secilen = adaylar[0] if dar[i] else 0.0
+        for aday in (adaylar if dar[i] else UZAK_PT + tuple(adaylar)):
             if not _olcu_yazi_kutusu(*parcalar[i], metinler[i], taraf, aday).intersects(engel):
                 secilen = aday
                 break
@@ -343,6 +349,7 @@ def ozellikler(t: dict, y: dict, c: dict, kur: dict, bilgi: dict) -> dict:
 
 
 def cerceveler(sf: Sayfa, t: dict, oz: dict, bilgi: dict, oturum_m2: float):
+    from .bayi_gorseli import sahip_adi
     x0, y0, x1, y1 = DIS
     sf.kutu(x0, y0, x1, y1, lw=1.3, z=4)
     sf.yuvarlak_kutu(ANA)
@@ -402,7 +409,9 @@ def cerceveler(sf: Sayfa, t: dict, oz: dict, bilgi: dict, oturum_m2: float):
     # `bayi_adi` ve `bayi_telefonu`yu bayi kartından doldurur, başka rakam dizisi reddedilir.
     ilgili = " · ".join(str(x).strip() for x in (bilgi.get("bayi_adi"), bilgi.get("bayi_telefonu")) if x) or "..."
     orta = [("PROJE KODU", f"{no} r{rev:02d}"), ("İLGİLİ KİŞİ-TELEFON", ilgili),
-            ("SEVK ADRESİ", bilgi.get("sevk_adresi") or "..."), ("PROJE ADI & M²", bilgi.get("proje_adi") or f"{t['kod']} · {oturum_m2:.0f} M² {tur} KONUT")]
+            ("SEVK ADRESİ", bilgi.get("sevk_adresi") or "..."),
+            ("PROJE ADI & M²", bilgi.get("proje_adi") or " · ".join(x for x in (sahip_adi(t, bilgi), f"{t['kod']} · {oturum_m2:.0f} M² {tur} KONUT") if x))]
+    # PROJE ADI: projenin sahibinin adı (bayinin mesajındaki müşteri, yoksa banka modelinin sahibi), herkeste görünür (D-33)
     for (ad, v), ya, yb in zip(orta, sat, sat[1:]):
         sf.yazi(287.0, (ya + yb) / 2 + 0.4, ad, 7.3)
         sf.yazi(431.0, (ya + yb) / 2 + (0.4 if v != "..." else -1.4), v, 7.3 if v != "..." else 12.0)
@@ -624,11 +633,28 @@ def tas_serit(sf: Sayfa, P, u0: float, u1: float):
         sf.cokgen(altigen, fc="none", ec=GRI, lw=0.5, z=4)
 
 
-def pencere_gorunus(sf: Sayfa, P, u0, u1, z0, z1, en):
+def pencere_gorunus(sf: Sayfa, P, u0, u1, z0, z1, en, acilis=None):
     def dort(ua, za, ub, zb, **kw):
         return sf.cokgen([P(ua, za), P(ub, za), P(ub, zb), P(ua, zb)], **kw)
     dort(u0, z0, u1, z1, fc="white", ec="black", lw=1.2, z=5)
     dort(u0 + 3, z0 + 3, u1 - 3, z1 - 3, fc="white", ec="black", lw=0.6, z=5)
+    if acilis == "surgulu":
+        # Sürgülü pencere (Lokman, 30 Ekim 2026, KT-04): prefabrikteki D-31 madde 11 bloğunun (`dxf_out._surgulu_blok`) sembolü. İki kanat
+        # ortada 2 × 2 cm bindirmeli, her biri çift çizgi; sabit kanatta (sol) iki çizgili cam işareti; sürülen kanatta (sağ) kırmızı yön
+        # oku (`ciz_genel.surgulu_oku`, çizim setiyle ve DXF'le tek kaynak). Ölçü, plan simgesi ve liste değişmez.
+        from .ciz_genel import surgulu_oku
+        o, c = (u0 + u1) / 2, 2.0
+        for a, b in ((u0 + 6, o + c), (o - c, u1 - 6)):
+            dort(a, z0 + 6, b, z1 - 6, fc="white", ec="black", lw=0.9, z=6)
+            dort(a + 2.5, z0 + 8.5, b - 2.5, z1 - 8.5, fc="none", ec="black", lw=0.6, z=6)
+        um, zm = (u0 + o) / 2, (z0 + z1) / 2
+        for d_ in (0.0, 6.0):
+            (xa, ya), (xb, yb) = P(um - 6 + d_, zm - 8), P(um + d_, zm + 2)
+            sf.cizgi(xa, ya, xb, yb, "black", 0.5, z=7)
+        for q in surgulu_oku([(u0, z0), (u1, z0), (u1, z1), (u0, z1)]):
+            (xa, ya), (xb, yb) = P(*q[0]), P(*q[1])
+            sf.cizgi(xa, ya, xb, yb, KIRMIZI, 0.8, z=7)
+        return
     n = 2 if en >= 100 else 1; w = (u1 - u0 - 6) / n
     for i in range(n):
         a, b = u0 + 3 + i * w + 2.5, u0 + 3 + (i + 1) * w - 2.5
@@ -693,7 +719,7 @@ def gorunus_ciz(sf: Sayfa, P, S: list[dict], taraf: str, renk: str, u_kaydir: fl
         pts = k2(s)
         if s["tur"] == "pencere":
             us = [u for u, _ in pts]; zs = [z for _, z in pts]
-            pencere_gorunus(sf, P, min(us), max(us), min(zs), max(zs), s.get("en", 0))
+            pencere_gorunus(sf, P, min(us), max(us), min(zs), max(zs), s.get("en", 0), s.get("acilis"))
         elif s["tur"] == "kapi":
             us = [u for u, _ in pts]; zs = [z for _, z in pts]
             kapi_gorunus(sf, P, min(us), max(us), min(zs), max(zs))
@@ -728,7 +754,7 @@ def pafta_pdf(t: dict, hedef: Path, kod: str, is_emri_no: str | None = None, rev
               yontem: str | None = None, bilgi: dict | None = None) -> dict:
     """Şablon paftası: `<kod>_pafta.pdf` (2 sayfa) ve `<kod>_pafta_sablon.png`. `bilgi`: antet, özellik ve özel istek alanları (zarftan)."""
     from . import cati_genel, ciz_genel, girdi_genel, kural, sahne as sahne_m, yapi
-    from .bayi_gorseli import musteri_projesi
+    from .bayi_gorseli import musteri_projesi, sahip_adi
     import matplotlib.pyplot as plt
     fontlari_hazirla()
     bilgi = dict(bilgi or {}); bilgi.setdefault("is_emri_no", is_emri_no); bilgi.setdefault("revizyon", revizyon)
@@ -786,13 +812,15 @@ def pafta_pdf(t: dict, hedef: Path, kod: str, is_emri_no: str | None = None, rev
     gs = GridSpec(2, 3, figure=fig2, left=0.03, right=0.985, top=0.9, bottom=0.04, hspace=0.18, wspace=0.08)
     inis, _ = ciz_genel.inis_kurali(c, kur, t["cati"].get("sacak", 30))
     # başlık kısa (uzun başlık dar sütundan sayfa dışına taşıyordu), açıklama sayfanın altında; üst üste binen eğim yazıları ayrılır (Lokman, 12.10)
-    ciz_genel.cati_plani_eksen(fig2.add_subplot(gs[:, 0]), y, c, inis, baslik="ÇATI PLANI", yazi_ayir=True)
+    ciz_genel.cati_plani_eksen(fig2.add_subplot(gs[:, 0]), y, c, inis, baslik="ÇATI PLANI", yazi_ayir=True, yazi_denetle=True)
     fig2.text(0.03, 0.012, "Çatı planı: eğim okları ve yüzdeleri · sarı nokta: dere inişi" + (f" ({len(inis)} adet)" if inis else "") +
               " · turuncu: duvara dayanan kenar · beyaz kesik çizgi: duvar dış yüzü · ölçüler cm", fontsize=7.2, ha="left", va="bottom", color="#333")
     for ax, taraf in zip((fig2.add_subplot(gs[0, 1]), fig2.add_subplot(gs[0, 2]), fig2.add_subplot(gs[1, 1]), fig2.add_subplot(gs[1, 2])), ("on", "arka", "sol", "sag")):
         ciz_genel.gorunus_eksen(ax, S, taraf, t["kat_yuksekligi"], sigdir=True)      # küçük panelde iki düşey ölçü şeridi ölçeğe göre açılır (13.10)
     no = bilgi.get("is_emri_no") or t["kod"]
-    ad = f"{t['kod']} · {oturum_m2:.0f} m²" if musteri_projesi(t) else f"{t['kod']} · {t['ad']}"     # müşteri projeleri bayiye adsız (D-08)
+    sahip = sahip_adi(t) if musteri_projesi(t) else ""
+    ad = (" · ".join(x for x in (t["kod"], sahip, f"{oturum_m2:.0f} m²") if x) if musteri_projesi(t)   # müşteri projesinde tarif yok,
+          else f"{t['kod']} · {t['ad']}")                                                                # sahibinin adı varsa o (D-33)
     # BK-09 M6: TASLAK başlıktan ayrı, sağ üstte (yedi modelde aynı yer); uzun katalog adı (Ç8801-K/L'nin parantezli açıklaması) TASLAK'a
     # yetişirse parantez düşer, yine sığmazsa punto küçülür — başlık sayfa dışına ve TASLAK'ın üstüne taşmaz (yazı çakışma testi `sayfa_disi`)
     taslak = fig2.text(0.985, 0.965, "TASLAK", fontsize=10.5, weight="bold", ha="right", va="top", color=KOYU_KIRMIZI)

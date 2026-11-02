@@ -1,0 +1,1534 @@
+{
+ "sema": "portman.yapi_kimligi/0.1",
+ "kod": "Ç8801",
+ "ad": "Tek kat çelik, 2+1, 88 m² (katalog)",
+ "aile": "tek_kat_celik",
+ "kaynak": {
+  "tur": "yapi_tanimi",
+  "tanim_sha256": "77fc3f41a11ed653a8987012cbba1a4b1fd3d3012b9e4144287b80e82925f9fd",
+  "kural_seti": "0.19.json",
+  "alan_olcusu": "net",
+  "koordinat": "tanımın ekseni, cm; +x doğu, +y kuzey"
+ },
+ "anlamsal": {
+  "oda_programi": "2+1",
+  "dis_olcu_cm": [
+   1024.0,
+   860.0
+  ],
+  "oturum_m2": 88.06,
+  "kapali_m2": 74.34,
+  "veranda_m2": 13.73,
+  "cati": {
+   "tip": "besik_cumba",
+   "duzlem": 4,
+   "yuzey_m2": 90.56,
+   "mahya": "x",
+   "egim": 0.33,
+   "parcalar": [
+    {
+     "duzlemler": [
+      "ana güney",
+      "ana kuzey"
+     ],
+     "tepe_cm": 395.5,
+     "ana": true
+    },
+    {
+     "duzlemler": [
+      "cumba doğu",
+      "cumba batı"
+     ],
+     "tepe_cm": 355.9,
+     "ana": false
+    }
+   ]
+  },
+  "mahaller": [
+   {
+    "ad": "Yaşam Alanı",
+    "sinif": "ic",
+    "islev": [
+     "salon"
+    ],
+    "islak": false,
+    "alan_m2": 21.34,
+    "olcu_cm": [
+     344.8,
+     619.0
+    ],
+    "bicim": "dikdortgen",
+    "cepheler": [
+     "K",
+     "B"
+    ],
+    "verandaya": [
+     "G"
+    ],
+    "pencereler": [
+     {
+      "ad": "P1",
+      "cephe": "G",
+      "olcu": "120x180",
+      "disi": "veranda"
+     },
+     {
+      "ad": "P3",
+      "cephe": "B",
+      "olcu": "120x120",
+      "disi": "dis"
+     },
+     {
+      "ad": "P4",
+      "cephe": "B",
+      "olcu": "120x120",
+      "disi": "dis"
+     }
+    ],
+    "kapilar": [
+     "K2"
+    ],
+    "nokta": [
+     182.9,
+     540.0
+    ]
+   },
+   {
+    "ad": "Mutfak",
+    "sinif": "ic",
+    "islev": [
+     "mutfak"
+    ],
+    "islak": false,
+    "alan_m2": 10.05,
+    "olcu_cm": [
+     260.5,
+     385.8
+    ],
+    "bicim": "dikdortgen",
+    "cepheler": [
+     "K"
+    ],
+    "verandaya": [],
+    "pencereler": [
+     {
+      "ad": "P5",
+      "cephe": "K",
+      "olcu": "120x180",
+      "disi": "dis"
+     }
+    ],
+    "kapilar": [
+     "K3"
+    ],
+    "nokta": [
+     496.0,
+     656.6
+    ]
+   },
+   {
+    "ad": "Hol",
+    "sinif": "ic",
+    "islev": [
+     "hol"
+    ],
+    "islak": false,
+    "alan_m2": 7.38,
+    "olcu_cm": [
+     391.5,
+     222.8
+    ],
+    "bicim": "girintili",
+    "cepheler": [],
+    "verandaya": [
+     "G"
+    ],
+    "pencereler": [
+     {
+      "ad": "P2",
+      "cephe": "G",
+      "olcu": "80x180",
+      "disi": "veranda"
+     }
+    ],
+    "kapilar": [
+     "K1",
+     "K2",
+     "K3",
+     "K4",
+     "K5",
+     "K6"
+    ],
+    "nokta": [
+     561.5,
+     393.0
+    ]
+   },
+   {
+    "ad": "Yatak Odası 1",
+    "sinif": "ic",
+    "islev": [
+     "yatak_odasi"
+    ],
+    "islak": false,
+    "alan_m2": 12.74,
+    "olcu_cm": [
+     376.8,
+     385.8
+    ],
+    "bicim": "girintili",
+    "cepheler": [
+     "K",
+     "D"
+    ],
+    "verandaya": [],
+    "pencereler": [
+     {
+      "ad": "P6",
+      "cephe": "D",
+      "olcu": "120x120",
+      "disi": "dis"
+     }
+    ],
+    "kapilar": [
+     "K4"
+    ],
+    "nokta": [
+     825.1,
+     691.6
+    ]
+   },
+   {
+    "ad": "Yatak Odası 2",
+    "sinif": "ic",
+    "islev": [
+     "yatak_odasi"
+    ],
+    "islak": false,
+    "alan_m2": 11.79,
+    "olcu_cm": [
+     379.0,
+     311.8
+    ],
+    "bicim": "dikdortgen",
+    "cepheler": [
+     "G",
+     "D"
+    ],
+    "verandaya": [
+     "B"
+    ],
+    "pencereler": [
+     {
+      "ad": "P9",
+      "cephe": "G",
+      "olcu": "120x180",
+      "disi": "dis"
+     },
+     {
+      "ad": "P8",
+      "cephe": "D",
+      "olcu": "120x120",
+      "disi": "dis"
+     }
+    ],
+    "kapilar": [
+     "K5"
+    ],
+    "nokta": [
+     824.0,
+     119.2
+    ]
+   },
+   {
+    "ad": "Banyo",
+    "sinif": "ic",
+    "islev": [
+     "banyo"
+    ],
+    "islak": true,
+    "alan_m2": 4.68,
+    "olcu_cm": [
+     245.8,
+     190.5
+    ],
+    "bicim": "dikdortgen",
+    "cepheler": [
+     "D"
+    ],
+    "verandaya": [],
+    "pencereler": [
+     {
+      "ad": "P7",
+      "cephe": "D",
+      "olcu": "60x40",
+      "disi": "dis"
+     }
+    ],
+    "kapilar": [
+     "K6"
+    ],
+    "nokta": [
+     890.6,
+     428.0
+    ]
+   },
+   {
+    "ad": "Veranda",
+    "sinif": "veranda",
+    "islev": [
+     "veranda"
+    ],
+    "islak": false,
+    "alan_m2": 13.73,
+    "olcu_cm": [
+     624.0,
+     220.0
+    ],
+    "bicim": "dikdortgen",
+    "cepheler": [
+     "G",
+     "B"
+    ],
+    "verandaya": [],
+    "pencereler": [],
+    "kapilar": [
+     "K1"
+    ],
+    "nokta": [
+     312.0,
+     110.0
+    ]
+   }
+  ]
+ },
+ "topolojik": {
+  "dugumler": [
+   {
+    "ad": "dis",
+    "islev": "dis",
+    "derinlik": 0
+   },
+   {
+    "ad": "Banyo",
+    "islev": "banyo",
+    "derinlik": 3
+   },
+   {
+    "ad": "Hol",
+    "islev": "hol",
+    "derinlik": 2
+   },
+   {
+    "ad": "Mutfak",
+    "islev": "mutfak",
+    "derinlik": 3
+   },
+   {
+    "ad": "Veranda",
+    "islev": "veranda",
+    "derinlik": 1
+   },
+   {
+    "ad": "Yatak Odası 1",
+    "islev": "yatak_odasi",
+    "derinlik": 3
+   },
+   {
+    "ad": "Yatak Odası 2",
+    "islev": "yatak_odasi",
+    "derinlik": 3
+   },
+   {
+    "ad": "Yaşam Alanı",
+    "islev": "salon",
+    "derinlik": 3
+   }
+  ],
+  "kenarlar": [
+   {
+    "a": "Banyo",
+    "b": "Hol",
+    "ortak_duvar_cm": 120.5,
+    "duvarlar": [
+     "I5"
+    ],
+    "kapilar": [
+     "K6"
+    ],
+    "pencereler": [],
+    "acik": false
+   },
+   {
+    "a": "Banyo",
+    "b": "Yatak Odası 1",
+    "ortak_duvar_cm": 305.2,
+    "duvarlar": [
+     "I5",
+     "I7"
+    ],
+    "kapilar": [],
+    "pencereler": [],
+    "acik": false
+   },
+   {
+    "a": "Banyo",
+    "b": "Yatak Odası 2",
+    "ortak_duvar_cm": 245.8,
+    "duvarlar": [
+     "I4"
+    ],
+    "kapilar": [],
+    "pencereler": [],
+    "acik": false
+   },
+   {
+    "a": "Banyo",
+    "b": "dis",
+    "ortak_duvar_cm": 190.5,
+    "duvarlar": [
+     "DD"
+    ],
+    "kapilar": [],
+    "pencereler": [
+     "P7"
+    ],
+    "acik": false
+   },
+   {
+    "a": "Hol",
+    "b": "Mutfak",
+    "ortak_duvar_cm": 260.5,
+    "duvarlar": [
+     "I2"
+    ],
+    "kapilar": [
+     "K3"
+    ],
+    "pencereler": [],
+    "acik": false
+   },
+   {
+    "a": "Hol",
+    "b": "Veranda",
+    "ortak_duvar_cm": 258.2,
+    "duvarlar": [
+     "DG"
+    ],
+    "kapilar": [
+     "K1"
+    ],
+    "pencereler": [
+     "P2"
+    ],
+    "acik": false
+   },
+   {
+    "a": "Hol",
+    "b": "Yatak Odası 1",
+    "ortak_duvar_cm": 120.5,
+    "duvarlar": [
+     "I2"
+    ],
+    "kapilar": [
+     "K4"
+    ],
+    "pencereler": [],
+    "acik": false
+   },
+   {
+    "a": "Hol",
+    "b": "Yatak Odası 2",
+    "ortak_duvar_cm": 212.2,
+    "duvarlar": [
+     "I4",
+     "I6"
+    ],
+    "kapilar": [
+     "K5"
+    ],
+    "pencereler": [],
+    "acik": false
+   },
+   {
+    "a": "Hol",
+    "b": "Yaşam Alanı",
+    "ortak_duvar_cm": 222.8,
+    "duvarlar": [
+     "I1"
+    ],
+    "kapilar": [
+     "K2"
+    ],
+    "pencereler": [],
+    "acik": false
+   },
+   {
+    "a": "Mutfak",
+    "b": "Yatak Odası 1",
+    "ortak_duvar_cm": 385.8,
+    "duvarlar": [
+     "I3"
+    ],
+    "kapilar": [],
+    "pencereler": [],
+    "acik": false
+   },
+   {
+    "a": "Mutfak",
+    "b": "Yaşam Alanı",
+    "ortak_duvar_cm": 385.8,
+    "duvarlar": [
+     "I1"
+    ],
+    "kapilar": [],
+    "pencereler": [],
+    "acik": false
+   },
+   {
+    "a": "Mutfak",
+    "b": "dis",
+    "ortak_duvar_cm": 260.5,
+    "duvarlar": [
+     "DK"
+    ],
+    "kapilar": [],
+    "pencereler": [
+     "P5"
+    ],
+    "acik": false
+   },
+   {
+    "a": "Veranda",
+    "b": "Yatak Odası 2",
+    "ortak_duvar_cm": 209.5,
+    "duvarlar": [
+     "DKB"
+    ],
+    "kapilar": [],
+    "pencereler": [],
+    "acik": false
+   },
+   {
+    "a": "Veranda",
+    "b": "Yaşam Alanı",
+    "ortak_duvar_cm": 344.8,
+    "duvarlar": [
+     "DG"
+    ],
+    "kapilar": [],
+    "pencereler": [
+     "P1"
+    ],
+    "acik": false
+   },
+   {
+    "a": "Veranda",
+    "b": "dis",
+    "ortak_duvar_cm": 0.0,
+    "duvarlar": [],
+    "kapilar": [],
+    "pencereler": [],
+    "acik": true
+   },
+   {
+    "a": "Yatak Odası 1",
+    "b": "dis",
+    "ortak_duvar_cm": 692.5,
+    "duvarlar": [
+     "DD",
+     "DK"
+    ],
+    "kapilar": [],
+    "pencereler": [
+     "P6"
+    ],
+    "acik": false
+   },
+   {
+    "a": "Yatak Odası 2",
+    "b": "dis",
+    "ortak_duvar_cm": 690.8,
+    "duvarlar": [
+     "DD",
+     "DKG"
+    ],
+    "kapilar": [],
+    "pencereler": [
+     "P8",
+     "P9"
+    ],
+    "acik": false
+   },
+   {
+    "a": "Yaşam Alanı",
+    "b": "dis",
+    "ortak_duvar_cm": 963.8,
+    "duvarlar": [
+     "DB",
+     "DK"
+    ],
+    "kapilar": [],
+    "pencereler": [
+     "P3",
+     "P4"
+    ],
+    "acik": false
+   }
+  ],
+  "ulasilamayan": [],
+  "merkez": "Hol",
+  "duzen": "hol_merkezli",
+  "imza": "c11d9d95a4255bf6",
+  "eslesmeyen_acikliklar": []
+ },
+ "parametrik": {
+  "izgara_cm": 5,
+  "uygulayici": "tanim_germe (İE-23 PR-2)",
+  "kesit_payi_cm": 5.0,
+  "kenarlar": [
+   {
+    "mahal": "Yaşam Alanı",
+    "yon": "G",
+    "konum_cm": 229.2,
+    "aralik": [
+     10.5,
+     355.2
+    ],
+    "uzunluk_cm": 344.8,
+    "en_dis": true,
+    "tur": "veranda",
+    "duvarlar": [
+     "DG"
+    ],
+    "arkasi": {
+     "Veranda": 344.8
+    },
+    "durum": "kilitli",
+    "neden": "verandaya bakan kenar: veranda ve çatısı değişir (İE-23 PR-2'de yok)"
+   },
+   {
+    "mahal": "Yaşam Alanı",
+    "yon": "K",
+    "konum_cm": 850.8,
+    "aralik": [
+     10.5,
+     355.2
+    ],
+    "uzunluk_cm": 344.8,
+    "en_dis": true,
+    "tur": "dis",
+    "duvarlar": [
+     "DK"
+    ],
+    "arkasi": {
+     "dis": 344.8
+    },
+    "durum": "kilitli",
+    "neden": "ana çatının açıklığı ve mahya kotu değişir (düzey 3)",
+    "kesit_bantlari": [
+     [
+      234.2,
+      238.0
+     ],
+     [
+      467.5,
+      519.5
+     ],
+     [
+      537.5,
+      628.5
+     ],
+     [
+      758.5,
+      845.8
+     ]
+    ]
+   },
+   {
+    "mahal": "Yaşam Alanı",
+    "yon": "B",
+    "konum_cm": 9.2,
+    "aralik": [
+     230.5,
+     849.5
+    ],
+    "uzunluk_cm": 619.0,
+    "en_dis": true,
+    "tur": "dis",
+    "duvarlar": [
+     "DB"
+    ],
+    "arkasi": {
+     "dis": 619.0
+    },
+    "durum": "kilitli",
+    "neden": "mahalin içinden geçen her kesit verandayı da keser: veranda ve çatısı değişir (İE-23 PR-2'de yok)"
+   },
+   {
+    "mahal": "Yaşam Alanı",
+    "yon": "D",
+    "konum_cm": 356.5,
+    "aralik": [
+     230.5,
+     849.5
+    ],
+    "uzunluk_cm": 619.0,
+    "en_dis": true,
+    "tur": "ic",
+    "duvarlar": [
+     "I1"
+    ],
+    "arkasi": {
+     "Hol": 222.8,
+     "Mutfak": 385.8
+    },
+    "durum": "oynar",
+    "neden": "iç duvar kayar; karşıdaki Hol, Mutfak küçülür ya da büyür"
+   },
+   {
+    "mahal": "Mutfak",
+    "yon": "G",
+    "konum_cm": 462.5,
+    "aralik": [
+     365.8,
+     626.2
+    ],
+    "uzunluk_cm": 260.5,
+    "en_dis": true,
+    "tur": "ic",
+    "duvarlar": [
+     "I2"
+    ],
+    "arkasi": {
+     "Hol": 260.5
+    },
+    "durum": "kilitli",
+    "neden": "karşıdaki Hol bu kenarın ötesinde Yatak Odası 1 yanında devam ediyor"
+   },
+   {
+    "mahal": "Mutfak",
+    "yon": "K",
+    "konum_cm": 850.8,
+    "aralik": [
+     365.8,
+     626.2
+    ],
+    "uzunluk_cm": 260.5,
+    "en_dis": true,
+    "tur": "dis",
+    "duvarlar": [
+     "DK"
+    ],
+    "arkasi": {
+     "dis": 260.5
+    },
+    "durum": "kilitli",
+    "neden": "ana çatının açıklığı ve mahya kotu değişir (düzey 3)",
+    "kesit_bantlari": [
+     [
+      467.5,
+      519.5
+     ],
+     [
+      537.5,
+      628.5
+     ],
+     [
+      758.5,
+      845.8
+     ]
+    ]
+   },
+   {
+    "mahal": "Mutfak",
+    "yon": "B",
+    "konum_cm": 364.5,
+    "aralik": [
+     463.8,
+     849.5
+    ],
+    "uzunluk_cm": 385.8,
+    "en_dis": true,
+    "tur": "ic",
+    "duvarlar": [
+     "I1"
+    ],
+    "arkasi": {
+     "Yaşam Alanı": 385.8
+    },
+    "durum": "kilitli",
+    "neden": "karşıdaki Yaşam Alanı bu kenarın ötesinde Hol yanında devam ediyor"
+   },
+   {
+    "mahal": "Mutfak",
+    "yon": "D",
+    "konum_cm": 627.5,
+    "aralik": [
+     463.8,
+     849.5
+    ],
+    "uzunluk_cm": 385.8,
+    "en_dis": true,
+    "tur": "ic",
+    "duvarlar": [
+     "I3"
+    ],
+    "arkasi": {
+     "Yatak Odası 1": 385.8
+    },
+    "durum": "oynar",
+    "neden": "iç duvar kayar; karşıdaki Yatak Odası 1 küçülür ya da büyür"
+   },
+   {
+    "mahal": "Hol",
+    "yon": "G",
+    "konum_cm": 229.2,
+    "aralik": [
+     365.8,
+     625.2
+    ],
+    "uzunluk_cm": 259.5,
+    "en_dis": true,
+    "tur": "veranda",
+    "duvarlar": [
+     "DG"
+    ],
+    "arkasi": {
+     "Veranda": 258.2
+    },
+    "durum": "kilitli",
+    "neden": "verandaya bakan kenar: veranda ve çatısı değişir (İE-23 PR-2'de yok)"
+   },
+   {
+    "mahal": "Hol",
+    "yon": "G",
+    "konum_cm": 331.5,
+    "aralik": [
+     635.5,
+     757.2
+    ],
+    "uzunluk_cm": 121.8,
+    "en_dis": false,
+    "tur": "ic",
+    "duvarlar": [
+     "I4"
+    ],
+    "arkasi": {
+     "Yatak Odası 2": 120.5
+    },
+    "durum": "kilitli",
+    "neden": "karşıdaki Yatak Odası 2 bu kenarın ötesinde Banyo yanında devam ediyor"
+   },
+   {
+    "mahal": "Hol",
+    "yon": "K",
+    "konum_cm": 454.5,
+    "aralik": [
+     365.8,
+     757.2
+    ],
+    "uzunluk_cm": 391.5,
+    "en_dis": true,
+    "tur": "ic",
+    "duvarlar": [
+     "I2"
+    ],
+    "arkasi": {
+     "Mutfak": 260.5,
+     "Yatak Odası 1": 120.5
+    },
+    "durum": "oynar",
+    "neden": "iç duvar kayar; karşıdaki Mutfak, Yatak Odası 1 küçülür ya da büyür"
+   },
+   {
+    "mahal": "Hol",
+    "yon": "B",
+    "konum_cm": 364.5,
+    "aralik": [
+     230.5,
+     453.2
+    ],
+    "uzunluk_cm": 222.8,
+    "en_dis": true,
+    "tur": "ic",
+    "duvarlar": [
+     "I1"
+    ],
+    "arkasi": {
+     "Yaşam Alanı": 222.8
+    },
+    "durum": "kilitli",
+    "neden": "karşıdaki Yaşam Alanı bu kenarın ötesinde Mutfak yanında devam ediyor"
+   },
+   {
+    "mahal": "Hol",
+    "yon": "D",
+    "konum_cm": 627.5,
+    "aralik": [
+     230.5,
+     332.8
+    ],
+    "uzunluk_cm": 102.2,
+    "en_dis": false,
+    "tur": "ic",
+    "duvarlar": [
+     "I6"
+    ],
+    "arkasi": {
+     "Yatak Odası 2": 91.8
+    },
+    "durum": "kilitli",
+    "neden": "karşıdaki Yatak Odası 2 bu kenarın ötesinde Veranda yanında devam ediyor"
+   },
+   {
+    "mahal": "Hol",
+    "yon": "D",
+    "konum_cm": 758.5,
+    "aralik": [
+     332.8,
+     453.2
+    ],
+    "uzunluk_cm": 120.5,
+    "en_dis": true,
+    "tur": "ic",
+    "duvarlar": [
+     "I5"
+    ],
+    "arkasi": {
+     "Banyo": 120.5
+    },
+    "durum": "kilitli",
+    "neden": "karşıdaki Banyo bu kenarın ötesinde Yatak Odası 1 yanında devam ediyor"
+   },
+   {
+    "mahal": "Yatak Odası 1",
+    "yon": "G",
+    "konum_cm": 462.5,
+    "aralik": [
+     636.8,
+     757.2
+    ],
+    "uzunluk_cm": 120.5,
+    "en_dis": true,
+    "tur": "ic",
+    "duvarlar": [
+     "I2"
+    ],
+    "arkasi": {
+     "Hol": 120.5
+    },
+    "durum": "kilitli",
+    "neden": "karşıdaki Hol bu kenarın ötesinde Mutfak yanında devam ediyor"
+   },
+   {
+    "mahal": "Yatak Odası 1",
+    "yon": "G",
+    "konum_cm": 532.5,
+    "aralik": [
+     766.5,
+     1013.5
+    ],
+    "uzunluk_cm": 247.0,
+    "en_dis": false,
+    "tur": "ic",
+    "duvarlar": [
+     "I7"
+    ],
+    "arkasi": {
+     "Banyo": 245.8
+    },
+    "durum": "oynar",
+    "neden": "iç duvar kayar; karşıdaki Banyo küçülür ya da büyür"
+   },
+   {
+    "mahal": "Yatak Odası 1",
+    "yon": "K",
+    "konum_cm": 850.8,
+    "aralik": [
+     636.8,
+     1013.5
+    ],
+    "uzunluk_cm": 376.8,
+    "en_dis": true,
+    "tur": "dis",
+    "duvarlar": [
+     "DK"
+    ],
+    "arkasi": {
+     "dis": 376.8
+    },
+    "durum": "kilitli",
+    "neden": "ana çatının açıklığı ve mahya kotu değişir (düzey 3)",
+    "kesit_bantlari": [
+     [
+      467.5,
+      519.5
+     ],
+     [
+      537.5,
+      628.5
+     ],
+     [
+      758.5,
+      845.8
+     ]
+    ]
+   },
+   {
+    "mahal": "Yatak Odası 1",
+    "yon": "B",
+    "konum_cm": 635.5,
+    "aralik": [
+     463.8,
+     849.5
+    ],
+    "uzunluk_cm": 385.8,
+    "en_dis": true,
+    "tur": "ic",
+    "duvarlar": [
+     "I3"
+    ],
+    "arkasi": {
+     "Mutfak": 385.8
+    },
+    "durum": "oynar",
+    "neden": "iç duvar kayar; karşıdaki Mutfak küçülür ya da büyür"
+   },
+   {
+    "mahal": "Yatak Odası 1",
+    "yon": "D",
+    "konum_cm": 758.5,
+    "aralik": [
+     463.8,
+     533.8
+    ],
+    "uzunluk_cm": 70.0,
+    "en_dis": false,
+    "tur": "ic",
+    "duvarlar": [
+     "I5"
+    ],
+    "arkasi": {
+     "Banyo": 59.5
+    },
+    "durum": "kilitli",
+    "neden": "karşıdaki Banyo bu kenarın ötesinde Hol yanında devam ediyor"
+   },
+   {
+    "mahal": "Yatak Odası 1",
+    "yon": "D",
+    "konum_cm": 1014.8,
+    "aralik": [
+     533.8,
+     849.5
+    ],
+    "uzunluk_cm": 315.8,
+    "en_dis": true,
+    "tur": "dis",
+    "duvarlar": [
+     "DD"
+    ],
+    "arkasi": {
+     "dis": 315.8
+    },
+    "durum": "duzey2",
+    "neden": "ev bu yöne büyür; ikincil çatı yeniden hesaplanır: cumba batı, cumba doğu",
+    "kesit_bantlari": [
+     [
+      640.5,
+      642.0
+     ],
+     [
+      742.0,
+      753.5
+     ],
+     [
+      889.0,
+      1009.8
+     ]
+    ]
+   },
+   {
+    "mahal": "Yatak Odası 2",
+    "yon": "G",
+    "konum_cm": 9.2,
+    "aralik": [
+     634.5,
+     1013.5
+    ],
+    "uzunluk_cm": 379.0,
+    "en_dis": true,
+    "tur": "dis",
+    "duvarlar": [
+     "DKG"
+    ],
+    "arkasi": {
+     "dis": 379.0
+    },
+    "durum": "kilitli",
+    "neden": "ana çatının açıklığı ve mahya kotu değişir (düzey 3)",
+    "kesit_bantlari": [
+     [
+      234.2,
+      238.0
+     ]
+    ]
+   },
+   {
+    "mahal": "Yatak Odası 2",
+    "yon": "K",
+    "konum_cm": 323.5,
+    "aralik": [
+     636.8,
+     1013.5
+    ],
+    "uzunluk_cm": 376.8,
+    "en_dis": true,
+    "tur": "ic",
+    "duvarlar": [
+     "I4"
+    ],
+    "arkasi": {
+     "Banyo": 245.8,
+     "Hol": 120.5
+    },
+    "durum": "oynar",
+    "neden": "iç duvar kayar; karşıdaki Banyo, Hol küçülür ya da büyür"
+   },
+   {
+    "mahal": "Yatak Odası 2",
+    "yon": "B",
+    "konum_cm": 633.2,
+    "aralik": [
+     10.5,
+     228.0
+    ],
+    "uzunluk_cm": 217.5,
+    "en_dis": true,
+    "tur": "veranda",
+    "duvarlar": [
+     "DKB"
+    ],
+    "arkasi": {
+     "Veranda": 209.5
+    },
+    "durum": "kilitli",
+    "neden": "verandaya bakan kenar: veranda ve çatısı değişir (İE-23 PR-2'de yok)"
+   },
+   {
+    "mahal": "Yatak Odası 2",
+    "yon": "B",
+    "konum_cm": 635.5,
+    "aralik": [
+     228.0,
+     322.2
+    ],
+    "uzunluk_cm": 94.2,
+    "en_dis": false,
+    "tur": "ic",
+    "duvarlar": [
+     "I6"
+    ],
+    "arkasi": {
+     "Hol": 91.8
+    },
+    "durum": "oynar",
+    "neden": "iç duvar kayar; karşıdaki Hol küçülür ya da büyür"
+   },
+   {
+    "mahal": "Yatak Odası 2",
+    "yon": "D",
+    "konum_cm": 1014.8,
+    "aralik": [
+     10.5,
+     322.2
+    ],
+    "uzunluk_cm": 311.8,
+    "en_dis": true,
+    "tur": "dis",
+    "duvarlar": [
+     "DD"
+    ],
+    "arkasi": {
+     "dis": 311.8
+    },
+    "durum": "duzey2",
+    "neden": "ev bu yöne büyür; ikincil çatı yeniden hesaplanır: cumba batı, cumba doğu",
+    "kesit_bantlari": [
+     [
+      640.5,
+      642.0
+     ],
+     [
+      742.0,
+      753.5
+     ],
+     [
+      889.0,
+      1009.8
+     ]
+    ]
+   },
+   {
+    "mahal": "Banyo",
+    "yon": "G",
+    "konum_cm": 331.5,
+    "aralik": [
+     767.8,
+     1013.5
+    ],
+    "uzunluk_cm": 245.8,
+    "en_dis": true,
+    "tur": "ic",
+    "duvarlar": [
+     "I4"
+    ],
+    "arkasi": {
+     "Yatak Odası 2": 245.8
+    },
+    "durum": "kilitli",
+    "neden": "karşıdaki Yatak Odası 2 bu kenarın ötesinde Hol yanında devam ediyor"
+   },
+   {
+    "mahal": "Banyo",
+    "yon": "K",
+    "konum_cm": 524.5,
+    "aralik": [
+     767.8,
+     1013.5
+    ],
+    "uzunluk_cm": 245.8,
+    "en_dis": true,
+    "tur": "ic",
+    "duvarlar": [
+     "I7"
+    ],
+    "arkasi": {
+     "Yatak Odası 1": 245.8
+    },
+    "durum": "oynar",
+    "neden": "iç duvar kayar; karşıdaki Yatak Odası 1 küçülür ya da büyür"
+   },
+   {
+    "mahal": "Banyo",
+    "yon": "B",
+    "konum_cm": 766.5,
+    "aralik": [
+     332.8,
+     523.2
+    ],
+    "uzunluk_cm": 190.5,
+    "en_dis": true,
+    "tur": "ic",
+    "duvarlar": [
+     "I5"
+    ],
+    "arkasi": {
+     "Hol": 120.5,
+     "Yatak Odası 1": 59.5
+    },
+    "durum": "oynar",
+    "neden": "iç duvar kayar; karşıdaki Hol, Yatak Odası 1 küçülür ya da büyür"
+   },
+   {
+    "mahal": "Banyo",
+    "yon": "D",
+    "konum_cm": 1014.8,
+    "aralik": [
+     332.8,
+     523.2
+    ],
+    "uzunluk_cm": 190.5,
+    "en_dis": true,
+    "tur": "dis",
+    "duvarlar": [
+     "DD"
+    ],
+    "arkasi": {
+     "dis": 190.5
+    },
+    "durum": "duzey2",
+    "neden": "ev bu yöne büyür; ikincil çatı yeniden hesaplanır: cumba doğu",
+    "kesit_bantlari": [
+     [
+      889.0,
+      1009.8
+     ]
+    ]
+   },
+   {
+    "mahal": "Veranda",
+    "yon": "K",
+    "konum_cm": 221.2,
+    "aralik": [
+     0.0,
+     624.0
+    ],
+    "uzunluk_cm": 624.0,
+    "en_dis": true,
+    "tur": "ic",
+    "duvarlar": [
+     "DG"
+    ],
+    "arkasi": {
+     "Hol": 258.2,
+     "Yaşam Alanı": 344.8
+    },
+    "durum": "kilitli",
+    "neden": "verandanın kenarı: veranda ve çatısı değişir (İE-23 PR-2'de yok)"
+   },
+   {
+    "mahal": "Veranda",
+    "yon": "D",
+    "konum_cm": 625.2,
+    "aralik": [
+     9.2,
+     220.0
+    ],
+    "uzunluk_cm": 210.8,
+    "en_dis": true,
+    "tur": "ic",
+    "duvarlar": [
+     "DKB"
+    ],
+    "arkasi": {
+     "Yatak Odası 2": 209.5
+    },
+    "durum": "kilitli",
+    "neden": "verandanın kenarı: veranda ve çatısı değişir (İE-23 PR-2'de yok)"
+   }
+  ],
+  "germe": {
+   "x": [
+    {
+     "aralik": [
+      14.2,
+      119.0
+     ],
+     "mahaller": [
+      "Veranda",
+      "Yaşam Alanı"
+     ],
+     "paralel": [
+      "ana güney",
+      "ana kuzey"
+     ],
+     "dik": [],
+     "duzey": 1
+    },
+    {
+     "aralik": [
+      249.0,
+      351.5
+     ],
+     "mahaller": [
+      "Veranda",
+      "Yaşam Alanı"
+     ],
+     "paralel": [
+      "ana güney",
+      "ana kuzey"
+     ],
+     "dik": [],
+     "duzey": 1
+    },
+    {
+     "aralik": [
+      369.5,
+      393.5
+     ],
+     "mahaller": [
+      "Hol",
+      "Mutfak",
+      "Veranda"
+     ],
+     "paralel": [
+      "ana güney",
+      "ana kuzey"
+     ],
+     "dik": [],
+     "duzey": 1
+    },
+    {
+     "aralik": [
+      640.5,
+      642.0
+     ],
+     "mahaller": [
+      "Hol",
+      "Yatak Odası 1",
+      "Yatak Odası 2"
+     ],
+     "paralel": [
+      "ana güney",
+      "ana kuzey"
+     ],
+     "dik": [
+      "cumba batı"
+     ],
+     "duzey": 2
+    },
+    {
+     "aralik": [
+      742.0,
+      753.5
+     ],
+     "mahaller": [
+      "Hol",
+      "Yatak Odası 1",
+      "Yatak Odası 2"
+     ],
+     "paralel": [
+      "ana güney",
+      "ana kuzey"
+     ],
+     "dik": [
+      "cumba batı"
+     ],
+     "duzey": 2
+    },
+    {
+     "aralik": [
+      889.0,
+      1009.8
+     ],
+     "mahaller": [
+      "Banyo",
+      "Yatak Odası 1",
+      "Yatak Odası 2"
+     ],
+     "paralel": [
+      "ana güney",
+      "ana kuzey"
+     ],
+     "dik": [
+      "cumba doğu"
+     ],
+     "duzey": 2
+    }
+   ],
+   "y": [
+    {
+     "aralik": [
+      14.2,
+      102.5
+     ],
+     "mahaller": [
+      "Veranda",
+      "Yatak Odası 2"
+     ],
+     "paralel": [
+      "cumba batı",
+      "cumba doğu"
+     ],
+     "dik": [],
+     "duzey": 1
+    },
+    {
+     "aralik": [
+      234.2,
+      238.0
+     ],
+     "mahaller": [
+      "Hol",
+      "Yatak Odası 2",
+      "Yaşam Alanı"
+     ],
+     "paralel": [
+      "cumba batı",
+      "cumba doğu"
+     ],
+     "dik": [
+      "ana güney"
+     ],
+     "duzey": 3
+    },
+    {
+     "aralik": [
+      467.5,
+      519.5
+     ],
+     "mahaller": [
+      "Banyo",
+      "Mutfak",
+      "Yatak Odası 1",
+      "Yaşam Alanı"
+     ],
+     "paralel": [],
+     "dik": [
+      "ana güney"
+     ],
+     "duzey": 3
+    },
+    {
+     "aralik": [
+      537.5,
+      540.0
+     ],
+     "mahaller": [
+      "Mutfak",
+      "Yatak Odası 1",
+      "Yaşam Alanı"
+     ],
+     "paralel": [],
+     "dik": [
+      "ana güney"
+     ],
+     "duzey": 3
+    },
+    {
+     "aralik": [
+      540.0,
+      628.5
+     ],
+     "mahaller": [
+      "Mutfak",
+      "Yatak Odası 1",
+      "Yaşam Alanı"
+     ],
+     "paralel": [],
+     "dik": [
+      "ana kuzey"
+     ],
+     "duzey": 3
+    },
+    {
+     "aralik": [
+      758.5,
+      845.8
+     ],
+     "mahaller": [
+      "Mutfak",
+      "Yatak Odası 1",
+      "Yaşam Alanı"
+     ],
+     "paralel": [],
+     "dik": [
+      "ana kuzey"
+     ],
+     "duzey": 3
+    }
+   ]
+  },
+  "sinirlar": "kurallar/plan/oda_kurallari.json"
+ },
+ "sayisal": {
+  "oturum_m2": 88.06,
+  "kapali_m2": 74.34,
+  "veranda_orani": 0.156,
+  "en_boy": 1.191,
+  "kompaktlik": 0.996,
+  "yatak": 2,
+  "banyo": 1,
+  "mahal": 7,
+  "kapi": 6,
+  "pencere": 9,
+  "islak_orani": 0.069,
+  "pencere_taban_orani": 0.205,
+  "dis_duvar_m_m2": 0.428,
+  "cati_yuzey_orani": 1.028,
+  "derinlik_en_cok": 3,
+  "derinlik_ortalama": 2.57
+ }
+}
