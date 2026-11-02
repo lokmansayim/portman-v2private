@@ -3,8 +3,10 @@
 Ara hatlar mahyaya paraleldir (makasa dik); duvar eksenindeki hatlar duvarın yönündedir. Asma dizme tavanda her iç duvarın ekseninde bir
 hat ve her kapalı odada başlangıç sınırından asma aralığıyla ara hatlar; ters tavanda her kapalı odada başlangıç duvarının yüzünden
 kitabın aralığıyla. Açık mahalde (ana çatının altındaki veranda) hat duvarın yüzünden kitabın aralığıyla başlar. Odanın öteki sınırına en
-kısa boydan yakın hat ya da hattın o kısmı konmaz (L biçimli odada her kol kendi sınırıyla). Her hat dizilimin başladığı uçtan tam
-parçalara (parça boyu − pay), kalanı son parçaya bölünür; en kısa boydan kısa kalan parçasız boşluktur.
+kısa boydan yakın hat ya da hattın o kısmı konmaz (L biçimli odada her kol kendi sınırıyla). Gövdeden taşan verandada (BK-14, yavru
+makaslı çatısı kurulan) hat açık mahaldeki gibi: yavru makaslara dik, kolon ve kirişlerin arasında, kitabın aralığıyla (tavanı ters tavan,
+yeşil alçıpan; Lokman, 31 Ekim 2026 19:23). Her hat dizilimin başladığı uçtan tam parçalara (parça boyu − pay), kalanı son parçaya bölünür;
+en kısa boydan kısa kalan parçasız boşluktur.
 
 K5b-2: açık mahale bakan dış duvarın üstündeki 100'lük duvar omegası (kart OM-02) `dis_duvar_hatlari`'ndadır.
 """
@@ -59,9 +61,10 @@ def _sinir(duvarlar: list[Duvar], kosu: str, yuz: float, taraf: int, r_aralik: t
     return yuz, None
 
 
-def hatlar(g: dict, K: dict, uyarilar: list | None = None) -> list[dict]:
+def hatlar(g: dict, K: dict, uyarilar: list | None = None, verandalar: list[dict] | None = None) -> list[dict]:
     """Omega hatları: {yer, eksen (adım ekseni), s, r0, r1, mahal, not[, sirt]}. `K`: okunan değerler (`aralik_asma`, `aralik_ters`, `en_kisa`,
-    `sirt_100`: 100'lük iç duvarın üstündeki hattın sırtı, cm).
+    `sirt_100`: 100'lük iç duvarın üstündeki hattın sırtı, cm). `verandalar`: çatısı kurulan taşan verandalar ({ad, poligon}); tavanları
+    açık mahal gibi (yavru makas ana makasa paraleldir, hat yine mahyaya paralel).
     Hat konmayan açık mahal parçası `uyarilar`'a yazılır."""
     uyarilar = uyarilar if uyarilar is not None else []
     kosu = "y" if g["cati"]["makas_ekseni"] == "x" else "x"         # mahyaya paralel
@@ -104,7 +107,8 @@ def hatlar(g: dict, K: dict, uyarilar: list | None = None) -> list[dict]:
         for yer, s, alan in konumlar:
             for r0, r1 in _kesit(alan, adim, s):
                 out.append({"yer": yer, "eksen": adim, "s": round(s, 4), "r0": r0, "r1": r1, "mahal": oda["ad"], "not": ""})
-    for v in g["acik"]:                                                 # açık mahal: duvarın yüzünden kitabın aralığıyla (PK-01 veranda)
+    acik = [(v, "açık mahal") for v in g["acik"]] + [(v, "taşan veranda") for v in verandalar or []]
+    for v, not_ in acik:                                                # açık mahal: duvarın yüzünden kitabın aralığıyla (PK-01 veranda)
         P = Polygon(v["poligon"])
         engel = [box(*e) for e in g["engeller"] if box(*e).intersects(P)]
         if engel:
@@ -132,7 +136,7 @@ def hatlar(g: dict, K: dict, uyarilar: list | None = None) -> list[dict]:
             s = bas + yon * k * K["aralik_ters"]
             for r0, r1 in _kesit(Q, adim, s):
                 out.append({"yer": "duvar_yuzu" if k == 0 and duvarli else "ara", "eksen": adim, "s": round(s, 4), "r0": r0, "r1": r1,
-                            "mahal": v["ad"], "not": "açık mahal"})
+                            "mahal": v["ad"], "not": not_})
             k += 1
     return out
 

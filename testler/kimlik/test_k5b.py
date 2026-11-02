@@ -6,7 +6,7 @@
   (İE-09 hattının arkasında; CIO onayı 30 Ekim 14:20): aşık sırası beşikte karar C, tek koddan (`prefabrik_liste.asik_mesafeleri`); baş makas
   betopanı ve Z kirişli veranda kalkanında da (D-32 madde 2). Saçak omegası (CK-01) duvar boyunca (D-41), sayısı saçak boyundan, liste gibi (Lokman, 31 Ekim 13:40
   "gerçek listeye uy": gerçek PK-01, PK-02, PK-03 listeleri saçak boyuyla tutuyor; K3b'deki fark kapandı). On dört kalem aynı. "Kural yok" 0
-  (K5'te 8). OM-01 veranda çatısından değil (kapsam dışı).
+  (K5'te 8). OM-01 taşan verandanın tavanında da (İE-24, pano 73.5: yavru makasların altında; `test_tasan_veranda_tavan_omegasi`).
 - Kör protokolü: gerçek liste açılmaz; kıyas liste üretecimizin çıktısıyla (CIO, 27 Ekim 22:02).
 - Kural birimleri: kaplamanın okunması (sandviç, tek kat, varsayılan tek kat ve uyarı, trapez ve kiremit "kural yok"); taşan veranda
   kaplaması iki yüz birlikte (⌈2 × mahya boyu ÷ kapatma⌉, artanlar bir panele sığarsa bir panelden, sığmazsa duvarda kesilir); dikey
@@ -27,7 +27,7 @@ from pathlib import Path
 
 import ifcopenshell
 import pytest
-from shapely.geometry import Polygon
+from shapely.geometry import LineString, Polygon
 from shapely.ops import unary_union
 
 KOK = Path(__file__).resolve().parents[2]
@@ -326,3 +326,27 @@ def test_pk01_veranda_yok(tmp_path):
     adet = {k["kod"]: k["adet"] for k in say["kartlar"]}
     assert adet["KP-02"] == adet["MA-03"] == 0 and adet["KP-01"] == 22 and say["kural_yok"] == []
     assert not any(p["bilgi"].get("Cati") for p in say["yerlesim"]["parcalar"])
+
+
+def test_tasan_veranda_tavan_omegasi(tk01, tk01_k):
+    """İE-24, pano 73.5 (Lokman, 31 Ekim 2026 19:23: "verandayı yeşil alçıpan ile ters tavan yap"): taşan verandanın tavanında tavan omegası
+    (OM-01) yavru makasların altında, açık mahaldeki gibi: kolon ve kirişlerin arasında, yavru makaslara dik (mahyaya paralel), kitabın
+    aralığıyla (60), karşı kirişe en kısa boydan yakın hat konmaz. Üstü duvar üstü kotunda (yavru makasın alt başlığı kirişin üstünde);
+    ilki kirişin iç yüzünde (açık mahalin ilk hattı duvarın yüzünde gibi), hattın ekseni kirişin ya da kolonun içine girmez. Ana çatının
+    altındaki omegalar değişmez (30)."""
+    say, g = tk01["say"], tk01_k["girdi"]
+    om = [p for p in _parcalar(say, "OM-01") if "VERANDA" in (p["bilgi"].get("Mahal") or "")]
+    hat = {}
+    for p in om:
+        hat.setdefault(p["bilgi"]["Mahal"], set()).add(float(re.match(r"x = (-?[\d.]+)", p["aciklama"]).group(1)))
+    assert {m: sorted(x) for m, x in hat.items()} == {"ÖN VERANDA": [266, 326, 386, 446, 506, 566], "ARKA VERANDA": [10, 70, 130, 190]}
+    engel = unary_union([Polygon([(r[0], r[1]), (r[2], r[1]), (r[2], r[3]), (r[0], r[3])]) for r in g["engeller"]])
+    kat = [p for p in tk01_k["parcalar"] if p["kural"] == "tavan_omegasi_yerlesimi" and "VERANDA" in (p["bilgi"].get("Mahal") or "")]
+    assert len(kat) == len(om) == 10
+    for p in kat:
+        x0, y0, z0, x1, y1, z1 = p["geo"]["kutu"]
+        assert abs(z1 - g["duvar_h"]) < 1e-6 and p["bilgi"]["Yer"] == "ara"
+        merkez = LineString([((x0 + x1) / 2, y0), ((x0 + x1) / 2, y1)])      # hattın ekseni kirişin içinde değil (ilki kirişin iç yüzünde)
+        assert not merkez.intersects(engel.buffer(-0.01)), p["aciklama"]
+    assert sorted(p["boy_cm"] for p in om) == [120.0] * 4 + [171.0] * 6
+    assert len(_parcalar(say, "OM-01")) - len(om) == 30

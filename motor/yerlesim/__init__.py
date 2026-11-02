@@ -200,8 +200,13 @@ def katmanlar(ie: dict, plan: dict, makaslar: list[dict], yerlesim: dict, liste:
     T = D["tavan_omegasi_yerlesimi"]
     tam = _cm(T["parca_boyu"] - T["pay"])
     uyarilar = list(g["uyarilar"])
+    # Taşan verandanın tavanı (Lokman, 31 Ekim 2026 19:23: "verandayı yeşil alçıpan ile ters tavan yap"): çatısı kurulan verandada (K5b) tavan
+    # omegası yavru makasların altında, kolon ve kirişlerin arasında (montaj rehberi alçıpanı bu omegalara vidalar)
+    tv = {F["ad"] for F in veranda.cerceveler(g)[0]} if g["dis_verandalar"] and g["cati_tipi"] in K[veranda.KURAL]["cati_tipleri"] else set()
     hatlar = tavan.hatlar(g, {"aralik_asma": _cm(T["aralik_asma"]), "aralik_ters": _cm(T["aralik_ters"]), "en_kisa": T["en_kisa_cm"],
-                              "sirt_100": T.get("sirt_100")}, uyarilar)
+                              "sirt_100": T.get("sirt_100")}, uyarilar,
+                          [{"ad": v["ad"], "poligon": [(v["rect"][0], v["rect"][1]), (v["rect"][2], v["rect"][1]), (v["rect"][2], v["rect"][3]),
+                                                       (v["rect"][0], v["rect"][3])]} for v in g["dis_verandalar"] if v["ad"] in tv])
     hatlar += tavan.dis_duvar_hatlari(g, {"en_kisa": T["en_kisa_cm"], "sirt_100": T["sirt_100"]})       # K5b-2 (D-32)
     ow, oh = kesit["omega"]
     for i, h in enumerate(hatlar, 1):
