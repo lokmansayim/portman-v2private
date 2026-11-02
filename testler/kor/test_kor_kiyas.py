@@ -3,6 +3,7 @@
 Her koşuda: aracın sırası (bizim yanımız kayıtlı → mühür → açılış kaydı) geçici bir depoda uydurma listeyle denenir; eşlemenin ölçü
 kuralları uydurma satırlarla denenir; gerçek mühür kaydının kör 19'u ve kapalı kayıtları açılış kaydı olmadan reddettiği ve durumların
 değişmediği gösterilir; açık sekiz projede tutan satırlar bugünkü Motor çıktısıyla yeniden denetlenir (PK-01 bilgi, kapıya girmez).
+İE-26'dan beri Patron'un kararıyla açılan on kör ev de (açılış kayıtlarıyla) aynı kapıda.
 Kaynak liste gerekmez.
 
 Tam koşu (`PORTMAN_KOR_TAM=1`, `PORTMAN_KOR_KAYNAK=<klasör>`): gerçek listeler depo dışındaki klasörden (SHA ile bulunur) yeniden
@@ -29,6 +30,11 @@ from testler.kor import esle, kiyas as K, oku  # noqa: E402
 PROJELER = sorted(p for p in (KOK / "testler" / "kor" / "projeler").iterdir() if (p / "proje.json").is_file())
 KOR19 = ["AP-06", "AP-09", *[f"AP-{n:02d}" for n in range(11, 19)], *[f"AP-{n:02d}" for n in range(20, 29)]]
 ACIK8 = ["PK-01", "PK-02", "PK-03", "PK-05", "PK-06", "PK-07", "PK-08", "TS-01"]
+# İE-26 (pano 70, PR-4): Patron'un karar kartı 2 Kasım 2026 21:48:56 UTC "Hepsi açılsın". Motor'un liste yazabildiği on kör ev açıldı;
+# kayıtları `kor` kaldı, açılışları `acilislar`'da (kendi listemizin commit'i d675641 ve sözlüğün commit'i taşır). Öteki kör evler
+# (AP-06, 12, 13, 16, 17, 23, 24, 27: Motor liste yazmıyor; AP-20 çift kat, ölçüm dışı) ve AP-10 açılmadı.
+ACILAN_IE26 = ["AP-09", "AP-11", "AP-14", "AP-15", "AP-18", "AP-21", "AP-22", "AP-25", "AP-26", "AP-28"]
+IE26_KARAR = "karar kartı 2 Kasım 2026 21:48:56 UTC: \"Hepsi açılsın\""
 # Mühürde kodların durumu (bir dosya birden çok kod taşıyabilir; kod bir kez sayılır her dosya için). Değişirse açılış Patron kararıdır.
 ACIK_KODLAR = ["AP-01", "AP-01", "AP-02", "AP-03", "AP-04", "AP-05", "AP-07", "AP-08", "AP-19", "PK-01", "PK-02", "PK-03", "PK-03",
                "PK-05", "PK-06", "PK-06", "PK-07", "PK-08", "PK-08", "TS-01"]
@@ -423,26 +429,38 @@ def test_kor19_ve_ap10_acilis_kaydi_olmadan_reddedilir(muhur):
         with pytest.raises(K.Durdu) as e:
             K.acilabilir_mi(r, muhur, kod, liste)
         assert e.value.adim == 3, kod
-    assert not set(KOR19 + ["AP-10"]) & set(muhur["acilislar"])
+    # İE-26: yalnız Patron'un kararıyla açılan on evin açılış kaydı var; her biri karar, bu dosyanın özeti ve iki commit'le
+    assert set(KOR19 + ["AP-10"]) & set(muhur["acilislar"]) == set(ACILAN_IE26)
+    for kod in ACILAN_IE26:
+        a = muhur["acilislar"][kod]
+        assert IE26_KARAR in a["karar"] and a["sha256"] == kor[kod]["sha256"], kod
+        assert len(a["liste_commit"]) >= 7 and len(a["sozluk_commit"]) >= 7, kod
 
 
 def test_cizim_icin_pafta_gorulen_kor_liste_kapali(muhur):
     # CIO 27 Ekim 22:43: AP-13 ve AP-16'nın montaj paftası İE-17 çizimine kullanıldı; kör listelerinin kaydında not, liste kapalı.
-    # İE-17 PR-2 (1 Kasım 2026): AP-09, AP-15, AP-22 de (AP-03'ün listesi 13 Ekim'den beri açık)
+    # İE-17 PR-2 (1 Kasım 2026): AP-09, AP-15, AP-22 de (AP-03'ün listesi 13 Ekim'den beri açık). İE-26: AP-09, 15, 22 Patron'un
+    # kararıyla açıldı (kayıt yine `kor`, not duruyor); AP-13 ve AP-16'da Motor liste yazmıyor, açılmadı
     for kod in ("AP-13", "AP-16", "AP-09", "AP-15", "AP-22"):
         r = [r for r in muhur["dosyalar"] if kod in r["kod"]]
         assert {(x["tur"], x["durum"]) for x in r} == {("montaj paftası", "kaynak"), (K.LISTE, "kor")}, kod
         liste = next(x for x in r if x["tur"] == K.LISTE)
-        assert liste["not"].startswith("çizim için pafta görüldü") and kod not in muhur["acilislar"], kod
+        assert liste["not"].startswith("çizim için pafta görüldü"), kod
+        assert (kod in muhur["acilislar"]) == (kod in ACILAN_IE26), kod
 
 
 def test_acik_sekiz_projenin_listesi_acik_kayitta(muhur):
-    assert [_oku(p / "proje.json")["kod"] for p in PROJELER] == ACIK8
+    """Açık sekiz projenin listesi `acik` kayıtta; İE-26'nın on projesinin listesi `kor` kayıtta, Patron'un açılış kaydıyla."""
+    assert sorted(_oku(p / "proje.json")["kod"] for p in PROJELER) == sorted(ACIK8 + ACILAN_IE26)
     for p in PROJELER:
         P = _oku(p / "proje.json")
         r = [r for r in muhur["dosyalar"] if r["sha256"] == P["liste_sha256"]]
-        assert len(r) == 1 and r[0]["durum"] == "acik" and P["kod"] in r[0]["kod"], P["kod"]
+        durum = "kor" if P["kod"] in ACILAN_IE26 else "acik"
+        assert len(r) == 1 and r[0]["durum"] == durum and P["kod"] in r[0]["kod"], P["kod"]
         assert muhur["acilislar"][P["kod"]]["liste_commit"]
+        if durum == "kor":
+            assert muhur["acilislar"][P["kod"]]["sha256"] == P["liste_sha256"], P["kod"]
+            assert K.kayitli_mi(p / "bizim_liste.json")["commit"].startswith(muhur["acilislar"][P["kod"]]["liste_commit"]), P["kod"]
         if P.get("ap"):
             assert P["ap"] in r[0]["kod"]
 
