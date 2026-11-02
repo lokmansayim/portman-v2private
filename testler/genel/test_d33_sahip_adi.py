@@ -77,6 +77,8 @@ def _uret(model: str, ek: dict, bilgi: dict) -> dict:
             kod = uret.kod_govde(t)
             c = Path(tmp, "c")
             r["yukleme"] = (json.loads((c / f"{kod}_yukleme.json").read_text(encoding="utf-8")).get("ad"), {})
+            r["kaynak"] = (json.loads((c / f"{kod}_girdi.json").read_text(encoding="utf-8")).get("kaynak"), {})
+            r["dosyalar"] = (sorted(p.name for p in c.iterdir()), {})
             import ifcopenshell
             f = ifcopenshell.open(str(c / f"{kod}.ifc"))
             r["ifc"] = ([f.by_type("IfcProject")[0].Name, f.by_type("IfcBuilding")[0].Name], {})
@@ -149,3 +151,39 @@ def test_kontrol_sayfasinda_sahibinin_adi():
     assert ">hayır<" in atolye_sayfa._sol({"gosterim": "Ç8801", "kod": "Ç8801"})
     # satır sayfaya verilen ada uyar (`atolye.ciz` adı motorun `musteri_projesi` koşuluyla verir): sayfa çizimle çelişmez
     assert "evet · sahibi Tanım Sahibi" in atolye_sayfa._sol({"gosterim": "Ç8801", "kod": "Ç8801"}, "Tanım Sahibi")
+
+
+ZARF = "Zarf Müşterisi Deneme"
+
+
+def test_zarfin_adi_tanima_yazilir():
+    # İE-09 PR-6c: müşteri projesinde zarfın adı tanımdakinin önüne geçer; katalogda, zarfsızda ve ad aynıyken tanım aynen döner
+    kt, kt_adli = {"kod": "KT-09", "ad": "tarif"}, {"kod": "KT-09", "ad": "tarif", "musteri_adi": "Tanım Sahibi"}
+    assert uret.zarfin_adiyla(kt, {"musteri_adi": ZARF}) == kt | {"musteri_adi": ZARF}
+    assert uret.zarfin_adiyla(kt_adli, {"musteri_adi": ZARF})["musteri_adi"] == ZARF                 # zarf önce
+    assert uret.zarfin_adiyla(kt, {"musteri_adi": "Veli Deneme 0532 000 00 00"})["musteri_adi"] == "Veli Deneme …"   # numara yazılmaz
+    for t, b in ((kt, None), (kt, {}), (kt, {"musteri_adi": "  "}), (kt_adli, {"musteri_adi": "Tanım Sahibi"}),
+                 ({"kod": "Ç8801", "ad": "Tek kat çelik"}, {"musteri_adi": ZARF})):
+        assert uret.zarfin_adiyla(t, b) is t, (t, b)                                                      # dosya kopyası yok, çıktı aynı
+    assert uret.zarfin_adiyla({"kod": "X1", "musteri_projesi": True}, {"musteri_adi": ZARF})["musteri_adi"] == ZARF
+
+
+def test_zarfin_adi_butun_ciktilarda():
+    # bayi siparişi: tanımda başka ad yazılı (KT-04 gibi), zarfta bayinin müşterisi; her çıktı zarfın adını yazar, tanımdakini yazmaz
+    r = _uret("KT01", {"musteri_adi": SAHIP}, BILGI | {"musteri_adi": ZARF})
+    kod = r["_kod"][0]
+    tarif = json.loads((KOK / "modeller" / "KT01.json").read_text(encoding="utf-8"))["ad"]
+    figurler = {d: r[d][0] for d in (f"{kod}_plan_bayi.png", "pafta_sayfa_1", "pafta_sayfa_2", f"{kod}_plan.png", f"{kod}_pafta.png",
+                                     f"{kod}_gorunusler.png")}
+    for d, yazi in figurler.items():
+        assert any(ZARF in x for x in yazi), d
+        assert not any(SAHIP in x or "kör test" in x or tarif in x for x in yazi), d
+    assert any(x.startswith(f"KT-01 · {ZARF} · ") for x in figurler["pafta_sayfa_2"])                 # paftanın başlığı
+    assert any(x.startswith(f"{ZARF} · KT-01 · ") for x in figurler["pafta_sayfa_1"])                  # antet
+    assert ZARF in r["dxf"][0] and SAHIP not in r["dxf"][0]                                            # düzenlenebilir DXF
+    assert r["yukleme"][0].startswith(f"KT-01 · {ZARF} · ")                                             # yükleme listesi
+    assert r["ifc"][0] == [f"Portman — KT-01 · {ZARF}", ZARF]                                           # IFC proje ve bina adı
+    assert r["kaynak"][0] == "Yapı Tanımı 0.5 (KT01.json)"                                              # listenin kaynağı asıl dosyanın adı
+    assert "KT01.json" not in r["dosyalar"][0] and not any("tanim" in d for d in r["dosyalar"][0])    # tanımın kopyası çıktıya girmez
+    for d in (f"{kod}_plan_bayi.png", "pafta_sayfa_1", "pafta_sayfa_2"):
+        assert _cakisma(r[d][1]) == [], (d, _cakisma(r[d][1]))
