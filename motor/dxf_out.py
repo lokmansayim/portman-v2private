@@ -149,7 +149,7 @@ def _grid_yazi(yapi, ayrac, ek) -> str:
 
 
 def _dosemeden_pencereler(plan) -> list:
-    """İE-27 madde 11: boyu üst kotu (200) geçen, döşemeden kurulan pencerelerin ölçüleri (sürgülü 180/200, 280/210 …); yoksa boş."""
+    """İE-27 madde 11: boyu üst kotu (200) geçen, döşemeden kurulan pencerelerin ölçüleri (200/210, 280/210 …; 180/200 döşemeden ama üst kotu 200, sayılmaz); yoksa boş."""
     return sorted({p.acilim.olcu for p in plan.panolar if p.acilim and p.acilim.tur == "pencere"
                    and G.pencere_kurali(p.acilim.olcu).ust > PENCERE_UST_KOTU + 1e-9})
 

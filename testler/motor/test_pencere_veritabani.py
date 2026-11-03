@@ -115,24 +115,54 @@ def test_kor_surguluyu_paftadaki_olcusuyle(kod, olcu, pano_boy):
     assert not any("veri tabanında yok" in u for u in plan.uyarilar)
 
 
-def test_uc_panoluk_birlesme_sirasi():
-    """n panoluk pencere: önce kendi panosu ve sonraki n − 1, olmazsa bir geri kayarak (iki panoda bugünkü sıra: sonraki, önceki).
-    AP-26'nın 280/210'u İş Emri'ndeki panosundan (2) başlayıp sonraki ikiyle birleşir."""
-    ie = _ie("AP26")
-    plan = G.kur(ie)
-    p = _pencere(plan, "280x210")
-    d = p.duvar
-    i = d.panolar.index(p)
-    assert abs(p.a1 - p.a0 - 3 * G.MOD) < 1e-6 and i >= 0
-    # sonraki panolardan biri dolu olunca (kapı) bir geri kayar
-    once = (p.a0, p.a1)
-    ie2 = _ie("AP26")
-    for a in ie2["acikliklar"]:
-        if a.get("olcu") == "280x210":
-            a["pano"] = a["pano"] + 1
-    p2 = _pencere(G.kur(ie2), "280x210")
-    assert abs(p2.a1 - p2.a0 - 3 * G.MOD) < 1e-6
-    assert (p2.a0, p2.a1) in (once, (once[0] + G.MOD, once[1] + G.MOD))
+def _tek_oda(*ekler):
+    """ALTIN'de ODA 1 ve ODA 2 tek oda: arka duvarında altı tam pano (10–763), açıklıksız."""
+    ie = json.loads(ALTIN.read_text(encoding="utf-8"))
+    ie["mahaller"] = [m for m in ie["mahaller"] if m["ad"] != "ODA 2"]
+    for m in ie["mahaller"]:
+        if m["ad"] == "ODA 1":
+            m["konum_pano"] = [[0, 5, 6, 8]]
+    ie["acikliklar"] = [a for a in ie["acikliklar"] if a.get("mahal") != "ODA 2" and "ODA 2" not in a.get("arasi", [])] + list(ekler)
+    return ie
+
+
+@pytest.mark.parametrize("pano, beklenen", [(0, (10.0, 386.5)), (2, (261.0, 637.5)), (3, (386.5, 763.0)),
+                                            (4, (386.5, 763.0)), (5, (386.5, 763.0))])
+def test_uc_panoluk_birlesme_sirasi(pano, beklenen):
+    """n panoluk pencere: önce kendi panosu ve sonraki n − 1; sığmazsa birer geri kayarak (iki panoda bugünkü sıra: sonraki, önceki).
+    Altı tam panolu duvarda 280'lik pencere: 0–3. panoda kendisi ve sonraki iki; 4'te bir, 5'te iki geri."""
+    pen = {"tur": "pencere", "olcu": "280x120", "mahal": "ODA 1", "duvar": "arka", "pano": pano}
+    p = _pencere(G.kur(_tek_oda(pen)), "280x120")
+    assert (p.a0, p.a1) == beklenen
+
+
+def test_uc_panoluk_dolu_panoyu_atlar():
+    """Sonraki panolardan biri açıklıklı (vasistas) olunca pencere bir geri kayar: 2. pano + 3, 4 değil, 1 + 2 + 3."""
+    pen = {"tur": "pencere", "olcu": "280x120", "mahal": "ODA 1", "duvar": "arka", "pano": 2}
+    vas = {"tur": "pencere", "olcu": "60x40", "mahal": "ODA 1", "duvar": "arka", "pano": 4}
+    plan = G.kur(_tek_oda(pen, vas))
+    p = _pencere(plan, "280x120")
+    assert (p.a0, p.a1) == (135.5, 512.0)
+    assert [(q.a0, q.a1) for q in p.duvar.panolar if q.acilim and q.acilim.olcu == "60x40"] == [(512.0, 637.5)]
+
+
+@pytest.mark.parametrize("olcu, ust_mm, alt_mm", [("120x180", 500, 200), ("120x200", 500, None), ("120x220", 300, None)])
+def test_liste_pencere_panelleri_kuraldan(olcu, ust_mm, alt_mm):
+    """Yükleme listesi 120'lik pencerenin üst ve alt panelini Motor'un pencere kuralından yazar (D-28 madde 1; geometri hakemi, İE-27
+    PR-2): döşemeden pencerede alt panel yok, üst panel duvar yüksekliği − boy."""
+    from motor import prefabrik_liste as PL
+    ie = json.loads(ALTIN.read_text(encoding="utf-8"))
+    ie["acikliklar"][3]["olcu"] = olcu                              # SALON ön 120x180
+    L = PL.liste(PL.model_motor(ie), PL.kurallari_oku(), None)
+    en, boy = olcu.split("x")
+    altlar = [s for s in L["satirlar"] if s["kalem"].startswith(f"Pencere alt panel ({en}/{boy})")]
+    ustler = {s["olcu"]: s["adet"] for s in L["satirlar"] if s["kalem"].startswith("Pencere üst panel")}
+    assert ustler.get(f"100 × 1250 × {ust_mm}", 0) >= 1, ustler
+    if alt_mm is None:
+        assert not altlar, altlar
+    else:
+        assert [s["olcu"] for s in altlar] == [f"100 × 1250 × {alt_mm}"]
+    assert not any(" × 0" == s["olcu"][-4:] or " × -" in s["olcu"] for s in L["satirlar"] if s["kalem"].startswith("Pencere"))
 
 
 def test_uc_panoluga_yer_yoksa_hata():

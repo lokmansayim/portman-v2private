@@ -786,7 +786,7 @@ def is_emri_prefabrik(kan: dict, o: CizimOkumasi, bk14: bool | None = None, esik
 
 
 def pencere_gecerli(olcu: str) -> bool:
-    """Pencere ölçüsü Pano Motor'unun tek kuralına uyuyor mu (`motor/geometry.pencere_kurali`: "ENxBOY", en 30–247, boy 20–180)?"""
+    """Pencere ölçüsü Pano Motor'unun tek kuralına uyuyor mu (`motor/geometry.pencere_kurali`: "ENxBOY", en 30–999, boy 20–240; `kurallar/pencere/pencereler.json`)?"""
     from motor.geometry import IsEmriHatasi, pencere_kurali
     try:
         pencere_kurali(olcu)

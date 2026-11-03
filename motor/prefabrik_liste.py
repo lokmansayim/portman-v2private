@@ -774,6 +774,9 @@ def liste(N: dict, kurallar: dict | None = None, pafta: dict | None = None) -> d
     H0 = N["H0"]
     ISLAK = tuple(r("islak_hacim"))
     PENCERE_UST_KOTU_CM = r("pencere_ust_kotu_cm")
+    from . import geometry as G
+    if abs(PENCERE_UST_KOTU_CM - G.PENCERE_UST_KOTU_CM) > 1e-9:          # İE-27 PR-2: kural kitabı ile pencere veri tabanı aynı kotu söyler
+        raise ValueError(f"pencere üst kotu iki yerde farklı: kural kitabı {PENCERE_UST_KOTU_CM:g}, pencere veri tabanı {G.PENCERE_UST_KOTU_CM:g}")
     ASMA_OMEGA_ARALIK_M, TERS_OMEGA_ARALIK_M = r("tavan_omegasi_aralik_m.asma"), _ortak(k, "tavan_omegasi_aralik_m")   # ters: kitabın 0,60
     TAVAN_H_ARALIK_M = r("tavan_h_aralik_m")
     ps_ = r("pencere_sinifi")
@@ -846,10 +849,13 @@ def liste(N: dict, kurallar: dict | None = None, pafta: dict | None = None) -> d
             elif id(a) in cift:
                 sayac[(f"Karkaslı özel pencere panosu ({en}/{boy}){fg}", f"{kal_mm} × {L} × {mm(H0)}", "Kural (L1)", "standart dışı pencere panosu tek parça (PK-03 160/180, PK-05 80/120)")] += 1
             else:
-                ust = H0 - PENCERE_UST_KOTU_CM
-                sayac[(f"Pencere üst panel{fg}", f"{kal_mm} × {L} × {mm(ust)}", "Liste kuralı", "pencereli pano listede üst + alt panel")] += 1
-                sayac[(f"Pencere alt panel ({en}/{boy}){fg}", f"{kal_mm} × {L} × {mm(PENCERE_UST_KOTU_CM - boy)}", "Liste kuralı",
-                       f"alt panel = {sy(PENCERE_UST_KOTU_CM)} − pencere boyu (H7)")] += 1
+                # İE-27 PR-2 (D-45 madde 11; D-28 madde 1): eşik ve üst kot Motor'un pencere kuralından (`geometry.pencere_kurali`,
+                # `kurallar/pencere/pencereler.json`); boyu 200'ü geçen pencere döşemeden: alt panel yok, üst panel H − boy
+                pkr = G.pencere_kurali(f"{en}x{boy}")
+                sayac[(f"Pencere üst panel{fg}", f"{kal_mm} × {L} × {mm(H0 - pkr.ust)}", "Liste kuralı", "pencereli pano listede üst + alt panel")] += 1
+                if pkr.esik > 1e-9:
+                    sayac[(f"Pencere alt panel ({en}/{boy}){fg}", f"{kal_mm} × {L} × {mm(pkr.esik)}", "Liste kuralı",
+                           f"alt panel = {sy(PENCERE_UST_KOTU_CM)} − pencere boyu (H7)")] += 1
         elif a["tur"] == "dis_kapi":
             sayac[(f"Karkaslı çelik kapı panosu{fg}", f"{kal_mm} × {L} × {mm(H0)}", "Sayım", "dış kapı boşluklu pano")] += 1
         elif a["tur"] == "ic_kapi":
