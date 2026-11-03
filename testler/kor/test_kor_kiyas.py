@@ -614,9 +614,14 @@ def test_kapi_tolerans_eslemede_grubun_olculerini_korur(sozluk, bugun):
 
 
 def test_kapi_kalan_eslemede_grubun_olculerini_korur(sozluk, bugun):
-    """Kalan eşlemeyle tutmuş satırda gruba eklenen satır eşlemeyi değiştirir: kapı durur."""
-    kayit, L = _ts01(bugun)
-    t = next(t for t in kayit["tutanlar"] if t["eslesme"] == "kalan")
+    """Kalan eşlemeyle tutmuş satırda gruba eklenen satır eşlemeyi değiştirir: kapı durur. (İE-27'den beri TS-01'in kalan eşlemeli
+    satırı, PVC betopan H'ı, sözlükte gruplu; kalan eşlemeli ilk kayıt alınır.)"""
+    for pd in PROJELER:
+        L = json.loads(json.dumps(bugun[pd.name]))
+        t = next((t for t in _oku(pd / "sonuc.json")["tutanlar"] if t["eslesme"] == "kalan"), None)
+        if t:
+            break
+    assert t, "kalan eşlemeli tutan yok"
     assert esle.tutuyor_mu(L["satirlar"], sozluk, t)
     s = esle.bizim_secimi(L["satirlar"], sozluk, t)[0]
     L["satirlar"].append({**s, "olcu": "L 2500"})
