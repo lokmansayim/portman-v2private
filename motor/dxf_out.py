@@ -147,6 +147,12 @@ def _grid_yazi(yapi, ayrac, ek) -> str:
     return f"{bir(G.X(nx) - G.X(0))}{ayrac}{bir(G.Y(ny) - G.Y(0))}"
 
 
+
+def _dosemeden_pencereler(plan) -> list:
+    """İE-27 madde 11: boyu üst kotu (200) geçen, döşemeden kurulan pencerelerin ölçüleri (sürgülü 180/200, 280/210 …); yoksa boş."""
+    return sorted({p.acilim.olcu for p in plan.panolar if p.acilim and p.acilim.tur == "pencere"
+                   and G.pencere_kurali(p.acilim.olcu).ust > PENCERE_UST_KOTU + 1e-9})
+
 class Cizici:
     def __init__(self, plan: G.Plan, katalog: Katalog):
         self.plan, self.kat = plan, katalog
@@ -856,6 +862,12 @@ class Cizici:
             b.add_line((x1, y), (x1 - 4, y + dy), dxfattribs={"layer": "0", "color": 1})
         return ad
 
+    def _ust_kot_yazisi(self, hy: float, lento: float) -> str:
+        """Görünüşün altındaki kot yazısı. İE-27 madde 11: döşemeden pencere (boyu 200'ü geçen, sürgülü 200/210) varsa üst kotu boyu kadar."""
+        ds = _dosemeden_pencereler(self.plan)
+        ek = f" (döşemeden pencere {', '.join(o.replace('x', '/') for o in ds)}: üst kotu boyu kadar)" if ds else ""
+        return f"Pencere üst kotu {fmt(hy - lento)} cm{ek} | Lento {fmt(lento)} cm | Bina yüksekliği {fmt(hy)} cm"
+
     def _on_pencere(self, u0, z0, w, h, olcu, acilis=None):
         """Görünüşte pencere: sürgülü bloğu (`acilis: surgulu`, D-31 madde 11), 60×40 vasistas bloğu (D-31 madde 6), öteki ölçüler kaynak ön
         pencere bloğu (Güncel Şablon 2024); açıklığa ölçekli."""
@@ -888,7 +900,7 @@ class Cizici:
                 if not p.acilim: continue
                 g = p.gap(); x0, x1 = g[0], g[2]; w = x1 - x0
                 if p.acilim.tur == "pencere":
-                    h = p.acilim.yukseklik; alt = hy - lento - h
+                    h = p.acilim.yukseklik; alt = G.pencere_kurali(p.acilim.olcu).esik   # İE-27: 200'ü geçen pencere döşemeden
                     self._on_pencere(x0 + ox, bot + alt, w, h, p.acilim.olcu, p.acilim.acilis)
                 elif p.acilim.tur == "dis_kapi":
                     h = hy - lento
@@ -902,8 +914,10 @@ class Cizici:
         self.dim((W + ox, bot), (W + ox, top), (W + 77 + ox, 0), 90, "ON_OLCU"); self.dim((xr, top), (xm, top + rise), (W + 77 + ox, 0), 90, "ON_OLCU")
         pen = [p for d in on_duvarlar for p in d.panolar if p.acilim and p.acilim.tur == "pencere"]
         if pen:
-            p = min(pen, key=lambda q: q.gap()[0]); g = p.gap(); h = p.acilim.yukseklik; ust = hy - lento; alt = ust - h
-            self.dim((g[0] + ox, bot), (g[0] + ox, bot + alt), (g[0] - 33 + ox, 0), 90, "ON_OLCU"); self.dim((g[0] + ox, bot + ust), (g[0] + ox, top), (g[0] - 33 + ox, 0), 90, "ON_OLCU")
+            p = min(pen, key=lambda q: q.gap()[0]); g = p.gap(); pk_ = G.pencere_kurali(p.acilim.olcu); ust, alt = pk_.ust, pk_.esik
+            if alt > 1e-6:                                        # İE-27: döşemeden pencerede (eşik 0) eşik ölçüsü yok
+                self.dim((g[0] + ox, bot), (g[0] + ox, bot + alt), (g[0] - 33 + ox, 0), 90, "ON_OLCU")
+            self.dim((g[0] + ox, bot + ust), (g[0] + ox, top), (g[0] - 33 + ox, 0), 90, "ON_OLCU")
         self.text("%" + fmt(egim * 100), (W / 4 + ox, top + rise / 2 + 30), 18, "ON_YAZI"); self.text("%" + fmt(egim * 100), (3 * W / 4 + ox, top + rise / 2 + 30), 18, "ON_YAZI")
         on_veranda = {v["ad"] for v in plan.dis_verandalar if v["cephe"] != "arka"}   # BK-14: önde ve yanda taşan veranda; arkadaki gövdenin ardında
         for p in VR.gorunus_parcalari(plan, plan.is_emri, "on") if on_veranda else []:
@@ -915,7 +929,7 @@ class Cizici:
             else:
                 msp.add_lwpolyline(pts, close=True, dxfattribs={"layer": "ON_CATI" if p["tur"] == "cati" else "ON_GORUNUS"})
         self.text("ÖN GÖRÜNÜŞ - ÇALIŞMA", (W / 2 + ox, top + rise + 100), 26, "ON_YAZI")
-        self.text(f"Pencere üst kotu {fmt(hy - lento)} cm | Lento {fmt(lento)} cm | Bina yüksekliği {fmt(hy)} cm", (W / 2 + ox, bot - 150), 15, "ON_YAZI")
+        self.text(self._ust_kot_yazisi(hy, lento), (W / 2 + ox, bot - 150), 15, "ON_YAZI")
 
     def _veranda_gorunusu(self, taraf, r):
         """D-31: taşan verandanın bu görünüşteki parçaları (`veranda.gorunus_parcalari`; u görünüşün yatayında, `cephe_gorunus.eksen` ile aynı
@@ -1018,7 +1032,8 @@ class Cizici:
             pen = [a for a in g["acikliklar"] if a["tur"] == "pencere"]
             if pen and taraf in KOT_GORUNUSLERI:
                 a = pen[0]
-                self.dim((a["u0"] + ox, bot), (a["u0"] + ox, bot + a["z0"]), (a["u0"] - 33 + ox, 0), 90, "ON_OLCU")
+                if a["z0"] > 1e-6:                                # İE-27: döşemeden pencerede (eşik 0) eşik ölçüsü yok
+                    self.dim((a["u0"] + ox, bot), (a["u0"] + ox, bot + a["z0"]), (a["u0"] - 33 + ox, 0), 90, "ON_OLCU")
                 self.dim((a["u0"] + ox, bot + a["z1"]), (a["u0"] + ox, top), (a["u0"] - 33 + ox, 0), 90, "ON_OLCU")
             yazilan = set()
             for u, z, e in r["egimler"]:                          # D-31 madde 10: aynı eğim görünüşte bir kez, soldaki yüzde
@@ -1028,7 +1043,7 @@ class Cizici:
                 self.text("%" + fmt(e * 100), (u + ox, bot + z + 30), 18, "ON_YAZI")
             self.text(f"{CG.AD[taraf]} GÖRÜNÜŞ - ÇALIŞMA", (W / 2 + ox, top + rise + 100), 26, "ON_YAZI")
             if taraf == "on":
-                self.text(f"Pencere üst kotu {fmt(hy - lento)} cm | Lento {fmt(lento)} cm | Bina yüksekliği {fmt(hy)} cm", (W / 2 + ox, bot - 150), 15, "ON_YAZI")
+                self.text(self._ust_kot_yazisi(hy, lento), (W / 2 + ox, bot - 150), 15, "ON_YAZI")
             self._bolge(taraf, n0)                                # D-31 madde 12: A4 sayfasında üstte ön ve arka, altta sol ve sağ
 
     def ciz_ozellik_tablosu(self, ox, oy, satirlar):
@@ -1194,7 +1209,9 @@ def uret(is_emri: dict, cikti_dir: Path, ad_govde: str | None = None, pdf_hatada
         c.ciz_plan(2 * gap, 0.0, "MONTAJ", "SAHA MONTAJ PLANI", baslik + " | Standart dışı panolar mor ve ölçülü")
     _yeni = G.yeni_anahtar_var(is_emri)
     _lento = float(yapi.get("duvar_yuksekligi_cm", 250)) - PENCERE_UST_KOTU
-    notlar = [f"Pencereler pano ortasında. Pencere üstünden duvar üstüne (lento): {fmt(_lento)} cm.",
+    _ds = _dosemeden_pencereler(c.plan)                     # İE-27 madde 11: döşemeden pencerenin lentosu boyundan
+    notlar = [f"Pencereler pano ortasında. Pencere üstünden duvar üstüne (lento): {fmt(_lento)} cm"
+              + (f"; döşemeden pencere {', '.join(o.replace('x', '/') for o in _ds)}: üst kotu boyu kadar." if _ds else "."),
               "Net alanlar kapı eşikleri hariç; veranda alanı açık dış kenarlara kadardır.",
               "Açık mahal sınırları bitişik duvar yüzünün devamı kabul edildi."]
     for i, s in enumerate(notlar):

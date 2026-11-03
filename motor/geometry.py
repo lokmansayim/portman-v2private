@@ -10,8 +10,10 @@ Bütün ölçüler cm. Koordinat: sol-alt dış köşe (0,0); +x sağa, +y arkay
 from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Optional
+import json
 import math
 import re
+from pathlib import Path
 
 from shapely.geometry import box, Polygon, MultiPolygon
 from shapely.ops import unary_union
@@ -30,11 +32,15 @@ _AKS_EK = {"x": [], "y": []}   # İE-11: ek aks değerleri (etiket için)
 
 PENCERE_OLCULERI = {"120x120": (120, 120), "120x180": (120, 180), "60x40": (60, 40)}   # BK-13'e kadarki katalog (DXF kaynak blokları ve çıkarıcı bunlar)
 # BK-13 (Lokman, kartlar 23 Ekim 06:23): her ölçü tek kuraldan (`pencere_kurali`); üstü 200 ("Üstü 200"), panodan geniş pencere 251'lik
-# panoda ("251'lik pano")
-PENCERE_UST_KOTU_CM = 200.0             # eşik = 200 − boy (bugünkü üçü: 80, 20, 160; malzeme kataloğu P01–P03)
-PENCERE_EN_SINIRI = (30, 247)           # 247 = iki panoluk (251) pencereli pano − PENCERE_PANO_PAYI_CM
-PENCERE_BOY_SINIRI = (20, 180)          # 180'den uzun pencere eşiği 20'nin (bugünkü en alçak) altına iter, kapı gibi olur
-PENCERE_PANO_PAYI_CM = 4.0              # açıklık panodan en az 4 cm dar
+# panoda ("251'lik pano"). İE-27 madde 11 (Lokman, 3 Kasım 2026 09:52: "pencereler konusunda da bir veri tabanın olmalı hangisi geldiyse onu
+# uygula yani kısaltma"): kural ve bildiğimiz pencereler `kurallar/pencere/pencereler.json`'da; gelen ölçü kısaltılmaz (boy 180, en 247 sınırı kalktı)
+PENCERE_VT = json.loads((Path(__file__).resolve().parents[1] / "kurallar" / "pencere" / "pencereler.json").read_text(encoding="utf-8"))
+_PK = {k: v["deger"] for k, v in PENCERE_VT["kural"].items()}
+PENCERE_UST_KOTU_CM = float(_PK["ust_kot_cm"])   # eşik = 200 − boy (bugünkü üçü: 80, 20, 160; malzeme kataloğu P01–P03)
+PENCERE_EN_SINIRI = tuple(_PK["en_cm"])         # (30, 999): üst sınır yok; pano sayısı enden, duvarda yer yoksa açık hata
+PENCERE_BOY_SINIRI = tuple(_PK["boy_cm"])       # (20, 240): üst kotu (200) geçen pencere döşemeden (eşik 0), üst kotu boyu kadar
+PENCERE_PANO_PAYI_CM = float(_PK["pano_payi_cm"])   # açıklık panodan en az 4 cm dar
+PENCERE_MODELLERI = frozenset(m["olcu"] for m in PENCERE_VT["modeller"])
 KAPI_GENISLIK = {"ic_kapi": 82.0, "dis_kapi": 97.0, "gecis": 82.0}
 # İE-11 (PK-01 montaj paftası, 13.10.2026; yalnız `dizilim.pencere` / `dizilim.kapi` anahtarıyla):
 PENCERE_ORTALAMA_ESIGI_CM = MOD / 4.0   # oda ortası ızgara panosunun ortasından en çok ¼ pano kaçıyorsa ızgara kalır (paftada 6 pencerenin 4'ü), yoksa pencereli pano odaya ortalanır
@@ -55,12 +61,18 @@ class PencereKurali:
     en: int                          # cm
     boy: int                         # cm
     esik: float                      # cm, döşemeden
-    pano: int                        # 1: tek pano (125,5); 2: panodan geniş, iki panoluk 251'lik pencereli pano
+    pano: int                        # 1: tek pano (125,5); 2: panodan geniş, 251'lik pencereli pano; 3: 376,5'lik (İE-27) …
+
+    @property
+    def ust(self) -> float:
+        """Pencerenin üst kotu (cm, döşemeden): 200; boyu 200'ü geçen pencerede boyu kadar (eşik 0)."""
+        return self.esik + self.boy
 
 
 def pencere_kurali(olcu) -> PencereKurali:
-    """Pencere ölçüsünün tek kuralı (BK-13): "ENxBOY" (tam cm) → en, boy, eşik (üst kot 200 − boy) ve pano sayısı (en 121,5'i geçerse 2).
-    Motor, IFC, DXF, pafta yazısı ve testler ölçüyü ve eşiği buradan alır. Yazım ya da sınır dışı ölçü açık hata."""
+    """Pencere ölçüsünün tek kuralı (BK-13; İE-27 madde 11, `kurallar/pencere/pencereler.json`): "ENxBOY" (tam cm) → en, boy, eşik (üst kot
+    200 − boy; boyu 200'ü geçen pencere döşemeden, eşik 0) ve pano sayısı ⌈(en + 4) ÷ 125,5⌉ (en 121,5'i geçerse 2, 247'yi geçerse 3 …).
+    Motor, IFC, DXF, pafta yazısı ve testler ölçüyü ve eşiği buradan alır. Ölçü kısaltılmaz; yazım ya da sınır dışı ölçü açık hata."""
     m = re.fullmatch(r"([1-9]\d{1,2})x([1-9]\d{1,2})", olcu) if isinstance(olcu, str) else None
     if not m:
         raise IsEmriHatasi(f"Katalog dışı pencere ölçüsü: {olcu} (biçim ENxBOY, tam cm; ör. 150x140)")
@@ -68,7 +80,8 @@ def pencere_kurali(olcu) -> PencereKurali:
     (e0, e1), (b0, b1) = PENCERE_EN_SINIRI, PENCERE_BOY_SINIRI
     if not (e0 <= en <= e1 and b0 <= boy <= b1):
         raise IsEmriHatasi(f"Katalog dışı pencere ölçüsü: {olcu} (en {e0}–{e1}, boy {b0}–{b1} cm)")
-    return PencereKurali(en, boy, PENCERE_UST_KOTU_CM - boy, 1 if en <= MOD - PENCERE_PANO_PAYI_CM else 2)
+    esik = max(0.0, PENCERE_UST_KOTU_CM - boy) if _PK["dosemeden"] else PENCERE_UST_KOTU_CM - boy
+    return PencereKurali(en, boy, esik, max(1, math.ceil((en + PENCERE_PANO_PAYI_CM) / MOD - 1e-9)))
 
 
 def pencere_yazisi(olcu: str) -> str:
@@ -901,7 +914,7 @@ def _kur(is_emri: dict) -> Plan:
                 pk = pencere_kurali(ac.get("olcu"))
             except IsEmriHatasi:
                 continue
-            if pk.pano == 2:                                    # BK-13: geniş pencerenin 251'lik panosu odaya ortalanmaz (ayrı PR)
+            if pk.pano >= 2:                                    # BK-13: geniş pencerenin 251'lik panosu odaya ortalanmaz (ayrı PR)
                 uyarilar.append(f"Pencere {ac['mahal']} {ac['olcu']}: panodan geniş pencere oda ortasına alınmadı; ızgara panosunda kaldı")
                 continue
             cand = _edges_of_room_side(duvarlar, ac["mahal"], NORMAL[ac["duvar"]])
@@ -1043,6 +1056,9 @@ def _kur(is_emri: dict) -> Plan:
         if tur == "pencere":
             pk = pencere_kurali(ac["olcu"])
             w, hh = pk.en, pk.boy
+            if ac["olcu"] not in PENCERE_MODELLERI:             # İE-27 madde 11: kayıtta olmayan pencere de kurulur; kayda eklensin diye uyarılır
+                uyarilar.append(f"Pencere {ac.get('mahal')} {ac['olcu']}: pencere veri tabanında yok (kurallar/pencere/pencereler.json); "
+                                "ölçüsüyle kuruldu, kayda eklenmeli")
             if "kapi_yeri" in ac:                                # K21: kapı anahtarı pencerede sessizce yutulmaz (duvar_ucu yukarıda)
                 raise IsEmriHatasi(f"kapi_yeri yalnız kapıda yazılır: {ac}")
             mahal = ac["mahal"]
@@ -1079,7 +1095,7 @@ def _kur(is_emri: dict) -> Plan:
             lo = X(k0 / 2) if d.yon == "x" else Y(k0 / 2)
             hi = X(k1 / 2) if d.yon == "x" else Y(k1 / 2)
             pano_araliklari.append((d, min(lo, hi), max(lo, hi)))
-            yarim = MOD / 2 if pk is not None and pk.pano == 2 else acl.genislik / 2   # BK-13: geniş pencerede aday panonun kendisi aralıkta
+            yarim = MOD / 2 if pk is not None and pk.pano >= 2 else acl.genislik / 2   # BK-13: geniş pencerede aday panonun kendisi aralıkta
             for p in d.panolar:
                 mid = (p.a0 + p.a1) / 2
                 if mid - yarim >= lo - 1e-6 and mid + yarim <= hi + 1e-6 and p not in [q for _, q in panolar]:
@@ -1105,7 +1121,7 @@ def _kur(is_emri: dict) -> Plan:
         d, p = panolar[idx]
         if p.acilim:
             raise IsEmriHatasi(f"Aynı panoya iki açıklık: {ac}")
-        if pk is not None and pk.pano == 2:                     # BK-13: panodan geniş pencere; komşusu bütün açıklıklar yerleşince seçilir
+        if pk is not None and pk.pano >= 2:                     # BK-13: panodan geniş pencere; komşusu bütün açıklıklar yerleşince seçilir
             genis_pencereler.append((d, p, next(((lo, hi) for dd, lo, hi in pano_araliklari if dd is d and lo - 1e-6 <= p.a0 and p.a1 <= hi + 1e-6), None), ac))
         elif acl.genislik > p.boy - 4:
             raise IsEmriHatasi(f"Açıklık panodan geniş: {ac} (pano {p.boy})")
@@ -1596,17 +1612,20 @@ def _genis_pencere_panosu(d: "Duvar", p: Pano, aralik: Optional[tuple], ac: dict
     """BK-13 (Lokman, kart 23 Ekim 06:23 "251'lik pano"): panodan geniş pencerenin panosu aynı duvardaki komşu tam panoyla birleşir.
     Komşu önce dizilim yönünde sonraki pano (+x ya da +y; arka-sol başlangıçta y duvarında arkadan öne), olmazsa önceki; ikisi de tam boy
     (125,5), komşu açıklıksız ve odanın duvar aralığında olmalı. Komşu yoksa açık hata; yalnız `dizilim.genis_pencere: yarim_pano` yazılıysa
-    (İE-17 PR-2) odanın duvar parçası 62,75 + pencereli pano + 62,75 olur (aşağıda), o da olmazsa yine hata. Her koşuda aynı komşu seçilir."""
+    (İE-17 PR-2) odanın duvar parçası 62,75 + pencereli pano + 62,75 olur (aşağıda), o da olmazsa yine hata. Her koşuda aynı komşu seçilir.
+    İE-27 madde 11 (kısaltma yok): iki panoya sığmayan pencere (AP-26 280/210) n = ⌈(en + 4) ÷ 125,5⌉ panoyla aynı kuralla birleşir: önce
+    pencerenin panosu ve sonraki n − 1 pano, olmazsa bir geri kayarak (iki panoda bugünkü sıra: sonraki, önceki)."""
     i = next(k for k, q in enumerate(d.panolar) if q is p)
+    n = pencere_kurali(p.acilim.olcu).pano
     tam = lambda q: abs(q.boy - MOD) < 1e-6
     if tam(p) and aralik is not None:
         lo, hi = aralik
-        for j in (i + 1, i - 1):
-            if not 0 <= j < len(d.panolar):
+        for a in range(i, i - n, -1):
+            b = a + n - 1
+            if a < 0 or b >= len(d.panolar):
                 continue
-            q = d.panolar[j]
-            if tam(q) and q.acilim is None and q.a0 >= lo - 1e-6 and q.a1 <= hi + 1e-6:
-                a, b = min(i, j), max(i, j)
+            qs = [d.panolar[j] for j in range(a, b + 1)]
+            if all(tam(q) and (q is p or q.acilim is None) and q.a0 >= lo - 1e-6 and q.a1 <= hi + 1e-6 for q in qs):
                 yeni = Pano(d, d.panolar[a].a0, d.panolar[b].a1, p.acilim)
                 d.panolar[a:b + 1] = [yeni]
                 return yeni
@@ -1618,13 +1637,13 @@ def _genis_pencere_panosu(d: "Duvar", p: Pano, aralik: Optional[tuple], ac: dict
         lo, hi = max(aralik[0], d.p0), min(aralik[1], d.p1)
         ic = [k for k, q in enumerate(d.panolar) if q.a0 >= lo - 1e-6 and q.a1 <= hi + 1e-6]
         orta = hi - lo - MOD
-        if ic and i in ic and ic == list(range(ic[0], ic[-1] + 1)) and abs(d.panolar[ic[0]].a0 - lo) < 1e-6 \
+        if n == 2 and ic and i in ic and ic == list(range(ic[0], ic[-1] + 1)) and abs(d.panolar[ic[0]].a0 - lo) < 1e-6 \
                 and abs(d.panolar[ic[-1]].a1 - hi) < 1e-6 and all(d.panolar[k].acilim is None for k in ic if k != i) \
                 and p.acilim.genislik + 4 - 1e-9 <= orta <= 2 * MOD + 1e-6:
             yeni = Pano(d, lo + MOD / 2, hi - MOD / 2, p.acilim)
             d.panolar[ic[0]:ic[-1] + 1] = [Pano(d, lo, lo + MOD / 2), yeni, Pano(d, hi - MOD / 2, hi)]
             return yeni
-    raise IsEmriHatasi(f"Panodan geniş pencere için yanında tam pano yok (sonraki ya da önceki pano 125,5, açıklıksız ve aynı odada olmalı"
+    raise IsEmriHatasi(f"Panodan geniş pencere için yanında tam pano yok ({n} panoluk; sonraki ya da önceki pano 125,5, açıklıksız ve aynı odada olmalı"
                        f"{'; odanın duvar parçası 62,75 + pencereli pano + 62,75 olmuyor' if yarim_pano else ''}): {ac}")
 
 

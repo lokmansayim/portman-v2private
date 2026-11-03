@@ -43,8 +43,8 @@
   "acikliklar": [
     {"tur": "dis_kapi", "olcu": 90, "arasi": ["__DIS__", "ANTRE"], "duvar": "on", "pano": 0},
     {"tur": "dis_kapi", "olcu": 90, "arasi": ["__DIS__", "YATAK ODASI 1"], "duvar": "arka", "pano": 2},
-    {"tur": "pencere", "olcu": "240x180", "mahal": "SALON", "duvar": "on", "acilis": "surgulu", "pano": 2},
-    {"tur": "pencere", "olcu": "200x180", "mahal": "YATAK ODASI 2", "duvar": "arka", "acilis": "surgulu", "pano": 0},
+    {"tur": "pencere", "olcu": "280x210", "mahal": "SALON", "duvar": "on", "acilis": "surgulu", "pano": 2},
+    {"tur": "pencere", "olcu": "200x210", "mahal": "YATAK ODASI 2", "duvar": "arka", "acilis": "surgulu", "pano": 0},
     {"tur": "pencere", "olcu": "120x120", "mahal": "YATAK ODASI 1", "duvar": "arka", "pano": 1},
     {"tur": "pencere", "olcu": "50x50", "mahal": "EBV WC", "duvar": "sag", "pano": 0},
     {"tur": "pencere", "olcu": "120x120", "mahal": "MUTFAK", "duvar": "sag", "pano": 0},
@@ -76,7 +76,7 @@
   "varsayimlar": [
     "Köşe ve ızgara (İE-17 kuralı; paftada aynı): makas y'yi geçer (makas planı MKS 1–14, yedi hat, her hatta iki parça; aşık 749,58 = 689,58 + 2 × 30), kısa kenar y. Ön ve arka duvar köşeden geçer, x ızgarası duvar ekseninden (5 + 125,5k); yan duvarlar araya girer, y ızgarası arka iç yüzden.",
     "Ön ve arka zemin terası gövdeden taşan veranda (verandalar): önde sağda 479,58 × 110, arkada sağda 438,58 × 110; üstleri tek eğim (paftada P1, P2: trapez 150'lik); eğim paftada yazılı değil, ana çatınınki alındı.",
-    "Pencereler ve kapılar paftadaki yerine en yakın Motor panosunda (pano dizini). Paftadaki 280×210 ve 200/210 sürgülüler Motor'un pencere sınırına göre (en çok 247 × 180) 240x180 ve 200x180 sürgülü yazıldı. Arka terastan yatak odası 1'e açılan kapı dış kapı sayıldı. Kapı genişlikleri paftada yazılı değil: dış kapı 90, iç kapı 82 (Motor'un ölçüsü).",
+    "Pencereler ve kapılar paftadaki yerine en yakın Motor panosunda (pano dizini). Paftadaki 280×210 ve 200/210 sürgülüler ölçüsüyle (İE-27 madde 11, kısaltma yok; 3 Kasım 2026'ya kadar Motor'un sınırıyla 240x180 ve 200x180 yazılıydı): döşemeden; 280'lik üç panoluk (376,5), 200'lük iki panoluk. Arka terastan yatak odası 1'e açılan kapı dış kapı sayıldı. Kapı genişlikleri paftada yazılı değil: dış kapı 90, iç kapı 82 (Motor'un ölçüsü).",
     "Oda adları ve alanları paftanın planından (yatak odaları 13,76 / 14,72, banyo 5,6, ebeveyn banyosu 4,23, mutfak 13,37, salon 19,37, antre 13,80 m²).",
     "Çatı: beşik, makas y'yi geçer, eğim 10,4° (%18,36; paftada yazılı), saçak 30 (aşık boyu ve 700'lük trapez), topuk 10. Özellikler paftanın özellik tablosundan ve açıklamasından."
   ],

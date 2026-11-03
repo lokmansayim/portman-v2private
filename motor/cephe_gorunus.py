@@ -91,7 +91,12 @@ def cephe(plan: G.Plan, taraf: str) -> dict:
             g = p.gap()
             u0, u1 = sorted((uu(g[0]), uu(g[2])) if yon == "x" else (uu(g[1]), uu(g[3])))
             ust = G.PENCERE_UST_KOTU_CM
-            ac.append({"tur": a.tur, "u0": u0, "u1": u1, "z0": ust - a.yukseklik if a.tur == "pencere" else 0.0, "z1": ust,
+            if a.tur == "pencere":                                      # İE-27 madde 11: 200'ü geçen pencere döşemeden, üstü boyu kadar
+                pk = G.pencere_kurali(a.olcu)
+                z0, z1 = pk.esik, pk.ust
+            else:
+                z0, z1 = 0.0, ust
+            ac.append({"tur": a.tur, "u0": u0, "u1": u1, "z0": z0, "z1": z1,
                        "olcu": a.olcu if a.tur == "pencere" else None, "acilis": a.acilis})
     return {"en": en, "derz": sorted(v for v in us if 1e-6 < v < en - 1e-6), "acikliklar": sorted(ac, key=lambda k: k["u0"])}
 

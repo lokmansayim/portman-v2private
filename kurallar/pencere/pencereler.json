@@ -1,0 +1,272 @@
+{
+ "sema": "portman.pencere_veritabani/1",
+ "aciklama": "Pencere veri tabanı (İE-27 PR-2, D-45 madde 11). Lokman, 3 Kasım 2026 09:52, madde 11: \"pencere modellerini sana vermiştim yani pencereler konusunda da bir veri tabanın olmalı hangisi geldiyse onu uygula yani kısaltma\". Gelen pencere (İş Emri, pafta) ölçüsüyle kurulur; Motor kısaltmaz, en yakın ölçüye çevirmez. `kural` Motor'un tek pencere kuralıdır (`motor/geometry.py › pencere_kurali` okur); `modeller` bildiğimiz pencerelerin kaydıdır: kaynağıyla, Lokman'ın ve Portatifev'in kullandığı ölçüler. Kayıtta olmayan ölçü yine kurulur, plan uyarısı yazılır (yeni model kayda eklenir).",
+ "kural": {
+  "ust_kot_cm": {
+   "deger": 200,
+   "kaynak": "BK-13, Lokman kartı 23 Ekim 06:23 \"Üstü 200\": eşik = 200 − boy"
+  },
+  "dosemeden": {
+   "deger": true,
+   "kaynak": "İE-27 madde 11: boyu üst kotu geçen pencere (sürgülü 200/210) kısaltılmaz; eşik 0, üst kot boyu kadar"
+  },
+  "pano_payi_cm": {
+   "deger": 4,
+   "kaynak": "BK-13: açıklık panodan en az 4 cm dar"
+  },
+  "pano_sayisi": {
+   "deger": "⌈(en + pano payı) ÷ 125,5⌉",
+   "kaynak": "BK-13 \"251'lik pano\" (iki pano); İE-27 madde 11: daha genişi üç ve daha çok panoluk (AP-26 280/210)"
+  },
+  "en_cm": {
+   "deger": [
+    30,
+    999
+   ],
+   "kaynak": "BK-13 alt sınırı 30; üst sınır yok (yazım üç hane), duvarda yer yoksa Motor açık hata verir"
+  },
+  "boy_cm": {
+   "deger": [
+    20,
+    240
+   ],
+   "kaynak": "BK-13 alt sınırı 20 (en alçak eşik değil, en kısa pencere); 240 bildiğimiz en uzun pencere (şablonda 200/240), 250'lik panoda 10 cm kalır; daha uzunu yazım hatası sayılır"
+  }
+ },
+ "modeller": [
+  {
+   "olcu": "120x120",
+   "tur": "pencere",
+   "ad": "standart pencere",
+   "kaynak": "Motor'un ilk üç ölçüsü (P01; şablonda 363 yazı)"
+  },
+  {
+   "olcu": "120x180",
+   "tur": "pencere",
+   "ad": "boy pencere",
+   "kaynak": "Motor'un ilk üç ölçüsü (P02; şablonda 105 yazı, ON_PENCERE_SABLON_120180)"
+  },
+  {
+   "olcu": "60x40",
+   "tur": "vasistas",
+   "ad": "vasistas",
+   "kaynak": "Motor'un ilk üç ölçüsü (P03; şablonda 139 yazı); banyo ve WC"
+  },
+  {
+   "olcu": "120x100",
+   "tur": "pencere",
+   "ad": "mutfak penceresi",
+   "kaynak": "Güncel Şablon 2024 ölçü etiketleri (Pencere varyasyonları envanteri (İE-22, 28 Ekim 2026; Drive PENCERE_VARYASYONLARI.md)), 65 yazı; AP-22 paftası"
+  },
+  {
+   "olcu": "120x125",
+   "tur": "pencere",
+   "ad": "standart pencere (125)",
+   "kaynak": "Lokman'ın 28 Ekim planı (Pencere varyasyonları envanteri (İE-22, 28 Ekim 2026; Drive PENCERE_VARYASYONLARI.md))"
+  },
+  {
+   "olcu": "60x125",
+   "tur": "pencere",
+   "kaynak": "Lokman'ın 28 Ekim planı (Pencere varyasyonları envanteri (İE-22, 28 Ekim 2026; Drive PENCERE_VARYASYONLARI.md))"
+  },
+  {
+   "olcu": "120x200",
+   "tur": "pencere",
+   "ad": "Fransız pencere",
+   "kaynak": "Lokman'ın 28 Ekim planı (Pencere varyasyonları envanteri (İE-22, 28 Ekim 2026; Drive PENCERE_VARYASYONLARI.md)); boy 200, eşik 0"
+  },
+  {
+   "olcu": "180x200",
+   "tur": "pencere",
+   "acilis": "surgulu",
+   "kaynak": "AP-11 ve AP-14 montaj paftası (İE-26 kör ölçümü); Güncel Şablon 2024 ölçü etiketleri (Pencere varyasyonları envanteri (İE-22, 28 Ekim 2026; Drive PENCERE_VARYASYONLARI.md)), 24 yazı"
+  },
+  {
+   "olcu": "200x210",
+   "tur": "pencere",
+   "acilis": "surgulu",
+   "kaynak": "AP-26 montaj paftası (İE-26 kör ölçümü)"
+  },
+  {
+   "olcu": "280x210",
+   "tur": "pencere",
+   "acilis": "surgulu",
+   "kaynak": "AP-26 montaj paftası (İE-26 kör ölçümü); üç panoluk"
+  },
+  {
+   "olcu": "160x180",
+   "tur": "pencere",
+   "kaynak": "Güncel Şablon 2024 ölçü etiketleri (Pencere varyasyonları envanteri (İE-22, 28 Ekim 2026; Drive PENCERE_VARYASYONLARI.md)), 14 yazı; AP-15, AP-28 paftaları"
+  },
+  {
+   "olcu": "180x180",
+   "tur": "pencere",
+   "kaynak": "Güncel Şablon 2024 ölçü etiketleri (Pencere varyasyonları envanteri (İE-22, 28 Ekim 2026; Drive PENCERE_VARYASYONLARI.md)), 29 yazı; AP-18 paftası"
+  },
+  {
+   "olcu": "170x180",
+   "tur": "pencere",
+   "kaynak": "AP-09 montaj paftası (İE-26 kör ölçümü)"
+  },
+  {
+   "olcu": "150x180",
+   "tur": "pencere",
+   "kaynak": "AP-09 montaj paftası (İE-26 kör ölçümü)"
+  },
+  {
+   "olcu": "120x70",
+   "tur": "pencere",
+   "kaynak": "AP-09 montaj paftası (İE-26 kör ölçümü)"
+  },
+  {
+   "olcu": "80x100",
+   "tur": "pencere",
+   "kaynak": "AP-28 montaj paftası (İE-26 kör ölçümü)"
+  },
+  {
+   "olcu": "100x60",
+   "tur": "vasistas",
+   "kaynak": "AP-21 montaj paftası (İE-26 kör ölçümü)"
+  },
+  {
+   "olcu": "50x50",
+   "tur": "vasistas",
+   "kaynak": "AP-22 ve AP-26 montaj paftası (İE-26 kör ölçümü)"
+  },
+  {
+   "olcu": "200x180",
+   "tur": "pencere",
+   "kaynak": "TK-03 İş Emri"
+  },
+  {
+   "olcu": "100x120",
+   "tur": "pencere",
+   "kaynak": "PK-07 paftası (BK-13)"
+  },
+  {
+   "olcu": "150x140",
+   "tur": "pencere",
+   "kaynak": "T76 planı (BK-13; Lokman 20 Ekim)"
+  },
+  {
+   "olcu": "120x150",
+   "tur": "pencere",
+   "kaynak": "T76 planı (BK-13); Güncel Şablon 2024 ölçü etiketleri (Pencere varyasyonları envanteri (İE-22, 28 Ekim 2026; Drive PENCERE_VARYASYONLARI.md)), 7 yazı"
+  },
+  {
+   "olcu": "180x150",
+   "tur": "pencere",
+   "kaynak": "T76 planı (BK-13)"
+  },
+  {
+   "olcu": "60x60",
+   "tur": "vasistas",
+   "kaynak": "T76 planı (BK-13); Güncel Şablon 2024 ölçü etiketleri (Pencere varyasyonları envanteri (İE-22, 28 Ekim 2026; Drive PENCERE_VARYASYONLARI.md)), 5 yazı"
+  },
+  {
+   "olcu": "200x200",
+   "tur": "pencere",
+   "kaynak": "Güncel Şablon 2024 ölçü etiketleri (Pencere varyasyonları envanteri (İE-22, 28 Ekim 2026; Drive PENCERE_VARYASYONLARI.md)), 22 yazı"
+  },
+  {
+   "olcu": "200x240",
+   "tur": "pencere",
+   "kaynak": "Güncel Şablon 2024 ölçü etiketleri (Pencere varyasyonları envanteri (İE-22, 28 Ekim 2026; Drive PENCERE_VARYASYONLARI.md)), 4 yazı"
+  },
+  {
+   "olcu": "200x195",
+   "tur": "pencere",
+   "kaynak": "Güncel Şablon 2024 ölçü etiketleri (Pencere varyasyonları envanteri (İE-22, 28 Ekim 2026; Drive PENCERE_VARYASYONLARI.md)), 6 yazı"
+  },
+  {
+   "olcu": "190x195",
+   "tur": "pencere",
+   "kaynak": "Güncel Şablon 2024 ölçü etiketleri (Pencere varyasyonları envanteri (İE-22, 28 Ekim 2026; Drive PENCERE_VARYASYONLARI.md)), 11 yazı"
+  },
+  {
+   "olcu": "160x200",
+   "tur": "pencere",
+   "kaynak": "Güncel Şablon 2024 ölçü etiketleri (Pencere varyasyonları envanteri (İE-22, 28 Ekim 2026; Drive PENCERE_VARYASYONLARI.md)), 2 yazı"
+  },
+  {
+   "olcu": "100x220",
+   "tur": "pencere",
+   "kaynak": "Güncel Şablon 2024 ölçü etiketleri (Pencere varyasyonları envanteri (İE-22, 28 Ekim 2026; Drive PENCERE_VARYASYONLARI.md)), 24 yazı"
+  },
+  {
+   "olcu": "150x220",
+   "tur": "pencere",
+   "kaynak": "Güncel Şablon 2024 ölçü etiketleri (Pencere varyasyonları envanteri (İE-22, 28 Ekim 2026; Drive PENCERE_VARYASYONLARI.md)), 14 yazı"
+  },
+  {
+   "olcu": "100x110",
+   "tur": "pencere",
+   "kaynak": "Güncel Şablon 2024 ölçü etiketleri (Pencere varyasyonları envanteri (İE-22, 28 Ekim 2026; Drive PENCERE_VARYASYONLARI.md)), 29 yazı"
+  },
+  {
+   "olcu": "100x180",
+   "tur": "pencere",
+   "kaynak": "Güncel Şablon 2024 ölçü etiketleri (Pencere varyasyonları envanteri (İE-22, 28 Ekim 2026; Drive PENCERE_VARYASYONLARI.md)), 18 yazı"
+  },
+  {
+   "olcu": "150x120",
+   "tur": "pencere",
+   "kaynak": "Güncel Şablon 2024 ölçü etiketleri (Pencere varyasyonları envanteri (İE-22, 28 Ekim 2026; Drive PENCERE_VARYASYONLARI.md)), 12 yazı"
+  },
+  {
+   "olcu": "150x150",
+   "tur": "pencere",
+   "kaynak": "Güncel Şablon 2024 ölçü etiketleri (Pencere varyasyonları envanteri (İE-22, 28 Ekim 2026; Drive PENCERE_VARYASYONLARI.md)), 9 yazı"
+  },
+  {
+   "olcu": "70x180",
+   "tur": "pencere",
+   "kaynak": "Güncel Şablon 2024 ölçü etiketleri (Pencere varyasyonları envanteri (İE-22, 28 Ekim 2026; Drive PENCERE_VARYASYONLARI.md)), 37 yazı"
+  },
+  {
+   "olcu": "59x170",
+   "tur": "pencere",
+   "kaynak": "Güncel Şablon 2024 ölçü etiketleri (Pencere varyasyonları envanteri (İE-22, 28 Ekim 2026; Drive PENCERE_VARYASYONLARI.md)), 20 yazı"
+  },
+  {
+   "olcu": "59x180",
+   "tur": "pencere",
+   "kaynak": "Güncel Şablon 2024 ölçü etiketleri (Pencere varyasyonları envanteri (İE-22, 28 Ekim 2026; Drive PENCERE_VARYASYONLARI.md)), 14 yazı"
+  },
+  {
+   "olcu": "50x180",
+   "tur": "pencere",
+   "kaynak": "Güncel Şablon 2024 ölçü etiketleri (Pencere varyasyonları envanteri (İE-22, 28 Ekim 2026; Drive PENCERE_VARYASYONLARI.md)), 4 yazı"
+  },
+  {
+   "olcu": "80x120",
+   "tur": "pencere",
+   "kaynak": "Güncel Şablon 2024 ölçü etiketleri (Pencere varyasyonları envanteri (İE-22, 28 Ekim 2026; Drive PENCERE_VARYASYONLARI.md)), 11 yazı"
+  },
+  {
+   "olcu": "105x170",
+   "tur": "pencere",
+   "kaynak": "Güncel Şablon 2024 ölçü etiketleri (Pencere varyasyonları envanteri (İE-22, 28 Ekim 2026; Drive PENCERE_VARYASYONLARI.md)), 10 yazı"
+  },
+  {
+   "olcu": "105x180",
+   "tur": "pencere",
+   "kaynak": "Güncel Şablon 2024 ölçü etiketleri (Pencere varyasyonları envanteri (İE-22, 28 Ekim 2026; Drive PENCERE_VARYASYONLARI.md)), 2 yazı"
+  },
+  {
+   "olcu": "120x140",
+   "tur": "pencere",
+   "kaynak": "Güncel Şablon 2024 ölçü etiketleri (Pencere varyasyonları envanteri (İE-22, 28 Ekim 2026; Drive PENCERE_VARYASYONLARI.md)), 9 yazı"
+  },
+  {
+   "olcu": "120x130",
+   "tur": "pencere",
+   "kaynak": "Güncel Şablon 2024 ölçü etiketleri (Pencere varyasyonları envanteri (İE-22, 28 Ekim 2026; Drive PENCERE_VARYASYONLARI.md)), 5 yazı"
+  },
+  {
+   "olcu": "30x30",
+   "tur": "vasistas",
+   "kaynak": "Güncel Şablon 2024 ölçü etiketleri (Pencere varyasyonları envanteri (İE-22, 28 Ekim 2026; Drive PENCERE_VARYASYONLARI.md)), 18 yazı"
+  }
+ ]
+}

@@ -42,7 +42,7 @@
   "acik_sinirlar": [],
   "acikliklar": [
     {"tur": "dis_kapi", "olcu": 90, "arasi": ["VERANDA", "SALON+MUTFAK"], "pano": 0},
-    {"tur": "pencere", "olcu": "180x180", "mahal": "SALON+MUTFAK", "duvar": "on", "acilis": "surgulu", "pano": 3},
+    {"tur": "pencere", "olcu": "180x200", "mahal": "SALON+MUTFAK", "duvar": "on", "acilis": "surgulu", "pano": 3},
     {"tur": "pencere", "olcu": "120x120", "mahal": "YATAK ODASI 1", "duvar": "arka"},
     {"tur": "pencere", "olcu": "60x40", "mahal": "BANYO", "duvar": "arka", "pano": 0},
     {"tur": "pencere", "olcu": "120x120", "mahal": "YATAK ODASI 2", "duvar": "arka", "pano": 0},
@@ -75,7 +75,7 @@
     "Köşe ve ızgara (İE-17 kuralı; paftada aynı): makas y'yi geçer (aşık planı 808,63 = 748,67 + 2 × 30 saçak; eğik boy 463,7), kısa kenar y. Ön ve arka duvar köşeden geçer, x ızgarası duvar ekseninden (5 + 125,5k); yan duvarlar araya girer, y ızgarası arka iç yüzden, 48'lik kesilmiş pano önde (son_pano: kosu).",
     "Veranda sağ önde, gömme (431 × 193,92), ön ve sağ açık; sağ ön köşede 10 × 10 dikme. Verandanın arka duvarı (Motor çerçevesinde y 622) ve sol duvarı (x 312,5) ek aks; verandanın arka duvarında panolar sol duvarın aksından (dis_pano_dayanagi): kapı panosu 312,5–438 (paftada 312,6–438,2), sürgülü pencere yanında.",
     "Pencereler: yatak odası 1'in arka penceresi odanın ortasında (dizilim.pencere: oda_ortasi; paftada 251'lik panonun ortası); ötekiler paftadaki yerine en yakın Motor panosunda (pano dizini). Motor'un ızgarasıyla bilinen farklar: ön pencere 38 cm, banyo vasistası 58 cm, verandaya bakan 120/180 24 cm kayık; arka duvarda Motor 8 pano, pafta 4 (pafta pencereli 251 ve 236,67'lik özel pano kullanıyor).",
-    "180/200 sürgülü pencere: Motor'un pencere boyu en çok 180, 180x180 sürgülü yazıldı (iki panoluk, paftada 242,75'lik pano).",
+    "180/200 sürgülü pencere paftadaki ölçüsüyle (İE-27 madde 11, kısaltma yok; 3 Kasım 2026'ya kadar Motor'un 180 sınırıyla 180x180 yazılıydı): döşemeden, iki panoluk (paftada 242,75'lik pano).",
     "Kapılar paftadaki duvarda ve panoda; genişlikler paftada yazılı değil: dış kapı 90, iç kapı 82 (Motor'un ölçüsü). Oda adları paftada yazılı değil, yerleşimden: salon + mutfak, banyo (60/40 vasistaslı), iki yatak odası, hol.",
     "Çatı: beşik, makas y'yi geçer (MK01–MK07), eğim 18,2° (%32,88), saçak 30, topuk 10 (paftada mahya 154,83). Özellikler ve alıcıya ait kalemler paftanın özellik tablosundan ve açıklamasından."
   ],

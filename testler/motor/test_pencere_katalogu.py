@@ -1,7 +1,8 @@
 """BK-13 · Pano Motor'unun pencere kataloğu (Lokman, kartlar 23 Ekim 06:23: "Uygula", "251'lik pano", "Üstü 200").
 
-- Her ölçü tek kuraldan (`geometry.pencere_kurali`): "ENxBOY" tam cm, en 30–247, boy 20–180; eşik = 200 − boy; en 121,5'i geçerse pencere
-  iki panoluk 251'lik pencereli panoda.
+- Her ölçü tek kuraldan (`geometry.pencere_kurali`): "ENxBOY" tam cm; eşik = 200 − boy; en 121,5'i geçerse pencere iki panoluk 251'lik
+  pencereli panoda. İE-27 madde 11 (Lokman, 3 Kasım 2026: "kısaltma"): en 247 ve boy 180 sınırı kalktı (boy 20–240, en 30'dan); daha geniş
+  ve uzun pencere `test_pencere_veritabani.py`'de. Burada sınanan: yazım hatası ve sınır dışı ölçü yine hata.
 - Komşu kuralı (CIO notu 2): önce dizilim yönünde sonraki pano, olmazsa önceki; tam boy, açıklıksız, aynı odanın duvar aralığında. Yoksa hata.
   Birleşme bütün açıklıklar yerleşince; aynı duvardaki geniş pencereler dizilimin sonundan başına kurulur. İş Emri'nin pano dizinleri
   ızgaraya göre kalır, sonuç açıklıkların yazılış sırasına bağlı değil (geometri hakemi, 23 Ekim, iki tur).
@@ -73,7 +74,7 @@ def test_kural_esik_200_eksi_boy_ve_pano(olcu, en, boy, esik, pano):
     assert k.esik + k.boy == G.PENCERE_UST_KOTU_CM == 200.0
 
 
-@pytest.mark.parametrize("olcu", ["29x120", "248x120", "120x19", "120x181", "120X120", "120x120 ", "120*120", "060x040", "120x120x50",
+@pytest.mark.parametrize("olcu", ["29x120", "120x19", "120x241", "120X120", "120x120 ", "120*120", "060x040", "120x120x50",
                                   "", None, 120, "1200x1200"])
 def test_sinir_disi_ya_da_yanlis_yazim_hata(olcu):
     with pytest.raises(G.IsEmriHatasi, match="Katalog dışı pencere ölçüsü"):
@@ -81,7 +82,7 @@ def test_sinir_disi_ya_da_yanlis_yazim_hata(olcu):
 
 
 def test_sinir_disi_olcu_motorda_hata():
-    ie = _oku(ALTIN); ie["acikliklar"][0]["olcu"] = "260x120"
+    ie = _oku(ALTIN); ie["acikliklar"][0]["olcu"] = "120x245"
     with pytest.raises(G.IsEmriHatasi, match="Katalog dışı pencere ölçüsü"):
         G.kur(ie)
 
