@@ -560,8 +560,8 @@ def _capraz_cumba_catilari(plan, ie: dict) -> tuple[list[dict], dict]:
     çatıya dik küçük beşik, taşan verandanın çapraz beşiği gibi (BK-14; PK-03): kalkanı dış ucunda, iki deresi ana çatının yüzüyle (ters
     mahya; vadi kenarları), mahyası dereler birleşene kadar. Cumba makası (yavru makas) dış ucundaki kalkan duvarının ekseninden başlar,
     125,5 arayla, derelerin birleştiği yere kadar (AP-22 paftası MK10–12: 3). Saçak, alın, mahya, vadi kenarları çatının kendi
-    kenarlarından (`cati_genel.cati_kur`). Çıkıntısız cumba (AP-13, AP-16; kör, makas planı kıyaslanmadı) ve birden çok cumba: liste
-    yazılmaz. Dönen: (parçalar, çatı tanımı; aşık ve kaplama yüz yüz ondan)."""
+    kenarlarından (`cati_genel.cati_kur`). Çıkıntısız cumba (alnı ana çatının saçak duvarında; AP-06, AP-13, AP-16) aynı kuralla: makas
+    planı üç paftada kıyaslandı (İE-29). Birden çok cumba: liste yazılmaz. Dönen: (parçalar, çatı tanımı; aşık ve kaplama yüz yüz ondan)."""
     from . import cati_prefabrik as CP
     from . import geometry as G
     from .genel import cati_genel
@@ -570,11 +570,11 @@ def _capraz_cumba_catilari(plan, ie: dict) -> tuple[list[dict], dict]:
     cumbalar = c.get("cumbalar") or []
     if len(cumbalar) != 1:
         raise ListeYazilmaz(f"beşik + cumba: {len(cumbalar)} cumba; liste tek çapraz cumbayı sayar, liste yazılmaz")
-    if not float(cumbalar[0].get("cikinti_cm", 0)):
-        # çıkıntısız cumbanın (alnı ana çatının saçak duvarında; AP-13, AP-16) makasları paftanın makas planıyla kıyaslanmadı (iki ev kör)
-        raise ListeYazilmaz("beşik + cumba ana çatının çatı satırları bu sürümde yok: çıkıntısız çapraz cumbanın (alnı ana çatının saçak "
-                            "duvarında) makasları paftanın makas planıyla kıyaslanmadı (İE-17 PR-1b/K7: yalnız çıkıntılı cumba, AP-22); "
-                            "liste yazılmaz")
+    # İE-29: çıkıntısız cumba (alnı ana çatının saçak duvarında; AP-06, AP-13, AP-16) aynı kuralla. Üç evin makas planında ana makaslar
+    # gövdenin bütün derinliğini geçer (AP-13 M1–M7, AP-16 MKS1–7, AP-06 MK01–08) ve cumbada iki makas var: dış uçtaki kalkan makası
+    # (M8, MKS8, MK09) ve onun arkasında, derelerin birleştiği yerden önce bir makas (M9, MKS9, MK10). Motor'un sayısı aynı (dış uçtan
+    # 125,5 arayla derelerin birleştiği yere kadar: 2); paftada ikinci makas kalkan makasından 46,75–87,19 cm geride ve iki ana makasın
+    # arasında kısa, Motor onu 125,5 geride yavru makas boyuyla yazar (adet aynı, ölçü farkı IE-29.md'de).
     try:
         t = CP.cati(plan, ie)
     except CP.PrefabrikCatiHatasi as e:

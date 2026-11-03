@@ -1,0 +1,13 @@
+{
+ "kod": "AP-16",
+ "ap": "AP-16",
+ "kip": "motor",
+ "girdi": {
+  "is_emri": "testler/kor/projeler/AP16/is_emri.json"
+ },
+ "bizim_liste": "bizim_liste.json",
+ "liste_sha256": "3e8ad249871f4e495d460e2d93c54faec9770b6456c9d79760601659e025cd8c",
+ "sayfa": null,
+ "kapi": true,
+ "not": "İE-29 kör ölçümü. Geometri İE-17 PR-1'in İş Emri'si (pafta çizim için görüldü, muhur.json notu); özellikler paftanın tablosundan. Çıkıntısız çapraz cumba (İE-29'da liste yazılır)."
+}
