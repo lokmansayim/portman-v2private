@@ -136,7 +136,8 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | D | D-43 | onaylı PR yeşilde beklemeden birleşir; kırmızıda sohbet düzeltir; onaysız PR'da sorulur (Lokman 2.11 16:29 "evet yaz"; pano 134) | yazıldı (2.11; İE-17 PR-1b/K7, `claude/project-thread-i19mbz`) |
 | D | D-44 | M-07 liste için açıldı ve yeniden mühürlendi: makas sayısı paftadaki gibi, dört evin listesi yazılır (Lokman 2.11 18:21 kartı) | yazıldı (2.11; İE-17 PR-1b/K7, `claude/project-thread-i19mbz`) |
 | D | D-45 | kör ölçüm farklarından liste kuralları ve kıyas (Lokman 3.11 09:52, öneri tablosunun cevapları) | yazıldı (3.11; İE-27, `claude/project-thread-wwx1p0`) |
-| D | **D-46** | — | **sıradaki boş** |
+| D | D-46 | uzun karkaslı pencereli pano (İE-28): Lokman'ın plan cevabıyla yazılır | ayrıldı (3.11; İE-28, `claude/project-thread-qnu2k8`) |
+| D | **D-47** | — | **sıradaki boş** |
 | İE | İE-01–İE-08 | bu depo (`main`) | yazıldı |
 | İE | İE-09 | model atölyesi: kontrollü model üretimi ve banka hattı (Görev 6e; pano 30; P6001 güncellemesi kapsam dışı) | alındı (16.10; `claude/gorev-6e-model-atolyesi-rnhtcp`; PR-1 banka hattı 29.10, `claude/project-thread-rhjgzv`) |
 | İE | İE-10, İE-11, İE-12 | prefabrik hattı (PR #12, PR #14, `ie-12-prefabrik-bayi-paftasi`) | `main`'e BK-12 ile (PR-1: motor ve bayi paftası; liste ve mühür kıyası sonraki PR'larda) |
@@ -156,7 +157,8 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | İE | İE-25 | çatı seçenek adımı: çatı plan seçildikten sonra, elimizdeki modellerle (pano 41; Lokman 1.11 karar kartı "Plan seçildikten sonra" ve "var olan modeller üzerinden"); alan setinde her plan bir kez, Ç8801 seçilince çatı seti; altın B01, E01, X08, A08, T01, T02 | alındı (1.11; `claude/project-thread-91gav7`) |
 | İE | İE-26 | prefabrik kör ölçümü: kör 19'dan Motor'un liste yazdığı on ev açıldı ve ölçüldü (pano 70, PR-4; Lokman 2.11 kartı "Hepsi açılsın") | alındı (2.11; `claude/project-thread-wwx1p0`, PR #113) |
 | İE | İE-27 | kör ölçüm farklarını kurala işleme (Lokman 3.11 09:52 cevapları; D-45): PR-1 liste kuralları ve kıyas, sonra pencere veri tabanı ve pano dizilimi | alındı (3.11; `claude/project-thread-wwx1p0`) |
-| İE | **İE-28** | — | **sıradaki boş** |
+| İE | İE-28 | uzun karkaslı pencereli pano: paftadaki tek parça karkaslı kaplama duvar panosu ve odaya ortalı geniş pencere Motor'da (Lokman 3.11 20:44 kartı "Ayrı iş olarak açılsın"; M-02'ye dokunur, plan önce Lokman'a) | alındı (3.11; `claude/project-thread-qnu2k8`) |
+| İE | **İE-29** | — | **sıradaki boş** |
 | BK | BK-01–BK-08 | bu depo; BK-08 8a sonrası temizlik (`bk-08-8a-temizlik`) | yazıldı |
 | BK | BK-09 | metin ve çizim düzeltmeleri, G1 (`bk-09-metin-cizim`, `bk-09-cizim-g1`) | alındı (14.10) |
 | BK | BK-10 | 8b sonrası küçük işler (DXF `.txt` notu, geç gelen Excel, panelden Excel, plan değişince kontrol kapanır, D-19 24 saat kuralı, düğmeli mesajda satır sonları, `YENI-` kodu ve ilk çelik planda LLM özeti bayiye gitmez, komut freni metni; pano satır 15; çelikte kapı değişikliği kapsam dışı) | alındı (30.10; `claude/project-thread-h64uz2`) |
