@@ -95,6 +95,7 @@ Biçim: karar · gerekçe · reddedilen seçenekler · geri alma yolu · kim ve 
 | [D-42](D-42.md) | Mühürlü konular: kayıt `KARARLAR/muhurlu.json` (M-01…M-10), Claude Code hook freni (düzenleme ve komut "Patron onayı gerekir" diye durur, oturum başında liste) ve CI kilit testi; açma yalnız Lokman'ın sözüyle | 1.11 (Lokman 20:16, 20:25, 20:32 kartı) |
 | [D-43](D-43.md) | Lokman'ın birleştirme onayı verdiği PR, doğrulama yeşil olunca beklemeden birleşir; kırmızıda sohbet kendisi düzeltip yeniden koşturur; onaysız PR'da birleştirme açıkça sorulur. Canlı, ücretli deneme, silme ve mühürlü konular kapsam dışı | 2.11 (Lokman 16:29 "evet yaz", 16:30) |
 | [D-44](D-44.md) | Dört evin mühürü (M-07) liste için açıldı ve yeniden mühürlendi: makas sayısı paftanın makas planıyla (AP-15 ana çatı 7, AP-09 cumbası 3; cumbanın iç ucunda makas yok), dört evin yükleme listesi çizimdeki çatıdan yazılır; çizim ve çatı değişmedi | 2.11 (Lokman 16:50 ve 18:21 kartları) |
+| [D-45](D-45.md) | Kör ölçüm farklarından liste kuralları (Lokman'ın 3 Kasım cevapları): 3'lü H dış duvarda da, çektirme U'su 60 yerinden, köşe direği tipsiz, mahya bandı mahya boyundan, temiz su ıslak hacim başına, 5,5 × 25 trapez vida; kıyasta atık su ölçüm dışı, eş adlar; açılmış on evin kaydı açık | 3.11 (Lokman 09:52) |
 
 ## Numara defteri (14 Ekim 2026, BK-08; CIO planı › Görev 3)
 
@@ -134,7 +135,8 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | D | D-42 | mühürlü konular: kayıt, hook freni, CI kilit testi (Lokman 1.11 20:16, 20:25; 20:32 kartı çelik çizim seti) | yazıldı (1.11; BK-20, `claude/project-thread-evp64h`) |
 | D | D-43 | onaylı PR yeşilde beklemeden birleşir; kırmızıda sohbet düzeltir; onaysız PR'da sorulur (Lokman 2.11 16:29 "evet yaz"; pano 134) | yazıldı (2.11; İE-17 PR-1b/K7, `claude/project-thread-i19mbz`) |
 | D | D-44 | M-07 liste için açıldı ve yeniden mühürlendi: makas sayısı paftadaki gibi, dört evin listesi yazılır (Lokman 2.11 18:21 kartı) | yazıldı (2.11; İE-17 PR-1b/K7, `claude/project-thread-i19mbz`) |
-| D | **D-45** | — | **sıradaki boş** |
+| D | D-45 | kör ölçüm farklarından liste kuralları ve kıyas (Lokman 3.11 09:52, öneri tablosunun cevapları) | yazıldı (3.11; İE-27, `claude/project-thread-wwx1p0`) |
+| D | **D-46** | — | **sıradaki boş** |
 | İE | İE-01–İE-08 | bu depo (`main`) | yazıldı |
 | İE | İE-09 | model atölyesi: kontrollü model üretimi ve banka hattı (Görev 6e; pano 30; P6001 güncellemesi kapsam dışı) | alındı (16.10; `claude/gorev-6e-model-atolyesi-rnhtcp`; PR-1 banka hattı 29.10, `claude/project-thread-rhjgzv`) |
 | İE | İE-10, İE-11, İE-12 | prefabrik hattı (PR #12, PR #14, `ie-12-prefabrik-bayi-paftasi`) | `main`'e BK-12 ile (PR-1: motor ve bayi paftası; liste ve mühür kıyası sonraki PR'larda) |
@@ -152,7 +154,9 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | İE | İE-23 | yapı kimliği: banka modellerine koddan kimlik (anlamsal, topolojik, parametrik, sayısal); PR-1 kimlik, PR-2 banka modelinde germe, PR-3 benzerlik ve olağan aralıklar | alındı (30.10; CIO; `claude/project-thread-2bptdw`) |
 | İE | İE-24 | gerçek proje denemesi TK-03 (Lokman'ın 87,72 m² evinin 1. katı): girintili gövde (`girintiler`), sonra çatı, görünüş, liste; "sen dene, ben düzelte düzelte gideceğim" | alındı (30.10; `claude/project-thread-756g5a`) |
 | İE | İE-25 | çatı seçenek adımı: çatı plan seçildikten sonra, elimizdeki modellerle (pano 41; Lokman 1.11 karar kartı "Plan seçildikten sonra" ve "var olan modeller üzerinden"); alan setinde her plan bir kez, Ç8801 seçilince çatı seti; altın B01, E01, X08, A08, T01, T02 | alındı (1.11; `claude/project-thread-91gav7`) |
-| İE | **İE-26** | — | **sıradaki boş** |
+| İE | İE-26 | prefabrik kör ölçümü: kör 19'dan Motor'un liste yazdığı on ev açıldı ve ölçüldü (pano 70, PR-4; Lokman 2.11 kartı "Hepsi açılsın") | alındı (2.11; `claude/project-thread-wwx1p0`, PR #113) |
+| İE | İE-27 | kör ölçüm farklarını kurala işleme (Lokman 3.11 09:52 cevapları; D-45): PR-1 liste kuralları ve kıyas, sonra pencere veri tabanı ve pano dizilimi | alındı (3.11; `claude/project-thread-wwx1p0`) |
+| İE | **İE-28** | — | **sıradaki boş** |
 | BK | BK-01–BK-08 | bu depo; BK-08 8a sonrası temizlik (`bk-08-8a-temizlik`) | yazıldı |
 | BK | BK-09 | metin ve çizim düzeltmeleri, G1 (`bk-09-metin-cizim`, `bk-09-cizim-g1`) | alındı (14.10) |
 | BK | BK-10 | 8b sonrası küçük işler (DXF `.txt` notu, geç gelen Excel, panelden Excel, plan değişince kontrol kapanır, D-19 24 saat kuralı, düğmeli mesajda satır sonları, `YENI-` kodu ve ilk çelik planda LLM özeti bayiye gitmez, komut freni metni; pano satır 15; çelikte kapı değişikliği kapsam dışı) | alındı (30.10; `claude/project-thread-h64uz2`) |

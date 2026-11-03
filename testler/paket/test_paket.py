@@ -159,12 +159,12 @@ def test_liste_canlidakiyle_ayni(paketler):
     aynı yol, `is_emrinden`). D-29 (Lokman 29 Ekim, TK-02 yorumları) ile 128 / 126: pencerenin iki yanı 62,75'lik yarım pano (dolu panonun
     dört boyu tek boya), giriş nişinde köşe direği yerine 3'lü H (10'luk köşe direği 8 → 6, dış T'si 3'lü H 6 → 8), kapılı pano 115,5.
     D-30 (Lokman 29 Ekim 10:48) ile 125 / 123: dış ölçü 898,5 × 888,5, kesik son panolar (1245, 620) tam boya (1250, 625), makas açıklığı
-    8980 → 8985."""
+    8980 → 8985. İE-27 (D-45, Lokman 3 Kasım 2026): 5,5 × 25 trapez vida satırı, 126 / 124."""
     from openpyxl import load_workbook
     from motor import prefabrik_liste as PL
     kok, _, _ = paketler
     ie = json.loads((KOK / _model("TK-01")["is_emri"]).read_text(encoding="utf-8"))
-    for s, n in (("asma", 125), ("ters", 123)):
+    for s, n in (("asma", 126), ("ters", 124)):
         L = PL.is_emrinden(copy.deepcopy(ie), ozellikler={"Tavan": s.capitalize()})
         ws = load_workbook(kok / "prefabrik" / "TK-01" / f"TK-01_yukleme_listesi_{s}.xlsx").active
         satir = [r[1:5] for r in ws.iter_rows(min_row=3, values_only=True)]
@@ -309,7 +309,9 @@ def test_kiyas_pk01(paketler):
     for a in ("h_plani.dis", "h_plani.h_standart", "makas_bas", "makas_orta", "asik", "sandvic_panel", "bas_makas_betopan"):
         assert pafta[a][4] == "geçer", pafta[a]
     ozet = {r[0]: r[1] for r in wb["Gerçek liste (kör test)"].iter_rows(min_row=3, max_row=12, values_only=True)}
-    assert ozet["aynı"] == 59              # D-32 (Lokman 29 Ekim 13:12 ve 21:12): baş makas omegası (gerçek 5) aday sütunundan tutuyor, 60 → 59
+    # D-32 (Lokman 29 Ekim 13:12 ve 21:12): baş makas omegası (gerçek 5) aday sütunundan tutuyor, 60 → 59. İE-27 (D-45): çektirme U'su 60
+    # yerinden 1 (gerçek 2), 59 → 58; doğru 69 → 72 (köşe direği tipsiz ve eş adlar ayrım ve aday olarak tutuyor)
+    assert ozet["aynı"] == 58
 
 
 def test_oda_sirasi():

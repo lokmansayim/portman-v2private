@@ -33,6 +33,8 @@ Bir anahtarda gerçek toplam G ise sonuç (13 Ekim raporlarının tanımı):
 - **bizde yok:** gerçek satırın grubu ya da ölçüsü bizde yok;
 - **bizde fazla:** bizim satırın (adet > 0) gerçek listede eşi yok. Gerçek satır sayısına girmez.
 Doğru = aynı + ayrım + pafta + aday. Gerçek listenin adedi boş ya da 0 olan satırı kıyasa girmez.
+**Ölçüm dışı:** sözlükte `olcum_disi: true` olan grubun (Patron'un kararı, gerekçesi `not`'ta; ör. atık su takımı, Lokman 3 Kasım 2026)
+gerçek satırları kıyasa ve paydaya girmez, sonucu "ölçüm dışı"dır; bizim satırları fazla sayılmaz.
 """
 from __future__ import annotations
 
@@ -43,8 +45,10 @@ from pathlib import Path
 
 SONUCLAR = ("aynı", "ayrım", "pafta", "aday", "farklı", "bizde yok")
 DOGRU = ("aynı", "ayrım", "pafta", "aday")
+OLCUM_DISI = "ölçüm dışı"
 ADLAR = {"aynı": "varsayılan adetle aynı", "ayrım": "toplam aynı, ayrım farklı", "pafta": "pafta sütunu tuttu",
-         "aday": "aday sütunu tuttu", "farklı": "adet ya da ölçü farklı", "bizde yok": "bizde yok", "bizde fazla": "bizde fazla"}
+         "aday": "aday sütunu tuttu", "farklı": "adet ya da ölçü farklı", "bizde yok": "bizde yok", "bizde fazla": "bizde fazla",
+         OLCUM_DISI: "ölçüm dışı (Patron kararı)"}
 KIPLER = ("tam", "yok", "her_satir")
 KAPI_SONUC = {"aynı": ("aynı", "ayrım"), "ayrım": ("aynı", "ayrım"), "pafta": ("aynı", "ayrım", "pafta"), "aday": DOGRU}
 GRUP_OLCULU = ("kalan", "esdeger", "tolerans")      # kapıda grubun bütün bizim ölçüleri de sabit
@@ -201,6 +205,8 @@ def sozluk_oku(yol: Path) -> list[dict]:
             raise ValueError(f"sözlük grubu {g.get('ad')!r}: bilinmeyen olcu {kip!r}")
         if g.get("olcu_serbest") and (kip == "tam" or not str(g.get("not") or "").strip()):
             raise ValueError(f"sözlük grubu {g.get('ad')!r}: olcu_serbest yalnız yok / her_satir kipinde ve gerekçesiyle (not)")
+        if g.get("olcum_disi") and not str(g.get("not") or "").strip():
+            raise ValueError(f"sözlük grubu {g.get('ad')!r}: olcum_disi yalnız gerekçesiyle (not: Patron'un kararı)")
         gruplar.append({**g, "olcu": kip, "_b": [re.compile(p) for p in g.get("bizim", [])],
                         "_g": [re.compile(p) for p in g.get("gercek", [])]})
     return gruplar
@@ -328,7 +334,14 @@ def esle(bizim: list[dict], gercek: list[dict], gruplar: list[dict]) -> dict:
     for j, s in enumerate(bizim):
         bg.setdefault(grup_anahtari(s["kalem"], gruplar, "_b"), {})[j] = s
     satir, fazla = {}, []
-    for anahtar in list(gg) + [k for k in bg if k not in gg]:
+    # ölçüm dışı grup (Patron kararı, sözlükte `olcum_disi` ve gerekçesi): gerçek satırları kıyasa ve paydaya girmez, bizim satırları fazla sayılmaz
+    disi = {a for a in set(gg) | set(bg) if a[0] == "s" and gruplar[a[1]].get("olcum_disi")}
+    for anahtar in sorted((a for a in disi if a in gg), key=str):
+        for i in gg[anahtar]:
+            satir[i] = {"i": i, "sonuc": OLCUM_DISI, "grup": gruplar[anahtar[1]]["ad"], "ad": None, "bizim": [], "b_anahtar": None,
+                        "G": dolu[i]["adet"], "n_g": 1, "olcu_tuttu": None, "eslesme": None, "anahtar_satirlari": [i], "grup_bizim": [],
+                        "satir_degerleri": None}
+    for anahtar in [k for k in gg if k not in disi] + [k for k in bg if k not in gg and k not in disi]:
         g_satir, b_satir = gg.get(anahtar, {}), bg.get(anahtar, {})
         tur, k = anahtar
         grup = gruplar[k] if tur == "s" else None
@@ -350,7 +363,10 @@ def esle(bizim: list[dict], gercek: list[dict], gruplar: list[dict]) -> dict:
     sonuc = [satir[i] for i in sorted(satir)]
     say = {s: sum(1 for r in sonuc if r["sonuc"] == s) for s in SONUCLAR}
     say["bizde fazla"] = len(fazla)
-    say["gercek_dolu"] = len(dolu)
+    n_disi = sum(1 for r in sonuc if r["sonuc"] == OLCUM_DISI)
+    if n_disi:
+        say[OLCUM_DISI] = n_disi
+    say["gercek_dolu"] = len(dolu) - n_disi
     say["dogru"] = sum(say[s] for s in DOGRU)
     return {"gercek": sonuc, "fazla": sorted(fazla), "sayilar": say}
 

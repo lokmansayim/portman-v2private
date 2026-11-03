@@ -91,7 +91,7 @@ def hazirla(ie: dict) -> dict:
                 if ac.tur == "pencere":
                     pk = G.pencere_kurali(ac.olcu)                  # BK-13: eşik = 200 − boy (bugünkü üçü BOM notlarındaki 80, 20, 160)
                     en, boy = pk.en, pk.boy
-                    z0 = pk.esik; z1 = min(z0 + boy, KAPI_UST)
+                    z0, z1 = pk.esik, pk.ust                        # İE-27 madde 11: 200'ü geçen pencere döşemeden, kısaltılmaz
                     dk = c.dograma[ac.olcu][1]
                     a = {"tur": "pencere", "olcu": ac.olcu}
                 else:

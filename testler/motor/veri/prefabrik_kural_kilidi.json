@@ -57,7 +57,6 @@
   "ortak.levha_m2.alcipan": 3.0,
   "ortak.levha_m2.boardex": 2.88,
   "ortak.levha_m2.osb": 2.9768,
-  "ortak.mahya_bandi.parca_boyu_m.metal_kiremit_mahyasi": 2.8,
   "ortak.mahya_bandi.rulo_m": 10.0,
   "ortak.panel_boyu_yuvarlama_mm": 10,
   "ortak.panel_cati_kenarlari.acik_alan.kenar_boardex": false,
@@ -302,6 +301,10 @@
     "atlama_parcasi"
    ]
   ],
+  "prefabrik.trapez_vida_5_5x25.asik": 10,
+  "prefabrik.trapez_vida_5_5x25.omega_2500": 6,
+  "prefabrik.trapez_vida_5_5x25.omega_3750": 10,
+  "prefabrik.trapez_vida_5_5x25.yuvarlama": 50,
   "prefabrik.uc_aday_inox_boleni": 2,
   "prefabrik.veranda_kirisi_eksik_cm": 10,
   "prefabrik.vida.alcipan_vidasi_yuvarlama": 250,

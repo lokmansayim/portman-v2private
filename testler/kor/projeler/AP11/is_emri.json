@@ -25,7 +25,7 @@
       "pencere": "oda_ortasi",
       "kapi": "mantik",
       "kose": "oda",
-      "son_pano": "kosu",
+      "son_pano": "son_aks",
       "kapi_yeri": "ortada",
       "dis_pano_dayanagi": [{"y": 716, "aralik_cm": [512, 716]}]
     },
@@ -43,7 +43,7 @@
   "acik_sinirlar": [],
   "acikliklar": [
     {"tur": "dis_kapi", "olcu": 90, "arasi": ["VERANDA", "HOL"], "pano": 1},
-    {"tur": "pencere", "olcu": "180x180", "mahal": "SALON+MUTFAK", "duvar": "on", "acilis": "surgulu", "pano": 0},
+    {"tur": "pencere", "olcu": "180x200", "mahal": "SALON+MUTFAK", "duvar": "on", "acilis": "surgulu", "pano": 0},
     {"tur": "pencere", "olcu": "120x180", "mahal": "SALON+MUTFAK", "duvar": "sol"},
     {"tur": "pencere", "olcu": "120x180", "mahal": "YATAK ODASI 1", "duvar": "arka", "pano": 1},
     {"tur": "pencere", "olcu": "60x40", "mahal": "BANYO", "duvar": "arka", "pano": 0},
@@ -74,9 +74,9 @@
     "icerik": ["aksli_plan", "alanli_kopya", "montaj_kopyasi", "on_gorunus", "cati_profili", "ozellik_tablosu"]
   },
   "varsayimlar": [
-    "Köşe ve ızgara (İE-17 kuralı; paftada aynı): makas y'yi geçer (makas planı M1–M11 boyuna dizili), kısa kenar y. Ön ve arka duvar köşeden geçer, x ızgarası duvar ekseninden (5 + 125,5k; 381,5, 883,5 ve 1009 paftada ek); yan duvarlar araya girer, y ızgarası arka iç yüzden.",
+    "Köşe ve ızgara (İE-17 kuralı; paftada aynı): makas y'yi geçer (makas planı M1–M11 boyuna dizili), kısa kenar y. Ön ve arka duvar köşeden geçer, x ızgarası duvar ekseninden (5 + 125,5k; 381,5, 883,5 ve 1009 paftada ek); yan duvarlar araya girer, y ızgarası arka iç yüzden. Son pano x yönünde paftadaki gibi ızgaranın sondan bir önceki aksından (dizilim.son_pano: son_aks; sağ uçta ön ve arka dış duvarda 62,75 + 89,25, aynı uca giden iç duvarda 62,75 + 84,25 (sağ duvarın iç yüzüne kadar); İE-27 PR-3, D-45 madde 1, 3 Kasım 2026; önce kosu: 125,5 + 26,5).",
     "Veranda sol önde, gömme (627,5 × 204), ön ve sol açık; sol ön köşede 10 × 10 dikme (paftada D tipi kutu profil, önde E tipi kiriş). Verandanın arka duvarı (Motor çerçevesinde y 517) ve yatak odası 2'nin ön duvarı (y 452,25) ek aks.",
-    "Pencereler: salonun sol penceresi odanın ortasında (dizilim.pencere: oda_ortasi; paftada 62,75 + 125,5 + 62,75); ötekiler paftadaki yerine en yakın Motor panosunda (pano dizini). 180/200 sürgülü: Motor'un pencere boyu en çok 180, 180x180 sürgülü yazıldı (paftada odaya ortalı 251'lik pano; Motor'da ızgaradaki iki pano). 120/180 çift açılır: Motor'da açılış yazılmaz (yalnız sürgülü), ölçü aynı.",
+    "Pencereler: salonun sol penceresi odanın ortasında (dizilim.pencere: oda_ortasi; paftada 62,75 + 125,5 + 62,75); ötekiler paftadaki yerine en yakın Motor panosunda (pano dizini). 180/200 sürgülü paftadaki ölçüsüyle (İE-27 madde 11, kısaltma yok; 3 Kasım 2026'ya kadar Motor'un 180 sınırıyla 180x180 yazılıydı): döşemeden, paftada odaya ortalı 251'lik pano ve iki yanında 62,75 (Motor'da ızgaradaki iki pano; Motor'un geniş pencere kuralı odaya ortalamaz, paftayla kalan fark). Verandaya bakan yatak odası 3 duvarı paftada tek parça 194'lük karkaslı pano (120/180 ortada); Motor'da 125,5'lik pencereli pano + 68,5 (kalan fark). Sağ duvarın önü paftada 78,5 + 125,5; Motor'da dayanak aynı aralıkta iki duvara düştüğü için 125,5 + 78,5 (kalan fark). 120/180 çift açılır: Motor'da açılış yazılmaz (yalnız sürgülü), ölçü aynı.",
     "Kapılar paftadaki duvarda ve panoda; koridordan yatak odası 1, banyo ve yatak odası 2'ye açılan kapılar paftadaki gibi duvarın kavşak ucunda (duvar_ucu); verandaya bakan yatak odası 3 duvarının panoları ön dış yüzün aksından (dis_pano_dayanagi, pencere 125,5'lik panoda); genişlikler paftada yazılı değil: dış kapı 90, iç kapı 82 (Motor'un ölçüsü). Oda adları ve alanları paftanın elektrik planından (salon + mutfak 18,49, yatak odaları 9,56 / 11,75 / 13,68, banyo 5,66, hol 7,53 m²).",
     "Çatı: beşik, makas y'yi geçer; paftada eğim ve saçak yazılı değil: eğim 18,2° (%32,88, prefabrik evlerin eğimi), saçak 30 (paftanın çatı alanı 101 m² ve 3 × 410'luk aşık sırası 1226 = 1166 + 2 × 30 ile), topuk 10. Kaplama paftanın kaplama sayfasından: OSB + nem bariyeri + trapez."
   ],

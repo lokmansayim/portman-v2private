@@ -76,7 +76,8 @@ grubun bütün bizim satırlarının değerleri (kalem, ölçü, varsayılan, pa
 ## Kör 19 ve açılış kaydı
 
 - **Kör 19:** AP-06, AP-09, AP-11…18, AP-20…28. Listeleri `muhur.json`'da `kor`; hiçbir PR liste açmaz. Montaj paftaları ve DWG'ler kaynak olarak
-  açılabilir, liste açılamaz.
+  açılabilir, liste açılamaz. İE-26'da Patron'un kararıyla açılan on evin kaydı İE-27'den (D-45) beri `acik`; kör kalan dokuz: AP-06, 12, 13, 16,
+  17, 20, 23, 24, 27.
 - **AP-10** (≈ PK-03): listesi `kapali`, kör sayılmaz ama o da açılmaz. Açılmamış öteki mühürlü dosyalar da (`kapali`) aynı kuraldadır.
 - **Yakın adlar:** AP-09, AP-08 (PK-07) ile; AP-17, AP-10 ile aynı adı ve m²'yi taşıyor. Bu ikisi kör test sayılmadan önce montaj paftaları
   karşılaştırılır; tasarım aynıysa o proje kör test listesinden çıkar (BK-12 planı).
@@ -117,3 +118,15 @@ O zamana kadar her yeni proje kör testtir; sonra katalog modellerine geçilir (
 - Sonuç: doğru 600 / 1295 (%46,3; ev başına %36,6–66,4). Tablo ve satır raporları proje dosyalarında (`Prefabrik_28_Olcum/IE-26_kor/`);
   iş emri `docs/is_emirleri/IE-26.md`.
 - Açılmayanlar: AP-06, 12, 13, 16, 17, 23, 24, 27 (Motor bu çatıların listesini yazmıyor) ve AP-20 (çift kat). Listeleri kör.
+
+## Durum (3 Kasım 2026, İE-27)
+
+- Lokman'ın öneri tablosuna cevaplarıyla (3 Kasım 09:52; `KARARLAR/D-45.md`) liste kuralları değişti (3'lü H dış duvarda da, çektirme U'su 60
+  yerinden, köşe direği tipsiz, mahya bandı mahya boyundan, temiz su ıslak hacim başına, 5,5 × 25 trapez vida) ve kıyas değişti: atık su
+  takımı **ölçüm dışı** (sözlükte `olcum_disi` ve gerekçesi; gerçek satırları paydaya ve doğruya girmez, sonuçta "ölçüm dışı" sayısı ayrı
+  yazar), köşe direği tek grup, eş adlar (sözlük 3).
+- İE-26'nın on evinin liste kaydı `acik`: açılmış liste kör değil, kurallar değiştikçe açık sekiz gibi yeniden ölçülür. Açılış kayıtları
+  `acilislar`'da iz olarak duruyor; açılıştaki liste commit'i (`d675641`) bugünkü listemizin geçmişinde (test). Kör kalan dokuz ev `kor`.
+- 18 projede kendi listemiz bugünkü Motor'la (üretici 1.10) yeniden üretildi, sonuçlar `--sonuc-yaz` ile yeniden yazıldı (adım 7; Patron
+  onayı D-45). On ev: doğru 674 / 1248 (%54,0; önce 600 / 1295, atık suyun 47 satırı artık paydada değil). Açık sekiz: 561 / 847 (önce 557). PR-2 (pencere veri tabanı, kısaltma yok; AP-11, 14, 26'nın sürgülüleri paftadaki ölçüsüyle): on ev 678 / 1248 (%54,3).
+  Satır raporları proje dosyalarında (`Prefabrik_28_Olcum/IE-27_olcum/`); iş emri `docs/is_emirleri/IE-27.md`.

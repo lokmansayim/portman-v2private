@@ -31,13 +31,16 @@ PROJELER = sorted(p for p in (KOK / "testler" / "kor" / "projeler").iterdir() if
 KOR19 = ["AP-06", "AP-09", *[f"AP-{n:02d}" for n in range(11, 19)], *[f"AP-{n:02d}" for n in range(20, 29)]]
 ACIK8 = ["PK-01", "PK-02", "PK-03", "PK-05", "PK-06", "PK-07", "PK-08", "TS-01"]
 # İE-26 (pano 70, PR-4): Patron'un karar kartı 2 Kasım 2026 21:48:56 UTC "Hepsi açılsın". Motor'un liste yazabildiği on kör ev açıldı;
-# kayıtları `kor` kaldı, açılışları `acilislar`'da (kendi listemizin commit'i d675641 ve sözlüğün commit'i taşır). Öteki kör evler
-# (AP-06, 12, 13, 16, 17, 23, 24, 27: Motor liste yazmıyor; AP-20 çift kat, ölçüm dışı) ve AP-10 açılmadı.
+# açılışları `acilislar`'da (kendi listemizin commit'i d675641 ve sözlüğün commit'i taşır). Öteki kör evler (AP-06, 12, 13, 16, 17, 23,
+# 24, 27: Motor liste yazmıyor; AP-20 çift kat, ölçüm dışı) ve AP-10 açılmadı.
+# İE-27 (3 Kasım 2026, D-45): açılmış liste artık kör değil; on evin kaydı `acik`a geçti (açılış kayıtları iz olarak duruyor) ki Lokman'ın
+# 3 Kasım cevaplarıyla değişen kurallardan sonra açık sekiz proje gibi yeniden ölçülebilsin. Kör kalan dokuz ev `kor`.
 ACILAN_IE26 = ["AP-09", "AP-11", "AP-14", "AP-15", "AP-18", "AP-21", "AP-22", "AP-25", "AP-26", "AP-28"]
+KOR9 = [k for k in KOR19 if k not in ACILAN_IE26]
 IE26_KARAR = "karar kartı 2 Kasım 2026 21:48:56 UTC: \"Hepsi açılsın\""
 # Mühürde kodların durumu (bir dosya birden çok kod taşıyabilir; kod bir kez sayılır her dosya için). Değişirse açılış Patron kararıdır.
-ACIK_KODLAR = ["AP-01", "AP-01", "AP-02", "AP-03", "AP-04", "AP-05", "AP-07", "AP-08", "AP-19", "PK-01", "PK-02", "PK-03", "PK-03",
-               "PK-05", "PK-06", "PK-06", "PK-07", "PK-08", "PK-08", "TS-01"]
+ACIK_KODLAR = sorted(["AP-01", "AP-01", "AP-02", "AP-03", "AP-04", "AP-05", "AP-07", "AP-08", "AP-19", "PK-01", "PK-02", "PK-03", "PK-03",
+                      "PK-05", "PK-06", "PK-06", "PK-07", "PK-08", "PK-08", "TS-01", *ACILAN_IE26])
 KAPALI_KODLAR = ["AP-10", "PK-02", "PK-02", "PK-04", "PK-04", "PK-04", "PK-05", "PK-05", "PK-07", "PK-07", "PK-07", "PK-07", "PK-08",
                  "PK-08"]
 UYDURMA_AD = "Deneme Kişisi Uydurma"
@@ -391,6 +394,32 @@ def test_kalan_eslemede_iki_yanda_sayi_varsa_olcu_tutmali(tmp_path):
     assert _sonuc([{"kalem": "Deneme strafor", "olcu": "paket / 60 m²", "adet": 3}], [("DENEME STRAFOR", "PKT / 60 M2", 3)], []) == ["aynı"]
 
 
+DISI = {"ad": "Deneme atık su", "bizim": ["^DENEME ATIK"], "gercek": ["^DENEME BORU", "^DENEME SÜZGEÇ"], "olcu": "yok",
+        "olcum_disi": True, "not": "uydurma Patron kararı"}
+
+
+def test_olcum_disi_grup_paydaya_ve_dogruya_girmez(tmp_path):
+    """İE-27 (Lokman, 3 Kasım 2026, madde 2): `olcum_disi` grubun gerçek satırları "ölçüm dışı", paydaya girmez; bizim satırı fazla değil."""
+    g = _gruplar(tmp_path, DISI, TOPLAM)
+    gercek = [("DENEME BORU", "100 X 3000", 2), ("DENEME SÜZGEÇ", "ADET", 1), ("DENEME TOPLAM", "300 X 2500", 4)]
+    bizim = [{"kalem": "Deneme atık su borusu", "olcu": "L 3000", "adet": 5}, {"kalem": "Deneme toplam", "olcu": "300 × 2500", "adet": 4}]
+    r = esle.esle(bizim, [{"malzeme": m, "boyut": b, "adet": a} for m, b, a in gercek], g)
+    assert [x["sonuc"] for x in r["gercek"]] == [esle.OLCUM_DISI, esle.OLCUM_DISI, "aynı"]
+    assert r["sayilar"]["gercek_dolu"] == 1 and r["sayilar"][esle.OLCUM_DISI] == 2 and r["sayilar"]["dogru"] == 1
+    assert r["fazla"] == [] and r["sayilar"]["bizde fazla"] == 0
+    yok = esle.esle(bizim[1:], [{"malzeme": m, "boyut": b, "adet": a} for m, b, a in gercek], _gruplar(tmp_path, TOPLAM))
+    assert yok["sayilar"]["gercek_dolu"] == 3 and esle.OLCUM_DISI not in yok["sayilar"]          # grup yoksa iki satır "bizde yok"
+    assert K.tutanlar({"bizim": {"satirlar": bizim}, "esle": r}) == K.tutanlar({"bizim": {"satirlar": bizim[1:]}, "esle": yok})
+    with pytest.raises(ValueError, match="olcum_disi"):
+        _gruplar(tmp_path, {**DISI, "not": ""})                                    # gerekçesiz olmaz
+
+
+def test_sozlukte_olcum_disi_yalniz_atik_su():
+    """Gerçek sözlükte ölçüm dışı tek grup: atık su (pis su) takımı (Lokman, 3 Kasım 2026 09:52: "Pis suyu komple kaldır")."""
+    g = [x for x in esle.sozluk_oku(K.SOZLUK) if x.get("olcum_disi")]
+    assert [x["ad"] for x in g] == ["Atık su (pis su) takımı"] and "Lokman" in g[0]["not"] and not g[0]["bizim"]
+
+
 # ------------------------------------------------------------------------------------------------------- gerçek mühür kaydı
 
 @pytest.fixture(scope="module")
@@ -405,22 +434,22 @@ def test_muhur_yalniz_kod_ve_ozet_tasir(muhur):
     for r in muhur["dosyalar"]:
         assert set(r) <= alanlar, r["kod"]
         assert all(k[:3] in ("PK-", "TS-", "AP-") and len(k) == 5 for k in r["kod"])
-    assert muhur["sayilar"] == {"acik": 17, "kaynak": 32, "kor": 19, "kapali": 14}
+    assert muhur["sayilar"] == {"acik": 27, "kaynak": 32, "kor": 9, "kapali": 14}               # İE-27: on açılmış ev `acik`
     assert Counter(r["durum"] for r in muhur["dosyalar"]) == muhur["sayilar"]          # özet dosyadaki sayıyla değil, yeniden sayılır
 
 
 def test_acik_ve_kapali_kodlar_degismedi(muhur):
     """Bir kaydın durumunu değiştirmek (kapalıyı açık yapmak) açılış kaydı olmadan liste açtırır: durumlar burada sabittir."""
     kodlar = {d: sorted(k for r in muhur["dosyalar"] if r["durum"] == d for k in r["kod"]) for d in K.DURUMLAR}
-    assert kodlar["acik"] == ACIK_KODLAR and kodlar["kapali"] == KAPALI_KODLAR and kodlar["kor"] == KOR19
+    assert kodlar["acik"] == ACIK_KODLAR and kodlar["kapali"] == KAPALI_KODLAR and kodlar["kor"] == KOR9
     for r in muhur["dosyalar"]:
         if r["durum"] in ("acik", "kor", "kapali"):
             assert r["tur"] == K.LISTE, r["kod"]
 
 
-def test_kor19_ve_ap10_acilis_kaydi_olmadan_reddedilir(muhur):
+def test_kor_kalanlar_ve_ap10_acilis_kaydi_olmadan_reddedilir(muhur):
     kor = {k: r for r in muhur["dosyalar"] if r["durum"] == "kor" for k in r["kod"]}
-    assert sorted(kor) == KOR19
+    assert sorted(kor) == KOR9
     ap10 = [r for r in muhur["dosyalar"] if "AP-10" in r["kod"] and r["tur"] == K.LISTE]
     assert len(ap10) == 1 and ap10[0]["durum"] == "kapali"
     liste = {"commit": "f" * 40}
@@ -429,38 +458,45 @@ def test_kor19_ve_ap10_acilis_kaydi_olmadan_reddedilir(muhur):
         with pytest.raises(K.Durdu) as e:
             K.acilabilir_mi(r, muhur, kod, liste)
         assert e.value.adim == 3, kod
-    # İE-26: yalnız Patron'un kararıyla açılan on evin açılış kaydı var; her biri karar, bu dosyanın özeti ve iki commit'le
+    # İE-26: yalnız Patron'un kararıyla açılan on evin açılış kaydı var; her biri karar, bu dosyanın özeti ve iki commit'le. İE-27'den
+    # beri bu on evin kaydı `acik`; açılış kaydı iz olarak duruyor
+    acilan = {k: r for r in muhur["dosyalar"] if r["tur"] == K.LISTE for k in r["kod"] if k in ACILAN_IE26}
+    assert sorted(acilan) == ACILAN_IE26 and all(r["durum"] == "acik" for r in acilan.values())
     assert set(KOR19 + ["AP-10"]) & set(muhur["acilislar"]) == set(ACILAN_IE26)
     for kod in ACILAN_IE26:
         a = muhur["acilislar"][kod]
-        assert IE26_KARAR in a["karar"] and a["sha256"] == kor[kod]["sha256"], kod
+        assert IE26_KARAR in a["karar"] and a["sha256"] == acilan[kod]["sha256"], kod
         assert len(a["liste_commit"]) >= 7 and len(a["sozluk_commit"]) >= 7, kod
 
 
 def test_cizim_icin_pafta_gorulen_kor_liste_kapali(muhur):
     # CIO 27 Ekim 22:43: AP-13 ve AP-16'nın montaj paftası İE-17 çizimine kullanıldı; kör listelerinin kaydında not, liste kapalı.
     # İE-17 PR-2 (1 Kasım 2026): AP-09, AP-15, AP-22 de (AP-03'ün listesi 13 Ekim'den beri açık). İE-26: AP-09, 15, 22 Patron'un
-    # kararıyla açıldı (kayıt yine `kor`, not duruyor); AP-13 ve AP-16'da Motor liste yazmıyor, açılmadı
+    # kararıyla açıldı (not duruyor; İE-27'den beri kayıt `acik`); AP-13 ve AP-16'da Motor liste yazmıyor, açılmadı
     for kod in ("AP-13", "AP-16", "AP-09", "AP-15", "AP-22"):
         r = [r for r in muhur["dosyalar"] if kod in r["kod"]]
-        assert {(x["tur"], x["durum"]) for x in r} == {("montaj paftası", "kaynak"), (K.LISTE, "kor")}, kod
+        durum = "acik" if kod in ACILAN_IE26 else "kor"
+        assert {(x["tur"], x["durum"]) for x in r} == {("montaj paftası", "kaynak"), (K.LISTE, durum)}, kod
         liste = next(x for x in r if x["tur"] == K.LISTE)
         assert liste["not"].startswith("çizim için pafta görüldü"), kod
+        assert liste["not"].endswith("açıldı (2 Kasım 2026)" if durum == "acik" else "liste kapalı, açılmadı"), kod
         assert (kod in muhur["acilislar"]) == (kod in ACILAN_IE26), kod
 
 
 def test_acik_sekiz_projenin_listesi_acik_kayitta(muhur):
-    """Açık sekiz projenin listesi `acik` kayıtta; İE-26'nın on projesinin listesi `kor` kayıtta, Patron'un açılış kaydıyla."""
+    """Açık sekiz projenin ve İE-26'nın on projesinin listesi `acik` kayıtta. On projenin açılış kaydı Patron'un kararını ve açılıştan
+    önce commit'lenmiş kendi listemizi taşır: o commit bugünkü listenin geçmişinde (İE-27'de liste yeniden üretildi, D-45)."""
     assert sorted(_oku(p / "proje.json")["kod"] for p in PROJELER) == sorted(ACIK8 + ACILAN_IE26)
     for p in PROJELER:
         P = _oku(p / "proje.json")
         r = [r for r in muhur["dosyalar"] if r["sha256"] == P["liste_sha256"]]
-        durum = "kor" if P["kod"] in ACILAN_IE26 else "acik"
-        assert len(r) == 1 and r[0]["durum"] == durum and P["kod"] in r[0]["kod"], P["kod"]
-        assert muhur["acilislar"][P["kod"]]["liste_commit"]
-        if durum == "kor":
-            assert muhur["acilislar"][P["kod"]]["sha256"] == P["liste_sha256"], P["kod"]
-            assert K.kayitli_mi(p / "bizim_liste.json")["commit"].startswith(muhur["acilislar"][P["kod"]]["liste_commit"]), P["kod"]
+        assert len(r) == 1 and r[0]["durum"] == "acik" and P["kod"] in r[0]["kod"], P["kod"]
+        a = muhur["acilislar"][P["kod"]]
+        assert a["liste_commit"]
+        if P["kod"] in ACILAN_IE26:
+            assert IE26_KARAR in a["karar"] and a["sha256"] == P["liste_sha256"], P["kod"]
+            bugun = K.kayitli_mi(p / "bizim_liste.json")["commit"]
+            assert K._git(KOK, "merge-base", "--is-ancestor", a["liste_commit"], bugun).returncode == 0, P["kod"]
         if P.get("ap"):
             assert P["ap"] in r[0]["kod"]
 
@@ -578,9 +614,14 @@ def test_kapi_tolerans_eslemede_grubun_olculerini_korur(sozluk, bugun):
 
 
 def test_kapi_kalan_eslemede_grubun_olculerini_korur(sozluk, bugun):
-    """Kalan eşlemeyle tutmuş satırda gruba eklenen satır eşlemeyi değiştirir: kapı durur."""
-    kayit, L = _ts01(bugun)
-    t = next(t for t in kayit["tutanlar"] if t["eslesme"] == "kalan")
+    """Kalan eşlemeyle tutmuş satırda gruba eklenen satır eşlemeyi değiştirir: kapı durur. (İE-27'den beri TS-01'in kalan eşlemeli
+    satırı, PVC betopan H'ı, sözlükte gruplu; kalan eşlemeli ilk kayıt alınır.)"""
+    for pd in PROJELER:
+        L = json.loads(json.dumps(bugun[pd.name]))
+        t = next((t for t in _oku(pd / "sonuc.json")["tutanlar"] if t["eslesme"] == "kalan"), None)
+        if t:
+            break
+    assert t, "kalan eşlemeli tutan yok"
     assert esle.tutuyor_mu(L["satirlar"], sozluk, t)
     s = esle.bizim_secimi(L["satirlar"], sozluk, t)[0]
     L["satirlar"].append({**s, "olcu": "L 2500"})
