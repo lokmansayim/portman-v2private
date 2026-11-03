@@ -233,6 +233,17 @@ def test_d37_makas_kurali_tk03_ve_sinirlar(defter):
     assert (s["birim_fiyat"], s["durum"]) == (1447.0, "öneri makas kuralı")
 
 
+
+def test_r07_trapez_vida_5_5x25(defter):
+    """r07 (3 Kasım 2026): İE-27'nin yeni prefabrik satırı 87 m² listesinin 143. satırından (5,5 × 25 trapez vida, 3 TL), Patron'un verdiği
+    listeden birebir; çelikteki aynı vidayla aynı kaynak satırı ve fiyat. TK-01 İş Emri r05'te asmada 1050 adet."""
+    k = defter["hatlar"]["prefabrik"]["kalemler"]["Trapez vida 5,5 × 25 (aşık ve omega) | adet"]
+    c = defter["hatlar"]["celik"]["kalemler"]["Trapez vida (5,5 × 25) | adet"]
+    assert (k["fiyat"], k["kaynak"], k["kaynak_satir"], k["durum"], k["onay"]) == (3, "EKIM87", [143], "eşleşti", True)
+    assert (c["fiyat"], c["kaynak"], c["kaynak_satir"]) == (k["fiyat"], k["kaynak"], k["kaynak_satir"])
+    s = F.fiyatla({"satirlar": [_pre("Trapez vida 5,5 × 25 (aşık ve omega)", "adet", 1050, "1008")]}, defter)["satirlar"][0]
+    assert (s["birim_fiyat"], s["tutar"], s["durum"], s["kaynak_adi"]) == (3, 3150, "onaylı", "87 m² listesi, 14.10.2026")
+
 def test_miktari_olmayan_fiyatli_satir(defter):
     C = defter["hatlar"]["celik"]
     kg_k = next(k for k, g in C["kalemler"].items() if g["birim"] == "kg" and g["fiyat"])
