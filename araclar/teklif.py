@@ -1,6 +1,6 @@
 """İE-13 PR-2 · Teklif: İş Emri → Motor'un yükleme listesi → fiyat defteri → teklif Excel ve JSON. D-28: teklif yalnız bu komutla üretilir.
 
-    python3 araclar/teklif.py <İş Emri.json> <çıktı klasörü> [--tavan asma,ters] [--kosullar <json>] [--defter <json>] [--oneri]
+    python3 araclar/teklif.py <İş Emri.json> <çıktı klasörü> [--tavan asma,ters] [--kosullar <json>] [--defter <json>] [--oneri] [--tarih GG.AA.YYYY]
 
 Liste dosyası almaz: listeyi İş Emri'nden Motor'la kendisi üretir (`motor/prefabrik_liste.is_emrinden`, paket üreteciyle ortak). Elle
 düzeltilmiş liste giremez, adet düzeltmesi yoktur: düzeltme kural kitabına ya da İş Emri'ne işlenir (D-28). Fiyat `araclar/fiyatla.py`
@@ -17,11 +17,14 @@ ile defterden; fiyat uydurulmaz, fiyatı olmayan satır boş kalır ve sayılır
 - Excel düzeni Patron'un yükleme listesinin düzeni (28 Ekim 06:40–06:41): grup adı sütun değil, grubun üstünde başlık satırı ve altında
   ara toplam; tek "Adet" sütunu; ölçüsü birim olan satırda (adet, metre, kova …) ölçü boş, birim o. Sayfalar: Özet, her seçenek bir
   sayfa, Fiyat kaynağı. Liste sayfasının yazıcısı `araclar/liste_excel.py`; `fiyatla.py --excel` de onu kullanır (tek yazıcı).
+- Teklif PDF'i (T5, PR-6): her seçenek bir PDF, Patron'un teklif formunun düzeninde (`araclar/teklif_pdf.py`, `kurallar/teklif/form.json`);
+  sayılar bu komutun JSON'undan, fiyatı olmayan satır boş. `--tarih` formun tarihi (verilmezse bugün).
 """
 from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -233,7 +236,10 @@ def main(argv: list[str] | None = None) -> int:
     a.add_argument("--tavan", help="seçenekler, virgülle: asma,ters")
     a.add_argument("--kosullar", type=Path, help="projeye özel teklif koşulları (kurallar/teklif/kosullar.json biçimi)")
     a.add_argument("--defter", type=Path, default=F.DEFTER); a.add_argument("--oneri", action="store_true")
+    a.add_argument("--tarih", help="teklif PDF'inin tarihi, GG.AA.YYYY (verilmezse bugün)")
     o = a.parse_args(argv)
+    if o.tarih and not re.fullmatch(r"\d{2}\.\d{2}\.\d{4}", o.tarih):
+        a.error(f"--tarih GG.AA.YYYY olmalı: {o.tarih}")
     ie = json.loads(o.is_emri.read_text(encoding="utf-8"))
     secim = secenekler(ie, [t.strip() for t in o.tavan.split(",")] if o.tavan else None)
     defter = F.oku(o.defter)
@@ -246,11 +252,13 @@ def main(argv: list[str] | None = None) -> int:
     o.cikti.mkdir(parents=True, exist_ok=True)
     (o.cikti / f"{kod}_teklif.json").write_text(json.dumps(T, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
     excel_yaz(T, defter, o.cikti / f"{kod}_teklif.xlsx")
+    from araclar import teklif_pdf
+    pdfler = [teklif_pdf.pdf_yaz(T, ie, sec, o.cikti / teklif_pdf.dosya_adi(T, sec), tarih=o.tarih) for sec in T["secenekler"]]
     for sec in T["secenekler"]:
         oz = sec["fiyat"]["ozet"]
         print(f"{T['kod']} · {sec['ad']}: {oz['toplam']:,.2f} TL · {oz['fiyatli']}/{oz['satir']} satır fiyatlı, {len(oz['fiyatsiz'])} fiyatsız")
     print("koşullar:", ", ".join(f"{k} {v or 'yok (Patron’dan)'}" for k, v in T["kosullar"].items()))
-    print("→", o.cikti / f"{kod}_teklif.xlsx")
+    print("\n".join(f"→ {p}" for p in [o.cikti / f"{kod}_teklif.xlsx", *pdfler]))
     return 0
 
 
