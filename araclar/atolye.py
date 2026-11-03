@@ -502,6 +502,65 @@ def metraj_hesapla(kart: dict, t: dict) -> None:
         kart.update(sonuc)
 
 
+def cizim_ayari(gk: str) -> dict:
+    """`ciz`'in motor ayarları (perspektif, kural seti ve karkas kuralı dışında): aday kartı gibi revizyonsuz "TASLAK", İş Emri yok, atölye
+    kaynağı. Kontrol sayfasının hedef örneği (`kontrol_sayfasi_yeniden`) aynı ayarla yeniden üretilir."""
+    return {"is_emri_no": None, "revizyon": None, "yontem": "panel", "bayi": True, "kaynak": f"Yapı Tanımı 0.5 ({gk}; İE-09 atölyesi)"}
+
+
+def sayfa_sahibi(t: dict) -> str:
+    """Kontrol sayfasının "Müşteri projesi" satırındaki ad: motorun çizimlere yazdığı sahibinin adı, motorun koşuluyla (D-33)."""
+    from motor.genel.bayi_gorseli import musteri_projesi, sahip_adi
+    return sahip_adi(t) if musteri_projesi(t) else ""
+
+
+def sayfa_izi(pdf: Path) -> list[str]:
+    """Kontrol sayfasının içerik izi, sayfa sayfa (D-28 A11): sayfa ölçüsü, bütün çizimler ve sözcükler (yeriyle, 0,1 pt;
+    `parmak_izi.genel_pdf_ozet` gibi) ile gömülü görsellerin yeri, çözülmüş pikselleri ve saydamlık maskesi. Bayt özeti değil: PyMuPDF her
+    kayıtta belge kimliğini yeniden yazar, aynı girdiden iki koşu iki ayrı bayt verir."""
+    import pymupdf
+    sys.path.insert(0, str(KOK / "testler" / "referans"))
+    from parmak_izi import _cizim
+    izler = []
+    with pymupdf.open(pdf) as d:
+        for s in d:
+            cizimler = sorted(_cizim(x) for x in s.get_drawings())
+            sozcukler = sorted([round(w[0], 1), round(w[1], 1), round(w[2], 1), round(w[3], 1), w[4]] for w in s.get_text("words"))
+            gorseller = []
+            for g in s.get_image_info(xrefs=True):
+                maske = d.extract_image(g["xref"]).get("smask") or 0       # Pixmap(d, xref) saydamlığı almaz (geometri hakemi, PR-8)
+                gorseller.append([[round(v, 1) for v in g["bbox"]], g["width"], g["height"], hashlib.sha256(pymupdf.Pixmap(d, g["xref"]).samples).hexdigest(),
+                                  hashlib.sha256(pymupdf.Pixmap(d, maske).samples).hexdigest() if maske else None])
+            gorseller.sort()
+            icerik = [round(s.rect.width, 1), round(s.rect.height, 1), cizimler, sozcukler, gorseller]
+            izler.append(hashlib.sha256(json.dumps(icerik, ensure_ascii=False).encode("utf-8")).hexdigest())
+    return izler
+
+
+def kontrol_sayfasi_yeniden(kart: dict, tp: Path, pdf: Path) -> Path:
+    """Kartın kontrol sayfasını çizimiyle birlikte yeniden üretir: çizim `ciz`'in ayarlarıyla (`cizim_ayari`, kartın pimi) perspektifsiz,
+    sabit üretim zamanıyla ve ayrı süreçte (tam izler gibi; D-02 madde 2), sayfa `atolye_sayfa.kontrol_pdf` ile verilen karttan. Onaylı
+    kontrol sayfasının kıyası için (`testler/kontrol_sayfasi/`); kart olduğu gibi okunur, yazılmaz."""
+    from araclar import atolye_sayfa
+    from motor.genel import uret as U
+    t = json.loads(tp.read_text(encoding="utf-8"))
+    gk = U.kod_govde(t)
+    set_yolu, karkas_yolu = cizim_kurallari(kart, t)
+    with tempfile.TemporaryDirectory() as tmp:
+        c = Path(tmp) / "c"
+        ayar = {"tp": str(tp), "hedef": str(c), "set": str(set_yolu), "karkas": str(karkas_yolu) if karkas_yolu else None, **cizim_ayari(gk)}
+        betik = ("import json, sys; from pathlib import Path; from motor.genel import uret as U; a = json.loads(sys.argv[1]); "
+                 "k = {x: a.pop(x) for x in ('tp', 'hedef', 'set', 'karkas')}; "
+                 "m = U.uret(Path(k['tp']), Path(k['hedef']), set_yolu=Path(k['set']), perspektif=False, "
+                 "karkas_yolu=Path(k['karkas']) if k['karkas'] else None, **a); sys.exit(0 if m['passed'] else 1)")
+        ortam = {**os.environ, "TEST_SABIT_ZAMAN": SABIT_ZAMAN, "PYTHONHASHSEED": "0",
+                 "PYTHONPATH": os.pathsep.join([str(KOK / "testler" / "referans" / "sabit_zaman"), str(KOK)] + ([os.environ["PYTHONPATH"]] if os.environ.get("PYTHONPATH") else []))}
+        r = subprocess.run([sys.executable, "-c", betik, json.dumps(ayar, ensure_ascii=False)], cwd=str(KOK), env=ortam, capture_output=True, text=True)
+        if r.returncode != 0:
+            raise RuntimeError(f"kontrol sayfasının çizimi üretilemedi: {r.stdout[-300:]} {r.stderr[-300:]}")
+        return atolye_sayfa.kontrol_pdf(kart, c, gk, Path(pdf), sayfa_sahibi(t))
+
+
 def ciz(a) -> int:
     kod = kod_normalize(a.kod)
     kart = kart_oku(kod, a.banka)
@@ -529,8 +588,7 @@ def ciz(a) -> int:
     set_yolu, karkas_yolu = cizim_kurallari(kart, t)
     rapor: dict = {}
     with yazi_denetimi(rapor), contextlib.redirect_stdout(sys.stderr):
-        m = U.uret(tp, hedef, is_emri_no=None, revizyon=None, set_yolu=set_yolu, yontem="panel", perspektif=a.perspektif, bayi=True,
-                   kaynak=f"Yapı Tanımı 0.5 ({gk}; İE-09 atölyesi)", karkas_yolu=karkas_yolu)
+        m = U.uret(tp, hedef, set_yolu=set_yolu, perspektif=a.perspektif, karkas_yolu=karkas_yolu, **cizim_ayari(gk))
     v = json.loads((hedef / "validation.json").read_text(encoding="utf-8"))
     liste = json.loads((hedef / f"{gk}_yukleme.json").read_text(encoding="utf-8")) if (hedef / f"{gk}_yukleme.json").exists() else {"satirlar": []}
     olcum = olc(t, set_yolu, liste, karkas_yolu)
@@ -549,8 +607,7 @@ def ciz(a) -> int:
     kart["durum"] = "beklemede" if kart["metraj_testi"]["durum"] == "beklemede" else "kontrolde"
     from araclar import atolye_sayfa
     pdf = hedef / f"{B.dosya_adi(kod)}_kontrol_c{no:02d}.pdf"
-    from motor.genel.bayi_gorseli import musteri_projesi, sahip_adi
-    atolye_sayfa.kontrol_pdf(kart, hedef, gk, pdf, sahip_adi(t) if musteri_projesi(t) else "")   # motorun koşulu: sayfa çizimle aynı (D-33)
+    atolye_sayfa.kontrol_pdf(kart, hedef, gk, pdf, sayfa_sahibi(t))
     kart["son_cizim"]["kontrol_pdf"] = _goreli(pdf)
     olay(kart, "ciz", no=no, durum=kart["durum"], passed=bool(m.get("passed")))
     kart_yaz(kart, a.banka)
