@@ -128,5 +128,5 @@ O zamana kadar her yeni proje kör testtir; sonra katalog modellerine geçilir (
 - İE-26'nın on evinin liste kaydı `acik`: açılmış liste kör değil, kurallar değiştikçe açık sekiz gibi yeniden ölçülür. Açılış kayıtları
   `acilislar`'da iz olarak duruyor; açılıştaki liste commit'i (`d675641`) bugünkü listemizin geçmişinde (test). Kör kalan dokuz ev `kor`.
 - 18 projede kendi listemiz bugünkü Motor'la (üretici 1.10) yeniden üretildi, sonuçlar `--sonuc-yaz` ile yeniden yazıldı (adım 7; Patron
-  onayı D-45). On ev: doğru 674 / 1248 (%54,0; önce 600 / 1295, atık suyun 47 satırı artık paydada değil). Açık sekiz: 561 / 847 (önce 557).
+  onayı D-45). On ev: doğru 674 / 1248 (%54,0; önce 600 / 1295, atık suyun 47 satırı artık paydada değil). Açık sekiz: 561 / 847 (önce 557). PR-2 (pencere veri tabanı, kısaltma yok; AP-11, 14, 26'nın sürgülüleri paftadaki ölçüsüyle): on ev 678 / 1248 (%54,3).
   Satır raporları proje dosyalarında (`Prefabrik_28_Olcum/IE-27_olcum/`); iş emri `docs/is_emirleri/IE-27.md`.
