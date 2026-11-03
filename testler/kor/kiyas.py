@@ -223,7 +223,7 @@ def kiyasla(proje: Path, kaynak: Path, *, kok: Path = KOK, muhur_yol: Path | Non
     S = siniflar_oku(siniflar, kod, kayit["sha256"])
     sinif = {}
     for x in r["gercek"]:
-        if x["sonuc"] in esle.DOGRU:
+        if x["sonuc"] in esle.DOGRU or x["sonuc"] == esle.OLCUM_DISI:
             continue
         s = S["satirlar"].get(str(x["i"]))
         if s and s.get("malzeme") and esle.ad(s["malzeme"]) != esle.ad(gercek[x["i"]]["malzeme"]):
@@ -358,6 +358,8 @@ def _ozet_satirlari(k: dict) -> list[tuple[str, str]]:
                                                          f"{k['okunmayan']['adetli']} (paydaya girmez)"),
            ("Doğru (aynı + ayrım + pafta + aday)", f"{s['dogru']} / {s['gercek_dolu']}")]
     out += [(esle.ADLAR[x], str(s[x])) for x in (*esle.SONUCLAR, "bizde fazla")]
+    if s.get(esle.OLCUM_DISI):
+        out.append((esle.ADLAR[esle.OLCUM_DISI] + " (paydaya girmez)", str(s[esle.OLCUM_DISI])))
     out += [(f"sınıf: {x}", str(n)) for x, n in k["sinif_sayilari"].items() if n]
     if k["once"]:
         o = k["once"]["esle"]["sayilar"]

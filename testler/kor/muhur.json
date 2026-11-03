@@ -1,13 +1,13 @@
 {
- "aciklama": "Kör test mührü (BK-12 PR-3, M7). Kayıt başına kod (PK ve AP), dosya türü, uzantı, bayt, SHA-256 ve durum; dosya adı ve kişi adı yazılmaz. Durum: acik (13 Ekim'de açıldı), kor (kör 19: açılış kaydı olmadan açılmaz), kapali (açılmadı; kör sayılmaz ama açılış kaydı olmadan o da açılmaz), kaynak (montaj paftası ya da detay; liste değil, araç okumaz). Açılış kaydı: proje kodu → tarih, kendi listemizin commit'i ve saatler (13 Ekim'in açık sekiz projesi). Kör ya da kapalı bir kayıt açılacaksa Patron kararıyla `acilislar`'a ayrı commit'le eklenir: {\"karar\": <Patron kararı ve saati>, \"tarih\": …, \"sha256\": <açılacak dosyanın özeti>, \"liste_commit\": <kendi listemizin commit'i>, \"sozluk_commit\": <sözlüğün commit'i>}; araç özet ya da liste commit'i tutmazsa açmaz, sözlük açılıştan sonra değişmişse sonuçta ve raporda yazar.",
+ "aciklama": "Kör test mührü (BK-12 PR-3, M7). Kayıt başına kod (PK ve AP), dosya türü, uzantı, bayt, SHA-256 ve durum; dosya adı ve kişi adı yazılmaz. Durum: acik (13 Ekim'de açıldı; İE-26'nın on evi Patron'un açılış kaydıyla 2 Kasım'da açıldı, İE-27'de (3 Kasım, D-45) kaydı `acik`a geçti: açılmış liste artık kör değil, kurallar değiştikçe açıkça yeniden ölçülür), kor (kör 19: açılış kaydı olmadan açılmaz), kapali (açılmadı; kör sayılmaz ama açılış kaydı olmadan o da açılmaz), kaynak (montaj paftası ya da detay; liste değil, araç okumaz). Açılış kaydı: proje kodu → tarih, kendi listemizin commit'i ve saatler (13 Ekim'in açık sekiz projesi). Kör ya da kapalı bir kayıt açılacaksa Patron kararıyla `acilislar`'a ayrı commit'le eklenir: {\"karar\": <Patron kararı ve saati>, \"tarih\": …, \"sha256\": <açılacak dosyanın özeti>, \"liste_commit\": <kendi listemizin commit'i>, \"sozluk_commit\": <sözlüğün commit'i>}; araç özet ya da liste commit'i tutmazsa açmaz, sözlük açılıştan sonra değişmişse sonuçta ve raporda yazar.",
  "kaynaklar": [
   "13 Ekim 2026 kör test serisi mührü (`ie-11-pr2-kor-test` dalı, `deneme/2026-10-13_aiprefabrik` mühür kaydı; adlı satırlar orada kalır)",
   "docs/notlar/2026-10-18_AIPrefabrik_muhur.md (AP kodlarıyla 61 dosya; 28 DWG'nin SHA'sı ilk indirmede alınır, bu dosyada yok)"
  ],
  "sayilar": {
-  "acik": 17,
+  "acik": 27,
   "kaynak": 32,
-  "kor": 19,
+  "kor": 9,
   "kapali": 14
  },
  "acilislar": {
@@ -364,8 +364,8 @@
    "uzanti": ".pdf",
    "bayt": 176407,
    "sha256": "b51874749775ee07d5ebab5fda596eb9c704db49fda7185d6918d0cc299c8da5",
-   "durum": "kor",
-   "not": "çizim için pafta görüldü (İE-17 PR-2, 1 Kasım 2026: montaj paftası kat planı, çatı ve görünüş çizimine kaynak); liste kapalı, açılmadı"
+   "durum": "acik",
+   "not": "çizim için pafta görüldü (İE-17 PR-2, 1 Kasım 2026: montaj paftası kat planı, çatı ve görünüş çizimine kaynak); liste İE-26'da Patron kararıyla açıldı (2 Kasım 2026)"
   },
   {
    "kod": [
@@ -406,7 +406,7 @@
    "uzanti": ".pdf",
    "bayt": 192733,
    "sha256": "317f6a74387aa9a576c0c050960fbf513c7de1f7a88111c35cfb101698ad9c7d",
-   "durum": "kor"
+   "durum": "acik"
   },
   {
    "kod": [
@@ -467,7 +467,7 @@
    "uzanti": ".pdf",
    "bayt": 236890,
    "sha256": "a55033adbf63642d5a5a47eac19724f51766f53554a7a2fd16edb7d561ace2fd",
-   "durum": "kor"
+   "durum": "acik"
   },
   {
    "kod": [
@@ -487,8 +487,8 @@
    "uzanti": ".pdf",
    "bayt": 250892,
    "sha256": "a8fb316b2e8aac04bba8f897ea9f7402f03432c2ef2f16486c49286d63ae8724",
-   "durum": "kor",
-   "not": "çizim için pafta görüldü (İE-17 PR-2, 1 Kasım 2026: montaj paftası kat planı, çatı ve görünüş çizimine kaynak); liste kapalı, açılmadı"
+   "durum": "acik",
+   "not": "çizim için pafta görüldü (İE-17 PR-2, 1 Kasım 2026: montaj paftası kat planı, çatı ve görünüş çizimine kaynak); liste İE-26'da Patron kararıyla açıldı (2 Kasım 2026)"
   },
   {
    "kod": [
@@ -549,7 +549,7 @@
    "uzanti": ".pdf",
    "bayt": 229567,
    "sha256": "52a6494c673e9adba86269f1fa360ad95eb2187e443b4f12a38bd6af60c8c010",
-   "durum": "kor"
+   "durum": "acik"
   },
   {
    "kod": [
@@ -619,7 +619,7 @@
    "uzanti": ".pdf",
    "bayt": 233771,
    "sha256": "71d0f698ae51cd7f9257374b0c91d44657be2763cef0d170fe2b480863dcd737",
-   "durum": "kor"
+   "durum": "acik"
   },
   {
    "kod": [
@@ -639,8 +639,8 @@
    "uzanti": ".pdf",
    "bayt": 232216,
    "sha256": "379c4fb14d4abaa04c780a1148fb4652c2b42b4a6989e55063ee3bf18959f981",
-   "durum": "kor",
-   "not": "çizim için pafta görüldü (İE-17 PR-2, 1 Kasım 2026: montaj paftası kat planı, çatı ve görünüş çizimine kaynak); liste kapalı, açılmadı"
+   "durum": "acik",
+   "not": "çizim için pafta görüldü (İE-17 PR-2, 1 Kasım 2026: montaj paftası kat planı, çatı ve görünüş çizimine kaynak); liste İE-26'da Patron kararıyla açıldı (2 Kasım 2026)"
   },
   {
    "kod": [
@@ -700,7 +700,7 @@
    "uzanti": ".pdf",
    "bayt": 230427,
    "sha256": "1fb37530d24494cbc56c183ac11c6105d81ca68bdaa25530e3d343e93cdbc430",
-   "durum": "kor"
+   "durum": "acik"
   },
   {
    "kod": [
@@ -720,7 +720,7 @@
    "uzanti": ".pdf",
    "bayt": 246526,
    "sha256": "6d9b40e64634aa11beed47269642b61d1a6fe04c5958ada7bcb1e8a7e50302dc",
-   "durum": "kor"
+   "durum": "acik"
   },
   {
    "kod": [
@@ -760,7 +760,7 @@
    "uzanti": ".pdf",
    "bayt": 230923,
    "sha256": "169b60a7087f8cc2db4835b38640a40b35e76ed3cda19989e784a4cca04491a6",
-   "durum": "kor"
+   "durum": "acik"
   },
   {
    "kod": [

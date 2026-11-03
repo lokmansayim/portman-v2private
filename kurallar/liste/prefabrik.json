@@ -137,7 +137,17 @@
   "cektirme_u_ic": {
    "deger": 2,
    "durum": "pafta",
-   "kaynak": "PK-01 ve PK-02'de 2. Açık Portatifev listelerinde 2–5 (PK-07 100'lük 5; TS-01 2, AP-02 ve AP-03 3, AP-05 5, 60'lık): ortak bir ölçü bulunamadı, değer 2 kaldı (BK-12 PR-2c)."
+   "kaynak": "PK-01 ve PK-02'de 2. Açık Portatifev listelerinde 2–5 (PK-07 100'lük 5; TS-01 2, AP-02 ve AP-03 3, AP-05 5, 60'lık): ortak bir ölçü bulunamadı, değer 2 kaldı (BK-12 PR-2c). İE-27 (Lokman, 3 Kasım 2026 09:52): Motor kipinde adet planın birleşimlerinden (panonun ortasına T ile gelen bölme, 100'lük köşede 60'lığa geçiş, kapısız serbest biten bölme); bu sabit yalnız pafta kipinde (birleşimler okunmuyor)."
+  },
+  "trapez_vida_5_5x25": {
+   "deger": {
+    "asik": 10,
+    "omega_3750": 10,
+    "omega_2500": 6,
+    "yuvarlama": 50
+   },
+   "durum": "lokman",
+   "kaynak": "İE-27 (Lokman, 3 Kasım 2026 09:52, öneri 9: \"nasıl olmaz sen ekle onu\"; öneri: aşık ve omega başına vida, 50'ye yukarı). Katsayılar yükleme listesi çalışma kitabının vida notundan (kitap `vida.trapez_5_5x25`'in kaynağı): aşık 10, omega (375) 10, omega (240) 6; 2,5'lik profil terimi kitabın 6'sı. Çelikte kitabın aşık ve omega terimleri 0 (Lokman, 7 Ekim 08:02); prefabrikte gerçek listelerin on evinin onunda satır var (850–1250)."
   },
   "tavan_omegasi_aralik_m": {
    "deger": {
@@ -385,8 +395,8 @@
      "atlama_parcasi"
     ]
    ],
-   "durum": "pafta",
-   "kaynak": "O17: bir banyolu evde ev başına bir takım (PK-03, PK-05, PK-07 birebir; PK-06 üç ıslak noktada boru 10, dirsek 20). Her satır: ad, ölçü, kural kitabındaki anahtar; adetler kitaptan (`tesisat`, ıslak hacim başına takım)."
+   "durum": "lokman",
+   "kaynak": "İE-27 (Lokman, 3 Kasım 2026 09:52: \"aynen 2 banyo varsa 2 takım vardır bu kadar\"): takım ıslak hacim başına (kitap gibi; ıslak hacim `islak_hacim`). Önce O17: ev başına bir takım (PK-03, PK-05, PK-07 tek ıslak hacimde birebir). Her satır: ad, ölçü, kural kitabındaki anahtar; adetler kitaptan (`tesisat`)."
   },
   "ana_cati_kose": {
    "deger": {
@@ -485,7 +495,7 @@
    "kitap": "mahya_bandi",
    "tur": "yontem",
    "karar_bekliyor": false,
-   "not": "Rulo boyu (10 m) ve mahya parça boyu (2,8 m) kitaptan. Prefabrik yalnız mahya adedi × 2,8 ÷ 10 (Portatifev şablonu; PK-01 2). Kitap ters mahya × 2,8 ve trapez mahyası × 0,8 de ekler (mühendis ve Excel motoru), baca çatıyı deliyorsa çevresini de (kör test projesinin gerçek listesi, 6 Ekim; kitabın 7 Ekim düzenlemesi); damlalık terimi yalnız listede damlalık satırı varsa girer, varsayılan hesapta yok (Lokman, 4 Ekim 15:18 ve 7 Ekim 07:45). Trapez sac çatıda prefabrik de mahya adedini 2,8 ile çarpar; trapez mahyası 18 Ekim'den beri L 800 (kitap) olduğu için bant trapezde kitabın hesabından büyük çıkar (PK-03 6, kitabın yöntemiyle 3); PK-03 ve PK-08'in gerçek listeleriyle kıyasta (PR-3) Lokman'a sorulur."
+   "not": "Rulo boyu (10 m) kitaptan. Prefabrik bandı mahya hattının boyundan sayar: beşik mahyaları ve kırma hatları ÷ 10 (Lokman, 3 Kasım 2026 09:52: \"mahya bandı mahya boyu kadar ötesi yok\"; İE-27). Önce Portatifev şablonu: mahya adedi × 2,8 ÷ 10 (PK-01 2); trapez mahyası L 800 olunca bant üç kat çıkıyordu. Kitap ters mahya × 2,8 ve trapez mahyası × 0,8 de ekler (mühendis ve Excel motoru), baca çatıyı deliyorsa çevresini de; damlalık terimi yalnız listede damlalık satırı varsa girer (Lokman, 4 Ekim 15:18 ve 7 Ekim 07:45)."
   },
   {
    "konu": "Tavan omegası",
@@ -579,7 +589,7 @@
    ],
    "tur": "yontem",
    "karar_bekliyor": false,
-   "not": "Takımın adetleri kitaptan. Prefabrik ev başına bir takım yazar (O17; PK-03, PK-05, PK-07 birebir), kitap ıslak hacim başına. Vitrifiye prefabrikte banyo başına bir takım (`vitrifiye_banyo_basina`, Lokman 27 Ekim; ayrı WC ya da lavabo hacmi olan evde \"Kural yok\"), kitapta dört satır; kitabın taharet musluğu (vitrifiye listedeyse ıslak hacim × 4, Lokman, 10 Ekim) prefabrikte ayrı satır değil: prefabrik vitrifiye takımının batarya grubu taharet musluğunu içerir (87 m² yükleme listesi, 14 Ekim: \"BANYO BATARYA GRUBU (LAVABO BATARYASI, BANYO BATARYASI, DUŞ BAŞLIĞI, TAHARET MUSLUĞU)\"; fiyat defterinde vitrifiye satırının kaynak kalemi)."
+   "not": "Takımın adetleri kitaptan. Prefabrik de kitap gibi ıslak hacim başına (İE-27, Lokman 3 Kasım 2026; önce O17 ev başına bir takım). Vitrifiye prefabrikte banyo başına bir takım (`vitrifiye_banyo_basina`, Lokman 27 Ekim; ayrı WC ya da lavabo hacmi olan evde \"Kural yok\"), kitapta dört satır; kitabın taharet musluğu (vitrifiye listedeyse ıslak hacim × 4, Lokman, 10 Ekim) prefabrikte ayrı satır değil: prefabrik vitrifiye takımının batarya grubu taharet musluğunu içerir (87 m² yükleme listesi, 14 Ekim: \"BANYO BATARYA GRUBU (LAVABO BATARYASI, BANYO BATARYASI, DUŞ BAŞLIĞI, TAHARET MUSLUĞU)\"; fiyat defterinde vitrifiye satırının kaynak kalemi)."
   },
   {
    "konu": "Kapı boşlukları",
