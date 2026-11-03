@@ -167,6 +167,33 @@
    "liste_commit_saati": "22:28:49",
    "sozluk_commit": "9f13755",
    "dayanak": "İE-26: kendi listemiz ve İş Emri önce commit'lendi ve dala gönderildi, sonra bu açılış kaydı (ayrı commit), sonra mühür denetimi ve kıyas"
+  },
+  "AP-06": {
+   "karar": "Patron (Lokman), karar kartı 2 Kasım 2026 21:48:56 UTC: \"Hepsi açılsın\" (soru: \"Kör 19 evin gerçek listeleri bu ölçümde açılsın mı?\"; AP-20 çift kat, ölçüm dışı). İE-26'da Motor liste yazmadığı için açılmamıştı; İE-29'da (pano 145; Lokman 3 Kasım 2026 21:56 UTC \"sen notion'da ne varsa bitir sana sonsuz izin\") Motor çıkıntısız çapraz cumbada liste yazıyor (D-47)",
+   "tarih": "2026-11-03",
+   "sha256": "8104f0298e6d80f6c639c9367a1e42cf35e248971179c1d0c03c38cfd7745691",
+   "liste_commit": "008f48e",
+   "liste_commit_saati": "22:25:37",
+   "sozluk_commit": "deb02c9",
+   "dayanak": "İE-29: kendi listemiz ve İş Emri önce commit'lendi ve dala gönderildi, sonra bu açılış kaydı (ayrı commit), sonra mühür denetimi ve kıyas"
+  },
+  "AP-13": {
+   "karar": "Patron (Lokman), karar kartı 2 Kasım 2026 21:48:56 UTC: \"Hepsi açılsın\" (soru: \"Kör 19 evin gerçek listeleri bu ölçümde açılsın mı?\"; AP-20 çift kat, ölçüm dışı). İE-26'da Motor liste yazmadığı için açılmamıştı; İE-29'da (pano 145; Lokman 3 Kasım 2026 21:56 UTC \"sen notion'da ne varsa bitir sana sonsuz izin\") Motor çıkıntısız çapraz cumbada liste yazıyor (D-47)",
+   "tarih": "2026-11-03",
+   "sha256": "f676aa3f1dcaad04654bbaeb084fb6dfc74bfcb1e9048fad9d04521567906fe1",
+   "liste_commit": "008f48e",
+   "liste_commit_saati": "22:25:37",
+   "sozluk_commit": "deb02c9",
+   "dayanak": "İE-29: kendi listemiz ve İş Emri önce commit'lendi ve dala gönderildi, sonra bu açılış kaydı (ayrı commit), sonra mühür denetimi ve kıyas"
+  },
+  "AP-16": {
+   "karar": "Patron (Lokman), karar kartı 2 Kasım 2026 21:48:56 UTC: \"Hepsi açılsın\" (soru: \"Kör 19 evin gerçek listeleri bu ölçümde açılsın mı?\"; AP-20 çift kat, ölçüm dışı). İE-26'da Motor liste yazmadığı için açılmamıştı; İE-29'da (pano 145; Lokman 3 Kasım 2026 21:56 UTC \"sen notion'da ne varsa bitir sana sonsuz izin\") Motor çıkıntısız çapraz cumbada liste yazıyor (D-47)",
+   "tarih": "2026-11-03",
+   "sha256": "3e8ad249871f4e495d460e2d93c54faec9770b6456c9d79760601659e025cd8c",
+   "liste_commit": "008f48e",
+   "liste_commit_saati": "22:25:37",
+   "sozluk_commit": "deb02c9",
+   "dayanak": "İE-29: kendi listemiz ve İş Emri önce commit'lendi ve dala gönderildi, sonra bu açılış kaydı (ayrı commit), sonra mühür denetimi ve kıyas"
   }
  },
  "dosyalar": [
