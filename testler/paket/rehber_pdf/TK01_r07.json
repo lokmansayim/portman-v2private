@@ -1,0 +1,33 @@
+{
+ "aciklama": "Montaj rehberinin zemininde ön onay PDF'i, hedef örnek. Lokman, 4 Kasım 2026 00:36: \"rehber aynı şekilde kalsın sadece altına PDF gelsin\"; 00:50: \"aynen şu anki halini repoda mühürleyelim\" (TK-01 r07 denemesi üzerine). Girdi İş Emri; çıktı PDF'teki kat planının yeri ve ölçeği (motorun A4 yerleşimi, A4PlanOkuyucu) ve sayfanın motor planı çerçevesindeki dikdörtgeni. Görsel kanıt: TK01_r07_adim09.jpg (rehberin 9. adımı, Salon; duvarlar paftadaki duvar çizgilerinin üstünde).",
+ "is_emri": "testler/motor/veri/TK01_r07.json",
+ "a4": {
+  "sayfa_mm": [
+   210.0,
+   297.0
+  ],
+  "plan_mm": [
+   36.77699301007999,
+   70.38735351765699,
+   136.44601397984002,
+   165.81811072964038
+  ],
+  "olcek_mm_cm": 0.12037612394166271,
+  "plan_kutu_cm": [
+   -189.99732083054252,
+   -282.0,
+   943.5,
+   1095.5
+  ]
+ },
+ "kagit_cm": [
+  -495.515,
+  -787.038,
+  1249.017,
+  1680.229
+ ],
+ "piksel": [
+  2481,
+  3508
+ ]
+}

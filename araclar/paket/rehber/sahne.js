@@ -214,7 +214,23 @@ const IC_KAL = M.ic_kal || "60'lık";
 const kartSat = kod => kod ? [['Kart ölçüsü', D.cards[kod].olcu], ['IFC', D.cards[kod].ifc ? `${D.cards[kod].ifc.sinif} · ${D.cards[kod].ifc.alt_tur}` : '—']] : [];
 
 // Zemin (veranda dahil)
-scene.add(bp(D.zemin[0], D.zemin[1], D.zemin[2], D.zemin[3], -12, 0, mat('concrete', 0)));
+const plak = bp(D.zemin[0], D.zemin[1], D.zemin[2], D.zemin[3], -12, 0, mat('concrete', 0));
+scene.add(plak);
+/* Zeminde ön onay PDF'i (varsa; `rehber/pdf_zemin.py`; Lokman, 4 Kasım 2026: "rehber aynı şekilde kalsın sadece altına PDF gelsin").
+   Sayfa gerçek ölçekte, kat planı evin tam altında (motorun A4 yerleşimi); plak gizlenir ki planı örtmesin (GLB'ye yine yazılır). */
+if (D.pdf_zemin) {
+  plak.visible = false;
+  const [x0, y0, x1, y1] = D.pdf_zemin.kagit_cm;
+  const img = new Image(), tex = new THREE.Texture(img);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  if (renderer) tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+  img.onload = () => { tex.needsUpdate = true; };
+  img.src = D.pdf_zemin.resim;
+  const kagit = new THREE.Mesh(new THREE.PlaneGeometry((x1 - x0) / 100, (y1 - y0) / 100), new THREE.MeshStandardMaterial({ map: tex, roughness: 0.92 }));
+  kagit.name = 'Ön onay PDF'; kagit.rotation.x = -Math.PI / 2; kagit.position.set(X((x0 + x1) / 2), -0.002, Z((y0 + y1) / 2));
+  kagit.receiveShadow = true;
+  scene.add(kagit);
+}
 
 /* 1 · Alt çerçeve */
 D.alt.forEach((s, i) => {

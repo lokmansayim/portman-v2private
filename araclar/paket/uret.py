@@ -163,10 +163,14 @@ def talep_modeli(kod: str, yol: Path, tavan: list[str] | None, kayit_: dict) -> 
 
 # ----------------------------------------------------------------------------- parçalar
 def cizim(ie: dict, gec: Path) -> dict:
-    """Ön onay PDF'i, DXF ve plan görseli (canlıdaki işlevler). Dönen: {'pdf','dxf','png','gorunusler','neden'}."""
+    """Ön onay PDF'i, DXF ve plan görseli (canlıdaki işlevler). Dönen: {'pdf','dxf','png','gorunusler','a4_plan','neden'}.
+    `a4_plan`: PDF'teki kat planının yeri ve ölçeği, motor çizerken okunur (`rehber/pdf_zemin.py`; rehberin zemini)."""
     from motor import bayi_gorseli, dxf_out
-    m = dxf_out.uret(copy.deepcopy(ie), gec / "motor")
+    from araclar.paket.rehber.pdf_zemin import A4PlanOkuyucu
+    with A4PlanOkuyucu() as okuyucu:
+        m = dxf_out.uret(copy.deepcopy(ie), gec / "motor")
     out = {"dxf": gec / "motor" / m["dxf"], "pdf": gec / "motor" / m["pdf"] if m.get("pdf") else None, "uyarilar": m.get("warnings") or []}
+    out["a4_plan"] = okuyucu.sonuc if out["pdf"] else None
     if out["pdf"] is None:
         out["neden"] = f"Motor'un doğrulaması geçmedi; teslim PDF'i üretilmedi ({m.get('pdf_skipped_reason')})"
     v = json.loads((gec / "motor" / "validation.json").read_text(encoding="utf-8")) if (gec / "motor" / "validation.json").exists() else None
@@ -199,12 +203,16 @@ def kart_modeli(ie: dict, gec: Path, kart_kodu: str) -> dict:
             "kural_yok": say["kural_yok"], "sema_hatasi": say["sema_hatasi"], "uyarilar": say.get("yerlesim", {}).get("uyarilar", [])}
 
 
-def rehber(km: dict, kart_kodu: str, ie: dict, L: dict, kod: str, gec: Path, glb: bool, render: bool = False) -> dict:
+def rehber(km: dict, kart_kodu: str, ie: dict, L: dict, kod: str, gec: Path, glb: bool, render: bool = False,
+           pdf_zemin: dict | None = None) -> dict:
+    """`pdf_zemin` (`rehber/pdf_zemin.veri`): verilirse rehberin zemininde ön onay PDF'i; rehberin geri kalanı aynen."""
     from araclar.paket.rehber import sayfa, veri
     try:
         d = veri.kur(copy.deepcopy(ie), km["klasor"], kart_kodu, L["satirlar"], kod)
     except veri.Desteklenmiyor as e:
         return {"neden": f"rehber üreteci bu evi kurmuyor: {e}"}
+    if pdf_zemin:
+        d["pdf_zemin"] = pdf_zemin
     html = sayfa.yaz(d, gec / "rehber.html")
     out = {"html": html, "veri": d, "kiyas": veri.kiyas(km["klasor"], kart_kodu, L["satirlar"])}
     if not glb:
@@ -422,8 +430,17 @@ def paket(m: dict, kok: Path, gecici: Path, glb: bool = False, kayit_: dict | No
                 ie_r = copy.deepcopy(ie)
                 if s_r:                                     # rehberin tavanı adetlerini aldığı listeninki (listeler() gibi)
                     ie_r.setdefault("ozellikler", {})["Tavan"] = s_r.capitalize()
+                pz, pz_neden = None, None                   # rehberin zemininde ön onay PDF'i (rehber/pdf_zemin.py)
+                if cz.get("a4_plan"):
+                    from araclar.paket.rehber import pdf_zemin as PZ
+                    try:
+                        pz = PZ.veri(cz["pdf"], cz["a4_plan"])
+                    except Exception as e:                                  # noqa: BLE001 — PDF zemini yoksa rehber eskisi gibi yazılır
+                        pz_neden = f"{type(e).__name__}: {str(e)[:160]}"
+                else:
+                    pz_neden = "PDF'teki kat planının yeri okunamadı"
                 try:
-                    rh = rehber(km, kart_kodu, ie_r, L[s_r], kod, gec, glb or render, render)
+                    rh = rehber(km, kart_kodu, ie_r, L[s_r], kod, gec, glb or render, render, pdf_zemin=pz)
                 except Exception as e:                                      # noqa: BLE001 — hata nedenle yazılır, öteki modeller sürer
                     rh = {"neden": f"rehber üreteci hata verdi ({type(e).__name__}: {str(e)[:160]})"}
                 if "neden" in rh:
@@ -439,6 +456,9 @@ def paket(m: dict, kok: Path, gecici: Path, glb: bool = False, kayit_: dict | No
                     if "galeri" in rh or "galeri_neden" in rh:
                         notlar.append(f"Render görselleri: {len(rh['galeri'])} görsel sayfada (Blender Cycles; 62 m² rehberinin galerisi gibi)" if "galeri" in rh
                                       else f"Render görselleri yok: {rh['galeri_neden']}")
+                    notlar.append(f"Rehberin zemini: ön onay PDF'i, kat planı evin altında (1 cm = {cz['a4_plan']['olcek_mm_cm']:.4f} mm, sayfa "
+                                  f"{pz['piksel'][0]} × {pz['piksel'][1]} piksel); temel plak sahnede gizli" if pz
+                                  else f"Rehberin zemininde PDF yok: {pz_neden}")
                     notlar.append(f"Rehber (62 m² rehberinin şablonu, D-28): {d['N']} adım, {len(d['rooms'])} oda, {len(d['panels'])} pano, {len(d['hs'])} H, "
                                   f"{len(d['posts'])} köşe direği, {len(d['makas'])} makas; motorun modelinde olmayanlar kuraldan (kartlarında yazar); adetler " +
                                   ("asma tavanlı listeyle" if "asma" in L else "İş Emri'nin tavanıyla yazılan listeyle"))

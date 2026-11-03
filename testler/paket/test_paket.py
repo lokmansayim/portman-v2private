@@ -26,6 +26,9 @@ from araclar.paket.rehber import iz  # noqa: E402
 
 SAGLAMA = json.loads((Path(__file__).with_name("veri") / "saglama.json").read_text(encoding="utf-8"))
 KODLAR = ["AP-19", "TK-01", "AP-13", "AP-02"]
+# Rehberin zeminindeki ön onay PDF'inin görseli (4 Kasım 2026, `rehber/pdf_zemin.py`): sayfaya base64 gömülü; yazı değildir, numara ve ad
+# taramasına girmez (taranırsa rastgele rakam dizileri numara sanılır). PDF'in kendi metni `_yazilar`'da ayrıca taranır.
+GOMULU_GORSEL = r"data:image/(?:jpeg|png);base64,[A-Za-z0-9+/=]+"
 KALEM = r"(bilgi\.md|bayi_paftasi\.pdf|plan\.png|gorunusler\.pdf|cizim\.dxf|montaj_paftasi\.pdf|yukleme_listesi(_asma|_ters)?\.xlsx|model\.ifc|" \
         r"montaj_rehberi\.html|model\.glb|kiyas\.xlsx)"
 
@@ -122,6 +125,7 @@ def test_ad_ve_numara_yok(paketler):
         else:
             continue
         t = re.sub(r"`[0-9a-f]{64}`|`[A-Za-z0-9_-]{25,40}`|\b[0-9a-f]{64}\b", "", t)      # SHA-256 ve Drive kimliği
+        t = re.sub(GOMULU_GORSEL, "", t)    # rehberin zeminindeki PDF görseli (base64; yazı değil, PDF'in metni ayrıca taranır)
         assert numara.maskele(t) == t, p.name
     html = (kok / "prefabrik" / "TK-01" / "TK-01_montaj_rehberi.html").read_text(encoding="utf-8")
     assert "<title>TK-01 Montaj Rehberi</title>" in html
@@ -352,7 +356,7 @@ def _yazilar(klasor: Path) -> dict[str, str]:
     out = {}
     for p in klasor.iterdir():
         if p.suffix in (".md", ".html", ".ifc"):
-            out[p.name] = p.read_text(encoding="utf-8", errors="replace")
+            out[p.name] = re.sub(GOMULU_GORSEL, "", p.read_text(encoding="utf-8", errors="replace"))   # gömülü görsel yazı değil
         elif p.suffix == ".xlsx":
             out[p.name] = "\n".join(str(c) for ws in load_workbook(p).worksheets for r in ws.iter_rows(values_only=True) for c in r if c is not None)
         elif p.suffix == ".pdf":
@@ -391,7 +395,11 @@ def test_is_emri_ile_paket(paketler, tmp_path):
         sat = lambda p: list(load_workbook(p).active.iter_rows(min_row=2, values_only=True))
         assert sat(b / f"TK-98_yukleme_listesi_{s}.xlsx") == sat(a / f"TK-01_yukleme_listesi_{s}.xlsx"), s
     html = (b / "TK-98_montaj_rehberi.html").read_text(encoding="utf-8")
-    assert html.replace("TK-98", "TK-01").replace("TK98", "TK01") == (a / "TK-01_montaj_rehberi.html").read_text(encoding="utf-8")
+    # rehberin zeminindeki ön onay PDF'inin görseli antette kodu taşır (TK-98 / TK-01; 4 Kasım 2026, rehber/pdf_zemin.py): görsel kıyas
+    # dışında; sayfanın plandaki yeri (`kagit_cm`) ve rehberin geri kalanı aynı
+    resimsiz = lambda s: re.sub(r'"resim":"data:image/jpeg;base64,[A-Za-z0-9+/=]+"', '"resim":""', s)
+    assert '"pdf_zemin":' in html
+    assert resimsiz(html).replace("TK-98", "TK-01").replace("TK98", "TK01") == resimsiz((a / "TK-01_montaj_rehberi.html").read_text(encoding="utf-8"))
     yazi = _yazilar(b)
     # antette kime ait ve m² (D-31 madde 14, Lokman 29 Ekim 2026 13:13; önceden "PORTMAN | Bayi TK-98 / TK-98 | İş Emri")
     assert "PORTMAN | Bayi TK-98 / TK-98 | 78,38 m² brüt · 72,71 m² net | İş Emri" in yazi["TK-98_cizim.dxf"] and "'TK-98 " in yazi["TK-98_model.ifc"]
