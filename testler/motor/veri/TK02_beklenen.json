@@ -2605,6 +2605,12 @@
    },
    {
     "grup": "1008",
+    "kalem": "Trapez vida 5,5 × 25 (aşık ve omega)",
+    "olcu": "adet",
+    "adet": 1050
+   },
+   {
+    "grup": "1008",
     "kalem": "Prefabrik pencere vidası (4,8 × 70)",
     "olcu": "adet",
     "adet": 160
@@ -2685,43 +2691,43 @@
     "grup": "1010",
     "kalem": "Temiz su borusu",
     "olcu": "L 4000",
-    "adet": 6
+    "adet": 12
    },
    {
     "grup": "1010",
     "kalem": "Normal dirsek 20 mm",
     "olcu": "adet",
-    "adet": 15
+    "adet": 30
    },
    {
     "grup": "1010",
     "kalem": "Kulaklı dirsek 20 mm",
     "olcu": "adet",
-    "adet": 12
+    "adet": 24
    },
    {
     "grup": "1010",
     "kalem": "Düz T 20 mm",
     "olcu": "adet",
-    "adet": 6
+    "adet": 12
    },
    {
     "grup": "1010",
     "kalem": "Maşon 20 mm",
     "olcu": "adet",
-    "adet": 15
+    "adet": 30
    },
    {
     "grup": "1010",
     "kalem": "İç dişli T 20 mm",
     "olcu": "adet",
-    "adet": 6
+    "adet": 12
    },
    {
     "grup": "1010",
     "kalem": "Atlama parçası yarım parmak",
     "olcu": "adet",
-    "adet": 3
+    "adet": 6
    },
    {
     "grup": "1010",

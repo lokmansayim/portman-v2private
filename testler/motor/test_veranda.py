@@ -199,7 +199,8 @@ def test_veranda_listesi():
     pencerenin iki yanı 62,75'lik yarım pano) 131 → 128, ters tavanda 129 → 126: 100'lük dolu panonun dört boyu tek boya indi. D-30 (Lokman,
     29 Ekim 2026, son pano 122 ve üzeriyse tam pano): gövde 898,5 × 888,5, satır 128 → 124, ters tavanda 126 → 122 (kesik son panoların
     satırları tam boy satırına katıldı); veranda kirişleri ve yavru makaslar aynı. Taşan verandaya bakan gövde duvarı ana çatının
-    kenarındadır, "çatı kenarına gelmeyen dış duvar"a girmez (D-32 madde 2, Lokman 29 Ekim 13:12: 6,47 → 0)."""
+    kenarındadır, "çatı kenarına gelmeyen dış duvar"a girmez (D-32 madde 2, Lokman 29 Ekim 13:12: 6,47 → 0). İE-27 (D-45, Lokman 3 Kasım
+    2026): 5,5 × 25 trapez vida satırı eklendi, satır 124 → 125, ters tavanda 122 → 123."""
     N = PL.model_motor(_ie())
     assert (N["W"], N["D"], N["brut_m2"]) == (898.5, 1199.5, 90.211)       # brüt gövde + veranda; dış kutunun boş köşeleri sayılmaz
     assert N["dis_cevre_m"] == pytest.approx(35.74) and N["ic_kalan_dis_duvar_m"] == 0.0 and N["dikmeler"] == 4
@@ -219,9 +220,9 @@ def test_veranda_listesi():
     assert [f.startswith("taşan verandanın dış kenarı") for f in formul] == [True, False, False, True, False, False]
     assert sat("Yavru makas · ön veranda çatısı") == [("L 4460", 3)] and sat("Yavru makas · arka veranda çatısı") == [("L 3210", 2)]
     assert sat("Metal dere") == [("L 4000", 7)]
-    assert L["ozet"]["satir"] == 124
+    assert L["ozet"]["satir"] == 125
     N["ozellikler"]["Tavan"] = "Ters"
-    assert PL.liste(N)["ozet"]["satir"] == 122
+    assert PL.liste(N)["ozet"]["satir"] == 123
 
 
 def test_verandasiz_ayni():
