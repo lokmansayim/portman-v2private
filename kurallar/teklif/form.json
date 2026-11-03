@@ -1,0 +1,36 @@
+{
+ "sema": "portman.teklif_formu/1",
+ "aciklama": "Teklif PDF'inin düzeni ve sabit metinleri (İE-13 PR-6, araclar/teklif_pdf.py). Fiyat, adet ve alan buradan gelmez: fiyat defterden, adet ve alan Motor'dan, proje özellikleri İş Emri'nden. {kat_mm}, {dis_mm}, {ic_mm} İş Emri'nin yapi bölümünden doldurulur.",
+ "kaynak": "Patron'un boş teklif formu: Drive 'Portman Arşiv' › Teklif örnekleri › Boş şablonlar › 'PREFABRİK - TEKLİF PORTATİFEV - YENİ.xlsx' (29 Nisan 2026; sayfa 'PREFABRİK TEKLİF TURKCE'). Düzen aynı arşivdeki verilen tekliflerin PDF'iyle aynı: başlık, 01 Bayi / firma bilgileri, 02 Ürün detayı, 03 Ödeme, 04 Paket içeriği ve teknik özellikleri, 05 Kapsam dışı işler. Formdaki ödeme satırlarının yarı yarıya formülü alınmadı: ödeme şekli kurallar/teklif/kosullar.json'dan (Patron'dan).",
+ "firma": "PORTATİF EV",
+ "web": "www.portatifev.com",
+ "baslik": "TEKLİF VE SATIŞ ONAY FORMU",
+ "urun": "PREFABRİK YAPI",
+ "teknik": [
+  ["Kat Yüksekliği", "{kat_mm} mm"],
+  ["Yapı Çeliği", "Yüksek mukavemetli galvanizli sacdan imal edilmiş, özel büküm roll-form taşıyıcı çelik profiller."],
+  ["Dış Cephe Panelleri", "Kalınlık {dis_mm} mm; 8 mm fibercement/betopan + 16 kg/m³ EPS + 8 mm fibercement/betopan"],
+  ["İç Cephe Panelleri", "Kalınlık {ic_mm} mm; 8 mm fibercement/betopan + 16 kg/m³ EPS + 8 mm fibercement/betopan"],
+  ["Çatı Şekli", "Beşik Çatı - Trapez (paslanmaya karşı yüksek dirençli, üzeri polyester boyalı galvanizli çelik sac)"],
+  ["Çatı Tavan Arası İzolasyonu", "Mineral yün (80 mm)"],
+  ["Dış Kapı", "Çelik Kapı"],
+  ["İç Kapı", "Metal Kasalı Amerikan Panel Kapı"],
+  ["Pencereler", "70 mm profil genişliğinde ve 5 odacıklı yalıtım sistemine sahip, TS EN 12608 standartlarında üretilmiş, iç-dış çift contalı PVC doğrama ve 4+12+4 mm Çift Isıcam."],
+  ["Elektrik Tesisatı ve Donanımları", "Öznur marka Antigron (NYM) serisi kablolar ile oluşturulmuş sıva altı elektrik tesisatı; VİKO marka anahtar ve priz grupları; Siemens marka otomatik sigorta ve kaçak akım koruma rölesi altyapısı."],
+  ["Su Tesisatı", "Fırat marka PPRC boru ve orijinal bağlantı elemanları kullanılarak oluşturulmuş; 20 mm (yarım parmak) uç tesisat hatlarına sahip, sıva altı sıcak ve soğuk su tesisatı altyapısı."],
+  ["Boya", "Polisan silikonlu iç/dış cephe boyası, Permolit tavan boyası ve metal aksam sentetik boyası. Panel birleşimlerinde Dayson poliüretan mastik."],
+  ["Vitrifiye ve Armatür Grubu", "50 cm ayaklı lavabo, rezervuar takımlı tam takım klozet ve duş teknesi. Lavabo ve duş bataryaları, sürgülü/mafsallı duş seti (telefonu), taharet muslukları, çelik bağlantı spiralleri, duş tropleni, esnek lavabo sifonu ve yer süzgeci."],
+  ["Dereler, Saçaklar", "Renkli Metal"],
+  ["Tavan", "Alçıpan Dizme (Asma)"]
+ ],
+ "deger_yazisi": {
+  "Tavan": {"Asma": "Alçıpan Dizme (Asma)", "Ters": "Ters Tavan"}
+ },
+ "kapsam_disi": [
+  "Zemin betonu, hafriyat ve çevre düzenlemesi işleri.",
+  "Şap atılması ve ıslak/kuru zemin kaplamaları (parke, fayans, seramik).",
+  "Ürünlerin şantiye alanına nakliyesi, nakliye sigortası ve araçtan indirilmesi (vinç/forklift vb.).",
+  "Montaj, kurulum ve saha işçilikleri.",
+  "Mutfak Dolabı"
+ ]
+}
