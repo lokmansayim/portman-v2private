@@ -574,7 +574,9 @@ def _capraz_cumba_catilari(plan, ie: dict) -> tuple[list[dict], dict]:
     # gövdenin bütün derinliğini geçer (AP-13 M1–M7, AP-16 MKS1–7, AP-06 MK01–08) ve cumbada iki makas var: dış uçtaki kalkan makası
     # (M8, MKS8, MK09) ve onun arkasında, derelerin birleştiği yerden önce bir makas (M9, MKS9, MK10). Motor'un sayısı aynı (dış uçtan
     # 125,5 arayla derelerin birleştiği yere kadar: 2); paftada ikinci makas kalkan makasından 46,75–87,19 cm geride ve iki ana makasın
-    # arasında kısa, Motor onu 125,5 geride yavru makas boyuyla yazar (adet aynı, ölçü farkı IE-29.md'de).
+    # arasında kısa, Motor onu 125,5 geride yavru makas boyuyla yazar (adet aynı; satırın notunda ve IE-29.md'de). Sayım kuralı dört paftada
+    # tuttu: üç çıkıntısız cumba (genişlik 386,5, dereler 193,25'te birleşir: 2) ve AP-22'nin çıkıntılı cumbası (574,75, 287,4: 3). Ön
+    # cephe dışındaki cumba aynı yoldan (genel motor döndürür; `cati_uretici.DONUS_CUMBA`), paftayla kıyaslanmadı.
     try:
         t = CP.cati(plan, ie)
     except CP.PrefabrikCatiHatasi as e:
@@ -615,6 +617,7 @@ def _capraz_cumba_catilari(plan, ie: dict) -> tuple[list[dict], dict]:
             "mahya_boy_cm": round(mh[0]["plan_boy"], 2), "sacak_hatlari_m": [round(e["plan_boy"] / 100, 3) for e in k_["cumba"]["sacak"]],
             "alin_kenarlari_m": [round(e["boy"] / 100, 3) for e in k_["cumba"]["alin"]],
             "dere_ici_m": [round(e["boy"] / 100, 3) for e in k_["cumba"]["vadi"]], "makas_kosu_cm": birlesim,
+            **({"cikintisiz": True} if float(cumbalar[0].get("cikinti_cm", 0)) == 0 else {}),
             "not": "Motor (İE-17): ana çatıya dik çapraz cumba (taşan verandanın çapraz beşiği gibi); iki deresi ana çatının yüzüyle"}]
     return out, t
 
@@ -1224,7 +1227,10 @@ def liste(N: dict, kurallar: dict | None = None, pafta: dict | None = None) -> d
             ekle("1005", f"Yavru makas · {ad}", f"L {round((c['aciklik_cm'] + 2 * c['sacak_cm']) * 10)}", n_m, "Kural (J8)",
                  (f"çatı tanımının makas yerleri ({c.get('makas_yeri')}) = {n_m}" if "makas_adet" in c else
                   f"ek çatı parçasının pano koşusu {mm(c['makas_kosu_cm'])} ÷ {mm(makas_ara)} yukarı + 1"),
-                 "PK-03: yavru makas 3 (MK10–MK12)" + ("; AP-22 paftası MK10–12: 3 tuttu" if c.get("capraz") and "makas_adet" in c else ""))
+                 "PK-03: yavru makas 3 (MK10–MK12)" + (("; çıkıntısız cumba (D-47): AP-13 M8–M9, AP-16 MKS8–MKS9, AP-06 MK09–MK10 paftası 2 "
+                                                         "tuttu; paftada ikinci makas kalkan makasından 47–87 cm geride, iki ana makasın arasında "
+                                                         "kısa; burada yavru makas boyuyla (artık, K16)") if c.get("cikintisiz") else
+                                                        "; AP-22 paftası MK10–12: 3 tuttu" if c.get("capraz") and "makas_adet" in c else ""))
         else:
             if c["kalkan"]:
                 ekle("1005", f"Makas (baş) · {ad}", f"açıklık {mm(c['aciklik_cm'])}", c["kalkan"], "Kural", "çatının iki ucunda" if c["kalkan"] == 2 else "çatının ucunda", "",
