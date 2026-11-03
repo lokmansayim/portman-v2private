@@ -516,8 +516,8 @@ def sayfa_sahibi(t: dict) -> str:
 
 def sayfa_izi(pdf: Path) -> list[str]:
     """Kontrol sayfasının içerik izi, sayfa sayfa (D-28 A11): sayfa ölçüsü, bütün çizimler ve sözcükler (yeriyle, 0,1 pt;
-    `parmak_izi.genel_pdf_ozet` gibi) ile gömülü görsellerin yeri ve çözülmüş pikselleri. Bayt özeti değil: PyMuPDF her kayıtta belge
-    kimliğini yeniden yazar, aynı girdiden iki koşu iki ayrı bayt verir."""
+    `parmak_izi.genel_pdf_ozet` gibi) ile gömülü görsellerin yeri, çözülmüş pikselleri ve saydamlık maskesi. Bayt özeti değil: PyMuPDF her
+    kayıtta belge kimliğini yeniden yazar, aynı girdiden iki koşu iki ayrı bayt verir."""
     import pymupdf
     sys.path.insert(0, str(KOK / "testler" / "referans"))
     from parmak_izi import _cizim
@@ -526,8 +526,12 @@ def sayfa_izi(pdf: Path) -> list[str]:
         for s in d:
             cizimler = sorted(_cizim(x) for x in s.get_drawings())
             sozcukler = sorted([round(w[0], 1), round(w[1], 1), round(w[2], 1), round(w[3], 1), w[4]] for w in s.get_text("words"))
-            gorseller = sorted([[round(v, 1) for v in g["bbox"]], g["width"], g["height"],
-                                hashlib.sha256(pymupdf.Pixmap(d, g["xref"]).samples).hexdigest()] for g in s.get_image_info(xrefs=True))
+            gorseller = []
+            for g in s.get_image_info(xrefs=True):
+                maske = d.extract_image(g["xref"]).get("smask") or 0       # Pixmap(d, xref) saydamlığı almaz (geometri hakemi, PR-8)
+                gorseller.append([[round(v, 1) for v in g["bbox"]], g["width"], g["height"], hashlib.sha256(pymupdf.Pixmap(d, g["xref"]).samples).hexdigest(),
+                                  hashlib.sha256(pymupdf.Pixmap(d, maske).samples).hexdigest() if maske else None])
+            gorseller.sort()
             icerik = [round(s.rect.width, 1), round(s.rect.height, 1), cizimler, sozcukler, gorseller]
             izler.append(hashlib.sha256(json.dumps(icerik, ensure_ascii=False).encode("utf-8")).hexdigest())
     return izler

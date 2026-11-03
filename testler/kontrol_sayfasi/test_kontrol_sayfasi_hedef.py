@@ -3,7 +3,8 @@
 Lokman KT-04'ü kontrol sayfası c07 ile kabul etti (1 Kasım 2026 11:45 UTC, karar kartı). O sayfa proje dosyalarında durur; depoda onun
 girdisi (c07 çizildiği anki kart, `KT04_kart_c07.json`), kayıtlı tanım ve pimler ile sayfa sayfa içerik izi durur (`hedef.json`).
 Sayfa bugünkü koddan yeniden üretilir: çizim `atolye.py ciz`'in ayarlarıyla, sabit üretim zamanıyla (D-02 madde 2), sayfa aynı karttan
-(`araclar/atolye.kontrol_sayfasi_yeniden`). İzi hedefle aynı olmalı. Onaylanan sayfadan tek fark paftanın antedindeki üretim tarihidir
+(`araclar/atolye.kontrol_sayfasi_yeniden`). İzi hedefle aynı olmalı. 1. sayfanın değerleri (ölçüm, denetimler, metraj) girdideki karttan
+okunur: ölçüm bankanın hızlı kaydına bağlıdır, denetimlerin sonucu karttaki gibi kalır. Onaylanan sayfadan tek fark paftanın antedindeki üretim tarihidir
 (`hedef.json › fark`). Hedef yalnız Lokman'ın onayıyla ve gerekçeli kararla yeniden dondurulur (D-02); testi geçirmek için değiştirilmez.
 
 Yeniden üretim model başına ~20 sn sürer: banka tam izleri gibi `PORTMAN_BANKA_TAM=1` ister (CI ve `ortam_kur.sh --dogrula` koyar)."""
@@ -41,6 +42,10 @@ def test_hedef_kaydi_onayli_sayfayla_tutarli():
     assert _sha(KOK / G["tanim"]) == G["tanim_sha256"] == kontrol["tanim_sha256"]
     for alan in ("kural_seti", "karkas_kurali"):
         assert G[alan] == kontrol[alan] and _sha(KOK / G[alan]) == G[f"{alan}_sha256"]
+    # 1. sayfanın değerleri girdideki karttan gelir; ölçüm bankanın hızlı kaydıyla aynı (`test_banka` onu her koşuda bugünkü kodla ölçer),
+    # çatının adı bugünkü kodla aynı. Denetimlerin sonuçları kartta olduğu gibi kalır (sınır: IE-09 › PR-8)
+    assert kart["olcum"] == kontrol["hizli"]
+    assert A.cati_adi(json.loads((KOK / G["tanim"]).read_text(encoding="utf-8"))) == kart["cati_adi"]
     # onay bu çizime: bankadaki kartın kabul kaydı c07
     banka = json.loads((KOK / "modeller" / "banka" / "KT04" / "kart.json").read_text(encoding="utf-8"))
     assert banka["durum"] == "kabul" and banka["kabul"]["cizim"] == 7 and banka["kabul"]["kim"] == "Lokman"

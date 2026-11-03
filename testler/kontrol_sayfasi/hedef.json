@@ -8,13 +8,13 @@
    "sha256": "69ab2a6f4205414f04a78db57244bd646a57c00c5953ea93c477e1250fd5fcf7",
    "sayfalar": [
     "1311471c3dfa35ccc6dc2ee9b61fba12094ee26d69a771f6709a6a5c54d82d99",
-    "d80559b7966564bb139bb89af6468ce57da0d16444f2f64ab389a818d455feae",
+    "52581c10724c137ef74b391779d27757f931ec8ad77509a3633a4e57da7ae373",
     "ad26c38813effb332c86c66eab8329e3f9601ad929644803b35135ff44db41f3",
     "33e7cc3312c3e4dde6ff918880a2fbf078b027aa1d8199ad645823b657bd5af0",
-    "b2ded1fcd6aa5979e712e644c76fd7c5e0fa50e2a654b6486fb587105b760a67"
+    "9f1cf056d44e1de73df5b63a47d58e141ac4c9080ddb25389e4de718c95f036d"
    ]
   },
-  "komut": "python3 araclar/atolye.py ciz KT04 (sayfayı üreten); kıyas: araclar/atolye.kontrol_sayfasi_yeniden + sayfa_izi",
+  "komut": "python3 araclar/atolye.py ciz <KOD> (sayfayı üreten; c07 böyle üretildi). Kıyas: araclar/atolye.kontrol_sayfasi_yeniden + sayfa_izi (aynı ayarlar, cizim_ayari; KT-04 kabul edildiği için ciz onu artık yeniden çizmez)",
   "kod": "dal claude/project-thread-rhjgzv, main 3776e29 üstünde (İE-09 PR-8)",
   "karar": "D-28 madde 2-3 (A11), D-20. İlk dondurma: onaylanan sayfa. Yeniden dondurma yalnız Lokman'ın onayıyla ve gerekçeli kararla (D-02)."
  },
@@ -36,9 +36,9 @@
  ],
  "sayfalar": [
   "1311471c3dfa35ccc6dc2ee9b61fba12094ee26d69a771f6709a6a5c54d82d99",
-  "d80559b7966564bb139bb89af6468ce57da0d16444f2f64ab389a818d455feae",
+  "52581c10724c137ef74b391779d27757f931ec8ad77509a3633a4e57da7ae373",
   "947dfb9d0c1c1d2ea5db217435461fe7508878712b83699e43485f7cb054d4a7",
   "33e7cc3312c3e4dde6ff918880a2fbf078b027aa1d8199ad645823b657bd5af0",
-  "b2ded1fcd6aa5979e712e644c76fd7c5e0fa50e2a654b6486fb587105b760a67"
+  "9f1cf056d44e1de73df5b63a47d58e141ac4c9080ddb25389e4de718c95f036d"
  ]
 }
