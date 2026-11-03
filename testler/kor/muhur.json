@@ -1,13 +1,13 @@
 {
- "aciklama": "Kör test mührü (BK-12 PR-3, M7). Kayıt başına kod (PK ve AP), dosya türü, uzantı, bayt, SHA-256 ve durum; dosya adı ve kişi adı yazılmaz. Durum: acik (13 Ekim'de açıldı; İE-26'nın on evi Patron'un açılış kaydıyla 2 Kasım'da açıldı, İE-27'de (3 Kasım, D-45) kaydı `acik`a geçti: açılmış liste artık kör değil, kurallar değiştikçe açıkça yeniden ölçülür), kor (kör 19: açılış kaydı olmadan açılmaz), kapali (açılmadı; kör sayılmaz ama açılış kaydı olmadan o da açılmaz), kaynak (montaj paftası ya da detay; liste değil, araç okumaz). Açılış kaydı: proje kodu → tarih, kendi listemizin commit'i ve saatler (13 Ekim'in açık sekiz projesi). Kör ya da kapalı bir kayıt açılacaksa Patron kararıyla `acilislar`'a ayrı commit'le eklenir: {\"karar\": <Patron kararı ve saati>, \"tarih\": …, \"sha256\": <açılacak dosyanın özeti>, \"liste_commit\": <kendi listemizin commit'i>, \"sozluk_commit\": <sözlüğün commit'i>}; araç özet ya da liste commit'i tutmazsa açmaz, sözlük açılıştan sonra değişmişse sonuçta ve raporda yazar.",
+ "aciklama": "Kör test mührü (BK-12 PR-3, M7). Kayıt başına kod (PK ve AP), dosya türü, uzantı, bayt, SHA-256 ve durum; dosya adı ve kişi adı yazılmaz. Durum: acik (13 Ekim'de açıldı; İE-26'nın on evi Patron'un açılış kaydıyla 2 Kasım'da açıldı, İE-27'de (3 Kasım, D-45) kaydı `acik`a geçti; İE-29'da (3 Kasım, D-47) AP-06, AP-13, AP-16 aynı kararla açıldı, kaydı `acik`: açılmış liste artık kör değil, kurallar değiştikçe açıkça yeniden ölçülür), kor (kör 19: açılış kaydı olmadan açılmaz), kapali (açılmadı; kör sayılmaz ama açılış kaydı olmadan o da açılmaz), kaynak (montaj paftası ya da detay; liste değil, araç okumaz). Açılış kaydı: proje kodu → tarih, kendi listemizin commit'i ve saatler (13 Ekim'in açık sekiz projesi). Kör ya da kapalı bir kayıt açılacaksa Patron kararıyla `acilislar`'a ayrı commit'le eklenir: {\"karar\": <Patron kararı ve saati>, \"tarih\": …, \"sha256\": <açılacak dosyanın özeti>, \"liste_commit\": <kendi listemizin commit'i>, \"sozluk_commit\": <sözlüğün commit'i>}; araç özet ya da liste commit'i tutmazsa açmaz, sözlük açılıştan sonra değişmişse sonuçta ve raporda yazar.",
  "kaynaklar": [
   "13 Ekim 2026 kör test serisi mührü (`ie-11-pr2-kor-test` dalı, `deneme/2026-10-13_aiprefabrik` mühür kaydı; adlı satırlar orada kalır)",
   "docs/notlar/2026-10-18_AIPrefabrik_muhur.md (AP kodlarıyla 61 dosya; 28 DWG'nin SHA'sı ilk indirmede alınır, bu dosyada yok)"
  ],
  "sayilar": {
-  "acik": 27,
+  "acik": 30,
   "kaynak": 32,
-  "kor": 9,
+  "kor": 6,
   "kapali": 14
  },
  "acilislar": {
@@ -351,7 +351,8 @@
    "uzanti": ".pdf",
    "bayt": 232767,
    "sha256": "8104f0298e6d80f6c639c9367a1e42cf35e248971179c1d0c03c38cfd7745691",
-   "durum": "kor"
+   "durum": "acik",
+   "not": "liste İE-29'da İE-26 kararıyla açıldı (3 Kasım 2026)"
   },
   {
    "kod": [
@@ -473,8 +474,8 @@
    "uzanti": ".pdf",
    "bayt": 245860,
    "sha256": "f676aa3f1dcaad04654bbaeb084fb6dfc74bfcb1e9048fad9d04521567906fe1",
-   "durum": "kor",
-   "not": "çizim için pafta görüldü (İE-17, 27 Ekim 2026: montaj paftası çatı ve görünüş çizimine kaynak); liste kapalı, açılmadı"
+   "durum": "acik",
+   "not": "çizim için pafta görüldü (İE-17, 27 Ekim 2026: montaj paftası çatı ve görünüş çizimine kaynak); liste İE-29'da İE-26 kararıyla açıldı (3 Kasım 2026)"
   },
   {
    "kod": [
@@ -535,8 +536,8 @@
    "uzanti": ".pdf",
    "bayt": 239623,
    "sha256": "3e8ad249871f4e495d460e2d93c54faec9770b6456c9d79760601659e025cd8c",
-   "durum": "kor",
-   "not": "çizim için pafta görüldü (İE-17, 27 Ekim 2026: montaj paftası çatı ve görünüş çizimine kaynak); liste kapalı, açılmadı"
+   "durum": "acik",
+   "not": "çizim için pafta görüldü (İE-17, 27 Ekim 2026: montaj paftası çatı ve görünüş çizimine kaynak); liste İE-29'da İE-26 kararıyla açıldı (3 Kasım 2026)"
   },
   {
    "kod": [

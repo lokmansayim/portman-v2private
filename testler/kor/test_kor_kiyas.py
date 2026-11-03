@@ -35,12 +35,16 @@ ACIK8 = ["PK-01", "PK-02", "PK-03", "PK-05", "PK-06", "PK-07", "PK-08", "TS-01"]
 # 24, 27: Motor liste yazmıyor; AP-20 çift kat, ölçüm dışı) ve AP-10 açılmadı.
 # İE-27 (3 Kasım 2026, D-45): açılmış liste artık kör değil; on evin kaydı `acik`a geçti (açılış kayıtları iz olarak duruyor) ki Lokman'ın
 # 3 Kasım cevaplarıyla değişen kurallardan sonra açık sekiz proje gibi yeniden ölçülebilsin. Kör kalan dokuz ev `kor`.
+# İE-29 (3 Kasım 2026, D-47; pano 145): Motor çıkıntısız çapraz cumbada da liste yazıyor; AP-06, AP-13, AP-16 aynı kararla açıldı
+# (kendi listemiz 008f48e, açılış kaydı ayrı commit) ve kaydı `acik`. Kör kalan altı: AP-12, 17, 23, 24, 27 (Motor liste yazmıyor), AP-20.
 ACILAN_IE26 = ["AP-09", "AP-11", "AP-14", "AP-15", "AP-18", "AP-21", "AP-22", "AP-25", "AP-26", "AP-28"]
-KOR9 = [k for k in KOR19 if k not in ACILAN_IE26]
+ACILAN_IE29 = ["AP-06", "AP-13", "AP-16"]
+ACILAN = sorted(ACILAN_IE26 + ACILAN_IE29)
+KOR_KALAN = [k for k in KOR19 if k not in ACILAN]
 IE26_KARAR = "karar kartı 2 Kasım 2026 21:48:56 UTC: \"Hepsi açılsın\""
 # Mühürde kodların durumu (bir dosya birden çok kod taşıyabilir; kod bir kez sayılır her dosya için). Değişirse açılış Patron kararıdır.
 ACIK_KODLAR = sorted(["AP-01", "AP-01", "AP-02", "AP-03", "AP-04", "AP-05", "AP-07", "AP-08", "AP-19", "PK-01", "PK-02", "PK-03", "PK-03",
-                      "PK-05", "PK-06", "PK-06", "PK-07", "PK-08", "PK-08", "TS-01", *ACILAN_IE26])
+                      "PK-05", "PK-06", "PK-06", "PK-07", "PK-08", "PK-08", "TS-01", *ACILAN])
 KAPALI_KODLAR = ["AP-10", "PK-02", "PK-02", "PK-04", "PK-04", "PK-04", "PK-05", "PK-05", "PK-07", "PK-07", "PK-07", "PK-07", "PK-08",
                  "PK-08"]
 UYDURMA_AD = "Deneme Kişisi Uydurma"
@@ -434,14 +438,14 @@ def test_muhur_yalniz_kod_ve_ozet_tasir(muhur):
     for r in muhur["dosyalar"]:
         assert set(r) <= alanlar, r["kod"]
         assert all(k[:3] in ("PK-", "TS-", "AP-") and len(k) == 5 for k in r["kod"])
-    assert muhur["sayilar"] == {"acik": 27, "kaynak": 32, "kor": 9, "kapali": 14}               # İE-27: on açılmış ev `acik`
+    assert muhur["sayilar"] == {"acik": 30, "kaynak": 32, "kor": 6, "kapali": 14}               # İE-27: on açılmış ev `acik`; İE-29: üç ev daha
     assert Counter(r["durum"] for r in muhur["dosyalar"]) == muhur["sayilar"]          # özet dosyadaki sayıyla değil, yeniden sayılır
 
 
 def test_acik_ve_kapali_kodlar_degismedi(muhur):
     """Bir kaydın durumunu değiştirmek (kapalıyı açık yapmak) açılış kaydı olmadan liste açtırır: durumlar burada sabittir."""
     kodlar = {d: sorted(k for r in muhur["dosyalar"] if r["durum"] == d for k in r["kod"]) for d in K.DURUMLAR}
-    assert kodlar["acik"] == ACIK_KODLAR and kodlar["kapali"] == KAPALI_KODLAR and kodlar["kor"] == KOR9
+    assert kodlar["acik"] == ACIK_KODLAR and kodlar["kapali"] == KAPALI_KODLAR and kodlar["kor"] == KOR_KALAN
     for r in muhur["dosyalar"]:
         if r["durum"] in ("acik", "kor", "kapali"):
             assert r["tur"] == K.LISTE, r["kod"]
@@ -449,7 +453,7 @@ def test_acik_ve_kapali_kodlar_degismedi(muhur):
 
 def test_kor_kalanlar_ve_ap10_acilis_kaydi_olmadan_reddedilir(muhur):
     kor = {k: r for r in muhur["dosyalar"] if r["durum"] == "kor" for k in r["kod"]}
-    assert sorted(kor) == KOR9
+    assert sorted(kor) == KOR_KALAN
     ap10 = [r for r in muhur["dosyalar"] if "AP-10" in r["kod"] and r["tur"] == K.LISTE]
     assert len(ap10) == 1 and ap10[0]["durum"] == "kapali"
     liste = {"commit": "f" * 40}
@@ -460,10 +464,10 @@ def test_kor_kalanlar_ve_ap10_acilis_kaydi_olmadan_reddedilir(muhur):
         assert e.value.adim == 3, kod
     # İE-26: yalnız Patron'un kararıyla açılan on evin açılış kaydı var; her biri karar, bu dosyanın özeti ve iki commit'le. İE-27'den
     # beri bu on evin kaydı `acik`; açılış kaydı iz olarak duruyor
-    acilan = {k: r for r in muhur["dosyalar"] if r["tur"] == K.LISTE for k in r["kod"] if k in ACILAN_IE26}
-    assert sorted(acilan) == ACILAN_IE26 and all(r["durum"] == "acik" for r in acilan.values())
-    assert set(KOR19 + ["AP-10"]) & set(muhur["acilislar"]) == set(ACILAN_IE26)
-    for kod in ACILAN_IE26:
+    acilan = {k: r for r in muhur["dosyalar"] if r["tur"] == K.LISTE for k in r["kod"] if k in ACILAN}
+    assert sorted(acilan) == ACILAN and all(r["durum"] == "acik" for r in acilan.values())
+    assert set(KOR19 + ["AP-10"]) & set(muhur["acilislar"]) == set(ACILAN)
+    for kod in ACILAN:
         a = muhur["acilislar"][kod]
         assert IE26_KARAR in a["karar"] and a["sha256"] == acilan[kod]["sha256"], kod
         assert len(a["liste_commit"]) >= 7 and len(a["sozluk_commit"]) >= 7, kod
@@ -472,28 +476,28 @@ def test_kor_kalanlar_ve_ap10_acilis_kaydi_olmadan_reddedilir(muhur):
 def test_cizim_icin_pafta_gorulen_kor_liste_kapali(muhur):
     # CIO 27 Ekim 22:43: AP-13 ve AP-16'nın montaj paftası İE-17 çizimine kullanıldı; kör listelerinin kaydında not, liste kapalı.
     # İE-17 PR-2 (1 Kasım 2026): AP-09, AP-15, AP-22 de (AP-03'ün listesi 13 Ekim'den beri açık). İE-26: AP-09, 15, 22 Patron'un
-    # kararıyla açıldı (not duruyor; İE-27'den beri kayıt `acik`); AP-13 ve AP-16'da Motor liste yazmıyor, açılmadı
+    # kararıyla açıldı (not duruyor; İE-27'den beri kayıt `acik`); AP-13 ve AP-16 İE-29'da aynı kararla (Motor artık liste yazıyor, D-47)
     for kod in ("AP-13", "AP-16", "AP-09", "AP-15", "AP-22"):
         r = [r for r in muhur["dosyalar"] if kod in r["kod"]]
-        durum = "acik" if kod in ACILAN_IE26 else "kor"
+        durum = "acik" if kod in ACILAN else "kor"
         assert {(x["tur"], x["durum"]) for x in r} == {("montaj paftası", "kaynak"), (K.LISTE, durum)}, kod
         liste = next(x for x in r if x["tur"] == K.LISTE)
         assert liste["not"].startswith("çizim için pafta görüldü"), kod
-        assert liste["not"].endswith("açıldı (2 Kasım 2026)" if durum == "acik" else "liste kapalı, açılmadı"), kod
-        assert (kod in muhur["acilislar"]) == (kod in ACILAN_IE26), kod
+        assert liste["not"].endswith("açıldı (3 Kasım 2026)" if kod in ACILAN_IE29 else "açıldı (2 Kasım 2026)"), kod
+        assert kod in muhur["acilislar"], kod
 
 
 def test_acik_sekiz_projenin_listesi_acik_kayitta(muhur):
     """Açık sekiz projenin ve İE-26'nın on projesinin listesi `acik` kayıtta. On projenin açılış kaydı Patron'un kararını ve açılıştan
     önce commit'lenmiş kendi listemizi taşır: o commit bugünkü listenin geçmişinde (İE-27'de liste yeniden üretildi, D-45)."""
-    assert sorted(_oku(p / "proje.json")["kod"] for p in PROJELER) == sorted(ACIK8 + ACILAN_IE26)
+    assert sorted(_oku(p / "proje.json")["kod"] for p in PROJELER) == sorted(ACIK8 + ACILAN)
     for p in PROJELER:
         P = _oku(p / "proje.json")
         r = [r for r in muhur["dosyalar"] if r["sha256"] == P["liste_sha256"]]
         assert len(r) == 1 and r[0]["durum"] == "acik" and P["kod"] in r[0]["kod"], P["kod"]
         a = muhur["acilislar"][P["kod"]]
         assert a["liste_commit"]
-        if P["kod"] in ACILAN_IE26:
+        if P["kod"] in ACILAN:
             assert IE26_KARAR in a["karar"] and a["sha256"] == P["liste_sha256"], P["kod"]
             bugun = K.kayitli_mi(p / "bizim_liste.json")["commit"]
             assert K._git(KOK, "merge-base", "--is-ancestor", a["liste_commit"], bugun).returncode == 0, P["kod"]
