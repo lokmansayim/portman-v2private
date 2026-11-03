@@ -32,6 +32,7 @@ DEGISIM = [
     (r' cm varsayım\)', ' cm, yaklaşık)', 'U dudağı varsayım', 1),
     (r'\s?\([^()]*Lokman[^()]*\)', '', 'Lokman geçen parantezler', 1),
     (r'Alpha Mini düzeni', 'Makas düzeni', 'makas metni', 1),
+    (r"\s?\(PK-01'de \d+\)", '', 'PK-01 kart ölçüsü notu (4.11)', 2),
     (r'<meta name="claude:viewport-fit-sides"[^>]*>\n?', '', 'artefakt meta', 1),
     (r'<link rel="preconnect"[^>]*>\n?', '', 'Google Fonts preconnect', 2),
     (r'<link rel="stylesheet" href="https://fonts\.googleapis\.com[^>]*>', '<link rel="stylesheet" href="yazi/yazi.css">',
@@ -47,7 +48,7 @@ MARKA = [(r' \(Izocam\)', '', 'Izocam (adım metni)', 1),
          (r' \(Izocam-Knauf\)', '', 'Izocam-Knauf (malzeme satırı)', 1),
          (r' \(IZOCAM-KNAUF\)', '', 'IZOCAM-KNAUF (liste satırı)', 1)]
 YASAK = ['lokman', 'teyit', 'paftada yok', '.bde', 'alpha mini', 'lytecad', 'sketchup', 'dwg', 'ums metal', 'assan',
-         'varsayım', 'varsayıl', 'tedarik', 'portman', 'astra', 'ubeyd', 'tatar', 'patron', '["kaynak"', "['kaynak'",
+         'varsayım', 'varsayıl', 'tedarik', 'pk-01', 'kart modeli', 'modelinde', 'portman', 'astra', 'ubeyd', 'tatar', 'patron', '["kaynak"', "['kaynak'",
          'kaynak:', '__proje__', '__kisa__', '__data__', '__script__', '__gorseller__', 'jsdelivr', 'googleapis',
          'gstatic', 'http://', 'https://']
 TELEFON = re.compile(r'(?<![\d.,])(?:\+?90[ -]?)?0?5\d{2}[ -]?\d{3}[ -]?\d{2}[ -]?\d{2}(?![\d.,])')

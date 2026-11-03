@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # PORTMAN · Montaj rehberini rehber.portatifev.com'da statik yayınla (kart 104, 25.10.2026; root).
-# Tek dosya olarak koşar: deneme/2026-10-24_montaj_rehberi/yayin/paketle.py paketi aşağıdaki işaretin yerine gömer
-# (cikti/rehber_kur.sh). Bu dosyanın kendisi paketsizdir; doğrudan koşulursa "paket gömülü değil" der.
+# Tek dosya olarak koşar: paketleyici (4.11'den beri deneme/2026-11-04_rehber_sitesi/site.py; açılış sayfası + her rehber
+# kendi klasöründe) paketi aşağıdaki işaretin yerine gömer (cikti/rehber_kur.sh). Bu dosyanın kendisi paketsizdir;
+# doğrudan koşulursa "paket gömülü değil" der. Paket tek rehberli (kökte) de olabilir, çok rehberli (alt klasörler) de.
 # Mac'ten (Lokman):
 #   kuru koşu : ssh portman-vps 'timeout 300 bash -s -- --dene'   < rehber_kur.sh > rehber_dene.txt 2>&1
 #   uygula    : ssh portman-vps 'timeout 300 bash -s -- --uygula' < rehber_kur.sh > rehber_uygula.txt 2>&1
@@ -91,8 +92,8 @@ server {
     add_header Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=()" always;
     add_header Cross-Origin-Opener-Policy same-origin always;
 
-    location = /index.html { limit_except GET HEAD { deny all; } expires -1; }
-    location = /SHA256SUMS { return 404; }
+    location ~ \.html\$ { limit_except GET HEAD { deny all; } expires -1; }
+    location ~ /SHA256SUMS\$ { return 404; }
     location ~ /\. { return 404; }
     location / { limit_except GET HEAD { deny all; } try_files \$uri \$uri/ =404; expires 7d; }
 }
@@ -238,11 +239,18 @@ adim 5 "Doğrulama (sunucu içinden)"
 sleep 1
 R=(--noproxy '*' --resolve "$ALAN:443:127.0.0.1" --resolve "$ALAN:80:127.0.0.1" -s -m 10 ${RH_CURL_EK:-})
 kod() { curl "${R[@]}" -o /dev/null -w '%{http_code}' "$1" </dev/null || true; }
-echo "   GET /                     → $(kod "https://$ALAN/")"
-echo "   GET /js/three.module.js   → $(kod "https://$ALAN/js/three.module.js")"
-echo "   GET /gorsel/ev_on_sag.jpg → $(kod "https://$ALAN/gorsel/ev_on_sag.jpg")"
-echo "   GET /gorsel/ (liste)      → $(kod "https://$ALAN/gorsel/") (403/404 beklenir)"
-echo "   GET /SHA256SUMS           → $(kod "https://$ALAN/SHA256SUMS") (404 beklenir)"
+# Paketteki her sayfa (index.html'li klasör), her Three.js kopyası ve ilk görsel klasörü sınanır.
+for f in $(cd "$TMP/a" && find . -name index.html | sed 's#^\.##; s#index\.html$##' | sort); do
+  printf '   GET %-24s → %s\n' "$f" "$(kod "https://$ALAN$f")"
+done
+for f in $(cd "$TMP/a" && find . -path '*js/three.module.js' | sed 's#^\.##' | sort); do
+  printf '   GET %-24s → %s\n' "$f" "$(kod "https://$ALAN$f")"
+done
+ALT=$(cd "$TMP/a" && find . -mindepth 1 -maxdepth 1 -type d ! -name gorsel ! -name js ! -name yazi | sed 's#^\.##' | sort | head -1)
+[ -n "$ALT" ] && printf '   GET %-24s → %s (301 beklenir)\n' "$ALT" "$(kod "https://$ALAN$ALT")"
+G=$(cd "$TMP/a" && find . -type d -name gorsel | sed 's#^\.##' | sort | head -1)
+[ -n "$G" ] && printf '   GET %-24s → %s (403/404 beklenir)\n' "$G/" "$(kod "https://$ALAN$G/")"
+echo "   GET /SHA256SUMS                → $(kod "https://$ALAN/SHA256SUMS") (404 beklenir)"
 echo "   POST /                    → $(curl "${R[@]}" -o /dev/null -w '%{http_code}' -X POST "https://$ALAN/" </dev/null || true) (403 beklenir)"
 echo "   http:// yönlendirme       → $(kod "http://$ALAN/") (301 beklenir)"
 echo "   başlıklar:"
