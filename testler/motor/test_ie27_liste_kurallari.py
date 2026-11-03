@@ -3,13 +3,15 @@
 Girdiler kör ölçümün açık projelerinin depodaki İş Emri'leri (`testler/kor/projeler/<KOD>/is_emri.json`; bizim okumamız, gerçek liste değil).
 
 - Madde 3: 3'lü H = bir H + bir çektirme U'su; dış duvarın pano ekine T ile gelen iç duvar da 3'lü H'tır (bugüne kadar yalnız
-  `dis_duvar_t_bolme` ile sayılıyordu). Dübelli / kulaklı ayrımı yapılmaz (kıyasta).
+  `dis_duvar_t_bolme` ile sayılıyordu). Dübelli / kulaklı ayrımı yapılmaz (kıyasta). Giriş nişindeki uç uca ek T değildir (geometri hakemi).
 - Madde 4: köşe direğinin tipi (A, B, C, D, "özel") yok; kaçlık (100 / 60) ve adet. "Özel köşe direği (D)" satırı 100'lük köşeye katılır.
 - Madde 6: mahya bandı mahya boyu kadar, ötesi yok.
 - Madde 7: temiz su takımı ıslak hacim başına ("2 banyo varsa 2 takım").
 - Madde 9: 5,5 × 25 trapez vida satırı (aşık ve omega).
 - Madde 13: 60'lık çektirme U'su 3'lü H olmayan yerde: duvar panonun ortasında odalara bölünüyorsa, 100'lük köşede 60'lığa geçişte,
-  kapısız yarım kalan bölmede. Pafta kipinde birleşimler okunmadığı için eski sabit kural kalır.
+  kapısız yarım kalan bölmede. Dış köşe yalnız iç duvar dış duvardan inceyse geçiştir. Pafta kipinde birleşimler okunmadığı için eski
+  sabit kural kalır.
+- K16: vida satırı boyu 3750 ya da 2500 olmayan omegayı sessizce düşürmez, uyarır.
 """
 from __future__ import annotations
 import copy
@@ -64,13 +66,35 @@ def test_uclu_h_dis_duvarin_ekine_gelen_ic_duvarda(listeler):
     assert _adet(L, "3'lü H standart 60 (iç T)") == 3
 
 
-def test_uclu_h_sayisi_t_bolme_isaretinden_bagimsiz(modeller):
-    """`dis_duvar_t_bolme` işareti olmadan da dış duvarın ekine gelen iç duvar 3'lü H'tır; işaretle sayı değişmez."""
-    ie = _ie("PK02")
-    ie["yapi"].setdefault("dizilim", {})["dis_duvar_t_bolme"] = True
-    isaretli = PL.model_motor(ie)
-    say = lambda N: sum(1 for e in N["ekler"] if e["duvar"] == "dis" and e["cins"] == "uclu")
-    assert say(isaretli) == say(modeller["PK02"]) == 5
+AP_UCLU_DIS = {"AP09": 3, "AP11": 3, "AP14": 3, "AP15": 1, "AP18": 4, "AP21": 4, "AP22": 5, "AP25": 5, "AP26": 4, "AP28": 4}
+
+
+@pytest.mark.parametrize("kod", sorted(AP_UCLU_DIS))
+def test_uclu_h_isaretsiz_evde_dis_ekte(kod, modeller):
+    """`dis_duvar_t_bolme` işareti olmayan evde (on açık AP evinin hepsi) dış duvarın ekine T ile gelen iç duvar 3'lü H'tır. Eski yol
+    (`plan.h_baglantilar`) bu evlerde dış ekte 3'lü H vermez; sayı iç duvarların T uçlarından bağımsız olarak yeniden sayılır."""
+    from motor import geometry as G
+    ie = _ie(kod)
+    assert not ie["yapi"].get("dizilim", {}).get("dis_duvar_t_bolme")
+    plan = G.kur(ie)
+    eski = bagimsiz = 0
+    for d in plan.duvarlar:
+        if d.tur != "dis":
+            continue
+        T = [i.c for i in plan.duvarlar if i.tur == "ic" for n in i.uc_notu.values()
+             if re.fullmatch(rf"T→{d.id}", n)]
+        for p in d.panolar[:-1]:
+            x, y = (p.a1, d.c) if d.yon == "x" else (d.c, p.a1)
+            eski += any(abs(h.x - x) <= d.h + 3.5 and abs(h.y - y) <= d.h + 3.5 for h in plan.h_baglantilar)
+            bagimsiz += any(abs(p.a1 - c) <= d.h + 3.5 for c in T)
+    say = sum(1 for e in modeller[kod]["ekler"] if e["duvar"] == "dis" and e["cins"] == "uclu")
+    assert eski == 0 and say == bagimsiz == AP_UCLU_DIS[kod], (kod, eski, bagimsiz, say)
+
+
+def test_uclu_h_isaretli_evde_ayni(modeller):
+    """PK-02 işaretli (`dis_duvar_t_bolme: true`): eski yol da beşini veriyordu, yeni yol çift saymaz."""
+    assert _ie("PK02")["yapi"]["dizilim"]["dis_duvar_t_bolme"] is True
+    assert sum(1 for e in modeller["PK02"]["ekler"] if e["duvar"] == "dis" and e["cins"] == "uclu") == 5
 
 
 @pytest.mark.parametrize("kod", MOTOR_KIPI)
@@ -87,6 +111,31 @@ def test_cektirme_yerleri_ornek(modeller):
     """AP-11: panonun ortasına gelen üç bölme ve dış köşeye gelen bir iç duvar; PK-02: bütün T'ler pano ekinde, çektirme yok."""
     assert modeller["AP11"]["cektirme_yerleri"] == {"t_orta": 3, "dis_kose": 1, "serbest": 0}
     assert modeller["PK02"]["cektirme_yerleri"] == {"t_orta": 0, "dis_kose": 0, "serbest": 0}
+
+
+@pytest.mark.parametrize("ad", ["TK02", "TK01_r07"])
+def test_giris_nisi_t_degil(ad):
+    """Geometri hakemi (İE-27): giriş nişinde yan duvar içeride iç duvar olarak sürer ve ucuna `T→<kapı duvarı>` yazılır, ama kapı duvarı
+    orada biter. O birleşim uç uca ektir, 3'lü H'ı `uc_uca_ekler`'den sayılır; "panonun ortasına T" sayılıp çektirme U'su almaz. TK-02 ve
+    TK-01 r07'de bütün T'ler pano ekinde: çektirme U'su (iç) 0."""
+    from motor import geometry as G
+    ie = json.loads((KOK / "testler" / "motor" / "veri" / f"{ad}.json").read_text(encoding="utf-8"))
+    plan = G.kur(ie)
+    assert G.uc_uca_ekler(plan) and all(k["cins"] == "uclu" for k in G.uc_uca_ekler(plan))
+    N = PL.model_motor(ie)
+    assert N["cektirme_yerleri"] == {"t_orta": 0, "dis_kose": 0, "serbest": 0}
+    ic = [x for x in _liste(N) if x["kalem"].startswith("Çektirme U'su") and x["dayanak"] == "Kural (Lokman 3.11)"]
+    assert len(ic) == 1 and ic[0]["adet"] == 0
+
+
+@pytest.mark.parametrize("kod", ["AP11", "AP15", "AP21"])
+def test_dis_kose_yalniz_60_gecisinde(kod, modeller):
+    """Madde 13 "100'lük köşelerde 60'lığa geçiş": iç duvar 100 olunca dış köşeye gelen iç duvar geçiş değildir, çektirme almaz."""
+    assert modeller[kod]["cektirme_yerleri"]["dis_kose"] == 1
+    ie = _ie(kod)
+    ie["yapi"]["duvar_kalinligi_cm"]["ic"] = 10
+    cy = PL.model_motor(ie)["cektirme_yerleri"]
+    assert cy["dis_kose"] == 0 and cy["t_orta"] == modeller[kod]["cektirme_yerleri"]["t_orta"]
 
 
 def test_cektirme_serbest_uc_sayilir(modeller):
@@ -155,3 +204,18 @@ def test_trapez_vida_5_5x25(kod, listeler):
     assert f"aşık {asik} × 10" in s["formul"]
     v = sum(int(a) * int(b) for a, b in re.findall(r"(\d+) × (\d+)", s["formul"]))
     assert s["adet"] == math.ceil(v / 50) * 50 and s["adet"] % 50 == 0 and s["adet"] >= v and s["grup"] == "1008"
+    assert "UYARI" not in s["formul"]
+
+
+def test_trapez_vida_bilinmeyen_omega_boyu_uyarir(modeller):
+    """K16 (geometri hakemi): omega satırı ölçüsündeki boydan seçilir; kural kitabında tavan omegasının boyu 3750'den başka olursa o satır
+    sessizce düşmez, vida satırı uyarıyla adını yazar."""
+    K = copy.deepcopy(PL.kurallari_oku())
+    pb = K["ortak"]["parca_boyu_m"]["tavan_omegasi"]
+    if isinstance(pb, dict):
+        pb["deger"] = 3.0
+    else:
+        K["ortak"]["parca_boyu_m"]["tavan_omegasi"] = 3.0
+    L = PL.liste(copy.deepcopy(modeller["AP09"]), K)["satirlar"]
+    s = next(x for x in L if x["kalem"] == "Trapez vida 5,5 × 25 (aşık ve omega)")
+    assert s["formul"].startswith("UYARI: boyu 3750 ya da 2500 olmayan omega satırı sayılmadı: ") and "× 3000" in s["formul"]

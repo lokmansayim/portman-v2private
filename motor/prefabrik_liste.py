@@ -197,7 +197,8 @@ def model_motor(ie: dict) -> dict:
     panolar, ekler = [], []
     # İE-27 (Lokman, 3 Kasım 2026 09:52, madde 3 ve 13): iç duvarın bir duvara T ile geldiği yer. Pano ekine denk gelirse o ekte 3'lü H
     # (dış duvarda da; bugüne kadar yalnız `dis_duvar_t_bolme` ile), panonun ortasına gelirse 60'lık çektirme U'su; iç duvar dış köşeye
-    # geliyorsa (100'lük köşede 60'lığa geçiş) ve bölme kapısız serbest bitiyorsa da çektirme U'su
+    # geliyorsa (100'lük köşede 60'lığa geçiş) ve bölme kapısız serbest bitiyorsa da çektirme U'su. Uç uca gelen iki duvarın eki (D-29 giriş
+    # nişi: yan duvar içeride iç duvar olarak sürer, kapı duvarı orada biter) T değildir: 3'lü H'ı `G.uc_uca_ekler`'den sayılır (geometri hakemi)
     W_ = {d.id: d for d in plan.duvarlar}
     t_uclari, cektirme = {}, {"t_orta": 0, "dis_kose": 0, "serbest": 0}
     for d in plan.duvarlar:
@@ -211,10 +212,14 @@ def model_motor(ie: dict) -> dict:
             m = re.match(r"T→(\d+)(.*)$", n)
             if not m:
                 continue
-            if "köşe" in m.group(2):
-                cektirme["dis_kose"] += 1
-                continue
             o = W_[int(m.group(1))]
+            if "köşe" in m.group(2):
+                if d.h < o.h - 1e-6:                            # 60'lığa geçiş yalnız iç duvar dış duvardan inceyse
+                    cektirme["dis_kose"] += 1
+                continue
+            if any(w is not d and w.yon == d.yon and abs(w.c - d.c) < 1e-6
+                   and (abs(w.p1 - d.p0) < 1e-6 if uc == 0 else abs(w.p0 - d.p1) < 1e-6) for w in plan.duvarlar):
+                continue                                        # uç uca ek (giriş nişi): 3'lü H orada, çektirme yok
             if any(abs(p.a1 - d.c) <= o.h + 3.5 for p in o.panolar[:-1]):
                 t_uclari.setdefault(o.id, []).append(d.c)
             else:
@@ -1455,8 +1460,10 @@ def liste(N: dict, kurallar: dict | None = None, pafta: dict | None = None) -> d
     n_o375 = _top(lambda s_: omega(s_) and _boy(s_) == 3750)
     n_o250 = _top(lambda s_: (omega(s_) and _boy(s_) == 2500) or s_["kalem"] == "Köşebent")
     v25 = n_asik * t25["asik"] + n_o375 * t25["omega_3750"] + n_o250 * t25["omega_2500"]
+    disi = sorted({f"{s_['kalem']} ({s_['olcu']})" for s_ in satirlar if omega(s_) and _boy(s_) not in (3750, 2500)})   # K16: sayılmayan raporlanır
     ekle("1008", "Trapez vida 5,5 × 25 (aşık ve omega)", "adet", int(math.ceil(v25 / t25["yuvarlama"] - 1e-9) * t25["yuvarlama"]), "Kural (Lokman 3.11)",
-         f"aşık {n_asik} × {t25['asik']} + 3,75'lik omega {n_o375} × {t25['omega_3750']} + 2,5'lik parça {n_o250} × {t25['omega_2500']} = {v25:.0f}, "
+         ("UYARI: boyu 3750 ya da 2500 olmayan omega satırı sayılmadı: " + "; ".join(disi) + ". " if disi else "")
+         + f"aşık {n_asik} × {t25['asik']} + 3,75'lik omega {n_o375} × {t25['omega_3750']} + 2,5'lik parça {n_o250} × {t25['omega_2500']} = {v25:.0f}, "
          f"{ye(t25['yuvarlama'])} yukarı", "çalışma kitabının vida notu; Lokman 3 Kasım 2026: satır eklenir (İE-27)")
     ka = _ortak(k, "kapsam_alici", "pencere_aliciya_aitse")       # kitap: pencere alıcıya aitse vida ve mastik yazılmaz (KT-01; Lokman, 8 Ekim 00:45)
     if pen and (not pencere_alici or ka["pencere_vidasi"]):     # 7.3 (O12): alıcıya ait pencerede de vida yazıyordu (PK-07 120)
