@@ -133,6 +133,30 @@ def test_ap12_yan_yana_cumbalar():
     assert round(kk["ana çatı ön kalkanı"]["tepe"], 1) == 445.9 and kk["ana çatı ön kalkanı"]["alan_m2"] < 3.2   # yalnız iki cumbanın üstü
 
 
+def test_ap12_makas_plani():
+    """Paftanın makas planı (s. 5): ana çatıda 13 makas (MK01–12, MK14); pencere panolarının yanındaki 62,75'lik panoların ekinde de
+    makas var: iki saçak duvarının ortak eki (820,75) her zaman makas alır (İE-29 PR-2). Cumbalarda paftada 3 + 3 (iç uçta MK13, MK18);
+    bizde 2 + 2: cumbanın iç ucunda makas yok (D-44, Lokman 2 Kasım 16:50)."""
+    from motor import cati_serit as CS
+    ie = _ie12()
+    t = CS.tanim(G.kur(copy.deepcopy(ie)), ie)
+    mk = {p["ad"]: [m["konum"] for m in p["makaslar"]] for p in t["parcalar"]}
+    assert mk["ana çatı"] == [256.0, 381.5, 507.0, 632.5, 758.0, 820.75, 883.5, 1009.0, 1134.5, 1260.0, 1385.5, 1511.0, 1636.5]
+    assert mk["ön sol cumba"] == [58.25, 130.5] and mk["ön sağ cumba"] == [5.0, 130.5]
+    assert all(p["makas_yeri"] == "pano ekleri" for p in t["parcalar"]) and not t["uyarilar"]
+
+
+@pytest.mark.parametrize("ekler, ortak, beklenen", [
+    ([30.0, 67.75, 130.5, 193.25, 256.0], (), [5.0, 130.5, 256.0, 381.5]),                 # ortak ek yok: en uzak ek
+    ([30.0, 67.75, 130.5, 193.25, 256.0], (193.25,), [5.0, 130.5, 193.25, 256.0, 381.5]),  # ortak ek her zaman makas
+    ([7.0, 135.5, 261.0], (7.0,), [5.0, 135.5, 261.0, 381.5]),     # ortak ekle sınır aşılıyor (7 → 135,5 > 125,5): yalnız en uzak ek
+])
+def test_makas_ortak_ek(ekler, ortak, beklenen):
+    from motor import cati_serit as CS
+    yer, duzenli = CS._makas_yerleri(5.0, 381.5, True, ekler, 5.0, list(ortak))
+    assert duzenli and yer == beklenen
+
+
 def test_ap12_gorunusler():
     from motor import cephe_gorunus as CGo
     plan = G.kur(_ie12())

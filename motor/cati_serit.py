@@ -17,7 +17,9 @@ Makaslar (paftanın makas planı MKS01–12; sayfa 9: makaslar dış duvarın H'
 ekseninde, cumbada tek baş makas dış uçtaki duvarın ekseninde; orta makaslar şeridin saçak duvarlarının pano eklerinde, en çok 125,5 arayla
 (baştan başlayarak en uzaktaki ek). Cumbanın iç ucunda makas yoktur: son açıklık komşunun baş makasına kadardır. Uçtaki açıklık
 125,5 + duvarın yarı kalınlığına kadar (kalkan duvarının yanında saçak duvarının panosu iç yüzden başlar: AP-15 paftası); ekler en az
-sayıdan fazla makas verse de açıklıklar sınırı aşmıyorsa makaslar eklerdedir (AP-09 cumbası; İE-17 PR-1b/K7). Ekler sınırı aşıyorsa eşit
+sayıdan fazla makas verse de açıklıklar sınırı aşmıyorsa makaslar eklerdedir (AP-09 cumbası; İE-17 PR-1b/K7). İki saçak duvarında da ek
+olan yer (iki duvarın H'ı karşı karşıya) her zaman makas alır, aradakiler aynı kuralla (AP-12 paftası: pencere panosunun yanındaki 62,75'lik
+panoların ekinde, ana çatıda 13 makas; İE-29 PR-2); ortak eklerle sınır aşılıyorsa yalnız en uzak ek kuralı. Ekler sınırı aşıyorsa eşit
 aralık, en az sayıyla (ana ⌈eksenler arası ÷ 125,5⌉ + 1, cumba ⌈dış eksenden komşunun eksenine ÷ 125,5⌉) ve uyarı (K16).
 
 Açık mahalin kendi çatısı (İE-17 PR-2, AP-09 paftası, 1 Kasım 2026): `cati.mahal_catilari` [{`mahal` (ızgaradaki açık mahal: veranda),
@@ -453,45 +455,63 @@ def _mahal_cati_denetle(mc: list[dict], duzlemler: list[dict]) -> None:
                                                   "yanlış çatı çizilmez")
 
 
-def _ekler(plan: G.Plan, serit, eksen: str, h: float) -> list[float]:
-    """Şeridin saçak duvarlarının (b0 ve b1 yüzündeki dış duvarlar) pano ekleri, mahya boyunca (a)."""
+def _ekler(plan: G.Plan, serit, eksen: str, h: float) -> tuple[list[float], list[float]]:
+    """Şeridin saçak duvarlarının (b0 ve b1 yüzündeki dış duvarlar) pano ekleri, mahya boyunca (a). Döner: (bütün ekler, iki yüzde de olan
+    ekler)."""
     a0, a1, b0, b1 = serit
     yon = "x" if eksen == "y" else "y"                                  # saçak duvarı mahyaya paralel
-    out = set()
+    yuz: tuple[set, set] = (set(), set())
     for d in plan.duvarlar:
         if d.tur != "dis" or d.yon != yon:
             continue
-        if not (abs(d.c - d.h - b0) < TOL or abs(d.c + d.h - b1) < TOL):
+        i = 0 if abs(d.c - d.h - b0) < TOL else 1 if abs(d.c + d.h - b1) < TOL else None
+        if i is None:
             continue
         ps = sorted(d.panolar, key=lambda p: p.a0)
         for p, q in zip(ps, ps[1:]):
             if abs(p.a1 - q.a0) < 1e-6 and a0 + h - TOL < p.a1 < a1 + h + TOL:
-                out.add(round(p.a1, 2))
-    return sorted(out)
+                yuz[i].add(round(p.a1, 2))
+    return sorted(yuz[0] | yuz[1]), sorted(yuz[0] & yuz[1])
 
 
-def _makas_yerleri(bas: float, son: float, son_makas: bool, ekler: list[float], h: float = 0.0) -> tuple[list[float], bool]:
+def _makas_yerleri(bas: float, son: float, son_makas: bool, ekler: list[float], h: float = 0.0,
+                   ortak: list[float] = ()) -> tuple[list[float], bool]:
     """`bas` (baş makas) → `son` (öteki baş makas ya da komşunun ekseni) arasında makaslar. Döner: (yerler, eklerde mi).
 
     Orta açıklık en çok 125,5. Uçtaki açıklık (baş makastan ilk eke, son ekten `son`'a) en çok 125,5 + `h` (duvarın yarı kalınlığı):
     kalkan duvarının yanında saçak duvarının panosu duvarın iç yüzünden başlarsa ilk ek eksenden 125,5 + h'dedir (AP-15, köşe paftadan;
     paftada uçlarda 130,5, ana çatıda 7 makas). Ekler en az sayıdan fazla makas verse de hiçbir açıklık sınırı aşmıyorsa makaslar eklerdedir
-    (AP-09 cumbası: saçak duvarında 56 + 125,5 + 57,75'lik panolar, paftada da eklerde); ekler sınırı aşıyorsa eşit aralık (İE-17 PR-1b/K7)."""
+    (AP-09 cumbası: saçak duvarında 56 + 125,5 + 57,75'lik panolar, paftada da eklerde); ekler sınırı aşıyorsa eşit aralık (İE-17 PR-1b/K7).
+    `ortak` (iki saçak duvarında da ek olan yerler) her zaman makas alır; aralarında ve uçlarda en uzak ek (AP-12 paftası, İE-29 PR-2).
+    Ortak eklerle bir açıklık sınırı aşıyorsa yalnız en uzak ek kuralı (ortak eklersiz)."""
     yon = 1.0 if son > bas else -1.0
     L = abs(son - bas)
     n = math.ceil(L / MOD - 1e-6)
     uc = MOD + h + 1e-6
     aday = [e for e in ekler if TOL < (e - bas) * yon < L - TOL]
-    xs, cur = [bas], bas
-    while abs(son - cur) > uc:
-        sinir = uc if len(xs) == 1 else MOD + 1e-6
-        uygun = [e for e in aday if 1e-6 < (e - cur) * yon <= sinir]
-        if not uygun:
-            break
-        cur = max(uygun, key=lambda e: (e - cur) * yon)
-        xs.append(cur)
-    if abs(son - cur) <= uc:
-        return xs + ([son] if son_makas else []), True
+
+    def doldur(p: float, q: float):
+        """p → q arasında en uzak ekler; sınır aşılıyorsa None."""
+        xs, cur = [], p
+        while abs(q - cur) > (uc if q == son else MOD + 1e-6):
+            sinir = uc if cur == bas else MOD + 1e-6
+            uygun = [e for e in aday if 1e-6 < (e - cur) * yon <= sinir and (q - e) * yon > 1e-6]
+            if not uygun:
+                return None
+            cur = max(uygun, key=lambda e: (e - cur) * yon)
+            xs.append(cur)
+        return xs
+
+    sabit = sorted({e for e in ortak if TOL < (e - bas) * yon < L - TOL}, key=lambda e: (e - bas) * yon)
+    for duraklar in ([bas, *sabit, son], [bas, son]) if sabit else ([bas, son],):
+        xs = [bas]
+        for p, q in zip(duraklar, duraklar[1:]):
+            ara = doldur(p, q)
+            if ara is None:
+                break
+            xs += ara + [q]
+        else:
+            return xs[:-1] + ([son] if son_makas else []), True
     esit = [bas + yon * L * i / n for i in range(n + 1)]
     return (esit if son_makas else esit[:-1]), False
 
@@ -619,15 +639,15 @@ def tanim(plan: G.Plan, ie: dict) -> dict:
             ham.append({"ad": f"{adlar[i]} {yuz}", "serit": i, "plan": pl,
                         "yukari": yukari(by), "egim": eg, "sacak_kotu": zs, "sacak": sacak(sb)})
         # makaslar
-        ekler = _ekler(plan, sr[i], eksen, h)
+        ekler, ortak = _ekler(plan, sr[i], eksen, h)
         if i == k:
-            yer, duzenli = _makas_yerleri(a0 + h, a1 - h, True, ekler, h)
+            yer, duzenli = _makas_yerleri(a0 + h, a1 - h, True, ekler, h, ortak)
             roller = ["bas"] + ["orta"] * (len(yer) - 2) + ["bas"]
         elif i < k:
-            yer, duzenli = _makas_yerleri(a0 + h, a1 + h, False, ekler, h)
+            yer, duzenli = _makas_yerleri(a0 + h, a1 + h, False, ekler, h, ortak)
             roller = ["bas"] + ["orta"] * (len(yer) - 1)
         else:
-            yer, duzenli = _makas_yerleri(a1 - h, a0 - h, False, ekler, h)
+            yer, duzenli = _makas_yerleri(a1 - h, a0 - h, False, ekler, h, ortak)
             roller = ["bas"] + ["orta"] * (len(yer) - 1)
         if not duzenli:
             uyarilar.append(f"makas yeri ({adlar[i]}): saçak duvarlarının pano ekleri makasları 125,5 arayla vermiyor; eşit aralıklı {len(yer)} makas")
