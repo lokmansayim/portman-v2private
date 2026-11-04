@@ -699,7 +699,8 @@ class IfcUretici:
 
     def _ana_ustu_makas(self, ad, kalem, ozellik, T, q, konum, kot):
         """İE-15 K6: çapraz cumbanın ana çatının üstündeki makası (D-47; paftada "iki ana makasın arasında kısa"): iki dere arasında, alt
-        başlığı ana makasların üst başlığının üstünde (ana çatının o kesitteki kotu), üst başlıkları cumbanın yüzleri boyunca mahyaya."""
+        başlığı ana makasların üst başlığının üstünde (ana çatının o kesitteki kotu), üst başlıkları cumbanın yüzleri boyunca mahyaya; uçları
+        topukta (üst başlığın üstü alt başlığın üstüne indiği yerde)."""
         from .cati_capraz import yavru_acikligi
         D = {d["ad"]: d for d in T["duzlemler"]}
         mahya_y = abs(q["mahya"][0][0] - q["mahya"][1][0]) < 1e-6                 # cumbanın mahyası y boyunca: makas x–z düzleminde
@@ -710,9 +711,13 @@ class IfcUretici:
         z_alt = min(kot(d, *nok(um)) for d in ana) + 10                        # ana makasın üst başlığının üstü
         cumba = [d for n_, d in D.items() if not n_.startswith("ana ")]
         zt = lambda u: min(kot(d, *nok(u)) for d in cumba)                    # cumbanın üst başlığının altı
-        uyeler = (("ALT_BASLIK", [(u0, z_alt), (u1, z_alt), (u1, z_alt + 5), (u0, z_alt + 5)]),
-                  ("UST_1", [(u0, zt(u0)), (um, zt(um)), (um, zt(um) + 10), (u0, zt(u0) + 10)]),
-                  ("UST_2", [(um, zt(um)), (u1, zt(u1)), (u1, zt(u1) + 10), (um, zt(um) + 10)]),
+        # uçlar (topuk): üst başlığın üstü alt başlığın üstüne indiği yerde; alt başlık üst başlığın içinde biter, dereye uzayıp cumbanın
+        # yüzünden taşmaz (geometri hakemi, İE-15 K6; rehberde de uçlar derenin üstünde biter). Sayı ve yer listeyle (D-47); boy gösterim
+        uc = lambda a: a + (z_alt - 5 - zt(a)) * (um - a) / (zt(um) - zt(a)) if zt(um) - zt(a) > 1e-6 else a
+        e0, e1 = min(uc(u0), um - 10), max(uc(u1), um + 10)
+        uyeler = (("ALT_BASLIK", [(e0, z_alt), (e1, z_alt), (e1, z_alt + 5), (e0, z_alt + 5)]),
+                  ("UST_1", [(e0, zt(e0)), (um, zt(um)), (um, zt(um) + 10), (e0, zt(e0) + 10)]),
+                  ("UST_2", [(um, zt(um)), (e1, zt(e1)), (e1, zt(e1) + 10), (um, zt(um) + 10)]),
                   ("DIKME_ORTA", [(um - 3, z_alt + 5), (um + 3, z_alt + 5), (um + 3, zt(um)), (um - 3, zt(um))]))
         asm = self._urun("IfcElementAssembly", ad, predefined="TRUSS")
         self._yerlestir(asm)

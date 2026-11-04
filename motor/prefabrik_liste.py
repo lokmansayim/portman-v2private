@@ -694,6 +694,14 @@ def cati_olculeri(c: dict) -> dict:
     return {"sac": sac, "eg": eg, "egik": egik, "yuz": yuz, "sacak_hat": sacak_hat, "mahya_boy": mahya_boy, "hatlar": hatlar}
 
 
+def trapez_kapatma_ie(kap: str) -> float | None:
+    """D-50 (M-11): İş Emri'nin çatı kaplaması trapez sacın kapatmasını yazıyorsa ("Trapez Saç (80 cm kapatır)") metre, yazmıyorsa None
+    (standart liste kuralından, `trapez_kapatma_m`). Liste (› 1006 Çatı) ve kart modeli (`motor/yerlesim.trapez_kapatma_m`) buradan okur
+    (D-28 madde 1; İE-15 K6)."""
+    m = re.search(r"(\d+(?:[.,]\d+)?)\s*cm\s*kapat", kap)
+    return float(m.group(1).replace(",", ".")) / 100 if m else None
+
+
 def asik_mesafeleri(egik_cm: float, aralik_cm: float, sacak_esigi_cm: float, esik: float = 1e-6) -> list[float]:
     """Karar C (Lokman, 24 Ekim 2026 "Mahyadan 60"; `kurallar/yerlesim/prefabrik.json › asik_sirasi`): bir beşik yüzünde aşık sıralarının
     mahyadan eğik uzaklıkları (cm). İlk sıra mahyada, sonra aralıkla; saçağa aralıktan az kalınca saçakta bir sıra daha; saçağa
@@ -1292,8 +1300,7 @@ def liste(N: dict, kurallar: dict | None = None, pafta: dict | None = None) -> d
     # D-50 (Lokman, 4 Kasım 2026 21:20, M-11): prefabrikte trapez sac standart 100 cm kapatır (`trapez_kapatma_m`; kitabın 0,8'i çelikte).
     # Tedarikçi dönem dönem 80'lik verebilir: İş Emri'nin çatı kaplaması kapatmayı yazıyorsa ("Trapez Saç (80 cm kapatır)") o (formülde yazar;
     # satır adı "Trapez sac" kalır: kör kıyas sözlüğü ve fiyat defteri o adla)
-    kap_ie = re.search(r"(\d+(?:[.,]\d+)?)\s*cm\s*kapat", kap) if trapez else None
-    kap_ie = float(kap_ie.group(1).replace(",", ".")) / 100 if kap_ie else None
+    kap_ie = trapez_kapatma_ie(kap) if trapez else None
     kap_m = _ortak(k, "sandvic_panel_kapatma_m") if sandvic else ((kap_ie or r("trapez_kapatma_m")) if trapez else
                                                                  (_ortak(k, "kiremit_kapatma_m") if kiremit else _ortak(k, "tek_kat_panel_kapatma_m")))
     tasma, yuvarla_mm = _ortak(k, "cati_kaplama_tasma_m"), _ortak(k, "panel_boyu_yuvarlama_mm")

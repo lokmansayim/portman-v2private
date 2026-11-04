@@ -106,10 +106,11 @@ def kaplama_yazisi(g: dict) -> str:
 
 
 def trapez_kapatma_m(g: dict, C: dict) -> float:
-    """İE-15 K6: trapez sacın kapatması, liste üretecinin okuması (D-50, M-11; `prefabrik_liste` › 1006): İş Emri'nin çatı kaplaması
-    kapatmayı yazıyorsa ("Trapez Sac (80 cm kapatır)") o, yazmıyorsa liste kuralı (`kapatma_trapez` → `trapez_kapatma_m`, standart 1,0)."""
-    m = re.search(r"(\d+(?:[.,]\d+)?)\s*cm\s*kapat", kaplama_yazisi(g))
-    return float(m.group(1).replace(",", ".")) / 100 if m else C["kapatma_trapez"]
+    """İE-15 K6: trapez sacın kapatması liste üretecinin işlevinden (D-50, M-11; `prefabrik_liste.trapez_kapatma_ie`, D-28 madde 1): İş Emri'nin
+    çatı kaplaması kapatmayı yazıyorsa ("Trapez Sac (80 cm kapatır)") o, yazmıyorsa liste kuralı (`kapatma_trapez` → `trapez_kapatma_m`, 1,0)."""
+    from motor.prefabrik_liste import trapez_kapatma_ie
+    m = trapez_kapatma_ie(kaplama_yazisi(g))
+    return m if m is not None else C["kapatma_trapez"]
 
 
 def _profil(C: dict, tur: str) -> dict:

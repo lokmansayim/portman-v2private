@@ -157,3 +157,26 @@ def test_asma_tavan_mahyaya_paralel(tk04):
     assert d["tavan"]["tip"] == "asma" and {o["yon"] for o in d["omega"] if o["oda"] != "veranda"} == {"x"}
     assert d["tavan"]["h"] and {h["o"] for h in d["tavan"]["h"]} == {"v"}
     assert d["tavan"]["acik"] == [{"ad": "Veranda", "yon": "x", "rects": [[386.5, 10, 878.5, 193.25]]}]
+
+
+@pytest.mark.parametrize("kod, kp03, ck07", [("AP16", 28, 14), ("AP06", 30, 15)])
+def test_seksenlik_trapez_kor_is_emrinde(kod, kp03, ck07):
+    """80'lik trapez sac (İş Emri "Trapez Kaplama (80 cm kapatır)"; D-50: kapatma İş Emri'nden, mahya L 800) kör İş Emri'lerinde: kart
+    modelinin kaplaması, mahyası, alın sacı ve Z'si listeyle aynı. Alın sacı çatının kenarından milimetreye, liste gibi (AP-16: hatlar
+    25,30 m ÷ 2,3 = 11; geometri hakemi, İE-15 K6). Aşığın parça adedi iki yolla sayılır (D-28 › A3; AP-16 41 / 42, AP-06 52 / 53)."""
+    from motor import kart_model, prefabrik_liste as PL
+    import tempfile
+    ie = _oku(KOK / "testler" / "kor" / "projeler" / kod / "is_emri.json")
+    assert "80 cm kapatır" in ie["ozellikler"]["Çatı Kaplaması"] and ie["cati"]["tip"] == "besik_cumba"
+    with tempfile.TemporaryDirectory() as t:
+        kart_model.uret(copy.deepcopy(ie), Path(t), kod)
+        say = _oku(Path(t) / f"{kod}_kart_sayim.json")
+    L = PL.is_emrinden(copy.deepcopy(ie))["satirlar"]
+    adet = {k["kod"]: k["adet"] for k in say["kartlar"]}
+    kp = [p for p in say["yerlesim"]["parcalar"] if p["kart"] == "KP-03"]
+    assert say["kural_yok"] == [] and adet["KP-03"] == _liste(L, "Trapez sac") == kp03 and {p["bilgi"]["Genislik_cm"] for p in kp} == {80.0}
+    c7 = say["kesim_plani"]["CK-07"]
+    assert (c7["stok"], c7["parca_boyu_cm"]) == (_liste(L, "Trapez sac mahyası"), 80.0) == (ck07, 80.0)
+    assert next(s["olcu"] for s in L if s["kalem"] == "Trapez sac mahyası") == "L 800"
+    for k, on in (("CK-03", "Alın sacı"), ("CK-04", "Baş makas Z'si"), ("CK-01", "100'lük saçak omegası"), ("CK-02", "Saçak sacı")):
+        assert say["kesim_plani"][k]["stok"] == _liste(L, on), k

@@ -254,7 +254,9 @@ def kalkan_kenarlari(g: dict, G_: dict, kesit: dict, kurallar: set[str], F: dict
             return min(a_, b_), max(a_, b_)
         for yuz, u0, u1 in (yuzler or (("sol", -F["s"], F["um"]), ("sag", F["um"], F["aciklik"] + F["s"]))):
             bilgi = {"Makas": m["ad"], "Yuz": yuz}
-            egik = F["egik"] if yuzler is None else (u1 - u0) / F["kos"]
+            # çatının kenarından verilen parça (`yuzler`) liste üreteci gibi milimetreye: liste çatı kenarını `round(boy / 100, 3)` m okur
+            # (`prefabrik_liste._capraz_cumba_catilari`, İE-24); sayı onun yoluyla (AP-16: 25,30 m ÷ 2,3 = 11; geometri hakemi, İE-15 K6)
+            egik = F["egik"] if yuzler is None else round((u1 - u0) / F["kos"], 1)
             ortak = {"boy_cm": _r(egik), "bilgi": bilgi}
             if "bas_makas_z_yerlesimi" in kurallar:
                 kes = [(_bant(F, u0, u1, 0.0, t), *v(v_dis, v_dis - s * Z["ust_kanat"])),
