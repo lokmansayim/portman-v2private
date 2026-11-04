@@ -1,6 +1,6 @@
 {
  "sema": "portman.fiyat_defteri/1",
- "surum": "2026-10-31-r06",
+ "surum": "2026-11-03-r07",
  "aciklama": "Yükleme listesi × birim fiyat (İE-13, Z-10'un liste yöntemi). Anahtar Motor'un liste satırı: prefabrikte 'kalem | olcu' (motor/prefabrik_liste.py), çelikte 'kalem | boyut' (motor/genel yükleme listesi). Fiyat uydurulmaz: kaynağı olmayan kalemde fiyat boş kalır.",
  "para_birimi": "TL",
  "kdv": "kaynak listelerde yazmıyor",
@@ -1143,6 +1143,18 @@
      "durum": "eşleşti",
      "onay": true,
      "not": ""
+    },
+    "Trapez vida 5,5 × 25 (aşık ve omega) | adet": {
+     "fiyat": 3,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      143
+     ],
+     "kaynak_kalem": "( 5.5 x 25 ) TRAPEZ VİDA (AŞIK+OMEGA…) | Adet",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": "r07: İE-27'nin yeni satırı (Lokman 3 Kasım 2026 09:52, D-45). Çelikteki Trapez vida (5,5 × 25) ile aynı kaynak satırı."
     },
     "Trapez vida 5,5 × 60 (trapez sac / metal kiremit) | adet": {
      "fiyat": 3,
