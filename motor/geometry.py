@@ -358,7 +358,8 @@ class Pano:
     def bosluk(self, ac: Acilim) -> tuple:
         """Açıklığın duvar boyunca aralığı (a0, a1; cm). `gap()` ile aynı formül."""
         s = (self.boy - ac.genislik) / 2.0
-        return self.a0 + s + ac.kayma, self.a1 - (s - ac.kayma)
+        sl, sr = s + ac.kayma, s - ac.kayma
+        return self.a0 + sl, self.a1 - sr
 
     def bosluk_dortgeni(self, ac: Acilim) -> tuple:
         b0, b1 = self.bosluk(ac)
@@ -1690,7 +1691,7 @@ def _genis_pencere_panosu(d: "Duvar", p: Pano, aralik: Optional[tuple], ac: dict
 
 def _genis_pencere_oda_ortasi(d: "Duvar", p: Pano, i: int, n: int, aralik: Optional[tuple], ac: dict) -> Pano:
     """D-46 (İE-28; AP-11 paftası, 180/200: 62,75 + 251 + 62,75): `dizilim.genis_pencere: oda_ortasi`. Panodan geniş pencerenin n panoluk
-    panosu odanın duvar parçasının (aks aralığı) ortasına konur; iki yanında kalan parça birer pano (ikisi de en çok 125,5). Parçadaki öteki
+    panosu odanın duvar parçasının (aks aralığı) ortasına konur; iki yanında kalan parça birer pano (ikisi de 20 ile 125,5 arası). Parçadaki öteki
     panolar açıklıksız, parçanın iki ucu pano ekinde olmalı; olmuyorsa açık hata (K21). Komşu kuralı (BK-13) bu anahtarla çalışmaz."""
     if aralik is not None:
         lo, hi = max(aralik[0], d.p0), min(aralik[1], d.p1)
@@ -1699,14 +1700,14 @@ def _genis_pencere_oda_ortasi(d: "Duvar", p: Pano, i: int, n: int, aralik: Optio
         yan = (hi - lo - L) / 2.0
         if ic and i in ic and ic == list(range(ic[0], ic[-1] + 1)) and abs(d.panolar[ic[0]].a0 - lo) < 1e-6 \
                 and abs(d.panolar[ic[-1]].a1 - hi) < 1e-6 and all(d.panolar[k].acilim is None for k in ic if k != i) \
-                and -1e-6 <= yan <= MOD + 1e-6:
+                and -1e-6 <= yan <= MOD + 1e-6 and (yan <= 1e-6 or yan >= 20.0 - 1e-9):   # yan parça yok ya da en az 20 (çok kısa pano sınırı)
             orta = (lo + hi) / 2.0
             yeni = Pano(d, orta - L / 2.0, orta + L / 2.0, p.acilim)
             parca = ([Pano(d, lo, yeni.a0)] if yan > 1e-6 else []) + [yeni] + ([Pano(d, yeni.a1, hi)] if yan > 1e-6 else [])
             d.panolar[ic[0]:ic[-1] + 1] = parca
             return yeni
     raise IsEmriHatasi(f"genis_pencere: oda_ortasi: {n} panoluk pencereli pano odanın duvar parçasına ortalanamıyor (parçanın uçları pano ekinde, "
-                       f"öteki panoları açıklıksız ve iki yanda kalan en çok 125,5 olmalı): {ac}")
+                       f"öteki panoları açıklıksız ve iki yanda kalan ya hiç ya da 20 ile 125,5 arası olmalı): {ac}")
 
 
 def _karkasli_satirlari(satirlar) -> list:
@@ -1742,8 +1743,9 @@ def _karkasli_panolar(plan: "Plan", satirlar: list, ayna_y: bool) -> None:
     duvarda tek panodur: aralığa düşen panolar birleşir, içindeki pencere ve dış kapı yerinde kalır (açıklığın ortası değişmez), içinde derz ve
     H yok. Aralığın dışında kalan parça ayrı pano olur; KARKAS_ARTIK_CM'den kısaysa komşu panoyla tek parça (AP-14 veranda: 242,75 + 62,75).
     Planın sonunda koşar (aynadan, kapı mantığından ve dikme kırpmasından sonra): bütün açıklıklar yerindedir. Açık hata (K21): duvar yok,
-    aralık duvarın panolarının dışında, aralıkta dik duvar (T ya da birleşim), açıklık aralığın ucuna pano payından yakın ya da dışına taşıyor,
-    iç kapı veya geçiş, aralık başka bir karkaslı panoyla çakışıyor, kısa artığın komşusu yok ya da açıklıklı."""
+    aralık duvarın panolarının dışında, aralıkta dış duvar birleşimi ya da üçlü H (iç duvar T'si olabilir), aralıkta açıklık yok, açıklık
+    aralığın ucuna pano payından yakın ya da dışına taşıyor, iç duvar T'sine biniyor ya da T'nin öteki yanına geçiyor, iç kapı veya geçiş,
+    aralık başka bir karkaslı panoyla çakışıyor, kısa artığın komşusu yok, açıklıklı, birleşince 125,5'i aşıyor ya da arada birleşim var."""
     H = plan.H
     pay = PENCERE_PANO_PAYI_CM / 2.0
     for yon, eksen, lo, hi, orta_yazili, st in satirlar:
@@ -1761,16 +1763,14 @@ def _karkasli_panolar(plan: "Plan", satirlar: list, ayna_y: bool) -> None:
         d = aday[0]
         # iç duvarın T'si aralıkta olabilir (AP-26 paftası: 428,8'lik pano 381,5'teki bölmeyi geçiyor; o T panonun ortasında, listede 3'lü H
         # yerine çektirme U'su, D-45 madde 13); dış duvar (köşe, girinti) ve üçlü H'lı birleşim aralıkta olamaz
-        for w in plan.duvarlar:
-            if w is d or w.yon == d.yon or not lo + 1.0 < w.c < hi - 1.0:
-                continue
-            if w.tur == "dis" and min(w.p0, w.p1) <= d.c + d.h + 1e-6 and max(w.p0, w.p1) >= d.c - d.h - 1e-6:
+        birlesim = _dik_birlesimler(plan, d, lo, hi)
+        for tur, e_, w in birlesim:
+            if tur == "dis":
                 raise IsEmriHatasi(f"dizilim.karkasli_panolar: aralıkta dış duvar birleşimi var (duvar {w.id}, eksen {w.c:g}); karkaslı pano "
                                    f"köşeden geçmez: {st}")
-        for h in plan.h_baglantilar:
-            e_, c_ = (h.x, h.y) if d.yon == "x" else (h.y, h.x)
-            if abs(c_ - d.c) <= d.h + 3.5 and lo + 1.0 < e_ < hi - 1.0:
-                raise IsEmriHatasi(f"dizilim.karkasli_panolar: aralıkta üçlü H birleşimi var ({h.x:g}, {h.y:g}); karkaslı pano içinde H yok: {st}")
+            if tur == "H":
+                raise IsEmriHatasi(f"dizilim.karkasli_panolar: aralıkta üçlü H birleşimi var ({w.x:g}, {w.y:g}); karkaslı pano içinde H yok: {st}")
+        ic_t = [w for tur, _e, w in birlesim if tur == "ic"]
         ps = d.panolar
         S = [k for k, q in enumerate(ps) if q.a0 < hi - 1e-6 and q.a1 > lo + 1e-6]
         i0, i1 = S[0], S[-1]
@@ -1785,6 +1785,9 @@ def _karkasli_panolar(plan: "Plan", satirlar: list, ayna_y: bool) -> None:
                                        f"kapı, aralığın ucundan en az {pay:g} cm içeride): {st}")
                 aciklar.append(((b0 + b1) / 2.0, ac))
         aciklar.sort(key=lambda t: t[0])
+        if not aciklar:                                       # D-46: karkaslı pano içinde bir ya da birden çok pencere ve kapı taşır
+            raise IsEmriHatasi(f"dizilim.karkasli_panolar: aralıkta pencere ya da dış kapı yok; karkaslı pano açıklıksız olmaz: {st}")
+        motor_yeri = [m for m, _ac in aciklar]
         if orta_yazili is not None:                           # paftadaki yer: açıklıklar duvar boyunca sırayla
             if len(orta_yazili) != len(aciklar):
                 raise IsEmriHatasi(f"dizilim.karkasli_panolar: aciklik_ortasi_cm {len(orta_yazili)} değer, aralıkta {len(aciklar)} açıklık var: {st}")
@@ -1794,6 +1797,12 @@ def _karkasli_panolar(plan: "Plan", satirlar: list, ayna_y: bool) -> None:
                     raise IsEmriHatasi(f"dizilim.karkasli_panolar: {ac.tur} {ac.olcu} ortası {m:g} aralığın ucuna pano payından yakın: {st}")
             if any(b[0] - b[1].genislik / 2.0 < a[0] + a[1].genislik / 2.0 + 1e-6 for a, b in zip(aciklar, aciklar[1:])):
                 raise IsEmriHatasi(f"dizilim.karkasli_panolar: aciklik_ortasi_cm'deki açıklıklar üst üste biniyor ya da sırası değişiyor: {st}")
+        # aralıktaki iç duvar T'si açıklığın üstüne gelmez ve açıklık T'nin öteki yanına (başka odaya) geçmez
+        for (m, ac), m0 in zip(aciklar, motor_yeri):
+            for w in ic_t:
+                if m - ac.genislik / 2.0 < w.c + w.h - 1e-6 and m + ac.genislik / 2.0 > w.c - w.h + 1e-6 or (m - w.c) * (m0 - w.c) < 0:
+                    raise IsEmriHatasi(f"dizilim.karkasli_panolar: {ac.tur} {ac.olcu} (ortası {m:g}) iç duvarın T'sine (duvar {w.id}, eksen "
+                                       f"{w.c:g}) biniyor ya da onun öteki yanına geçiyor: {st}")
         yeni = Pano(d, lo, hi, karkasli=True)
         orta = (lo + hi) / 2.0
         for m, ac in aciklar:
@@ -1804,23 +1813,43 @@ def _karkasli_panolar(plan: "Plan", satirlar: list, ayna_y: bool) -> None:
         sol, sag = ps[i0].a0, ps[i1].a1
         bas, son = i0, i1 + 1
         parca = [yeni]
+        # kısa artık açıklıksız komşu panoyla tek parça; birleşen pano 125,5'i aşamaz, içine birleşim (T, köşe, H) almaz (pano eki yerinde kalır)
+        birlesmez = lambda a, b: b - a > MOD + 1e-6 or _dik_birlesimler(plan, d, a, b)
         if lo - sol > 1e-6:
             if lo - sol < KARKAS_ARTIK_CM - 1e-6:
-                if i0 == 0 or ps[i0 - 1].aciklar or ps[i0 - 1].karkasli:
-                    raise IsEmriHatasi(f"dizilim.karkasli_panolar: aralığın başında kalan {lo - sol:g} cm'lik parça komşu panoyla birleşemiyor: {st}")
+                if i0 == 0 or ps[i0 - 1].aciklar or ps[i0 - 1].karkasli or birlesmez(ps[i0 - 1].a0, lo):
+                    raise IsEmriHatasi(f"dizilim.karkasli_panolar: aralığın başında kalan {lo - sol:g} cm'lik parça komşu panoyla birleşemiyor "
+                                       f"(komşu açıklıksız olmalı, birleşen pano en çok 125,5 ve arada birleşim yok): {st}")
                 bas = i0 - 1
                 parca.insert(0, Pano(d, ps[bas].a0, lo))
             else:
                 parca.insert(0, Pano(d, sol, lo))
         if sag - hi > 1e-6:
             if sag - hi < KARKAS_ARTIK_CM - 1e-6:
-                if i1 + 1 >= len(ps) or ps[i1 + 1].aciklar or ps[i1 + 1].karkasli:
-                    raise IsEmriHatasi(f"dizilim.karkasli_panolar: aralığın sonunda kalan {sag - hi:g} cm'lik parça komşu panoyla birleşemiyor: {st}")
+                if i1 + 1 >= len(ps) or ps[i1 + 1].aciklar or ps[i1 + 1].karkasli or birlesmez(hi, ps[i1 + 1].a1):
+                    raise IsEmriHatasi(f"dizilim.karkasli_panolar: aralığın sonunda kalan {sag - hi:g} cm'lik parça komşu panoyla birleşemiyor "
+                                       f"(komşu açıklıksız olmalı, birleşen pano en çok 125,5 ve arada birleşim yok): {st}")
                 son = i1 + 2
                 parca.append(Pano(d, hi, ps[i1 + 1].a1))
             else:
                 parca.append(Pano(d, hi, sag))
         d.panolar[bas:son] = parca
+
+
+def _dik_birlesimler(plan: "Plan", d: "Duvar", a: float, b: float) -> list:
+    """D-46: d duvarına (a, b) aralığında (uçlardan 1 cm içeride) bağlanan dik duvarlar ve d'nin üstündeki üçlü H'lar, [(tür, eksen, nesne)];
+    tür dis | ic | H. Dik duvar d'nin kalınlığına değiyorsa bağlıdır (T ya da köşe)."""
+    cik = []
+    for w in plan.duvarlar:
+        if w is d or w.yon == d.yon or not a + 1.0 < w.c < b - 1.0:
+            continue
+        if min(w.p0, w.p1) <= d.c + d.h + 1e-6 and max(w.p0, w.p1) >= d.c - d.h - 1e-6:
+            cik.append((w.tur, w.c, w))
+    for h in plan.h_baglantilar:
+        e_, c_ = (h.x, h.y) if d.yon == "x" else (h.y, h.x)
+        if abs(c_ - d.c) <= d.h + 3.5 and a + 1.0 < e_ < b - 1.0:
+            cik.append(("H", e_, h))
+    return cik
 
 
 def _edges_of_room_side(duvarlar, mahal, normal):

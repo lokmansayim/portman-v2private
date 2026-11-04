@@ -147,11 +147,13 @@ def _tk01(satirlar) -> dict:
     ([{"yon": "x", "eksen_cm": 5, "aralik_cm": [200, 300]}], "üçlü H birleşimi var \\(261, 883.5\\)"),
     ([{"yon": "x", "eksen_cm": 5, "aralik_cm": [72.75, 196]}], "pencere 120x180 .* karkaslı panoya girmiyor"),
     ([{"yon": "x", "eksen_cm": 883.5, "aralik_cm": [15, 381.5]}], "başında kalan 5 cm'lik parça komşu panoyla birleşemiyor"),
-    ([{"yon": "x", "eksen_cm": 883.5, "aralik_cm": [10, 130]}], "sonunda kalan 5.5 cm'lik parça komşu panoyla birleşemiyor"),
+    ([{"yon": "x", "eksen_cm": 5, "aralik_cm": [72.75, 250]}], "sonunda kalan 11 cm'lik parça komşu panoyla birleşemiyor"),   # komşuda 60/40
     ([{"yon": "x", "eksen_cm": 883.5, "aralik_cm": [10, 261]}, {"yon": "x", "eksen_cm": 883.5, "aralik_cm": [135.5, 381.5]}],
      "başka bir karkaslı panoyla çakışıyor"),
     ([{"yon": "x", "eksen_cm": 883.5, "aralik_cm": [10, 261], "aciklik_ortasi_cm": [100, 200]}], "2 değer, aralıkta 1 açıklık"),
     ([{"yon": "x", "eksen_cm": 883.5, "aralik_cm": [10, 261], "aciklik_ortasi_cm": [70]}], "ortası 70 aralığın ucuna pano payından yakın"),
+    ([{"yon": "x", "eksen_cm": 883.5, "aralik_cm": [261, 381.5]}], "aralıkta pencere ya da dış kapı yok"),                # D-46: açıklıksız olmaz
+    ([{"yon": "x", "eksen_cm": 883.5, "aralik_cm": [136, 381.5]}], "başında kalan 0.5 cm'lik parça komşu panoyla birleşemiyor"),  # 10–136 > 125,5
 ])
 def test_satir_hatalari(satirlar, mesaj):
     with pytest.raises(G.IsEmriHatasi, match=mesaj):
@@ -159,9 +161,11 @@ def test_satir_hatalari(satirlar, mesaj):
 
 
 def test_kisa_artik_komsuyla_tek_parca():
-    """Aralığın dışında kalan 20 cm'den kısa parça açıklıksız komşu panoyla tek parça; 20 cm ve üstü kendi panosu."""
+    """Aralığın dışında kalan 20 cm'den kısa parça açıklıksız komşu panoyla tek parça (birleşen pano en çok 125,5; AP-14 verandası 62,92);
+    20 cm ve üstü kendi panosu. 10–136 (126 cm) olacaksa açık hata (`test_satir_hatalari`)."""
     sira = lambda ie: [(round(p.a0, 2), round(p.a1, 2), p.karkasli) for p in _duvar(G.kur(ie), 6).panolar]
-    assert sira(_tk01([{"yon": "x", "eksen_cm": 883.5, "aralik_cm": [136, 381.5]}])) == [(10.0, 136.0, False), (136.0, 381.5, True)]
+    assert sira(_tk01([{"yon": "x", "eksen_cm": 883.5, "aralik_cm": [10, 260.5]}])) == \
+        [(10.0, 260.5, True), (260.5, 381.5, False)]                                    # 0,5 cm'lik artık 261–381,5 ile: 121
     assert sira(_tk01([{"yon": "x", "eksen_cm": 883.5, "aralik_cm": [131, 381.5]}])) == [(10.0, 131.0, False), (131.0, 381.5, True)]
     assert sira(_tk01([{"yon": "x", "eksen_cm": 883.5, "aralik_cm": [30, 381.5]}])) == [(10.0, 30.0, False), (30.0, 381.5, True)]
     assert sira(_tk01([{"yon": "x", "eksen_cm": 883.5, "aralik_cm": [10, 261]}])) == [(10.0, 261.0, True), (261.0, 381.5, False)]
@@ -269,3 +273,41 @@ def test_montaj_rehberi_karkasli_duvar(tmp_path):
     k = [p for p in d["panels"] if p.get("karkas")]
     assert sorted((p["boy"], [o["kind"] for o in p["ops"]]) for p in k) == [(251.0, ["win"]), (371.5, ["win"])]
     assert all(p["op"] == p["ops"][0] and p["tur"] == "OZEL" for p in k)
+
+
+def test_kisa_artik_birlesimi_yutmaz():
+    """Kısa artık komşusuyla birleşirken aradaki pano ekinde birleşim varsa (AP-14 arka duvarı, 256'daki iç duvar T'si; orada 3'lü H) açık hata;
+    T sessizce panonun ortasına düşmez."""
+    ie = _ie("AP14")
+    st = next(s for s in ie["yapi"]["dizilim"]["karkasli_panolar"] if s["eksen_cm"] == 5 and s["aralik_cm"] == [5, 256])
+    st["aralik_cm"] = [5, 240]
+    with pytest.raises(G.IsEmriHatasi, match="sonunda kalan 16 cm'lik parça komşu panoyla birleşemiyor"):
+        G.kur(ie)
+
+
+@pytest.mark.parametrize("orta, acik", [([None, 470], "pencere 200x210"), ([430, 580], "dis_kapi 90")])
+def test_aciklik_ic_duvar_tsine_binmez(orta, acik):
+    """AP-26 arka duvarı: 381,5'teki iç duvar T'si karkaslı panonun içinde (paftadaki gibi); paftadan yazılan açıklık ortası pencereyi T'nin
+    üstüne (470: 370–570) ya da kapıyı T'nin öteki yanına (430: yatak odası 1'den yatak odası 2'ye) götüremez."""
+    ie = _ie("AP26")
+    st = next(s for s in ie["yapi"]["dizilim"]["karkasli_panolar"] if s.get("aciklik_ortasi_cm") == [None, 525.3])
+    st["aciklik_ortasi_cm"] = orta
+    with pytest.raises(G.IsEmriHatasi, match=f"{acik} .* iç duvarın T'sine \\(duvar 8, eksen 381.5\\) biniyor ya da onun öteki yanına"):
+        G.kur(ie)
+
+
+@pytest.mark.parametrize("hi, olur", [(271.0, False), (291.0, True), (251.0, True)])
+def test_oda_ortasi_yan_parcasi_cok_kisa_olmaz(hi, olur):
+    """`genis_pencere: oda_ortasi`: iki yanda kalan parça ya hiç yok ya da en az 20 cm (çok kısa pano sınırı); 10 cm'lik iki pano kurulmaz."""
+    d = G.Duvar(id=1, yon="x", hat=0, c=5.0, h=5.0, tur="dis", cevre=False, govde_yonu=0, n0=0, n1=4, p0=0.0, p1=400.0)
+    ac = G.Acilim(tur="pencere", olcu="180x200", genislik=180.0, yukseklik=200.0, mahal="SALON")
+    pts = sorted({0.0, G.MOD, 2 * G.MOD, hi, 400.0})
+    d.panolar = [G.Pano(d, a, b) for a, b in zip(pts, pts[1:])]
+    d.panolar[1].acilim = ac
+    if olur:
+        G._genis_pencere_oda_ortasi(d, d.panolar[1], 1, 2, (0.0, hi), {"olcu": "180x200"})
+        yan = (hi - 2 * G.MOD) / 2
+        assert [round(p.boy, 2) for p in d.panolar if p.a1 <= hi + 1e-6] == ([yan, 2 * G.MOD, yan] if yan else [2 * G.MOD])
+    else:
+        with pytest.raises(G.IsEmriHatasi, match="20 ile 125,5 arası"):
+            G._genis_pencere_oda_ortasi(d, d.panolar[1], 1, 2, (0.0, hi), {"olcu": "180x200"})

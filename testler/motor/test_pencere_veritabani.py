@@ -122,6 +122,18 @@ def test_kor_surguluyu_paftadaki_olcusuyle(kod, olcu, pano_boy):
     assert not any("veri tabanında yok" in u for u in plan.uyarilar)
 
 
+def test_karkasli_satirsiz_uc_panoluk_komsu_yolu():
+    """BK-13'ün üç panoluk komşu yolu: AP-26'nın 280/210'u karkaslı satırı yazılmazsa 3 × 125,5'lik pencereli panoda (İE-28'den önceki
+    beklenti; karkaslı satır o yolu bu evde kapattığı için ayrı sınanır)."""
+    ie = _ie("AP26")
+    ie["yapi"]["dizilim"].pop("karkasli_panolar")
+    plan = G.kur(ie)
+    p = _pencere(plan, "280x210")
+    assert p.boy == pytest.approx(3 * G.MOD, abs=1e-6) and not p.karkasli and p.aciklar == [p.acilim]
+    g = p.gap()
+    assert abs((g[2] - g[0] if p.duvar.yon == "x" else g[3] - g[1]) - G.pencere_kurali("280x210").en) < 1e-6
+
+
 def _tek_oda(*ekler):
     """ALTIN'de ODA 1 ve ODA 2 tek oda: arka duvarında altı tam pano (10–763), açıklıksız."""
     ie = json.loads(ALTIN.read_text(encoding="utf-8"))
