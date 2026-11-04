@@ -90,13 +90,36 @@ def kosullari_oku(ek: Path | str | None = None, ie: dict | None = None) -> dict:
     return K
 
 
+def ayni_kalemi_topla(satirlar: list[dict]) -> list[dict]:
+    """Teklifte aynı grup, kalem, ölçü ve birimdeki satırlar tek satır, adet toplam (Lokman 4 Kasım 2026 05:01, TK-02 teklif PDF'i:
+    "1710 2 kere alt alta yazdın, adet 2 yazsaydın"). Motor'un listesi her kirişi ayrı satır yazar, her birinin formülü ayrı; teklif okur
+    ve toplar, Motor'un listesini değiştirmez. Adedi olmayan (kural yok) ya da kg'lı satır toplanmaz. Satır ilkinin yerinde kalır,
+    formüller birleşir, `birlesen` kaç satırın toplandığını söyler."""
+    sonuc: list[dict] = []
+    yer: dict[tuple, int] = {}
+    for s in satirlar:
+        toplanir = isinstance(s.get("adet"), (int, float)) and s.get("kg") is None
+        k = (s.get("grup"), s.get("kalem"), s.get("olcu"), s.get("birim"))
+        if toplanir and k in yer:
+            t = sonuc[yer[k]]
+            t["adet"] += s["adet"]
+            if s.get("formul") and s["formul"] not in str(t.get("formul") or ""):
+                t["formul"] = f"{t['formul']}; {s['formul']}" if t.get("formul") else s["formul"]
+            t["birlesen"] = t.get("birlesen", 1) + 1
+            continue
+        if toplanir:
+            yer[k] = len(sonuc)
+        sonuc.append(dict(s))
+    return sonuc
+
+
 def uret(ie: dict, defter: dict, secim: list[tuple[str, dict]], kosullar: dict, oneri: bool = False) -> dict:
     """Her seçenek için Motor'un listesi ve fiyatı; teklifin JSON'u (zaman damgası yok: aynı girdi aynı çıktıyı verir)."""
     sec, kod = [], None
     for ad, oz in secim:
         L = PL.is_emrinden(ie, ozellikler=oz)
         kod = kod or L.get("kod")
-        R = F.fiyatla(L, defter, "prefabrik", oneri)
+        R = F.fiyatla(dict(L, satirlar=ayni_kalemi_topla(L["satirlar"])), defter, "prefabrik", oneri)
         sec.append({"ad": ad, "ozellikler": oz, "liste": {k: L[k] for k in ("uretici_surum", "kural_seti", "girdi_ozeti", "ozet")}, "fiyat": R})
     return {"sema": "portman.teklif/1", "kod": kod or ie.get("is_emri_no"),
             "is_emri_no": ie.get("is_emri_no"), "revizyon": ie.get("revizyon"), "defter_surumu": defter.get("surum"),
