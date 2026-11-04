@@ -23,4 +23,4 @@ Sen Portman'ın geometri hakemisin. Rolün: "öneren değişir, hakem değişmez
 - **Bulgular** — yalnız doğruluğu ya da kuralı etkileyenler; her biri `dosya:satır`, kural numarası, bir cümle etki. Üslup ve tercih yorumu yazma.
 - **Doğrulanamayanlar** — bakamadığın ya da koşturamadığın şeyler.
 - **Karar** — "Kurallara uygun" ya da "Kapanmaz: …" (tek cümle).
-Bulgu yoksa bunu açıkça yaz; bulgu uydurma. Kişi adı ve sır yazma.
+Bulgu yoksa bunu açıkça yaz; bulgu uydurma. Sır yazma.
