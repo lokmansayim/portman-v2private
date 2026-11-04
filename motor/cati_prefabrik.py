@@ -22,6 +22,9 @@ Tipler:
 - `kirma`: dört düzlem, kalkan yok; mahya uzun kenar boyunca (AP-01). Uçtaki iki kırma yüzünün eğimi paftada ana yüzlerden farklıysa
   `kirma_egimleri` {sol, sag} (mahya x boyunca) ya da {on, arka} (mahya y boyunca), yüzde: kırma çizgileri 45° olmaz, mahya o yana kayar
   (AP-01: ana %33, sol %32,5, sağ %36,2). Verilmezse eşit eğim (`genel.cati_kirma`, kırmalar 45°).
+  Tek uçlu kırma (İE-29, AP-27): `kalkan_ucu` sol | sag (mahya x boyunca) ya da on | arka (mahya y boyunca) → o uçta kalkan (beşikteki
+  gibi, dış duvarın dış yüzünde; saçak o uçta da), öteki uçta kırma yüzü; eşit eğim, kırma çizgileri 45° (`_tek_uclu_kirma`). Mahya
+  kısa kenar boyunca da olur (AP-27 773 × 1000, mahya 773 boyunca). `kirma_egimleri` ile birlikte yazılmaz.
 """
 from __future__ import annotations
 
@@ -32,7 +35,8 @@ TIP_ADI = {"besik_cumba": "beşik + cumba", "kirma": "kırma"}
 UST_PAY_CM = 14.0                  # ifc_uret: sac düzlemin 10 cm üstünde, 4 cm (pano Motor'unun beşik IFC'siyle aynı)
 CEPHE_YAN = {"on": "G", "arka": "K", "sol": "B", "sag": "D"}
 ALANLAR = {"tip", "egim_yuzde", "sacak_cm", "topuk_cm", "makas_ekseni", "makas_yonu"}   # her tipte; tanınmayan alan yok sayılmaz
-TIP_ALANI = {"besik_cumba": {"cumbalar"}, "kirma": {"kirma_egimleri"}}
+TIP_ALANI = {"besik_cumba": {"cumbalar"}, "kirma": {"kirma_egimleri", "kalkan_ucu"}}
+KALKAN_UCLARI = {"x": ("sol", "sag"), "y": ("on", "arka")}       # İE-29: tek uçlu kırmada kalkanlı uç (mahya yönüne göre)
 CUMBA_ALANLARI = {"cephe", "bas_cm", "bit_cm", "cikinti_cm", "egim_yuzde"}
 
 
@@ -109,6 +113,41 @@ def _kirma_farkli(kutu: tuple, mahya: str, e: float, uc: dict, b: dict, k: dict)
     return duz
 
 
+def _tek_uclu_kirma(kutu: tuple, mahya: str, uc: str, b: dict, k: dict) -> tuple[list[dict], list[dict]]:
+    """İE-29 (AP-27): bir ucu kalkan, öteki ucu kırma; eşit eğim (kırma çizgileri 45°). Kanonik yön mahya x (kalkan sol ya da sağda);
+    mahya y boyunca çatı devrik kurulup geri çevrilir (kalkan ön ya da arkada). Saçak her yanda S, kalkanlı uçta da (`cati_besik` gibi;
+    kalkan dış duvarın dış yüzünde). Mahya kalkanlı uçtaki saçaktan kırmanın tepesine: uzun kenar + 2 S − (derinlik / 2 + S)."""
+    from .genel import cati_ortak as CO
+    if uc not in KALKAN_UCLARI[mahya]:
+        raise PrefabrikCatiHatasi(f"tek uçlu kırma: kalkan ucu mahya {mahya} boyunca {' ya da '.join(KALKAN_UCLARI[mahya])} olur ({uc} yazılmış)")
+    x0, y0, x1, y1 = kutu
+    if mahya == "y":                                  # devrik: x ↔ y (ön ↔ sol, arka ↔ sağ)
+        x0, y0, x1, y1 = y0, x0, y1, x1
+    bati = uc in ("sol", "on")
+    S = b["S"]
+    X0, Y0, X1, Y1 = x0 - S, y0 - S, x1 + S, y1 + S
+    ym = (Y0 + Y1) / 2
+    yari = ym - Y0
+    if (X1 - X0) - yari < float(k["kirma_mahya_en_az_cm"]):
+        raise PrefabrikCatiHatasi(f"tek uçlu kırma: mahya {(X1 - X0) - yari:.1f} cm; en az {k['kirma_mahya_en_az_cm']:g} cm")
+    if bati:                                          # kalkan batıda, kırma doğuda
+        xb = X1 - yari
+        duz = [CO.duzlem(b, "güney", [[X0, Y0], [X1, Y0], [xb, ym], [X0, ym]], [0, 1], {"y": Y0}, "güney yüzü"),
+               CO.duzlem(b, "kuzey", [[X0, ym], [xb, ym], [X1, Y1], [X0, Y1]], [0, -1], {"y": Y1}, "kuzey yüzü"),
+               CO.duzlem(b, "doğu", [[X1, Y0], [X1, Y1], [xb, ym]], [-1, 0], {"x": X1}, "doğu kırması")]
+        kal = [CO.kalkan("batı kalkanı", "x", x0, (y0, y1), "dogu", ["güney", "kuzey"])]
+    else:                                             # kalkan doğuda, kırma batıda
+        xa = X0 + yari
+        duz = [CO.duzlem(b, "güney", [[X0, Y0], [X1, Y0], [X1, ym], [xa, ym]], [0, 1], {"y": Y0}, "güney yüzü"),
+               CO.duzlem(b, "kuzey", [[xa, ym], [X1, ym], [X1, Y1], [X0, Y1]], [0, -1], {"y": Y1}, "kuzey yüzü"),
+               CO.duzlem(b, "batı", [[X0, Y0], [xa, ym], [X0, Y1]], [1, 0], {"x": X0}, "batı kırması")]
+        kal = [CO.kalkan("doğu kalkanı", "x", x1, (y0, y1), "bati", ["güney", "kuzey"])]
+    if mahya == "y":
+        c = CO.devrik({"duzlemler": duz, "kalkanlar": kal})
+        duz, kal = c["duzlemler"], c["kalkanlar"]
+    return duz, kal
+
+
 def cati(plan: G.Plan, ie: dict) -> dict:
     """Beşik dışı ana çatı → genel motorun `cati` biçimi. Dönen sözlük `sunum.cati_tanimi`'nin beşik çatısının anahtarlarında,
     ek olarak `tip_adi`, `ust_pay` ve `kalkanlar` (`cati_genel.cati_kur` ve `cephe_gorunus` okur)."""
@@ -128,7 +167,19 @@ def cati(plan: G.Plan, ie: dict) -> dict:
     H0 = float((ie.get("yapi") or {}).get("duvar_yuksekligi_cm", 250))
     kutu = tuple(float(v) for v in G.govde_kutusu(plan))
     mahya = "y" if c.get("makas_ekseni", "x") == "x" else "x"
-    if tip == "kirma":
+    if tip == "kirma" and c.get("kalkan_ucu") is not None:   # İE-29: tek uçlu kırma (AP-27); genel motorun üreticisi değişmez
+        if c.get("kirma_egimleri"):
+            raise PrefabrikCatiHatasi("tek uçlu kırmada uç eğimi (`kirma_egimleri`) bu sürümde yok: kırma yüzü ana yüzlerin eğiminde")
+        from .genel import cati_ortak as CO
+        lo, hi = k["egim_yuzde_aralik"]
+        if not lo <= float(c["egim_yuzde"]) <= hi:
+            raise PrefabrikCatiHatasi(f"tek uçlu kırma: eğim %{c['egim_yuzde']:g} aralık dışı (%{lo}–%{hi})")
+        ayak = [list(kutu)]
+        e = round(float(c["egim_yuzde"]) / 100, 5)
+        duz0, kal0 = _tek_uclu_kirma(kutu, mahya, c["kalkan_ucu"], CO.baglam(k, e, H0), k)
+        u = {"tip": "kirma", "sacak": k["sacak_cm"], "topuk": k["topuk_cm"], "duvar_ustu": H0, "panel_kalinligi": k["panel_kalinligi_cm"],
+             "duzlemler": duz0, "kalkanlar": kal0}
+    elif tip == "kirma":
         ayak = [list(kutu)]
         try:
             u = CU.uret(ayak, "kirma", mahya=mahya, egim_yuzde=float(c["egim_yuzde"]), duvar_ustu=H0, kural=k)

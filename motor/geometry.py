@@ -930,13 +930,19 @@ def _kur(is_emri: dict) -> Plan:
         if "duvar_ucu" not in ac:
             continue
         uc = ac["duvar_ucu"]
-        if ac.get("tur") not in ("ic_kapi", "dis_kapi") or uc not in NORMAL or "pano" in ac or OUT in ac.get("arasi", ()):
-            raise IsEmriHatasi(f"duvar_ucu yalnız iki mahal arasındaki kapıda, pano dizini olmadan ve on | arka | sol | sag olarak yazılır: {ac}")
+        dis = OUT in ac.get("arasi", ())                      # İE-29 (AP-27): dışarı açılan kapıda da, cephesi (`duvar`) yazılmışsa
+        if ac.get("tur") not in ("ic_kapi", "dis_kapi") or uc not in NORMAL or "pano" in ac \
+                or (dis and (ac.get("tur") != "dis_kapi" or ac.get("duvar") not in NORMAL)):
+            raise IsEmriHatasi(f"duvar_ucu yalnız iki mahal arasındaki kapıda ya da cephesi yazılmış dış kapıda, pano dizini olmadan ve "
+                               f"on | arka | sol | sag olarak yazılır: {ac}")
         a, b = ac["arasi"]
-        if a not in mahaller or b not in mahaller:
+        if any(n not in mahaller and not (dis and n == OUT) for n in (a, b)):
             raise IsEmriHatasi(f"Açıklık için bilinmeyen mahal: {ac}")
         yon = "y" if uc in ("on", "arka") else "x"           # ön / arka uç y boyunca uzanan duvarda, sol / sağ uç x boyunca uzananda
-        cand = [c for c in _edges_between(duvarlar, a, b) if c[0].yon == yon]
+        if dis:                                              # dış kapı: mahalin o cephedeki dış duvarı (açıklık seçimiyle aynı aday)
+            cand = [c for c in _edges_of_room_side(duvarlar, b if a == OUT else a, NORMAL[ac["duvar"]]) if c[0].yon == yon]
+        else:
+            cand = [c for c in _edges_between(duvarlar, a, b) if c[0].yon == yon]
         if not cand:
             raise IsEmriHatasi(f"duvar_ucu {uc}: {a}–{b} arasında {'ön–arka' if yon == 'y' else 'sol–sağ'} uzanan ortak duvar yok: {ac}")
         d, k0, k1 = max(cand, key=lambda c: c[2] - c[1])
