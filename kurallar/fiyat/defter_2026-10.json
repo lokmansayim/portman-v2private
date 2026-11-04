@@ -866,6 +866,16 @@
      "onay": true,
      "not": "kaynakta antrasit"
     },
+    "Trapez sac mahyası | L 1000": {
+     "fiyat": 189,
+     "birim": "adet",
+     "kaynak": "HAZ",
+     "kaynak_satir": "ÇG25",
+     "kaynak_kalem": "Antrasit gri trapez saç mahyası L 1000",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": "r08: trapez çatının mahyası (TK-04). Lokman 4 Kasım 2026 21:16 \"Trapez Mahyayıda 100 al\" ve 21:20: prefabrikte trapez sac ve mahya standart 100 cm kapatır (D-50, M-11; parça L 1000). 87 m² listesinde trapez mahya yok; Haziran listesinden birebir (r02 kuralı). 100 cm kapatan trapez sacın fiyatı iki listede de yok (Haziran'daki ÇG15 80 cm kapatır): sac satırı fiyatsız, fiyat Patron'dan."
+    },
     "Ters mahya (dere içi) | L 2800": {
      "fiyat": 189,
      "birim": "adet",
@@ -1866,32 +1876,6 @@
      "kaynak_kalem": "ÇG1 ANTRESİT GRİ TEK KAT PANEL(87 CM KAPATIR) * 1 | L=5450",
      "onay": true,
      "dayanak": "Tek kat çatı paneli m² birim fiyatından, yani boyla orantılı (en 87 cm sabit), her çatı ve her boy (Lokman 31 Ekim 2026 15:26: \"Tek kat çatı paneli içinde aynısını yap m² birim fiyat üzerinden git\"; D-36). Haziran listesinde L 5450 1.650 TL; kuruşa yuvarlanır. Defterdeki 5100, 2400, 1750 bu yöntemle."
-    },
-    {
-     "kalem_baslar": "Trapez sac · ",
-     "boy_mm": 2550,
-     "fiyat": 625,
-     "yuvarlama": 0.01,
-     "kaynak": "HAZ",
-     "kaynak_satir": [
-      208
-     ],
-     "kaynak_kalem": "ÇG15 ANTRASİT GRİ TRAPEZ SAÇ 80 CM KAPATIR | L=2550",
-     "onay": false,
-     "dayanak": "r08 öneri (TK-04 trapez çatı, Lokman 4 Kasım 2026 20:47): trapez sac boyla orantılı, tek kat çatı paneli gibi (D-36'nın yöntemi; trapez sac için onayı yok). Haziran listesinde antrasit 80 cm kapatır L 2550 625 TL (metresi 245,10); 87 m² listesinde trapez sac yok. Patron onaylayana kadar teklifin toplamına girmez."
-    },
-    {
-     "kalem": "Trapez sac mahyası",
-     "boy_mm": 1000,
-     "fiyat": 189,
-     "yuvarlama": 0.01,
-     "kaynak": "HAZ",
-     "kaynak_satir": [
-      218
-     ],
-     "kaynak_kalem": "ÇG25 ANTRASİT GRİ TRAPEZ SAÇ MAHYASI | L=1000",
-     "onay": false,
-     "dayanak": "r08 öneri (TK-04 trapez mahya, Lokman 4 Kasım 2026 20:47; adet D-50): Haziran listesinde antrasit trapez sac mahyası yalnız L 1000, 189 TL; Motor 80 cm kapatan sacta L 800 yazar (D-50), fiyatı boyla orantılı öneri (L 800 = 151,20). Patron onaylayana kadar toplama girmez."
     }
    ],
    "makas_kurali": {

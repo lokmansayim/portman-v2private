@@ -263,6 +263,28 @@ def test_r08_ters_mahya(defter):
     assert R["ozet"]["toplam"] == 567 and [f["anahtar"] for f in R["ozet"]["fiyatsiz"]] == ["Ters mahya kenar kutusu | L 21 × 40 × 21 × 2800"]
 
 
+
+def test_r08_trapez_cati(defter):
+    """r08 (4 Kasım 2026): TK-04'ün trapez çatısı (Lokman 20:47; D-50, M-11: sac ve mahya standart 100 cm kapatır, 21:20). Trapez sacın vidası
+    87 m² listesinin 144. satırından (5,5 × 60, 3 TL) birebir onaylı; mahya L 1000 Haziran listesinden birebir (ÇG25, 189 TL; Lokman 21:16
+    "Trapez Mahyayıda 100 al"). 100 cm kapatan trapez sacın iki listede de fiyatı yok (Haziran'daki ÇG15 80 cm kapatır): sacın boy önerisi yok,
+    satır fiyatsız kalır; 80'lik sacın mahyası (L 800) da fiyatsız. Fiyat uydurulmaz."""
+    P = defter["hatlar"]["prefabrik"]
+    v = P["kalemler"]["Trapez vida 5,5 × 60 (trapez sac) | adet"]
+    assert (v["fiyat"], v["kaynak"], v["kaynak_satir"], v["durum"], v["onay"]) == (3, "EKIM87", [144], "eşleşti", True)
+    m = P["kalemler"]["Trapez sac mahyası | L 1000"]
+    assert (m["fiyat"], m["kaynak"], m["kaynak_satir"], m["durum"], m["onay"]) == (189, "HAZ", "ÇG25", "eşleşti", True)
+    assert not any((b.get("kalem") or b.get("kalem_baslar", "")).startswith("Trapez sac") for b in P["boy_onerileri"])
+    R = F.fiyatla({"satirlar": [_pre("Trapez sac · ana çatı", "L 3530", 22, "1006"), _pre("Trapez sac mahyası", "L 1000", 11, "1006"),
+                                _pre("Trapez sac mahyası", "L 800", 14, "1006"), _pre("Trapez vida 5,5 × 60 (trapez sac)", "adet", 400, "1008")]},
+                  defter)
+    sac, mahya, m80, vida = R["satirlar"]
+    assert sac["birim_fiyat"] is None and sac.get("oneri_fiyat") is None and m80["birim_fiyat"] is None
+    assert (mahya["birim_fiyat"], mahya["tutar"], mahya["durum"]) == (189, 2079, "onaylı")
+    assert (vida["birim_fiyat"], vida["tutar"], vida["durum"]) == (3, 1200, "onaylı")
+    assert R["ozet"]["toplam"] == 2079 + 1200
+    assert {f["anahtar"] for f in R["ozet"]["fiyatsiz"]} == {"Trapez sac · ana çatı | L 3530", "Trapez sac mahyası | L 800"}
+
 def test_miktari_olmayan_fiyatli_satir(defter):
     C = defter["hatlar"]["celik"]
     kg_k = next(k for k, g in C["kalemler"].items() if g["birim"] == "kg" and g["fiyat"])
