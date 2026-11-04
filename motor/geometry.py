@@ -299,6 +299,7 @@ def _birlesimleri_oku(birlesimler, tablo: bool) -> tuple[dict, set]:
     for b in birlesimler or []:
         if not isinstance(b, dict) or set(b) - {"nokta_cm", "kose", "t"} or ("kose" in b) == ("t" in b) \
                 or not isinstance(b.get("nokta_cm"), list) or len(b["nokta_cm"]) != 2 \
+                or not all(isinstance(v, (int, float)) and not isinstance(v, bool) for v in b["nokta_cm"]) \
                 or b.get("kose", "x") not in ("x", "y") or b.get("t", "cektirme_u") != "cektirme_u":
             raise IsEmriHatasi(f"yapi.birlesimler: nokta_cm [x, y] ve ya kose (x | y) ya da t (cektirme_u) ister: {b}")
         if not tablo:
@@ -591,6 +592,7 @@ def _kur(is_emri: dict) -> Plan:
     dayanak_duvari: set = set()
     kose_yonu, eklemsiz_t = _birlesimleri_oku(yapi.get("birlesimler"), tablo)   # D-49 madde 3
     birlesim_kullanildi: set = set()
+    eklemsiz_yer: dict = {}                                 # D-49 madde 3: nokta → (geçen duvar, T ile gelen duvar)
     uyarilar = list(tamamlama_uyarisi)                    # D-30: tam panoya tamamlama söylenir
     if KISA_KENAR == "x" and makas_ekseni == "y":
         uyarilar.append("Makas y'yi geçiyor ama kisa_kenar x: montaj paftalarında köşe makasın oturduğu duvarlardadır; "
@@ -889,7 +891,7 @@ def _kur(is_emri: dict) -> Plan:
             branches = [(d, uc) for d, uc in ends if d.tur == "ic" and d.yon != t.yon]
             if P in eklemsiz_t:                    # D-49 madde 3: geçen duvar burada bölünmez, 3'lü H yok (listede çektirme U'su)
                 if len(branches) == 1 and len(thr) == 1 and len(ends) == 1:
-                    birlesim_kullanildi.add(P)
+                    birlesim_kullanildi.add(P); eklemsiz_yer[P] = (t, branches[0][0])
                 continue
             if (t.tur == "ic" or dis_t_bolme) and len(branches) == 1 and len(thr) == 1:
                 d, uc = branches[0]
@@ -1249,6 +1251,14 @@ def _kur(is_emri: dict) -> Plan:
             uyarilar.append(f"{ad} net alanı birden çok parçaya bölündü; en büyük parça alındı")
         m.poly = poly
         m.alan_m2 = poly.area / 10000.0
+
+    # D-49 madde 3 (geometri hakemi, 4 Kasım 2026): çektirme U'su panonun ortasına gelen T'ye yazılır. T geçen duvarın bir ekine denk
+    # geliyorsa (ızgara aksı) o ekte 3'lü H olur; birleşim yazılırsa 3'lü H sessizce kalkar, listede de sayılmazdı. Tolerans listedeki gibi
+    # (`prefabrik_liste.model_motor`, T'nin ekte mi ortada mı olduğu)
+    for P, (t, d) in sorted(eklemsiz_yer.items()):
+        if any(abs(p.a1 - d.c) <= t.h + 3.5 for p in t.panolar[:-1]):
+            raise IsEmriHatasi(f"yapi.birlesimler: {X(P[0] / 2):g}, {Y(P[1] / 2):g} cm'deki T geçen duvarın pano ekine denk geliyor (orada 3'lü H "
+                               f"olur); t: cektirme_u yalnız panonun ortasına gelen T'ye yazılır")
 
     profil = [(x0, y0, x1, y1) for (x0, y0, x1, y1, *_r) in acik_kenarlar]
     plan = Plan(grid_nx, grid_ny, W, H, mahaller, duvarlar, koseler, h_bag, dikmeler, profil, acik_sinir_cizgileri, uyarilar, is_emri,
