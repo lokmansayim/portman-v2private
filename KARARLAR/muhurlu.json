@@ -98,7 +98,8 @@
     "D-29",
     "D-30",
     "D-31",
-    "D-34"
+    "D-34",
+    "D-49"
    ],
    "pr": [
     79,
@@ -129,7 +130,7 @@
     },
     {
      "yer": "kurallar/prefabrik/cizim_kurallari.json#kurallar[karar=D-31].kural",
-     "iz": "602be97cd3de8983"
+     "iz": "a3c36b1647fee7a0"
     },
     {
      "yer": "kurallar/prefabrik/cizim_kurallari.json#kurallar[karar=D-34].kural",
@@ -137,7 +138,7 @@
     },
     {
      "yer": "testler/motor/veri/TK02_beklenen.json#onay",
-     "iz": "a5cb90adc7df8dae"
+     "iz": "edd258641d29dee9"
     },
     {
      "yer": "testler/motor/veri/TK02_beklenen.json#iz.dogrulama",
@@ -153,15 +154,15 @@
     },
     {
      "yer": "testler/motor/veri/TK02_beklenen.json#iz.pdf_izi",
-     "iz": "95c061141ee6c921"
+     "iz": "2d8e9689ea744e1d"
     },
     {
      "yer": "testler/motor/veri/TK02_beklenen.json#iz.dxf_izi",
-     "iz": "cd197c0143e17ae1"
+     "iz": "c24b77c9dd2f003f"
     },
     {
      "yer": "testler/motor/veri/TK01_r07_beklenen.json#onay",
-     "iz": "d1e4cd9e2c010d7f"
+     "iz": "c43e3b4d0c42b533"
     },
     {
      "yer": "testler/motor/veri/TK01_r07_beklenen.json#iz.dogrulama",
@@ -177,11 +178,11 @@
     },
     {
      "yer": "testler/motor/veri/TK01_r07_beklenen.json#iz.pdf_izi",
-     "iz": "21e3d5b48004a066"
+     "iz": "7f20e69aeba6aeca"
     },
     {
      "yer": "testler/motor/veri/TK01_r07_beklenen.json#iz.dxf_izi",
-     "iz": "dd87176d3417e0f9"
+     "iz": "07f294b4f9c84490"
     },
     {
      "yer": "testler/motor/veri/TK02.json",
@@ -201,20 +202,23 @@
     },
     {
      "yer": "testler/motor/test_d31_gorunus.py",
-     "iz": "d064a29d05fca766"
+     "iz": "89a9ac4517912394"
     },
     {
      "yer": "testler/motor/test_d34_cizim.py",
      "iz": "2467d706ab672bf7"
     }
    ],
-   "durum": "açık",
-   "gecmis": [],
-   "acilis": {
-    "tarih": "2026-11-04 19:55",
-    "soz": "Karar kartı \"Mühürlü ön onay çizimini (M-02) bu iki düzeltme için açayım mı?\" → \"Aç, iki düzeltme girsin\" (14:24 \"bizde m² bürüt üzerinden verilir ve buna veranda dahildir çünkü çatı kapattığı için bunuda dahil eder misin?\"; 14:25 mutfak penceresinin sağındaki \"2 parça\" pano)",
-    "mesaj": "cmsg_01UAFvcnfVuTR1wfFux5fQPPWqz9RSSRrAcCNN2N9aTKWT"
-   }
+   "durum": "mühürlü",
+   "gecmis": [
+    {
+     "tarih": "2026-11-04 19:55",
+     "soz": "Karar kartı \"Mühürlü ön onay çizimini (M-02) bu iki düzeltme için açayım mı?\" → \"Aç, iki düzeltme girsin\" (14:24 \"bizde m² bürüt üzerinden verilir ve buna veranda dahildir çünkü çatı kapattığı için bunuda dahil eder misin?\"; 14:25 mutfak penceresinin sağındaki \"2 parça\" pano)",
+     "mesaj": "cmsg_01UAFvcnfVuTR1wfFux5fQPPWqz9RSSRrAcCNN2N9aTKWT",
+     "kapanis": "2026-11-04T20:13Z",
+     "karar": "D-49"
+    }
+   ]
   },
   {
    "kod": "M-03",
