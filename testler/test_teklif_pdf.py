@@ -79,7 +79,7 @@ def test_ilk_sayfa_formun_duzeni(cikti, T):
         toplam = TP.tl(sec["fiyat"]["ozet"]["toplam"])
         assert s1.count(toplam) == 4, (sec["ad"], toplam)                     # birim fiyat, tutar, toplam, genel toplam
         assert f"{TP.sayi(sec['liste']['girdi_ozeti']['brut_m2'])} m²" in s1
-        assert "2 satır fiyatsız, toplam eksik; Teslim süresi, Ödeme şekli boş (Patron'dan)" in s1
+        assert "1 satır fiyatsız, toplam eksik; Teslim süresi, Ödeme şekli boş (Patron'dan)" in s1      # r09: 120 × 180 karkas fiyatlı
         assert "sayfa 1 / " in s1
 
 
@@ -96,10 +96,10 @@ def test_ek_satirlari_json_ile_ayni_fiyatsiz_bos(cikti, T):
             assert p[3] == ("" if s.get("adet") is None else str(s["adet"])), (p, s)
             assert (p[4], p[5]) == (TP.tl(s["birim_fiyat"]), TP.tl(s["tutar"])), (p, s)
         bos = [p[0] for p in pdf if p[4] == "" and p[5] == ""]
-        assert len(bos) == len(sec["fiyat"]["ozet"]["fiyatsiz"]) == 2
-        assert any(b.startswith("Çırpı ipi") for b in bos) and any("120×180" in b for b in bos)
+        assert len(bos) == len(sec["fiyat"]["ozet"]["fiyatsiz"]) == 1                  # r09 (Lokman 4 Kasım 23:20): 120 × 180 karkas 700 TL
+        assert bos[0].startswith("Çırpı ipi")
         son = _metin(yol)[-1]
-        assert TP.tl(sec["fiyat"]["ozet"]["toplam"]) in son and "Fiyatı olmayan satır: 2" in son
+        assert TP.tl(sec["fiyat"]["ozet"]["toplam"]) in son and "Fiyatı olmayan satır: 1" in son
 
 
 def test_tavan_satiri_secenege_gore(cikti, T):

@@ -1,6 +1,6 @@
 {
  "sema": "portman.fiyat_defteri/1",
- "surum": "2026-11-04-r08",
+ "surum": "2026-11-04-r09",
  "aciklama": "Yükleme listesi × birim fiyat (İE-13, Z-10'un liste yöntemi). Anahtar Motor'un liste satırı: prefabrikte 'kalem | olcu' (motor/prefabrik_liste.py), çelikte 'kalem | boyut' (motor/genel yükleme listesi). Fiyat uydurulmaz: kaynağı olmayan kalemde fiyat boş kalır.",
  "para_birimi": "TL",
  "kdv": "kaynak listelerde yazmıyor",
@@ -26,6 +26,13 @@
    "tarih": "2026-09-01",
    "patron_verdi": false,
    "not": "Drive 'AI İçin Hesaplamalar'; kalem birim fiyatları, pencere fiyat tablosu, çatı kaplaması m² fiyatı, çelik panel kg fiyatı. Yalnız iki listede olmayan kalemde öneri."
+  },
+  "PATRON": {
+   "ad": "Patron'un thread'de verdiği birim fiyat (listelerde olmayan kalem)",
+   "kisa": "Patron, 04.11.2026",
+   "tarih": "2026-11-04",
+   "patron_verdi": true,
+   "not": "Patron'un kendi sözüyle verdiği fiyat; kalemin notunda sözü kelimesi kelimesine, saati ve mesaj numarası. Kaynak listesi yok."
   }
  },
  "hatlar": {
@@ -509,14 +516,14 @@
      "not": ""
     },
     "Özel pencere karkası (120×180) (100'lük çektirme U'su + 100'lük H geçen) | 1200 × 1800": {
-     "fiyat": null,
+     "fiyat": 700,
      "birim": "adet",
-     "kaynak": null,
+     "kaynak": "PATRON",
      "kaynak_satir": null,
-     "kaynak_kalem": "",
-     "durum": "kaynakta yok",
-     "onay": false,
-     "not": "87 m² listesinde: kaynakta 120×120 (515) ve 120×100 (151) var, 120×180 yok; Haziran listesinde: yalnız 250/180 karkaslı özel pencere panosu (satır 34, 4250); Özel pencere karkası iki listede de yok."
+     "kaynak_kalem": "Lokman, TK-04 teklif PDF'inin bu satırına yorum",
+     "durum": "Patron verdi",
+     "onay": true,
+     "not": "r09: Lokman 4 Kasım 2026 23:20 UTC, TK-04 teklif PDF'inde bu satıra yorum (mesaj cmsg_01UAFvcnfVuTR1wfFux5fQPPBfB5HrfjnbBaNrm824isuu): \"700 TL olarak yaz\". Önceki not: 87 m² listesinde: kaynakta 120×120 (515) ve 120×100 (151) var, 120×180 yok; Haziran listesinde: yalnız 250/180 karkaslı özel pencere panosu (satır 34, 4250); Özel pencere karkası iki listede de yok."
     },
     "Çektirme U'su 100 | 100 × 2440": {
      "fiyat": 148,

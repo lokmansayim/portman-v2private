@@ -18,7 +18,7 @@ from araclar import fiyatla as F  # noqa: E402
 
 DEFTER = KOK / "kurallar" / "fiyat" / "defter_2026-10.json"
 KOR = sorted((KOK / "testler" / "kor" / "projeler").glob("*/bizim_liste.json"))
-DURUMLAR = {"eşleşti", "bant", "öneri onaylı", "ikinci kaynak", "yedek öneri", "hesap", "kaynakta yok", "yakın", "TK-01 onaylı kalemle aynı",
+DURUMLAR = {"eşleşti", "bant", "öneri onaylı", "ikinci kaynak", "yedek öneri", "hesap", "kaynakta yok", "yakın", "TK-01 onaylı kalemle aynı", "Patron verdi",
             "eşdeğer"}
 BIRIMLER = {"adet", "metre", "m", "kg"}
 
@@ -293,6 +293,20 @@ def test_r08_trapez_cati(defter):
     assert (m80["birim_fiyat"], m80["durum"]) == (151.2, "onaylı boy")
     assert (vida["birim_fiyat"], vida["tutar"], vida["durum"]) == (3, 1800, "onaylı")
     assert [f["anahtar"] for f in R["ozet"]["fiyatsiz"]] == ["Trapez sac · ana çatı | L 3530"]
+
+
+def test_r09_patron_fiyati(defter):
+    """r09 (4 Kasım 2026): 120 × 180 özel pencere karkası iki listede de yoktu; Lokman TK-04 teklif PDF'inde bu satıra 23:20'de "700 TL olarak
+    yaz" dedi. Kaynak `PATRON` (Patron'un verdiği fiyat; liste yok), durum "Patron verdi", onaylı; notunda sözü ve mesaj numarası."""
+    assert defter["surum"] == "2026-11-04-r09"
+    pk = defter["kaynaklar"]["PATRON"]
+    assert pk["patron_verdi"] and pk["kisa"] == "Patron, 04.11.2026"
+    k = defter["hatlar"]["prefabrik"]["kalemler"]["Özel pencere karkası (120×180) (100'lük çektirme U'su + 100'lük H geçen) | 1200 × 1800"]
+    assert (k["fiyat"], k["kaynak"], k["durum"], k["onay"]) == (700, "PATRON", "Patron verdi", True)
+    assert '"700 TL olarak yaz"' in k["not"] and "23:20" in k["not"] and "cmsg_" in k["not"]
+    s = F.fiyatla({"satirlar": [_pre("Özel pencere karkası (120×180) (100'lük çektirme U'su + 100'lük H geçen)", "1200 × 1800", 2, "1003")]},
+                  defter)["satirlar"][0]
+    assert (s["birim_fiyat"], s["tutar"], s["durum"], s["kaynak_adi"]) == (700, 1400, "onaylı", "Patron, 04.11.2026")
 
 def test_miktari_olmayan_fiyatli_satir(defter):
     C = defter["hatlar"]["celik"]
