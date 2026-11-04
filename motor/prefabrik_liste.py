@@ -1303,10 +1303,14 @@ def liste(N: dict, kurallar: dict | None = None, pafta: dict | None = None) -> d
              aday_notu="Şablon B (PK-02 17 ✓): iki yüz toplam yukarı" if c is ana and o["yuz"] > 1 else "")
     pm, bm = _ortak(k, "parca_boyu_m", "mahya"), _ortak(k, "bindirme_m", "mahya")
     if trapez:
-        tp_, tb_ = pb("trapez_mahyasi"), _ortak(k, "bindirme_m", "trapez_mahyasi")
-        mahya = sum(TAVAN(o["mahya_boy"] / (tp_ - tb_)) for c, o in C if c["tip"] == "besik")
-        ekle("1006", "Trapez sac mahyası", f"L {mm_m(tp_)}", mahya, "Kural (J5)", f"beşik mahyaları ÷ {sy(tp_ - tb_)} (L {mm_m(tp_)}, {sy(tb_ * 100)} cm bindirme)",
-             "parça boyu kitaptan (Excel motoru); 7.3'te L 1000 (PK-03 listesinde 15)")
+        # D-50 (Lokman, 4 Kasım 2026 20:49): trapez mahya, trapez sac kaç kapatırsa o kadar kapatır (sac 80 → mahya L 800, sac 100 → L 1000);
+        # kitabın parça boyu ve 20 cm bindirmesi prefabrikte okunmaz (`kitapla_farkli`)
+        if r("trapez_mahyasi") != "sac_kapatmasi":
+            raise ValueError(f"trapez_mahyasi: bilinmeyen yöntem {r('trapez_mahyasi')!r}")
+        mahya = sum(TAVAN(o["mahya_boy"] / kap_m) for c, o in C if c["tip"] == "besik")
+        ekle("1006", "Trapez sac mahyası", f"L {mm_m(kap_m)}", mahya, "Kural (Lokman 4.11 20:49, D-50)",
+             f"her beşiğin mahyası ÷ {sy(kap_m)}, yukarı (mahya, trapez sacın kapattığı {sy(kap_m * 100)} cm'yi kapatır; bindirme düşülmez)",
+             "AP-06, AP-11, AP-14, AP-15, AP-16, AP-26, PK-03, PK-08 gerçek listeleri tuttu (eski ÷ 0,6 yalnız AP-25)")
     else:
         mahya = TAVAN(sum(o["mahya_boy"] for c, o in C if c["tip"] == "besik") / (pm - bm))   # O10: toplam ÷ 2,6 (PK-06 6, PK-07 4)
         ekle("1006", "Metal kiremit mahyası", f"L {mm_m(pm)}", mahya, "Kural (O10)", f"beşik mahyalarının toplamı ÷ {sy(pm - bm)}", "PK-01, PK-02, PK-06, PK-07 tuttu")

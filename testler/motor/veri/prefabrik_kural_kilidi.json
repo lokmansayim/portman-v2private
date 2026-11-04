@@ -10,7 +10,6 @@
   "ortak.bindirme_m.dere": 0.2,
   "ortak.bindirme_m.mahya": 0.2,
   "ortak.bindirme_m.sacak_saci": 0.2,
-  "ortak.bindirme_m.trapez_mahyasi": 0.2,
   "ortak.boya.dayson_m2_basina": 0.06,
   "ortak.boya.dis_cephe_kova_m2_basina": 0.02,
   "ortak.boya.ic_cephe_kova_m2_basina": 0.02,
@@ -80,7 +79,6 @@
   "ortak.parca_boyu_m.sacak_saci": 2.5,
   "ortak.parca_boyu_m.sandvic_kapama": 2.5,
   "ortak.parca_boyu_m.tavan_omegasi": 3.75,
-  "ortak.parca_boyu_m.trapez_mahyasi": 0.8,
   "ortak.sandvic_kapama.bindirme_m": 0.2,
   "ortak.sandvic_kapama.olcu": "sacak_toplami",
   "ortak.sandvic_kapama.parca_boyu_m": 2.5,
@@ -301,6 +299,7 @@
     "atlama_parcasi"
    ]
   ],
+  "prefabrik.trapez_mahyasi": "sac_kapatmasi",
   "prefabrik.trapez_vida_5_5x25.asik": 10,
   "prefabrik.trapez_vida_5_5x25.omega_2500": 6,
   "prefabrik.trapez_vida_5_5x25.omega_3750": 10,
@@ -382,6 +381,10 @@
   ],
   [
    "Tavan omegası",
+   false
+  ],
+  [
+   "Trapez sac mahyası",
    false
   ],
   [
