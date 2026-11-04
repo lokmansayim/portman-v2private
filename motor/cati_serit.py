@@ -41,6 +41,12 @@ duvar üstüne, serbest dikme kirişin altına; makas kirişe oturur. Makaslar (
 yüzün mahyasından yüksekse kırma ya da dere mahyayı aşar; kırmaya uzayan yüz başka yüze binerse; ikisinde de çatı çizilmez (geometri hakemi,
 1 Kasım: makas x'li AP-09 verandasında kırma 21 cm basamaklı çatı veriyordu).
 
+Köşe kırmasında yüzün kendi eğimi (İE-29, AP-24 paftası s. 4 makas ve s. 5 aşık planı; AP-03'ün kubbeli eşi, aynı gövde): paftada çapraz
+makas (MK09) planda 45° değil, 0,61 eğik; veranda yüzü ana çatıdan yatık iner (%32,88 × 0,61 = %20). `yuz_egimi_yuzde` (yalnız kırmada;
+paftadan) yüzün eğimidir; saçak, saçak kotu ve öteki her şey ana çatınınki kalır, kırma ve dere iki düzlemin kesişiminden (kırmanın
+duvardaki ucu arka saçaktan 155,5 × 20 ÷ 32,88 = 94,6 içeride; paftada 94–95). Yazılmazsa eşit eğim (AP-03, 45°); `egim_yuzde`
+kırmada yine yazılmaz.
+
 Yan yana iki cumba (İE-29, AP-12 paftası s. 5 makas, s. 6 baş makas betopanı, s. 7 aşık planı; Lokman, 4 Kasım 2026 04:33 "Evet, sırayla
 çiz"): `cati.yan_yana_cumbalar` {`cephe` (ana çatının bir ucu: mahya y boyuncaysa on | arka, x boyuncaysa sol | sag), `kalkan_mahali`
 (ana çatının o uçtaki kalkanı bu mahalin o cepheye bakan dış duvarının dış yüzünde), `bolme_cm` (iki cumbayı ayıran duvarın ekseni, cephe
@@ -120,7 +126,7 @@ def cati_izi(plan: G.Plan, ie: dict | None = None):
     return Polygon(en.exterior.coords).simplify(TOL)
 
 
-MAHAL_CATI_ALANLARI = {"mahal", "tip", "egim_yuzde", "yuksek_yan", "sacak_cm"}
+MAHAL_CATI_ALANLARI = {"mahal", "tip", "egim_yuzde", "yuksek_yan", "sacak_cm", "yuz_egimi_yuzde"}
 KIRIS_CM = 10.0      # mahal çatısının kirişi 10 × 10 (dikme gibi; `veranda.KIRIS_CM`)
 _YAN_YON = {"on": (0, -1), "arka": (0, 1), "sol": (-1, 0), "sag": (1, 0)}      # yanın dışarı yönü (gerçek çerçeve: ön y = 0)
 
@@ -172,12 +178,16 @@ def mahal_catilari(plan: G.Plan, ie: dict) -> list[dict]:
         if tip not in ("tek_yon", "kirma"):
             raise PrefabrikCatiHatasi(f"mahal çatısı ({ad}): tek_yon (tek eğimli panel çatı) ya da kirma (ana çatının köşe kırması) çizilir; "
                                       f"'{tip}' yok")
+        if "yuz_egimi_yuzde" in g and tip != "kirma":
+            raise PrefabrikCatiHatasi(f"mahal çatısı ({ad}): yuz_egimi_yuzde yalnız köşe kırmasında yazılır (tek_yon'da egim_yuzde)")
         if tip == "kirma":
             yazili = sorted(a for a in ("egim_yuzde", "sacak_cm") if a in g)
             if yazili:
                 raise PrefabrikCatiHatasi(f"mahal çatısı ({ad}): köşe kırmasının eğimi ve saçağı ana çatınınki; {', '.join(yazili)} yazılmaz "
                                           "(eşit eğim 45° kırma verir)")
             g = {**g, "egim_yuzde": float(c.get("egim_yuzde", 33)), "sacak_cm": float(c.get("sacak_cm", 30))}
+            if "yuz_egimi_yuzde" in g:                                     # İE-29 (AP-24 paftası s. 4: MK09 planda 0,61 eğik): yüzün kendi
+                g["egim_yuzde"] = g["yuz_egimi_yuzde"]                    # eğimi paftadan; saçak ve saçak kotu yine ana çatınınki
         if g.get("egim_yuzde") is None:
             raise PrefabrikCatiHatasi(f"mahal çatısı ({ad}): eğim paftadan yazılır (`egim_yuzde`; varsayılan yok)")
         eg = float(g["egim_yuzde"]) / 100.0
@@ -308,6 +318,7 @@ def _kirma(m: dict, duzlemler: list[dict], kalkanlar: list[dict], ana_iz) -> lis
     p_ust = kot(P, yuksek, y0) if egim_x else kot(P, x0, yuksek)        # mahalin yüzünün duvardaki (yüksek yan) kotu
     sinir, kesik, eski = serit, {}, {}
     lo_hi = []
+    ana_eg = P["egim"]                                                  # kırma yanındaki ana çatı yüzünün eğimi (çapraz makasın doğrultusu)
     for L, durum in m["yanlar"].items():
         out_yon = tuple(float(v) for v in _YAN_YON[L])
         eks = "y" if L in ("on", "arka") else "x"
@@ -327,6 +338,7 @@ def _kirma(m: dict, duzlemler: list[dict], kalkanlar: list[dict], ana_iz) -> lis
             raise PrefabrikCatiHatasi(f"köşe kırması ({m['mahal']}): mahalin yüzü duvarda {p_ust:.2f} kotunda, {D['ad']} yüzünün mahyası "
                                       f"{d_ust:.2f}; {'kırma' if durum == 'acik' else 'dere'} mahyayı aşar, çatı çizilmez (geometri hakemi, 1 Kasım)")
         if durum == "acik":
+            ana_eg = D["egim"]
             sinir = sinir.intersection(_yari(D, P))                     # mahalin yüzü ana çatı yüzünün altında kalan yanda
             lo_hi.append(hedef)
             yaka = (box(-B_, -B_, B_, hedef) if yon[L] > 0 else box(-B_, hedef, B_, B_)) if eks == "y" else \
@@ -406,7 +418,8 @@ def _kirma(m: dict, duzlemler: list[dict], kalkanlar: list[dict], ana_iz) -> lis
                                "p": [round(ax_, 2), round(ay_, 2)], "q": [round(bx_, 2), round(by_, 2)]})
     # makaslar (İE-17 PR-1b/K7; AP-03 paftası s. 7, MK9–13): yüksek yana dik, alçak kenardaki kirişe oturur; kiriş boyunca (mahalin yanı)
     # eşit aralıkla, en çok 125,5: sayı ⌈yan ÷ 125,5⌉ + 1 (taşan verandanın makası gibi). Açık yandaki uçta kırma hattında çapraz makas
-    # (MK13; eşit eğimde 45°, boyu yanın √2 katı), öteki uçta ve arada kısa makas (MK9–12). Liste sayıyı buradan okur
+    # (MK13; eşit eğimde 45°, boyu yanın √2 katı; yüzün kendi eğimi varsa kırmanın doğrultusunda, AP-24 MK09), öteki uçta ve arada kısa
+    # makas (MK9–12). Liste sayıyı buradan okur
     lo_, hi_ = (y0, y1) if egim_x else (x0, x1)
     uc_yan = ("on", "arka") if egim_x else ("sol", "sag")
     n_ = math.ceil((hi_ - lo_) / MOD - 1e-6)
@@ -416,7 +429,7 @@ def _kirma(m: dict, duzlemler: list[dict], kalkanlar: list[dict], ana_iz) -> lis
         yan_ = uc_yan[0] if i == 0 else uc_yan[1] if i == n_ else None
         capraz = yan_ is not None and m["yanlar"].get(yan_) == "acik"
         mk.append({"konum": round(lo_ + (hi_ - lo_) * i / n_, 2), "rol": "capraz" if capraz else "kisa",
-                   "plan_boy_cm": round(kosu * (math.sqrt(2) if capraz else 1.0), 2)})
+                   "plan_boy_cm": round(kosu * (math.hypot(1.0, P["egim"] / ana_eg) if capraz else 1.0), 2)})
     m["makaslar"] = mk
     return hatlar
 

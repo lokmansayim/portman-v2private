@@ -266,3 +266,107 @@ def test_ap17_iki_kubbe_ust_uste():
     ie["kubbeler"].append({"cephe": "on", "mahal": "SALON", "bas_cm": 600})
     with pytest.raises(G.IsEmriHatasi, match="üst üste"):
         G.kur(ie)
+
+
+# ───────────────────────────── AP-24: AP-03'ün kubbeli eşi (İE-29 PR-2) ─────────────────────────────
+# AP-24'ün İş Emri'si `testler/kor/projeler/AP24/is_emri.json` (montaj paftasından; kişi ve bayi adı yok). Gövde AP-03'ünki (763 × 835,75,
+# sağ arkada veranda), kubbe yaşama alanının sağ duvarında. Beklenen pano hatları paftanın montaj planındaki dörtgenlerden (gerçek çerçeve,
+# y önden; 0,15 payla). Paftanın üç köşesi `dizilim.kose_uzayan`, verandanın iç duvarı (125,5 · 62,75 · 125,5 · 120,5) yardımcı akslara
+# dayalı. Veranda çatısı paftanın makas planındaki gibi %20 (`yuz_egimi_yuzde`; MK09 planda 0,61 eğik), AP-03'te ana eğim (45°).
+
+AP24 = KOK / "testler" / "kor" / "projeler" / "AP24" / "is_emri.json"
+AP03 = KOK / "testler" / "cizim" / "evler" / "AP03.json"
+PAFTA24 = {   # (yön, eksen): paftadaki pano uçları (montaj planının dörtgenleri)
+    ("x", 5.0): [4.88, 67.71, 193.14, 318.79, 444.21, 569.64, 632.47, 757.89],
+    ("x", 830.75): [4.88, 67.71, 193.14, 318.79, 444.21, 569.64, 632.47],
+    ("x", 512.0): [9.99, 67.71, 193.14, 315.68],
+    ("x", 389.5): [196.24, 318.79],
+    ("x", 261.0): [9.99, 67.71, 193.14],
+    ("y", 5.0): [9.99, 135.44, 260.89, 386.57, 512.02, 637.47, 762.92, 825.76],
+    ("y", 193.25): [264.0, 389.45, 508.91],
+    ("y", 318.75): [9.99, 135.44, 260.89, 386.57, 512.02, 637.47, 762.92, 825.76],
+    ("y", 632.5): [391.45, 516.9, 579.74, 705.19, 825.76],
+}
+
+
+def _ie24() -> dict:
+    return json.loads(AP24.read_text(encoding="utf-8"))
+
+
+def _uclar(plan, yon: str, c: float) -> list:
+    return sorted({v for d in plan.duvarlar if d.yon == yon and abs(d.c - c) < 0.5 for p in d.panolar for v in (p.a0, p.a1)})
+
+
+def test_ap24_pano_hatlari():
+    plan = G.kur(_ie24())
+    for (yon, c), pafta in PAFTA24.items():
+        bizim = _uclar(plan, yon, c)
+        assert len(bizim) == len(pafta) and max(abs(a - b) for a, b in zip(bizim, pafta)) < 0.15, (yon, c, bizim, pafta)
+    assert [round(v, 2) for v in _uclar(plan, "y", 758.0)] == [10.0, 72.61, 323.61, 386.5]   # paftada 9,99 · 72,61 · 323,73 · 386,57 (kubbe 251)
+    assert [round(v, 2) for v in _uclar(plan, "x", 386.5)] == [632.5, 753.0]                   # paftada 632,47 · 752,79 (köşe parçası 10,21)
+    assert not any("kısa pano" in u for u in plan.uyarilar)
+    assert G.ana_akslar("y") == [10.0, 72.75, 198.25, 323.75, 389.5, 449.25, 574.75, 700.25, 825.75]   # yardımcı akslar çizilmez
+
+
+def test_ap24_kubbe_ve_alanlar():
+    plan = G.kur(_ie24())
+    kb, = plan.kubbeler
+    assert (kb["cephe"], kb["mahal"], round(kb["u0"], 2), round(kb["u1"], 2)) == ("sag", "YAŞAMA ALANI", 72.61, 323.61)
+    assert [round(b[1] - a[1], 2) for a, b in zip(kb["dis"], kb["dis"][1:])] == [58.61, 133.78, 58.61]
+    assert round(kb["dis"][1][0] - 763.0, 2) == 58.61
+    alan = {ad: round(m.alan_m2, 2) for ad, m in plan.mahaller.items()}
+    assert alan == {"YATAK ODASI 1": 9.50, "BANYO": 4.42, "HOL": 1.46, "YATAK ODASI 2": 9.12, "YAŞAMA ALANI": 30.68, "VERANDA": 5.58}
+    # paftada 9,45 · 4,34 · 1,61 · 9,13 · 30,73 · 5,61
+
+
+def test_ap24_veranda_catisi():
+    from motor import sunum
+    ie = _ie24()
+    t = sunum.cati_tanimi(G.kur(copy.deepcopy(ie)), ie)
+    d = {z["ad"]: z for z in t["duzlemler"]}
+    v = d["VERANDA çatısı"]
+    assert v["egim"] == pytest.approx(0.20)
+    assert [[round(a, 1) for a in q] for q in v["plan"]] == [[637.5, 771.2], [793.0, 865.8], [793.0, 421.5], [637.5, 326.9]]
+    assert 865.75 - v["plan"][0][1] == pytest.approx(155.5 * 20 / 32.88, abs=0.01)              # kırmanın duvardaki ucu (paftada 94–95)
+    hat = {h["tur"]: (h["p"], h["q"]) for h in t["hatlar"]}
+    assert hat["kirma"] == ([793.0, 865.75], [667.5, 789.41]) and hat["dere"] == ([667.5, 345.16], [793.0, 421.5])
+    mk = t["mahal_catilari"][0]["makaslar"]
+    assert [m["rol"] for m in mk] == ["kisa"] * 4 + ["capraz"]
+    assert mk[-1]["plan_boy_cm"] == round(155.5 * (1 + (20 / 32.88) ** 2) ** 0.5, 2)        # kırmanın doğrultusunda
+
+
+def test_yuz_egimi_ana_egimle_ayni_cati():
+    """`yuz_egimi_yuzde` ana eğime eşitse çatı yazılmamış hâliyle aynı (AP-03, 45°); tek_yon'da yazılmaz."""
+    from motor import sunum
+    ie = json.loads(AP03.read_text(encoding="utf-8"))
+    ie2 = copy.deepcopy(ie)
+    ie2["cati"]["mahal_catilari"][0]["yuz_egimi_yuzde"] = ie["cati"]["egim_yuzde"]
+    a, b = (sunum.cati_tanimi(G.kur(copy.deepcopy(x)), x) for x in (ie, ie2))
+    assert a["duzlemler"] == b["duzlemler"] and a["hatlar"] == b["hatlar"] and a["kalkanlar"] == b["kalkanlar"]
+    assert a["mahal_catilari"][0]["makaslar"] == b["mahal_catilari"][0]["makaslar"]
+    ie3 = copy.deepcopy(ie)
+    ie3["cati"]["mahal_catilari"][0].update(tip="tek_yon", egim_yuzde=10, yuz_egimi_yuzde=20)
+    with pytest.raises(CP.PrefabrikCatiHatasi, match="yalnız köşe kırmasında"):
+        sunum.cati_tanimi(G.kur(copy.deepcopy(ie3)), ie3)
+
+
+def test_ap24_cizim(tmp_path):
+    import ezdxf
+    from motor import dxf_out
+    r = dxf_out.uret(_ie24(), tmp_path)
+    assert r["validation_passed"] and r["pdf"] and not r["warnings"]
+    msp = ezdxf.readfile(tmp_path / r["dxf"]).modelspace()
+    kub = [e for e in msp.query('LWPOLYLINE[layer=="KUBBE"]') if e.closed and max(p[0] for p in e.get_points("xy")) < 1100]
+    assert len(kub) == 10
+
+
+@pytest.mark.parametrize("giris, mesaj", [
+    ({"x": 318.75, "y": 446.25}, "kose_uzayan girişi"),
+    ({"x": 318.75, "y": 446.25, "uzayan": "z"}, "kose_uzayan girişi"),
+    ({"x": 444.25, "y": 446.25, "uzayan": "x"}, "L köşesine düşmüyor"),
+])
+def test_kose_uzayan_hatalari(giris, mesaj):
+    ie = _ie24()
+    ie["yapi"]["dizilim"]["kose_uzayan"].append(giris)
+    with pytest.raises(G.IsEmriHatasi, match=mesaj):
+        G.kur(ie)

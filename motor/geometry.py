@@ -98,7 +98,7 @@ def pencere_yazisi(olcu: str) -> str:
 
 YENI_ANAHTARLAR = ("duvar_kalinligi_cm", "dis_olcu_cm", "dizilim", "ek_akslar_cm")   # İE-11 (6 Ekim denemesi + genişletme)
 DIZILIM_ANAHTARLARI = frozenset({"baslangic", "hiza", "dis_duvar_t_bolme", "pencere", "kapi", "kose", "kapi_yeri", "son_pano",
-                                 "dis_pano_dayanagi", "genis_pencere"})   # İE-11, İE-17, D-34 madde 5, İE-17 PR-2
+                                 "dis_pano_dayanagi", "genis_pencere", "kose_uzayan"})   # İE-11, İE-17, D-34 madde 5, İE-17 PR-2, İE-29
 
 
 PANO_YUKSEKLIKLERI_CM = (250.0, 280.0, 300.0)   # Lokman 13.10.2026 07:28: %80 / %19 / %1; başka ölçü yok (kurallar/model/duvar_tipleri.json PE-DIS-100.pano)
@@ -230,7 +230,9 @@ def Y(j: float) -> float:
 
 def aks_tablosu_kur(ek_akslar, nx2: int, ny2: int, zorunlu: bool = False) -> tuple[int, int]:
     """İE-11: `ek_akslar_cm` verilince (ya da zorunluysa) yarım adım aksları + ek akslardan sıralı aks tablosu kurar.
-    Dönen (nx2, ny2) tablo uzunluğudur. Tablo yokken Motor eskisi gibi formülle çalışır."""
+    Dönen (nx2, ny2) tablo uzunluğudur. Tablo yokken Motor eskisi gibi formülle çalışır.
+    İE-29 (AP-24): `x_yardimci` / `y_yardimci` → tabloya giren ama ana aks olmayan (çizimde aks çizgisi ve adı yok) akslar: duvar hattı
+    olmayan, yalnız bir duvarın paftadaki pano eklerini veren dayanak noktaları (`dizilim.dis_pano_dayanagi`)."""
     global _AKS, _AKS_ANA, _AKS_EK
     _AKS = {"x": None, "y": None}; _AKS_ANA = {"x": None, "y": None}; _AKS_EK = {"x": [], "y": []}
     if not ek_akslar and not zorunlu:
@@ -241,7 +243,7 @@ def aks_tablosu_kur(ek_akslar, nx2: int, ny2: int, zorunlu: bool = False) -> tup
         taban = [f(k / 2) for k in range(n2 + 1)]          # tablo henüz yok: formül (kesim dahil)
         lo, hi = taban[0], taban[-1]
         tab = list(taban)
-        for v in ek.get(yon) or []:
+        for v in list(ek.get(yon) or []) + list(ek.get(f"{yon}_yardimci") or []):
             v = float(v)
             if not (lo + 1e-6 < v < hi - 1e-6):
                 raise IsEmriHatasi(f"Ek aks ({yon}) yapının içinde değil: {v} cm (aralık {lo:g}–{hi:g})")
@@ -553,6 +555,15 @@ def _kur(is_emri: dict) -> Plan:
     kose_kurali = dizilim.get("kose", "eski")               # İE-11: "eski" (gövdesi aks dışındaki V uzar) | "oda" (kollar arasında kapalı oda → V uzar)
     if kose_kurali not in ("eski", "oda"):
         raise IsEmriHatasi(f"dizilim.kose bilinmiyor: {kose_kurali} (eski | oda)")
+    # İE-29 (AP-24 paftası, montaj planı): `kose_uzayan` [{x, y (Motor çerçevesinde, arkadan), uzayan: x | y}] → o L köşesinde köşe kuralı
+    # yerine paftadaki: uzayan duvar ötekinin eksenine kadar gider, öteki uzayanın yüzünde biter (holün yatak odası 2'ye bakan duvarı köşeden
+    # geçer, salonun iç duvarı onun yüzünde biter; kuralın verdiği 3 cm'lik pano yok). Köşeye düşmeyen giriş sessizce yutulmaz (K21).
+    kose_uzayan: dict = {}
+    for k_ in dizilim.get("kose_uzayan") or []:
+        if not isinstance(k_, dict) or set(k_) != {"x", "y", "uzayan"} or k_.get("uzayan") not in ("x", "y"):
+            raise IsEmriHatasi(f"dizilim.kose_uzayan girişi {{\"x\", \"y\" (aks, Motor çerçevesinde), \"uzayan\": x | y}} olmalı: {k_}")
+        kose_uzayan[(round(float(k_["x"]), 4), round(float(k_["y"]), 4))] = k_["uzayan"]
+    kose_uzayan_kullanilan: set = set()
     son_pano = dizilim.get("son_pano", "kosu")             # İE-17: "kosu" (koşu başından 125,5; kalan son parça) | "son_aks" (kesilmiş son pano
     if son_pano not in ("kosu", "son_aks"):                 # ızgaranın sondan bir önceki aksından başlar, gerekirse önünde yarım pano; montaj paftası)
         raise IsEmriHatasi(f"dizilim.son_pano bilinmiyor: {son_pano} (kosu | son_aks)")
@@ -882,6 +893,10 @@ def _kur(is_emri: dict) -> Plan:
             kapali = not is_out(owner(u if H_side > 0 else u - 1, v if V_side > 0 else v - 1))
             # İE-17 (kısa kenar y, yedi montaj paftası): dış köşede H uzar (42 köşenin 39'u, verandanın iç köşesi dahil); iç köşede kural aynı
             v_extender = kapali if (KISA_KENAR == "x" or tur == "ic") else False
+        anahtar_ = (round(Vw.c, 4), round(Hw.c, 4))
+        if anahtar_ in kose_uzayan:                # İE-29: köşe paftadan (`dizilim.kose_uzayan`)
+            v_extender = kose_uzayan[anahtar_] == "y"
+            kose_uzayan_kullanilan.add(anahtar_)
         if (Hw.yukseklik is None) != (Vw.yukseklik is None):
             # İE-29 (AP-12 paftası, montaj ve kaynaklı profil planı): yarım duvarın köşesinde iki duvar da köşenin yüzünde biter, köşe parçası
             # tam kare (paftada K ve L kaynaklı profilleri, 10 × 10); yarım duvarın panoları öteki duvarın iç yüzünden (10 ve 507'de)
@@ -982,6 +997,9 @@ def _kur(is_emri: dict) -> Plan:
             ends[0][0].uc_notu[ends[0][1]] = "serbest"
         else:
             uyarilar.append(f"Aks noktası {P}: çözümsüz birleşim {[(d.id, uc) for d, uc in ends]}")
+    bos_kose = sorted(set(kose_uzayan) - kose_uzayan_kullanilan)
+    if bos_kose:                                              # K21: L köşesine düşmeyen giriş sessizce yutulmaz
+        raise IsEmriHatasi(f"dizilim.kose_uzayan L köşesine düşmüyor: {', '.join(f'({x:g}, {y:g})' for x, y in bos_kose)}")
 
     # ---------------- açıklık listesi (aynalı çerçevede) ve oda ortası pencere hedefleri (İE-11; bölmeden önce gerekir)
     NORMAL = {"sol": "-x", "sag": "+x", "on": "-y", "arka": "+y"}
