@@ -1026,14 +1026,18 @@ def _kur(is_emri: dict) -> Plan:
             # ortalanır; iki yanı 62,75'lik yarım pano olur, artık köşe panosunda kalır. İki yanı tam pano değilse (PK-01 paftası) ya da ek
             # uzaksa (kör PK-02) odanın ortası.
             ek = min(pts[1:-1], key=lambda a: abs(a - mrk), default=None)
+            eke_ortali = False
             if ek is not None and abs(ek - mrk) <= PENCERE_YARIM_PANO_ESIGI_CM + 1e-6 and \
                     all(any(abs(q - b) < 1e-6 for q in pts) for b in (ek - MOD, ek + MOD)) and lo_p - 1e-6 <= ek - MOD and ek + MOD <= hi_p + 1e-6:
                 q0, q1 = ek - MOD / 2.0, ek + MOD / 2.0
+                eke_ortali = True
             if q0 < lo_p - 1e-6 or q1 > hi_p + 1e-6:
                 uyarilar.append(f"Pencere {acikliklar[i].get('mahal')} {acikliklar[i].get('olcu')}: oda duvarı 125,5'lik pencereli panoya dar; ızgara panosunda kaldı")
                 continue
             pts = [pts[0]] + sorted(set([q for q in pts[1:-1] if not (q0 - 1e-9 < q < q1 + 1e-9)] + [q for q in (q0, q1) if pts[0] + 1e-9 < q < pts[-1] - 1e-9])) + [pts[-1]]
             hedef[4] = q0
+            if not eke_ortali:
+                pts = _pencere_yani_tek_pano(pts, q0, q1, lo_p, hi_p, d, splits, kapi_hedef, pencere_hedef, i, acikliklar)
         d.panolar = [Pano(d, pts[i], pts[i + 1]) for i in range(len(pts) - 1)]
         for p in d.panolar:
             if p.boy < 20 - 1e-9:
@@ -1606,6 +1610,48 @@ def _kapi_mantigi(plan: "Plan", kapi_yeri: str = "mentese_ucu", kapi_yeri_yazili
                 s = (p.boy - acl.genislik) / 2.0
                 if s > KAPI_YASLAMA_CM:
                     acl.kayma = (s - KAPI_YASLAMA_CM) if uc == 1 else -(s - KAPI_YASLAMA_CM)
+
+
+def _pencere_yani_tek_pano(pts: list, q0: float, q1: float, lo_p: float, hi_p: float, d: "Duvar", splits: list, kapi_hedef: dict,
+                           pencere_hedef: dict, i: int, acikliklar: list) -> list:
+    """D-49 (Lokman, 4 Kasım 2026 14:25, TK-04 mutfağı: "pencereyi güzel ortalamışsın ama pencerenin sağındaki panel duvarı yanlış
+    ölçeklendirmişsin 2 parça gibi ölçeklendirmişsin"): odaya ortalanan pencereli panonun (oda ortası; D-29'un eke ortalı yarım pano yolu
+    değil) duvarın ucuna (köşeye) bakan yanında, pencereli panodan duvarın ucuna kadar kalan duvar 125,5 ya da kısaysa tek panodur: aradaki
+    ızgara eki kalkar (TK-04: 32,38 + 62,75 değil 95,13). Yan bir T'de (oda sınırı) bitiyorsa ekler aynen: kör PK-02'nin gerçek listesi
+    pencereyle T arasında 42,25 + 39 bırakmış (D-29 madde 2, `test_uzak_ekte_oda_ortasi_kalir`). Kalan duvar 125,5'ten uzunsa, arada kapı
+    panosu, aynı duvardaki öteki pencerenin panosu ya da T varsa, odanın dış kapısı varsa yan dokunulmaz. Dönüş: yeni ek listesi."""
+    mahal = acikliklar[i].get("mahal")
+    if any(a.get("tur") == "dis_kapi" and mahal in (a.get("arasi") or ()) for a in acikliklar):
+        return pts                                             # dış kapının panosu sonra seçilir; kapılı odanın duvarı değişmez
+    korunan = set(splits) | {d.p0, d.p1}
+    for did, k0, k1 in kapi_hedef.values():
+        if did == d.id:
+            korunan |= {k0, k1}
+    obur = []                                                  # aynı duvardaki öteki pencerelerin panosu (seçildiyse) ya da oda ortası
+    for j, h in pencere_hedef.items():
+        if j == i or h[0] != d.id:
+            continue
+        if h[4] is not None:
+            son = next((q for q in pts if q > h[4] + 1e-6), h[4])
+            korunan |= {h[4], son}
+        obur.append(h[1])
+    yeni = list(pts)
+    for yan, a, b in (("sol", lo_p, q0), ("sag", q1, hi_p)):
+        if abs((a - d.p0) if yan == "sol" else (b - d.p1)) > 1e-6:
+            continue                                           # yan duvarın ucunda (köşede) bitmiyor: T'deki ekler aynen (PK-02)
+        ic = [q for q in yeni if a + 1e-6 < q < b - 1e-6]
+        if not ic or any(any(abs(q - k) < 1e-6 for k in korunan) for q in ic) or any(a - 1e-6 <= m <= b + 1e-6 for m in obur):
+            continue
+        kalan = [q for q in yeni if q not in ic]
+        if yan == "sol":                                       # birleşen pano: odanın ucundaki ekten pencereli panonun kenarına
+            bas = max((q for q in kalan if q <= a + 1e-6), default=None)
+            boy = None if bas is None else q0 - bas
+        else:
+            son = min((q for q in kalan if q >= b - 1e-6), default=None)
+            boy = None if son is None else son - q1
+        if boy is not None and boy <= MOD + 1e-6:
+            yeni = kalan
+    return yeni
 
 
 def _genis_pencere_panosu(d: "Duvar", p: Pano, aralik: Optional[tuple], ac: dict, yarim_pano: bool = False) -> Pano:

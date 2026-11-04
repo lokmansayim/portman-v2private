@@ -726,6 +726,25 @@
     "testler/motor/test_veranda.py::test_kose_kolonu",
     "testler/paket/test_ie24_rehber.py::test_kose_balkonu"
    ]
+  },
+  {
+   "kod": "PC-31",
+   "baslik": "Ortalanan pencerenin köşeye bakan yanı tek pano",
+   "kural": "Odaya ortalanan pencereli panonun (oda ortası ızgara panosundan ¼ panodan çok kaçtığı için; D-29'un eke ortalı yarım pano yolu değil) duvarın ucuna, köşeye bakan yanında pencereli panodan duvarın ucuna kalan duvar 125,5 ya da kısaysa tek panodur, aradaki ızgara eki kalkar (TK-04 mutfağı: 32,375 + 62,75 değil 95,125). Yan bir T'de (oda sınırı) bitiyorsa ekler aynen (kör PK-02'nin gerçek listesi pencereyle T arasında 42,25 + 39). Arada kapı panosu, aynı duvarda başka pencere ya da T varsa, odanın dış kapısı varsa o yan değişmez.",
+   "karar": "D-49",
+   "madde": 1,
+   "lokman": {
+    "tarih": "2026-11-04",
+    "saat": "14:25",
+    "soz": "küçük bir hata mutfaktaki 120x180 pencereyi güzel ortalamışsın ama pencerenin sağındaki panel duvarı yanlış ölçeklendirmişsin 2 parça gibi ölçeklendirmişsin"
+   },
+   "kod_yeri": [
+    "motor/geometry.py::_pencere_yani_tek_pano"
+   ],
+   "test": [
+    "testler/motor/test_d49.py::test_pencere_yani_koseye_tek_pano",
+    "testler/motor/test_d49.py::test_t_yanindaki_ekler_aynen"
+   ]
   }
  ]
 }
