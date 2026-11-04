@@ -9,6 +9,7 @@ pencereler konusunda da bir veri tabanın olmalı hangisi geldiyse onu uygula ya
   `test_bk18_ic_100.py`, mühür M-02).
 """
 from __future__ import annotations
+import copy
 import json
 import re
 import sys

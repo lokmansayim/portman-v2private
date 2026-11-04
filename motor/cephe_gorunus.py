@@ -96,7 +96,8 @@ def cephe(plan: G.Plan, taraf: str) -> dict:
             else:
                 z0, z1 = 0.0, ust
             ac.append({"tur": a.tur, "u0": u0, "u1": u1, "z0": z0, "z1": z1,
-                       "olcu": a.olcu if a.tur == "pencere" else None, "acilis": a.acilis})
+                       "olcu": a.olcu if a.tur == "pencere" else None, "acilis": a.acilis,
+                       "bolmeler": a.bolmeler})
     return {"en": en, "derz": sorted(v for v in us if 1e-6 < v < en - 1e-6), "acikliklar": sorted(ac, key=lambda k: k["u0"])}
 
 
