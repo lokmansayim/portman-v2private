@@ -515,7 +515,7 @@
   {
    "kod": "PC-22",
    "baslik": "Antette kime ait ve m²; alt yazılar A4'te yok",
-   "kural": "A4 sayfasının antetinin ikinci satırı: PORTMAN | bayi / müşteri (İş Emri'nin talebinden; boş olan yazılmaz) | brüt ve net m² | İş Emri no ve revizyon. Brüt: nişsiz kapalı gövdenin dış yüzleri (veranda hariç); net: kapalı odaların net alanları toplamı (montaj rehberindeki m²). Sayfanın altında kural kaydı, üretim saati ve uyarı satırları yoktur (DXF'te ve kayıtta durur).",
+   "kural": "A4 sayfasının antetinin ikinci satırı: PORTMAN | bayi / müşteri (İş Emri'nin talebinden; boş olan yazılmaz) | brüt ve net m² | İş Emri no ve revizyon. Brüt (D-49, Lokman 4 Kasım 2026 14:24 \"çatı kapattığı için\"): çatının örttüğü oturum, dış duvarların dış yüzleri, niş, gövdedeki ve taşan veranda, dikmeler dahil (yükleme listesindeki bina_m2 ile aynı); net: kapalı odaların net alanları toplamı (montaj rehberindeki m²). Sayfanın altında kural kaydı, üretim saati ve uyarı satırları yoktur (DXF'te ve kayıtta durur).",
    "karar": "D-31",
    "madde": 14,
    "lokman": {
@@ -528,7 +528,8 @@
     "motor/dxf_out.py::uret"
    ],
    "test": [
-    "testler/motor/test_d31_gorunus.py::test_antette_kime_ait_ve_m2"
+    "testler/motor/test_d31_gorunus.py::test_antette_kime_ait_ve_m2",
+    "testler/motor/test_d49.py::test_antet_brut_verandali_ve_listeyle_ayni"
    ]
   },
   {
@@ -744,6 +745,25 @@
    "test": [
     "testler/motor/test_d49.py::test_pencere_yani_koseye_tek_pano",
     "testler/motor/test_d49.py::test_t_yanindaki_ekler_aynen"
+   ]
+  },
+  {
+   "kod": "PC-32",
+   "baslik": "İş Emri tek birleşimi yazabilir: iç köşenin yönü, panonun ortasına gelen T",
+   "kural": "İş Emri `yapi.birlesimler` ile tek tek birleşimde Motor'un kuralını değiştirir. {\"nokta_cm\": [x, y], \"kose\": \"x\" | \"y\"}: iki iç duvarın L köşesinde yazılan yönde uzanan duvar köşeden geçer, öteki onun yüzünde biter (TK-04 r04: 5. aks ile D aksının köşesinde 5. akstaki duvar geçer, C–D panosu tam pano, salon kapısının panosu 122,5). {\"nokta_cm\": [x, y], \"t\": \"cektirme_u\"}: bir duvarın ortasına tek iç duvarın T ile geldiği yerde geçen duvar bölünmez, 3'lü H yok; listede çektirme U'su (İE-27). Nokta mahallerin konum_cm'i gibi aks tablosundadır; yazılan nokta öyle bir köşe ya da T değilse İş Emri hatası. Yazılmayan birleşimde kural aynen (PC-01…PC-31).",
+   "karar": "D-49",
+   "madde": 3,
+   "lokman": {
+    "tarih": "2026-11-04",
+    "saat": "19:59",
+    "soz": "5 numaralı aks ile D aksının kesiştiği iç köşenin yönünü değiştir salon kapısı doğal olarak 122.5 ' a düşüyor ama 5 numaralı aks üzerindeki C ve D aksları ortasındaki pano tam pano oluyor ortasına 3 lü H değil Çektirme U'su koyacaksın"
+   },
+   "kod_yeri": [
+    "motor/geometry.py::_birlesimleri_oku"
+   ],
+   "test": [
+    "testler/motor/test_d49.py::test_bes_d_kosesi_ve_cektirme_u",
+    "testler/motor/test_d49.py::test_birlesim_yanlis_noktada_hata"
    ]
   }
  ]

@@ -208,8 +208,13 @@
      "iz": "2467d706ab672bf7"
     }
    ],
-   "durum": "mühürlü",
-   "gecmis": []
+   "durum": "açık",
+   "gecmis": [],
+   "acilis": {
+    "tarih": "2026-11-04 19:55",
+    "soz": "Karar kartı \"Mühürlü ön onay çizimini (M-02) bu iki düzeltme için açayım mı?\" → \"Aç, iki düzeltme girsin\" (14:24 \"bizde m² bürüt üzerinden verilir ve buna veranda dahildir çünkü çatı kapattığı için bunuda dahil eder misin?\"; 14:25 mutfak penceresinin sağındaki \"2 parça\" pano)",
+    "mesaj": "cmsg_01UAFvcnfVuTR1wfFux5fQPPWqz9RSSRrAcCNN2N9aTKWT"
+   }
   },
   {
    "kod": "M-03",

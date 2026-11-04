@@ -289,6 +289,30 @@ def aks_dizini(v: float, yon: str) -> int:
     raise IsEmriHatasi(f"Sınır aks üstünde değil ({yon} = {v} cm); `yapi.ek_akslar_cm` ile ekleyin. Akslar: {[round(t, 2) for t in tab]}")
 
 
+def _birlesimleri_oku(birlesimler, tablo: bool) -> tuple[dict, set]:
+    """D-49 madde 3 (Lokman, 4 Kasım 2026 19:59; TK-04: "5 numaralı aks ile D aksının kesiştiği iç köşenin yönünü değiştir ... C ve D aksları
+    ortasındaki pano tam pano oluyor ortasına 3'lü H değil Çektirme U'su koyacaksın"): İş Emri tek tek birleşimi yazar, Motor'un kuralı orada
+    uygulanmaz. `yapi.birlesimler`: [{"nokta_cm": [x, y], "kose": "x" | "y"}] iki iç duvarın L köşesinde geçen duvar (x: x boyunca uzanan,
+    öteki onun yüzünde biter); [{"nokta_cm": [x, y], "t": "cektirme_u"}] bir duvarın ortasına iç duvarın T ile geldiği yer: geçen duvar orada
+    bölünmez, 3'lü H yok, listede çektirme U'su (İE-27). Nokta mahallerin `konum_cm`'i gibi (aks tablosunda, Motor çerçevesinde)."""
+    kose_yonu, eklemsiz_t = {}, set()
+    for b in birlesimler or []:
+        if not isinstance(b, dict) or set(b) - {"nokta_cm", "kose", "t"} or ("kose" in b) == ("t" in b) \
+                or not isinstance(b.get("nokta_cm"), list) or len(b["nokta_cm"]) != 2 \
+                or b.get("kose", "x") not in ("x", "y") or b.get("t", "cektirme_u") != "cektirme_u":
+            raise IsEmriHatasi(f"yapi.birlesimler: nokta_cm [x, y] ve ya kose (x | y) ya da t (cektirme_u) ister: {b}")
+        if not tablo:
+            raise IsEmriHatasi("yapi.birlesimler aks tablosu ister (`konum_cm` ya da `yapi.ek_akslar_cm`)")
+        P = (aks_dizini(tamamla_cm(b["nokta_cm"][0], "x"), "x"), aks_dizini(tamamla_cm(b["nokta_cm"][1], "y"), "y"))
+        if P in kose_yonu or P in eklemsiz_t:
+            raise IsEmriHatasi(f"yapi.birlesimler: aynı nokta iki kez yazılmış: {b}")
+        if "kose" in b:
+            kose_yonu[P] = b["kose"]
+        else:
+            eklemsiz_t.add(P)
+    return kose_yonu, eklemsiz_t
+
+
 def _ayna_aciklik(ac: dict) -> dict:
     """Dizilim arka-sol: İş Emri gerçek cepheleri yazar; Motor y'de aynalı kurar → ön ↔ arka çevrilir.
     Menteşe çevrilmez: kapı varyantı (`kapi_varyanti`) çizim anında, `_aynala_y` sonrası gerçek çerçevede, gerçek normalle hesaplanır;
@@ -565,6 +589,8 @@ def _kur(is_emri: dict) -> Plan:
             raise IsEmriHatasi(f"dizilim.dis_pano_dayanagi: aks {aks_:g} aralığın ({lo_:g}–{hi_:g}) dışında ya da aralık boş")
         dayanaklar[yon_[0]].append((lo_, hi_, aks_, bool(dy.get("ic_duvarlar", False))))
     dayanak_duvari: set = set()
+    kose_yonu, eklemsiz_t = _birlesimleri_oku(yapi.get("birlesimler"), tablo)   # D-49 madde 3
+    birlesim_kullanildi: set = set()
     uyarilar = list(tamamlama_uyarisi)                    # D-30: tam panoya tamamlama söylenir
     if KISA_KENAR == "x" and makas_ekseni == "y":
         uyarilar.append("Makas y'yi geçiyor ama kisa_kenar x: montaj paftalarında köşe makasın oturduğu duvarlardadır; "
@@ -811,6 +837,8 @@ def _kur(is_emri: dict) -> Plan:
             kapali = not is_out(owner(u if H_side > 0 else u - 1, v if V_side > 0 else v - 1))
             # İE-17 (kısa kenar y, yedi montaj paftası): dış köşede H uzar (42 köşenin 39'u, verandanın iç köşesi dahil); iç köşede kural aynı
             v_extender = kapali if (KISA_KENAR == "x" or tur == "ic") else False
+        if tur == "ic" and (P_ := (Vw.hat, Hw.hat)) in kose_yonu:    # D-49 madde 3: İş Emri bu iç köşede geçen duvarı yazmış
+            v_extender = kose_yonu[P_] == "y"; birlesim_kullanildi.add(P_)
         if v_extender:
             # V uzatan: V, H'nin orta eksenine kadar; H, V'nin yüzünde (aks) biter; köşe parçası V şeridinde
             if V_uc == 0: Vw.p0 = Hw.c
@@ -859,6 +887,10 @@ def _kur(is_emri: dict) -> Plan:
                 stop_at_face(d, uc, o); d.uc_notu[uc] = f"T→{o.id}"
             t = thr[0]
             branches = [(d, uc) for d, uc in ends if d.tur == "ic" and d.yon != t.yon]
+            if P in eklemsiz_t:                    # D-49 madde 3: geçen duvar burada bölünmez, 3'lü H yok (listede çektirme U'su)
+                if len(branches) == 1 and len(thr) == 1 and len(ends) == 1:
+                    birlesim_kullanildi.add(P)
+                continue
             if (t.tur == "ic" or dis_t_bolme) and len(branches) == 1 and len(thr) == 1:
                 d, uc = branches[0]
                 # simge geçen duvarın merkezinde (t.c): eksendeki duvarda aks, gövdesi aks dışındaki yan dış duvarda gövde ortası (hakem 2. tur 6)
@@ -901,6 +933,11 @@ def _kur(is_emri: dict) -> Plan:
             ends[0][0].uc_notu[ends[0][1]] = "serbest"
         else:
             uyarilar.append(f"Aks noktası {P}: çözümsüz birleşim {[(d.id, uc) for d, uc in ends]}")
+
+    for P in sorted((set(kose_yonu) | eklemsiz_t) - birlesim_kullanildi):
+        nokta = f"{X(P[0] / 2):g}, {Y(P[1] / 2):g} cm"
+        raise IsEmriHatasi(f"yapi.birlesimler: {nokta} " + ("iki iç duvarın L köşesi değil" if P in kose_yonu else
+                           "bir duvarın ortasına tek iç duvarın T ile geldiği yer değil"))
 
     # ---------------- açıklık listesi (aynalı çerçevede) ve oda ortası pencere hedefleri (İE-11; bölmeden önce gerekir)
     NORMAL = {"sol": "-x", "sag": "+x", "on": "-y", "arka": "+y"}
@@ -952,6 +989,8 @@ def _kur(is_emri: dict) -> Plan:
         splits = []
         if (d.tur == "ic" and hiza != "tam_izgara") or dis_t_bolme:
             for (u, v), lst in ends_at.items():
+                if (u, v) in eklemsiz_t:              # D-49 madde 3: T panonun ortasında, çektirme U'su
+                    continue
                 if d.yon == "x" and v == d.hat and d.n0 < u < d.n1 and any(o.yon != d.yon for o, _ in lst):
                     splits.append(X(u / 2))
                 if d.yon == "y" and u == d.hat and d.n0 < v < d.n1 and any(o.yon != d.yon for o, _ in lst):
