@@ -50,6 +50,12 @@ PENCERE_YARIM_PANO_ESIGI_CM = 5.0     # D-29: oda ortası en yakın ekten en ço
                                        # 0,25; bugünkü planlarda 0,25–2,5); daha çoksa odanın ortası (kör PK-02: 20,5 cm'de mühendis 42,25 / 83,25 bırakmış)
 KAPI_YASLAMA_CM = 11.5                  # oda kapısı boşluğu menteşe tarafındaki pano ucundan 11,5 cm içeride (paftada 4 kapı: 11,3 / 11,3 / 11,6 / 11,5)
 ACIK_MAHAL_TURLERI = {"veranda", "balkon", "sundurma", "teras"}
+# İE-29 PR-2 (AP-17, AP-23, AP-24 montaj paftaları; AP-02 aynı modül): kubbe. Kapalı mahalin dış duvarında 251'lik (iki pano) boşluğun
+# önünde üç panolu, 45° yan duvarlı çıkma; dış yüzde taban 251, ön 133,78, çıkma 58,61 (paftanın ölçü zinciri 58,61 · 133,78 · 58,61).
+# Yan panolar 79 (paftada "790", pencere 59/170), ön pano 125,5 (pencere 105/170); köşelerde açılı köşe direği. Kubbenin küçük çatısı
+# (shingle; AP-24 paftası "KUBBE SHİNGLE KAPLAMA YAPILACAK") üç makasla duvarın ortasında birleşir: tepe duvarda, kubbenin ortasında.
+KUBBE = {"taban_cm": 251.0, "cikma_cm": 58.61, "yan_pano_cm": 79.0, "on_pano_cm": 125.5, "on_pencere": "105x170", "yan_pencere": "59x170"}
+KUBBE_ANAHTARLARI = frozenset({"cephe", "mahal", "bas_cm", "on_pencere", "yan_pencere"})
 
 
 class IsEmriHatasi(ValueError):
@@ -105,7 +111,8 @@ def geometri_anahtari_var(is_emri: dict) -> bool:
     return any(k in yapi for k in YENI_ANAHTARLAR) or yapi.get("kisa_kenar", "x") != "x" \
         or any("konum_cm" in m for m in is_emri.get("mahaller", [])) \
         or any(("konum_cm" in a) or ("hizalama" in a) or ("duvar_ucu" in a) for a in is_emri.get("acikliklar", [])) \
-        or bool(is_emri.get("verandalar")) or bool(is_emri.get("girintiler")) or bool(is_emri.get("duvarli_sinirlar"))
+        or bool(is_emri.get("verandalar")) or bool(is_emri.get("girintiler")) or bool(is_emri.get("duvarli_sinirlar")) \
+        or bool(is_emri.get("kubbeler"))
     # `acikliklar[].dograma` geometri anahtarı değildir (kod incelemesi D1): yalnız BOM işaretini etkiler, kendi varlığıyla çalışır
 
 
@@ -309,6 +316,7 @@ class Mahal:
     cells: set = field(default_factory=set)
     poly: Optional[Polygon] = None
     alan_m2: float = 0.0
+    ek: list = field(default_factory=list)   # İE-29: mahalin gövde dışındaki net alan parçaları (kubbenin içi); `poly` gövdenin içinde kalır
 
 
 @dataclass
@@ -352,6 +360,8 @@ class Pano:
     def rects(self) -> list:
         if not self.acilim:
             return [self.rect()]
+        if self.acilim.tur == "kubbe":                      # İE-29: kubbenin boşluğu panonun tamamı; kubbenin üç panosu `Plan.kubbeler`'de
+            return []
         w = self.acilim.genislik
         s = (self.boy - w) / 2.0
         sl, sr = s + self.acilim.kayma, s - self.acilim.kayma      # kayma 0 → eski formül bit bit (a1 − s)
@@ -433,6 +443,7 @@ class Plan:
     dis_verandalar: list = field(default_factory=list)     # BK-14: gövdeden taşan verandalar (İş Emri `verandalar`; `_dis_verandalar`)
     girintili: bool = False                                 # İE-24: İş Emri'nde `girintiler` var (gövde dikdörtgen değil; `govde_cokgeni`)
     kose_kolonlari: list = field(default_factory=list)     # D-38: açık mahalin iki açık kenarının birleştiği köşeye Motor'un koyduğu dikmeler
+    kubbeler: list = field(default_factory=list)           # İE-29: kubbeler (`_kubbeler`; gerçek çerçevede plan geometrisi)
 
     @property
     def panolar(self) -> list:
@@ -1022,6 +1033,41 @@ def _kur(is_emri: dict) -> Plan:
         if q0 < lo - 1e-6 or q1 > hi + 1e-6:
             raise IsEmriHatasi(f"duvar_ucu {uc}: {a}–{b} ortak duvarı ({hi - lo:g} cm) tam panoya kısa: {ac}")
         kapi_hedef[i] = (d.id, q0, q1)
+    # İE-29 PR-2 (AP-17, 23, 24): kubbeler (`kubbeler[]`: cephe, mahal, bas_cm; bas_cm gerçek çerçevede, dış yüzde kubbenin başı: x soldan,
+    # y önden). Düz duvarda kubbenin tabanı (251) tek pano olur, boşluk (iki ucu derz); dizilim iki yanında kendi ucundan başlar (AP-17
+    # paftası: 94,13 · kubbe · 94,13; AP-23: 67,75 · kubbe · 57,75). Kubbe yalnız kapalı mahalin dış duvarında.
+    kubbe_hedef = []            # (duvar id, q0, q1, İş Emri girdisi); q Motor çerçevesinde
+    kubbe_panolari = []         # (kubbenin panosu, İş Emri girdisi); geometri aynadan sonra (`_kubbe_geometrisi`)
+    for kb in is_emri.get("kubbeler") or []:
+        if not isinstance(kb, dict) or not {"cephe", "mahal", "bas_cm"} <= set(kb) or set(kb) - KUBBE_ANAHTARLARI:
+            raise IsEmriHatasi(f"kubbeler girişi {{\"cephe\": on | arka | sol | sag, \"mahal\", \"bas_cm\" (gerçek çerçevede, dış yüzde "
+                               f"kubbenin başı), \"on_pencere\" ve \"yan_pencere\" isteğe bağlı}} olmalı: {kb}")
+        cephe = kb["cephe"]
+        if cephe not in NORMAL:
+            raise IsEmriHatasi(f"kubbe cephesi bilinmiyor: {cephe} (on | arka | sol | sag)")
+        m_ = mahaller.get(kb["mahal"])
+        if m_ is None or m_.acik:
+            raise IsEmriHatasi(f"kubbe kapalı bir mahalin dış duvarında olur: {kb}")
+        for k_ in ("on_pencere", "yan_pencere"):
+            if k_ in kb:
+                pencere_kurali(kb[k_])                       # K21: yanlış yazılmış ölçü açık hata
+        cephe_m = {"on": "arka", "arka": "on"}.get(cephe, cephe) if ayna_y else cephe
+        yon_ = "x" if cephe in ("on", "arka") else "y"
+        b0 = tamamla_gercek_cm(float(kb["bas_cm"]), yon_)
+        b1 = b0 + KUBBE["taban_cm"]
+        q0, q1 = (H - b1, H - b0) if (yon_ == "y" and ayna_y) else (b0, b1)
+        hedef_d = None
+        for d, k0, k1 in _edges_of_room_side(duvarlar, kb["mahal"], NORMAL[cephe_m]):
+            lo, hi = (X(k0 / 2), X(k1 / 2)) if d.yon == "x" else (Y(k0 / 2), Y(k1 / 2))
+            lo, hi = max(min(lo, hi), d.p0), min(max(lo, hi), d.p1)
+            if d.tur == "dis" and lo - 1e-6 <= q0 and q1 <= hi + 1e-6:
+                hedef_d = d
+        if hedef_d is None:
+            raise IsEmriHatasi(f"kubbe {kb['mahal']} mahalinin {cephe} dış duvarına sığmıyor (taban {KUBBE['taban_cm']:g} cm, baş "
+                               f"{kb['bas_cm']}): {kb}")
+        if any(did == hedef_d.id and q0 < b - 1e-6 and a < q1 - 1e-6 for did, a, b, _k in kubbe_hedef):
+            raise IsEmriHatasi(f"iki kubbe aynı duvarda üst üste: {kb}")
+        kubbe_hedef.append((hedef_d.id, q0, q1, kb))
 
     # ---------------- pano ayrıştırma
     for d in duvarlar:
@@ -1038,11 +1084,21 @@ def _kur(is_emri: dict) -> Plan:
                 bas_ = ilk_aks(d.yon) + MOD * (n_ - 1)
                 if son - bas_ < MOD - 1e-6 and d.a0 + 1e-6 < bas_ < d.a1 - 1e-6 and not any(abs(bas_ - v) < 1e-6 for v in splits):
                     splits.append(bas_)
+        kubbe_d = [(q0, q1) for did, q0, q1, _k in kubbe_hedef if did == d.id]    # İE-29: dizilim kubbenin iki ucundan da başlar
+        splits += [q for q0, q1 in kubbe_d for q in (q0, q1) if d.a0 + 1e-6 < q < d.a1 - 1e-6]
         marks = sorted(set([d.a0, d.a1] + splits))
         sinirlar = []
         son_, n_ = (X_SON, grid_nx) if d.yon == "x" else (Y_SON, grid_ny)
         son_bas = ilk_aks(d.yon) + MOD * (n_ - 1) if son_pano == "son_aks" and son_ is not None else None
+        kubbe_bas = {round(q0, 6) for q0, _q1 in kubbe_d}
+        kubbe_son = {round(q1, 6) for _q0, q1 in kubbe_d}
         for s0, s1 in zip(marks, marks[1:]):
+            if round(s0, 6) in kubbe_son or round(s1, 6) in kubbe_bas:   # İE-29: kubbenin yanındaki koşu kubbenin ucundan dışarı 125,5
+                if round(s0, 6) in kubbe_son:                            # (AP-17: 94,13 · kubbe · 94,13); kalan parça öteki uçta
+                    sinirlar += [s0 + MOD * i for i in range(1, math.ceil((s1 - s0) / MOD - 1e-9))]
+                else:
+                    sinirlar += [s1 - MOD * i for i in range(1, math.ceil((s1 - s0) / MOD - 1e-9))]
+                continue
             if hiza == "tam_izgara":                             # İE-17 (AP-01, 13, 16 paftaları): ek her tam aksta, T'de değil; son_aks'ta
                 bas = ilk_aks(d.yon)                               # kesilmiş son panonun başından sonra tam aks yok
                 v = bas + MOD * (math.floor((s0 - bas) / MOD + 1e-9) + 1)
@@ -1081,6 +1137,9 @@ def _kur(is_emri: dict) -> Plan:
             if did == d.id:
                 pts = [pts[0]] + sorted(set([q for q in pts[1:-1] if not (q0 - 1e-9 < q < q1 + 1e-9)]
                                             + [q for q in (q0, q1) if pts[0] + 1e-9 < q < pts[-1] - 1e-9])) + [pts[-1]]
+        for q0, q1 in kubbe_d:                                 # İE-29: kubbenin tabanı tek pano; içindeki derzler kalkar
+            pts = [pts[0]] + sorted(set([q for q in pts[1:-1] if not (q0 - 1e-9 < q < q1 + 1e-9)]
+                                        + [q for q in (q0, q1) if pts[0] + 1e-9 < q < pts[-1] - 1e-9])) + [pts[-1]]
         for i, hedef in pencere_hedef.items():                # İE-11 `dizilim.pencere: oda_ortasi`
             did, mrk, lo, hi, _ = hedef
             if did != d.id:
@@ -1114,10 +1173,17 @@ def _kur(is_emri: dict) -> Plan:
             pts = [pts[0]] + sorted(set([q for q in pts[1:-1] if not (q0 - 1e-9 < q < q1 + 1e-9)] + [q for q in (q0, q1) if pts[0] + 1e-9 < q < pts[-1] - 1e-9])) + [pts[-1]]
             hedef[4] = q0
         d.panolar = [Pano(d, pts[i], pts[i + 1]) for i in range(len(pts) - 1)]
+        for q0, q1, kb in [(q0, q1, kb) for did, q0, q1, kb in kubbe_hedef if did == d.id]:
+            p_ = next((p for p in d.panolar if abs(p.a0 - q0) < 1e-6 and abs(p.a1 - q1) < 1e-6), None)
+            if p_ is None:
+                raise IsEmriHatasi(f"kubbenin tabanı duvarın ucuna değiyor ya da köşeye giriyor ({q0:g}–{q1:g}, duvar {d.p0:g}–{d.p1:g}): {kb}")
+            p_.acilim = Acilim("kubbe", "kubbe", float(KUBBE["taban_cm"]), None, mahal=kb["mahal"],
+                               disari_normal=NORMAL[{"on": "arka", "arka": "on"}.get(kb["cephe"], kb["cephe"]) if ayna_y else kb["cephe"]])
+            kubbe_panolari.append((p_, kb))
         for p in d.panolar:
             if p.boy < 20 - 1e-9:
                 uyarilar.append(f"Duvar {d.id}: {p.boy} cm'lik çok kısa pano (özel pano kuralı doğrulanmalı)")
-            if p.boy > MOD + 1e-6:
+            if p.boy > MOD + 1e-6 and not (p.acilim is not None and p.acilim.tur == "kubbe"):   # kubbenin tabanı pano değil, boşluk
                 uyarilar.append(f"Duvar {d.id}: {p.boy} cm'lik uzun özel pano (125,5 üstü) — doğrulanmalı")
 
     bos_dayanak = [f"{y_} {a:g} ({lo_:g}–{hi_:g})" for y_ in ("x", "y") for j, (lo_, hi_, a, _ic) in enumerate(dayanaklar[y_])
@@ -1177,6 +1243,8 @@ def _kur(is_emri: dict) -> Plan:
             yarim = MOD / 2 if pk is not None and pk.pano >= 2 else acl.genislik / 2   # BK-13: geniş pencerede aday panonun kendisi aralıkta
             for p in d.panolar:
                 mid = (p.a0 + p.a1) / 2
+                if p.acilim is not None and p.acilim.tur == "kubbe":   # İE-29: kubbenin panosuna açıklık konmaz
+                    continue
                 if mid - yarim >= lo - 1e-6 and mid + yarim <= hi + 1e-6 and p not in [q for _, q in panolar]:
                     panolar.append((d, p))
         panolar.sort(key=lambda dp: dp[1].a0)
@@ -1322,7 +1390,58 @@ def _kur(is_emri: dict) -> Plan:
                 else:
                     w.p1 = p.a1 = e0
     _dis_verandalar(plan, is_emri)
+    _kubbe_geometrisi(plan, kubbe_panolari)
     return plan
+
+
+def _kubbe_geometrisi(plan: "Plan", kubbe_panolari: list) -> None:
+    """İE-29 PR-2: kubbelerin plan geometrisi, gerçek çerçevede (aynadan sonra). Düz duvar boyunca u, dış yüzden dışarı s (s = 0 dış yüz,
+    −T_DIS iç yüz). Dış çizgi tabanda 251, önde 133,78, çıkma 58,61; 45° yan panonun iç yüzü düz duvarın iç yüzünü ve ön panonun iç yüzünü
+    10·(√2 − 1) = 4,14 içeride keser (ön pano 125,5 = 133,78 − 2 × 4,14; paftadaki gibi). Yan pano 79 (dış kenarı tabandan 79/√2 = 55,86
+    çıkar; ön köşedeki açılı köşe direği kalanı doldurur). Kubbenin içi (iç çizgiyle düz duvarın iç yüzü arası) mahalin net alanına girer
+    (`Mahal.ek`); gövde (`Mahal.poly`, çatının ayak izi) değişmez. Kubbenin çatısı: tepe duvarda kubbenin ortasında, üç saçak kubbenin dış
+    çizgisinde (görünüşte `cephe_gorunus.kubbe_parcalari`)."""
+    K, t, r2 = KUBBE, T_DIS, math.sqrt(2.0)
+    c, yb = K["cikma_cm"], K["yan_pano_cm"] / r2
+    k2 = t * (r2 - 1.0)
+    for p, kb in kubbe_panolari:
+        d, n = p.duvar, p.acilim.disari_normal
+        sg = 1.0 if n[0] == "+" else -1.0
+        yuz = d.c + sg * d.h
+        t0, t1 = p.a0, p.a1
+        tm = (t0 + t1) / 2.0
+        P = (lambda u, s_, yuz=yuz, sg=sg: (round(u, 6), round(yuz + sg * s_, 6))) if d.yon == "x" else \
+            (lambda u, s_, yuz=yuz, sg=sg: (round(yuz + sg * s_, 6), round(u, 6)))
+        V = (lambda du, ds: (du, sg * ds)) if d.yon == "x" else (lambda du, ds: (sg * ds, du))
+        dis = [P(t0, 0), P(t0 + c, c), P(t1 - c, c), P(t1, 0)]
+        ic = [P(t0 + k2, -t), P(t0 + c + k2, c - t), P(t1 - c - k2, c - t), P(t1 - k2, -t)]
+        bant = dis + [P(t1, -t)] + ic[::-1] + [P(t0, -t)]
+        h2 = t / r2
+        on_e = K["on_pano_cm"] / 2.0
+        panolar = [
+            {"tur": "yan", "boy": K["yan_pano_cm"], "pencere": kb.get("yan_pencere", K["yan_pencere"]).replace("/", "x"),
+             "dis_kenar": (P(t0, 0), P(t0 + yb, yb)), "ic_kenar": (P(t0 + h2, -h2), P(t0 + yb + h2, yb - h2)),
+             "orta": P(t0 + yb / 2 + h2 / 2, yb / 2 - h2 / 2), "boyunca": V(1 / r2, 1 / r2), "disari": V(-1 / r2, 1 / r2)},
+            {"tur": "on", "boy": K["on_pano_cm"], "pencere": kb.get("on_pencere", K["on_pencere"]).replace("/", "x"),
+             "dis_kenar": (P(tm - on_e, c), P(tm + on_e, c)), "ic_kenar": (P(tm - on_e, c - t), P(tm + on_e, c - t)),
+             "orta": P(tm, c - t / 2), "boyunca": V(1.0, 0.0), "disari": V(0.0, 1.0)},
+            {"tur": "yan", "boy": K["yan_pano_cm"], "pencere": kb.get("yan_pencere", K["yan_pencere"]).replace("/", "x"),
+             "dis_kenar": (P(t1 - yb, yb), P(t1, 0)), "ic_kenar": (P(t1 - yb - h2, yb - h2), P(t1 - h2, -h2)),
+             "orta": P(t1 - yb / 2 - h2 / 2, yb / 2 - h2 / 2), "boyunca": V(1 / r2, -1 / r2), "disari": V(1 / r2, 1 / r2)}]
+        for q in panolar:                                    # pencere panoya sığmalı (pano payı kadar dar)
+            pk = pencere_kurali(q["pencere"])
+            if pk.en > q["boy"] - PENCERE_PANO_PAYI_CM + 1e-9:
+                raise IsEmriHatasi(f"kubbe {q['tur']} panosu ({q['boy']:g}) {q['pencere']} penceresine dar: {kb}")
+        derzler = [(P(t0, 0), P(t0 + h2, -h2)), (P(t0 + yb, yb), P(t0 + yb + h2, yb - h2)), (P(tm - on_e, c), P(tm - on_e, c - t)),
+                   (P(tm + on_e, c), P(tm + on_e, c - t)), (P(t1 - yb, yb), P(t1 - yb - h2, yb - h2)), (P(t1, 0), P(t1 - h2, -h2))]
+        ic_alan = Polygon(ic)
+        m = plan.mahaller[kb["mahal"]]
+        m.ek.append(ic_alan)
+        m.alan_m2 = unary_union([m.poly] + m.ek).area / 10000.0
+        cephe = {"-y": "on", "+y": "arka", "-x": "sol", "+x": "sag"}[n]
+        plan.kubbeler.append({"mahal": kb["mahal"], "cephe": cephe, "duvar": d.id, "yon": d.yon, "u0": t0, "u1": t1, "yuz": yuz,
+                              "isaret": sg, "dis": dis, "ic": ic, "bant": bant, "panolar": panolar, "derzler": derzler,
+                              "ic_alan": [tuple(v) for v in ic_alan.exterior.coords][:-1], "tepe": P(tm, 0), "cikma_cm": c})
 
 
 KOSE_KOLONU_YAKIN_CM = 11.0   # D-38: köşeye bu uzaklıktan yakın bir dikme varsa (İş Emri'nde yazılı) yenisi eklenmez

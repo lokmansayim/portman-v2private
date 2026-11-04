@@ -168,3 +168,101 @@ def test_ap12_yan_yana_hatalari(degis, mesaj):
     degis(ie["cati"])
     with pytest.raises(CP.PrefabrikCatiHatasi, match=mesaj):
         CS.tanim(G.kur(copy.deepcopy(ie)), ie)
+
+
+# ───────────────────────────── AP-17: kubbe (İE-29 PR-2) ─────────────────────────────
+# AP-17'nin İş Emri'si `testler/kor/projeler/AP17/is_emri.json` (montaj paftasından; kişi ve bayi adı yok). Paftanın montaj planında salonun
+# ön duvarında kubbe: dış yüzde ölçü zinciri 58,61 · 133,78 · 58,61 (taban 251), iki yanında 94,13'lük pano; yan panolar 790 (59/170), ön
+# pano 105/170; salonun iç ölçüsü 494,86 kubbenin ön panosunun iç yüzünden. Öteki duvarların pano hatları paftanın dörtgenlerinden.
+
+AP17 = KOK / "testler" / "kor" / "projeler" / "AP17" / "is_emri.json"
+
+
+def _ie17() -> dict:
+    return json.loads(AP17.read_text(encoding="utf-8"))
+
+
+def _hat(plan, yon: str, c: float) -> list:
+    return sorted({round(v, 1) for d in plan.duvarlar if d.yon == yon and abs(d.c - c) < 6 for p in d.panolar for v in (p.a0, p.a1)})
+
+
+def test_ap17_pano_hatlari():
+    plan = G.kur(_ie17())
+    assert _hat(plan, "x", 5) == [444.2, 538.4, 789.4, 883.5]                                    # 94,13 · kubbe · 94,13
+    assert _hat(plan, "x", 193.25) == [5.0, 67.8, 318.8, 444.2]                                  # verandanın ardı: yarım, 180/200 (251), kapı
+    assert _hat(plan, "x", 893.5) == [5.0, 130.5, 256.0, 381.5, 507.0, 632.5, 695.2, 820.8, 883.5]   # yatak odası 2'nin penceresi ortada
+    assert _hat(plan, "y", 5) == [198.2, 261.0, 386.5, 449.2, 574.8, 637.5, 763.0, 888.5]         # 449,25 aksına dayalı (yarım panolar)
+    assert _hat(plan, "y", 883.5) == [10.0, 135.5, 261.0, 386.5, 449.2, 574.8, 637.5, 763.0, 888.5]
+    assert _hat(plan, "y", 318.75) == _hat(plan, "y", 507.0) == [449.2, 574.8, 637.5, 763.0, 888.5]   # holün ve banyonun iki duvarı
+    assert not any("uzun özel pano" in u for u in plan.uyarilar)
+
+
+def test_ap17_kubbe():
+    plan = G.kur(_ie17())
+    assert len(plan.kubbeler) == 1
+    kb = plan.kubbeler[0]
+    assert (kb["cephe"], kb["mahal"], kb["u0"], kb["u1"]) == ("on", "SALON", 538.375, 789.375)
+    dis, ic = kb["dis"], kb["ic"]
+    assert [round(b[0] - a[0], 2) for a, b in zip(dis, dis[1:])] == [58.61, 133.78, 58.61]         # paftanın zinciri
+    assert round(dis[1][1], 2) == round(dis[2][1], 2) == -58.61                                   # çıkma
+    assert [q["boy"] for q in kb["panolar"]] == [79.0, 125.5, 79.0]
+    assert [q["pencere"] for q in kb["panolar"]] == ["59x170", "105x170", "59x170"]
+    assert round(ic[2][0] - ic[1][0], 2) == 125.5                                                 # ön panonun iç yüzü
+    assert round(446.25 - ic[1][1], 2) == 494.86                                                  # salonun paftadaki iç ölçüsü
+    salon = plan.mahaller["SALON"]
+    assert round(salon.alan_m2, 2) == 30.70 and round(salon.ek[0].area / 1e4, 3) == 1.079        # kubbenin içi salonda (paftada 30,6)
+    p = next(p for d in plan.duvarlar for p in d.panolar if p.acilim and p.acilim.tur == "kubbe")
+    assert p.rects() == [] and p.boy == 251.0                                                    # taban boşluk
+
+
+def test_ap17_cizim(tmp_path):
+    import ezdxf
+    from motor import dxf_out
+    r = dxf_out.uret(_ie17(), tmp_path)
+    assert r["validation_passed"] and r["pdf"]
+    doc = ezdxf.readfile(tmp_path / r["dxf"])
+    msp = doc.modelspace()
+    kub = [e for e in msp.query('LWPOLYLINE[layer=="KUBBE"]') if e.closed and max(p[0] for p in e.get_points("xy")) < 1100]
+    assert len(kub) == 10                                                                         # 6 pano parçası, 2 köşe direği, 2 kama
+    from shapely.geometry import Polygon
+    salon = next(e for e in msp.query('LWPOLYLINE[layer=="NET_ALAN_GEOMETRISI"]') if e.get_xdata("PORTMAN_ROOM")[0].value == "SALON")
+    assert round(Polygon(list(salon.get_points("xy"))).area / 1e4, 2) == 30.70
+
+
+def test_ap17_kubbe_gorunusu():
+    from motor import cephe_gorunus as CGo
+    ie = _ie17()
+    plan = G.kur(copy.deepcopy(ie))
+    r = {t: CGo.cati_cizgileri(plan, ie, t)["kubbe"] for t in CGo.TARAFLAR}
+    assert [a["olcu"] for a in r["on"]["pencereler"]] == ["59x170", "105x170", "59x170"]
+    assert (r["on"]["u0"], r["on"]["u1"]) == (538.375, 789.375)
+    assert round(max(z for k in r["on"]["dolgu"] for _u, z in k), 2) == round(260 + 0.3288 * 58.61, 2)   # tepe düz duvarda
+    assert r["arka"]["dolgu"] == [] and r["arka"]["pencereler"] == []                             # gövdenin ardında
+    for t, uc in (("sol", 898.5), ("sag", 0.0)):
+        k = r[t]
+        assert [a["olcu"] for a in k["pencereler"]] == ["59x170"]
+        ust = [u for k2 in k["dolgu"] for u, z in k2 if z > 250.5]                                # topuk ve çatı: saçağın dışında kalan
+        assert ust and all(abs(u - uc) >= 30.0 - 0.1 for u in ust)                                # ana çatının 30'luk saçağı örter
+    assert "kubbe" not in CGo.cati_cizgileri(G.kur(_ie12()), _ie12(), "on")                       # kubbesiz evde anahtar yok
+
+
+@pytest.mark.parametrize("degis, mesaj", [
+    (lambda k: k.update(mahal="VERANDA"), "kapalı bir mahalin"),
+    (lambda k: k.update(bas_cm=700), "sığmıyor"),
+    (lambda k: k.update(cephe="arka"), "sığmıyor"),
+    (lambda k: k.update(cephe="ust"), "cephesi bilinmiyor"),
+    (lambda k: k.update(yan_pencere="76x170"), "penceresine dar"),
+    (lambda k: k.update(renk="beyaz"), "kubbeler girişi"),
+])
+def test_ap17_kubbe_hatalari(degis, mesaj):
+    ie = _ie17()
+    degis(ie["kubbeler"][0])
+    with pytest.raises(G.IsEmriHatasi, match=mesaj):
+        G.kur(ie)
+
+
+def test_ap17_iki_kubbe_ust_uste():
+    ie = _ie17()
+    ie["kubbeler"].append({"cephe": "on", "mahal": "SALON", "bas_cm": 600})
+    with pytest.raises(G.IsEmriHatasi, match="üst üste"):
+        G.kur(ie)

@@ -231,8 +231,103 @@ def cati_cizgileri(plan: G.Plan, ie: dict, taraf: str) -> dict:
         e_, c_ = _mahal_catisi(plan, m, taraf, u, d, ortu)               # tepe ve saçak kotu ana çatıdan (köşe kırması ana çatının düzlemlerinde)
         egimler += e_
         cizgi += c_
-    return {"cizgiler": cizgi, "egimler": sorted(egimler), "u0": u0, "u1": u1, "tepe": tepe, "sacak_kotu": sacak_kotu,
-            "topuklar": _topuklar(ck, u, d, ortu, (u0, u1), float((ie.get("cati") or {}).get("topuk_cm", 10)))}
+    out = {"cizgiler": cizgi, "egimler": sorted(egimler), "u0": u0, "u1": u1, "tepe": tepe, "sacak_kotu": sacak_kotu,
+           "topuklar": _topuklar(ck, u, d, ortu, (u0, u1), float((ie.get("cati") or {}).get("topuk_cm", 10)))}
+    if plan.kubbeler:                                                    # İE-29: anahtar yalnız kubbeli planda (öteki görünüşler aynen)
+        out["kubbe"] = _kubbe_gorunusu(plan, ie, taraf, u, d, ck)
+    return out
+
+
+def _yakin_parca(k3: list, d, D: float) -> list:
+    """Üç boyutlu çokgenin (x, y, z) planda derinliği D'den küçük (bakana yakın) kısmı (Sutherland–Hodgman; kesişimde doğrusal ara değer)."""
+    out = []
+    for i, a in enumerate(k3):
+        b = k3[(i + 1) % len(k3)]
+        da, db = d(a[0], a[1]) - D, d(b[0], b[1]) - D
+        if da < 0:
+            out.append(a)
+        if (da < 0) != (db < 0):
+            t = da / (da - db)
+            out.append(tuple(a[j] + t * (b[j] - a[j]) for j in range(3)))
+    return out
+
+
+def _kubbe_gorunusu(plan: G.Plan, ie: dict, taraf: str, u, d, ck: dict) -> dict:
+    """İE-29 PR-2: kubbelerin bu görünüşteki parçaları (`G._kubbe_geometrisi`). Kubbe dışbükey: üç duvar yüzü (zeminden duvar üstüne), üstünde
+    topuk şeridi (duvar üstünden saçak kotuna, ana çatının topuğu) ve üç üçgen çatı yüzü (saçak kubbenin dış çizgisinde, tepe düz duvarda
+    kubbenin ortasında; ön yüzün eğimi ana çatınınki, köşelerden tepeye iki mahya). Bakana dönük yüz çizilir, öbürü kubbenin ya da gövdenin
+    ardındadır. Ana çatının bakana dönük düzlemlerinin ve kalkanlarının kubbenin yüzünden yakın kısmı (`_yakin_parca`; düzlemin topuğu dahil)
+    kubbeyi örter (yandan bakışta saçağın altı; ortalama derinlik yetmez: ana çatının düzlemi mahyadan saçağa kubbenin iki yanına uzanır).
+    Döner: {"dolgu": [[(u, z)]] (beyaz; ardındaki çizgiler örtülür), "cizgiler": [{"katman": duvar | cati, "u": [(u, z)]}],
+    "pencereler": [{"u0", "u1", "z0", "z1", "olcu"}], "u0", "u1"} (u0 / u1 kubbenin görünen uçları; yoksa None)."""
+    from shapely.affinity import translate
+    from shapely.geometry import LineString, MultiLineString, Polygon
+    from shapely.ops import unary_union
+    cati = ie.get("cati") or {}
+    hy = float(ie["yapi"].get("duvar_yuksekligi_cm", 250))
+    topuk, e = float(cati.get("topuk_cm", 10)), float(cati.get("egim_yuzde", 33)) / 100.0
+    ze = hy + topuk
+    bx, by = _BAKANA[taraf]
+    out = {"dolgu": [], "cizgiler": [], "pencereler": [], "u0": None, "u1": None}
+
+    donuk3, perde3 = [], []
+    for dz in ck["duzlemler"]:
+        yx, yy = dz["yukari"]
+        if -dz["egim"] * (yx * bx + yy * by) / math.sqrt(1 + dz["egim"] ** 2) > YAN_ESIGI:
+            donuk3.append([tuple(map(float, p)) for p in dz["ucboyut"]])
+    for k in ck["kalkanlar"]:
+        perde3.append([(sv, k["konum"], z) if k["eksen"] == "y" else (k["konum"], sv, z) for sv, z in k["kose"]])
+
+    def ortu_(derinlik):
+        g = []
+        for k3 in donuk3:
+            k2 = [(u(x, y), z) for x, y, z in _yakin_parca(k3, d, derinlik)]
+            if len(k2) >= 3 and Polygon(k2).area > 1e-6:
+                g += [Polygon(k2).buffer(0.05), translate(Polygon(k2), 0.0, -topuk)]     # ana çatının topuğu
+        for k3 in perde3:
+            k2 = [(u(x, y), z) for x, y, z in _yakin_parca(k3, d, derinlik)]
+            if len(k2) >= 3 and Polygon(k2).area > 1:
+                g.append(Polygon(k2).buffer(-0.5))
+        g = unary_union(g) if g else None
+        return None if g is None or g.is_empty else g
+
+    def ekle(geo, katman):
+        for h in (geo.geoms if isinstance(geo, MultiLineString) else [geo]):
+            if isinstance(h, LineString) and h.length > 0.5:
+                out["cizgiler"].append({"katman": katman, "u": [(round(a, 4), round(b, 4)) for a, b in h.coords]})
+
+    for kb in plan.kubbeler:
+        E, tp = kb["dis"], kb["tepe"]
+        za = ze + e * kb["cikma_cm"]
+        for i, q in enumerate(kb["panolar"]):
+            nx, ny = q["disari"]
+            if nx * bx + ny * by <= YAN_ESIGI:                               # bakana dönük değil (yandan ya da arkadan)
+                continue
+            a, b = E[i], E[i + 1]
+            ua, ub = u(*a), u(*b)
+            yuzler = [("duvar", [(ua, 0.0), (ub, 0.0), (ub, hy), (ua, hy)]), ("cati", [(ua, hy), (ub, hy), (ub, ze), (ua, ze)]),
+                      ("cati", [(ua, ze), (ub, ze), (u(*tp), za)])]
+            derinlik = {"duvar": (d(*a) + d(*b)) / 2.0}
+            derinlik["cati"] = derinlik["duvar"]
+            for katman, k2 in yuzler:
+                pg = Polygon(k2)
+                if pg.area < 1e-6:
+                    continue
+                o = ortu_(derinlik[katman] if katman == "duvar" else (d(*a) + d(*b) + d(*tp)) / 3.0)
+                gor = pg if o is None else pg.difference(o)
+                for g in getattr(gor, "geoms", [gor]):
+                    if g.geom_type == "Polygon" and g.area > 1.0:
+                        out["dolgu"].append([(round(x, 4), round(z, 4)) for x, z in g.exterior.coords[:-1]])
+                hat = LineString(k2 + k2[:1])
+                ekle(hat if o is None else hat.difference(o), katman)
+            pk = G.pencere_kurali(q["pencere"])
+            (mx, my), (vx, vy) = ((q["dis_kenar"][0][0] + q["dis_kenar"][1][0]) / 2.0, (q["dis_kenar"][0][1] + q["dis_kenar"][1][1]) / 2.0), q["boyunca"]
+            u0, u1 = sorted((u(mx - vx * pk.en / 2.0, my - vy * pk.en / 2.0), u(mx + vx * pk.en / 2.0, my + vy * pk.en / 2.0)))
+            out["pencereler"].append({"u0": round(u0, 4), "u1": round(u1, 4), "z0": pk.esik, "z1": pk.ust, "olcu": q["pencere"]})
+    us = [p[0] for k2 in out["dolgu"] for p in k2]
+    if us:
+        out["u0"], out["u1"] = min(us), max(us)
+    return out
 
 
 def kapali_golge(plan: G.Plan, taraf: str):

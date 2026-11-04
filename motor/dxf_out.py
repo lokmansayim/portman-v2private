@@ -170,6 +170,8 @@ class Cizici:
             doc.layers.add(name, color=color, linetype=lt)
         doc.layers.get("NET_ALAN_GEOMETRISI").off()
         doc.layers.get("NET_ALAN_GEOMETRISI").dxf.plot = 0
+        if plan.kubbeler:                                   # İE-29: katman yalnız kubbeli planda (öteki DXF'ler değişmez)
+            doc.layers.add("KUBBE", color=30, linetype="Continuous")
         doc.styles.add("PORTMAN", font=FONT)
         for style in doc.styles:
             style.dxf.font = FONT
@@ -388,6 +390,9 @@ class Cizici:
         """BK-14: taşan verandanın gövde kutusu (0, 0, W, H) dışına çıktığı pay (cm; alt, ust, sol, sag). Veranda yoksa hepsi 0."""
         W, H = self.plan.W, self.plan.H
         rs = [v["rect"] for v in self.plan.dis_verandalar]
+        for kb in self.plan.kubbeler:                     # İE-29: kubbe gövdenin dışına çıkar (taşan veranda gibi pay)
+            xs_, ys_ = [p[0] for p in kb["dis"]], [p[1] for p in kb["dis"]]
+            rs.append((min(xs_), min(ys_), max(xs_), max(ys_)))
         return {"alt": max([0.0] + [-r[1] for r in rs]), "ust": max([0.0] + [r[3] - H for r in rs]),
                 "sol": max([0.0] + [-r[0] for r in rs]), "sag": max([0.0] + [r[2] - W for r in rs])}
 
@@ -401,6 +406,8 @@ class Cizici:
         dolu: list = []                                       # bu planda konmuş özel pano ölçü yazılarının kutuları (`_ozel_olcu`)
         for d in plan.duvarlar:
             for p in d.panolar:
+                if p.acilim is not None and p.acilim.tur == "kubbe":   # İE-29: kubbenin tabanı boşluk; kubbe aşağıda (`_kubbe_plani`)
+                    continue
                 name, frame, kod = self.pano_blok(p)
                 r = p.rect(); standart = abs(p.boy - G.MOD) < 1e-6
                 if montaj: layer = "MONTAJ_STANDART" if standart else "MONTAJ_OZEL_PANO"
@@ -450,6 +457,8 @@ class Cizici:
             ic_y = d.c + (d.h + 16 if d.c < H / 2 else -(d.h + 16)); ic_x = d.c + (d.h + 16 if d.c < W / 2 else -(d.h + 16))
             yer = ((d.p0 + d.p1) / 2, ic_y) if d.yon == "x" else (ic_x, (d.p0 + d.p1) / 2)
             self.text(f"YARIM DUVAR h:{fmt(d.yukseklik)}", (yer[0] + ox, yer[1] + oy), 12, "ODA_ADLARI", rot=(90.0 if d.yon == "y" else 0.0))
+        for kb in plan.kubbeler:                               # İE-29: kubbe (üç pano, iki köşe direği, duvar ucunda iki kama)
+            self._kubbe_plani(kb, ox, oy, montaj, olcu=not montaj)
         # veranda profili (her açık kenar bir blok: dış yüz + 10 cm içeri, kesik çizgi)
         dis_ad = {v["ad"] for v in plan.dis_verandalar}
         for ad, m in plan.mahaller.items():
@@ -504,6 +513,9 @@ class Cizici:
         etiketler, yerlesecek, nis_yazilari, zincir_h = {}, [], {}, set()
         for ad, m in plan.mahaller.items():
             poly = m.poly.simplify(0.0)
+            if m.ek:                                        # İE-29: kubbenin içi mahalin net alanında
+                from shapely.ops import unary_union
+                poly = unary_union([m.poly] + m.ek).simplify(0.0)
             if rol == "ANA":
                 e = msp.add_lwpolyline([(x + ox, y + oy) for x, y in list(poly.exterior.coords)[:-1]], close=True, dxfattribs={"layer": "NET_ALAN_GEOMETRISI"})
                 e.set_xdata("PORTMAN_ROOM", [(1000, ad)])
@@ -576,6 +588,7 @@ class Cizici:
             for d in plan.duvarlar:
                 for p in d.panolar:
                     if abs(p.boy - G.MOD) < 1e-6: continue
+                    if p.acilim is not None and p.acilim.tur == "kubbe": continue     # İE-29: kubbenin ölçüsü kendi zincirinde
                     self._ozel_olcu(d, p.rect(), W, H, ox, oy, "OZEL_PANEL_OLCU_CM", dolu)
             for ad, m in plan.mahaller.items():
                 if not m.acik or not m.cells: continue      # taşan veranda (BK-14) yukarıda ölçülü
@@ -771,6 +784,51 @@ class Cizici:
         self.msp.add_text(s, dxfattribs={"height": h, "layer": layer, "style": "PORTMAN", "rotation": rot}).set_placement(pos, align=align)
 
     OZEL_OLCU_UZAKLIK_CM = (40, 25, 70, 100)
+
+    def _kubbe_plani(self, kb: dict, ox: float, oy: float, montaj: bool, olcu: bool) -> None:
+        """İE-29 PR-2: kubbe planda (`G._kubbe_geometrisi`): her pano pencere boşluğunun iki yanında iki parça ve pano ortasında pencere bloğu
+        (`pano_blok`'un V çerçevesi: x dış yüzden içeri, y pano boyunca), iki açılı köşe direği, düz duvarın ucunda iki kama; katman `KUBBE`
+        (dış duvarın rengi). Kubbenin panoları BOM bloğu değil (listesi çizim onayından sonra). `olcu`: dış yüzde paftanın zinciri
+        (58,61 · 133,78 · 58,61) ve çıkma."""
+        msp, t = self.msp, G.T_DIS
+        o = lambda p: (p[0] + ox, p[1] + oy)
+        dis, ic, bant, pn = kb["dis"], kb["ic"], kb["bant"], kb["panolar"]
+        for q in pn:
+            A, B = q["dis_kenar"]; nx, ny = q["disari"]
+            ex, ey = (-nx, -ny), (ny, -nx)
+            if (B[0] - A[0]) * ey[0] + (B[1] - A[1]) * ey[1] < 0:
+                A, B = B, A
+            at = lambda x, y, A=A, ex=ex, ey=ey: (A[0] + x * ex[0] + y * ey[0], A[1] + x * ex[1] + y * ey[1])
+            L = float(q["boy"]); w = float(G.pencere_kurali(q["pencere"]).en); s = (L - w) / 2.0
+            lay = ("MONTAJ_STANDART" if abs(L - G.MOD) < 1e-6 else "MONTAJ_OZEL_PANO") if montaj else "KUBBE"
+            for y0, y1 in ((0.0, s), (s + w, L)):
+                msp.add_lwpolyline([o(at(0, y0)), o(at(0, y1)), o(at(t, y1)), o(at(t, y0))], close=True, dxfattribs={"layer": lay})
+            dname, _, _src, nat, bb = self._pencere_blok(q["pencere"])
+            th = math.degrees(math.atan2(ex[1], ex[0])) % 360.0
+            if self._pencere_yazi_ters(q["pencere"], th):
+                dname = self._pencere_ters_blok(q["pencere"])
+            orta = (t - 10.0) / 2.0
+            (lx, ly), lr = ((t - bb[2] - orta, s - bb[1]), 0.0) if nat == "V" else ((t - bb[3] - orta, s + bb[2]), 270.0)
+            msp.add_blockref(dname, o(at(lx, ly)), dxfattribs={"rotation": (th + lr) % 360.0, "layer": "PENCERE"})
+        lay = "MONTAJ_STANDART" if montaj else "KUBBE"
+        for poly in ([pn[0]["dis_kenar"][1], dis[1], pn[1]["dis_kenar"][0], ic[1]],          # köşe direkleri
+                     [pn[1]["dis_kenar"][1], dis[2], pn[2]["dis_kenar"][0], ic[2]],
+                     [dis[0], pn[0]["ic_kenar"][0], ic[0], bant[9]],                          # düz duvarın ucunda kama
+                     [dis[3], pn[2]["ic_kenar"][1], ic[3], bant[4]]):
+            msp.add_lwpolyline([o(p) for p in poly], close=True, dxfattribs={"layer": lay})
+        if not olcu:
+            return
+        sg, c = kb["isaret"], kb["cikma_cm"]
+        if kb["yon"] == "x":                                   # zincir dış çizginin 60 dışında (pencere yazısının dışında); çıkma kubbenin sağında
+            yb = kb["yuz"] + sg * (c + 60.0)
+            for a, b in zip(dis, dis[1:]):
+                self.dim(o(a), o(b), (0, yb + oy), 0)
+            self.dim(o(dis[3]), o(dis[2]), (dis[3][0] + 30.0 + ox, 0), 90)
+        else:
+            xb = kb["yuz"] + sg * (c + 60.0)
+            for a, b in zip(dis, dis[1:]):
+                self.dim(o(a), o(b), (xb + ox, 0), 90)
+            self.dim(o(dis[3]), o(dis[2]), (0, dis[3][1] + 30.0 + oy), 0)
 
     def _ozel_olcu(self, d, r, W, H, ox, oy, layer, dolu: list) -> None:
         """Standart dışı panonun ölçüsü, duvarın iç yanında panodan 40 cm uzakta. Yazısı bu planda daha önce konmuş bir özel pano ölçü
@@ -1044,7 +1102,9 @@ class Cizici:
             n0 = len(msp)
             g, r = CG.cephe(plan, taraf), CG.cati_cizgileri(plan, ie, taraf)
             vp = self._veranda_gorunusu(taraf, r) + CG.mahal_cati_parcalari(plan, ie, taraf)    # İE-17 PR-2: ızgaradaki verandanın dikme ve kirişi
-            sol_uc = min([r["u0"]] + [u for p in vp for u, _z in p["u"]])
+            ku = r.get("kubbe") or {}                                  # İE-29: kubbe görünüşte (`CG._kubbe_gorunusu`)
+            ku_uc = [v for v in (ku.get("u0"), ku.get("u1")) if v is not None]
+            sol_uc = min([r["u0"]] + [u for p in vp for u, _z in p["u"]] + ku_uc)
             if k:
                 ox = sag_uc + 360.0 - sol_uc
             W = g["en"]
@@ -1084,8 +1144,17 @@ class Cizici:
                     msp.add_lwpolyline(pts, dxfattribs={"layer": "ON_TOPUK" if p["tur"] == "topuk" else "ON_CATI"})
                 else:
                     msp.add_lwpolyline(pts, close=p.get("kapali", True), dxfattribs={"layer": "ON_CATI" if p["tur"] == "cati" else "ON_GORUNUS"})
+            if ku:                                                # İE-29: önce beyaz dolgu (ardındaki duvar ve çatı çizgisi örtülür), sonra çizgi ve pencere
+                for k2 in ku["dolgu"]:
+                    ort = msp.add_hatch(dxfattribs={"layer": "ON_GORUNUS"})
+                    ort.rgb = (255, 255, 255)
+                    ort.paths.add_polyline_path([(a + ox, bot + z) for a, z in k2], is_closed=True)
+                for c_ in ku["cizgiler"]:
+                    msp.add_lwpolyline([(a + ox, bot + z) for a, z in c_["u"]], dxfattribs={"layer": "ON_GORUNUS" if c_["katman"] == "duvar" else "ON_CATI"})
+                for a in ku["pencereler"]:
+                    self._on_pencere(a["u0"] + ox, bot + a["z0"], a["u1"] - a["u0"], a["z1"] - a["z0"], a["olcu"])
             tu, tz = r["tepe"]; rise = tz - hy
-            ud = max([W] + [u for p in vp for u, _z in p["u"]]) + 77      # sağdaki yükseklik ölçüleri verandanın da dışında
+            ud = max([W] + [u for p in vp for u, _z in p["u"]] + ku_uc) + 77      # sağdaki yükseklik ölçüleri verandanın da (ve kubbenin) dışında
             self.dim((xl, top), (xr, top), (0, bot - 110), 0, "ON_OLCU"); self.dim((ox, bot), (W + ox, bot), (0, bot - 67), 0, "ON_OLCU")
             if taraf in KOT_GORUNUSLERI:                          # D-31 madde 14
                 self.dim((W + ox, bot), (W + ox, top), (ud + ox, 0), 90, "ON_OLCU"); self.dim((xr, top), (tu + ox, bot + tz), (ud + ox, 0), 90, "ON_OLCU")
