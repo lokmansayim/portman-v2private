@@ -14,7 +14,7 @@ Kaynaklar (sırayla oku, değiştirme): `docs/durum/`'daki en yeni ekler (`main`
 2. **Açık iş** — kod, dal, kullanıcı adımlarının durumu (Çalışmıyor / Kısmen / Yerelde / Canlıda).
 3. **Senin onayını bekleyenler** — merge, silme, ücretli deneme, canlı değişiklik; her biri için bir evet/hayır sorusu.
 4. **Senin kararını bekleyenler** — açık kararlar (K16, K3/K4, Z-03/Z-06 vb.) ve her birinin neyi tıkadığı.
-5. **Açık riskler** — tarihli (anahtar son kullanma, sunucu erişimi, imzasız paket, kişisel veri kopyaları).
+5. **Açık riskler** — tarihli (anahtar son kullanma, sunucu erişimi, imzasız paket).
 6. **Son kanıt** — en son doğrulamanın tarihi ve sayıları (harness, referans, test).
 7. **Ölçüm** — varsa gerçek veriyle ölçülmüş son sonuç (ör. yükleme listesi eşleşmesi); "kural görmemiş veriyle" olup olmadığını belirt.
 8. **Sıradaki en küçük adım** — bir oturumda bitecek, kanıtı tanımlı tek iş.

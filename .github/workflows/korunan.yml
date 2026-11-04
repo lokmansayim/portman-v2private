@@ -1,0 +1,47 @@
+# Portman · korunan dosya onayı (BK-21, 4 Kasım 2026).
+#
+# Project thread'lerinde (claude.ai proje sohbeti) `.claude/settings.json` okunmaz: `sir_koruma.py` hook'u ve izinlerin "engelle /
+# sor" kuralları orada çalışmaz (4 Kasım 2026 denetimi). Bu iş aynı dosya listesini PR'da denetler (`araclar/fren.py ci`):
+# - sır ya da canlı durum dosyası PR'a girmişse kırmızı (etiket kurtarmaz);
+# - dondurulmuş kayıt (SHA256SUMS, KARARLAR.md, testler/referans/<tarih>/, hosting/), referans girdinin var olan dosyası ya da
+#   fren dosyası (hook, izin, CI iş akışı) değişiyorsa, Lokman PR'a `patron-onayi` etiketini GitHub'da kendisi eklemeden kırmızı.
+#   Bir uygulama üzerinden (Claude dahil) eklenen etiket sayılmaz.
+# Dal korumasında "Doğrulama sonucu"nun yanında zorunlu tutulacak denetim: "Korunan dosya onayı".
+#
+# Güvenlik: pull_request_target taban dalın (main) iş akışını ve betiğini koşar; PR'ın kodu çekilmez, koşmaz. PR bu denetimi kendi
+# değiştirdiği dosyayla gevşetemez; betiğin ve bu dosyanın değişikliği de onay ister. Yalnız okuma izni, sır yok.
+# Taslak PR'da koşmaz (taslak birleştirilemez); "Ready for review", yeni push ve etiket değişince koşar. Birkaç saniye sürer.
+name: Korunan dosyalar
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened, ready_for_review, labeled, unlabeled]
+
+concurrency:
+  group: korunan-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: read
+  issues: read
+
+jobs:
+  korunan:
+    name: Korunan dosya onayı
+    if: ${{ !github.event.pull_request.draft }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      # Taban dal (main); PR'ın dosyaları çekilmez.
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+
+      - name: Korunan dosyalar ve Lokman'ın onayı
+        env:
+          GH_TOKEN: ${{ github.token }}
+          DEPO: ${{ github.repository }}
+          PR_NO: ${{ github.event.pull_request.number }}
+          SAHIP: ${{ github.repository_owner }}
+        run: python3 araclar/fren.py ci
