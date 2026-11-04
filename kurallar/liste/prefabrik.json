@@ -30,11 +30,12 @@
   "karkasli_kaplama_panosu": {
    "deger": {
     "kalem": "Karkaslı kaplama duvar panosu",
+    "boy": "gercek_boy",
     "ic_pencereye_ust_alt_panel": false,
     "ic_pencereye_ozel_karkas": false
    },
    "durum": "lokman",
-   "kaynak": "D-46 (İE-28; Lokman, 4 Kasım 2026 04:35, kart \"Paftadan, ev ev\"): paftadaki tek parça karkaslı kaplama duvar panosu (188–491 cm) İş Emri'nin `dizilim.karkasli_panolar` satırından; listede tek satır, boyu panonun sipariş boyu. İçindeki pencereye üst ve alt panel, özel pencere karkası ve 100'lük pencere U'su yazılmaz (karkas panonun kendisinde); pencere ve kapı kendi kalemlerinde. Gerçek listelerde: AP-14 dört, AP-25 bir, AP-26 iki, AP-11 iki, AP-18 iki."
+   "kaynak": "D-46 (İE-28; Lokman, 4 Kasım 2026 04:35, kart \"Paftadan, ev ev\"): paftadaki tek parça karkaslı kaplama duvar panosu (188–491 cm) İş Emri'nin `dizilim.karkasli_panolar` satırından; listede tek satır, 100 × L × H; L panonun gerçek boyu (mm, bir ondalık; yapıştırma panonun sipariş boyu kuralı uygulanmaz: gerçek listeler karkaslı panoyu gerçek boyuyla yazıyor, AP-11 2510 ve 1940, AP-18 3765 ve 2510, AP-26 4286 ve 4914). İçindeki pencereye üst ve alt panel, özel pencere karkası ve 100'lük pencere U'su yazılmaz (karkas panonun kendisinde); pencere ve kapı kendi kalemlerinde. Gerçek listelerde: AP-14 dört, AP-25 bir, AP-26 iki, AP-11 iki, AP-18 iki."
   },
   "siparis_boyu": {
    "deger": {

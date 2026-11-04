@@ -833,8 +833,9 @@ def liste(N: dict, kurallar: dict | None = None, pafta: dict | None = None) -> d
     # karkası ve 100'lük pencere U'su yazılmaz (karkas panonun kendisinde)
     acl = [a for p in N["panolar"] for a in (p.get("aciklar") if p.get("karkasli") else [p["aciklik"]] if p["aciklik"] else [])]
     karkas_ici = {id(a) for p in N["panolar"] if p.get("karkasli") for a in p["aciklar"]}
-    if kkp["ic_pencereye_ust_alt_panel"] or kkp["ic_pencereye_ozel_karkas"]:
-        raise ValueError("karkasli_kaplama_panosu: içindeki pencereye üst/alt panel ya da özel karkas yazan kural bu üreteçte yok (D-46)")
+    if kkp["ic_pencereye_ust_alt_panel"] or kkp["ic_pencereye_ozel_karkas"] or kkp["boy"] != "gercek_boy":
+        raise ValueError("karkasli_kaplama_panosu: içindeki pencereye üst/alt panel ya da özel karkas yazan, ya da gerçek boydan başka boy "
+                         "yazan kural bu üreteçte yok (D-46)")
     pen = [a for a in acl if a["tur"] == "pencere"]
     vasistas = lambda a: pencere_olcusu(a["olcu"])[0] <= ps_["vasistas_en_cm"] and pencere_olcusu(a["olcu"])[1] <= ps_["vasistas_boy_cm"]   # 7.1
     standart = lambda a: pencere_olcusu(a["olcu"])[0] == ps_["standart_en_cm"]                  # 7.1: 120 genişlikte her pencere üst + alt panel (H7)
@@ -853,8 +854,8 @@ def liste(N: dict, kurallar: dict | None = None, pafta: dict | None = None) -> d
         L = siparis(p["boy"], R); a = p["aciklik"]
         if p.get("karkasli"):                                   # D-46 (İE-28): paftadaki tek parça pano; içindeki açıklıklar kaynakta
             ic_ = ", ".join(x["olcu"].replace("x", "/") if x["tur"] == "pencere" else f"kapı {x['olcu']}" for x in p["aciklar"]) or "açıklıksız"
-            sayac[(f"{kkp['kalem']}{fg}", f"{kal_mm} × {L} × {mm(H0)}", "İş Emri (D-46)",
-                   f"paftadaki tek parça pano; içinde {ic_}")] += 1
+            sayac[(f"{kkp['kalem']}{fg}", f"{kal_mm} × {mm(p['boy'])} × {mm(H0)}", "İş Emri (D-46)",   # gerçek boy (sipariş boyu değil)
+                   f"paftadaki tek parça pano, gerçek boyuyla; içinde {ic_}")] += 1
         elif a is None:
             sayac[(f"{kal} yapıştırma dolu pano{fg}", f"{kal_mm} × {L} × {mm(H0)}", "Sayım", "sipariş boyu (PK-01 dersi 2)")] += 1
         elif a["tur"] == "pencere":
@@ -877,7 +878,7 @@ def liste(N: dict, kurallar: dict | None = None, pafta: dict | None = None) -> d
             sayac[(f"{kal} karkaslı + kasalı pano", f"{kal_mm} × {L} × {mm(H0)}", "Sayım", "iç kapı boşluklu pano")] += 1
         else:
             sayac[(f"{kal} geçişli pano", f"{kal_mm} × {L} × {mm(H0)}", "Sayım", "kapısız geçiş")] += 1
-    for (kalem, olcu, dayanak, kaynak), n in sorted(sayac.items(), key=lambda x: (x[0][0], -int(x[0][1].split(" × ")[1]))):
+    for (kalem, olcu, dayanak, kaynak), n in sorted(sayac.items(), key=lambda x: (x[0][0], -float(x[0][1].split(" × ")[1].replace(",", ".")))):
         ekle("1001", kalem, olcu, n, dayanak, f"{kaynak_ad} sayım", kaynak)
 
     if kubbeler:

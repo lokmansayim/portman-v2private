@@ -185,6 +185,7 @@
    "islak",
    "lavabo"
   ],
+  "prefabrik.karkasli_kaplama_panosu.boy": "gercek_boy",
   "prefabrik.karkasli_kaplama_panosu.ic_pencereye_ozel_karkas": false,
   "prefabrik.karkasli_kaplama_panosu.ic_pencereye_ust_alt_panel": false,
   "prefabrik.karkasli_kaplama_panosu.kalem": "Karkaslı kaplama duvar panosu",

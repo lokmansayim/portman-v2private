@@ -185,7 +185,8 @@ def _adet(L, bas):
 
 
 def test_liste_satiri_ve_ic_pencere():
-    """Listede "Karkaslı kaplama duvar panosu" (kural kitabında `karkasli_kaplama_panosu`), 100 × sipariş boyu × H; içindeki 120'lik pencereye
+    """Listede "Karkaslı kaplama duvar panosu" (kural kitabında `karkasli_kaplama_panosu`), 100 × gerçek boy × H (gerçek listeler gibi, AP-11
+    2510; yapıştırma panonun sipariş boyu kuralı değil); içindeki 120'lik pencereye
     üst ve alt panel, özel pencere karkası yok; panodan geniş pencerenin karkaslı özel pencere panosu da yok (pano onun yerine). Pencere ve kapı
     kalemleri aynı (AP-14: dört karkaslı pano, gerçek listede de dört)."""
     from motor import prefabrik_liste as PL
@@ -194,8 +195,8 @@ def test_liste_satiri_ve_ic_pencere():
     ie = _ie("AP14")
     L = _liste(ie)
     k = sorted((s["olcu"], s["adet"], s["dayanak"]) for s in L if s["kalem"] == "Karkaslı kaplama duvar panosu")
-    assert k == [("100 × 1880 × 2500", 1, "İş Emri (D-46)"), ("100 × 2360 × 2500", 1, "İş Emri (D-46)"),
-                 ("100 × 2425 × 2500", 1, "İş Emri (D-46)"), ("100 × 2500 × 2500", 1, "İş Emri (D-46)")]
+    assert k == [("100 × 1882,5 × 2500", 1, "İş Emri (D-46)"), ("100 × 2366,7 × 2500", 1, "İş Emri (D-46)"),     # gerçek boy, sipariş boyu değil
+                 ("100 × 2427,5 × 2500", 1, "İş Emri (D-46)"), ("100 × 2510 × 2500", 1, "İş Emri (D-46)")]
     ie0 = copy.deepcopy(ie)
     ie0["yapi"]["dizilim"].pop("karkasli_panolar")
     L0 = _liste(ie0)
@@ -210,10 +211,11 @@ def test_liste_satiri_ve_ic_pencere():
 
 def test_liste_karkasli_kural_kitabi_denetlenir():
     from motor import prefabrik_liste as PL
-    K = copy.deepcopy(PL.kurallari_oku())
-    K["prefabrik"]["kurallar"]["karkasli_kaplama_panosu"]["deger"]["ic_pencereye_ust_alt_panel"] = True
-    with pytest.raises(ValueError, match="karkasli_kaplama_panosu"):
-        PL.liste(PL.model_motor(_ie("AP14")), K)
+    for alan, deger in (("ic_pencereye_ust_alt_panel", True), ("ic_pencereye_ozel_karkas", True), ("boy", "siparis_boyu")):
+        K = copy.deepcopy(PL.kurallari_oku())
+        K["prefabrik"]["kurallar"]["karkasli_kaplama_panosu"]["deger"][alan] = deger
+        with pytest.raises(ValueError, match="karkasli_kaplama_panosu"):
+            PL.liste(PL.model_motor(_ie("AP14")), K)
 
 
 def test_kapi_karkasli_panoda_giris_sayilir():
