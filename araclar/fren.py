@@ -10,13 +10,15 @@ ve izinlerin koruduğu dosya listesini iki yerde denetler:
   python3 araclar/fren.py ci                      GitHub'da (`.github/workflows/korunan.yml`, pull_request_target): PR'ın dosyaları
                                                   ve Lokman'ın `patron-onayi` etiketi
 
-Sınıflar:
+Sınıflar (bir dosya birden çok listeye uyarsa en sıkısı geçer):
   yasak   sır ya da canlı durum dosyası depoya giriyor. Etiket kurtarmaz: dosya depodan çıkar, sır değiştirilir.
-  onay    dondurulmuş kayıt, referans girdinin var olan dosyası ya da fren dosyası değişiyor: Lokman'ın onayı gerekir.
+  onay    dondurulmuş kayıt, referans girdinin var olan dosyası, fren dosyası, mühür kaydında var olan bir mühür, karar dosyası
+          silme: Lokman'ın onayı gerekir.
   bilgi   var olan bir karar dosyası, AGENTS.md ya da CLAUDE.md değişiyor: durdurmaz, PR'da görünür.
 
-Onay: PR'da `patron-onayi` etiketi var ve o etiketi en son, depo sahibi (Lokman) GitHub'da kendisi eklemiş. Bir uygulama üzerinden
-(Claude dahil) eklenen etiket sayılmaz. Etiketi oturum eklemez (AGENTS.md: Lokman'ın yerine onay verilmez).
+Onay: PR'da `patron-onayi` etiketi var, o etiketi en son depo sahibi (Lokman) GitHub'da kendisi eklemiş (bir uygulama üzerinden,
+Claude dahil, eklenen sayılmaz) ve etiketten sonra yazılmış bir commit korunan bir dosyaya dokunmuyor. Etiketi oturum eklemez
+(AGENTS.md: Lokman'ın yerine onay verilmez). Onaydan sonra korunan dosya yeniden değişirse Lokman etiketi kaldırıp yeniden ekler.
 
 Çıkış: 0 temiz · 1 yasak, sözdizimi ya da mühür hatası, CI'da onaysız korunan dosya · 3 (yalnız oturumda) Lokman'ın onayı gerekir.
 Yalnız standart kütüphane.
@@ -24,16 +26,20 @@ Yalnız standart kütüphane.
 from __future__ import annotations
 
 import argparse
+import base64
+import datetime
 import json
 import os
 import re
 import subprocess
 import sys
+import urllib.error
 import urllib.request
 from pathlib import Path
 
 KOK = Path(__file__).resolve().parents[1]
 ONAY_ETIKETI = "patron-onayi"
+MUHUR_KAYDI = "KARARLAR/muhurlu.json"
 
 # Sır ve canlı durum dosyaları: `.claude/hooks/sir_koruma.py › KORUNAN` ile aynı desenler (testler/test_fren.py denetler).
 YASAK = [
@@ -69,22 +75,35 @@ REFERANS_GIRDI = [
     (r"^modeller/[^/]+\.json$", "model tanımı (D-07: var olan tanım değişmez, yeni dosya ya da sürüm)"),
     (r"^kurallar/liste/setler/", "dondurulmuş kural seti (eski set eski çıktıyı bayt bayt verir)"),
 ]
-# Frenlerin kendisi: her değişiklik onay ister (CLAUDE.md › Frenler: hook değişikliği Lokman'ın onayıyla).
+# Frenlerin kendisi ve onları sınayan yerler: her değişiklik onay ister (CLAUDE.md › Frenler: Lokman'ın onayıyla).
 FREN = [
     (r"^\.claude/settings\.json$", "izinler ve hook ayarı"),
     (r"^\.claude/hooks/", "hook (fren kodu)"),
+    (r"^\.claude/agents/", "hakem ajan (kapanış incelemesi)"),
+    (r"^\.claude/skills/kapanis/", "kapanış adımları (doğrulama, kanıt)"),
     (r"^\.github/workflows/", "CI iş akışı (son kapı)"),
     (r"^araclar/fren\.py$", "bu fren"),
     (r"^testler/test_fren\.py$", "bu frenin testi"),
     (r"^testler/test_muhurlu_konular\.py$", "mühür kilit testi"),
+    (r"^testler/referans/dogrula\.py$", "gerileme ve sır taraması kapısı (CI'da koşar)"),
+    (r"^testler/test_sir_taramasi\.py$", "sır taramasının testi"),
+    (r"^denetim/", "sır taraması (dogrula.py üzerinden CI'da)"),
     (r"^\.claude/rules/frenler\.md$", "frenlerin metni"),
 ]
-# Durdurmaz; PR'da görünür.
-BILGI = [
-    (r"^KARARLAR/(?!README\.md$)[^/]+\.md$", "var olan karar dosyası değişti: kararın metni Lokman'ın sözü olmadan değişmez"),
-    (r"^(AGENTS|CLAUDE)\.md$", "ortak kural dosyası değişti"),
-]
+# Kararlar ve ortak kurallar: değişiklik PR'da görünür; silme onay ister.
+KARAR = [(r"^KARARLAR/(?!README\.md$)[^/]+\.md$", "karar dosyası (var olan kararın metni Lokman'ın sözü olmadan değişmez)")]
+ORTAK = [(r"^(AGENTS|CLAUDE)\.md$", "ortak kural dosyası")]
 
+# (liste, {durum: sınıf}); durum A eklendi, M değişti, D silindi. Listede olup durumu tabloda olmayan serbesttir.
+SINIFLAR = [
+    (YASAK, {"A": "yasak", "M": "yasak"}),
+    (DONDURULMUS, {"A": "onay", "M": "onay", "D": "onay"}),
+    (REFERANS_GIRDI, {"M": "onay", "D": "onay"}),
+    (FREN, {"A": "onay", "M": "onay", "D": "onay"}),
+    (KARAR, {"M": "bilgi", "D": "onay"}),
+    (ORTAK, {"M": "bilgi", "D": "onay"}),
+]
+SIRA = {"bilgi": 1, "onay": 2, "yasak": 3}
 SINIF_ADI = {"yasak": "YASAK", "onay": "ONAY GEREKİR", "bilgi": "bilgi"}
 
 
@@ -95,22 +114,21 @@ def _eslesen(yol: str, liste: list[tuple[str, str]]) -> str | None:
     return None
 
 
-def sinifla(durum: str, yol: str) -> tuple[str, str] | None:
-    """(durum, yol) → (sınıf, neden) ya da None (serbest). Durum: A (eklendi), M (değişti), D (silindi)."""
+def _yol(yol: str) -> str:
     yol = yol.replace("\\", "/")
-    if yol.startswith("./"):
-        yol = yol[2:]
-    if durum != "D":
-        neden = _eslesen(yol, YASAK)
-        if neden:
-            return "yasak", neden
-    for liste, kipler in ((DONDURULMUS, "AMD"), (REFERANS_GIRDI, "MD"), (FREN, "AMD"), (BILGI, "MD")):
+    return yol[2:] if yol.startswith("./") else yol
+
+
+def sinifla(durum: str, yol: str) -> tuple[str, str] | None:
+    """(durum, yol) → (sınıf, neden) ya da None (serbest). Birden çok liste uyarsa en sıkı sınıf."""
+    yol = _yol(yol)
+    en: tuple[str, str] | None = None
+    for liste, kipler in SINIFLAR:
         neden = _eslesen(yol, liste)
-        if neden and durum in kipler:
-            return ("bilgi" if liste is BILGI else "onay"), neden
-        if neden:
-            return None  # listede ama bu durumda serbest (ör. referans girdiye yeni dosya)
-    return None
+        sinif = kipler.get(durum) if neden else None
+        if sinif and (en is None or SIRA[sinif] > SIRA[en[0]]):
+            en = (sinif, neden)
+    return en
 
 
 def siniflandir(degisiklikler: list[tuple[str, str]]) -> list[dict]:
@@ -118,12 +136,43 @@ def siniflandir(degisiklikler: list[tuple[str, str]]) -> list[dict]:
     for durum, yol in degisiklikler:
         s = sinifla(durum, yol)
         if s:
-            bulgular.append({"sinif": s[0], "durum": durum, "yol": yol, "neden": s[1]})
+            bulgular.append({"sinif": s[0], "durum": durum, "yol": _yol(yol), "neden": s[1]})
     return bulgular
 
 
+def muhur_kaydi_bulgusu(durum: str, eski: str | None, yeni: str | None) -> dict | None:
+    """Mühür kaydında var olan bir mühürü değiştiren ya da kaldıran, çekirdek listesini daraltan değişiklik onay ister (açma ve
+    kapama dahil: Lokman'ın sözü kayda oturumun elinden girer, onayı etiketle Lokman verir). Yeni mühür eklemek serbest."""
+    if eski is None:
+        return None
+    try:
+        e = json.loads(eski)
+    except ValueError:
+        return None
+    y = None
+    if durum == "D" or yeni is None:
+        degisen = ["kayıt siliniyor"]
+    else:
+        try:
+            y = json.loads(yeni)
+            degisen = [] if isinstance(y, dict) else ["kayıt biçimi bozuk"]
+        except ValueError:
+            degisen = ["kayıt JSON olarak okunmuyor"]
+    if isinstance(y, dict):
+        yk = {m.get("kod"): m for m in y.get("muhurler", [])}
+        degisen = [str(m.get("kod")) for m in e.get("muhurler", []) if yk.get(m.get("kod")) != m]
+        if set(e.get("cekirdek", [])) - set(y.get("cekirdek", [])):
+            degisen.append("çekirdek listesi")
+        if e.get("sema") != y.get("sema"):
+            degisen.append("şema")
+    if not degisen:
+        return None
+    return {"sinif": "onay", "durum": durum, "yol": MUHUR_KAYDI,
+            "neden": f"mühür kaydında var olan mühür değişiyor ({', '.join(degisen)}); yeni mühür eklemek serbest"}
+
+
 def pr_degisiklikleri(dosyalar: list[dict]) -> list[tuple[str, str]]:
-    """GitHub'ın PR dosya listesi → (durum, yol). Yeniden adlandırma: eski yol silindi, yeni yol eklendi."""
+    """GitHub'ın PR ya da commit dosya listesi → (durum, yol). Yeniden adlandırma: eski yol silindi, yeni yol eklendi."""
     sonuc = []
     for d in dosyalar:
         s, yol = d.get("status"), d["filename"]
@@ -138,23 +187,53 @@ def pr_degisiklikleri(dosyalar: list[dict]) -> list[tuple[str, str]]:
     return sonuc
 
 
-def onay_durumu(etiketler: list[str], olaylar: list[dict], sahip: str, etiket: str = ONAY_ETIKETI) -> tuple[bool, str]:
-    """Etiket var mı ve en son ekleyen, uygulama aracılığı olmadan depo sahibi mi."""
+def _zaman(metin: str) -> datetime.datetime:
+    return datetime.datetime.fromisoformat(metin.replace("Z", "+00:00"))
+
+
+def onay_durumu(etiketler: list[str], olaylar: list[dict], sahip: str, etiket: str = ONAY_ETIKETI) -> tuple[bool, str, str | None]:
+    """Etiket var mı ve en son ekleyen, uygulama aracılığı olmadan depo sahibi mi. → (onaylı, metin, etiketin zamanı)."""
     if etiket not in etiketler:
-        return False, f"`{etiket}` etiketi yok"
+        return False, f"`{etiket}` etiketi yok", None
     eklemeler = sorted((o for o in olaylar if o.get("event") == "labeled" and (o.get("label") or {}).get("name") == etiket),
                        key=lambda o: o.get("created_at") or "")
     if not eklemeler:
-        return False, f"`{etiket}` etiketini kimin eklediği okunamadı"
+        return False, f"`{etiket}` etiketini kimin eklediği okunamadı", None
     son = eklemeler[-1]
     kim = (son.get("actor") or {}).get("login") or "?"
     uygulama = son.get("performed_via_github_app")
     if kim != sahip:
-        return False, f"`{etiket}` etiketini {kim} ekledi; onay yalnız {sahip}'ın"
+        return False, f"`{etiket}` etiketini {kim} ekledi; onay yalnız {sahip}'ın", None
     if uygulama:
         ad = uygulama.get("slug") or uygulama.get("name") or "uygulama"
-        return False, f"`{etiket}` etiketi bir uygulama üzerinden ({ad}) eklendi; Lokman GitHub'da kendisi ekler"
-    return True, f"`{etiket}`: {kim}, {son.get('created_at')}"
+        return False, f"`{etiket}` etiketi bir uygulama üzerinden ({ad}) eklendi; Lokman GitHub'da kendisi ekler", None
+    return True, f"`{etiket}`: {kim}, {son.get('created_at')}", son.get("created_at")
+
+
+def onaydan_sonraki(commitler: list[dict], zaman: str) -> list[str]:
+    """Etiketten sonra yazılmış tek ebeveynli commit'ler (zamanı okunamayan da sayılır). Birleştirme commit'i sayılmaz: `main`'i
+    dala getirir, `main`'de olan değişiklik PR'ın farkında görünmez."""
+    t = _zaman(zaman)
+    sonra = []
+    for c in commitler:
+        if len(c.get("parents") or []) != 1:
+            continue
+        tarih = ((c.get("commit") or {}).get("committer") or {}).get("date")
+        if not tarih or _zaman(tarih) > t:
+            sonra.append(c["sha"])
+    return sonra
+
+
+def eskiyen_onay(sonraki: list[tuple[str, list[tuple[str, str]]]], korunan: set[str]) -> list[str]:
+    """Etiketten sonraki commit'lerden korunan bir dosyaya dokunanlar: `<sha> <yol>`."""
+    out = []
+    for sha, degisiklikler in sonraki:
+        for durum, yol in degisiklikler:
+            yol = _yol(yol)
+            s = sinifla(durum, yol)
+            if yol in korunan or (s and s[0] in ("onay", "yasak")):
+                out.append(f"{sha[:7]} {yol}")
+    return out
 
 
 def rapor(bulgular: list[dict]) -> list[str]:
@@ -171,8 +250,12 @@ def _git(*args: str, kok: Path) -> str:
     return subprocess.run(["git", *args], cwd=kok, capture_output=True, text=True, check=True).stdout
 
 
+def _temel(taban: str, kok: Path) -> str:
+    return _git("merge-base", taban, "HEAD", kok=kok).strip()
+
+
 def yerel_degisiklikler(taban: str, kok: Path) -> list[tuple[str, str]]:
-    temel = _git("merge-base", taban, "HEAD", kok=kok).strip()
+    temel = _temel(taban, kok)
     sonuc = []
     for satir in _git("diff", "--name-status", "-M", temel, kok=kok).splitlines():
         parca = satir.split("\t")
@@ -189,6 +272,19 @@ def yerel_degisiklikler(taban: str, kok: Path) -> list[tuple[str, str]]:
         if yol:
             sonuc.append(("A", yol))
     return sonuc
+
+
+def yerel_muhur_kaydi(degisiklikler: list[tuple[str, str]], taban: str, kok: Path) -> dict | None:
+    durumlar = [d for d, y in degisiklikler if _yol(y) == MUHUR_KAYDI]
+    if not durumlar:
+        return None
+    try:
+        eski = _git("show", f"{_temel(taban, kok)}:{MUHUR_KAYDI}", kok=kok)
+    except subprocess.CalledProcessError:
+        eski = None
+    p = kok / MUHUR_KAYDI
+    yeni = p.read_text(encoding="utf-8") if p.is_file() else None
+    return muhur_kaydi_bulgusu(durumlar[-1], eski, yeni)
 
 
 def sozdizimi(degisiklikler: list[tuple[str, str]], kok: Path) -> list[str]:
@@ -221,16 +317,33 @@ def muhur(kok: Path) -> tuple[bool, str]:
     return r.returncode == 0, (r.stdout + r.stderr).strip()
 
 
+def _tabani_guncelle(taban: str, kok: Path) -> str | None:
+    """`origin/main` ile kıyaslanıyorsa önce alınır (eski origin/main, main'e girmiş işi dalın farkı sanar). → uyarı ya da None."""
+    if taban != "origin/main":
+        return None
+    try:
+        r = subprocess.run(["git", "fetch", "-q", "origin", "main"], cwd=kok, capture_output=True, text=True, timeout=90)
+    except (subprocess.TimeoutExpired, FileNotFoundError):
+        return "uyarı: origin/main alınamadı (zaman aşımı); yereldeki origin/main ile kıyaslanıyor"
+    if r.returncode:
+        return f"uyarı: origin/main alınamadı ({(r.stderr or '').strip().splitlines()[-1:] or ['?']}); yereldeki origin/main ile kıyaslanıyor"
+    return None
+
+
 def yerel(taban: str, kok: Path = KOK) -> int:
+    uyari = _tabani_guncelle(taban, kok)
     try:
         degisiklikler = yerel_degisiklikler(taban, kok)
+        kayit = yerel_muhur_kaydi(degisiklikler, taban, kok)
     except subprocess.CalledProcessError as e:
         print(f"DUR: git farkı okunamadı ({taban}): {e.stderr.strip()}")
         return 1
-    bulgular = siniflandir(degisiklikler)
+    bulgular = siniflandir(degisiklikler) + ([kayit] if kayit else [])
     hatalar = sozdizimi(degisiklikler, kok)
     muhur_tamam, muhur_metni = muhur(kok)
     print(f"Fren denetimi · {len(degisiklikler)} dosya, taban {taban}")
+    if uyari:
+        print(f"- {uyari}")
     for s in rapor(bulgular) + hatalar:
         print(s)
     print(f"- mühür · {muhur_metni}")
@@ -259,12 +372,27 @@ def _api(yol: str, token: str) -> list | dict:
 
 def _sayfalar(yol: str, token: str, en_cok: int = 30) -> list:
     hepsi = []
+    ayrac = "&" if "?" in yol else "?"
     for sayfa in range(1, en_cok + 1):
-        parca = _api(f"{yol}?per_page=100&page={sayfa}", token)
+        parca = _api(f"{yol}{ayrac}per_page=100&page={sayfa}", token)
+        if isinstance(parca, dict):  # commit: dosyalar `files` altında
+            parca = parca.get("files") or []
         hepsi += parca
         if len(parca) < 100:
             return hepsi
     raise RuntimeError(f"{yol}: {en_cok} sayfadan uzun; denetim eksik kalırdı")
+
+
+def _icerik(depo: str, yol: str, ref: str, token: str) -> str | None:
+    try:
+        veri = _api(f"/repos/{depo}/contents/{yol}?ref={ref}", token)
+    except urllib.error.HTTPError as e:
+        if e.code == 404:
+            return None
+        raise
+    if not isinstance(veri, dict) or veri.get("encoding") != "base64":
+        raise RuntimeError(f"{yol}@{ref[:7]} okunamadı")
+    return base64.b64decode(veri["content"]).decode("utf-8")
 
 
 def ci() -> int:
@@ -274,11 +402,31 @@ def ci() -> int:
     try:
         degisiklikler = pr_degisiklikleri(_sayfalar(f"/repos/{depo}/pulls/{no}/files", token))
         bulgular = siniflandir(degisiklikler)
+        kayit_durum = [d for d, y in degisiklikler if y == MUHUR_KAYDI]
+        if kayit_durum:  # mühür kaydı: var olan mühürler dalın ayrıldığı yerle kıyaslanır
+            pr = _api(f"/repos/{depo}/pulls/{no}", token)  # PR'ın commit'leri taban depoda da okunur (refs/pull/N/head)
+            bas = pr["head"]["sha"]
+            temel = _api(f"/repos/{depo}/compare/{pr['base']['sha']}...{bas}", token)["merge_base_commit"]["sha"]
+            yeni = None if kayit_durum[-1] == "D" else _icerik(depo, MUHUR_KAYDI, bas, token)
+            kayit = muhur_kaydi_bulgusu(kayit_durum[-1], _icerik(depo, MUHUR_KAYDI, temel, token), yeni)
+            if kayit:
+                bulgular.append(kayit)
         onay_gerekli = any(b["sinif"] == "onay" for b in bulgular)
         onayli, onay_metni = True, ""
         if onay_gerekli:
             etiketler = [e["name"] for e in _sayfalar(f"/repos/{depo}/issues/{no}/labels", token)]
-            onayli, onay_metni = onay_durumu(etiketler, _sayfalar(f"/repos/{depo}/issues/{no}/events", token), sahip)
+            onayli, onay_metni, zaman = onay_durumu(etiketler, _sayfalar(f"/repos/{depo}/issues/{no}/events", token), sahip)
+            if onayli:
+                commitler = _sayfalar(f"/repos/{depo}/pulls/{no}/commits", token, en_cok=3)
+                if len(commitler) >= 250:  # GitHub PR'ın ilk 250 commit'ini verir; sonrası görülmez
+                    raise RuntimeError("PR'da 250'den çok commit var; onaydan sonraki değişiklik denetlenemez")
+                sonraki = [(sha, pr_degisiklikleri(_sayfalar(f"/repos/{depo}/commits/{sha}", token, en_cok=10)))
+                           for sha in onaydan_sonraki(commitler, zaman)]
+                eski = eskiyen_onay(sonraki, {b["yol"] for b in bulgular if b["sinif"] in ("onay", "yasak")})
+                if eski:
+                    onayli = False
+                    onay_metni = (f"etiketten sonra korunan dosya yeniden değişti ({'; '.join(eski[:5])}); Lokman etiketi kaldırıp "
+                                  "yeniden ekler")
     except Exception as e:  # noqa: BLE001 — okunamayan PR'da kapı kapalı kalır
         print(f"::error::Korunan dosya denetimi koşamadı: {e}")
         return 1

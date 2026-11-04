@@ -66,7 +66,6 @@ def test_izin_listesi_frende():
     ("M", "KARARLAR.md", "onay"),
     ("A", "testler/referans/2026-11-04/pdf_parmak_izleri.txt", "onay"),
     ("M", "testler/referans/2026-10-14b/sonuc.json", "onay"),
-    ("M", "testler/referans/dogrula.py", None),
     ("A", "hosting/x.php", "onay"),
     ("A", "is_emri/yeni.json", None),
     ("M", "is_emri/p6001.json", "onay"),
@@ -91,6 +90,21 @@ def test_izin_listesi_frende():
     ("M", "AGENTS.md", "bilgi"),
     ("M", "motor/dxf_out.py", None),
     ("M", "./SHA256SUMS", "onay"),
+    # inceleme bulguları (BK-21): sır taraması, gerileme kapısı, hakem ve kapanış da frendir
+    ("M", "testler/referans/dogrula.py", "onay"),
+    ("M", "testler/test_sir_taramasi.py", "onay"),
+    ("M", "denetim/kos.py", "onay"),
+    ("D", ".claude/agents/geometri-hakemi.md", "onay"),
+    ("M", ".claude/skills/kapanis/SKILL.md", "onay"),
+    ("M", ".claude/skills/atolye/SKILL.md", None),
+    # karar ve ortak kural silinmez; değişikliği görünür
+    ("D", "KARARLAR/D-28.md", "onay"),
+    ("D", "AGENTS.md", "onay"),
+    ("D", "KARARLAR/README.md", None),
+    # birden çok liste uyarsa en sıkısı: referans girdideki sır dosyası yasak, yeni dosya olsa da
+    ("A", "beyin/veri/agent.env", "yasak"),
+    ("M", "is_emri/x.key", "yasak"),
+    ("D", "is_emri/x.key", "onay"),
 ])
 def test_sinif(durum, yol, beklenen):
     s = fren.sinifla(durum, yol)
@@ -131,7 +145,54 @@ CLAUDE = {"slug": "claude", "name": "Claude"}
     (["baska"], [_olay("lokmansayim", "2026-11-04T06:00:00Z", ad="baska")], False),
 ])
 def test_onay(etiketler, olaylar, beklenen):
-    assert fren.onay_durumu(etiketler, olaylar, "lokmansayim")[0] is beklenen
+    onayli, _, zaman = fren.onay_durumu(etiketler, olaylar, "lokmansayim")
+    assert onayli is beklenen and (zaman is not None) is beklenen
+
+
+def _kayit(*muhurler, cekirdek=("a", "b")):
+    return json.dumps({"sema": "s/1", "cekirdek": list(cekirdek), "muhurler": list(muhurler)}, ensure_ascii=False)
+
+
+M1 = {"kod": "M-01", "kural": "k", "durum": "mühürlü", "kilitler": [{"yer": "x.json#a", "iz": "1"}], "gecmis": []}
+M2 = {"kod": "M-02", "kural": "k2", "durum": "mühürlü", "kilitler": [], "gecmis": []}
+
+
+@pytest.mark.parametrize("durum, eski, yeni, beklenen", [
+    ("M", _kayit(M1), _kayit(M1, M2), None),                                    # yeni mühür serbest
+    ("M", _kayit(M1), _kayit(dict(M1, kural="gevşek")), "M-01"),                 # kural değişti
+    ("M", _kayit(M1), _kayit(dict(M1, durum="açık")), "M-01"),                   # açma da Lokman'ın onayıyla
+    ("M", _kayit(M1), _kayit(dict(M1, gecmis=[{"soz": "uydurma"}])), "M-01"),    # kapama (geçmiş) da
+    ("M", _kayit(M1, M2), _kayit(M2), "M-01"),                                   # mühür silinmez
+    ("M", _kayit(M1), _kayit(M1, cekirdek=("a",)), "çekirdek"),
+    ("M", _kayit(M1), "{", "JSON"),
+    ("D", _kayit(M1), None, "siliniyor"),
+    ("A", None, _kayit(M1), None),                                               # ilk kayıt
+])
+def test_muhur_kaydi(durum, eski, yeni, beklenen):
+    b = fren.muhur_kaydi_bulgusu(durum, eski, yeni)
+    if beklenen is None:
+        assert b is None
+    else:
+        assert b["sinif"] == "onay" and b["yol"] == fren.MUHUR_KAYDI and beklenen in b["neden"]
+
+
+def _commit(sha, tarih, ebeveyn=1):
+    return {"sha": sha, "parents": [{"sha": "p"}] * ebeveyn, "commit": {"committer": {"date": tarih}}}
+
+
+def test_onaydan_sonraki_commitler():
+    """Etiketten sonraki tek ebeveynli commit'ler; birleştirme commit'i sayılmaz; zamanı okunamayan sayılır."""
+    commitler = [_commit("a" * 40, "2026-11-04T05:00:00Z"), _commit("b" * 40, "2026-11-04T07:00:00Z"),
+                 _commit("c" * 40, "2026-11-04T08:00:00Z", ebeveyn=2), _commit("d" * 40, None)]
+    assert fren.onaydan_sonraki(commitler, "2026-11-04T06:00:00Z") == ["b" * 40, "d" * 40]
+
+
+def test_eskiyen_onay():
+    """Onaydan sonra korunan dosyaya dokunan commit onayı düşürür; serbest dosyaya dokunan düşürmez."""
+    korunan = {"KARARLAR/muhurlu.json", "SHA256SUMS"}
+    assert fren.eskiyen_onay([("b" * 40, [("M", "motor/dxf_out.py"), ("A", "docs/x.md")])], korunan) == []
+    assert fren.eskiyen_onay([("b" * 40, [("M", "KARARLAR/muhurlu.json")])], korunan) == ["bbbbbbb KARARLAR/muhurlu.json"]
+    assert fren.eskiyen_onay([("c" * 40, [("M", ".claude/hooks/sir_koruma.py")])], korunan) == ["ccccccc .claude/hooks/sir_koruma.py"]
 
 
 def _git(kok, *args):
@@ -165,6 +226,28 @@ def test_yerel_kip(tmp_path):
     (tmp_path / "kanal" / "settings.json").write_text("{}")
     kod, cikti = kos()
     assert kod == 1 and "YASAK" in cikti
+
+
+def test_yerel_kip_muhur_kaydi(tmp_path):
+    """Oturum kipi mühür kaydını dalın ayrıldığı yerle kıyaslar: yeni mühür temiz, var olan mühürün değişmesi onay (3)."""
+    _git(tmp_path, "init", "-q", "-b", "main")
+    (tmp_path / "KARARLAR").mkdir()
+    kayit = tmp_path / "KARARLAR" / "muhurlu.json"
+    kayit.write_text(_kayit(M1), encoding="utf-8")
+    _git(tmp_path, "add", "-A")
+    _git(tmp_path, "commit", "-q", "-m", "ilk")
+    _git(tmp_path, "checkout", "-q", "-b", "is")
+
+    def kos():
+        r = subprocess.run([sys.executable, str(KOK / "araclar" / "fren.py"), "--taban", "main"], cwd=tmp_path, capture_output=True,
+                           text=True)
+        return r.returncode, r.stdout
+
+    kayit.write_text(_kayit(M1, M2), encoding="utf-8")
+    assert kos()[0] == 0
+    kayit.write_text(_kayit(dict(M1, kural="gevşek"), M2), encoding="utf-8")
+    kod, cikti = kos()
+    assert kod == 3 and "M-01" in cikti
 
 
 def test_ci_isi_taban_kodunu_kosar():
