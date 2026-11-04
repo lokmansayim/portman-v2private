@@ -96,7 +96,8 @@ Lokman'ın mühürlediği bir konu, Lokman yeni bir değişiklik verene kadar de
 
 ## Değişiklik disiplini
 
-- Her iş emrinin kendi dalı olur (`ie-NN-…`, `bk-NN-…`); `main`'e birleştirme yalnız Lokman'ın açık onayıyla, PR üzerinden.
+- Her iş emrinin kendi dalı olur (`ie-NN-…`, `bk-NN-…`); `main`'e birleştirme yalnız Lokman'ın açık onayıyla, PR üzerinden. Onay verilen PR doğrulama yeşil olunca beklemeden birleşir; onaysız PR'da birleştirme açıkça sorulur (D-43).
+- **Korunan dosyalar (BK-21).** Dondurulmuş kayıtlar, referans girdilerin var olan dosyaları ve frenler (hook, izin, CI iş akışı) `araclar/fren.py`'de listelidir; commit'ten önce `python3 araclar/fren.py` koşulur. PR'da `Korunan dosya onayı` bunlardan biri değişiyorsa Lokman'ın `patron-onayi` etiketini ister; etiketi Lokman GitHub'da kendisi ekler, ajan eklemez. Sır ve canlı durum dosyası hiçbir etiketle depoya girmez. Ayrıntı `.claude/rules/frenler.md`.
 - **PR taslak açılır; GitHub doğrulaması taslakta koşmaz** (28 Ekim 2026, Actions dakikası; `.github/workflows/dogrulama.yml`). Taslakken oturumun yerel doğrulaması esastır; `main`'i dala birleştirmek taslakta dakika harcamaz. Birleştirme onayı alınınca (ya da onay sorulmadan hemen önce) güncel `main` dala alınır ve PR "Ready for review" yapılır; doğrulama o an koşar (PR'da Python 3.12, dört iş; `main`'e her birleşmede 3.11 + 3.12). "Doğrulama sonucu" yeşil olmadan birleştirilmez (D-28). Hazır PR'a her push yeni bir koşudur: düzeltmeler toplu gönderilir.
 - İş emri belgesi (`docs/is_emirleri/<KOD>.md`) amaç, kullanıcı adımları, değişiklik, kapsam dışı, sınırlar ve kanıt bölümleriyle yazılır; kanıt tarihli komut ve sonuçtur.
 - Çıktı üreten ya da değiştiren iş (D-28) belgesinde üç şeyi yazar: çıktıyı üreten komut, Lokman'ın onayladığı hedef örneğin depodaki yeri, onu kıyaslayan test. Kıyas testi CI'da koşmuyorsa (kaynağı depo dışında) nedeni ve kaynaklı koşunun kanıtı yazılır.
