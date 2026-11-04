@@ -169,11 +169,15 @@ def test_liste_ve_perspektif_frenleri(tmp_path, capsys):
     # İE-17 PR-1: beşik dışı ana çatının yükleme listesi ve perspektifi yazılmaz; beşik kuralıyla yanlış sayı ya da yanlış çatı çıkmaz (A4, A5
     # PR-1b). Motor'un IFC'si ve `model_motor` bugünkü gibi (çatı beşik kurulur): İE-15'in kimlik akışı bunu bilir, beşik dışında çatı
     # katmanları "kural yok" ve komut 1 döner (`testler/kimlik`: kırma çatı vakaları)
+    # İE-29 (D-47): çıkıntısız çapraz cumbada (AP-13) liste yazılır; perspektif yine çizilmez
     from motor import prefabrik_liste as PL
     for ad in ("AP13", "AP01"):
         (tmp_path / f"{ad}.json").write_text(json.dumps(_ie(ad), ensure_ascii=False), encoding="utf-8")
-        assert PL.main([str(tmp_path / f"{ad}.json"), str(tmp_path / ad)]) == 1 and not (tmp_path / ad).exists()
-        assert "liste yazılmaz" in capsys.readouterr().err
+        if ad == "AP01":
+            assert PL.main([str(tmp_path / f"{ad}.json"), str(tmp_path / ad)]) == 1 and not (tmp_path / ad).exists()
+            assert "liste yazılmaz" in capsys.readouterr().err
+        else:
+            assert PL.main([str(tmp_path / f"{ad}.json"), str(tmp_path / ad)]) == 0 and (tmp_path / ad / f"{ad}_liste.json").exists()
         assert sunum.perspektif_uret(_ie(ad), tmp_path, ad)["durum"] == "ÇİZİLEMEDİ"
     assert PL.model_motor(_ie("PK01"))["cati"][0]["tip"] == "besik"                 # beşik aynen
     assert PL.main([str(VERI / "PK01.json"), str(tmp_path / "PK01")]) == 0 and (tmp_path / "PK01" / "PK01_liste.json").exists()
