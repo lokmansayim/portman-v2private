@@ -28,7 +28,7 @@ def ana_mahya_yonu(ie: dict) -> str:
 
 
 def teras_paneli(v: dict, ie: dict) -> dict:
-    """D-50: teras paneli (`cati.tip: teras_paneli`): düz, üst yüzü duvar üstünün (ana çatının saçak altı çizgisi) 10 cm altında, 8 cm kalın;
+    """D-52: teras paneli (`cati.tip: teras_paneli`): düz, üst yüzü duvar üstünün (ana çatının saçak altı çizgisi) 10 cm altında, 8 cm kalın;
     planda duvardan `cikma_cm` dışarı, cephe boyunca verandanın eni. `cati` ile aynı biçim (tek düzlem, eğim 0) + `alt_kotu`, `kalinlik`."""
     x0, y0, x1, y1 = v["rect"]
     c = v["cati"]; k = c["cikma_cm"]; cephe = v["cephe"]
@@ -116,7 +116,7 @@ def uyarilar(plan: G.Plan, ie: dict) -> list[str]:
     zs_ana = duvar_ustu(ie) + float(ana.get("topuk_cm", 10))
     mahya_y = ana_mahya_yonu(ie) == "y"
     for v in plan.dis_verandalar:
-        if v["cati"]["tip"] == "teras_paneli":                          # D-50: düz panel ana çatının saçağının altında; birleşim yok
+        if v["cati"]["tip"] == "teras_paneli":                          # D-52: düz panel ana çatının saçağının altında; birleşim yok
             continue
         kalkan_yuzu = (v["cephe"] in ("on", "arka")) == mahya_y      # ana çatının kalkanına dayanıyor (TK-01)
         if not kalkan_yuzu and cati(v, ie)["mahya_kotu"] > zs_ana + 1e-6:
@@ -159,7 +159,7 @@ def gorunus_parcalari(plan: G.Plan, ie: dict, taraf: str) -> list[dict]:
 
     out = []
     for v in plan.dis_verandalar:
-        if v["cati"]["tip"] == "teras_paneli":                          # D-50: kolon ve kiriş panelin altında, panel düz bant
+        if v["cati"]["tip"] == "teras_paneli":                          # D-52: kolon ve kiriş panelin altında, panel düz bant
             out += _teras_paneli_parcalari(v, ie, kutu_u)
             continue
         for (x0, y0, x1, y1) in v["kolonlar"]:
@@ -194,7 +194,7 @@ def gorunus_parcalari(plan: G.Plan, ie: dict, taraf: str) -> list[dict]:
 
 
 def _teras_paneli_parcalari(v: dict, ie: dict, kutu_u) -> list[dict]:
-    """D-50: teras panelinin görünüşü. Kolon zeminden kirişin altına, kiriş (10 × 10) panelin altında, panel 8 cm'lik düz bant (`teras_paneli`):
+    """D-52: teras panelinin görünüşü. Kolon zeminden kirişin altına, kiriş (10 × 10) panelin altında, panel 8 cm'lik düz bant (`teras_paneli`):
     önden ve arkadan bakınca cephe boyunca, yandan bakınca duvardan panelin dış kenarına. Saçak ve topuk çizgisi yok (çatı gibi şekilli değil)."""
     T = teras_paneli(v, ie)
     za, zu = T["alt_kotu"], T["sacak_kotu"]

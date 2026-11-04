@@ -734,7 +734,7 @@ class IfcUretici:
             z = self._urun("IfcSlab", f"VERANDA_ZEMINI_{i}", predefined="FLOOR")
             self._yerlestir(z); self._temsil(z, self._prizma_xy([(x0, y0), (x1, y0), (x1, y1), (x0, y1)], -15, 0), "beton")
             self._pset(z, "PortatifEv_Kapsam", {"BOMKalem": f"{v['ad']} zemini — kapsam dışı (bayi/saha)", "KapsamDisi": True})
-            if C["tip"] == "teras_paneli":                      # D-50: düz teras paneli, üst yüzü duvar üstünün 10 altında, 8 cm (`veranda.teras_paneli`)
+            if C["tip"] == "teras_paneli":                      # D-52: düz teras paneli, üst yüzü duvar üstünün 10 altında, 8 cm (`veranda.teras_paneli`)
                 roof = self._urun("IfcRoof", f"VERANDA_CATISI_{i}", predefined="FLAT_ROOF")
                 self._yerlestir(roof)
                 self._pset(roof, "PortatifEv_Cati", {"Veranda": v["ad"], "Egim_yuzde": 0.0, "Sacak_cm": 0.0, "Ust_kotu_cm": round(zs, 1),
@@ -794,7 +794,7 @@ class IfcUretici:
             return H0
 
         teras = [(v["cati"]["alt_kotu"], v["rect"]) for v in (self.G.get("dis_verandalar") or [])
-                 if v["cati"]["tip"] == "teras_paneli"]              # D-50: kiriş panelin altında, dikme kirişin altına (`veranda.cati`)
+                 if v["cati"]["tip"] == "teras_paneli"]              # D-52: kiriş panelin altında, dikme kirişin altına (`veranda.cati`)
 
         def teras_alti(x0, y0, x1, y1):
             return next((za for za, (rx0, ry0, rx1, ry1) in teras

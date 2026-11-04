@@ -71,7 +71,7 @@ def gorunur(plan: G.Plan, d, dis: str) -> bool:
 
 def cephe(plan: G.Plan, taraf: str) -> dict:
     """{"en": cephenin eni, "derz": [u], "acikliklar": [{"tur": pencere | dis_kapi, "u0", "u1", "z0", "z1", "olcu", "acilis", "bolmeler",
-    "kapi_turu", "mentese"}]} (soldan sağa; `mentese` yalnız türü yazılı dış kapıda, görünüşte menteşenin yanı, D-50)."""
+    "kapi_turu", "mentese"}]} (soldan sağa; `mentese` yalnız türü yazılı dış kapıda, görünüşte menteşenin yanı, D-52)."""
     yon, dis = _YON[taraf]
     u, _, en = eksen(plan, taraf)
     uu = (lambda a: u(a, 0.0)) if yon == "x" else (lambda a: u(0.0, a))
@@ -104,7 +104,7 @@ def cephe(plan: G.Plan, taraf: str) -> dict:
 
 
 def kapi_mentese_yani(plan: G.Plan, a, g, uu, yon: str) -> str:
-    """D-50: dış kapının menteşesi görünüşte bakanın solunda mı sağında mı ("sol" | "sag"). Menteşe ucu planın kapı sembolüyle aynı
+    """D-52: dış kapının menteşesi görünüşte bakanın solunda mı sağında mı ("sol" | "sag"). Menteşe ucu planın kapı sembolüyle aynı
     (`bayi_gorseli._mentese_a0_ucunda`: `dizilim.kapi: mantik`ta `G.mentese_ucu`); `g` açıklığın boşluk dörtgeni, `uu` duvar boyunca
     koordinattan görünüşün yatayına, `yon` duvarın yönü."""
     from .bayi_gorseli import _mentese_a0_ucunda

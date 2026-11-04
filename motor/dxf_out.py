@@ -170,7 +170,7 @@ class Cizici:
             doc.layers.add(name, color=color, linetype=lt)
         doc.layers.get("NET_ALAN_GEOMETRISI").off()
         doc.layers.get("NET_ALAN_GEOMETRISI").dxf.plot = 0
-        if any(v["cati"]["tip"] == "teras_paneli" for v in plan.dis_verandalar):   # D-50: katman yalnız teras panelli planda (öteki DXF'ler aynı)
+        if any(v["cati"]["tip"] == "teras_paneli" for v in plan.dis_verandalar):   # D-52: katman yalnız teras panelli planda (öteki DXF'ler aynı)
             doc.layers.add("VERANDA_PANEL", color=8, linetype="Continuous")
         doc.styles.add("PORTMAN", font=FONT)
         for style in doc.styles:
@@ -556,7 +556,7 @@ class Cizici:
                         blk.add_line((0, 0), (boy, 0), dxfattribs={"layer": "0", "color": 256, "lineweight": 25})
                         blk.add_line((0, sy), (boy, sy), dxfattribs={"layer": "0", "color": 256, "lineweight": 25})
                 self.yerlestir(name, kod, (x0, y0), 0.0, "MONTAJ_STANDART" if montaj else "VERANDA_PROFIL_100", rol, ox, oy)
-        for v in plan.dis_verandalar:                       # D-50: teras panelinin dış çizgisi (paftadaki gibi; duvardan cikma_cm)
+        for v in plan.dis_verandalar:                       # D-52: teras panelinin dış çizgisi (paftadaki gibi; duvardan cikma_cm)
             if v["cati"]["tip"] == "teras_paneli":
                 X0, Y0, X1, Y1 = VR.teras_paneli(v, plan.is_emri)["kutu"]
                 msp.add_lwpolyline([(X0 + ox, Y0 + oy), (X1 + ox, Y0 + oy), (X1 + ox, Y1 + oy), (X0 + ox, Y1 + oy)], close=True,
@@ -938,14 +938,14 @@ class Cizici:
         """İE-29 (Lokman, 4 Kasım 2026 05:17, AP-27 paftasının pencere detayı: "pencereleri bu şekilde çizmen gerekiyor"): bölmeleri pencere
         veri tabanında yazılı pencere (`modeller[].bolmeler`: soldan sağa kanat ve sabit, cm) görünüşte bölmeleriyle. Çift kasa; her bölmede
         kasa içi çerçeve (iki bölmenin çerçevesi arası kayıt); kanatta çift çizgili kanat ve açılım (kırmızı kesik, menteşe yanının iki
-        köşesinden kol yanının ortasına; tek açılım. D-50: paftalarda kollar kol yanında buluşur, AP-26 kapı detayında kol üçgenin tepesinde;
-        vasistas bloğunda da kollar açılan üst yanda buluşur); vasistas bölmesinde (D-50) kollar alt köşelerden üst ortaya; sabitte cam işareti; sürgülüde (D-50) çift çizgili kanat ve sürüldüğü yana kırmızı yön oku. Oranlar ve çizgi kalınlığı kaynak ön pencere bloğundaki gibi (kasa 3,5, kanat 4,5; 0,25 mm).
+        köşesinden kol yanının ortasına; tek açılım. D-52: paftalarda kollar kol yanında buluşur, AP-26 kapı detayında kol üçgenin tepesinde;
+        vasistas bloğunda da kollar açılan üst yanda buluşur); vasistas bölmesinde (D-52) kollar alt köşelerden üst ortaya; sabitte cam işareti; sürgülüde (D-52) çift çizgili kanat ve sürüldüğü yana kırmızı yön oku. Oranlar ve çizgi kalınlığı kaynak ön pencere bloğundaki gibi (kasa 3,5, kanat 4,5; 0,25 mm).
         Blok cm, pencerenin kendi ölçüsünde; ilk kullanımda kurulur. `bolmeler` verilirse (İş Emri'nde açıklığın kendi bölmeleri, AP-26:
         aynı ölçü TK-01 ve TK-02'de bölmesiz) veri tabanındakinin yerine; blok adı bölmelerden."""
         bolmeler = bolmeler or PENCERE_BOLMELERI[olcu]
         ad = f"on-pencere-{olcu}" if bolmeler == PENCERE_BOLMELERI.get(olcu) else \
             f"on-pencere-{olcu}-" + "-".join((f"{'su' if b['tur'] == 'surgulu' else b['tur'][0]}{float(b['en_cm']):g}".replace(".", "p")
-                                              + (b.get("mentese") or b.get("yon") or "")[:2]) for b in bolmeler)   # D-50: sürgülü "su", vasistas "v"
+                                              + (b.get("mentese") or b.get("yon") or "")[:2]) for b in bolmeler)   # D-52: sürgülü "su", vasistas "v"
         if ad in self.doc.blocks:
             return ad
         pk = G.pencere_kurali(olcu)
@@ -969,7 +969,7 @@ class Cizici:
                     b.add_line((cx + u0 * o, cy + v0 * o), (cx + u1 * o, cy + v1 * o), dxfattribs=cizgi)
                 continue
             kutu(x0 + kanat, y0 + kanat, x1 - kanat, y1 - kanat)                              # kanat çift çizgi
-            if bl["tur"] == "surgulu":                                                        # D-50: sürülen kanatta yön oku (`_surgulu_blok`'unki gibi)
+            if bl["tur"] == "surgulu":                                                        # D-52: sürülen kanatta yön oku (`_surgulu_blok`'unki gibi)
                 y, xa, xb = (y0 + y1) / 2, x0 + (x1 - x0) * 0.2, x0 + (x1 - x0) * 0.8
                 bas, uc = (xb, xa) if bl["yon"] == "sol" else (xa, xb)
                 ok = 1.0 if uc > bas else -1.0
@@ -978,12 +978,12 @@ class Cizici:
                 for dy in (-2.5, 2.5):
                     b.add_line((uc, y), (uc - 4 * ok, y + dy), dxfattribs=kirmizi)
                 continue
-            if bl["tur"] == "vasistas":                                                       # D-50: alttan menteşeli; kollar üst ortada (`_vasistas_blok`)
+            if bl["tur"] == "vasistas":                                                       # D-52: alttan menteşeli; kollar üst ortada (`_vasistas_blok`)
                 tepe, koseler = ((x0 + x1) / 2, y1 - kanat), ((x0 + kanat, y0 + kanat), (x1 - kanat, y0 + kanat))
             else:
                 m_x, k_x = (x0 + kanat, x1 - kanat) if bl["mentese"] == "sol" else (x1 - kanat, x0 + kanat)   # menteşe yanı, kol yanı
                 tepe, koseler = (k_x, (y0 + y1) / 2), ((m_x, y0 + kanat), (m_x, y1 - kanat))
-            for kose in koseler:                                                              # açılım: menteşe yanının köşelerinden kol yanının ortasına (D-50)
+            for kose in koseler:                                                              # açılım: menteşe yanının köşelerinden kol yanının ortasına (D-52)
                 dx, dy = tepe[0] - kose[0], tepe[1] - kose[1]
                 n = max(2, round(((dx * dx + dy * dy) ** 0.5 + 4.0) / 9.0))                 # ~5'lik kesik, ~4 ara; iki ucu köşede ve tepede
                 for j in range(n):
@@ -998,7 +998,7 @@ class Cizici:
         return f"Pencere üst kotu {fmt(hy - lento)} cm{ek} | Lento {fmt(lento)} cm | Bina yüksekliği {fmt(hy)} cm"
 
     def _pvc_kapi_blok(self, mentese: str) -> tuple:
-        """D-50 (AP-26 paftasının kapı detayı: "PVC kapı, komple cam olacak, kilitli olacak", beyaz, düz kasa, içeri açılır): görünüşte çift
+        """D-52 (AP-26 paftasının kapı detayı: "PVC kapı, komple cam olacak, kilitli olacak", beyaz, düz kasa, içeri açılır): görünüşte çift
         kasa, altta eşik, kanadın içi komple cam (cam işareti), kol menteşenin karşı yanında ortada, açılım kırmızı kesik: menteşe yanının iki
         köşesinden kol yanının ortasına (paftadaki gibi; vasistas bloğundaki gibi kollar açılan yanda buluşur). Blok cm, 90 × 200 (kapının
         çizimdeki boşluğu; açıklığa ölçekli); `mentese` görünüşte bakanın solu ya da sağı. İlk kullanımda kurulur."""
@@ -1033,7 +1033,7 @@ class Cizici:
         return ad, en, boy
 
     def _on_kapi(self, u0, z0, w, h, kapi_turu=None, mentese=None):
-        """Görünüşte dış kapı: türü yazılı kapı kendi bloğuyla (D-50: `pvc_cam` → `_pvc_kapi_blok`), öteki kaynak ön kapı bloğu (çelik kapı,
+        """Görünüşte dış kapı: türü yazılı kapı kendi bloğuyla (D-52: `pvc_cam` → `_pvc_kapi_blok`), öteki kaynak ön kapı bloğu (çelik kapı,
         Güncel Şablon 2024); açıklığa ölçekli."""
         if kapi_turu == "pvc_cam":
             ad, en, boy = self._pvc_kapi_blok(mentese or "sag")
@@ -1042,10 +1042,10 @@ class Cizici:
             self.msp.add_blockref("kaynak-on-kapi", (u0, z0), dxfattribs={"xscale": w / 68.697, "yscale": h / 133.557, "layer": "ON_DOGRAMA"})
 
     def _on_pencere(self, u0, z0, w, h, olcu, acilis=None, bolmeler=None):
-        """Görünüşte pencere: bölmeleri yazılı pencere (İş Emri'nde açıklığın kendi bölmeleri, D-50 ile sürgülü bölme de; ya da veri
+        """Görünüşte pencere: bölmeleri yazılı pencere (İş Emri'nde açıklığın kendi bölmeleri, D-52 ile sürgülü bölme de; ya da veri
         tabanındaki model, İE-29) bölmeli blokla (`_bolmeli_blok`), sürgülü bloğu (`acilis: surgulu`, D-31 madde 11), 60×40 vasistas bloğu
         (D-31 madde 6), öteki ölçüler kaynak ön pencere bloğu (Güncel Şablon 2024); açıklığa ölçekli."""
-        if bolmeler:                                                # D-50: açıklığın kendi bölmeleri önce (280/210 sürgülü bölmeli)
+        if bolmeler:                                                # D-52: açıklığın kendi bölmeleri önce (280/210 sürgülü bölmeli)
             pk = G.pencere_kurali(olcu)
             self.msp.add_blockref(self._bolmeli_blok(olcu, list(bolmeler)), (u0, z0), dxfattribs={"xscale": w / pk.en, "yscale": h / pk.boy, "layer": "ON_DOGRAMA"})
         elif acilis == "surgulu":
@@ -1084,7 +1084,7 @@ class Cizici:
                 elif a_.tur == "dis_kapi":
                     h = hy - lento
                     men = None
-                    if a_.kapi_turu:                                # D-50: ön cephede u = x; menteşe yanı cephenin hesabıyla
+                    if a_.kapi_turu:                                # D-52: ön cephede u = x; menteşe yanı cephenin hesabıyla
                         from . import cephe_gorunus as CG
                         men = CG.kapi_mentese_yani(plan, a_, g, lambda t: t, "x")
                     self._on_kapi(x0 + ox, bot, w, h, a_.kapi_turu, men)

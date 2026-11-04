@@ -1,9 +1,9 @@
-"""D-50 (İE-30; Lokman, 4 Kasım 2026 20:42 ve 21:14, kart "Paftadan, ev ev") · AP-26: pencere bölmeleri, cam PVC kapı, teras paneli (PC-32).
+"""D-52 (İE-30; Lokman, 4 Kasım 2026 20:42 ve 21:14, kart "Paftadan, ev ev") · AP-26: pencere bölmeleri, cam PVC kapı, teras paneli (PC-32).
 
 Lokman: "pencereler çizimi tam doğru değil ayrıca teras ayrı bir teknikler yapılıyor çatı saçağının 10 cm altında çatı paneli olarak
 kullandığımız bir 8 cm genişliğinde C den oluşan panel yapıyoruz üzerine yine Trapez sac araya damlalık atıyoruz yani çatı gibi şekilli
 değil AP26 montaj paftasını iyice incele". Paftadan İş Emri'ne:
-- pencerenin bölmeleri açıklık başına (`acikliklar[i].bolmeler`, İE-29'un biçimi; D-50 ile sürgülü ve vasistas bölmesi),
+- pencerenin bölmeleri açıklık başına (`acikliklar[i].bolmeler`, İE-29'un biçimi; D-52 ile sürgülü ve vasistas bölmesi),
 - dış kapının türü (`kapi_turu: pvc_cam`: beyaz, komple cam PVC kapı),
 - taşan verandanın üstü teras paneli (`verandalar[i].cati: {tip: teras_paneli, cikma_cm}`: düz, duvar üstünün 10 altında, 8 cm).
 Anahtarları yazılmamış İş Emri'nde hiçbir şey değişmez (TK-01 r07, TK-02, P6001; referans ve M-02 testleri ayrıca).
@@ -162,7 +162,7 @@ def _kirmizi(doc, ad):
 
 
 def test_kanat_kollari_kol_yaninda_bulusur(ap26_dxf):
-    """D-50: açılımın kolları menteşe yanının iki köşesinden kol yanının ortasına (AP-26 paftası: 120/120'de ortada; kapı detayında kol
+    """D-52: açılımın kolları menteşe yanının iki köşesinden kol yanının ortasına (AP-26 paftası: 120/120'de ortada; kapı detayında kol
     üçgenin tepesinde). 120/120: menteşe dış yanlarda, kollar ortadaki kayıtta buluşur."""
     k = _kirmizi(ap26_dxf, "on-pencere-120x120-k60so-k60sa")
     xs = [x for (a, b) in k for x in (a[0], b[0])]
@@ -214,7 +214,7 @@ def test_teras_paneli_planda(ap26_dxf):
 
 
 def test_ap27_kayitlarinin_blogu_degismedi():
-    """İE-29'un AP-27 pencereleri (veri tabanı 180x210, 140x150): D-50'de menteşe adı kanadın sabit yanına çevrildi, çizgiler aynı (AP-27
+    """İE-29'un AP-27 pencereleri (veri tabanı 180x210, 140x150): D-52'de menteşe adı kanadın sabit yanına çevrildi, çizgiler aynı (AP-27
     paftasında kollar dış yanda buluşur; İE-29'un görünüş testindeki 12,5–38,5 ve 141,5–167,5)."""
     import ezdxf
     from motor import dxf_out

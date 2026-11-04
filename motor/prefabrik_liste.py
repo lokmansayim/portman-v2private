@@ -376,12 +376,12 @@ def _veranda_catilari(plan, ie: dict) -> list[dict]:
     for v in plan.dis_verandalar:
         c = v["cati"]; s = float(c["sacak_cm"]); en, derin = float(v["en"]), float(v["derinlik"])
         ad = f"{_kucuk(v['ad'])} çatısı"
-        if c["tip"] == "teras_paneli":                 # D-50: makassız düz panel çatı (AP-09'un açık mahal panel çatısı gibi; Lokman 4 Kasım 20:42:
+        if c["tip"] == "teras_paneli":                 # D-52: makassız düz panel çatı (AP-09'un açık mahal panel çatısı gibi; Lokman 4 Kasım 20:42:
             k_ = float(c["cikma_cm"])                  # "çatı paneli olarak kullandığımız ... C den oluşan panel"): açıklık duvardan panelin dış
             out.append({"ad": ad, "tip": "tek_yon", "aciklik_cm": k_, "boy_cm": en, "egim_yuzde": 0.0, "sacak_cm": 0.0, "kalkan": 0,   # kenarı,
                         "makas_yok": True, "acik": True, "teras_paneli": True, "mahya_boy_cm": en,                                  # boy eni;
                         "sacak_hatlari_m": [round(en / 100, 3)], "alin_kenarlari_m": [round(k_ / 100, 3)] * 2,                     # saçak dış
-                        "not": "Motor (D-50): teras paneli; saçağın 10 cm altında düz panel, üstü trapez sac (panel, damlalık ve "  # kenarda,
+                        "not": "Motor (D-52): teras paneli; saçağın 10 cm altında düz panel, üstü trapez sac (panel, damlalık ve "  # kenarda,
                                "tavan satırları çizim onayından sonra)"})                                                           # iki yan alın
             continue
         if c["tip"] == "besik":

@@ -233,7 +233,7 @@ def test_bolmeli_pencere_kaydi():
     for olcu, bs in bol.items():
         assert abs(sum(b["en_cm"] for b in bs) - G.pencere_kurali(olcu).en) < 1e-6, olcu
         assert [b["tur"] for b in bs] == ["kanat", "sabit", "kanat"], olcu
-        assert [b.get("mentese") for b in bs] == ["sag", None, "sol"], olcu          # D-50: iki kanat da sabit yanından menteşeli (kollar dış yanda)
+        assert [b.get("mentese") for b in bs] == ["sag", None, "sol"], olcu          # D-52: iki kanat da sabit yanından menteşeli (kollar dış yanda)
     from motor import dxf_out
     assert dxf_out.PENCERE_BOLMELERI == bol
 
