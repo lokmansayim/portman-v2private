@@ -201,3 +201,38 @@ def test_pafta_kot_yazisi_dosemeden_pencereyi_soyler():
         else:
             assert not any("döşemeden" in s for s in yazi), yazi
             assert any(re.search(r"Pencere üst kotu 200 cm \| Lento 50 cm", s) for s in yazi), yazi
+
+
+# --------------------------------------------------------------------------- bölmeli pencere (İE-29 PR-2)
+
+def test_bolmeli_pencere_kaydi():
+    """İE-29 PR-2 (Lokman, 4 Kasım 2026 05:17, AP-27 paftasının pencere detayı: "pencereleri bu şekilde çizmen gerekiyor"): bölmeleri
+    yazılı model soldan sağa kanat ve sabit; bölmelerin toplamı pencerenin eni, kanatta menteşe yanı yazılı."""
+    bol = {m["olcu"]: m["bolmeler"] for m in VT["modeller"] if m.get("bolmeler")}
+    assert sorted(bol) == ["140x150", "180x210"]
+    for olcu, bs in bol.items():
+        assert abs(sum(b["en_cm"] for b in bs) - G.pencere_kurali(olcu).en) < 1e-6, olcu
+        assert [b["tur"] for b in bs] == ["kanat", "sabit", "kanat"], olcu
+        assert [b.get("mentese") for b in bs] == ["sol", None, "sag"], olcu          # iki kanat da dış yanından
+    from motor import dxf_out
+    assert dxf_out.PENCERE_BOLMELERI == bol
+
+
+def test_bolmeli_pencere_gorunuste_ap27():
+    """AP-27'nin dört penceresi görünüşte bölmeli blokla; öteki pencereler (vasistas, sürgülü, kaynak blok) eskisi gibi."""
+    import ezdxf
+    from motor import dxf_out
+    with tempfile.TemporaryDirectory() as t:
+        dxf_out.uret(_ie("AP27"), Path(t), pdf_hatada=False)
+        doc = ezdxf.readfile(next(Path(t).glob("*.dxf")))
+    adlar = [e.dxf.name for e in doc.modelspace().query("INSERT") if e.dxf.layer == "ON_DOGRAMA"]
+    assert sorted(a for a in adlar if a.startswith("on-pencere-")) == ["on-pencere-140x150"] + ["on-pencere-180x210"] * 3
+    b = doc.blocks.get("on-pencere-180x210")
+    xs = {round(float(v[0]), 2) for e in b.query("LWPOLYLINE") for v in e.get_points()}
+    assert {43.0, 49.0, 131.0, 137.0} <= xs                                             # kayıtlar 46 ve 134'te: 46 | 88 | 46
+    kirmizi = [(float(e.dxf.start.x), float(e.dxf.end.x)) for e in b.query("LINE") if e.dxf.color == 1]
+    sol = [x for k in kirmizi for x in k if x < 46]
+    sag = [x for k in kirmizi for x in k if x > 134]
+    assert len(sol) + len(sag) == 2 * len(kirmizi)                                       # açılım yalnız kanatlarda (sabitte yok)
+    assert (round(min(sol), 2), round(max(sol), 2)) == (12.5, 38.5)                      # sol kanat: kollar dış yandaki menteşede buluşur
+    assert (round(min(sag), 2), round(max(sag), 2)) == (141.5, 167.5)                    # sağ kanat: ayna

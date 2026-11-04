@@ -1,6 +1,6 @@
 {
  "sema": "portman.pencere_veritabani/1",
- "aciklama": "Pencere veri tabanı (İE-27 PR-2, D-45 madde 11). Lokman, 3 Kasım 2026 09:52, madde 11: \"pencere modellerini sana vermiştim yani pencereler konusunda da bir veri tabanın olmalı hangisi geldiyse onu uygula yani kısaltma\". Gelen pencere (İş Emri, pafta) ölçüsüyle kurulur; Motor kısaltmaz, en yakın ölçüye çevirmez. `kural` Motor'un tek pencere kuralıdır (`motor/geometry.py › pencere_kurali` okur); `modeller` bildiğimiz pencerelerin kaydıdır: kaynağıyla, Lokman'ın ve Portatifev'in kullandığı ölçüler. Kayıtta olmayan ölçü yine kurulur, plan uyarısı yazılır (yeni model kayda eklenir).",
+ "aciklama": "Pencere veri tabanı (İE-27 PR-2, D-45 madde 11). Lokman, 3 Kasım 2026 09:52, madde 11: \"pencere modellerini sana vermiştim yani pencereler konusunda da bir veri tabanın olmalı hangisi geldiyse onu uygula yani kısaltma\". Gelen pencere (İş Emri, pafta) ölçüsüyle kurulur; Motor kısaltmaz, en yakın ölçüye çevirmez. `kural` Motor'un tek pencere kuralıdır (`motor/geometry.py › pencere_kurali` okur); `modeller` bildiğimiz pencerelerin kaydıdır: kaynağıyla, Lokman'ın ve Portatifev'in kullandığı ölçüler. Kayıtta olmayan ölçü yine kurulur, plan uyarısı yazılır (yeni model kayda eklenir). Bölmeleri yazılı model (`bolmeler`: soldan sağa kanat ve sabit, cm; kanatta menteşe yanı) görünüşte bölmeleriyle çizilir (İE-29 PR-2, `motor/dxf_out.py › _bolmeli_blok`).",
  "kural": {
   "ust_kot_cm": {
    "deger": 200,
@@ -267,6 +267,50 @@
    "olcu": "30x30",
    "tur": "vasistas",
    "kaynak": "Güncel Şablon 2024 ölçü etiketleri (Pencere varyasyonları envanteri (İE-22, 28 Ekim 2026; Drive PENCERE_VARYASYONLARI.md)), 18 yazı"
+  },
+  {
+   "olcu": "180x210",
+   "tur": "pencere",
+   "ad": "üç bölmeli pencere",
+   "kaynak": "AP-27 montaj paftasının pencere detayı (3 adet 178×208 iç ölçü, 1 adet 138×148; kanat, sabit, kanat; dıştan binmeli, tek açılım, iç dış beyaz); Lokman, 4 Kasım 2026 05:17: \"pencereleri bu şekilde çizmen gerekiyor\" (İE-29 PR-2). Bölmeler paftadaki kayıtlardan (178'lik pencerede 45,4 ve 132,6)",
+   "bolmeler": [
+    {
+     "tur": "kanat",
+     "mentese": "sol",
+     "en_cm": 46
+    },
+    {
+     "tur": "sabit",
+     "en_cm": 88
+    },
+    {
+     "tur": "kanat",
+     "mentese": "sag",
+     "en_cm": 46
+    }
+   ]
+  },
+  {
+   "olcu": "140x150",
+   "tur": "pencere",
+   "ad": "üç bölmeli pencere",
+   "kaynak": "AP-27 montaj paftasının pencere detayı (3 adet 178×208 iç ölçü, 1 adet 138×148; kanat, sabit, kanat; dıştan binmeli, tek açılım, iç dış beyaz); Lokman, 4 Kasım 2026 05:17: \"pencereleri bu şekilde çizmen gerekiyor\" (İE-29 PR-2). Bölmeler paftadaki kayıtlardan (138'lik pencerede 51,4 ve 83,0; kanatlar eşit alındı)",
+   "bolmeler": [
+    {
+     "tur": "kanat",
+     "mentese": "sol",
+     "en_cm": 54
+    },
+    {
+     "tur": "sabit",
+     "en_cm": 32
+    },
+    {
+     "tur": "kanat",
+     "mentese": "sag",
+     "en_cm": 54
+    }
+   ]
   }
  ]
 }
