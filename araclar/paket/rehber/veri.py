@@ -1002,26 +1002,39 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
     # ---------- kaplama ----------
     TP = satirlar("Tek kat çatı paneli")
     SP = satirlar("Sandviç panel")
-    TR_ = satirlar("Trapez sac") if not TP and not SP else []
+    # İE-15 K6: trapez sac (TK-04 r05; Lokman 4 Kasım 2026 20:47); "Trapez sac mahyası" satırı kaplama değil
+    TR_ = [s for s in satirlar("Trapez sac") if s["kalem"] == "Trapez sac" or s["kalem"].startswith("Trapez sac ·")] if not TP and not SP else []
+    KAPS = TP or SP or TR_
+    kap_cm = 100
     if TP:
         kap_ad = "Tek kat panel"
         boy = {kucuk(s["kalem"].split(" · ")[1]): s["olcu"] for s in TP}
     elif SP:
         kap_ad = "Sandviç panel"
         boy = {"ana çatı": SP[0]["olcu"]}
+    elif TR_:
+        if "osb" in kucuk(OZ.get("çatı kaplaması", "") or ""):
+            raise Desteklenmiyor("İş Emri'nde OSB + nem bariyeri + trapez sac: rehber OSB ve nem bariyeri katmanlarını kurmuyor")
+        if len({s.get("kapatma_m") for s in TR_}) != 1 or TR_[0].get("kapatma_m") is None:
+            raise Desteklenmiyor("listede trapez sacın kapatması yazılı değil (D-50, M-11)")
+        kap_ad, kap_cm = "Trapez sac", round(TR_[0]["kapatma_m"] * 100, 2)
+        boy = {(kucuk(s["kalem"].split(" · ")[1]) if " · " in s["kalem"] else "ana çatı"): s["olcu"] for s in TR_}
     else:
-        raise Desteklenmiyor("listede çatı kaplaması (tek kat panel ya da sandviç panel) satırı yok")
+        raise Desteklenmiyor("listede çatı kaplaması (tek kat panel, sandviç panel ya da trapez sac) satırı yok")
+    MAH = "Trapez sac mahyası" if TR_ else "Metal kiremit mahyası"       # trapez sacta mahya sacın kapattığı kadar kapatır (D-50, M-11)
+    mahya_soz = (f"trapez sac mahyasıyla ({ls(MAH)}; sacın kapattığı kadar kapatır, bindirme yok)" if TR_ else "metal kiremit mahyasıyla")
     if GIR or CAP:                                # girintili gövdede, çapraz cumbada panel boyu çatı parçası başına (liste: "· ana çatı", "· cumba")
-        boy = {kucuk(s["kalem"].split(" · ")[1]): s["olcu"] for s in (TP or SP) if " · " in s["kalem"]}
+        boy = {kucuk(s["kalem"].split(" · ")[1]): s["olcu"] for s in KAPS if " · " in s["kalem"]}
     # kaplamanın kesiti kart modelinin kuralından (`cati_kaplamasi.profil`; D-40): türü kart modelinin kaplama parçalarından, liste satırıyla aynı
     KAP = (SAYIM.get("yerlesim") or {}).get("degerler", {}).get("cati_kaplamasi", {})
     # (kart modeli kaplamayı kurmadıysa, ör. girintili gövdede tek kat panel, tür listeden; ayrışırsa rehber kurulmaz)
     kap_tur = {p["bilgi"]["Kaplama"] for p in (SAYIM.get("yerlesim") or {}).get("parcalar", []) if "Kaplama" in p.get("bilgi", {})}
-    kap_tur = kap_tur or {"tek kat" if TP else "sandvi"}
-    if kap_tur != {"tek kat" if TP else "sandvi"} or "profil" not in KAP:
+    beklenen_tur = "tek kat" if TP else "sandvi" if SP else "trapez"
+    kap_tur = kap_tur or {beklenen_tur}
+    if kap_tur != {beklenen_tur} or "profil" not in KAP:
         raise Desteklenmiyor(f"kart modelinin kaplaması {sorted(kap_tur) or 'yok'}, listede {kap_ad.lower()}" +
                              ("" if "profil" in KAP else "; kart modelinin kuralında kaplama profili yok"))
-    KPR = KAP["profil"][next(iter(kap_tur))]
+    KPR = KAP["profil"][next(iter(kap_tur))] if next(iter(kap_tur)) in KAP["profil"] else KAP["profil"][KAP["profil_esi"][next(iter(kap_tur))]]
     renk = kucuk(OZ.get("çatı kaplama rengi", "") or "")
     # hadve aralığı kuraldan: tek kat panelde 20 cm (27/200), sandviç panelde 25 cm (5 hadvenin biri bindirme hadvesi; Lokman 1.11.2026 10:46)
     hadve, HA = {}, KPR["hadve_araligi"]
@@ -1050,7 +1063,7 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
             lo_, hi_ = hadve_ar[f"H{v['R']}{'R' if v['sag_devam'] and not v['sol_devam'] else 'L'}"]
             mahya.append({"R": v["R"], "topR": v["R"], "r": 0, "O": [0, 0], "s0": v["M"], "z": [_r(-hi_), _r(-lo_)], "ad": f"{kucuk(v['ad'])} mahyası"})
     kaplama = {
-        "profil": {"hadve": KPR["hadve"], "tepe": KPR["tepe"], "taban": KPR["taban"], "kenar": KPR["kenar"], "kapatir": 100,
+        "profil": {"hadve": KPR["hadve"], "tepe": KPR["tepe"], "taban": KPR["taban"], "kenar": KPR["kenar"], "kapatir": kap_cm,
                    **({"yalitim": KPR["yalitim"]} if KPR["yalitim"] else {})},
         "hadve": hadve, "mahya": mahya,
         "metin": {"ad": f"{kap_ad} {{ad}}", "kesim": f"{kap_ad} · kesim parçası", "say_onek": kap_ad,
@@ -1061,11 +1074,12 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
                              "sandviç panel tek kat panelden "
                              f"{fmtc(KPR['yalitim'] + KPR['hadve'] - KAP['profil'][KAP['varsayilan']]['yalitim'] - KAP['profil'][KAP['varsayilan']]['hadve'])} cm "
                              "kalın, alın sacının alnı o kadar geniş (D-40)" if KPR["yalitim"] else
-                             "100 cm kapatır; kesit kartta yazılı değil, çizimde 62 m²’deki 27/200 trapez profili gösterildi (varsayım)"),
-                  "dizilim": "kalkan kenarından başlayarak, her levha 100 cm kapatır; boy eğim boyunca (liste kuralı)",
+                             f"{fmt(kap_cm)} cm kapatır" + (" (D-50, M-11)" if TR_ else "") +
+                             "; kesit kartta yazılı değil, çizimde 62 m²’deki 27/200 trapez profili gösterildi (varsayım)"),
+                  "dizilim": f"kalkan kenarından başlayarak, her levha {fmt(kap_cm)} cm kapatır; boy eğim boyunca (liste kuralı)",
                   "renk": renk or "—",
-                  "liste": "; ".join(f"{s['kalem']} {s['olcu']} · {s['adet']} adet" for s in (TP or SP)),
-                  "mahya_ad": "Metal kiremit mahyası", "mahya_liste": f"{ls('Metal kiremit mahyası')}; {ls('Mahya bandı')}"},
+                  "liste": "; ".join(f"{s['kalem']} {s['olcu']} · {s['adet']} adet" for s in KAPS),
+                  "mahya_ad": MAH, "mahya_liste": f"{ls(MAH)}; {ls('Mahya bandı')}"},
     }
 
     # ---------- izolasyon ----------
@@ -1383,10 +1397,10 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
                               LR("Metal dere inişi aparatı"), LR("Dere kapağı")) if x]},
         {"ad": f"{kap_ad} ve mahya", "t": f"{kap_ad} ve mahya",
          "p": f"{kap_ad} ({renk or 'çatı rengi'}) doğrudan aşıkların üstüne serilip vidalanır (OSB ve nem bariyeri yok). Levhalar kalkan kenarından başlayarak dizilir, her levha "
-              "100 cm kapatır; boy eğim boyunca: " + ", ".join(f"{y} {b}" for y, b in boy.items()) + ". Mahya metal kiremit mahyasıyla, altı mahya bandıyla kapatılır. "
+              f"{fmt(kap_cm)} cm kapatır; boy eğim boyunca: " + ", ".join(f"{y} {b}" for y, b in boy.items()) + f". Mahya {mahya_soz}, altı mahya bandıyla kapatılır. "
               "Levhalar motorun modelinde yok; liste kuralının boyuyla dizildi.",
          "kamera": K([0, 2.8, 0.3], 0.62, 0.5, 19),
-         "rows": [x for x in ([LR(s["kalem"], s["olcu"]) for s in (TP or SP)] + [I("Modelde", "{kaplama_n} levha · 100 cm kapatır"), LR("Metal kiremit mahyası"), LR("Mahya bandı")]) if x]},
+         "rows": [x for x in ([LR(s["kalem"], s["olcu"]) for s in KAPS] + [I("Modelde", f"{{kaplama_n}} levha · {fmt(kap_cm)} cm kapatır"), LR(MAH), LR("Mahya bandı")]) if x]},
         {"ad": "Alın sacları", "t": "Alın sacları",
          "p": "Alın sacı kalkanların eğik kenarlarına, kaplamadan sonra takılır: tırnağı baş makas Z’sine girer, saçak altı kolu aşıkların altını kapatır ve makasın "
               "topuğunda kesilir; üstte kaplamanın kenar hadvesini kavrar. Alın yüzü dereyi de içine alacak kadar geniştir: köşede saçak sacının alnıyla birleşir ve derenin ucunu kapatır.",
@@ -1509,7 +1523,7 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
         kp_["p"] = ("Ters mahyadan sonra: " + kp_["p"][:1].lower() + kp_["p"][1:]).replace(
             "Levhalar motorun modelinde yok; liste kuralının boyuyla dizildi.",
             "Levhalar kart modelinin diziliminden (liste gibi parça parça): ana çatıda dizilimin başladığı kalkan kenarından, cumbada dış uçtaki "
-            "kalkandan; dere hattında açıyla kesilir.").replace("Mahya metal kiremit mahyasıyla", "Ana çatının ve cumbanın mahyası metal kiremit mahyasıyla")
+            "kalkandan; dere hattında açıyla kesilir.").replace(f"Mahya {mahya_soz}", f"Ana çatının ve cumbanın mahyası {mahya_soz}")
         tm = {"ad": "Ters mahya", "t": "Ters mahya",
               "p": (f"Kaplamadan önce iki dere (vadi) hattına, cumbanın ana çatıyla birleştiği yere ters mahya döşenir: iki yüzün suyu bu oluktan saçağa "
                     "iner. Ters mahya aşıkların üstünde, kaplamanın altındadır, iki yüzde de 20 cm; uçlarına kenar kutusu takılır. Dere hatları çatı "
@@ -1538,14 +1552,14 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
         *[x for x in (LR("100'lük saçak omegası"), LR("100'lük duvar omegası"), LR("Baş makas omegası"), LR("Saçak sacı"), LR("Baş makas betopanı"),
                       LR("Baş makas Z'si"), LR("60'lık duvar omegası"), LR("60'lık tavan omegası"), LR("Tavan H'ı"), LR("Tavan beyaz alçıpan"),
                       LR("Tavan yeşil alçıpan"), LR("Aşık"), LR("Çatı şiltesi")) if x],
-        *[LR(s["kalem"], s["olcu"]) for s in (TP or SP)],
-        *[x for x in (LR("Metal kiremit mahyası"), *((LR("Ters mahya (dere içi)"), LR("Ters mahya kenar kutusu")) if CAP else ()), LR("Alın sacı"),
+        *[LR(s["kalem"], s["olcu"]) for s in KAPS],
+        *[x for x in (LR(MAH), *((LR("Ters mahya (dere içi)"), LR("Ters mahya kenar kutusu")) if CAP else ()), LR("Alın sacı"),
                       LR("Metal dere", "L 4000"), LR("Metal dere inişi aparatı"), LR("Çelik dübel")) if x],
         {"grp": "Kapı ve pencere"}, {"pre": ["K-", "P-"], "adlar": ["PVC"]},
     ]
     # kartı olan ama modelde tek tek yerleşmeyen parçalar (şablon rolü → kart; 62 m²'nin verisinde yok, orada "kart yok")
     kart_bag = {"alt_dis": ALT_KART.get("dış"), "alt_ic": ALT_KART.get("iç"), "omega_sacak": "CK-01", "sacak": "CK-02", "betopan": "BT-01",
-                "z": "CK-04", "tomega": "OM-01", "asik": "AS-01", "ckapama": "CK-05", "mahya": "CK-06", "alin": "CK-03", "dere": "DR-01",
+                "z": "CK-04", "tomega": "OM-01", "asik": "AS-01", "ckapama": "CK-05", "mahya": "CK-07" if TR_ else "CK-06", "alin": "CK-03", "dere": "DR-01",
                 "inis": "DR-02", **({"kaplama": "KP-01"} if SP else {})}
     kabuk = {
         "proje": f"{kod} prefabrik", "kisa": kod, "chip": f"{fmt(m2, 2)} m² · motordan",

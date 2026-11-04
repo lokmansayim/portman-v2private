@@ -118,17 +118,24 @@
    "kapatma_tek_kat": {"okunan": "kitap › tek_kat_panel_kapatma_m"},
    "tasma": {"okunan": "kitap › cati_kaplama_tasma_m"},
    "yuvarlama_mm": {"okunan": "kitap › panel_boyu_yuvarlama_mm"},
+   "kapatma_trapez": {"okunan": "kurallar/liste/prefabrik.json › kurallar.trapez_kapatma_m"},
    "kaplamalar": {
-    "deger": {"sandvi": "sandviç panel", "tek kat": "tek kat panel"},
+    "deger": {"sandvi": "sandviç panel", "trapez": "trapez sac", "tek kat": "tek kat panel"},
     "durum": "varsayim",
     "tarih": "2026-10-30",
-    "not": "İş Emri'nin \"Çatı Kaplaması\" özelliğinde aranan yazı (sırayla) ve kaplamanın adı; anahtar kartın `yerlesim.bilgi.Kaplama`'sıdır (KP-01 sandviç, KP-02 tek kat; K5b). Sandviç K2'de (PK-01), tek kat panel K5b'de (TK-01)."
+    "not": "İş Emri'nin \"Çatı Kaplaması\" özelliğinde aranan yazı (sırayla) ve kaplamanın adı; anahtar kartın `yerlesim.bilgi.Kaplama`'sıdır (KP-01 sandviç, KP-02 tek kat, KP-03 trapez sac; K5b, İE-15 K6). Sandviç K2'de (PK-01), tek kat panel K5b'de (TK-01), trapez sac K6'da (TK-04 r05; Lokman 4 Kasım 2026 20:47, teklif PDF'ine yorum: \"çatı paneli tek kat değil Trapez olacak\"). Trapez sacın kapatması liste kuralından (`kapatma_trapez`: `trapez_kapatma_m`, D-50 ve M-11: standart 100 cm); İş Emri'nin çatı kaplaması kapatmayı yazıyorsa (\"(80 cm kapatır)\") o, liste üretecinin okuması. Trapez sac şeritleri tek kat panelinkiyle aynı dizilir (liste: yüz başına ⌈mahya boyu ÷ kapatma⌉, ek çatı parçasında iki yüz birlikte)."
+   },
+   "profil_esi": {
+    "deger": {"trapez": "tek kat"},
+    "durum": "varsayim",
+    "tarih": "2026-11-04",
+    "not": "İE-15 K6: profili `profil`'de yazılı olmayan kaplamanın kesiti hangi kaplamanınkiyle gösterilir. Trapez sac tek kat panelin 27/200 trapez profiliyle (62 m² rehberinin trapez sacı; kalınlaşma 0, alın sacı aynı). Yalnız gösterim; sayı, boy ve metre bundan çıkmaz. `profil` M-06'nın kilidi olduğu için ayrı anahtar."
    },
    "kurulmayan": {
-    "deger": {"trapez": "trapez sac", "kiremit": "metal kiremit"},
+    "deger": {"kiremit": "metal kiremit"},
     "durum": "muhendis",
     "tarih": "2026-10-30",
-    "not": "Liste üretecinin okuması (`motor/prefabrik_liste.py` › 1006 Çatı): bu yazılar geçiyorsa kaplama trapez sac ya da metal kiremittir; kartları yok, \"kural yok\" yazar."
+    "not": "Liste üretecinin okuması (`motor/prefabrik_liste.py` › 1006 Çatı): bu yazı geçiyorsa kaplama metal kiremittir; kartı yok, \"kural yok\" yazar. Trapez sac İE-15 K6'dan beri kurulur (`kaplamalar`; önce burada)."
    },
    "varsayilan": {
     "deger": "tek kat",
@@ -432,7 +439,7 @@
    "not": "Modelde kenar başına bir parça (eğik boy); metre parçaların toplamı."
   },
   "mahya_yerlesimi": {
-   "kural": "Metal kiremit mahyası mahya boyunca, saçak ucundan ucuna, kaplamanın üstünde; iki yanında kanat. Sayı ⌈mahya boyu ÷ (parça boyu − bindirme)⌉ (liste üretecinin O10'u). Çatı kaplamasında trapez sac varsa mahya trapez sac mahyasıdır; kartı yok, \"kural yok\" yazar.",
+   "kural": "Metal kiremit mahyası mahya boyunca, saçak ucundan ucuna, kaplamanın üstünde; iki yanında kanat. Sayı ⌈mahya boyu ÷ (parça boyu − bindirme)⌉ (liste üretecinin O10'u). Çatı kaplamasında trapez sac varsa mahya trapez sac mahyasıdır (kart CK-07; İE-15 K6): aynı yerde, her beşiğin mahyası (ana çatı, cumba) bir hat, hat başına ⌈mahya boyu ÷ sacın kapattığı⌉ parça, bindirme düşülmez (D-50, M-11: \"trapez mahya sac kaç kapatırsa o kadar kapatır\"; liste üreteciyle aynı). Parçanın boyu trapez sacın kapatması (`kapatma_trapez`; İş Emri kapatmayı yazıyorsa o).",
    "parca_boyu": {"okunan": "kitap › parca_boyu_m.mahya"},
    "bindirme": {"okunan": "kitap › bindirme_m.mahya"},
    "yontem": {
@@ -446,6 +453,12 @@
     "durum": "muhendis",
     "tarih": "2026-10-25",
     "not": "Liste üretecinin okuması (`motor/prefabrik_liste.py`, J5 ve O10): İş Emri'nin \"Çatı Kaplaması\" özelliğinde bu yazı geçiyorsa mahya trapez sac mahyasıdır (ayrı ürün), geçmiyorsa metal kiremit mahyası."
+   },
+   "trapez_yontem": {
+    "deger": "kenar",
+    "durum": "lokman",
+    "tarih": "2026-11-04",
+    "not": "İE-15 K6 (trapez sac mahyası, CK-07): liste üretecinin yolu (D-50; Lokman, 4 Kasım 2026 20:49 \"yalnız trapez mahya sac kaç kapatırsa o kadar kapatır\", 21:20 \"standart olarak 100 kapatır\"): her beşiğin mahyası ayrı, ⌈mahya boyu ÷ kapatma⌉, bindirme yok. Parça boyu parçanın bilgisinden (`ParcaBoyu_m`: trapez sacın kapatması)."
    },
    "cati_tipleri": ["besik", "besik_cumba"],
    "durum": "muhendis",

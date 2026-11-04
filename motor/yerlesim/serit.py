@@ -280,7 +280,8 @@ def _alin_cercevesi(Fs: dict, e: dict) -> tuple[dict, bool]:
     raise ValueError(f"alın kenarı {e['p']}–{e['q']} hiçbir çatı parçasının ucunda değil")
 
 
-def kenarlar(g: dict, ck: dict, G_: dict, kesit: dict, kurulan: set[str], engeller: list[dict] | None = None) -> list[dict]:
+def kenarlar(g: dict, ck: dict, G_: dict, kesit: dict, kurulan: set[str], engeller: list[dict] | None = None,
+             trapez_m: float | None = None) -> list[dict]:
     """K3b'nin çatı kenarları girintili gövdede (kurallar `kurulan`): saçak omegası, saçak sacı, mahya, Z, alın sacı, C kapama. Saçak omegası
     kenarın altındaki duvarların üstünde (gövdenin o hattaki kısmı; saçağa uzamaz, D-41), sayı saçak kenarının boyundan, dikdörtgen gövdedeki
     gibi (D-39; liste de saçak kenarlarının boyunu sayar); kesitine baş makas betopanı (`engeller`, `betopan`) iniyorsa orada kesilir. Hat, kenarın düzleminin parçasına yazılır (`Cati`; aynı düzlemdeki ana çatı ve cumba yüzü
@@ -311,7 +312,7 @@ def kenarlar(g: dict, ck: dict, G_: dict, kesit: dict, kurulan: set[str], engell
         for F in Fs.values():
             (mx0, my0), (mx1, my1) = F["parca"]["mahya"]
             v0, v1 = sorted((my0, my1) if F["mx"] else (mx0, mx1))
-            out += kenar.mahya(g, G_, kesit, dict(F, v0=v0, v1=v1))
+            out += kenar.mahya(g, G_, kesit, dict(F, v0=v0, v1=v1), trapez_m=trapez_m)    # İE-15 K6: trapez sacta CK-07
     kk = kurulan & {"bas_makas_z_yerlesimi", "alin_saci_yerlesimi", "c_kapama_yerlesimi"}
     if kk:
         for e in (e for e in gorunen if e["tur"] == "alin"):

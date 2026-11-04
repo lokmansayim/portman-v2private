@@ -8,7 +8,7 @@
   "gerçek listeye uy": gerçek PK-01, PK-02, PK-03 listeleri saçak boyuyla tutuyor; K3b'deki fark kapandı). On dört kalem aynı. "Kural yok" 0
   (K5'te 8). OM-01 taşan verandanın tavanında da (İE-24, pano 73.5: yavru makasların altında; `test_tasan_veranda_tavan_omegasi`).
 - Kör protokolü: gerçek liste açılmaz; kıyas liste üretecimizin çıktısıyla (CIO, 27 Ekim 22:02).
-- Kural birimleri: kaplamanın okunması (sandviç, tek kat, varsayılan tek kat ve uyarı, trapez ve kiremit "kural yok"); taşan veranda
+- Kural birimleri: kaplamanın okunması (sandviç, tek kat, varsayılan tek kat ve uyarı, trapez sac (İE-15 K6), kiremit "kural yok"); taşan veranda
   kaplaması iki yüz birlikte (⌈2 × mahya boyu ÷ kapatma⌉, artanlar bir panele sığarsa bir panelden, sığmazsa duvarda kesilir); dikey
   betopan (H5 sayısı, levhalar örtüşmez, artan uçları kapatır, uç en dıştaki levhanın); dere kesimi hatlar arasında (PK-01 6, TK-01 7);
   yavru makas (J8 sayısı, ilki dış kirişte, sonuncusu duvar dibinde); tek yön ve çapraz veranda çatısı "kural yok" (K6).
@@ -208,7 +208,7 @@ def test_tk01_kenarlar_verandada(tk01):
 
 # ----------------------------------------------------------------------------- kural birimleri
 @pytest.mark.parametrize("yazi, tur, uyari", [("Sandviç Panel", "sandvi", False), ("Tek Kat Panel", "tek kat", False), ("", "tek kat", True),
-                                              ("Antrasit", "tek kat", True), ("Trapez Sac", None, False), ("Metal Kiremit", None, False)])
+                                              ("Antrasit", "tek kat", True), ("Trapez Sac", "trapez", False), ("Metal Kiremit", None, False)])
 def test_kaplama_okumasi(yazi, tur, uyari):
     D = Y.degerler(_oku(KM.YERLESIM), _oku(KM.LISTE_KURALLARI))["cati_kaplamasi"]
     u = []

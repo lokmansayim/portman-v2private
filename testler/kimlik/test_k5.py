@@ -14,7 +14,7 @@
   AP-13'tü, cumbada liste artık yazılıyor).
 - BK-14'ün taşan verandası (TK-01): zemin kartsız (kapsam dışı); çatı yüzü ve alın dolgusu K5'te "kural yok"tu, K5b'de kartsız (çatının
   parçaları kartlı kuruldu; `test_k5b.py`).
-- Beşikte de kuralı kurulmayan çatı kenarı kartı "kurulmadı" yazar (trapez kaplamada mahya).
+- Beşikte de kuralı kurulmayan çatı kenarı kartı "kurulmadı" yazar (İE-15 K6'ya kadar trapez kaplamada mahya; şimdi mahya kuralı testte "kural yok"a çevrilir).
 - PK-01'in K1–K3b'si değişmez: öteki test dosyaları aynen geçer (K5'te yalnız Değişiklik (K5)'te yazılı üç vaka değişti).
 - İE-15 K6 (D-53; Lokman, 4 Kasım 2026 20:51): beşik + çıkıntısız çapraz cumbanın (AP-13, AP-16) çatısı kart modelinde kurulur
   (`motor/cati_capraz.py`; çatı kuralları ve MA-01/MA-02 eşlemesi "besik_cumba"da da, yavru makas MA-05). Bu dosyada cumbalı iki ev için
@@ -110,9 +110,10 @@ def test_catiya_bagli_olmayan_kartlar_ikizle_ayni(evler, ev):
 def test_catiya_bagli_kartlar():
     """Çatıya bağlı kartlar veri dosyalarından: makaslar, makasa göre ayrılan dış H'ler, K2'nin dört çatı katmanı, K3b'nin altı çatı kenarı;
     K5b'de tek kat panel (KP-02) ve yavru makas (MA-03); K5b-2'de çatı izolasyonu (IZ-01); İE-24'te cumba makası (MA-04, beşikte); K6'da
-    çapraz cumbanın yavru makası (MA-05, beşik + cumbada)."""
+    çapraz cumbanın yavru makası (MA-05, beşik + cumbada), trapez sac (KP-03) ve trapez sac mahyası (CK-07; trapez çatıda CK-06'nın yerine,
+    "kurulmadı" listesine trapez dışında girmez)."""
     assert _catiya_bagli() == {"MA-01", "MA-02", "H-01", "H-02", "H-04", "H-05", "H-08", "H-09", "AS-01", "KP-01", "BT-01", "DR-01", "DR-02",
-                               "KP-02", "MA-03", "IZ-01", "MA-04", "MA-05", *CATI_KENARI}
+                               "KP-02", "MA-03", "IZ-01", "MA-04", "MA-05", "KP-03", "CK-07", *CATI_KENARI}
 
 
 @pytest.mark.parametrize("ev", KIRMA)
@@ -266,13 +267,20 @@ def test_tasan_veranda_siniflanir(tmp_path):
 
 
 # ----------------------------------------------------------------------------- beşikte "kurulmadı"
-def test_besikte_kurulmayan_kenar_karti(tmp_path):
-    """Beşikte de kuralı kurulmayan çatı kenarı kartı "kurulmadı" yazar (trapez kaplamada mahya): sayımda `kenar.kurulmadi`, yedinci sayfanın
-    lejantında ve Excel'de; liste sütunu üretecin sayısı (beşikte liste yazılır). Sayılar değişmez."""
-    ie = _oku(MOTOR_VERI / "PK01.json")
-    ie["ozellikler"]["Çatı Kaplaması"] = "Trapez Sac"
-    (tmp_path / "trapez.json").write_text(json.dumps(ie, ensure_ascii=False), encoding="utf-8")
-    assert KM.main([str(tmp_path / "trapez.json"), str(tmp_path / "c"), "--kod", "T"]) == 1
+def test_besikte_kurulmayan_kenar_karti(tmp_path, monkeypatch):
+    """Beşikte de kuralı kurulmayan çatı kenarı kartı "kurulmadı" yazar: sayımda `kenar.kurulmadi`, yedinci sayfanın lejantında ve
+    Excel'de; liste sütunu üretecin sayısı (beşikte liste yazılır). Sayılar değişmez. (İE-15 K6'ya, D-53, kadar bu durumu trapez kaplamada
+    mahya veriyordu; trapez sac mahyası (CK-07) artık kurulduğu için mahya kuralı burada "kural yok"a çevrilir.)"""
+    from motor.yerlesim import kenar as KE
+    asil = KE.katman
+
+    def mahyasiz(*a, **kw):
+        s = asil(*a, **kw)
+        return s | {"parcalar": [p for p in s["parcalar"] if p["kural"] != "mahya_yerlesimi"],
+                    "kural_yok": s["kural_yok"] + [{"parca": KE.CATI_ADI["mahya_yerlesimi"], "sinif": "IfcCovering", "neden": "test: kurulmadı"}]}
+    monkeypatch.setattr(KE, "katman", mahyasiz)
+    (tmp_path / "pk01.json").write_text((MOTOR_VERI / "PK01.json").read_text(encoding="utf-8"), encoding="utf-8")
+    assert KM.main([str(tmp_path / "pk01.json"), str(tmp_path / "c"), "--kod", "T"]) == 1
     say = _oku(tmp_path / "c" / "T_kart_sayim.json")
     assert say["kenar"]["kurulmadi"] == ["CK-06"] and "liste_yazilmaz" not in say["kenar"] and isinstance(say["kenar"]["liste"]["CK-06"], int)
     import pymupdf

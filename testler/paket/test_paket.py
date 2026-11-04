@@ -93,7 +93,7 @@ def test_beklenen_dosyalar(paketler):
     assert var["AP-13"] == {"bilgi.md", "bayi_paftasi.pdf", "plan.png", "cizim.dxf", "yukleme_listesi.xlsx", "model.ifc", "montaj_paftasi.pdf"}
     assert var["AP-02"] == {"bilgi.md"}
     d13 = s["AP-13"]["dosyalar"]
-    assert "listede çatı kaplaması" in d13["AP-13_montaj_rehberi.html"]    # İş Emri'nde OSB + nem bariyeri + trapez sac: rehber trapezi kurmuyor
+    assert "OSB ve nem bariyeri" in d13["AP-13_montaj_rehberi.html"]    # İş Emri'nde OSB + nem bariyeri + trapez sac: rehber o katmanları kurmuyor
     assert "dört görünüş (ön, arka, sol, sağ)" in d13["AP-13_gorunusler.pdf"]
     assert "kör" in d13["AP-13_kiyas.xlsx"]
     assert "adım 3" in s["AP-02"]["dosyalar"]["AP-02_bayi_paftasi.pdf"]

@@ -60,7 +60,7 @@ IC100_KARTLARI = {k: 0 for k in ("D-06", "D-07", "H-07", "H-08", "H-09", "H-10",
 K5B_KARTLARI = {k: 0 for k in ("KP-02", "MA-03")}    # K5b: tek kat çatı paneli ve yavru makas; PK-01 sandviç ve verandasız
 K5B2_KARTLARI = {k: 0 for k in ("H-11", "AL-01", "AL-02", "IZ-01")}    # K5b-2: tavan katmanı ve çatı izolasyonu (yerleşim katmanında; K1 modelinde 0)
 IE24_KARTLARI = {"MA-04": 0}    # İE-24: cumba makası (girintili gövdenin cumbası); bu evde cumba yok
-K6_KARTLARI = {"MA-05": 0}      # İE-15 K6 (D-53): yavru makas (çapraz cumba); bu evde cumba yok
+K6_KARTLARI = {k: 0 for k in ("MA-05", "KP-03", "CK-07")}   # İE-15 K6 (D-53): yavru makas (çapraz cumba), trapez sac ve mahyası; bu evde cumba yok, çatı sandviç
 KILIT_K1 = "94c253954968d2dee4023c097e47326281fe57998c92e347e2b48d24762e4d23"   # K1'de çıkan 25 kodun adlarıyla SHA'sı (PR #31)
 
 

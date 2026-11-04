@@ -1,11 +1,14 @@
-"""İE-15 K6 · TK-04'ün çatısı kart modelinde ve montaj rehberinde (D-53; İş Emri r04 `testler/motor/veri/TK04_r04.json`).
+"""İE-15 K6 · TK-04'ün çatısı kart modelinde ve montaj rehberinde (D-53; İş Emri r05 `testler/motor/veri/TK04_r05.json`: r04'ün planı,
+çatı kaplaması trapez sac; Lokman 4 Kasım 2026 20:47 "çatı paneli tek kat değil Trapez olacak", "Trapez mahya olacak").
 
 Beşik + çıkıntısız çapraz cumba (AP-06 gibi, D-47): ana çatının mahyası x yönünde, cumba önde 0–386,5. Çatı çatı tanımından
 (`motor/cati_capraz.py`; liste üreteci, çizim ve bugünkü IFC aynı tanımı okur). Kart modelinde çatı kartları "kural yok" değil, listeyle
 aynı: yerleşen adetle sayılanlar (makaslar, tek kat panel, iniş) adet adet, boyla alınanlar kesim stoğuyla. Saçak omegası (M-01, D-41;
 D-53 ile beşik + cumbada da) saçak duvarının üstünde duvar boyunca, listedeki gibi 6. Rehber 62 m² şablonunun cumbasıyla: ana çatının 8
 makası, cumbanın baş makası ve ana çatının üstündeki yavru makası (MA-05), derelerde kırpılan yüzler, ters mahya adımı, iki boy kaplama;
-mahya x yönünde olduğu için asma tavanın omegaları x boyunca, H'ları dik. Beşik evlerin rehberi değişmez (`test_rehber.py`, `test_paket.py`).
+mahya x yönünde olduğu için asma tavanın omegaları x boyunca, H'ları dik. Trapez sac (KP-03) tek kat panel gibi dizilir, kapatması liste
+kuralından (D-50, M-11: standart 100 cm); trapez sac mahyası (CK-07) her beşiğin mahyasında ⌈mahya ÷ kapatma⌉. Beşik evlerin rehberi
+değişmez (`test_rehber.py`, `test_paket.py`).
 """
 from __future__ import annotations
 
@@ -19,7 +22,7 @@ import pytest
 
 KOK = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(KOK))
-IE = KOK / "testler" / "motor" / "veri" / "TK04_r04.json"
+IE = KOK / "testler" / "motor" / "veri" / "TK04_r05.json"
 
 
 def _oku(p: Path) -> dict:
@@ -51,16 +54,36 @@ def test_kart_modeli_listeyle_ayni(tk04):
     say, L = tk04["say"], tk04["L"]
     assert say["cati_tipi"] == "besik_cumba" and say["kural_yok"] == [] and say["sema_hatasi"] == {"bugunku_ifc": 0, "kart_modeli": 0}
     adet = {k["kod"]: k["adet"] for k in say["kartlar"]}
-    yerlesen = {"MA-01": "Makas (baş)", "MA-02": "Makas (orta)", "MA-05": "Yavru makas · cumba", "KP-02": "Tek kat çatı paneli",
+    yerlesen = {"MA-01": "Makas (baş)", "MA-02": "Makas (orta)", "MA-05": "Yavru makas · cumba", "KP-03": "Trapez sac",
                 "BT-01": "Baş makas betopanı", "DR-02": "Metal dere inişi aparatı"}
     assert {k: adet[k] for k in yerlesen} == {k: _liste(L, on) for k, on in yerlesen.items()} == {
-        "MA-01": 2, "MA-02": 6, "MA-05": 2, "KP-02": 25, "BT-01": 9, "DR-02": 5}
-    stok = {k: say["kesim_plani"][k]["stok"] for k in ("AS-01", "DR-01", "CK-01", "CK-02", "CK-03", "CK-04", "CK-06")}
+        "MA-01": 2, "MA-02": 6, "MA-05": 2, "KP-03": 25, "BT-01": 9, "DR-02": 5}
+    stok = {k: say["kesim_plani"][k]["stok"] for k in ("AS-01", "DR-01", "CK-01", "CK-02", "CK-03", "CK-04", "CK-07")}
     boyla = {"AS-01": "Aşık", "DR-01": "Metal dere", "CK-01": "100'lük saçak omegası", "CK-02": "Saçak sacı", "CK-03": "Alın sacı",
-             "CK-04": "Baş makas Z'si", "CK-06": "Metal kiremit mahyası"}
+             "CK-04": "Baş makas Z'si", "CK-07": "Trapez sac mahyası"}
     assert stok == {k: _liste(L, on) for k, on in boyla.items()} == {"AS-01": 43, "DR-01": 4, "CK-01": 6, "CK-02": 7, "CK-03": 11, "CK-04": 10,
-                                                                      "CK-06": 5}
-    assert adet["MA-03"] == adet["MA-04"] == 0                             # taşan verandanın ve paralel cumbanın makası yok
+                                                                      "CK-07": 13}
+    assert adet["MA-03"] == adet["MA-04"] == adet["KP-02"] == 0 and "CK-06" not in say["kesim_plani"]   # taşan veranda, paralel cumba, tek kat yok
+
+
+def test_trapez_sac_ve_mahyasi(tk04):
+    """Trapez sac liste gibi: ana çatıda yüz başına ⌈mahya ÷ kapatma⌉, cumbada iki yüz birlikte; kapatma liste kuralından (D-50, M-11: 1,0).
+    Trapez sac mahyası her beşiğin mahyası ayrı, ⌈mahya ÷ kapatma⌉ (ana çatı 10, cumba 3), parça boyu sacın kapatması; kural yok yok."""
+    say, L = tk04["say"], tk04["L"]
+    kp = [p for p in say["yerlesim"]["parcalar"] if p["kart"] == "KP-03"]
+    assert {p["bilgi"]["Genislik_cm"] for p in kp} == {100.0} and Counter(p["bilgi"]["Cati"] for p in kp) == {"ana çatı": 20, "cumba": 5}
+    c7 = say["kesim_plani"]["CK-07"]
+    assert (c7["parca_boyu_cm"], c7["hat_basina"]) == (100.0, [10, 3]) and next(s["olcu"] for s in L if s["kalem"] == "Trapez sac mahyası") == "L 1000"
+    assert say["kenar"]["liste"]["CK-07"] == 13 and "CK-06" not in say["kenar"]["liste"] and "kurulmadi" not in say["kenar"]
+
+
+def test_trapez_kapatmasi_is_emrinden():
+    """İş Emri'nin çatı kaplaması kapatmayı yazıyorsa ("(80 cm kapatır)") o, yazmıyorsa liste kuralı; liste üretecinin okuması (D-50)."""
+    from motor import yerlesim as Y
+    C = {"kapatma_trapez": 1.0}
+    assert Y.trapez_kapatma_m({"ozellikler": {"Çatı Kaplaması": "Trapez Saç"}}, C) == 1.0
+    assert Y.trapez_kapatma_m({"ozellikler": {"Çatı Kaplaması": "Trapez Kaplama (80 cm kapatır)"}}, C) == 0.8
+    assert Y.trapez_kapatma_m({"ozellikler": {"ÇATI KAPLAMASI": "Trapez Sac (82,5 cm kapatır)"}}, C) == 0.825
 
 
 def test_sacak_omegasi_duvar_boyunca(tk04):
@@ -79,11 +102,15 @@ def test_rehber_adimlari(tk04):
     ad = [a.get("ad") for a in d["adimlar"]]
     assert d["N"] == 21 and len(d["panels"]) == 50
     i = ad.index("Dere ve inişler")
-    assert ad[i + 1:i + 3] == ["Ters mahya", "Tek kat panel ve mahya"] and d["S"]["tersmahya"] == i + 1
+    assert ad[i + 1:i + 3] == ["Ters mahya", "Trapez sac ve mahya"] and d["S"]["tersmahya"] == i + 1
     assert "Ana çatı ve cumba makasları" in ad and d["cati_adim"] == list(range(d["S"]["makas"], d["S"]["alin"] + 1))
     tm = d["adimlar"][i + 1]
     assert [r[1:3] for r in tm["rows"]] == [["Ters mahya (dere içi) L 2800", "3 adet"], ["Ters mahya kenar kutusu L 21 × 40 × 21 × 2800", "6 adet"]]
     assert d["kabuk"]["spec"][3].startswith("beşik + çapraz cumba %33")
+    kp = d["adimlar"][i + 2]
+    assert [r[1:3] for r in kp["rows"] if r[3:] == ["liste"]] == [["Trapez sac · ana çatı L 5100", "20 adet"], ["Trapez sac · cumba L 2410", "5 adet"],
+                                                              ["Trapez sac mahyası L 1000", "13 adet"], ["Mahya bandı rulo 10 m", "2 adet"]]
+    assert "trapez sac mahyasıyla" in kp["p"] and d["kaplama"]["profil"]["kapatir"] == 100 and d["kaplama"]["metin"]["mahya_ad"] == "Trapez sac mahyası"
 
 
 def test_makaslar(tk04):
@@ -111,7 +138,7 @@ def test_yuzler_dere_ve_kaplama(tk04):
     assert sorted(k["ad"] for k in d["kalkan"]) == ["ana çatı sağ kalkanı (MKS08)", "ana çatı sol kalkanı (MKS01)", "cumba kalkanı (MKS09)"]
     assert {k: y["serit"]["ad"] for k, y in Y.items()} == {"MFL": "L 5100 (ana çatı)", "MFR": "L 5100 (ana çatı)", "MB": "L 5100 (ana çatı)",
                                                           "CL": "L 2410 (cumba)", "CR": "L 2410 (cumba)"}
-    assert _liste(L, "Tek kat çatı paneli · ana çatı") == 20 and _liste(L, "Tek kat çatı paneli · cumba") == 5
+    assert _liste(L, "Trapez sac · ana çatı") == 20 and _liste(L, "Trapez sac · cumba") == 5
 
 
 def test_asiklar_kart_modelinden(tk04):

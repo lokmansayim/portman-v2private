@@ -262,6 +262,17 @@ def yerlesim_kartlari(p: dict, kartlar: dict) -> list[dict]:
             and all(p["bilgi"].get(a) == v for a, v in k["yerlesim"].get("bilgi", {}).items())]
 
 
+def _kesim_degeri(R: dict, v: str, parcalar: list[dict], kod: str):
+    """Kartın `yerlesim.kesim` değeri: kuralın başka bir değeri ya da `bilgi:<ad>` ile parçaların bilgisindeki ortak değer (İE-15 K6: trapez sac
+    mahyasının parça boyu sacın kapatmasıdır, İş Emri'ne göre değişir; parçalar aynı değeri taşır)."""
+    if not v.startswith("bilgi:"):
+        return R[v]
+    degerler = {p["bilgi"].get(v[6:]) for p in parcalar}
+    if len(degerler) != 1 or None in degerler:
+        raise ValueError(f"{kod}: parçaların {v[6:]} değeri tek değil ({sorted(map(str, degerler))})")
+    return degerler.pop()
+
+
 def _yerlesim_anahtarlari(kart: dict, p: dict, tavan: str) -> list[str]:
     if kart.get("pafta_disi") and all(p["bilgi"].get(a) == v for a, v in kart["pafta_disi"]["bilgi"].items()):
         return []                                                     # paftada sayılmayan parça (K5b-2: açık mahale bakan dış duvarın omegası)
@@ -330,7 +341,7 @@ def _k2(f, kartlar: dict, yerlesim: dict, liste_kurallari: dict, is_emri: dict, 
         if k["sayim"] == "boy_kesim" and boylar:
             R = D[k["yerlesim"]["kural"]]
             if k["yerlesim"].get("kesim"):                             # kartın parça boyu ve payı kuralın başka değerlerinden (OM-02: D-32 ek)
-                R = {**R, **{a: R[v] for a, v in k["yerlesim"]["kesim"].items()}}
+                R = {**R, **{a: _kesim_degeri(R, v, kp, k["kod"]) for a, v in k["yerlesim"]["kesim"].items()}}
             cm = lambda m: round(m * 100, 6)
             if R.get("yontem") == "toplam":                            # K3b: liste üretecinin yolu, hatların toplamı (kesik hat bir kez)
                 hat = {}
@@ -364,7 +375,11 @@ def _k2(f, kartlar: dict, yerlesim: dict, liste_kurallari: dict, is_emri: dict, 
                            "degerler": D[Y.ELEKTRIK]}
     if KN is not None:
         from motor import prefabrik_liste as PL
-        kalem = {k["kod"]: (k["liste"]["satirlar"] or [None])[0] for k in kartlar["kartlar"] if k.get("yerlesim", {}).get("kural") in KE.KENAR}
+        # İE-15 K6: mahyanın kartı kaplamaya göre biri (metal kiremit mahyası CK-06 ya da trapez sac mahyası CK-07); öteki yazılmaz
+        mahya_parca = "trapez_mahya" if D["mahya_yerlesimi"]["trapez_yazisi"] in Y.kaplama_yazisi(g) else "mahya"
+        kenar_kartlari = [k for k in kartlar["kartlar"] if k.get("yerlesim", {}).get("kural") in KE.KENAR
+                          and (k["yerlesim"]["kural"] != "mahya_yerlesimi" or k["yerlesim"]["parca"] == mahya_parca)]
+        kalem = {k["kod"]: (k["liste"]["satirlar"] or [None])[0] for k in kenar_kartlari}
         satir: dict[str, int] = {}
         try:                                                            # listeyle aynı yol (D-28); beşik dışı ana çatıda liste yazılmaz (K5)
             L = PL.is_emrinden(copy.deepcopy(is_emri))
@@ -374,7 +389,7 @@ def _k2(f, kartlar: dict, yerlesim: dict, liste_kurallari: dict, is_emri: dict, 
             if x["kalem"] in kalem.values():                          # yalnız bu kartların satırları (başka satırın adedi boş olabilir)
                 satir[x["kalem"]] = satir.get(x["kalem"], 0) + x["adet"]
         yok = {x["parca"] for x in KN["kural_yok"]}
-        kurulmadi = [k["kod"] for k in kartlar["kartlar"] if KE.CATI_ADI.get(k.get("yerlesim", {}).get("kural")) in yok]
+        kurulmadi = [k["kod"] for k in kenar_kartlari if KE.CATI_ADI.get(k["yerlesim"]["kural"]) in yok]
         out["kenar"] = {"uyarilar": KN["uyarilar"], "hatlar": KN["hatlar"],
                         "liste": {kod: (LISTE_YAZILMAZ if L is None else satir.get(ad, 0) if ad else None) for kod, ad in kalem.items()},
                         **({"liste_yazilmaz": yazilmaz} if L is None else {}), **({"kurulmadi": kurulmadi} if kurulmadi else {}),

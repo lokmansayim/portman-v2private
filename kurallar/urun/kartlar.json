@@ -931,6 +931,32 @@
    "pafta": [],
    "bugunku_ifc": [{"sinif": "IfcElementAssembly", "kosul": [["PortatifEv_Kapsam", "BOMKalem", "^Yavru makas · "]], "cati_tipleri": ["besik_cumba"]}],
    "kaynak": {"durum": "lokman", "tarih": "2026-11-04", "dayanak": "D-47 (Lokman, 3 Kasım 2026 21:56): çıkıntısız çapraz cumbada makas dış uçtaki kalkan duvarının ekseninden 125,5 arayla derelerin birleştiği yere kadar; listedeki satır \"Yavru makas · <cumba>\" (`motor/prefabrik_liste.py`), taşan verandanın yavru makasıyla (MA-03) aynı liste satırı. TK-04 (Lokman, 4 Kasım 2026 14:13: \"çatı AP-06 gibi\"); kart İE-15'le anlaşılan sırayla sona eklendi (K6, TK-04 montaj rehberi)"}
+  },
+  {
+   "kod": "KP-03",
+   "ad": "Trapez sac",
+   "liste": {"grup": "1006", "satirlar": ["Trapez sac"]},
+   "olcu": "Kapatması liste kuralından (`trapez_kapatma_m`, standart 100 cm; D-50, M-11) ya da İş Emri'nin yazdığı; boy parçada (eğik boy + 5 cm, 10 mm'ye yukarı)",
+   "birim": "adet",
+   "nerede": "Çatı yüzünde mahyadan saçağa şeritler, aşıkların üstünde; tek kat panel gibi dizilir: ana çatıda yüz başına, cumbada ve taşan verandanın çatısında iki yüz birlikte (`cati_kaplamasi`)",
+   "sayim": "yerlesen_adet",
+   "ifc": {"sinif": "IfcCoveringType", "alt_tur": "ROOFING"},
+   "pafta": [],
+   "yerlesim": {"kural": "cati_kaplamasi", "parca": "panel", "sinif": "IfcCovering", "bilgi": {"Kaplama": "trapez"}},
+   "kaynak": {"durum": "lokman", "tarih": "2026-11-04", "dayanak": "Lokman, 4 Kasım 2026 20:47 (TK-04 teklif PDF'ine yorum): \"çatı paneli tek kat değil Trapez olacak\"; 21:20: \"bundan sonra standart olarak 100 kapatır\" (D-50, M-11). Liste satırı \"Trapez sac\" (`motor/prefabrik_liste.py`, P3 ve O9 ile tek kat panel gibi sayılır). Kesit kartta yazılı değil; rehberde 62 m²'nin trapez sacı (27/200, varsayım). Kart İE-15'le anlaşılan sırayla sona eklendi (K6, TK-04 montaj rehberi)"}
+  },
+  {
+   "kod": "CK-07",
+   "ad": "Trapez sac mahyası",
+   "liste": {"grup": "1006", "satirlar": ["Trapez sac mahyası"]},
+   "olcu": "Boyu trapez sacın kapatması (L 1000; 80'lik sacta L 800); mahyanın iki yanında kanat (metal kiremit mahyası gibi, gösterim); mahyanın boyu parçada",
+   "birim": "adet",
+   "nerede": "Trapez sac kaplamalı çatıda her beşiğin mahyası boyunca (ana çatı ve cumba ayrı), saçak ucundan ucuna, kaplamanın üstünde; hat başına ⌈mahya boyu ÷ kapatma⌉, bindirme yok (`mahya_yerlesimi`)",
+   "sayim": "boy_kesim",
+   "ifc": {"sinif": "IfcCoveringType", "alt_tur": "ROOFING"},
+   "pafta": [],
+   "yerlesim": {"kural": "mahya_yerlesimi", "parca": "trapez_mahya", "sinif": "IfcCovering", "kesim": {"yontem": "trapez_yontem", "parca_boyu": "bilgi:ParcaBoyu_m"}},
+   "kaynak": {"durum": "lokman", "tarih": "2026-11-04", "dayanak": "D-50 (Lokman, 4 Kasım 2026 20:49): \"yalnız trapez mahya sac kaç kapatırsa o kadar kapatır yani sac 100 kapatırsa trapez mahyada 100 kapatır\"; 20:47 \"Trapez mahya olacak\"; M-11. Liste satırı \"Trapez sac mahyası\" (her beşiğin mahyası ÷ kapatma, yukarı). Kart İE-15'le anlaşılan sırayla sona eklendi (K6, TK-04 montaj rehberi)"}
   }
  ],
  "gorunum": [
