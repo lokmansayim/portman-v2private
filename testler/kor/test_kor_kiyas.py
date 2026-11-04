@@ -36,10 +36,13 @@ ACIK8 = ["PK-01", "PK-02", "PK-03", "PK-05", "PK-06", "PK-07", "PK-08", "TS-01"]
 # İE-27 (3 Kasım 2026, D-45): açılmış liste artık kör değil; on evin kaydı `acik`a geçti (açılış kayıtları iz olarak duruyor) ki Lokman'ın
 # 3 Kasım cevaplarıyla değişen kurallardan sonra açık sekiz proje gibi yeniden ölçülebilsin. Kör kalan dokuz ev `kor`.
 # İE-29 (3 Kasım 2026, D-47; pano 145): Motor çıkıntısız çapraz cumbada da liste yazıyor; AP-06, AP-13, AP-16 aynı kararla açıldı
-# (kendi listemiz 008f48e, açılış kaydı ayrı commit) ve kaydı `acik`. Kör kalan altı: AP-12, 17, 23, 24, 27 (Motor liste yazmıyor), AP-20.
+# (kendi listemiz 008f48e, açılış kaydı ayrı commit) ve kaydı `acik`. İE-29 PR-2 (4 Kasım 2026, D-48): Motor tek uçlu kırmada liste
+# yazıyor, AP-27 aynı kararla ve Lokman'ın 4 Kasım 05:19 çizim onayıyla açıldı (kendi listemiz f4476db, açılış kaydı ayrı commit de98f2e).
+# Kör kalan beş: AP-12, 17, 23, 24 (Motor liste yazmıyor), AP-20.
 ACILAN_IE26 = ["AP-09", "AP-11", "AP-14", "AP-15", "AP-18", "AP-21", "AP-22", "AP-25", "AP-26", "AP-28"]
 ACILAN_IE29 = ["AP-06", "AP-13", "AP-16"]
-ACILAN = sorted(ACILAN_IE26 + ACILAN_IE29)
+ACILAN_IE29_PR2 = ["AP-27"]
+ACILAN = sorted(ACILAN_IE26 + ACILAN_IE29 + ACILAN_IE29_PR2)
 KOR_KALAN = [k for k in KOR19 if k not in ACILAN]
 IE26_KARAR = "karar kartı 2 Kasım 2026 21:48:56 UTC: \"Hepsi açılsın\""
 # Mühürde kodların durumu (bir dosya birden çok kod taşıyabilir; kod bir kez sayılır her dosya için). Değişirse açılış Patron kararıdır.
@@ -438,7 +441,7 @@ def test_muhur_yalniz_kod_ve_ozet_tasir(muhur):
     for r in muhur["dosyalar"]:
         assert set(r) <= alanlar, r["kod"]
         assert all(k[:3] in ("PK-", "TS-", "AP-") and len(k) == 5 for k in r["kod"])
-    assert muhur["sayilar"] == {"acik": 30, "kaynak": 32, "kor": 6, "kapali": 14}               # İE-27: on açılmış ev `acik`; İE-29: üç ev daha
+    assert muhur["sayilar"] == {"acik": 31, "kaynak": 32, "kor": 5, "kapali": 14}               # İE-27: on açılmış ev `acik`; İE-29: dört ev daha
     assert Counter(r["durum"] for r in muhur["dosyalar"]) == muhur["sayilar"]          # özet dosyadaki sayıyla değil, yeniden sayılır
 
 
