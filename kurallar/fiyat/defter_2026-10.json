@@ -894,14 +894,16 @@
      "not": "r08: cumbalı prefabrik çatının satırı (çıkıntısız çapraz cumba, D-47; TK-04 r04). 87 m² listesinde ters mahya yok; Haziran listesinden birebir, çelikteki Ters mahya | L 2800 ile aynı kaynak satırı ve fiyat (r02)."
     },
     "Ters mahya kenar kutusu | L 21 × 40 × 21 × 2800": {
-     "fiyat": null,
+     "fiyat": 100,
      "birim": "adet",
-     "kaynak": null,
+     "kaynak": "PATRON",
      "kaynak_satir": null,
-     "kaynak_kalem": "Ters mahya kenar kutuları, fiyatsız",
-     "durum": "kaynakta yok",
-     "onay": false,
-     "not": "r08: cumbalı prefabrik çatının satırı; iki listede de fiyatı yok (çelikteki kayıtla aynı). Fiyat Patron'dan."
+     "kaynak_kalem": "Lokman, TK-04 teklif PDF'inin bu satırına yorum",
+     "durum": "Patron verdi",
+     "onay": true,
+     "teklif_adi": "Metal tahta (galvaniz)",
+     "teklif_olcu": "L 2800",
+     "not": "r09: Lokman 4 Kasım 2026 23:24 UTC, TK-04 teklif PDF'inde bu satıra yorum (mesaj cmsg_01UAFvcnfVuTR1wfFux5fQPPFiHDxbk9Gx7xa6JsskWMiq): \"'METAL TAHTA L:2800 (GALVANİZ)' Yaz fiyat:100 TL\". Teklifte adı ve ölçüsü `teklif_adi` ve `teklif_olcu`'dan (Motor'un iç adı, kör kıyas ve defter anahtarı aynı kalır; kitap 0.20'nin C1.9 'Metal tahta' adıyla aynı yol: iç ad değişmez). Önceki not (r08): cumbalı prefabrik çatının satırı; iki listede de fiyatı yok (çelikteki kayıtla aynı)."
     },
     "Mahya bandı | rulo 10 m": {
      "fiyat": 125,

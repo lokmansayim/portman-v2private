@@ -155,3 +155,15 @@ def test_ayni_girdi_ayni_pdf(cikti, T, tmp_path):
     for sec in T["secenekler"]:
         ad = TP.dosya_adi(T, sec)
         assert (tmp_path / ad).read_bytes() == (cikti / ad).read_bytes(), ad
+
+
+def test_teklifte_yazilan_ad_ve_olcu(T):
+    """r09 (Lokman 4 Kasım 23:24, TK-04 teklif PDF'i: "'METAL TAHTA L:2800 (GALVANİZ)' Yaz fiyat:100 TL"): defter kaydı `teklif_adi` ve
+    `teklif_olcu` taşıyorsa Ek-1'de satır o adla ve ölçüyle yazılır; iç ad (`kalem`) ve ölçü tabloya girmez."""
+    sec = json.loads(json.dumps(T["secenekler"][0]))
+    s = sec["fiyat"]["satirlar"][0]
+    s.update({"kalem": "Ters mahya kenar kutusu", "olcu": "L 21 × 40 × 21 × 2800", "teklif_adi": "Metal tahta (galvaniz)", "teklif_olcu": "L 2800"})
+    _b, _bas, satir, _son = TP.ek_satirlari(T, sec)
+    h = "".join(x[2] for x in satir if x[0] == "kalem")
+    assert ">Metal tahta (galvaniz)<" in h and ">L 2800<" in h
+    assert "Ters mahya kenar kutusu" not in h and "21 × 40 × 21" not in h

@@ -44,6 +44,7 @@ def test_defter_bicimi(defter):
             assert g["durum"] in DURUMLAR, (k, g["durum"])
             assert g["birim"] in BIRIMLER, (k, g["birim"])
             assert isinstance(g["onay"], bool), k
+            assert all(isinstance(g[a], str) and g[a] for a in F.YAZILAN if a in g), k   # teklifte yazılan ad ve ölçü (r09)
             if g["fiyat"] is not None:
                 assert g["fiyat"] > 0, k
                 assert g["kaynak"] in defter["kaynaklar"], (k, g["kaynak"])
@@ -247,20 +248,17 @@ def test_r07_trapez_vida_5_5x25(defter):
 def test_r08_ters_mahya(defter):
     """r08 (4 Kasım 2026): cumbalı prefabrik çatının (çıkıntısız çapraz cumba, D-47; TK-04 r04) iki satırı. Ters mahya 87 m² listesinde yok,
     Haziran listesinden birebir (ÇG19, 189 TL): Patron'un verdiği listeden, r02 kuralıyla onaylı; çelikteki Ters mahya | L 2800 ile aynı
-    kaynak satırı ve fiyat. Kenar kutusunun iki listede de fiyatı yok: kayıt fiyatsız, "kaynakta yok" (çelikteki gibi); fiyat uydurulmaz."""
+    kaynak satırı ve fiyat. Kenar kutusunun iki listede de fiyatı yoktu: r08'de kayıt fiyatsız, "kaynakta yok" (çelikteki gibi); fiyat
+    uydurulmadı. r09'da prefabrikteki fiyatını Patron verdi (`test_r09_metal_tahta`); çelikteki kayıt fiyatsız kalır."""
     P, C = defter["hatlar"]["prefabrik"]["kalemler"], defter["hatlar"]["celik"]["kalemler"]
     k, c = P["Ters mahya (dere içi) | L 2800"], C["Ters mahya | L 2800"]
     assert (k["fiyat"], k["kaynak"], k["kaynak_satir"], k["durum"], k["onay"]) == (189, "HAZ", "ÇG19", "eşleşti", True)
     assert (c["fiyat"], c["kaynak"], c["kaynak_satir"], c["kaynak_kalem"]) == (k["fiyat"], k["kaynak"], k["kaynak_satir"], k["kaynak_kalem"])
-    kk = P["Ters mahya kenar kutusu | L 21 × 40 × 21 × 2800"]
-    assert (kk["fiyat"], kk["kaynak"], kk["durum"], kk["onay"]) == (None, None, "kaynakta yok", False)
     assert C["Ters mahya kenar kutusu | L 21 × 40 × 21 × 2800"]["fiyat"] is None
-    R = F.fiyatla({"satirlar": [_pre("Ters mahya (dere içi)", "L 2800", 3, "1006"),
-                                _pre("Ters mahya kenar kutusu", "L 21 × 40 × 21 × 2800", 6, "1006")]}, defter)
-    s, t = R["satirlar"]
+    R = F.fiyatla({"satirlar": [_pre("Ters mahya (dere içi)", "L 2800", 3, "1006")]}, defter)
+    s = R["satirlar"][0]
     assert (s["birim_fiyat"], s["tutar"], s["durum"], s["kaynak_adi"]) == (189, 567, "onaylı", "Haziran malzeme listesi, 16.06.2026")
-    assert t["birim_fiyat"] is None and t["tutar"] is None
-    assert R["ozet"]["toplam"] == 567 and [f["anahtar"] for f in R["ozet"]["fiyatsiz"]] == ["Ters mahya kenar kutusu | L 21 × 40 × 21 × 2800"]
+    assert R["ozet"]["toplam"] == 567 and R["ozet"]["fiyatsiz"] == []
 
 
 
@@ -307,6 +305,32 @@ def test_r09_patron_fiyati(defter):
     s = F.fiyatla({"satirlar": [_pre("Özel pencere karkası (120×180) (100'lük çektirme U'su + 100'lük H geçen)", "1200 × 1800", 2, "1003")]},
                   defter)["satirlar"][0]
     assert (s["birim_fiyat"], s["tutar"], s["durum"], s["kaynak_adi"]) == (700, 1400, "onaylı", "Patron, 04.11.2026")
+
+
+def test_r09_metal_tahta(defter, tmp_path):
+    """r09 (4 Kasım 2026): Lokman TK-04 teklif PDF'inde ters mahya kenar kutusunun satırına 23:24'te "'METAL TAHTA L:2800 (GALVANİZ)' Yaz
+    fiyat:100 TL" dedi. Fiyat Patron'dan (100 TL, onaylı); teklifte yazılan ad ve ölçü kaydın `teklif_adi` ve `teklif_olcu`'sundan. Motor'un
+    iç adı (`kalem`), ölçüsü ve defter anahtarı aynı kalır (kör kıyas ve öteki satırlar o adla). Fiyatlı listenin Excel'i de yazılan adı
+    gösterir. Çelikteki kayıt değişmez (fiyatsız)."""
+    P, C = defter["hatlar"]["prefabrik"]["kalemler"], defter["hatlar"]["celik"]["kalemler"]
+    a = "Ters mahya kenar kutusu | L 21 × 40 × 21 × 2800"
+    k = P[a]
+    assert (k["fiyat"], k["kaynak"], k["durum"], k["onay"]) == (100, "PATRON", "Patron verdi", True)
+    assert (k["teklif_adi"], k["teklif_olcu"]) == ("Metal tahta (galvaniz)", "L 2800")
+    assert "METAL TAHTA L:2800 (GALVANİZ)" in k["not"] and "23:24" in k["not"] and "cmsg_" in k["not"]
+    assert C[a]["fiyat"] is None and "teklif_adi" not in C[a]
+    R = F.fiyatla({"satirlar": [_pre("Ters mahya kenar kutusu", "L 21 × 40 × 21 × 2800", 6, "1006"), _pre("Ters mahya (dere içi)", "L 2800", 3, "1006")]},
+                  defter)
+    s, t = R["satirlar"]
+    assert (s["kalem"], s["olcu"], s["teklif_adi"], s["teklif_olcu"]) == ("Ters mahya kenar kutusu", "L 21 × 40 × 21 × 2800", "Metal tahta (galvaniz)", "L 2800")
+    assert (s["birim_fiyat"], s["tutar"], s["durum"], s["kaynak_adi"]) == (100, 600, "onaylı", "Patron, 04.11.2026")
+    assert "teklif_adi" not in t and "teklif_olcu" not in t
+    assert R["ozet"]["toplam"] == 1167 and R["ozet"]["fiyatsiz"] == []
+    import openpyxl
+    F.excel_yaz(R, tmp_path / "l.xlsx", "deneme")
+    hucre = [(r[0], r[1]) for r in openpyxl.load_workbook(tmp_path / "l.xlsx").active.iter_rows(values_only=True)]
+    assert ("Metal tahta (galvaniz)", "L 2800") in hucre and not any(a_ == "Ters mahya kenar kutusu" for a_, _ in hucre)
+
 
 def test_miktari_olmayan_fiyatli_satir(defter):
     C = defter["hatlar"]["celik"]
