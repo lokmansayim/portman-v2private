@@ -1,6 +1,6 @@
 {
  "sema": "portman.fiyat_defteri/1",
- "surum": "2026-11-03-r07",
+ "surum": "2026-11-04-r08",
  "aciklama": "Yükleme listesi × birim fiyat (İE-13, Z-10'un liste yöntemi). Anahtar Motor'un liste satırı: prefabrikte 'kalem | olcu' (motor/prefabrik_liste.py), çelikte 'kalem | boyut' (motor/genel yükleme listesi). Fiyat uydurulmaz: kaynağı olmayan kalemde fiyat boş kalır.",
  "para_birimi": "TL",
  "kdv": "kaynak listelerde yazmıyor",
@@ -865,6 +865,26 @@
      "durum": "eşleşti",
      "onay": true,
      "not": "kaynakta antrasit"
+    },
+    "Ters mahya (dere içi) | L 2800": {
+     "fiyat": 189,
+     "birim": "adet",
+     "kaynak": "HAZ",
+     "kaynak_satir": "ÇG19",
+     "kaynak_kalem": "Antrasit ters mahya L 2800",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": "r08: cumbalı prefabrik çatının satırı (çıkıntısız çapraz cumba, D-47; TK-04 r04). 87 m² listesinde ters mahya yok; Haziran listesinden birebir, çelikteki Ters mahya | L 2800 ile aynı kaynak satırı ve fiyat (r02)."
+    },
+    "Ters mahya kenar kutusu | L 21 × 40 × 21 × 2800": {
+     "fiyat": null,
+     "birim": "adet",
+     "kaynak": null,
+     "kaynak_satir": null,
+     "kaynak_kalem": "Ters mahya kenar kutuları, fiyatsız",
+     "durum": "kaynakta yok",
+     "onay": false,
+     "not": "r08: cumbalı prefabrik çatının satırı; iki listede de fiyatı yok (çelikteki kayıtla aynı). Fiyat Patron'dan."
     },
     "Mahya bandı | rulo 10 m": {
      "fiyat": 125,
