@@ -12,7 +12,8 @@
    "konu": "Saçak omegası",
    "kural": "100'lük saçak omegası saçak duvarının üstünde duvar boyunca (taşan verandada yan kirişin üstünde kiriş boyunca); saçağa uzamaz, saçaktan saçağa yalnız baş makas omegası gider. Adedi saçak boyundan, gerçek listeler gibi (PK-01 9, TK-01 11, TK-03 11).",
    "kararlar": [
-    "D-41"
+    "D-41",
+    "D-53"
    ],
    "pr": [
     106,
@@ -36,7 +37,7 @@
    "kilitler": [
     {
      "yer": "kurallar/yerlesim/prefabrik.json#kurallar.sacak_omegasi_yerlesimi",
-     "iz": "0e8c3c74a85f1e65"
+     "iz": "9df33a6b0d781ccf"
     },
     {
      "yer": "kurallar/urun/kartlar.json#kartlar[kod=CK-01].nerede",
@@ -88,7 +89,15 @@
     }
    ],
    "durum": "mühürlü",
-   "gecmis": []
+   "gecmis": [
+    {
+     "tarih": "2026-11-04 20:51",
+     "soz": "Karar kartı \"Saçak omegası mührü (M-01) cumbalı çatıya da uygulansın diye açılsın mı?\" → \"Aç, cumbalı çatıya da uygulansın\" (20:51 \"daha önce bu cumba modeline seninle çizdik ama montaj rehberi oluşturmadık ne gerekiyorsa yap\")",
+     "mesaj": "cmsg_01UAFvcnfVuTR1wfFux5fQPPC88cuU3xdmrSAkwDR9WhVj",
+     "kapanis": "2026-11-04T21:58Z",
+     "karar": "D-53"
+    }
+   ]
   },
   {
    "kod": "M-02",

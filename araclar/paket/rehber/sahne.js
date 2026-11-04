@@ -433,7 +433,7 @@ D.makas.forEach((mk, i) => {
   if (!ara) { const r = makasKur(R, mk.bas, mk.son, mk.wl, mk.NB, mk.T0, m); g = r.g; P = r.P; }
   else g = araMakas(R, mk.bas, mk.son, ysR(RF[mk.zR], mk.yuz), mk.nps, m);
   const w = mk.yon === 'y' ? cerceve(Math.PI / 2, mk.konum, 0) : cerceve(0, 0, mk.konum); w.add(g);
-  const kod = ara ? null : mk.kod !== undefined ? mk.kod : mk.rol === 'bas' ? 'MA-01' : 'MA-02';
+  const kod = mk.kod !== undefined ? mk.kod : ara ? null : mk.rol === 'bas' ? 'MA-01' : 'MA-02';   // İE-15 K6: çapraz cumbanın ara makası MA-05
   const yer = mk.yon === 'y' ? `x = ${fmtc(mk.konum)} cm (sol dış yüzden)` : mk.konum > D.dis[1] ? `y = ${fmtc(mk.konum)} cm (arka duvarın arkasında)` : `y = ${fmtc(mk.konum)} cm (ön duvarın ${mk.konum < 0 ? 'önünde' : 'arkasında'})`;
   const span = mk.son - mk.bas;
   add(step, w, i, { kod, ad: kart(kod, mk.kart_ad || M.ara_ad), satir: [

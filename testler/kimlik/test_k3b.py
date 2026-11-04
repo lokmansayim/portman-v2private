@@ -141,7 +141,7 @@ def test_kurallar_ve_degerler():
     for ad in KE.KENAR:
         k = K[ad]
         assert k["kural"] and k["durum"] in durumlar and k["tarih"] == "2026-10-25" and k["kaynak"], ad
-        assert ad == KE.ALT_CERCEVE or k["cati_tipleri"] == ["besik"], ad
+        assert ad == KE.ALT_CERCEVE or k["cati_tipleri"] == ["besik", "besik_cumba"], ad     # İE-15 K6 (D-53): çapraz cumbada da
         for alt in ("parca_boyu", "bindirme"):
             if alt in k:
                 assert set(k[alt]) == {"okunan"} and k[alt]["okunan"].startswith(("kurallar/liste/prefabrik.json › ", "kitap › ")), (ad, alt)

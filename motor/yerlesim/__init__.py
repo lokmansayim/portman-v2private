@@ -155,7 +155,8 @@ def _verandalar(g: dict, D: dict, K: dict, kesit: dict, kural_yok: list, uyarila
 
 
 def _serit_katmani(ad: str, adi: str, sinif: str, g: dict, D: dict, kitap: dict, kesit: dict, kural_yok: list, uyarilar: list) -> list[dict]:
-    """İE-24: girintili gövdenin çatı katmanı (`serit.py`): liste üretecinin saydığı çatıdan (kitabın çok düzlemli çatısı)."""
+    """İE-24: girintili gövdenin çatı katmanı (`serit.py`): liste üretecinin saydığı çatıdan (kitabın çok düzlemli çatısı). İE-15 K6: çıkıntısız
+    çapraz cumbada (`cati_serit["capraz"]`) aynı katmanlar; kaplama ve izolasyon liste gibi parça parça (gövde dikdörtgen)."""
     from motor.genel import cati_genel
     ck = cati_genel.cati_kur(g["cati_serit"], kitap)
     if ad == "asik_sirasi":
@@ -163,6 +164,11 @@ def _serit_katmani(ad: str, adi: str, sinif: str, g: dict, D: dict, kitap: dict,
         return serit.asik(g, ck, {"kesit_asik": kesit["asik"], "tam": _cm(A["parca_boyu"] - A["pay"]), "en_kisa": A["en_kisa_cm"]})
     if ad == "cati_kaplamasi":
         tur, neden = kaplama_turu(g, D[ad], uyarilar)
+        if g["cati_serit"].get("capraz") and not neden:              # İE-15 K6: çapraz cumba; liste gibi parça parça (O9; `serit.kaplama_capraz`)
+            out = serit.kaplama_capraz(g, kaplama_degerleri(D[ad], tur, kesit))
+            for p in out:
+                p["bilgi"]["Kaplama"] = tur
+            return out
         if neden or tur != "sandvi":
             kural_yok.append({"parca": adi, "sinif": sinif, "neden": neden or "girintili gövdede tek kat panelin çok düzlemli dizilimi yok "
                                                                                "(liste üreteci de parça parça sayar; İE-24)"})
@@ -176,6 +182,8 @@ def _serit_katmani(ad: str, adi: str, sinif: str, g: dict, D: dict, kitap: dict,
         levhalar, nedenler = serit.betopan(g, cati.betopan_degerleri(B, kesit), kesit["betopan"])     # kenar katmanı aynı levhalarda keser
         kural_yok += [{"parca": adi, "sinif": sinif, "neden": f"{ad}: {n}"} for n in nedenler]
         return levhalar
+    if ad == "cati_izolasyonu" and g["cati_serit"].get("capraz"):    # İE-15 K6: gövde dikdörtgen; şeritler ana çatının makas aralıklarında
+        return tavan_katmani.izolasyon(serit.ana_makaslari(g), {"kalinlik": kesit["izolasyon"]})
     if ad == "cati_izolasyonu":                 # K5b-2'nin şeritleri dış ölçü kutusundan ve tek makas dizisinden; girintili gövdede yok (beyan)
         kural_yok.append({"parca": adi, "sinif": sinif, "neden": f"{ad}: girintili gövdede (ana çatı + cumba) makas aralığı şeritleri henüz "
                                                                  "kurulmuyor; şeritler dış ölçü kutusundan çıkar, girinti gözlerine taşar (İE-24)"})

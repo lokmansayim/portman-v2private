@@ -96,6 +96,7 @@ Biçim: karar · gerekçe · reddedilen seçenekler · geri alma yolu · kim ve 
 | [D-43](D-43.md) | Lokman'ın birleştirme onayı verdiği PR, doğrulama yeşil olunca beklemeden birleşir; kırmızıda sohbet kendisi düzeltip yeniden koşturur; onaysız PR'da birleştirme açıkça sorulur. Canlı, ücretli deneme, silme ve mühürlü konular kapsam dışı | 2.11 (Lokman 16:29 "evet yaz", 16:30) |
 | [D-44](D-44.md) | Dört evin mühürü (M-07) liste için açıldı ve yeniden mühürlendi: makas sayısı paftanın makas planıyla (AP-15 ana çatı 7, AP-09 cumbası 3; cumbanın iç ucunda makas yok), dört evin yükleme listesi çizimdeki çatıdan yazılır; çizim ve çatı değişmedi | 2.11 (Lokman 16:50 ve 18:21 kartları) |
 | [D-45](D-45.md) | Kör ölçüm farklarından liste kuralları (Lokman'ın 3 Kasım cevapları): 3'lü H dış duvarda da, çektirme U'su 60 yerinden, köşe direği tipsiz, mahya bandı mahya boyundan, temiz su ıslak hacim başına, 5,5 × 25 trapez vida; kıyasta atık su ölçüm dışı, eş adlar; açılmış on evin kaydı açık | 3.11 (Lokman 09:52) |
+| [D-53](D-53.md) | Saçak omegası kuralı (M-01) beşik + cumba çatıda da (kural aynı; mühür açıldı ve yeniden mühürlendi); kart modeli ve montaj rehberi beşik + çıkıntısız çapraz cumbayı kurar, yeni kart MA-05 yavru makas (İE-15 K6; TK-04, AP-13, AP-16) | 4.11 (Lokman 20:51 kartı) |
 
 ## Numara defteri (14 Ekim 2026, BK-08; CIO planı › Görev 3)
 
@@ -136,6 +137,7 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | D | D-43 | onaylı PR yeşilde beklemeden birleşir; kırmızıda sohbet düzeltir; onaysız PR'da sorulur (Lokman 2.11 16:29 "evet yaz"; pano 134) | yazıldı (2.11; İE-17 PR-1b/K7, `claude/project-thread-i19mbz`) |
 | D | D-44 | M-07 liste için açıldı ve yeniden mühürlendi: makas sayısı paftadaki gibi, dört evin listesi yazılır (Lokman 2.11 18:21 kartı) | yazıldı (2.11; İE-17 PR-1b/K7, `claude/project-thread-i19mbz`) |
 | D | D-45 | kör ölçüm farklarından liste kuralları ve kıyas (Lokman 3.11 09:52, öneri tablosunun cevapları) | yazıldı (3.11; İE-27, `claude/project-thread-wwx1p0`) |
+| D | D-53 | M-01 beşik + cumbada da; kart modeli ve montaj rehberi çapraz cumbayı kurar, MA-05 (Lokman 4.11 20:51; TK-04 montaj rehberi) | yazıldı (4.11; İE-15 K6, `claude/project-thread-xwohu4`) |
 | D | **D-46** | — | **sıradaki boş** |
 | İE | İE-01–İE-08 | bu depo (`main`) | yazıldı |
 | İE | İE-09 | model atölyesi: kontrollü model üretimi ve banka hattı (Görev 6e; pano 30; P6001 güncellemesi kapsam dışı) | alındı (16.10; `claude/gorev-6e-model-atolyesi-rnhtcp`; PR-1 banka hattı 29.10, `claude/project-thread-rhjgzv`) |

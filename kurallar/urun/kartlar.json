@@ -1,6 +1,6 @@
 {
  "sema": "portman.urun_kartlari/1",
- "surum": "12",
+ "surum": "13",
  "aciklama": "Ürün kimlik kartları (İE-15 K1, K2, K3, K3b, K5, K5b ve K5b-2, D-24). Kart bir ürünü tanımlar; modelde IFC tür nesnesidir, parça (örnek) türüne bağlanır. Okuyan `motor/kart_model.py`. Kod kalıcıdır: bir kod başka ürüne verilmez, ürün kalkarsa kod boş kalır (`testler/kimlik/veri/kart_kodlari.json` kilidi). Kart kodu boy ve projeyle değişmez; bugünkü malzeme kataloğunun kodu (D01, D09…) boya göre ve projede yeni boy çıktıkça verilir, parçada `KatalogKodu` olarak kalır. Bu yüzden kart kodu tirelidir (D-01). Ailelerin harfi katalogla aynıdır. Kartı düzeltmek için bu dosya düzeltilir, model yeniden üretilir; Bonsai'de yapılan değişiklik geri okunmaz.",
  "alanlar": {
   "kod": "Kalıcı kod, `<aile>-<nn>`",
@@ -455,7 +455,7 @@
    "sayim": "yerlesen_adet",
    "ifc": {"sinif": "IfcElementAssemblyType", "alt_tur": "TRUSS"},
    "pafta": ["makas_bas"],
-   "bugunku_ifc": [{"sinif": "IfcElementAssembly", "kosul": [["PortatifEv_Kapsam", "BOMKalem", "\\(baş\\)"]], "cati_tipleri": ["besik"]}],
+   "bugunku_ifc": [{"sinif": "IfcElementAssembly", "kosul": [["PortatifEv_Kapsam", "BOMKalem", "\\(baş\\)"]], "cati_tipleri": ["besik", "besik_cumba"]}],
    "kaynak": {"durum": "muhendis", "tarih": "2026-10-19", "dayanak": "PK-01 gerçek listesinin satır adı (PR #28)"}
   },
   {
@@ -468,7 +468,7 @@
    "sayim": "yerlesen_adet",
    "ifc": {"sinif": "IfcElementAssemblyType", "alt_tur": "TRUSS"},
    "pafta": ["makas_orta"],
-   "bugunku_ifc": [{"sinif": "IfcElementAssembly", "kosul": [["PortatifEv_Kapsam", "BOMKalem", "\\(orta\\)"]], "cati_tipleri": ["besik"]}],
+   "bugunku_ifc": [{"sinif": "IfcElementAssembly", "kosul": [["PortatifEv_Kapsam", "BOMKalem", "\\(orta\\)"]], "cati_tipleri": ["besik", "besik_cumba"]}],
    "kaynak": {"durum": "muhendis", "tarih": "2026-10-19", "dayanak": "PK-01 gerçek listesinin satır adı (PR #28)"}
   },
   {
@@ -918,6 +918,19 @@
    "pafta": [],
    "bugunku_ifc": [{"sinif": "IfcElementAssembly", "kosul": [["PortatifEv_Kapsam", "BOMKalem", "^Cumba makası"]], "cati_tipleri": ["besik"]}],
    "kaynak": {"durum": "lokman", "tarih": "2026-10-30", "dayanak": "Lokman, 30 Ekim 2026 13:49: \"en uzun makasları ana makas kabul et, diğer makasları cumba makası kabul et\" (`motor/cati_serit.py`); listedeki satır \"Cumba makası · <cumba>\" (`motor/prefabrik_liste.py`). Kesit kartta yazılı değil (MA-01, MA-02 gibi). Kart İE-15'le anlaşılan sırayla sona eklendi (İE-24, pano 116)"}
+  },
+  {
+   "kod": "MA-05",
+   "ad": "Yavru makas (çapraz cumba)",
+   "liste": {"grup": "1005", "satirlar": ["Yavru makas"]},
+   "olcu": "Açıklık parçada (listede cumbanın açıklığı + iki saçak; TK-04'te 4465); ana çatının üstündekiler iki dere arasında, kısa",
+   "birim": "adet",
+   "nerede": "Beşik + çıkıntısız çapraz cumbanın çatısında (İE-15 K6, D-47): ilki dış uçtaki kalkan duvarının üstünde (cumbanın baş makası), ötekiler 125,5 arayla ana çatının makaslarının üstünde, iki dere arasında, derelerin birleştiği yere kadar. Yer ve sayı çatı tanımından (`motor/cati_capraz.py`; liste, 3B model ve montaj rehberi aynı)",
+   "sayim": "yerlesen_adet",
+   "ifc": {"sinif": "IfcElementAssemblyType", "alt_tur": "TRUSS"},
+   "pafta": [],
+   "bugunku_ifc": [{"sinif": "IfcElementAssembly", "kosul": [["PortatifEv_Kapsam", "BOMKalem", "^Yavru makas · "]], "cati_tipleri": ["besik_cumba"]}],
+   "kaynak": {"durum": "lokman", "tarih": "2026-11-04", "dayanak": "D-47 (Lokman, 3 Kasım 2026 21:56): çıkıntısız çapraz cumbada makas dış uçtaki kalkan duvarının ekseninden 125,5 arayla derelerin birleştiği yere kadar; listedeki satır \"Yavru makas · <cumba>\" (`motor/prefabrik_liste.py`), taşan verandanın yavru makasıyla (MA-03) aynı liste satırı. TK-04 (Lokman, 4 Kasım 2026 14:13: \"çatı AP-06 gibi\"); kart İE-15'le anlaşılan sırayla sona eklendi (K6, TK-04 montaj rehberi)"}
   }
  ],
  "gorunum": [

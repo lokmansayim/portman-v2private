@@ -192,8 +192,8 @@ def kart_modeli(ie: dict, gec: Path, kart_kodu: str) -> dict:
     from motor import kart_model
     from motor.cati_prefabrik import TIP_ADI
     tip = (ie.get("cati") or {}).get("tip", "besik")
-    if tip != "besik":
-        return {"neden": f"kart modeli {TIP_ADI.get(tip, tip)} çatıyı kurmuyor (yerleşimi yalnız düz beşik; İE-15 K5)"}
+    if tip not in ("besik", "besik_cumba"):              # İE-15 K6: beşik + çıkıntısız çapraz cumba da (`motor/cati_capraz.py`)
+        return {"neden": f"kart modeli {TIP_ADI.get(tip, tip)} çatıyı kurmuyor (yerleşimi beşik ve beşik + çapraz cumba; İE-15 K5, K6)"}
     say = kart_model.uret(copy.deepcopy(ie), gec / "kart", kart_kodu)
     return {"klasor": gec / "kart", "ifc": gec / "kart" / f"{kart_kodu}_model.ifc", "pdf": gec / "kart" / f"{kart_kodu}_yerlesim_planlari.pdf",
             "kural_yok": say["kural_yok"], "sema_hatasi": say["sema_hatasi"], "uyarilar": say.get("yerlesim", {}).get("uyarilar", [])}

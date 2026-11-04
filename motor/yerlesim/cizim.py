@@ -259,7 +259,8 @@ def ciz(model_yolu: Path, say: dict, yol: Path, kod: str) -> Path:
         kd, ki = _kart(say, "DR-01"), _kart(say, "DR-02")
         ym = _kart(say, "MA-03")
         _lejant(fig, [f"MA-01 Makas (baş): {_kart(say, 'MA-01')['adet']}", f"MA-02 Makas (orta): {_kart(say, 'MA-02')['adet']}"]
-                + ([f"MA-03 Yavru makas: {ym['adet']} (Y; veranda çatısı)"] if ym["adet"] else []) + ["",
+                + ([f"MA-03 Yavru makas: {ym['adet']} (Y; veranda çatısı)"] if ym["adet"] else [])
+                + [f"{k} {_kart(say, k)['ad']}: {_kart(say, k)['adet']}" for k in ("MA-05",) if _kart(say, k)["adet"]] + ["",
                      f"DR-01 Metal dere: {kd['adet']} hat, {_sayi(kd.get('metre', 0))} m"]
                 + ([f"   kesim: {kesim['DR-01']['stok']} boy L {kesim['DR-01']['parca_boyu_cm']:g}", f"   ({kesim['DR-01']['bindirme_cm']:g} cm bindirme)"]
                    if "DR-01" in kesim else [])

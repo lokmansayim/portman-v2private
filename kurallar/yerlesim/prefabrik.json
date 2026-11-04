@@ -24,7 +24,7 @@
     "tarih": "2026-10-20",
     "not": "Makas aralığının yarısı: bir duvar çizgisinde her makasa en çok bir H düşer. Çarpan K1'in seçimi; makas aralığı liste kurallarından okunur."
    },
-   "cati_tipleri": ["besik"],
+   "cati_tipleri": ["besik", "besik_cumba"],
    "turler": {"denk": "dubelli_kulakli", "denk_degil": "dubelli"},
    "durum": "muhendis",
    "tarih": "2026-10-13",
@@ -106,7 +106,7 @@
     "tarih": "2026-10-24",
     "not": "Tavan omegasının `en_kisa_cm`'siyle aynı: sıranın kalanı bundan kısaysa parçasız boşluktur (P6001'de mahya 823 cm → 410 + 410, 3 cm parça yok). 31 Ekim 2026'ya kadar saçak sırasının eşiği de buydu; BK-19'da eşik ayrı liste kuralı oldu (`sacak_esigi`, 30 cm). Geometri hakemi K2."
    },
-   "cati_tipleri": ["besik"],
+   "cati_tipleri": ["besik", "besik_cumba"],
    "durum": "lokman",
    "tarih": "2026-10-24",
    "kaynak": "Karar C: Lokman, 24 Ekim 2026 06:17 kartı \"Mahyadan 60\". PK-01 aşık planı (s. 8): yüz başına 7 sıra (mahyadan 0, 60 … 300 ve saçakta 347).",
@@ -146,7 +146,7 @@
     "kaynak": "Lokman, 1 Kasım 2026 10:23: \"şayet çatı sandviç panel ise çatı kaplaması kalınlaşır ve doğal olarak alın sacı alnı da genişler başka hiç bir yerde değişiklik olmaz ... 100cm kapatır olan ve 5 hadveli olan\" (verdiği ürün: İzocam Tekiz SPÇ 1000 5H; üreticinin tablosunda faydalı genişlik 1000 mm, 5 hadve, hadve yüksekliği 35 mm, poliüretan yalıtım 35–120 mm, satıcıda stok standart 40 mm, sac 0,40 / 0,40). Tek kat panel: 62 m² rehberinin 27/200 trapez profili (İE-18, varsayım). Lokman, 1 Kasım 2026 10:46 (görsel): \"sadece görsellik açısından sandviç panellerin hadvelerinin içide poliüretan (yani dolu sarı) oluyor altı düz birde ölçülü çizdin 5 hadve sık olmuş gibi 4 hadve yapabilir misin?\"; 10:50: \"internette küçükdevecioğlu dışında da bu ürünü satanlar var ... ölçüleri oralardan alabilirsin bir hata olmasın\". Başka üreticiler: 5 hadveli çatı panelinde hadveler 250 mm arayla, biri yandaki panele binen bindirme hadvesi, çatının 1 metresinde 4 hadve (Teknopanel çatı ve cephe paneli broşürü RP-5H; 3 hadvelide 500 mm); faydalı genişlik 1000 mm (Teknopanel, Mekpan, Nuhpanel, İrden), poliüretan 40 mm'den (Teknopanel, Mekpan, İrden; Tekiz 35 mm'den), hadve yüksekliği 32–40 mm (Tekiz 35, Teknopanel 32/40).",
     "not": "Durum varsayım: Lokman'ın verdiği 100 cm kapatma, 5 hadve ve kalınlaşma kuralıdır (D-40); hadve yüksekliği ve aralığı üreticilerin ölçüsü, yalıtımın 40 mm'si, hadvenin tepe ve taban genişliği ve tek kat panelin 27/200 profili varsayımdır. Yalnız gösterim (cm): ürünün hadve sayısı ve hadve aralığı, hadve yüksekliği, hadvenin tepe ve taban genişliği, kalkan kenarındaki hadvenin levha kenarından ekseni, yalıtım kalınlığı (tek kat panelde 0). Kaplamanın kalınlaşması tek kat panele göre (yalıtım + hadve) farkıdır, sandviç panelde 4,8 cm: kart modelinde kaplama ve alın sacının alnı bu kadar artar, montaj rehberi paneli yalıtımıyla çizer ve alın sacı kendiliğinden genişler; başka hiçbir parça değişmez, mahya kaplamanın üstünde kalır (D-40). Sandviç panelin tepe ve taban genişliği ile yalıtımın 40 mm'si varsayımdır (başka kalınlık sipariş edilirse burada değişir). Sayı, boy ve metre bunlardan çıkmaz. `hadve_sayisi` ürünün hadve sayısıdır (sandviç panelde biri bindirme hadvesi), `hadve_araligi` hadve eksenleri arası (cm): tek kat panelde 20 (27/200), sandviç panelde 25, çatının 1 metresinde 4 hadve (Lokman 10:46 \"4 hadve\"; üreticilerin ölçüsü). Rehber sandviç panelin hadvelerinin içini poliüretanla dolu, altını düz çizer (Lokman, 1 Kasım 10:46; D-40 ek)."
    },
-   "cati_tipleri": ["besik"],
+   "cati_tipleri": ["besik", "besik_cumba"],
    "durum": "muhendis",
    "tarih": "2026-10-24",
    "kaynak": "PK-01 çatı kaplaması planı (s. 9): yüz başına 11 × (350 × 100), son şerit yüzün ucundan taşar. Taşan veranda: liste üretecinin ek çatı parçası sayısı (P3, O9) ve İE-18 rehberi (TK-01 ön verandada iki yüzün 11'er cm'lik şeritleri bir levhadan).",
@@ -162,7 +162,7 @@
     "tarih": "2026-10-24",
     "not": "PK-01 s. 5 lejantı 125 × 250; levhalar yatık çizili."
    },
-   "cati_tipleri": ["besik"],
+   "cati_tipleri": ["besik", "besik_cumba"],
    "durum": "muhendis",
    "tarih": "2026-10-24",
    "kaynak": "PK-01 baş makas betopan yerleşimi (s. 5): makas başına 2 levha, mahyaya ortalı, uçlardaki ince üçgenler açık. PK-07 s. 10 (K5b; 845 cm makas, üçgen 125'ten yüksek): levhalar dikey 125 × 250, mahyada ek, çatı çizgisinin üstünde kesilen parçalar uçları kapatır (Lokman, 26 Ekim: \"baş makasların duvar dışındaki uçları artan betopanla kaplandı\"). Paftada mahyanın sağında ve solunda 3 + 1 ve 2 + 1 levha; iki yana sırayla dizilim varsayım, sayı H5.",
@@ -179,7 +179,7 @@
    "kose_basina": {"okunan": "kitap › inis.kose_basina"},
    "parca_boyu": {"okunan": "kitap › parca_boyu_m.dere"},
    "bindirme": {"okunan": "kitap › bindirme_m.dere"},
-   "cati_tipleri": ["besik"],
+   "cati_tipleri": ["besik", "besik_cumba"],
    "durum": "muhendis",
    "tarih": "2026-10-24",
    "kaynak": "PK-01 makas ve dere planı (s. 7): 2 hat × 1059,8; 6 iniş (hat uçlarında 4, ortada 2). Köşe başına iniş Lokman'ın 13 Ekim kuralıyla aynı (liste `ana_cati_kose`).",
@@ -238,7 +238,7 @@
   "cati_izolasyonu": {
    "kural": "Çatı izolasyonu (cam yünü şilte) tavanın üstünde, aşıklardan önce serilir: ana çatının her makas aralığında bir şerit, dış dikdörtgenin dış duvarlarının iç yüzleri arasında (makasın uzandığı eksende), iki makasın arası (uç duvarların iç yüzüne kırpılır). Ana çatının altındaki gömme veranda ve niş şeridin içindedir: rehber rulonun sol duvardan sağ duvara serildiğini yazar, liste de brüt alandan sayar (geometri hakemi, K5b-2). Taşan verandanın çatısı şerit almaz (yavru makasları bugünkü IFC'de değil; rehberde de verandaların üstü açık). Paket: şeritlerin alanı toplamı ÷ paketin alanı, bir kez yukarı.",
    "paket_m2": {"okunan": "kitap › silte_adet_m2"},
-   "cati_tipleri": ["besik"],
+   "cati_tipleri": ["besik", "besik_cumba"],
    "durum": "varsayim",
    "tarih": "2026-10-30",
    "kaynak": "CIO, 27 Ekim 23:11 (K5b planı): \"çatı cam yünü (makas aralığı başına)\". Montaj rehberi (`araclar/paket/rehber/veri.py`, izolasyon): \"Her makas aralığına bir şerit gelir: rulo sol duvarın üstünden başlar, açılarak sağ duvara kadar serilir\"; 62 m² rehberinde de şerit duvardan duvara (10 … 590). Liste üreteci brüt alandan sayar (brüt bina ÷ 9,6; aday: saçaklı çatı tabanı); model şeritlerden: fark yazılır, liste değişmez.",
@@ -364,7 +364,7 @@
     "tarih": "2026-10-31",
     "not": "Lokman, 31 Ekim 2026 13:40 (saçak omegası duvar boyu mu saçak boyu mu sorusuna): \"gerçek listeye uy\". Gerçek Portatifev listeleri saçak boyuyla tutuyor (PK-01 9, PK-02 7, PK-03 8; `testler/kor/projeler/*/sonuc.json`); sayı saçak boyundan (iki saçak kenarı, bina boyu + iki saçak; PK-01 21,20 m ÷ 2,5 → 9), liste üreteciyle aynı (BK-19). Yer: duvar boyu (Lokman, 1 Kasım 15:19: \"hiç bir zaman saçak omegalarının dışarı 30 cm uzayacağını söylemedim sadece baş makas omegasını söyledim\"; D-41); BK-19'daki saçak ucundan ucuna kurulum bu sözün yanlış okunmasıydı. Önce (K3b planı §2; Lokman, 25 Ekim 17:47 \"Uygula\"): rehberdeki gibi duvar boyu (PK-01 20 m → 8), fark 6e'ye nottu."
    },
-   "cati_tipleri": ["besik"],
+   "cati_tipleri": ["besik", "besik_cumba"],
    "durum": "varsayim",
    "tarih": "2026-10-25",
    "kaynak": "Montaj rehberi (Lokman'ın 24 Ekim çizimleri): saçak omegası yüz başına 4 × 250 cm, duvarın üstünde, makasın altında; kesit ters U (içte ~6 cm kanat ve 4 cm ayak, dışta eğik ~6 cm kanat). Teyit bekleyen maddeler varsayım (Lokman, 25 Ekim 09:10).",
@@ -380,7 +380,7 @@
     "tarih": "2026-10-25",
     "not": "K3b planı §2 (Lokman, 25 Ekim 17:47 \"Uygula\"): liste üretecinin sayma yolu, boy modelden."
    },
-   "cati_tipleri": ["besik"],
+   "cati_tipleri": ["besik", "besik_cumba"],
    "durum": "varsayim",
    "tarih": "2026-10-25",
    "kaynak": "Montaj rehberi (Lokman'ın 24 Ekim çizimleri): profil tırnak 3 → saçak altı 30 → alın 13 → kıvrım 10 cm (açınım ≈ 56 cm), sac 1 mm; kıvrımın ölçüsü teyit bekliyor (Lokman, 25 Ekim 09:10: \"Varsayım kalsın\"). Sayı liste kuralından (PK-01 ve PK-02 tuttu).",
@@ -396,7 +396,7 @@
     "tarih": "2026-10-25",
     "not": "K3b planı §2 (Lokman, 25 Ekim 17:47 \"Uygula\"): liste üretecinin sayma yolu, boy modelden."
    },
-   "cati_tipleri": ["besik"],
+   "cati_tipleri": ["besik", "besik_cumba"],
    "durum": "varsayim",
    "tarih": "2026-10-25",
    "kaynak": "Montaj rehberi (Lokman'ın 24 Ekim çizimleri): profil saçak sacınınki ve kenar hadvesini kavrayan kıvrım; alt ucun kesim yüksekliği teyit bekliyor (Lokman, 25 Ekim 09:10: \"Varsayım kalsın\"). Sayı liste kuralından (PK-01 ve PK-02 tuttu).",
@@ -411,7 +411,7 @@
     "tarih": "2026-10-25",
     "not": "K3b planı §2 (Lokman, 25 Ekim 17:47 \"Uygula\"): liste üretecinin sayma yolu (O7; kitabın `bas_makas_z.kenar_kenar`'ı), boy modelden."
    },
-   "cati_tipleri": ["besik"],
+   "cati_tipleri": ["besik", "besik_cumba"],
    "durum": "varsayim",
    "tarih": "2026-10-25",
    "kaynak": "Montaj rehberi (Lokman'ın 24 Ekim çizimleri): üst kanat makas ve betopan üstünde, 3 cm çentik, 3 cm dış kanat, sac 1 mm. Teyit bekleyen maddeler varsayım (Lokman, 25 Ekim 09:10). Sayı liste kuralından (O7; PK-02, PK-06, PK-07 tuttu).",
@@ -425,7 +425,7 @@
     "tarih": "2026-10-25",
     "not": "K3b planı §1 (Lokman, 25 Ekim 17:47 \"Uygula\"): listede satırı yok, kart metreyle sayılır; listeye satır eklemek 6e'nin ve Lokman'ın kararı. Listedeki \"Sandviç panel kapaması\" başka parçadır (kitaba göre dere boyunca)."
    },
-   "cati_tipleri": ["besik"],
+   "cati_tipleri": ["besik", "besik_cumba"],
    "durum": "varsayim",
    "tarih": "2026-10-25",
    "kaynak": "Montaj rehberi (Lokman'ın 24 Ekim çizimleri): gövde ~6 cm, kanatlar 2 cm içeri; aşık uçlarında, alın sacının arkasında. Teyit bekleyen maddeler varsayım (Lokman, 25 Ekim 09:10).",
@@ -447,7 +447,7 @@
     "tarih": "2026-10-25",
     "not": "Liste üretecinin okuması (`motor/prefabrik_liste.py`, J5 ve O10): İş Emri'nin \"Çatı Kaplaması\" özelliğinde bu yazı geçiyorsa mahya trapez sac mahyasıdır (ayrı ürün), geçmiyorsa metal kiremit mahyası."
    },
-   "cati_tipleri": ["besik"],
+   "cati_tipleri": ["besik", "besik_cumba"],
    "durum": "muhendis",
    "tarih": "2026-10-25",
    "kaynak": "Liste kuralı O10 (PK-01, PK-02, PK-06, PK-07 listelerinde tuttu); yer ve kanat montaj rehberinden (Lokman'ın 24 Ekim çizimleri: mahyanın iki yanında 26'şar cm kanat).",
