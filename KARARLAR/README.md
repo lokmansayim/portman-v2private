@@ -171,7 +171,8 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | BK | BK-18 | Pano Motor'unda dış ve iç duvar aynı kalınlıkta (100 / 100; TK-02 "içlerde 100'lük"; `claude/project-thread-5p2lsc`) | alındı (28.10; CIO) |
 | BK | BK-19 | prefabrik yükleme listesi kart modeliyle aynı sayar (D-39; PR #96) | alındı (31.10) |
 | BK | BK-20 | mühürlü konular freni: kayıt, hook, CI kilit testi (D-42; `claude/project-thread-evp64h`) | alındı (1.11) |
-| BK | **BK-21** | — | **sıradaki boş** |
+| BK | BK-21 | frenler thread'lerin okuduğu yerde: `.claude/rules/frenler.md`, `araclar/fren.py`, CI "Korunan dosya onayı" (Lokman'ın `patron-onayi` etiketi); BK-17 `main`'e (`claude/project-thread-7n2p8x`) | alındı (4.11) |
+| BK | **BK-22** | — | **sıradaki boş** |
 
 ## 27 Eylülde Lokman'ın verdiği kararlar
 
