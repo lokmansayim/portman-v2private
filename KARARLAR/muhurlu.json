@@ -657,6 +657,55 @@
    ],
    "durum": "mühürlü",
    "gecmis": []
+  },
+  {
+   "kod": "M-11",
+   "konu": "Prefabrik trapez çatı: sac ve mahya 100 cm kapatır",
+   "kural": "Prefabrikte trapez sac standart 100 cm kapatır (kurallar/liste/prefabrik.json › trapez_kapatma_m = 1,0): adet her yüzde mahya boyu ÷ 1. Trapez sac mahyası sacın kapattığı kadar kapatır (trapez_mahyasi = sac_kapatmasi): parça L 1000, her beşiğin mahyası ÷ 1, yukarı; bindirme düşülmez. Tedarikçinin 80'lik sacı yalnız İş Emri'nin çatı kaplaması yazarsa (\"Trapez Saç (80 cm kapatır)\"): sac ÷ 0,8, mahya L 800 ÷ 0,8. Kural kitabının (çelik, genel motor) trapez sacı 0,8 ve mahyası L 800 − 20 cm bindirme olarak durur; prefabrikte okunmaz (kitapla_farkli).",
+   "kararlar": [
+    "D-50"
+   ],
+   "pr": [
+    123
+   ],
+   "lokman": [
+    {
+     "tarih": "2026-11-04 20:49",
+     "soz": "yalnız trapez mahya sac kaç kapatırsa o kadar kapatır yani sac 100 kapatırsa trapez mahyada 100 kapatır AIPrefabrik klasörü yada Drive hangisinden veri çekiyorsan onlardaki yükleme listelerinde var",
+     "mesaj": "cmsg_01UAFvcnfVuTR1wfFux5fQPP3Doc2vGWFzKe8ihgKLKnof"
+    },
+    {
+     "tarih": "2026-11-04 21:16",
+     "soz": "Trapez Mahyayıda 100 al",
+     "mesaj": "cmsg_01UAFvcnfVuTR1wfFux5fQPPCwByhbUb84kESJGPJS7LgZ"
+    },
+    {
+     "tarih": "2026-11-04 21:19",
+     "soz": "Sac da mahya da 100 cm (karar kartı: Trapez mahya 100 derken sac da 100 cm mi kapatıyor?)",
+     "mesaj": "cmsg_01UAFvcnfVuTR1wfFux5fQPP8ET57RBuXDfyZq9XiJtYtg"
+    },
+    {
+     "tarih": "2026-11-04 21:20",
+     "soz": "daha önce konuşmuştuk dönem dönem tedarikçiler 80 kapatır sacda verebilir ama biz bundan sonra standart olarak 100 kapatır yapacağız o yüzden Trapez Mahyada Sacda 100 kapatır olarak kuralla ve mühürle başa dönmeyelim düzelttiğimiz bir yer tekrar bozulmasın",
+     "mesaj": "cmsg_01UAFvcnfVuTR1wfFux5fQPP1cizD1KpVyoRyt5UPHKvW3"
+    }
+   ],
+   "kilitler": [
+    {
+     "yer": "kurallar/liste/prefabrik.json#kurallar.trapez_kapatma_m.deger",
+     "iz": "d0ff5974b6aa52cf"
+    },
+    {
+     "yer": "kurallar/liste/prefabrik.json#kurallar.trapez_mahyasi.deger",
+     "iz": "97d46c45d6270938"
+    },
+    {
+     "yer": "testler/motor/test_d50_trapez.py",
+     "iz": "0451da0e805fb45a"
+    }
+   ],
+   "durum": "mühürlü",
+   "gecmis": []
   }
  ]
 }

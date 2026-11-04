@@ -65,7 +65,7 @@
     "makas_ekseni": "y",
     "cumbalar": [{"cephe": "on", "bas_cm": 439.25, "bit_cm": 1014, "cikinti_cm": 62.75}]
   },
-  "ozellikler": {"Panel Türü": "Pres Panel", "Çatı Şekli": "Beşik + Cumba", "Çatı Kaplaması": "Trapez Kaplama", "Çatı Kaplama Rengi": "Antrasit Gri", "Dış Kapı": "Çelik Standart", "İç Kapılar": "Standart Amerikan", "Dış Cephe Boya": "?", "İç Cephe Boya": "?", "Pencere Rengi": "Antrasit", "Tavan": "Ters", "Saçak ve Alın Rengi": "Antrasit Gri", "Açıklama": "1- İç duvarlar alçıpan kaplama 2- Çatı izolasyon mineral yün 3- Trapez saç ve mahya alıcıya ait. Ters mahya gidecek."},
+  "ozellikler": {"Panel Türü": "Pres Panel", "Çatı Şekli": "Beşik + Cumba", "Çatı Kaplaması": "Trapez Kaplama (80 cm kapatır)", "Çatı Kaplama Rengi": "Antrasit Gri", "Dış Kapı": "Çelik Standart", "İç Kapılar": "Standart Amerikan", "Dış Cephe Boya": "?", "İç Cephe Boya": "?", "Pencere Rengi": "Antrasit", "Tavan": "Ters", "Saçak ve Alın Rengi": "Antrasit Gri", "Açıklama": "1- İç duvarlar alçıpan kaplama 2- Çatı izolasyon mineral yün 3- Trapez saç ve mahya alıcıya ait. Ters mahya gidecek."},
   "alici_ait": {"kalemler": ["trapez saç ve mahya"], "kaynak": "paftanın açıklaması (3. madde): trapez saç ve mahya alıcıya ait; listenin bu kalem için kuralı yok"},
   "cikti": {
     "pdf": true,
