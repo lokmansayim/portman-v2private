@@ -244,6 +244,56 @@ def test_r07_trapez_vida_5_5x25(defter):
     s = F.fiyatla({"satirlar": [_pre("Trapez vida 5,5 × 25 (aşık ve omega)", "adet", 1050, "1008")]}, defter)["satirlar"][0]
     assert (s["birim_fiyat"], s["tutar"], s["durum"], s["kaynak_adi"]) == (3, 3150, "onaylı", "87 m² listesi, 14.10.2026")
 
+def test_r08_ters_mahya(defter):
+    """r08 (4 Kasım 2026): cumbalı prefabrik çatının (çıkıntısız çapraz cumba, D-47; TK-04 r04) iki satırı. Ters mahya 87 m² listesinde yok,
+    Haziran listesinden birebir (ÇG19, 189 TL): Patron'un verdiği listeden, r02 kuralıyla onaylı; çelikteki Ters mahya | L 2800 ile aynı
+    kaynak satırı ve fiyat. Kenar kutusunun iki listede de fiyatı yok: kayıt fiyatsız, "kaynakta yok" (çelikteki gibi); fiyat uydurulmaz."""
+    P, C = defter["hatlar"]["prefabrik"]["kalemler"], defter["hatlar"]["celik"]["kalemler"]
+    k, c = P["Ters mahya (dere içi) | L 2800"], C["Ters mahya | L 2800"]
+    assert (k["fiyat"], k["kaynak"], k["kaynak_satir"], k["durum"], k["onay"]) == (189, "HAZ", "ÇG19", "eşleşti", True)
+    assert (c["fiyat"], c["kaynak"], c["kaynak_satir"], c["kaynak_kalem"]) == (k["fiyat"], k["kaynak"], k["kaynak_satir"], k["kaynak_kalem"])
+    kk = P["Ters mahya kenar kutusu | L 21 × 40 × 21 × 2800"]
+    assert (kk["fiyat"], kk["kaynak"], kk["durum"], kk["onay"]) == (None, None, "kaynakta yok", False)
+    assert C["Ters mahya kenar kutusu | L 21 × 40 × 21 × 2800"]["fiyat"] is None
+    R = F.fiyatla({"satirlar": [_pre("Ters mahya (dere içi)", "L 2800", 3, "1006"),
+                                _pre("Ters mahya kenar kutusu", "L 21 × 40 × 21 × 2800", 6, "1006")]}, defter)
+    s, t = R["satirlar"]
+    assert (s["birim_fiyat"], s["tutar"], s["durum"], s["kaynak_adi"]) == (189, 567, "onaylı", "Haziran malzeme listesi, 16.06.2026")
+    assert t["birim_fiyat"] is None and t["tutar"] is None
+    assert R["ozet"]["toplam"] == 567 and [f["anahtar"] for f in R["ozet"]["fiyatsiz"]] == ["Ters mahya kenar kutusu | L 21 × 40 × 21 × 2800"]
+
+
+
+def test_r08_trapez_cati(defter):
+    """r08 (4 Kasım 2026): TK-04'ün trapez çatısı (Lokman 20:47; D-50, M-11: sac ve mahya standart 100 cm kapatır, 21:20). Trapez sacın vidası
+    87 m² listesinin 144. satırından (5,5 × 60, 3 TL) birebir onaylı; mahya L 1000 Haziran listesinden birebir (ÇG25, 189 TL; Lokman 21:16
+    "Trapez Mahyayıda 100 al"). Trapez sac m² fiyatından (D-51, Lokman 21:37: "m² birim fiyatı değişmez 80 kapatırda olsa 100 kapatırda olsa
+    aynıdır"): Haziran ÇG15 80 cm kapatır L 2550 625 TL; fiyat boyla ve satırın kapatmasıyla (Motor'un `kapatma_m`'si) orantılı, kuruşa.
+    Satırın kapatması yoksa kural uygulanmaz (fiyat uydurulmaz). Mahyanın öteki boyları boyla orantılı (L 800 151,20)."""
+    P = defter["hatlar"]["prefabrik"]
+    v = P["kalemler"]["Trapez vida 5,5 × 60 (trapez sac) | adet"]
+    assert (v["fiyat"], v["kaynak"], v["kaynak_satir"], v["durum"], v["onay"]) == (3, "EKIM87", [144], "eşleşti", True)
+    m = P["kalemler"]["Trapez sac mahyası | L 1000"]
+    assert (m["fiyat"], m["kaynak"], m["kaynak_satir"], m["durum"], m["onay"]) == (189, "HAZ", "ÇG25", "eşleşti", True)
+    sk = [b for b in P["boy_onerileri"] if b.get("kalem_baslar") == "Trapez sac · "]
+    assert len(sk) == 1 and (sk[0]["boy_mm"], sk[0]["kapatma_m"], sk[0]["fiyat"], sk[0]["kaynak_satir"], sk[0]["onay"]) == (2550, 0.8, 625, [208], True)
+    assert "D-51" in sk[0]["dayanak"] and "21:37" in sk[0]["dayanak"]
+
+    def sac(olcu, adet, kap):
+        return dict(_pre("Trapez sac · ana çatı", olcu, adet, "1006"), **({"kapatma_m": kap} if kap else {}))
+    R = F.fiyatla({"satirlar": [sac("L 5100", 20, 1.0), sac("L 2410", 5, 1.0), sac("L 2550", 2, 0.8), sac("L 3530", 1, None),
+                                _pre("Trapez sac mahyası", "L 1000", 13, "1006"), _pre("Trapez sac mahyası", "L 800", 14, "1006"),
+                                _pre("Trapez vida 5,5 × 60 (trapez sac)", "adet", 600, "1008")]}, defter)
+    s100, s100b, s80, sbos, mahya, m80, vida = R["satirlar"]
+    assert (s100["birim_fiyat"], s100["tutar"], s100["durum"]) == (1562.5, 31250.0, "onaylı boy")      # 625 × 5100/2550 × 1/0,8
+    assert (s100b["birim_fiyat"], s100b["tutar"]) == (738.36, 3691.8)
+    assert (s80["birim_fiyat"], s80["tutar"]) == (625.0, 1250.0)                                        # kaynağın kendisi
+    assert sbos["birim_fiyat"] is None and sbos["durum"] == "defterde yok"                              # kapatması yok: uydurulmaz
+    assert (mahya["birim_fiyat"], mahya["tutar"], mahya["durum"]) == (189, 2457, "onaylı")
+    assert (m80["birim_fiyat"], m80["durum"]) == (151.2, "onaylı boy")
+    assert (vida["birim_fiyat"], vida["tutar"], vida["durum"]) == (3, 1800, "onaylı")
+    assert [f["anahtar"] for f in R["ozet"]["fiyatsiz"]] == ["Trapez sac · ana çatı | L 3530"]
+
 def test_miktari_olmayan_fiyatli_satir(defter):
     C = defter["hatlar"]["celik"]
     kg_k = next(k for k, g in C["kalemler"].items() if g["birim"] == "kg" and g["fiyat"])
