@@ -370,3 +370,107 @@ def test_kose_uzayan_hatalari(giris, mesaj):
     ie["yapi"]["dizilim"]["kose_uzayan"].append(giris)
     with pytest.raises(G.IsEmriHatasi, match=mesaj):
         G.kur(ie)
+
+
+# ---------------- AP-23 (ikiz ev: iki AP-03 dairesi aynalı, ortada 10'luk ortak duvar, iki kubbe, iki %20 veranda)
+AP23 = KOK / "testler" / "kor" / "projeler" / "AP23" / "is_emri.json"
+PAFTA23 = {   # (yön, eksen): paftadaki pano uçları (montaj planının dörtgenleri; paftanın çiziminde ~0,2 kayma: 10 → 10,21)
+    ("x", 5.0): [4.87, 130.41, 255.95, 381.49, 507.04, 569.69, 695.23, 757.88, 820.77, 946.08, 1008.96, 1134.51, 1259.81, 1385.35, 1510.89],
+    ("x", 261.0): [321.63, 381.49, 504.02, 1011.98, 1134.51, 1194.14],
+    ("x", 386.5): [9.98, 130.41, 135.52, 255.95, 318.61, 444.15, 507.04, 632.34, 753.01, 762.99, 883.42, 1008.96, 1071.62, 1197.16, 1259.81,
+                   1380.48, 1385.35, 1505.79],
+    ("x", 830.75): [130.41, 255.95, 381.49, 507.04, 632.34, 757.88, 883.42, 1008.96, 1134.51, 1259.81, 1385.35],
+    ("y", 5.0): [10.21, 72.88, 323.76, 386.66],
+    ("y", 130.5): [391.53, 512.22, 574.88, 700.44, 825.77],
+    ("y", 318.75): [10.21, 135.54, 261.1, 383.64],
+    ("y", 507.0): [10.21, 135.54, 261.1, 383.64],
+    ("y", 758.0): [10.21, 135.54, 261.1, 386.66, 512.22, 574.88, 700.44, 825.77],
+    ("y", 1009.0): [10.21, 135.54, 261.1, 383.64],
+    ("y", 1197.25): [10.21, 135.54, 261.1, 383.64],
+    ("y", 1385.5): [391.53, 512.22, 574.88, 700.44, 825.77],
+    ("y", 1511.0): [10.21, 72.88, 323.76, 386.66],
+}
+
+
+def _ie23() -> dict:
+    return json.loads(AP23.read_text(encoding="utf-8"))
+
+
+def test_ap23_pano_hatlari():
+    plan = G.kur(_ie23())
+    hatlar = {(d.yon, round(d.c, 2)) for d in plan.duvarlar}
+    assert hatlar == set(PAFTA23)
+    for (yon, c), pafta in PAFTA23.items():
+        bizim = _uclar(plan, yon, c)
+        assert len(bizim) == len(pafta) and max(abs(a - b) for a, b in zip(bizim, pafta)) < 0.25, (yon, c, bizim, pafta)
+    assert not plan.uyarilar
+
+
+def test_ap23_ortak_duvar():
+    """İki dairenin arasındaki duvar dış duvar (10'luk, dış pano); görünüşte yok; salonların ön duvarı onun iki yüzünde biter (iki T)."""
+    plan = G.kur(_ie23())
+    od, = [d for d in plan.duvarlar if d.yon == "y" and abs(d.c - 758.0) < 1e-6]
+    assert (od.tur, 2 * od.h, od.p0, od.p1) == ("dis", 10.0, 10.0, 825.75)
+    assert G.disari_yonleri(plan, od) == []
+    on = sorted((d.p0, d.p1) for d in plan.duvarlar if d.yon == "x" and d.tur == "ic" and abs(d.c - 386.5) < 1e-6)
+    assert on == [(135.5, 753.0), (763.0, 1380.5)]
+    assert not plan.arti_birlesimler
+    ic = G.kur(_ie23() | {"ortak_duvarlar": []})                     # yazılmazsa iç duvar (6), ön duvar geçer
+    ws = [d for d in ic.duvarlar if d.yon == "y" and abs(d.c - 758.0) < 1e-6]
+    assert ws and all(d.tur == "ic" and 2 * d.h == 6.0 for d in ws)
+
+
+@pytest.mark.parametrize("degis, mesaj", [
+    ({"ortak_duvarlar": [["SALON + MUTFAK 1"]]}, "iki ayrı mahal"),
+    ({"ortak_duvarlar": [["SALON + MUTFAK 1", "SALON + MUTFAK 1"]]}, "iki ayrı mahal"),
+    ({"ortak_duvarlar": [["SALON + MUTFAK 1", "YOK"]]}, "bilinmeyen mahal"),
+    ({"ortak_duvarlar": [["SALON + MUTFAK 1", "VERANDA 1"]]}, "açık mahal"),
+    ({"ortak_duvarlar": [["SALON + MUTFAK 1", "BANYO 2"]]}, "komşu değil"),
+])
+def test_ortak_duvar_hatalari(degis, mesaj):
+    with pytest.raises(G.IsEmriHatasi, match=mesaj):
+        G.kur(_ie23() | degis)
+
+
+def test_ap23_kubbe_ve_alanlar():
+    plan = G.kur(_ie23())
+    k1, k2 = sorted(plan.kubbeler, key=lambda k: k["mahal"])
+    assert (k1["cephe"], k1["mahal"], k2["cephe"], k2["mahal"]) == ("sol", "YATAK ODASI 1", "sag", "YATAK ODASI 2")
+    for kb in (k1, k2):
+        assert (round(kb["u0"], 2), round(kb["u1"], 2)) == (72.75, 323.75)          # paftada 72,88 · 323,76 (onay paftası 72,75 · 251)
+    assert round(-k1["dis"][1][0], 2) == round(k2["dis"][1][0] - 1516.0, 2) == 58.61
+    alan = {ad: round(m.alan_m2, 2) for ad, m in plan.mahaller.items()}
+    for n in (1, 2):
+        assert {k[:-2]: v for k, v in alan.items() if k.endswith(str(n))} == {
+            "SALON + MUTFAK": 26.94, "VERANDA": 5.58, "ÇOCUK ODASI": 9.08, "HOL": 2.18, "BANYO": 4.52, "YATAK ODASI": 12.47}
+    # paftada 26,75 · 5,51 · 9,14 · 2,23 · 4,52 · 12,60
+
+
+def test_ap23_catisi():
+    """Sağ veranda AP-24'ünkiyle aynı (x + 753), sol veranda onun aynası; her verandanın deresi kendi yanındaki cumbayla (iki uçta cumba)."""
+    from motor import sunum
+    ie, ie24 = _ie23(), _ie24()
+    d = {z["ad"]: z for z in sunum.cati_tanimi(G.kur(copy.deepcopy(ie)), ie)["duzlemler"]}
+    d24 = {z["ad"]: z for z in sunum.cati_tanimi(G.kur(copy.deepcopy(ie24)), ie24)["duzlemler"]}
+    sag = [[round(x, 2), round(y, 2)] for x, y in d["VERANDA 2 çatısı"]["plan"]]
+    assert sag == [[round(x + 753, 2), round(y, 2)] for x, y in d24["VERANDA çatısı"]["plan"]]
+    sol = [[round(x, 2), round(y, 2)] for x, y in d["VERANDA 1 çatısı"]["plan"]]
+    assert sorted(sol) == sorted([[round(1516 - x, 2), y] for x, y in sag])
+    assert d["VERANDA 1 çatısı"]["egim"] == d["VERANDA 2 çatısı"]["egim"] == pytest.approx(0.20)
+    t = sunum.cati_tanimi(G.kur(copy.deepcopy(ie)), ie)
+    dere = {tuple(h["duzlemler"]) for h in t["hatlar"] if h["tur"] == "dere"}
+    assert dere == {("VERANDA 1 çatısı", "sol cumba arka"), ("VERANDA 2 çatısı", "sağ cumba arka")}
+
+
+def test_ap23_cizim(tmp_path):
+    import ezdxf
+    from motor import dxf_out
+    r = dxf_out.uret(_ie23(), tmp_path)
+    assert r["validation_passed"] and r["pdf"] and not r["warnings"]
+    msp = ezdxf.readfile(tmp_path / r["dxf"]).modelspace()
+    od = sorted((round(e.dxf.insert[1], 2), e.dxf.name) for e in msp.query('INSERT[layer=="DIS_DUVAR_100"]')
+                if abs(e.dxf.insert[0] - 753.0) < 1e-6 and abs(e.dxf.rotation) < 1e-6)     # ortak duvarın panoları dış pano (10'luk)
+    assert [y for y, _ in od] == [10.0, 135.5, 261.0, 386.5, 512.0, 574.75, 700.25]
+    assert sum("627p5" in n for _, n in od) == 1 and sum("1255p0" in n for _, n in od) == 6
+    kub = [e for e in msp.query('LWPOLYLINE[layer=="KUBBE"]') if e.closed and max(p[0] for p in e.get_points("xy")) < 1700]
+    assert len(kub) == 20

@@ -112,7 +112,7 @@ def geometri_anahtari_var(is_emri: dict) -> bool:
         or any("konum_cm" in m for m in is_emri.get("mahaller", [])) \
         or any(("konum_cm" in a) or ("hizalama" in a) or ("duvar_ucu" in a) for a in is_emri.get("acikliklar", [])) \
         or bool(is_emri.get("verandalar")) or bool(is_emri.get("girintiler")) or bool(is_emri.get("duvarli_sinirlar")) \
-        or bool(is_emri.get("kubbeler"))
+        or bool(is_emri.get("kubbeler")) or bool(is_emri.get("ortak_duvarlar"))
     # `acikliklar[].dograma` geometri anahtarı değildir (kod incelemesi D1): yalnız BOM işaretini etkiler, kendi varlığıyla çalışır
 
 
@@ -697,6 +697,23 @@ def _kur(is_emri: dict) -> Plan:
     # duvarı (120/120 pencereli) ve açık verandayla arasındaki duvar (kapılı). Yazılan parçanın tamamı o iki mahalin duvarsız sınırında olmalı.
     # `yukseklik_cm` (isteğe bağlı, parca_cm ile): yarım duvar (AP-12 paftası: verandanın önü "Yarım Duvar h:80"); duvar dış duvardır,
     # panoları dış duvarınki gibi dizilir, yüksekliği planda yazılır ve görünüşte o kadar çizilir. Bina yüksekliğinden alçak olur.
+    # İE-29 (AP-23 paftası, 4 Kasım 2026): ikiz evin ortak duvarı. Paftada iki dairenin arasındaki duvar 10'luk, panoları dış duvarınki
+    # gibi (dış pano, 10'luk köşe); iki yanı kapalı mahal. `ortak_duvarlar` [[mahal, mahal], ...]: iki kapalı mahalin sınırı iç duvar
+    # yerine dış duvar olur. İki yanı içeride olduğundan görünüşte çizilmez (dışarı yönü yok); ona gelen iç duvar yüzünde biter, ortak
+    # duvarı kesen iç duvar orada bölünür (ortak duvar geçer; paftada salonların ön duvarı ortak duvarın iki yüzünde biter).
+    ortak_ciftler: set = set()
+    for s in is_emri.get("ortak_duvarlar") or []:
+        if not isinstance(s, list) or len(s) != 2 or s[0] == s[1]:
+            raise IsEmriHatasi(f"ortak_duvarlar girişi iki ayrı mahal adı olur ([mahal, mahal]): {s}")
+        for n in s:
+            if n not in mahaller:
+                raise IsEmriHatasi(f"Ortak duvarda bilinmeyen mahal: {n}")
+            if mahaller[n].acik:
+                raise IsEmriHatasi(f"Ortak duvar iki kapalı mahalin arasındadır; {n} açık mahal: {s}")
+        if frozenset(s) in acik_ciftler or frozenset(s) in acik_parcalar:
+            raise IsEmriHatasi(f"Ortak duvar açık sınırda olmaz: {s}")
+        ortak_ciftler.add(frozenset(s))
+
     duvarli_parcalar: dict = {}
     yarim_kenar: dict = {}
     for s in is_emri.get("duvarli_sinirlar") or []:
@@ -755,6 +772,8 @@ def _kur(is_emri: dict) -> Plan:
             return "dis"
         if frozenset((a, b)) in acik_ciftler:
             return "acik_sinir"
+        if frozenset((a, b)) in ortak_ciftler:                 # İE-29 (AP-23): ikiz evin ortak duvarı
+            return "dis"
         return "ic"
 
     def parca_acik(yon, hat, k, a, b):
@@ -787,6 +806,9 @@ def _kur(is_emri: dict) -> Plan:
                 raise IsEmriHatasi(f"Duvarlı sınır {'–'.join(sorted(pair))}: parca_cm aralığının bir kısmı iki mahalin duvarsız sınırında değil")
         if None in ps and not any(e[5] == "dis" and frozenset((e[3], e[4])) == pair for e in edges):
             raise IsEmriHatasi(f"Duvarlı sınır {'–'.join(sorted(pair))}: iki mahalin duvarsız sınırı yok")
+    for pair in ortak_ciftler:
+        if not any(frozenset((e[3], e[4])) == pair for e in edges):
+            raise IsEmriHatasi(f"Ortak duvar {'–'.join(sorted(pair))}: iki mahal komşu değil")
 
     # ---------------- duvar koşuları
     duvarlar: list[Duvar] = []
@@ -849,17 +871,24 @@ def _kur(is_emri: dict) -> Plan:
                 P = (dy.hat, dx.hat)
                 if dx.n0 < dy.hat < dx.n1 and dy.n0 < dx.hat < dy.n1 and P not in uclar:
                     bol, gecen = (dx, dy) if (dx.a1 - dx.a0) < (dy.a1 - dy.a0) - 1e-6 else (dy, dx)   # uzun geçer; eşitse düşey bölünür
-                    kesim.setdefault(bol.id, []).append((P[0] if bol.yon == "x" else P[1], P, gecen.id))
+                    kesim.setdefault(bol.id, []).append((P[0] if bol.yon == "x" else P[1], P, gecen.id, False))
+        # İE-29 (AP-23): ortak duvarı kesen iç duvar orada bölünür, ortak duvar geçer; iki ucu onun yüzünde biter (iki T, dört kollu değil)
+        for o in (d for d in duvarlar if d.tur == "dis" and any(frozenset((a, b)) in ortak_ciftler for _k, a, b in d.edges)):
+            for d in (d for d in duvarlar if d.tur == "ic" and d.yon != o.yon):
+                P = (o.hat, d.hat) if o.yon == "y" else (d.hat, o.hat)
+                if d.n0 < o.hat < d.n1 and o.n0 < d.hat < o.n1 and P not in uclar:
+                    kesim.setdefault(d.id, []).append((o.hat, P, o.id, True))
         for bol in list(duvarlar):
-            for k, P, gecen_id in sorted(kesim.get(bol.id, [])):
+            for k, P, gecen_id, ortak_ in sorted(kesim.get(bol.id, [])):
                 yeni = Duvar(id=wid, yon=bol.yon, hat=bol.hat, c=bol.c, h=bol.h, tur=bol.tur, cevre=bol.cevre, govde_yonu=bol.govde_yonu,
                              n0=k, n1=bol.n1, edges=[e for e in bol.edges if e[0] >= k], yukseklik=bol.yukseklik)
                 bol.edges = [e for e in bol.edges if e[0] < k]; bol.n1 = k
                 bol.p0, bol.p1 = bol.a0, bol.a1; yeni.p0, yeni.p1 = yeni.a0, yeni.a1
                 duvarlar.append(yeni); wid += 1
-                arti_noktalari.append((X(P[0] / 2), Y(P[1] / 2)))
-                uyarilar.append(f"Aks noktası {P}: dört kollu birleşim; duvar {bol.id} o noktada bölündü ({bol.id}, {yeni.id}), uçları geçen "
-                                f"duvarın ({gecen_id}) yüzünde; birleşim profili kural kitabında yok")
+                if not ortak_:
+                    arti_noktalari.append((X(P[0] / 2), Y(P[1] / 2)))
+                    uyarilar.append(f"Aks noktası {P}: dört kollu birleşim; duvar {bol.id} o noktada bölündü ({bol.id}, {yeni.id}), uçları "
+                                    f"geçen duvarın ({gecen_id}) yüzünde; birleşim profili kural kitabında yok")
                 bol = yeni
 
     # ---------------- birleşimler (nokta tabanlı)

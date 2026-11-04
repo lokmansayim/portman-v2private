@@ -45,7 +45,8 @@ Köşe kırmasında yüzün kendi eğimi (İE-29, AP-24 paftası s. 4 makas ve s
 makas (MK09) planda 45° değil, 0,61 eğik; veranda yüzü ana çatıdan yatık iner (%32,88 × 0,61 = %20). `yuz_egimi_yuzde` (yalnız kırmada;
 paftadan) yüzün eğimidir; saçak, saçak kotu ve öteki her şey ana çatınınki kalır, kırma ve dere iki düzlemin kesişiminden (kırmanın
 duvardaki ucu arka saçaktan 155,5 × 20 ÷ 32,88 = 94,6 içeride; paftada 94–95). Yazılmazsa eşit eğim (AP-03, 45°); `egim_yuzde`
-kırmada yine yazılmaz.
+kırmada yine yazılmaz. İki uçta cumba ve iki veranda (İE-29, AP-23 ikiz ev): dere yanında aynı saçak hattında
+birden çok yüz varsa mahala en yakını alınır (öteki ucun cumbası değil).
 
 Yan yana iki cumba (İE-29, AP-12 paftası s. 5 makas, s. 6 baş makas betopanı, s. 7 aşık planı; Lokman, 4 Kasım 2026 04:33 "Evet, sırayla
 çiz"): `cati.yan_yana_cumbalar` {`cephe` (ana çatının bir ucu: mahya y boyuncaysa on | arka, x boyuncaysa sol | sag), `kalkan_mahali`
@@ -326,8 +327,9 @@ def _kirma(m: dict, duzlemler: list[dict], kalkanlar: list[dict], ana_iz) -> lis
             hedef, iç = lat[L] + yon[L] * s, tuple(-v for v in out_yon)
         else:                                                           # dere: kapalı yandaki çatının mahala inen yüzü, saçağı mahalin içinde
             hedef, iç = lat[L] - yon[L] * s, out_yon
-        D = next((d for d in duzlemler if abs(d["sacak"].get(eks, 1e9) - hedef) < 0.5
-                  and tuple(float(v) for v in d["yukari"]) == iç), None)
+        aday = [d for d in duzlemler if abs(d["sacak"].get(eks, 1e9) - hedef) < 0.5 and tuple(float(v) for v in d["yukari"]) == iç]
+        # İE-29 (AP-23: iki uçta cumba, iki veranda): aynı saçak hattında birden çok yüz varsa mahala en yakını (öteki ucun cumbası değil)
+        D = min(aday, key=lambda d: Polygon(d["plan"]).distance(box(x0, y0, x1, y1))) if aday else None
         if D is None:
             raise PrefabrikCatiHatasi(f"köşe kırması ({m['mahal']}): {L} yanında " + (
                 "o yöne inen ve saçağı mahalin saçağında biten ana çatı yüzü yok; kırma kurulmaz" if durum == "acik" else
