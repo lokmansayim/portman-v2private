@@ -444,6 +444,12 @@ class Cizici:
             if name not in self.doc.blocks: self._rect(self.doc.blocks.new(name), 0, 0, 10, 10)
             for (x0, y0, x1, y1) in plan.dikmeler:
                 self.yerlestir(name, kod, (x0, y0), 0.0, "MONTAJ_STANDART" if montaj else "VERANDA_DIKME", rol, ox, oy)
+        for d in plan.duvarlar:                                # İE-29 (AP-12 paftası: "Yarım Duvar h:80"): yarım duvarın yüksekliği iç yanında
+            if d.yukseklik is None:
+                continue
+            ic_y = d.c + (d.h + 16 if d.c < H / 2 else -(d.h + 16)); ic_x = d.c + (d.h + 16 if d.c < W / 2 else -(d.h + 16))
+            yer = ((d.p0 + d.p1) / 2, ic_y) if d.yon == "x" else (ic_x, (d.p0 + d.p1) / 2)
+            self.text(f"YARIM DUVAR h:{fmt(d.yukseklik)}", (yer[0] + ox, yer[1] + oy), 12, "ODA_ADLARI", rot=(90.0 if d.yon == "y" else 0.0))
         # veranda profili (her açık kenar bir blok: dış yüz + 10 cm içeri, kesik çizgi)
         dis_ad = {v["ad"] for v in plan.dis_verandalar}
         for ad, m in plan.mahaller.items():
@@ -1051,6 +1057,15 @@ class Cizici:
                     self._on_pencere(a["u0"] + ox, bot + a["z0"], w, h, a["olcu"], a.get("acilis"))
                 else:
                     msp.add_blockref("kaynak-on-kapi", (a["u0"] + ox, bot), dxfattribs={"xscale": w / 68.697, "yscale": h / 133.557, "layer": "ON_DOGRAMA"})
+            for y_ in g.get("yarim", []):                         # İE-29 (AP-12): yarım duvar önde, ardındaki duvarın altını örter
+                pts = [(y_["u0"] + ox, bot), (y_["u1"] + ox, bot), (y_["u1"] + ox, bot + y_["z1"]), (y_["u0"] + ox, bot + y_["z1"])]
+                ort = msp.add_hatch(dxfattribs={"layer": "ON_GORUNUS"})
+                ort.rgb = (255, 255, 255)
+                ort.paths.add_polyline_path(pts, is_closed=True)
+                msp.add_lwpolyline(pts, close=True, dxfattribs={"layer": "ON_GORUNUS"})
+                for u in y_["derz"]:
+                    msp.add_line((u + ox, bot), (u + ox, bot + y_["z1"]), dxfattribs={"layer": "ON_DERZ"})
+                self.text(f"YARIM DUVAR h:{fmt(y_['z1'])}", ((y_["u0"] + y_["u1"]) / 2 + ox, bot + y_["z1"] / 2), 12, "ON_YAZI")
             xl, xr = r["u0"] + ox, r["u1"] + ox
             msp.add_line((xl, top), (xr, top), dxfattribs={"layer": "ON_CATI"})
             msp.add_line((xl, top), (xl, top + topuk), dxfattribs={"layer": "ON_TOPUK"}); msp.add_line((xr, top), (xr, top + topuk), dxfattribs={"layer": "ON_TOPUK"})

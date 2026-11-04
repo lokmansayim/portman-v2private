@@ -40,6 +40,18 @@ duvar üstüne, serbest dikme kirişin altına; makas kirişe oturur. Makaslar (
 125,5, ⌈yan ÷ 125,5⌉ + 1; açık yandaki uçta çapraz makas (MK13), öteki uçta ve arada kısa makas (MK9–12). Mahalin yüzü duvarda komşu
 yüzün mahyasından yüksekse kırma ya da dere mahyayı aşar; kırmaya uzayan yüz başka yüze binerse; ikisinde de çatı çizilmez (geometri hakemi,
 1 Kasım: makas x'li AP-09 verandasında kırma 21 cm basamaklı çatı veriyordu).
+
+Yan yana iki cumba (İE-29, AP-12 paftası s. 5 makas, s. 6 baş makas betopanı, s. 7 aşık planı; Lokman, 4 Kasım 2026 04:33 "Evet, sırayla
+çiz"): `cati.yan_yana_cumbalar` {`cephe` (ana çatının bir ucu: mahya y boyuncaysa on | arka, x boyuncaysa sol | sag), `kalkan_mahali`
+(ana çatının o uçtaki kalkanı bu mahalin o cepheye bakan dış duvarının dış yüzünde), `bolme_cm` (iki cumbayı ayıran duvarın ekseni, cephe
+boyunca dış yüzden: on / arka x, sol / sag y)}. Kalkanın önündeki gövde mahyaya paralel bölme duvarında ikiye ayrılır: her yarı kendi
+beşiğidir (sol cumba dış yüzden bölme duvarının öteki yüzüne, sağ cumba bölme duvarının öteki yüzünden dış yüze; ikisi de bölme duvarını
+örter), eğim, saçak ve saçak kotu ana çatınınki. Dış yüzleri ana çatının yüzlerinin devamıdır (aynı düzlem, birleşir: aşık planında ana
+yüzler kalkanın önüne uzar), iç yüzleri bölme ekseninde derede buluşur. Ana çatının o ucundaki kalkan iki cumbanın üstünde kalan kısımdır
+(betopan yerleşiminde ana kalkanın altı iki cumbanın profili), saçağı kalkanın önüne 30 uzar; cumbaların dış ucunda kendi kalkanı ve
+saçağı, iç ucu ana çatının kalkan duvarının dış yüzünde. Bir cumba ötekinden kısaysa (AP-12: sol cumba verandanın yarım duvarında,
+sağdaki açık verandanın önünde biter) uzun cumbanın iç yüzü kısanın önünde kendi saçağına uzar (aşık planında 80,2'lik basamak: sağ
+cumbanın iç yüzü sol cumbanın duvar yüzüne kadar). Her yarı tek şerit olmalı; olmazsa çatı çizilmez, hata söylenir.
 """
 from __future__ import annotations
 
@@ -469,6 +481,66 @@ def _makas_yerleri(bas: float, son: float, son_makas: bool, ekler: list[float], 
     return (esit if son_makas else esit[:-1]), False
 
 
+YAN_YANA_ALANLARI = {"cephe", "kalkan_mahali", "bolme_cm"}
+
+
+def _yan_yana(plan: G.Plan, ie: dict, sr: list, k: int, eksen: str, P, K):
+    """`cati.yan_yana_cumbalar` (modül belgesi) → (şeritler, ana şeridin dizini, {şerit dizini: 0 alt b | 1 üst b}, bölme ekseni (b),
+    bölme duvarının yarı kalınlığı). Kalkanın önündeki şeritler (gövdenin o kısmı) bölme duvarında iki yarıya ayrılır; her yarı tek şerit."""
+    yy = (ie.get("cati") or {}).get("yan_yana_cumbalar")
+    if not isinstance(yy, dict) or set(yy) != YAN_YANA_ALANLARI:
+        raise PrefabrikCatiHatasi(f"cati.yan_yana_cumbalar {{cephe, kalkan_mahali, bolme_cm}} olur (yok sayılmaz): {yy}")
+    uclar = ("on", "arka") if eksen == "x" else ("sol", "sag")
+    if yy["cephe"] not in uclar:
+        raise PrefabrikCatiHatasi(f"yan yana cumbalar ana çatının bir ucunda olur ({' ya da '.join(uclar)}): {yy['cephe']}")
+    m = plan.mahaller.get(yy["kalkan_mahali"])
+    if m is None or m.poly is None or m.acik:
+        raise PrefabrikCatiHatasi(f"yan yana cumbalar: kalkan mahali kapalı bir mahal olur: {yy['kalkan_mahali']}")
+    alt_uc = yy["cephe"] in ("on", "sol")                                  # cephe kanonik a'nın küçük ucunda mı
+    x0, y0, x1, y1 = m.poly.bounds
+    ma0, ma1 = (y0, y1) if eksen == "x" else (x0, x1)                      # mahalin a aralığı
+    mb0, mb1 = (x0, x1) if eksen == "x" else (y0, y1)
+    yon = "x" if eksen == "x" else "y"                                     # kalkan duvarı mahyaya dik
+    hedef = ma0 if alt_uc else ma1
+    duv = [d for d in plan.duvarlar if d.tur == "dis" and d.yon == yon and abs(d.c - hedef) <= d.h + TOL
+           and d.p0 < mb1 - TOL and d.p1 > mb0 + TOL]
+    if len(duv) != 1:
+        raise PrefabrikCatiHatasi(f"yan yana cumbalar: {m.ad} mahalinin {yy['cephe']} yanında bir dış duvar olmalı ({len(duv)} bulundu)")
+    a_k = duv[0].c - duv[0].h if alt_uc else duv[0].c + duv[0].h          # ana kalkanın a'sı: duvarın o cepheye bakan dış yüzü
+    a0, a1, b0, b1 = sr[k]
+    if not a0 + TOL < a_k < a1 - TOL:
+        raise PrefabrikCatiHatasi(f"yan yana cumbalar: ana kalkan ({a_k:g}) ana çatının şeridinde ({a0:g}–{a1:g}) değil")
+    bol = float(yy["bolme_cm"])
+    bd = [d for d in plan.duvarlar if d.yon != yon and abs(d.c - bol) < TOL]
+    if not bd or not b0 + TOL < bol < b1 - TOL:
+        raise PrefabrikCatiHatasi(f"yan yana cumbalar: bölme ekseninde ({bol:g}) mahyaya paralel bir duvar yok ya da ana çatının dışında")
+    h_b = bd[0].h
+    iz = cati_izi(plan, ie)
+    A0, A1 = min(q[0] for q in sr) - 1, max(q[1] for q in sr) + 1
+    on = box(*P(A0, b0 - 1), *P(a_k, b1 + 1)) if alt_uc else box(*P(a_k, b0 - 1), *P(A1, b1 + 1))
+    bolge = iz.intersection(on)
+    yarilar = []
+    for n_, (lo, hi) in enumerate(((b0 - 1, bol - h_b), (bol + h_b, b1 + 1))):  # bölme duvarının iki yanı; yarı duvarı da örter
+        g = bolge.intersection(box(*P(A0, lo), *P(A1, hi)))
+        g = max(getattr(g, "geoms", [g]), key=lambda q: q.area)
+        ss = seritler(Polygon(g.exterior.coords).simplify(TOL), ie)
+        if len(ss) != 1:
+            raise PrefabrikCatiHatasi(f"yan yana cumbalar: bölmenin bir yanı tek şerit değil ({len(ss)}); kademeli cumba bu sürümde çizilmez")
+        q = list(ss[0])
+        if abs(q[3 if n_ == 0 else 2] - (bol - h_b if n_ == 0 else bol + h_b)) > TOL:
+            raise PrefabrikCatiHatasi("yan yana cumbalar: cumba bölme duvarına dayanmıyor")
+        q[3 if n_ == 0 else 2] = bol + h_b if n_ == 0 else bol - h_b
+        if (abs(q[1] - a_k) if alt_uc else abs(q[0] - a_k)) > TOL:
+            raise PrefabrikCatiHatasi("yan yana cumbalar: cumba ana çatının kalkan duvarına dayanmıyor")
+        yarilar.append(q)
+    ana = [a_k, a1, b0, b1] if alt_uc else [a0, a_k, b0, b1]
+    if alt_uc:
+        yeni = yarilar + [ana] + sr[k + 1:]
+        return yeni, 2, {0: 0, 1: 1}, bol, h_b
+    yeni = sr[:k] + [ana] + yarilar
+    return yeni, k, {k + 1: 0, k + 2: 1}, bol, h_b
+
+
 def tanim(plan: G.Plan, ie: dict) -> dict:
     """Girintili gövdenin çatısı → `sunum.cati_tanimi`'nin beşik biçimi (`tip`, `sacak`, `topuk`, `duvar_ustu`, `duzlemler`) ve ek olarak
     `kalkanlar` (`cati_genel.cati_kur`, görünüşte örtü), `parcalar` (şerit başına ana ya da cumba: açıklık, boy, mahya, makaslar) ve
@@ -487,8 +559,11 @@ def tanim(plan: G.Plan, ie: dict) -> dict:
     h = next(d.h for d in plan.duvarlar if d.tur == "dis")
     sr = seritler(cati_izi(plan, ie), ie)
     k = max(range(len(sr)), key=lambda i: (round(sr[i][3] - sr[i][2], 2), round(sr[i][1] - sr[i][0], 2), -i))
+    ikiz, bol = {}, None                                                # İE-29 (AP-12): yan yana iki cumba
+    if c.get("yan_yana_cumbalar") is not None:
+        sr, k, ikiz, bol, _h_b = _yan_yana(plan, ie, sr, k, eksen, P, _K)
     for i in range(len(sr)):                                            # cumba ana çatıya doğru komşusunun açıklığı içinde
-        if i == k:
+        if i == k or i in ikiz:
             continue
         j = i + 1 if i < k else i - 1
         if not (sr[j][2] - TOL <= sr[i][2] and sr[i][3] <= sr[j][3] + TOL):
@@ -500,9 +575,11 @@ def tanim(plan: G.Plan, ie: dict) -> dict:
     for i in range(len(sr)):
         if i == k:
             adlar.append("ana çatı")
+        elif i in ikiz:
+            adlar.append(f"{yan_adi[0] if i < k else yan_adi[1]} {yuz_adi[ikiz[i]]} cumba")
         else:
             taraf = yan_adi[0] if i < k else yan_adi[1]
-            ayni = [j for j in range(len(sr)) if j != k and (j < k) == (i < k)]
+            ayni = [j for j in range(len(sr)) if j != k and j not in ikiz and (j < k) == (i < k)]
             sira = sorted(ayni, key=lambda j: abs(j - k)).index(i)
             adlar.append(f"{taraf} cumba" + (f" {sira + 1}" if len(ayni) > 1 else ""))
 
@@ -517,8 +594,14 @@ def tanim(plan: G.Plan, ie: dict) -> dict:
         bm = (b0 + b1) / 2
         A0 = a0 - s if i <= k else a0                                    # cumbanın iç ucu komşunun duvar yüzünde
         A1 = a1 + s if i >= k else a1
-        for yuz, (c0, c1, by, sb) in zip(yuz_adi, ((b0 - s, bm, 1, b0 - s), (bm, b1 + s, -1, b1 + s))):
-            ham.append({"ad": f"{adlar[i]} {yuz}", "serit": i, "plan": [list(P(A0, c0)), list(P(A1, c0)), list(P(A1, c1)), list(P(A0, c1))],
+        for n_, (yuz, (c0, c1, by, sb)) in enumerate(zip(yuz_adi, ((b0 - s, bm, 1, b0 - s), (bm, b1 + s, -1, b1 + s)))):
+            pl = [list(P(A0, c0)), list(P(A1, c0)), list(P(A1, c1)), list(P(A0, c1))]
+            if i in ikiz and n_ != ikiz[i]:                              # yan yana cumbanın iç yüzü: ötekinin önünde bölme ekseninde dere
+                t0, t1 = next(sr[j][:2] for j in ikiz if j != i)
+                kes = box(*P(t0, bol), *P(t1, b1 + s + 1)) if ikiz[i] == 0 else box(*P(t0, b0 - s - 1), *P(t1, bol))
+                g = Polygon(pl).difference(kes)
+                pl = [[round(x, 4), round(y, 4)] for x, y in g.simplify(TOL).exterior.coords[:-1]]
+            ham.append({"ad": f"{adlar[i]} {yuz}", "serit": i, "plan": pl,
                         "yukari": yukari(by), "egim": eg, "sacak_kotu": zs, "sacak": sacak(sb)})
         # makaslar
         ekler = _ekler(plan, sr[i], eksen, h)
@@ -574,21 +657,49 @@ def tanim(plan: G.Plan, ie: dict) -> dict:
 
     kalkanlar = []
     ic_adi = {("y", 1): "dogu", ("y", -1): "bati", ("x", 1): "kuzey", ("x", -1): "guney"}
+
+    def komsular(i, uc):
+        """Şeridin `uc` ucundaki komşu şeritler (a boyunca); yan yana cumbanın iki yarısı ana çatının o ucunda birlikte komşudur."""
+        if i in ikiz:
+            ic_uc = (uc == 1) == (i < k)                                  # yarının ana çatıya bakan ucu
+            return [k] if ic_uc else []
+        j = i - 1 if uc == 0 else i + 1
+        if j in ikiz:
+            return sorted(ikiz)
+        return [j] if 0 <= j < len(sr) else []
+
+    ikiz_yuzleri = sorted({f for j in ikiz for f in yuzleri(j)})
     for i, (a0, a1, b0, b1) in enumerate(sr):
-        for uc, konum, ic, j in ((0, a0, 1, i - 1), (1, a1, -1, i + 1)):
-            komsu = sr[j] if 0 <= j < len(sr) else None
-            if komsu is not None and abs(j - k) < abs(i - k):
+        for uc, konum, ic in ((0, a0, 1), (1, a1, -1)):
+            js = komsular(i, uc)
+            if js and all(abs(j - k) < abs(i - k) or j == k for j in js) and i != k:
                 continue                                                  # cumbanın iç ucu: komşu yüksek, kalkan yok
             ad = f"{adlar[i]} {('sol', 'sağ')[uc] if eksen == 'y' else ('ön', 'arka')[uc]} kalkanı"
-            temel = {"eksen": "x" if eksen == "y" else "y", "konum": konum, "ic": ic_adi[(eksen, ic)], "ust": yuzleri(i)}
-            if komsu is None:
+            temel = {"eksen": "x" if eksen == "y" else "y", "konum": konum, "ic": ic_adi[(eksen, ic)],
+                     "ust": ikiz_yuzleri if i in ikiz else yuzleri(i)}
+            if not js:
                 kalkanlar.append({"ad": ad, **temel, "aralik": [b0, b1]})
                 continue
-            lo, hi = max(b0, komsu[2] - s), min(b1, komsu[3] + s)       # komşunun saçaklı açıklığı: kalkan onun çatısının üstünde
-            kalkanlar.append({"ad": ad, **temel, "aralik": [lo, hi], "alt": birlesmemis(j, i)})
+            lo, hi = max(b0, min(sr[j][2] for j in js) - s), min(b1, max(sr[j][3] for j in js) + s)   # komşunun saçaklı açıklığı
+            kalkanlar.append({"ad": ad, **temel, "aralik": [lo, hi], "alt": sorted({f for j in js for f in birlesmemis(j, i)})})
             for r0, r1 in ((b0, lo), (hi, b1)):
                 if r1 - r0 > TOL:
                     kalkanlar.append({"ad": f"{ad} ({r0:g}–{r1:g})", **temel, "aralik": [r0, r1]})
+    ozel = []
+    if ikiz:                                                            # iç yüzün bölme eksenindeki kenarının, ötekinin iç yüzüne değmeyen
+        ic = {i: ad_of[f"{adlar[i]} {yuz_adi[1 - ikiz[i]]}"] for i in ikiz}  # kısmı (kısa cumbanın önünde) derenin devamıdır: iki yüz
+        cizgi = LineString([P(-1e5, bol), P(1e5, bol)])                  # o çizgide aynı kotta buluşur
+        boy_ = {}
+        for i, ad in ic.items():
+            pl = next(d["plan"] for d in duzlemler if d["ad"] == ad)
+            g = Polygon(pl).exterior.intersection(cizgi)
+            ks = sorted(_K(x, y)[0] for gg in getattr(g, "geoms", [g]) if gg.geom_type == "LineString" for x, y in gg.coords)
+            boy_[i] = (ks[0], ks[-1])
+        for i, (u0, u1) in boy_.items():
+            v0, v1 = next(boy_[j] for j in ikiz if j != i)
+            for r0, r1 in ((u0, min(u1, v0)), (max(u0, v1), u1)):
+                if r1 - r0 > TOL:
+                    ozel.append({"duzlem": ic[i], "p": list(P(r0, bol)), "q": list(P(r1, bol)), "tur": "vadi"})
     hatlar = []
     if mc:
         a0_, a1_, b0_, b1_ = sr[k]                                       # ana çatının saçaklı şeridi: altında kalan hat görünmez
@@ -598,4 +709,5 @@ def tanim(plan: G.Plan, ie: dict) -> dict:
         _mahal_cati_denetle([m for m in mc if m["tip"] != "kirma"], duzlemler)
     return {"tip": "besik", "tip_adi": "beşik: ana çatı + paralel cumba", "sacak": s, "topuk": top, "duvar_ustu": H0, "duzlemler": duzlemler,
             "kalkanlar": kalkanlar, "parcalar": parcalar, "uyarilar": uyarilar, **({"mahal_catilari": mc} if mc else {}),
+            **({"kenar_ozel": ozel} if ozel else {}),
             **({"hatlar": hatlar} if hatlar else {})}
