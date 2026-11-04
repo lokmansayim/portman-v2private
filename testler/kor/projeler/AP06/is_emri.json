@@ -67,7 +67,7 @@
     "makas_ekseni": "y",
     "cumbalar": [{"cephe": "on", "bas_cm": 0, "bit_cm": 386.5, "cikinti_cm": 0}]
   },
-  "ozellikler": {"Panel Türü": "Pres Panel", "Çatı Şekli": "Beşik + Cumba", "Çatı Kaplaması": "Trapez Kaplama", "Çatı Kaplama Rengi": "Antrasit Gri", "Dış Kapı": "Alıcıya ait", "İç Kapılar": "Alıcıya ait", "Dış Cephe Boya": "Alıcıya ait", "İç Cephe Boya": "Alıcıya ait", "Pencere Rengi": "Antrasit", "Tavan": "Ters", "Saçak ve Alın Rengi": "Antrasit Gri", "Açıklama": "- İç duvarlar Alçıpan kaplama olacak. - Klozet, duşakabin, lavabo ve bataryalar olmayacak."},
+  "ozellikler": {"Panel Türü": "Pres Panel", "Çatı Şekli": "Beşik + Cumba", "Çatı Kaplaması": "Trapez Kaplama (80 cm kapatır)", "Çatı Kaplama Rengi": "Antrasit Gri", "Dış Kapı": "Alıcıya ait", "İç Kapılar": "Alıcıya ait", "Dış Cephe Boya": "Alıcıya ait", "İç Cephe Boya": "Alıcıya ait", "Pencere Rengi": "Antrasit", "Tavan": "Ters", "Saçak ve Alın Rengi": "Antrasit Gri", "Açıklama": "- İç duvarlar Alçıpan kaplama olacak. - Klozet, duşakabin, lavabo ve bataryalar olmayacak."},
   "alici_ait": {"kalemler": ["dış kapı", "iç kapı", "boya", "vitrifiye"], "kaynak": "paftanın özellik tablosu (dış kapı, iç kapılar, dış ve iç cephe boyası alıcıya ait) ve açıklaması (klozet, duşakabin, lavabo ve bataryalar olmayacak)"},
   "cikti": {
     "pdf": true,

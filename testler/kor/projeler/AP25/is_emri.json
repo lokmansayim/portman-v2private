@@ -68,7 +68,7 @@
     "makas_yonu": "kisa_kenar",
     "makas_ekseni": "x"
   },
-  "ozellikler": {"Panel Türü": "Pres Panel", "Çatı Şekli": "Beşik + Cumba", "Çatı Kaplaması": "Trapez Kaplama", "Çatı Kaplama Rengi": "Antrasit Gri", "Dış Kapı": "Çelik Standart", "İç Kapılar": "Alıcıya ait", "Dış Cephe Boya": "Alıcıya ait", "İç Cephe Boya": "Alıcıya ait", "Pencere Rengi": "Beyaz", "Tavan": "Ters", "Saçak ve Alın Rengi": "Antrasit Gri", "Açıklama": "1- Çatı izolasyon Mineral Yün (80mm) 2- Boya grubu alıcıya ait. 3- İç kapılar alıcıya ait. 4- Vitrifiye ve armatür grubu alıcıya ait. 5- Su tesisatı alıcıya ait. 6- Acil müdahale kapağı olacak. 7- İç oda kapı boşlukları belirtilen şekilde bırakılacaktır."},
+  "ozellikler": {"Panel Türü": "Pres Panel", "Çatı Şekli": "Beşik + Cumba", "Çatı Kaplaması": "Trapez Kaplama (80 cm kapatır)", "Çatı Kaplama Rengi": "Antrasit Gri", "Dış Kapı": "Çelik Standart", "İç Kapılar": "Alıcıya ait", "Dış Cephe Boya": "Alıcıya ait", "İç Cephe Boya": "Alıcıya ait", "Pencere Rengi": "Beyaz", "Tavan": "Ters", "Saçak ve Alın Rengi": "Antrasit Gri", "Açıklama": "1- Çatı izolasyon Mineral Yün (80mm) 2- Boya grubu alıcıya ait. 3- İç kapılar alıcıya ait. 4- Vitrifiye ve armatür grubu alıcıya ait. 5- Su tesisatı alıcıya ait. 6- Acil müdahale kapağı olacak. 7- İç oda kapı boşlukları belirtilen şekilde bırakılacaktır."},
   "alici_ait": {"kalemler": ["boya", "iç kapı", "vitrifiye", "su tesisatı"], "kaynak": "paftanın açıklaması (2–5. maddeler): boya grubu, iç kapılar, vitrifiye ve armatür, su tesisatı alıcıya ait"},
   "cikti": {
     "pdf": true,

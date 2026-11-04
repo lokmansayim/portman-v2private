@@ -57,7 +57,7 @@ ISARET_YOLU = KOK / "kurallar" / "liste" / "prefabrik_isaret.json"
 TEK_KAYNAK = "Tek kaynak (zayıf)"
 ISARETLI = ("pencere_u_h_gecen", "omega_kapak")   # satırı `zayif(...)` ile yazılan kurallar (BK-12 PR-2c)
 
-SURUM = "1.10 (3 Kasım 2026; İE-27, Lokman 3 Kasım 09:52 (D-45): 3'lü H dış duvarda da (iç duvarın T'si pano ekleminde); çektirme U'su 60 yerinden (eklemsiz T, dış köşe, serbest uç); köşe direği tipsiz (özel köşe 100'lük köşeye katılır); mahya bandı mahya boyundan; temiz su ıslak hacim başına; trapez vida 5,5 × 25 aşık ve omegadan; 1.9, 30 Ekim: K5b TK-01 kıyası (CIO onayı 30 Ekim 14:20): aşık sırası beşikte karar C (Lokman 24 Ekim); baş makas betopanı ve Z'si taşan verandanın kirişli kalkanında da (D-32 madde 2); 1.8, 30 Ekim: asma dizme tavanda da 100'lük iç duvarın üstü 100'lük duvar omegası, ayrı satır yok (Lokman 30 Ekim 07:04, D-32 ek); 1.7, 29 Ekim: baş makas omegası saçak ucundan saçak ucuna, taşan verandanın dış kirişindeki dahil (Lokman 29 Ekim 13:12, D-32); 1.6, 28 Ekim: vitrifiye banyo başına (İE-13 PR-2; Lokman onayı 28 Ekim, PR-3); nişin ağzındaki kiriş (BK-14 ek); taşan verandanın dış kirişi kolonun dış yüzünden dış yüzüne (Lokman, kart 28 Ekim); 1.5, 22 Ekim: kör test üreteci 7.3, kurallar kural kitabında; orta iniş 9 m, kitapla farklı on yedi kalemde kitap; PK-07 hedef örnek; T76 cevapları; 100'lük duvar omegası kirişlerin de üstünde; elektrik oda kuralı)"
+SURUM = "1.11 (4 Kasım 2026; D-50, Lokman 4 Kasım 20:49–21:20 (M-11): trapez sac standart 100 cm kapatır, mahya sacın kapattığı kadar kapatır (L 1000, ÷ 1, bindirme yok); İş Emri'nin çatı kaplaması başka kapatma yazıyorsa o; trapez sac satırında `kapatma_m` (D-51, fiyat m²'den); 1.10, 3 Kasım 2026: İE-27, Lokman 3 Kasım 09:52 (D-45): 3'lü H dış duvarda da (iç duvarın T'si pano ekleminde); çektirme U'su 60 yerinden (eklemsiz T, dış köşe, serbest uç); köşe direği tipsiz (özel köşe 100'lük köşeye katılır); mahya bandı mahya boyundan; temiz su ıslak hacim başına; trapez vida 5,5 × 25 aşık ve omegadan; 1.9, 30 Ekim: K5b TK-01 kıyası (CIO onayı 30 Ekim 14:20): aşık sırası beşikte karar C (Lokman 24 Ekim); baş makas betopanı ve Z'si taşan verandanın kirişli kalkanında da (D-32 madde 2); 1.8, 30 Ekim: asma dizme tavanda da 100'lük iç duvarın üstü 100'lük duvar omegası, ayrı satır yok (Lokman 30 Ekim 07:04, D-32 ek); 1.7, 29 Ekim: baş makas omegası saçak ucundan saçak ucuna, taşan verandanın dış kirişindeki dahil (Lokman 29 Ekim 13:12, D-32); 1.6, 28 Ekim: vitrifiye banyo başına (İE-13 PR-2; Lokman onayı 28 Ekim, PR-3); nişin ağzındaki kiriş (BK-14 ek); taşan verandanın dış kirişi kolonun dış yüzünden dış yüzüne (Lokman, kart 28 Ekim); 1.5, 22 Ekim: kör test üreteci 7.3, kurallar kural kitabında; orta iniş 9 m, kitapla farklı on yedi kalemde kitap; PK-07 hedef örnek; T76 cevapları; 100'lük duvar omegası kirişlerin de üstünde; elektrik oda kuralı)"
 GRUPLAR = {"1001": "Panel", "1002": "Metal aksam", "1003": "Kapı ve pencere", "1004": "Tavan", "1005": "Makas", "1006": "Çatı",
            "1007": "Elektrik", "1008": "Vida", "1009": "Depo", "1010": "Sıhhi tesisat", "1011": "Dere", "1012": "Boya"}
 TAVAN = lambda x: int(math.ceil(x - 1e-9))
@@ -812,10 +812,10 @@ def liste(N: dict, kurallar: dict | None = None, pafta: dict | None = None) -> d
             v = (v or {}).get(a)
         return (v or {}).get("adet"), (v or {}).get("not", "")
 
-    def ekle(grup, kalem, olcu, adet, dayanak, formul, kaynak="", birim="adet", pafta=None, aday=None, aday_notu=""):
+    def ekle(grup, kalem, olcu, adet, dayanak, formul, kaynak="", birim="adet", pafta=None, aday=None, aday_notu="", **ek):
         pa, pn = pk(*pafta) if pafta else (None, "")
         satirlar.append({"grup": grup, "grup_adi": GRUPLAR[grup], "kalem": kalem, "olcu": olcu, "adet": adet, "birim": birim, "dayanak": dayanak,
-                         "formul": formul, "kaynak": kaynak, "pafta": pa, "pafta_notu": pn, "aday": aday, "aday_notu": aday_notu})
+                         "formul": formul, "kaynak": kaynak, "pafta": pa, "pafta_notu": pn, "aday": aday, "aday_notu": aday_notu, **ek})
 
     def zayif(kural: str) -> str:
         """Kaynağı tek listeye dayanan kuralın satır dayanağı (`prefabrik_isaret.json`; CIO notu 5, BK-12 PR-2c)."""
@@ -1289,7 +1289,12 @@ def liste(N: dict, kurallar: dict | None = None, pafta: dict | None = None) -> d
     kiremit = "kiremit" in kap and not (sandvic or trapez)          # 7.3: metal kiremit (TS-01 kaplama paftası "Kapatır: 105 cm")
     # kapatma ve panel boyu kural kitabından (Lokman, 4 Ekim 15:18 ve 7 Ekim 07:45; prefabrikte 18 Ekim 19:22): boy eğik boy + taşma, 10 mm'ye yukarı.
     # Kitabın uzatma kuralı (`panel_boyu_uzatma`) kırma çatının çapraz parçaları içindir: dikdörtgen yüzde adet boydan bağımsız
-    kap_m = _ortak(k, "sandvic_panel_kapatma_m") if sandvic else (_ortak(k, "trapez_sac_kapatma_m") if trapez else
+    # D-50 (Lokman, 4 Kasım 2026 21:20, M-11): prefabrikte trapez sac standart 100 cm kapatır (`trapez_kapatma_m`; kitabın 0,8'i çelikte).
+    # Tedarikçi dönem dönem 80'lik verebilir: İş Emri'nin çatı kaplaması kapatmayı yazıyorsa ("Trapez Saç (80 cm kapatır)") o (formülde yazar;
+    # satır adı "Trapez sac" kalır: kör kıyas sözlüğü ve fiyat defteri o adla)
+    kap_ie = re.search(r"(\d+(?:[.,]\d+)?)\s*cm\s*kapat", kap) if trapez else None
+    kap_ie = float(kap_ie.group(1).replace(",", ".")) / 100 if kap_ie else None
+    kap_m = _ortak(k, "sandvic_panel_kapatma_m") if sandvic else ((kap_ie or r("trapez_kapatma_m")) if trapez else
                                                                  (_ortak(k, "kiremit_kapatma_m") if kiremit else _ortak(k, "tek_kat_panel_kapatma_m")))
     tasma, yuvarla_mm = _ortak(k, "cati_kaplama_tasma_m"), _ortak(k, "panel_boyu_yuvarlama_mm")
     boy_mm = lambda e_: int(math.ceil((e_ + tasma) * 1000 / yuvarla_mm - 1e-9) * yuvarla_mm)
@@ -1315,13 +1320,18 @@ def liste(N: dict, kurallar: dict | None = None, pafta: dict | None = None) -> d
              + f"; boy eğik {od(o['egik'], 3)} + taşma {sy(tasma)} m, {yuvarla_mm} mm'ye yukarı (kitap)",
              "PK-01 22, PK-07 18 (yüz başına) tuttu", pafta=("sandvic_panel",) if c is ana else None,
              aday=TAVAN(o["yuz"] * o["mahya_boy"] / kap_m) if c is ana and o["yuz"] > 1 else None,
-             aday_notu="Şablon B (PK-02 17 ✓): iki yüz toplam yukarı" if c is ana and o["yuz"] > 1 else "")
+             aday_notu="Şablon B (PK-02 17 ✓): iki yüz toplam yukarı" if c is ana and o["yuz"] > 1 else "",
+             **({"kapatma_m": kap_m} if trapez else {}))   # D-51: fiyat defteri trapez sacı m² fiyatıyla, satırın kapatmasından
     pm, bm = _ortak(k, "parca_boyu_m", "mahya"), _ortak(k, "bindirme_m", "mahya")
     if trapez:
-        tp_, tb_ = pb("trapez_mahyasi"), _ortak(k, "bindirme_m", "trapez_mahyasi")
-        mahya = sum(TAVAN(o["mahya_boy"] / (tp_ - tb_)) for c, o in C if c["tip"] == "besik")
-        ekle("1006", "Trapez sac mahyası", f"L {mm_m(tp_)}", mahya, "Kural (J5)", f"beşik mahyaları ÷ {sy(tp_ - tb_)} (L {mm_m(tp_)}, {sy(tb_ * 100)} cm bindirme)",
-             "parça boyu kitaptan (Excel motoru); 7.3'te L 1000 (PK-03 listesinde 15)")
+        # D-50 (Lokman, 4 Kasım 2026 20:49–21:20, M-11): trapez mahya, trapez sac kaç kapatırsa o kadar kapatır (sac 100 → mahya L 1000,
+        # ÷ 1; 80'lik sacta L 800, ÷ 0,8); kitabın parça boyu ve 20 cm bindirmesi prefabrikte okunmaz (`kitapla_farkli`)
+        if r("trapez_mahyasi") != "sac_kapatmasi":
+            raise ValueError(f"trapez_mahyasi: bilinmeyen yöntem {r('trapez_mahyasi')!r}")
+        mahya = sum(TAVAN(o["mahya_boy"] / kap_m) for c, o in C if c["tip"] == "besik")
+        ekle("1006", "Trapez sac mahyası", f"L {mm_m(kap_m)}", mahya, "Kural (Lokman 4.11 20:49 ve 21:20, D-50)",
+             f"her beşiğin mahyası ÷ {sy(kap_m)}, yukarı (mahya, trapez sacın kapattığı {sy(kap_m * 100)} cm'yi kapatır; bindirme düşülmez)",
+             "AP-06, AP-11, AP-14, AP-15, AP-16, AP-26, PK-03, PK-08 gerçek listelerinin adedi tuttu (eski ÷ 0,6 yalnız AP-25)")
     else:
         mahya = TAVAN(sum(o["mahya_boy"] for c, o in C if c["tip"] == "besik") / (pm - bm))   # O10: toplam ÷ 2,6 (PK-06 6, PK-07 4)
         ekle("1006", "Metal kiremit mahyası", f"L {mm_m(pm)}", mahya, "Kural (O10)", f"beşik mahyalarının toplamı ÷ {sy(pm - bm)}", "PK-01, PK-02, PK-06, PK-07 tuttu")
