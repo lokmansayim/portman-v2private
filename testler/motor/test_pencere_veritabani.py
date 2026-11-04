@@ -220,3 +220,19 @@ def test_pafta_kot_yazisi_dosemeden_pencereyi_soyler():
         else:
             assert not any("döşemeden" in s for s in yazi), yazi
             assert any(re.search(r"Pencere üst kotu 200 cm \| Lento 50 cm", s) for s in yazi), yazi
+
+
+# --------------------------------------------------------------------------- bölmeli pencere (İE-29 PR-2)
+
+def test_bolmeli_pencere_kaydi():
+    """İE-29 PR-2 (Lokman, 4 Kasım 2026 05:17, AP-27 paftasının pencere detayı: "pencereleri bu şekilde çizmen gerekiyor"): bölmeleri
+    yazılı model soldan sağa kanat ve sabit; bölmelerin toplamı pencerenin eni, kanatta menteşe yanı yazılı."""
+    bol = {m["olcu"]: m["bolmeler"] for m in VT["modeller"] if m.get("bolmeler")}
+    assert sorted(bol) == ["140x150", "180x210"]
+    for olcu, bs in bol.items():
+        assert abs(sum(b["en_cm"] for b in bs) - G.pencere_kurali(olcu).en) < 1e-6, olcu
+        assert [b["tur"] for b in bs] == ["kanat", "sabit", "kanat"], olcu
+        assert [b.get("mentese") for b in bs] == ["sol", None, "sag"], olcu          # iki kanat da dış yanından
+    from motor import dxf_out
+    assert dxf_out.PENCERE_BOLMELERI == bol
+

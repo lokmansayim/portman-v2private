@@ -77,6 +77,9 @@ VASISTAS_BLOK = ("on-vasistas", 60.0, 40.0, 3.0)        # ad, doğal en, boy, ka
 # `acilis: "surgulu"` yazan pencere görünüşte sürgülü; sembol Lokman'ın föyündeki 197,5 × 197,5 sürgülü kapıdan: çift kasa, ortada bindirmeli
 # iki kanat, sabit kanatta cam işareti, sürülen kanatta yön oku (kırmızı, açılım çizgisi gibi). Blok cm, 120 × 180; ölçü ve pano değişmez.
 SURGULU_BLOK = ("on-surgulu", 120.0, 180.0, 3.0)          # ad, doğal en, boy, kasa payı
+# İE-29 (Lokman, 4 Kasım 2026 05:17): pencere veri tabanında bölmeleri yazılı pencere görünüşte bölmeleriyle (`Cizici._bolmeli_blok`); öteki
+# ölçüler eskisi gibi kaynak ön pencere bloğu (TK-01, TK-02 ve M-07 evlerinin çizimi değişmez: onlarda bölmeli ölçü yok).
+PENCERE_BOLMELERI = {m["olcu"]: m["bolmeler"] for m in G.PENCERE_VT["modeller"] if m.get("bolmeler")}
 # D-31 madde 14 (Lokman, 29 Ekim 2026 13:14: "görünüşlerdeki sadece ön görünüşde ve sağ görünüşde kodları göster diğerlerinden sil"): düşey
 # kot ölçüleri (duvar, tepe, pencere eşiği ve lentosu) yalnız ön ve sağ görünüşte; arka ve solda yatay ölçüler kalır.
 KOT_GORUNUSLERI = ("on", "sag")
@@ -924,6 +927,46 @@ class Cizici:
             b.add_line((x1, y), (x1 - 4, y + dy), dxfattribs={"layer": "0", "color": 1})
         return ad
 
+    def _bolmeli_blok(self, olcu: str) -> str:
+        """İE-29 (Lokman, 4 Kasım 2026 05:17, AP-27 paftasının pencere detayı: "pencereleri bu şekilde çizmen gerekiyor"): bölmeleri pencere
+        veri tabanında yazılı pencere (`modeller[].bolmeler`: soldan sağa kanat ve sabit, cm) görünüşte bölmeleriyle. Çift kasa; her bölmede
+        kasa içi çerçeve (iki bölmenin çerçevesi arası kayıt); kanatta çift çizgili kanat ve açılım (kırmızı kesik, kanadın menteşe yanının
+        ortasına; tek açılım); sabitte cam işareti. Oranlar ve çizgi kalınlığı kaynak ön pencere bloğundaki gibi (kasa 3,5, kanat 4,5; 0,25 mm).
+        Blok cm, pencerenin kendi ölçüsünde; ilk kullanımda kurulur."""
+        ad = f"on-pencere-{olcu}"
+        if ad in self.doc.blocks:
+            return ad
+        pk = G.pencere_kurali(olcu)
+        en, boy = float(pk.en), float(pk.boy)
+        kasa, ic, kanat, kayit = 3.5, 8.0, 4.5, 3.0     # kasa çift çizgi arası, bölme çerçevesinin dıştan payı, kanat çift çizgi arası, kayıt yarısı
+        cizgi = {"layer": "0", "color": 7, "lineweight": 25}
+        kirmizi = {"layer": "0", "color": 1, "lineweight": 25}
+        b = self.doc.blocks.new(ad)
+        kutu = lambda x0, y0, x1, y1: b.add_lwpolyline([(x0, y0), (x1, y0), (x1, y1), (x0, y1)], close=True, dxfattribs=cizgi)
+        kutu(0.0, 0.0, en, boy); kutu(kasa, kasa, en - kasa, boy - kasa)                      # çift kasa
+        y0, y1 = ic, boy - ic
+        x = 0.0
+        for bl in PENCERE_BOLMELERI[olcu]:
+            a, c = x, x + float(bl["en_cm"]); x = c
+            x0 = ic if a < 1e-6 else a + kayit
+            x1 = en - ic if abs(c - en) < 1e-6 else c - kayit
+            kutu(x0, y0, x1, y1)
+            if bl["tur"] == "sabit":                                                          # cam işareti: üç eğik çizgi
+                cx, cy, o = (x0 + x1) / 2, (y0 + y1) / 2, min(2.2, (x1 - x0) / 18)
+                for (u0, v0, u1, v1) in ((-2.0, 9.0, -6.5, 3.0), (1.5, 7.5, -5.5, -3.5), (1.5, -1.0, -5.5, -12.5)):
+                    b.add_line((cx + u0 * o, cy + v0 * o), (cx + u1 * o, cy + v1 * o), dxfattribs=cizgi)
+                continue
+            kutu(x0 + kanat, y0 + kanat, x1 - kanat, y1 - kanat)                              # kanat çift çizgi
+            m_x, u_x = (x0 + kanat, x1 - kanat) if bl["mentese"] == "sol" else (x1 - kanat, x0 + kanat)
+            tepe = (m_x, (y0 + y1) / 2)
+            for kose in ((u_x, y0 + kanat), (u_x, y1 - kanat)):                               # açılım: menteşe yanının ortasına, kesik
+                dx, dy = tepe[0] - kose[0], tepe[1] - kose[1]
+                n = max(2, round(((dx * dx + dy * dy) ** 0.5 + 4.0) / 9.0))                 # ~5'lik kesik, ~4 ara; iki ucu köşede ve tepede
+                for j in range(n):
+                    t0, t1 = j / (n - 0.5), (j + 0.5) / (n - 0.5)
+                    b.add_line((kose[0] + dx * t0, kose[1] + dy * t0), (kose[0] + dx * t1, kose[1] + dy * t1), dxfattribs=kirmizi)
+        return ad
+
     def _ust_kot_yazisi(self, hy: float, lento: float) -> str:
         """Görünüşün altındaki kot yazısı. İE-27 madde 11: döşemeden pencere (boyu 200'ü geçen, sürgülü 200/210) varsa üst kotu boyu kadar."""
         ds = _dosemeden_pencereler(self.plan)
@@ -939,6 +982,9 @@ class Cizici:
         elif olcu in VASISTAS_OLCULERI:
             _, en, boy, _ = VASISTAS_BLOK
             self.msp.add_blockref(self._vasistas_blok(), (u0, z0), dxfattribs={"xscale": w / en, "yscale": h / boy, "layer": "ON_DOGRAMA"})
+        elif olcu in PENCERE_BOLMELERI:                             # İE-29: veri tabanında bölmeleri yazılı pencere (AP-27 pencere detayı)
+            pk = G.pencere_kurali(olcu)
+            self.msp.add_blockref(self._bolmeli_blok(olcu), (u0, z0), dxfattribs={"xscale": w / pk.en, "yscale": h / pk.boy, "layer": "ON_DOGRAMA"})
         else:
             self.msp.add_blockref("kaynak-on-pencere", (u0, z0), dxfattribs={"xscale": w / 77.101, "yscale": h / 116.017, "layer": "ON_DOGRAMA"})
 
