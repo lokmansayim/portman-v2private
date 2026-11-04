@@ -97,6 +97,7 @@ Biçim: karar · gerekçe · reddedilen seçenekler · geri alma yolu · kim ve 
 | [D-44](D-44.md) | Dört evin mühürü (M-07) liste için açıldı ve yeniden mühürlendi: makas sayısı paftanın makas planıyla (AP-15 ana çatı 7, AP-09 cumbası 3; cumbanın iç ucunda makas yok), dört evin yükleme listesi çizimdeki çatıdan yazılır; çizim ve çatı değişmedi | 2.11 (Lokman 16:50 ve 18:21 kartları) |
 | [D-45](D-45.md) | Kör ölçüm farklarından liste kuralları (Lokman'ın 3 Kasım cevapları): 3'lü H dış duvarda da, çektirme U'su 60 yerinden, köşe direği tipsiz, mahya bandı mahya boyundan, temiz su ıslak hacim başına, 5,5 × 25 trapez vida; kıyasta atık su ölçüm dışı, eş adlar; açılmış on evin kaydı açık | 3.11 (Lokman 09:52) |
 | [D-46](D-46.md) | Karkaslı kaplama duvar panosu paftadan, ev ev: pencereli dış duvarın paftadaki tek parça panosu İş Emri'ne yazılır (`dizilim.karkasli_panolar`), odaya ortalı geniş pencere anahtarı (`genis_pencere: oda_ortasi`), ön onay kuralı PC-31; anahtarsız İş Emri'leri aynı | 4.11 (Lokman 04:35) |
+| [D-50](D-50.md) | AP-26'nın pencere bölmeleri, cam PVC kapısı ve teras paneli paftadan, ev ev: açıklık başına `bolmeler` (sürgülü ve vasistas bölmesiyle) ve `kapi_turu: pvc_cam`, verandada `cati.tip: teras_paneli` (düz, saçak altının 10 cm altında, 8 cm); açılımın kolları kol yanında; ön onay kuralı PC-32; anahtarsız İş Emri'leri aynı | 4.11 (Lokman 21:14) |
 
 ## Numara defteri (14 Ekim 2026, BK-08; CIO planı › Görev 3)
 
@@ -139,6 +140,7 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | D | D-45 | kör ölçüm farklarından liste kuralları ve kıyas (Lokman 3.11 09:52, öneri tablosunun cevapları) | yazıldı (3.11; İE-27, `claude/project-thread-wwx1p0`) |
 | D | D-46 | karkaslı kaplama duvar panosu paftadan, ev ev (İE-28; Lokman 4.11 04:35 kartı "Paftadan, ev ev") | yazıldı (4.11; İE-28, `claude/project-thread-qnu2k8`) |
 | D | D-47 | çıkıntısız çapraz cumbada liste (İE-29; PR #119) | yazıldı (4.11; İE-29) |
+| D | D-50 | AP-26'nın pencere bölmeleri, cam PVC kapısı ve teras paneli paftadan, ev ev (İE-30; Lokman 4.11 21:14 kartı "Paftadan, ev ev") | yazıldı (4.11; İE-30, `claude/project-thread-qnu2k8`) |
 | D | **D-48** | — | **sıradaki boş** |
 | İE | İE-01–İE-08 | bu depo (`main`) | yazıldı |
 | İE | İE-09 | model atölyesi: kontrollü model üretimi ve banka hattı (Görev 6e; pano 30; P6001 güncellemesi kapsam dışı) | alındı (16.10; `claude/gorev-6e-model-atolyesi-rnhtcp`; PR-1 banka hattı 29.10, `claude/project-thread-rhjgzv`) |
@@ -161,7 +163,8 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | İE | İE-27 | kör ölçüm farklarını kurala işleme (Lokman 3.11 09:52 cevapları; D-45): PR-1 liste kuralları ve kıyas, sonra pencere veri tabanı ve pano dizilimi | alındı (3.11; `claude/project-thread-wwx1p0`) |
 | İE | İE-28 | uzun karkaslı pencereli pano: paftadaki tek parça karkaslı kaplama duvar panosu ve odaya ortalı geniş pencere Motor'da (Lokman 3.11 20:44 kartı "Ayrı iş olarak açılsın"; M-02'ye dokunur, plan önce Lokman'a) | alındı (3.11; `claude/project-thread-qnu2k8`) |
 | İE | İE-29 | kör kalan evlerin geometrisi (pano 145; D-47; PR #119) | alındı (3.11) |
-| İE | **İE-30** | — | **sıradaki boş** |
+| İE | İE-30 | AP-26'nın pencereleri ve terası paftadan (Lokman 4.11 20:42; D-50) | alındı (4.11; `claude/project-thread-qnu2k8`) |
+| İE | **İE-31** | — | **sıradaki boş** |
 | BK | BK-01–BK-08 | bu depo; BK-08 8a sonrası temizlik (`bk-08-8a-temizlik`) | yazıldı |
 | BK | BK-09 | metin ve çizim düzeltmeleri, G1 (`bk-09-metin-cizim`, `bk-09-cizim-g1`) | alındı (14.10) |
 | BK | BK-10 | 8b sonrası küçük işler (DXF `.txt` notu, geç gelen Excel, panelden Excel, plan değişince kontrol kapanır, D-19 24 saat kuralı, düğmeli mesajda satır sonları, `YENI-` kodu ve ilk çelik planda LLM özeti bayiye gitmez, komut freni metni; pano satır 15; çelikte kapı değişikliği kapsam dışı) | alındı (30.10; `claude/project-thread-h64uz2`) |

@@ -771,6 +771,72 @@
     "testler/motor/test_ie28_karkasli_pano.py::test_aciklik_ic_duvar_tsine_binmez",
     "testler/motor/test_ie28_karkasli_pano.py::test_oda_ortasi_yan_parcasi_cok_kisa_olmaz"
    ]
+  },
+  {
+   "kod": "PC-32",
+   "baslik": "Pencere bölmeleri, cam PVC kapı ve teras paneli paftadan",
+   "kural": "Paftanın pencere ve kapı detayı İş Emri'ne açıklık başına yazılır. Pencere: `bolmeler` dışarıdan bakınca soldan sağa [{tur: kanat | sabit | surgulu | vasistas, en_cm, mentese: sol | sag (yalnız kanatta), yon: sol | sag (yalnız sürgülüde, sürüldüğü yan)}], enlerin toplamı pencerenin eni; sürgülü bölmesi olan pencere `acilis: surgulu` ile, öteki bölmeli pencere açılışsız. Görünüşte bölmeli blok (İE-29): çift kasa, bölme başına çerçeve; kanatta açılımın kırmızı kesik kolları menteşe yanının iki köşesinden kol yanının ortasına (paftalarda kollar kol yanında buluşur), sabitte cam işareti, sürgülüde sürüldüğü yana kırmızı ok, vasistasta kollar alt köşelerden üst ortaya. Dış kapı: `kapi_turu: pvc_cam` → görünüşte beyaz, komple cam PVC kapı (çift kasa, eşik, cam işareti, kol menteşenin karşı yanında; menteşe planın kapı sembolüyle aynı yanda). Taşan veranda: `cati: {tip: teras_paneli, cikma_cm}` → düz teras paneli: üst yüzü duvar üstünün (ana çatının saçak altı çizgisi) 10 cm altında, 8 cm; duvardan `cikma_cm` (derinlikle derinlik + 60 arası), cephe boyunca verandanın eni. Görünüşte kolon kirişin altına, kiriş panelin altında, panel düz bant; topuk, kalkan ve eğik çizgi yok. Planda panelin dış çizgisi (VERANDA_PANEL katmanı, yalnız teras panelli planda). Listede makassız panel çatı parçası (yavru makas ve aşık yok). Anahtarsız İş Emri'nde hiçbir şey değişmez. Yanlış yazılan bölme, kapı türü ve teras paneli hata.",
+   "karar": "D-50",
+   "madde": 1,
+   "lokman": {
+    "tarih": "2026-11-04",
+    "saat": "21:14",
+    "soz": "Paftadan, ev ev (kart: \"AP-26'nın pencerelerini ve terasını paftadan, ev ev mi kuralım?\"; sonuç: \"Pencere bölmeleri, cam PVC kapı ve teras paneli İş Emri'ne paftadan yazılır; TK-01, TK-02 ve mühürlü veranda kuralı değişmez.\"). 20:42: \"pencereler çizimi tam doğru değil ayrıca teras ayrı bir teknikler yapılıyor çatı saçağının 10 cm altında çatı paneli olarak kullandığımız bir 8 cm genişliğinde C den oluşan panel yapıyoruz üzerine yine Trapez sac araya damlalık atıyoruz yani çatı gibi şekilli değil AP26 montaj paftasını iyice incele\""
+   },
+   "kod_yeri": [
+    "motor/geometry.py::bolmeler_dogrula",
+    "motor/geometry.py::BOLME_TURLERI",
+    "motor/geometry.py::DIS_KAPI_TURLERI",
+    "motor/geometry.py::VERANDA_CATI_TIPLERI",
+    "motor/veranda.py::teras_paneli",
+    "motor/dxf_out.py::Cizici._bolmeli_blok",
+    "motor/dxf_out.py::Cizici._pvc_kapi_blok",
+    "motor/dxf_out.py::Cizici._on_kapi",
+    "motor/cephe_gorunus.py::kapi_mentese_yani",
+    "motor/prefabrik_liste.py::_veranda_catilari"
+   ],
+   "sabitler": [
+    {
+     "yer": "motor/geometry.py::TERAS_PANELI_SACAK_ALTI_CM",
+     "deger": 10.0
+    },
+    {
+     "yer": "motor/geometry.py::TERAS_PANELI_KALINLIK_CM",
+     "deger": 8.0
+    },
+    {
+     "yer": "motor/geometry.py::BOLME_TURLERI",
+     "deger": [
+      "kanat",
+      "sabit",
+      "surgulu",
+      "vasistas"
+     ]
+    },
+    {
+     "yer": "motor/geometry.py::DIS_KAPI_TURLERI",
+     "deger": [
+      "pvc_cam"
+     ]
+    }
+   ],
+   "test": [
+    "testler/motor/test_ie30_pencere_teras.py::test_ap26_is_emri_paftadan",
+    "testler/motor/test_ie30_pencere_teras.py::test_bolmeler_yanlis_yazim",
+    "testler/motor/test_ie30_pencere_teras.py::test_surgulu_bolme_acilisla",
+    "testler/motor/test_ie30_pencere_teras.py::test_kapi_turu_yanlis_yazim",
+    "testler/motor/test_ie30_pencere_teras.py::test_teras_paneli_yanlis_yazim",
+    "testler/motor/test_ie30_pencere_teras.py::test_teras_paneli_kotlari_ve_gorunusu",
+    "testler/motor/test_ie30_pencere_teras.py::test_ap26_gorunus_bloklari",
+    "testler/motor/test_ie30_pencere_teras.py::test_kanat_kollari_kol_yaninda_bulusur",
+    "testler/motor/test_ie30_pencere_teras.py::test_surgulu_ve_vasistas_bolmesi",
+    "testler/motor/test_ie30_pencere_teras.py::test_pvc_kapi_menteseye_gore",
+    "testler/motor/test_ie30_pencere_teras.py::test_teras_paneli_planda",
+    "testler/motor/test_ie30_pencere_teras.py::test_ap27_kayitlarinin_blogu_degismedi",
+    "testler/motor/test_ie30_pencere_teras.py::test_anahtarsiz_is_emrinde_yeni_blok_yok",
+    "testler/motor/test_ie30_pencere_teras.py::test_liste_teras_paneli_panel_cati",
+    "testler/motor/test_ie30_pencere_teras.py::test_ifc_teras_paneli_duz"
+   ]
   }
  ]
 }

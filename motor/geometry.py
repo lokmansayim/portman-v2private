@@ -333,6 +333,7 @@ class Acilim:
     kapi_yeri: Optional[str] = None         # İE-17: İş Emri'nin bu kapıya yazdığı yer ("mentese_ucu" | "ortada"); yoksa `dizilim.kapi_yeri`
     acilis: Optional[str] = None            # D-31 madde 11: pencerenin açılışı; None (ölçünün bloğu) | "surgulu" (görünüşte sürgülü kanat)
     bolmeler: Optional[tuple] = None        # İE-29: açıklığın kendi bölmeleri (İş Emri'nde; veri tabanındakini ezer), görünüşte soldan sağa
+    kapi_turu: Optional[str] = None         # D-50: dış kapının türü; None (çelik kapı) | "pvc_cam" (beyaz, komple cam PVC kapı)
 
 
 @dataclass
@@ -1173,9 +1174,16 @@ def _kur(is_emri: dict) -> Plan:
             raise IsEmriHatasi(f"Açıklıkta acilis yalnız pencerede ve \"surgulu\" olabilir: {ac}")
         acl.acilis = ac.get("acilis")             # D-31 madde 11: geometri değil; görünüşün pencere bloğunu seçer
         if "bolmeler" in ac:                      # İE-29: açıklığın kendi bölmeleri (aynı ölçü başka evde başka bölmeli: 120x120 TK-01/02'de de)
-            if tur != "pencere" or ac.get("acilis"):
+            if tur != "pencere":
                 raise IsEmriHatasi(f"Açıklıkta bolmeler yalnız pencerede ve acilis'siz yazılır: {ac}")
             acl.bolmeler = bolmeler_dogrula(ac["bolmeler"], pk.en, ac)
+            if any(b["tur"] == "surgulu" for b in acl.bolmeler) != (ac.get("acilis") == "surgulu"):   # D-50: sürgülü bölmeli pencere sürgülüdür
+                raise IsEmriHatasi(f"Açıklıkta bolmeler yalnız pencerede ve acilis'siz yazılır; sürgülü bölmesi olan pencere "
+                                   f"acilis: surgulu ile (D-50): {ac}")
+        if ac.get("kapi_turu") is not None:       # D-50: paftanın kapı detayı (AP-26: komple cam PVC kapı)
+            if tur != "dis_kapi" or ac["kapi_turu"] not in DIS_KAPI_TURLERI:
+                raise IsEmriHatasi(f"Açıklıkta kapi_turu yalnız dış kapıda ve {' | '.join(DIS_KAPI_TURLERI)} olabilir: {ac}")
+            acl.kapi_turu = ac["kapi_turu"]
         p.acilim = acl
     # BK-13: komşu tam panoyla 251'lik pano. Bütün açıklıklar yerleştikten sonra: İş Emri'nin pano dizinleri ızgaraya göre kalır ve komşu kuralı
     # listede sonra yazılan açıklıkları da görür. Aynı duvardaki geniş pencereler dizilimin sonundan başına kurulur: her biri önce kendi sonraki
@@ -1291,20 +1299,23 @@ def _kur(is_emri: dict) -> Plan:
     return plan
 
 
-BOLME_TURLERI = ("kanat", "sabit")
+BOLME_TURLERI = ("kanat", "sabit", "surgulu", "vasistas")   # D-50: sürgülü (AP-26 280/210: sabit, sürgülü, sürgülü, sabit) ve vasistas (50/50)
 
 
 def bolmeler_dogrula(bolmeler, en: float, kaynak=None) -> tuple:
-    """İE-29: pencerenin bölmeleri (veri tabanının `modeller[].bolmeler` biçimi; dışarıdan bakınca soldan sağa): [{"tur": kanat | sabit,
-    "en_cm", "mentese": sol | sag (yalnız kanatta)}]; enlerin toplamı pencerenin eni. Yanlış yazılan açık hata (K21)."""
+    """İE-29: pencerenin bölmeleri (veri tabanının `modeller[].bolmeler` biçimi; dışarıdan bakınca soldan sağa): [{"tur": kanat | sabit |
+    surgulu | vasistas, "en_cm", "mentese": sol | sag (yalnız kanatta), "yon": sol | sag (yalnız sürgülüde, sürüldüğü yan; D-50)}]; enlerin
+    toplamı pencerenin eni. Vasistas (D-50) alttan menteşeli, üstten açılır. Yanlış yazılan açık hata (K21)."""
     if not isinstance(bolmeler, list) or not bolmeler:
         raise IsEmriHatasi(f"bolmeler soldan sağa bölmelerin listesi olur: {kaynak}")
     out = []
     for b in bolmeler:
-        if not isinstance(b, dict) or b.get("tur") not in BOLME_TURLERI or set(b) - {"tur", "en_cm", "mentese"} \
-                or not isinstance(b.get("en_cm"), (int, float)) or b["en_cm"] <= 0 \
-                or (b["tur"] == "kanat") != ("mentese" in b) or b.get("mentese", "sol") not in ("sol", "sag"):
-            raise IsEmriHatasi(f"bölme {{\"tur\": kanat | sabit, \"en_cm\", \"mentese\": sol | sag (yalnız kanatta)}} olur: {b} ({kaynak})")
+        if not isinstance(b, dict) or b.get("tur") not in BOLME_TURLERI or set(b) - {"tur", "en_cm", "mentese", "yon"} \
+                or not isinstance(b.get("en_cm"), (int, float)) or isinstance(b.get("en_cm"), bool) or b["en_cm"] <= 0 \
+                or (b["tur"] == "kanat") != ("mentese" in b) or b.get("mentese", "sol") not in ("sol", "sag") \
+                or (b["tur"] == "surgulu") != ("yon" in b) or b.get("yon", "sol") not in ("sol", "sag"):
+            raise IsEmriHatasi(f"bölme {{\"tur\": kanat | sabit | surgulu | vasistas, \"en_cm\", \"mentese\": sol | sag (yalnız kanatta), \"yon\": sol | sag "
+                               f"(yalnız sürgülüde)}} olur: {b} ({kaynak})")
         out.append(dict(b))
     if abs(sum(float(b["en_cm"]) for b in out) - float(en)) > 1e-6:
         raise IsEmriHatasi(f"bölmelerin enleri toplamı pencerenin eni ({en:g}) olmalı: {kaynak}")
@@ -1355,7 +1366,13 @@ def _kose_kolonlari(plan: "Plan") -> None:
 
 
 VERANDA_KOLON_CM = 10.0      # veranda dikmesi 10 × 10 (DXF bloğu VERANDA_DIKME_100x100; liste "Özel kutu profil (kolon) 100 × 100")
-VERANDA_CATI_TIPLERI = ("besik", "tek_yon")
+VERANDA_CATI_TIPLERI = ("besik", "tek_yon", "teras_paneli")
+# D-50 (İE-30; Lokman 4 Kasım 2026 20:42: "teras ayrı bir teknikle yapılıyor çatı saçağının 10 cm altında çatı paneli olarak kullandığımız bir
+# 8 cm genişliğinde C den oluşan panel yapıyoruz üzerine yine Trapez sac araya damlalık atıyoruz yani çatı gibi şekilli değil"; 21:14 "Paftadan,
+# ev ev"): verandanın üstü `cati: {tip: teras_paneli, cikma_cm}` → düz panel, üst yüzü ana çatının saçak altı çizgisinin (duvar üstü) 10 cm
+# altında, 8 cm kalınlıkta; duvardan `cikma_cm` (paftada P1 ve P2: 140) dışarı, cephe boyunca verandanın eni kadar; makas ve aşık yok
+TERAS_PANELI_SACAK_ALTI_CM = 10.0
+TERAS_PANELI_KALINLIK_CM = 8.0
 
 
 def _dis_verandalar(plan: "Plan", is_emri: dict) -> None:
@@ -1435,8 +1452,15 @@ def _dis_verandalar(plan: "Plan", is_emri: dict) -> None:
         tip = c.get("tip", "besik")
         if tip not in VERANDA_CATI_TIPLERI:
             raise IsEmriHatasi(f"Veranda {ad}: çatı tipi bilinmiyor: {tip} ({' | '.join(VERANDA_CATI_TIPLERI)})")
-        cati = {"tip": tip, "egim_yuzde": float(c.get("egim_yuzde", ana.get("egim_yuzde", 33))),
-                "sacak_cm": float(c.get("sacak_cm", ana.get("sacak_cm", 30))), "topuk_cm": float(ana.get("topuk_cm", 10))}
+        if tip == "teras_paneli":                   # D-50: düz panel; eğimi, saçağı yok (K21: yazılırsa yok sayılmaz)
+            cikma = c.get("cikma_cm")
+            if set(c) - {"tip", "cikma_cm"} or not isinstance(cikma, (int, float)) or isinstance(cikma, bool) or not d <= float(cikma) <= d + 60:
+                raise IsEmriHatasi(f"Veranda {ad}: teras_paneli yalnız cikma_cm alır (duvardan panelin dış kenarı; derinlikten "
+                                   f"{d:g} en çok 60 cm fazla): {c}")
+            cati = {"tip": tip, "egim_yuzde": 0.0, "sacak_cm": 0.0, "topuk_cm": float(ana.get("topuk_cm", 10)), "cikma_cm": float(cikma)}
+        else:
+            cati = {"tip": tip, "egim_yuzde": float(c.get("egim_yuzde", ana.get("egim_yuzde", 33))),
+                    "sacak_cm": float(c.get("sacak_cm", ana.get("sacak_cm", 30))), "topuk_cm": float(ana.get("topuk_cm", 10))}
         if varsayim:
             eg_yazi = f"{cati['egim_yuzde']:g}".replace(".", ",")
             plan.uyarilar.append(f"Veranda {ad}: çatısı İş Emri'nde yok; beşik, ana çatının eğimi (%{eg_yazi}) alındı")
@@ -1733,6 +1757,9 @@ def _genis_pencere_oda_ortasi(d: "Duvar", p: Pano, i: int, n: int, aralik: Optio
             return yeni
     raise IsEmriHatasi(f"genis_pencere: oda_ortasi: {n} panoluk pencereli pano odanın duvar parçasına ortalanamıyor (parçanın uçları pano ekinde, "
                        f"öteki panoları açıklıksız ve iki yanda kalan ya hiç ya da 20 ile 125,5 arası olmalı): {ac}")
+
+
+DIS_KAPI_TURLERI = ("pvc_cam",)                           # D-50: çelik kapı dışında paftadan yazılan dış kapı türleri
 
 
 def _karkasli_satirlari(satirlar) -> list:
