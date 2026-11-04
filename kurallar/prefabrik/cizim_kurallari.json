@@ -750,7 +750,7 @@
   {
    "kod": "PC-32",
    "baslik": "İş Emri tek birleşimi yazabilir: iç köşenin yönü, panonun ortasına gelen T",
-   "kural": "İş Emri `yapi.birlesimler` ile tek tek birleşimde Motor'un kuralını değiştirir. {\"nokta_cm\": [x, y], \"kose\": \"x\" | \"y\"}: iki iç duvarın L köşesinde yazılan yönde uzanan duvar köşeden geçer, öteki onun yüzünde biter (TK-04 r04: 5. aks ile D aksının köşesinde 5. akstaki duvar geçer, C–D panosu tam pano, salon kapısının panosu 122,5). {\"nokta_cm\": [x, y], \"t\": \"cektirme_u\"}: bir duvarın ortasına tek iç duvarın T ile geldiği yerde geçen duvar bölünmez, 3'lü H yok; listede çektirme U'su (İE-27). Nokta mahallerin konum_cm'i gibi aks tablosundadır; yazılan nokta öyle bir köşe ya da T değilse İş Emri hatası. Yazılmayan birleşimde kural aynen (PC-01…PC-31).",
+   "kural": "İş Emri `yapi.birlesimler` ile tek tek birleşimde Motor'un kuralını değiştirir. {\"nokta_cm\": [x, y], \"kose\": \"x\" | \"y\"}: iki iç duvarın L köşesinde yazılan yönde uzanan duvar köşeden geçer, öteki onun yüzünde biter (TK-04 r04: 5. aks ile D aksının köşesinde 5. akstaki duvar geçer, C–D panosu tam pano, salon kapısının panosu 122,5). {\"nokta_cm\": [x, y], \"t\": \"cektirme_u\"}: bir duvarın ortasına tek iç duvarın T ile geldiği yerde geçen duvar bölünmez, 3'lü H yok; listede çektirme U'su (İE-27). Nokta mahallerin konum_cm'i gibi aks tablosundadır; yazılan nokta öyle bir köşe ya da T değilse, T geçen duvarın pano ekine denk geliyorsa (orada 3'lü H olur) İş Emri hatası. Yazılmayan birleşimde kural aynen (PC-01…PC-31).",
    "karar": "D-49",
    "madde": 3,
    "lokman": {

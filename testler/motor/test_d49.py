@@ -91,13 +91,18 @@ def test_bes_d_kosesi_ve_cektirme_u():
 
 
 def test_birlesim_yanlis_noktada_hata():
-    """Yazılan nokta iki iç duvarın L köşesi ya da panonun ortasına gelen T değilse, anahtar yanlışsa sessiz geçilmez (K21)."""
+    """Yazılan nokta iki iç duvarın L köşesi ya da panonun ortasına gelen T değilse, T geçen duvarın ekindeyse, anahtar yanlışsa sessiz geçilmez
+    (K21)."""
     import pytest
     for b, beklenen in (({"nokta_cm": [318.75, 386.5], "kose": "x"}, "L köşesi değil"),
                         ({"nokta_cm": [381.5, 386.5], "t": "cektirme_u"}, "T ile geldiği yer değil"),
                         ({"nokta_cm": [381.5, 386.5], "kose": "z"}, "kose (x | y)"),
                         ({"nokta_cm": [381.5, 386.5]}, "kose (x | y)"),
-                        ({"nokta_cm": [380.0, 386.5], "kose": "x"}, "aks üstünde değil")):
+                        ({"nokta_cm": [380.0, 386.5], "kose": "x"}, "aks üstünde değil"),
+                        ({"nokta_cm": ["381.5", 386.5], "kose": "x"}, "kose (x | y)"),
+                        # geometri hakemi: T ızgara aksında, geçen duvarın ekinde (orada 3'lü H): yazılsa 3'lü H sessizce kalkardı
+                        ({"nokta_cm": [318.75, 261], "t": "cektirme_u"}, "pano ekine denk geliyor"),
+                        ({"nokta_cm": [5, 386.5], "t": "cektirme_u"}, "pano ekine denk geliyor")):
         ie = _r04(); ie["yapi"]["birlesimler"] = [b]
         with pytest.raises(G.IsEmriHatasi, match=re.escape(beklenen)):
             G.kur(ie)
