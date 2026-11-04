@@ -340,6 +340,7 @@ class Acilim:
     pano_is_emri: Optional[int] = None      # İE-11: İş Emri'nin yazdığı pano dizini (yoksa None)
     kapi_yeri: Optional[str] = None         # İE-17: İş Emri'nin bu kapıya yazdığı yer ("mentese_ucu" | "ortada"); yoksa `dizilim.kapi_yeri`
     acilis: Optional[str] = None            # D-31 madde 11: pencerenin açılışı; None (ölçünün bloğu) | "surgulu" (görünüşte sürgülü kanat)
+    bolmeler: Optional[tuple] = None        # İE-29: açıklığın kendi bölmeleri (İş Emri'nde; veri tabanındakini ezer), görünüşte soldan sağa
 
 
 @dataclass
@@ -1327,6 +1328,10 @@ def _kur(is_emri: dict) -> Plan:
         if ac.get("acilis") not in (None, "surgulu") or (ac.get("acilis") and tur != "pencere"):   # K21
             raise IsEmriHatasi(f"Açıklıkta acilis yalnız pencerede ve \"surgulu\" olabilir: {ac}")
         acl.acilis = ac.get("acilis")             # D-31 madde 11: geometri değil; görünüşün pencere bloğunu seçer
+        if "bolmeler" in ac:                      # İE-29: açıklığın kendi bölmeleri (aynı ölçü başka evde başka bölmeli: 120x120 TK-01/02'de de)
+            if tur != "pencere" or ac.get("acilis"):
+                raise IsEmriHatasi(f"Açıklıkta bolmeler yalnız pencerede ve acilis'siz yazılır: {ac}")
+            acl.bolmeler = bolmeler_dogrula(ac["bolmeler"], pk.en, ac)
         p.acilim = acl
     # BK-13: komşu tam panoyla 251'lik pano. Bütün açıklıklar yerleştikten sonra: İş Emri'nin pano dizinleri ızgaraya göre kalır ve komşu kuralı
     # listede sonra yazılan açıklıkları da görür. Aynı duvardaki geniş pencereler dizilimin sonundan başına kurulur: her biri önce kendi sonraki
@@ -1489,6 +1494,26 @@ def _kubbe_geometrisi(plan: "Plan", kubbe_panolari: list) -> None:
         plan.kubbeler.append({"mahal": kb["mahal"], "cephe": cephe, "duvar": d.id, "yon": d.yon, "u0": t0, "u1": t1, "yuz": yuz,
                               "isaret": sg, "dis": dis, "ic": ic, "bant": bant, "panolar": panolar, "derzler": derzler,
                               "ic_alan": [tuple(v) for v in ic_alan.exterior.coords][:-1], "tepe": P(tm, 0), "cikma_cm": c})
+
+
+BOLME_TURLERI = ("kanat", "sabit")
+
+
+def bolmeler_dogrula(bolmeler, en: float, kaynak=None) -> tuple:
+    """İE-29: pencerenin bölmeleri (veri tabanının `modeller[].bolmeler` biçimi; dışarıdan bakınca soldan sağa): [{"tur": kanat | sabit,
+    "en_cm", "mentese": sol | sag (yalnız kanatta)}]; enlerin toplamı pencerenin eni. Yanlış yazılan açık hata (K21)."""
+    if not isinstance(bolmeler, list) or not bolmeler:
+        raise IsEmriHatasi(f"bolmeler soldan sağa bölmelerin listesi olur: {kaynak}")
+    out = []
+    for b in bolmeler:
+        if not isinstance(b, dict) or b.get("tur") not in BOLME_TURLERI or set(b) - {"tur", "en_cm", "mentese"} \
+                or not isinstance(b.get("en_cm"), (int, float)) or b["en_cm"] <= 0 \
+                or (b["tur"] == "kanat") != ("mentese" in b) or b.get("mentese", "sol") not in ("sol", "sag"):
+            raise IsEmriHatasi(f"bölme {{\"tur\": kanat | sabit, \"en_cm\", \"mentese\": sol | sag (yalnız kanatta)}} olur: {b} ({kaynak})")
+        out.append(dict(b))
+    if abs(sum(float(b["en_cm"]) for b in out) - float(en)) > 1e-6:
+        raise IsEmriHatasi(f"bölmelerin enleri toplamı pencerenin eni ({en:g}) olmalı: {kaynak}")
+    return tuple(out)
 
 
 KOSE_KOLONU_YAKIN_CM = 11.0   # D-38: köşeye bu uzaklıktan yakın bir dikme varsa (İş Emri'nde yazılı) yenisi eklenmez

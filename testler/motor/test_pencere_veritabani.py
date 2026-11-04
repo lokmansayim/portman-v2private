@@ -9,6 +9,7 @@ pencereler konusunda da bir veri tabanın olmalı hangisi geldiyse onu uygula ya
   `test_bk18_ic_100.py`, mühür M-02).
 """
 from __future__ import annotations
+import copy
 import json
 import re
 import sys
@@ -236,3 +237,38 @@ def test_bolmeli_pencere_gorunuste_ap27():
     assert len(sol) + len(sag) == 2 * len(kirmizi)                                       # açılım yalnız kanatlarda (sabitte yok)
     assert (round(min(sol), 2), round(max(sol), 2)) == (12.5, 38.5)                      # sol kanat: kollar dış yandaki menteşede buluşur
     assert (round(min(sag), 2), round(max(sag), 2)) == (141.5, 167.5)                    # sağ kanat: ayna
+
+
+def test_acikligin_kendi_bolmeleri():
+    """İE-29 (İE-28 thread'inin isteği, AP-26 paftasının pencere detayı): aynı ölçü başka evde başka bölmeli olabilir (120x120 TK-01 ve
+    TK-02'de bölmesiz), bölmeler açıklık başına İş Emri'nden de verilir (`acikliklar[i].bolmeler`, veri tabanındakini ezer); yazılmayan
+    açıklık eskisi gibi. Yanlış yazılan açık hata."""
+    import ezdxf
+    from motor import cephe_gorunus as CG, dxf_out
+    ie = _ie("AP27")
+    i = next(k for k, a in enumerate(ie["acikliklar"]) if a["tur"] == "pencere" and a["olcu"] == "180x210")
+    iki = [{"tur": "kanat", "mentese": "sol", "en_cm": 90}, {"tur": "kanat", "mentese": "sag", "en_cm": 90}]
+    ie["acikliklar"][i]["bolmeler"] = iki
+    plan = G.kur(copy.deepcopy(ie))
+    ac = [a for t in CG.TARAFLAR for a in CG.cephe(plan, t)["acikliklar"] if a["tur"] == "pencere" and a["olcu"] == "180x210"]
+    assert sorted((a["bolmeler"] is None) for a in ac) == [False, True, True]
+    with tempfile.TemporaryDirectory() as t:
+        dxf_out.uret(ie, Path(t), pdf_hatada=False)
+        doc = ezdxf.readfile(next(Path(t).glob("*.dxf")))
+    adlar = sorted(e.dxf.name for e in doc.modelspace().query("INSERT") if e.dxf.layer == "ON_DOGRAMA" and e.dxf.name.startswith("on-pencere-"))
+    assert adlar == ["on-pencere-140x150", "on-pencere-180x210", "on-pencere-180x210", "on-pencere-180x210-k90so-k90sa"]
+    b = doc.blocks.get("on-pencere-180x210-k90so-k90sa")
+    xs = {round(float(v[0]), 2) for e in b.query("LWPOLYLINE") for v in e.get_points()}
+    assert {87.0, 93.0} <= xs and not ({43.0, 49.0} & xs)                                # kayıt 90'da: 90 | 90
+    for yanlis, mesaj in (([{"tur": "kanat", "mentese": "sol", "en_cm": 90}], "toplamı"),
+                          ([{"tur": "kanat", "en_cm": 180}], "bölme"),
+                          ([{"tur": "sabit", "mentese": "sol", "en_cm": 180}], "bölme"),
+                          ([{"tur": "surgu", "en_cm": 180}], "bölme"), ([], "listesi")):
+        ie2 = copy.deepcopy(ie)
+        ie2["acikliklar"][i]["bolmeler"] = yanlis
+        with pytest.raises(G.IsEmriHatasi, match=mesaj):
+            G.kur(ie2)
+    ie3 = copy.deepcopy(ie)
+    ie3["acikliklar"][i]["acilis"] = "surgulu"
+    with pytest.raises(G.IsEmriHatasi, match="acilis'siz"):
+        G.kur(ie3)
