@@ -194,6 +194,15 @@
    "liste_commit_saati": "22:25:37",
    "sozluk_commit": "deb02c9",
    "dayanak": "İE-29: kendi listemiz ve İş Emri önce commit'lendi ve dala gönderildi, sonra bu açılış kaydı (ayrı commit), sonra mühür denetimi ve kıyas"
+  },
+  "AP-27": {
+   "karar": "Patron (Lokman), karar kartı 2 Kasım 2026 21:48:56 UTC: \"Hepsi açılsın\" (soru: \"Kör 19 evin gerçek listeleri bu ölçümde açılsın mı?\"; AP-20 çift kat, ölçüm dışı). İE-26 ve İE-29 PR-1'de Motor liste yazmadığı için açılmamıştı; İE-29 PR-2'de (pano 145) çizim Lokman'ın karar kartıyla onaylandı (4 Kasım 2026 05:19 UTC \"Onaylıyorum\"; sonucu: \"AP-27'nin listesini kırma kurallarıyla yazar, kör ölçümünü koşarım\") ve Motor tek uçlu kırmada liste yazıyor (D-48)",
+   "tarih": "2026-11-04",
+   "sha256": "dc0ebc6924a41c4a566112cf195667544c3ff944fa1db5b0a05a30d6fb0787dc",
+   "liste_commit": "f4476db",
+   "liste_commit_saati": "06:21:10",
+   "sozluk_commit": "f4476db",
+   "dayanak": "İE-29 PR-2: kendi listemiz, İş Emri ve sözlük (surum 4) önce commit'lendi ve dala gönderildi, sonra bu açılış kaydı (ayrı commit), sonra mühür denetimi ve kıyas"
   }
  },
  "dosyalar": [
