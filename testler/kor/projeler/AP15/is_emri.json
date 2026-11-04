@@ -60,7 +60,7 @@
     "makas_yonu": "kisa_kenar",
     "makas_ekseni": "x"
   },
-  "ozellikler": {"Panel Türü": "Press Panel", "Çatı Şekli": "Beşik + Cumba", "Çatı Kaplaması": "OSB + Nem Bariyeri + Trapez", "Çatı Kaplama Rengi": "Antrasit", "Dış Kapı": "Çelik", "İç Kapılar": "Amerikan Panel", "Dış Cephe Boya": "", "İç Cephe Boya": "", "Tavan": "Ters tavan", "Saçak Rengi": "Antrasit", "Saçak Çıkması": "30 cm", "Yağmur Oluğu": "Metal", "Yağmur Oluğu Rengi": "Antrasit", "Yağmur İniş Borusu": ""},
+  "ozellikler": {"Panel Türü": "Press Panel", "Çatı Şekli": "Beşik + Cumba", "Çatı Kaplaması": "OSB + Nem Bariyeri + Trapez (80 cm kapatır)", "Çatı Kaplama Rengi": "Antrasit", "Dış Kapı": "Çelik", "İç Kapılar": "Amerikan Panel", "Dış Cephe Boya": "", "İç Cephe Boya": "", "Tavan": "Ters tavan", "Saçak Rengi": "Antrasit", "Saçak Çıkması": "30 cm", "Yağmur Oluğu": "Metal", "Yağmur Oluğu Rengi": "Antrasit", "Yağmur İniş Borusu": ""},
   "alici_ait": {"kalemler": [], "kaynak": "paftanın özellik tablosu: alıcıya ait kalem yazılmamış (paftada açıklama yok)"},
   "cikti": {
     "pdf": true,

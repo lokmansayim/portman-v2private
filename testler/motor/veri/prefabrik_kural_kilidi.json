@@ -96,7 +96,6 @@
   "ortak.tesisat.mason_20": 15,
   "ortak.tesisat.normal_dirsek_20": 15,
   "ortak.tesisat.temiz_su_borusu_4m": 6,
-  "ortak.trapez_sac_kapatma_m": 0.8,
   "ortak.urun_adlari.degistir": [
    [
     "Dış cephe Boardex",
@@ -299,6 +298,7 @@
     "atlama_parcasi"
    ]
   ],
+  "prefabrik.trapez_kapatma_m": 1.0,
   "prefabrik.trapez_mahyasi": "sac_kapatmasi",
   "prefabrik.trapez_vida_5_5x25.asik": 10,
   "prefabrik.trapez_vida_5_5x25.omega_2500": 6,
@@ -381,6 +381,10 @@
   ],
   [
    "Tavan omegası",
+   false
+  ],
+  [
+   "Trapez sac kapatması",
    false
   ],
   [

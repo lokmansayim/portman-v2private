@@ -569,10 +569,10 @@ def test_kitaba_gecen_kalemler(pk01, N, kurallar):
     assert [_satir(bp, x)["adet"] for x in ("NYM kablo 3 × 2,5", "NYM kablo 2 × 1,5")] == [124, 112]
     assert "dış ölçünün köşegeni" in _satir(bp, "NYM kablo 2 × 1,5")["formul"]
     assert _satir(b, "Acil müdahale kapağı")["adet"] == 1 and "Çatı müdahale kapağı" not in {s["kalem"] for s in b["satirlar"]}
-    # ters100 (trapez, cumba): trapez mahyası sacın kapattığı kadar kapatır (D-50): ⌈10,60 ÷ 0,8⌉ + ⌈2,10 ÷ 0,8⌉ = 14 + 3 (eski ÷ 0,6 ile 22);
-    # ters mahya başına iki kenar kutusu. ters60: metal kiremit 100 cm kapatır
+    # ters100 (trapez, cumba): sac standart 100 cm kapatır, mahya da (D-50, M-11): L 1000, ⌈10,60 ÷ 1⌉ + ⌈2,10 ÷ 1⌉ = 11 + 3 (eski L 800
+    # ÷ 0,6 ile 22); ters mahya başına iki kenar kutusu. ters60: metal kiremit 100 cm kapatır
     t = V["ters100"]
-    assert (_satir(t, "Trapez sac mahyası")["olcu"], _satir(t, "Trapez sac mahyası")["adet"]) == ("L 800", 17)
+    assert (_satir(t, "Trapez sac mahyası")["olcu"], _satir(t, "Trapez sac mahyası")["adet"]) == ("L 1000", 14)
     kk = _satir(t, "Ters mahya kenar kutusu")
     assert (kk["olcu"], kk["adet"]) == ("L 21 × 40 × 21 × 2800", 2 * _satir(t, "Ters mahya (dere içi)")["adet"])
     assert _satir(V["ters60"], "Metal kiremit (100 cm kapatır) · ana çatı")["adet"] == 22
