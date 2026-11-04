@@ -63,6 +63,7 @@ Lokman'ın mühürlediği bir konu, Lokman yeni bir değişiklik verene kadar de
 | M-08 | Çatı seçenek adımı | İE-25 · PR #105 · Lokman 2026-11-01 12:18 | Talepte çatı yoksa önce sorulmaz; plan seçilince "Çatı seçin" görseli gelir, elimizdeki modellerin kendi çatılarıyla (Ç8801 üç çatı). Hedef örnek çatı seti görseli (testler/cati_secimi/hedef.json). |
 | M-09 | Çelik duvar paneli oda bölmesinde biter | İE-16 · PR #49, #77 · Lokman 2026-10-28 13:14 | Çelikte duvar paneli her oda bölmesinde biter: koşu ona dik bağlanan her dış, iç ve ek duvarın ekseninde bölünür; T ile bağlanan iç duvarda da iki panele bölünür; bölmesiz koşu 516 cm'yi aşarsa eşit bölünür (İE-16 A1, A5). |
 | M-10 | Çelik çizim seti (Örnek Şablon paftası) | D-10, D-11, D-16 · PR #18, #19, #102 · Lokman 2026-11-01 20:32 | Çelik hattının çizim seti bugünkü hâliyle: plan, çatı planı, dört görünüş, Örnek Şablon paftası, perspektifler, bayi görseli ve düzenlenebilir DXF (kurallar/cizim/cizim_seti.json, pafta_sablonu.json, duzenlenebilir.json); yedi modelin çizim izleri son referanstaki gibi (PNG, PDF, DXF); bayiye giden çıktılarda yazı çakışması sıfır. |
+| M-11 | Prefabrik trapez çatı: sac ve mahya 100 cm kapatır | D-50 · PR #123 · Lokman 2026-11-04 20:49, 21:20 | Prefabrikte trapez sac standart 100 cm kapatır (÷ 1); trapez mahya sacın kapattığı kadar kapatır: L 1000, her beşiğin mahyası ÷ 1, bindirme yok. 80'lik sac yalnız İş Emri'nin çatı kaplaması yazarsa (÷ 0,8, mahya L 800). Kural kitabının (çelik) 0,8'i ve L 800 − 20 cm mahyası değişmez. |
 
 ## Depo düzeni
 
