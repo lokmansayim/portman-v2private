@@ -84,9 +84,8 @@ def hazirla(ie: dict) -> dict:
             L, t = p.boy, 2 * d.h
             pr = {"id": len(panolar), "rect": [_r(x0), _r(y0), _r(x1), _r(y1)], "yon": d.yon, "boy": _r(L), "kalinlik": _r(t),
                   "tur": d.tur, "sinif": pano_sinifi(L, t), "kod": kod, "kalem": kalem(kod), "acikliklar": []}
-            ac = p.acilim
-            if ac is not None:
-                g = p.gap()
+            for ac in p.aciklar:                                # D-46: karkaslı panoda birden çok açıklık
+                g = p.bosluk_dortgeni(ac)
                 a0, a1 = (g[0], g[2]) if d.yon == "x" else (g[1], g[3])
                 if ac.tur == "pencere":
                     pk = G.pencere_kurali(ac.olcu)                  # BK-13: eşik = 200 − boy (bugünkü üçü BOM notlarındaki 80, 20, 160)

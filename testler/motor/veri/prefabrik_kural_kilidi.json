@@ -185,6 +185,9 @@
    "islak",
    "lavabo"
   ],
+  "prefabrik.karkasli_kaplama_panosu.ic_pencereye_ozel_karkas": false,
+  "prefabrik.karkasli_kaplama_panosu.ic_pencereye_ust_alt_panel": false,
+  "prefabrik.karkasli_kaplama_panosu.kalem": "Karkaslı kaplama duvar panosu",
   "prefabrik.kosebent": 7,
   "prefabrik.kosebent_aday": 3,
   "prefabrik.kubbe_takimi": [

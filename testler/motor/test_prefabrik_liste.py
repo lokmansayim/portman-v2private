@@ -263,7 +263,8 @@ def _varyantlar(N: dict, pf: dict) -> dict:
     veranda (18 m²), WC ve hol türü: elektrik oda kuralının takımı ve kitaptan sayılan odaları; acik_mutfak: mutfağı ayrı mahal olmayan ev
     (mutfak koridor, banyo ıslak hacim türünde, ek lavabo): açık mutfak salona, ıslak hacim ve lavabo banyo, koridor hol gibi (BK-12 PR-2f);
     tasan: ilk açık kenar taşan verandanın dış kenarı sayılır (BK-14; kiriş kolonun dış yüzünden dış yüzüne, Lokman, kart 28 Ekim);
-    asma100: asma dizme tavan, 100'lük iç duvar (iç duvar üstü 100'lük duvar omegasında; Lokman, 30 Ekim 07:04, D-32 ek).
+    asma100: asma dizme tavan, 100'lük iç duvar (iç duvar üstü 100'lük duvar omegasında; Lokman, 30 Ekim 07:04, D-32 ek); karkasli: 120'lik
+    pencereli bir dış pano karkaslı kaplama duvar panosu (D-46, İE-28; Lokman, 4 Kasım 04:35).
     D-35'in kolonsuz köşe kirişi türevi (`kose`) D-38 ile kalktı: köşeye Motor kolon koyar, kirişler kolonlu verandanın kuralıyla."""
     def tur(n, **d):
         n = copy.deepcopy(n)
@@ -284,6 +285,9 @@ def _varyantlar(N: dict, pf: dict) -> dict:
     pan_b[pen[0]]["aciklik"]["olcu"], pan_b[pen[1]]["aciklik"]["olcu"] = "80/50", "50/80"   # vasistas sınırının iki yanı
     pan_b[pen[2]]["aciklik"]["olcu"] = "120x70"                  # fugalı latada artan 0,30 m: artık eşiğinin üstünde
     pan_b[dolu]["boy"] = 2 * PL.MOD + 0.3                        # modül katına 3 mm: sipariş boyu toleransı
+    pan_k = copy.deepcopy(N["panolar"])
+    k120 = next(i for i in pen if PL.pencere_olcusu(pan_k[i]["aciklik"]["olcu"])[0] == 120)
+    pan_k[k120].update(karkasli=True, aciklar=[dict(pan_k[k120]["aciklik"])], boy=2 * PL.MOD)   # D-46: karkaslı kaplama duvar panosu
     kisa_uzun = {"kaynak": "pafta", "H0": 250.0, "W": 600.0, "D": 900.0, "t_dis": 10.0, "panolar": [], "ekler": [], "koseler": {"dis": 4},
                  "dikmeler": 0, "veranda_kirisleri_cm": [], "kapali": [], "acik": [], "ozellikler": {}, "alici_ait": {},
                  "cati": [{"ad": "ana çatı", "tip": "besik", "aciklik_cm": 600.0, "boy_cm": 900.0, "egim_yuzde": 33.0, "sacak_cm": 30.0,
@@ -312,6 +316,7 @@ def _varyantlar(N: dict, pf: dict) -> dict:
                                        for m in N["kapali"]] + [{"ad": "LAVABO", "tur": "lavabo", "alan_m2": 2.0, "en_cm": 100.0, "derin_cm": 200.0}]), pf),
         "tasan": (tur(N, veranda_dis_kenar_sira=[0]), pf),
         "asma100": (tur(N, panolar=[dict(p, kal_mm=100) if p["duvar"] == "ic" else p for p in N["panolar"]]), pf),
+        "karkasli": (tur(N, panolar=pan_k), pf),
     }
 
 

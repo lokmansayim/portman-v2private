@@ -230,7 +230,7 @@ D.alt.forEach((s, i) => {
 const PW = D.pencere;   // pencere ölçüsü → kart, ad, liste satırı, açılım (acilir | surgulu | vasistas | b180), karkas
 const openTxt = op => !op ? null : op.kind === 'win' ? `Pencere ${op.size} · eşik ${op.s} cm` : op.kind === 'door_ext' ? `Dış kapı boşluğu ${Math.round(op.a1 - op.a0)} × ${op.top} · ${M.dis_kapi}` : M.ic_kapi_boslugu;
 D.panels.forEach(p => {
-  const [x0, y0, x1, y1] = p.rect, op = p.op, s = p.step, dvr = !p.card && /DVR/.test(p.ad || '');
+  const [x0, y0, x1, y1] = p.rect, op = p.op, s = p.step, dvr = !!p.karkas || (!p.card && /DVR/.test(p.ad || ''));   // D-46: karkaslı kaplama duvar panosu
   const pm = mat(p.duvar === 'dis' ? 'pdis' : 'pic', s);
   const g = new THREE.Group();
   const along = p.o === 'h' ? [x0, x1] : [y0, y1];
@@ -254,7 +254,22 @@ D.panels.forEach(p => {
     });
   };
   if (!op) piece(along[0], along[1], 0, H, pm);
-  else {
+  else if (p.ops && p.ops.length > 1) {   // D-46: birden çok açıklıklı karkaslı pano; açıklıkların arası tam boy, altı ve üstü dolu
+    const fm = mat('steel', s), t = p.t + 1.2, f = 2.2;
+    const across = p.o === 'h' ? [(y0 + y1) / 2 - t / 2, (y0 + y1) / 2 + t / 2] : [(x0 + x1) / 2 - t / 2, (x0 + x1) / 2 + t / 2];
+    const fr = (b0, b1, h0, h1, m) => g.add(p.o === 'h' ? bp(b0, b1, across[0], across[1], h0, h1, m) : bp(across[0], across[1], b0, b1, h0, h1, m));
+    let u = along[0];
+    [...p.ops].sort((a, b) => a.a0 - b.a0).forEach(o => {
+      if (o.a0 > u) piece(u, o.a0, 0, H, pm);
+      if (o.s > 0) piece(o.a0, o.a1, 0, o.s, pm);
+      piece(o.a0, o.a1, o.top, H, pm);
+      const m = o.kind === 'door' ? mat('kasa', s) : fm;
+      fr(o.a0, o.a1, o.top - f, o.top, m); if (o.s > 0) fr(o.a0, o.a1, o.s, o.s + f, m);
+      fr(o.a0, o.a0 + f, o.s, o.top, m); fr(o.a1 - f, o.a1, o.s, o.top, m);
+      u = o.a1;
+    });
+    if (along[1] > u) piece(u, along[1], 0, H, pm);
+  } else {
     const { a0, a1, s: sill, top } = op;
     const jm = (op.kind === 'win' && PW[op.size].karkas && !dvr) ? mat('steel', s) : pm;   // pencere karkası (X, Y); DVR'de pencere yanları da betopan kaplı ve fugalı (Lokman)
     if (sill > 0) piece(along[0], along[1], 0, sill, pm);
@@ -269,9 +284,10 @@ D.panels.forEach(p => {
     if (sill > 0) fr(a0, a1, sill, sill + f);
     fr(a0, a0 + f, sill, top); fr(a1 - f, a1, sill, top);
   }
-  const yapi = dvr ? [['Yapı', 'çelik karkas (alt ve üst başlık, dikmeler, pencere üstünde kafes başlık), iki yüzü betopan'], ['Kaynak', M.dvr_kaynak]]
+  const yapi = p.karkas ? [['Yapı', 'karkaslı kaplama duvar panosu: tek parça çelik karkas, iki yüzü betopan; içinde derz ve H yok, pencerenin üst ve alt panosu ve özel pencere karkası yok'], ['Kaynak', 'İş Emri, montaj paftasındaki yerinden (D-46)']]
+    : dvr ? [['Yapı', 'çelik karkas (alt ve üst başlık, dikmeler, pencere üstünde kafes başlık), iki yüzü betopan'], ['Kaynak', M.dvr_kaynak]]
     : op && op.kind === 'win' && PW[op.size].karkas ? [['Yapı', PW[op.size].tip === 'b180' ? '' : `alt pano ${op.s} cm + üst pano ${H - op.top} cm, özel pencere karkası (100'lük çektirme U'su + H)`]] : [];
-  add(s, g, p.order, { kod: p.card, ad: kart(p.card, p.ad), satir: [['Bu parça', `boy ${fmtc(p.boy)} cm · ${p.tur === 'STD' ? 'standart' : 'özel boy'}`], ['Oda', roomName(p.room)], ['Duvar', `${p.duvar === 'dis' ? 'dış' : 'iç'} · ${fmtc(p.t)} cm`], ...(op ? [['Açıklık', openTxt(op)]] : []), ...yapi, ...(disYuz >= 0 && D.fuga ? [['Cephe', D.fuga.metin]] : []), ...kartSat(p.card)] });
+  add(s, g, p.order, { kod: p.card, ad: kart(p.card, p.ad), satir: [['Bu parça', `boy ${fmtc(p.boy)} cm · ${p.tur === 'STD' ? 'standart' : 'özel boy'}`], ['Oda', roomName(p.room)], ['Duvar', `${p.duvar === 'dis' ? 'dış' : 'iç'} · ${fmtc(p.t)} cm`], ...(p.ops && p.ops.length > 1 ? p.ops.map(o => ['Açıklık', openTxt(o)]) : op ? [['Açıklık', openTxt(op)]] : []), ...yapi, ...(disYuz >= 0 && D.fuga ? [['Cephe', D.fuga.metin]] : []), ...kartSat(p.card)] });
 });
 D.hs.forEach(h => {
   const s = h.step, g = new THREE.Group(), dis = h.t > 8;
@@ -779,8 +795,8 @@ D.doors.forEach((d, i) => {
 {
   const MK = M.dis_kapi_kanat;
   let wo = 3;
-  D.panels.filter(p => p.op && (p.op.kind === 'win' || p.op.kind === 'door_ext')).forEach(p => {
-    const [x0, y0, x1, y1] = p.rect, op = p.op, g = new THREE.Group(), c = p.o === 'h' ? (y0 + y1) / 2 : (x0 + x1) / 2;
+  D.panels.flatMap(p => (p.ops || (p.op ? [p.op] : [])).map(op => [p, op])).filter(([p, op]) => op.kind === 'win' || op.kind === 'door_ext').forEach(([p, op]) => {   // D-46: karkaslı panoda her açıklık
+    const [x0, y0, x1, y1] = p.rect, g = new THREE.Group(), c = p.o === 'h' ? (y0 + y1) / 2 : (x0 + x1) / 2;
     const out = p.o === 'h' ? (c > D.dis[1] / 2 ? 1 : -1) : (c > D.dis[0] / 2 ? 1 : -1), ic = -out;   // ic: odanın içine doğru (plan)
     const kutu = (hedef, a0, a1, d0, d1, h0, h1, m, sh = true) => {
       const o = p.o === 'h' ? bp(a0, a1, d0, d1, h0, h1, m) : bp(d0, d1, a0, a1, h0, h1, m); o.castShadow = sh;

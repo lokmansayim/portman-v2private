@@ -31,9 +31,14 @@ def _ie(kod: str) -> dict:
 
 
 def _pencere(plan, olcu: str):
-    ps = [p for p in plan.panolar if p.acilim and p.acilim.tur == "pencere" and p.acilim.olcu == olcu]
+    """Pencerenin panosu ve kendisi; karkaslı kaplama panosunda (D-46) açıklık panonun açıklıklarından biri."""
+    ps = [(p, a) for p in plan.panolar for a in p.aciklar if a.tur == "pencere" and a.olcu == olcu]
     assert len(ps) == 1, (olcu, len(ps))
-    return ps[0]
+    return ps[0][0]
+
+
+def _acik(p, olcu: str):
+    return next(a for a in p.aciklar if a.tur == "pencere" and a.olcu == olcu)
 
 
 # --------------------------------------------------------------------------- veri tabanı
@@ -99,8 +104,10 @@ def test_kural_kisaltmaz(olcu, esik, ust, pano):
 
 # --------------------------------------------------------------------------- Motor: kör ölçümün sürgülüleri
 
-@pytest.mark.parametrize("kod, olcu, pano_boy", [("AP11", "180x200", 2 * G.MOD), ("AP14", "180x200", 2 * G.MOD),
-                                                  ("AP26", "200x210", 2 * G.MOD), ("AP26", "280x210", 3 * G.MOD)])
+# D-46 (İE-28; Lokman, 4 Kasım 2026 04:35, "Paftadan, ev ev"): AP-14'ün 180/200'ü ve AP-26'nın iki sürgülüsü paftadaki karkaslı kaplama duvar
+# panosunda (242,75; kapıyla birlikte 428,58; 491,33); AP-11'in 251'i odanın ortasında karkaslı pano. Pencerenin eni yine kısaltılmadan
+@pytest.mark.parametrize("kod, olcu, pano_boy", [("AP11", "180x200", 2 * G.MOD), ("AP14", "180x200", 242.75),
+                                                  ("AP26", "200x210", 428.58), ("AP26", "280x210", 491.33)])
 def test_kor_surguluyu_paftadaki_olcusuyle(kod, olcu, pano_boy):
     ie = _ie(kod)
     a = [x for x in ie["acikliklar"] if x.get("olcu") == olcu]
@@ -108,9 +115,9 @@ def test_kor_surguluyu_paftadaki_olcusuyle(kod, olcu, pano_boy):
     assert not [x for x in ie["acikliklar"] if x.get("olcu") in ("180x180", "240x180", "200x180") and x.get("acilis") == "surgulu"]
     plan = G.kur(ie)
     p = _pencere(plan, olcu)
-    assert abs(p.boy - pano_boy) < 1e-6
+    assert p.boy == pytest.approx(pano_boy, abs=1e-6) and p.karkasli
     k = G.pencere_kurali(olcu)
-    g = p.gap()
+    g = p.bosluk_dortgeni(_acik(p, olcu))
     assert abs((g[2] - g[0] if p.duvar.yon == "x" else g[3] - g[1]) - k.en) < 1e-6
     assert not any("veri tabanında yok" in u for u in plan.uyarilar)
 

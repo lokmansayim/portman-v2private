@@ -333,22 +333,25 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
     for pr, (d, pp) in zip(HZ["panolar"], PL):
         x0, y0, x1, y1 = pr["rect"]
         o = "h" if pr["yon"] == "x" else "v"
-        op = None
-        for a in pr["acikliklar"]:
+        op, ops = None, []
+        for a, ac_ in zip(pr["acikliklar"], pp.aciklar):        # D-46: karkaslı panoda birden çok açıklık (IFC'deki sırayla)
             A = HZ["acikliklar"][a["aciklik"]]
             if A["tur"] == "pencere":
                 op = {"kind": "win", "size": A["olcu"].replace("x", "/"), "a0": A["a0"], "a1": A["a1"], "s": A["z0"], "top": A["z1"]}
             elif A["alt_tur"] == "dis_kapi":
                 op = {"kind": "door_ext", "a0": A["a0"], "a1": A["a1"], "s": 0, "top": A["z1"],
-                      "mentese": "sol" if G.mentese_ucu(pp.acilim) == 0 else "sag"}
+                      "mentese": "sol" if G.mentese_ucu(ac_) == 0 else "sag"}
             else:
                 op = {"kind": "door", "a0": A["a0"], "a1": A["a1"], "s": 0, "top": A["z1"]}
+            ops.append(op)
         cx, cy = (x0 + x1) / 2, (y0 + y1) / 2
         probes = [(cx, y0 - 25), (cx, y1 + 25)] if o == "h" else [(x0 - 25, cy), (x1 + 25, cy)]
         oda = oda_sec(probes)
         k = {"id": f"P{pr['id']}", "rect": [_r(v) for v in pr["rect"]], "o": o, "t": _r(pr["kalinlik"]), "duvar": pr["tur"],
              "tur": "STD" if abs(pr["boy"] - 125.5) < 0.01 else "OZEL", "boy": _r(pr["boy"]), "card": KK.get(pr["kod"]),
              "ad": None if KK.get(pr["kod"]) else pr["kalem"], "op": op, "room": KIM[oda], "step": ADIM_ODA[oda]}
+        if pp.karkasli:                                          # D-46: karkaslı kaplama duvar panosu (sahnede çelik karkaslı duvar gibi)
+            k.update({"op": ops[0] if ops else None, "ops": ops, "karkas": True})
         panels.append(k)
         oge[oda].append(((cx, cy), 1, k))
 
@@ -1119,10 +1122,11 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
     h_oda = defaultdict(lambda: defaultdict(int))
     for p in panels:
         h_oda[p["room"]]["pdis" if p["duvar"] == "dis" else "pic"] += 1
-        if p["op"] and p["op"]["kind"] == "win":
-            h_oda[p["room"]]["pen"] += 1
-        if p["op"] and p["op"]["kind"] in ("door", "door_ext"):
-            h_oda[p["room"]]["kap"] += 1
+        for op in p.get("ops") or ([p["op"]] if p["op"] else []):
+            if op["kind"] == "win":
+                h_oda[p["room"]]["pen"] += 1
+            if op["kind"] in ("door", "door_ext"):
+                h_oda[p["room"]]["kap"] += 1
     for h in hs:
         h_oda[h["room"]]["h"] += 1
         if h["stub"]:

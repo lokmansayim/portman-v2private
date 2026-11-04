@@ -57,7 +57,7 @@ ISARET_YOLU = KOK / "kurallar" / "liste" / "prefabrik_isaret.json"
 TEK_KAYNAK = "Tek kaynak (zayıf)"
 ISARETLI = ("pencere_u_h_gecen", "omega_kapak")   # satırı `zayif(...)` ile yazılan kurallar (BK-12 PR-2c)
 
-SURUM = "1.10 (3 Kasım 2026; İE-27, Lokman 3 Kasım 09:52 (D-45): 3'lü H dış duvarda da (iç duvarın T'si pano ekleminde); çektirme U'su 60 yerinden (eklemsiz T, dış köşe, serbest uç); köşe direği tipsiz (özel köşe 100'lük köşeye katılır); mahya bandı mahya boyundan; temiz su ıslak hacim başına; trapez vida 5,5 × 25 aşık ve omegadan; 1.9, 30 Ekim: K5b TK-01 kıyası (CIO onayı 30 Ekim 14:20): aşık sırası beşikte karar C (Lokman 24 Ekim); baş makas betopanı ve Z'si taşan verandanın kirişli kalkanında da (D-32 madde 2); 1.8, 30 Ekim: asma dizme tavanda da 100'lük iç duvarın üstü 100'lük duvar omegası, ayrı satır yok (Lokman 30 Ekim 07:04, D-32 ek); 1.7, 29 Ekim: baş makas omegası saçak ucundan saçak ucuna, taşan verandanın dış kirişindeki dahil (Lokman 29 Ekim 13:12, D-32); 1.6, 28 Ekim: vitrifiye banyo başına (İE-13 PR-2; Lokman onayı 28 Ekim, PR-3); nişin ağzındaki kiriş (BK-14 ek); taşan verandanın dış kirişi kolonun dış yüzünden dış yüzüne (Lokman, kart 28 Ekim); 1.5, 22 Ekim: kör test üreteci 7.3, kurallar kural kitabında; orta iniş 9 m, kitapla farklı on yedi kalemde kitap; PK-07 hedef örnek; T76 cevapları; 100'lük duvar omegası kirişlerin de üstünde; elektrik oda kuralı)"
+SURUM = "1.11 (4 Kasım 2026; İE-28, Lokman 4 Kasım 04:35 (D-46): karkaslı kaplama duvar panosu İş Emri'nden (paftadaki tek parça pano), içindeki pencereye üst ve alt panel ile özel pencere karkası yok; 1.10, 3 Kasım 2026; İE-27, Lokman 3 Kasım 09:52 (D-45): 3'lü H dış duvarda da (iç duvarın T'si pano ekleminde); çektirme U'su 60 yerinden (eklemsiz T, dış köşe, serbest uç); köşe direği tipsiz (özel köşe 100'lük köşeye katılır); mahya bandı mahya boyundan; temiz su ıslak hacim başına; trapez vida 5,5 × 25 aşık ve omegadan; 1.9, 30 Ekim: K5b TK-01 kıyası (CIO onayı 30 Ekim 14:20): aşık sırası beşikte karar C (Lokman 24 Ekim); baş makas betopanı ve Z'si taşan verandanın kirişli kalkanında da (D-32 madde 2); 1.8, 30 Ekim: asma dizme tavanda da 100'lük iç duvarın üstü 100'lük duvar omegası, ayrı satır yok (Lokman 30 Ekim 07:04, D-32 ek); 1.7, 29 Ekim: baş makas omegası saçak ucundan saçak ucuna, taşan verandanın dış kirişindeki dahil (Lokman 29 Ekim 13:12, D-32); 1.6, 28 Ekim: vitrifiye banyo başına (İE-13 PR-2; Lokman onayı 28 Ekim, PR-3); nişin ağzındaki kiriş (BK-14 ek); taşan verandanın dış kirişi kolonun dış yüzünden dış yüzüne (Lokman, kart 28 Ekim); 1.5, 22 Ekim: kör test üreteci 7.3, kurallar kural kitabında; orta iniş 9 m, kitapla farklı on yedi kalemde kitap; PK-07 hedef örnek; T76 cevapları; 100'lük duvar omegası kirişlerin de üstünde; elektrik oda kuralı)"
 GRUPLAR = {"1001": "Panel", "1002": "Metal aksam", "1003": "Kapı ve pencere", "1004": "Tavan", "1005": "Makas", "1006": "Çatı",
            "1007": "Elektrik", "1008": "Vida", "1009": "Depo", "1010": "Sıhhi tesisat", "1011": "Dere", "1012": "Boya"}
 TAVAN = lambda x: int(math.ceil(x - 1e-9))
@@ -224,12 +224,13 @@ def model_motor(ie: dict) -> dict:
                 t_uclari.setdefault(o.id, []).append(d.c)
             else:
                 cektirme["t_orta"] += 1
+    ac_ = lambda a: {"tur": a.tur, "olcu": a.olcu, "genislik": a.genislik, "mentese": a.mentese, "dograma": a.dograma}
     for d in plan.duvarlar:
         for p in d.panolar:
             a = p.acilim
-            panolar.append({"duvar": d.tur, "kal_mm": round(2 * d.h * 10), "boy": p.boy,
-                            "aciklik": None if a is None else {"tur": a.tur, "olcu": a.olcu, "genislik": a.genislik, "mentese": a.mentese,
-                                                                "dograma": a.dograma}})
+            panolar.append({"duvar": d.tur, "kal_mm": round(2 * d.h * 10), "boy": p.boy, "aciklik": None if a is None else ac_(a)})
+            if p.karkasli:                                      # D-46: karkaslı kaplama duvar panosu ve içindeki bütün açıklıklar
+                panolar[-1].update({"karkasli": True, "aciklar": [ac_(x) for x in p.aciklar]})
         for a_, _b in zip(d.panolar, d.panolar[1:]):
             x, yy = (a_.a1, d.c) if d.yon == "x" else (d.c, a_.a1)
             uclu = any(abs(h.x - x) <= d.h + 3.5 and abs(h.y - yy) <= d.h + 3.5 for h in plan.h_baglantilar)
@@ -326,10 +327,10 @@ def model_motor(ie: dict) -> dict:
         serit = _serit_catilari(plan, ie)                      # (çatı parçaları, çatı tanımı)
     # kitap `kablo_en_uzak_mesafe`: sigorta kutusu (yeri İş Emri'nde yok) giriş kapısında; kapının ortasından kapalı kısmın en uzak köşesine kuş uçuşu
     kose = [q for g_ in getattr(fp, "geoms", [fp]) for q in g_.exterior.coords]
-    giris = next(((d, p) for d in plan.duvarlar if d.tur == "dis" for p in d.panolar if p.acilim and p.acilim.tur == "dis_kapi"), None)
-    if giris:
-        d, p = giris
-        orta = (p.a0 + p.a1) / 2 + p.acilim.kayma
+    giris = next(((d, p, a) for d in plan.duvarlar if d.tur == "dis" for p in d.panolar for a in p.aciklar if a.tur == "dis_kapi"), None)
+    if giris:                                                   # karkaslı panoda kapı ötekiyle birlikte (D-46): kayma pano ortasına göre
+        d, p, a = giris
+        orta = (p.a0 + p.a1) / 2 + a.kayma
         kutu = (orta, d.c) if d.yon == "x" else (d.c, orta)
         en_uzak = {"m": max(math.hypot(qx - kutu[0], qy - kutu[1]) for qx, qy in kose) / 100, "nereden": "giriş kapısından kapalı kısmın en uzak köşesi"}
     else:
@@ -783,6 +784,7 @@ def liste(N: dict, kurallar: dict | None = None, pafta: dict | None = None) -> d
     ASMA_OMEGA_ARALIK_M, TERS_OMEGA_ARALIK_M = r("tavan_omegasi_aralik_m.asma"), _ortak(k, "tavan_omegasi_aralik_m")   # ters: kitabın 0,60
     TAVAN_H_ARALIK_M = r("tavan_h_aralik_m")
     ps_ = r("pencere_sinifi")
+    kkp = r("karkasli_kaplama_panosu")                          # D-46: karkaslı kaplama duvar panosunun satırı ve içindeki pencere
     kucuk = _kucuk
     oz = {kucuk(kk): kucuk(v) for kk, v in (N.get("ozellikler") or {}).items()}
     alici = [kucuk(x) for x in ((N.get("alici_ait") or {}).get("kalemler") or [])]
@@ -827,12 +829,18 @@ def liste(N: dict, kurallar: dict | None = None, pafta: dict | None = None) -> d
             if g == grup:
                 ekle(g, kalem, olcu, n * len(kubbeler), "Kural (Lokman 13.10, R6)", f"kubbe başına {n} × {len(kubbeler)} kubbe",
                      "E2 − E3 (inceleme setinin kubbeli ve kubbesiz iki projesi); PK-08 aynı takım, makas ve membransız")
-    acl = [p["aciklik"] for p in N["panolar"] if p["aciklik"]]
+    # D-46: karkaslı kaplama duvar panosunun içindeki açıklıklar da kapı ve pencere sayılır (`aciklar`); üst ve alt panel, özel pencere
+    # karkası ve 100'lük pencere U'su yazılmaz (karkas panonun kendisinde)
+    acl = [a for p in N["panolar"] for a in (p.get("aciklar") if p.get("karkasli") else [p["aciklik"]] if p["aciklik"] else [])]
+    karkas_ici = {id(a) for p in N["panolar"] if p.get("karkasli") for a in p["aciklar"]}
+    if kkp["ic_pencereye_ust_alt_panel"] or kkp["ic_pencereye_ozel_karkas"]:
+        raise ValueError("karkasli_kaplama_panosu: içindeki pencereye üst/alt panel ya da özel karkas yazan kural bu üreteçte yok (D-46)")
     pen = [a for a in acl if a["tur"] == "pencere"]
     vasistas = lambda a: pencere_olcusu(a["olcu"])[0] <= ps_["vasistas_en_cm"] and pencere_olcusu(a["olcu"])[1] <= ps_["vasistas_boy_cm"]   # 7.1
     standart = lambda a: pencere_olcusu(a["olcu"])[0] == ps_["standart_en_cm"]                  # 7.1: 120 genişlikte her pencere üst + alt panel (H7)
     cift = {id(a) for a in pen if not standart(a) and not vasistas(a)}                               # L1: karkaslı özel pencere panosu
-    pen_k = [a for a in pen if not vasistas(a) and id(a) not in cift]   # ayrı karkaslı pencereler (vasistas ve iki modüllük hariç)
+    pen_k = [a for a in pen if not vasistas(a) and id(a) not in cift and id(a) not in karkas_ici]   # ayrı karkaslı pencereler (vasistas,
+    # iki modüllük ve karkaslı kaplama panosundakiler hariç)
 
     # ── 1001 Panel ──────────────────────────────────────────────────────────
     fugali = "fugalı" in oz.get("açıklama", "") or "fugali" in oz.get("açıklama", "")
@@ -843,7 +851,11 @@ def liste(N: dict, kurallar: dict | None = None, pafta: dict | None = None) -> d
         kal = kalinlik_adi(kal_mm)                              # 6.1: iç duvar 100 mm olabilir (PK-07 özellik tablosu)
         fg = " (FUGALI)" if (fugali and p["duvar"] == "dis") else ""   # O1: fugalı dış cephede dış panolar ayrı satır (PK-07)
         L = siparis(p["boy"], R); a = p["aciklik"]
-        if a is None:
+        if p.get("karkasli"):                                   # D-46 (İE-28): paftadaki tek parça pano; içindeki açıklıklar kaynakta
+            ic_ = ", ".join(x["olcu"].replace("x", "/") if x["tur"] == "pencere" else f"kapı {x['olcu']}" for x in p["aciklar"]) or "açıklıksız"
+            sayac[(f"{kkp['kalem']}{fg}", f"{kal_mm} × {L} × {mm(H0)}", "İş Emri (D-46)",
+                   f"paftadaki tek parça pano; içinde {ic_}")] += 1
+        elif a is None:
             sayac[(f"{kal} yapıştırma dolu pano{fg}", f"{kal_mm} × {L} × {mm(H0)}", "Sayım", "sipariş boyu (PK-01 dersi 2)")] += 1
         elif a["tur"] == "pencere":
             en, boy = pencere_olcusu(a["olcu"])

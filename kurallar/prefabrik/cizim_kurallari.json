@@ -726,6 +726,47 @@
     "testler/motor/test_veranda.py::test_kose_kolonu",
     "testler/paket/test_ie24_rehber.py::test_kose_balkonu"
    ]
+  },
+  {
+   "kod": "PC-31",
+   "baslik": "Karkaslı kaplama duvar panosu paftadan; geniş pencere oda ortasında",
+   "kural": "Paftada pencereli dış duvarın bir parçası tek parça karkaslı kaplama duvar panosuysa (188–491 cm; içinde bir ya da birden çok pencere ve dış kapı) İş Emri `yapi.dizilim.karkasli_panolar` satırıyla yazar: duvarın yönü ve ekseni (`yon`, `eksen_cm`; Motor çerçevesinde, `dis_pano_dayanagi` gibi) ve aralık (`aralik_cm`); isteğe bağlı `aciklik_ortasi_cm` her açıklığın paftadaki ortası (null: Motor'un yeri). Aralığa düşen panolar tek panoya birleşir; içinde derz ve H yok, iç duvarın T'si olabilir (listede çektirme U'su). Aralığın dışında kalan parça ayrı pano; 20 cm'den kısaysa açıklıksız komşusuyla tek parça. Çizimde tek blok (kat planı, net alan, saha montaj; standart dışı pano ölçüsüyle), görünüşte içinde derz yok; listede \"Karkaslı kaplama duvar panosu\", içindeki pencereye üst ve alt panel ve özel pencere karkası yazılmaz. `yapi.dizilim.genis_pencere: oda_ortasi`: panodan geniş pencerenin panosu odanın duvar parçasının ortasında, iki yanı en çok 125,5 (AP-11: 62,75 + 251 + 62,75). Anahtarsız İş Emri'nde hiçbir şey değişmez. Duvar yok, aralık duvarın dışında, aralıkta üçlü H ya da dış duvar birleşimi, açıklık aralığın ucuna pano payından yakın, iç kapı, iki satır çakışıyor ya da kısa artığın komşusu yok veya açıklıklıysa hata.",
+   "karar": "D-46",
+   "madde": 1,
+   "lokman": {
+    "tarih": "2026-11-04",
+    "saat": "04:35",
+    "soz": "Paftadan, ev ev (kart: \"Karkaslı panoyu Motor'a paftadan mı ekleyelim, kendi kuralıyla mı?\"; sonuç: \"Panonun yeri İş Emri'ne paftadan yazılır; TK-01, TK-02 ve bugünkü çizimler değişmez, ön onay kurallarına yalnız yeni satır eklenir.\")"
+   },
+   "kod_yeri": [
+    "motor/geometry.py::_karkasli_panolar",
+    "motor/geometry.py::_karkasli_satirlari",
+    "motor/geometry.py::_genis_pencere_oda_ortasi",
+    "motor/geometry.py::KARKAS_ARTIK_CM",
+    "motor/dxf_out.py::Cizici.karkas_blok"
+   ],
+   "sabitler": [
+    {
+     "yer": "motor/geometry.py::KARKAS_ARTIK_CM",
+     "deger": 20.0
+    },
+    {
+     "yer": "motor/geometry.py::KARKAS_ACIKLIK_TURLERI",
+     "deger": [
+      "pencere",
+      "dis_kapi"
+     ]
+    }
+   ],
+   "test": [
+    "testler/motor/test_ie28_karkasli_pano.py::test_ap14_dort_karkasli_pano",
+    "testler/motor/test_ie28_karkasli_pano.py::test_ap26_kapi_ve_pencere_tek_panoda",
+    "testler/motor/test_ie28_karkasli_pano.py::test_ap11_oda_ortasi_genis_pencere",
+    "testler/motor/test_ie28_karkasli_pano.py::test_satir_hatalari",
+    "testler/motor/test_ie28_karkasli_pano.py::test_anahtarsiz_is_emrinde_karkasli_pano_yok",
+    "testler/motor/test_ie28_karkasli_pano.py::test_cizim_dogrulamadan_gecer",
+    "testler/motor/test_ie28_karkasli_pano.py::test_liste_satiri_ve_ic_pencere"
+   ]
   }
  ]
 }

@@ -27,6 +27,15 @@
    "durum": "pafta",
    "kaynak": "L1 ve 7.1: en ve boyu 60'ı geçmeyen vasistas; 120 genişlikteki her pencere üst + alt panelle; ötekiler karkaslı özel pencere panosu (PK-03 160/180, PK-05 80/120, PK-08 59/170)."
   },
+  "karkasli_kaplama_panosu": {
+   "deger": {
+    "kalem": "Karkaslı kaplama duvar panosu",
+    "ic_pencereye_ust_alt_panel": false,
+    "ic_pencereye_ozel_karkas": false
+   },
+   "durum": "lokman",
+   "kaynak": "D-46 (İE-28; Lokman, 4 Kasım 2026 04:35, kart \"Paftadan, ev ev\"): paftadaki tek parça karkaslı kaplama duvar panosu (188–491 cm) İş Emri'nin `dizilim.karkasli_panolar` satırından; listede tek satır, boyu panonun sipariş boyu. İçindeki pencereye üst ve alt panel, özel pencere karkası ve 100'lük pencere U'su yazılmaz (karkas panonun kendisinde); pencere ve kapı kendi kalemlerinde. Gerçek listelerde: AP-14 dört, AP-25 bir, AP-26 iki, AP-11 iki, AP-18 iki."
+  },
   "siparis_boyu": {
    "deger": {
     "kesinti_mm": 2.5,

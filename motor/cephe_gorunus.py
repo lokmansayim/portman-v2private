@@ -84,11 +84,10 @@ def cephe(plan: G.Plan, taraf: str) -> dict:
             us.add(uu(d.c - d.h)); us.add(uu(d.c + d.h))
     ac = []
     for d in duvarlar:
-        for p in d.panolar:
-            a = p.acilim
-            if not a or a.tur not in ("pencere", "dis_kapi"):
+        for p, a in ((p, a) for p in d.panolar for a in p.aciklar):     # D-46: karkaslı panoda birden çok açıklık
+            if a.tur not in ("pencere", "dis_kapi"):
                 continue
-            g = p.gap()
+            g = p.bosluk_dortgeni(a)
             u0, u1 = sorted((uu(g[0]), uu(g[2])) if yon == "x" else (uu(g[1]), uu(g[3])))
             ust = G.PENCERE_UST_KOTU_CM
             if a.tur == "pencere":                                      # İE-27 madde 11: 200'ü geçen pencere döşemeden, üstü boyu kadar

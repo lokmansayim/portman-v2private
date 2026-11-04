@@ -26,7 +26,11 @@
       "kapi": "mantik",
       "kose": "oda",
       "son_pano": "kosu",
-      "kapi_yeri": "ortada"
+      "kapi_yeri": "ortada",
+      "karkasli_panolar": [
+        {"yon": "x", "eksen_cm": 1314.02, "aralik_cm": [193.25, 684.58], "aciklik_ortasi_cm": [449.9]},
+        {"yon": "x", "eksen_cm": 5, "aralik_cm": [256, 684.58], "aciklik_ortasi_cm": [null, 525.3]}
+      ]
     },
     "ek_akslar_cm": {"x": [], "y": []}
   },
@@ -78,7 +82,8 @@
     "Ön ve arka zemin terası gövdeden taşan veranda (verandalar): önde sağda 479,58 × 110, arkada sağda 438,58 × 110; üstleri tek eğim (paftada P1, P2: trapez 150'lik); eğim paftada yazılı değil, ana çatınınki alındı.",
     "Pencereler ve kapılar paftadaki yerine en yakın Motor panosunda (pano dizini). Paftadaki 280×210 ve 200/210 sürgülüler ölçüsüyle (İE-27 madde 11, kısaltma yok; 3 Kasım 2026'ya kadar Motor'un sınırıyla 240x180 ve 200x180 yazılıydı): döşemeden; 280'lik üç panoluk (376,5), 200'lük iki panoluk. Arka terastan yatak odası 1'e açılan kapı dış kapı sayıldı. Kapı genişlikleri paftada yazılı değil: dış kapı 90, iç kapı 82 (Motor'un ölçüsü).",
     "Oda adları ve alanları paftanın planından (yatak odaları 13,76 / 14,72, banyo 5,6, ebeveyn banyosu 4,23, mutfak 13,37, salon 19,37, antre 13,80 m²).",
-    "Çatı: beşik, makas y'yi geçer, eğim 10,4° (%18,36; paftada yazılı), saçak 30 (aşık boyu ve 700'lük trapez), topuk 10. Özellikler paftanın özellik tablosundan ve açıklamasından."
+    "Çatı: beşik, makas y'yi geçer, eğim 10,4° (%18,36; paftada yazılı), saçak 30 (aşık boyu ve 700'lük trapez), topuk 10. Özellikler paftanın özellik tablosundan ve açıklamasından.",
+    "Karkaslı kaplama duvar panoları paftadan (İE-28, D-46): ön duvar 125,5 (kapı) + 62,75 + 491,33 (280/210, ortası paftada 449,9; köşeye kadar); arka duvar 125,5 + 125,5 + 428,58 (dış kapı yerinde + 200/210, ortası 525,3; köşeye kadar, 381,5'teki bölmenin T'si panonun ortasında). Paftada 491,6 ve 428,8; gerçek liste çelik karkaslı pano 491,4 ve 428,6."
   ],
   "eksikler": [],
   "verandalar": [{"ad": "ÖN TERAS", "cephe": "on", "bas_cm": 210, "bit_cm": 689.58, "derinlik_cm": 110, "cati": {"tip": "tek_yon", "egim_yuzde": 18.36}}, {"ad": "ARKA TERAS", "cephe": "arka", "bas_cm": 251, "bit_cm": 689.58, "derinlik_cm": 110, "cati": {"tip": "tek_yon", "egim_yuzde": 18.36}}]

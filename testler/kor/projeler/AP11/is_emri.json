@@ -27,7 +27,12 @@
       "kose": "oda",
       "son_pano": "son_aks",
       "kapi_yeri": "ortada",
-      "dis_pano_dayanagi": [{"y": 716, "aralik_cm": [512, 716]}]
+      "dis_pano_dayanagi": [{"y": 716, "aralik_cm": [512, 716]}],
+      "genis_pencere": "oda_ortasi",
+      "karkasli_panolar": [
+        {"yon": "x", "eksen_cm": 517, "aralik_cm": [67.75, 318.75]},
+        {"yon": "y", "eksen_cm": 632.5, "aralik_cm": [522, 716]}
+      ]
     },
     "ek_akslar_cm": {"x": [], "y": [517, 452.25]}
   },
@@ -78,7 +83,8 @@
     "Veranda sol önde, gömme (627,5 × 204), ön ve sol açık; sol ön köşede 10 × 10 dikme (paftada D tipi kutu profil, önde E tipi kiriş). Verandanın arka duvarı (Motor çerçevesinde y 517) ve yatak odası 2'nin ön duvarı (y 452,25) ek aks.",
     "Pencereler: salonun sol penceresi odanın ortasında (dizilim.pencere: oda_ortasi; paftada 62,75 + 125,5 + 62,75); ötekiler paftadaki yerine en yakın Motor panosunda (pano dizini). 180/200 sürgülü paftadaki ölçüsüyle (İE-27 madde 11, kısaltma yok; 3 Kasım 2026'ya kadar Motor'un 180 sınırıyla 180x180 yazılıydı): döşemeden, paftada odaya ortalı 251'lik pano ve iki yanında 62,75 (Motor'da ızgaradaki iki pano; Motor'un geniş pencere kuralı odaya ortalamaz, paftayla kalan fark). Verandaya bakan yatak odası 3 duvarı paftada tek parça 194'lük karkaslı pano (120/180 ortada); Motor'da 125,5'lik pencereli pano + 68,5 (kalan fark). Sağ duvarın önü paftada 78,5 + 125,5; Motor'da dayanak aynı aralıkta iki duvara düştüğü için 125,5 + 78,5 (kalan fark). 120/180 çift açılır: Motor'da açılış yazılmaz (yalnız sürgülü), ölçü aynı.",
     "Kapılar paftadaki duvarda ve panoda; koridordan yatak odası 1, banyo ve yatak odası 2'ye açılan kapılar paftadaki gibi duvarın kavşak ucunda (duvar_ucu); verandaya bakan yatak odası 3 duvarının panoları ön dış yüzün aksından (dis_pano_dayanagi, pencere 125,5'lik panoda); genişlikler paftada yazılı değil: dış kapı 90, iç kapı 82 (Motor'un ölçüsü). Oda adları ve alanları paftanın elektrik planından (salon + mutfak 18,49, yatak odaları 9,56 / 11,75 / 13,68, banyo 5,66, hol 7,53 m²).",
-    "Çatı: beşik, makas y'yi geçer; paftada eğim ve saçak yazılı değil: eğim 18,2° (%32,88, prefabrik evlerin eğimi), saçak 30 (paftanın çatı alanı 101 m² ve 3 × 410'luk aşık sırası 1226 = 1166 + 2 × 30 ile), topuk 10. Kaplama paftanın kaplama sayfasından: OSB + nem bariyeri + trapez."
+    "Çatı: beşik, makas y'yi geçer; paftada eğim ve saçak yazılı değil: eğim 18,2° (%32,88, prefabrik evlerin eğimi), saçak 30 (paftanın çatı alanı 101 m² ve 3 × 410'luk aşık sırası 1226 = 1166 + 2 × 30 ile), topuk 10. Kaplama paftanın kaplama sayfasından: OSB + nem bariyeri + trapez.",
+    "Karkaslı kaplama duvar panoları paftadan (İE-28, D-46): 180/200 odaya ortalı 62,75 + 251 + 62,75 (`dizilim.genis_pencere: oda_ortasi`), 251'lik pano karkaslı; yatak odası 3'ün verandaya bakan duvarı tek parça 194 (120/180). Paftanın bu evdeki renkleri pano pano okunmadı (İE-27 PR-3 okuması ve gerçek liste: karkaslı kaplamalı pano 251 ve 194); pencereler Motor'un yerinde."
   ],
   "eksikler": []
 }

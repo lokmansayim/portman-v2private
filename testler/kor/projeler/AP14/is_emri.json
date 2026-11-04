@@ -27,7 +27,13 @@
       "kose": "oda",
       "son_pano": "kosu",
       "kapi_yeri": "ortada",
-      "dis_pano_dayanagi": [{"x": 312.5, "aralik_cm": [312.5, 743.67]}]
+      "dis_pano_dayanagi": [{"x": 312.5, "aralik_cm": [312.5, 743.67]}],
+      "karkasli_panolar": [
+        {"yon": "x", "eksen_cm": 816, "aralik_cm": [67.75, 256], "aciklik_ortasi_cm": [158.9]},
+        {"yon": "x", "eksen_cm": 5, "aralik_cm": [5, 256]},
+        {"yon": "x", "eksen_cm": 5, "aralik_cm": [507, 743.67]},
+        {"yon": "x", "eksen_cm": 622, "aralik_cm": [438, 680.75], "aciklik_ortasi_cm": [559.5]}
+      ]
     },
     "ek_akslar_cm": {"x": [312.5], "y": [622]}
   },
@@ -77,7 +83,8 @@
     "Pencereler: yatak odası 1'in arka penceresi odanın ortasında (dizilim.pencere: oda_ortasi; paftada 251'lik panonun ortası); ötekiler paftadaki yerine en yakın Motor panosunda (pano dizini). Motor'un ızgarasıyla bilinen farklar: ön pencere 38 cm, banyo vasistası 58 cm, verandaya bakan 120/180 24 cm kayık; arka duvarda Motor 8 pano, pafta 4 (pafta pencereli 251 ve 236,67'lik özel pano kullanıyor).",
     "180/200 sürgülü pencere paftadaki ölçüsüyle (İE-27 madde 11, kısaltma yok; 3 Kasım 2026'ya kadar Motor'un 180 sınırıyla 180x180 yazılıydı): döşemeden, iki panoluk (paftada 242,75'lik pano).",
     "Kapılar paftadaki duvarda ve panoda; genişlikler paftada yazılı değil: dış kapı 90, iç kapı 82 (Motor'un ölçüsü). Oda adları paftada yazılı değil, yerleşimden: salon + mutfak, banyo (60/40 vasistaslı), iki yatak odası, hol.",
-    "Çatı: beşik, makas y'yi geçer (MK01–MK07), eğim 18,2° (%32,88), saçak 30, topuk 10 (paftada mahya 154,83). Özellikler ve alıcıya ait kalemler paftanın özellik tablosundan ve açıklamasından."
+    "Çatı: beşik, makas y'yi geçer (MK01–MK07), eğim 18,2° (%32,88), saçak 30, topuk 10 (paftada mahya 154,83). Özellikler ve alıcıya ait kalemler paftanın özellik tablosundan ve açıklamasından.",
+    "Karkaslı kaplama duvar panoları paftadan (İE-28, D-46; `dizilim.karkasli_panolar`, Motor çerçevesinde): salonun ön duvarı 62,75 + 188,25 (120/180, ortası paftada 158,9) + 56,5; yatak odası 1'in arka duvarı 251 (120/120); yatak odası 2'nin arka duvarı 236,67 (120/120); verandanın arka duvarı kapılı pano + 242,75 (180/200, ortası 559,5) + 62,92 (paftada 62,75; aralığın dışında kalan 8,25 komşu 54,67'lik panoyla tek parça). Gerçek liste: dört karkaslı kaplama duvar panosu (187,75 · 242,25 · 236,17 · 250,5). Bilinen fark: arka duvarda 256–507 arası Motor'da 56,5 + 125,5 + 69 (dayanak aralığı), paftada 125,5 + 125,5."
   ],
   "eksikler": []
 }
