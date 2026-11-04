@@ -89,10 +89,10 @@ def test_beklenen_dosyalar(paketler):
                             "montaj_rehberi.html", "kiyas.xlsx"}
     assert var["TK-01"] == {"bilgi.md", "bayi_paftasi.pdf", "plan.png", "cizim.dxf", "montaj_paftasi.pdf", "yukleme_listesi_asma.xlsx",
                             "yukleme_listesi_ters.xlsx", "model.ifc", "montaj_rehberi.html"}
-    assert var["AP-13"] == {"bilgi.md", "bayi_paftasi.pdf", "plan.png", "cizim.dxf"}
+    assert var["AP-13"] == {"bilgi.md", "bayi_paftasi.pdf", "plan.png", "cizim.dxf", "yukleme_listesi.xlsx"}     # İE-29: çıkıntısız cumbada liste
     assert var["AP-02"] == {"bilgi.md"}
     d13 = s["AP-13"]["dosyalar"]
-    assert "İE-17 PR-1b" in d13["AP-13_yukleme_listesi.xlsx"] and "İE-15 K5" in d13["AP-13_model.ifc"]
+    assert "İE-15 K5" in d13["AP-13_model.ifc"]
     assert "dört görünüş (ön, arka, sol, sağ)" in d13["AP-13_gorunusler.pdf"]
     assert "kör" in d13["AP-13_kiyas.xlsx"]
     assert "adım 3" in s["AP-02"]["dosyalar"]["AP-02_bayi_paftasi.pdf"]

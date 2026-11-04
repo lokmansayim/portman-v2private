@@ -215,7 +215,7 @@
    "pencere_ic_duvar": "uygun",
    "engel": "cumba",
    "adim": "1a",
-   "is_emri": "testler/cizim/evler/AP13.json",
+   "is_emri": "testler/kor/projeler/AP13/is_emri.json",
    "kor_test": null,
    "tavan_secenekleri": null,
    "hakem": null
@@ -263,7 +263,7 @@
    "pencere_ic_duvar": "uygun",
    "engel": "cumba",
    "adim": "1a",
-   "is_emri": "testler/cizim/evler/AP16.json",
+   "is_emri": "testler/kor/projeler/AP16/is_emri.json",
    "kor_test": null,
    "tavan_secenekleri": null,
    "hakem": null

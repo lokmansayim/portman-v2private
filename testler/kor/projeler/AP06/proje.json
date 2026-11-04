@@ -1,0 +1,13 @@
+{
+ "kod": "AP-06",
+ "ap": "AP-06",
+ "kip": "motor",
+ "girdi": {
+  "is_emri": "testler/kor/projeler/AP06/is_emri.json"
+ },
+ "bizim_liste": "bizim_liste.json",
+ "liste_sha256": "8104f0298e6d80f6c639c9367a1e42cf35e248971179c1d0c03c38cfd7745691",
+ "sayfa": null,
+ "kapi": true,
+ "not": "İE-29 kör ölçümü: İş Emri montaj paftasından (varsayımları İş Emri'nde). Çıkıntısız çapraz cumba (İE-29'da liste yazılır)."
+}
