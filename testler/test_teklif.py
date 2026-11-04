@@ -64,20 +64,22 @@ def test_tk01_toplamlar(T):
     yeni satır "Trapez vida 5,5 × 25 (aşık ve omega)" 1050 adet defterde yok (fiyatsız 2 → 3; kaynağın fiyatı 3 TL, deftere fiyat defteri
     işinde girer): toplam +3.839 TL (asma 459.753,13, ters 458.482,13), satır 124 → 125 ve 122 → 123. Defter r07 (3 Kasım; 87 m² listesi
     satır 143, Patron'un verdiği listeden birebir): bu satır 3 TL, asmada 1050 adet (+3.150 TL), tersde 1200 adet (+3.600 TL; ters tavanın
-    omegası fazla): asma 462.903,13, ters 462.082,13, fiyatsız 3 → 2 (120 × 180 özel pencere karkası, çırpı ipi)."""
+    omegası fazla): asma 462.903,13, ters 462.082,13, fiyatsız 3 → 2 (120 × 180 özel pencere karkası, çırpı ipi). Aynı kalem tek satır
+    (Lokman 4 Kasım 05:01, TK-02 teklif PDF'i: "1710 2 kere alt alta yazdın, adet 2 yazsaydın"; `teklif.ayni_kalemi_topla`): kiriş L 1710
+    ve L 1200 ikişer satırdı, birer satır oldu (adet 2): satır 125 → 123 ve 123 → 121, fiyatlı 123 → 121 ve 121 → 119; toplam aynı."""
     assert T["kod"] == "TK-01" and T["is_emri_no"] == "PM-TK01-80M2" and T["revizyon"] == 5
     assert T["defter_surumu"] == "2026-11-03-r07" and not T["oneri_dahil"]
     ozet = {s["ad"]: s["fiyat"]["ozet"] for s in T["secenekler"]}
     assert list(ozet) == ["Asma tavan", "Ters tavan"]
     assert ozet["Asma tavan"]["toplam"] == 462903.13 and ozet["Ters tavan"]["toplam"] == 462082.13
-    assert (ozet["Asma tavan"]["satir"], ozet["Asma tavan"]["fiyatli"], len(ozet["Asma tavan"]["fiyatsiz"])) == (125, 123, 2)
-    assert (ozet["Ters tavan"]["satir"], ozet["Ters tavan"]["fiyatli"], len(ozet["Ters tavan"]["fiyatsiz"])) == (123, 121, 2)
+    assert (ozet["Asma tavan"]["satir"], ozet["Asma tavan"]["fiyatli"], len(ozet["Asma tavan"]["fiyatsiz"])) == (123, 121, 2)
+    assert (ozet["Ters tavan"]["satir"], ozet["Ters tavan"]["fiyatli"], len(ozet["Ters tavan"]["fiyatsiz"])) == (121, 119, 2)
     makas = [(x["kalem"], x["olcu"], x["adet"], x["birim_fiyat"], x["durum"]) for x in T["secenekler"][0]["fiyat"]["satirlar"] if "akas" in x["kalem"]
              and x["durum"].endswith("makas kuralı")]
     assert [m[:4] for m in makas] == [("Makas (baş) · ana çatı", "açıklık 8985", 2, 3110), ("Makas (orta) · ana çatı", "açıklık 8985", 6, 3110),
                                       ("Yavru makas · ön veranda çatısı", "L 4460", 3, 1447), ("Yavru makas · arka veranda çatısı", "L 3210", 2, 1042)]
-    kiris = [(x["olcu"], x["birim_fiyat"]) for x in T["secenekler"][0]["fiyat"]["satirlar"] if x["kalem"] == "Kutu profil (kiriş) 100 × 100"]
-    assert kiris == [("L 3860", 3217), ("L 1710", 1425), ("L 1710", 1425), ("L 2610", 2175), ("L 1200", 1000), ("L 1200", 1000)]
+    kiris = [(x["olcu"], x["adet"], x["birim_fiyat"], x["tutar"]) for x in T["secenekler"][0]["fiyat"]["satirlar"] if x["kalem"] == "Kutu profil (kiriş) 100 × 100"]
+    assert kiris == [("L 3860", 1, 3217, 3217), ("L 1710", 2, 1425, 2850), ("L 2610", 1, 2175, 2175), ("L 1200", 2, 1000, 2000)]
     roleler = [x["birim_fiyat"] for x in T["secenekler"][0]["fiyat"]["satirlar"] if x["kalem"] == "Kaçak akım rölesi (ikili)"]
     assert roleler == [2000] and not any("oneri_fiyat" in f for f in ozet["Asma tavan"]["fiyatsiz"])
     assert ozet["Asma tavan"]["oneri_bekleyen"] == ozet["Ters tavan"]["oneri_bekleyen"] == {"satir": 0, "tutar": 0.0}
@@ -92,12 +94,26 @@ def test_tk01_toplamlar(T):
         assert s["fiyat"]["ozet"]["toplam"] == round(top, 2)
 
 
+def _topla(satirlar):
+    """Motor'un satırları, aynı (grup, kalem, ölçü, birim) adetli satırlar ilk göründüğü yerde toplanmış: (kalem, ölçü, adet)."""
+    sira, adet = [], {}
+    for x in satirlar:
+        k = (x["grup"], x["kalem"], x["olcu"], x["birim"]) if isinstance(x["adet"], (int, float)) and x.get("kg") is None else id(x)
+        if k not in adet:
+            sira.append((k, x)); adet[k] = 0
+        adet[k] = (adet[k] + x["adet"]) if isinstance(x["adet"], (int, float)) else x["adet"]
+    return [(x["kalem"], x["olcu"], adet[k]) for k, x in sira]
+
+
 def test_liste_ortak_giristen(T):
-    """Teklifin listesi paket üreteciyle ortak girişin (`is_emrinden`) listesiyle satır satır aynı; seçenek yalnız tavanı değiştirir."""
+    """Teklifin listesi paket üreteciyle ortak girişin (`is_emrinden`) listesi; aynı kalem ve ölçüdeki satırlar tek satır, adet toplam
+    (Lokman 4 Kasım 05:01). Motor'un listesi değişmez (kirişler ayrı satır). Seçenek yalnız tavanı değiştirir."""
     ie = _oku(IE)
     for s, tavan in zip(T["secenekler"], ("Asma", "Ters")):
         L = PL.is_emrinden(ie, ozellikler={"Tavan": tavan})
-        assert [(x["kalem"], x["olcu"], x["adet"]) for x in L["satirlar"]] == [(x["kalem"], x["olcu"], x["adet"]) for x in s["fiyat"]["satirlar"]]
+        assert _topla(L["satirlar"]) == [(x["kalem"], x["olcu"], x["adet"]) for x in s["fiyat"]["satirlar"]]
+        assert len(L["satirlar"]) == len(s["fiyat"]["satirlar"]) + 2                    # kiriş L 1710 ve L 1200 Motor'da ikişer satır
+        assert sum(1 for x in L["satirlar"] if (x["kalem"], x["olcu"]) == ("Kutu profil (kiriş) 100 × 100", "L 1710")) == 2
         assert s["liste"]["ozet"] == L["ozet"] and s["liste"]["girdi_ozeti"] == L["girdi_ozeti"] and L["girdi_ozeti"]["tavan"] == tavan.lower()
 
 
@@ -292,3 +308,19 @@ def test_fiyatla_excel_ayni_yazici(tmp_path):
     assert F.main([str(tmp_path / "l.json"), "--excel", str(tmp_path / "f.xlsx")]) == 0
     rows = list(load_workbook(tmp_path / "f.xlsx").active.iter_rows(values_only=True))
     assert ("PANEL", *SUTUN, "Durum", "Kaynak") in [tuple(r[:9]) for r in rows]
+
+
+def test_ayni_kalem_tek_satir():
+    """`ayni_kalemi_topla` (Lokman 4 Kasım 05:01): aynı grup, kalem, ölçü ve birim tek satır, adet toplam, formüller birleşir; adedi olmayan
+    ya da kg'lı satır toplanmaz; ölçüsü ya da grubu farklı satır ayrı kalır; girdi değişmez."""
+    s = lambda kalem, olcu, adet, formul="", grup="1002", kg=None: {"grup": grup, "kalem": kalem, "olcu": olcu, "birim": "adet",  # noqa: E731
+                                                                     "adet": adet, "kg": kg, "formul": formul}
+    girdi = [s("Kiriş", "L 1710", 1, "sol"), s("Kiriş", "L 2610", 1, "dış"), s("Kiriş", "L 1710", 1, "sağ"), s("Kiriş", "L 1710", None, "yok"),
+             s("Kiriş", "L 1710", 1, "başka grup", grup="1003"), s("Makas", "L 3000", 2, kg=10.0), s("Makas", "L 3000", 2, kg=10.0)]
+    once = json.dumps(girdi, sort_keys=True)
+    sonuc = TK.ayni_kalemi_topla(girdi)
+    assert json.dumps(girdi, sort_keys=True) == once
+    assert [(x["kalem"], x["olcu"], x["adet"], x["grup"]) for x in sonuc] == [
+        ("Kiriş", "L 1710", 2, "1002"), ("Kiriş", "L 2610", 1, "1002"), ("Kiriş", "L 1710", None, "1002"), ("Kiriş", "L 1710", 1, "1003"),
+        ("Makas", "L 3000", 2, "1002"), ("Makas", "L 3000", 2, "1002")]
+    assert sonuc[0]["formul"] == "sol; sağ" and sonuc[0]["birlesen"] == 2 and "birlesen" not in sonuc[1]
