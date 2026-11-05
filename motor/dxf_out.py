@@ -1298,10 +1298,13 @@ def a4_bayi_sayfasi(doc, bolgeler: dict, cfg) -> bytes:
 
 
 def alan_yazisi(plan) -> str:
-    """D-31 madde 14 (Lokman, 29 Ekim 2026 13:13: "yukarıya m² ve kime ait olduğunu yaz"): antetteki alan. Brüt: kapalı gövdenin dış yüzleri
-    (niş ve veranda hariç; `sunum.bina_cizgisi`); net: kapalı odaların net alanları toplamı (açık mahal hariç; montaj rehberindeki m²)."""
-    from . import sunum
-    brut = sunum.bina_cizgisi(plan).area / 1e4
+    """D-31 madde 14 (Lokman, 29 Ekim 2026 13:13: "yukarıya m² ve kime ait olduğunu yaz"): antetteki alan. Brüt (D-49, Lokman 4 Kasım 2026
+    14:24: "bizde m² bürüt üzerinden verilir ve buna veranda dahildir çünkü çatı kapattığı için"): çatının örttüğü oturum, dış duvarların dış
+    yüzleri, niş, veranda (gövdedeki ve taşan) ve dikmeler dahil. Sayı yükleme listesindeki `bina_m2`'nin kendisi (tek kaynak
+    `prefabrik_liste.bina_brut_cm2`, D-28 madde 1; yuvarlama bir kez, yazıda: üç basamağa yuvarlayıp yeniden iki basamağa yuvarlamak
+    51,9550 → 51,955 → 51,95 verirdi, P6701); net: kapalı odaların net alanları toplamı (açık mahal hariç; montaj rehberindeki m²)."""
+    from . import prefabrik_liste
+    brut = prefabrik_liste.bina_brut_cm2(plan) / 1e4
     net = sum(m.alan_m2 for m in plan.mahaller.values() if not m.acik)
     f2 = lambda v: f"{v:.2f}".replace(".", ",")
     return f"{f2(brut)} m² brüt · {f2(net)} m² net"

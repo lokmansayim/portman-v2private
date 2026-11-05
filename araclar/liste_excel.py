@@ -75,10 +75,10 @@ def liste_sayfasi(ws, R: dict, baslik: str, aciklama: str, renk=None, kaynak_sut
             c.font = Font(bold=True); c.fill = dolgu["baslik"]
         ara = round(sum(s["tutar"] or 0 for s in ss), 2)
         for s in ss:
-            olcu, birim = gorunen(s.get("olcu"), s.get("birim"))
+            olcu, birim = gorunen(s.get("teklif_olcu") or s.get("olcu"), s.get("birim"))
             neden = eksik(s)
             notu = neden or (fiyat_notu(s) if s["birim_fiyat"] is None else "")
-            ws.append([s["kalem"], olcu, birim, s.get("adet")] + ([s.get("kg")] if kg else []) + [s["birim_fiyat"], s["tutar"], notu]
+            ws.append([s.get("teklif_adi") or s["kalem"], olcu, birim, s.get("adet")] + ([s.get("kg")] if kg else []) + [s["birim_fiyat"], s["tutar"], notu]
                       + ([s["durum"], s.get("kaynak_adi") or s.get("kaynak")] if kaynak_sutunu else []))
             r = ws[ws.max_row]
             r[i_bf - 1].number_format = r[i_tut - 1].number_format = TL

@@ -55,9 +55,9 @@ def test_ap27_cati_parcasi_kenarlardan():
 
 
 def test_ap27_kaplama_ve_mahya(liste):
-    assert _adet(liste, "Trapez sac ·") == {"Trapez sac · ana çatı": 24}               # kitabın kırma çatı dizilimi, 80 cm'lik şeritler
+    assert _adet(liste, "Trapez sac ·") == {"Trapez sac · ana çatı": 20}               # kitabın kırma çatı dizilimi, 100 cm'lik şeritler (D-50)
     assert {s["olcu"] for s in liste["satirlar"] if s["kalem"].startswith("Trapez sac ·")} == {"L 5630"}   # eğik 5,58 + taşma
-    assert _adet(liste, "Trapez sac mahyası") == {"Trapez sac mahyası": 6 + 13 + 13}   # mahya 3,03 ve iki kırma hattı 7,70, hat başına ÷ 0,6
+    assert _adet(liste, "Trapez sac mahyası") == {"Trapez sac mahyası": 4 + 8 + 8}     # mahya 3,03 ve iki kırma hattı 7,70, hat başına ÷ 1 (D-50)
     assert not _adet(liste, "Kırma mahyası")                                          # trapezde kırma hattı trapez mahyasında
     assert _adet(liste, "Mahya bandı") == {"Mahya bandı": 2}                           # 3,03 + 2 × 7,70 = 18,42 m ÷ 10
     assert _adet(liste, "Metal dere inişi") == {"Metal dere inişi aparatı": 5}         # iki köşe + iki uç, 10,6 m'lik saçağa bir orta

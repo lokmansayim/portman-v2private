@@ -1,6 +1,6 @@
 {
  "sema": "portman.fiyat_defteri/1",
- "surum": "2026-11-03-r07",
+ "surum": "2026-11-04-r09",
  "aciklama": "Yükleme listesi × birim fiyat (İE-13, Z-10'un liste yöntemi). Anahtar Motor'un liste satırı: prefabrikte 'kalem | olcu' (motor/prefabrik_liste.py), çelikte 'kalem | boyut' (motor/genel yükleme listesi). Fiyat uydurulmaz: kaynağı olmayan kalemde fiyat boş kalır.",
  "para_birimi": "TL",
  "kdv": "kaynak listelerde yazmıyor",
@@ -26,6 +26,13 @@
    "tarih": "2026-09-01",
    "patron_verdi": false,
    "not": "Drive 'AI İçin Hesaplamalar'; kalem birim fiyatları, pencere fiyat tablosu, çatı kaplaması m² fiyatı, çelik panel kg fiyatı. Yalnız iki listede olmayan kalemde öneri."
+  },
+  "PATRON": {
+   "ad": "Patron'un thread'de verdiği birim fiyat (listelerde olmayan kalem)",
+   "kisa": "Patron, 04.11.2026",
+   "tarih": "2026-11-04",
+   "patron_verdi": true,
+   "not": "Patron'un kendi sözüyle verdiği fiyat; kalemin notunda sözü kelimesi kelimesine, saati ve mesaj numarası. Kaynak listesi yok."
   }
  },
  "hatlar": {
@@ -509,14 +516,14 @@
      "not": ""
     },
     "Özel pencere karkası (120×180) (100'lük çektirme U'su + 100'lük H geçen) | 1200 × 1800": {
-     "fiyat": null,
+     "fiyat": 700,
      "birim": "adet",
-     "kaynak": null,
+     "kaynak": "PATRON",
      "kaynak_satir": null,
-     "kaynak_kalem": "",
-     "durum": "kaynakta yok",
-     "onay": false,
-     "not": "87 m² listesinde: kaynakta 120×120 (515) ve 120×100 (151) var, 120×180 yok; Haziran listesinde: yalnız 250/180 karkaslı özel pencere panosu (satır 34, 4250); Özel pencere karkası iki listede de yok."
+     "kaynak_kalem": "Lokman, TK-04 teklif PDF'inin bu satırına yorum",
+     "durum": "Patron verdi",
+     "onay": true,
+     "not": "r09: Lokman 4 Kasım 2026 23:20 UTC, TK-04 teklif PDF'inde bu satıra yorum (mesaj cmsg_01UAFvcnfVuTR1wfFux5fQPPBfB5HrfjnbBaNrm824isuu): \"700 TL olarak yaz\". Önceki not: 87 m² listesinde: kaynakta 120×120 (515) ve 120×100 (151) var, 120×180 yok; Haziran listesinde: yalnız 250/180 karkaslı özel pencere panosu (satır 34, 4250); Özel pencere karkası iki listede de yok."
     },
     "Çektirme U'su 100 | 100 × 2440": {
      "fiyat": 148,
@@ -866,6 +873,38 @@
      "onay": true,
      "not": "kaynakta antrasit"
     },
+    "Trapez sac mahyası | L 1000": {
+     "fiyat": 189,
+     "birim": "adet",
+     "kaynak": "HAZ",
+     "kaynak_satir": "ÇG25",
+     "kaynak_kalem": "Antrasit gri trapez saç mahyası L 1000",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": "r08: trapez çatının mahyası (TK-04). Lokman 4 Kasım 2026 21:16 \"Trapez Mahyayıda 100 al\" ve 21:20: prefabrikte trapez sac ve mahya standart 100 cm kapatır (D-50, M-11; parça L 1000). 87 m² listesinde trapez mahya yok; Haziran listesinden birebir (r02 kuralı). Trapez sac ve öteki mahya boyları `boy_onerileri`'nden, m² fiyatıyla (D-51, Lokman 21:37)."
+    },
+    "Ters mahya (dere içi) | L 2800": {
+     "fiyat": 189,
+     "birim": "adet",
+     "kaynak": "HAZ",
+     "kaynak_satir": "ÇG19",
+     "kaynak_kalem": "Antrasit ters mahya L 2800",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": "r08: cumbalı prefabrik çatının satırı (çıkıntısız çapraz cumba, D-47; TK-04 r04). 87 m² listesinde ters mahya yok; Haziran listesinden birebir, çelikteki Ters mahya | L 2800 ile aynı kaynak satırı ve fiyat (r02)."
+    },
+    "Ters mahya kenar kutusu | L 21 × 40 × 21 × 2800": {
+     "fiyat": 100,
+     "birim": "adet",
+     "kaynak": "PATRON",
+     "kaynak_satir": null,
+     "kaynak_kalem": "Lokman, TK-04 teklif PDF'inin bu satırına yorum",
+     "durum": "Patron verdi",
+     "onay": true,
+     "teklif_adi": "Metal tahta (galvaniz)",
+     "teklif_olcu": "L 2800",
+     "not": "r09: Lokman 4 Kasım 2026 23:24 UTC, TK-04 teklif PDF'inde bu satıra yorum (mesaj cmsg_01UAFvcnfVuTR1wfFux5fQPPFiHDxbk9Gx7xa6JsskWMiq): \"'METAL TAHTA L:2800 (GALVANİZ)' Yaz fiyat:100 TL\". Teklifte adı ve ölçüsü `teklif_adi` ve `teklif_olcu`'dan (Motor'un iç adı, kör kıyas ve defter anahtarı aynı kalır; kitap 0.20'nin C1.9 'Metal tahta' adıyla aynı yol: iç ad değişmez). Önceki not (r08): cumbalı prefabrik çatının satırı; iki listede de fiyatı yok (çelikteki kayıtla aynı)."
+    },
     "Mahya bandı | rulo 10 m": {
      "fiyat": 125,
      "birim": "adet",
@@ -1167,6 +1206,18 @@
      "durum": "eşleşti",
      "onay": true,
      "not": ""
+    },
+    "Trapez vida 5,5 × 60 (trapez sac) | adet": {
+     "fiyat": 3,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      144
+     ],
+     "kaynak_kalem": "( 5.5 x 60 ) TRAPEZ VİDA (TRAPEZ SAC / METAL KİREMİT) | Adet",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": "r08: trapez çatının vida satırı (TK-04 trapez, Lokman 4 Kasım 2026 20:47). Kaynak satırı trapez sacın vidası; Trapez vida 5,5 × 60 (trapez sac / metal kiremit) ile aynı kaynak satırı ve fiyat."
     },
     "230'luk kesme taşı | adet": {
      "fiyat": 155,
@@ -1834,6 +1885,33 @@
      "kaynak_kalem": "ÇG1 ANTRESİT GRİ TEK KAT PANEL(87 CM KAPATIR) * 1 | L=5450",
      "onay": true,
      "dayanak": "Tek kat çatı paneli m² birim fiyatından, yani boyla orantılı (en 87 cm sabit), her çatı ve her boy (Lokman 31 Ekim 2026 15:26: \"Tek kat çatı paneli içinde aynısını yap m² birim fiyat üzerinden git\"; D-36). Haziran listesinde L 5450 1.650 TL; kuruşa yuvarlanır. Defterdeki 5100, 2400, 1750 bu yöntemle."
+    },
+    {
+     "kalem_baslar": "Trapez sac · ",
+     "boy_mm": 2550,
+     "kapatma_m": 0.8,
+     "fiyat": 625,
+     "yuvarlama": 0.01,
+     "kaynak": "HAZ",
+     "kaynak_satir": [
+      208
+     ],
+     "kaynak_kalem": "ÇG15 ANTRASİT GRİ TRAPEZ SAÇ 80 CM KAPATIR | L=2550",
+     "onay": true,
+     "dayanak": "Trapez sac m² birim fiyatından (D-51; D-36'nın tek kat panel yöntemi): fiyat boyla ve kapatmayla orantılı, her çatı, her boy ve her kapatma (Lokman 4 Kasım 2026 21:37: \"fiyatları listelerden al sonuçta m² birim fiyatı değişmez 80 kapatırda olsa 100 kapatırda olsa aynıdır\"). Haziran listesinde antrasit 80 cm kapatır L 2550 625 TL (kapatılan m² 2,04, m²'si 306,37 TL); standart 100 cm kapatan sacta (D-50, M-11) L 2550 781,25 TL. Satırın kapatması Motor'un `kapatma_m`'sinden; yoksa uygulanmaz. Kuruşa yuvarlanır."
+    },
+    {
+     "kalem": "Trapez sac mahyası",
+     "boy_mm": 1000,
+     "fiyat": 189,
+     "yuvarlama": 0.01,
+     "kaynak": "HAZ",
+     "kaynak_satir": [
+      218
+     ],
+     "kaynak_kalem": "ÇG25 ANTRASİT GRİ TRAPEZ SAÇ MAHYASI | L=1000",
+     "onay": true,
+     "dayanak": "Trapez sac mahyası boyla orantılı (D-51; D-36'nın yöntemi; Lokman 4 Kasım 2026 21:37: \"fiyatları listelerden al sonuçta m² birim fiyatı değişmez 80 kapatırda olsa 100 kapatırda olsa aynıdır\"). Haziran listesinde yalnız L 1000 189 TL (kayıtlı kalem); 80'lik sacın mahyası L 800 151,20 TL. Kuruşa yuvarlanır."
     }
    ],
    "makas_kurali": {
