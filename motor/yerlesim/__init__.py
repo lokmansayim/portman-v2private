@@ -16,6 +16,7 @@ betopanın örtmediği üçgen) parça üretmez, "kural yok" yazar; varsayılan 
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 
 from . import cati, girdi, serit, tavan, tavan_katmani, veranda
@@ -29,7 +30,7 @@ PARCA_ADI = {"omega": "OMEGA", "asik": "ASIK", "panel": "KAPLAMA", "levha": "BET
              "priz_cift": "PRIZ_CIFT", "uydu_prizi": "UYDU", "zil": "ZIL", "sigorta_kutusu": "SIGORTA", "kablo_priz": "KABLO_PRIZ",
              "kablo_aydinlatma": "KABLO_AYDINLATMA",
              "alt_cerceve": "ALT_CERCEVE", "sacak_omegasi": "SACAK_OMEGASI", "sacak_saci": "SACAK_SACI", "alin_saci": "ALIN_SACI",
-             "bas_makas_z": "BAS_MAKAS_Z", "c_kapama": "C_KAPAMA", "mahya": "MAHYA", "yavru_makas": "YAVRU_MAKAS",
+             "bas_makas_z": "BAS_MAKAS_Z", "c_kapama": "C_KAPAMA", "mahya": "MAHYA", "trapez_mahya": "TRAPEZ_MAHYA", "yavru_makas": "YAVRU_MAKAS",
              "tavan_h": "TAVAN_H", "goz": "ALCIPAN", "serit": "IZOLASYON"}
 DIS_DUVAR = "DIS_DUVAR_"                                            # K5b-2: açık mahale bakan dış duvarın omegası (rehber tavan omegalarını adıyla okur)
 ELEKTRIK = "elektrik_yerlesimi"                                     # K3 (`elektrik.py`); K2'nin katmanlarından ayrı, istenince kurulur
@@ -82,9 +83,9 @@ def _cm(m: float) -> float:
 
 
 def kaplama_turu(g: dict, C: dict, uyarilar: list | None = None) -> tuple[str | None, str | None]:
-    """Liste üretecinin okuması (`motor/prefabrik_liste.py` › 1006 Çatı): "Çatı Kaplaması"nda sandviç geçiyorsa sandviç; trapez ya da
-    kiremit geçiyorsa kartı yok ("kural yok" nedeni döner); değilse tek kat panel (yazılı değilse uyarı)."""
-    yazili = girdi.kucuk(next((v for k, v in g["ozellikler"].items() if girdi.kucuk(k) == "çatı kaplaması"), ""))
+    """Liste üretecinin okuması (`motor/prefabrik_liste.py` › 1006 Çatı): "Çatı Kaplaması"nda sandviç geçiyorsa sandviç, trapez geçiyorsa
+    trapez sac (İE-15 K6); kiremit geçiyorsa kartı yok ("kural yok" nedeni döner); değilse tek kat panel (yazılı değilse uyarı)."""
+    yazili = kaplama_yazisi(g)
     vars_ = C["varsayilan"]
     tur = next((t for t in C["kaplamalar"] if t != vars_ and t in yazili), None)
     if tur:
@@ -99,18 +100,38 @@ def kaplama_turu(g: dict, C: dict, uyarilar: list | None = None) -> tuple[str | 
     return vars_, None
 
 
+def kaplama_yazisi(g: dict) -> str:
+    """İş Emri'nin "Çatı Kaplaması" özelliği, küçük harfle."""
+    return girdi.kucuk(next((v for k, v in g["ozellikler"].items() if girdi.kucuk(k) == "çatı kaplaması"), ""))
+
+
+def trapez_kapatma_m(g: dict, C: dict) -> float:
+    """İE-15 K6: trapez sacın kapatması liste üretecinin işlevinden (D-50, M-11; `prefabrik_liste.trapez_kapatma_ie`, D-28 madde 1): İş Emri'nin
+    çatı kaplaması kapatmayı yazıyorsa ("Trapez Sac (80 cm kapatır)") o, yazmıyorsa liste kuralı (`kapatma_trapez` → `trapez_kapatma_m`, 1,0)."""
+    from motor.prefabrik_liste import trapez_kapatma_ie
+    m = trapez_kapatma_ie(kaplama_yazisi(g))
+    return m if m is not None else C["kapatma_trapez"]
+
+
+def _profil(C: dict, tur: str) -> dict:
+    """Kaplamanın gösterim profili: `profil`'de yoksa eşinin (`profil_esi`; trapez sac tek kat panelin 27/200 profiliyle, İE-15 K6)."""
+    return C["profil"][tur if tur in C["profil"] else C.get("profil_esi", {})[tur]]
+
+
 def kaplama_kalinlasma(C: dict, tur: str | None) -> float:
     """Kaplamanın tek kat panele (varsayılan kaplama) göre kalınlaşması, cm (D-40; Lokman, 1 Kasım 2026 10:23): profilin (yalıtım + hadve)
     farkı (`cati_kaplamasi.profil`), sandviç panelde 4,8. Kart modelinde kaplama ve alın sacının alnı bu kadar artar; başka parça değişmez.
     Kaplama kurulmuyorsa (`tur` yok) 0."""
     if tur is None:
         return 0.0
-    P = C["profil"]
-    return round((P[tur]["yalitim"] + P[tur]["hadve"]) - (P[C["varsayilan"]]["yalitim"] + P[C["varsayilan"]]["hadve"]), 6)
+    P, V = _profil(C, tur), C["profil"][C["varsayilan"]]
+    return round((P["yalitim"] + P["hadve"]) - (V["yalitim"] + V["hadve"]), 6)
 
 
-def kaplama_degerleri(C: dict, tur: str, kesit: dict) -> dict:
-    kapatma = C["kapatma_tek_kat"] if tur == "tek kat" else C["kapatma"]
+def kaplama_degerleri(C: dict, tur: str, kesit: dict, g: dict | None = None) -> dict:
+    """Kaplamanın dizilim değerleri. Trapez sacın kapatması İş Emri'nden (`g`; `trapez_kapatma_m`), İş Emri verilmezse liste kuralı."""
+    kapatma = (C["kapatma_tek_kat"] if tur == "tek kat" else (trapez_kapatma_m(g, C) if g else C["kapatma_trapez"]) if tur == "trapez"
+               else C["kapatma"])
     return {"kesit_asik": kesit["asik"], "kalinlik_kaplama": kesit["kaplama"] + kaplama_kalinlasma(C, tur), "tasma_m": C["tasma"],
             "yuvarlama_mm": C["yuvarlama_mm"], "kapatma_cm": _cm(kapatma)}
 
@@ -136,7 +157,7 @@ def _verandalar(g: dict, D: dict, K: dict, kesit: dict, kural_yok: list, uyarila
         p += cati.asik(g, {"kesit_asik": kesit["asik"], "aralik": _cm(A["aralik"]), "tam": _cm(A["parca_boyu"] - A["pay"]),
                            "en_kisa": A["en_kisa_cm"], "sacak_esigi": _cm(A["sacak_esigi"])}, F)
         if not neden:
-            for q in cati.kaplama(g, kaplama_degerleri(D["cati_kaplamasi"], tur, kesit), F, iki_yuz=True):
+            for q in cati.kaplama(g, kaplama_degerleri(D["cati_kaplamasi"], tur, kesit, g), F, iki_yuz=True):
                 q["bilgi"]["Kaplama"] = tur
                 p.append(q)
         levhalar, neden_b = cati.betopan(g, cati.betopan_degerleri(B, kesit), F, kalkanlar=[veranda.kalkan(F, kesit["betopan"])])
@@ -155,7 +176,8 @@ def _verandalar(g: dict, D: dict, K: dict, kesit: dict, kural_yok: list, uyarila
 
 
 def _serit_katmani(ad: str, adi: str, sinif: str, g: dict, D: dict, kitap: dict, kesit: dict, kural_yok: list, uyarilar: list) -> list[dict]:
-    """İE-24: girintili gövdenin çatı katmanı (`serit.py`): liste üretecinin saydığı çatıdan (kitabın çok düzlemli çatısı)."""
+    """İE-24: girintili gövdenin çatı katmanı (`serit.py`): liste üretecinin saydığı çatıdan (kitabın çok düzlemli çatısı). İE-15 K6: çıkıntısız
+    çapraz cumbada (`cati_serit["capraz"]`) aynı katmanlar; kaplama ve izolasyon liste gibi parça parça (gövde dikdörtgen)."""
     from motor.genel import cati_genel
     ck = cati_genel.cati_kur(g["cati_serit"], kitap)
     if ad == "asik_sirasi":
@@ -163,11 +185,16 @@ def _serit_katmani(ad: str, adi: str, sinif: str, g: dict, D: dict, kitap: dict,
         return serit.asik(g, ck, {"kesit_asik": kesit["asik"], "tam": _cm(A["parca_boyu"] - A["pay"]), "en_kisa": A["en_kisa_cm"]})
     if ad == "cati_kaplamasi":
         tur, neden = kaplama_turu(g, D[ad], uyarilar)
+        if g["cati_serit"].get("capraz") and not neden:              # İE-15 K6: çapraz cumba; liste gibi parça parça (O9; `serit.kaplama_capraz`)
+            out = serit.kaplama_capraz(g, kaplama_degerleri(D[ad], tur, kesit, g))
+            for p in out:
+                p["bilgi"]["Kaplama"] = tur
+            return out
         if neden or tur != "sandvi":
             kural_yok.append({"parca": adi, "sinif": sinif, "neden": neden or "girintili gövdede tek kat panelin çok düzlemli dizilimi yok "
                                                                                "(liste üreteci de parça parça sayar; İE-24)"})
             return []
-        out = serit.kaplama(g, ck, kitap, kaplama_degerleri(D[ad], tur, kesit), "sandvic_panel")
+        out = serit.kaplama(g, ck, kitap, kaplama_degerleri(D[ad], tur, kesit, g), "sandvic_panel")
         for p in out:
             p["bilgi"]["Kaplama"] = tur
         return out
@@ -176,6 +203,8 @@ def _serit_katmani(ad: str, adi: str, sinif: str, g: dict, D: dict, kitap: dict,
         levhalar, nedenler = serit.betopan(g, cati.betopan_degerleri(B, kesit), kesit["betopan"])     # kenar katmanı aynı levhalarda keser
         kural_yok += [{"parca": adi, "sinif": sinif, "neden": f"{ad}: {n}"} for n in nedenler]
         return levhalar
+    if ad == "cati_izolasyonu" and g["cati_serit"].get("capraz"):    # İE-15 K6: gövde dikdörtgen; şeritler ana çatının makas aralıklarında
+        return tavan_katmani.izolasyon(serit.ana_makaslari(g), {"kalinlik": kesit["izolasyon"]})
     if ad == "cati_izolasyonu":                 # K5b-2'nin şeritleri dış ölçü kutusundan ve tek makas dizisinden; girintili gövdede yok (beyan)
         kural_yok.append({"parca": adi, "sinif": sinif, "neden": f"{ad}: girintili gövdede (ana çatı + cumba) makas aralığı şeritleri henüz "
                                                                  "kurulmuyor; şeritler dış ölçü kutusundan çıkar, girinti gözlerine taşar (İE-24)"})
@@ -251,7 +280,7 @@ def katmanlar(ie: dict, plan: dict, makaslar: list[dict], yerlesim: dict, liste:
             if neden:
                 kural_yok.append({"parca": adi, "sinif": sinif, "neden": neden})
                 continue
-            for p in cati.kaplama(g, kaplama_degerleri(D[ad], tur, kesit)):
+            for p in cati.kaplama(g, kaplama_degerleri(D[ad], tur, kesit, g)):
                 p["bilgi"]["Kaplama"] = tur
                 parcalar.append(p)
         elif ad == "cati_izolasyonu":

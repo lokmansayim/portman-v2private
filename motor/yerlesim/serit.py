@@ -63,6 +63,8 @@ def cerceveler(g: dict) -> dict[str, dict]:
         (a0, a1), (b0, b1) = q["a"], q["b"]
         if q["rol"] == "ana":
             v0, v1 = a0 - s, a1 + s
+        elif q.get("capraz"):                                         # İE-15 K6: çapraz cumbanın dış ucu saçaklı, iç ucu derelerin birleştiği yer
+            v0, v1 = (a0 - s, a1) if abs(q["dis_uc"] - a0) < 0.5 else (a0, a1 + s)
         elif a1 < ana["a"][0] + 0.5:                                  # cumba ana çatının solunda (önünde): iç ucu a1 (bir yanda iki cumbada dıştaki de)
             v0, v1 = a0 - s, a1
         else:
@@ -74,8 +76,11 @@ def cerceveler(g: dict) -> dict[str, dict]:
     return out
 
 
-def _makas_adi(g: dict, konum: float) -> str:
-    return min(g["makaslar"], key=lambda m: abs(m["konum"] - konum))["ad"]
+def _makas_adi(g: dict, konum: float, F: dict) -> str:
+    """Parçanın `konum`daki makası: parçanın makaslarıyla aynı yönde uzananların en yakını (çapraz cumbada ana çatının ve cumbanın
+    makasları aynı sayıda konumda olabilir; İE-15 K6)."""
+    eksen = 0 if F["mx"] else 1
+    return min((m for m in g["makaslar"] if m.get("eksen", eksen) == eksen), key=lambda m: abs(m["konum"] - konum))["ad"]
 
 
 # ----------------------------------------------------------------------------- K2: aşık, kaplama, betopan, dere
@@ -158,6 +163,33 @@ def kaplama(g: dict, ck: dict, kitap: dict, K: dict, kaplama_adi: str) -> list[d
     return out
 
 
+def ana_makaslari(g: dict) -> dict:
+    """İE-15 K6: yerleşim girdisi, makasları yalnız ana çatınınki (çapraz cumbanın makasları öteki eksende; izolasyon şeritleri ana çatının
+    makas aralıklarında, `tavan_katmani.izolasyon`)."""
+    eksen = 1 if g["cati"]["makas_ekseni"] == "y" else 0                 # ana makasın uzandığı eksen
+    return dict(g, makaslar=[m for m in g["makaslar"] if m.get("eksen", eksen) == eksen])
+
+
+def kaplama_capraz(g: dict, K: dict) -> list[dict]:
+    """İE-15 K6: çapraz cumbanın kaplaması liste üreteci gibi parça parça (O9; `prefabrik_liste` › 1006): ana çatı yüz başına ⌈mahya boyu ÷
+    kapatma⌉ şerit (beşiğin kuralı, `cati.kaplama`), cumba iki yüz birlikte ⌈2 × mahya boyu ÷ kapatma⌉ (ek çatı parçası; şeritler dış uçtaki
+    kalkandan, artanlar bir panelden). Cumba ana çatının kaplamasının üstüne kurulur (yavru makaslar ana makasların üstünde); şeritler cumbanın
+    beşik çerçevesinde dikdörtgen (gösterim), derelerin içi ters mahyayla kapanır (liste)."""
+    out = []
+    for F in cerceveler(g).values():
+        q = F["parca"]
+        if q["rol"] == "ana":
+            parcalar = cati.kaplama(g, K, F)
+        else:
+            F = dict(F, v_bas="min" if abs(q["dis_uc"] - F["w0"]) < 0.5 else "max")
+            parcalar = cati.kaplama(g, K, F, iki_yuz=True)
+        for p in parcalar:
+            p["bilgi"]["Cati"] = q["ad"]
+            p["aciklama"] = f"{q['ad']}, {p['aciklama']}"
+        out += parcalar
+    return out
+
+
 def betopan(g: dict, K: dict, kalinlik: float) -> tuple[list[dict], list[str]]:
     """Her parçanın baş makaslarında, parçanın çerçevesiyle (`cati.betopan`): levha uç duvarın dış yüzünde."""
     out, nedenler = [], []
@@ -166,7 +198,7 @@ def betopan(g: dict, K: dict, kalinlik: float) -> tuple[list[dict], list[str]]:
         kalkanlar = []
         for m in (m for m in q["makaslar"] if m["rol"] == "bas"):
             alt = abs(m["konum"] - F["w0"]) < abs(m["konum"] - F["w1"])
-            kalkanlar.append({"ad": _makas_adi(g, m["konum"]), "v0": F["w0"] - kalinlik if alt else F["w1"],
+            kalkanlar.append({"ad": _makas_adi(g, m["konum"], F), "v0": F["w0"] - kalinlik if alt else F["w1"],
                               "v1": F["w0"] if alt else F["w1"] + kalinlik})
         levhalar, neden = cati.betopan(g, K, F, kalkanlar=kalkanlar)
         if neden:
@@ -182,9 +214,12 @@ def dere(g: dict, ck: dict, K: dict) -> list[dict]:
     dw, dh = K["kesit_dere"]
     iw, iu = (K["kesit_inis"], K["kesit_inis"]) if isinstance(K["kesit_inis"], (int, float)) else K["kesit_inis"]
     adli = {dz["ad"]: dz for dz in ck["duzlemler"]}
+    parcalar = {q["ad"]: q for q in g["cati_serit"]["parcalar"]}
+    geri = any(q.get("geri_cm") for q in parcalar.values())
     out = []
     for h in ck["dere"]["hatlar"]:
         dz = adli[h["duzlem"]]
+        q = parcalar.get(dz["ad"].rsplit(" ", 1)[0], {})
         (yx, yy) = dz["yukari"]
         ax = 0 if abs(dz["sag"][0]) > 0.5 else 1
         r0, r1 = sorted((h["p"][ax], h["q"][ax]))
@@ -201,6 +236,14 @@ def dere(g: dict, ck: dict, K: dict) -> list[dict]:
         konumlar = [("uç", r0 + iw / 2 + k * 2 * iw) for k in range(n)] + [("uç", r1 - iw / 2 - k * 2 * iw) for k in range(n)]
         if boy > K["orta_esik_cm"] + ESIK:
             konumlar.insert(n, ("orta", (r0 + r1) / 2))
+        if geri and q.get("capraz"):                                     # İE-15 K6: ana makaslar cumba makasının arkasına çekilince cumbanın
+            dis_once = q["cephe"] in ("on", "sol")                       # iki yanında kısa saçak (geri + saçak) kalır; tek inişi duvar
+            ic_uc = r1 if dis_once else r0                               # tarafındaki ucunda, evin köşesinde (Lokman, 5 Kasım 2026 12:51:
+            P = (c, ic_uc) if ax == 1 else (ic_uc, c)                    # "cumbanın solundaki kısa dere tam köşeye gelsin"). O uçta öteki
+            kose = any(math.hypot(P[0] - u[0], P[1] - u[1]) < 1.0         # saçağın deresi başlıyorsa (cumba ile verandanın köşesi) iniş o
+                       for h2 in ck["dere"]["hatlar"] if h2 is not h for u in (h2["p"], h2["q"]))   # derenin ucundaki inişte birleşir: "cumba
+            konumlar = [] if kose else [("uç", r1 - iw / 2 - k * 2 * iw) if dis_once else ("uç", r0 + iw / 2 + k * 2 * iw) for k in range(n)]
+            # ile veranda köşesindeki dere inişi de tam köşenin iç tarafına gelsin" (12:51; önce iki iniş vardı; liste "ek çatı parçası başına 2")
         uc = (c0 + c1) / 2
         for yer, v in konumlar:
             out.append({"kural": "dere_hatti", "parca": "inis", "geo": {"tip": "kutu", "kutu": kutu(v - iw / 2, v + iw / 2, uc - iu / 2, uc + iu / 2,
@@ -238,7 +281,9 @@ def _sacak_cercevesi(Fs: dict, e: dict) -> tuple[dict, str]:
 def _alin_cercevesi(Fs: dict, e: dict) -> tuple[dict, bool]:
     """Alın kenarının parçası: kenarın mahya eksenindeki yeri parçanın saçaklı ucu. Dönen: çerçeve, kalkan önde mi (`v` küçük uçta)."""
     for F in Fs.values():
-        v = e["p"][1] if F["mx"] else e["p"][0]
+        v, vq = (e["p"][1], e["q"][1]) if F["mx"] else (e["p"][0], e["q"][0])
+        if abs(v - vq) > 0.5:                                            # alın kenarı makas boyunca (çapraz cumbanın alnı ana çatıya dik)
+            continue
         if abs(v - F["v0"]) < 0.5 and abs(F["v0"] - (F["w0"] - F["s"])) < 0.5:
             return F, True
         if abs(v - F["v1"]) < 0.5 and abs(F["v1"] - (F["w1"] + F["s"])) < 0.5:
@@ -246,7 +291,8 @@ def _alin_cercevesi(Fs: dict, e: dict) -> tuple[dict, bool]:
     raise ValueError(f"alın kenarı {e['p']}–{e['q']} hiçbir çatı parçasının ucunda değil")
 
 
-def kenarlar(g: dict, ck: dict, G_: dict, kesit: dict, kurulan: set[str], engeller: list[dict] | None = None) -> list[dict]:
+def kenarlar(g: dict, ck: dict, G_: dict, kesit: dict, kurulan: set[str], engeller: list[dict] | None = None,
+             trapez_m: float | None = None) -> list[dict]:
     """K3b'nin çatı kenarları girintili gövdede (kurallar `kurulan`): saçak omegası, saçak sacı, mahya, Z, alın sacı, C kapama. Saçak omegası
     kenarın altındaki duvarların üstünde (gövdenin o hattaki kısmı; saçağa uzamaz, D-41), sayı saçak kenarının boyundan, dikdörtgen gövdedeki
     gibi (D-39; liste de saçak kenarlarının boyunu sayar); kesitine baş makas betopanı (`engeller`, `betopan`) iniyorsa orada kesilir. Hat, kenarın düzleminin parçasına yazılır (`Cati`; aynı düzlemdeki ana çatı ve cumba yüzü
@@ -254,19 +300,25 @@ def kenarlar(g: dict, ck: dict, G_: dict, kesit: dict, kurulan: set[str], engell
     Fs = cerceveler(g)
     govde = Polygon(g["govde"])
     out, sayac = [], {}
+    geri = any(q.get("geri_cm") for q in g["cati_serit"]["parcalar"])
     gorunen = [e for e in ck["kenarlar"] if e["tur"] in ("sacak", "alin") and not _ortulu(ck, e)]
     for e in (e for e in ck["kenarlar"] if e["tur"] == "sacak"):          # dere hattı gibi: saçak kenarının tamamı (altta kalan uç dahil)
         F, yuz = _sacak_cercevesi(Fs, e)
         ax = 0 if not F["mx"] else 1
         r0, r1 = sorted((e["p"][ax], e["q"][ax]))
-        if "sacak_omegasi_yerlesimi" in kurulan:
+        Fd = F
+        if F["parca"].get("duvar_b"):                                    # İE-15 K6: ana makaslar geri çekilince çatının ayak izi duvardan
+            d0, d1 = F["parca"]["duvar_b"]                               # geride; saçak omegası yine duvarın üstünde (M-01)
+            Fd = dict(F, ou=d0, aciklik=d1 - d0)
+        if "sacak_omegasi_yerlesimi" in kurulan and not (geri and F["parca"].get("capraz")):   # cumbanın iki yanındaki kısa saçağın
+            # altında duvar boyu yok: duvarın ucu cumbanın baş makas omegasının altında (D-53 madde 7)
             cati_ = e["duzlemler"][0].rsplit(" ", 1)[0]
             k = sayac[(cati_, yuz)] = sayac.get((cati_, yuz), 0) + 1    # aynı çatının aynı yüzündeki ikinci saçak kenarı ayrı hat
-            ic = F["ou"] + 0.5 if yuz == "sol" else F["ou"] + F["aciklik"] - 0.5      # kenarın altındaki duvarlar: gövdenin o hattaki kısmı
+            ic = Fd["ou"] + 0.5 if yuz == "sol" else Fd["ou"] + Fd["aciklik"] - 0.5      # kenarın altındaki duvarlar: gövdenin o hattaki kısmı
             kes = govde.intersection(LineString([(r0, ic), (r1, ic)] if ax == 0 else [(ic, r0), (ic, r1)]))
             duvar = sorted(tuple(sorted(q[ax] for q in (s.coords[0], s.coords[-1]))) for s in getattr(kes, "geoms", [kes])
                            if not s.is_empty and s.length >= 1.0)
-            for p in (kenar.sacak_omegasi(g, G_, dict(F, v0=r0, v1=r1), engeller, yuz, duvar) if duvar else []):
+            for p in (kenar.sacak_omegasi(g, G_, dict(Fd, v0=r0, v1=r1), engeller, yuz, duvar) if duvar else []):
                 if "Hat" in p["bilgi"] and k > 1:
                     p["bilgi"]["Hat"] = f"{yuz} {k}"
                 p["bilgi"] = {"Cati": cati_, **p["bilgi"]}
@@ -277,7 +329,7 @@ def kenarlar(g: dict, ck: dict, G_: dict, kesit: dict, kurulan: set[str], engell
         for F in Fs.values():
             (mx0, my0), (mx1, my1) = F["parca"]["mahya"]
             v0, v1 = sorted((my0, my1) if F["mx"] else (mx0, mx1))
-            out += kenar.mahya(g, G_, kesit, dict(F, v0=v0, v1=v1))
+            out += kenar.mahya(g, G_, kesit, dict(F, v0=v0, v1=v1), trapez_m=trapez_m)    # İE-15 K6: trapez sacta CK-07
     kk = kurulan & {"bas_makas_z_yerlesimi", "alin_saci_yerlesimi", "c_kapama_yerlesimi"}
     if kk:
         for e in (e for e in gorunen if e["tur"] == "alin"):
@@ -286,7 +338,7 @@ def kenarlar(g: dict, ck: dict, G_: dict, kesit: dict, kurulan: set[str], engell
             yuz = "sol" if (u0 + u1) / 2 < F["um"] else "sag"
             q = F["parca"]
             bas = min((m for m in q["makaslar"] if m["rol"] == "bas"), key=lambda m: abs(m["konum"] - (F["w0"] if on else F["w1"])))
-            ka = {"ad": _makas_adi(g, bas["konum"]), "on": on, "v_dis": F["w0"] - kesit["betopan"] if on else F["w1"] + kesit["betopan"],
+            ka = {"ad": _makas_adi(g, bas["konum"], F), "on": on, "v_dis": F["w0"] - kesit["betopan"] if on else F["w1"] + kesit["betopan"],
                   "v_uc": F["v0"] if on else F["v1"]}
             out += kenar.kalkan_kenarlari(g, G_, kesit, kk, F, [ka], yuzler=[(yuz, u0, u1)])
     return out

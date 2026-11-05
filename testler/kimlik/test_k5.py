@@ -14,8 +14,12 @@
   AP-13'tü, cumbada liste artık yazılıyor).
 - BK-14'ün taşan verandası (TK-01): zemin kartsız (kapsam dışı); çatı yüzü ve alın dolgusu K5'te "kural yok"tu, K5b'de kartsız (çatının
   parçaları kartlı kuruldu; `test_k5b.py`).
-- Beşikte de kuralı kurulmayan çatı kenarı kartı "kurulmadı" yazar (trapez kaplamada mahya).
+- Beşikte de kuralı kurulmayan çatı kenarı kartı "kurulmadı" yazar (İE-15 K6'ya kadar trapez kaplamada mahya; şimdi mahya kuralı testte "kural yok"a çevrilir).
 - PK-01'in K1–K3b'si değişmez: öteki test dosyaları aynen geçer (K5'te yalnız Değişiklik (K5)'te yazılı üç vaka değişti).
+- İE-15 K6 (D-53; Lokman, 4 Kasım 2026 20:51): beşik + çıkıntısız çapraz cumbanın (AP-13, AP-16) çatısı kart modelinde kurulur
+  (`motor/cati_capraz.py`; çatı kuralları ve MA-01/MA-02 eşlemesi "besik_cumba"da da, yavru makas MA-05). Bu dosyada cumbalı iki ev için
+  "kural yok" ve "kurulmadı" beklentisi kalktı: çatıya bağlı kartlar kurulur, yerleşen adetle sayılanlar listeyle aynı, kural yok boş.
+  Kırma (AP-01) aynen. TK-04'ün çatı kartları listeyle `test_k6.py`'de.
 """
 from __future__ import annotations
 
@@ -37,6 +41,8 @@ from motor.yerlesim import cizim, girdi  # noqa: E402
 EVLER = KOK / "testler" / "cizim" / "evler"
 MOTOR_VERI = KOK / "testler" / "motor" / "veri"
 TIP = {"AP13": "besik_cumba", "AP16": "besik_cumba", "AP01": "kirma"}
+KIRMA = [e for e, t in TIP.items() if t == "kirma"]
+CUMBA = [e for e, t in TIP.items() if t == "besik_cumba"]
 CATI_KENARI = ("CK-01", "CK-02", "CK-03", "CK-04", "CK-05", "CK-06")
 
 
@@ -94,29 +100,44 @@ def test_catiya_bagli_olmayan_kartlar_ikizle_ayni(evler, ev):
     assert set(a) == set(b)
     assert {k: v for k, v in a.items() if k not in bagli} == {k: v for k, v in b.items() if k not in bagli}
     assert {k for k, v in b.items() if k not in bagli and v[0]} >= {"OM-01", "AC-01", "AC-02"}       # ikizde de kurulan katmanlar
-    assert all(a[k][0] == 0 and a[k][3] == "null" for k in bagli), ev
+    if TIP[ev] == "kirma":
+        assert all(a[k][0] == 0 and a[k][3] == "null" for k in bagli), ev
+    else:                                                                   # İE-15 K6 (D-53): çapraz cumbanın çatısı kurulur
+        assert {k for k in bagli if a[k][0]} >= {"MA-01", "MA-02", "MA-05", "AS-01", "KP-02", "BT-01", "DR-01", "DR-02", "IZ-01", *CATI_KENARI}, ev
     assert {k for k in bagli if b[k][0]} >= {"MA-01", "MA-02", "AS-01", "DR-01", "DR-02", *CATI_KENARI}      # ikizde çatı kurulur
 
 
 def test_catiya_bagli_kartlar():
     """Çatıya bağlı kartlar veri dosyalarından: makaslar, makasa göre ayrılan dış H'ler, K2'nin dört çatı katmanı, K3b'nin altı çatı kenarı;
-    K5b'de tek kat panel (KP-02) ve yavru makas (MA-03); K5b-2'de çatı izolasyonu (IZ-01); İE-24'te cumba makası (MA-04, beşikte)."""
+    K5b'de tek kat panel (KP-02) ve yavru makas (MA-03); K5b-2'de çatı izolasyonu (IZ-01); İE-24'te cumba makası (MA-04, beşikte); K6'da
+    çapraz cumbanın yavru makası (MA-05, beşik + cumbada), trapez sac (KP-03) ve trapez sac mahyası (CK-07; trapez çatıda CK-06'nın yerine,
+    "kurulmadı" listesine trapez dışında girmez)."""
     assert _catiya_bagli() == {"MA-01", "MA-02", "H-01", "H-02", "H-04", "H-05", "H-08", "H-09", "AS-01", "KP-01", "BT-01", "DR-01", "DR-02",
-                               "KP-02", "MA-03", "IZ-01", "MA-04", *CATI_KENARI}
+                               "KP-02", "MA-03", "IZ-01", "MA-04", "MA-05", "KP-03", "CK-07", *CATI_KENARI}
 
 
-@pytest.mark.parametrize("ev", list(TIP))
+@pytest.mark.parametrize("ev", KIRMA)
 def test_kural_yok_catinin_adiyla(evler, ev):
+    """Kırmada çatının parçaları "kural yok"; nedende kuralın çatı tipleri (K6'dan beri beşik ve beşik + cumba; D-53)."""
     tip, say = TIP[ev], evler[ev]["say"]
     assert say["cati_tipi"] == tip and say["yerlesim"]["cati_tipi"] == tip
     assert say["kural_yok"] and all(x.get("cati") == tip for x in say["kural_yok"])
     for x in say["kural_yok"]:
-        assert f"İş Emri'nin çatısı \"{tip}\" ({TIP_ADI[tip]}); " in x["neden"] and "yalnız \"besik\" (beşik) çatıda" in x["neden"]
+        assert f"İş Emri'nin çatısı \"{tip}\" ({TIP_ADI[tip]}); " in x["neden"]
+        assert "yalnız \"besik\" (beşik), \"besik_cumba\" (beşik + cumba) çatıda" in x["neden"], x
         assert x["neden"].endswith(girdi.cati_sonra(tip))
     adlar = {x["parca"] for x in say["kural_yok"]}
     assert {"aşık", "çatı kaplaması", "baş makas betopanı", "dere ve iniş", "saçak omegası", "saçak sacı", "alın sacı", "baş makas Z'si",
             "C kapama", "mahya"} <= adlar
     assert not any("cati" in x for x in evler[ev]["ikiz"]["kural_yok"])    # ikizin kural yoku (kaplama yazılı değil, betopan) çatı tipinden değil
+
+
+@pytest.mark.parametrize("ev", CUMBA)
+def test_capraz_cumbada_kural_yok_yok(evler, ev):
+    """İE-15 K6 (D-53): çıkıntısız çapraz cumbada çatının bütün parçaları kartlı kurulur; kural yok boş (bugünkü IFC'nin şeması `_model`'de)."""
+    say = evler[ev]["say"]
+    assert say["cati_tipi"] == say["yerlesim"]["cati_tipi"] == "besik_cumba"
+    assert say["kural_yok"] == []
 
 
 def test_cati_adi_ve_nedeni():
@@ -147,10 +168,11 @@ def test_liste_yazilmaz(evler, ev):
     assert "liste_yazilmaz" not in t and "kurulmadi" not in t
 
 
-@pytest.mark.parametrize("ev", [e for e, t in TIP.items() if t == "besik_cumba"])
+@pytest.mark.parametrize("ev", CUMBA)
 def test_cikintisiz_cumbada_liste_yazilir(evler, ev):
     """İE-29: çıkıntısız çapraz cumbada liste yazılır (üç evin makas planı paftayla kıyaslandı, IE-29.md); kart modelinin liste sütunu
-    üretecin sayısı, nedeni yok. Çatı kenarı kartları modelde yine kurulmadı (cumbanın kart kuralı K6'da)."""
+    üretecin sayısı, nedeni yok. K6'dan beri (D-53) çatı kenarı kartları modelde kurulur ("kurulmadı" yok); yerleşen adetle sayılan çatı
+    kartları listeyle aynı: makaslar (yavru makas MA-05, listede "Yavru makas · cumba"), tek kat panel, betopan, iniş."""
     k = evler[ev]["say"]["kenar"]
     L = PL.is_emrinden(copy.deepcopy(evler[ev]["ie"]))
     satir = {}
@@ -159,7 +181,11 @@ def test_cikintisiz_cumbada_liste_yazilir(evler, ev):
     kalem = {c["kod"]: (c["liste"]["satirlar"] or [None])[0] for c in _oku(KM.KARTLAR)["kartlar"] if c["kod"] in k["liste"]}
     assert k["liste"] == {kod: (satir.get(ad, 0) if ad else None) for kod, ad in kalem.items()}
     assert KM.LISTE_YAZILMAZ not in k["liste"].values() and "liste_yazilmaz" not in k
-    assert k["kurulmadi"] == list(CATI_KENARI)
+    assert "kurulmadi" not in k
+    adet = {x["kod"]: x["adet"] for x in evler[ev]["say"]["kartlar"]}
+    assert (adet["MA-01"], adet["MA-02"], adet["MA-05"], adet["KP-02"], adet["BT-01"], adet["DR-02"]) == (
+        satir["Makas (baş) · ana çatı"], satir["Makas (orta) · ana çatı"], satir["Yavru makas · cumba"],
+        sum(n for a, n in satir.items() if a.startswith("Tek kat çatı paneli")), satir["Baş makas betopanı"], satir["Metal dere inişi aparatı"])
 
 
 # ----------------------------------------------------------------------------- komut: çizim ve Excel
@@ -241,13 +267,20 @@ def test_tasan_veranda_siniflanir(tmp_path):
 
 
 # ----------------------------------------------------------------------------- beşikte "kurulmadı"
-def test_besikte_kurulmayan_kenar_karti(tmp_path):
-    """Beşikte de kuralı kurulmayan çatı kenarı kartı "kurulmadı" yazar (trapez kaplamada mahya): sayımda `kenar.kurulmadi`, yedinci sayfanın
-    lejantında ve Excel'de; liste sütunu üretecin sayısı (beşikte liste yazılır). Sayılar değişmez."""
-    ie = _oku(MOTOR_VERI / "PK01.json")
-    ie["ozellikler"]["Çatı Kaplaması"] = "Trapez Sac"
-    (tmp_path / "trapez.json").write_text(json.dumps(ie, ensure_ascii=False), encoding="utf-8")
-    assert KM.main([str(tmp_path / "trapez.json"), str(tmp_path / "c"), "--kod", "T"]) == 1
+def test_besikte_kurulmayan_kenar_karti(tmp_path, monkeypatch):
+    """Beşikte de kuralı kurulmayan çatı kenarı kartı "kurulmadı" yazar: sayımda `kenar.kurulmadi`, yedinci sayfanın lejantında ve
+    Excel'de; liste sütunu üretecin sayısı (beşikte liste yazılır). Sayılar değişmez. (İE-15 K6'ya, D-53, kadar bu durumu trapez kaplamada
+    mahya veriyordu; trapez sac mahyası (CK-07) artık kurulduğu için mahya kuralı burada "kural yok"a çevrilir.)"""
+    from motor.yerlesim import kenar as KE
+    asil = KE.katman
+
+    def mahyasiz(*a, **kw):
+        s = asil(*a, **kw)
+        return s | {"parcalar": [p for p in s["parcalar"] if p["kural"] != "mahya_yerlesimi"],
+                    "kural_yok": s["kural_yok"] + [{"parca": KE.CATI_ADI["mahya_yerlesimi"], "sinif": "IfcCovering", "neden": "test: kurulmadı"}]}
+    monkeypatch.setattr(KE, "katman", mahyasiz)
+    (tmp_path / "pk01.json").write_text((MOTOR_VERI / "PK01.json").read_text(encoding="utf-8"), encoding="utf-8")
+    assert KM.main([str(tmp_path / "pk01.json"), str(tmp_path / "c"), "--kod", "T"]) == 1
     say = _oku(tmp_path / "c" / "T_kart_sayim.json")
     assert say["kenar"]["kurulmadi"] == ["CK-06"] and "liste_yazilmaz" not in say["kenar"] and isinstance(say["kenar"]["liste"]["CK-06"], int)
     import pymupdf

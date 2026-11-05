@@ -141,7 +141,7 @@ def test_kurallar_ve_degerler():
     for ad in KE.KENAR:
         k = K[ad]
         assert k["kural"] and k["durum"] in durumlar and k["tarih"] == "2026-10-25" and k["kaynak"], ad
-        assert ad == KE.ALT_CERCEVE or k["cati_tipleri"] == ["besik"], ad
+        assert ad == KE.ALT_CERCEVE or k["cati_tipleri"] == ["besik", "besik_cumba"], ad     # İE-15 K6 (D-53): çapraz cumbada da
         for alt in ("parca_boyu", "bindirme"):
             if alt in k:
                 assert set(k[alt]) == {"okunan"} and k[alt]["okunan"].startswith(("kurallar/liste/prefabrik.json › ", "kitap › ")), (ad, alt)
@@ -357,14 +357,18 @@ def test_kirma_catida_cati_kenarlari_kural_yok(pk01, tmp_path):
     assert [adet[c] for c in K3B_KODLARI[2:]] == [0] * 6 and m["say"]["kesim_plani"]["AC-01"]["stok"] == 9      # alt çerçeve çatıya bağlı değil
 
 
-def test_trapez_kaplamada_mahya_kural_yok(pk01, tmp_path):
+def test_trapez_kaplamada_trapez_mahyasi(pk01, tmp_path):
+    """İE-15 K6 (D-53): trapez sac kaplamada mahya trapez sac mahyasıdır (CK-07; D-50, M-11): parça boyu sacın kapattığı kadar (L 1000),
+    her beşiğin mahyası ÷ kapatma, yukarı, bindirme yok. Stok liste üretecinin "Trapez sac mahyası" satırıyla aynı (PK-01 11); CK-06 yok,
+    öteki kenarlar değişmez, kural yok yok."""
     ie = copy.deepcopy(pk01["ie"])
     ie["ozellikler"]["Çatı Kaplaması"] = "Trapez Sac"
     m = _model(ie, tmp_path, "trapez")
-    k = [x for x in m["say"]["kural_yok"] if x["parca"] in cizim.SAYFA[7][0]]
-    assert [x["parca"] for x in k] == ["mahya"] and "trapez sac" in k[0]["neden"]
-    assert {c: m["say"]["kesim_plani"][c]["stok"] for c in STOKLU[:-1]} == {c: pk01["say"]["kesim_plani"][c]["stok"] for c in STOKLU[:-1]}
-    assert "CK-06" not in m["say"]["kesim_plani"]
+    assert not [x for x in m["say"]["kural_yok"] if x["parca"] in cizim.SAYFA[7][0]]
+    kp = m["say"]["kesim_plani"]
+    assert {c: kp[c]["stok"] for c in STOKLU[:-1]} == {c: pk01["say"]["kesim_plani"][c]["stok"] for c in STOKLU[:-1]}
+    assert "CK-06" not in kp and (kp["CK-07"]["parca_boyu_cm"], kp["CK-07"]["stok"]) == (100.0, 11)
+    assert m["say"]["kenar"]["liste"]["CK-07"] == 11 and "CK-06" not in m["say"]["kenar"]["liste"]
 
 
 def test_bas_makas_yoksa_kalkan_kenarlari_kural_yok(pk01):
