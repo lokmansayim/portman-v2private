@@ -393,6 +393,10 @@ def test_r07_veranda_sacak_kadar_icerde(tk04_r07):
     assert {s["olcu"] for s in L if s["kalem"].startswith("Makas (")} == {"açıklık 8610"} and _liste(L, "Metal dere inişi aparatı") == 6
     # D-61 madde 3 (Lokman, kart 5 Kasım 22:49): ön kiriş iki kolonun arasında, yüzünden yüzüne (502 − 2 × 10); sağ kiriş 155,75 − 10
     assert sorted(s["olcu"] for s in L if s["kalem"].startswith("Kutu profil (kiriş)")) == ["L 1457,5", "L 4820"]
+    # rehber kirişin boyunu listeden okur (D-28 madde 1): iki ucunda kolon olan ön kiriş L 482, liste satırına bağlı
+    assert {k["bu"].split(":")[0]: k["liste"] for v in d["verandalar"] for k in v["kiris"]} == {
+        "veranda · ön kiriş · L 482 cm": "Kutu profil (kiriş) 100 × 100 L 4820 · 1 adet",
+        "veranda · sağ yan kiriş · L 145,75 cm": "Kutu profil (kiriş) 100 × 100 L 1457,5 · 1 adet"}
     f = ifcopenshell.open(str(tk04_r07["kart"] / "TK04_model.ifc"))
     st = ifcopenshell.geom.settings()
     st.set(st.USE_WORLD_COORDS, True)
