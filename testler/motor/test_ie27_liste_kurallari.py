@@ -99,12 +99,14 @@ def test_uclu_h_isaretli_evde_ayni(modeller):
 
 @pytest.mark.parametrize("kod", MOTOR_KIPI)
 def test_cektirme_u_60_yerinden(kod, modeller, listeler):
-    """Çektirme U'su 60 = eklemsiz T + dış köşeye gelen iç duvar + serbest biten bölme; sabit 2 değil."""
+    """Çektirme U'su 60 = eklemsiz T + dış köşeye gelen iç duvar + serbest biten bölme; sabit 2 değil. Boyu pano yüksekliğiyle (BK-25, D-60:
+    250'de 2440, 280'de 2740; AP-28 280'lik)."""
     cy = modeller[kod]["cektirme_yerleri"]
     assert set(cy) == {"t_orta", "dis_kose", "serbest"}
     ic = [x for x in listeler[kod] if x["kalem"].startswith("Çektirme U'su") and x["dayanak"] == "Kural (Lokman 3.11)"]
     assert len(ic) == 1 and ic[0]["adet"] == sum(cy.values()), (kod, cy, ic)
-    assert ic[0]["olcu"].endswith(" × 2440") and "pafta kipinde" not in ic[0]["formul"]
+    boy = {250: "2440", 280: "2740"}[int(modeller[kod]["H0"])]
+    assert ic[0]["olcu"].endswith(f" × {boy}") and "pafta kipinde" not in ic[0]["formul"]
 
 
 def test_cektirme_yerleri_ornek(modeller):
