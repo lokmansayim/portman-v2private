@@ -71,7 +71,7 @@ def test_tk01_toplamlar(T):
     (Lokman 4 Kasım 23:20, TK-04 teklif PDF'ine yorum: "700 TL olarak yaz"): 120 × 180 özel pencere karkası 700 TL, TK-01'de 4 adet
     (+2.800 TL): asma 465.703,13, ters 464.882,13, fiyatsız 2 → 1 (çırpı ipi), fiyatlı 121 → 122 ve 119 → 120."""
     assert T["kod"] == "TK-01" and T["is_emri_no"] == "PM-TK01-80M2" and T["revizyon"] == 5
-    assert T["defter_surumu"] == "2026-11-04-r09" and not T["oneri_dahil"]
+    assert T["defter_surumu"] == "2026-11-05-r10" and not T["oneri_dahil"]
     ozet = {s["ad"]: s["fiyat"]["ozet"] for s in T["secenekler"]}
     assert list(ozet) == ["Asma tavan", "Ters tavan"]
     assert ozet["Asma tavan"]["toplam"] == 465703.13 and ozet["Ters tavan"]["toplam"] == 464882.13

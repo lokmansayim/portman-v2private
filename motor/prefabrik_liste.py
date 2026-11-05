@@ -93,6 +93,9 @@ def _ortak(k: dict, *yol):
     return v
 
 
+STANDART_PANO_CM = 250   # prefabrik standart pano yüksekliği (D-14; `duvar_tipleri.json` › PE-DIS-100 › pano › yukseklik_cm[0])
+
+
 def _dt(k: dict, *yol):
     v = k
     for a in yol:
@@ -181,8 +184,18 @@ def ic_duvar_kalinligi_mm(N: dict, kurallar: dict) -> int:
     return Counter(ic).most_common(1)[0][0] if ic else _dt(kurallar["duvar_tipleri"], "tipler", "PE-IC-60", "anma_mm")
 
 
+def dis_duvar_kalinligi_mm(N: dict, kurallar: dict) -> int:
+    """Dış duvar kalınlığı (mm): dış panoların en sık kalınlığı; dış duvarsız girdide 100 (standart dış duvar, `PE-DIS-100`; eski adlar aynen).
+    160 / 100 müşteri seçeneğinde (D-12, `yapi.duvar_kalinligi_cm` {dis 16}) 160: dış duvarın profilleri de 160'lık (BK-25, D-60)."""
+    dis = [p["kal_mm"] for p in N["panolar"] if p["duvar"] == "dis"]
+    return Counter(dis).most_common(1)[0][0] if dis else 100
+
+
 def kalinlik_adi(kal_mm: int) -> str:
-    """Satır adındaki kalınlık: 100 mm ve üstü "100'lük", altı "60'lık" (6.1, PK-07)."""
+    """Satır adındaki kalınlık: 100 mm ve üstü "100'lük", altı "60'lık" (6.1, PK-07); 160 mm "160'lık" (BK-25, D-60: 160 / 100 seçeneğinin
+    dış duvarı; önce "100'lük" yazıyordu)."""
+    if kal_mm == 160:
+        return "160'lık"
     return "100'lük" if kal_mm >= 100 else "60'lık"
 
 
@@ -855,6 +868,14 @@ def liste(N: dict, kurallar: dict | None = None, pafta: dict | None = None) -> d
     # ── 1001 Panel ──────────────────────────────────────────────────────────
     fugali = "fugalı" in oz.get("açıklama", "") or "fugali" in oz.get("açıklama", "")
     ic_kal = ic_duvar_kalinligi_mm(N, kurallar)
+    dk = dis_duvar_kalinligi_mm(N, kurallar)                   # BK-25 (D-60): 160 / 100 seçeneğinde dış duvarın profilleri 160'lık
+    dka = kalinlik_adi(dk)
+    D60 = "Lokman, 5 Kasım 2026 12:42: 160'lık dış duvarda profiller de 160'lık (D-60)"
+    # BK-25: çektirme U'su kitabın parça boyu (244) standart pano yüksekliğinde (250, `PE-DIS-100` › pano › yukseklik_cm'nin ilki);
+    # yükseklikle birlikte uzar. 45. hafta fiyat listesi (Lokman, 5 Kasım 2026 12:37) çektirme U'sunu 2440 / 2740 / 2940 mm verir
+    # (pano 2500 / 2800 / 3000, D-14). 250'de ölçü ve adet eskisiyle bayt bayt aynı.
+    cu_cm = r("cektirme_u_100_aday")["boy_cm"] + H0 - STANDART_PANO_CM
+    cu_boy = mm(cu_cm)
     sayac = Counter()
     for p in N["panolar"]:
         kal_mm = p["kal_mm"]
@@ -895,7 +916,14 @@ def liste(N: dict, kurallar: dict | None = None, pafta: dict | None = None) -> d
     # adet. 100'lükte özel köşe yok: dış köşeye konan ters çevrilince iç köşe olur. Bütün köşeler kalınlığına göre tek satırda
     oz_k = kc.get("ozel", 0)
     ozel_y = f" + dış çizginin iç köşesi {oz_k}" if oz_k else ""
-    if ic_kal >= 100:                                          # 6.1: iç duvar 100 → iç köşe de 10'luk (PK-07)
+    if dk != 100:                                              # BK-25 (D-60): 160'lık dış duvarın köşeleri 16'lık, iç köşeler iç duvarın
+        ekle("1002", f"16'lık köşe direği {dk} × {dk}", f"{dk} × {dk} × {mm(H0)}", kc.get("dis", 0) + oz_k, "Sayım",
+             f"dış duvarın köşeleri (dış {kc.get('dis', 0)}{ozel_y}; dış duvar {dk})", D60)
+        if ic_kal >= 100:
+            ekle("1002", "10'luk köşe direği 100 × 100", f"100 × 100 × {mm(H0)}", kc.get("ic", 0), "Sayım", f"iç köşeler (iç duvar {ic_kal})", D60)
+        else:
+            ekle("1002", "6'lık köşe direği 60 × 60", f"60 × 60 × {mm(H0)}", kc.get("ic", 0), "Sayım", "60'lık köşeler (iç)")
+    elif ic_kal >= 100:                                        # 6.1: iç duvar 100 → iç köşe de 10'luk (PK-07)
         ekle("1002", "10'luk köşe direği 100 × 100", f"100 × 100 × {mm(H0)}", kc.get("dis", 0) + kc.get("ic", 0) + oz_k, "Sayım",
              f"bütün köşeler (dış {kc.get('dis', 0)} + iç {kc.get('ic', 0)}{ozel_y}; iç duvar 100)",
              "Lokman, 3 Kasım 2026 09:52: tip yok, kaçlık ve adet (İE-27)")
@@ -936,38 +964,40 @@ def liste(N: dict, kurallar: dict | None = None, pafta: dict | None = None) -> d
              "E5 L 3255 ve TS-01 L 2800 gerçek listelerde var; duvarsız açıklığa kiriş gelir (Lokman, kart 22 Ekim)")
     ec = Counter((e["duvar"], e["cins"]) for e in N["ekler"])
     ek_s = Counter((e["duvar"], e["cins"]) for e in N["ekler"] if e["sacak"])
-    ekle("1002", "H 100 (dış pano eki)", f"100 × 100 × {mm(H0)}", ec[("dis", "pano_eki")], "Sayım", "her dış ekte bir H", "kulaklı / dübelli ayrımı: aday",
+    ekle("1002", f"H {dk} (dış pano eki)", f"{dk} × {dk} × {mm(H0)}", ec[("dis", "pano_eki")], "Sayım", "her dış ekte bir H", "kulaklı / dübelli ayrımı: aday",
          aday=f"kulaklı {ek_s[('dis', 'pano_eki')]} / dübelli {ec[('dis', 'pano_eki')] - ek_s[('dis', 'pano_eki')]}",
          aday_notu="makasın denk geldiği dış ek kulaklı; PK-01 12 / 7, PK-02 8 / 9, PK-06 13 / 6 tuttu", pafta=("h_plani", "dis"))
     arti = sum(1 for e in N["ekler"] if e.get("arti"))
     ekle("1002", f"H standart {ic_kal} (iç pano eki)", f"{ic_kal} × {ic_kal} × {mm(H0)}", ec[("ic", "pano_eki")], "Sayım", "her iç ekte bir H"
          + (f"; UYARI: {arti} dört kollu (+) birleşim burada pano eki sayıldı, birleşim profili kural kitabında yok" if arti else ""),
          pafta=("h_plani", "h_standart"))
-    ekle("1002", f"3'lü H 100 × 100 × {ic_kal} (dış duvar T'si)", f"L {mm(H0)}", ec[("dis", "uclu")], "Sayım", "iç duvarın dış duvara geldiği T", "",
+    ekle("1002", f"3'lü H {dk} × {dk} × {ic_kal} (dış duvar T'si)", f"L {mm(H0)}", ec[("dis", "uclu")], "Sayım", "iç duvarın dış duvara geldiği T", "",
          aday=f"kulaklı {ek_s[('dis', 'uclu')]} / dübelli {ec[('dis', 'uclu')] - ek_s[('dis', 'uclu')]}", aday_notu="aynı kural; PK-01 2 / 3, PK-02 2 / 3",
          pafta=("h_plani", "uclu_dis"))
     ekle("1002", f"3'lü H standart {ic_kal} (iç T)", f"L {mm(H0)}", ec[("ic", "uclu")], "Sayım", "iç–iç T birleşimi", pafta=("h_plani", "uclu_standart"))
     dubelli = ec[("dis", "pano_eki")] + ec[("dis", "uclu")]
     for olcu, n in sorted(Counter(a["olcu"] for a in pen_k).items()):   # O12: pencere alıcıya ait olsa da karkas bizde (PK-07 C × 4)
         en, boy = pencere_olcusu(olcu)
-        ekle("1002", f"Özel pencere karkası ({en}×{boy}) (100'lük çektirme U'su + 100'lük H geçen)", f"{en * 10} × {boy * 10}", n, "Kural (Portatifev)",
+        ekle("1002", f"Özel pencere karkası ({en}×{boy}) ({dka} çektirme U'su + {dka} H geçen)", f"{en * 10} × {boy * 10}", n, "Kural (Portatifev)",
              "her karkaslı pencereye bir (PK-01 dersi 3; PK-07 alıcıya ait pencerede de 4)", "", aday=0, aday_notu="Şablon B (PK-02): hazır karkas yok, U'lar yerinde",
              pafta=("pencere_karkasi",))
     if not pencere_alici:
         ua = r("cektirme_u_100_aday")
-        ekle("1002", "Çektirme U'su 100", f"100 × {ua['boy_cm'] * 10}", r("cektirme_u_100"), "Kural (Portatifev)",
+        ekle("1002", f"Çektirme U'su {dk}", f"{dk} × {cu_boy}", r("cektirme_u_100"), "Kural (Portatifev)",
              f"karkas hazır gidince {r('cektirme_u_100')} sabit (PK-01: \"pencere özel iletiliyor, 2 fix\")",
-             aday=TAVAN(sum(2 * pencere_olcusu(a["olcu"])[0] for a in pen_k) / ua["boy_cm"] + ua["ek"]), aday_notu=f"Şablon B (PK-02 6 ✓): karkaslı pencerelerde (2 × en = {sum(2 * pencere_olcusu(a['olcu'])[0] for a in pen_k)} cm) ÷ {sy(ua['boy_cm'])} + {ua['ek']}")
-        ekle("1002", "100'lük pencere U'su H geçen", "L 2500", r("pencere_u_h_gecen"), zayif("pencere_u_h_gecen"), f"sabit {r('pencere_u_h_gecen')} (yalnız PK-01)",
+             aday=TAVAN(sum(2 * pencere_olcusu(a["olcu"])[0] for a in pen_k) / cu_cm + ua["ek"]), aday_notu=f"Şablon B (PK-02 6 ✓): karkaslı pencerelerde (2 × en = {sum(2 * pencere_olcusu(a['olcu'])[0] for a in pen_k)} cm) ÷ {sy(cu_cm)} + {ua['ek']}")
+        ekle("1002", f"{dka} pencere U'su H geçen", "L 2500", r("pencere_u_h_gecen"), zayif("pencere_u_h_gecen"), f"sabit {r('pencere_u_h_gecen')} (yalnız PK-01)",
              aday=r("pencere_u_h_gecen_aday_pencere_basina") * len(pen_k), aday_notu=f"Şablon B (PK-02 8 ✓): karkaslı pencere {len(pen_k)} × {r('pencere_u_h_gecen_aday_pencere_basina')}")
     cy = N.get("cektirme_yerleri")
     if cy is not None:                                          # İE-27 (Lokman, 3 Kasım 2026 09:52, madde 13): yeri planın birleşimlerinden
-        ekle("1002", f"Çektirme U'su {ic_kal}" + (" (iç duvar)" if ic_kal >= 100 else ""), f"{ic_kal} × 2440", cy["t_orta"] + cy["dis_kose"] + cy["serbest"],
-             "Kural (Lokman 3.11)", f"panonun ortasına T ile gelen bölme {cy['t_orta']} + 100'lük köşede 60'lığa geçiş {cy['dis_kose']} + kapısız "
-             f"serbest biten bölme {cy['serbest']}", "3'lü H olmayan yerde duvar odalara bölünüyorsa, 100'lük köşede 60'lığa geçişte, kapısız "
+        ic_e = "100'lüğe" if ic_kal >= 100 else "60'lığa"
+        gecis = "100'lük köşede 60'lığa geçiş" if dk == 100 else f"{dka} köşede {ic_e} geçiş"   # BK-25: 160 / 100'de "160'lık köşede 100'lüğe"
+        ekle("1002", f"Çektirme U'su {ic_kal}" + (" (iç duvar)" if ic_kal >= 100 else ""), f"{ic_kal} × {cu_boy}", cy["t_orta"] + cy["dis_kose"] + cy["serbest"],
+             "Kural (Lokman 3.11)", f"panonun ortasına T ile gelen bölme {cy['t_orta']} + {gecis} {cy['dis_kose']} + kapısız "
+             f"serbest biten bölme {cy['serbest']}", f"3'lü H olmayan yerde duvar odalara bölünüyorsa, {gecis}te, kapısız "
              "yarım kalan bölmede (İE-27)")
     else:                                                       # pafta kipi: birleşimler okunmuyor, eski kural
-        ekle("1002", f"Çektirme U'su {ic_kal}" + (" (iç duvar)" if ic_kal >= 100 else ""), f"{ic_kal} × 2440", r("cektirme_u_ic"), "Kural (Portatifev)",
+        ekle("1002", f"Çektirme U'su {ic_kal}" + (" (iç duvar)" if ic_kal >= 100 else ""), f"{ic_kal} × {cu_boy}", r("cektirme_u_ic"), "Kural (Portatifev)",
              f"sabit {r('cektirme_u_ic')} (PK-01 ve PK-02'de 2; açık Portatifev listelerinde 2–5, ortak ölçü bulunamadı); pafta kipinde "
              "birleşimler okunmuyor (İE-27 kuralı Motor kipinde)")
     # tavan taşıyıcısı (H8)
@@ -1007,8 +1037,15 @@ def liste(N: dict, kurallar: dict | None = None, pafta: dict | None = None) -> d
                                       (f"çatı kenarında olmayan kirişler {od(kiris_ic)} m", kiris_ic), (f"100'lük iç duvarlar {od(ust100)} m", ust100)) if v)
     uyari = ("UYARI: kenarda olmayan kiriş okunmadı (ic_kirisler_cm yok); paftada çatı kenarında olmayan yeşil kesikli profil varsa eksik. "
              if N["kaynak"] == "pafta" and N.get("ic_kirisler_cm") is None else "")
+    if dk != 100 and ic_kalan > 0:                             # BK-25 (D-60): 160'lık dış duvarın üstü 160'lık duvar omegası; kiriş ve iç duvar 100'lük
+        ekle("1002", f"{dka} duvar omegası", f"{dk} × {mm_m(dob)}", TAVAN(ic_kalan / dob), "Kural (J2, O5)",
+             f"çatı kenarına gelmeyen dış duvarlar {od(ic_kalan)} m ÷ {sy(dob)} (dış duvar {dk})", D60)
+        ic_kalan = 0.0
+        terim = " + ".join(t for t, v in ((f"çatı kenarında olmayan kirişler {od(kiris_ic)} m", kiris_ic), (f"100'lük iç duvarlar {od(ust100)} m", ust100)) if v)
+    bos = ("çatı kenarına gelmeyen duvar ve kiriş yok (bütün dış duvarlar saçak ya da baş makas omegası alır)" if dk == 100 or not N.get("ic_kalan_dis_duvar_m")
+           else f"çatı kenarına gelmeyen dış duvarlar {dka} duvar omegasında; kiriş ve 100'lük iç duvar yok")
     ekle("1002", "100'lük duvar omegası", f"100 × {mm_m(dob)}", TAVAN((ic_kalan + kiris_ic + ust100) / dob), "Kural (J2, O5)",
-         uyari + (f"{terim} ÷ {sy(dob)}" if terim else "çatı kenarına gelmeyen duvar ve kiriş yok (bütün dış duvarlar saçak ya da baş makas omegası alır)"),
+         uyari + (f"{terim} ÷ {sy(dob)}" if terim else bos),
          "Portatifev E2, E3, E5, PK-07 elle tuttu; TS-01 kuralla 2, girdide kiriş yok (üretilen 0); Şablon B bilgi: E1, E4, PK-06")
     sacak_m = sum(sum(o["hatlar"]) for _c, o in C)                # bütün saçaklar (sandviç kapaması da toplamdan; kitapta da)
     # Çatı panelli (makassız) parçanın kenarları kural kitabından (`panel_cati_kenarlari`; Lokman, 10 Ekim 10:18; prefabrikte 18 Ekim 19:22):
@@ -1030,8 +1067,14 @@ def liste(N: dict, kurallar: dict | None = None, pafta: dict | None = None) -> d
     # (çıkarım: PK-07'de paftanın 2 + 2'si veranda saçağının kenarlarıdır, kitabın kenar kuralı da 2 + 2 verir)
     ob = {} if any(panelli(c) for c, _o in C) else ob0
     sob = r("sacak_omegasi_bolen_m")
-    ekle("1002", "100'lük saçak omegası", f"100 × {mm_m(sob)}", TAVAN(sacak_om / sob), "Kural (PK-01)",
-         f"saçak kenarları {od(sacak_om)} m{haric(sacak_om, sacak_m)} ÷ {sy(sob)}, bir kez yukarı", "PK-01 9, PK-02 7 tuttu")
+    # BK-25 (D-60): 160'lık dış duvarın üstündeki saçak omegası 160'lık. Verandalı ya da çok parçalı çatıda saçak omegasının bir kısmı kirişin
+    # (100 × 100) üstünde (M-01) ve duvar ile kiriş üstü ayrılmıyor: satır eski adıyla (100'lük) sayılır, satırda uyarı yazar, Lokman'a sorulur.
+    karma = dk != 100 and bool(len(C) > 1 or N["dikmeler"] or N.get("veranda_kenarlari_cm") or N.get("veranda_kirisleri_cm") or N.get("nis_agizlari_cm"))
+    sk = 100 if karma else dk
+    ekle("1002", f"{kalinlik_adi(sk)} saçak omegası", f"{sk} × {mm_m(sob)}", TAVAN(sacak_om / sob), "Kural (PK-01)",
+         ("UYARI (BK-25): 160'lık dış duvarın üstündeki saçak omegası 160'lık olmalı (D-60); verandalı ya da çok parçalı çatıda duvar ve kiriş "
+          "üstü ayrılmıyor, satır 100'lük sayıldı; Lokman'a sorulur. " if karma else "")
+         + f"saçak kenarları {od(sacak_om)} m{haric(sacak_om, sacak_m)} ÷ {sy(sob)}, bir kez yukarı", "PK-01 9, PK-02 7 tuttu")
     ps, bs = _ortak(k, "parca_boyu_m", "sacak_saci"), _ortak(k, "bindirme_m", "sacak_saci")
     ekle("1002", "Saçak sacı (30'luk, 3'ü menfezli)", f"300 × {mm_m(ps)}", TAVAN(sacak_sc / (ps - bs)) - ob.get("sacak", 0), "Kural",
          f"saçak kenarları {od(sacak_sc)} m{haric(sacak_sc, sacak_m)} ÷ {sy(ps - bs)}" + (f" − özel büküm {ob['sacak']}" if ob.get("sacak") else ""),
@@ -1088,7 +1131,12 @@ def liste(N: dict, kurallar: dict | None = None, pafta: dict | None = None) -> d
             bet += kb(c) * TAVAN(bmb["katsayi"] * 0.5 * (c["aciklik_cm"] / 100 + 2 * o["sac"]) * yuks / bmb["levha_m2"])
     ekle("1002", "Baş makas betopanı", levha("1250 × 2500", bmb["levha_m2"]), bet, "Kural (H5)", f"baş makas başına ⌈{sy(bmb['katsayi'])} × saçaklı üçgen ÷ {sy(bmb['levha_m2'])}⌉" + bm_not, "PK-01 4, PK-02 6, PK-06 6")
     acb = r("alt_cerceve_bolen_m")
-    if ic_kal >= 100:                                           # O8: iç duvar 100 → tek satır (PK-07 16)
+    if dk != 100:                                               # BK-25 (D-60): dış duvarın alt çerçevesi 160'lık, iç duvarınki iç kalınlıkta
+        ekle("1002", f"{dka} alt çerçeve", f"{dk} × {mm_m(acb)}", TAVAN(N["dis_cevre_m"] / acb), "Şablon formülü (H4)",
+             f"dış duvarlar {od(N['dis_cevre_m'])} m (veranda sayılmaz) ÷ {sy(acb)}", D60)
+        ekle("1002", f"{kalinlik_adi(ic_kal)} alt çerçeve", f"{ic_kal} × {mm_m(acb)}", TAVAN(L_duvar / acb), "Şablon formülü (H4, O8)",
+             f"{kalinlik_adi(ic_kal)} iç duvarlar {od(L_duvar)} m ÷ {sy(acb)}", "Lokman: alt çerçeve her zaman 3750")
+    elif ic_kal >= 100:                                         # O8: iç duvar 100 → tek satır (PK-07 16)
         ekle("1002", "100'lük alt çerçeve", f"100 × {mm_m(acb)}", TAVAN((N["dis_cevre_m"] + L_duvar) / acb), "Şablon formülü (H4, O8)",
              f"(dış duvarlar {od(N['dis_cevre_m'])} + 100'lük iç duvarlar {od(L_duvar)}) m ÷ {sy(acb)}", "PK-07 16 tuttu")
     else:
@@ -1625,10 +1673,14 @@ def liste(N: dict, kurallar: dict | None = None, pafta: dict | None = None) -> d
              f"özellik: metal iniş borusu → iniş {inis} × {ib['inis_borusu']} × L {mm_m(pb('inis_borusu'))}", "PK-02 tuttu")
     else:
         p0, p1 = ib_["pvc"]
+        # BK-25: L 2000 + L 500 bina yüksekliği 2500 içindir; 280'lik evde L 500 iki parça (2000 + 2 × 500 ≥ 2800)
+        n_p1 = max(1, TAVAN((H0 * 10 - float(p0[2:])) / float(p1[2:]) - 1e-9))
         ekle("1011", "70 mm PVC dere iniş borusu", p0, inis, "Kural (Lokman 13.10, R2)",
-             f"iniş {inis} × {p0} (PVC; {p0[2:]} + {p1[2:]} = bina yüksekliği 2500)", "PK-03, -05, -06, E1–E4 L 2000",
+             (f"iniş {inis} × {p0} (PVC; {p0[2:]} + {p1[2:]} = bina yüksekliği 2500)" if n_p1 == 1 else
+              f"iniş {inis} × {p0} (PVC; {p0[2:]} + {n_p1} × {p1[2:]} ≥ bina yüksekliği {mm(H0)})"), "PK-03, -05, -06, E1–E4 L 2000",
              aday=f"{inis} × {r('inis_borusu_aday')}", aday_notu=f"PK-01, E5: {r('inis_borusu_aday')}")
-        ekle("1011", "70 mm PVC dere iniş borusu", p1, inis, "Kural (PK-01)", f"iniş {inis} × {p1} (PVC)")
+        ekle("1011", "70 mm PVC dere iniş borusu", p1, inis * n_p1, "Kural (PK-01)", f"iniş {inis} × {p1} (PVC)" if n_p1 == 1 else
+             f"iniş {inis} × {n_p1} × {p1} (PVC; bina yüksekliği {mm(H0)}, BK-25)")
     for kalem, anahtar in (("Açık dirsek", "acik_dirsek"), ("Kapalı dirsek", "kapali_dirsek"), ("PVC iniş kelepçesi", "inis_kelepcesi")):
         ekle("1011", kalem, "adet", inis * ib[anahtar], "Kural", f"iniş {inis} × {ib[anahtar]}", "PK-01 ve PK-02'de tuttu")
     ekle("1011", "Dere kapağı", "adet", taban + ekp * n_cumba, "Kural (J4)",
