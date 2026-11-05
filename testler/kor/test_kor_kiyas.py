@@ -38,11 +38,11 @@ ACIK8 = ["PK-01", "PK-02", "PK-03", "PK-05", "PK-06", "PK-07", "PK-08", "TS-01"]
 # İE-29 (3 Kasım 2026, D-47; pano 145): Motor çıkıntısız çapraz cumbada da liste yazıyor; AP-06, AP-13, AP-16 aynı kararla açıldı
 # (kendi listemiz 008f48e, açılış kaydı ayrı commit) ve kaydı `acik`. İE-29 PR-2 (4 Kasım 2026, D-48): Motor tek uçlu kırmada liste
 # yazıyor, AP-27 aynı kararla ve Lokman'ın 4 Kasım 05:19 çizim onayıyla açıldı (kendi listemiz f4476db, açılış kaydı ayrı commit de98f2e);
-# AP-12 (yan yana iki cumba) Lokman'ın 4 Kasım 21:35 çizim onayıyla (kendi listemiz f13ad5b, açılış kaydı e6e3651).
-# Kör kalan dört: AP-17, 23, 24 (çizim onay bekliyor), AP-20.
+# AP-12 (yan yana iki cumba) Lokman'ın 4 Kasım 21:35 çizim onayıyla (kendi listemiz f13ad5b, açılış kaydı e6e3651); kubbeli AP-17,
+# AP-24, AP-23 (D-54) Lokman'ın 5 Kasım 12:34 çizim onayıyla (kendi listemiz 711d4eb, açılış kaydı 81acb38). Kör kalan: AP-20.
 ACILAN_IE26 = ["AP-09", "AP-11", "AP-14", "AP-15", "AP-18", "AP-21", "AP-22", "AP-25", "AP-26", "AP-28"]
 ACILAN_IE29 = ["AP-06", "AP-13", "AP-16"]
-ACILAN_IE29_PR2 = ["AP-12", "AP-27"]
+ACILAN_IE29_PR2 = ["AP-12", "AP-17", "AP-23", "AP-24", "AP-27"]
 ACILAN = sorted(ACILAN_IE26 + ACILAN_IE29 + ACILAN_IE29_PR2)
 KOR_KALAN = [k for k in KOR19 if k not in ACILAN]
 IE26_KARAR = "karar kartı 2 Kasım 2026 21:48:56 UTC: \"Hepsi açılsın\""
@@ -442,7 +442,7 @@ def test_muhur_yalniz_kod_ve_ozet_tasir(muhur):
     for r in muhur["dosyalar"]:
         assert set(r) <= alanlar, r["kod"]
         assert all(k[:3] in ("PK-", "TS-", "AP-") and len(k) == 5 for k in r["kod"])
-    assert muhur["sayilar"] == {"acik": 32, "kaynak": 32, "kor": 4, "kapali": 14}               # İE-27: on açılmış ev `acik`; İE-29: beş ev daha
+    assert muhur["sayilar"] == {"acik": 35, "kaynak": 32, "kor": 1, "kapali": 14}               # İE-27: on açılmış ev `acik`; İE-29: sekiz ev daha
     assert Counter(r["durum"] for r in muhur["dosyalar"]) == muhur["sayilar"]          # özet dosyadaki sayıyla değil, yeniden sayılır
 
 
