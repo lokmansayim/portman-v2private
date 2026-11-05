@@ -123,6 +123,7 @@ def test_ad_ve_numara_yok(paketler):
         else:
             continue
         t = re.sub(r"`[0-9a-f]{64}`|`[A-Za-z0-9_-]{25,40}`|\b[0-9a-f]{64}\b", "", t)      # SHA-256 ve Drive kimliği
+        t = re.sub(r"data:image/[a-z]+;base64,[A-Za-z0-9+/=]+", "", t)   # gömülü görüntü (İE-15 K6: rehberin altındaki ön onay sayfası); yazı değil
         assert numara.maskele(t) == t, p.name
     html = (kok / "prefabrik" / "TK-01" / "TK-01_montaj_rehberi.html").read_text(encoding="utf-8")
     assert "<title>TK-01 Montaj Rehberi</title>" in html
@@ -354,6 +355,8 @@ def _yazilar(klasor: Path) -> dict[str, str]:
     for p in klasor.iterdir():
         if p.suffix in (".md", ".html", ".ifc"):
             out[p.name] = p.read_text(encoding="utf-8", errors="replace")
+            if p.suffix == ".html":                 # İE-15 K6: rehberin altındaki sayfa ön onay PDF'inin görüntüsü (yazısı PDF'te okunur)
+                out[p.name] = re.sub(r"data:image/[a-z]+;base64,[A-Za-z0-9+/=]+", "", out[p.name])
         elif p.suffix == ".xlsx":
             out[p.name] = "\n".join(str(c) for ws in load_workbook(p).worksheets for r in ws.iter_rows(values_only=True) for c in r if c is not None)
         elif p.suffix == ".pdf":
@@ -392,7 +395,11 @@ def test_is_emri_ile_paket(paketler, tmp_path):
         sat = lambda p: list(load_workbook(p).active.iter_rows(min_row=2, values_only=True))
         assert sat(b / f"TK-98_yukleme_listesi_{s}.xlsx") == sat(a / f"TK-01_yukleme_listesi_{s}.xlsx"), s
     html = (b / "TK-98_montaj_rehberi.html").read_text(encoding="utf-8")
-    assert html.replace("TK-98", "TK-01").replace("TK98", "TK01") == (a / "TK-01_montaj_rehberi.html").read_text(encoding="utf-8")
+    ka = (a / "TK-01_montaj_rehberi.html").read_text(encoding="utf-8")
+    # İE-15 K6: rehberin altındaki ön onay sayfası görüntüdür, antetinde kod yazar (TK-98 / TK-01): görüntü dışında aynı, sayfa ikisinde de
+    kagit = re.compile(r'"src":"data:image/jpeg;base64,[A-Za-z0-9+/=]+"')
+    assert len(kagit.findall(html)) == len(kagit.findall(ka)) == 1
+    assert kagit.sub('"src":""', html).replace("TK-98", "TK-01").replace("TK98", "TK01") == kagit.sub('"src":""', ka)
     yazi = _yazilar(b)
     # antette kime ait ve m² (D-31 madde 14, Lokman 29 Ekim 2026 13:13; önceden "PORTMAN | Bayi TK-98 / TK-98 | İş Emri"); brüt verandayla (D-49; TK-01 r06, listedeki bina_m2 90,211)
     assert "PORTMAN | Bayi TK-98 / TK-98 | 90,21 m² brüt · 72,71 m² net | İş Emri" in yazi["TK-98_cizim.dxf"] and "'TK-98 " in yazi["TK-98_model.ifc"]

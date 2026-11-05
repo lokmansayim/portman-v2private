@@ -158,6 +158,13 @@ def test_yavru_makas_ap06_paftasindaki_gibi(tk04):
     birim = 100 if max(xs) < 50 else 1                                                     # IFC metre ya da cm
     assert (round(min(xs) * birim, 1), round(max(xs) * birim, 1)) == (94.2, 292.3)
     assert round((min(ys) + max(ys)) / 2 * birim, 2) == 56.75
+    # kural kurulamazsa (dar cumba: uçlar derelerin dışında) makas D-47'nin yerinde kalır, uyarı yazılır; çatı yine kurulur (geometri hakemi)
+    dar = copy.deepcopy(ie)
+    dar["cati"]["cumbalar"][0].update(bas_cm=0, bit_cm=300)
+    T2 = CC.tanim(G.kur(copy.deepcopy(dar)), copy.deepcopy(dar))
+    y2 = next(q for q in T2["parcalar"] if q["rol"] == "cumba")["makaslar"][1]
+    assert y2["konum"] == 130.5 and "uclar" not in y2
+    assert any("yavru makas AP-06'nın kuralıyla kurulamadı" in u for u in T2["uyarilar"])
 
 
 def test_yuzler_dere_ve_kaplama(tk04):

@@ -15,7 +15,8 @@ liste (`prefabrik_liste._capraz_cumba_catilari`) aynı kuralla kendisi sayar, ka
   cumbanın baş makası (kalkan duvarının üstünde), ötekiler ana çatının üstünde (yavru makas; paftada "iki ana makasın arasında kısa").
   Ana çatının üstündeki ilk makasın yeri ve boyu AP-06 paftasından (`kurallar/yerlesim/prefabrik.json › cumba_yavru_makasi`; Lokman,
   5 Kasım 2026 00:45): baş makasın iç yüzünden net 46,75 geride, cumba mahyasının iki yanındaki ana makaslara oturur, uçları onların
-  ekseninden 36,3 taşar (`uclar`, `oturdugu`). Ötekiler 125,5 aralığında, iki dere arasında.
+  ekseninden 36,3 taşar (`uclar`, `oturdugu`). Kural kurulamazsa (dar cumba, mahyanın altında ana makas) D-47'nin yeri ve uyarı.
+  Ötekiler 125,5 aralığında, iki dere arasında.
 
 Çıkıntılı cumba (AP-22: gövde girintili) ve birden çok cumba bu sürümde yok: `PrefabrikCatiHatasi` (yanlış çatı kurulmaz).
 """
@@ -42,22 +43,27 @@ def yavru_kurali() -> dict:
     return {"net": float(k["bas_makastan_net_cm"]["deger"]), "tasma": float(k["tasma_cm"]["deger"]), "kalinlik": float(k["makas_kalinligi_cm"]["deger"])}
 
 
-def _yavru_yeri(t: dict, cumba: dict, m: dict, ana_konum: list[float]) -> dict:
+def _yavru_yeri(t: dict, cumba: dict, m: dict, ana_konum: list[float]) -> tuple[dict | None, str | None]:
     """Ana çatının üstündeki ilk cumba makası (`yavru_kurali`, AP-06 paftası): baş makasın ekseninden kalınlık + net aralık geride; cumba
-    mahyasının iki yanındaki ana makaslara oturur, uçları onların ekseninden `tasma` dışarıda. Uçlar o kesitte derelerin arasında kalmalı."""
+    mahyasının iki yanındaki komşu ana makaslara oturur, uçları onların ekseninden `tasma` dışarıda. Dönen (yer, None) ya da kuralın
+    kurulamadığı evde (None, uyarı): mahyanın iki yanında ana makas yok, bir ana makas mahyanın altında (kural bu durumu söylemiyor) ya
+    da uçlar o kesitte derelerin dışında (dar cumba). O zaman makas D-47'nin yerinde kalır, uyarı raporlanır (K16; geometri hakemi)."""
     Y = yavru_kurali()
     konum = m["konum"][0] + m["ic"] * (Y["kalinlik"] + Y["net"])
     um = (cumba["b"][0] + cumba["b"][1]) / 2
-    sol = max((x for x in ana_konum if x < um - TOL), default=None)
-    sag = min((x for x in ana_konum if x > um + TOL), default=None)
+    on = "makas yeri (cumba): yavru makas AP-06'nın kuralıyla kurulamadı"
+    if any(abs(x - um) <= Y["kalinlik"] for x in ana_konum):
+        return None, f"{on} (cumba mahyasının altında ana makas var); D-47'nin yerinde"
+    sol = max((x for x in ana_konum if x < um), default=None)
+    sag = min((x for x in ana_konum if x > um), default=None)
     if sol is None or sag is None:
-        raise PrefabrikCatiHatasi(f"cumbanın yavru makası: mahyanın ({um:g}) iki yanında ana makas yok, oturacağı yer kurulamaz")
+        return None, f"{on} (mahyanın iki yanında ana makas yok); D-47'nin yerinde"
     e0, e1 = sol - Y["tasma"], sag + Y["tasma"]
     u0, u1 = yavru_acikligi(t, cumba, konum)
     if not (u0 < e0 and e1 < u1):
-        raise PrefabrikCatiHatasi(f"cumbanın yavru makası ({konum:g}): uçları {e0:g}–{e1:g} derelerin ({u0:g}–{u1:g}) dışına taşıyor")
+        return None, f"{on} (uçlar {e0:g}–{e1:g} o kesitte derelerin {u0:g}–{u1:g} dışında); D-47'nin yerinde"
     return {"konum": round(konum, 2), "uzaklik": round(abs(konum - m["dis"]), 2), "uclar": [round(e0, 2), round(e1, 2)],
-            "oturdugu": [round(sol, 2), round(sag, 2)]}
+            "oturdugu": [round(sol, 2), round(sag, 2)]}, None
 
 
 def _mahya_kenari(t: dict) -> dict:
@@ -167,7 +173,11 @@ def tanim(plan: G.Plan, ie: dict) -> dict:
              "makas_yeri": (f"kalkan duvarının ekseninden {MOD:g} arayla, derelerin birleştiği yere kadar (D-47); ana çatının üstündeki ilki "
                             "iki ana makasa oturur, AP-06 paftasındaki gibi (`cumba_yavru_makasi`)"), "komsu": "ana çatı"}
     if len(cumba["makaslar"]) > 1:
-        cumba["makaslar"][1].update(_yavru_yeri(t, cumba, m, [mk["konum"] for mk in ana["makaslar"]]))
+        yer_, uyari_ = _yavru_yeri(t, cumba, m, [mk["konum"] for mk in ana["makaslar"]])
+        if yer_:
+            cumba["makaslar"][1].update(yer_)
+        else:
+            uyarilar = uyarilar + [uyari_]
     return {**t, "capraz": True, "parcalar": [ana, cumba], "uyarilar": uyarilar}
 
 
