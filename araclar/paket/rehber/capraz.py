@@ -40,7 +40,7 @@ def cati(HZ: dict, plan, kitap: dict, IFC: dict, ASIK: dict, SC: float, TAN: flo
          Desteklenmiyor, _r, fmt, fmtc, kucuk, ASMA: bool, W: float, DY: float) -> dict:
     """Rehberin çatı verisi (`girinti.cati` ile aynı anahtarlar: `RF`, `makas`, `omega_duvar`, `sacak`, `kalkan`, `yuz`, `asik`, kaplama
     mahyası, `izo`, dere ve iniş) ve adım yazılarının sayıları. `IFC`: kart modelinin kutuları (makas alt başlığı, aşık, iniş); `ASIK`:
-    aşıkların yüz ve sıra bilgisi."""
+    aşıkların yüz ve sıra bilgisi, inişlerin düzlemi (kart modelinin parça seti)."""
     from motor.cati_capraz import yavru_acikligi
     from motor.genel import cati_genel
     from motor.yerlesim.serit import _ortulu
@@ -301,7 +301,9 @@ def cati(HZ: dict, plan, kitap: dict, IFC: dict, ASIK: dict, SC: float, TAN: flo
             continue
         xc, yc = (kt[0] + kt[3]) / 2, (kt[1] + kt[4]) / 2
         uc_ = lambda h: (yc, xc) if h["dik"] else (xc, yc)             # noqa: E731 (inişin yeri: hat boyunca, hatta dik)
-        h = min(hatlar, key=lambda h: abs(uc_(h)[1] - h["ys"]) + (0 if h["r0"] - 10 <= uc_(h)[0] <= h["r1"] + 10 else 1e4))
+        aday = [h for h in hatlar if h["dz"] == (ASIK.get(n) or {}).get("Cati")] or hatlar   # kart modelinin yazdığı düzlemin hattı (geometri
+        h = min(aday, key=lambda h: abs(uc_(h)[1] - h["ys"]) + (0 if h["r0"] - 10 <= uc_(h)[0] <= h["r1"] + 10 else 1e4))   # hakemi: köşedeki
+        # iniş yakın olan öteki hatta düşüyordu)
         ax, rc = (1, yc) if h["dik"] else (0, xc)                       # iniş hattın koştuğu eksende rc'de; duvarlar hatta paralel
         duvar = sorted((d.a0 - d.h, d.a1 + d.h) for d in plan.duvarlar if d.tur == "dis" and d.yon == ("y" if h["dik"] else "x")
                        and abs((d.c - h["ic"] * d.h) - h["yd"]) < 0.6)
@@ -318,6 +320,8 @@ def cati(HZ: dict, plan, kitap: dict, IFC: dict, ASIK: dict, SC: float, TAN: flo
         if not uclar:
             raise Desteklenmiyor(f"kart modelinin inişi {n}: {h['ad']} saçağının altında duvar ya da kolon yok")
         _d, s, tur = min(uclar)
+        if h["dik"] and tur == "duvar":                                  # cumbanın kısa yan saçağı: iniş derenin boyunda, duvarın köşesinde
+            s = min(max(s, h["r0"] + (kt[4 - ax] - kt[1 - ax]) / 2), h["r1"] - (kt[4 - ax] - kt[1 - ax]) / 2)   # (geometri hakemi)
         if tur == "kolon":
             inisler.append({"hat": h["ad"], "s": _r(h["a1"] if rc > s else h["a0"]), "yuz": _r(h["yd"]), "duvar": "veranda kolonu", "sw": _r(s)})
         else:

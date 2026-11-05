@@ -238,6 +238,15 @@ def test_ana_makaslar_cumba_makasinin_arkasindan(tk04):
         CP.cati(G.kur(copy.deepcopy(bozuk)), bozuk)
 
 
+def test_inisler_kendi_hatlarinda(tk04):
+    """Rehberin inişleri kart modelinin yazdığı düzlemin hattında (geometri hakemi, İE-15 K6 dördüncü tur: ön saçağın sol uç inişi yakın
+    olan cumbanın kısa hattına düşüyor, o hat iki iniş alıyordu); cumbanın kısa yan saçaklarının inişi derenin boyunda (-30 … 7,5)."""
+    ini = tk04["d"]["dere"]["inisler"]
+    assert Counter(i["hat"] for i in ini) == {"ana çatı ön (cumbanın sağı)": 2, "ana çatı arka": 3, "cumba sol yanı": 1, "cumba sağ yanı": 1}
+    hat = {h["ad"]: h for h in tk04["d"]["dere"]["hatlar"]}
+    assert all(hat[i["hat"]]["a0"] <= i["s"] <= hat[i["hat"]]["a1"] for i in ini if i["hat"].startswith("cumba"))
+
+
 def test_yuzler_dere_ve_kaplama(tk04):
     d, L = tk04["d"], tk04["L"]
     Y = d["yuz"]
@@ -289,3 +298,39 @@ def test_seksenlik_trapez_kor_is_emrinde(kod, kp03, ck07):
     assert next(s["olcu"] for s in L if s["kalem"] == "Trapez sac mahyası") == "L 800"
     for k, on in (("CK-03", "Alın sacı"), ("CK-04", "Baş makas Z'si"), ("CK-01", "100'lük saçak omegası"), ("CK-02", "Saçak sacı")):
         assert say["kesim_plani"][k]["stok"] == _liste(L, on), k
+
+
+@pytest.fixture(scope="module")
+def tk04_r05(tmp_path_factory):
+    from motor import kart_model, prefabrik_liste as PL
+    from araclar.paket.rehber import veri
+    ie = _oku(IE.with_name("TK04_r05.json"))
+    kart = tmp_path_factory.mktemp("tk04_r05")
+    kart_model.uret(copy.deepcopy(ie), kart, "TK04")
+    L = PL.is_emrinden(copy.deepcopy(ie))["satirlar"]
+    return {"d": veri.kur(copy.deepcopy(ie), kart, "TK04", L, "TK-04"), "say": _oku(kart / "TK04_kart_sayim.json"), "L": L}
+
+
+def test_r05_anahtarsiz_eski_yol(tk04_r05):
+    """`ana_makas` anahtarı olmayan çapraz cumba (TK-04 r05) eski yoldan: ana makaslar saçaktan saçağa (gövdenin önünden), kart modeli
+    listeyle aynı, rehber r05'teki gibi (geometri hakemi, İE-15 K6 dördüncü tur: r06'ya geçen dosyada anahtarsız yolun koruması kalmıştı)."""
+    say, L, d = tk04_r05["say"], tk04_r05["L"], tk04_r05["d"]
+    assert say["kural_yok"] == [] and say["sema_hatasi"] == {"bugunku_ifc": 0, "kart_modeli": 0}
+    adet = {k["kod"]: k["adet"] for k in say["kartlar"]}
+    yerlesen = {"MA-01": "Makas (baş)", "MA-02": "Makas (orta)", "MA-05": "Yavru makas · cumba", "KP-03": "Trapez sac",
+                "BT-01": "Baş makas betopanı", "DR-02": "Metal dere inişi aparatı"}
+    assert {k: adet[k] for k in yerlesen} == {k: _liste(L, on) for k, on in yerlesen.items()} == {
+        "MA-01": 2, "MA-02": 6, "MA-05": 2, "KP-03": 25, "BT-01": 9, "DR-02": 5}
+    boyla = {"AS-01": "Aşık", "DR-01": "Metal dere", "CK-01": "100'lük saçak omegası", "CK-02": "Saçak sacı", "CK-03": "Alın sacı",
+             "CK-04": "Baş makas Z'si", "CK-07": "Trapez sac mahyası"}
+    assert {k: say["kesim_plani"][k]["stok"] for k in boyla} == {k: _liste(L, on) for k, on in boyla.items()} == {
+        "AS-01": 43, "DR-01": 4, "CK-01": 6, "CK-02": 7, "CK-03": 11, "CK-04": 10, "CK-07": 13}
+    assert {s["olcu"] for s in L if s["kalem"].startswith("Makas (")} == {"açıklık 8985"}
+    W, DY = d["dis"]
+    assert sorted((o["perp"], o["a0"], o["a1"]) for o in d["omega_duvar"] if o["tur"] == "sacak") == [(5, 416.5, W), (DY - 5, 0, W)]
+    assert {(x["bas"], x["son"]) for x in d["makas"] if x["aile"] == "ana"} == {(-30.0, 928.5)}
+    assert sorted(s["ad"] for s in d["sacak"]) == ["ana çatı arka saçağı", "ana çatı ön (cumbanın sağı) saçağı"]
+    assert all("not" not in s for s in d["sacak"]) and len(d["dere"]["inisler"]) == 5
+    kp = next(a for a in d["adimlar"] if a.get("ad") == "Trapez sac ve mahya")
+    assert [r[1:3] for r in kp["rows"] if r[3:] == ["liste"]] == [["Trapez sac · ana çatı L 5100", "20 adet"], ["Trapez sac · cumba L 2410", "5 adet"],
+                                                              ["Trapez sac mahyası L 1000", "13 adet"], ["Mahya bandı rulo 10 m", "2 adet"]]

@@ -615,7 +615,7 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
     elif CAP:                                     # İE-15 K6: beşik + çapraz cumba; çatı çatı tanımından (ana çatı + cumba, `capraz.py`)
         if VR:
             raise Desteklenmiyor("çapraz cumbada gövdeden taşan veranda; rehber ikisini birlikte kurmuyor")
-        GC = capraz.cati(HZ, plan, kurallari_oku()["ortak"], IFC, ifc_parcalar(kart / f"{kart_kodu}_model.ifc", r"^ASIK_\d+$"), SC, TAN, COS,
+        GC = capraz.cati(HZ, plan, kurallari_oku()["ortak"], IFC, ifc_parcalar(kart / f"{kart_kodu}_model.ifc", r"^(ASIK|INIS)_\d+$"), SC, TAN, COS,
                          SAYIM["yerlesim"]["baslangic"], ls, PI, Desteklenmiyor, _r, fmt, fmtc, kucuk, ASMA, W, DY)
         RF, makas, omega_duvar, tepe = GC["RF"], GC["makas"], GC["omega_duvar"], GC["tepe"]
         n_ma05 = sum(k["adet"] for k in SAYIM["kartlar"] if k["kod"] == "MA-05")      # yavru makasın kartı (MA-05) kart modelinden
