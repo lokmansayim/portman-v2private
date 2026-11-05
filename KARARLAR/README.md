@@ -100,6 +100,8 @@ Biçim: karar · gerekçe · reddedilen seçenekler · geri alma yolu · kim ve 
 | [D-53](D-53.md) | Saçak omegası kuralı (M-01) beşik + cumba çatıda da (kural aynı; mühür açıldı ve yeniden mühürlendi); kart modeli ve montaj rehberi beşik + çıkıntısız çapraz cumbayı kurar, yeni kart MA-05 yavru makas; trapez sac çatı kart modelinde ve rehberde, yeni kartlar KP-03 trapez sac ve CK-07 trapez sac mahyası (D-50 okunur) (İE-15 K6; TK-04 r05, AP-13, AP-16) | 4.11 (Lokman 20:51 kartı) |
 | [D-58](D-58.md) | TK-04 r07: veranda 30 cm saçak kalacak kadar içeri (ön kiriş ön dış yüzden 37,5; girinti + ek aks), kirişin salon duvarına geldiği yere 250 cm kolon (İş Emri dikmesi); çizimde içeri alınan verandanın ağzı da profil (İş Emri `girinti_kirisi`), dış parça ölçüsü kirişte bölünür (37,5 + 155,75), yazısına özel pano ölçüsü binmez (PC-33; BK-24) | 5.11 (Lokman 11:00) |
 | [D-59](D-59.md) | Birleştirmeyi Lokman yapar: oturum PR'ı hazırlar, doğrulamayı koşturur (kırmızıda kendisi düzeltir), yeşilse bağlantıyı verir; `main`'e birleştirmez ve denemez. D-43'ün birleştirme kısmının yerini alır | 5.11 (Lokman 12:35) |
+| [D-61](D-61.md) | TK-04 listesi: çıkıntısız çapraz cumbanın ana çatı üstündeki makası kısa (boy çatı tanımından), cumba ile ana çatının köşesinde tek iniş, iki ucu kolonlu açık kenarda kiriş kolonun yüzünden yüzüne (− 2 × 10); saçak omegası 7 (M-01) | 5.11 (Lokman 22:49 kartı "Öneriyle düzelt") |
+| [D-62](D-62.md) | Prefabrik fiyatlar 45. hafta listesinden: yeni defter `kurallar/fiyat/defter_2026-11.json` (r11, araçların varsayılanı); TK-04'ün listede karşılığı olan bütün kalemleri onaylı (birebir, yöntemle hesap, yakın), listede olmayan eski fiyatında; r10 defteri eski teklifi aynen verir | 5.11 (Lokman 23:00 "fiyatları buradan al", 23:10 "Hepsini al") |
 
 ## Numara defteri (14 Ekim 2026, BK-08; CIO planı › Görev 3)
 
@@ -142,6 +144,8 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | D | D-45 | kör ölçüm farklarından liste kuralları ve kıyas (Lokman 3.11 09:52, öneri tablosunun cevapları) | yazıldı (3.11; İE-27, `claude/project-thread-wwx1p0`) |
 | D | D-53 | M-01 beşik + cumbada da; kart modeli ve montaj rehberi çapraz cumbayı ve trapez sacı kurar, MA-05, KP-03, CK-07 (Lokman 4.11 20:51; TK-04 montaj rehberi) | yazıldı (4.11; İE-15 K6, `claude/project-thread-xwohu4`) |
 | D | D-58 | TK-04 r07 veranda içeri, salon duvarına kolon; içeri alınan veranda ağzı çizimde profil (Lokman 5.11 11:00) | yazıldı (5.11; BK-24, `claude/project-thread-jlqian`) |
+| D | D-61 | TK-04 listesi: kısa cumba makası, köşede tek iniş, iki kolon arası kiriş (Lokman 5.11 22:49 kartı) | yazıldı (5.11; İE-13 PR-10, `claude/project-thread-tr7mtv`) |
+| D | D-62 | 45. hafta fiyat listesi, defter r11 `defter_2026-11.json` (Lokman 5.11 23:00, 23:10) | yazıldı (5.11; İE-13 PR-10, `claude/project-thread-tr7mtv`) |
 | D | **D-46** | — | **sıradaki boş** |
 | İE | İE-01–İE-08 | bu depo (`main`) | yazıldı |
 | İE | İE-09 | model atölyesi: kontrollü model üretimi ve banka hattı (Görev 6e; pano 30; P6001 güncellemesi kapsam dışı) | alındı (16.10; `claude/gorev-6e-model-atolyesi-rnhtcp`; PR-1 banka hattı 29.10, `claude/project-thread-rhjgzv`) |
