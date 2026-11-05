@@ -172,9 +172,9 @@ def ek_satirlari(T: dict, sec: dict) -> tuple[str, str, list[tuple[str, str, str
     for ad, ss in gruplar.items():
         satir.append(("grup", ad, f"<tr class='grup'><td colspan='{n}'>{e(buyuk(ad))}</td></tr>"))
         for s in ss:
-            olcu, birim = gorunen(s.get("olcu"), s.get("birim"))
+            olcu, birim = gorunen(s.get("teklif_olcu") or s.get("olcu"), s.get("birim"))
             bos = " class='sag nw bos'" if s["birim_fiyat"] is None or eksik(s) else " class='sag nw'"
-            hucre = [f"<td{w(0)}>{e(s['kalem'])}</td>", f"<td{w(1)} class='nw'>{e(olcu)}</td>", f"<td{w(2)} class='orta'>{e(birim)}</td>",
+            hucre = [f"<td{w(0)}>{e(s.get('teklif_adi') or s['kalem'])}</td>", f"<td{w(1)} class='nw'>{e(olcu)}</td>", f"<td{w(2)} class='orta'>{e(birim)}</td>",
                      f"<td{w(3)} class='sag'>{e(s.get('adet') if s.get('adet') is not None else '')}</td>"]
             if kg:
                 hucre.append(f"<td{w(4)} class='sag'>{e(sayi(s['kg']) if s.get('kg') is not None else '')}</td>")

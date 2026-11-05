@@ -106,6 +106,11 @@ def makas_bul(s: dict, kural: dict | None) -> tuple[dict, float, float] | None:
     return kural, float(int(kg * kural["kg_fiyat"] + 0.5)), kg
 
 
+# Teklifte yazılan ad ve ölçü (defter kaydında varsa; r09, Lokman 4 Kasım 23:24 "'METAL TAHTA L:2800 (GALVANİZ)' Yaz"): satıra geçer; iç ad
+# (`kalem`), ölçü ve anahtar aynı kalır. Fiyatlı liste ve teklif (Excel, PDF) bu ikisini gösterir (`liste_excel`, `teklif_pdf`).
+YAZILAN = ("teklif_adi", "teklif_olcu")
+
+
 def fiyatla(L: dict, defter: dict, hat: str | None = None, oneri: bool = False) -> dict:
     """Her satıra fiyat, tutar ve kaynak; özet (toplam, grup toplamları, fiyatsız satırlar). Listeyi değiştirmez."""
     hat = hat or hat_bul(L)
@@ -165,7 +170,8 @@ def fiyatla(L: dict, defter: dict, hat: str | None = None, oneri: bool = False) 
         satirlar.append({"sira": i, "grup": s.get("grup"), "grup_adi": s.get("grup_adi"), "kalem": s["kalem"], "olcu": s.get("boyut") if hat == "celik" else s.get("olcu"),
                          "birim": birim, "adet": s.get("adet"), "kg": s.get("kg"), "birim_fiyat": fiyat, "tutar": tutar,
                          "durum": durum, "kaynak": kaynak, "kaynak_adi": (defter["kaynaklar"].get(kaynak) or {}).get("kisa") if kaynak else None,
-                         **({"oneri_fiyat": oneri_fiyat} if oneri_fiyat is not None else {})})
+                         **({"oneri_fiyat": oneri_fiyat} if oneri_fiyat is not None else {}),
+                         **{a: g[a] for a in YAZILAN if g and g.get(a)}})
     return {"hat": hat, "defter_surumu": defter.get("surum"), "oneri_dahil": oneri, "satirlar": satirlar,
             "ozet": {"toplam": round(toplam, 2), "onayli_fiyatlarla": round(onayli, 2), "onerilerle": round(oneri_toplam, 2),
                      "satir": len(satirlar), "fiyatli": sum(1 for x in satirlar if x["tutar"] is not None),
