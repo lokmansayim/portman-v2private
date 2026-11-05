@@ -186,6 +186,24 @@ def kalinlik_adi(kal_mm: int) -> str:
     return "100'lük" if kal_mm >= 100 else "60'lık"
 
 
+def bina_brut_cm2(plan) -> float:
+    """Brüt (cm²): yükleme listesindeki `bina_m2` ve ön onay antedindeki brüt m²'nin tek kaynağı (D-49 madde 2; D-28 madde 1: aynı sayıyı
+    iki kod üretmez, `dxf_out.alan_yazisi` bunu okur). Gövde, veranda ve dikmelerin dış kutusu; taşan verandada gövde kutusu + veranda
+    (BK-14, dış kutunun boş köşeleri sayılmaz); girintili gövdede gövdenin dış çizgisi (İE-24)."""
+    from . import geometry as G
+    from shapely.geometry import box
+    from shapely.ops import unary_union
+    g = unary_union([plan.footprint()] + [m.poly for m in plan.mahaller.values() if m.poly is not None] + [box(*r) for r in plan.dikmeler])
+    bx0, by0, bx1, by1 = g.bounds
+    brut = (bx1 - bx0) * (by1 - by0)
+    if plan.dis_verandalar:
+        gx0, gy0, gx1, gy1 = G.govde_kutusu(plan)
+        brut = (gx1 - gx0) * (gy1 - gy0) + sum((v["rect"][2] - v["rect"][0]) * (v["rect"][3] - v["rect"][1]) for v in plan.dis_verandalar)
+    if plan.girintili:
+        brut = G.govde_cokgeni(plan).area
+    return brut
+
+
 def model_motor(ie: dict) -> dict:
     from . import geometry as G
     from shapely.geometry import LineString, Point, box
@@ -308,18 +326,15 @@ def model_motor(ie: dict) -> dict:
         dis_kenar_sira.append(len(kirisler))                   # `kenarlar`: dış, yan 1, yan 2
         kirisler += [max(x1 - x0, y1 - y0) for (x0, y0, x1, y1) in v["kenarlar"]]
     t_dis = 2 * next(d.h for d in plan.duvarlar if d.tur == "dis")
-    brut = W * D
+    brut = bina_brut_cm2(plan)                                 # D-49: antet de bunu okur; BK-14 taşan veranda, İE-24 girintili gövde orada
     if plan.dis_verandalar:                                    # BK-14: ana çatı gövdeyi örter; brüt gövde + veranda, dış kutunun boş köşeleri sayılmaz
         gx0, gy0, gx1, gy1 = G.govde_kutusu(plan)
         GW, GD = gx1 - gx0, gy1 - gy0
-        brut = GW * GD + sum((v["rect"][2] - v["rect"][0]) * (v["rect"][3] - v["rect"][1]) for v in plan.dis_verandalar)
     else:
         GW, GD = W, D
     aciklik, bina_boyu = (GW, GD) if mx else (GD, GW)
     serit = None
     from . import cati_serit as _cs
-    if plan.girintili:                                         # İE-24: brüt gövdenin dış çizgisi (açık mahal dahil); girinti gözleri sayılmaz
-        brut = G.govde_cokgeni(plan).area
     if c.get("tip") == "besik_cumba":                          # İE-17 PR-1b/K7: beşik + çıkıntılı çapraz cumba (AP-22), çizimdeki çatıdan
         serit = _capraz_cumba_catilari(plan, ie)
     elif plan.girintili or _cs.mahal_catilari_var(ie):         # İE-24 girintili gövde; İE-17 PR-1b/K7 açık mahalin kendi çatısı (AP-09, AP-03)

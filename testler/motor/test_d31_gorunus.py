@@ -287,14 +287,15 @@ def test_kot_yalniz_on_ve_sag_gorunuste(tk02):
 
 
 def test_antette_kime_ait_ve_m2(tmp_path):
-    """Madde 14 (Lokman 13:13): antette kime ait (bayi / müşteri; boşu yazılmaz) ve m² (brüt: nişsiz gövdenin dış yüzü, net: kapalı odalar)."""
+    """Madde 14 (Lokman 13:13): antette kime ait (bayi / müşteri; boşu yazılmaz) ve m² (net: kapalı odalar). Brüt D-49'dan beri (Lokman
+    4.11 14:24, "çatı kapattığı için" veranda dahil) çatının örttüğü oturum: gövde 898,5 × 888,5 + ön veranda 386 × 181 + arka 266 × 130."""
     ie = _ie("TK02")
-    assert dxf_out.alan_yazisi(G.kur(copy.deepcopy(ie))) == "78,38 m² brüt · 71,45 m² net"
+    assert dxf_out.alan_yazisi(G.kur(copy.deepcopy(ie))) == "90,28 m² brüt · 71,45 m² net"
     ie["talep"]["bayi"]["ad"], ie["talep"]["musteri_adi"] = "", "Müşteri A"
     m = dxf_out.uret(ie, tmp_path)
     doc = ezdxf.readfile(tmp_path / m["dxf"])
     antet = [e.dxf.text for e in doc.modelspace().query("TEXT") if e.dxf.text.startswith("PORTMAN |")]
-    assert antet == ["PORTMAN | Müşteri A | 78,38 m² brüt · 71,45 m² net | İş Emri PM-TK02-80M2 r03"]
+    assert antet == ["PORTMAN | Müşteri A | 90,28 m² brüt · 71,45 m² net | İş Emri PM-TK02-80M2 r03"]
 
 
 ODA_M2_EVLER = {"TK02": VERI / "TK02.json", "TK01_r06": KOK / "araclar" / "paket" / "girdi" / "TK01_r06.json", "PK01": VERI / "PK01.json",
