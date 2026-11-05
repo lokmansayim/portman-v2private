@@ -267,7 +267,8 @@ def test_liste_teras_paneli_panel_cati():
     değil"): yavru makas ve aşık yok; teras başına bir "Teras paneli (hafif çelik C 80)" 80 × 0,8 (paftada P1, P2; gerçek listede PANEL
     80 × 0,8: 2); trapez duvardan panelin dış kenarına, eğik boyuyla (D-52 ek: %10'da 140,7 + taşma 5 → 1460; paftada trapez 150 × 6 + 6).
     Kolon dış kirişin altına kadar: L 2100 × 4 (gerçek listede 2100 × 4); yan kiriş yok, yalnız iki dış kiriş (D-56). Arka terasın komple cam PVC kapısı ayrı satır 900 × 2100 (gerçek
-    listede PVC KAPI + BEYAZ 90 × 210: 1); öteki dış kapı çelik."""
+    listede PVC KAPI + BEYAZ 90 × 210: 1); öteki dış kapı çelik. Damlalık L 2800, ön ve arka terasın genişliği birlikte ÷ 2,8 (D-57; Lokman,
+    5 Kasım 2026 11:02: "teras genişliği kadar ama L:2800 alacaksın ön ve arka terasın genişliğin bir hesapla ve 2800'e böl")."""
     from motor import prefabrik_liste as PL
     L = PL.is_emrinden(_ap26())
     k = {(s["kalem"], s["olcu"]): s for s in L["satirlar"]}
@@ -279,6 +280,8 @@ def test_liste_teras_paneli_panel_cati():
     assert [(s["olcu"], s["adet"]) for s in kolon] == [("L 2100", 4)]
     kiris = [(s["olcu"], s["adet"]) for s in L["satirlar"] if s["kalem"].startswith("Kutu profil (kiriş)")]
     assert sorted(kiris) == [("L 4385,8", 1), ("L 4795,8", 1)]                      # D-56: yalnız iki dış kiriş (gerçek liste 4386, 4796)
+    (dam,) = [s for s in L["satirlar"] if s["kalem"] == "Damlalık"]
+    assert (dam["olcu"], dam["adet"]) == ("L 2800", 4)                                 # D-57: (479,58 + 438,58) ÷ 280 = 3,28 → 4
     kapi = [(s["kalem"], s["olcu"], s["adet"]) for s in L["satirlar"] if s["grup"] == "1003" and "kapı" in s["kalem"] and "Amerikan" not in s["kalem"]]
     assert kapi == [("PVC kapı (beyaz, komple cam)", "900 × 2100", 1), ("Prefabrik çelik kapı (SOL)", "900 × 2000", 1)]
 
@@ -293,7 +296,7 @@ def test_liste_teras_paneli_yoksa_ayni():
         a.pop("kapi_turu", None)
     L = PL.is_emrinden(ie)
     assert [s["olcu"] for s in L["satirlar"] if s["kalem"].startswith("Özel kutu profil (kolon)")] == ["L 2500"]
-    assert not any(s["kalem"].startswith(("PVC kapı", "Teras paneli")) for s in L["satirlar"])
+    assert not any(s["kalem"].startswith(("PVC kapı", "Teras paneli", "Damlalık")) for s in L["satirlar"])
 
 
 def test_ifc_teras_paneli_egimli():

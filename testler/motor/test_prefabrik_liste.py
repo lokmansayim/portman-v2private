@@ -265,7 +265,8 @@ def _varyantlar(N: dict, pf: dict) -> dict:
     (mutfak koridor, banyo ıslak hacim türünde, ek lavabo): açık mutfak salona, ıslak hacim ve lavabo banyo, koridor hol gibi (BK-12 PR-2f);
     tasan: ilk açık kenar taşan verandanın dış kenarı sayılır (BK-14; kiriş kolonun dış yüzünden dış yüzüne, Lokman, kart 28 Ekim);
     asma100: asma dizme tavan, 100'lük iç duvar (iç duvar üstü 100'lük duvar omegasında; Lokman, 30 Ekim 07:04, D-32 ek); karkasli: 120'lik
-    pencereli bir dış pano karkaslı kaplama duvar panosu (D-46, İE-28; Lokman, 4 Kasım 04:35).
+    pencereli bir dış pano karkaslı kaplama duvar panosu (D-46, İE-28; Lokman, 4 Kasım 04:35); teras: teras panelli veranda çatısı (D-52;
+    damlalık D-57, Lokman, 5 Kasım 11:02).
     D-35'in kolonsuz köşe kirişi türevi (`kose`) D-38 ile kalktı: köşeye Motor kolon koyar, kirişler kolonlu verandanın kuralıyla."""
     def tur(n, **d):
         n = copy.deepcopy(n)
@@ -297,6 +298,8 @@ def _varyantlar(N: dict, pf: dict) -> dict:
     ek_yapi = {"ad": "ek yapı", "tip": "tek_yon", "aciklik_cm": 200.0, "boy_cm": 400.0, "egim_yuzde": 5.0, "sacak_cm": 30.0, "kalkan": 0, "makas_yok": True,
                "makas_kosu_cm": 380.0}
     sundurma = dict(ek_yapi, ad="sundurma", aciklik_cm=300.0, boy_cm=1000.0, makas_kosu_cm=980.0)
+    teras = {"ad": "teras", "tip": "tek_yon", "aciklik_cm": 140.0, "boy_cm": 450.0, "egim_yuzde": 10.0, "sacak_cm": 0.0, "kalkan": 0,
+             "makas_yok": True, "acik": True, "teras_paneli": True, "mahya_boy_cm": 450.0, "sacak_hatlari_m": [4.5], "alin_kenarlari_m": [1.4, 1.4]}
     return {
         "pk01": (N, pf),
         "bizde": (tur(N, alici_ait={}, ozellikler=bizde_oz, cati=N["cati"] + [kubbe], panolar=pan_b), {**pf, **elektrik}),
@@ -318,6 +321,7 @@ def _varyantlar(N: dict, pf: dict) -> dict:
         "tasan": (tur(N, veranda_dis_kenar_sira=[0]), pf),
         "asma100": (tur(N, panolar=[dict(p, kal_mm=100) if p["duvar"] == "ic" else p for p in N["panolar"]]), pf),
         "karkasli": (tur(N, panolar=pan_k), pf),
+        "teras": (tur(N, cati=N["cati"] + [teras]), pf),
     }
 
 
@@ -408,7 +412,7 @@ OLCULU = {("ortak", "sandvic_kapama", "parca_boyu_m"), ("ortak", "duvar_dibi", "
           ("prefabrik", "fugali_cephe", "lata_kisa_boyu_m"), ("prefabrik", "duvar_omegasi_100_bolen_m"), ("prefabrik", "sacak_omegasi_bolen_m"),
           ("prefabrik", "bas_makas_omegasi_bolen_m"), ("prefabrik", "alt_cerceve_bolen_m"), ("prefabrik", "cektirme_u_100_aday", "boy_cm"),
           ("prefabrik", "bas_makas_betopani", "levha_m2"), ("prefabrik", "siparis_boyu", "modul_siparis_mm"), ("ortak", "bas_makas_z", "parca_boyu_m"),
-          ("prefabrik", "omega_kapak", "parca_m"), ("duvar_tipleri", "tipler", "PE-IC-60", "anma_mm")}
+          ("prefabrik", "omega_kapak", "parca_m"), ("duvar_tipleri", "tipler", "PE-IC-60", "anma_mm"), ("prefabrik", "teras_damlaligi", "parca_boyu_m")}
 # Ölçüsü kitabın kendi yaprağından aynen gelen satırlar: o yaprak OLCULU'da sınanır; başka bir parça boyunun milimetresi bu ölçüde geçse de
 # (kenar kutusunun 2800'ü mahyanın 2800'ü değildir) eski boydan kalmış yazı sayılmaz (BK-12 › Kanıt, 18 Ekim "Kitap")
 SABIT_OLCU = {("ortak", "ters_mahya_kenar_kutusu", "boyut")}
