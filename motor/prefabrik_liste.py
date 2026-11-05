@@ -358,6 +358,8 @@ def model_motor(ie: dict) -> dict:
             **({"nis_agizlari_cm": nis_agizlari} if nis_agizlari else {}),
             "kapali": [oda(m) for m in kapali], "acik": [{**oda(m), "tur": "veranda"} for m in acik],
             "sigorta_en_uzak": en_uzak,
+            # BK-23 (D-55): `yapi.lento_cm` yazılmışsa pencere üst kotu modelde taşınır; liste modülün durumunu okumaz (yazılmamışsa anahtar yok, 200)
+            **({"ust_kot_cm": G.ust_kot()} if abs(G.ust_kot() - G.PENCERE_UST_KOTU_CM) > 1e-9 else {}),
             **({"cati_tanimi": serit[1]} if serit else {}),
             "cati": serit[0] if serit else
                     [{"ad": "ana çatı", "tip": c.get("tip", "besik"), "aciklik_cm": aciklik, "boy_cm": bina_boyu,
@@ -803,6 +805,7 @@ def liste(N: dict, kurallar: dict | None = None, pafta: dict | None = None) -> d
     from . import geometry as G
     if abs(PENCERE_UST_KOTU_CM - G.PENCERE_UST_KOTU_CM) > 1e-9:          # İE-27 PR-2: kural kitabı ile pencere veri tabanı aynı kotu söyler
         raise ValueError(f"pencere üst kotu iki yerde farklı: kural kitabı {PENCERE_UST_KOTU_CM:g}, pencere veri tabanı {G.PENCERE_UST_KOTU_CM:g}")
+    UST_KOT = float(N.get("ust_kot_cm", PENCERE_UST_KOTU_CM))   # BK-23 (D-55): Motor kipinde `yapi.lento_cm`'den; pafta kipinde ve lentosuz 200
     ASMA_OMEGA_ARALIK_M, TERS_OMEGA_ARALIK_M = r("tavan_omegasi_aralik_m.asma"), _ortak(k, "tavan_omegasi_aralik_m")   # ters: kitabın 0,60
     TAVAN_H_ARALIK_M = r("tavan_h_aralik_m")
     ps_ = r("pencere_sinifi")
@@ -877,11 +880,11 @@ def liste(N: dict, kurallar: dict | None = None, pafta: dict | None = None) -> d
             else:
                 # İE-27 PR-2 (D-45 madde 11; D-28 madde 1): eşik ve üst kot Motor'un pencere kuralından (`geometry.pencere_kurali`,
                 # `kurallar/pencere/pencereler.json`); boyu 200'ü geçen pencere döşemeden: alt panel yok, üst panel H − boy
-                pkr = G.pencere_kurali(f"{en}x{boy}")
+                pkr = G.pencere_kurali(f"{en}x{boy}", ust=UST_KOT)
                 sayac[(f"Pencere üst panel{fg}", f"{kal_mm} × {L} × {mm(H0 - pkr.ust)}", "Liste kuralı", "pencereli pano listede üst + alt panel")] += 1
                 if pkr.esik > 1e-9:
                     sayac[(f"Pencere alt panel ({en}/{boy}){fg}", f"{kal_mm} × {L} × {mm(pkr.esik)}", "Liste kuralı",
-                           f"alt panel = {sy(PENCERE_UST_KOTU_CM)} − pencere boyu (H7)")] += 1
+                           f"alt panel = {sy(UST_KOT)} − pencere boyu (H7)")] += 1   # BK-23: üst kot `yapi.lento_cm`'den
         elif a["tur"] == "dis_kapi":
             sayac[(f"Karkaslı çelik kapı panosu{fg}", f"{kal_mm} × {L} × {mm(H0)}", "Sayım", "dış kapı boşluklu pano")] += 1
         elif a["tur"] == "ic_kapi":
