@@ -57,7 +57,7 @@ ISARET_YOLU = KOK / "kurallar" / "liste" / "prefabrik_isaret.json"
 TEK_KAYNAK = "Tek kaynak (zayıf)"
 ISARETLI = ("pencere_u_h_gecen", "omega_kapak")   # satırı `zayif(...)` ile yazılan kurallar (BK-12 PR-2c)
 
-SURUM = "1.12 (4 Kasım 2026; İE-28, Lokman 4 Kasım 04:35 (D-46): karkaslı kaplama duvar panosu İş Emri'nden (paftadaki tek parça pano), içindeki pencereye üst ve alt panel ile özel pencere karkası yok; 1.11, 4 Kasım 2026; D-50, Lokman 4 Kasım 20:49–21:20 (M-11): trapez sac standart 100 cm kapatır, mahya sacın kapattığı kadar kapatır (L 1000, ÷ 1, bindirme yok); İş Emri'nin çatı kaplaması başka kapatma yazıyorsa o; trapez sac satırında `kapatma_m` (D-51, fiyat m²'den); 1.10, 3 Kasım 2026: İE-27, Lokman 3 Kasım 09:52 (D-45): 3'lü H dış duvarda da (iç duvarın T'si pano ekleminde); çektirme U'su 60 yerinden (eklemsiz T, dış köşe, serbest uç); köşe direği tipsiz (özel köşe 100'lük köşeye katılır); mahya bandı mahya boyundan; temiz su ıslak hacim başına; trapez vida 5,5 × 25 aşık ve omegadan; 1.9, 30 Ekim: K5b TK-01 kıyası (CIO onayı 30 Ekim 14:20): aşık sırası beşikte karar C (Lokman 24 Ekim); baş makas betopanı ve Z'si taşan verandanın kirişli kalkanında da (D-32 madde 2); 1.8, 30 Ekim: asma dizme tavanda da 100'lük iç duvarın üstü 100'lük duvar omegası, ayrı satır yok (Lokman 30 Ekim 07:04, D-32 ek); 1.7, 29 Ekim: baş makas omegası saçak ucundan saçak ucuna, taşan verandanın dış kirişindeki dahil (Lokman 29 Ekim 13:12, D-32); 1.6, 28 Ekim: vitrifiye banyo başına (İE-13 PR-2; Lokman onayı 28 Ekim, PR-3); nişin ağzındaki kiriş (BK-14 ek); taşan verandanın dış kirişi kolonun dış yüzünden dış yüzüne (Lokman, kart 28 Ekim); 1.5, 22 Ekim: kör test üreteci 7.3, kurallar kural kitabında; orta iniş 9 m, kitapla farklı on yedi kalemde kitap; PK-07 hedef örnek; T76 cevapları; 100'lük duvar omegası kirişlerin de üstünde; elektrik oda kuralı)"
+SURUM = "1.13 (5 Kasım 2026; İE-30, D-52 (M-12, Lokman 5 Kasım 10:17): teras panelli verandanın kolonu dış kirişin altına kadar (Motor), teras başına bir panel (8 cm C, 80 × 0,8), komple cam PVC kapı ayrı satır (900 × 2100); 1.12, 4 Kasım 2026; İE-28, Lokman 4 Kasım 04:35 (D-46): karkaslı kaplama duvar panosu İş Emri'nden (paftadaki tek parça pano), içindeki pencereye üst ve alt panel ile özel pencere karkası yok; 1.11, 4 Kasım 2026; D-50, Lokman 4 Kasım 20:49–21:20 (M-11): trapez sac standart 100 cm kapatır, mahya sacın kapattığı kadar kapatır (L 1000, ÷ 1, bindirme yok); İş Emri'nin çatı kaplaması başka kapatma yazıyorsa o; trapez sac satırında `kapatma_m` (D-51, fiyat m²'den); 1.10, 3 Kasım 2026: İE-27, Lokman 3 Kasım 09:52 (D-45): 3'lü H dış duvarda da (iç duvarın T'si pano ekleminde); çektirme U'su 60 yerinden (eklemsiz T, dış köşe, serbest uç); köşe direği tipsiz (özel köşe 100'lük köşeye katılır); mahya bandı mahya boyundan; temiz su ıslak hacim başına; trapez vida 5,5 × 25 aşık ve omegadan; 1.9, 30 Ekim: K5b TK-01 kıyası (CIO onayı 30 Ekim 14:20): aşık sırası beşikte karar C (Lokman 24 Ekim); baş makas betopanı ve Z'si taşan verandanın kirişli kalkanında da (D-32 madde 2); 1.8, 30 Ekim: asma dizme tavanda da 100'lük iç duvarın üstü 100'lük duvar omegası, ayrı satır yok (Lokman 30 Ekim 07:04, D-32 ek); 1.7, 29 Ekim: baş makas omegası saçak ucundan saçak ucuna, taşan verandanın dış kirişindeki dahil (Lokman 29 Ekim 13:12, D-32); 1.6, 28 Ekim: vitrifiye banyo başına (İE-13 PR-2; Lokman onayı 28 Ekim, PR-3); nişin ağzındaki kiriş (BK-14 ek); taşan verandanın dış kirişi kolonun dış yüzünden dış yüzüne (Lokman, kart 28 Ekim); 1.5, 22 Ekim: kör test üreteci 7.3, kurallar kural kitabında; orta iniş 9 m, kitapla farklı on yedi kalemde kitap; PK-07 hedef örnek; T76 cevapları; 100'lük duvar omegası kirişlerin de üstünde; elektrik oda kuralı)"
 GRUPLAR = {"1001": "Panel", "1002": "Metal aksam", "1003": "Kapı ve pencere", "1004": "Tavan", "1005": "Makas", "1006": "Çatı",
            "1007": "Elektrik", "1008": "Vida", "1009": "Depo", "1010": "Sıhhi tesisat", "1011": "Dere", "1012": "Boya"}
 TAVAN = lambda x: int(math.ceil(x - 1e-9))
@@ -242,7 +242,8 @@ def model_motor(ie: dict) -> dict:
                 t_uclari.setdefault(o.id, []).append(d.c)
             else:
                 cektirme["t_orta"] += 1
-    ac_ = lambda a: {"tur": a.tur, "olcu": a.olcu, "genislik": a.genislik, "mentese": a.mentese, "dograma": a.dograma}
+    ac_ = lambda a: {"tur": a.tur, "olcu": a.olcu, "genislik": a.genislik, "mentese": a.mentese, "dograma": a.dograma,
+                     **({"kapi_turu": a.kapi_turu} if getattr(a, "kapi_turu", None) else {})}       # D-52: cam PVC kapı
     for d in plan.duvarlar:
         for p in d.panolar:
             a = p.acilim
@@ -355,6 +356,7 @@ def model_motor(ie: dict) -> dict:
             "dis_cevre_m": dis_duvar_m, "ic_kalan_dis_duvar_m": ic_kalan_m, "ic_kirisler_cm": ic_kirisler, "t_dis": t_dis, "panolar": panolar, "ekler": ekler,
             "koseler": dict(Counter("dis" if kk.tur == "dis" else "ic" for kk in plan.koseler)), "cektirme_yerleri": cektirme,
             "dikmeler": len(plan.dikmeler), **({"kose_kolonlari": len(plan.kose_kolonlari)} if plan.kose_kolonlari else {}),
+            **_teras_kolon_boylari(plan, ie),
             "veranda_kenarlari_cm": kirisler, **({"veranda_dis_kenar_sira": dis_kenar_sira} if dis_kenar_sira else {}),
             **({"nis_agizlari_cm": nis_agizlari} if nis_agizlari else {}),
             "kapali": [oda(m) for m in kapali], "acik": [{**oda(m), "tur": "veranda"} for m in acik],
@@ -366,6 +368,19 @@ def model_motor(ie: dict) -> dict:
                       "makas_kosu_cm": bina_boyu - 2 * t_dis}] + _veranda_catilari(plan, ie),
             "ozellikler": ie.get("ozellikler") or {}, "alici_ait": ie.get("alici_ait") or {}, "is_emri_no": ie.get("is_emri_no"),
             "kod": y.get("referans_model")}
+
+
+def _teras_kolon_boylari(plan, ie: dict) -> dict:
+    """D-52 (M-12): teras panelli verandanın kolonu dış kirişin altına kadar (`veranda.teras_paneli` › kolon_ustu; AP-26 210, gerçek listede
+    KUTU PROFİL (KOLON) 2100 × 4); öteki dikmeler duvar boyunda. Teras paneli yoksa boş: anahtarsız İş Emri'nin listesi aynı."""
+    from . import veranda as VR
+    teras = {tuple(round(q, 6) for q in k): VR.cati(v, ie)["kolon_ustu"]
+             for v in plan.dis_verandalar if v["cati"]["tip"] == "teras_paneli" for k in v["kolonlar"]}
+    if not teras:
+        return {}
+    H0 = float(ie["yapi"].get("duvar_yuksekligi_cm", 250))
+    return {"kolon_boylari_cm": [round(teras.get(tuple(round(q, 6) for q in d), H0), 2) for d in plan.dikmeler],
+            "kolon_boyu_notu": "teras panelli verandada dış kirişin altına kadar; Motor, D-52"}
 
 
 def _kucuk(x) -> str:
@@ -927,7 +942,7 @@ def liste(N: dict, kurallar: dict | None = None, pafta: dict | None = None) -> d
          aday=r("kosebent_aday"), aday_notu=f"Şablon B sabit {r('kosebent_aday')} (PK-02 3, PK-03 ve PK-05 5)")
     if N["dikmeler"]:
         for L_k, n_k in sorted(Counter(N.get("kolon_boylari_cm") or [H0] * N["dikmeler"]).items(), reverse=True):   # O4: kolon boyu paftadan
-            ekle("1002", "Özel kutu profil (kolon) 100 × 100", f"L {mm(L_k)}", n_k, "Sayım", "veranda dikmesi" + (" (boy paftadan, O4)" if N.get("kolon_boylari_cm") else "")
+            ekle("1002", "Özel kutu profil (kolon) 100 × 100", f"L {mm(L_k)}", n_k, "Sayım", "veranda dikmesi" + (f" ({N.get('kolon_boyu_notu') or 'boy paftadan, O4'})" if N.get("kolon_boylari_cm") else "")
                  + (f"; {N['kose_kolonlari']} tanesi açık mahalin iki açık kenarının birleştiği köşede, Motor kuralı" if N.get("kose_kolonlari") else ""),
                  "Lokman, 31 Ekim 15:08: kirişlerin birleştiği yerde kolon gelir, kirişler askıda kalmaz (D-38)" if N.get("kose_kolonlari") else "")
         # profil vidalama aparatı yazılmaz: kolonlu beş Portatifev listesinde yok, yalnız PK-01'de 2 ("ekstradan ekledik"; BK-12 PR-2c)
@@ -1123,6 +1138,11 @@ def liste(N: dict, kurallar: dict | None = None, pafta: dict | None = None) -> d
     # ── 1003 Kapı ve pencere ────────────────────────────────────────────────
     for a in (a for a in acl if a["tur"] == "dis_kapi"):
         kapi_alici = a.get("dograma") == "alıcıya ait" or "alıcı" in oz.get("dış kapı", "")
+        if a.get("kapi_turu") == "pvc_cam":                    # D-52: komple cam PVC kapı (paftanın kapı detayı 88 × 208 iç ölçü)
+            ekle("1003", "PVC kapı (beyaz, komple cam)", "900 × 2100", 0 if kapi_alici else 1, "İş Emri (D-52)",
+                 kaynak_ad + ("; alıcıya ait" if kapi_alici else "") + f"; kapi_turu pvc_cam, çizimde {mm(a['genislik'])}",
+                 "AP-26 paftasının kapı detayı (88 × 208 iç ölçü); gerçek listesi PVC KAPI + BEYAZ 90 × 210: 1")
+            continue
         ekle("1003", f"Prefabrik çelik kapı ({'SAĞ' if a.get('mentese') == 'sag' else 'SOL'})", "900 × 2000", 0 if kapi_alici else 1, "Sayım",
              kaynak_ad + ("; alıcıya ait" if kapi_alici else "") + f"; ölçü listede her zaman 90 × 200 (L4; çizimde {mm(a['genislik'])})")
     kapilar = Counter(a.get("mentese") for a in acl if a["tur"] == "ic_kapi")
@@ -1241,6 +1261,11 @@ def liste(N: dict, kurallar: dict | None = None, pafta: dict | None = None) -> d
     asik_ara, asik_esik, tek_yon_asik = _ortak(k, "asik", "aralik_m"), r("asik_sacak_esigi_m"), False
     for c, o in C:
         ad = c.get("ad", "çatı")
+        if c.get("teras_paneli"):                               # D-52: teras başına tek panel (8 cm C; paftada P1, P2), makas ve aşık yok
+            ekle("1005", f"Teras paneli (hafif çelik C 80) · {ad}", "80 × 0,8", 1, "Paftadan (D-52)",
+                 "teras başına bir panel: 8 cm C'den, duvardan dış kenara (Lokman, 4 Kasım 2026 20:42: \"8 cm genişliğinde C den oluşan panel\")",
+                 "AP-26 paftası P1, P2; gerçek listesi PANEL 80 × 0,8: 2 (iki teras)")
+            continue
         if c.get("makas_yok"):
             ekle("1005", f"Çatı paneli (hafif çelik) · {ad}", "—", None, "Kural yok", "makas ve aşık yerine hafif çelik çatı paneli", c.get("not", ""), pafta=("cati_paneli",))
             continue

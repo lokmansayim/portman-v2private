@@ -1,6 +1,6 @@
 {
  "aciklama": "Kör test aracının kalem sözlüğü (BK-12 PR-3, M7): iki listede farklı yazılan ya da farklı bölünen kalemler. Desenler esle.ad() ile düzgünleştirilmiş adlara uygulanır (büyük harf, apostrof yok, sayı ile 'LÜK / MM' bitişik, noktalama çevresinde boşluk yok); ilk uyan grup alır. olcu: tam (ölçüyle eşle), yok (grubun toplamı ve ölçü kümesi), her_satir (bizim satır her gerçek satırla); anahtar: en_buyuk (ölçünün en büyük sayısı, profil boyu), tolerans (mm), sira; olcu_serbest: yok / her_satir grubunda ölçü kıyaslanmaz (gerekçe not'ta). `olcum_disi: true` grubun gerçek satırları kıyasa ve paydaya girmez (Patron kararı, gerekçesi `not`'ta). Sözlük adet ve ölçü taşımaz. Araç sözlüğü gerçek listeyi okumadan önce denetler (commit'li, değişmemiş); kör bir projenin açılış kaydı sözlük commit'ini taşır, açılıştan sonra yapılan değişiklik o projenin sonucunda ve raporunda yazılır.",
- "surum": "4 (4 Kasım 2026, İE-28; D-46: karkaslı kaplama duvar panosu karkaslı panolar grubunda); 3 (3 Kasım 2026, İE-27; Lokman'ın 3 Kasım 09:52 cevapları: atık su ölçüm dışı, köşe direği tipsiz, eş adlar)",
+ "surum": "5 (5 Kasım 2026, İE-30; D-52: teras paneli ve cam PVC kapı ayrı grup); 4 (4 Kasım 2026, İE-28; D-46: karkaslı kaplama duvar panosu karkaslı panolar grubunda); 3 (3 Kasım 2026, İE-27; Lokman'ın 3 Kasım 09:52 cevapları: atık su ölçüm dışı, köşe direği tipsiz, eş adlar)",
  "gruplar": [
   {"ad": "Atık su (pis su) takımı", "bizim": [], "gercek": ["^100LÜK BORU", "^(50|70)X(1000|500)LİK BORU", "^(50X50|100X50) ÇATAL", "^50LİK (AÇIK|KAPALI) DİRSEK", "^100LÜK KAPALI DİRSEK", "^SÜZGEÇ", "^YER SÜZGECİ", "^YER SÜZGEÇİ"], "olcu": "yok", "olcum_disi": true, "not": "Lokman, 3 Kasım 2026 09:52 (İE-27, öneri 2): \"Pis suyu komple kaldır yani puana dahil etme\". Gerçek satırları kıyasa ve paydaya girmez."},
   {"ad": "60'lık karkaslı + kasalı pano", "bizim": ["^60LIK KARKASLI\\+KASALI PANO$"], "gercek": ["^60LIK KARKASLI\\+KASALI PANO(LAR)?$", "^ÖZEL 60LIK KARKASLI\\+KASALI PANO(LAR)?\\("], "olcu": "tam"},
@@ -31,6 +31,7 @@
   {"ad": "Sandviç panel", "bizim": ["^SANDVİÇ PANEL\\("], "gercek": ["^SANDVİÇ PANEL\\("], "olcu": "tam", "sira": true},
   {"ad": "Tek kat çatı paneli", "bizim": ["^TEK KAT ÇATI PANELİ"], "gercek": ["^TEK KAT PANEL\\("], "olcu": "tam", "sira": true},
   {"ad": "Panel kapaması", "bizim": ["^PANEL KAPAMASI$"], "gercek": ["^TEK KAT PANEL PANEL KAPAMASI", "^PANEL KAPAMASI$"], "olcu": "yok"},
+  {"ad": "Teras paneli", "bizim": ["^TERAS PANELİ\\("], "gercek": ["^PANEL$"], "olcu": "yok", "not": "D-52 (AP-26): teras başına bir 8 cm C panel; gerçek listede makas grubunda PANEL 80 × 0,8."},
   {"ad": "OSB 11 mm (çatı)", "bizim": ["^OSB 11MM"], "gercek": ["^OSB 11MM", "^OSB\\(11MM\\)", "^OSB TAM$"], "olcu": "yok"},
   {"ad": "Kubbe OSB", "bizim": ["^KUBBE OSB"], "gercek": ["^KUBBE OSB"], "olcu": "yok"},
   {"ad": "Veranda tavan Boardex", "bizim": ["BOARDEX"], "gercek": ["BOARDEX"], "olcu": "tam"},
@@ -69,6 +70,7 @@
   {"ad": "Çelik kapı (sağ)", "bizim": ["^PREFABRİK ÇELİK KAPI\\(SAĞ\\)"], "gercek": ["^(PREFABRİK )?ÇELİK KAPI\\(SAĞ\\)"], "olcu": "yok"},
   {"ad": "Amerikan kapı", "bizim": ["^AMERİKAN KAPI"], "gercek": ["^AMERİKAN KAPI", "^AMERİKAN PANEL KAPI"], "olcu": "yok"},
   {"ad": "PVC pencere ve vasistas", "bizim": ["^PVC (PENCERE|VASİSTAS)$", "^PENCERE GRUBU$"], "gercek": ["^PVC DOĞRAMA"], "olcu": "tam"},
+  {"ad": "PVC kapı", "bizim": ["^PVC KAPI\\("], "gercek": ["^PVC KAPI"], "olcu": "yok", "not": "D-52 (AP-26): komple cam PVC kapı (kapi_turu pvc_cam); gerçek listede PVC KAPI + BEYAZ 90 × 210."},
   {"ad": "Dış cephe boya", "bizim": ["^DIŞ CEPHE BOYA"], "gercek": ["^(SADECE )?DIŞ CEPHE BOYA"], "olcu": "yok"},
   {"ad": "İç cephe boya", "bizim": ["^İÇ CEPHE BOYA"], "gercek": ["^İÇ CEPHE BOYA"], "olcu": "yok"},
   {"ad": "Kenarlar için boya", "bizim": ["^KENARLAR İÇİN BOYA"], "gercek": ["^(DIŞ CEPHE )?KENARLAR( İÇİN)? BOYA"], "olcu": "yok"},

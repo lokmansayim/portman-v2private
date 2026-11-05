@@ -263,17 +263,35 @@ def test_anahtarsiz_is_emrinde_yeni_blok_yok(yol):
 # --------------------------------------------------------------------------- liste ve 3B
 
 def test_liste_teras_paneli_panel_cati():
-    """Teras paneli listede makassız panel çatı parçası (AP-09'un açık mahal panel çatısı gibi; Lokman: "çatı paneli olarak kullandığımız
-    ... C den oluşan panel", "çatı gibi şekilli değil"): yavru makas ve aşık yok, "Çatı paneli (hafif çelik)" satırı "Kural yok"; trapez
-    duvardan panelin dış kenarına, eğik boyuyla (D-52 ek: %10'da 140,7 + taşma 5 → 1460; paftada trapez 150 × 6 + 6). Panel, damlalık ve
-    tavan satırları çizim onayından sonra."""
+    """Teras paneli listede makassız panel çatı parçası (Lokman: "çatı paneli olarak kullandığımız ... C den oluşan panel", "çatı gibi şekilli
+    değil"): yavru makas ve aşık yok; teras başına bir "Teras paneli (hafif çelik C 80)" 80 × 0,8 (paftada P1, P2; gerçek listede PANEL
+    80 × 0,8: 2); trapez duvardan panelin dış kenarına, eğik boyuyla (D-52 ek: %10'da 140,7 + taşma 5 → 1460; paftada trapez 150 × 6 + 6).
+    Kolon dış kirişin altına kadar: L 2100 × 4 (gerçek listede 2100 × 4). Arka terasın komple cam PVC kapısı ayrı satır 900 × 2100 (gerçek
+    listede PVC KAPI + BEYAZ 90 × 210: 1); öteki dış kapı çelik."""
     from motor import prefabrik_liste as PL
     L = PL.is_emrinden(_ap26())
     k = {(s["kalem"], s["olcu"]): s for s in L["satirlar"]}
     for ad in ("ön teras çatısı", "arka teras çatısı"):
-        assert k[(f"Çatı paneli (hafif çelik) · {ad}", "—")]["dayanak"] == "Kural yok"
-        assert not any(x["kalem"] == f"Yavru makas · {ad}" for x in L["satirlar"])
+        assert k[(f"Teras paneli (hafif çelik C 80) · {ad}", "80 × 0,8")]["adet"] == 1
+        assert not any(x["kalem"] in (f"Yavru makas · {ad}", f"Çatı paneli (hafif çelik) · {ad}") for x in L["satirlar"])
         assert k[(f"Trapez sac · {ad}", "L 1460")]["adet"] == 6
+    kolon = [s for s in L["satirlar"] if s["kalem"].startswith("Özel kutu profil (kolon)")]
+    assert [(s["olcu"], s["adet"]) for s in kolon] == [("L 2100", 4)]
+    kapi = [(s["kalem"], s["olcu"], s["adet"]) for s in L["satirlar"] if s["grup"] == "1003" and "kapı" in s["kalem"] and "Amerikan" not in s["kalem"]]
+    assert kapi == [("PVC kapı (beyaz, komple cam)", "900 × 2100", 1), ("Prefabrik çelik kapı (SOL)", "900 × 2000", 1)]
+
+
+def test_liste_teras_paneli_yoksa_ayni():
+    """Teras paneli ve cam PVC kapı yazılmamış İş Emri'nde kolon duvar boyunda, kapı çelik (anahtarsız İş Emri aynı)."""
+    from motor import prefabrik_liste as PL
+    ie = _ap26()
+    for v in ie["verandalar"]:
+        v["cati"] = {"tip": "tek_yon", "egim_yuzde": 10, "sacak_cm": 30}
+    for a in ie["acikliklar"]:
+        a.pop("kapi_turu", None)
+    L = PL.is_emrinden(ie)
+    assert [s["olcu"] for s in L["satirlar"] if s["kalem"].startswith("Özel kutu profil (kolon)")] == ["L 2500"]
+    assert not any(s["kalem"].startswith(("PVC kapı", "Teras paneli")) for s in L["satirlar"])
 
 
 def test_ifc_teras_paneli_egimli():
