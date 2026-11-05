@@ -237,9 +237,13 @@ def dere(g: dict, ck: dict, K: dict) -> list[dict]:
         if boy > K["orta_esik_cm"] + ESIK:
             konumlar.insert(n, ("orta", (r0 + r1) / 2))
         if geri and q.get("capraz"):                                     # İE-15 K6: ana makaslar cumba makasının arkasına çekilince cumbanın
-            dis_once = q["cephe"] in ("on", "sol")                       # iki yanında kısa saçak (geri + saçak) kalır; hattın tek inişi dış
-            konumlar = [("uç", r0 + iw / 2 + k * 2 * iw) if dis_once else ("uç", r1 - iw / 2 - k * 2 * iw) for k in range(n)]   # ucunda,
-            # cumbanın ön köşesinde (AP-06 paftasında inişler cumbanın köşelerinde); cumbanın iki hattı liste gibi ek parça başına 2 iniş
+            dis_once = q["cephe"] in ("on", "sol")                       # iki yanında kısa saçak (geri + saçak) kalır; tek inişi duvar
+            ic_uc = r1 if dis_once else r0                               # tarafındaki ucunda, evin köşesinde (Lokman, 5 Kasım 2026 12:51:
+            P = (c, ic_uc) if ax == 1 else (ic_uc, c)                    # "cumbanın solundaki kısa dere tam köşeye gelsin"). O uçta öteki
+            kose = any(math.hypot(P[0] - u[0], P[1] - u[1]) < 1.0         # saçağın deresi başlıyorsa (cumba ile verandanın köşesi) iniş o
+                       for h2 in ck["dere"]["hatlar"] if h2 is not h for u in (h2["p"], h2["q"]))   # derenin ucundaki inişte birleşir: "cumba
+            konumlar = [] if kose else [("uç", r1 - iw / 2 - k * 2 * iw) if dis_once else ("uç", r0 + iw / 2 + k * 2 * iw) for k in range(n)]
+            # ile veranda köşesindeki dere inişi de tam köşenin iç tarafına gelsin" (12:51; önce iki iniş vardı; liste "ek çatı parçası başına 2")
         uc = (c0 + c1) / 2
         for yer, v in konumlar:
             out.append({"kural": "dere_hatti", "parca": "inis", "geo": {"tip": "kutu", "kutu": kutu(v - iw / 2, v + iw / 2, uc - iu / 2, uc + iu / 2,

@@ -760,8 +760,9 @@ D.dere.inisler.forEach((p, i) => {
   const h = HAT[p.hat], S = dereSerit(h), w = S.yeni(), m = mat('gutter', AD.dere), ust = DERE_ALT;   // cm
   const kolon = p.sw !== undefined;   // verandada boru kolonun yerinde (p.sw)
   const yuzU = (p.yuz - h.kenar) * h.out;   // duvar yüzünün yerel x'i (dışa pozitif)
-  const sw = kolon ? p.sw : Math.min(D.dis[p.dis] - 17, Math.max(17, p.s));                 // boru: köşe direği kaplamasının yanında ya da kolonda
-  const so = Math.min(Math.max(h.a0, h.a1) - 6, Math.max(Math.min(h.a0, h.a1) + 6, sw));    // ağız: borunun hizasında
+  const sw = p.boru !== undefined ? p.boru : kolon ? p.sw : Math.min(D.dis[p.dis] - 17, Math.max(17, p.s));   // boru: köşe direği kaplamasının yanında
+  // ya da kolonda; veri yerini verdiyse orada (İE-15 K6: cumbanın kısa yan saçağında evin köşesinde, ağzı tam hizasında; Lokman, 5 Kasım 2026)
+  const so = p.agiz !== undefined ? p.agiz : Math.min(Math.max(h.a0, h.a1) - 6, Math.max(Math.min(h.a0, h.a1) + 6, sw));    // ağız: borunun hizasında
   const zo = S.zOf(so), zw = S.zOf(sw), gx = SAC + 0.03 + 7.5, wx = yuzU + 4;
   const V = (x, y, z) => new THREE.Vector3(x / 100, y / 100, z / 100);
   const boru = (a, b) => { const d = new THREE.Vector3().subVectors(b, a), c = mesh(new THREE.BoxGeometry(0.06, d.length(), 0.08), m);

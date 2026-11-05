@@ -309,6 +309,19 @@ def cati(HZ: dict, plan, kitap: dict, IFC: dict, ASIK: dict, SC: float, TAN: flo
         h = min(aday, key=lambda h: abs(uc_(h)[1] - h["ys"]) + (0 if h["r0"] - 10 <= uc_(h)[0] <= h["r1"] + 10 else 1e4))   # hakemi: köşedeki
         # iniş yakın olan öteki hatta düşüyordu)
         ax, rc = (1, yc) if h["dik"] else (0, xc)                       # iniş hattın koştuğu eksende rc'de; duvarlar hatta paralel
+        if h["dik"]:          # cumbanın kısa yan saçağı (ana makaslar geri çekilince): boru evin köşesinde, ağzı borunun tam hizasında, kaz boynu
+            # duvara dik (Lokman, 5 Kasım 2026 12:51: "ne olursa olsun kesinlikle düzgün insin … cumbanın solundaki kısa dere tam köşeye gelsin";
+            # önce boru köşe direği kaplamasının yanında, köşeden 17 cm gerideydi, ağız derenin ucunda kaldığı için kaz boynu duvar boyunca kayıyordu)
+            kes_ = govde.intersection(LineString([(h["yd"] + h["ic"] * 0.5, -1e4), (h["yd"] + h["ic"] * 0.5, 1e4)]))
+            if kes_.is_empty:
+                raise Desteklenmiyor(f"kart modelinin inişi {n}: {h['ad']} saçağının altında duvar yok")
+            g0, g1 = kes_.bounds[1], kes_.bounds[3]
+            kose_, yon = (g0, 1) if abs(rc - g0) <= abs(rc - g1) else (g1, -1)
+            yar = (kt[4 - ax] - kt[1 - ax]) / 2                                 # borunun duvar boyunca yarısı (kart modelinin iniş kesiti)
+            s = min(max(kose_ + yon * yar, h["a0"] + yar + 0.5), h["a1"] - yar - 0.5)   # ağız derenin içinde kalır
+            inisler.append({"hat": h["ad"], "s": _r(s), "boru": _r(s), "agiz": _r(s), "yuz": _r(h["yd"]), "dis": ax, "kose": True,
+                            "duvar": f"evin köşesi ({h['ad']} saçağının altındaki duvarın ucu)"})
+            continue
         duvar = sorted((d.a0 - d.h, d.a1 + d.h) for d in plan.duvarlar if d.tur == "dis" and d.yon == ("y" if h["dik"] else "x")
                        and abs((d.c - h["ic"] * d.h) - h["yd"]) < 0.6)
         kol = [((r[1] + r[3]) / 2 if h["dik"] else (r[0] + r[2]) / 2, r) for r in kolonlar
@@ -324,11 +337,10 @@ def cati(HZ: dict, plan, kitap: dict, IFC: dict, ASIK: dict, SC: float, TAN: flo
         if not uclar:
             raise Desteklenmiyor(f"kart modelinin inişi {n}: {h['ad']} saçağının altında duvar ya da kolon yok")
         _d, s, tur = min(uclar)
-        if h["dik"] and tur == "duvar":                                  # cumbanın kısa yan saçağı: iniş derenin boyunda, duvarın köşesinde
-            s = min(max(s, h["r0"] + (kt[4 - ax] - kt[1 - ax]) / 2), h["r1"] - (kt[4 - ax] - kt[1 - ax]) / 2)   # (geometri hakemi)
         if tur == "kolon":
             uc_s = h["a0"] if abs(rc - h["a0"]) < abs(rc - h["a1"]) else h["a1"]     # dere hattın inişe yakın ucunda biter (r07'de sol uçta
-            inisler.append({"hat": h["ad"], "s": _r(uc_s), "yuz": _r(h["yd"]), "duvar": "veranda kolonu", "sw": _r(s)})   # salon duvarının kolonu)
+            inisler.append({"hat": h["ad"], "s": _r(uc_s), "yuz": _r(h["yd"]), "duvar": "veranda kolonu", "sw": _r(s)})   # salon duvarının kolonu:
+            # cumba ile verandanın köşesinde tek iniş, köşenin iç tarafında; cumbanın kısa yan saçağının deresi buraya akar, Lokman 12:51)
         else:
             inisler.append({"hat": h["ad"], "s": _r(s), "yuz": _r(h["yd"]), "duvar": f"{h['ad']} saçağının ucundaki duvar köşesi", "dis": ax, "kose": True})
 
