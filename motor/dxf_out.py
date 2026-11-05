@@ -23,7 +23,7 @@ try:
     import pymupdf as fitz
 except ImportError:  # eski PyMuPDF
     import fitz
-from shapely.geometry import box
+from shapely.geometry import LineString, Point, box
 from shapely.prepared import prep
 
 from . import geometry as G
@@ -446,26 +446,37 @@ class Cizici:
         for ad, m in plan.mahaller.items():
             if not m.acik or ad in dis_ad: continue         # BK-14: taşan verandanın kenarları aşağıda (gövde çizgisi profil değil)
             ring = list(m.poly.simplify(0.0).exterior.coords)
-            segs = []
+            segs, ic_kenar = [], set()
             for (ax_, ay_), (bx_, by_) in zip(ring, ring[1:]):
                 if (abs(ax_ - bx_) < 1e-9 and (abs(ax_) < 1e-9 or abs(ax_ - W) < 1e-9)) or (abs(ay_ - by_) < 1e-9 and (abs(ay_) < 1e-9 or abs(ay_ - H) < 1e-9)):
                     segs.append((min(ax_, bx_), min(ay_, by_), max(ax_, bx_), max(ay_, by_)))
+                elif plan.girintili and self._girinti_acik_kenari(ax_, ay_, bx_, by_):
+                    # D-58 (Lokman, 5 Kasım 2026 11:00, TK-04 r07; BK-24): girintiye bakan açık kenar (veranda içeri alınmış) gövdenin dış
+                    # çizgisinde değil; profili yine çizilir (D-29 madde 6: bütün prefabrik çizimlere; depoda kör AP-18 ve AP-25'in
+                    # verandası da böyle, profilleri eksikti). Girintisiz ve girintiye bakan açık kenarı olmayan çizimler aynen
+                    seg = (min(ax_, bx_), min(ay_, by_), max(ax_, bx_), max(ay_, by_))
+                    segs.append(seg); ic_kenar.add(seg); self._girinti_profili = True
+            segs = [s for s in segs if s not in ic_kenar] + [s for s in segs if s in ic_kenar]   # profil kodları eski sırada kalır
             pts_all = [(x0, y0) for (x0, y0, x1, y1) in segs] + [(x1, y1) for (x0, y0, x1, y1) in segs] + [(x0, y1) for (x0, y0, x1, y1) in segs] + [(x1, y0) for (x0, y0, x1, y1) in segs]
+            dikmede = lambda x, y: any(d[0] - 0.5 <= x <= d[2] + 0.5 and d[1] - 0.5 <= y <= d[3] + 0.5 for d in plan.dikmeler)
             for (x0, y0, x1, y1) in segs:
                 vertical = abs(x0 - x1) < 1e-9
                 boy = (y1 - y0) if vertical else (x1 - x0)
                 kod = self.kat.veranda_profil(boy, "YAN" if vertical else "ON")
-                name = f"BOM_{kod}_VERANDA_{'YAN' if vertical else 'ON'}_{mm_tag(boy)}"
+                ic_ = (x0, y0, x1, y1) in ic_kenar
+                name = f"BOM_{kod}_VERANDA_{'YAN' if vertical else 'ON'}_{mm_tag(boy)}" + ("_GIRINTI" if ic_ else "")
+                # girintiye bakan kenarda iç çizgi mahalin içine ve uçtaki dikmenin (köşe kolonu, duvar dibindeki kolon) yüzünde biter
+                uc = (lambda x, y: pts_all.count((x, y)) > 1 or dikmede(x, y)) if ic_ else (lambda x, y: pts_all.count((x, y)) > 1)
                 if name not in self.doc.blocks:
                     blk = self.doc.blocks.new(name)
                     if vertical:
-                        sx = 10.0 if x0 < W / 2 else -10.0
-                        ya = 10.0 if pts_all.count((x0, y0)) > 1 else 0.0; yb = boy - (10.0 if pts_all.count((x0, y1)) > 1 else 0.0)
+                        sx = ((10.0 if m.poly.contains(Point(x0 + 1.0, (y0 + y1) / 2)) else -10.0) if ic_ else (10.0 if x0 < W / 2 else -10.0))
+                        ya = 10.0 if uc(x0, y0) else 0.0; yb = boy - (10.0 if uc(x0, y1) else 0.0)
                         blk.add_line((0, 0), (0, boy), dxfattribs={"layer": "0", "color": 256, "lineweight": 25})
                         blk.add_line((sx, ya), (sx, yb), dxfattribs={"layer": "0", "color": 256, "lineweight": 25})
                     else:
-                        sy = 10.0 if y0 < H / 2 else -10.0
-                        xa = 10.0 if pts_all.count((x0, y0)) > 1 else 0.0; xb = boy - (10.0 if pts_all.count((x1, y0)) > 1 else 0.0)
+                        sy = ((10.0 if m.poly.contains(Point((x0 + x1) / 2, y0 + 1.0)) else -10.0) if ic_ else (10.0 if y0 < H / 2 else -10.0))
+                        xa = 10.0 if uc(x0, y0) else 0.0; xb = boy - (10.0 if uc(x1, y0) else 0.0)
                         blk.add_line((0, 0), (boy, 0), dxfattribs={"layer": "0", "color": 256, "lineweight": 25})
                         blk.add_line((xa, sy), (xb, sy), dxfattribs={"layer": "0", "color": 256, "lineweight": 25})
                 self.yerlestir(name, kod, (x0, y0), 0.0, "MONTAJ_STANDART" if montaj else "VERANDA_PROFIL_100", rol, ox, oy)
@@ -553,7 +564,7 @@ class Cizici:
             if aks:
                 self._bolge("aks_zinciri", n_z)                   # D-31 madde 13: A4 sayfasının planında yok
             if plan.girintili:                                  # D-34: kapalı gövdenin her dış parçası mor ölçüyle
-                self._dis_parca_olculeri(ox, oy)
+                self._dis_parca_olculeri(ox, oy, dolu if getattr(self, "_girinti_profili", False) else None)
             for v in plan.dis_verandalar:                   # BK-14: taşan verandanın eni ve derinliği
                 vx0, vy0, vx1, vy1 = v["rect"]
                 if v["cephe"] in ("on", "arka"):
@@ -747,6 +758,19 @@ class Cizici:
             h = max(14.0, h * uygun / genislik)
         return h, rot
 
+    def _girinti_acik_kenari(self, ax: float, ay: float, bx: float, by: float) -> bool:
+        """Açık mahalin halkasındaki bir parça, gövdenin dış çizgisinde olmayan bir açık kenarın (girintiye bakan veranda ağzı) üstünde mi
+        (`plan.acik_kenarlar`; D-58)."""
+        if abs(ax - bx) > 1e-9 and abs(ay - by) > 1e-9:
+            return False
+        if getattr(self, "_acik_ag", None) is None or self._acik_ag[0] is not self.plan:
+            from shapely.ops import unary_union
+            self._acik_ag = (self.plan, unary_union([LineString([(k[0], k[1]), (k[2], k[3])]) for k in self.plan.acik_kenarlar]).buffer(0.5))
+        # açık kenar akstan aksa, halka yüzden yüze (ya da dış yüze): uçlardaki duvar yarı kalınlığı kadar pay
+        L = math.hypot(bx - ax, by - ay); e = min(6.0, L / 4) / L if L > 0 else 0.0
+        p0 = (ax + (bx - ax) * e, ay + (by - ay) * e); p1 = (bx - (bx - ax) * e, by - (by - ay) * e)
+        return L > 1.0 and self._acik_ag[1].contains(LineString([p0, p1]))
+
     @staticmethod
     def _merge_lines(segs):
         out = []
@@ -788,12 +812,13 @@ class Cizici:
             yd = r[3] + u if ic > 0 else r[1] - u; yk = r[1] if ic > 0 else r[3]
             self.dim((r[0] + ox, yk + oy), (r[2] + ox, yk + oy), (0, yd + oy), 0, layer)
 
-    def _dis_parca_olculeri(self, ox: float, oy: float) -> None:
+    def _dis_parca_olculeri(self, ox: float, oy: float, dolu: list | None = None) -> None:
         """D-34 (Lokman, 30 Ekim 2026 14:45: "mor ile çizdiğim yerleri de ölçeklendir rengi de mor olsun"): girintili gövdede (İE-24) kapalı
         gövdenin dış çizgisinin (`G.kapali_govde_cokgeni`: duvarların dış yüzü; balkon gibi açık mahal dışarıda) her düz parçası kendi dış
         yanında, yüzden `DIS_PARCA_PAYI` uzakta ölçülür (DIS_PARCA_OLCU; mor çizgi, siyah yazı çizginin ortasında, `dim`). Açık mahalin (balkon)
         aks ölçüsü bu planda yazılmaz: eni ve derinliği bu ölçülerde (`ciz_plan`). Dikdörtgen gövdede dış ölçü iki toplam
-        ölçüdür; bu ölçü çizilmez (katman da açılmaz, eski çizimler aynen)."""
+        ölçüdür; bu ölçü çizilmez (katman da açılmaz, eski çizimler aynen). `dolu` verilirse yazıların kutusu oraya eklenir: özel pano
+        ölçüsü bu yazının üstüne binmez (D-58, TK-04 r07: salon duvarının 120,5'i 193,25'in üstündeydi)."""
         from shapely.geometry.polygon import orient
         if "DIS_PARCA_OLCU" not in self.doc.layers:
             self.doc.layers.add("DIS_PARCA_OLCU", color=OLCU_MOR, linetype="Continuous")
@@ -804,9 +829,15 @@ class Cizici:
             if abs(yb - ya) < 1e-6:                           # yatay parça; saat yönü tersinde dışarısı (0, −dx)
                 y = ya - math.copysign(DIS_PARCA_PAYI, xb - xa)
                 self.dim((min(xa, xb) + ox, ya + oy), (max(xa, xb) + ox, ya + oy), (0, y + oy), 0, "DIS_PARCA_OLCU")
+                if dolu is not None:
+                    yari = self.yazi_eni(fmt(abs(xb - xa)), 14) / 2 + 2
+                    dolu.append(((xa + xb) / 2 - yari, y - 9, (xa + xb) / 2 + yari, y + 9))
             else:                                             # düşey parça; dışarısı (dy, 0)
                 x = xa + math.copysign(DIS_PARCA_PAYI, yb - ya)
                 self.dim((xa + ox, min(ya, yb) + oy), (xa + ox, max(ya, yb) + oy), (x + ox, 0), 90, "DIS_PARCA_OLCU")
+                if dolu is not None:
+                    yari = self.yazi_eni(fmt(abs(yb - ya)), 14) / 2 + 2
+                    dolu.append((x - 9, (ya + yb) / 2 - yari, x + 9, (ya + yb) / 2 + yari))
 
     def dim(self, p1, p2, base, angle, layer="OLCULER"):
         base = (p1[0], base[1]) if angle == 0 else (base[0], p1[1])

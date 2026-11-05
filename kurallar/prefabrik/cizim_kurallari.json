@@ -765,6 +765,26 @@
     "testler/motor/test_d49.py::test_bes_d_kosesi_ve_cektirme_u",
     "testler/motor/test_d49.py::test_birlesim_yanlis_noktada_hata"
    ]
+  },
+  {
+   "kod": "PC-33",
+   "baslik": "Veranda içeri alınınca ağzındaki kiriş de çizilir; ölçü yazıları binmez",
+   "kural": "Veranda ya da balkon gövdenin dış çizgisinden içeri alınmışsa (İş Emri `girintiler` ile; önündeki şerit bina dışı), girintiye bakan açık kenarı da veranda profilidir: dış yüzü kenarda, iç çizgisi 10 cm mahalin içinde, uçta köşe kolonunun ya da duvar dibindeki İş Emri dikmesinin yüzünde biter (TK-04 r07: ön kiriş ön dış yüzden 37,5 içeride; çatının saçağı kirişin önünde 30 cm). Böyle bir planda girintili gövdenin dış parça ölçüsünün (D-34) yazısı da doludur: özel pano ölçüsü onun üstüne binmez, sıradaki uzaklığa çekilir. Kirişin duvara geldiği yerdeki kolon İş Emri'nin `dikmeler`'ine yazılır (250 cm; listede kolon). Girintiye bakan açık kenarı olmayan çizim aynen (PC-01…PC-32).",
+   "karar": "D-58",
+   "lokman": {
+    "tarih": "2026-11-05",
+    "saat": "11:00",
+    "soz": "veranda da saçak oturmadığı için verandayı 30cm saçak olacak şekilde içeri almamız gerekiyor çatı kısmi naif bir L olacak ayrıca kiriş profilin boşta kalmaması için köşe direğine vidalayamıyoruz o yüzden tam geldiği yerede bir tane 250cm kolon koyması gerekiyor"
+   },
+   "kod_yeri": [
+    "motor/dxf_out.py::Cizici._girinti_acik_kenari",
+    "motor/dxf_out.py::Cizici._dis_parca_olculeri"
+   ],
+   "test": [
+    "testler/motor/test_d58.py::test_veranda_ice_alinir",
+    "testler/motor/test_d58.py::test_girinti_kenarinda_profil",
+    "testler/motor/test_d58.py::test_olcu_yazilari_binmez"
+   ]
   }
  ]
 }
