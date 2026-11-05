@@ -690,16 +690,17 @@ class IfcUretici:
                     kalem = f"Cumba makası · {q['ad']}"
                 oz = {"Aciklik_cm": round(b1 - b0, 1), "CatiParcasi": q["ad"], "Rol": "baş" if m["rol"] == "bas" else "orta"}
                 if m.get("ana_ustunde"):
-                    self._ana_ustu_makas(f"MAKAS_{n:02d}", kalem, oz, T, q, m["konum"], kot)
+                    self._ana_ustu_makas(f"MAKAS_{n:02d}", kalem, oz, T, q, m["konum"], kot, m.get("uclar"))
                 else:
                     self._makas(f"MAKAS_{n:02d}", kalem, oz, b0, b1, m["konum"], mahya_x, zs, eg_, s)
                 yerler.append({"parca": q["ad"], "rol": m["rol"], "konum_cm": round(m["konum"], 2)})
         self.cati_ozet = {"mahya_cm": round(mahya, 1), "makas": n, "cati_alan_m2": round(alan, 2), "makaslar": yerler,
                           **({"uyari": T["uyarilar"]} if T["uyarilar"] else {})}
 
-    def _ana_ustu_makas(self, ad, kalem, ozellik, T, q, konum, kot):
+    def _ana_ustu_makas(self, ad, kalem, ozellik, T, q, konum, kot, uclar=None):
         """İE-15 K6: çapraz cumbanın ana çatının üstündeki makası (D-47; paftada "iki ana makasın arasında kısa"): iki dere arasında, alt
-        başlığı ana makasların üst başlığının üstünde (ana çatının o kesitteki kotu), üst başlıkları cumbanın yüzleri boyunca mahyaya; uçları
+        başlığı ana makasların üst başlığının üstünde (ana çatının o kesitteki kotu), üst başlıkları cumbanın yüzleri boyunca mahyaya. Uçları
+        çatı tanımında (`uclar`; AP-06 paftasındaki gibi iki ana makasın ekseninden 36,3 dışarıda, `cati_capraz._yavru_yeri`); tanımda yoksa
         topukta (üst başlığın üstü alt başlığın üstüne indiği yerde)."""
         from .cati_capraz import yavru_acikligi
         D = {d["ad"]: d for d in T["duzlemler"]}
@@ -714,7 +715,7 @@ class IfcUretici:
         # uçlar (topuk): üst başlığın üstü alt başlığın üstüne indiği yerde; alt başlık üst başlığın içinde biter, dereye uzayıp cumbanın
         # yüzünden taşmaz (geometri hakemi, İE-15 K6; rehberde de uçlar derenin üstünde biter). Sayı ve yer listeyle (D-47); boy gösterim
         uc = lambda a: a + (z_alt - 5 - zt(a)) * (um - a) / (zt(um) - zt(a)) if zt(um) - zt(a) > 1e-6 else a
-        e0, e1 = min(uc(u0), um - 10), max(uc(u1), um + 10)
+        e0, e1 = (min(uc(u0), um - 10), max(uc(u1), um + 10)) if uclar is None else uclar
         uyeler = (("ALT_BASLIK", [(e0, z_alt), (e1, z_alt), (e1, z_alt + 5), (e0, z_alt + 5)]),
                   ("UST_1", [(e0, zt(e0)), (um, zt(um)), (um, zt(um) + 10), (e0, zt(e0) + 10)]),
                   ("UST_2", [(um, zt(um)), (e1, zt(e1)), (e1, zt(e1) + 10), (um, zt(um) + 10)]),

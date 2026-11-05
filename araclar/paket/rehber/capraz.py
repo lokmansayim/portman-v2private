@@ -89,15 +89,20 @@ def cati(HZ: dict, plan, kitap: dict, IFC: dict, ASIK: dict, SC: float, TAN: flo
                           "yon": "x", "wl": [_r(c0 + 2.7), _r(c1 - 2.7)], "NB": nb(c1 - c0 + 2 * SC), "T0": 38.9, "cati": cati_cu, "kod": "MA-05",
                           "kaynak": kaynak_cu})
             continue
-        u0, u1 = yavru_acikligi(T, cu, m["konum"])                 # dereler arası (kart modelindeki parçanın boyu)
-        d = ARA_PAY / TAN - ARA_YUZ
-        if u1 - u0 < 2 * d + 20:
-            raise Desteklenmiyor(f"cumbanın yavru makası ({m['konum']:g}): dereler arası {fmtc(u1 - u0)} cm, rehberin ara makası kurulamaz")
-        makas.append({"ad": ad, "aile": "ara", "rol": "ara", "konum": _r(m["konum"]), "bas": _r(u0 + d), "son": _r(u1 - d),
-                      "yuz": _r(m["konum"] - ic * ARA_YUZ), "R": "CU", "zR": "AN", "yon": "x", "nps": 1 if u1 - u0 - 2 * d < 200 else 2,
-                      "cati": cati_cu, "kod": "MA-05", "kart_ad": None, "dereler_arasi": [_r(u0), _r(u1)],
-                      "kaynak": (f"{kaynak_cu}; dereler arası {fmtc(u1 - u0)} cm (kart modeli); uçları derenin 10 cm üstünde biter (gösterim, 62 m² "
-                                 "rehberindeki ara makas gibi)")})
+        u0, u1 = yavru_acikligi(T, cu, m["konum"])                 # dereler arası
+        if m.get("uclar"):                                         # AP-06 paftasındaki gibi iki ana makasa oturur (`cumba_yavru_makasi`)
+            b_, s_ = m["uclar"]
+            yer = (f"; AP-06 paftasındaki gibi baş makasın arkasında, iki ana makasa ({' ve '.join(fmtc(v) for v in m['oturdugu'])}) oturur, "
+                   f"boyu {fmtc(s_ - b_)} cm (Lokman, 5 Kasım 2026; kart modeliyle aynı)")
+        else:                                                      # D-47: uçları derenin 10 cm üstünde (gösterim, 62 m² rehberindeki ara makas gibi)
+            d = ARA_PAY / TAN - ARA_YUZ
+            if u1 - u0 < 2 * d + 20:
+                raise Desteklenmiyor(f"cumbanın yavru makası ({m['konum']:g}): dereler arası {fmtc(u1 - u0)} cm, rehberin ara makası kurulamaz")
+            b_, s_ = u0 + d, u1 - d
+            yer = f"; dereler arası {fmtc(u1 - u0)} cm; uçları derenin 10 cm üstünde biter (gösterim, 62 m² rehberindeki ara makas gibi)"
+        makas.append({"ad": ad, "aile": "ara", "rol": "ara", "konum": _r(m["konum"]), "bas": _r(b_), "son": _r(s_),
+                      "yuz": _r(m["konum"] - ic * ARA_YUZ), "R": "CU", "zR": "AN", "yon": "x", "nps": 1 if s_ - b_ < 200 else 2,
+                      "cati": cati_cu, "kod": "MA-05", "kart_ad": None, "dereler_arasi": [_r(u0), _r(u1)], "kaynak": kaynak_cu + yer})
     n_ifc = sum(1 for n in IFC if n.startswith("MAKAS"))
     if n_ifc != len(makas):
         raise Desteklenmiyor(f"kart modelinde {n_ifc} makas, çatı tanımında {len(makas)}")

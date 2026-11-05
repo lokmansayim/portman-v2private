@@ -37,7 +37,7 @@ def tk04(tmp_path_factory):
     kart = tmp_path_factory.mktemp("tk04_k6")
     kart_model.uret(copy.deepcopy(ie), kart, "TK04")
     L = PL.is_emrinden(copy.deepcopy(ie))["satirlar"]
-    return {"d": veri.kur(copy.deepcopy(ie), kart, "TK04", L, "TK-04"), "say": _oku(kart / "TK04_kart_sayim.json"), "L": L, "ie": ie}
+    return {"d": veri.kur(copy.deepcopy(ie), kart, "TK04", L, "TK-04"), "say": _oku(kart / "TK04_kart_sayim.json"), "L": L, "ie": ie, "kart": kart}
 
 
 def _liste(L: list[dict], ad: str) -> int:
@@ -127,6 +127,37 @@ def test_makaslar(tk04):
     ara = next(x for x in m if x["aile"] == "ara")
     assert ara["zR"] == "AN" and ara["dereler_arasi"][0] < ara["bas"] < ara["son"] < ara["dereler_arasi"][1]
     assert d["cards"]["MA-05"]["ad"] == "Yavru makas (çapraz cumba)"
+    # AP-06 paftasındaki gibi (D-53 ek, Lokman 5 Kasım 00:45; `cumba_yavru_makasi`): baş makasın iç yüzünden net 46,75 geride, 130,5 ve
+    # 256'daki ana makaslara oturur, uçları onlardan 36,3 taşar (198,1 cm); önce 130,5'te, dereler arasında 73 cm idi
+    assert (ara["konum"], ara["bas"], ara["son"]) == (56.75, 94.2, 292.3)
+    assert ana[1] == 130.5 and ana[2] == 256.0 and ara["bas"] < ana[1] < ana[2] < ara["son"]
+
+
+def test_yavru_makas_ap06_paftasindaki_gibi(tk04):
+    """Çatı tanımı (`cati_capraz._yavru_yeri`) ile bugünkü IFC'nin yavru makası aynı uçlarda; kural kitaptan (`cumba_yavru_makasi`)."""
+    import ifcopenshell
+    import ifcopenshell.util.element as E
+    from motor import cati_capraz as CC
+    from motor import geometry as G
+    ie = tk04["ie"]
+    T = CC.tanim(G.kur(copy.deepcopy(ie)), copy.deepcopy(ie))
+    cu = next(q for q in T["parcalar"] if q["rol"] == "cumba")
+    bas, yavru = cu["makaslar"]
+    assert CC.yavru_kurali() == {"net": 46.75, "tasma": 36.3, "kalinlik": 5.0}
+    assert yavru["konum"] - bas["konum"] - 5.0 == pytest.approx(46.75)                    # yüzden yüze net (makas kalınlığı 5)
+    assert yavru["oturdugu"] == [130.5, 256.0] and yavru["uclar"] == [94.2, 292.3]
+    f = ifcopenshell.open(str(tk04["kart"] / "TK04_model.ifc"))
+    ust = [a for a in f.by_type("IfcElementAssembly") if E.get_pset(a, "PortatifEv_Kapsam", "AnaCatininUstunde")]
+    assert len(ust) == 1
+    alt = [e for e in f.by_type("IfcMember") if e.Name == f"{ust[0].Name}_ALT_BASLIK"]
+    import ifcopenshell.geom
+    st = ifcopenshell.geom.settings()
+    st.set(st.USE_WORLD_COORDS, True)
+    v = ifcopenshell.geom.create_shape(st, alt[0]).geometry.verts
+    xs, ys = v[0::3], v[1::3]
+    birim = 100 if max(xs) < 50 else 1                                                     # IFC metre ya da cm
+    assert (round(min(xs) * birim, 1), round(max(xs) * birim, 1)) == (94.2, 292.3)
+    assert round((min(ys) + max(ys)) / 2 * birim, 2) == 56.75
 
 
 def test_yuzler_dere_ve_kaplama(tk04):

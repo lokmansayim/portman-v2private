@@ -485,6 +485,17 @@
    "durum": "varsayim",
    "tarih": "2026-10-25",
    "not": "Alt çerçeve zeminde: tabanı panonun altında, kanatları duvarın iki yüzünde. Saçak omegası saçak duvarının üstünde; saçak sacının saçak altı omeganın üstü kotunda, alnı saçak ucunda; mahya kaplamanın üstünde. Kalkan kenarlarında Z baş makasın üstünden betopanın dışına iner; alın sacının saçak altı makas üstünün 3 cm altında, uç duvardan saçak ucuna; C kapama saçak ucunda aşık uçlarında; alın sacının alnı en önde."
+  },
+  "cumba_yavru_makasi": {
+   "kural": "Çıkıntısız çapraz cumbanın ana çatının üstündeki makası (yavru makas, MA-05; D-47'nin paftadaki \"iki ana makasın arasında kısa\" makası) cumba mahyasının iki yanındaki ana makasların üst başlığına oturur, iki ucu ana makasların ekseninden dışarı taşar; baş makasın arkasında, yüzden yüze net aralıkla. Yalnız 3B'deki yer ve boy (bugünkü IFC, kart modeli, montaj rehberi; çatı tanımı `motor/cati_capraz.py`). Makas sayısı ve listedeki satır D-47'den, değişmez. Cumbada ana çatının üstünde birden çok makas varsa yalnız ilki bu kuralla; ötekiler D-47'nin 125,5 aralığında, dereler arasında.",
+   "bas_makastan_net_cm": {"deger": 46.75, "durum": "pafta", "tarih": "2026-11-05", "not": "AP-06 makas planındaki yazılı ölçü: cumbanın baş makasının (MK09) iç yüzünden yavru makasın (MK10) yüzüne."},
+   "tasma_cm": {"deger": 36.3, "durum": "pafta", "tarih": "2026-11-05", "not": "AP-06 makas planından vektörle ölçüldü: MK10 ≈ 198 cm, oturduğu iki ana makasın ekseninden her iki yana 36,2–36,4 cm (pafta ölçeği yazılı 46,75'ten ya da 125,5'lik makas aralığından)."},
+   "makas_kalinligi_cm": {"deger": 5, "durum": "varsayim", "tarih": "2026-11-05", "not": "Bugünkü IFC'nin makas kalınlığı (`ifc_uret._makas`, `_ana_ustu_makas`: konum ± 2,5); net aralık bu kalınlıkla eksene çevrilir (baş makasın ekseninden 46,75 + 5 = 51,75)."},
+   "cati_tipleri": ["besik_cumba"],
+   "durum": "pafta",
+   "tarih": "2026-11-05",
+   "kaynak": "Lokman, 5 Kasım 2026 00:45: \"AIPrefabrik klasöründeki [AP-06] montaj paftasına bakar mısın cumba tarafına gelen makaslarda hata yapmışsın\". TK-04 AP-06 gibi (D-47, D-53); AP-06 montaj paftası, makas planı (MK09, MK10).",
+   "not": "AP-13 (M9) ve AP-16 (MKS9) paftalarında da kısa makas iki ana makasa oturur; aralık (87,19 / 67 cm) ve taşma (≈ 0 / ≈ 24 cm) başka, üç paftadan tek geometrik kural çıkmadı: AP-06'nınki alındı (TK-04 AP-06 gibi), ötekiler kör ölçümde ayrıca bakılır. Önceki yer D-47'nin 125,5 aralığıydı: TK-04'te makas 130,5'te, iki dere arasında 73 cm ve ana makaslara oturmuyordu."
   }
  }
 }
