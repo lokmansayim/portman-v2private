@@ -37,6 +37,7 @@ PENCERE_OLCULERI = {"120x120": (120, 120), "120x180": (120, 180), "60x40": (60, 
 PENCERE_VT = json.loads((Path(__file__).resolve().parents[1] / "kurallar" / "pencere" / "pencereler.json").read_text(encoding="utf-8"))
 _PK = {k: v["deger"] for k, v in PENCERE_VT["kural"].items()}
 PENCERE_UST_KOTU_CM = float(_PK["ust_kot_cm"])   # eşik = 200 − boy (bugünkü üçü: 80, 20, 160; malzeme kataloğu P01–P03)
+UST_KOT_CM = PENCERE_UST_KOTU_CM   # BK-23 (D-55): bu kurulumun pencere/kapı üst kotu; `yapi.lento_cm` yazılınca yükseklik − lento, yoksa 200 (`kur()`)
 PENCERE_EN_SINIRI = tuple(_PK["en_cm"])         # (30, 999): üst sınır yok; pano sayısı enden, duvarda yer yoksa açık hata
 PENCERE_BOY_SINIRI = tuple(_PK["boy_cm"])       # (20, 240): üst kotu (200) geçen pencere döşemeden (eşik 0), üst kotu boyu kadar
 PENCERE_PANO_PAYI_CM = float(_PK["pano_payi_cm"])   # açıklık panodan en az 4 cm dar
@@ -69,7 +70,7 @@ class PencereKurali:
         return self.esik + self.boy
 
 
-def pencere_kurali(olcu) -> PencereKurali:
+def pencere_kurali(olcu, ust: float | None = None) -> PencereKurali:
     """Pencere ölçüsünün tek kuralı (BK-13; İE-27 madde 11, `kurallar/pencere/pencereler.json`): "ENxBOY" (tam cm) → en, boy, eşik (üst kot
     200 − boy; boyu 200'ü geçen pencere döşemeden, eşik 0) ve pano sayısı ⌈(en + 4) ÷ 125,5⌉ (en 121,5'i geçerse 2, 247'yi geçerse 3 …).
     Motor, IFC, DXF, pafta yazısı ve testler ölçüyü ve eşiği buradan alır. Ölçü kısaltılmaz; yazım ya da sınır dışı ölçü açık hata."""
@@ -80,7 +81,8 @@ def pencere_kurali(olcu) -> PencereKurali:
     (e0, e1), (b0, b1) = PENCERE_EN_SINIRI, PENCERE_BOY_SINIRI
     if not (e0 <= en <= e1 and b0 <= boy <= b1):
         raise IsEmriHatasi(f"Katalog dışı pencere ölçüsü: {olcu} (en {e0}–{e1}, boy {b0}–{b1} cm)")
-    esik = max(0.0, PENCERE_UST_KOTU_CM - boy) if _PK["dosemeden"] else PENCERE_UST_KOTU_CM - boy
+    u = UST_KOT_CM if ust is None else float(ust)                # BK-23: `ust` verilirse modül durumu okunmaz (liste kendi modelinden verir)
+    esik = max(0.0, u - boy) if _PK["dosemeden"] else u - boy
     return PencereKurali(en, boy, esik, max(1, math.ceil((en + PENCERE_PANO_PAYI_CM) / MOD - 1e-9)))
 
 
@@ -118,6 +120,27 @@ def yeni_anahtar_var(is_emri: dict) -> bool:
     yapi = is_emri.get("yapi", {})
     yukseklik_farkli = "duvar_yuksekligi_cm" in yapi and abs(float(yapi["duvar_yuksekligi_cm"]) - 250.0) > 1e-9
     return geometri_anahtari_var(is_emri) or yukseklik_farkli
+
+
+def ust_kot() -> float:
+    """Bu kurulumun pencere ve kapı üst kotu (cm, döşemeden). BK-23 (D-55; Lokman, 5 Kasım 2026 10:47 "yükseklik 280cm lento 70"):
+    İş Emri `yapi.lento_cm` yazarsa yükseklik − lento (280 − 70 = 210); yazmazsa pencere veri tabanının 200'ü (D-14, BK-13): anahtarsız
+    İş Emri bayt bayt eski yoldan."""
+    return UST_KOT_CM
+
+
+def lento_ayarla(yapi: dict) -> None:
+    """BK-23 (D-55): `yapi.lento_cm` → pencere/kapı üst kotu = duvar yüksekliği − lento; yoksa 200. Lento yalnız İş Emri'nin seçeneğidir:
+    D-14'ün varsayılanı (lento = yükseklik − 200) değişmez. Lento sayı değilse ya da kalan üst kot 200'ün altına düşerse ya da
+    duvardan taşarsa açık hata (K21; kapı 200'den alçak çizilmez)."""
+    global UST_KOT_CM
+    UST_KOT_CM = PENCERE_UST_KOTU_CM
+    if "lento_cm" not in yapi:
+        return
+    lento, hy = yapi["lento_cm"], float(yapi.get("duvar_yuksekligi_cm", 250))
+    if isinstance(lento, bool) or not isinstance(lento, (int, float)) or not (0 < float(lento) <= hy - PENCERE_UST_KOTU_CM):
+        raise IsEmriHatasi(f"lento_cm geçersiz: {lento!r} (sayı; 0 < lento ≤ duvar yüksekliği − {PENCERE_UST_KOTU_CM:g} = {hy - PENCERE_UST_KOTU_CM:g} cm)")
+    UST_KOT_CM = hy - float(lento)
 
 
 def kalinlik_ayarla(dis_cm: float, ic_cm: float) -> None:
@@ -523,7 +546,7 @@ def kur(is_emri: dict) -> Plan:
     try:
         return _kur(is_emri)
     except BaseException:
-        aks_durumu_sifirla(); kalinlik_ayarla(10.0, 6.0)
+        aks_durumu_sifirla(); kalinlik_ayarla(10.0, 6.0); lento_ayarla({})
         raise
 
 
@@ -538,6 +561,9 @@ def _kur(is_emri: dict) -> Plan:
     _hy = float(yapi.get("duvar_yuksekligi_cm", 250))
     if not any(abs(_hy - h) < 1e-9 for h in PANO_YUKSEKLIKLERI_CM):   # K21: sessizce 2500 koduna düşmez
         raise IsEmriHatasi(f"Prefabrik pano yüksekliği {_hy:g} cm tanımlı değil; yalnız 250 / 280 / 300 cm (Lokman 13.10.2026)")
+    lento_ayarla(yapi)                                     # BK-23 (D-55): `yapi.lento_cm` yoksa üst kot 200 (eski yol)
+    if (is_emri.get("cikti") or {}).get("plan_olcusu") not in (None, "en_boy"):   # BK-23 madde 3: K21, bilinmeyen değer sessizce yutulmaz
+        raise IsEmriHatasi(f"cikti.plan_olcusu yalnız en_boy olabilir: {is_emri['cikti']['plan_olcusu']!r}")
     if int(yapi.get("kat_sayisi", 1)) != 1:
         raise IsEmriHatasi("v1 yalnız tek kat destekler")
     global KISA_KENAR
@@ -614,13 +640,20 @@ def _kur(is_emri: dict) -> Plan:
     # D-34 madde 5 (TK-03; Lokman 30 Ekim 2026 15:33, PC-29): dış duvarın panoları bir aralıkta ızgara yerine bir iç duvarın aksına dayanır
     # (yatak odası 2'nin ön ve arka duvarı banyo duvarının aksına, 780,6). Aralıkta ekler aks ± 125,5k ve aralığın iki ucu; aralığın dışı ızgarada.
     # Aks ve uçlar aks tablosunda (K21); x aksı x boyunca uzanan dış duvarlara, y aksı (Motor çerçevesinde, arkadan) y boyuncakilere.
+    # BK-23 madde 2 (D-55; Lokman, 5 Kasım 2026 11:10, TK-05: "öndeki 120/120 pencereyi tam ortala yani sağına ve soluna 62,75 pano koy"):
+    # isteğe bağlı `cephe` (on | arka x aksında, sol | sag y aksında; gerçek çerçevede) dayanağı yalnız o cephedeki dış duvara uygular;
+    # yazılmamışsa aralıktaki bütün dış duvarlara (D-34, TK-03 aynen).
     dayanaklar: dict[str, list] = {"x": [], "y": []}
     for dy in dizilim.get("dis_pano_dayanagi") or []:
         yon_ = [k for k in ("x", "y") if k in dy] if isinstance(dy, dict) else []
-        if len(yon_) != 1 or set(dy) - {"x", "y", "aralik_cm", "ic_duvarlar"} or not isinstance(dy.get("aralik_cm"), list) \
-                or len(dy["aralik_cm"]) != 2 or not isinstance(dy.get("ic_duvarlar", False), bool):
-            raise IsEmriHatasi(f"dizilim.dis_pano_dayanagi bir aks (x ya da y), iki uçlu aralik_cm ve isteğe bağlı ic_duvarlar (true | false) "
-                               f"ister: {dy}")
+        cephe_ = dy.get("cephe") if isinstance(dy, dict) else None
+        if len(yon_) != 1 or set(dy) - {"x", "y", "aralik_cm", "ic_duvarlar", "cephe"} or not isinstance(dy.get("aralik_cm"), list) \
+                or len(dy["aralik_cm"]) != 2 or not isinstance(dy.get("ic_duvarlar", False), bool) \
+                or cephe_ not in ((None, "on", "arka") if yon_ == ["x"] else (None, "sol", "sag")):
+            raise IsEmriHatasi(f"dizilim.dis_pano_dayanagi bir aks (x ya da y), iki uçlu aralik_cm, isteğe bağlı ic_duvarlar (true | false) "
+                               f"ve isteğe bağlı cephe (x aksında on | arka, y aksında sol | sag) ister: {dy}")
+        if cephe_ is not None and dy.get("ic_duvarlar", False):   # K21: cephe yalnız dış duvarı seçer; iç duvarlar sessizce düşmesin
+            raise IsEmriHatasi(f"dizilim.dis_pano_dayanagi: cephe ile ic_duvarlar birlikte yazılmaz (cephe yalnız o cephedeki dış duvara): {dy}")
         if not tablo:
             raise IsEmriHatasi("dizilim.dis_pano_dayanagi aks tablosu ister (`yapi.ek_akslar_cm`)")
         aks_, (lo_, hi_) = float(dy[yon_[0]]), sorted(float(v) for v in dy["aralik_cm"])
@@ -628,7 +661,10 @@ def _kur(is_emri: dict) -> Plan:
             aks_dizini(v, yon_[0])
         if not lo_ < hi_ or not lo_ <= aks_ <= hi_:
             raise IsEmriHatasi(f"dizilim.dis_pano_dayanagi: aks {aks_:g} aralığın ({lo_:g}–{hi_:g}) dışında ya da aralık boş")
-        dayanaklar[yon_[0]].append((lo_, hi_, aks_, bool(dy.get("ic_duvarlar", False))))
+        if ayna_y and cephe_ in ("on", "arka"):               # arka-sol: Motor y'yi arkadan sayar, cephe adı açıklıktaki gibi çevrilir
+            cephe_ = "arka" if cephe_ == "on" else "on"
+        normal_ = {"on": "-y", "arka": "+y", "sol": "-x", "sag": "+x", None: None}[cephe_]
+        dayanaklar[yon_[0]].append((lo_, hi_, aks_, bool(dy.get("ic_duvarlar", False)), normal_))
     dayanak_duvari: set = set()
     kose_yonu, eklemsiz_t = _birlesimleri_oku(yapi.get("birlesimler"), tablo)   # D-49 madde 3
     birlesim_kullanildi: set = set()
@@ -1068,10 +1104,12 @@ def _kur(is_emri: dict) -> Plan:
             k = math.ceil((s1 - s0) / MOD - 1e-9)
             sinirlar += [s0 + MOD * i for i in range(1, k)]
         sinirlar += splits
-        for j, (lo_, hi_, aks_, ic_) in enumerate(dayanaklar[d.yon]):   # D-34 madde 5: aralıkta ekler aksa dayalı
+        for j, (lo_, hi_, aks_, ic_, nrm_) in enumerate(dayanaklar[d.yon]):   # D-34 madde 5: aralıkta ekler aksa dayalı
             # İE-17 PR-2 (AP-03 paftası): `ic_duvarlar: true` → aralıktaki iç duvarlar da aynı akslara dayanır (paftada ön bölümün bütün
             # duvarları salonun ön duvarının aksından 125,5 arayla). Yazılmamışsa yalnız dış duvarlar (D-34, TK-03)
             if d.tur != "dis" and not (ic_ and d.tur == "ic"):
+                continue
+            if nrm_ is not None and (d.tur != "dis" or _dis_normal(d, mahaller) != nrm_):   # BK-23: yalnız yazılan cephedeki dış duvar
                 continue
             if min(hi_, d.p1) - max(lo_, d.p0) < 1e-6:
                 continue
@@ -1090,7 +1128,8 @@ def _kur(is_emri: dict) -> Plan:
                 continue
             w = float(pencere_kurali(acikliklar[i]["olcu"]).en)
             lo_p, hi_p = max(lo, d.p0), min(hi, d.p1)
-            if d.tur == "dis" and any(a - 1e-6 <= mrk <= b + 1e-6 for a, b, _, _ic in dayanaklar[d.yon]):
+            if d.tur == "dis" and any(a - 1e-6 <= mrk <= b + 1e-6 and (nrm is None or _dis_normal(d, mahaller) == nrm)
+                                      for a, b, _, _ic, nrm in dayanaklar[d.yon]):
                 # D-34 madde 5: dayanak aralığında panolar sabit; pencere odanın pencereye yeten, ortası oda ortasına en yakın panosuna girer
                 uygun = [(a, b) for a, b in zip(pts, pts[1:]) if a >= lo_p - 1e-6 and b <= hi_p + 1e-6 and b - a >= w + 4 - 1e-9]
                 if uygun:
@@ -1126,8 +1165,9 @@ def _kur(is_emri: dict) -> Plan:
             if p.boy > MOD + 1e-6:
                 uyarilar.append(f"Duvar {d.id}: {p.boy} cm'lik uzun özel pano (125,5 üstü) — doğrulanmalı")
 
-    bos_dayanak = [f"{y_} {a:g} ({lo_:g}–{hi_:g})" for y_ in ("x", "y") for j, (lo_, hi_, a, _ic) in enumerate(dayanaklar[y_])
-                   if (y_, j) not in dayanak_duvari]
+    _cephe_adi = {"-y": "arka" if ayna_y else "on", "+y": "on" if ayna_y else "arka", "-x": "sol", "+x": "sag"}   # BK-23: gerçek çerçevede
+    bos_dayanak = [f"{y_} {a:g} ({lo_:g}–{hi_:g}{', cephe ' + _cephe_adi[n_] if n_ else ''})"
+                   for y_ in ("x", "y") for j, (lo_, hi_, a, _ic, n_) in enumerate(dayanaklar[y_]) if (y_, j) not in dayanak_duvari]
     if bos_dayanak:                                           # K21: hiçbir dış duvara düşmeyen dayanak sessizce yutulmaz
         raise IsEmriHatasi(f"dizilim.dis_pano_dayanagi hiçbir dış duvara düşmüyor: {', '.join(bos_dayanak)}")
 
@@ -2005,6 +2045,20 @@ def _dik_birlesimler(plan: "Plan", d: "Duvar", a: float, b: float) -> list:
         if abs(c_ - d.c) <= d.h + 3.5 and a + 1.0 < e_ < b - 1.0:
             cik.append(("H", e_, h))
     return cik
+
+
+def _dis_normal(d, mahaller: dict) -> str | None:
+    """BK-23: dış duvarın dışarı baktığı yön (Motor çerçevesinde "-y" | "+y" | "-x" | "+x"), `disari_yon` ile aynı kural: dışarı ya da açık
+    mahal (veranda, balkon, giriş nişi) olan yan; görünüşler duvara cephesini buradan verir (`_edges_of_room_side` ile aynı çerçeve: x duvarında
+    a duvarın -y yanı, b +y yanı). İki yanı da kapalıysa ya da ikisi de açıksa None."""
+    for _k, a, b in d.edges:
+        ma, mb = mahaller.get(a), mahaller.get(b)
+        a_out = a == OUT or (ma is not None and ma.acik); b_out = b == OUT or (mb is not None and mb.acik)
+        if a_out and not b_out:
+            return "-y" if d.yon == "x" else "-x"
+        if b_out and not a_out:
+            return "+y" if d.yon == "x" else "+x"
+    return None
 
 
 def _edges_of_room_side(duvarlar, mahal, normal):

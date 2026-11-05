@@ -100,7 +100,7 @@ def hazirla(ie: dict) -> dict:
                     dk = c.dograma[ac.olcu][1]
                     a = {"tur": "pencere", "olcu": ac.olcu}
                 else:
-                    z0, z1 = 0.0, KAPI_UST
+                    z0, z1 = 0.0, G.ust_kot()                       # BK-23 (D-55): kapı üstü pencereninkiyle aynı kot (`yapi.lento_cm` yoksa 200)
                     dk = c.dograma["ic82"][1] if ac.tur == "ic_kapi" else (c._dis_kapi_blok(ac.genislik)[1] if ac.tur == "dis_kapi" else None)
                     a = {"tur": "kapi", "alt_tur": ac.tur, "genislik": _r(ac.genislik)}
                 a.update({"yon": d.yon, "a0": _r(a0), "a1": _r(a1), "c": _r(d.c), "z0": z0, "z1": z1, "panolar": [pr["id"]],
@@ -157,7 +157,7 @@ def hazirla(ie: dict) -> dict:
         "kapsam": {"ic_kapi": True, "gecis_malzeme_degil": True},
         "bina": {"ad": f"{ie.get('talep', {}).get('musteri_adi', '')} — {ie['yapi']['grid']['x_pano']}×{ie['yapi']['grid']['y_pano']} pano",
                  "W": _r(plan.W), "H": _r(plan.H), "duvar_h": float(ie["yapi"].get("duvar_yuksekligi_cm", DUVAR_H)),
-                 "lento": float(ie["yapi"].get("duvar_yuksekligi_cm", DUVAR_H)) - KAPI_UST,   # 250 → 50; 280 / 300 → 80 / 100 (D-14; üst kot 200 çıkarım, DXF ile aynı)
+                 "lento": float(ie["yapi"].get("duvar_yuksekligi_cm", DUVAR_H)) - G.ust_kot(),   # 250 → 50; 280 / 300 → 80 / 100 (D-14; üst kot 200 çıkarım, DXF ile aynı); BK-23: `yapi.lento_cm`
                  "cati": {"tip": cati.get("tip", "besik"), "egim": float(cati.get("egim_yuzde", 33)) / 100, "sacak": float(cati.get("sacak_cm", 30)),
                           "topuk": float(cati.get("topuk_cm", 10)), "makas_yonu": ("y (derinlik)" if cati.get("makas_ekseni") == "y" else "x (kısa kenar)"),
                           **({"makas_ekseni": cati["makas_ekseni"]} if "makas_ekseni" in cati else {}), "renk": "antrasit"}},

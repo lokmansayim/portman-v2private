@@ -90,7 +90,7 @@ def cephe(plan: G.Plan, taraf: str) -> dict:
                 continue
             g = p.bosluk_dortgeni(a)
             u0, u1 = sorted((uu(g[0]), uu(g[2])) if yon == "x" else (uu(g[1]), uu(g[3])))
-            ust = G.PENCERE_UST_KOTU_CM
+            ust = G.ust_kot()                                           # BK-23 (D-55): `yapi.lento_cm` yoksa 200
             if a.tur == "pencere":                                      # İE-27 madde 11: 200'ü geçen pencere döşemeden, üstü boyu kadar
                 pk = G.pencere_kurali(a.olcu)
                 z0, z1 = pk.esik, pk.ust
