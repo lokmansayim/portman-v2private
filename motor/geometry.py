@@ -1370,9 +1370,12 @@ VERANDA_CATI_TIPLERI = ("besik", "tek_yon", "teras_paneli")
 # D-52 (İE-30; Lokman 4 Kasım 2026 20:42: "teras ayrı bir teknikle yapılıyor çatı saçağının 10 cm altında çatı paneli olarak kullandığımız bir
 # 8 cm genişliğinde C den oluşan panel yapıyoruz üzerine yine Trapez sac araya damlalık atıyoruz yani çatı gibi şekilli değil"; 21:14 "Paftadan,
 # ev ev"): verandanın üstü `cati: {tip: teras_paneli, cikma_cm}` → düz panel, üst yüzü ana çatının saçak altı çizgisinin (duvar üstü) 10 cm
-# altında, 8 cm kalınlıkta; duvardan `cikma_cm` (paftada P1 ve P2: 140) dışarı, cephe boyunca verandanın eni kadar; makas ve aşık yok
+# altında, 8 cm kalınlıkta; duvardan `cikma_cm` (paftada P1 ve P2: 140) dışarı, cephe boyunca verandanın eni kadar; makas ve aşık yok.
+# D-52 ek (Lokman, 5 Kasım 2026 00:36: "teraslara biraz eğim vereceksin"): panel duvardan dışarı `egim_yuzde` ile iner; üst yüzü duvarda saçak
+# altının 10 cm altında kalır. Dış kiriş panelin altında, kolon dış kirişin altında (`veranda.teras_paneli`).
 TERAS_PANELI_SACAK_ALTI_CM = 10.0
 TERAS_PANELI_KALINLIK_CM = 8.0
+TERAS_PANELI_EGIM_SINIRI = 20.0      # % (açık hata üstünde; eğimsiz teras paneli yok)
 
 
 def _dis_verandalar(plan: "Plan", is_emri: dict) -> None:
@@ -1452,12 +1455,15 @@ def _dis_verandalar(plan: "Plan", is_emri: dict) -> None:
         tip = c.get("tip", "besik")
         if tip not in VERANDA_CATI_TIPLERI:
             raise IsEmriHatasi(f"Veranda {ad}: çatı tipi bilinmiyor: {tip} ({' | '.join(VERANDA_CATI_TIPLERI)})")
-        if tip == "teras_paneli":                   # D-52: düz panel; eğimi, saçağı yok (K21: yazılırsa yok sayılmaz)
-            cikma = c.get("cikma_cm")
-            if set(c) - {"tip", "cikma_cm"} or not isinstance(cikma, (int, float)) or isinstance(cikma, bool) or not d <= float(cikma) <= d + 60:
-                raise IsEmriHatasi(f"Veranda {ad}: teras_paneli yalnız cikma_cm alır (duvardan panelin dış kenarı; derinlikten "
-                                   f"{d:g} en çok 60 cm fazla): {c}")
-            cati = {"tip": tip, "egim_yuzde": 0.0, "sacak_cm": 0.0, "topuk_cm": float(ana.get("topuk_cm", 10)), "cikma_cm": float(cikma)}
+        if tip == "teras_paneli":                   # D-52: panel; saçağı, topuğu yok (K21: yazılırsa yok sayılmaz); D-52 ek: eğimi İş Emri'nden
+            cikma, eg = c.get("cikma_cm"), c.get("egim_yuzde")
+            sayi = lambda q: isinstance(q, (int, float)) and not isinstance(q, bool)
+            if (set(c) - {"tip", "cikma_cm", "egim_yuzde"} or not sayi(cikma) or not d <= float(cikma) <= d + 60
+                    or not sayi(eg) or not 0 < float(eg) <= TERAS_PANELI_EGIM_SINIRI):
+                raise IsEmriHatasi(f"Veranda {ad}: teras_paneli cikma_cm ve egim_yuzde alır (cikma_cm duvardan panelin dış kenarı, derinlikten "
+                                   f"{d:g} en çok 60 cm fazla; egim_yuzde duvardan dışarı, 0'dan büyük, en çok "
+                                   f"{TERAS_PANELI_EGIM_SINIRI:g}): {c}")
+            cati = {"tip": tip, "egim_yuzde": float(eg), "sacak_cm": 0.0, "topuk_cm": float(ana.get("topuk_cm", 10)), "cikma_cm": float(cikma)}
         else:
             cati = {"tip": tip, "egim_yuzde": float(c.get("egim_yuzde", ana.get("egim_yuzde", 33))),
                     "sacak_cm": float(c.get("sacak_cm", ana.get("sacak_cm", 30))), "topuk_cm": float(ana.get("topuk_cm", 10))}

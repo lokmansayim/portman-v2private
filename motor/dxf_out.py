@@ -1107,7 +1107,9 @@ class Cizici:
             if p["veranda"] not in on_veranda:
                 continue
             pts = [(u + ox, bot + z) for u, z in p["u"]]
-            if p.get("kalkan") or p.get("acik"):                # BK-18 ek: saçak altı çizgisi ON_CATI'de, topuk ON_TOPUK'ta (ana çatınınki gibi)
+            if p["tur"] == "yazi":                              # D-52 ek: teras panelinin eğimi, yandan bakışta bir kez
+                self.text(p["metin"], pts[0], 14, "ON_YAZI")
+            elif p.get("kalkan") or p.get("acik"):              # BK-18 ek: saçak altı çizgisi ON_CATI'de, topuk ON_TOPUK'ta (ana çatınınki gibi)
                 msp.add_lwpolyline(pts, dxfattribs={"layer": "ON_TOPUK" if p["tur"] == "topuk" else "ON_CATI"})
             else:
                 msp.add_lwpolyline(pts, close=True, dxfattribs={"layer": "ON_CATI" if p["tur"] == "cati" else "ON_GORUNUS"})
@@ -1138,6 +1140,9 @@ class Cizici:
             if cephe[p["veranda"]] == karsi[taraf]:
                 continue
             q = dict(p, u=[(u + kay, z) for u, z in p["u"]])
+            if q["tur"] == "yazi":                               # D-52 ek: teras panelinin eğim yazısı (kırpılmaz)
+                out.append(q)
+                continue
             imza = (q["tur"], tuple(q["u"]))
             if imza in gorulen:                                  # yandan bakışta üst üste düşen kolon ve kiriş bir kez
                 continue

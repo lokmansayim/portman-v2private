@@ -5,7 +5,8 @@ kullandığımız bir 8 cm genişliğinde C den oluşan panel yapıyoruz üzerin
 değil AP26 montaj paftasını iyice incele". Paftadan İş Emri'ne:
 - pencerenin bölmeleri açıklık başına (`acikliklar[i].bolmeler`, İE-29'un biçimi; D-52 ile sürgülü ve vasistas bölmesi),
 - dış kapının türü (`kapi_turu: pvc_cam`: beyaz, komple cam PVC kapı),
-- taşan verandanın üstü teras paneli (`verandalar[i].cati: {tip: teras_paneli, cikma_cm}`: düz, duvar üstünün 10 altında, 8 cm).
+- taşan verandanın üstü teras paneli (`verandalar[i].cati: {tip: teras_paneli, cikma_cm, egim_yuzde}`: 8 cm, üst yüzü duvarda duvar
+  üstünün 10 altında; D-52 ek, Lokman 5 Kasım 2026 00:36 "teraslara biraz eğim vereceksin": duvardan dışarı eğimle iner).
 Anahtarları yazılmamış İş Emri'nde hiçbir şey değişmez (TK-01 r07, TK-02, P6001; referans ve M-02 testleri ayrıca).
 """
 from __future__ import annotations
@@ -105,11 +106,15 @@ def test_kapi_turu_yanlis_yazim(yer, deger):
 
 
 @pytest.mark.parametrize("cati", [
-    {"tip": "teras_paneli"},                                            # çıkma yok
-    {"tip": "teras_paneli", "cikma_cm": 100},                           # derinlikten (110) kısa
-    {"tip": "teras_paneli", "cikma_cm": 175},                           # derinlikten 60'tan fazla
-    {"tip": "teras_paneli", "cikma_cm": 140, "egim_yuzde": 5},          # eğim yazılmaz (düz)
-    {"tip": "teras_paneli", "cikma_cm": "140"},
+    {"tip": "teras_paneli", "egim_yuzde": 10},                          # çıkma yok
+    {"tip": "teras_paneli", "cikma_cm": 100, "egim_yuzde": 10},         # derinlikten (110) kısa
+    {"tip": "teras_paneli", "cikma_cm": 175, "egim_yuzde": 10},         # derinlikten 60'tan fazla
+    {"tip": "teras_paneli", "cikma_cm": "140", "egim_yuzde": 10},
+    {"tip": "teras_paneli", "cikma_cm": 140},                           # D-52 ek: eğimsiz teras paneli yok
+    {"tip": "teras_paneli", "cikma_cm": 140, "egim_yuzde": 0},
+    {"tip": "teras_paneli", "cikma_cm": 140, "egim_yuzde": 25},         # en çok %20
+    {"tip": "teras_paneli", "cikma_cm": 140, "egim_yuzde": True},
+    {"tip": "teras_paneli", "cikma_cm": 140, "egim_yuzde": 10, "sacak_cm": 30},   # saçağı yok
 ])
 def test_teras_paneli_yanlis_yazim(cati):
     ie = _ap26()
@@ -121,29 +126,42 @@ def test_teras_paneli_yanlis_yazim(cati):
 # --------------------------------------------------------------------------- teras panelinin geometrisi
 
 def test_teras_paneli_kotlari_ve_gorunusu():
-    """Panelin üst yüzü duvar üstünün (ana çatının saçak altı çizgisi) 10 cm altında, 8 cm kalın; planda duvardan 140, cephe boyunca
-    verandanın eni. Görünüşte kolon kirişin altına, kiriş panelin altında, panel düz bant; topuk, kalkan ve eğik çatı çizgisi yok."""
+    """Panelin üst yüzü duvarda duvar üstünün (ana çatının saçak altı çizgisi) 10 cm altında, 8 cm kalın; D-52 ek: duvardan dışarı %10 iner
+    (240 → 140'ta 226). Planda duvardan 140, cephe boyunca verandanın eni. Dış kiriş düz, panelin altında (altının dış kirişin dış yüzündeki
+    kotu: 110'da 221); kolon dış kirişin altına (211; gerçek listede kolon 210); yan kiriş panelin altında eğimle. Önden bakınca panel bant
+    (dış kenarın altından duvardaki üstüne) ve dış kenarın üstü açık çizgi, yan kiriş arkada kalır; yandan bakınca panel ve yan kiriş eğik
+    dörtgen, bir kez "%10". Topuk, kalkan, saçak yok."""
     from motor import veranda as VR
     ie = _ap26()
     plan = G.kur(copy.deepcopy(ie))
     on = next(v for v in plan.dis_verandalar if v["cephe"] == "on")
     T = VR.cati(on, ie)
-    assert T["tip"] == "teras_paneli" and T["mahya"] is None and T["egim"] == 0
-    assert (T["sacak_kotu"], T["alt_kotu"]) == (240.0, 232.0)
+    assert T["tip"] == "teras_paneli" and T["mahya"] is None and T["egim"] == pytest.approx(0.10)
+    assert [round(T[k], 6) for k in ("mahya_kotu", "sacak_kotu", "kalinlik", "dis_kiris_ustu", "kolon_ustu")] == [240.0, 226.0, 8.0, 221.0, 211.0]
     x0, _, x1, y1 = on["rect"]
     assert T["kutu"] == (x0, y1 - 140, x1, y1)
     assert VR.uyarilar(plan, ie) == []
-    for taraf in ("on", "sol"):
-        p = [q for q in VR.gorunus_parcalari(plan, ie, taraf) if q["veranda"] == on["ad"]]
-        assert {q["tur"] for q in p} == {"kolon", "kiris", "cati"}
-        assert not any(q.get("kalkan") or q.get("acik") for q in p)
-        assert {max(z for _, z in q["u"]) for q in p if q["tur"] == "kolon"} == {222.0}
-        assert {(min(z for _, z in q["u"]), max(z for _, z in q["u"])) for q in p if q["tur"] == "kiris"} == {(222.0, 232.0)}
-        (panel,) = [q for q in p if q["tur"] == "cati"]
-        assert panel["panel"] and {z for _, z in panel["u"]} == {232.0, 240.0}
-        if taraf == "sol":                                              # yandan: duvardan panelin dış kenarına 140
-            us = [u for u, _ in panel["u"]]
-            assert round(max(us) - min(us), 6) == 140.0
+    r = lambda q: sorted({round(z, 6) for _, z in q["u"]})
+    p = [q for q in VR.gorunus_parcalari(plan, ie, "on") if q["veranda"] == on["ad"]]
+    assert {q["tur"] for q in p} == {"kolon", "kiris", "cati"}
+    assert {max(r(q)) for q in p if q["tur"] == "kolon"} == {211.0}
+    assert [r(q) for q in p if q["tur"] == "kiris"] == [[211.0, 221.0]]            # yalnız dış kiriş
+    (panel,) = [q for q in p if q["tur"] == "cati" and q.get("panel")]
+    assert r(panel) == [218.0, 240.0]
+    (ust,) = [q for q in p if q["tur"] == "cati" and q.get("acik")]
+    assert r(ust) == [226.0]
+    p = [q for q in VR.gorunus_parcalari(plan, ie, "sol") if q["veranda"] == on["ad"]]
+    assert {q["tur"] for q in p} == {"kolon", "kiris", "cati", "yazi"}
+    assert not any(q.get("kalkan") or q.get("acik") for q in p)
+    assert {max(r(q)) for q in p if q["tur"] == "kolon"} == {211.0}
+    assert sorted(r(q) for q in p if q["tur"] == "kiris") == [[211.0, 221.0]] + [[211.0, 221.0, 222.0, 232.0]] * 2
+    (panel,) = [q for q in p if q["tur"] == "cati"]
+    assert r(panel) == [218.0, 226.0, 232.0, 240.0]
+    us = [u for u, _ in panel["u"]]
+    assert round(max(us) - min(us), 6) == 140.0                                    # yandan: duvardan panelin dış kenarına 140
+    duvar_u = next(u for u, z in panel["u"] if abs(z - 240.0) < 1e-6)                # sol görünüşte ön teras sağda: duvar solda
+    assert all(z >= 232.0 - 1e-6 for u, z in panel["u"] if abs(u - duvar_u) < 1e-6)
+    assert [q["metin"] for q in p if q["tur"] == "yazi"] == ["%10"]
 
 
 # --------------------------------------------------------------------------- çizim (ön onay PDF'inin DXF'i)
@@ -247,18 +265,20 @@ def test_anahtarsiz_is_emrinde_yeni_blok_yok(yol):
 def test_liste_teras_paneli_panel_cati():
     """Teras paneli listede makassız panel çatı parçası (AP-09'un açık mahal panel çatısı gibi; Lokman: "çatı paneli olarak kullandığımız
     ... C den oluşan panel", "çatı gibi şekilli değil"): yavru makas ve aşık yok, "Çatı paneli (hafif çelik)" satırı "Kural yok"; trapez
-    duvardan panelin dış kenarına (140 + bindirme payı; paftada trapez 150 × 6 + 6). Panel, damlalık ve tavan satırları çizim onayından sonra."""
+    duvardan panelin dış kenarına, eğik boyuyla (D-52 ek: %10'da 140,7 + taşma 5 → 1460; paftada trapez 150 × 6 + 6). Panel, damlalık ve
+    tavan satırları çizim onayından sonra."""
     from motor import prefabrik_liste as PL
     L = PL.is_emrinden(_ap26())
     k = {(s["kalem"], s["olcu"]): s for s in L["satirlar"]}
     for ad in ("ön teras çatısı", "arka teras çatısı"):
         assert k[(f"Çatı paneli (hafif çelik) · {ad}", "—")]["dayanak"] == "Kural yok"
         assert not any(x["kalem"] == f"Yavru makas · {ad}" for x in L["satirlar"])
-        assert k[(f"Trapez sac · {ad}", "L 1450")]["adet"] == 6
+        assert k[(f"Trapez sac · {ad}", "L 1460")]["adet"] == 6
 
 
-def test_ifc_teras_paneli_duz():
-    """3B modelde teras paneli düz levha (232–240), kiriş panelin altında (222–232), dikme kirişin altına (0–222)."""
+def test_ifc_teras_paneli_egimli():
+    """3B modelde teras paneli eğik levha (duvarda 232–240, dışarı %10 iner), dış kiriş panelin altında (211–221), yan kiriş panelin altında
+    eğimle (211–232), dikme dış kirişin altına (0–211)."""
     import ifcopenshell
     from motor import ifc_uret
     with tempfile.TemporaryDirectory() as t:
@@ -266,14 +286,16 @@ def test_ifc_teras_paneli_duz():
         oz = ifc_uret.uret(_ap26(), yol)
         f = ifcopenshell.open(str(yol))
         catilar = [e for e in f.by_type("IfcRoof") if e.Name.startswith("VERANDA_CATISI_")]
-        assert {e.PredefinedType for e in catilar} == {"FLAT_ROOF"}
+        assert {e.PredefinedType for e in catilar} == {"SHED_ROOF"}
 
-        def kot(e):
+        def ozellik(e, pset, ad):
             for r in e.IsDefinedBy:
                 ps = getattr(r, "RelatingPropertyDefinition", None)
-                if ps and ps.is_a("IfcPropertySet") and ps.Name == "PortatifEv_Kapsam":
-                    return next((p.NominalValue.wrappedValue for p in ps.HasProperties if p.Name == "Kot_cm"), None)
-        dikme = {kot(e) for e in f.by_type("IfcColumn") if e.Name.startswith("DIKME_")}
-        profil = {kot(e) for e in f.by_type("IfcBeam") if e.Name.startswith("VERANDA_PROFIL_")}
-    assert dikme == {"0–222"} and profil == {"222–232"}
+                if ps and ps.is_a("IfcPropertySet") and ps.Name == pset:
+                    return next((p.NominalValue.wrappedValue for p in ps.HasProperties if p.Name == ad), None)
+        assert {(ozellik(e, "PortatifEv_Cati", "Egim_yuzde"), ozellik(e, "PortatifEv_Cati", "Ust_kotu_cm"),
+                 ozellik(e, "PortatifEv_Cati", "Dis_ust_kotu_cm")) for e in catilar} == {(10.0, 240.0, 226.0)}
+        dikme = {ozellik(e, "PortatifEv_Kapsam", "Kot_cm") for e in f.by_type("IfcColumn") if e.Name.startswith("DIKME_")}
+        profil = sorted(ozellik(e, "PortatifEv_Kapsam", "Kot_cm") for e in f.by_type("IfcBeam") if e.Name.startswith("VERANDA_PROFIL_"))
+    assert dikme == {"0–211"} and profil == ["211–221"] * 2 + ["211–232"] * 4
     assert oz.get("hata", oz.get("hatalar", 0)) in (0, [], None)
