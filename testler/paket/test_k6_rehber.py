@@ -200,7 +200,7 @@ def test_ana_makaslar_cumba_makasinin_arkasindan(tk04):
     # liste: ana makasların açıklığı 861, sayı aynı; cumbanın kısa saçakları saçak hatlarında (dere, saçak omegası saçak boyundan)
     L = tk04["L"]
     assert {s["olcu"] for s in L if s["kalem"].startswith("Makas (")} == {"açıklık 8610"}
-    # bugünkü IFC: ana makasların üst ve alt başlığı y = 7,5'te başlar (10 cm topuk), arkada saçak ucu 928,5; alt başlık arka duvarda
+    # bugünkü IFC: ana makasların üst başlığı saçak ucunda (ön 7,5, arka 928,5), alt başlığı topuktan topuğa
     f = ifcopenshell.open(str(tk04["kart"] / "TK04_model.ifc"))
     st = ifcopenshell.geom.settings()
     st.set(st.USE_WORLD_COORDS, True)
@@ -211,7 +211,8 @@ def test_ana_makaslar_cumba_makasinin_arkasindan(tk04):
         return round(min(v[1::3]) * b, 1), round(max(v[1::3]) * b, 1)
     asm = [a for a in f.by_type("IfcElementAssembly") if (E.get_pset(a, "PortatifEv_Kapsam") or {}).get("CatiParcasi") == "ana çatı"]
     assert len(asm) == 8
-    assert {(uc(f"{a.Name}_UST_1")[0], uc(f"{a.Name}_UST_2")[1], uc(f"{a.Name}_ALT_BASLIK")) for a in asm} == {(7.5, 928.5, (7.5, 898.5))}
+    # alt başlık açıklık boyunca (37,5 … 898,5), listedeki "açıklık 8610" gibi (geometri hakemi, dördüncü tur; önce 7,5'ten başlıyordu)
+    assert {(uc(f"{a.Name}_UST_1")[0], uc(f"{a.Name}_UST_2")[1], uc(f"{a.Name}_ALT_BASLIK")) for a in asm} == {(7.5, 928.5, (37.5, 898.5))}
     # rehber: ana makaslar 7,5'ten 928,5'e (ön duvarın dikmesi yok, makasın topuğu duvarın üstünde); baş makas omegası makasın boyunca
     # (M-03, Lokman 07:15 "baş makasın omegasını dışarda bırakmışsın"); sol kalkanın ön ucunda saçak ucu betopanı yok
     m = tk04["d"]["makas"]
@@ -236,6 +237,15 @@ def test_ana_makaslar_cumba_makasinin_arkasindan(tk04):
         bozuk = copy.deepcopy(ie)
         bozuk["cati"]["cumbalar"][0]["ana_makas"] = "kes"
         CP.cati(G.kur(copy.deepcopy(bozuk)), bozuk)
+
+
+def test_inisler_kendi_hatlarinda(tk04):
+    """Rehberin inişleri kart modelinin yazdığı düzlemin hattında (geometri hakemi, İE-15 K6 dördüncü tur: ön saçağın sol uç inişi yakın
+    olan cumbanın kısa hattına düşüyor, o hat iki iniş alıyordu); cumbanın kısa yan saçaklarının inişi derenin boyunda (-30 … 7,5)."""
+    ini = tk04["d"]["dere"]["inisler"]
+    assert Counter(i["hat"] for i in ini) == {"ana çatı ön (cumbanın sağı)": 2, "ana çatı arka": 3, "cumba sol yanı": 1, "cumba sağ yanı": 1}
+    hat = {h["ad"]: h for h in tk04["d"]["dere"]["hatlar"]}
+    assert all(hat[i["hat"]]["a0"] <= i["s"] <= hat[i["hat"]]["a1"] for i in ini if i["hat"].startswith("cumba"))
 
 
 def test_yuzler_dere_ve_kaplama(tk04):
@@ -289,3 +299,92 @@ def test_seksenlik_trapez_kor_is_emrinde(kod, kp03, ck07):
     assert next(s["olcu"] for s in L if s["kalem"] == "Trapez sac mahyası") == "L 800"
     for k, on in (("CK-03", "Alın sacı"), ("CK-04", "Baş makas Z'si"), ("CK-01", "100'lük saçak omegası"), ("CK-02", "Saçak sacı")):
         assert say["kesim_plani"][k]["stok"] == _liste(L, on), k
+
+
+@pytest.fixture(scope="module")
+def tk04_r05(tmp_path_factory):
+    from motor import kart_model, prefabrik_liste as PL
+    from araclar.paket.rehber import veri
+    ie = _oku(IE.with_name("TK04_r05.json"))
+    kart = tmp_path_factory.mktemp("tk04_r05")
+    kart_model.uret(copy.deepcopy(ie), kart, "TK04")
+    L = PL.is_emrinden(copy.deepcopy(ie))["satirlar"]
+    return {"d": veri.kur(copy.deepcopy(ie), kart, "TK04", L, "TK-04"), "say": _oku(kart / "TK04_kart_sayim.json"), "L": L}
+
+
+def test_r05_anahtarsiz_eski_yol(tk04_r05):
+    """`ana_makas` anahtarı olmayan çapraz cumba (TK-04 r05) eski yoldan: ana makaslar saçaktan saçağa (gövdenin önünden), kart modeli
+    listeyle aynı, rehber r05'teki gibi (geometri hakemi, İE-15 K6 dördüncü tur: r06'ya geçen dosyada anahtarsız yolun koruması kalmıştı)."""
+    say, L, d = tk04_r05["say"], tk04_r05["L"], tk04_r05["d"]
+    assert say["kural_yok"] == [] and say["sema_hatasi"] == {"bugunku_ifc": 0, "kart_modeli": 0}
+    adet = {k["kod"]: k["adet"] for k in say["kartlar"]}
+    yerlesen = {"MA-01": "Makas (baş)", "MA-02": "Makas (orta)", "MA-05": "Yavru makas · cumba", "KP-03": "Trapez sac",
+                "BT-01": "Baş makas betopanı", "DR-02": "Metal dere inişi aparatı"}
+    assert {k: adet[k] for k in yerlesen} == {k: _liste(L, on) for k, on in yerlesen.items()} == {
+        "MA-01": 2, "MA-02": 6, "MA-05": 2, "KP-03": 25, "BT-01": 9, "DR-02": 5}
+    boyla = {"AS-01": "Aşık", "DR-01": "Metal dere", "CK-01": "100'lük saçak omegası", "CK-02": "Saçak sacı", "CK-03": "Alın sacı",
+             "CK-04": "Baş makas Z'si", "CK-07": "Trapez sac mahyası"}
+    assert {k: say["kesim_plani"][k]["stok"] for k in boyla} == {k: _liste(L, on) for k, on in boyla.items()} == {
+        "AS-01": 43, "DR-01": 4, "CK-01": 6, "CK-02": 7, "CK-03": 11, "CK-04": 10, "CK-07": 13}
+    assert {s["olcu"] for s in L if s["kalem"].startswith("Makas (")} == {"açıklık 8985"}
+    W, DY = d["dis"]
+    assert sorted((o["perp"], o["a0"], o["a1"]) for o in d["omega_duvar"] if o["tur"] == "sacak") == [(5, 416.5, W), (DY - 5, 0, W)]
+    assert {(x["bas"], x["son"]) for x in d["makas"] if x["aile"] == "ana"} == {(-30.0, 928.5)}
+    assert sorted(s["ad"] for s in d["sacak"]) == ["ana çatı arka saçağı", "ana çatı ön (cumbanın sağı) saçağı"]
+    assert all("not" not in s for s in d["sacak"]) and len(d["dere"]["inisler"]) == 5
+    kp = next(a for a in d["adimlar"] if a.get("ad") == "Trapez sac ve mahya")
+    assert [r[1:3] for r in kp["rows"] if r[3:] == ["liste"]] == [["Trapez sac · ana çatı L 5100", "20 adet"], ["Trapez sac · cumba L 2410", "5 adet"],
+                                                              ["Trapez sac mahyası L 1000", "13 adet"], ["Mahya bandı rulo 10 m", "2 adet"]]
+
+
+@pytest.fixture(scope="module")
+def tk04_r07(tmp_path_factory):
+    from motor import kart_model, prefabrik_liste as PL
+    from araclar.paket.rehber import veri
+    ie = _oku(IE.with_name("TK04_r07.json"))
+    kart = tmp_path_factory.mktemp("tk04_r07")
+    kart_model.uret(copy.deepcopy(ie), kart, "TK04")
+    L = PL.is_emrinden(copy.deepcopy(ie))["satirlar"]
+    return {"d": veri.kur(copy.deepcopy(ie), kart, "TK04", L, "TK-04"), "say": _oku(kart / "TK04_kart_sayim.json"), "L": L, "ie": ie, "kart": kart}
+
+
+def test_r07_veranda_sacak_kadar_icerde(tk04_r07):
+    """Lokman, 5 Kasım 2026 11:00: "veranda da saçak oturmadığı için verandayı 30cm saçak olacak şekilde içeri almamız gerekiyor … tam
+    geldiği yerede bir tane 250cm kolon koyması gerekiyor" (İş Emri r07, kat planı sohbetinin; gövde L, ön kirişin dış yüzü 37,5, salon
+    duvarında kolon 386,5). Çatı r06'nınkiyle aynı (ana çatının ayak izi 37,5 … 898,5); ana çatının ön saçağının altındaki kiriş 37,5'ta:
+    saçak altı var, saçak omegası kirişin üstünde, sağ kalkan köşe kolonundan (önü saçak ucu), ön saçağın inişleri iki kolonda; makasın alt
+    başlığı ve topuğundaki dikme kirişin üstünde. Ön kirişin kendisi (çizimde PC-33) burada sınanmaz."""
+    import ifcopenshell
+    import ifcopenshell.geom
+    import ifcopenshell.util.element as E
+    from motor import cati_capraz as CC
+    from motor import geometry as G
+    ie, say, L, d = tk04_r07["ie"], tk04_r07["say"], tk04_r07["L"], tk04_r07["d"]
+    plan = G.kur(copy.deepcopy(ie))
+    assert plan.girintili and ie["dikmeler"] == [[386.5, 37.5]]
+    ana = next(q for q in CC.tanim(plan, copy.deepcopy(ie))["parcalar"] if q["rol"] == "ana")
+    assert (ana["b"], ana["duvar_b"], ana["geri_cm"], ana["mahya"][0][1]) == ([37.5, 898.5], [37.5, 898.5], 7.5, 468.0)
+    assert say["kural_yok"] == [] and say["sema_hatasi"] == {"bugunku_ifc": 0, "kart_modeli": 0}
+    adet = {k["kod"]: k["adet"] for k in say["kartlar"]}
+    assert {k: adet[k] for k in ("MA-01", "MA-02", "MA-05", "KP-03", "DR-02")} == {"MA-01": 2, "MA-02": 6, "MA-05": 2, "KP-03": 26, "DR-02": 7}
+    assert {s["olcu"] for s in L if s["kalem"].startswith("Makas (")} == {"açıklık 8610"}
+    f = ifcopenshell.open(str(tk04_r07["kart"] / "TK04_model.ifc"))
+    st = ifcopenshell.geom.settings()
+    st.set(st.USE_WORLD_COORDS, True)
+
+    def uc(ad):
+        v = ifcopenshell.geom.create_shape(st, next(e for e in f.by_type("IfcMember") if e.Name == ad)).geometry.verts
+        b = 100 if max(abs(x) for x in v) < 50 else 1
+        return round(min(v[1::3]) * b, 1), round(max(v[1::3]) * b, 1)
+    asm = [a for a in f.by_type("IfcElementAssembly") if (E.get_pset(a, "PortatifEv_Kapsam") or {}).get("CatiParcasi") == "ana çatı"]
+    assert len(asm) == 8 and {uc(f"{a.Name}_ALT_BASLIK") for a in asm} == {(37.5, 898.5)}
+    assert {(x["bas"], x["son"], tuple(x["wl"])) for x in d["makas"] if x["aile"] == "ana"} == {(7.5, 928.5, (40.2, 895.8))}
+    sa = {s["ad"]: s for s in d["sacak"]}
+    on = sa["ana çatı ön (cumbanın sağı) saçağı"]
+    assert "not" not in on and on["t0"] < on["t1"]
+    assert sorted((o["perp"], o["a0"], o["a1"]) for o in d["omega_duvar"] if o["tur"] == "sacak") == [(42.5, 416.5, 888.5), (893.5, 0, 888.5)]
+    K = {k["ad"]: k for k in d["kalkan"]}
+    assert (K["ana çatı sağ kalkanı (MKS08)"]["duvar"]["A"], K["ana çatı sağ kalkanı (MKS08)"]["uc"]["A"]) == (37.5, 7.5)
+    assert K["ana çatı sol kalkanı (MKS01)"]["duvar"]["A"] == -7.5
+    ini = [i for i in d["dere"]["inisler"] if i["hat"] == "ana çatı ön (cumbanın sağı)"]
+    assert sorted((i["duvar"], i["s"], i["sw"]) for i in ini) == [("veranda kolonu", 416.7, 391.5), ("veranda kolonu", 918.7, 883.5)]

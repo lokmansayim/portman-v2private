@@ -148,7 +148,8 @@ def tanim(plan: G.Plan, ie: dict) -> dict:
     if c.get("tip") != "besik_cumba":
         raise PrefabrikCatiHatasi(f"çapraz cumba tanımı yalnız beşik + cumba çatıda ({c.get('tip')})")
     cs = c.get("cumbalar") or []
-    if len(cs) != 1 or float(cs[0].get("cikinti_cm", 0)) != 0 or plan.girintili:
+    if len(cs) != 1 or float(cs[0].get("cikinti_cm", 0)) != 0 or (plan.girintili and CP.ana_geri_cm(c, plan) is None):   # geri çekilen
+        # ana çatıda (TK-04 r07) gövde L: veranda ana çatının saçağı kadar içeride; birleşimi `cati_prefabrik.cati` denetler
         raise PrefabrikCatiHatasi("beşik + cumba: kart modeli tek, çıkıntısız çapraz cumbayı kurar (çıkıntılı cumba ve çift cumba bu sürümde yok)")
     t = CP.cati(plan, ie)
     s, top, H0 = float(t["sacak"]), float(t["topuk"]), float(t["duvar_ustu"])
@@ -161,10 +162,18 @@ def tanim(plan: G.Plan, ie: dict) -> dict:
     a0, a1, b0, b1 = min(a0, a1), max(a0, a1), min(b0, b1), max(b0, b1)
     yer, uyarilar = ana_makaslari(plan, eksen, a0, a1, b0, b1, h)               # makas yerleri gövdenin duvarlarından (saçak duvarının ekleri)
     geri = CP.ana_geri_cm(c, plan)
+    duvar_b = None
     if geri is not None:                                                         # İE-15 K6 (D-53 madde 7): ana çatının ayak izi geride
-        rx0, ry0, rx1, ry1 = CP._cumba(c, (gx0, gy0, gx1, gy1), plan)[0]
+        from shapely.geometry import box
+        ayak, serit = CP._cumba(c, (gx0, gy0, gx1, gy1), plan)
+        rx0, ry0, rx1, ry1 = ayak
         kb = (K(rx0, ry0)[1], K(rx1, ry1)[1])
         b0, b1 = min(kb), max(kb)
+        # ana çatının saçak hatlarının altındaki duvar ya da kiriş: gövdenin cumba şeridi dışındaki sınırı (r06'da ön duvar 0; r07'de veranda
+        # ana çatının saçağı kadar içeride, Lokman 5 Kasım 11:00, ön kiriş 37,5'ta)
+        govde = G.govde_cokgeni(plan) if plan.girintili else box(gx0, gy0, gx1, gy1)
+        gx0_, gy0_, gx1_, gy1_ = govde.difference(box(*serit)).bounds
+        duvar_b = sorted(round(K(*v)[1], 2) for v in ((gx0_, gy0_), (gx1_, gy1_)))
     duzenli = not uyarilar
     bm = (b0 + b1) / 2
     ana = {"ad": "ana çatı", "rol": "ana", "a": [a0, a1], "b": [b0, b1], "aciklik_cm": round(b1 - b0, 2), "boy_cm": round(a1 - a0, 2),
@@ -172,7 +181,7 @@ def tanim(plan: G.Plan, ie: dict) -> dict:
            "makas_ust_boy_cm": round((bm - b0 + s) * math.sqrt(1 + eg * eg), 2), "makas_yuksekligi_cm": round(top + eg * (bm - b0 + s), 2),
            "makaslar": [{"konum": round(x, 2), "rol": "bas" if i in (0, len(yer) - 1) else "orta"} for i, x in enumerate(yer)],
            "makas_yeri": "pano ekleri" if duzenli else "eşit aralık", "komsu": None,
-           **({"geri_cm": round(geri, 2), "duvar_b": sorted(round(K(*v)[1], 2) for v in ((gx0, gy0), (gx1, gy1)))} if geri is not None else {})}
+           **({"geri_cm": round(geri, 2), "duvar_b": duvar_b} if geri is not None else {})}
     m = cumba_makaslari(t, ie, plan)
     cx0, cy0, cx1, cy1 = m["kutu"]
     if m["eks"] == 1:                                                            # ön ya da arka cephe: cumbanın mahyası y boyunca

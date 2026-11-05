@@ -172,7 +172,9 @@ def cati(plan: G.Plan, ie: dict) -> dict:
             from .cati_serit import cati_izi
             fark = cati_izi(plan).symmetric_difference(box(*ana).union(box(*cumba))).area
             if fark > 1.0:
-                raise PrefabrikCatiHatasi(f"{'çıkıntılı cumba' if ana != list(kutu) else 'beşik + cumba (girintili gövde)'}: gövdenin dış "
+                ne = ("beşik + cumba (ana makaslar cumba makasının arkasından)" if ana_geri_cm(c, plan) is not None else
+                      "çıkıntılı cumba" if ana != list(kutu) else "beşik + cumba (girintili gövde)")
+                raise PrefabrikCatiHatasi(f"{ne}: gövdenin dış "
                                           f"çizgisi ana çatı ile cumbanın birleşimi değil ({fark:.0f} cm² fark; çıkıntı ve cumbanın yeri gövdenin "
                                           "girintisiyle aynı olmalı)")
         ayak = [ana, cumba]
