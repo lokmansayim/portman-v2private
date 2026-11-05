@@ -820,7 +820,7 @@
    "lokman": {
     "tarih": "2026-11-04",
     "saat": "21:14",
-    "soz": "Paftadan, ev ev (kart: \"AP-26'nın pencerelerini ve terasını paftadan, ev ev mi kuralım?\"; sonuç: \"Pencere bölmeleri, cam PVC kapı ve teras paneli İş Emri'ne paftadan yazılır; TK-01, TK-02 ve mühürlü veranda kuralı değişmez.\"). 20:42: \"pencereler çizimi tam doğru değil ayrıca teras ayrı bir teknikler yapılıyor çatı saçağının 10 cm altında çatı paneli olarak kullandığımız bir 8 cm genişliğinde C den oluşan panel yapıyoruz üzerine yine Trapez sac araya damlalık atıyoruz yani çatı gibi şekilli değil AP26 montaj paftasını iyice incele\". 5 Kasım 2026 00:36: \"teraslara biraz eğim vereceksin\""
+    "soz": "Paftadan, ev ev (kart: \"AP-26'nın pencerelerini ve terasını paftadan, ev ev mi kuralım?\"; sonuç: \"Pencere bölmeleri, cam PVC kapı ve teras paneli İş Emri'ne paftadan yazılır; TK-01, TK-02 ve mühürlü veranda kuralı değişmez.\"). 20:42: \"pencereler çizimi tam doğru değil ayrıca teras ayrı bir teknikler yapılıyor çatı saçağının 10 cm altında çatı paneli olarak kullandığımız bir 8 cm genişliğinde C den oluşan panel yapıyoruz üzerine yine Trapez sac araya damlalık atıyoruz yani çatı gibi şekilli değil AP26 montaj paftasını iyice incele\". 5 Kasım 2026 00:36: \"teraslara biraz eğim vereceksin\". 10:17 (\"%10 eğimle ve paftadaki gibi 120 derinlikle devam edeyim mi?\" sorusuna): \"evet onaylıyorum mühürle bu çizim şeklini\" (AP-26 çizimi mühürlü, M-12)"
    },
    "kod_yeri": [
     "motor/geometry.py::bolmeler_dogrula",
@@ -879,7 +879,9 @@
     "testler/motor/test_ie30_pencere_teras.py::test_ap27_kayitlarinin_blogu_degismedi",
     "testler/motor/test_ie30_pencere_teras.py::test_anahtarsiz_is_emrinde_yeni_blok_yok",
     "testler/motor/test_ie30_pencere_teras.py::test_liste_teras_paneli_panel_cati",
-    "testler/motor/test_ie30_pencere_teras.py::test_ifc_teras_paneli_egimli"
+    "testler/motor/test_ie30_pencere_teras.py::test_ifc_teras_paneli_egimli",
+    "testler/motor/test_m12_ap26.py::test_m12_hedef_ornek_izi",
+    "testler/motor/test_m12_ap26.py::test_m12_teraslar_paftadaki_gibi"
    ]
   }
  ]
