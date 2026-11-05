@@ -214,7 +214,22 @@ const IC_KAL = M.ic_kal || "60'lık";
 const kartSat = kod => kod ? [['Kart ölçüsü', D.cards[kod].olcu], ['IFC', D.cards[kod].ifc ? `${D.cards[kod].ifc.sinif} · ${D.cards[kod].ifc.alt_tur}` : '—']] : [];
 
 // Zemin (veranda dahil)
-scene.add(bp(D.zemin[0], D.zemin[1], D.zemin[2], D.zemin[3], -12, 0, mat('concrete', 0)));
+const plak = bp(D.zemin[0], D.zemin[1], D.zemin[2], D.zemin[3], -12, 0, mat('concrete', 0));
+scene.add(plak);
+/* İE-15 K6 · Ön onay sayfası evin altında (Lokman, 5 Kasım 2026 00:53, TK-01 rehberi): Motor'un A4 sayfası gerçek ölçekte, kat planı evin
+   tam altına oturur; sayfa varken temel plak gizli. Görüntü ve yer `kagit.py`'den (`dxf_out.a4_cercevesi`); sayfasız rehberde null. */
+const KAGIT = __KAGIT__;
+if (KAGIT) {
+  plak.visible = false;
+  const img = new Image(), tex = new THREE.Texture(img);
+  tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 16;
+  img.onload = () => { tex.needsUpdate = true; };
+  img.src = KAGIT.src;
+  const [x0, x1] = KAGIT.x, [y0, y1] = KAGIT.y;
+  const kagit = new THREE.Mesh(new THREE.PlaneGeometry((x1 - x0) / 100, (y1 - y0) / 100), new THREE.MeshStandardMaterial({ map: tex, roughness: 0.92 }));
+  kagit.name = 'Ön onay sayfası'; kagit.rotation.x = -Math.PI / 2; kagit.position.set(X((x0 + x1) / 2), -0.002, Z((y0 + y1) / 2)); kagit.receiveShadow = true;
+  scene.add(kagit);
+}
 
 /* 1 · Alt çerçeve */
 D.alt.forEach((s, i) => {
