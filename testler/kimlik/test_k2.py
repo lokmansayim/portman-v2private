@@ -341,12 +341,19 @@ def test_kirma_catida_cati_katmanlari_kural_yok(tmp_path):
 
 
 def test_sandvic_disi_kaplama_kural_yok(tmp_path):
+    """Kartı olmayan kaplama (metal kiremit) "kural yok". Trapez sac İE-15 K6'dan (D-53) beri kurulur: KP-03, liste gibi yüz başına
+    ⌈mahya ÷ kapatma⌉ (D-50, M-11: standart 1,0; PK-01 22); öteki çatı parçaları değişmez (`testler/paket/test_k6_rehber.py`)."""
     ie = _ie()
-    ie["ozellikler"]["Çatı Kaplaması"] = "Trapez Sac"
-    m = _model(ie, tmp_path, "trapez")
-    assert [x["parca"] for x in m["say"]["kural_yok"]] == ["çatı kaplaması"] and "trapez sac" in m["say"]["kural_yok"][0]["neden"]
+    ie["ozellikler"]["Çatı Kaplaması"] = "Metal Kiremit"
+    m = _model(ie, tmp_path, "kiremit")
+    assert [x["parca"] for x in m["say"]["kural_yok"]] == ["çatı kaplaması"] and "metal kiremit" in m["say"]["kural_yok"][0]["neden"]
     a = _adet(m["say"])
-    assert a["KP-01"] == 0 and (a["AS-01"], a["BT-01"], a["DR-01"], a["DR-02"]) == (42, 4, 2, 6)
+    assert (a["KP-01"], a["KP-03"]) == (0, 0) and (a["AS-01"], a["BT-01"], a["DR-01"], a["DR-02"]) == (42, 4, 2, 6)
+    ie["ozellikler"]["Çatı Kaplaması"] = "Trapez Sac"
+    t = _model(ie, tmp_path, "trapez")
+    assert t["say"]["kural_yok"] == []
+    a = _adet(t["say"])
+    assert (a["KP-01"], a["KP-03"]) == (0, 22) and (a["AS-01"], a["BT-01"], a["DR-01"], a["DR-02"]) == (42, 4, 2, 6)
 
 
 def test_inis_kurali_esik_degilse_inis_yok(tmp_path):

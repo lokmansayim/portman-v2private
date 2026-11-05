@@ -163,10 +163,11 @@ def talep_modeli(kod: str, yol: Path, tavan: list[str] | None, kayit_: dict) -> 
 
 # ----------------------------------------------------------------------------- parçalar
 def cizim(ie: dict, gec: Path) -> dict:
-    """Ön onay PDF'i, DXF ve plan görseli (canlıdaki işlevler). Dönen: {'pdf','dxf','png','gorunusler','neden'}."""
+    """Ön onay PDF'i, DXF ve plan görseli (canlıdaki işlevler). Dönen: {'pdf','dxf','png','gorunusler','a4','neden'}."""
     from motor import bayi_gorseli, dxf_out
     m = dxf_out.uret(copy.deepcopy(ie), gec / "motor")
-    out = {"dxf": gec / "motor" / m["dxf"], "pdf": gec / "motor" / m["pdf"] if m.get("pdf") else None, "uyarilar": m.get("warnings") or []}
+    out = {"dxf": gec / "motor" / m["dxf"], "pdf": gec / "motor" / m["pdf"] if m.get("pdf") else None, "uyarilar": m.get("warnings") or [],
+           "a4": m.get("a4_sayfa_cm")}                  # İE-15 K6: ön onay sayfasının kat planı çerçevesindeki yeri (rehberin altındaki sayfa)
     if out["pdf"] is None:
         out["neden"] = f"Motor'un doğrulaması geçmedi; teslim PDF'i üretilmedi ({m.get('pdf_skipped_reason')})"
     v = json.loads((gec / "motor" / "validation.json").read_text(encoding="utf-8")) if (gec / "motor" / "validation.json").exists() else None
@@ -192,21 +193,24 @@ def kart_modeli(ie: dict, gec: Path, kart_kodu: str) -> dict:
     from motor import kart_model
     from motor.cati_prefabrik import TIP_ADI
     tip = (ie.get("cati") or {}).get("tip", "besik")
-    if tip != "besik":
-        return {"neden": f"kart modeli {TIP_ADI.get(tip, tip)} çatıyı kurmuyor (yerleşimi yalnız düz beşik; İE-15 K5)"}
+    if tip not in ("besik", "besik_cumba"):              # İE-15 K6: beşik + çıkıntısız çapraz cumba da (`motor/cati_capraz.py`)
+        return {"neden": f"kart modeli {TIP_ADI.get(tip, tip)} çatıyı kurmuyor (yerleşimi beşik ve beşik + çapraz cumba; İE-15 K5, K6)"}
     say = kart_model.uret(copy.deepcopy(ie), gec / "kart", kart_kodu)
     return {"klasor": gec / "kart", "ifc": gec / "kart" / f"{kart_kodu}_model.ifc", "pdf": gec / "kart" / f"{kart_kodu}_yerlesim_planlari.pdf",
             "kural_yok": say["kural_yok"], "sema_hatasi": say["sema_hatasi"], "uyarilar": say.get("yerlesim", {}).get("uyarilar", [])}
 
 
-def rehber(km: dict, kart_kodu: str, ie: dict, L: dict, kod: str, gec: Path, glb: bool, render: bool = False) -> dict:
+def rehber(km: dict, kart_kodu: str, ie: dict, L: dict, kod: str, gec: Path, glb: bool, render: bool = False, cz: dict | None = None) -> dict:
+    """`cz`: `cizim()`'in sonucu; ön onay PDF'i varsa rehberde evin altına serilir (`rehber/kagit.py`, İE-15 K6)."""
+    from araclar.paket.rehber import kagit as KG
     from araclar.paket.rehber import sayfa, veri
     try:
         d = veri.kur(copy.deepcopy(ie), km["klasor"], kart_kodu, L["satirlar"], kod)
     except veri.Desteklenmiyor as e:
         return {"neden": f"rehber üreteci bu evi kurmuyor: {e}"}
-    html = sayfa.yaz(d, gec / "rehber.html")
-    out = {"html": html, "veri": d, "kiyas": veri.kiyas(km["klasor"], kart_kodu, L["satirlar"])}
+    kg = KG.kur((cz or {}).get("pdf"), (cz or {}).get("a4"))
+    html = sayfa.yaz(d, gec / "rehber.html", kagit=kg)
+    out = {"html": html, "veri": d, "kiyas": veri.kiyas(km["klasor"], kart_kodu, L["satirlar"]), "kagit": kg is not None}
     if not glb:
         out["glb_neden"] = "GLB bu koşuda istenmedi (`--glb` yok)"
     elif not os.environ.get("THREE_DIR"):
@@ -226,7 +230,7 @@ def rehber(km: dict, kart_kodu: str, ie: dict, L: dict, kod: str, gec: Path, glb
         from araclar.paket.rehber import galeri
         try:
             g = galeri.uret(out["glb"], d, gec)
-            sayfa.yaz(d, html, g)
+            sayfa.yaz(d, html, g, kg)
             out["galeri"] = g
         except galeri.Yok as e:
             out["galeri_neden"] = f"render görselleri yazılamadı: {e}"
@@ -357,6 +361,7 @@ def paket(m: dict, kok: Path, gecici: Path, glb: bool = False, kayit_: dict | No
             durum[ad(kalem, uz)] = f"Yok: {neden}"
     else:
         # çizim
+        cz: dict = {}
         try:
             cz = cizim(ie, gec)
             # K23 ve canlı akış (`kanal/worker.py`): doğrulama geçmezse bayiye ne PDF ne plan görseli gider; DXF denetim için yazılır.
@@ -423,7 +428,7 @@ def paket(m: dict, kok: Path, gecici: Path, glb: bool = False, kayit_: dict | No
                 if s_r:                                     # rehberin tavanı adetlerini aldığı listeninki (listeler() gibi)
                     ie_r.setdefault("ozellikler", {})["Tavan"] = s_r.capitalize()
                 try:
-                    rh = rehber(km, kart_kodu, ie_r, L[s_r], kod, gec, glb or render, render)
+                    rh = rehber(km, kart_kodu, ie_r, L[s_r], kod, gec, glb or render, render, cz)
                 except Exception as e:                                      # noqa: BLE001 — hata nedenle yazılır, öteki modeller sürer
                     rh = {"neden": f"rehber üreteci hata verdi ({type(e).__name__}: {str(e)[:160]})"}
                 if "neden" in rh:
@@ -442,6 +447,8 @@ def paket(m: dict, kok: Path, gecici: Path, glb: bool = False, kayit_: dict | No
                     notlar.append(f"Rehber (62 m² rehberinin şablonu, D-28): {d['N']} adım, {len(d['rooms'])} oda, {len(d['panels'])} pano, {len(d['hs'])} H, "
                                   f"{len(d['posts'])} köşe direği, {len(d['makas'])} makas; motorun modelinde olmayanlar kuraldan (kartlarında yazar); adetler " +
                                   ("asma tavanlı listeyle" if "asma" in L else "İş Emri'nin tavanıyla yazılan listeyle"))
+                    if rh.get("kagit"):
+                        notlar.append("Rehberde evin altında ön onay sayfası (bayi PDF'inin kendisi, gerçek ölçekte; İE-15 K6)")
     # kıyas
     kiyas_yolu = gec / "kiyas.xlsx"
     neden = kiyas(m, km, rh, kiyas_yolu) if ie is not None and not teslim_yok else durum[ad("model", "ifc")][5:]

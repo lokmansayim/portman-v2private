@@ -233,7 +233,7 @@ def test_kural_dosyasi():
     Z, I = yer["kurallar"]["dizme_tavan"], yer["kurallar"]["cati_izolasyonu"]
     D = _degerler()
     assert D["dizme_tavan"]["levha_cm"][0] * D["dizme_tavan"]["levha_cm"][1] / 1e4 == D["dizme_tavan"]["levha_m2"] == 3.0
-    assert Z["durum"] == I["durum"] == "varsayim" and I["cati_tipleri"] == ["besik"]
+    assert Z["durum"] == I["durum"] == "varsayim" and I["cati_tipleri"] == ["besik", "besik_cumba"]     # İE-15 K6 (D-53): çapraz cumbada da
     dis = yer["kurallar"]["tavan_omegasi_yerlesimi"]["dis_duvar"]
     assert dis["durum"] == "lokman" and dis["tarih"] == "2026-10-21"
     kartlar = {k["kod"]: k for k in _oku(KM.KARTLAR)["kartlar"]}

@@ -45,12 +45,13 @@ SAYFA = {1: (("tavan omegası", "tavan H'ı ve gözler"), ("OMEGA_", "DIS_DUVAR_
          6: (("elektrik", "elektrik noktaları", "kablo_priz", "kablo_aydinlatma"),
              ("DUY_", "GLOP_", "ANAHTAR_", "PRIZ_", "UYDU_", "ZIL_", "SIGORTA_", "KABLO_")),
          7: (("alt çerçeve", "saçak omegası", "saçak sacı", "alın sacı", "baş makas Z'si", "C kapama", "mahya", "alt çerçeve ve çatı kenarları"),
-             ("ALT_CERCEVE_", "SACAK_OMEGASI_", "SACAK_SACI_", "ALIN_SACI_", "BAS_MAKAS_Z_", "C_KAPAMA_", "MAHYA_", "VERANDA_SACAK_",
-              "VERANDA_ALIN_SACI_", "VERANDA_MAHYA_"))}
+             ("ALT_CERCEVE_", "SACAK_OMEGASI_", "SACAK_SACI_", "ALIN_SACI_", "BAS_MAKAS_Z_", "C_KAPAMA_", "MAHYA_", "TRAPEZ_MAHYA_", "VERANDA_SACAK_",
+              "VERANDA_ALIN_SACI_", "VERANDA_MAHYA_", "VERANDA_TRAPEZ_MAHYA_"))}
 ELEKTRIK_RENK = {"EL-01": "#c0392b", "EL-02": "#c0392b", "EL-03": "#1e8449", "EL-04": "#1e8449", "EL-05": "#1f4e9c", "EL-06": "#1f4e9c",
                  "EL-07": "#7d3c98", "EL-08": "#ca6f1e", "EL-09": "#111111", "EL-10": "#1f4e9c", "EL-11": "#e67e22"}
 KENAR_RENK = {"AC-01": "#1f4e9c", "AC-02": "#e67e22", "CK-01": "#c0392b", "CK-02": "#85c1e9", "CK-03": "#ca6f1e", "CK-04": "#7d3c98",
-              "CK-05": "#111111", "CK-06": "#1e8449"}
+              "CK-05": "#111111", "CK-06": "#1e8449", "CK-07": "#1e8449"}
+ESI_KENAR = {"CK-06", "CK-07"}      # İE-15 K6: metal kiremit ya da trapez sac mahyası; kaplamaya göre biri kurulur, öteki lejantta yazılmaz
 
 
 def _sayi(x: float, n: int = 2) -> str:
@@ -259,7 +260,8 @@ def ciz(model_yolu: Path, say: dict, yol: Path, kod: str) -> Path:
         kd, ki = _kart(say, "DR-01"), _kart(say, "DR-02")
         ym = _kart(say, "MA-03")
         _lejant(fig, [f"MA-01 Makas (baş): {_kart(say, 'MA-01')['adet']}", f"MA-02 Makas (orta): {_kart(say, 'MA-02')['adet']}"]
-                + ([f"MA-03 Yavru makas: {ym['adet']} (Y; veranda çatısı)"] if ym["adet"] else []) + ["",
+                + ([f"MA-03 Yavru makas: {ym['adet']} (Y; veranda çatısı)"] if ym["adet"] else [])
+                + [f"{k} {_kart(say, k)['ad']}: {_kart(say, k)['adet']}" for k in ("MA-05",) if _kart(say, k)["adet"]] + ["",
                      f"DR-01 Metal dere: {kd['adet']} hat, {_sayi(kd.get('metre', 0))} m"]
                 + ([f"   kesim: {kesim['DR-01']['stok']} boy L {kesim['DR-01']['parca_boyu_cm']:g}", f"   ({kesim['DR-01']['bindirme_cm']:g} cm bindirme)"]
                    if "DR-01" in kesim else [])
@@ -326,7 +328,7 @@ def ciz(model_yolu: Path, say: dict, yol: Path, kod: str) -> Path:
         pdf.savefig(fig); plt.close(fig)
 
         # 4 · aşık ve 5 · çatı kaplaması
-        KP = [kk for kk in ("KP-01", "KP-02") if m["k2"].get(kk)] or ["KP-01"]   # sandviç ya da tek kat panel (K5b)
+        KP = [kk for kk in ("KP-01", "KP-02", "KP-03") if m["k2"].get(kk)] or ["KP-01"]   # sandviç, tek kat panel (K5b) ya da trapez sac (K6)
         for sayfa, kart, baslik in ((4, "AS-01", "AŞIK YERLEŞİM PLANI"), (5, KP[0], "ÇATI KAPLAMASI YERLEŞİM PLANI")):
             fig, ax = plt.subplots(figsize=(16.54, 11.69))
             _duvarlar(ax, m, dolgu=False)
@@ -428,7 +430,7 @@ def _kenar(zemin, cati_, m: dict, plt) -> None:
     for ad, mk in sorted(m["makas"].items()):
         x, yy = _iz(np.vstack(mk["uyeler"])).exterior.xy
         cati_.fill(x, yy, color=RENK["makas"], alpha=0.12, lw=0)
-    for kod, alfa in (("CK-02", 0.55), ("CK-06", 0.75), ("CK-01", 0.9)):
+    for kod, alfa in (("CK-02", 0.55), ("CK-06", 0.75), ("CK-07", 0.75), ("CK-01", 0.9)):
         for p in m["k2"].get(kod, []):
             iz = _iz(p["v"]); x, yy = iz.exterior.xy
             cati_.fill(x, yy, color=KENAR_RENK[kod], alpha=alfa, lw=0)
@@ -446,7 +448,7 @@ def _kenar(zemin, cati_, m: dict, plt) -> None:
         cati_.text(cx + (14 * ic if dik else 0), cy + (0 if dik else 14 * ic), f"{p['p']['Makas']} {YUZ[p['p']['Yuz']]}: {_sayi(p['p']['Boy_cm'], 1)}",
                    rotation=90 if dik else 0, fontsize=6.5, ha=("left" if ic > 0 else "right") if dik else "center",
                    va="center" if dik else ("bottom" if ic > 0 else "top"), color=KENAR_RENK["CK-04"])
-    for kod, ad in (("CK-02", "saçak sacı"), ("CK-01", "saçak omegası"), ("CK-06", "mahya")):
+    for kod, ad in (("CK-02", "saçak sacı"), ("CK-01", "saçak omegası"), ("CK-06", "mahya"), ("CK-07", "trapez mahya")):
         hat: dict = {}                                          # kesik hattın (saçak omegası betopanda kesilir, BK-19) yazısı bir kez,
         for p in m["k2"].get(kod, []):                          # en uzun parçasında, hattın boyuyla
             a = (p["p"].get("Cati"), p["p"].get("Hat", p["ad"]))
@@ -473,6 +475,8 @@ def _kenar_lejanti(fig, say: dict, plt) -> None:
         if k["kod"] not in KENAR_RENK:
             continue
         kp = kesim.get(k["kod"])
+        if k["kod"] in ESI_KENAR and not kp and k["kod"] not in kurulmadi and not liste.get(k["kod"]):
+            continue
         model = "kurulmadı" if k["kod"] in kurulmadi else f"{kp['stok']} boy" if kp else f"{_sayi(k.get('metre', 0))} m"
         lst = liste.get(k["kod"])
         lst = ("listede yok" if lst is None else "liste yazılmaz" if lst == LISTE_YAZILMAZ

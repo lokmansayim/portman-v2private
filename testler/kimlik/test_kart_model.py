@@ -60,6 +60,7 @@ IC100_KARTLARI = {k: 0 for k in ("D-06", "D-07", "H-07", "H-08", "H-09", "H-10",
 K5B_KARTLARI = {k: 0 for k in ("KP-02", "MA-03")}    # K5b: tek kat çatı paneli ve yavru makas; PK-01 sandviç ve verandasız
 K5B2_KARTLARI = {k: 0 for k in ("H-11", "AL-01", "AL-02", "IZ-01")}    # K5b-2: tavan katmanı ve çatı izolasyonu (yerleşim katmanında; K1 modelinde 0)
 IE24_KARTLARI = {"MA-04": 0}    # İE-24: cumba makası (girintili gövdenin cumbası); bu evde cumba yok
+K6_KARTLARI = {k: 0 for k in ("MA-05", "KP-03", "CK-07")}   # İE-15 K6 (D-53): yavru makas (çapraz cumba), trapez sac ve mahyası; bu evde cumba yok, çatı sandviç
 KILIT_K1 = "94c253954968d2dee4023c097e47326281fe57998c92e347e2b48d24762e4d23"   # K1'de çıkan 25 kodun adlarıyla SHA'sı (PR #31)
 
 
@@ -160,7 +161,7 @@ def test_yerlesim_kurallari():
     assert h["durum"] in durumlar and h["kaynak"]
     for ad in ("makasin_oturdugu_duvar", "duvar_cizgisi_payi_cm", "denk_gelme_payi"):     # uygulamak için seçilen değer: K1'in varsayımı
         assert h[ad]["durum"] == "varsayim" and h[ad]["durum"] in durumlar and h[ad]["not"], ad
-    assert h["cati_tipleri"] == ["besik"]
+    assert h["cati_tipleri"] == ["besik", "besik_cumba"]                 # İE-15 K6 (D-53): çapraz cumbada da (makasa göre ayrılan dış H)
 
 
 # ----------------------------------------------------------------------------- PK-01 kart modeli
@@ -175,7 +176,7 @@ def test_her_parca_kartli(pk01, kartlar):
     adet = {k["kod"]: k["adet"] for k in s["kartlar"]}
     assert adet == {"D-01": 23, "D-02": 3, "D-03": 2, "D-04": 1, "D-05": 1, "I-01": 15, "I-02": 5, "I-03": 0,
                     "K-01": 5, "K-02": 1, "P-01": 3, "P-02": 2, "P-03": 1, "B-01": 6, "B-02": 1, "V-01": 1, "V-02": 2,
-                    "H-01": 12, "H-02": 7, "H-03": 10, "H-04": 2, "H-05": 3, "H-06": 4, "MA-01": 2, "MA-02": 7} | K2_KARTLARI | K3_KARTLARI | K3B_KARTLARI | IC100_KARTLARI | K5B_KARTLARI | K5B2_KARTLARI | IE24_KARTLARI
+                    "H-01": 12, "H-02": 7, "H-03": 10, "H-04": 2, "H-05": 3, "H-06": 4, "MA-01": 2, "MA-02": 7} | K2_KARTLARI | K3_KARTLARI | K3B_KARTLARI | IC100_KARTLARI | K5B_KARTLARI | K5B2_KARTLARI | IE24_KARTLARI | K6_KARTLARI
     assert len(s["gorunum"]) == 9 and all(g["asil"].startswith("BAGLANTI_B0") for g in s["gorunum"])
     assert s["bilesen"] == {f"MAKAS_{i:02d}": 8 for i in range(1, 10)}
     assert Counter(k["sinif"] for k in s["kartsiz"]) == {"IfcOpeningElement": 12, "IfcSlab": 3, "IfcPlate": 2, "IfcRoof": 1}
