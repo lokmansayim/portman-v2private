@@ -583,12 +583,16 @@ class IfcUretici:
         prof = self.sb.profile(self.sb.polyline([np.array([_m(a), _m(b)]) for a, b in yerel], closed=True))
         return self.sb.extrude(prof, magnitude=_m(t), position=np.array([_m(p0[0]), _m(p0[1]), _m(z0)]), position_z_axis=Z, position_x_axis=X)
 
-    def _makas(self, ad, kalem, ozellik, b0, b1, konum, mahya_x, zs, eg, s):
-        """Beşik makası (`_cati_y` ile aynı çubuklar): b0..b1 dış yüzden dış yüze, saçaklar s; mahya x boyunca ise makas y–z düzleminde."""
+    def _makas(self, ad, kalem, ozellik, b0, b1, konum, mahya_x, zs, eg, s, alt=None):
+        """Beşik makası (`_cati_y` ile aynı çubuklar): b0..b1 dış yüzden dış yüze, saçaklar s; mahya x boyunca ise makas y–z düzleminde.
+        İE-15 K6 (D-53 madde 7): `alt` (a0, a1) verilirse alt başlık orada başlar ve biter. Ana makaslar cumba makasının arkasına geri
+        çekilince çatının ayak izi duvardan geridedir: makasın ön ucu cumba makasının iç yüzünde duvarın üstünde, alt başlık o uca kadar
+        uzanır ve üst başlık orada alt başlığa oturur (normal 10 cm topuk); arkada alt başlık yine duvarda biter."""
         H0 = self.G["bina"]["duvar_h"]; ym = (b0 + b1) / 2; zm = zs + (ym - b0 + s) * eg
         zt = lambda y: zs + (min(y - b0, b1 - y) + s) * eg
         q1, q3 = (b0 + ym) / 2, (ym + b1) / 2
-        uyeler = (("ALT_BASLIK", [(b0, H0), (b1, H0), (b1, H0 + 10), (b0, H0 + 10)]),
+        a0, a1 = alt if alt else (b0, b1)
+        uyeler = (("ALT_BASLIK", [(a0, H0), (a1, H0), (a1, H0 + 10), (a0, H0 + 10)]),
                   ("UST_1", [(b0 - s, zs), (ym, zm), (ym, zm + 10), (b0 - s, zs + 10)]),
                   ("UST_2", [(ym, zm), (b1 + s, zs), (b1 + s, zs + 10), (ym, zm + 10)]),
                   ("DIKME_ORTA", [(ym - 3, H0 + 10), (ym + 3, H0 + 10), (ym + 3, zt(ym)), (ym - 3, zt(ym))]),
@@ -692,7 +696,8 @@ class IfcUretici:
                 if m.get("ana_ustunde"):
                     self._ana_ustu_makas(f"MAKAS_{n:02d}", kalem, oz, T, q, m["konum"], kot, m.get("uclar"))
                 else:
-                    self._makas(f"MAKAS_{n:02d}", kalem, oz, b0, b1, m["konum"], mahya_x, zs, eg_, s)
+                    alt = (max(b0 - s, q["duvar_b"][0]), min(b1 + s, q["duvar_b"][1])) if q.get("duvar_b") else None
+                    self._makas(f"MAKAS_{n:02d}", kalem, oz, b0, b1, m["konum"], mahya_x, zs, eg_, s, alt)
                 yerler.append({"parca": q["ad"], "rol": m["rol"], "konum_cm": round(m["konum"], 2)})
         self.cati_ozet = {"mahya_cm": round(mahya, 1), "makas": n, "cati_alan_m2": round(alan, 2), "makaslar": yerler,
                           **({"uyari": T["uyarilar"]} if T["uyarilar"] else {})}

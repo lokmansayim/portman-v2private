@@ -9,7 +9,10 @@ liste (`prefabrik_liste._capraz_cumba_catilari`) aynı kuralla kendisi sayar, ka
   AP-06 MK01–08). Yerleri dikdörtgen beşiğin kuralıyla (BK-12 PR-R, `ifc_uret.IfcUretici.cati`): baş makaslar iki kalkan duvarının
   ekseninde, orta makaslar boydan boya kesintisiz koşan saçak duvarının pano eklerinde (iki duvar da kesintisizse ortak ekler); ekler
   düzenli değilse (125,5 arayla değil, sayı listeninkinden farklı) eşit aralıkla, listenin sayısında (⌈(boy − 2 × dış duvar) ÷ 125,5⌉ + 1)
-  ve uyarıyla.
+  ve uyarıyla. İş Emri'nde cumbanın `ana_makas`'ı "cumba_makasindan" ise (D-53 madde 7, `cumba_altindaki_ana_makas`; Lokman, 5 Kasım
+  2026 07:19–10:15) bütün ana makaslar geri çekilir: cumbanın baş makasının iç yüzünden 10 cm topukla başlar, arka saçak aynı; ana
+  çatının ayak izi (`b`) öndeki duvardan geride (`cati_prefabrik._cumba`), gerçek duvarlar `duvar_b`'de, geri çekme `geri_cm`'de. Makas
+  yerleri yine gövdenin duvarlarından.
 - **Cumba** ana çatıya dik küçük beşik; alnı ana çatının saçak duvarında (çıkıntı 0), mahyası dış yüzden derelerin birleştiği yere kadar.
   Makaslar dış uçtaki kalkan duvarının ekseninden 125,5 arayla, derelerin birleştiği yere kadar (D-47; liste aynı sayıyı sayar): ilki
   cumbanın baş makası (kalkan duvarının üstünde), ötekiler ana çatının üstünde (yavru makas; paftada "iki ana makasın arasında kısa").
@@ -41,6 +44,15 @@ def yavru_kurali() -> dict:
     """`kurallar/yerlesim/prefabrik.json › cumba_yavru_makasi`: {'net', 'tasma', 'kalinlik'} (cm)."""
     k = json.loads(YERLESIM.read_text(encoding="utf-8"))["kurallar"]["cumba_yavru_makasi"]
     return {"net": float(k["bas_makastan_net_cm"]["deger"]), "tasma": float(k["tasma_cm"]["deger"]), "kalinlik": float(k["makas_kalinligi_cm"]["deger"])}
+
+
+def bitis_kurali() -> str:
+    """`kurallar/yerlesim/prefabrik.json › cumba_altindaki_ana_makas › bitis`: geri çekilen ana makasın topuklu ucu cumbanın baş makasının
+    "eksen"inde ya da "yuz"ünde (iç yüzü; D-53 madde 7)."""
+    b = json.loads(YERLESIM.read_text(encoding="utf-8"))["kurallar"]["cumba_altindaki_ana_makas"]["bitis"]["deger"]
+    if b not in ("eksen", "yuz"):
+        raise PrefabrikCatiHatasi(f"cumba_altindaki_ana_makas: bitis {b!r} (eksen ya da yuz)")
+    return b
 
 
 def _yavru_yeri(t: dict, cumba: dict, m: dict, ana_konum: list[float]) -> tuple[dict | None, str | None]:
@@ -82,7 +94,7 @@ def cumba_makaslari(t: dict, ie: dict, plan: G.Plan) -> dict:
     from .cati_prefabrik import _cumba
     c = ie.get("cati") or {}
     cephe = c["cumbalar"][0]["cephe"]
-    _ana, (cx0, cy0, cx1, cy1) = _cumba(c, tuple(float(v) for v in G.govde_kutusu(plan)))
+    _ana, (cx0, cy0, cx1, cy1) = _cumba(c, tuple(float(v) for v in G.govde_kutusu(plan)), plan)
     h = next(d.h for d in plan.duvarlar if d.tur == "dis")
     dis = {"on": cy0, "arka": cy1, "sol": cx0, "sag": cx1}[cephe]
     ic = 1.0 if cephe in ("on", "sol") else -1.0                                # dış yüzden içeri yön (dizildiği eksende)
@@ -147,14 +159,20 @@ def tanim(plan: G.Plan, ie: dict) -> dict:
     gx0, gy0, gx1, gy1 = (float(v) for v in G.govde_kutusu(plan))
     (a0, b0), (a1, b1) = K(gx0, gy0), K(gx1, gy1)
     a0, a1, b0, b1 = min(a0, a1), max(a0, a1), min(b0, b1), max(b0, b1)
-    yer, uyarilar = ana_makaslari(plan, eksen, a0, a1, b0, b1, h)
+    yer, uyarilar = ana_makaslari(plan, eksen, a0, a1, b0, b1, h)               # makas yerleri gövdenin duvarlarından (saçak duvarının ekleri)
+    geri = CP.ana_geri_cm(c, plan)
+    if geri is not None:                                                         # İE-15 K6 (D-53 madde 7): ana çatının ayak izi geride
+        rx0, ry0, rx1, ry1 = CP._cumba(c, (gx0, gy0, gx1, gy1), plan)[0]
+        kb = (K(rx0, ry0)[1], K(rx1, ry1)[1])
+        b0, b1 = min(kb), max(kb)
     duzenli = not uyarilar
     bm = (b0 + b1) / 2
     ana = {"ad": "ana çatı", "rol": "ana", "a": [a0, a1], "b": [b0, b1], "aciklik_cm": round(b1 - b0, 2), "boy_cm": round(a1 - a0, 2),
            "mahya": [list(P(a0 - s, bm)), list(P(a1 + s, bm))], "mahya_kotu": round(zs + eg * (bm - b0 + s), 2),
            "makas_ust_boy_cm": round((bm - b0 + s) * math.sqrt(1 + eg * eg), 2), "makas_yuksekligi_cm": round(top + eg * (bm - b0 + s), 2),
            "makaslar": [{"konum": round(x, 2), "rol": "bas" if i in (0, len(yer) - 1) else "orta"} for i, x in enumerate(yer)],
-           "makas_yeri": "pano ekleri" if duzenli else "eşit aralık", "komsu": None}
+           "makas_yeri": "pano ekleri" if duzenli else "eşit aralık", "komsu": None,
+           **({"geri_cm": round(geri, 2), "duvar_b": sorted(round(K(*v)[1], 2) for v in ((gx0, gy0), (gx1, gy1)))} if geri is not None else {})}
     m = cumba_makaslari(t, ie, plan)
     cx0, cy0, cx1, cy1 = m["kutu"]
     if m["eks"] == 1:                                                            # ön ya da arka cephe: cumbanın mahyası y boyunca

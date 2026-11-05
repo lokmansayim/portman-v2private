@@ -597,7 +597,7 @@ def _capraz_cumba_catilari(plan, ie: dict) -> tuple[list[dict], dict]:
     except CP.PrefabrikCatiHatasi as e:
         raise ListeYazilmaz(f"beşik + cumba çatı kurulmadı: {e}") from None
     s, eg = float(t["sacak"]), float(c["egim_yuzde"])
-    ana_k, cb_k = CP._cumba(c, tuple(float(v) for v in G.govde_kutusu(plan)))
+    ana_k, cb_k = CP._cumba(c, tuple(float(v) for v in G.govde_kutusu(plan)), plan)
     ck = cati_genel.cati_kur(t)
     parca = lambda d: "ana" if d.startswith("ana ") else "cumba"          # noqa: E731 (genel motorun cumba düzlem adları)
     k_ = {"ana": {"sacak": [], "alin": [], "mahya": [], "vadi": []}, "cumba": {"sacak": [], "alin": [], "mahya": [], "vadi": []}}

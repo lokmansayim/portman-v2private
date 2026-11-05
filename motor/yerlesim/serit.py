@@ -214,9 +214,12 @@ def dere(g: dict, ck: dict, K: dict) -> list[dict]:
     dw, dh = K["kesit_dere"]
     iw, iu = (K["kesit_inis"], K["kesit_inis"]) if isinstance(K["kesit_inis"], (int, float)) else K["kesit_inis"]
     adli = {dz["ad"]: dz for dz in ck["duzlemler"]}
+    parcalar = {q["ad"]: q for q in g["cati_serit"]["parcalar"]}
+    geri = any(q.get("geri_cm") for q in parcalar.values())
     out = []
     for h in ck["dere"]["hatlar"]:
         dz = adli[h["duzlem"]]
+        q = parcalar.get(dz["ad"].rsplit(" ", 1)[0], {})
         (yx, yy) = dz["yukari"]
         ax = 0 if abs(dz["sag"][0]) > 0.5 else 1
         r0, r1 = sorted((h["p"][ax], h["q"][ax]))
@@ -233,6 +236,10 @@ def dere(g: dict, ck: dict, K: dict) -> list[dict]:
         konumlar = [("uç", r0 + iw / 2 + k * 2 * iw) for k in range(n)] + [("uç", r1 - iw / 2 - k * 2 * iw) for k in range(n)]
         if boy > K["orta_esik_cm"] + ESIK:
             konumlar.insert(n, ("orta", (r0 + r1) / 2))
+        if geri and q.get("capraz"):                                     # İE-15 K6: ana makaslar cumba makasının arkasına çekilince cumbanın
+            dis_once = q["cephe"] in ("on", "sol")                       # iki yanında kısa saçak (geri + saçak) kalır; hattın tek inişi dış
+            konumlar = [("uç", r0 + iw / 2 + k * 2 * iw) if dis_once else ("uç", r1 - iw / 2 - k * 2 * iw) for k in range(n)]   # ucunda,
+            # cumbanın ön köşesinde (AP-06 paftasında inişler cumbanın köşelerinde); cumbanın iki hattı liste gibi ek parça başına 2 iniş
         uc = (c0 + c1) / 2
         for yer, v in konumlar:
             out.append({"kural": "dere_hatti", "parca": "inis", "geo": {"tip": "kutu", "kutu": kutu(v - iw / 2, v + iw / 2, uc - iu / 2, uc + iu / 2,
@@ -289,19 +296,25 @@ def kenarlar(g: dict, ck: dict, G_: dict, kesit: dict, kurulan: set[str], engell
     Fs = cerceveler(g)
     govde = Polygon(g["govde"])
     out, sayac = [], {}
+    geri = any(q.get("geri_cm") for q in g["cati_serit"]["parcalar"])
     gorunen = [e for e in ck["kenarlar"] if e["tur"] in ("sacak", "alin") and not _ortulu(ck, e)]
     for e in (e for e in ck["kenarlar"] if e["tur"] == "sacak"):          # dere hattı gibi: saçak kenarının tamamı (altta kalan uç dahil)
         F, yuz = _sacak_cercevesi(Fs, e)
         ax = 0 if not F["mx"] else 1
         r0, r1 = sorted((e["p"][ax], e["q"][ax]))
-        if "sacak_omegasi_yerlesimi" in kurulan:
+        Fd = F
+        if F["parca"].get("duvar_b"):                                    # İE-15 K6: ana makaslar geri çekilince çatının ayak izi duvardan
+            d0, d1 = F["parca"]["duvar_b"]                               # geride; saçak omegası yine duvarın üstünde (M-01)
+            Fd = dict(F, ou=d0, aciklik=d1 - d0)
+        if "sacak_omegasi_yerlesimi" in kurulan and not (geri and F["parca"].get("capraz")):   # cumbanın iki yanındaki kısa saçağın
+            # altında duvar boyu yok: duvarın ucu cumbanın baş makas omegasının altında (D-53 madde 7)
             cati_ = e["duzlemler"][0].rsplit(" ", 1)[0]
             k = sayac[(cati_, yuz)] = sayac.get((cati_, yuz), 0) + 1    # aynı çatının aynı yüzündeki ikinci saçak kenarı ayrı hat
-            ic = F["ou"] + 0.5 if yuz == "sol" else F["ou"] + F["aciklik"] - 0.5      # kenarın altındaki duvarlar: gövdenin o hattaki kısmı
+            ic = Fd["ou"] + 0.5 if yuz == "sol" else Fd["ou"] + Fd["aciklik"] - 0.5      # kenarın altındaki duvarlar: gövdenin o hattaki kısmı
             kes = govde.intersection(LineString([(r0, ic), (r1, ic)] if ax == 0 else [(ic, r0), (ic, r1)]))
             duvar = sorted(tuple(sorted(q[ax] for q in (s.coords[0], s.coords[-1]))) for s in getattr(kes, "geoms", [kes])
                            if not s.is_empty and s.length >= 1.0)
-            for p in (kenar.sacak_omegasi(g, G_, dict(F, v0=r0, v1=r1), engeller, yuz, duvar) if duvar else []):
+            for p in (kenar.sacak_omegasi(g, G_, dict(Fd, v0=r0, v1=r1), engeller, yuz, duvar) if duvar else []):
                 if "Hat" in p["bilgi"] and k > 1:
                     p["bilgi"]["Hat"] = f"{yuz} {k}"
                 p["bilgi"] = {"Cati": cati_, **p["bilgi"]}

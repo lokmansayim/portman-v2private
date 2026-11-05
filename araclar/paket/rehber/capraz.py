@@ -72,6 +72,11 @@ def cati(HZ: dict, plan, kitap: dict, IFC: dict, ASIK: dict, SC: float, TAN: flo
     cati_an = f"ana çatı beşiği · eğim %{fmt(TAN * 100)} ({fmt(EGIM_D, 1)}°) · açıklık {fmtc(b1 - b0 + 2 * SC)} cm"
     cati_cu = (f"çapraz cumba · eğim %{fmt(TAN * 100)} · açıklık {fmtc(c1 - c0 + 2 * SC)} cm; mahyası ana çatının yüzüne iner "
                f"(derelerin birleştiği yer, dış yüzden {fmtc(abs(birlesim - dis))} cm)")
+    d0, d1 = ana.get("duvar_b") or (b0, b1)                          # duvarlar (İE-15 K6: ana makaslar cumba makasının arkasına geri
+    geri = ana.get("geri_cm")                                       # çekilince çatının ayak izi öndeki duvardan geride, `duvar_b`)
+    if geri:
+        cati_an += (f"; makaslar cumbanın baş makasının arkasından başlar (ön uç duvarın üstünde, 10 cm topuk), arka saçak {fmtc(SC)} cm "
+                    "(Lokman, 5 Kasım 2026)")
     for m in ana["makaslar"]:
         k = m["konum"]
         if m["rol"] == "bas":
@@ -79,7 +84,8 @@ def cati(HZ: dict, plan, kitap: dict, IFC: dict, ASIK: dict, SC: float, TAN: flo
         ad = f"MKS{len(makas) + 1:02d}"
         MAD[ana["ad"]].append(ad)
         makas.append({"ad": ad, "aile": "ana", "rol": m["rol"], "konum": _r(k), "bas": _r(b0 - SC), "son": _r(b1 + SC), "R": "AN", "yon": "y",
-                      "wl": [_r(b0 + 2.7), _r(b1 - 2.7)], "NB": nb(b1 - b0 + 2 * SC), "T0": 38.9, "cati": cati_an})
+                      "wl": [_r(w) for w in (d0 + 2.7, d1 - 2.7) if b0 - SC + 5 < w < b1 + SC - 5], "NB": nb(b1 - b0 + 2 * SC), "T0": 38.9,
+                      "cati": cati_an})
     kaynak_cu = f"yer çatı tanımından (D-47: dış uçtaki kalkan duvarının ekseninden 125,5 arayla, derelerin birleştiği yere kadar); {ls('Yavru makas · ' + cu['ad'])}"
     for m in cu["makaslar"]:
         ad = f"MKS{len(makas) + 1:02d}"
@@ -118,24 +124,36 @@ def cati(HZ: dict, plan, kitap: dict, IFC: dict, ASIK: dict, SC: float, TAN: flo
     hatlar = []
     for e in (e for e in ck["kenarlar"] if e["tur"] == "sacak"):
         dz = adli[e["duzlemler"][0]]
-        if abs(e["p"][1] - e["q"][1]) > ESIK:
+        anam = dz["ad"].startswith("ana ")
+        dik = abs(e["p"][1] - e["q"][1]) > ESIK                        # kenar y boyunca: ana makaslar geri çekilince cumbanın iki yanı
+        if dik and (anam or not geri or abs(e["p"][0] - e["q"][0]) > ESIK):
             raise Desteklenmiyor(f"{dz['ad']}: saçak kenarı x yönünde değil")
-        ic_ = 1 if dz["yukari"][1] > 0 else -1                          # içeri yön (y): ön yüzde +1
-        ys = e["p"][1]
-        yd = ys + ic_ * SC
-        r0, r1 = sorted((e["p"][0], e["q"][0]))
-        kes = govde.intersection(LineString([(r0, yd + ic_ * 0.5), (r1, yd + ic_ * 0.5)]))
-        w0, w1 = kes.bounds[0], kes.bounds[2]
+        ax = 1 if dik else 0                                            # hattın koştuğu eksen
+        ic_ = 1 if dz["yukari"][1 - ax] > 0 else -1                     # içeri yön (dik eksende): ön yüzde, cumbanın solunda +1
+        ys = e["p"][1 - ax]
+        yd = ys + ic_ * SC                                              # saçak sacının yüzü (saçak ucundan saçak kadar içeride)
+        duvar_ = (d0 if ic_ > 0 else d1) if anam else yd                # saçağın altındaki duvarın dış yüzü (ana makaslar geri çekilince
+        r0, r1 = sorted((e["p"][ax], e["q"][ax]))                       # ön saçak duvarın üstünde biter: saçak altı yok)
+        kes = govde.intersection(LineString([(r0, duvar_ + ic_ * 0.5), (r1, duvar_ + ic_ * 0.5)] if not dik else
+                                            [(duvar_ + ic_ * 0.5, r0), (duvar_ + ic_ * 0.5, r1)]))
+        w0, w1 = kes.bounds[ax], kes.bounds[2 + ax]
         bos0, bos1 = r0 < w0 - 1, r1 > w1 + 1                           # saçaklı uç (duvarın dışında); öbürü cumbanın alnında biter
-        yer = "ön" if ic_ > 0 else "arka"
-        ad = f"ana çatı {yer}" + (f" (cumbanın {'sağı' if r0 > M_cu else 'solu'})" if (ic_ > 0) == on and (not bos0 or not bos1) else "")
-        hatlar.append({"ad": ad, "dz": dz["ad"], "ic": ic_, "ys": ys, "yd": yd, "r0": r0, "r1": r1,
+        if dik:
+            ad = f"cumba {'sol' if ic_ > 0 else 'sağ'} yanı"
+        else:
+            yer = "ön" if ic_ > 0 else "arka"
+            ad = f"ana çatı {yer}" + (f" (cumbanın {'sağı' if r0 > M_cu else 'solu'})" if (ic_ > 0) == on and (not bos0 or not bos1) else "")
+        hatlar.append({"ad": ad, "dz": dz["ad"], "ic": ic_, "ys": ys, "yd": duvar_, "yuz": yd, "dik": dik, "r0": r0, "r1": r1,
                        "a0": r0 - 0.2 if bos0 else r0 + 0.2, "a1": r1 + 0.2 if bos1 else r1 - 0.2,
-                       "t0": w0 - 1.1 if bos0 else r0 + 0.2, "t1": w1 + 1.1 if bos1 else r1 - 0.2})
-    hatlar.sort(key=lambda h: (h["ic"] < 0, h["ys"]))
-    sacak = [{"ad": f"{h['ad']} saçağı", "o": "h", "face": _r(h["yd"]), "out": -h["ic"], "a0": _r(h["a0"]), "a1": _r(h["a1"]), "f0": _r(h["a0"]),
-              "f1": _r(h["a1"]), "t0": _r(h["t0"]), "t1": _r(h["t1"]), "R": "AN"} for h in hatlar]
-    dere_hat = [{"ad": h["ad"], "yon": "x", "a0": h["a0"], "a1": h["a1"], "kenar": _r(h["ys"] - h["ic"] * 0.2), "out": -h["ic"]} for h in hatlar]
+                       "t0": w0 - 1.1 if bos0 else r0 + 0.2, "t1": w1 + 1.1 if bos1 else r1 - 0.2, "altsiz": abs(duvar_ - yd) > 0.5})
+    hatlar.sort(key=lambda h: (h["dik"], h["ic"] < 0, h["ys"]))
+    sacak = [{"ad": f"{h['ad']} saçağı", "o": "v" if h["dik"] else "h", "face": _r(h["yuz"]), "out": -h["ic"], "a0": _r(h["a0"]), "a1": _r(h["a1"]),
+              "f0": _r(h["a0"]), "f1": _r(h["a1"]), "t0": _r(h["a0"] if h["altsiz"] else h["t0"]), "t1": _r(h["a0"] if h["altsiz"] else h["t1"]),
+              "R": "CU" if h["dik"] else "AN",
+              **({"not": "saçak altı yok: ana makaslar cumbanın baş makasının arkasından başlar, saçak ucu duvarın üstünde; saçak sacının alnı ve "
+                         "kıvrımı saçak ucunda (Lokman, 5 Kasım 2026)"} if h["altsiz"] else {})} for h in hatlar]
+    dere_hat = [{"ad": h["ad"], "yon": "y" if h["dik"] else "x", "a0": h["a0"], "a1": h["a1"], "kenar": _r(h["ys"] - h["ic"] * 0.2), "out": -h["ic"]}
+                for h in hatlar]
 
     # ---------- baş makas omegaları (D-32: baş makasın boyunca saçak ucundan saçak ucuna) ve kalkanlar ----------
     def alt_uc(p) -> bool:
@@ -155,7 +173,8 @@ def cati(HZ: dict, plan, kitap: dict, IFC: dict, ASIK: dict, SC: float, TAN: flo
             raise Desteklenmiyor(f"ana çatının {'sol' if sol else 'sağ'} kalkanı saçaktan saçağa görünmüyor")
         p = -1 if sol else 1
         kalkan.append({"ad": f"ana çatı {'sol' if sol else 'sağ'} kalkanı ({m['ad']})", "r": -PI / 2 if sol else PI / 2, "O": [_r(w), 0], "R": "AN", "p": p,
-                       "uc": {"A": _r(p * (b0 - SC)), "B": _r(p * (b1 + SC))}, "sm": _r(p * M_an), "duvar": {"A": _r(p * b0), "B": _r(p * b1)},
+                       "uc": {"A": _r(p * (b0 - SC)), "B": _r(p * (b1 + SC))}, "sm": _r(p * M_an),
+                       "duvar": {"A": _r(p * max(d0, b0 - SC)), "B": _r(p * min(d1, b1 + SC))},   # makas duvarın üstünde başlıyorsa uç orada
                        "altUc": {"A": alt_uc((xa, b0 - SC)), "B": alt_uc((xa, b1 + SC))}})
     mb = next(m for m in makas if m["aile"] == "cumba")
     omega_duvar.append({"tur": "bas", "o": "h", "perp": _r(dis + ic * 5), "a0": _r(c0 - SC), "a1": _r(c1 + SC), "out": -1 if on else 1,
@@ -272,39 +291,43 @@ def cati(HZ: dict, plan, kitap: dict, IFC: dict, ASIK: dict, SC: float, TAN: flo
 
     # ---------- izolasyon: ana çatının her makas aralığına bir şerit, ön duvardan arka duvara (cumba ana çatının üstünde) ----------
     serme = f"çatı kapanmadan önce, aşıkların arasından; rulo ön duvardan arka duvara açılır, {'asma ' if ASMA else 'ters '}tavanın üstüne serilir"
-    izo = {"ana": {"yon": "y", "bas": _r(b0 + 10), "L": _r(b1 - b0 - 20), "ad": "Çatı izolasyonu · 10 cm rulo cam yünü", "serme": serme}, "ek": []}
+    izo = {"ana": {"yon": "y", "bas": _r(d0 + 10), "L": _r(d1 - d0 - 20), "ad": "Çatı izolasyonu · 10 cm rulo cam yünü", "serme": serme}, "ek": []}
 
     # ---------- inişler (kart modelinden): saçağın altındaki duvarın ucunda ya da veranda kolonunda iner ----------
-    dis_duvar = [d for d in plan.duvarlar if d.tur == "dis" and d.yon == "x"]
     kolonlar = [b["rect"] for b in HZ.get("baglantilar", []) if b["tur"] == "dikme"]
     inisler = []
     for n, kt in sorted(IFC.items()):
         if not n.startswith("INIS"):
             continue
         xc, yc = (kt[0] + kt[3]) / 2, (kt[1] + kt[4]) / 2
-        h = min(hatlar, key=lambda h: abs(yc - h["ys"]) + (0 if h["r0"] - 10 <= xc <= h["r1"] + 10 else 1e4))
-        duvar = sorted((d.a0 - d.h, d.a1 + d.h) for d in dis_duvar if abs((d.c - h["ic"] * d.h) - h["yd"]) < 0.6)
-        kol = [((r[0] + r[2]) / 2, r) for r in kolonlar if abs((r[1] if h["ic"] > 0 else r[3]) - h["yd"]) < 0.6]
-        icinde = next(((w0, w1) for w0, w1 in duvar if w0 <= xc <= w1), None)
+        uc_ = lambda h: (yc, xc) if h["dik"] else (xc, yc)             # noqa: E731 (inişin yeri: hat boyunca, hatta dik)
+        h = min(hatlar, key=lambda h: abs(uc_(h)[1] - h["ys"]) + (0 if h["r0"] - 10 <= uc_(h)[0] <= h["r1"] + 10 else 1e4))
+        ax, rc = (1, yc) if h["dik"] else (0, xc)                       # iniş hattın koştuğu eksende rc'de; duvarlar hatta paralel
+        duvar = sorted((d.a0 - d.h, d.a1 + d.h) for d in plan.duvarlar if d.tur == "dis" and d.yon == ("y" if h["dik"] else "x")
+                       and abs((d.c - h["ic"] * d.h) - h["yd"]) < 0.6)
+        kol = [((r[1] + r[3]) / 2 if h["dik"] else (r[0] + r[2]) / 2, r) for r in kolonlar
+               if abs((r[1 - ax] if h["ic"] > 0 else r[3 - ax]) - h["yd"]) < 0.6]
+        icinde = next(((w0, w1) for w0, w1 in duvar if w0 <= rc <= w1), None)
         if icinde:
-            s = min(max(xc, icinde[0] + 17), icinde[1] - 17)
-            inisler.append({"hat": h["ad"], "s": _r(s), "yuz": _r(h["yd"]), "duvar": f"{h['ad']} saçağının altındaki duvar", "dis": 0,
-                            "kose": bool(abs(s - xc) > 0.5 or s < icinde[0] + 17.5 or s > icinde[1] - 17.5)})
+            s = min(max(rc, icinde[0] + 17), icinde[1] - 17)
+            inisler.append({"hat": h["ad"], "s": _r(s), "yuz": _r(h["yd"]), "duvar": f"{h['ad']} saçağının altındaki duvar", "dis": ax,
+                            "kose": bool(abs(s - rc) > 0.5 or s < icinde[0] + 17.5 or s > icinde[1] - 17.5)})
             continue
-        uclar = [(abs(xc - w0), w0 + 17, "duvar") for w0, _w1 in duvar] + [(abs(xc - w1), w1 - 17, "duvar") for _w0, w1 in duvar] + \
-                [(abs(xc - kx), kx, "kolon") for kx, _r_ in kol]
+        uclar = [(abs(rc - w0), w0 + 17, "duvar") for w0, _w1 in duvar] + [(abs(rc - w1), w1 - 17, "duvar") for _w0, w1 in duvar] + \
+                [(abs(rc - kx), kx, "kolon") for kx, _r_ in kol]
         if not uclar:
             raise Desteklenmiyor(f"kart modelinin inişi {n}: {h['ad']} saçağının altında duvar ya da kolon yok")
         _d, s, tur = min(uclar)
         if tur == "kolon":
-            inisler.append({"hat": h["ad"], "s": _r(h["a1"] if xc > s else h["a0"]), "yuz": _r(h["yd"]), "duvar": "veranda kolonu", "sw": _r(s)})
+            inisler.append({"hat": h["ad"], "s": _r(h["a1"] if rc > s else h["a0"]), "yuz": _r(h["yd"]), "duvar": "veranda kolonu", "sw": _r(s)})
         else:
-            inisler.append({"hat": h["ad"], "s": _r(s), "yuz": _r(h["yd"]), "duvar": f"{h['ad']} saçağının ucundaki duvar köşesi", "dis": 0, "kose": True})
+            inisler.append({"hat": h["ad"], "s": _r(s), "yuz": _r(h["yd"]), "duvar": f"{h['ad']} saçağının ucundaki duvar köşesi", "dis": ax, "kose": True})
 
     tepe = (b1 - b0) / 2 * TAN + SC * TAN
     aralik = sorted({round(q - p_, 1) for p_, q in zip([m["konum"] for m in ana["makaslar"]], [m["konum"] for m in ana["makaslar"]][1:])})
     return {"RF": RF, "makas": makas, "MAD": dict(MAD), "omega_duvar": omega_duvar, "sacak": sacak, "kalkan": kalkan, "yuz": yuz,
             "hadve_ar": hadve_ar, "asik": asik, "mahya": mahya, "izo": izo, "dere_hat": dere_hat, "inisler": inisler, "tepe": tepe,
             "aralik": aralik, "ucu": [], "hatlar": [h["ad"] for h in hatlar], "parcalar": T["parcalar"], "anahtar": {ana["ad"]: "AN", cu["ad"]: "CU"},
-            "sacak_hatlari": [{"ad": h["ad"], "perp": _r(h["yd"] + h["ic"] * 5), "a0": _r(h["a0"] - 0.4), "a1": _r(h["a1"] + 0.4)} for h in hatlar],
+            "sacak_hatlari": [{"ad": h["ad"], "perp": _r(h["yd"] + h["ic"] * 5), "a0": _r(h["a0"] - 0.4), "a1": _r(h["a1"] + 0.4)} for h in hatlar
+                              if not h["dik"]],
             "birlesim": birlesim, "cumba": cu, "ana": ana, "tepe_cu": (c1 - c0) / 2 * TAN + SC * TAN, "tepe_nokta": tepe_}

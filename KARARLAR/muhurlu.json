@@ -234,7 +234,8 @@
    "konu": "Baş makas omegası saçaktan saçağa",
    "kural": "Baş makas omegası baş makasın boyunca saçak ucundan saçak ucuna; taşan verandanın baş makası (dış kiriş) da aynı. Listede her baş makasta açıklık + 2 × saçak, toplam ÷ 2,5. Kirişsiz açık çatı parçası sayılmaz.",
    "kararlar": [
-    "D-32"
+    "D-32",
+    "D-53"
    ],
    "pr": [
     81
@@ -276,7 +277,15 @@
     }
    ],
    "durum": "mühürlü",
-   "gecmis": []
+   "gecmis": [
+    {
+     "tarih": "2026-11-05 07:15",
+     "soz": "bu seferde baş makasın omegasını dışarda bırakmışsın (07:15; 07:13'teki \"Köşede ana baş makasın omegası mühürlü kurala göre hâlâ saçağa kadar uzanıyor … O da cumba makasında bitsin mi?\" sorusuna)",
+     "mesaj": "cmsg_01UAFvcnfVuTR1wfFux5fQPPUxk9Sss5U6VoVKd8ejFwrw",
+     "kapanis": "2026-11-05T10:47Z",
+     "karar": "D-53"
+    }
+   ]
   },
   {
    "kod": "M-04",

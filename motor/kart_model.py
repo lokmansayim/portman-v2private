@@ -149,20 +149,22 @@ def h_turleri(f: ifcopenshell.file, adaylar: list, kural: dict, makas_aralik_cm:
     pay_cizgi = kural["duvar_cizgisi_payi_cm"]["deger"]
     pay_denk = makas_aralik_cm * kural["denk_gelme_payi"]["carpan"]
     makaslar_ = makaslar(f, kutu)
-    duvarlar = []                                                      # dış duvar parçaları: (uzandığı eksen, orta çizgi, uç, uç)
+    duvarlar = []                                                      # dış duvar parçaları: (uzandığı eksen, orta çizgi, yarı kalınlık, uç, uç)
     for w in f.by_type("IfcWall"):
         if ue.get_psets(w).get("Pset_WallCommon", {}).get("IsExternal") is not True:
             continue
         a, b = kutu(w)
         yon = 0 if b[0] - a[0] > b[1] - a[1] else 1
-        duvarlar.append((yon, (a[1 - yon] + b[1 - yon]) / 2, a[yon], b[yon]))
+        duvarlar.append((yon, (a[1 - yon] + b[1 - yon]) / 2, (b[1 - yon] - a[1 - yon]) / 2, a[yon], b[yon]))
     H = [(e, kutu.merkez(e)) for e in adaylar]
     sonuc = {e.id(): {"tur": kural["turler"]["denk_degil"], "makas": None, "uzaklik_cm": None} for e, _ in H}
     en_yakin: dict[int, float] = {}                                    # iki makas aynı H'ye denk gelirse kayıt en yakınını yazar
     for m in makaslar_:
         yon = 1 - m["eksen"]                                           # oturduğu duvar makasın dizildiği eksende uzanır
-        cizgiler = sorted({round(c, 1) for y, c, u0, u1 in duvarlar
-                           if y == yon and m["aralik"][0] <= c <= m["aralik"][1] and u0 <= m["konum"] <= u1})
+        # makas duvarın üstüne biniyorsa (bandıyla örtüşüyorsa) o duvara oturur: cumbanın altında kesilen ana makas (D-53 madde 7) ön
+        # duvarın eksenine varmadan, duvarın üstünde biter; ekseni aralığın içinde aramak onu duvarsız sayardı
+        cizgiler = sorted({round(c, 1) for y, c, h, u0, u1 in duvarlar
+                           if y == yon and m["aralik"][0] <= c + h and c - h <= m["aralik"][1] and u0 <= m["konum"] <= u1})
         for c in cizgiler:
             ustteki = [(e, xy) for e, xy in H if abs(xy[1 - yon] - c) <= pay_cizgi]
             if not ustteki:
