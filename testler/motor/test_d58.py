@@ -5,8 +5,13 @@ geldiği yere 250 cm kolon.
 profilin boşta kalmaması için köşe direğine vidalayamıyoruz o yüzden tam geldiği yerede bir tane 250cm kolon koyması gerekiyor".
 r06'da ana makaslar cumba makasının arkasından başlar (D-53 madde 7): ana çatının açıklığı ön dış yüzden 37,5'ta başlar, saçağı 7,5'ta biter.
 r07'de verandanın ön kirişi 37,5'a alınır (İş Emri: ek aks y 861, girinti, `dikmeler`); Motor kodu değişmez. Çizimde girintiye bakan açık
-kenarın profili (verandada `girinti_kirisi: true`), dış parça ölçüsünün kirişte bölünmesi ve ölçü yazılarının binmemesi PC-33 (`dxf_out`);
-anahtarsız İş Emri eski yoldan (aynı biçimli AP-15, AP-18, AP-22, AP-25 aynen).
+kenarın profili (verandada `girinti_kirisi: true`) PC-33 (`dxf_out`); anahtarsız İş Emri eski yoldan (aynı biçimli AP-15, AP-18, AP-22,
+AP-25 aynen).
+
+r08 (Lokman, 5 Kasım 2026 22:08): "aks çizgisini bozma nasıl ki 62,75'e aks çizmiyoruz bina sonu özel ölçü olmadığı sürece çizme ... salonun
+en öndeki 1. panosu yani 1. aks ile 2 aks arasındaki pano yani A ve D aksındaki ponalar standart mantık yürüt neden orada 155,75 bir pano
+veya ölçü olsun". Ara aks 1′ ve verandanın şeridinden doğan dış parça ölçüleri çizilmez (plan r06'daki gibi ölçülür); D aksındaki dış
+duvarın panoları ızgaraya dayanır (`dizilim.dis_pano_dayanagi`, İş Emri r08).
 """
 from __future__ import annotations
 
@@ -75,24 +80,23 @@ def test_girinti_kenarinda_profil():
             assert not [e for e in doc.modelspace().query("INSERT") if e.dxf.name.endswith("_GIRINTI")]
 
 
-def test_olcu_yazilari_binmez():
-    """Salon duvarının dış parça ölçüsü kirişin dış yüzünde bölünür (193,25 → 37,5 geri çekilme + 155,75 veranda derinliği); özel pano
-    ölçüleri (62,75, 120,5) bu yazılara binmez (PC-33 öncesi 120,5, 193,25'in üstündeydi)."""
-    with tempfile.TemporaryDirectory() as td:
-        doc = _dxf(_oku("TK04_r07.json"), td)
-    kutular = []
-    for e in doc.modelspace().query("DIMENSION"):
-        if e.dxf.layer not in ("OZEL_PANEL_OLCU_CM", "DIS_PARCA_OLCU") or not e.dxf.hasattr("text_midpoint"):
-            continue
-        x, y = e.dxf.text_midpoint.x, e.dxf.text_midpoint.y
-        if not (380 < x < 520 and 0 < y < 200):
-            continue
-        yari = dxf_out.Cizici.yazi_eni(dxf_out.fmt(e.get_measurement()), 14) / 2
-        dusey = abs(e.dxf.get("angle", 0.0) - 90.0) < 1e-6
-        kutular.append((e.dxf.layer, round(e.get_measurement(), 2), (x - 7, y - yari, x + 7, y + yari) if dusey else (x - yari, y - 7, x + yari, y + 7)))
-    olculer = {(k[0], k[1]) for k in kutular}
-    assert olculer >= {("DIS_PARCA_OLCU", 37.5), ("DIS_PARCA_OLCU", 155.75), ("OZEL_PANEL_OLCU_CM", 62.75), ("OZEL_PANEL_OLCU_CM", 120.5)}, kutular
-    assert ("DIS_PARCA_OLCU", 193.25) not in olculer, kutular
-    for i, (la, ma, a) in enumerate(kutular):
-        for lb, mb, b in kutular[i + 1:]:
-            assert not (a[0] < b[2] and b[0] < a[2] and a[1] < b[3] and b[1] < a[3]), ((la, ma, a), (lb, mb, b))
+def test_ara_aks_ve_olcu_yok():
+    """Ara aks 1′ (verandanın içeri alındığı ek aks) çizilmez: ne aks çizgisi ne adı ne aks zincirindeki 37,5; verandanın şeridi girinti
+    sayılmaz, dış parça ölçüsü (37,5, 155,75, 193,25, 386,5, 502, 705,25) yok. Akslar r06'daki gibi A–H, 1–8."""
+    for ad in ("TK04_r07.json", "TK04_r08.json"):
+        with tempfile.TemporaryDirectory() as td:
+            doc = _dxf(_oku(ad), td)
+        msp = doc.modelspace()
+        assert sorted({e.dxf.text for e in msp.query("TEXT") if e.dxf.layer == "AKS_YAZI"}) == sorted("12345678ABCDEFGH"), ad
+        assert not [e for e in msp.query("LINE") if e.dxf.layer == "AKS" and abs(e.dxf.start.y - 37.5) < 1e-6], ad
+        assert not msp.query('DIMENSION[layer=="DIS_PARCA_OLCU"]'), ad
+        assert not [e for e in msp.query('DIMENSION[layer=="OLCULER"]') if abs(e.get_measurement() - 37.5) < 1e-6], ad
+
+
+def test_d_aksi_izgarada():
+    """r08: salon–veranda duvarında (D aksı) 1. ile 2. aks arası tam pano 125,5, artan 57,75 mutfak köşesinde (r07'de önde 62,75 + 120,5);
+    öteki bütün duvarlar ve panolar r07 ile aynı."""
+    a, b = _duvarlar(G.kur(_oku("TK04_r07.json"))), _duvarlar(G.kur(_oku("TK04_r08.json")))
+    fark = {k: (a[k], b[k]) for k in a if a[k] != b.get(k)}
+    assert set(a) == set(b)
+    assert fark == {("dis", "y", 381.5, 10.0, 193.25): ([(62.75, ""), (120.5, "")], [(125.5, ""), (57.75, "")])}, fark

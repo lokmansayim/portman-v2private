@@ -768,8 +768,8 @@
   },
   {
    "kod": "PC-33",
-   "baslik": "Veranda içeri alınınca ağzındaki kiriş de çizilir; ölçü yazıları binmez",
-   "kural": "Veranda içeri alınınca (İş Emri `girintiler` ile; önündeki şerit bina dışı) İş Emri verandanın mahalinde `girinti_kirisi: true` yazar; o verandanın girintiye bakan açık kenarı da veranda profilidir (kiriş): dış yüzü kenarda, iç çizgisi 10 cm mahalin içinde ve iki uçta 10 cm kısa, uçlardaki kolonların yüzünde biter (TK-04 r07: ön kiriş ön dış yüzden 37,5 içeride, uçlarda köşe kolonu ve salon duvarının dibindeki İş Emri dikmesi; çatının saçağı kirişin önünde 30 cm). Kirişin duvara geldiği yerdeki kolon İş Emri'nin `dikmeler`'ine yazılır (250 cm; listede kolon). Böyle bir planda girintili gövdenin dış parça ölçüsü (D-34) kirişin dış yüzünde bölünür: geri çekilme ve veranda derinliği ayrı yazılır (TK-04 r07: 193,25 yerine 37,5 + 155,75); bu ölçülerin yazıları dolu sayılır, özel pano ölçüsü üstlerine binmez, sıradaki uzaklığa çekilir. Anahtarsız İş Emri aynen (PC-01…PC-32): depoda girintiye bakan veranda kenarı olan AP-15, AP-18, AP-22, AP-25 (AP-15 ve AP-22 M-07 ile mühürlü) bugünkü gibi çizilir; onlara yaymak Lokman'ın kararıdır.",
+   "baslik": "Veranda içeri alınınca ağzındaki kiriş de çizilir; ara aks ve şerit ölçüsü çizilmez",
+   "kural": "Veranda içeri alınınca (İş Emri `girintiler` ile; önündeki şerit bina dışı) İş Emri verandanın mahalinde `girinti_kirisi: true` yazar; o verandanın girintiye bakan açık kenarı da veranda profilidir (kiriş): dış yüzü kenarda, iç çizgisi 10 cm mahalin içinde ve iki uçta 10 cm kısa, uçlardaki kolonların yüzünde biter (TK-04 r07: ön kiriş ön dış yüzden 37,5 içeride, uçlarda köşe kolonu ve salon duvarının dibindeki İş Emri dikmesi; çatının saçağı kirişin önünde 30 cm). Kirişin duvara geldiği yerdeki kolon İş Emri'nin `dikmeler`'ine yazılır (250 cm; listede kolon). Verandanın önündeki şerit girinti sayılmaz: İş Emri'nin bütün girintileri böyle şeritse dış parça ölçüleri (D-34) çizilmez, kirişin dış yüzündeki ek aks (TK-04 r07: 1′) çizgisi, adı ve aks zincirindeki ölçüsüyle çizilmez; plan r06'daki gibi ölçülür (Lokman, 5 Kasım 2026 22:08: \"aks çizgisini bozma nasıl ki 62,75'e aks çizmiyoruz bina sonu özel ölçü olmadığı sürece çizme ... neden orada 155,75 bir pano veya ölçü olsun\"). Gerçek girintisi de olan planda dış parça ölçüleri çizilir; yazıları dolu sayılır, özel pano ölçüsü üstlerine binmez. Aynı sözle salon–veranda duvarının panoları ızgaraya dayanır (1. ile 2. aks arası tam pano); bu İş Emri'ne yazılır (`dizilim.dis_pano_dayanagi`, TK-04 r08), kural değişmez. Anahtarsız İş Emri aynen (PC-01…PC-32): depoda girintiye bakan veranda kenarı olan AP-15, AP-18, AP-22, AP-25 (AP-15 ve AP-22 M-07 ile mühürlü) bugünkü gibi çizilir; onlara yaymak Lokman'ın kararıdır.",
    "karar": "D-58",
    "lokman": {
     "tarih": "2026-11-05",
@@ -779,12 +779,15 @@
    "kod_yeri": [
     "motor/dxf_out.py::Cizici.ciz_plan",
     "motor/dxf_out.py::Cizici._girinti_acik_kenari",
-    "motor/dxf_out.py::Cizici._dis_parca_olculeri"
+    "motor/dxf_out.py::Cizici._dis_parca_olculeri",
+    "motor/dxf_out.py::Cizici._yalniz_kiris_girintisi",
+    "motor/dxf_out.py::Cizici._gizli_ek_akslar"
    ],
    "test": [
     "testler/motor/test_d58.py::test_veranda_ice_alinir",
     "testler/motor/test_d58.py::test_girinti_kenarinda_profil",
-    "testler/motor/test_d58.py::test_olcu_yazilari_binmez"
+    "testler/motor/test_d58.py::test_ara_aks_ve_olcu_yok",
+    "testler/motor/test_d58.py::test_d_aksi_izgarada"
    ]
   }
  ]
