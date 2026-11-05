@@ -254,9 +254,11 @@ def _yakin_parca(k3: list, d, D: float) -> list:
 
 
 def _kubbe_gorunusu(plan: G.Plan, ie: dict, taraf: str, u, d, ck: dict) -> dict:
-    """İE-29 PR-2: kubbelerin bu görünüşteki parçaları (`G._kubbe_geometrisi`). Kubbe dışbükey: üç duvar yüzü (zeminden duvar üstüne), üstünde
-    topuk şeridi (duvar üstünden saçak kotuna, ana çatının topuğu) ve üç üçgen çatı yüzü (saçak kubbenin dış çizgisinde, tepe düz duvarda
-    kubbenin ortasında; ön yüzün eğimi ana çatınınki, köşelerden tepeye iki mahya). Bakana dönük yüz çizilir, öbürü kubbenin ya da gövdenin
+    """İE-29 PR-2: kubbelerin bu görünüşteki parçaları (`G._kubbe_geometrisi`). Kubbe dışbükey: üç duvar yüzü ve üç üçgen çatı yüzü (D-54,
+    Lokman 5 Kasım 2026 10:41 kubbe detayı: kubbe duvarı zeminden ana duvarın üstünün 50 cm altına, `KUBBE["ust_bant_cm"]`; saçak ana
+    çatınınki gibi kubbenin dış çizgisinden `sacak_cm` dışarıda, `G.kubbe_sacagi`; saçakta topuk şeridi, kubbe duvarının üstünden topuk
+    kadar; tepe düz duvarda kubbenin ortasında, kubbe duvarının üstünden 35 cm; köşelerden tepeye iki mahya). Kubbenin üstündeki ana duvar
+    bandı ana cephede çizilir. Bakana dönük yüz çizilir, öbürü kubbenin ya da gövdenin
     ardındadır. Ana çatının bakana dönük düzlemlerinin ve kalkanlarının kubbenin yüzünden yakın kısmı (`_yakin_parca`; düzlemin topuğu dahil)
     kubbeyi örter (yandan bakışta saçağın altı; ortalama derinlik yetmez: ana çatının düzlemi mahyadan saçağa kubbenin iki yanına uzanır).
     Döner: {"dolgu": [[(u, z)]] (beyaz; ardındaki çizgiler örtülür), "cizgiler": [{"katman": duvar | cati, "u": [(u, z)]}],
@@ -266,8 +268,9 @@ def _kubbe_gorunusu(plan: G.Plan, ie: dict, taraf: str, u, d, ck: dict) -> dict:
     from shapely.ops import unary_union
     cati = ie.get("cati") or {}
     hy = float(ie["yapi"].get("duvar_yuksekligi_cm", 250))
-    topuk, e = float(cati.get("topuk_cm", 10)), float(cati.get("egim_yuzde", 33)) / 100.0
-    ze = hy + topuk
+    topuk, sacak = float(cati.get("topuk_cm", 10)), float(cati.get("sacak_cm", 30))
+    hk = hy - G.KUBBE["ust_bant_cm"]                                         # kubbe duvarının üstü (D-54)
+    ze, za = hk + topuk, hk + G.KUBBE["tepe_cm"]
     bx, by = _BAKANA[taraf]
     out = {"dolgu": [], "cizgiler": [], "pencereler": [], "u0": None, "u1": None}
 
@@ -298,23 +301,21 @@ def _kubbe_gorunusu(plan: G.Plan, ie: dict, taraf: str, u, d, ck: dict) -> dict:
                 out["cizgiler"].append({"katman": katman, "u": [(round(a, 4), round(b, 4)) for a, b in h.coords]})
 
     for kb in plan.kubbeler:
-        E, tp = kb["dis"], kb["tepe"]
-        za = ze + e * kb["cikma_cm"]
+        E, tp, S = kb["dis"], kb["tepe"], G.kubbe_sacagi(kb, sacak)
         for i, q in enumerate(kb["panolar"]):
             nx, ny = q["disari"]
             if nx * bx + ny * by <= YAN_ESIGI:                               # bakana dönük değil (yandan ya da arkadan)
                 continue
-            a, b = E[i], E[i + 1]
-            ua, ub = u(*a), u(*b)
-            yuzler = [("duvar", [(ua, 0.0), (ub, 0.0), (ub, hy), (ua, hy)]), ("cati", [(ua, hy), (ub, hy), (ub, ze), (ua, ze)]),
-                      ("cati", [(ua, ze), (ub, ze), (u(*tp), za)])]
-            derinlik = {"duvar": (d(*a) + d(*b)) / 2.0}
-            derinlik["cati"] = derinlik["duvar"]
-            for katman, k2 in yuzler:
+            a, b, sa, sb = E[i], E[i + 1], S[i], S[i + 1]
+            ua, ub, usa, usb = u(*a), u(*b), u(*sa), u(*sb)
+            yuzler = [("duvar", [(ua, 0.0), (ub, 0.0), (ub, hk), (ua, hk)], (d(*a) + d(*b)) / 2.0),
+                      ("cati", [(usa, hk), (usb, hk), (usb, ze), (usa, ze)], (d(*sa) + d(*sb)) / 2.0),               # saçaktaki topuk
+                      ("cati", [(usa, ze), (usb, ze), (u(*tp), za)], (d(*sa) + d(*sb) + d(*tp)) / 3.0)]
+            for katman, k2, derinlik in yuzler:
                 pg = Polygon(k2)
                 if pg.area < 1e-6:
                     continue
-                o = ortu_(derinlik[katman] if katman == "duvar" else (d(*a) + d(*b) + d(*tp)) / 3.0)
+                o = ortu_(derinlik)
                 gor = pg if o is None else pg.difference(o)
                 for g in getattr(gor, "geoms", [gor]):
                     if g.geom_type == "Polygon" and g.area > 1.0:

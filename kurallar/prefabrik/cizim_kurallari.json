@@ -765,6 +765,44 @@
     "testler/motor/test_d49.py::test_bes_d_kosesi_ve_cektirme_u",
     "testler/motor/test_d49.py::test_birlesim_yanlis_noktada_hata"
    ]
+  },
+  {
+   "kod": "PC-33",
+   "baslik": "Kubbe: duvarı ana duvardan 50 cm alçak, üç yüzlü çatısının tepesi 35 cm, saçağı ana çatınınki",
+   "kural": "İş Emri'nin `kubbeler` anahtarıyla gelen kubbenin (taban 251, çıkma 58,61) görünüşte duvarları zeminden ana duvarın üstünün 50 cm altına çizilir; ana duvar kubbenin üstünde 50'lik bantla görünür. Kubbenin çatısı üç üçgen yüz: tepe düz duvarda kubbenin ortasında, kubbe duvarının üstünden 35 cm; her yüzün saçağı ana çatınınki gibi (`cati.sacak_cm`, topuk `cati.topuk_cm`) kubbenin dış çizgisinden dışarıda, köşeler gönye, yan yüzlerin saçağı düz duvarın yüzüne kadar; saçakta topuk şeridi. Ana çatının bakana yakın parçaları kubbeyi örter. Kubbesiz İş Emri'nde görünüş aynen.",
+   "karar": "D-54",
+   "madde": 1,
+   "lokman": {
+    "tarih": "2026-11-05",
+    "saat": "10:41",
+    "soz": "AP-17 için kubbe çizim detaylarını veriyorum ayrıca üzerine standart çatı aşığı geliyor onunda üstüne 11mm OSB üzerine Membran ve onun üzerine shingle geliyor yine aynı normal çatı gibi saçak omegası ve saçak sacı geliyor bunu tüm kubbeli binalar için uygula"
+   },
+   "kod_yeri": [
+    "motor/geometry.py::KUBBE",
+    "motor/geometry.py::kubbe_sacagi",
+    "motor/cephe_gorunus.py::_kubbe_gorunusu"
+   ],
+   "sabitler": [
+    {
+     "yer": "motor/geometry.py::KUBBE",
+     "deger": {
+      "taban_cm": 251.0,
+      "cikma_cm": 58.61,
+      "yan_pano_cm": 79.0,
+      "on_pano_cm": 125.5,
+      "on_pencere": "105x170",
+      "yan_pencere": "59x170",
+      "ust_bant_cm": 50.0,
+      "tepe_cm": 35.0,
+      "makas": 3
+     }
+    }
+   ],
+   "test": [
+    "testler/cizim/test_ie29_cizim.py::test_ap17_kubbe_gorunusu",
+    "testler/cizim/test_ie29_cizim.py::test_ap24_kubbe_ve_alanlar",
+    "testler/cizim/test_ie29_cizim.py::test_ap23_kubbe_ve_alanlar"
+   ]
   }
  ]
 }

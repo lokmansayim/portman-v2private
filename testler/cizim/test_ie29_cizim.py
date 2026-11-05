@@ -259,14 +259,18 @@ def test_ap17_kubbe_gorunusu():
     plan = G.kur(copy.deepcopy(ie))
     r = {t: CGo.cati_cizgileri(plan, ie, t)["kubbe"] for t in CGo.TARAFLAR}
     assert [a["olcu"] for a in r["on"]["pencereler"]] == ["59x170", "105x170", "59x170"]
-    assert (r["on"]["u0"], r["on"]["u1"]) == (538.375, 789.375)
-    assert round(max(z for k in r["on"]["dolgu"] for _u, z in k), 2) == round(260 + 0.3288 * 58.61, 2)   # tepe düz duvarda
+    k30 = round(30 * 2 ** 0.5, 4)                                                                 # D-54: saçak 30, 45° yüzde gönye
+    assert (r["on"]["u0"], r["on"]["u1"]) == (round(538.375 - k30, 4), round(789.375 + k30, 4))   # saçak düz duvarın yüzüne uzar
+    assert max(z for k in r["on"]["dolgu"] for _u, z in k) == 200 + 35                            # tepe düz duvarda, kubbe duvarından 35
+    assert min(z for k in r["on"]["dolgu"] for _u, z in k if _u < 538.375 - 1) == 200             # kubbe duvarı ana duvardan 50 alçak
     assert r["arka"]["dolgu"] == [] and r["arka"]["pencereler"] == []                             # gövdenin ardında
     for t, uc in (("sol", 898.5), ("sag", 0.0)):
         k = r[t]
         assert [a["olcu"] for a in k["pencereler"]] == ["59x170"]
-        ust = [u for k2 in k["dolgu"] for u, z in k2 if z > 250.5]                                # topuk ve çatı: saçağın dışında kalan
-        assert ust and all(abs(u - uc) >= 30.0 - 0.1 for u in ust)                                # ana çatının 30'luk saçağı örter
+        ust = [u for k2 in k["dolgu"] for u, z in k2 if z > 200.5]                                # topuk ve çatı
+        assert round(min(abs(u - uc) for u in ust), 2) == 0.0                                     # ana çatının saçağının altında, örtülmez
+        assert round(max(abs(u - uc) for u in ust), 2) == round(58.61 + 30, 2)                    # kubbenin saçağı çıkmadan 30 dışarıda
+        assert max(z for k2 in k["dolgu"] for _u, z in k2) == 235
     assert "kubbe" not in CGo.cati_cizgileri(G.kur(_ie12()), _ie12(), "on")                       # kubbesiz evde anahtar yok
 
 
@@ -338,6 +342,8 @@ def test_ap24_kubbe_ve_alanlar():
     assert (kb["cephe"], kb["mahal"], round(kb["u0"], 2), round(kb["u1"], 2)) == ("sag", "YAŞAMA ALANI", 72.61, 323.61)
     assert [round(b[1] - a[1], 2) for a, b in zip(kb["dis"], kb["dis"][1:])] == [58.61, 133.78, 58.61]
     assert round(kb["dis"][1][0] - 763.0, 2) == 58.61
+    # D-54: kubbe çatısının saçağı ana çatınınki gibi 30; ön yüzde çıkmadan 30 dışarıda, 45° yüzlerde dik 30 (gönye), düz duvarın yüzüne uzar
+    assert G.kubbe_sacagi(kb, 30) == [(763.0, 30.1836), (851.61, 118.7936), (851.61, 277.4264), (763.0, 366.0364)]
     alan = {ad: round(m.alan_m2, 2) for ad, m in plan.mahaller.items()}
     assert alan == {"YATAK ODASI 1": 9.50, "BANYO": 4.42, "HOL": 1.46, "YATAK ODASI 2": 9.12, "YAŞAMA ALANI": 30.68, "VERANDA": 5.58}
     # paftada 9,45 · 4,34 · 1,61 · 9,13 · 30,73 · 5,61
@@ -463,6 +469,8 @@ def test_ap23_kubbe_ve_alanlar():
     for kb in (k1, k2):
         assert (round(kb["u0"], 2), round(kb["u1"], 2)) == (72.75, 323.75)          # paftada 72,88 · 323,76 (onay paftası 72,75 · 251)
     assert round(-k1["dis"][1][0], 2) == round(k2["dis"][1][0] - 1516.0, 2) == 58.61
+    s1, s2 = G.kubbe_sacagi(k1, 30), G.kubbe_sacagi(k2, 30)                     # D-54: iki kubbenin saçağı birbirinin aynası
+    assert [(round(-x, 4), y) for x, y in s1] == [(round(x - 1516.0, 4), y) for x, y in s2] and s2[1] == (1604.61, 118.9336)
     alan = {ad: round(m.alan_m2, 2) for ad, m in plan.mahaller.items()}
     for n in (1, 2):
         assert {k[:-2]: v for k, v in alan.items() if k.endswith(str(n))} == {
