@@ -151,7 +151,7 @@ def _grid_yazi(yapi, ayrac, ek) -> str:
 def _dosemeden_pencereler(plan) -> list:
     """İE-27 madde 11: boyu üst kotu (200) geçen, döşemeden kurulan pencerelerin ölçüleri (200/210, 280/210 …; 180/200 döşemeden ama üst kotu 200, sayılmaz); yoksa boş."""
     return sorted({p.acilim.olcu for p in plan.panolar if p.acilim and p.acilim.tur == "pencere"
-                   and G.pencere_kurali(p.acilim.olcu).ust > PENCERE_UST_KOTU + 1e-9})
+                   and G.pencere_kurali(p.acilim.olcu).ust > G.ust_kot() + 1e-9})   # BK-23: üst kot `yapi.lento_cm`'den
 
 class Cizici:
     def __init__(self, plan: G.Plan, katalog: Katalog):
@@ -396,6 +396,10 @@ class Cizici:
         aks, montaj = (rol == "ANA"), (rol == "MONTAJ")
         n0 = len(msp)
         dolu: list = []                                       # bu planda konmuş özel pano ölçü yazılarının kutuları (`_ozel_olcu`)
+        # BK-23 madde 3 (D-55; Lokman, 5 Kasım 2026 11:37, TK-05: "içteki pano ölçülerini kaldır bu genel kural değil şimdilik sadece net
+        # ölçüleri ver sadece en boy"): İş Emri `cikti.plan_olcusu: en_boy` → planda yalnız binanın eni ve boyu; özel pano, açık mahal, dış parça
+        # ve taşan veranda ölçüleri çizilmez (montaj kopyası aynen). Yazılmazsa eskisi gibi (PC-06, PC-20).
+        en_boy = (plan.is_emri.get("cikti") or {}).get("plan_olcusu") == "en_boy" and not montaj
         for d in plan.duvarlar:
             for p in d.panolar:
                 name, frame, kod = self.pano_blok(p)
@@ -569,9 +573,9 @@ class Cizici:
             zincir_h = {e.dxf.handle for e in list(msp)[n_z:]}
             if aks:
                 self._bolge("aks_zinciri", n_z)                   # D-31 madde 13: A4 sayfasının planında yok
-            if plan.girintili and not self._yalniz_kiris_girintisi():   # D-34: kapalı gövdenin her dış parçası mor ölçüyle
+            if plan.girintili and not en_boy and not self._yalniz_kiris_girintisi():   # D-34: kapalı gövdenin her dış parçası mor ölçüyle
                 self._dis_parca_olculeri(ox, oy, dolu if getattr(self, "_girinti_kirisleri", None) else None)
-            for v in plan.dis_verandalar:                   # BK-14: taşan verandanın eni ve derinliği
+            for v in ([] if en_boy else plan.dis_verandalar):   # BK-14: taşan verandanın eni ve derinliği
                 vx0, vy0, vx1, vy1 = v["rect"]
                 if v["cephe"] in ("on", "arka"):
                     self.dim((vx0 + ox, (vy0 if v["cephe"] == "on" else vy1) + oy), (vx1 + ox, (vy0 if v["cephe"] == "on" else vy1) + oy),
@@ -581,7 +585,7 @@ class Cizici:
                     self.dim(((vx0 if v["cephe"] == "sol" else vx1) + ox, vy0 + oy), ((vx0 if v["cephe"] == "sol" else vx1) + ox, vy1 + oy),
                              ((vx0 - 40 if v["cephe"] == "sol" else vx1 + 40) + ox, 0), 90)
                     self.dim((vx0 + ox, vy1 + oy), (vx1 + ox, vy1 + oy), (0, vy1 + 40 + oy), 0)
-            for d in plan.duvarlar:
+            for d in ([] if en_boy else plan.duvarlar):
                 for p in d.panolar:
                     if abs(p.boy - G.MOD) < 1e-6: continue
                     self._ozel_olcu(d, p.rect(), W, H, ox, oy, "OZEL_PANEL_OLCU_CM", dolu)
@@ -597,11 +601,12 @@ class Cizici:
                 if dar and y0 <= G.Y(0) + 1e-6: yb = -45.0
                 elif dar and y1 >= son_y - 1e-6: yb = H + 30.0
                 else: yb = y0 + 55.0
-                self.dim((x0 + ox, y0 + oy), (x1 + ox, y0 + oy), (0, yb + oy), 0)
                 if dar and x1 >= son_x - 1e-6: xb = W + 40.0
                 elif dar and x0 <= G.X(0) + 1e-6: xb = -80.0
                 else: xb = x0 + 33.0
-                self.dim((x0 + ox, y0 + oy), (x0 + ox, y1 + oy), (xb + ox, 0), 90)
+                if not en_boy:
+                    self.dim((x0 + ox, y0 + oy), (x1 + ox, y0 + oy), (0, yb + oy), 0)
+                    self.dim((x0 + ox, y0 + oy), (x0 + ox, y1 + oy), (xb + ox, 0), 90)
                 nis_yazilari[ad] = f"{fmt((x1 - x0) / G.MOD)} x {fmt((y1 - y0) / G.MOD)} aks modülü"   # net alan planında adın üstünde (`_mahal_etiketleri`)
         if montaj:
             self.text("Mor: standart dışı pano (gerçek uçtan uca boy ölçülü) | Beyaz: standart 125,5 cm pano | Ölçüler cm", (W / 2 + ox, -145 - alt + oy), 13, "MONTAJ_YAZI")
@@ -956,7 +961,7 @@ class Cizici:
         plan, msp = self.plan, self.msp
         W = plan.W; hy = float(plan.is_emri["yapi"].get("duvar_yuksekligi_cm", 250)); cati = plan.is_emri.get("cati", {})
         egim = float(cati.get("egim_yuzde", 33)) / 100.0; sacak = float(cati.get("sacak_cm", 30)); topuk = float(cati.get("topuk_cm", 10))
-        lento = hy - PENCERE_UST_KOTU                        # 250 → 50 (eski değer); 280 / 300 → 80 / 100 (D-14; üst kot 200 çıkarım)
+        lento = hy - G.ust_kot()                             # 250 → 50 (eski değer); 280 / 300 → 80 / 100 (D-14; üst kot 200 çıkarım); BK-23: `yapi.lento_cm`
         bot = top - hy
         msp.add_lwpolyline([(ox, bot), (W + ox, bot), (W + ox, top), (ox, top)], close=True, dxfattribs={"layer": "ON_GORUNUS"})
         xs = set()
@@ -1058,7 +1063,7 @@ class Cizici:
         plan, msp, ie = self.plan, self.msp, self.plan.is_emri
         hy = float(ie["yapi"].get("duvar_yuksekligi_cm", 250)); cati = ie["cati"]
         topuk = float(cati.get("topuk_cm", 10)); sacak = float(cati.get("sacak_cm", 30))
-        bot = top - hy; lento = hy - PENCERE_UST_KOTU
+        bot = top - hy; lento = hy - G.ust_kot()             # BK-23 (D-55): `yapi.lento_cm` yoksa hy − 200
         ox, sag_uc = 0.0, 0.0
         for k, taraf in enumerate(CG.TARAFLAR):
             n0 = len(msp)
@@ -1295,7 +1300,7 @@ def uret(is_emri: dict, cikti_dir: Path, ad_govde: str | None = None, pdf_hatada
     if montaj:
         c.ciz_plan(2 * gap, 0.0, "MONTAJ", "SAHA MONTAJ PLANI", baslik + " | Standart dışı panolar mor ve ölçülü")
     _yeni = G.yeni_anahtar_var(is_emri)
-    _lento = float(yapi.get("duvar_yuksekligi_cm", 250)) - PENCERE_UST_KOTU
+    _lento = float(yapi.get("duvar_yuksekligi_cm", 250)) - G.ust_kot()   # BK-23 (D-55)
     _ds = _dosemeden_pencereler(c.plan)                     # İE-27 madde 11: döşemeden pencerenin lentosu boyundan
     notlar = [f"Pencereler pano ortasında. Pencere üstünden duvar üstüne (lento): {fmt(_lento)} cm"
               + (f"; döşemeden pencere {', '.join(o.replace('x', '/') for o in _ds)}: üst kotu boyu kadar." if _ds else "."),
