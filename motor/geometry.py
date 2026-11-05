@@ -1130,6 +1130,9 @@ def _kur(is_emri: dict) -> Plan:
     # paftası: 94,13 · kubbe · 94,13; AP-23: 67,75 · kubbe · 57,75). Kubbe yalnız kapalı mahalin dış duvarında.
     kubbe_hedef = []            # (duvar id, q0, q1, İş Emri girdisi); q Motor çerçevesinde
     kubbe_panolari = []         # (kubbenin panosu, İş Emri girdisi); geometri aynadan sonra (`_kubbe_geometrisi`)
+    if is_emri.get("kubbeler") and abs(_hy - 250.0) > 1e-9:  # K21, D-54: kubbe duvarı 203 + 50'lik parça − 3 kertik = 250
+        raise IsEmriHatasi(f"kubbe yalnız 250 cm'lik duvarda (D-54: kubbe duvarı 203, üstündeki 50'lik parça 3 cm kertilir); "
+                           f"{_hy:g} cm duvarda kubbenin ölçüsü kararda yok")
     for kb in is_emri.get("kubbeler") or []:
         if not isinstance(kb, dict) or not {"cephe", "mahal", "bas_cm"} <= set(kb) or set(kb) - KUBBE_ANAHTARLARI:
             raise IsEmriHatasi(f"kubbeler girişi {{\"cephe\": on | arka | sol | sag, \"mahal\", \"bas_cm\" (gerçek çerçevede, dış yüzde "

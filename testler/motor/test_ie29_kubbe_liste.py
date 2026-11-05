@@ -79,6 +79,18 @@ def test_ap17_kubbe_asigi_ve_sacak_omegasi():
     assert "kubbe 1 × üç yüz 5,1 m" in L["Aşık"]["formul"]
 
 
+@pytest.mark.parametrize("hy", [280, 300])
+def test_kubbe_yalniz_250_duvarda(hy):
+    """D-54 yalnız 250'lik duvarı kapsar (203 + 50 − 3): başka yükseklikte kubbe sessizce 250'lik takımla çizilmez ve listelenmez (K21)."""
+    ie = _ie("AP17")
+    ie["yapi"]["duvar_yuksekligi_cm"] = hy
+    with pytest.raises(G.IsEmriHatasi, match="kubbe yalnız 250"):
+        G.kur(ie)
+    with pytest.raises(G.IsEmriHatasi, match="kubbe yalnız 250"):
+        PL.is_emrinden(ie)
+    G.kur(_kubbesiz(ie))                                      # kubbesiz aynı ev o yükseklikte kurulur
+
+
 def test_kubbesiz_evin_listesi_aynen():
     """Kubbe yalnız `kubbeler` anahtarlı İş Emri'nde: kubbesiz çatı girişi ve satırları değişmez."""
     ie = _kubbesiz(_ie("AP17"))
