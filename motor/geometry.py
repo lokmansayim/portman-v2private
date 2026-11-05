@@ -54,11 +54,12 @@ ACIK_MAHAL_TURLERI = {"veranda", "balkon", "sundurma", "teras"}
 # önünde üç panolu, 45° yan duvarlı çıkma; dış yüzde taban 251, ön 133,78, çıkma 58,61 (paftanın ölçü zinciri 58,61 · 133,78 · 58,61).
 # Yan panolar 79 (paftada "790", pencere 59/170), ön pano 125,5 (pencere 105/170); köşelerde açılı köşe direği. Kubbenin küçük çatısı
 # (shingle; AP-24 paftası "KUBBE SHİNGLE KAPLAMA YAPILACAK") üç makasla duvarın ortasında birleşir: tepe duvarda, kubbenin ortasında.
-# D-54 (Lokman, 5 Kasım 2026 10:41, kubbe detayı "2030 + 500 = 2530, 350"): kubbenin duvarları ana duvarın üstünden 50 cm aşağıda biter
-# (ana duvar kubbenin üstünde 50'lik bantla sürer; detayın toplamı 2530 taban profiliyle, paftada bina yüksekliği 2500); kubbe çatısının tepesi
-# kubbe duvarının üstünden 35 cm, düz duvarda kubbenin ortasında; üç makas (biri düz duvar boyunca, ikisi tepeden ön köşelere).
+# D-54 (Lokman, 5 Kasım 2026 10:41 kubbe detayı ve 12:05 düzeltmesi): kubbenin çıkıntılı tarafı (duvarları) 203 cm; üstüne konan 50'lik
+# parça (ana duvarın kubbe üstündeki bandı, kitapta "Kubbe özel pano 100 × 2500 × 500") uçlardan 3 cm kertilir, alttan alçıpan vurulunca
+# saçak omegasıyla aynı seviyede (ana duvarın üstü değişmez); kubbe çatısının tepesi kubbe duvarının üstünden 35 cm, düz duvarda kubbenin
+# ortasında; saçağı 18,5 cm (ana çatınınki değil); üç makas (biri düz duvar boyunca, ikisi tepeden ön köşelere).
 KUBBE = {"taban_cm": 251.0, "cikma_cm": 58.61, "yan_pano_cm": 79.0, "on_pano_cm": 125.5, "on_pencere": "105x170", "yan_pencere": "59x170",
-         "ust_bant_cm": 50.0, "tepe_cm": 35.0, "makas": 3}
+         "duvar_cm": 203.0, "tepe_cm": 35.0, "sacak_cm": 18.5, "makas": 3}
 KUBBE_ANAHTARLARI = frozenset({"cephe", "mahal", "bas_cm", "on_pencere", "yan_pencere"})
 
 
@@ -1508,9 +1509,9 @@ def _kubbe_geometrisi(plan: "Plan", kubbe_panolari: list) -> None:
     −T_DIS iç yüz). Dış çizgi tabanda 251, önde 133,78, çıkma 58,61; 45° yan panonun iç yüzü düz duvarın iç yüzünü ve ön panonun iç yüzünü
     10·(√2 − 1) = 4,14 içeride keser (ön pano 125,5 = 133,78 − 2 × 4,14; paftadaki gibi). Yan pano 79 (dış kenarı tabandan 79/√2 = 55,86
     çıkar; ön köşedeki açılı köşe direği kalanı doldurur). Kubbenin içi (iç çizgiyle düz duvarın iç yüzü arası) mahalin net alanına girer
-    (`Mahal.ek`); gövde (`Mahal.poly`, çatının ayak izi) değişmez. Kubbenin çatısı (D-54): kubbe duvarı ana duvarın üstünden 50 cm aşağıda
-    biter; tepe düz duvarda kubbenin ortasında, kubbe duvarının üstünden 35 cm; üç yüzün saçağı ana çatınınki gibi kubbenin dış çizgisinden
-    dışarıda (`kubbe_sacagi`; görünüşte `cephe_gorunus._kubbe_gorunusu`)."""
+    (`Mahal.ek`); gövde (`Mahal.poly`, çatının ayak izi) değişmez. Kubbenin çatısı (D-54): kubbe duvarı 203 cm; tepe düz duvarda kubbenin
+    ortasında, kubbe duvarının üstünden 35 cm; üç yüzün saçağı kubbenin dış çizgisinden 18,5 cm dışarıda (`kubbe_sacagi`; görünüşte
+    `cephe_gorunus._kubbe_gorunusu`)."""
     K, t, r2 = KUBBE, T_DIS, math.sqrt(2.0)
     c, yb = K["cikma_cm"], K["yan_pano_cm"] / r2
     k2 = t * (r2 - 1.0)
@@ -1556,9 +1557,10 @@ def _kubbe_geometrisi(plan: "Plan", kubbe_panolari: list) -> None:
 
 
 def kubbe_sacagi(kb: dict, sacak: float) -> list:
-    """D-54 (Lokman, 5 Kasım 2026 10:41: "aynı normal çatı gibi saçak omegası ve saçak sacı geliyor"): kubbe çatısının saçak çizgisi, gerçek
-    çerçevede: [düz duvarda sol uç, sol ön köşe, sağ ön köşe, düz duvarda sağ uç]. Üç yüzün saçağı kubbenin dış çizgisinden `sacak` dışarıda
-    (ana çatınınki), köşeler gönye; 45° yan yüzün saçağı düz duvarın dış yüzüne kadar uzar (tabandan sacak·√2 dışarıda)."""
+    """D-54 (Lokman, 5 Kasım 2026 10:41: "aynı normal çatı gibi saçak omegası ve saçak sacı geliyor"; 12:05: "kubbenin saçakları 18.5 cm
+    olacak"): kubbe çatısının saçak çizgisi, gerçek çerçevede: [düz duvarda sol uç, sol ön köşe, sağ ön köşe, düz duvarda sağ uç]. Üç yüzün
+    saçağı kubbenin dış çizgisinden `sacak` (`KUBBE["sacak_cm"]`) dışarıda, köşeler gönye; 45° yan yüzün saçağı düz duvarın dış yüzüne kadar
+    uzar (tabandan sacak·√2 dışarıda)."""
     t0, t1, c, sg, yuz = kb["u0"], kb["u1"], kb["cikma_cm"], kb["isaret"], kb["yuz"]
     k = sacak * math.sqrt(2.0)
     P = (lambda u, s_: (round(u, 4), round(yuz + sg * s_, 4))) if kb["yon"] == "x" else (lambda u, s_: (round(yuz + sg * s_, 4), round(u, 4)))

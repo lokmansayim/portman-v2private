@@ -255,10 +255,10 @@ def _yakin_parca(k3: list, d, D: float) -> list:
 
 def _kubbe_gorunusu(plan: G.Plan, ie: dict, taraf: str, u, d, ck: dict) -> dict:
     """İE-29 PR-2: kubbelerin bu görünüşteki parçaları (`G._kubbe_geometrisi`). Kubbe dışbükey: üç duvar yüzü ve üç üçgen çatı yüzü (D-54,
-    Lokman 5 Kasım 2026 10:41 kubbe detayı: kubbe duvarı zeminden ana duvarın üstünün 50 cm altına, `KUBBE["ust_bant_cm"]`; saçak ana
-    çatınınki gibi kubbenin dış çizgisinden `sacak_cm` dışarıda, `G.kubbe_sacagi`; saçakta topuk şeridi, kubbe duvarının üstünden topuk
-    kadar; tepe düz duvarda kubbenin ortasında, kubbe duvarının üstünden 35 cm; köşelerden tepeye iki mahya). Kubbenin üstündeki ana duvar
-    bandı ana cephede çizilir. Bakana dönük yüz çizilir, öbürü kubbenin ya da gövdenin
+    Lokman 5 Kasım 2026 10:41 kubbe detayı ve 12:05 düzeltmesi: kubbe duvarı zeminden 203 cm, `KUBBE["duvar_cm"]`; saçak kubbenin dış
+    çizgisinden 18,5 cm dışarıda, `KUBBE["sacak_cm"]`, `G.kubbe_sacagi`; saçakta topuk şeridi, kubbe duvarının üstünden topuk kadar; tepe
+    düz duvarda kubbenin ortasında, kubbe duvarının üstünden 35 cm; köşelerden tepeye iki mahya). Kubbenin üstündeki ana duvar bandı ana
+    cephede çizilir. Bakana dönük yüz çizilir, öbürü kubbenin ya da gövdenin
     ardındadır. Ana çatının bakana dönük düzlemlerinin ve kalkanlarının kubbenin yüzünden yakın kısmı (`_yakin_parca`; düzlemin topuğu dahil)
     kubbeyi örter (yandan bakışta saçağın altı; ortalama derinlik yetmez: ana çatının düzlemi mahyadan saçağa kubbenin iki yanına uzanır).
     Döner: {"dolgu": [[(u, z)]] (beyaz; ardındaki çizgiler örtülür), "cizgiler": [{"katman": duvar | cati, "u": [(u, z)]}],
@@ -268,8 +268,8 @@ def _kubbe_gorunusu(plan: G.Plan, ie: dict, taraf: str, u, d, ck: dict) -> dict:
     from shapely.ops import unary_union
     cati = ie.get("cati") or {}
     hy = float(ie["yapi"].get("duvar_yuksekligi_cm", 250))
-    topuk, sacak = float(cati.get("topuk_cm", 10)), float(cati.get("sacak_cm", 30))
-    hk = hy - G.KUBBE["ust_bant_cm"]                                         # kubbe duvarının üstü (D-54)
+    topuk, sacak = float(cati.get("topuk_cm", 10)), G.KUBBE["sacak_cm"]
+    hk = G.KUBBE["duvar_cm"]                                                 # kubbe duvarının üstü (D-54)
     ze, za = hk + topuk, hk + G.KUBBE["tepe_cm"]
     bx, by = _BAKANA[taraf]
     out = {"dolgu": [], "cizgiler": [], "pencereler": [], "u0": None, "u1": None}
