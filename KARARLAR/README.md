@@ -141,8 +141,12 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | D | D-45 | kör ölçüm farklarından liste kuralları ve kıyas (Lokman 3.11 09:52, öneri tablosunun cevapları) | yazıldı (3.11; İE-27, `claude/project-thread-wwx1p0`) |
 | D | D-46 | karkaslı kaplama duvar panosu paftadan, ev ev (İE-28; Lokman 4.11 04:35 kartı "Paftadan, ev ev") | yazıldı (4.11; İE-28, `claude/project-thread-qnu2k8`) |
 | D | D-47 | çıkıntısız çapraz cumbada liste (İE-29; PR #119) | yazıldı (4.11; İE-29) |
-| D | D-52 | AP-26'nın pencere bölmeleri, cam PVC kapısı ve teras paneli paftadan, ev ev (İE-30; Lokman 4.11 21:14 kartı "Paftadan, ev ev") | yazıldı (4.11; İE-30, `claude/project-thread-qnu2k8`) |
-| D | **D-48** | — | **sıradaki boş** |
+| D | D-48 | tek uçlu kırma çizimi ve listesi, topuk 10, üç bölmeli pencere (İE-29 PR-2; Lokman 4.11 05:19) | alındı (4.11; İE-29 dalı) |
+| D | D-49 | ön onay çiziminde brüt m² verandayla, ortalanan pencerenin köşeye bakan yanı tek pano, İş Emri tek birleşimi yazar (BK-22; PC-31, PC-32) | yazıldı (4.11; BK-22, PR #122) |
+| D | D-50 | trapez sac standart 100 cm kapatır, mahya sacın kapattığı kadar (M-11; İE-13 PR-8) | yazıldı (4.11; PR #123) |
+| D | D-51 | trapez sac fiyatı m² birim fiyatından (İE-13 PR-8) | yazıldı (4.11; PR #123) |
+| D | D-52 | AP-26'nın pencere bölmeleri, cam PVC kapısı ve teras paneli paftadan, ev ev (İE-30; Lokman 4.11 21:14 kartı "Paftadan, ev ev") | yazıldı (4.11; İE-30, `claude/project-thread-qnu2k8`; ek 5.11: teras paneline eğim (Lokman 5.11 00:36). Kural satırları PC-33 (D-46) ve PC-34 (D-52). |
+| D | **D-53** | — | **sıradaki boş** |
 | İE | İE-01–İE-08 | bu depo (`main`) | yazıldı |
 | İE | İE-09 | model atölyesi: kontrollü model üretimi ve banka hattı (Görev 6e; pano 30; P6001 güncellemesi kapsam dışı) | alındı (16.10; `claude/gorev-6e-model-atolyesi-rnhtcp`; PR-1 banka hattı 29.10, `claude/project-thread-rhjgzv`) |
 | İE | İE-10, İE-11, İE-12 | prefabrik hattı (PR #12, PR #14, `ie-12-prefabrik-bayi-paftasi`) | `main`'e BK-12 ile (PR-1: motor ve bayi paftası; liste ve mühür kıyası sonraki PR'larda) |
@@ -180,7 +184,8 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | BK | BK-19 | prefabrik yükleme listesi kart modeliyle aynı sayar (D-39; PR #96) | alındı (31.10) |
 | BK | BK-20 | mühürlü konular freni: kayıt, hook, CI kilit testi (D-42; `claude/project-thread-evp64h`) | alındı (1.11) |
 | BK | BK-21 | frenler thread'lerin okuduğu yerde: `.claude/rules/frenler.md`, `araclar/fren.py`, CI "Korunan dosya onayı" (Lokman'ın `patron-onayi` etiketi); BK-17 `main`'e (`claude/project-thread-7n2p8x`) | alındı (4.11) |
-| BK | **BK-22** | — | **sıradaki boş** |
+| BK | BK-22 | ön onay çiziminde verandalı brüt m², ortalanan pencerenin yanı tek pano, İş Emri'nde tek birleşim (D-49; `claude/project-thread-jlqian`, PR #122) | alındı (4.11) |
+| BK | **BK-23** | — | **sıradaki boş** |
 
 ## 27 Eylülde Lokman'ın verdiği kararlar
 
