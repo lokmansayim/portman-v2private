@@ -133,6 +133,7 @@ def kur(ie: dict, plan: dict, makaslar: list[dict]) -> dict:
         "baslangic": {"x": "min", "y": "max" if baslangic.startswith("arka") else "min"},
         "makaslar": makaslar,
         "uyarilar": uyarilar,
-        # İE-24: girintili gövde (TK-03): dış çizgi ve çizimdeki çatı (`cati_serit`); çatı katmanları `serit.py`'de
-        **({"govde": plan["govde"], "cati_serit": plan["cati_serit"]} if plan.get("cati_serit") else {}),
+        # İE-24: girintili gövde (TK-03): dış çizgi ve çizimdeki çatı (`cati_serit`); çatı katmanları `serit.py`'de. İE-15 K6: çapraz cumbada
+        # (`cati_capraz`) gövde dikdörtgendir, dış çizgisi bugünkü IFC'nin dış ölçüsü (`hazirla` gövde yazmaz: döşeme değişmez)
+        **({"govde": plan.get("govde") or [[0.0, 0.0], [W, 0.0], [W, H], [0.0, H]], "cati_serit": plan["cati_serit"]} if plan.get("cati_serit") else {}),
     }

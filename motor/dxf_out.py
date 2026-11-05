@@ -1137,8 +1137,18 @@ def a4_yerlesim(kutular: dict) -> dict:
 A4_BOLGELER = ("antet", "plan", "on", "arka", "sol", "sag")
 
 
-def a4_bayi_sayfasi(doc, bolgeler: dict, cfg) -> bytes:
-    """Tek sayfalı PDF: dikey A4 bayi sayfası (`a4_yerlesim`)."""
+def a4_cercevesi(kutu, yer: tuple, olcek: float) -> dict:
+    """İE-15 K6: A4 bayi sayfasının kat planı çerçevesindeki yeri (cm; x sol dış yüzden sağa, y ön dış yüzden arkaya; aksli kat planı modelde
+    0, 0'da çizilir). `kutu`: plan bölgesinin model kutusu (payıyla), `yer`: sayfadaki yeri (mm, sol üst köşe 0, y aşağı), `olcek` mm / cm.
+    Montaj rehberi ön onay sayfasını evin altına gerçek ölçekte serer (Lokman, 5 Kasım 2026 00:53; `araclar/paket/rehber/kagit.py`)."""
+    x0, y1 = kutu.extmin.x - yer[0] / olcek, kutu.extmax.y + yer[1] / olcek
+    return {"x": [round(x0, 3), round(x0 + A4_DIKEY_MM[0] / olcek, 3)], "y": [round(y1 - A4_DIKEY_MM[1] / olcek, 3), round(y1, 3)],
+            "olcek_mm_cm": round(olcek, 6)}
+
+
+def a4_bayi_sayfasi(doc, bolgeler: dict, cfg, cerceve: dict | None = None) -> bytes:
+    """Tek sayfalı PDF: dikey A4 bayi sayfası (`a4_yerlesim`). `cerceve` verilirse sayfanın kat planı çerçevesindeki yeri yazılır
+    (`a4_cercevesi`); sayfanın baytları aynı."""
     kutu = {}
     for ad in A4_BOLGELER:
         b = ebbox.extents([doc.entitydb[h] for h in bolgeler.get(ad, []) if h in doc.entitydb])
@@ -1161,6 +1171,8 @@ def a4_bayi_sayfasi(doc, bolgeler: dict, cfg) -> bytes:
             raise RuntimeError(f"A4 bayi sayfasında {ad} bölgesine yer kalmadı ({w:.1f} × {h:.1f} mm)")
         with fitz.open("pdf", _bolge_pdf(doc, bolgeler[ad], b, w, h, cfg)) as parca:
             sayfa.show_pdf_page(fitz.Rect(x * pt, y * pt, (x + w) * pt, (y + h) * pt), parca, 0)
+    if cerceve is not None:
+        cerceve.update(a4_cercevesi(kutu["plan"], yer["plan"], yer["olcek"]["plan"]))
     return out.tobytes(garbage=3, deflate=True, no_new_id=True)
 
 
@@ -1298,13 +1310,13 @@ def uret(is_emri: dict, cikti_dir: Path, ad_govde: str | None = None, pdf_hatada
     checks["bom_counts_from_file"] = V.bom_sayim(saved)
     (cikti_dir / "validation.json").write_text(json.dumps(checks, ensure_ascii=False, indent=2), encoding="utf-8")
     gecti = checks.get("passed") is True
-    pdf_yazildi = None
+    pdf_yazildi, a4 = None, {}
     if gecti or pdf_hatada:
         if not gecti:
             pdf = cikti_dir / f"{stem}.HATALI.pdf"      # yalnız tanı; teslim edilmez
         backend = pymupdf.PyMuPdfBackend()
         cfg = config.Configuration(background_policy=config.BackgroundPolicy.WHITE, color_policy=config.ColorPolicy.COLOR, min_lineweight=0.15)
-        pdf.write_bytes(a4_bayi_sayfasi(saved, c.bolgeler, cfg))
+        pdf.write_bytes(a4_bayi_sayfasi(saved, c.bolgeler, cfg, a4))
         with fitz.open(pdf) as document:
             if len(document) != 1 or not document[0].get_drawings():
                 raise RuntimeError("PDF boş veya tek sayfa değil")
@@ -1318,7 +1330,8 @@ def uret(is_emri: dict, cikti_dir: Path, ad_govde: str | None = None, pdf_hatada
                 "pdf_skipped_reason": None if gecti else "doğrulama geçmedi; teslim PDF'i üretilmedi",
                 "validation_passed": checks.get("passed"), "warnings": plan.uyarilar, "generator": "portman-motor-v1.1",
                 "generator_sha256": {f: sha256(ROOT / "motor" / f) for f in ("geometry.py", "dxf_out.py", "validate.py", "katalog.py")},
-                "reference_dxf_sha256": sha256(REF_DXF), "pdf_generated_from_reopened_dxf": True, "yeni_kodlar": [e["code"] for e in kat.yeni]}
+                "reference_dxf_sha256": sha256(REF_DXF), "pdf_generated_from_reopened_dxf": True, "yeni_kodlar": [e["code"] for e in kat.yeni],
+                "a4_sayfa_cm": a4 if (pdf_yazildi and gecti) else None}      # İE-15 K6: rehberin altındaki kat planı (`a4_cercevesi`)
     (cikti_dir / "manifest.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8")
     (cikti_dir / "is_emri.json").write_text(json.dumps(is_emri, ensure_ascii=False, indent=2), encoding="utf-8")
     return manifest

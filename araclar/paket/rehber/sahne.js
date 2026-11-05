@@ -214,7 +214,22 @@ const IC_KAL = M.ic_kal || "60'lık";
 const kartSat = kod => kod ? [['Kart ölçüsü', D.cards[kod].olcu], ['IFC', D.cards[kod].ifc ? `${D.cards[kod].ifc.sinif} · ${D.cards[kod].ifc.alt_tur}` : '—']] : [];
 
 // Zemin (veranda dahil)
-scene.add(bp(D.zemin[0], D.zemin[1], D.zemin[2], D.zemin[3], -12, 0, mat('concrete', 0)));
+const plak = bp(D.zemin[0], D.zemin[1], D.zemin[2], D.zemin[3], -12, 0, mat('concrete', 0));
+scene.add(plak);
+/* İE-15 K6 · Ön onay sayfası evin altında (Lokman, 5 Kasım 2026 00:53, TK-01 rehberi): Motor'un A4 sayfası gerçek ölçekte, kat planı evin
+   tam altına oturur; sayfa varken temel plak gizli. Görüntü ve yer `kagit.py`'den (`dxf_out.a4_cercevesi`); sayfasız rehberde null. */
+const KAGIT = __KAGIT__;
+if (KAGIT) {
+  plak.visible = false;
+  const img = new Image(), tex = new THREE.Texture(img);
+  tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 16;
+  img.onload = () => { tex.needsUpdate = true; };
+  img.src = KAGIT.src;
+  const [x0, x1] = KAGIT.x, [y0, y1] = KAGIT.y;
+  const kagit = new THREE.Mesh(new THREE.PlaneGeometry((x1 - x0) / 100, (y1 - y0) / 100), new THREE.MeshStandardMaterial({ map: tex, roughness: 0.92 }));
+  kagit.name = 'Ön onay sayfası'; kagit.rotation.x = -Math.PI / 2; kagit.position.set(X((x0 + x1) / 2), -0.002, Z((y0 + y1) / 2)); kagit.receiveShadow = true;
+  scene.add(kagit);
+}
 
 /* 1 · Alt çerçeve */
 D.alt.forEach((s, i) => {
@@ -400,7 +415,7 @@ const SACAK = D.sacak.map(e => ({ ...e, R: RF[e.R] }));
         const fl = lb(-5, 5, -SAC / 2, SAC / 2, y0, y1, m);             // makasa doğru 10 cm kıvrım: aşığın üstünden trapezin altına
         fl.position.x = (30.2 - 5 * e.R.cos) / 100; fl.position.y = (ht + 5 * e.R.sin) / 100; fl.rotation.z = -e.R.th; g.add(fl);
       }
-      add(AD.sacak, g, to++ * 0.5, { kod: KB('sacak'), ad: 'Saçak sacı', satir: [['Bu parça', `${e.ad} · L ${fmtc(a1 - a0)} cm`], ['Profil', 'tırnak 3 → saçak altı 30 → alın 13 → makasa doğru kıvrım 10; açınım ≈ 56 cm'], ['Sıra', 'aşıklardan sonra, dereden önce (Lokman, 26.10.2026)'], ['Uçta', 'saçak altı baş makasın (betopanının) hizasında kesilir; alın ve kıvrım köşeye, alın sacına kadar devam eder (Lokman, 26.10.2026)'], ['Liste', M.sacak_liste], ...kartSat(KB('sacak'))] });
+      add(AD.sacak, g, to++ * 0.5, { kod: KB('sacak'), ad: 'Saçak sacı', satir: [['Bu parça', `${e.ad} · L ${fmtc(a1 - a0)} cm`], ['Profil', 'tırnak 3 → saçak altı 30 → alın 13 → makasa doğru kıvrım 10; açınım ≈ 56 cm'], ['Sıra', 'aşıklardan sonra, dereden önce (Lokman, 26.10.2026)'], ['Uçta', 'saçak altı baş makasın (betopanının) hizasında kesilir; alın ve kıvrım köşeye, alın sacına kadar devam eder (Lokman, 26.10.2026)'], ...(e.not ? [['Bu çatıda', e.not]] : []), ['Liste', M.sacak_liste], ...kartSat(KB('sacak'))] });
     }
   });
 }
@@ -433,7 +448,7 @@ D.makas.forEach((mk, i) => {
   if (!ara) { const r = makasKur(R, mk.bas, mk.son, mk.wl, mk.NB, mk.T0, m); g = r.g; P = r.P; }
   else g = araMakas(R, mk.bas, mk.son, ysR(RF[mk.zR], mk.yuz), mk.nps, m);
   const w = mk.yon === 'y' ? cerceve(Math.PI / 2, mk.konum, 0) : cerceve(0, 0, mk.konum); w.add(g);
-  const kod = ara ? null : mk.kod !== undefined ? mk.kod : mk.rol === 'bas' ? 'MA-01' : 'MA-02';
+  const kod = mk.kod !== undefined ? mk.kod : ara ? null : mk.rol === 'bas' ? 'MA-01' : 'MA-02';   // İE-15 K6: çapraz cumbanın ara makası MA-05
   const yer = mk.yon === 'y' ? `x = ${fmtc(mk.konum)} cm (sol dış yüzden)` : mk.konum > D.dis[1] ? `y = ${fmtc(mk.konum)} cm (arka duvarın arkasında)` : `y = ${fmtc(mk.konum)} cm (ön duvarın ${mk.konum < 0 ? 'önünde' : 'arkasında'})`;
   const span = mk.son - mk.bas;
   add(step, w, i, { kod, ad: kart(kod, mk.kart_ad || M.ara_ad), satir: [
@@ -474,6 +489,7 @@ function rake(G, end, m, uzat = 0) {
     // "baş makasların uçlarında hâlâ kaplanmamış alan var; saçak sacı ile alın sacının birleştiği yerin boş kalmasının sebebi o")
     ['A', 'B'].forEach(end => {
       if (G.ucKapali && G.ucKapali[end]) return;   // uç veranda çatısının altında kalır (yüz ana çatının devamı)
+      if (Math.abs(G.uc[end] - G.duvar[end]) < 0.5) return;   // İE-15 K6: makas duvarın üstünde başlar (cumbanın baş makasının arkasında), dışarıda ucu yok
       // alt ucu duvar üstündeki parçalar gibi baş makas omegasının dış U yanağında: omega saçak ucundan saçak ucuna (D-32); önce saçak sacının
       // saçak altındaydı, omeganın 3 cm üstünde kalıyordu (Lokman, 31.10.2026: "baş makas omegasının tam arasına girmeli, uçlarda yukarıda kalmış")
       const sE = G.uc[end], dir = Math.sign(G.sm - sE), a = G.duvar[end], b = sE + dir * 0.2, yt = s => (G.h(s) - 0.2) / 100, alt = (H - BAS_KANAT) / 100;
@@ -744,8 +760,9 @@ D.dere.inisler.forEach((p, i) => {
   const h = HAT[p.hat], S = dereSerit(h), w = S.yeni(), m = mat('gutter', AD.dere), ust = DERE_ALT;   // cm
   const kolon = p.sw !== undefined;   // verandada boru kolonun yerinde (p.sw)
   const yuzU = (p.yuz - h.kenar) * h.out;   // duvar yüzünün yerel x'i (dışa pozitif)
-  const sw = kolon ? p.sw : Math.min(D.dis[p.dis] - 17, Math.max(17, p.s));                 // boru: köşe direği kaplamasının yanında ya da kolonda
-  const so = Math.min(Math.max(h.a0, h.a1) - 6, Math.max(Math.min(h.a0, h.a1) + 6, sw));    // ağız: borunun hizasında
+  const sw = p.boru !== undefined ? p.boru : kolon ? p.sw : Math.min(D.dis[p.dis] - 17, Math.max(17, p.s));   // boru: köşe direği kaplamasının yanında
+  // ya da kolonda; veri yerini verdiyse orada (İE-15 K6: cumbanın kısa yan saçağında evin köşesinde, ağzı tam hizasında; Lokman, 5 Kasım 2026)
+  const so = p.agiz !== undefined ? p.agiz : Math.min(Math.max(h.a0, h.a1) - 6, Math.max(Math.min(h.a0, h.a1) + 6, sw));    // ağız: borunun hizasında
   const zo = S.zOf(so), zw = S.zOf(sw), gx = SAC + 0.03 + 7.5, wx = yuzU + 4;
   const V = (x, y, z) => new THREE.Vector3(x / 100, y / 100, z / 100);
   const boru = (a, b) => { const d = new THREE.Vector3().subVectors(b, a), c = mesh(new THREE.BoxGeometry(0.06, d.length(), 0.08), m);
