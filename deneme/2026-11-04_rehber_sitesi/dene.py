@@ -16,8 +16,9 @@ SITE = os.path.abspath(sys.argv[1] if len(sys.argv) > 1 else os.path.join(B, 'ci
 EKRAN = os.path.join(B, 'cikti', 'ekran')
 os.makedirs(EKRAN, exist_ok=True)
 REHBER = {'62m2': dict(N=20, galeri=8, pafta=False, yasak_ek=[]),
-          '80m2': dict(N=22, galeri=0, pafta=True, yasak_ek=['62 m²'])}
-YASAK = ['lokman', 'kaynak:', 'liste de böyle', 'varsay', 'motor', 'teyit', 'sketchup', 'alpha mini', 'tk-01', 'pk-01', 'pm-tk', 'kitap',
+          '80m2': dict(N=22, galeri=0, pafta=True, yasak_ek=['62 m²']),
+          '80m2-21': dict(N=21, galeri=0, pafta=True, yasak_ek=['62 m²', '3+1'])}
+YASAK = ['lokman', 'kaynak:', 'liste de böyle', 'varsay', 'motor', 'teyit', 'sketchup', 'alpha mini', 'tk-01', 'pk-0', 'tk-0', '(d-', 'pm-tk', 'kitap',
          'kitab', 'kural', 'modelinde', 'kart modeli', 'portman', 'tatar', 'patron', 'deneme', 'undefined', 'null', 'nan']
 
 
@@ -69,7 +70,7 @@ def acilis(b, cihaz, ayar):
               img: a.querySelector('img').complete && a.querySelector('img').naturalWidth > 0 })) })''')
     print(f'[{ad}] {json.dumps(o, ensure_ascii=False)}')
     p.evaluate('() => Promise.all([...document.images].map(i => i.complete ? 1 : new Promise(r => { i.onload = i.onerror = r; })))')
-    if o['kip'] != 'CSS1Compat' or len(o['kart']) != 2:
+    if o['kip'] != 'CSS1Compat' or len(o['kart']) != len(REHBER):
         bulgu.append(f'{ad}: belge kipi ya da kart sayısı yanlış')
     p.screenshot(path=os.path.join(EKRAN, f'acilis_{cihaz}.png'), full_page=True)
     for k in o['kart']:
@@ -154,7 +155,7 @@ def rehber(b, kl, cihaz, ayar):
         p.evaluate('() => window.__montaj.ackapa(0)')
     # ön onay paftası
     if bek['pafta']:
-        pf = p.evaluate('() => { const k = window.__pdf; const im = k && k.material.map && k.material.map.image; return { var: !!k, gorunur: !!(k && k.visible), yuklu: !!(im && im.complete && im.naturalWidth), en: im ? im.naturalWidth : 0 }; }')
+        pf = p.evaluate('() => { let sc = window.__montaj.parts[0].obj; while (sc.parent) sc = sc.parent; const k = window.__pdf || sc.getObjectByName("Ön onay sayfası"); const im = k && k.material.map && k.material.map.image; return { var: !!k, gorunur: !!(k && k.visible), yuklu: !!(im && im.complete && im.naturalWidth), en: im ? im.naturalWidth : 0 }; }')
         print(f'[{ad}] ön onay paftası: {pf}')
         if not (pf['var'] and pf['gorunur'] and pf['yuklu']):
             bulgu.append(f'{ad}: ön onay paftası yüklenmedi ({pf})')
@@ -193,10 +194,13 @@ CIHAZ = {'masaustu': dict(viewport={'width': 1366, 'height': 860}),
          'telefon': dict(viewport={'width': 390, 'height': 844}, device_scale_factor=3, is_mobile=True, has_touch=True)}
 with sync_playwright() as pw:
     b = pw.chromium.launch(args=['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'])
+    SADECE = os.environ.get('DENE_REHBER')        # ör. DENE_REHBER=80m2-21: yalnız o rehber (açılış dahil değil)
     for cihaz, ayar in CIHAZ.items():
-        acilis(b, cihaz, ayar)
+        if not SADECE:
+            acilis(b, cihaz, ayar)
         for kl in REHBER:
-            rehber(b, kl, cihaz, ayar)
+            if not SADECE or kl == SADECE:
+                rehber(b, kl, cihaz, ayar)
     b.close()
 srv.shutdown()
 print('BULGU:' if bulgu else 'SONUÇ: geçti (bulgu yok)')

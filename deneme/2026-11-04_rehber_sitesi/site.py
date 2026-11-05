@@ -3,7 +3,8 @@
 Lokman'ın kararı (4.11): iki rehber birlikte yayında, açılış sayfası ikisini listeler.
   /        açılış (PortatifEv montaj rehberleri)
   /62m2/   62 m² Beşik + Cumba (deneme/2026-10-25_rehber_62m2/yayin/paketle.py)
-  /80m2/   80 m² 3+1, evin altında ön onay paftası (rehber80/paketle.py)
+  /80m2/   80 m² 3+1, evin altında ön onay paftası (rehber80/paketle.py --rehber 80m2)
+  /80m2-21/ 80 m² 2+1, aynı şablon (rehber80/paketle.py --rehber 80m2-21; Lokman 6.11)
 
 Kullanım: python3 site.py --npm <npm pack klasörü> --esbuild <esbuild yolu>
 Çıktı (cikti/, depoya girmez): site/, rehber_paket.tgz, rehber_kur.sh (vps/rehber_yayin.sh + gömülü site).
@@ -22,6 +23,8 @@ R62 = os.path.join(ortak.DEPO, 'deneme', '2026-10-25_rehber_62m2', 'yayin')
 REHBERLER = [   # klasör, başlık, özellikler, kapak
     ('62m2', '62 m² Beşik + Cumba', ['900 × 600 cm', 'beşik + cumba çatı', 'veranda', '20 adım'], 'gorsel/ev_on_sol.jpg'),
     ('80m2', '80 m² 3+1', ['898,5 × 888,5 cm', '3 yatak odası', '2 veranda', '22 adım', 'ön onay paftası'], 'gorsel/kapak.jpg'),
+    ('80m2-21', '80 m² 2+1', ['888,5 × 898,5 cm', '2 yatak odası', 'çapraz cumba', 'gömme veranda', '21 adım', 'ön onay paftası'],
+     'gorsel/kapak.jpg'),
 ]
 
 
@@ -135,11 +138,11 @@ def main():
     s62 = open(os.path.join(SITE, '62m2', 'index.html'), encoding='utf-8').read()
     ortak.denetle(re.sub(r'<script type="application/json" id="pafta">.*?</script>', '', s62, flags=re.S), '62m2 (betik)')
     ortak.denetle(re.search(r'id="pafta">(.*?)</script>', s62, flags=re.S).group(1), '62m2 (veri)')
-    print('== 80 m² paketi')
-    subprocess.run([sys.executable, os.path.join(B, 'rehber80', 'paketle.py'), '--npm', a.npm, '--esbuild', a.esbuild,
-                    '--cikti', os.path.join(SITE, '80m2')], check=True)
-    print('== 80 m² kapak görseli')
-    kapak_al(os.path.join(SITE, '80m2'), os.path.join(SITE, '80m2', 'gorsel', 'kapak.jpg'))
+    for kl in ('80m2', '80m2-21'):
+        print(f'== {kl} paketi ve kapak görseli')
+        subprocess.run([sys.executable, os.path.join(B, 'rehber80', 'paketle.py'), '--rehber', kl, '--npm', a.npm,
+                        '--esbuild', a.esbuild, '--cikti', os.path.join(SITE, kl)], check=True)
+        kapak_al(os.path.join(SITE, kl), os.path.join(SITE, kl, 'gorsel', 'kapak.jpg'))
     for kl, _, _, kapak in REHBERLER:
         if not os.path.exists(os.path.join(SITE, kl, kapak)):
             sys.exit(f'HATA: kapak yok: {kl}/{kapak}')

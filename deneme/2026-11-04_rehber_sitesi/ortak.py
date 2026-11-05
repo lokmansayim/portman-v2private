@@ -11,7 +11,7 @@ DEPO = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), 
 FONTLAR = [('barlow-condensed', ['500', '600', '700']), ('ibm-plex-mono', ['400', '500']), ('source-sans-3', ['400', '600'])]
 YASAK = ['lokman', 'teyit', 'paftada yok', '.bde', 'alpha mini', 'lytecad', 'sketchup', 'dwg', 'ums metal', 'assan',
          'varsayım', 'varsayıl', 'tedarik', 'portman', 'astra', 'ubeyd', 'tatar', 'patron', '["kaynak"', "['kaynak'",
-         'kaynak:', 'motor', 'kart modeli', 'modelinde', 'liste de böyle', 'kitap', 'pk-01', 'tk-01', 'tk01', 'pm-tk', 'iş emri', '__proje__', '__kisa__', '__data__',
+         'kaynak:', 'motor', 'kart modeli', 'modelinde', 'liste de böyle', 'kitap', 'pk-0', 'tk-0', 'tk-1', '(d-3', '(d-2', 'ie-1', 'İe-1', 'tk0', 'pm-tk', 'iş emri', '__proje__', '__kisa__', '__data__',
          '__script__', '__gorseller__', '__chip__', '__spec__', '__note__', 'jsdelivr', 'googleapis', 'gstatic',
          'http://', 'https://']
 TELEFON = re.compile(r'(?<![\d.,])(?:\+?90[ -]?)?0?5\d{2}[ -]?\d{3}[ -]?\d{2}[ -]?\d{2}(?![\d.,])')

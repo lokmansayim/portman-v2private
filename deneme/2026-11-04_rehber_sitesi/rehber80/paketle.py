@@ -1,7 +1,8 @@
-"""80 m² 3+1 montaj rehberinin herkese açık paketi (kart 104, 4.11.2026; Lokman'ın kararları 4.11 00:5x).
+"""İE-18 şablonlu montaj rehberlerinin herkese açık paketi (kart 104; 4.11.2026, 6.11'den beri birden çok rehber).
 
-Girdi: kaynak/TK-01_montaj_rehberi_pdfli.html (Lokman'ın gönderdiği sayfa; İE-18 şablonu + evin altında ön onay paftası).
-Kararlar: başlık "80 m² 3+1" (kod görünmez); ön onay paftasının "PORTMAN | Bayi … | İş Emri …" satırı silinir.
+Girdi: kaynak/ altında Lokman'ın gönderdiği sayfa (İE-18 şablonu + evin altında ön onay paftası); REHBERLER'de her
+rehberin kaynağı, görünen adı, çipi ve alt notu. Kararlar (Lokman, 4.11): başlıkta kod görünmez (alan + oda sayısı);
+ön onay paftasının "PORTMAN | Bayi … | İş Emri …" satırı silinir.
 
 Temizlik üç katta:
   1. veri (JSON): iç kaynak alanları atılır; değerlerde iç not taşıyan parantezler, cümleler ve maddeler çıkar;
@@ -9,7 +10,7 @@ Temizlik üç katta:
   3. son kapı: ortak.YASAK taraması (paket bu taramadan geçmezse üretilmez).
 Pafta görseli sayfadan ayrı dosyaya çıkar (gorsel/onay_pafta.jpg), üst satırı beyazla örtülür.
 
-Kullanım: python3 paketle.py --npm <npm pack klasörü> --esbuild <esbuild yolu> --cikti <klasör>
+Kullanım: python3 paketle.py --rehber <80m2|80m2-21> --npm <npm pack klasörü> --esbuild <esbuild yolu> --cikti <klasör>
 """
 import argparse, base64, io, json, os, re, shutil, subprocess, sys
 from PIL import Image, ImageDraw
@@ -18,33 +19,55 @@ B = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.dirname(B))
 import ortak  # noqa: E402
 
-KAYNAK = os.path.join(B, 'kaynak', 'TK-01_montaj_rehberi_pdfli.html')
-AD, KISA = '80 m² 3+1', '80 m² 3+1'
-NOT_METNI = ('Bu rehber 80 m² 3+1 montaj paftasından kurulan 3B modeldir. Parça yerleri paftadan, adetler yükleme '
-             'listesindendir. Evin altında ön onay paftası gerçek ölçekte serilidir. Ölçüler bilgi içindir; '
-             'uygulamada paftadaki ölçüler esastır.')
+def _not(ad):
+    return (f'Bu rehber {ad} montaj paftasından kurulan 3B modeldir. Parça yerleri paftadan, adetler yükleme '
+            'listesindendir. Evin altında ön onay paftası gerçek ölçekte serilidir. Ölçüler bilgi içindir; '
+            'uygulamada paftadaki ölçüler esastır.')
+
+
+REHBERLER = {   # klasör → kaynak (kaynak/ altında), iç kod, görünen ad, çip
+    '80m2': dict(kaynak='TK-01_montaj_rehberi_pdfli.html', kod='TK-01', ad='80 m² 3+1', chip='78,38 m² brüt · 72,71 m² net'),
+    '80m2-21': dict(kaynak='TK-04_montaj_rehberi_r08.html', kod='TK-04', ad='80 m² 2+1', chip='77,95 m² brüt · 65,22 m² net'),
+}
 PAFTA_ORTU = (600, 98, 1880, 142)       # 2481 × 3508 görselde "PORTMAN | Bayi … | İş Emri …" satırı (ölçüldü: y 106–134)
 
 # İç not işaretleri: bunları taşıyan parantez, sonra cümle/madde çıkar.
 IC = re.compile(r"varsayı|motor|lokman|pk-01|62 m²|62 m2|kitab|kitap|montaj rehberi|kural|modelinde|model(?:den|inden)\b|"
-                r"teyit|sketchup|alpha mini|`|paftası yok|tk-01|deneme|kart modeli", re.I)
+                r"teyit|sketchup|alpha mini|`|paftası yok|tk-\d\d|deneme|kart modeli|liste de böyle", re.I)
 ON_DEGISIM = [   # cümle düşürmeden önce anlamı koruyan kısa değişimler
     (r'motorun kart modeli:\s*', ''), (r'motorun (?:kimlik kartlı )?planından', 'paftadan'),
-    (r'TK-01 prefabrik', '80 m² 3+1 prefabrik konut'), (r'\bTK-01\b', '80 m² 3+1'),
+    (r'{kod} prefabrik', '{ad} prefabrik konut'), (r'\b{kod}\b', '{ad}'),   # yalnız bu evin kodu; başka evin kodu iç nottur
     (r',\s*kitabın aralığıyla', ''), (r'Veranda çatılarında da sıralar kart modelinden, aynı kuralla\.', 'Veranda çatılarında da sıralar aynı düzende.'),
 ]
 ATILAN_ANAHTAR = {'kaynak', 'makas_kaynak', 'dvr_kaynak'}
 
 
+AD = KOD = None
+
+
+def _parantez(m):
+    """İç not taşıyan parantez: iç notlu maddeler (;) düşer, kalan varsa parantez kalır."""
+    ic = m.group(1)
+    if not IC.search(ic):
+        return m.group(0)
+    kalan = [p for p in re.split(r';\s*', ic) if p and not IC.search(p)]
+    return f'{m.group(0)[:len(m.group(0)) - len(m.group(0).lstrip())]}({"; ".join(kalan)})' if kalan else ''
+
+
+KARAR = re.compile(r'\s?\((?:(?:D|İE|BK)-\d{2}[;,]?\s*)+\)|(?<=\()(?:D|İE|BK)-\d{2}[;,]\s*|[;,]\s*(?:D|İE|BK)-\d{2}(?=\))')
+
+
 def temiz_deger(s):
+    if isinstance(s, str):                               # parantez içi karar kodları: "(D-41)", "(D-39; …)", "(…; D-41)"
+        s = KARAR.sub('', s)
     if not isinstance(s, str) or not IC.search(s):
         return s
     for d, y in ON_DEGISIM:
-        s = re.sub(d, y, s)
+        s = re.sub(d.replace('{kod}', KOD), y.replace('{ad}', AD), s)
     onceki = None
     while onceki != s:                                   # iç not taşıyan en içteki parantezler
         onceki = s
-        s = re.sub(r'\s?\(([^()]*)\)', lambda m: '' if IC.search(m.group(1)) else m.group(0), s)
+        s = re.sub(r'\s?\(([^()]*)\)', _parantez, s)
     if IC.search(s):                                     # cümle ve madde düzeyi
         cumleler = re.split(r'(?<=[.!?])\s+', s)
         s = ' '.join(c for c in cumleler if not IC.search(c))
@@ -76,10 +99,16 @@ JS_DEGISIM = [   # esbuild çıktısında (çift tırnak, boşluksuz)
 
 def main():
     ap = argparse.ArgumentParser()
+    ap.add_argument('--rehber', required=True, choices=sorted(REHBERLER))
     ap.add_argument('--npm', required=True)
     ap.add_argument('--esbuild', required=True)
     ap.add_argument('--cikti', required=True, help='paketin yazılacağı klasör (silinip yeniden kurulur)')
     a = ap.parse_args()
+    global AD, KOD
+    r = REHBERLER[a.rehber]
+    KOD = r['kod']
+    AD, KISA, CHIP, NOT_METNI = r['ad'], r['ad'], r['chip'], _not(r['ad'])
+    KAYNAK = os.path.join(B, 'kaynak', r['kaynak'])
     paket = os.path.abspath(a.cikti)
     if os.path.exists(paket):
         shutil.rmtree(paket)
@@ -100,14 +129,14 @@ def main():
     v = re.search(r'(<script type="application/json" id="pafta">)(.*?)(</script>)', html, flags=re.S)
     d = temiz_veri(json.loads(v.group(2)))
     d['kod'] = AD
-    d['kabuk'].update(proje=AD, kisa=KISA, chip='78,38 m² brüt · 72,71 m² net', note=NOT_METNI)
+    d['kabuk'].update(proje=AD, kisa=KISA, chip=CHIP, note=NOT_METNI)
     veri = json.dumps(d, ensure_ascii=False, separators=(',', ':')).replace('</', '<\\/')
     html = html[:v.start(2)] + veri + html[v.end(2):]
 
     # 3 · kabuk (başlık, çip, not; kabuk.html'e üretimde yazılmış hâlleri)
     kab = [(r'<title>[^<]*</title>', ortak.bas_etiketleri(f'PortatifEv Montaj Rehberi · {KISA}'), 1),
            (r'<h1>[^<]*</h1>', f'<h1>{AD} · Montaj Rehberi</h1>', 1),
-           (r'<span class="chip">[^<]*</span>', '<span class="chip">78,38 m² brüt · 72,71 m² net</span>', 1),
+           (r'<span class="chip">[^<]*</span>', f'<span class="chip">{CHIP}</span>', 1),
            (r'<p class="note">.*?</p>', f'<p class="note">{NOT_METNI}</p>', 1),
            (r'<meta name="claude:viewport-fit-sides"[^>]*>\n?', '', 1),
            (r'<link rel="preconnect"[^>]*>\n?', '', 2),
@@ -132,12 +161,12 @@ def main():
         if n < en_az:
             sys.exit(f'HATA: kural beklenenden az eşleşti ({n} < {en_az}): {ad}')
         print(f'  {n:3d} × {ad}')
-    html = ortak.belge_ve_csp(html, 3)
+    html = ortak.belge_ve_csp(html, 1 + len(re.findall(r'<script type="module">', html)))
     ortak.denetle(re.sub(r'<script type="application/json" id="pafta">.*?</script>', '', html, flags=re.S), 'index.html (betik)')
     ortak.denetle(veri, 'index.html (veri)')
     open(os.path.join(paket, 'index.html'), 'w', encoding='utf-8').write(html)
     addon = ortak.yerel_kutuphaneler(html, paket, a.npm)
-    print(f'80 m² paketi: {paket} (addon: {", ".join(addon)})')
+    print(f'{AD} paketi: {paket} (addon: {", ".join(addon)})')
 
 
 if __name__ == '__main__':
