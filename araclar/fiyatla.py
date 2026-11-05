@@ -60,7 +60,8 @@ def boy_onerisi_bul(s: dict, oneriler: list[dict]) -> tuple[dict, float] | None:
     """Kesilen parçanın boyu (ölçü "L <mm>"): kaydın tam boy fiyatından boyla orantılı birim fiyat (kayıt, fiyat). Kayıt kalemi adıyla
     (`kalem`) ya da adının başıyla (`kalem_baslar`; ör. her çatının tek kat paneli) eşler; yuvarlama `yuvarlama` adımına yarım yukarı
     (varsayılan tam TL). Kaydın `onay`ını çağıran değerlendirir: D-36'ten beri (Lokman 31 Ekim) kutu profil ve tek kat çatı paneli
-    kuralı onaylı, her boy için."""
+    kuralı onaylı, her boy için. Kayıt `kapatma_m` taşıyorsa (D-51, trapez sac) fiyat satırın kapatmasıyla da orantılıdır (m² fiyatı
+    aynı): satırın `kapatma_m`'si yoksa kural uygulanmaz."""
     olcu = (s.get("olcu") or "").strip()
     if not re.fullmatch(r"L \d+(?:[.,]\d+)?", olcu):
         return None
@@ -68,7 +69,12 @@ def boy_onerisi_bul(s: dict, oneriler: list[dict]) -> tuple[dict, float] | None:
     for b in oneriler:
         if b.get("kalem") == kalem or ("kalem_baslar" in b and kalem.startswith(b["kalem_baslar"])):
             adim = b.get("yuvarlama", 1)
-            return b, float(round(int(b["fiyat"] * n / b["boy_mm"] / adim + 0.5) * adim, 2))
+            oran = 1.0
+            if "kapatma_m" in b:                                 # D-51 (Lokman 4 Kasım 2026 21:37): kapatması farklı sacın m² fiyatı aynı;
+                if not s.get("kapatma_m"):                       # satırın kapatması yoksa fiyat uydurulmaz
+                    return None
+                oran = s["kapatma_m"] / b["kapatma_m"]
+            return b, float(round(int(b["fiyat"] * n / b["boy_mm"] * oran / adim + 0.5) * adim, 2))
     return None
 
 
@@ -98,6 +104,11 @@ def makas_bul(s: dict, kural: dict | None) -> tuple[dict, float, float] | None:
     boy = float(m.group(2).replace(",", ".")) + (2 * kural["sacak_mm"] if m.group(1) == "açıklık" else 0)
     kg = round(int(kural["kg_m"] * boy / 10 + 0.5) / 100, 2)
     return kural, float(int(kg * kural["kg_fiyat"] + 0.5)), kg
+
+
+# Teklifte yazılan ad ve ölçü (defter kaydında varsa; r09, Lokman 4 Kasım 23:24 "'METAL TAHTA L:2800 (GALVANİZ)' Yaz"): satıra geçer; iç ad
+# (`kalem`), ölçü ve anahtar aynı kalır. Fiyatlı liste ve teklif (Excel, PDF) bu ikisini gösterir (`liste_excel`, `teklif_pdf`).
+YAZILAN = ("teklif_adi", "teklif_olcu")
 
 
 def fiyatla(L: dict, defter: dict, hat: str | None = None, oneri: bool = False) -> dict:
@@ -159,7 +170,8 @@ def fiyatla(L: dict, defter: dict, hat: str | None = None, oneri: bool = False) 
         satirlar.append({"sira": i, "grup": s.get("grup"), "grup_adi": s.get("grup_adi"), "kalem": s["kalem"], "olcu": s.get("boyut") if hat == "celik" else s.get("olcu"),
                          "birim": birim, "adet": s.get("adet"), "kg": s.get("kg"), "birim_fiyat": fiyat, "tutar": tutar,
                          "durum": durum, "kaynak": kaynak, "kaynak_adi": (defter["kaynaklar"].get(kaynak) or {}).get("kisa") if kaynak else None,
-                         **({"oneri_fiyat": oneri_fiyat} if oneri_fiyat is not None else {})})
+                         **({"oneri_fiyat": oneri_fiyat} if oneri_fiyat is not None else {}),
+                         **{a: g[a] for a in YAZILAN if g and g.get(a)}})
     return {"hat": hat, "defter_surumu": defter.get("surum"), "oneri_dahil": oneri, "satirlar": satirlar,
             "ozet": {"toplam": round(toplam, 2), "onayli_fiyatlarla": round(onayli, 2), "onerilerle": round(oneri_toplam, 2),
                      "satir": len(satirlar), "fiyatli": sum(1 for x in satirlar if x["tutar"] is not None),

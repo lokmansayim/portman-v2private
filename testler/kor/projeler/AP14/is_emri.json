@@ -69,7 +69,7 @@
     "makas_yonu": "uzun_kenar",
     "makas_ekseni": "y"
   },
-  "ozellikler": {"Panel Türü": "Pres Panel", "Çatı Şekli": "Beşik", "Çatı Kaplaması": "Trapez Kaplama", "Çatı Kaplama Rengi": "Antrasit Gri", "Dış Kapı": "Çelik Standart", "İç Kapılar": "Standart Amerikan", "Dış Cephe Boya": "Alıcıya ait", "İç Cephe Boya": "Alıcıya ait", "Pencere Rengi": "Beyaz", "Tavan": "Ters", "Saçak ve Alın Rengi": "Antrasit Gri", "Açıklama": "Vitrifiye ve armatür grubu alıcıya ait."},
+  "ozellikler": {"Panel Türü": "Pres Panel", "Çatı Şekli": "Beşik", "Çatı Kaplaması": "Trapez Kaplama (80 cm kapatır)", "Çatı Kaplama Rengi": "Antrasit Gri", "Dış Kapı": "Çelik Standart", "İç Kapılar": "Standart Amerikan", "Dış Cephe Boya": "Alıcıya ait", "İç Cephe Boya": "Alıcıya ait", "Pencere Rengi": "Beyaz", "Tavan": "Ters", "Saçak ve Alın Rengi": "Antrasit Gri", "Açıklama": "Vitrifiye ve armatür grubu alıcıya ait."},
   "alici_ait": {"kalemler": ["vitrifiye", "boya"], "kaynak": "paftanın özellik tablosu (dış ve iç cephe boyası alıcıya ait) ve açıklaması (vitrifiye ve armatür grubu alıcıya ait)"},
   "cikti": {
     "pdf": true,

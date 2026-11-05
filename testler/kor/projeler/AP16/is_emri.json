@@ -65,7 +65,7 @@
     "makas_ekseni": "y",
     "cumbalar": [{"cephe": "on", "bas_cm": 0, "bit_cm": 386.5, "cikinti_cm": 0}]
   },
-  "ozellikler": {"Panel Türü": "Pres Panel", "Çatı Şekli": "Beşik + Cumba", "Çatı Kaplaması": "Trapez Kaplama", "Çatı Kaplama Rengi": "Antrasit Gri", "Dış Kapı": "Çelik Standart", "İç Kapılar": "Standart Amerikan", "Dış Cephe Boya": "?", "İç Cephe Boya": "?", "Pencere Rengi": "Beyaz", "Tavan": "Ters", "Saçak ve Alın Rengi": "Antrasit Gri", "Açıklama": "1- Çatı izolasyon mineral yün (80mm)"},
+  "ozellikler": {"Panel Türü": "Pres Panel", "Çatı Şekli": "Beşik + Cumba", "Çatı Kaplaması": "Trapez Kaplama (80 cm kapatır)", "Çatı Kaplama Rengi": "Antrasit Gri", "Dış Kapı": "Çelik Standart", "İç Kapılar": "Standart Amerikan", "Dış Cephe Boya": "?", "İç Cephe Boya": "?", "Pencere Rengi": "Beyaz", "Tavan": "Ters", "Saçak ve Alın Rengi": "Antrasit Gri", "Açıklama": "1- Çatı izolasyon mineral yün (80mm)"},
   "alici_ait": {"kalemler": [], "kaynak": "paftanın özellik tablosu ve açıklaması: alıcıya ait kalem yazılmamış"},
   "cikti": {
     "pdf": true,

@@ -1,4 +1,4 @@
-"""D-52 (İE-30; Lokman, 4 Kasım 2026 20:42 ve 21:14, kart "Paftadan, ev ev") · AP-26: pencere bölmeleri, cam PVC kapı, teras paneli (PC-32).
+"""D-52 (İE-30; Lokman, 4 Kasım 2026 20:42 ve 21:14, kart "Paftadan, ev ev") · AP-26: pencere bölmeleri, cam PVC kapı, teras paneli (PC-34).
 
 Lokman: "pencereler çizimi tam doğru değil ayrıca teras ayrı bir teknikler yapılıyor çatı saçağının 10 cm altında çatı paneli olarak
 kullandığımız bir 8 cm genişliğinde C den oluşan panel yapıyoruz üzerine yine Trapez sac araya damlalık atıyoruz yani çatı gibi şekilli

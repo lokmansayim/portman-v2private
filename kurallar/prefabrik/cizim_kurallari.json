@@ -515,7 +515,7 @@
   {
    "kod": "PC-22",
    "baslik": "Antette kime ait ve m²; alt yazılar A4'te yok",
-   "kural": "A4 sayfasının antetinin ikinci satırı: PORTMAN | bayi / müşteri (İş Emri'nin talebinden; boş olan yazılmaz) | brüt ve net m² | İş Emri no ve revizyon. Brüt: nişsiz kapalı gövdenin dış yüzleri (veranda hariç); net: kapalı odaların net alanları toplamı (montaj rehberindeki m²). Sayfanın altında kural kaydı, üretim saati ve uyarı satırları yoktur (DXF'te ve kayıtta durur).",
+   "kural": "A4 sayfasının antetinin ikinci satırı: PORTMAN | bayi / müşteri (İş Emri'nin talebinden; boş olan yazılmaz) | brüt ve net m² | İş Emri no ve revizyon. Brüt (D-49, Lokman 4 Kasım 2026 14:24 \"çatı kapattığı için\"): çatının örttüğü oturum, dış duvarların dış yüzleri, niş, gövdedeki ve taşan veranda, dikmeler dahil (yükleme listesindeki bina_m2 ile aynı); net: kapalı odaların net alanları toplamı (montaj rehberindeki m²). Sayfanın altında kural kaydı, üretim saati ve uyarı satırları yoktur (DXF'te ve kayıtta durur).",
    "karar": "D-31",
    "madde": 14,
    "lokman": {
@@ -528,7 +528,8 @@
     "motor/dxf_out.py::uret"
    ],
    "test": [
-    "testler/motor/test_d31_gorunus.py::test_antette_kime_ait_ve_m2"
+    "testler/motor/test_d31_gorunus.py::test_antette_kime_ait_ve_m2",
+    "testler/motor/test_d49.py::test_antet_brut_verandali_ve_listeyle_ayni"
    ]
   },
   {
@@ -729,6 +730,44 @@
   },
   {
    "kod": "PC-31",
+   "baslik": "Ortalanan pencerenin köşeye bakan yanı tek pano",
+   "kural": "Odaya ortalanan pencereli panonun (oda ortası ızgara panosundan ¼ panodan çok kaçtığı için; D-29'un eke ortalı yarım pano yolu değil) duvarın ucuna, köşeye bakan yanında pencereli panodan duvarın ucuna kalan duvar 125,5 ya da kısaysa tek panodur, aradaki ızgara eki kalkar (TK-04 mutfağı: 32,375 + 62,75 değil 95,125). Yan bir T'de (oda sınırı) bitiyorsa ekler aynen (kör PK-02'nin gerçek listesi pencereyle T arasında 42,25 + 39). Arada kapı panosu, aynı duvarda başka pencere ya da T varsa, odanın dış kapısı varsa o yan değişmez.",
+   "karar": "D-49",
+   "madde": 1,
+   "lokman": {
+    "tarih": "2026-11-04",
+    "saat": "14:25",
+    "soz": "küçük bir hata mutfaktaki 120x180 pencereyi güzel ortalamışsın ama pencerenin sağındaki panel duvarı yanlış ölçeklendirmişsin 2 parça gibi ölçeklendirmişsin"
+   },
+   "kod_yeri": [
+    "motor/geometry.py::_pencere_yani_tek_pano"
+   ],
+   "test": [
+    "testler/motor/test_d49.py::test_pencere_yani_koseye_tek_pano",
+    "testler/motor/test_d49.py::test_t_yanindaki_ekler_aynen"
+   ]
+  },
+  {
+   "kod": "PC-32",
+   "baslik": "İş Emri tek birleşimi yazabilir: iç köşenin yönü, panonun ortasına gelen T",
+   "kural": "İş Emri `yapi.birlesimler` ile tek tek birleşimde Motor'un kuralını değiştirir. {\"nokta_cm\": [x, y], \"kose\": \"x\" | \"y\"}: iki iç duvarın L köşesinde yazılan yönde uzanan duvar köşeden geçer, öteki onun yüzünde biter (TK-04 r04: 5. aks ile D aksının köşesinde 5. akstaki duvar geçer, C–D panosu tam pano, salon kapısının panosu 122,5). {\"nokta_cm\": [x, y], \"t\": \"cektirme_u\"}: bir duvarın ortasına tek iç duvarın T ile geldiği yerde geçen duvar bölünmez, 3'lü H yok; listede çektirme U'su (İE-27). Nokta mahallerin konum_cm'i gibi aks tablosundadır; yazılan nokta öyle bir köşe ya da T değilse, T geçen duvarın pano ekine denk geliyorsa (orada 3'lü H olur) İş Emri hatası. Yazılmayan birleşimde kural aynen (PC-01…PC-31).",
+   "karar": "D-49",
+   "madde": 3,
+   "lokman": {
+    "tarih": "2026-11-04",
+    "saat": "19:59",
+    "soz": "5 numaralı aks ile D aksının kesiştiği iç köşenin yönünü değiştir salon kapısı doğal olarak 122.5 ' a düşüyor ama 5 numaralı aks üzerindeki C ve D aksları ortasındaki pano tam pano oluyor ortasına 3 lü H değil Çektirme U'su koyacaksın"
+   },
+   "kod_yeri": [
+    "motor/geometry.py::_birlesimleri_oku"
+   ],
+   "test": [
+    "testler/motor/test_d49.py::test_bes_d_kosesi_ve_cektirme_u",
+    "testler/motor/test_d49.py::test_birlesim_yanlis_noktada_hata"
+   ]
+  },
+  {
+   "kod": "PC-33",
    "baslik": "Karkaslı kaplama duvar panosu paftadan; geniş pencere oda ortasında",
    "kural": "Paftada pencereli dış duvarın bir parçası tek parça karkaslı kaplama duvar panosuysa (188–491 cm; içinde bir ya da birden çok pencere ve dış kapı) İş Emri `yapi.dizilim.karkasli_panolar` satırıyla yazar: duvarın yönü ve ekseni (`yon`, `eksen_cm`; Motor çerçevesinde, `dis_pano_dayanagi` gibi) ve aralık (`aralik_cm`); isteğe bağlı `aciklik_ortasi_cm` her açıklığın paftadaki ortası (null: Motor'un yeri). Aralığa düşen panolar tek panoya birleşir; içinde derz ve H yok, iç duvarın T'si olabilir (listede çektirme U'su). Aralığın dışında kalan parça ayrı pano; 20 cm'den kısaysa açıklıksız komşusuyla tek parça (birleşen pano en çok 125,5, arasında birleşim yok). Çizimde tek blok (kat planı, net alan, saha montaj; standart dışı pano ölçüsüyle), görünüşte içinde derz yok; listede \"Karkaslı kaplama duvar panosu\", içindeki pencereye üst ve alt panel ve özel pencere karkası yazılmaz. `yapi.dizilim.genis_pencere: oda_ortasi`: panodan geniş pencerenin panosu odanın duvar parçasının ortasında, iki yanı ya hiç yok ya da 20 ile 125,5 arası (AP-11: 62,75 + 251 + 62,75). Anahtarsız İş Emri'nde hiçbir şey değişmez. Duvar yok, aralık duvarın dışında, aralıkta üçlü H ya da dış duvar birleşimi, aralıkta açıklık yok, açıklık aralığın ucuna pano payından yakın, iç duvar T'sine biniyor ya da T'nin öteki yanına geçiyor, iç kapı, iki satır çakışıyor ya da kısa artığın komşusu yok, açıklıklı, birleşince 125,5'i aşıyor veya arada birleşim varsa hata.",
    "karar": "D-46",
@@ -773,7 +812,7 @@
    ]
   },
   {
-   "kod": "PC-32",
+   "kod": "PC-34",
    "baslik": "Pencere bölmeleri, cam PVC kapı ve teras paneli paftadan",
    "kural": "Paftanın pencere ve kapı detayı İş Emri'ne açıklık başına yazılır. Pencere: `bolmeler` dışarıdan bakınca soldan sağa [{tur: kanat | sabit | surgulu | vasistas, en_cm, mentese: sol | sag (yalnız kanatta), yon: sol | sag (yalnız sürgülüde, sürüldüğü yan)}], enlerin toplamı pencerenin eni; sürgülü bölmesi olan pencere `acilis: surgulu` ile, öteki bölmeli pencere açılışsız. Görünüşte bölmeli blok (İE-29): çift kasa, bölme başına çerçeve; kanatta açılımın kırmızı kesik kolları menteşe yanının iki köşesinden kol yanının ortasına (paftalarda kollar kol yanında buluşur), sabitte cam işareti, sürgülüde sürüldüğü yana kırmızı ok, vasistasta kollar alt köşelerden üst ortaya. Dış kapı: `kapi_turu: pvc_cam` → görünüşte beyaz, komple cam PVC kapı (çift kasa, eşik, cam işareti, kol menteşenin karşı yanında; menteşe planın kapı sembolüyle aynı yanda). Taşan veranda: `cati: {tip: teras_paneli, cikma_cm, egim_yuzde}` → teras paneli: 8 cm, üst yüzü duvarda duvar üstünün (ana çatının saçak altı çizgisi) 10 cm altında, duvardan dışarı `egim_yuzde` ile iner (0'dan büyük, en çok 20; 5 Kasım ek); duvardan `cikma_cm` (derinlikle derinlik + 60 arası), cephe boyunca verandanın eni. Dış kiriş düz, panelin altında (üstü panelin altının dış kirişin dış yüzündeki kotu); kolon dış kirişin altına; yan kiriş panelin altında eğimle. Görünüşte önden bakınca panel bant (dış kenarın altından duvardaki üstüne) ve dış kenarın üstü çizgisi, yan kiriş arkada kalır; yandan bakınca panel ve yan kiriş eğik dörtgen, bir kez eğim yazısı; topuk, kalkan ve saçak yok. Planda panelin dış çizgisi (VERANDA_PANEL katmanı, yalnız teras panelli planda). IFC'de eğik levha. Listede makassız panel çatı parçası (yavru makas ve aşık yok), trapez eğik boyla. Anahtarsız İş Emri'nde hiçbir şey değişmez. Yanlış yazılan bölme, kapı türü ve teras paneli hata.",
    "karar": "D-52",
@@ -789,7 +828,7 @@
     "motor/geometry.py::DIS_KAPI_TURLERI",
     "motor/geometry.py::VERANDA_CATI_TIPLERI",
     "motor/veranda.py::teras_paneli",
-  "motor/veranda.py::teras_kirisi",
+    "motor/veranda.py::teras_kirisi",
     "motor/dxf_out.py::Cizici._bolmeli_blok",
     "motor/dxf_out.py::Cizici._pvc_kapi_blok",
     "motor/dxf_out.py::Cizici._on_kapi",

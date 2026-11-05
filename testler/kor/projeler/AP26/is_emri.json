@@ -69,7 +69,7 @@
     "makas_yonu": "uzun_kenar",
     "makas_ekseni": "y"
   },
-  "ozellikler": {"Panel Türü": "Pres Panel", "Çatı Şekli": "Beşik", "Çatı Kaplaması": "Trapez Kaplama", "Çatı Kaplama Rengi": "Antrasit Gri", "Dış Kapı": "Çelik Standart", "İç Kapılar": "Standart Amerikan", "Dış Cephe Boya": "?", "İç Cephe Boya": "?", "Pencere Rengi": "Beyaz", "Tavan": "Ters", "Saçak ve Alın Rengi": "Antrasit Gri", "Açıklama": "1- Dış Cephe Panelleri: Betopan + Alçıpan 2- İç Cephe Panelleri: Alçıpan + Betopan + Alçıpan 3- Mineral Yün (80mm)"},
+  "ozellikler": {"Panel Türü": "Pres Panel", "Çatı Şekli": "Beşik", "Çatı Kaplaması": "Trapez Kaplama (80 cm kapatır)", "Çatı Kaplama Rengi": "Antrasit Gri", "Dış Kapı": "Çelik Standart", "İç Kapılar": "Standart Amerikan", "Dış Cephe Boya": "?", "İç Cephe Boya": "?", "Pencere Rengi": "Beyaz", "Tavan": "Ters", "Saçak ve Alın Rengi": "Antrasit Gri", "Açıklama": "1- Dış Cephe Panelleri: Betopan + Alçıpan 2- İç Cephe Panelleri: Alçıpan + Betopan + Alçıpan 3- Mineral Yün (80mm)"},
   "alici_ait": {"kalemler": [], "kaynak": "paftanın özellik tablosu ve açıklaması: alıcıya ait kalem yazılmamış"},
   "cikti": {
     "pdf": true,

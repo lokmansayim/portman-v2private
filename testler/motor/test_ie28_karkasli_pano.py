@@ -1,4 +1,4 @@
-"""D-46 (İE-28; Lokman, 4 Kasım 2026 04:35, kart "Paftadan, ev ev") · Karkaslı kaplama duvar panosu ve odaya ortalı geniş pencere (PC-31).
+"""D-46 (İE-28; Lokman, 4 Kasım 2026 04:35, kart "Paftadan, ev ev") · Karkaslı kaplama duvar panosu ve odaya ortalı geniş pencere (PC-33).
 
 Paftadaki tek parça karkaslı kaplama duvar panosunun yeri İş Emri'ne paftadan yazılır (`yapi.dizilim.karkasli_panolar`): dış duvar (yön ve
 eksen, Motor çerçevesinde) ve aralık; aralığa düşen panolar tek panoya birleşir, içindeki pencere ve dış kapı yerinde (ya da paftadaki

@@ -98,7 +98,8 @@
     "D-29",
     "D-30",
     "D-31",
-    "D-34"
+    "D-34",
+    "D-49"
    ],
    "pr": [
     79,
@@ -129,7 +130,7 @@
     },
     {
      "yer": "kurallar/prefabrik/cizim_kurallari.json#kurallar[karar=D-31].kural",
-     "iz": "602be97cd3de8983"
+     "iz": "a3c36b1647fee7a0"
     },
     {
      "yer": "kurallar/prefabrik/cizim_kurallari.json#kurallar[karar=D-34].kural",
@@ -137,7 +138,7 @@
     },
     {
      "yer": "testler/motor/veri/TK02_beklenen.json#onay",
-     "iz": "a5cb90adc7df8dae"
+     "iz": "edd258641d29dee9"
     },
     {
      "yer": "testler/motor/veri/TK02_beklenen.json#iz.dogrulama",
@@ -153,15 +154,15 @@
     },
     {
      "yer": "testler/motor/veri/TK02_beklenen.json#iz.pdf_izi",
-     "iz": "95c061141ee6c921"
+     "iz": "2d8e9689ea744e1d"
     },
     {
      "yer": "testler/motor/veri/TK02_beklenen.json#iz.dxf_izi",
-     "iz": "cd197c0143e17ae1"
+     "iz": "c24b77c9dd2f003f"
     },
     {
      "yer": "testler/motor/veri/TK01_r07_beklenen.json#onay",
-     "iz": "d1e4cd9e2c010d7f"
+     "iz": "c43e3b4d0c42b533"
     },
     {
      "yer": "testler/motor/veri/TK01_r07_beklenen.json#iz.dogrulama",
@@ -177,11 +178,11 @@
     },
     {
      "yer": "testler/motor/veri/TK01_r07_beklenen.json#iz.pdf_izi",
-     "iz": "21e3d5b48004a066"
+     "iz": "7f20e69aeba6aeca"
     },
     {
      "yer": "testler/motor/veri/TK01_r07_beklenen.json#iz.dxf_izi",
-     "iz": "dd87176d3417e0f9"
+     "iz": "07f294b4f9c84490"
     },
     {
      "yer": "testler/motor/veri/TK02.json",
@@ -201,7 +202,7 @@
     },
     {
      "yer": "testler/motor/test_d31_gorunus.py",
-     "iz": "d064a29d05fca766"
+     "iz": "89a9ac4517912394"
     },
     {
      "yer": "testler/motor/test_d34_cizim.py",
@@ -209,7 +210,15 @@
     }
    ],
    "durum": "mühürlü",
-   "gecmis": []
+   "gecmis": [
+    {
+     "tarih": "2026-11-04 19:55",
+     "soz": "Karar kartı \"Mühürlü ön onay çizimini (M-02) bu iki düzeltme için açayım mı?\" → \"Aç, iki düzeltme girsin\" (14:24 \"bizde m² bürüt üzerinden verilir ve buna veranda dahildir çünkü çatı kapattığı için bunuda dahil eder misin?\"; 14:25 mutfak penceresinin sağındaki \"2 parça\" pano)",
+     "mesaj": "cmsg_01UAFvcnfVuTR1wfFux5fQPPWqz9RSSRrAcCNN2N9aTKWT",
+     "kapanis": "2026-11-04T20:13Z",
+     "karar": "D-49"
+    }
+   ]
   },
   {
    "kod": "M-03",
@@ -635,6 +644,55 @@
     {
      "yer": "testler/genel/test_duzenlenebilir.py",
      "iz": "e7ebac88b28e33f1"
+    }
+   ],
+   "durum": "mühürlü",
+   "gecmis": []
+  },
+  {
+   "kod": "M-11",
+   "konu": "Prefabrik trapez çatı: sac ve mahya 100 cm kapatır",
+   "kural": "Prefabrikte trapez sac standart 100 cm kapatır (kurallar/liste/prefabrik.json › trapez_kapatma_m = 1,0): adet her yüzde mahya boyu ÷ 1. Trapez sac mahyası sacın kapattığı kadar kapatır (trapez_mahyasi = sac_kapatmasi): parça L 1000, her beşiğin mahyası ÷ 1, yukarı; bindirme düşülmez. Tedarikçinin 80'lik sacı yalnız İş Emri'nin çatı kaplaması yazarsa (\"Trapez Saç (80 cm kapatır)\"): sac ÷ 0,8, mahya L 800 ÷ 0,8. Kural kitabının (çelik, genel motor) trapez sacı 0,8 ve mahyası L 800 − 20 cm bindirme olarak durur; prefabrikte okunmaz (kitapla_farkli).",
+   "kararlar": [
+    "D-50"
+   ],
+   "pr": [
+    123
+   ],
+   "lokman": [
+    {
+     "tarih": "2026-11-04 20:49",
+     "soz": "yalnız trapez mahya sac kaç kapatırsa o kadar kapatır yani sac 100 kapatırsa trapez mahyada 100 kapatır AIPrefabrik klasörü yada Drive hangisinden veri çekiyorsan onlardaki yükleme listelerinde var",
+     "mesaj": "cmsg_01UAFvcnfVuTR1wfFux5fQPP3Doc2vGWFzKe8ihgKLKnof"
+    },
+    {
+     "tarih": "2026-11-04 21:16",
+     "soz": "Trapez Mahyayıda 100 al",
+     "mesaj": "cmsg_01UAFvcnfVuTR1wfFux5fQPPCwByhbUb84kESJGPJS7LgZ"
+    },
+    {
+     "tarih": "2026-11-04 21:19",
+     "soz": "Sac da mahya da 100 cm (karar kartı: Trapez mahya 100 derken sac da 100 cm mi kapatıyor?)",
+     "mesaj": "cmsg_01UAFvcnfVuTR1wfFux5fQPP8ET57RBuXDfyZq9XiJtYtg"
+    },
+    {
+     "tarih": "2026-11-04 21:20",
+     "soz": "daha önce konuşmuştuk dönem dönem tedarikçiler 80 kapatır sacda verebilir ama biz bundan sonra standart olarak 100 kapatır yapacağız o yüzden Trapez Mahyada Sacda 100 kapatır olarak kuralla ve mühürle başa dönmeyelim düzelttiğimiz bir yer tekrar bozulmasın",
+     "mesaj": "cmsg_01UAFvcnfVuTR1wfFux5fQPP1cizD1KpVyoRyt5UPHKvW3"
+    }
+   ],
+   "kilitler": [
+    {
+     "yer": "kurallar/liste/prefabrik.json#kurallar.trapez_kapatma_m.deger",
+     "iz": "d0ff5974b6aa52cf"
+    },
+    {
+     "yer": "kurallar/liste/prefabrik.json#kurallar.trapez_mahyasi.deger",
+     "iz": "97d46c45d6270938"
+    },
+    {
+     "yer": "testler/motor/test_d50_trapez.py",
+     "iz": "0451da0e805fb45a"
     }
    ],
    "durum": "mühürlü",
