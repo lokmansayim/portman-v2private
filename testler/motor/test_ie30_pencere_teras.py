@@ -128,7 +128,7 @@ def test_teras_paneli_yanlis_yazim(cati):
 def test_teras_paneli_kotlari_ve_gorunusu():
     """Panelin üst yüzü duvarda duvar üstünün (ana çatının saçak altı çizgisi) 10 cm altında, 8 cm kalın; D-52 ek: duvardan dışarı %10 iner
     (240 → 140'ta 226). Planda duvardan 140, cephe boyunca verandanın eni. Dış kiriş düz, panelin altında (altının dış kirişin dış yüzündeki
-    kotu: 120'de 220); kolon dış kirişin altına (210; gerçek listede kolon 2100); yan kiriş yok (D-54; Lokman, 5 Kasım 2026 10:48, "Kaldır,
+    kotu: 120'de 220); kolon dış kirişin altına (210; gerçek listede kolon 2100); yan kiriş yok (D-56; Lokman, 5 Kasım 2026 10:48, "Kaldır,
     gerçek liste gibi"). Önden bakınca panel bant (dış kenarın altından duvardaki üstüne) ve dış kenarın üstü açık çizgi; yandan bakınca panel
     eğik dörtgen, altında dış kirişin ucu, bir kez "%10". Topuk, kalkan, saçak yok."""
     from motor import veranda as VR
@@ -154,7 +154,7 @@ def test_teras_paneli_kotlari_ve_gorunusu():
     assert {q["tur"] for q in p} == {"kolon", "kiris", "cati", "yazi"}
     assert not any(q.get("kalkan") or q.get("acik") for q in p)
     assert {max(r(q)) for q in p if q["tur"] == "kolon"} == {210.0}
-    assert [r(q) for q in p if q["tur"] == "kiris"] == [[210.0, 220.0]]            # D-54: yalnız dış kirişin ucu, yan kiriş yok
+    assert [r(q) for q in p if q["tur"] == "kiris"] == [[210.0, 220.0]]            # D-56: yalnız dış kirişin ucu, yan kiriş yok
     (panel,) = [q for q in p if q["tur"] == "cati"]
     assert r(panel) == [218.0, 226.0, 232.0, 240.0]
     us = [u for u, _ in panel["u"]]
@@ -266,7 +266,7 @@ def test_liste_teras_paneli_panel_cati():
     """Teras paneli listede makassız panel çatı parçası (Lokman: "çatı paneli olarak kullandığımız ... C den oluşan panel", "çatı gibi şekilli
     değil"): yavru makas ve aşık yok; teras başına bir "Teras paneli (hafif çelik C 80)" 80 × 0,8 (paftada P1, P2; gerçek listede PANEL
     80 × 0,8: 2); trapez duvardan panelin dış kenarına, eğik boyuyla (D-52 ek: %10'da 140,7 + taşma 5 → 1460; paftada trapez 150 × 6 + 6).
-    Kolon dış kirişin altına kadar: L 2100 × 4 (gerçek listede 2100 × 4); yan kiriş yok, yalnız iki dış kiriş (D-54). Arka terasın komple cam PVC kapısı ayrı satır 900 × 2100 (gerçek
+    Kolon dış kirişin altına kadar: L 2100 × 4 (gerçek listede 2100 × 4); yan kiriş yok, yalnız iki dış kiriş (D-56). Arka terasın komple cam PVC kapısı ayrı satır 900 × 2100 (gerçek
     listede PVC KAPI + BEYAZ 90 × 210: 1); öteki dış kapı çelik."""
     from motor import prefabrik_liste as PL
     L = PL.is_emrinden(_ap26())
@@ -278,7 +278,7 @@ def test_liste_teras_paneli_panel_cati():
     kolon = [s for s in L["satirlar"] if s["kalem"].startswith("Özel kutu profil (kolon)")]
     assert [(s["olcu"], s["adet"]) for s in kolon] == [("L 2100", 4)]
     kiris = [(s["olcu"], s["adet"]) for s in L["satirlar"] if s["kalem"].startswith("Kutu profil (kiriş)")]
-    assert sorted(kiris) == [("L 4385,8", 1), ("L 4795,8", 1)]                      # D-54: yalnız iki dış kiriş (gerçek liste 4386, 4796)
+    assert sorted(kiris) == [("L 4385,8", 1), ("L 4795,8", 1)]                      # D-56: yalnız iki dış kiriş (gerçek liste 4386, 4796)
     kapi = [(s["kalem"], s["olcu"], s["adet"]) for s in L["satirlar"] if s["grup"] == "1003" and "kapı" in s["kalem"] and "Amerikan" not in s["kalem"]]
     assert kapi == [("PVC kapı (beyaz, komple cam)", "900 × 2100", 1), ("Prefabrik çelik kapı (SOL)", "900 × 2000", 1)]
 
@@ -297,7 +297,7 @@ def test_liste_teras_paneli_yoksa_ayni():
 
 
 def test_ifc_teras_paneli_egimli():
-    """3B modelde teras paneli eğik levha (duvarda 232–240, dışarı %10 iner), dış kiriş panelin altında (210–220), yan kiriş yok (D-54),
+    """3B modelde teras paneli eğik levha (duvarda 232–240, dışarı %10 iner), dış kiriş panelin altında (210–220), yan kiriş yok (D-56),
     dikme dış kirişin altına (0–210)."""
     import ifcopenshell
     from motor import ifc_uret

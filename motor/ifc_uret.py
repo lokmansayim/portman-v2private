@@ -837,7 +837,7 @@ class IfcUretici:
                 e = self._urun("IfcBeam", f"VERANDA_PROFIL_{b['kod']}_{i:02d}", predefined="BEAM")
                 z1 = profil_ust(x0, y0, x1, y1)
                 tv = teras_verandasi(x0, y0, x1, y1)
-                if tv is not None:                               # D-52 ek, D-54: yalnız dış kiriş, düz, panelin altında
+                if tv is not None:                               # D-52 ek, D-56: yalnız dış kiriş, düz, panelin altında
                     z1 = tv["cati"]["dis_kiris_ustu"]
                 z0, z1, malz = z1 - 10, z1, "profil"
             else:

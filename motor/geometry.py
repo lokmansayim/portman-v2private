@@ -1526,7 +1526,7 @@ def _dis_verandalar(plan: "Plan", is_emri: dict) -> None:
         yan0, yan1 = (dis[0], ic[0]), (dis[1], ic[1])
         kenarlar = [(min(p[0] for p in e), min(p[1] for p in e), max(p[0] for p in e), max(p[1] for p in e)) for e in (dis, yan0, yan1)]
         kirisler = [kutu.intersection(LineString([e[:2], e[2:]]).buffer(k, cap_style=2)).bounds for e in kenarlar]   # açık kenarda, içeride 10'luk
-        if tip == "teras_paneli":                   # D-54 (Lokman, 5 Kasım 2026 10:48, "Kaldır, gerçek liste gibi"): yan kiriş yok, yalnız dış
+        if tip == "teras_paneli":                   # D-56 (Lokman, 5 Kasım 2026 10:48, "Kaldır, gerçek liste gibi"): yan kiriş yok, yalnız dış
             kirisler = kirisler[:1]                 # kiriş; panel duvara ve dış kirişe oturur (AP-26 gerçek listesi: iki dış kiriş, dört kolon)
         mh = Mahal(ad=ad, tur=tur, rects=[], acik=True, poly=kutu, alan_m2=kutu.area / 10000.0)
         plan.mahaller[ad] = mh
