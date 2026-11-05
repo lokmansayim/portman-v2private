@@ -59,7 +59,7 @@ Hook'lar talimat değil koddur: kuralı yorumlayarak aşılamaz. Bir hook'u, `ar
 - **Commit kimliği:** `git -c user.name="Claude" -c user.email="noreply@anthropic.com" commit`. Mesajın sonuna oturumun verdiği Co-Authored-By ve Claude-Session satırları eklenir.
 - **Push.** Oturum sonunda izlenmeyen dosyalar da commit'lenip iş dalına push edilir.
 - **Dallar.** Her iş emrinin kendi dalı olur. `main`'e birleştirme yalnız Lokman'ın açık onayıyla yapılır.
-- **Onaylı PR (D-43).** Lokman bir PR'a birleştirme onayı verdiyse o PR'ın sohbeti, `Doğrulama sonucu` ve `Korunan dosya onayı` yeşil olunca beklemeden birleştirir (merge commit) ve sonucu tek satırla bildirir; kırmızıda kendisi düzeltir, toplu gönderir, yeniden koşturur. Onay PR'a özgüdür; onaysız PR'da birleştirme Lokman'a açıkça sorulur. Canlı, ücretli deneme, silme ve mühürlü konular bu kararın dışındadır.
+- **Birleştirme (D-59; D-43'ün birleştirme kısmının yerine).** `main`'e birleştirmeyi Lokman kendisi yapar; oturum birleştirmez ve denemez. Oturum PR'ı hazırlar: yerel doğrulama, güncel `main` dala, "Ready for review"; `Doğrulama sonucu` ve `Korunan dosya onayı` yeşil olunca PR bağlantısını tek satırla Lokman'a verir; PR taslak bırakılmaz, Lokman'a yalnız "Merge pull request" kalır. Kırmızıda kendisi düzeltir, toplu gönderir, yeniden koşturur. Canlı, ücretli deneme, silme ve mühürlü konular yine ayrı onayla.
 - **Oturum sonu.** Her oturumun son adımı `docs/durum/`'a tarihli bir ek dosyası yazmaktır (`/kapanis` bunu yapar); `DURUM.md`'ye ek yazılmaz (her PR aynı satırları değiştirdiği için çakışıyordu). Pencere değişecekse `docs/devir/`'e bir not yazılır.
 
 ## Yerler
