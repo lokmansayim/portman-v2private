@@ -769,7 +769,7 @@
   {
    "kod": "PC-33",
    "baslik": "Veranda içeri alınınca ağzındaki kiriş de çizilir; ölçü yazıları binmez",
-   "kural": "Veranda ya da balkon gövdenin dış çizgisinden içeri alınmışsa (İş Emri `girintiler` ile; önündeki şerit bina dışı), girintiye bakan açık kenarı da veranda profilidir: dış yüzü kenarda, iç çizgisi 10 cm mahalin içinde, uçta köşe kolonunun ya da duvar dibindeki İş Emri dikmesinin yüzünde biter (TK-04 r07: ön kiriş ön dış yüzden 37,5 içeride; çatının saçağı kirişin önünde 30 cm). Böyle bir planda girintili gövdenin dış parça ölçüsünün (D-34) yazısı da doludur: özel pano ölçüsü onun üstüne binmez, sıradaki uzaklığa çekilir. Kirişin duvara geldiği yerdeki kolon İş Emri'nin `dikmeler`'ine yazılır (250 cm; listede kolon). Girintiye bakan açık kenarı olmayan çizim aynen (PC-01…PC-32).",
+   "kural": "Veranda içeri alınınca (İş Emri `girintiler` ile; önündeki şerit bina dışı) İş Emri verandanın mahalinde `girinti_kirisi: true` yazar; o verandanın girintiye bakan açık kenarı da veranda profilidir (kiriş): dış yüzü kenarda, iç çizgisi 10 cm mahalin içinde ve iki uçta 10 cm kısa, uçlardaki kolonların yüzünde biter (TK-04 r07: ön kiriş ön dış yüzden 37,5 içeride, uçlarda köşe kolonu ve salon duvarının dibindeki İş Emri dikmesi; çatının saçağı kirişin önünde 30 cm). Kirişin duvara geldiği yerdeki kolon İş Emri'nin `dikmeler`'ine yazılır (250 cm; listede kolon). Böyle bir planda girintili gövdenin dış parça ölçüsü (D-34) kirişin dış yüzünde bölünür: geri çekilme ve veranda derinliği ayrı yazılır (TK-04 r07: 193,25 yerine 37,5 + 155,75); bu ölçülerin yazıları dolu sayılır, özel pano ölçüsü üstlerine binmez, sıradaki uzaklığa çekilir. Anahtarsız İş Emri aynen (PC-01…PC-32): depoda girintiye bakan veranda kenarı olan AP-15, AP-18, AP-22, AP-25 (AP-15 ve AP-22 M-07 ile mühürlü) bugünkü gibi çizilir; onlara yaymak Lokman'ın kararıdır.",
    "karar": "D-58",
    "lokman": {
     "tarih": "2026-11-05",
@@ -777,6 +777,7 @@
     "soz": "veranda da saçak oturmadığı için verandayı 30cm saçak olacak şekilde içeri almamız gerekiyor çatı kısmi naif bir L olacak ayrıca kiriş profilin boşta kalmaması için köşe direğine vidalayamıyoruz o yüzden tam geldiği yerede bir tane 250cm kolon koyması gerekiyor"
    },
    "kod_yeri": [
+    "motor/dxf_out.py::Cizici.ciz_plan",
     "motor/dxf_out.py::Cizici._girinti_acik_kenari",
     "motor/dxf_out.py::Cizici._dis_parca_olculeri"
    ],

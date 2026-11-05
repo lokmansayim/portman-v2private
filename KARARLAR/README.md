@@ -98,7 +98,7 @@ Biçim: karar · gerekçe · reddedilen seçenekler · geri alma yolu · kim ve 
 | [D-44](D-44.md) | Dört evin mühürü (M-07) liste için açıldı ve yeniden mühürlendi: makas sayısı paftanın makas planıyla (AP-15 ana çatı 7, AP-09 cumbası 3; cumbanın iç ucunda makas yok), dört evin yükleme listesi çizimdeki çatıdan yazılır; çizim ve çatı değişmedi | 2.11 (Lokman 16:50 ve 18:21 kartları) |
 | [D-45](D-45.md) | Kör ölçüm farklarından liste kuralları (Lokman'ın 3 Kasım cevapları): 3'lü H dış duvarda da, çektirme U'su 60 yerinden, köşe direği tipsiz, mahya bandı mahya boyundan, temiz su ıslak hacim başına, 5,5 × 25 trapez vida; kıyasta atık su ölçüm dışı, eş adlar; açılmış on evin kaydı açık | 3.11 (Lokman 09:52) |
 | [D-53](D-53.md) | Saçak omegası kuralı (M-01) beşik + cumba çatıda da (kural aynı; mühür açıldı ve yeniden mühürlendi); kart modeli ve montaj rehberi beşik + çıkıntısız çapraz cumbayı kurar, yeni kart MA-05 yavru makas; trapez sac çatı kart modelinde ve rehberde, yeni kartlar KP-03 trapez sac ve CK-07 trapez sac mahyası (D-50 okunur) (İE-15 K6; TK-04 r05, AP-13, AP-16) | 4.11 (Lokman 20:51 kartı) |
-| [D-58](D-58.md) | TK-04 r07: veranda 30 cm saçak kalacak kadar içeri (ön kiriş ön dış yüzden 37,5; girinti + ek aks), kirişin salon duvarına geldiği yere 250 cm kolon (İş Emri dikmesi); çizimde girintiye bakan veranda ağzı da profil, dış parça ölçüsünün yazısına özel pano ölçüsü binmez (PC-33; BK-24) | 5.11 (Lokman 11:00) |
+| [D-58](D-58.md) | TK-04 r07: veranda 30 cm saçak kalacak kadar içeri (ön kiriş ön dış yüzden 37,5; girinti + ek aks), kirişin salon duvarına geldiği yere 250 cm kolon (İş Emri dikmesi); çizimde içeri alınan verandanın ağzı da profil (İş Emri `girinti_kirisi`), dış parça ölçüsü kirişte bölünür (37,5 + 155,75), yazısına özel pano ölçüsü binmez (PC-33; BK-24) | 5.11 (Lokman 11:00) |
 
 ## Numara defteri (14 Ekim 2026, BK-08; CIO planı › Görev 3)
 
@@ -140,7 +140,7 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | D | D-44 | M-07 liste için açıldı ve yeniden mühürlendi: makas sayısı paftadaki gibi, dört evin listesi yazılır (Lokman 2.11 18:21 kartı) | yazıldı (2.11; İE-17 PR-1b/K7, `claude/project-thread-i19mbz`) |
 | D | D-45 | kör ölçüm farklarından liste kuralları ve kıyas (Lokman 3.11 09:52, öneri tablosunun cevapları) | yazıldı (3.11; İE-27, `claude/project-thread-wwx1p0`) |
 | D | D-53 | M-01 beşik + cumbada da; kart modeli ve montaj rehberi çapraz cumbayı ve trapez sacı kurar, MA-05, KP-03, CK-07 (Lokman 4.11 20:51; TK-04 montaj rehberi) | yazıldı (4.11; İE-15 K6, `claude/project-thread-xwohu4`) |
-| D | D-58 | TK-04 r07 veranda içeri, salon duvarına kolon; girintiye bakan veranda ağzı çizimde profil (Lokman 5.11 11:00) | yazıldı (5.11; BK-24, `claude/project-thread-jlqian`) |
+| D | D-58 | TK-04 r07 veranda içeri, salon duvarına kolon; içeri alınan veranda ağzı çizimde profil (Lokman 5.11 11:00) | yazıldı (5.11; BK-24, `claude/project-thread-jlqian`) |
 | D | **D-46** | — | **sıradaki boş** |
 | İE | İE-01–İE-08 | bu depo (`main`) | yazıldı |
 | İE | İE-09 | model atölyesi: kontrollü model üretimi ve banka hattı (Görev 6e; pano 30; P6001 güncellemesi kapsam dışı) | alındı (16.10; `claude/gorev-6e-model-atolyesi-rnhtcp`; PR-1 banka hattı 29.10, `claude/project-thread-rhjgzv`) |
