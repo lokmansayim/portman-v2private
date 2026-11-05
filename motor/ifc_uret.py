@@ -571,7 +571,7 @@ class IfcUretici:
         self.cati_ozet = {"mahya_cm": round(zm, 1), "makas": n, "cati_alan_m2": round(alan, 2), "makas_ekseni": "y", "aciklik_cm": round(Hd, 1), "makas_x_cm": [round(x, 2) for x in xs]}
 
     def _teras_kesiti(self, cephe, kutu, za_duvar, za_dis, t):
-        """D-52 ek: teras panelinin (ya da altındaki yan kirişin) eğik prizması: plandaki kutu, altı duvar ucunda `za_duvar`, dış uçta `za_dis`,
+        """D-52 ek: teras panelinin eğik prizması: plandaki kutu, altı duvar ucunda `za_duvar`, dış uçta `za_dis`,
         düşeyde `t` kalın; kesit verandanın derinliği boyunca, cephe boyunca uzar."""
         X0, Y0, X1, Y1 = kutu
         if cephe in ("on", "arka"):
@@ -837,16 +837,8 @@ class IfcUretici:
                 e = self._urun("IfcBeam", f"VERANDA_PROFIL_{b['kod']}_{i:02d}", predefined="BEAM")
                 z1 = profil_ust(x0, y0, x1, y1)
                 tv = teras_verandasi(x0, y0, x1, y1)
-                if tv is not None:
-                    egik_, z_w, z_o = VR.teras_kirisi(tv["cati"], tv, b["rect"])
-                    if egik_:                                    # D-52 ek: yan kiriş panelin altında eğimle
-                        self._yerlestir(e)
-                        self._temsil(e, self._teras_kesiti(tv["cephe"], b["rect"], z_w - 10, z_o - 10, 10), "profil")
-                        self._pset(e, "PortatifEv_Kapsam", {"BOMKalem": b["kalem"], "BOMKod": b["kod"], "Blok": b.get("blok", ""),
-                                                            "Kot_cm": f"{z_o - 10:.0f}–{z_w:.0f}", "KesimBoyuTanimli": False,
-                                                            "Not": "Teras panelinin altında, eğimle (D-52 ek)"})
-                        continue
-                    z1 = z_o
+                if tv is not None:                               # D-52 ek, D-54: yalnız dış kiriş, düz, panelin altında
+                    z1 = tv["cati"]["dis_kiris_ustu"]
                 z0, z1, malz = z1 - 10, z1, "profil"
             else:
                 e = self._urun("IfcMember", f"BAGLANTI_{b['kod']}_{i:02d}", predefined="STUD")

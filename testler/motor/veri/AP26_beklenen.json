@@ -1,7 +1,7 @@
 {
  "aciklama": "M-12 · AP-26 ön onay çiziminin hedef örneği (D-28 madde 2, D-52): A4 PDF ve DXF içerik izi, doğrulama özeti, pano BOM'u ve görünüş çizgileri (yükleme listesi hariç).",
  "girdi": "testler/kor/projeler/AP26/is_emri.json",
- "onay": "AP-26 ön onay çizimi (İE-30, D-52; mühür M-12). Lokman, 4 Kasım 2026 20:42: \"pencereler çizimi tam doğru değil ayrıca teras ayrı bir teknikler yapılıyor çatı saçağının 10 cm altında çatı paneli olarak kullandığımız bir 8 cm genişliğinde C den oluşan panel yapıyoruz üzerine yine Trapez sac araya damlalık atıyoruz yani çatı gibi şekilli değil AP26 montaj paftasını iyice incele\"; 21:14 kartı \"Paftadan, ev ev\"; 5 Kasım 2026 00:36: \"teraslara biraz eğim vereceksin\"; 10:17 (\"%10 eğimle ve paftadaki gibi 120 derinlikle devam edeyim mi?\" sorusuna): \"evet onaylıyorum mühürle bu çizim şeklini\".",
+ "onay": "AP-26 ön onay çizimi (İE-30, D-52; mühür M-12). Lokman, 4 Kasım 2026 20:42: \"pencereler çizimi tam doğru değil ayrıca teras ayrı bir teknikler yapılıyor çatı saçağının 10 cm altında çatı paneli olarak kullandığımız bir 8 cm genişliğinde C den oluşan panel yapıyoruz üzerine yine Trapez sac araya damlalık atıyoruz yani çatı gibi şekilli değil AP26 montaj paftasını iyice incele\"; 21:14 kartı \"Paftadan, ev ev\"; 5 Kasım 2026 00:36: \"teraslara biraz eğim vereceksin\"; 10:17 (\"%10 eğimle ve paftadaki gibi 120 derinlikle devam edeyim mi?\" sorusuna): \"evet onaylıyorum mühürle bu çizim şeklini\". 10:48 kartı (\"Teras yan kirişini listeden ve yan görünüşten kaldırayım mı?\"): \"Kaldır, gerçek liste gibi\" (D-54; M-12 bununla açıldı, iz yalnız yan kirişin kalkmasıyla yeniden donduruldu).",
  "iz": {
   "dogrulama": {
    "passed": true,
@@ -486,17 +486,6 @@
    },
    {
     "kod": "V06",
-    "malzeme": "Veranda yan profil gösterimi",
-    "olcu_mm": [
-     1200.0,
-     100,
-     null
-    ],
-    "adet": 4,
-    "birim": "adet"
-   },
-   {
-    "kod": "V07",
     "malzeme": "Veranda ön profil gösterimi",
     "olcu_mm": [
      4385.8,
@@ -1452,46 +1441,6 @@
     "ON_GORUNUS",
     true,
     [
-     2489.16,
-     -748.0
-    ],
-    [
-     2369.16,
-     -760.0
-    ],
-    [
-     2369.16,
-     -750.0
-    ],
-    [
-     2489.16,
-     -738.0
-    ]
-   ],
-   [
-    "ON_GORUNUS",
-    true,
-    [
-     3808.18,
-     -748.0
-    ],
-    [
-     3928.18,
-     -760.0
-    ],
-    [
-     3928.18,
-     -750.0
-    ],
-    [
-     3808.18,
-     -738.0
-    ]
-   ],
-   [
-    "ON_GORUNUS",
-    true,
-    [
      3918.18,
      -970.0
     ],
@@ -1586,46 +1535,6 @@
     [
      4558.18,
      -720.0
-    ]
-   ],
-   [
-    "ON_GORUNUS",
-    true,
-    [
-     4558.18,
-     -748.0
-    ],
-    [
-     4438.18,
-     -760.0
-    ],
-    [
-     4438.18,
-     -750.0
-    ],
-    [
-     4558.18,
-     -738.0
-    ]
-   ],
-   [
-    "ON_GORUNUS",
-    true,
-    [
-     5877.2,
-     -748.0
-    ],
-    [
-     5997.2,
-     -760.0
-    ],
-    [
-     5997.2,
-     -750.0
-    ],
-    [
-     5877.2,
-     -738.0
     ]
    ],
    [
@@ -1765,7 +1674,7 @@
     ]
    ]
   ],
-  "pdf_izi": "35d4fa55f21d85f30fe4e44661a411275efbbdaefc5f509a3e8ccc58f318f3ee",
-  "dxf_izi": "d22ce51de3d0af31ed6c9060eb00097dd0e185071672539ddd78d2a7dbb0ef41"
+  "pdf_izi": "db37bd6209f81153892d951c9bc3da5107e7c3bb108f1c8bdcff23550c647124",
+  "dxf_izi": "b88c1b8fe96b945d97dfa6199355d6f9f7a21cc9e59a843d0554f9aeef9ea3e3"
  }
 }

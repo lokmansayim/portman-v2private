@@ -4,7 +4,8 @@ Lokman, 5 Kasım 2026 10:17 ("%10 eğimle ve paftadaki gibi 120 derinlikle devam
 şeklini". Onaylanan çizim AP-26'nın montaj paftasından İş Emri'nin (`testler/kor/projeler/AP26/is_emri.json`) ön onay çizimidir: paftanın
 pencere bölmeleri (120/120 iki kanat, 280/210 sabit + sürgülü + sürgülü + sabit, 200/210 iki bölmeli sürgülü, 50/50 vasistas), arka
 terastan yatak odasına komple cam PVC kapı, ön ve arka teras 120 derin, üstleri teras paneli (8 cm, duvarda saçak altının 10 cm altında,
-dışarı %10 iner, duvardan 140; kolon 210), karkaslı kaplama duvar panoları (D-46). İzi `veri/AP26_beklenen.json`: A4 ön onay PDF'inin ve
+dışarı %10 iner, duvardan 140; kolon 210; yan kiriş yok, D-54: Lokman, 5 Kasım 2026 10:48, "Kaldır, gerçek liste gibi"), karkaslı
+kaplama duvar panoları (D-46). İzi `veri/AP26_beklenen.json`: A4 ön onay PDF'inin ve
 DXF'in içerik izi, doğrulama özeti, pano BOM'u, dört görünüşün çizgileri (üretim saati yok). Yükleme listesi bu ize girmez: liste aşaması
 çizim onayından sonra (sıra kuralı, 29 Ekim 2026).
 
@@ -28,7 +29,9 @@ ONAY = ("AP-26 ön onay çizimi (İE-30, D-52; mühür M-12). Lokman, 4 Kasım 2
         "bir teknikler yapılıyor çatı saçağının 10 cm altında çatı paneli olarak kullandığımız bir 8 cm genişliğinde C den oluşan panel "
         "yapıyoruz üzerine yine Trapez sac araya damlalık atıyoruz yani çatı gibi şekilli değil AP26 montaj paftasını iyice incele\"; 21:14 "
         "kartı \"Paftadan, ev ev\"; 5 Kasım 2026 00:36: \"teraslara biraz eğim vereceksin\"; 10:17 (\"%10 eğimle ve paftadaki gibi 120 "
-        "derinlikle devam edeyim mi?\" sorusuna): \"evet onaylıyorum mühürle bu çizim şeklini\".")
+        "derinlikle devam edeyim mi?\" sorusuna): \"evet onaylıyorum mühürle bu çizim şeklini\". 10:48 kartı (\"Teras yan kirişini listeden "
+        "ve yan görünüşten kaldırayım mı?\"): \"Kaldır, gerçek liste gibi\" (D-54; M-12 bununla açıldı, iz yalnız yan kirişin kalkmasıyla "
+        "yeniden donduruldu).")
 GORUNUS_KATMANLARI = ("ON_GORUNUS", "ON_DERZ", "ON_CATI", "ON_TOPUK")
 
 

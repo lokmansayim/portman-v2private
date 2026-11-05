@@ -701,9 +701,10 @@
   {
    "kod": "M-12",
    "konu": "AP-26 ön onay çizimi: pencere bölmeleri, cam PVC kapı, eğimli teras paneli",
-   "kural": "AP-26'nın ön onay çizimi 5 Kasım 2026'da onaylanan hâliyle (İE-30, D-52, PC-34): İş Emri montaj paftasından (testler/kor/projeler/AP26/is_emri.json: yapı, mahaller, açıklıklar, çatı, verandalar). Pencere bölmeleri paftanın pencere detayından: 120/120 iki kanat (menteşe dış yanlarda, kollar ortada buluşur), 280/210 sabit + sürgülü + sürgülü + sabit, 200/210 iki bölmeli sürgülü, 50/50 vasistas. Arka terastan yatak odası 1'e komple cam PVC kapı (kapi_turu pvc_cam). Ön ve arka teras 120 derin; üstleri teras paneli: 8 cm C panel, üst yüzü duvarda duvar üstünün (saçak altı) 10 cm altında, dışarı %10 iner, duvardan 140; dış kiriş panelin altında, kolon 210; makas, aşık, topuk, kalkan ve saçak yok. Çizimin izi testler/motor/veri/AP26_beklenen.json (A4 PDF, DXF, doğrulama, pano BOM, görünüşler). Yükleme listesi mühürde değil (liste aşaması çizim onayından sonra).",
+   "kural": "AP-26'nın ön onay çizimi 5 Kasım 2026'da onaylanan hâliyle (İE-30, D-52, PC-34): İş Emri montaj paftasından (testler/kor/projeler/AP26/is_emri.json: yapı, mahaller, açıklıklar, çatı, verandalar). Pencere bölmeleri paftanın pencere detayından: 120/120 iki kanat (menteşe dış yanlarda, kollar ortada buluşur), 280/210 sabit + sürgülü + sürgülü + sabit, 200/210 iki bölmeli sürgülü, 50/50 vasistas. Arka terastan yatak odası 1'e komple cam PVC kapı (kapi_turu pvc_cam). Ön ve arka teras 120 derin; üstleri teras paneli: 8 cm C panel, üst yüzü duvarda duvar üstünün (saçak altı) 10 cm altında, dışarı %10 iner, duvardan 140; dış kiriş panelin altında, kolon 210; yan kiriş yok (D-54, gerçek liste gibi); makas, aşık, topuk, kalkan ve saçak yok. Çizimin izi testler/motor/veri/AP26_beklenen.json (A4 PDF, DXF, doğrulama, pano BOM, görünüşler). Yükleme listesi mühürde değil (liste aşaması çizim onayından sonra).",
    "kararlar": [
-    "D-52"
+    "D-52",
+    "D-54"
    ],
    "pr": [
     116
@@ -750,7 +751,7 @@
     },
     {
      "yer": "kurallar/prefabrik/cizim_kurallari.json#kurallar[kod=PC-34].kural",
-     "iz": "0a5486e55af71a19"
+     "iz": "55aa1fa56b753bcc"
     },
     {
      "yer": "motor/geometry.py::TERAS_PANELI_SACAK_ALTI_CM",
@@ -762,7 +763,7 @@
     },
     {
      "yer": "testler/motor/veri/AP26_beklenen.json#onay",
-     "iz": "0d4568c84eb902dd"
+     "iz": "4441f15b746bc5b2"
     },
     {
      "yer": "testler/motor/veri/AP26_beklenen.json#iz.dogrulama",
@@ -770,23 +771,23 @@
     },
     {
      "yer": "testler/motor/veri/AP26_beklenen.json#iz.bom",
-     "iz": "35b73a38cef3cc9a"
+     "iz": "d8cfe0e0e463cd8d"
     },
     {
      "yer": "testler/motor/veri/AP26_beklenen.json#iz.gorunusler",
-     "iz": "feef5b2f398907a6"
+     "iz": "2ff7984f3e93cc53"
     },
     {
      "yer": "testler/motor/veri/AP26_beklenen.json#iz.pdf_izi",
-     "iz": "7d08beedf72eb2df"
+     "iz": "8465c3fec8a4fea6"
     },
     {
      "yer": "testler/motor/veri/AP26_beklenen.json#iz.dxf_izi",
-     "iz": "b3e738a1180149b8"
+     "iz": "48f12a35fb190791"
     },
     {
      "yer": "testler/motor/test_m12_ap26.py",
-     "iz": "41b6b48e414d109d"
+     "iz": "9b97a05327080bb1"
     },
     {
      "yer": "testler/motor/test_ie30_pencere_teras.py::test_ap26_is_emri_paftadan",
@@ -794,7 +795,7 @@
     },
     {
      "yer": "testler/motor/test_ie30_pencere_teras.py::test_teras_paneli_kotlari_ve_gorunusu",
-     "iz": "98ddddfc8f1e4130"
+     "iz": "6ad5163eee4f6b2a"
     },
     {
      "yer": "testler/motor/test_ie30_pencere_teras.py::test_ap26_gorunus_bloklari",
@@ -818,7 +819,15 @@
     }
    ],
    "durum": "mühürlü",
-   "gecmis": []
+   "gecmis": [
+    {
+     "tarih": "2026-11-05 10:48",
+     "soz": "Kaldır, gerçek liste gibi (karar kartı: \"Teras yan kirişini listeden ve yan görünüşten kaldırayım mı?\"; seçeneğin sonucu: \"Listeden dört yan kiriş düşer; yan görünüşte panelin altında yalnız dış kiriş ve kolon kalır. M-12 bunun için açılıp kapanır.\")",
+     "mesaj": "cmsg_01UAFvcnfVuTR1wfFux5fQPP9p1AfAoGqEoAGgQnau5HMh",
+     "kapanis": "2026-11-05T10:56Z",
+     "karar": "D-54"
+    }
+   ]
   }
  ]
 }

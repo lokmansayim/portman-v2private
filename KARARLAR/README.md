@@ -99,6 +99,7 @@ Biçim: karar · gerekçe · reddedilen seçenekler · geri alma yolu · kim ve 
 | [D-45](D-45.md) | Kör ölçüm farklarından liste kuralları (Lokman'ın 3 Kasım cevapları): 3'lü H dış duvarda da, çektirme U'su 60 yerinden, köşe direği tipsiz, mahya bandı mahya boyundan, temiz su ıslak hacim başına, 5,5 × 25 trapez vida; kıyasta atık su ölçüm dışı, eş adlar; açılmış on evin kaydı açık | 3.11 (Lokman 09:52) |
 | [D-46](D-46.md) | Karkaslı kaplama duvar panosu paftadan, ev ev: pencereli dış duvarın paftadaki tek parça panosu İş Emri'ne yazılır (`dizilim.karkasli_panolar`), odaya ortalı geniş pencere anahtarı (`genis_pencere: oda_ortasi`), ön onay kuralı PC-33; anahtarsız İş Emri'leri aynı | 4.11 (Lokman 04:35) |
 | [D-52](D-52.md) | AP-26'nın pencere bölmeleri, cam PVC kapısı ve teras paneli paftadan, ev ev: açıklık başına `bolmeler` (sürgülü ve vasistas bölmesiyle) ve `kapi_turu: pvc_cam`, verandada `cati.tip: teras_paneli` (düz, saçak altının 10 cm altında, 8 cm); açılımın kolları kol yanında; ön onay kuralı PC-34; anahtarsız İş Emri'leri aynı; ek: %10 eğim (5.11 00:36); ek 2: teraslar 120, çizim mühürlü M-12 (5.11 10:17) | 4.11 (Lokman 21:14) |
+| [D-54](D-54.md) | AP-26'nın teras panelinde yan kiriş yok, gerçek liste gibi: kiriş yalnız dış kenarda, panel duvara ve dış kirişe oturur; listede iki dış kiriş, planda, görünüşte ve 3B'de yan kiriş yok; M-12 açılıp bu kararla kapandı | 5.11 (Lokman 10:48) |
 
 ## Numara defteri (14 Ekim 2026, BK-08; CIO planı › Görev 3)
 
@@ -146,7 +147,9 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | D | D-50 | trapez sac standart 100 cm kapatır, mahya sacın kapattığı kadar (M-11; İE-13 PR-8) | yazıldı (4.11; PR #123) |
 | D | D-51 | trapez sac fiyatı m² birim fiyatından (İE-13 PR-8) | yazıldı (4.11; PR #123) |
 | D | D-52 | AP-26'nın pencere bölmeleri, cam PVC kapısı ve teras paneli paftadan, ev ev (İE-30; Lokman 4.11 21:14 kartı "Paftadan, ev ev") | yazıldı (4.11; İE-30, `claude/project-thread-qnu2k8`; ek 5.11: teras paneline eğim (Lokman 5.11 00:36); ek 2: çizim onayı ve mühür M-12 (Lokman 5.11 10:17). Kural satırları PC-33 (D-46) ve PC-34 (D-52). |
-| D | **D-53** | — | **sıradaki boş** |
+| D | D-53 | TK-04 montaj rehberi (İE-15 K6; PR #124) | ayrıldı (başka iş dalında) |
+| D | D-54 | AP-26'nın teras panelinde yan kiriş yok, gerçek liste gibi (İE-30; Lokman 5.11 10:48 kartı "Kaldır, gerçek liste gibi"; M-12 açılıp kapandı) | yazıldı (5.11; İE-30, `claude/project-thread-qnu2k8`) |
+| D | **D-55** | — | **sıradaki boş** |
 | İE | İE-01–İE-08 | bu depo (`main`) | yazıldı |
 | İE | İE-09 | model atölyesi: kontrollü model üretimi ve banka hattı (Görev 6e; pano 30; P6001 güncellemesi kapsam dışı) | alındı (16.10; `claude/gorev-6e-model-atolyesi-rnhtcp`; PR-1 banka hattı 29.10, `claude/project-thread-rhjgzv`) |
 | İE | İE-10, İE-11, İE-12 | prefabrik hattı (PR #12, PR #14, `ie-12-prefabrik-bayi-paftasi`) | `main`'e BK-12 ile (PR-1: motor ve bayi paftası; liste ve mühür kıyası sonraki PR'larda) |
