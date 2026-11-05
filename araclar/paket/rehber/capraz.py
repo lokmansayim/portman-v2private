@@ -41,6 +41,7 @@ def cati(HZ: dict, plan, kitap: dict, IFC: dict, ASIK: dict, SC: float, TAN: flo
     """Rehberin çatı verisi (`girinti.cati` ile aynı anahtarlar: `RF`, `makas`, `omega_duvar`, `sacak`, `kalkan`, `yuz`, `asik`, kaplama
     mahyası, `izo`, dere ve iniş) ve adım yazılarının sayıları. `IFC`: kart modelinin kutuları (makas alt başlığı, aşık, iniş); `ASIK`:
     aşıkların yüz ve sıra bilgisi, inişlerin düzlemi (kart modelinin parça seti)."""
+    from motor import geometry as G
     from motor.cati_capraz import yavru_acikligi
     from motor.genel import cati_genel
     from motor.yerlesim.serit import _ortulu
@@ -120,7 +121,7 @@ def cati(HZ: dict, plan, kitap: dict, IFC: dict, ASIK: dict, SC: float, TAN: flo
     adli = {dz["ad"]: dz for dz in ck["duzlemler"]}
     alin_uclari = [p for e in ck["kenarlar"] if e["tur"] == "alin" for p in (e["p"], e["q"])]
     sac_uclari = [p for e in ck["kenarlar"] if e["tur"] == "sacak" for p in (e["p"], e["q"])]
-    govde = box(0, 0, W, DY)
+    govde = G.govde_cokgeni(plan) if plan.girintili else box(0, 0, W, DY)   # İE-15 K6 (TK-04 r07): veranda ana çatının saçağı kadar içeride
     hatlar = []
     for e in (e for e in ck["kenarlar"] if e["tur"] == "sacak"):
         dz = adli[e["duzlemler"][0]]
@@ -172,9 +173,11 @@ def cati(HZ: dict, plan, kitap: dict, IFC: dict, ASIK: dict, SC: float, TAN: flo
         if not ys_ or abs(ys_[0] - (b0 - SC)) > 0.5 or abs(ys_[-1] - (b1 + SC)) > 0.5:
             raise Desteklenmiyor(f"ana çatının {'sol' if sol else 'sağ'} kalkanı saçaktan saçağa görünmüyor")
         p = -1 if sol else 1
+        _gx, g0_, _gx1, g1_ = govde.intersection(LineString([(w + (0.5 if sol else -0.5), b0 - SC), (w + (0.5 if sol else -0.5), b1 + SC)])).bounds
         kalkan.append({"ad": f"ana çatı {'sol' if sol else 'sağ'} kalkanı ({m['ad']})", "r": -PI / 2 if sol else PI / 2, "O": [_r(w), 0], "R": "AN", "p": p,
                        "uc": {"A": _r(p * (b0 - SC)), "B": _r(p * (b1 + SC))}, "sm": _r(p * M_an),
-                       "duvar": {"A": _r(p * max(d0, b0 - SC)), "B": _r(p * min(d1, b1 + SC))},   # makas duvarın üstünde başlıyorsa uç orada
+                       "duvar": {"A": _r(p * max(g0_, b0 - SC)), "B": _r(p * min(g1_, b1 + SC))},   # kalkanın altındaki duvar ya da kiriş; makas
+                       # duvarın üstünde başlıyorsa uç orada, duvar içeride başlıyorsa (r07'nin sağ kalkanı, köşe kolonu 37,5) önü saçak ucu
                        "altUc": {"A": alt_uc((xa, b0 - SC)), "B": alt_uc((xa, b1 + SC))}})
     mb = next(m for m in makas if m["aile"] == "cumba")
     omega_duvar.append({"tur": "bas", "o": "h", "perp": _r(dis + ic * 5), "a0": _r(c0 - SC), "a1": _r(c1 + SC), "out": -1 if on else 1,
@@ -291,7 +294,8 @@ def cati(HZ: dict, plan, kitap: dict, IFC: dict, ASIK: dict, SC: float, TAN: flo
 
     # ---------- izolasyon: ana çatının her makas aralığına bir şerit, ön duvardan arka duvara (cumba ana çatının üstünde) ----------
     serme = f"çatı kapanmadan önce, aşıkların arasından; rulo ön duvardan arka duvara açılır, {'asma ' if ASMA else 'ters '}tavanın üstüne serilir"
-    izo = {"ana": {"yon": "y", "bas": _r(d0 + 10), "L": _r(d1 - d0 - 20), "ad": "Çatı izolasyonu · 10 cm rulo cam yünü", "serme": serme}, "ek": []}
+    _gx, i0, _gx1, i1 = govde.bounds
+    izo = {"ana": {"yon": "y", "bas": _r(i0 + 10), "L": _r(i1 - i0 - 20), "ad": "Çatı izolasyonu · 10 cm rulo cam yünü", "serme": serme}, "ek": []}
 
     # ---------- inişler (kart modelinden): saçağın altındaki duvarın ucunda ya da veranda kolonunda iner ----------
     kolonlar = [b["rect"] for b in HZ.get("baglantilar", []) if b["tur"] == "dikme"]
@@ -323,7 +327,8 @@ def cati(HZ: dict, plan, kitap: dict, IFC: dict, ASIK: dict, SC: float, TAN: flo
         if h["dik"] and tur == "duvar":                                  # cumbanın kısa yan saçağı: iniş derenin boyunda, duvarın köşesinde
             s = min(max(s, h["r0"] + (kt[4 - ax] - kt[1 - ax]) / 2), h["r1"] - (kt[4 - ax] - kt[1 - ax]) / 2)   # (geometri hakemi)
         if tur == "kolon":
-            inisler.append({"hat": h["ad"], "s": _r(h["a1"] if rc > s else h["a0"]), "yuz": _r(h["yd"]), "duvar": "veranda kolonu", "sw": _r(s)})
+            uc_s = h["a0"] if abs(rc - h["a0"]) < abs(rc - h["a1"]) else h["a1"]     # dere hattın inişe yakın ucunda biter (r07'de sol uçta
+            inisler.append({"hat": h["ad"], "s": _r(uc_s), "yuz": _r(h["yd"]), "duvar": "veranda kolonu", "sw": _r(s)})   # salon duvarının kolonu)
         else:
             inisler.append({"hat": h["ad"], "s": _r(s), "yuz": _r(h["yd"]), "duvar": f"{h['ad']} saçağının ucundaki duvar köşesi", "dis": ax, "kose": True})
 

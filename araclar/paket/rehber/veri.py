@@ -602,8 +602,8 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
                "poligon": GV["poligon"], "engel": [b["rect"] for b in kol + kir]}
 
     # ---------- çatılar ----------
-    if GIR:                                       # İE-24: girintili gövde; çatı çizimdeki çatıdan (ana çatı + cumbalar, `girinti.py`)
-        if VR:
+    if GIR and not CAP:                           # İE-24: girintili gövde; çatı çizimdeki çatıdan (ana çatı + cumbalar, `girinti.py`); çapraz
+        if VR:                                    # cumbanın L gövdesi (İE-15 K6, TK-04 r07) aşağıda `capraz.py`'de
             raise Desteklenmiyor("girintili gövdede gövdeden taşan veranda; rehber ikisini birlikte kurmuyor")
         GC = girinti.cati(HZ, kurallari_oku()["ortak"], IFC, ifc_parcalar(kart / f"{kart_kodu}_model.ifc", r"^ASIK_\d+$"), H, SC, TAN, COS,
                           SAYIM["yerlesim"]["baslangic"], ls, PI, Desteklenmiyor, _r, fmt, fmtc, kucuk, ASMA)
@@ -1413,7 +1413,7 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
          "kamera": K([0, 0.8, 0.3], 0.5, 1.0, 15.5),
          "extra": [x for x in (LR("Özel pencere karkası"), LR("Prefabrik pencere vidası")) if x]},
     ]
-    if GIR:                                       # İE-24: girintili gövdenin yazıları (ana çatı + cumbalar; saçaklar önde ve arkada)
+    if GIR and not CAP:                           # İE-24: girintili gövdenin yazıları (ana çatı + cumbalar; saçaklar önde ve arkada)
         AD_ = {x["ad"]: x for x in adim if "ad" in x}
         cumbalar = [q for q in GC["parcalar"] if q["rol"] != "ana"]
         ana_q = next(q for q in GC["parcalar"] if q["rol"] == "ana")
@@ -1574,6 +1574,7 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
     }
     if GIR:
         kabuk["spec"][0] = f"girintili, dış ölçü {fmtc(W)} × {fmtc(DY)} cm"
+    if GIR and not CAP:
         kabuk["spec"][3] = f"beşik (ana + {len(cumbalar)} cumba) %{fmt(TAN * 100)} · {fmt(EGIM_D, 1)}°"
         kabuk["note"] = kabuk["note"].replace("kirişleri) ve kimlik kartlı modeli (kartlar, H türleri, makas, aşık, iniş ve tavan omegası yerleri)",
                                               "kirişleri), çatı tanımı (ana çatı ve cumbalar, makas yerleri) ve kimlik kartlı modeli (kartlar, H türleri, aşık, iniş "
