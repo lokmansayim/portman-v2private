@@ -181,7 +181,9 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | İE | İE-28 | uzun karkaslı pencereli pano: paftadaki tek parça karkaslı kaplama duvar panosu ve odaya ortalı geniş pencere Motor'da (Lokman 3.11 20:44 kartı "Ayrı iş olarak açılsın"; M-02'ye dokunur, plan önce Lokman'a) | alındı (3.11; `claude/project-thread-qnu2k8`) |
 | İE | İE-29 | kör kalan evlerin geometrisi (pano 145; D-47; PR #119) | alındı (3.11) |
 | İE | İE-30 | AP-26'nın pencereleri ve terası paftadan (Lokman 4.11 20:42; D-52) | alındı (4.11; `claude/project-thread-qnu2k8`) |
-| İE | **İE-31** | — | **sıradaki boş** |
+| İE | İE-31 | çıkıntısız çapraz cumbanın r07 tekniği AP-06, AP-13, AP-16'ya (Lokman 5.11 12:45; TK-04 plan thread'i) | alındı (5.11) |
+| İE | İE-32 | montaj rehberinin altında ön onay sayfası: TK-01 r07 hedef örneği, kilit testi, mühür M-13 (pano 146; özellik D-53 madde 6, PR #124) | alındı (6.11; `claude/project-thread-bij4mz`) |
+| İE | **İE-33** | — | **sıradaki boş** |
 | BK | BK-01–BK-08 | bu depo; BK-08 8a sonrası temizlik (`bk-08-8a-temizlik`) | yazıldı |
 | BK | BK-09 | metin ve çizim düzeltmeleri, G1 (`bk-09-metin-cizim`, `bk-09-cizim-g1`) | alındı (14.10) |
 | BK | BK-10 | 8b sonrası küçük işler (DXF `.txt` notu, geç gelen Excel, panelden Excel, plan değişince kontrol kapanır, D-19 24 saat kuralı, düğmeli mesajda satır sonları, `YENI-` kodu ve ilk çelik planda LLM özeti bayiye gitmez, komut freni metni; pano satır 15; çelikte kapı değişikliği kapsam dışı) | alındı (30.10; `claude/project-thread-h64uz2`) |

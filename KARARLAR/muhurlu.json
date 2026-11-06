@@ -846,6 +846,63 @@
      "karar": "D-56"
     }
    ]
+  },
+  {
+   "kod": "M-13",
+   "konu": "Montaj rehberinin altında ön onay sayfası",
+   "kural": "Montaj rehberi aynen kalır (adımlar, parçalar, kartlar, yazılar, kamera); evin altına Motor'un bayiye giden tek sayfalık A4 ön onay PDF'i (sayfanın kendisi, 300 dpi görüntü) gerçek ölçekte serilir, kat planı duvarların tam altına oturur; sayfa varken temel plak gizli. Sayfanın yeri Motor'un A4 yerleşiminden (motor/dxf_out.a4_cercevesi, manifestte a4_sayfa_cm), görüntüsü araclar/paket/rehber/kagit.py'den, sahnede sahne.js › KAGIT; paketin ürettiği her rehberde (ön onay PDF'i olan evde). Hedef örnek TK-01 r07: sayfa x −495,515 … 1249,017, y −787,038 … 1680,229 cm, 2481 × 3508 piksel (testler/paket/rehber_kagit/TK01_r07.json; Lokman'ın 5 Kasım 00:53'te gönderdiği sayfanınkiyle aynı). Sayfanın içeriği M-02'nin konusu; bu mühür sayfanın rehberdeki yerini ve rehberin aynen kalmasını sabitler.",
+   "kararlar": [
+    "D-53",
+    "İE-32"
+   ],
+   "pr": [
+    124
+   ],
+   "lokman": [
+    {
+     "tarih": "2026-11-04 00:36",
+     "soz": "rehber aynı şekilde kalsın sadece altına PDF gelsin"
+    },
+    {
+     "tarih": "2026-11-04 00:50",
+     "soz": "aynen şu anki halini repoda mühürleyelim ama bundan Portman Proje (koordinatöründe) haberi olsun yoksa PR lar çakışıyor"
+    },
+    {
+     "tarih": "2026-11-05 00:53",
+     "soz": "biz dün en son bunda kalmıştık ama bulamaman gayet normal çünkü başka oturumda başka sohbette ben bunu oluşturdum altta diğer sohbette oluşturduğumuz kat planı var"
+    }
+   ],
+   "kilitler": [
+    {
+     "yer": "testler/paket/rehber_kagit/TK01_r07.json",
+     "iz": "923ad4ca1389f6e2"
+    },
+    {
+     "yer": "testler/paket/test_m13_rehber_kagit.py",
+     "iz": "f7ba247d996f9f03"
+    },
+    {
+     "yer": "testler/paket/test_rehber_kagit.py::test_tk01_lokmanin_sayfasiyla_ayni",
+     "iz": "392a553c7373e734"
+    },
+    {
+     "yer": "motor/dxf_out.py::a4_cercevesi",
+     "iz": "d5659ba01d8bd720"
+    },
+    {
+     "yer": "araclar/paket/rehber/kagit.py::kur",
+     "iz": "a4147ffe54f75f82"
+    },
+    {
+     "yer": "araclar/paket/rehber/kagit.py::DPI",
+     "iz": "5fce4263d803dd88"
+    },
+    {
+     "yer": "araclar/paket/rehber/sahne.js@KAGIT|kagit|plak\\.visible",
+     "iz": "5898ef1d43fed622"
+    }
+   ],
+   "durum": "mühürlü"
   }
  ]
 }
