@@ -1,6 +1,6 @@
 """İE-13 · Yükleme listesi × fiyat defteri (Z-10'un liste yöntemi) ve basit yöntemle (alan × m² fiyatı) yan yana fark.
 
-    python3 araclar/fiyatla.py <liste.json> [--defter kurallar/fiyat/defter_2026-10.json] [--hat prefabrik|celik] [--oneri]
+    python3 araclar/fiyatla.py <liste.json> [--defter kurallar/fiyat/defter_2026-11.json] [--hat prefabrik|celik] [--oneri]
         [--duzeltme duzeltmeler.json] [--alan <m²> --m2-fiyat <TL/m²> [--esik <yüzde>]] [--json <çıktı.json>] [--excel <çıktı.xlsx>]
 
 Liste: prefabrik Motor'un listesi (`motor/prefabrik_liste.py`, satırda `olcu`) ya da genel motorun yükleme listesi
@@ -21,7 +21,7 @@ import argparse, json, re, sys
 from pathlib import Path
 
 KOK = Path(__file__).resolve().parents[1]
-DEFTER = KOK / "kurallar" / "fiyat" / "defter_2026-10.json"
+DEFTER = KOK / "kurallar" / "fiyat" / "defter_2026-11.json"   # r11: 45. hafta listesi (D-62); eski teklif eski defterle (--defter defter_2026-10.json)
 
 
 def oku(p: Path | str) -> dict:

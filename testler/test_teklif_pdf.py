@@ -19,6 +19,7 @@ from araclar import teklif as TK  # noqa: E402
 from araclar import teklif_pdf as TP  # noqa: E402
 
 IE = KOK / "testler" / "teklif" / "TK01_is_emri_r05.json"
+ESKI_DEFTER = ["--defter", str(KOK / "kurallar" / "fiyat" / "defter_2026-10.json")]   # toplamlar r10 defteriyle (D-62)
 BOLUMLER = ["01 BAYİ / FİRMA BİLGİLERİ", "02 ÜRÜN DETAYI", "03 ÖDEME", "04 PAKET İÇERİĞİ VE TEKNİK ÖZELLİKLERİ",
             "05 KAPSAM DIŞI İŞLER (BAYİ/SAHA SORUMLULUKLARI)"]
 BAYRAK = pymupdf.TEXTFLAGS_TEXT & ~pymupdf.TEXT_PRESERVE_LIGATURES       # "fi" bitişik harf olarak değil, iki harf
@@ -32,7 +33,7 @@ def _oku(p):
 @pytest.fixture(scope="module")
 def cikti(tmp_path_factory):
     d = tmp_path_factory.mktemp("teklif_pdf")
-    assert TK.main([str(IE), str(d), "--tavan", "asma,ters", "--tarih", "03.11.2026"]) == 0
+    assert TK.main([str(IE), str(d), "--tavan", "asma,ters", "--tarih", "03.11.2026", *ESKI_DEFTER]) == 0
     return d
 
 
@@ -151,7 +152,7 @@ def test_kosullar_dolu_ve_fiyatsiz_yoksa_taslak_yok(T):
 
 
 def test_ayni_girdi_ayni_pdf(cikti, T, tmp_path):
-    assert TK.main([str(IE), str(tmp_path), "--tavan", "asma,ters", "--tarih", "03.11.2026"]) == 0
+    assert TK.main([str(IE), str(tmp_path), "--tavan", "asma,ters", "--tarih", "03.11.2026", *ESKI_DEFTER]) == 0
     for sec in T["secenekler"]:
         ad = TP.dosya_adi(T, sec)
         assert (tmp_path / ad).read_bytes() == (cikti / ad).read_bytes(), ad

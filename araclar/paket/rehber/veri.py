@@ -502,15 +502,25 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
     # `tasan_veranda_dis_kirisi_eksik_cm` = 0) böyle. Listede çizimdeki boy yoksa kart listedeki boyu ve çizimle farkını gösterir (AP-19).
     EKSIK = _pr(kurallari_oku()["prefabrik"], "veranda_kirisi_eksik_cm")
 
-    def kiris_boyu(acik, cizim):
-        """(kartta yazan boy, Liste satırı, ek not). `acik`: açık kenarın dış ölçüsü (None: nişin kirişi, aks arası); `cizim`: çizimdeki boy (cm).
-        Önce çizimdeki boyun satırı, yoksa açık kenar − kitabın eksiği."""
-        for L_ in [cizim] + ([] if acik is None else [acik - EKSIK]):
+    def kiris_boyu(acik, cizim, uc_kolon=1):
+        """(kartta yazan boy, Liste satırı, ek not). `acik`: açık kenarın dış ölçüsü (None: nişin kirişi, aks arası); `cizim`: çizimdeki boy (cm);
+        `uc_kolon`: kirişin iki ucundan kaçında kolon var. Önce çizimdeki boyun satırı, yoksa açık kenar − kitabın eksiği; iki ucunda kolon
+        varsa kiriş iki kolonun yüzünden yüzüne, eksik iki kez (D-61 madde 3; Lokman, kart 5 Kasım 2026 22:49; liste üreteci aynı kuralla)."""
+        iki = uc_kolon > 1
+        for L_ in [cizim] + ([] if acik is None else [acik - EKSIK * (2 if iki else 1)]):
             olcu = f"L {LU.mm(L_)}"                      # listenin yazımı (yarım milimetre: L 3137,5)
             if satirlar("Kutu profil (kiriş)", olcu):
-                fark = "" if abs(L_ - cizim) < 0.6 else f"; boy listeden (kural kitabı: açık kenar dış ölçüsü − {fmtc(EKSIK)} cm), çizimde {fmtc(cizim)} cm"
+                ek = f"2 × {fmtc(EKSIK)} cm, iki kolonun yüzünden yüzüne" if iki else f"{fmtc(EKSIK)} cm"
+                fark = "" if abs(L_ - cizim) < 0.6 else f"; boy listeden (kural kitabı: açık kenar dış ölçüsü − {ek}), çizimde {fmtc(cizim)} cm"
                 return L_, ls("Kutu profil (kiriş)", olcu), fark
         return cizim, f"listede kiriş L {LU.mm(cizim)} satırı yok", ""
+
+    def uc_kolon_sayisi(r, kolonlar):
+        """Kirişin (`r`) iki ucundan kaçında kolon var: kolon kirişin çizgisinde, boydaki yüzü kirişin ucunda (± 1 cm; liste üreteci gibi)."""
+        yat = r[2] - r[0] > r[3] - r[1]
+        a0, a1, b0, b1 = (0, 2, 1, 3) if yat else (1, 3, 0, 2)
+        return len({u for k in kolonlar if k[b0] <= r[b1] + 1.0 and k[b1] >= r[b0] - 1.0
+                    for u, var in ((0, abs(k[a0] - r[a0]) < 1.0), (1, abs(k[a1] - r[a1]) < 1.0)) if var})
 
     verandalar, VR, GVK = [], [], None          # VR: çatı ve yerleşim için taşan veranda kaydı; GVK: gömme veranda
     for vi, v in enumerate(VER):
@@ -592,9 +602,11 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
         def gv_kiris(i, b):
             r = b["rect"]
             Lc = max(r[2] - r[0], r[3] - r[1])
-            Lk, lst, fark = kiris_boyu(None if not kol else Lc, Lc)
+            n_uc = uc_kolon_sayisi(r, [b["rect"] for b in kol])
+            Lk, lst, fark = kiris_boyu(None if not kol else Lc, Lc, n_uc)
+            bag = "iki yandaki duvarı bağlar" if nis else ("iki kolonun arasında" if n_uc > 1 else "kolonu gövdeye bağlar")
             return {"rect": [_r(t) for t in r], "order": o0 + len(kol) + i, "liste": lst,
-                    "bu": f"{gad} · {kenar(r)} · L {fmtc(Lk)} cm: {'iki yandaki duvarı bağlar' if nis else 'kolonu gövdeye bağlar'}, duvar üstü kotunda; "
+                    "bu": f"{gad} · {kenar(r)} · L {fmtc(Lk)} cm: {bag}, duvar üstü kotunda; "
                           f"üstüne omega ve {'çatının' if GIR else 'ana çatının'} makasları gelir{fark}"}
         verandalar.append({
             "kolon": [{"rect": [_r(t) for t in b["rect"]], "order": o0 + i, "bu": f"{gad} · {kose(b['rect'])} kolonu · 100 × 100 × {fmt(H * 10)}",
