@@ -102,3 +102,28 @@ Render oturumunun çıktısı: son görünümler ve rehbere eklenmiş galeri. Ha
 **Dikkat:**
 - İlk `--uygula` DNS denetimindeki `::ffff:` hatasıyla durmuştu; hiçbir şey değişmedi, betik düzeltildi (`5285247`).
 - Yeni rehber yayını: aynı paketleyiciyle yeni `rehber_kur.sh`, önce `--dene`, sonra `--uygula`.
+
+## Güncelleme · 4–6 Kasım 2026 · rehber sitesi (üç rehber)
+
+**Site:** https://rehber.portatifev.com
+- `/`: açılış sayfası
+- `/62m2/`: 62 m² Beşik + Cumba
+- `/80m2/`: 80 m² 3+1
+- `/80m2-21/`: 80 m² 2+1
+
+**Üretim:**
+- Komut: `deneme/2026-11-04_rehber_sitesi/site.py --npm <npm pack> --esbuild <yol>`, sonra `dene.py` (uzun sürer; `DENE_REHBER=<klasör>` ile tek rehber koşar).
+- Yeni bir İE-18 rehberi eklemek için: kaynak sayfa `rehber80/kaynak/` altına, `rehber80/paketle.py` › `REHBERLER` ve `site.py` › `REHBERLER` dizilerine birer satır.
+
+**Sunucuya gönderim (6.11'den beri):**
+1. `rsync -P rehber_kur.sh portman-vps:/root/rehber_siteN_kur.sh`
+2. `ssh -n portman-vps 'timeout 300 bash /root/rehber_siteN_kur.sh --dene'`, sonra aynı komut `--uygula` ile.
+
+Neden: 5 MB'tan büyük paketi `bash -s` ile göndermek bir kez koptu.
+
+**Sürümler (sunucuda):**
+- `20261106111444`: üç rehber, `guncel`.
+- `20261104074044`: iki rehber, `onceki`.
+- Daha eski sürümler `surumler/` altında duruyor. Silmek ayrı onay ister.
+
+**Açık nokta:** D-28'e göre üretim `main`'deki koda taşınmalı (iş emri yok).
