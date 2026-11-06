@@ -47,7 +47,7 @@ ACILAN = sorted(ACILAN_IE26 + ACILAN_IE29 + ACILAN_IE29_PR2)
 # İE-32 (6 Kasım 2026; pano 70): açık sekiz evden AP setinde kendi klasörü olmayanlar Motor kipinde ölçülür. Listeleri 13 Ekim'den beri
 # `acik` (AP-01…05 örnek olarak okundu, E1–E5; AP-07 = TS-01, AP-08 = PK-07): açılış kararı gerekmez, kör değildir. Kendi listemiz yine
 # kıyastan önce commit'lenir (protokol adım 3); açılış kaydı 13 Ekim'inki.
-ACIK_IE32 = {"AP-02": "AP-01…05", "AP-03": "AP-01…05", "AP-05": "AP-01…05"}
+ACIK_IE32 = {"AP-02": "AP-01…05", "AP-03": "AP-01…05", "AP-05": "AP-01…05", "AP-04": "AP-01…05"}
 KOR_KALAN = [k for k in KOR19 if k not in ACILAN]
 IE26_KARAR = "karar kartı 2 Kasım 2026 21:48:56 UTC: \"Hepsi açılsın\""
 # Mühürde kodların durumu (bir dosya birden çok kod taşıyabilir; kod bir kez sayılır her dosya için). Değişirse açılış Patron kararıdır.
