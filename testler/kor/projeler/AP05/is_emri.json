@@ -4,7 +4,7 @@
   "talep": {
     "bayi": {"kod": "AP05", "ad": "Bayi AP-05"},
     "musteri_adi": "AP-05",
-    "metin": "İE-32 açık ev ölçümü: AP-05 (49 m², beşik, verandasız, sandviç panel çatı) montaj paftasından okundu (6 Kasım 2026). Konumlar cm, aks; x sol dış yüzden; dizilim arka-sol olduğundan mahallerin y'si arka dış yüzden (Motor'un kuralı), açıklıkların cepheleri gerçek çerçevede (paftanın altı ön, giriş kapısı)."
+    "metin": "İE-33 açık ev ölçümü: AP-05 (49 m², beşik, verandasız, sandviç panel çatı) montaj paftasından okundu (6 Kasım 2026). Konumlar cm, aks; x sol dış yüzden; dizilim arka-sol olduğundan mahallerin y'si arka dış yüzden (Motor'un kuralı), açıklıkların cepheleri gerçek çerçevede (paftanın altı ön, giriş kapısı)."
   },
   "yapi": {
     "sistem": "prefabrik",

@@ -4,7 +4,7 @@
  "ap": "AP-03",
  "kip": "motor",
  "kapi": true,
- "not": "İE-32 ölçümü (açık sekiz; liste 13 Ekim'de örnek olarak okundu, kör değil). Geometri İE-17 PR-2'nin İş Emri'si (M-07, testler/cizim/evler/AP03.json; değişmedi); özellikler paftanın tablosundan.",
+ "not": "İE-33 ölçümü (açık sekiz; liste 13 Ekim'de örnek olarak okundu, kör değil). Geometri İE-17 PR-2'nin İş Emri'si (M-07, testler/cizim/evler/AP03.json; değişmedi); özellikler paftanın tablosundan.",
  "tarih": "2026-11-06",
  "kiyas_commit": "74d219494f4a1d8677b54804729adccc41bfcf99",
  "bizim_liste": {

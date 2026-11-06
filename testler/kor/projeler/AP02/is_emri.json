@@ -7,7 +7,7 @@
    "ad": "Bayi AP-02"
   },
   "musteri_adi": "AP-02",
-  "metin": "İE-32 ölçüm: AP-02 (65 m², beşik + kubbe, AP-03'ün kubbeli hâli) montaj paftasından okundu (6 Kasım 2026). Konumlar cm, aks; x sol dış yüzden; dizilim arka-sol olduğundan mahallerin y'si arka dış yüzden (Motor'un kuralı), açıklıkların cepheleri gerçek çerçevede (paftanın üstü arka)."
+  "metin": "İE-33 ölçüm: AP-02 (65 m², beşik + kubbe, AP-03'ün kubbeli hâli) montaj paftasından okundu (6 Kasım 2026). Konumlar cm, aks; x sol dış yüzden; dizilim arka-sol olduğundan mahallerin y'si arka dış yüzden (Motor'un kuralı), açıklıkların cepheleri gerçek çerçevede (paftanın üstü arka)."
  },
  "yapi": {
   "sistem": "prefabrik",
@@ -262,13 +262,14 @@
   "Pencereler paftadaki panoda ve yazısıyla (s. 2 ve s. 1 pencere detayı): salonun arkasında iki 120/120, çocuk odasının önünde 120/120, banyoda 60/40, yatak odasının önünde 120/180 ve verandaya bakan salon penceresi 120/180 (AP-03'te ikisi 120/120). Verandaya açılan salon penceresi sürgülü (TK-02 r09 başlangıcı, AP-03'teki gibi).",
   "Kubbe (D-54): yatak odasının sağ duvarında, iki yanında 62,75'lik pano (paftada KUBBE-DUVAR-1…4; yan panolar 59/170, ön pano 105/170, AP-17 ve AP-24'le aynı modül); taban dış yüzde önden 72,61'den başlar (AP-24'le aynı yer). Kubbe çatısı D-54'ün kuralıyla (duvar 203, tepe 35, saçak 18,5).",
   "Kapılar: salon–hol kapısı paftadaki gibi salona açılır; dış kapı ve salon–hol kapısı ortak duvarın ucundaki kavşaktan tam panoda (duvar_ucu; paftada 125,5); holden açılan üç kapı menteşe ucunda (kapi_yeri: mentese_ucu; paftada kavşaktan 11–13 cm). Kapı genişlikleri paftada yazılı değil: dış kapı 90, iç kapı 82 (Motor'un ölçüsü).",
-  "Çatı (paftanın s. 7 makas ve s. 9 aşık planı): ana beşik makas y'yi geçer, mahya x boyunca (157,25 = 10 topuk + 447,9 × 0,3288; Motor'da ana çatı salonun sağ duvarına kadar, şeritlerden); sağ öndeki yatak odası bölümünün üstünde paralel cumba (paftanın sağ kesiti 456,5, mahya 85,04; Motor'da 451,5 duvarın dış yüzünden). Veranda köşesi: Lokman'ın kararı (1 Kasım 2026 10:17, karar kartı \"Paftadaki gibi köşe kırma\") — veranda çatısı ana çatının eğimi ve saçağıyla sağa iner (MK9–12 kısa makaslar), arkada ana çatının arka yüzüyle 45° kırma (MK13 çapraz makas), önde cumbanın arka yüzüyle dere (`cati.mahal_catilari` tip kirma). Aşık planıyla aynı: veranda yüzü paralelkenar, aşık 444,25; ana çatının arka yüzü 823; cumbanın arka yüzünde aşık 155,5. AP-02'nin paftası (s. 7 makas ve dere yerleşim planı, s. 8 kesitler) AP-03'ünkiyle aynı; ek olarak kubbede üç kubbe makası (K-MK14…16)."
+  "Çatı (paftanın s. 7 makas ve s. 9 aşık planı): ana beşik makas y'yi geçer, mahya x boyunca (157,25 = 10 topuk + 447,9 × 0,3288; Motor'da ana çatı salonun sağ duvarına kadar, şeritlerden); sağ öndeki yatak odası bölümünün üstünde paralel cumba (paftanın sağ kesiti 456,5, mahya 85,04; Motor'da 451,5 duvarın dış yüzünden). Veranda köşesi: Lokman'ın kararı (1 Kasım 2026 10:17, karar kartı \"Paftadaki gibi köşe kırma\") — veranda çatısı ana çatının eğimi ve saçağıyla sağa iner (MK9–12 kısa makaslar), arkada ana çatının arka yüzüyle 45° kırma (MK13 çapraz makas), önde cumbanın arka yüzüyle dere (`cati.mahal_catilari` tip kirma). Aşık planıyla aynı: veranda yüzü paralelkenar, aşık 444,25; ana çatının arka yüzü 823; cumbanın arka yüzünde aşık 155,5. AP-02'nin paftası (s. 7 makas ve dere yerleşim planı, s. 8 kesitler) AP-03'ünkiyle aynı; ek olarak kubbede üç kubbe makası (K-MK14…16).",
+  "Okuma düzeltmesi (6 Kasım 2026, kıyastan sonra): paftanın çatı kaplaması planı trapez sacın 80 cm kapattığını yazıyor (\"ANTRASİT TRAPEZ SAÇ (80 KAPATIR)\"); İş Emri'nin çatı kaplamasına \"(80 cm kapatır)\" eklendi (D-50, M-11; öteki on bir trapez evin okuması gibi). Kayıtlı ölçüm (bizim_liste.json, sonuc.json) düzeltmeden önceki okumayladır ve değişmedi; düzeltilmiş okumayla trapez sac ve mahya satırlarından ikisi daha tutar (İE-33 sonuç tablosu)."
  ],
  "eksikler": [],
  "ozellikler": {
   "Panel Türü": "Pres Panel",
   "Çatı Şekli": "Beşik + Kubbe",
-  "Çatı Kaplaması": "Trapez Kaplama + OSB + Nem Bariyeri",
+  "Çatı Kaplaması": "Trapez Kaplama + OSB + Nem Bariyeri (80 cm kapatır)",
   "Çatı Kaplama Rengi": "Antrasit Gri",
   "Dış Kapı": "Çelik Standart",
   "İç Kapılar": "Standart Amerikan",
