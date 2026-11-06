@@ -352,7 +352,9 @@ def test_r10_tk05_160_ve_280(defter):
              "160'lık yapıştırma dolu pano | 160 × 1250 × 2800": 2100 * 1.12 + eps * 3.5,
              "160'lık yapıştırma dolu pano | 160 × 625 × 2800": 1050 * 1.12 + eps * 1.75,
              "Karkaslı çelik kapı panosu | 160 × 1250 × 2800": 2200 * 1.12 + eps * (3.5 - 0.95 * 2.05),
-             "Pencere üst panel | 160 × 1250 × 700": 420 * 1.4 + eps * 0.875, "H 160 (dış pano eki) | 160 × 160 × 2800": (431.42 * 7 + 424.29 * 4) / 11,
+             "Pencere üst panel | 160 × 1250 × 800": 420 * 1.6 + eps * 1.0,      # lento 80 (D-63)
+             "Pencere alt panel (120/120) | 160 × 1250 × 800": 700 + eps * 1.0, "Pencere alt panel (120/180) | 160 × 1250 × 200": 210 + eps * 0.25,
+             "H 160 (dış pano eki) | 160 × 160 × 2800": (431.42 * 7 + 424.29 * 4) / 11,
              "160'lık alt çerçeve | 160 × 3750": 186.85 * 3750 / 2510}
     for a, f in hesap.items():
         assert P[a]["fiyat"] == pytest.approx(f, abs=0.006) and P[a]["onay"] is False and P[a]["durum"] == "hesap", a

@@ -2000,8 +2000,8 @@
      "onay": false,
      "not": "r10 (TK-05, D-60): tabanı 2200 × 1,12 + EPS 1,5525 m²; 280'lik pano 250'liğin 2800/2500 = 1,12 katı (45. hafta listesinde EPS, levha, köşe ve H'ın 2800'ü 2500'ünün tam 1,12 katı; D-36 boyla orantılı); 160'lık pano 100'lüğün üstüne strafor farkı: 140 mm EPS − 80 mm EPS, 1250 × 2800'de 1.265,73 − 723,28 = 542,45 TL (154,9857 TL/m²), panonun dolu alanı kadar; kapı boşluğu (95 × 205) düşüldü"
     },
-    "Pencere alt panel (120/120) | 160 × 1250 × 900": {
-     "fiyat": 961.86,
+    "Pencere alt panel (120/120) | 160 × 1250 × 800": {
+     "fiyat": 854.99,
      "birim": "adet",
      "kaynak": "EKIM87",
      "kaynak_satir": [
@@ -2010,10 +2010,10 @@
      "kaynak_kalem": "PENCERE ALT PANEL (120/120) | 100x1250x800",
      "durum": "hesap",
      "onay": false,
-     "not": "r10 (TK-05, D-60): tabanı 700 × 1,125 + EPS 1,125 m²; 280'lik pano 250'liğin 2800/2500 = 1,12 katı (45. hafta listesinde EPS, levha, köşe ve H'ın 2800'ü 2500'ünün tam 1,12 katı; D-36 boyla orantılı); 160'lık pano 100'lüğün üstüne strafor farkı: 140 mm EPS − 80 mm EPS, 1250 × 2800'de 1.265,73 − 723,28 = 542,45 TL (154,9857 TL/m²), panonun dolu alanı kadar; boy 800 → 900 (lento 70, H 2800)"
+     "not": "r10 (TK-05, D-60): tabanı 700 × 1,0 + EPS 1,0 m²; 280'lik pano 250'liğin 2800/2500 = 1,12 katı (45. hafta listesinde EPS, levha, köşe ve H'ın 2800'ü 2500'ünün tam 1,12 katı; D-36 boyla orantılı); 160'lık pano 100'lüğün üstüne strafor farkı: 140 mm EPS − 80 mm EPS, 1250 × 2800'de 1.265,73 − 723,28 = 542,45 TL (154,9857 TL/m²), panonun dolu alanı kadar; boy 800 (lento 80, H 2800; D-63)"
     },
-    "Pencere alt panel (120/180) | 160 × 1250 × 300": {
-     "fiyat": 373.12,
+    "Pencere alt panel (120/180) | 160 × 1250 × 200": {
+     "fiyat": 248.75,
      "birim": "adet",
      "kaynak": "HAZ",
      "kaynak_satir": [
@@ -2022,10 +2022,10 @@
      "kaynak_kalem": "YK19 100'LÜK KARKASLI DOLU PENCERE ALT PANEL (120/180) | 100*1250*200",
      "durum": "hesap",
      "onay": false,
-     "not": "r10 (TK-05, D-60): tabanı 210 × 1,5 + EPS 0,375 m²; 280'lik pano 250'liğin 2800/2500 = 1,12 katı (45. hafta listesinde EPS, levha, köşe ve H'ın 2800'ü 2500'ünün tam 1,12 katı; D-36 boyla orantılı); 160'lık pano 100'lüğün üstüne strafor farkı: 140 mm EPS − 80 mm EPS, 1250 × 2800'de 1.265,73 − 723,28 = 542,45 TL (154,9857 TL/m²), panonun dolu alanı kadar; boy 200 → 300 (lento 70, H 2800)"
+     "not": "r10 (TK-05, D-60): tabanı 210 × 1,0 + EPS 0,25 m²; 280'lik pano 250'liğin 2800/2500 = 1,12 katı (45. hafta listesinde EPS, levha, köşe ve H'ın 2800'ü 2500'ünün tam 1,12 katı; D-36 boyla orantılı); 160'lık pano 100'lüğün üstüne strafor farkı: 140 mm EPS − 80 mm EPS, 1250 × 2800'de 1.265,73 − 723,28 = 542,45 TL (154,9857 TL/m²), panonun dolu alanı kadar; boy 200 (lento 80, H 2800; D-63)"
     },
-    "Pencere üst panel | 160 × 1250 × 700": {
-     "fiyat": 723.61,
+    "Pencere üst panel | 160 × 1250 × 800": {
+     "fiyat": 826.99,
      "birim": "adet",
      "kaynak": "EKIM87",
      "kaynak_satir": [
@@ -2034,7 +2034,7 @@
      "kaynak_kalem": "PENCERE ÜST PANEL | 100x1250x500",
      "durum": "hesap",
      "onay": false,
-     "not": "r10 (TK-05, D-60): tabanı 420 × 1,4 + EPS 0,875 m²; 280'lik pano 250'liğin 2800/2500 = 1,12 katı (45. hafta listesinde EPS, levha, köşe ve H'ın 2800'ü 2500'ünün tam 1,12 katı; D-36 boyla orantılı); 160'lık pano 100'lüğün üstüne strafor farkı: 140 mm EPS − 80 mm EPS, 1250 × 2800'de 1.265,73 − 723,28 = 542,45 TL (154,9857 TL/m²), panonun dolu alanı kadar; boy 500 → 700 (lento 70, H 2800)"
+     "not": "r10 (TK-05, D-60): tabanı 420 × 1,6 + EPS 1,0 m²; 280'lik pano 250'liğin 2800/2500 = 1,12 katı (45. hafta listesinde EPS, levha, köşe ve H'ın 2800'ü 2500'ünün tam 1,12 katı; D-36 boyla orantılı); 160'lık pano 100'lüğün üstüne strafor farkı: 140 mm EPS − 80 mm EPS, 1250 × 2800'de 1.265,73 − 723,28 = 542,45 TL (154,9857 TL/m²), panonun dolu alanı kadar; boy 500 → 800 (lento 80, H 2800; D-63)"
     },
     "Sandviç panel kapaması | L 2500": {
      "fiyat": 308.04,
