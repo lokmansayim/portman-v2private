@@ -81,7 +81,7 @@ def alt_cerceve(ie: dict, D: dict, G_: dict) -> tuple[list[dict], list[dict]]:
     P = G.kur(copy.deepcopy(ie))
     turler = set(D["kesilen_bosluklar"])
     pay, kanat, t = G_["alt_cerceve"]["pay"], G_["alt_cerceve"]["kanat"], G_["sac"]
-    bosluklar = [(d.yon, p.gap()) for d in P.duvarlar for p in d.panolar if p.acilim and p.acilim.tur in turler]
+    bosluklar = [(d.yon, p.bosluk_dortgeni(a)) for d in P.duvarlar for p in d.panolar for a in p.aciklar if a.tur in turler]
     T = max(2 * d.h for d in P.duvarlar if d.tur == "dis")
     hatlar = []
     fp = P.footprint()
@@ -118,7 +118,7 @@ def alt_cerceve(ie: dict, D: dict, G_: dict) -> tuple[list[dict], list[dict]]:
         kosular.append(k)
         cerceve = "100'lük" if round(2 * d.h * 10) >= D["ic_100_esigi_mm"] else "60'lık"
         for k in kosular:
-            kes = [((g[0], g[2]) if d.yon == "x" else (g[1], g[3])) for g in (p.gap() for p in k if p.acilim and p.acilim.tur in turler)]
+            kes = [((g[0], g[2]) if d.yon == "x" else (g[1], g[3])) for g in (p.bosluk_dortgeni(a) for p in k for a in p.aciklar if a.tur in turler)]
             hatlar.append({"duvar": "iç", "cerceve": cerceve, "yon": d.yon, "c0": d.c - d.h - pay - t, "c1": d.c + d.h + pay + t, "eksen": d.c,
                            "a0": k[0].a0, "a1": k[-1].a1, "boy": sum(p.boy for p in k), "kesikler": kes, "kalinlik_cm": 2 * d.h})
     hatlar.sort(key=lambda h: (h["duvar"] != "dış", h["yon"], h["eksen"], h["a0"]))

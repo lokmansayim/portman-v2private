@@ -26,7 +26,11 @@
       "kapi": "mantik",
       "kose": "oda",
       "son_pano": "kosu",
-      "kapi_yeri": "ortada"
+      "kapi_yeri": "ortada",
+      "karkasli_panolar": [
+        {"yon": "x", "eksen_cm": 1314.02, "aralik_cm": [193.25, 684.58], "aciklik_ortasi_cm": [449.9]},
+        {"yon": "x", "eksen_cm": 5, "aralik_cm": [256, 684.58], "aciklik_ortasi_cm": [null, 525.3]}
+      ]
     },
     "ek_akslar_cm": {"x": [], "y": []}
   },
@@ -42,13 +46,13 @@
   "acik_sinirlar": [],
   "acikliklar": [
     {"tur": "dis_kapi", "olcu": 90, "arasi": ["__DIS__", "ANTRE"], "duvar": "on", "pano": 0},
-    {"tur": "dis_kapi", "olcu": 90, "arasi": ["__DIS__", "YATAK ODASI 1"], "duvar": "arka", "pano": 2},
-    {"tur": "pencere", "olcu": "280x210", "mahal": "SALON", "duvar": "on", "acilis": "surgulu", "pano": 2},
+    {"tur": "dis_kapi", "olcu": 90, "arasi": ["__DIS__", "YATAK ODASI 1"], "duvar": "arka", "pano": 2, "kapi_turu": "pvc_cam"},
+    {"tur": "pencere", "olcu": "280x210", "mahal": "SALON", "duvar": "on", "acilis": "surgulu", "pano": 2, "bolmeler": [{"tur": "sabit", "en_cm": 70}, {"tur": "surgulu", "en_cm": 70, "yon": "sol"}, {"tur": "surgulu", "en_cm": 70, "yon": "sag"}, {"tur": "sabit", "en_cm": 70}]},
     {"tur": "pencere", "olcu": "200x210", "mahal": "YATAK ODASI 2", "duvar": "arka", "acilis": "surgulu", "pano": 0},
-    {"tur": "pencere", "olcu": "120x120", "mahal": "YATAK ODASI 1", "duvar": "arka", "pano": 1},
-    {"tur": "pencere", "olcu": "50x50", "mahal": "EBV WC", "duvar": "sag", "pano": 0},
-    {"tur": "pencere", "olcu": "120x120", "mahal": "MUTFAK", "duvar": "sag", "pano": 0},
-    {"tur": "pencere", "olcu": "120x120", "mahal": "SALON", "duvar": "sag", "pano": 0},
+    {"tur": "pencere", "olcu": "120x120", "mahal": "YATAK ODASI 1", "duvar": "arka", "pano": 1, "bolmeler": [{"tur": "kanat", "en_cm": 60, "mentese": "sol"}, {"tur": "kanat", "en_cm": 60, "mentese": "sag"}]},
+    {"tur": "pencere", "olcu": "50x50", "mahal": "EBV WC", "duvar": "sag", "pano": 0, "bolmeler": [{"tur": "vasistas", "en_cm": 50}]},
+    {"tur": "pencere", "olcu": "120x120", "mahal": "MUTFAK", "duvar": "sag", "pano": 0, "bolmeler": [{"tur": "kanat", "en_cm": 60, "mentese": "sol"}, {"tur": "kanat", "en_cm": 60, "mentese": "sag"}]},
+    {"tur": "pencere", "olcu": "120x120", "mahal": "SALON", "duvar": "sag", "pano": 0, "bolmeler": [{"tur": "kanat", "en_cm": 60, "mentese": "sol"}, {"tur": "kanat", "en_cm": 60, "mentese": "sag"}]},
     {"tur": "ic_kapi", "olcu": 82, "arasi": ["ANTRE", "YATAK ODASI 1"], "pano": 2},
     {"tur": "ic_kapi", "olcu": 82, "arasi": ["ANTRE", "YATAK ODASI 2"], "pano": 0},
     {"tur": "ic_kapi", "olcu": 82, "arasi": ["ANTRE", "BANYO WC"], "pano": 2},
@@ -75,11 +79,12 @@
   },
   "varsayimlar": [
     "Köşe ve ızgara (İE-17 kuralı; paftada aynı): makas y'yi geçer (makas planı MKS 1–14, yedi hat, her hatta iki parça; aşık 749,58 = 689,58 + 2 × 30), kısa kenar y. Ön ve arka duvar köşeden geçer, x ızgarası duvar ekseninden (5 + 125,5k); yan duvarlar araya girer, y ızgarası arka iç yüzden.",
-    "Ön ve arka zemin terası gövdeden taşan veranda (verandalar): önde sağda 479,58 × 110, arkada sağda 438,58 × 110; üstleri tek eğim (paftada P1, P2: trapez 150'lik); eğim paftada yazılı değil, ana çatınınki alındı.",
-    "Pencereler ve kapılar paftadaki yerine en yakın Motor panosunda (pano dizini). Paftadaki 280×210 ve 200/210 sürgülüler ölçüsüyle (İE-27 madde 11, kısaltma yok; 3 Kasım 2026'ya kadar Motor'un sınırıyla 240x180 ve 200x180 yazılıydı): döşemeden; 280'lik üç panoluk (376,5), 200'lük iki panoluk. Arka terastan yatak odası 1'e açılan kapı dış kapı sayıldı. Kapı genişlikleri paftada yazılı değil: dış kapı 90, iç kapı 82 (Motor'un ölçüsü).",
+    "Ön ve arka zemin terası gövdeden taşan veranda (verandalar): önde sağda 479,58 × 120, arkada sağda 438,58 × 120. Derinlik paftadan: planda kolonun dış yüzü duvardan 120 (Lokman, 5 Kasım 2026 10:17, \"%10 eğimle ve paftadaki gibi 120 derinlikle devam edeyim mi?\" sorusuna: \"evet onaylıyorum mühürle bu çizim şeklini\"; M-12). Gerçek listede yan kiriş yok, iki dış kiriş 4796 ve 4386, dört kolon 2100. İE-30 (D-52; Lokman, 4 Kasım 2026 20:42: \"teras ayrı bir teknikle yapılıyor çatı saçağının 10 cm altında çatı paneli olarak kullandığımız bir 8 cm genişliğinde C den oluşan panel yapıyoruz üzerine yine Trapez sac araya damlalık atıyoruz yani çatı gibi şekilli değil\"; 21:14 \"Paftadan, ev ev\"): üstleri teras paneli (cati.tip teras_paneli): 8 cm, üst yüzü duvarda duvar üstünün 10 cm altında, dışarı %10 iner (D-52 ek; Lokman, 5 Kasım 2026 00:36: \"teraslara biraz eğim vereceksin\"; pafta eğim yazmıyor, gerçek listenin 2100'lük kolonu paftanın 120 derinliğinde %10 veriyor); duvardan 140 (paftada P1, P2: panel 140, kaplaması 142,9; üstü trapez 150'lik, damlalık 12, altı boardex tavan). Makas ve aşık yok.",
+    "Pencereler ve kapılar paftadaki yerine en yakın Motor panosunda (pano dizini). Paftadaki 280×210 ve 200/210 sürgülüler ölçüsüyle (İE-27 madde 11, kısaltma yok; 3 Kasım 2026'ya kadar Motor'un sınırıyla 240x180 ve 200x180 yazılıydı): döşemeden; 280'lik üç panoluk (376,5), 200'lük iki panoluk. Arka terastan yatak odası 1'e açılan kapı dış kapı sayıldı; paftanın kapı detayında beyaz, komple cam PVC kapı, içeri açılır (88 × 208 iç ölçü; kapi_turu pvc_cam, D-52). Pencere detayından bölmeler (D-52, dışarıdan bakınca soldan sağa): 120/120 iki kanat (118 × 118; menteşe dış yanlarda, kollar ortada buluşur; paftanın notu \"tek açılım\"), 280/210 sabit + sürgülü + sürgülü + sabit (278 × 208; iki orta kanat dışa sürülür; bölmeler eşit alındı), 200/210 iki bölmeli sürgülü (eski sürgülü bloğu), 50/50 vasistas (48 × 48). Kapı genişlikleri paftada yazılı değil: dış kapı 90, iç kapı 82 (Motor'un ölçüsü).",
     "Oda adları ve alanları paftanın planından (yatak odaları 13,76 / 14,72, banyo 5,6, ebeveyn banyosu 4,23, mutfak 13,37, salon 19,37, antre 13,80 m²).",
-    "Çatı: beşik, makas y'yi geçer, eğim 10,4° (%18,36; paftada yazılı), saçak 30 (aşık boyu ve 700'lük trapez), topuk 10. Özellikler paftanın özellik tablosundan ve açıklamasından."
+    "Çatı: beşik, makas y'yi geçer, eğim 10,4° (%18,36; paftada yazılı), saçak 30 (aşık boyu ve 700'lük trapez), topuk 10. Özellikler paftanın özellik tablosundan ve açıklamasından.",
+    "Karkaslı kaplama duvar panoları paftadan (İE-28, D-46): ön duvar 125,5 (kapı) + 62,75 + 491,33 (280/210, ortası paftada 449,9; köşeye kadar); arka duvar 125,5 + 125,5 + 428,58 (dış kapı yerinde + 200/210, ortası 525,3; köşeye kadar, 381,5'teki bölmenin T'si panonun ortasında). Paftada 491,6 ve 428,8; gerçek liste çelik karkaslı pano 491,4 ve 428,6."
   ],
   "eksikler": [],
-  "verandalar": [{"ad": "ÖN TERAS", "cephe": "on", "bas_cm": 210, "bit_cm": 689.58, "derinlik_cm": 110, "cati": {"tip": "tek_yon", "egim_yuzde": 18.36}}, {"ad": "ARKA TERAS", "cephe": "arka", "bas_cm": 251, "bit_cm": 689.58, "derinlik_cm": 110, "cati": {"tip": "tek_yon", "egim_yuzde": 18.36}}]
+  "verandalar": [{"ad": "ÖN TERAS", "cephe": "on", "bas_cm": 210, "bit_cm": 689.58, "derinlik_cm": 120, "cati": {"tip": "teras_paneli", "cikma_cm": 140, "egim_yuzde": 10}}, {"ad": "ARKA TERAS", "cephe": "arka", "bas_cm": 251, "bit_cm": 689.58, "derinlik_cm": 120, "cati": {"tip": "teras_paneli", "cikma_cm": 140, "egim_yuzde": 10}}]
 }

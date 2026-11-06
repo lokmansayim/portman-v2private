@@ -90,9 +90,8 @@ def hazirla(ie: dict) -> dict:
             L, t = p.boy, 2 * d.h
             pr = {"id": len(panolar), "rect": [_r(x0), _r(y0), _r(x1), _r(y1)], "yon": d.yon, "boy": _r(L), "kalinlik": _r(t),
                   "tur": d.tur, "sinif": pano_sinifi(L, t), "kod": kod, "kalem": kalem(kod), "acikliklar": []}
-            ac = p.acilim
-            if ac is not None:
-                g = p.gap()
+            for ac in p.aciklar:                                # D-46: karkaslı panoda birden çok açıklık
+                g = p.bosluk_dortgeni(ac)
                 a0, a1 = (g[0], g[2]) if d.yon == "x" else (g[1], g[3])
                 if ac.tur == "pencere":
                     pk = G.pencere_kurali(ac.olcu)                  # BK-13: eşik = 200 − boy (bugünkü üçü BOM notlarındaki 80, 20, 160)
@@ -577,6 +576,16 @@ class IfcUretici:
             api("aggregate.assign_object", self.f, relating_object=asm, products=uyeler_e)
         self.cati_ozet = {"mahya_cm": round(zm, 1), "makas": n, "cati_alan_m2": round(alan, 2), "makas_ekseni": "y", "aciklik_cm": round(Hd, 1), "makas_x_cm": [round(x, 2) for x in xs]}
 
+    def _teras_kesiti(self, cephe, kutu, za_duvar, za_dis, t):
+        """D-52 ek: teras panelinin eğik prizması: plandaki kutu, altı duvar ucunda `za_duvar`, dış uçta `za_dis`,
+        düşeyde `t` kalın; kesit verandanın derinliği boyunca, cephe boyunca uzar."""
+        X0, Y0, X1, Y1 = kutu
+        if cephe in ("on", "arka"):
+            w, o = (Y1, Y0) if cephe == "on" else (Y0, Y1)
+            return self._prizma_yz([(w, za_duvar), (o, za_dis), (o, za_dis + t), (w, za_duvar + t)], X0, X1)
+        w, o = (X1, X0) if cephe == "sol" else (X0, X1)
+        return self._prizma_xz([(w, za_duvar), (o, za_dis), (o, za_dis + t), (w, za_duvar + t)], Y0, Y1)
+
     def _egik_levha(self, cokgen, p0, u, egim, z0, t):
         """Eğik çatı levhası: plan çokgeni (cm), saçak çizgisindeki bir nokta `p0`, planda yukarı yön `u` (birim), eğim; alt yüzü saçakta
         `z0`, kalınlık `t`. Yerel x mahyaya paralel, yerel y eğim boyunca yukarı, yerel z yüzün normali (yukarı)."""
@@ -786,6 +795,17 @@ class IfcUretici:
             z = self._urun("IfcSlab", f"VERANDA_ZEMINI_{i}", predefined="FLOOR")
             self._yerlestir(z); self._temsil(z, self._prizma_xy([(x0, y0), (x1, y0), (x1, y1), (x0, y1)], -15, 0), "beton")
             self._pset(z, "PortatifEv_Kapsam", {"BOMKalem": f"{v['ad']} zemini — kapsam dışı (bayi/saha)", "KapsamDisi": True})
+            if C["tip"] == "teras_paneli":                      # D-52: teras paneli, 8 cm; üst yüzü duvarda duvar üstünün 10 altında, dışarı
+                roof = self._urun("IfcRoof", f"VERANDA_CATISI_{i}", predefined="SHED_ROOF")   # eğimle iner (D-52 ek; `veranda.teras_paneli`)
+                self._yerlestir(roof)
+                self._pset(roof, "PortatifEv_Cati", {"Veranda": v["ad"], "Egim_yuzde": round(eg * 100, 2), "Sacak_cm": 0.0,
+                                                     "Ust_kotu_cm": round(zm, 1), "Dis_ust_kotu_cm": round(zs, 1), "Kalinlik_cm": C["kalinlik"]})
+                sl = self._urun("IfcSlab", f"VERANDA_CATI_{i}_1", predefined="ROOF", kapsa=False)
+                self._yerlestir(sl); self._temsil(sl, self._teras_kesiti(v["cephe"], (X0, Y0, X1, Y1), zm - C["kalinlik"], zs - C["kalinlik"],
+                                                                         C["kalinlik"]), "sac")
+                self._pset(sl, "PortatifEv_Kapsam", {"BOMKalem": f"Teras paneli (C profilden panel, üstü trapez sac) — {v['ad']}"})
+                api("aggregate.assign_object", self.f, relating_object=roof, products=[sl])
+                continue
             roof = self._urun("IfcRoof", f"VERANDA_CATISI_{i}", predefined="GABLE_ROOF" if C["tip"] == "besik" else "SHED_ROOF")
             self._yerlestir(roof)
             self._pset(roof, "PortatifEv_Cati", {"Veranda": v["ad"], "Egim_yuzde": round(eg * 100, 2), "Sacak_cm": s, "Mahya_cm": round(zm, 1)})
@@ -835,6 +855,12 @@ class IfcUretici:
                     return min(kot(m["duzlem"], x, y) for x in (x0, x1) for y in (y0, y1))
             return H0
 
+        teras = [v for v in (self.G.get("dis_verandalar") or []) if v["cati"]["tip"] == "teras_paneli"]   # D-52: kiriş panelin altında,
+                                                                                                          # dikme dış kirişin altına
+        def teras_verandasi(x0, y0, x1, y1):
+            return next((v for v in teras for rx0, ry0, rx1, ry1 in [v["rect"]]
+                         if rx0 - 0.5 <= x0 and x1 <= rx1 + 0.5 and ry0 - 0.5 <= y0 and y1 <= ry1 + 0.5), None)
+
         def egik(rect):                                          # açık yandaki eğik kiriş (geometri hakemi, 1 Kasım): çatının altında, eğimle
             return next((m for m in mc for r in m.get("egik_kirisler", []) if all(abs(a - b) < 0.5 for a, b in zip(r, rect))), None)
         for i, b in enumerate(self.G.get("baglantilar", [])):
@@ -843,6 +869,8 @@ class IfcUretici:
             if b["tur"] == "dikme":
                 e = self._urun("IfcColumn", f"DIKME_{b['kod']}_{i:02d}", predefined="COLUMN")
                 z1 = next((z for cx, cy, z in kolon_ust if abs(cx - (x0 + x1) / 2) < 1 and abs(cy - (y0 + y1) / 2) < 1), H0)
+                if teras_verandasi(x0, y0, x1, y1) is not None:
+                    z1 = teras_verandasi(x0, y0, x1, y1)["cati"]["kolon_ustu"]
                 z0, z1, malz = 0.0, z1, "profil"
             elif b["tur"] == "veranda_profil" and egik(b["rect"]):
                 m = egik(b["rect"]); d = m["duzlem"]
@@ -859,6 +887,9 @@ class IfcUretici:
             elif b["tur"] == "veranda_profil":
                 e = self._urun("IfcBeam", f"VERANDA_PROFIL_{b['kod']}_{i:02d}", predefined="BEAM")
                 z1 = profil_ust(x0, y0, x1, y1)
+                tv = teras_verandasi(x0, y0, x1, y1)
+                if tv is not None:                               # D-52 ek, D-56: yalnız dış kiriş, düz, panelin altında
+                    z1 = tv["cati"]["dis_kiris_ustu"]
                 z0, z1, malz = z1 - 10, z1, "profil"
             else:
                 e = self._urun("IfcMember", f"BAGLANTI_{b['kod']}_{i:02d}", predefined="STUD")
