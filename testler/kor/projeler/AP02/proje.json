@@ -1,0 +1,13 @@
+{
+ "kod": "AP-02",
+ "ap": "AP-02",
+ "kip": "motor",
+ "girdi": {
+  "is_emri": "testler/kor/projeler/AP02/is_emri.json"
+ },
+ "bizim_liste": "bizim_liste.json",
+ "liste_sha256": "b2174de293292b5bf9b1a1562655115d7314e8bb012ffcecf3f866e58f4bedaf",
+ "sayfa": null,
+ "kapi": true,
+ "not": "İE-32 ölçümü (açık sekiz; liste 13 Ekim'de örnek olarak okundu, kör değil). İş Emri montaj paftasından: AP-03'ün İş Emri'si (M-07) + sağ duvarda kubbe (D-54) ve paftadaki iki 120/180 pencere; varsayımlar İş Emri'nde."
+}
