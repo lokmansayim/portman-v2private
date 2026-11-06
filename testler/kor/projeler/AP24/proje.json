@@ -1,0 +1,13 @@
+{
+ "kod": "AP-24",
+ "ap": "AP-24",
+ "kip": "motor",
+ "girdi": {
+  "is_emri": "testler/kor/projeler/AP24/is_emri.json"
+ },
+ "bizim_liste": "bizim_liste.json",
+ "liste_sha256": "40934fd0cec22709119bf1c558f52be1e4093aaba81f3603745c5df05c715e56",
+ "sayfa": null,
+ "kapi": true,
+ "not": "İE-29 PR-2 kör ölçümü: İş Emri montaj paftasından (çizim Lokman 5 Kasım 2026 12:34'te onaylandı, r03; pafta çizim için görüldü, muhur.json notu). AP-03'ün kubbeli eşi: beşik, cumba, köşe kırmalı veranda (%20); sağ duvarda kubbe (yaşama alanı). Kubbe D-54: duvar 203, saçak 18,5, tepe 35; listede kitabın kubbe takımı (R6) + aşık + saçak omegası."
+}

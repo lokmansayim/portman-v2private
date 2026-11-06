@@ -99,7 +99,9 @@ def dogrula(doc, plan: G.Plan, is_emri: dict) -> dict:
             if min(a[2], b[2]) - max(a[0], b[0]) > 1e-6 and min(a[3], b[3]) - max(a[1], b[1]) > 1e-6:
                 hatalar.append(f"Duvar çakışması: {a} / {b}")
     # ayak izi: Plan'ın kendi hesabıyla birebir olmalı (dosya ↔ model)
-    fp_file = unary_union([box(*r) for r in rects] + [box(*g["gap"]) for g in gaps])
+    # İE-29: kubbenin tabanı (düz duvardaki 251'lik boşluk) dosyada blok değil; Plan'ın ayak izinde boşluk olarak var, net alanda mahalin içi
+    kubbe_pano = [pn for pn in plan.panolar if pn.acilim and pn.acilim.tur == "kubbe"]
+    fp_file = unary_union([box(*r) for r in rects] + [box(*g["gap"]) for g in gaps] + [box(*pn.gap()) for pn in kubbe_pano])
     fp_solid = unary_union([box(*r) for r in rects] + [box(*g["gap"]) for g in gaps if g["kind"] != "gecis"])   # geçiş boşluğu alana dahil olabilir
     fp_plan = plan.footprint()
     fp_diff = fp_file.symmetric_difference(fp_plan).area
@@ -187,8 +189,12 @@ def dogrula(doc, plan: G.Plan, is_emri: dict) -> dict:
     exp_gec = sum(1 for p in plan.panolar for a in p.aciklar if a.tur == "gecis")
     if kinds["pencere"] != exp_pen or kinds["kapi"] != exp_kap or kinds["gecis"] != exp_gec:
         hatalar.append(f"Açıklık adedi dosya {dict(kinds)} / plan pencere {exp_pen} kapı {exp_kap} geçiş {exp_gec}")
-    if len(panels) != len(plan.panolar):
-        hatalar.append(f"Pano adedi dosya {len(panels)} / plan {len(plan.panolar)}")
+    if len(panels) != len(plan.panolar) - len(kubbe_pano):
+        hatalar.append(f"Pano adedi dosya {len(panels)} / plan {len(plan.panolar) - len(kubbe_pano)}")
+    if plan.kubbeler:                                     # İE-29: her kubbede üç panonun altı parçası, iki köşe direği, iki kama
+        n_kubbe = sum(1 for e in msp.query('LWPOLYLINE[layer=="KUBBE"]') if e.closed and min(p[0] for p in e.get_points("xy")) <= limit)
+        if n_kubbe != 10 * len(plan.kubbeler):
+            hatalar.append(f"Kubbe çizimi eksik: dosyada {n_kubbe} parça / beklenen {10 * len(plan.kubbeler)}")
     # altın beklentiler (varsa)
     altin = is_emri.get("altin_beklenti")
     altin_sonuc = None
