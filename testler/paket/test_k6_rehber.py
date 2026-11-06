@@ -372,7 +372,7 @@ def test_r07_veranda_sacak_kadar_icerde(tk04_r07):
     geldiği yerede bir tane 250cm kolon koyması gerekiyor" (İş Emri r07, kat planı sohbetinin; gövde L, ön kirişin dış yüzü 37,5, salon
     duvarında kolon 386,5). Çatı r06'nınkiyle aynı (ana çatının ayak izi 37,5 … 898,5); ana çatının ön saçağının altındaki kiriş 37,5'ta:
     saçak altı var, saçak omegası kirişin üstünde, sağ kalkan köşe kolonundan (önü saçak ucu), ön saçağın inişleri iki kolonda (sol uçtaki
-    cumba ile verandanın köşesinde tek iniş; Lokman 12:51); makasın alt başlığı ve topuğundaki dikme kirişin üstünde. Ön kirişin kendisi (çizimde PC-33) burada sınanmaz."""
+    cumba ile verandanın köşesinde tek iniş; Lokman 12:51); makasın alt başlığı ve topuğundaki dikme kirişin üstünde. Ön kirişin kendisi (çizimde PC-35) burada sınanmaz."""
     import ifcopenshell
     import ifcopenshell.geom
     import ifcopenshell.util.element as E

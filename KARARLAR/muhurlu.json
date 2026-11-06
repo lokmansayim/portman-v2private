@@ -715,6 +715,137 @@
    ],
    "durum": "mühürlü",
    "gecmis": []
+  },
+  {
+   "kod": "M-12",
+   "konu": "AP-26 ön onay çizimi: pencere bölmeleri, cam PVC kapı, eğimli teras paneli",
+   "kural": "AP-26'nın ön onay çizimi 5 Kasım 2026'da onaylanan hâliyle (İE-30, D-52, PC-34): İş Emri montaj paftasından (testler/kor/projeler/AP26/is_emri.json: yapı, mahaller, açıklıklar, çatı, verandalar). Pencere bölmeleri paftanın pencere detayından: 120/120 iki kanat (menteşe dış yanlarda, kollar ortada buluşur), 280/210 sabit + sürgülü + sürgülü + sabit, 200/210 iki bölmeli sürgülü, 50/50 vasistas. Arka terastan yatak odası 1'e komple cam PVC kapı (kapi_turu pvc_cam). Ön ve arka teras 120 derin; üstleri teras paneli: 8 cm C panel, üst yüzü duvarda duvar üstünün (saçak altı) 10 cm altında, dışarı %10 iner, duvardan 140; dış kiriş panelin altında, kolon 210; yan kiriş yok (D-56, gerçek liste gibi); makas, aşık, topuk, kalkan ve saçak yok. Çizimin izi testler/motor/veri/AP26_beklenen.json (A4 PDF, DXF, doğrulama, pano BOM, görünüşler). Yükleme listesi mühürde değil (liste aşaması çizim onayından sonra).",
+   "kararlar": [
+    "D-52",
+    "D-56"
+   ],
+   "pr": [
+    116
+   ],
+   "lokman": [
+    {
+     "tarih": "2026-11-04 20:42",
+     "soz": "pencereler çizimi tam doğru değil ayrıca teras ayrı bir teknikler yapılıyor çatı saçağının 10 cm altında çatı paneli olarak kullandığımız bir 8 cm genişliğinde C den oluşan panel yapıyoruz üzerine yine Trapez sac araya damlalık atıyoruz yani çatı gibi şekilli değil AP26 montaj paftasını iyice incele"
+    },
+    {
+     "tarih": "2026-11-04 21:14",
+     "soz": "Karar kartı \"AP-26'nın pencerelerini ve terasını paftadan, ev ev mi kuralım?\" → \"Paftadan, ev ev\""
+    },
+    {
+     "tarih": "2026-11-05 00:36",
+     "soz": "teraslara biraz eğim vereceksin"
+    },
+    {
+     "tarih": "2026-11-05 10:17",
+     "soz": "evet onaylıyorum mühürle bu çizim şeklini (\"%10 eğimle ve paftadaki gibi 120 derinlikle devam edeyim mi?\" sorusuna)",
+     "mesaj": "cmsg_01UAFvcnfVuTR1wfFux5fQPPF5FHCjGP7ATVYGjV2WqQn1"
+    }
+   ],
+   "kilitler": [
+    {
+     "yer": "testler/kor/projeler/AP26/is_emri.json#yapi",
+     "iz": "1f3c3b08954d078f"
+    },
+    {
+     "yer": "testler/kor/projeler/AP26/is_emri.json#mahaller",
+     "iz": "02168b0e685c45bd"
+    },
+    {
+     "yer": "testler/kor/projeler/AP26/is_emri.json#acikliklar",
+     "iz": "39e754655ddfcb75"
+    },
+    {
+     "yer": "testler/kor/projeler/AP26/is_emri.json#cati",
+     "iz": "2af7be7fee92f6c4"
+    },
+    {
+     "yer": "testler/kor/projeler/AP26/is_emri.json#verandalar",
+     "iz": "bd7a3a4b7fa2bda5"
+    },
+    {
+     "yer": "kurallar/prefabrik/cizim_kurallari.json#kurallar[kod=PC-34].kural",
+     "iz": "26df8dd319a2ac14"
+    },
+    {
+     "yer": "motor/geometry.py::TERAS_PANELI_SACAK_ALTI_CM",
+     "iz": "899fe3104e5d0df9"
+    },
+    {
+     "yer": "motor/geometry.py::TERAS_PANELI_KALINLIK_CM",
+     "iz": "b8a93e5e6fc5c631"
+    },
+    {
+     "yer": "testler/motor/veri/AP26_beklenen.json#onay",
+     "iz": "a80a281365ccd138"
+    },
+    {
+     "yer": "testler/motor/veri/AP26_beklenen.json#iz.dogrulama",
+     "iz": "510e5775f9ade808"
+    },
+    {
+     "yer": "testler/motor/veri/AP26_beklenen.json#iz.bom",
+     "iz": "d8cfe0e0e463cd8d"
+    },
+    {
+     "yer": "testler/motor/veri/AP26_beklenen.json#iz.gorunusler",
+     "iz": "2ff7984f3e93cc53"
+    },
+    {
+     "yer": "testler/motor/veri/AP26_beklenen.json#iz.pdf_izi",
+     "iz": "8465c3fec8a4fea6"
+    },
+    {
+     "yer": "testler/motor/veri/AP26_beklenen.json#iz.dxf_izi",
+     "iz": "48f12a35fb190791"
+    },
+    {
+     "yer": "testler/motor/test_m12_ap26.py",
+     "iz": "dbbbf468df2c9194"
+    },
+    {
+     "yer": "testler/motor/test_ie30_pencere_teras.py::test_ap26_is_emri_paftadan",
+     "iz": "593581beec40724a"
+    },
+    {
+     "yer": "testler/motor/test_ie30_pencere_teras.py::test_teras_paneli_kotlari_ve_gorunusu",
+     "iz": "4828491ced208e7d"
+    },
+    {
+     "yer": "testler/motor/test_ie30_pencere_teras.py::test_ap26_gorunus_bloklari",
+     "iz": "3bb4ce65d5f04589"
+    },
+    {
+     "yer": "testler/motor/test_ie30_pencere_teras.py::test_kanat_kollari_kol_yaninda_bulusur",
+     "iz": "fb341bc3e80034c7"
+    },
+    {
+     "yer": "testler/motor/test_ie30_pencere_teras.py::test_surgulu_ve_vasistas_bolmesi",
+     "iz": "209c5966724c4f67"
+    },
+    {
+     "yer": "testler/motor/test_ie30_pencere_teras.py::test_pvc_kapi_menteseye_gore",
+     "iz": "cebc26aeaccc2f48"
+    },
+    {
+     "yer": "testler/motor/test_ie30_pencere_teras.py::test_teras_paneli_planda",
+     "iz": "fbaa7bfe285eeb34"
+    }
+   ],
+   "durum": "mühürlü",
+   "gecmis": [
+    {
+     "tarih": "2026-11-05 10:48",
+     "soz": "Kaldır, gerçek liste gibi (karar kartı: \"Teras yan kirişini listeden ve yan görünüşten kaldırayım mı?\"; seçeneğin sonucu: \"Listeden dört yan kiriş düşer; yan görünüşte panelin altında yalnız dış kiriş ve kolon kalır. M-12 bunun için açılıp kapanır.\")",
+     "mesaj": "cmsg_01UAFvcnfVuTR1wfFux5fQPP9p1AfAoGqEoAGgQnau5HMh",
+     "kapanis": "2026-11-05T10:56Z",
+     "karar": "D-56"
+    }
+   ]
   }
  ]
 }

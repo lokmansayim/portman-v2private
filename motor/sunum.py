@@ -95,7 +95,7 @@ def oturum_m2(plan: G.Plan) -> float:
 
 
 def sayimlar(plan: G.Plan) -> dict:
-    acl = [p.acilim for p in plan.panolar if p.acilim]
+    acl = [a for p in plan.panolar for a in p.aciklar]
     ek = G.pano_ekleri(plan)
     pen = [a for a in acl if a.tur == "pencere" and (a.yukseklik or 0) > VASISTAS_ESIGI_CM]
     vas = [a for a in acl if a.tur == "pencere" and (a.yukseklik or 0) <= VASISTAS_ESIGI_CM]
@@ -220,11 +220,8 @@ def plan_ciz(ax, plan: G.Plan, yazi: float = 1.0) -> dict:
         ax.add_patch(Rectangle((x0, y0), x1 - x0, y1 - y0, fc=H_RENGI, ec=H_KENAR, lw=0.2, zorder=4.5))
     # açıklıklar
     for d in plan.duvarlar:
-        for p in d.panolar:
-            a = p.acilim
-            if a is None:
-                continue
-            g = p.gap()
+        for p, a in ((p, a) for p in d.panolar for a in p.aciklar):     # D-46: karkaslı panoda birden çok açıklık
+            g = p.bosluk_dortgeni(a)
             if a.tur == "pencere":
                 pay = 2.0
                 x0, y0, x1, y1 = (g[0], g[1] - pay, g[2], g[3] + pay) if d.yon == "x" else (g[0] - pay, g[1], g[2] + pay, g[3])
