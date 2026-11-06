@@ -1,10 +1,10 @@
 {
  "sema": "portman.fiyat_defteri/1",
- "surum": "2026-11-04-r09",
+ "surum": "2026-11-05-r10",
  "aciklama": "Yükleme listesi × birim fiyat (İE-13, Z-10'un liste yöntemi). Anahtar Motor'un liste satırı: prefabrikte 'kalem | olcu' (motor/prefabrik_liste.py), çelikte 'kalem | boyut' (motor/genel yükleme listesi). Fiyat uydurulmaz: kaynağı olmayan kalemde fiyat boş kalır.",
  "para_birimi": "TL",
  "kdv": "kaynak listelerde yazmıyor",
- "onay_kurali": "onay true: Patron'un verdiği listeden (patron_verdi) ya da onayladığı öneriden, kalemin kendisi için. onay false: öneri (yakın ürün, hesap ya da Patron'un vermediği kaynak); araclar/fiyatla.py bunları yalnız --oneri ile uygular. Kaynak sırası (Patron, TK-01'de): önce EKIM87, yoksa HAZ, ikisinde de yoksa CTKB; birebir eşleşme yakından önce. Patron'un 27 Ekim 22:00 kararı ('son listeler') genel kaynaktır: iki listeden birebir eşleşen kalem çelikte de onaylı (r02).",
+ "onay_kurali": "onay true: Patron'un verdiği listeden (patron_verdi) ya da onayladığı öneriden, kalemin kendisi için. onay false: öneri (yakın ürün, hesap ya da Patron'un vermediği kaynak); araclar/fiyatla.py bunları yalnız --oneri ile uygular. Kaynak sırası (Patron, TK-01'de): önce EKIM87, yoksa HAZ, ikisinde de yoksa L45 (45. hafta listesi, r10; Patron 5 Kasım, TK-05), hiçbirinde yoksa CTKB; birebir eşleşme yakından önce. Patron'un 27 Ekim 22:00 kararı ('son listeler') genel kaynaktır: iki listeden birebir eşleşen kalem çelikte de onaylı (r02).",
  "kaynaklar": {
   "EKIM87": {
    "ad": "87 m² tek kat prefabrik yükleme listesi (birim fiyat sütunu)",
@@ -33,6 +33,13 @@
    "tarih": "2026-11-04",
    "patron_verdi": true,
    "not": "Patron'un kendi sözüyle verdiği fiyat; kalemin notunda sözü kelimesi kelimesine, saati ve mesaj numarası. Kaynak listesi yok."
+  },
+  "L45": {
+   "ad": "45. hafta malzeme satış fiyat listesi (birim fiyat sütunu)",
+   "kisa": "45. hafta listesi, 03.11.2026",
+   "tarih": "2026-11-03",
+   "patron_verdi": true,
+   "not": "Patron 5 Kasım 2026 12:37'de TK-05 için verdi (\"bu belgede tüm fiyatlar var\"; 12:42 \"bu belgeyide senin düzenlemen gerekiyor bizde yok\"; D-60). Deftere yalnız 87 m² listesinde ve Haziran listesinde olmayan kalemler (160'lık dış duvar, 280 yükseklik, sandviç panel) girdi; var olan kalemlerin fiyatı değişmedi. Dosyanın sözleşme ve müşteri alanları boş; deftere yalnız kalem ve fiyat alındı. kaynak_satir 'bölüm-sıra' (ör. '2-2': 2 Köşe direği, 2. satır). KDV durumu listede yazmıyor. Listenin pano fiyatları yalnız 100 mm dış / 60 mm iç / 2500 mm seçimi için: 160'lık ve 280'lik pano fiyatı listede yok, defterde hesapla önerildi."
   }
  },
  "hatlar": {
@@ -1714,6 +1721,344 @@
      "durum": "eşdeğer",
      "onay": true,
      "not": "'3'lü H standart 60 (iç T) | L 2500' ile aynı fiyat; 3'lü H'da 60'lık 3'lü H ile aynı fiyat (Lokman 31 Ekim 2026 15:25); iç T'nin karşılığı iç T (D-36)"
+    },
+    "16'lık köşe direği 160 × 160 | 160 × 160 × 2800": {
+     "fiyat": 935.67,
+     "birim": "adet",
+     "kaynak": "L45",
+     "kaynak_satir": [
+      "2-2"
+     ],
+     "kaynak_kalem": "KÖŞE DİREĞİ-2 | 160x160x2800 mm",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": "r10 (TK-05, D-60): 160'lık dış duvarın köşesi, H 2800; listeden birebir"
+    },
+    "10'luk köşe direği 100 × 100 | 100 × 100 × 2800": {
+     "fiyat": 723.02,
+     "birim": "adet",
+     "kaynak": "L45",
+     "kaynak_satir": [
+      "2-5"
+     ],
+     "kaynak_kalem": "KÖŞE DİREĞİ-5 | 100x100x2800 mm",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": "r10 (TK-05, D-60): H 2800; listeden birebir (87 m² listesinde yalnız 2500: 773)"
+    },
+    "Çektirme U'su 160 | 160 × 2740": {
+     "fiyat": 196.38,
+     "birim": "adet",
+     "kaynak": "L45",
+     "kaynak_satir": [
+      "4-2"
+     ],
+     "kaynak_kalem": "ÇEKTİRME U PROFİLİ-2 | 160x2740 mm",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": "r10 (TK-05, D-60): H 2800'de çektirme U'su 2740; listeden birebir"
+    },
+    "Çektirme U'su 100 (iç duvar) | 100 × 2740": {
+     "fiyat": 138.32,
+     "birim": "adet",
+     "kaynak": "L45",
+     "kaynak_satir": [
+      "4-5"
+     ],
+     "kaynak_kalem": "ÇEKTİRME U PROFİLİ-5 | 100x2740 mm",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": "r10 (TK-05, D-60): H 2800'de çektirme U'su 2740; listeden birebir"
+    },
+    "160'lık pencere U'su H geçen | L 2500": {
+     "fiyat": 186.1,
+     "birim": "adet",
+     "kaynak": "L45",
+     "kaynak_satir": [
+      "8-13"
+     ],
+     "kaynak_kalem": "PENCERE KASA PROFİLİ-1 | 'H'' GEÇEN 160x2500 mm",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": "r10 (TK-05, D-60): listeden birebir"
+    },
+    "160'lık saçak omegası | 160 × 2500": {
+     "fiyat": 216.4,
+     "birim": "adet",
+     "kaynak": "L45",
+     "kaynak_satir": [
+      "5-9"
+     ],
+     "kaynak_kalem": "SAÇAK OMEGASI-1 | 160x2510 mm",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": "r10 (TK-05, D-60): listede omegalar 2510 yazılı (100'lük de 2510, 87 m² listesinde 100*2500); aynı parça; listeden birebir"
+    },
+    "Prefabrik çelik kapı (SAĞ) | 900 × 2000": {
+     "fiyat": 7500,
+     "birim": "adet",
+     "kaynak": "HAZ",
+     "kaynak_satir": [
+      106
+     ],
+     "kaynak_kalem": "KP1 ÇELİK KAPI / SAĞ,SOL STANDART | 95*205",
+     "durum": "ikinci kaynak",
+     "onay": true,
+     "not": "r10 (TK-05, D-60): SOL kapıyla aynı kaynak satırı ve fiyat (Haziran listesinde sağ ve sol aynı satır); 87 m² listesinde dış kapı yok"
+    },
+    "Trapez vida 5,5 × 110 (sandviç panel) | adet": {
+     "fiyat": 3,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      145
+     ],
+     "kaynak_kalem": "( 5.5x 110) TRAPEZ VİDA ( SANDVİÇ PANEL) | Adet",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": "r10 (TK-05, D-60): sandviç panelli çatının vidası; 87 m² listesinden birebir"
+    },
+    "H 160 (dış pano eki) | 160 × 160 × 2800": {
+     "fiyat": 428.83,
+     "birim": "adet",
+     "kaynak": "L45",
+     "kaynak_satir": [
+      "3-20",
+      "3-11"
+     ],
+     "kaynak_kalem": "KULAKLI & DÜBELLİ H -2 | 160x160x2800 mm; DÜBELLİ H -2 | 160x160x2800 mm",
+     "durum": "hesap",
+     "onay": false,
+     "not": "r10 (TK-05, D-60): kaynakta kulaklı 431,42, dübelli 424,29; listenin adayı kulaklı 7 / dübelli 4 → ortalama (TK-01'deki H 100'ün yöntemi, Patron 27 Ekim 22:08)"
+    },
+    "H standart 100 (iç pano eki) | 100 × 100 × 2800": {
+     "fiyat": 334.38,
+     "birim": "adet",
+     "kaynak": "L45",
+     "kaynak_satir": [
+      "3-23",
+      "3-14"
+     ],
+     "kaynak_kalem": "KULAKLI & DÜBELLİ H -5 | 100x100x2800 mm; DÜBELLİ H -5 | 100x100x2800 mm",
+     "durum": "hesap",
+     "onay": false,
+     "not": "r10 (TK-05, D-60): iç ve dış H 100'lükse aynı fiyat (D-36): dış H 100'ün 2800'ü; kaynakta kulaklı 337,94, dübelli 330,82 → ortalama"
+    },
+    "3'lü H 160 × 160 × 100 (dış duvar T'si) | L 2800": {
+     "fiyat": 558.58,
+     "birim": "adet",
+     "kaynak": "L45",
+     "kaynak_satir": [
+      "3-68",
+      "3-50"
+     ],
+     "kaynak_kalem": "ÜÇLÜ H KULAKLI & DÜBELLİ-5 | 160x100x2800 mm; ÜÇLÜ H DÜBELLİ-5 | 160x100x2800 mm",
+     "durum": "hesap",
+     "onay": false,
+     "not": "r10 (TK-05, D-60): kaynakta kulaklı 562,14, dübelli 555,02; listenin adayı kulaklı 1 / dübelli 1 → ortalama (TK-01'deki 3'lü H'nın yöntemi)"
+    },
+    "3'lü H standart 100 (iç T) | L 2800": {
+     "fiyat": 334.12,
+     "birim": "adet",
+     "kaynak": "L45",
+     "kaynak_satir": [
+      "3-44"
+     ],
+     "kaynak_kalem": "ÜÇLÜ H -17 | 60x60x2800 mm",
+     "durum": "eşdeğer",
+     "onay": false,
+     "not": "r10 (TK-05, D-60): 3'lü H'da 60'lık 3'lü H ile aynı fiyat (D-36; 2500'de 389): 60'lık standart 3'lü H'nın 2800'ü"
+    },
+    "160'lık alt çerçeve | 160 × 3750": {
+     "fiyat": 279.16,
+     "birim": "adet",
+     "kaynak": "L45",
+     "kaynak_satir": [
+      "7-1"
+     ],
+     "kaynak_kalem": "ALT ÇERÇEVE-1 | 160x2510 mm",
+     "durum": "hesap",
+     "onay": false,
+     "not": "r10 (TK-05, D-60): kaynakta 160 × 2510 (186,85); boyla orantılı (60'lık alt çerçevenin yöntemi, Patron 27 Ekim 22:08)"
+    },
+    "Özel pencere karkası (120×120) (160'lık çektirme U'su + 160'lık H geçen) | 1200 × 1200": {
+     "fiyat": 705.76,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      77
+     ],
+     "kaynak_kalem": "ÖZEL PENCERE KARKASI (120X120) (100 LÜK ÇEKTİRME U SU + 100 LÜK H GEÇEN) - X | 1200*1200",
+     "durum": "hesap",
+     "onay": false,
+     "not": "r10 (TK-05, D-60): 100'lük karkas 515 × 160/100 oranı 1.3704 (45. hafta listesi: 160'lık çektirme U'su 174,88 + 160'lık H geçen 186,10 = 360,98; 100'lük 123,18 + 140,23 = 263,41)"
+    },
+    "Özel pencere karkası (120×180) (160'lık çektirme U'su + 160'lık H geçen) | 1200 × 1800": {
+     "fiyat": 959.29,
+     "birim": "adet",
+     "kaynak": "PATRON",
+     "kaynak_satir": null,
+     "kaynak_kalem": "Lokman, TK-04 teklif PDF'inin bu satırına yorum (100'lük, 700 TL)",
+     "durum": "hesap",
+     "onay": false,
+     "not": "r10 (TK-05, D-60): 100'lük karkas 700 (Patron, 4 Kasım 23:20) × 160/100 oranı 1.3704 (45. hafta listesi, 120×120'deki gibi)"
+    },
+    "100'lük yapıştırma dolu pano | 100 × 1250 × 2800": {
+     "fiyat": 2352.0,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      11
+     ],
+     "kaynak_kalem": "100'LÜK YAPIŞTIRMA DOLU PANO | 100x1250x2500",
+     "durum": "hesap",
+     "onay": false,
+     "not": "r10 (TK-05, D-60): tabanı 2100 × 1,12; 280'lik pano 250'liğin 2800/2500 = 1,12 katı (45. hafta listesinde EPS, levha, köşe ve H'ın 2800'ü 2500'ünün tam 1,12 katı; D-36 boyla orantılı)"
+    },
+    "100'lük yapıştırma dolu pano | 100 × 1200 × 2800": {
+     "fiyat": 2352.0,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      11,
+      12
+     ],
+     "kaynak_kalem": "100'LÜK YAPIŞTIRMA DOLU PANO | 100x1250x2500",
+     "durum": "hesap",
+     "onay": false,
+     "not": "r10 (TK-05, D-60): tabanı 2100 × 1,12; 280'lik pano 250'liğin 2800/2500 = 1,12 katı (45. hafta listesinde EPS, levha, köşe ve H'ın 2800'ü 2500'ünün tam 1,12 katı; D-36 boyla orantılı); 1190 ve 1250 enli pano aynı fiyat (bant)"
+    },
+    "100'lük yapıştırma dolu pano | 100 × 625 × 2800": {
+     "fiyat": 1176.0,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      19
+     ],
+     "kaynak_kalem": "100'LÜK YAPIŞTIRMA DOLU PANO | 100x595x2500",
+     "durum": "hesap",
+     "onay": false,
+     "not": "r10 (TK-05, D-60): tabanı 1050 × 1,12; 280'lik pano 250'liğin 2800/2500 = 1,12 katı (45. hafta listesinde EPS, levha, köşe ve H'ın 2800'ü 2500'ünün tam 1,12 katı; D-36 boyla orantılı); 627,5'e kadar yarım pano (Patron 27 Ekim 22:08)"
+    },
+    "100'lük karkaslı + kasalı pano | 100 × 1170 × 2800": {
+     "fiyat": 2464.0,
+     "birim": "adet",
+     "kaynak": "HAZ",
+     "kaynak_satir": [
+      39
+     ],
+     "kaynak_kalem": "YK27 100'LÜK KARKASLI DOLU ÇELİK KAPI PANOSU (95/205) | 100x1250X2500",
+     "durum": "hesap",
+     "onay": false,
+     "not": "r10 (TK-05, D-60): tabanı 2200 × 1,12; 280'lik pano 250'liğin 2800/2500 = 1,12 katı (45. hafta listesinde EPS, levha, köşe ve H'ın 2800'ü 2500'ünün tam 1,12 katı; D-36 boyla orantılı); iç ve dış karkaslı pano aynı (D-36), en 1070–1250 bandı"
+    },
+    "160'lık yapıştırma dolu pano | 160 × 1250 × 2800": {
+     "fiyat": 2894.45,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      11
+     ],
+     "kaynak_kalem": "100'LÜK YAPIŞTIRMA DOLU PANO | 100x1250x2500",
+     "durum": "hesap",
+     "onay": false,
+     "not": "r10 (TK-05, D-60): tabanı 2100 × 1,12 + EPS 3,5 m²; 280'lik pano 250'liğin 2800/2500 = 1,12 katı (45. hafta listesinde EPS, levha, köşe ve H'ın 2800'ü 2500'ünün tam 1,12 katı; D-36 boyla orantılı); 160'lık pano 100'lüğün üstüne strafor farkı: 140 mm EPS − 80 mm EPS, 1250 × 2800'de 1.265,73 − 723,28 = 542,45 TL (154,9857 TL/m²), panonun dolu alanı kadar"
+    },
+    "160'lık yapıştırma dolu pano | 160 × 625 × 2800": {
+     "fiyat": 1447.23,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      19
+     ],
+     "kaynak_kalem": "100'LÜK YAPIŞTIRMA DOLU PANO | 100x595x2500",
+     "durum": "hesap",
+     "onay": false,
+     "not": "r10 (TK-05, D-60): tabanı 1050 × 1,12 + EPS 1,75 m²; 280'lik pano 250'liğin 2800/2500 = 1,12 katı (45. hafta listesinde EPS, levha, köşe ve H'ın 2800'ü 2500'ünün tam 1,12 katı; D-36 boyla orantılı); 160'lık pano 100'lüğün üstüne strafor farkı: 140 mm EPS − 80 mm EPS, 1250 × 2800'de 1.265,73 − 723,28 = 542,45 TL (154,9857 TL/m²), panonun dolu alanı kadar; yarım pano"
+    },
+    "160'lık yapıştırma dolu vasistaslı pano (60/40) | 160 × 1250 × 2800": {
+     "fiyat": 2857.25,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      24
+     ],
+     "kaynak_kalem": "100'LÜK YAPIŞTIRMA DOLU VASİSTASLI PANO (60/40) | 100x1250x2500",
+     "durum": "hesap",
+     "onay": false,
+     "not": "r10 (TK-05, D-60): tabanı 2100 × 1,12 + EPS 3,26 m²; 280'lik pano 250'liğin 2800/2500 = 1,12 katı (45. hafta listesinde EPS, levha, köşe ve H'ın 2800'ü 2500'ünün tam 1,12 katı; D-36 boyla orantılı); 160'lık pano 100'lüğün üstüne strafor farkı: 140 mm EPS − 80 mm EPS, 1250 × 2800'de 1.265,73 − 723,28 = 542,45 TL (154,9857 TL/m²), panonun dolu alanı kadar; vasistas boşluğu (60 × 40) düşüldü"
+    },
+    "Karkaslı çelik kapı panosu | 160 × 1250 × 2800": {
+     "fiyat": 2704.62,
+     "birim": "adet",
+     "kaynak": "HAZ",
+     "kaynak_satir": [
+      39
+     ],
+     "kaynak_kalem": "YK27 100'LÜK KARKASLI DOLU ÇELİK KAPI PANOSU (95/205) | 100x1250X2500",
+     "durum": "hesap",
+     "onay": false,
+     "not": "r10 (TK-05, D-60): tabanı 2200 × 1,12 + EPS 1,5525 m²; 280'lik pano 250'liğin 2800/2500 = 1,12 katı (45. hafta listesinde EPS, levha, köşe ve H'ın 2800'ü 2500'ünün tam 1,12 katı; D-36 boyla orantılı); 160'lık pano 100'lüğün üstüne strafor farkı: 140 mm EPS − 80 mm EPS, 1250 × 2800'de 1.265,73 − 723,28 = 542,45 TL (154,9857 TL/m²), panonun dolu alanı kadar; kapı boşluğu (95 × 205) düşüldü"
+    },
+    "Pencere alt panel (120/120) | 160 × 1250 × 800": {
+     "fiyat": 854.99,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      41
+     ],
+     "kaynak_kalem": "PENCERE ALT PANEL (120/120) | 100x1250x800",
+     "durum": "hesap",
+     "onay": false,
+     "not": "r10 (TK-05, D-60): tabanı 700 × 1,0 + EPS 1,0 m²; 280'lik pano 250'liğin 2800/2500 = 1,12 katı (45. hafta listesinde EPS, levha, köşe ve H'ın 2800'ü 2500'ünün tam 1,12 katı; D-36 boyla orantılı); 160'lık pano 100'lüğün üstüne strafor farkı: 140 mm EPS − 80 mm EPS, 1250 × 2800'de 1.265,73 − 723,28 = 542,45 TL (154,9857 TL/m²), panonun dolu alanı kadar; boy 800 (lento 80, H 2800; D-63)"
+    },
+    "Pencere alt panel (120/180) | 160 × 1250 × 200": {
+     "fiyat": 248.75,
+     "birim": "adet",
+     "kaynak": "HAZ",
+     "kaynak_satir": [
+      33
+     ],
+     "kaynak_kalem": "YK19 100'LÜK KARKASLI DOLU PENCERE ALT PANEL (120/180) | 100*1250*200",
+     "durum": "hesap",
+     "onay": false,
+     "not": "r10 (TK-05, D-60): tabanı 210 × 1,0 + EPS 0,25 m²; 280'lik pano 250'liğin 2800/2500 = 1,12 katı (45. hafta listesinde EPS, levha, köşe ve H'ın 2800'ü 2500'ünün tam 1,12 katı; D-36 boyla orantılı); 160'lık pano 100'lüğün üstüne strafor farkı: 140 mm EPS − 80 mm EPS, 1250 × 2800'de 1.265,73 − 723,28 = 542,45 TL (154,9857 TL/m²), panonun dolu alanı kadar; boy 200 (lento 80, H 2800; D-63)"
+    },
+    "Pencere üst panel | 160 × 1250 × 800": {
+     "fiyat": 826.99,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      40
+     ],
+     "kaynak_kalem": "PENCERE ÜST PANEL | 100x1250x500",
+     "durum": "hesap",
+     "onay": false,
+     "not": "r10 (TK-05, D-60): tabanı 420 × 1,6 + EPS 1,0 m²; 280'lik pano 250'liğin 2800/2500 = 1,12 katı (45. hafta listesinde EPS, levha, köşe ve H'ın 2800'ü 2500'ünün tam 1,12 katı; D-36 boyla orantılı); 160'lık pano 100'lüğün üstüne strafor farkı: 140 mm EPS − 80 mm EPS, 1250 × 2800'de 1.265,73 − 723,28 = 542,45 TL (154,9857 TL/m²), panonun dolu alanı kadar; boy 500 → 800 (lento 80, H 2800; D-63)"
+    },
+    "Sandviç panel kapaması | L 2500": {
+     "fiyat": 308.04,
+     "birim": "adet",
+     "kaynak": "EKIM87",
+     "kaynak_satir": [
+      104
+     ],
+     "kaynak_kalem": "Sandviç panel kapaması L 2800",
+     "durum": "hesap",
+     "onay": false,
+     "not": "r10 (TK-05, D-60): kaynakta L 2800 (345); boyla orantılı; Motor'un sandviç panel kapaması L 2500 (kitap)"
+    },
+    "Çektirme U'su 60 | 60 × 2740": {
+     "fiyat": 102.46,
+     "birim": "adet",
+     "kaynak": "L45",
+     "kaynak_satir": [
+      "4-8"
+     ],
+     "kaynak_kalem": "ÇEKTİRME U PROFİLİ-8 | 60x2740 mm",
+     "durum": "eşleşti",
+     "onay": true,
+     "not": "r10 (BK-25, D-60): 280'lik evin iç duvarının çektirme U'su (AP-28 gibi); listeden birebir"
     }
    },
    "bantlar": [
@@ -1912,6 +2257,19 @@
      "kaynak_kalem": "ÇG25 ANTRASİT GRİ TRAPEZ SAÇ MAHYASI | L=1000",
      "onay": true,
      "dayanak": "Trapez sac mahyası boyla orantılı (D-51; D-36'nın yöntemi; Lokman 4 Kasım 2026 21:37: \"fiyatları listelerden al sonuçta m² birim fiyatı değişmez 80 kapatırda olsa 100 kapatırda olsa aynıdır\"). Haziran listesinde yalnız L 1000 189 TL (kayıtlı kalem); 80'lik sacın mahyası L 800 151,20 TL. Kuruşa yuvarlanır."
+    },
+    {
+     "kalem_baslar": "Sandviç panel (100 cm kapatır) · ",
+     "boy_mm": 1000,
+     "fiyat": 554.79,
+     "yuvarlama": 0.01,
+     "kaynak": "L45",
+     "kaynak_satir": [
+      "12-15"
+     ],
+     "kaynak_kalem": "SANDAWİÇ PANEL-2 | 40 mm SANDAWİÇ PANEL 0,30 sac RAL7016 | 1.000 mm",
+     "onay": false,
+     "dayanak": "r10 (TK-05, D-60): sandviç panel metre fiyatından, yani boyla orantılı (100 cm kapatır; tek kat panelin D-36 yöntemi, Lokman 31 Ekim 2026 15:26 \"m² birim fiyat üzerinden git\"). 45. hafta listesinde 40 mm antrasit sandviç panel 1.000 mm 554,79 TL (yalıtımın 40 mm'si D-40'ın satıcı stok standardı; 20 mm 416,82). Kuruşa yuvarlanır. Patron onayı bekler."
     }
    ],
    "makas_kurali": {
