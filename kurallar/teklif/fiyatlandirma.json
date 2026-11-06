@@ -1,0 +1,15 @@
+{
+ "sema": "portman.teklif_fiyatlandirma/1",
+ "aciklama": "Bayi teklif formunun fiyatı (D-64, araclar/teklif_pdf.py › bayi_fiyati). Taban, teklifin seçeneğindeki toplamdır (Motor'un yükleme listesi × fiyat defteri; araclar/teklif.py). Bayi birim fiyatı = taban × (1 + kar_orani + kdv_orani × fiyata_katilan_kdv_payi); formdaki KDV = bayi birim fiyatı × faturada_kdv_orani; Toplam = birim fiyat + KDV. Oranlar pazara göre değişir ve burada durur, koda gömülmez (Lokman: \"bayi karı KDV falan değişkenlik gösterebilir kural olacaklar\"). Tanımı olmayan pazarla form üretilmez; oran uydurulmaz.",
+ "pazarlar": {
+  "yurt_disi": {
+   "ad": "Yurt dışı",
+   "kar_orani": 0.20,
+   "kdv_orani": 0.20,
+   "fiyata_katilan_kdv_payi": 0.5,
+   "faturada_kdv_orani": 0.0,
+   "kdv_notu": "Yurt dışı satış olduğu için KDV uygulanmaz.",
+   "dayanak": "Lokman, 6 Kasım 2026 08:38 (TK-05 bayi formu, Romanya): \"bu yurt dışı olduğu için KDV'yi yarım alacağız kar marjını %20 de tutacağız bayi karı KDV falan değişkenlik gösterebilir kural olacaklar\"; madde 4: \"Birim fiyata + %30 ekle ... KDV'ye 0 (yurt dışı KDV yok) yaz\". %30 = kâr %20 + KDV'nin (%20) yarısı %10, toplanarak."
+  }
+ }
+}
