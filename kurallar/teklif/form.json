@@ -37,7 +37,7 @@
   }
  },
  "bayi_formu": {
-  "aciklama": "Bayiye giden teklif ve satış onay formu (D-64; araclar/teklif.py --bayi <girdi>). İç teklifin PDF'inden farkı: TASLAK ve uyarı satırı yok; 01 bayinin bilgileri girdiden; 02'de ürün tanımı tavansız, birim fiyat kurallar/teklif/fiyatlandirma.json'daki pazarın kuralıyla, KDV pazarın oranıyla; 03 girdiden, boş satırla form üretilmez; Ek-1'de malzeme listesi birim fiyat ve tutar boş, ara ve genel toplam yok. Girdi depoya girmez (bayinin iletişim bilgisi); proje klasöründe durur.",
+  "aciklama": "Bayiye giden teklif ve satış onay formu (D-64; araclar/teklif.py --bayi <girdi>). İç teklifin PDF'inden farkı: TASLAK ve uyarı satırı yok; 01 bayinin bilgileri girdiden; 02'de ürün tanımı tavansız, birim fiyat kurallar/teklif/fiyatlandirma.json'daki pazarın kuralıyla, KDV pazarın oranıyla; 03 girdiden, boş satırla form üretilmez; Ek-1'de malzeme listesi birim fiyat ve tutar boş, ara ve genel toplam yok, adedi 0 olan satır yok. Girdi depoya girmez (bayinin iletişim bilgisi); proje klasöründe durur.",
   "dosya": "{kod}_teklif_formu.pdf",
   "urun": "{kat} Prefabrik Yapı",
   "kat_adi": {"1": "Tek Kat"},
@@ -46,7 +46,7 @@
   "odeme_satirlari": ["Teslim süresi", "Teslim şekli", "Ödeme şekli"],
   "telefon": "maskeli",
   "telefon_dayanagi": "D-33 madde 3: telefon numarası her yerde maskelenir (son dört hane kalır, beyin/numara.py). Bayi formunda açık yazılması Lokman'ın kararını bekliyor (6 Kasım 2026).",
-  "fiyat_aciklamasi": "Birim fiyat; 04'teki teknik özellikler ve Ek-1'deki malzeme listesiyle paketin satış fiyatıdır, teslim ve ödeme koşulları 03'tedir. {kdv_notu} Alan, verandalar dahil yapının brüt alanıdır.",
+  "fiyat_aciklamasi": "Birim fiyat; 04'teki teknik özellikler ve Ek-1'deki malzeme listesiyle paketin satış fiyatıdır, teslim ve ödeme koşulları 03'tedir. {kdv_notu} Alan, yapının brüt alanıdır (varsa verandalar dahil).",
   "ek_basligi": "EK-1 · MALZEME LİSTESİ",
   "alt_yazi": "teklif ve satış onay formu"
  },

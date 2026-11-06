@@ -277,7 +277,7 @@ def ek_satirlari(T: dict, sec: dict, bayi_basligi: str | None = None) -> tuple[s
     """Ek-1'in parçaları: (başlık, tablo başı, satırlar, son). Satır (tür, grup, html); tür "grup", "kalem", "ara" ya da "genel". Motor'un
     listesi grup grup, birim fiyat ve tutarla (Excel'in seçenek sayfasıyla aynı satırlar ve toplamlar); ara toplamların toplamı özetin
     toplamını tutmazsa durur. `bayi_basligi` verilirse bayi formunun eki (D-64): o başlık, aynı satırlar, birim fiyat ve tutar boş, ara
-    ve genel toplam yok, son yok."""
+    ve genel toplam yok, son yok; adedi 0 olan satır (pakette yok) yazılmaz."""
     bayi = bayi_basligi is not None
     from araclar.liste_excel import GENEL, buyuk, eksik, gorunen
     R = sec["fiyat"]; o = R["ozet"]
@@ -298,8 +298,10 @@ def ek_satirlari(T: dict, sec: dict, bayi_basligi: str | None = None) -> tuple[s
     satir: list[tuple[str, str, str]] = []
     toplam = 0.0
     for ad, ss in gruplar.items():
-        satir.append(("grup", ad, f"<tr class='grup'><td colspan='{n}'>{e(buyuk(ad))}</td></tr>"))
-        for s in ss:
+        gorunur = [s for s in ss if not (bayi and s.get("adet") == 0)]      # bayi formunda adedi 0 olan satır yazılmaz
+        if gorunur:
+            satir.append(("grup", ad, f"<tr class='grup'><td colspan='{n}'>{e(buyuk(ad))}</td></tr>"))
+        for s in gorunur:
             olcu, birim = gorunen(s.get("teklif_olcu") or s.get("olcu"), s.get("birim"))
             bos = " class='sag nw bos'" if s["birim_fiyat"] is None or eksik(s) else " class='sag nw'"
             hucre = [f"<td{w(0)}>{e(s.get('teklif_adi') or s['kalem'])}</td>", f"<td{w(1)} class='nw'>{e(olcu)}</td>", f"<td{w(2)} class='orta'>{e(birim)}</td>",
