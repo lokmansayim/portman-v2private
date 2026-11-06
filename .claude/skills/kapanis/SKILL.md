@@ -1,6 +1,6 @@
 ---
 name: kapanis
-description: İş emrini kapatır — doğrulama, kanıt, DURUM.md, commit/push, bağımsız inceleme ve PR özeti. Merge etmez; main'e birleştirme Lokman'ın onayıyla.
+description: İş emrini kapatır — doğrulama, kanıt, DURUM.md, commit/push, bağımsız inceleme ve PR özeti. Merge etmez; main'e birleştirmeyi Lokman yapar (D-59).
 disable-model-invocation: true
 argument-hint: [KOD]
 ---
@@ -38,5 +38,5 @@ Kapanış, "çalışıyor" demenin kanıtını üretir. Sıra sabittir; bir adı
 
 ## 6. PR ve özet
 - Taslak PR aç: `gh pr create --draft --base main --title "<KOD> · <başlık>" --body-file <geçici dosya>` ya da GitHub MCP `create_pull_request` (`draft: true`); ikisi de yoksa karşılaştırma bağlantısını yaz (`https://github.com/lokmansayim/portman-v2private/compare/main...<dal>`). GitHub doğrulaması taslakta koşmaz (dakika, `AGENTS.md` › Değişiklik disiplini).
-- Birleştirme onayı alınınca (ya da onay sorulmadan hemen önce): güncel `main`'i dala al, PR'ı hazır yap (`gh pr ready` ya da MCP `update_pull_request`, `draft: false`), "Doğrulama sonucu" yeşil olunca birleştir; kırmızıysa düzelt, birleştirme yok.
-- Lokman'a 6 satırlık özet: ne değişti, kanıt sayıları, inceleme bulguları, kalan riskler, onayını bekleyen şeyler, sıradaki iş. Son cümle: **"main'e birleştirme senin onayınla."**
+- **Birleştirmeyi Lokman yapar (D-59).** Yerel doğrulama bitince güncel `main`'i dala al ve PR'ı hazır yap (`gh pr ready` ya da MCP `update_pull_request`, `draft: false`); GitHub doğrulaması orada koşar. Kırmızıysa düzelt, düzeltmeleri toplu gönder, yeniden koştur. "Doğrulama sonucu" ve "Korunan dosya onayı" yeşil olunca PR bağlantısını Lokman'a tek satırla ver. Oturum birleştirmez ve birleştirmeyi denemez; bağlantı verilen PR taslak değildir.
+- Lokman'a 6 satırlık özet: ne değişti, kanıt sayıları, inceleme bulguları, kalan riskler, onayını bekleyen şeyler, sıradaki iş. Korunan dosya değiştiyse "Korunan dosya onayı" için Lokman'ın `patron-onayi` etiketi gerekir; etiketi oturum eklemez. Son cümle: **"Birleştirme sizde: PR'da yalnız Merge pull request düğmesi kaldı."**
