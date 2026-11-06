@@ -10,7 +10,7 @@ from pathlib import Path
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-from matplotlib.patches import Rectangle, Arc
+from matplotlib.patches import Rectangle, Arc, Polygon as MPolygon
 
 from . import geometry as G
 
@@ -44,6 +44,9 @@ def plan_gorseli(ie: dict, yol: Path, v: dict | None = None, genislik_px: int = 
     bx0, by0, bx1, by1 = 0.0, 0.0, W, H          # çerçeve: gövde ve taşan verandalar (BK-14; veranda yoksa gövde, eskisi gibi)
     for v_ in plan.dis_verandalar:
         x0, y0, x1, y1 = v_["rect"]; bx0, by0, bx1, by1 = min(bx0, x0), min(by0, y0), max(bx1, x1), max(by1, y1)
+    for kb in plan.kubbeler:                     # İE-29: kubbe gövdenin dışında
+        bx0, by0 = min([bx0] + [p_[0] for p_ in kb["dis"]]), min([by0] + [p_[1] for p_ in kb["dis"]])
+        bx1, by1 = max([bx1] + [p_[0] for p_ in kb["dis"]]), max([by1] + [p_[1] for p_ in kb["dis"]])
     fig_w = genislik_px / 100
     fig = plt.figure(figsize=(fig_w, fig_w * (by1 - by0 + 2 * pay + 90) / (bx1 - bx0 + 2 * pay)), dpi=100)
     ax = fig.add_axes([0, 0, 1, 1]); ax.set_aspect("equal"); ax.axis("off")
@@ -53,6 +56,9 @@ def plan_gorseli(ie: dict, yol: Path, v: dict | None = None, genislik_px: int = 
         poly = m.poly
         if poly is None or poly.is_empty:
             continue
+        if m.ek:                                 # İE-29: kubbenin içi mahalin
+            from shapely.ops import unary_union
+            poly = unary_union([poly] + m.ek)
         polys = list(poly.geoms) if hasattr(poly, "geoms") else [poly]
         for pg in polys:
             xs, ys = pg.exterior.xy
@@ -71,6 +77,8 @@ def plan_gorseli(ie: dict, yol: Path, v: dict | None = None, genislik_px: int = 
             for (x0, y0, x1, y1) in p.rects():
                 ax.add_patch(Rectangle((x0, y0), x1 - x0, y1 - y0, facecolor=DUVAR, edgecolor=DUVAR, linewidth=0.5, zorder=4))
             for ac_ in p.aciklar:                           # D-46: karkaslı panoda birden çok açıklık
+                if ac_.tur == "kubbe":                    # İE-29: kubbenin tabanı boşluk; kubbe aşağıda
+                    continue
                 x0, y0, x1, y1 = p.bosluk_dortgeni(ac_)
                 if ac_.tur == "pencere":
                     ax.add_patch(Rectangle((x0, y0), x1 - x0, y1 - y0, facecolor="white", edgecolor=PENCERE, linewidth=1.2, zorder=4))
@@ -100,6 +108,16 @@ def plan_gorseli(ie: dict, yol: Path, v: dict | None = None, genislik_px: int = 
     for k in plan.koseler:
         x0, y0, x1, y1 = k.rect
         ax.add_patch(Rectangle((x0, y0), x1 - x0, y1 - y0, facecolor=DUVAR, edgecolor=DUVAR, linewidth=0.5, zorder=4))
+    for kb in plan.kubbeler:                     # İE-29: kubbe (bant duvar renginde, üç panonun ortasında pencere)
+        ax.add_patch(MPolygon(kb["bant"], closed=True, facecolor=DUVAR, edgecolor=DUVAR, linewidth=0.5, zorder=4))
+        for q in kb["panolar"]:
+            (ax_, ay_), (bx_, by_) = q["dis_kenar"]; (vx, vy), (nx, ny) = q["boyunca"], q["disari"]
+            mx, my = (ax_ + bx_) / 2 - nx * G.T_DIS / 2, (ay_ + by_) / 2 - ny * G.T_DIS / 2
+            w, t = G.pencere_kurali(q["pencere"]).en / 2, G.T_DIS / 2
+            kose = [(mx + sa * vx * w + sb * nx * t, my + sa * vy * w + sb * ny * t) for sa, sb in ((-1, -1), (1, -1), (1, 1), (-1, 1))]
+            ax.add_patch(MPolygon(kose, closed=True, facecolor="white", edgecolor=PENCERE, linewidth=1.2, zorder=4))
+            ax.plot([mx - vx * w, mx + vx * w], [my - vy * w, my + vy * w], color=PENCERE, linewidth=1.0, zorder=5)
+            ax.text(mx + nx * 22, my + ny * 22, q["pencere"], ha="center", va="center", fontsize=7, color=PENCERE, zorder=5)
     for (x0, y0, x1, y1) in plan.dikmeler:
         ax.add_patch(Rectangle((x0, y0), x1 - x0, y1 - y0, facecolor="#6b5b45", edgecolor="#6b5b45", zorder=4))
     # dış ölçüler

@@ -5,7 +5,7 @@ geldiği yere 250 cm kolon.
 profilin boşta kalmaması için köşe direğine vidalayamıyoruz o yüzden tam geldiği yerede bir tane 250cm kolon koyması gerekiyor".
 r06'da ana makaslar cumba makasının arkasından başlar (D-53 madde 7): ana çatının açıklığı ön dış yüzden 37,5'ta başlar, saçağı 7,5'ta biter.
 r07'de verandanın ön kirişi 37,5'a alınır (İş Emri: ek aks y 861, girinti, `dikmeler`); Motor kodu değişmez. Çizimde girintiye bakan açık
-kenarın profili (verandada `girinti_kirisi: true`) PC-35 (`dxf_out`); anahtarsız İş Emri eski yoldan (aynı biçimli AP-15, AP-18, AP-22,
+kenarın profili (verandada `girinti_kirisi: true`) PC-36 (`dxf_out`); anahtarsız İş Emri eski yoldan (aynı biçimli AP-15, AP-18, AP-22,
 AP-25 aynen).
 
 r08 (Lokman, 5 Kasım 2026 22:08): "aks çizgisini bozma nasıl ki 62,75'e aks çizmiyoruz bina sonu özel ölçü olmadığı sürece çizme ... salonun

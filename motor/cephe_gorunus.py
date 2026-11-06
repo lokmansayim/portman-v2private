@@ -49,6 +49,27 @@ def gorunur(plan: G.Plan, d, dis: str) -> bool:
     boyunu örtmüyorsa. Gövde = dış kutu − ızgaradaki açık mahaller (niş, köşe verandası); girintili gövdede kutu yerine gövdenin dış çizgisi
     (`G.govde_cokgeni`; İE-24: TK-03'ün girintideki duvarı ön görünüşte görünür). Öndeki giriş nişinin yan duvarları dışarı (nişe) bakar
     ama yandan bakışta gövdenin ardında kalır; yan görünüşte derz ve doğrama vermez (D-31 madde 7)."""
+    golge, a, b = _golge(plan, d, dis)
+    return (b - a) - golge.intersection(box_(a, 0, b, 1)).area >= 1.0
+
+
+def gorunen_araliklar(plan: G.Plan, d, dis: str) -> list[tuple[float, float]]:
+    """İE-29: duvarın boyunca (p0–p1) o yandan görünen aralıklar (1 cm'den kısası yok); duvar görünmüyorsa boş."""
+    if not gorunur(plan, d, dis):
+        return []
+    golge, a, b = _golge(plan, d, dis)
+    acik_ = box_(a, 0, b, 1).difference(golge)
+    return sorted((g.bounds[0], g.bounds[2]) for g in getattr(acik_, "geoms", [acik_]) if not g.is_empty and g.bounds[2] - g.bounds[0] >= 1.0)
+
+
+def box_(*a):
+    from shapely.geometry import box
+    return box(*a)
+
+
+def _golge(plan: G.Plan, d, dis: str):
+    """`gorunur`'un örtüsü: duvarın boyunca önündeki gövdenin kapladığı aralıklar (shapely, 0–1 şeridinde), duvarın uçları. İE-29: yarım
+    duvar örtmez (ardındaki duvar üstünden görünür)."""
     from shapely.geometry import box
     from shapely.ops import unary_union
     x0, y0, x1, y1 = G.govde_kutusu(plan)
@@ -56,6 +77,8 @@ def gorunur(plan: G.Plan, d, dis: str) -> bool:
     acik = [m.poly for m in plan.mahaller.values() if m.acik and m.poly is not None and m.ad not in dis_v]
     govde = G.govde_cokgeni(plan)
     govde = govde.difference(unary_union(acik)) if acik else govde
+    yarim = [box(*yarim_kutusu(w)) for w in plan.duvarlar if w.yukseklik is not None and w is not d]
+    govde = govde.difference(unary_union(yarim)) if yarim else govde     # İE-29: yarım duvarın ardındaki duvar üstünden görünür
     yuz = d.c + d.h if dis[0] == "+" else d.c - d.h
     a, b = d.p0, d.p1
     if d.yon == "y":
@@ -66,22 +89,42 @@ def gorunur(plan: G.Plan, d, dis: str) -> bool:
     k = 1 if d.yon == "y" else 0                      # duvar boyunca eksen (y duvarında y); derinlik öteki eksende
     parca = [g.bounds for g in getattr(ortu, "geoms", [ortu]) if not g.is_empty and g.area > 0]
     golge = unary_union([box(r[k], 0, r[k + 2], 1) for r in parca if r[3 - k] - r[1 - k] >= 1.0])    # 1 cm'den ince şerit örtmez
-    return (b - a) - golge.intersection(box(a, 0, b, 1)).area >= 1.0
+    return golge, a, b
+
+
+def yarim_kutusu(d) -> tuple:
+    """Yarım duvarın plandaki kutusu (x0, y0, x1, y1)."""
+    return (d.p0, d.c - d.h, d.p1, d.c + d.h) if d.yon == "x" else (d.c - d.h, d.p0, d.c + d.h, d.p1)
 
 
 def cephe(plan: G.Plan, taraf: str) -> dict:
     """{"en": cephenin eni, "derz": [u], "acikliklar": [{"tur": pencere | dis_kapi, "u0", "u1", "z0", "z1", "olcu", "acilis", "bolmeler",
-    "kapi_turu", "mentese"}]} (soldan sağa; `mentese` yalnız türü yazılı dış kapıda, görünüşte menteşenin yanı, D-52)."""
+    "kapi_turu", "mentese"}], "yarim": [{"u0", "u1", "z1", "derz": [u]}]} (soldan sağa; `mentese` yalnız türü yazılı dış kapıda, görünüşte
+    menteşenin yanı, D-52). İE-29 (AP-12): yarım duvar (`Duvar.yukseklik`) kendi yüksekliğinde; derzi yalnız kendi boyunda, ardındaki duvarın
+    altını örter (`yarim`); ardındaki duvar üstünden görünür (`gorunur`)."""
     yon, dis = _YON[taraf]
     u, _, en = eksen(plan, taraf)
     uu = (lambda a: u(a, 0.0)) if yon == "x" else (lambda a: u(0.0, a))
-    duvarlar = [d for d in plan.duvarlar if d.tur == "dis" and d.yon == yon and G.disari_yon(plan, d) == dis and gorunur(plan, d, dis)]
-    us = set()
+    duvarlar = [d for d in plan.duvarlar if d.tur == "dis" and d.yon == yon and dis in G.disari_yonleri(plan, d) and gorunur(plan, d, dis)]
+    # İE-29: duvarın ikinci yönü (iki açık mahalin arasındaki kısım; `G.disari_yonleri`) yalnız görünen aralıklarıyla: derz ve açıklık orada
+    gorunen = {d.id: gorunen_araliklar(plan, d, dis) for d in duvarlar if G.disari_yon(plan, d) != dis}
+    icinde = lambda d, a0, a1: d.id not in gorunen or any(lo - 0.5 <= a0 and a1 <= hi + 0.5 for lo, hi in gorunen[d.id])
+    us, yarim = set(), []
     for d in duvarlar:
+        if d.yukseklik is not None:
+            ds = sorted({uu(v) for p in d.panolar for v in (p.a0, p.a1)})
+            yarim.append({"u0": ds[0], "u1": ds[-1], "z1": float(d.yukseklik), "derz": ds[1:-1]})
+            continue
+        if d.id in gorunen:
+            uc = [v for lo, hi in gorunen[d.id] for v in (lo, hi)] + [v for p in d.panolar for v in (p.a0, p.a1)]
+            us.update(uu(v) for v in uc if icinde(d, v, v))
+            continue
         for p in d.panolar:
             us.add(uu(p.a0)); us.add(uu(p.a1))
     for d in plan.duvarlar:
-        if d.tur == "dis" and d.yon != yon and cepheye_deger(d, duvarlar):
+        if d.tur == "dis" and d.yon != yon and (cepheye_deger(d, [w for w in duvarlar if w.id not in gorunen])
+                                                 or any(cepheye_deger(d, [w]) and icinde(w, d.c - d.h, d.c + d.h)
+                                                        for w in duvarlar if w.id in gorunen)):
             us.add(uu(d.c - d.h)); us.add(uu(d.c + d.h))
     ac = []
     for d in duvarlar:
@@ -89,6 +132,8 @@ def cephe(plan: G.Plan, taraf: str) -> dict:
             if a.tur not in ("pencere", "dis_kapi"):
                 continue
             g = p.bosluk_dortgeni(a)
+            if not icinde(d, *((g[0], g[2]) if d.yon == "x" else (g[1], g[3]))):
+                continue
             u0, u1 = sorted((uu(g[0]), uu(g[2])) if yon == "x" else (uu(g[1]), uu(g[3])))
             ust = G.ust_kot()                                           # BK-23 (D-55): `yapi.lento_cm` yoksa 200
             if a.tur == "pencere":                                      # İE-27 madde 11: 200'ü geçen pencere döşemeden, üstü boyu kadar
@@ -100,7 +145,8 @@ def cephe(plan: G.Plan, taraf: str) -> dict:
                        "olcu": a.olcu if a.tur == "pencere" else None, "acilis": a.acilis,
                        "bolmeler": a.bolmeler, "kapi_turu": a.kapi_turu,
                        "mentese": kapi_mentese_yani(plan, a, g, uu, yon) if a.kapi_turu else None})
-    return {"en": en, "derz": sorted(v for v in us if 1e-6 < v < en - 1e-6), "acikliklar": sorted(ac, key=lambda k: k["u0"])}
+    return {"en": en, "derz": sorted(v for v in us if 1e-6 < v < en - 1e-6), "acikliklar": sorted(ac, key=lambda k: k["u0"]),
+            "yarim": sorted(yarim, key=lambda k: k["u0"])}
 
 
 def kapi_mentese_yani(plan: G.Plan, a, g, uu, yon: str) -> str:
@@ -198,8 +244,104 @@ def cati_cizgileri(plan: G.Plan, ie: dict, taraf: str) -> dict:
         e_, c_ = _mahal_catisi(plan, m, taraf, u, d, ortu)               # tepe ve saçak kotu ana çatıdan (köşe kırması ana çatının düzlemlerinde)
         egimler += e_
         cizgi += c_
-    return {"cizgiler": cizgi, "egimler": sorted(egimler), "u0": u0, "u1": u1, "tepe": tepe, "sacak_kotu": sacak_kotu,
-            "topuklar": _topuklar(ck, u, d, ortu, (u0, u1), float((ie.get("cati") or {}).get("topuk_cm", 10)))}
+    out = {"cizgiler": cizgi, "egimler": sorted(egimler), "u0": u0, "u1": u1, "tepe": tepe, "sacak_kotu": sacak_kotu,
+           "topuklar": _topuklar(ck, u, d, ortu, (u0, u1), float((ie.get("cati") or {}).get("topuk_cm", 10)))}
+    if plan.kubbeler:                                                    # İE-29: anahtar yalnız kubbeli planda (öteki görünüşler aynen)
+        out["kubbe"] = _kubbe_gorunusu(plan, ie, taraf, u, d, ck)
+    return out
+
+
+def _yakin_parca(k3: list, d, D: float) -> list:
+    """Üç boyutlu çokgenin (x, y, z) planda derinliği D'den küçük (bakana yakın) kısmı (Sutherland–Hodgman; kesişimde doğrusal ara değer)."""
+    out = []
+    for i, a in enumerate(k3):
+        b = k3[(i + 1) % len(k3)]
+        da, db = d(a[0], a[1]) - D, d(b[0], b[1]) - D
+        if da < 0:
+            out.append(a)
+        if (da < 0) != (db < 0):
+            t = da / (da - db)
+            out.append(tuple(a[j] + t * (b[j] - a[j]) for j in range(3)))
+    return out
+
+
+def _kubbe_gorunusu(plan: G.Plan, ie: dict, taraf: str, u, d, ck: dict) -> dict:
+    """İE-29 PR-2: kubbelerin bu görünüşteki parçaları (`G._kubbe_geometrisi`). Kubbe dışbükey: üç duvar yüzü ve üç üçgen çatı yüzü (D-54,
+    Lokman 5 Kasım 2026 10:41 kubbe detayı ve 12:05 düzeltmesi: kubbe duvarı zeminden 203 cm, `KUBBE["duvar_cm"]`; saçak kubbenin dış
+    çizgisinden 18,5 cm dışarıda, `KUBBE["sacak_cm"]`, `G.kubbe_sacagi`; saçakta topuk şeridi, kubbe duvarının üstünden topuk kadar; tepe
+    düz duvarda kubbenin ortasında, kubbe duvarının üstünden 35 cm; köşelerden tepeye iki mahya). Kubbenin üstündeki ana duvar bandı ana
+    cephede çizilir. Bakana dönük yüz çizilir, öbürü kubbenin ya da gövdenin
+    ardındadır. Ana çatının bakana dönük düzlemlerinin ve kalkanlarının kubbenin yüzünden yakın kısmı (`_yakin_parca`; düzlemin topuğu dahil)
+    kubbeyi örter (yandan bakışta saçağın altı; ortalama derinlik yetmez: ana çatının düzlemi mahyadan saçağa kubbenin iki yanına uzanır).
+    Döner: {"dolgu": [[(u, z)]] (beyaz; ardındaki çizgiler örtülür), "cizgiler": [{"katman": duvar | cati, "u": [(u, z)]}],
+    "pencereler": [{"u0", "u1", "z0", "z1", "olcu"}], "u0", "u1"} (u0 / u1 kubbenin görünen uçları; yoksa None)."""
+    from shapely.affinity import translate
+    from shapely.geometry import LineString, MultiLineString, Polygon
+    from shapely.ops import unary_union
+    cati = ie.get("cati") or {}
+    hy = float(ie["yapi"].get("duvar_yuksekligi_cm", 250))
+    topuk, sacak = float(cati.get("topuk_cm", 10)), G.KUBBE["sacak_cm"]
+    hk = G.KUBBE["duvar_cm"]                                                 # kubbe duvarının üstü (D-54)
+    ze, za = hk + topuk, hk + G.KUBBE["tepe_cm"]
+    bx, by = _BAKANA[taraf]
+    out = {"dolgu": [], "cizgiler": [], "pencereler": [], "u0": None, "u1": None}
+
+    donuk3, perde3 = [], []
+    for dz in ck["duzlemler"]:
+        yx, yy = dz["yukari"]
+        if -dz["egim"] * (yx * bx + yy * by) / math.sqrt(1 + dz["egim"] ** 2) > YAN_ESIGI:
+            donuk3.append([tuple(map(float, p)) for p in dz["ucboyut"]])
+    for k in ck["kalkanlar"]:
+        perde3.append([(sv, k["konum"], z) if k["eksen"] == "y" else (k["konum"], sv, z) for sv, z in k["kose"]])
+
+    def ortu_(derinlik):
+        g = []
+        for k3 in donuk3:
+            k2 = [(u(x, y), z) for x, y, z in _yakin_parca(k3, d, derinlik)]
+            if len(k2) >= 3 and Polygon(k2).area > 1e-6:
+                g += [Polygon(k2).buffer(0.05), translate(Polygon(k2), 0.0, -topuk)]     # ana çatının topuğu
+        for k3 in perde3:
+            k2 = [(u(x, y), z) for x, y, z in _yakin_parca(k3, d, derinlik)]
+            if len(k2) >= 3 and Polygon(k2).area > 1:
+                g.append(Polygon(k2).buffer(-0.5))
+        g = unary_union(g) if g else None
+        return None if g is None or g.is_empty else g
+
+    def ekle(geo, katman):
+        for h in (geo.geoms if isinstance(geo, MultiLineString) else [geo]):
+            if isinstance(h, LineString) and h.length > 0.5:
+                out["cizgiler"].append({"katman": katman, "u": [(round(a, 4), round(b, 4)) for a, b in h.coords]})
+
+    for kb in plan.kubbeler:
+        E, tp, S = kb["dis"], kb["tepe"], G.kubbe_sacagi(kb, sacak)
+        for i, q in enumerate(kb["panolar"]):
+            nx, ny = q["disari"]
+            if nx * bx + ny * by <= YAN_ESIGI:                               # bakana dönük değil (yandan ya da arkadan)
+                continue
+            a, b, sa, sb = E[i], E[i + 1], S[i], S[i + 1]
+            ua, ub, usa, usb = u(*a), u(*b), u(*sa), u(*sb)
+            yuzler = [("duvar", [(ua, 0.0), (ub, 0.0), (ub, hk), (ua, hk)], (d(*a) + d(*b)) / 2.0),
+                      ("cati", [(usa, hk), (usb, hk), (usb, ze), (usa, ze)], (d(*sa) + d(*sb)) / 2.0),               # saçaktaki topuk
+                      ("cati", [(usa, ze), (usb, ze), (u(*tp), za)], (d(*sa) + d(*sb) + d(*tp)) / 3.0)]
+            for katman, k2, derinlik in yuzler:
+                pg = Polygon(k2)
+                if pg.area < 1e-6:
+                    continue
+                o = ortu_(derinlik)
+                gor = pg if o is None else pg.difference(o)
+                for g in getattr(gor, "geoms", [gor]):
+                    if g.geom_type == "Polygon" and g.area > 1.0:
+                        out["dolgu"].append([(round(x, 4), round(z, 4)) for x, z in g.exterior.coords[:-1]])
+                hat = LineString(k2 + k2[:1])
+                ekle(hat if o is None else hat.difference(o), katman)
+            pk = G.pencere_kurali(q["pencere"])
+            (mx, my), (vx, vy) = ((q["dis_kenar"][0][0] + q["dis_kenar"][1][0]) / 2.0, (q["dis_kenar"][0][1] + q["dis_kenar"][1][1]) / 2.0), q["boyunca"]
+            u0, u1 = sorted((u(mx - vx * pk.en / 2.0, my - vy * pk.en / 2.0), u(mx + vx * pk.en / 2.0, my + vy * pk.en / 2.0)))
+            out["pencereler"].append({"u0": round(u0, 4), "u1": round(u1, 4), "z0": pk.esik, "z1": pk.ust, "olcu": q["pencere"]})
+    us = [p[0] for k2 in out["dolgu"] for p in k2]
+    if us:
+        out["u0"], out["u1"] = min(us), max(us)
+    return out
 
 
 def kapali_golge(plan: G.Plan, taraf: str):
@@ -209,7 +351,8 @@ def kapali_golge(plan: G.Plan, taraf: str):
     from shapely.ops import unary_union
     B = 1e5
     acik = [m.poly for m in plan.mahaller.values() if m.acik and m.poly is not None]
-    kapali = G.govde_cokgeni(plan).difference(unary_union(acik + [box(*r) for r in plan.dikmeler]))
+    yarim = [box(*yarim_kutusu(w)) for w in plan.duvarlar if w.yukseklik is not None]      # İE-29: yarım duvar örtmez
+    kapali = G.govde_cokgeni(plan).difference(unary_union(acik + [box(*r) for r in plan.dikmeler] + yarim))
     i = 0 if taraf in ("on", "arka") else 1
     cs = sorted({round(c[i], 4) for g in getattr(kapali, "geoms", [kapali]) for c in g.exterior.coords})
     out = []
