@@ -1,0 +1,13 @@
+{
+ "kod": "AP-04",
+ "ap": "AP-04",
+ "kip": "motor",
+ "girdi": {
+  "is_emri": "testler/kor/projeler/AP04/is_emri.json"
+ },
+ "bizim_liste": "bizim_liste.json",
+ "liste_sha256": "11c49f7853adf6862c62b063c399311adc679f9618667c02dce30b2d766e722f",
+ "sayfa": null,
+ "kapi": true,
+ "not": "İE-32 ölçümü (açık sekiz; liste 13 Ekim'de örnek olarak okundu, kör değil). İş Emri montaj paftasından (1139,5 × 835,75 beşik, sağ önde gömme veranda, trapez 80 cm kapatır); pano dizilimi paftadaki gibi (dis_pano_dayanagi, karkaslı pano); varsayımlar İş Emri'nde."
+}

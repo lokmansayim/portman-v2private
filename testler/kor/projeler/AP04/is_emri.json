@@ -1,0 +1,87 @@
+{
+  "is_emri_no": "KOR-AP04",
+  "revizyon": 1,
+  "talep": {
+    "bayi": {"kod": "AP04", "ad": "Bayi AP-04"},
+    "musteri_adi": "AP-04",
+    "metin": "İE-32 açık ev ölçümü: AP-04 (beşik, gövdenin sağ önünde gömme veranda, trapez çatı) montaj paftasından okundu (6 Kasım 2026). Konumlar cm, aks; x sol dış yüzden; dizilim arka-sol olduğundan mahallerin y'si arka dış yüzden (Motor'un kuralı), açıklıkların cepheleri gerçek çerçevede (paftanın altı ön, veranda ve giriş)."
+  },
+  "yapi": {
+    "sistem": "prefabrik",
+    "kat_sayisi": 1,
+    "duvar_yuksekligi_cm": 250,
+    "duvar_kalinligi_cm": {"dis": 10, "ic": 6},
+    "olcu_kaynagi": "dis_olcu",
+    "dis_olcu_cm": {"x": 1139.5, "y": 835.75},
+    "referans_model": "AP-04",
+    "grid": {"x_pano": 9, "y_pano": 6.5},
+    "kisa_kenar": "y",
+    "giris_cephesi": "on",
+    "dis_dusey_duvar": "cevre_aks_disinda",
+    "dizilim": {
+      "baslangic": "arka-sol",
+      "hiza": "tam_izgara",
+      "dis_duvar_t_bolme": false,
+      "pencere": "pano",
+      "kapi": "mantik",
+      "kose": "oda",
+      "son_pano": "kosu",
+      "kapi_yeri": "ortada",
+      "dis_pano_dayanagi": [
+        {"y": 323.75, "aralik_cm": [261, 512], "cephe": "sol"}
+      ],
+      "karkasli_panolar": [
+        {"yon": "x", "eksen_cm": 830.75, "aralik_cm": [381.5, 632.5], "aciklik_ortasi_cm": [507]}
+      ]
+    },
+    "ek_akslar_cm": {"x": [], "y": []}
+  },
+  "mahaller": [
+    {"ad": "YATAK ODASI 1", "tur": "yatak_odasi", "konum_cm": [[5, 10, 381.5, 323.75]]},
+    {"ad": "WC", "tur": "banyo", "konum_cm": [[5, 323.75, 256, 512]]},
+    {"ad": "HOL", "tur": "antre_hol", "konum_cm": [[256, 323.75, 381.5, 449.25]]},
+    {"ad": "YATAK ODASI 2", "tur": "yatak_odasi", "konum_cm": [[5, 512, 381.5, 825.75], [256, 449.25, 381.5, 512]]},
+    {"ad": "YATAK ODASI 3", "tur": "yatak_odasi", "konum_cm": [[381.5, 449.25, 632.5, 825.75]]},
+    {"ad": "SALON", "tur": "salon", "konum_cm": [[381.5, 10, 1134.5, 449.25]]},
+    {"ad": "VERANDA", "tur": "veranda", "konum_cm": [[632.5, 449.25, 1134.5, 825.75]]}
+  ],
+  "acik_sinirlar": [["HOL", "SALON"]],
+  "acikliklar": [
+    {"tur": "pencere", "olcu": "120x120", "mahal": "YATAK ODASI 1", "duvar": "arka"},
+    {"tur": "pencere", "olcu": "120x120", "mahal": "SALON", "duvar": "arka"},
+    {"tur": "pencere", "olcu": "120x120", "mahal": "SALON", "duvar": "sag"},
+    {"tur": "pencere", "olcu": "120x180", "mahal": "SALON", "duvar": "on", "acilis": "surgulu", "pano": 2},
+    {"tur": "pencere", "olcu": "60x40", "mahal": "WC", "duvar": "sol"},
+    {"tur": "pencere", "olcu": "120x120", "mahal": "YATAK ODASI 2", "duvar": "on"},
+    {"tur": "pencere", "olcu": "120x120", "mahal": "YATAK ODASI 3", "duvar": "on"},
+    {"tur": "dis_kapi", "olcu": 90, "arasi": ["VERANDA", "SALON"], "pano": 0},
+    {"tur": "ic_kapi", "olcu": 82, "arasi": ["HOL", "YATAK ODASI 1"], "duvar_ucu": "sag"},
+    {"tur": "ic_kapi", "olcu": 82, "arasi": ["HOL", "WC"], "duvar_ucu": "arka"},
+    {"tur": "ic_kapi", "olcu": 82, "arasi": ["HOL", "YATAK ODASI 2"]},
+    {"tur": "ic_kapi", "olcu": 82, "arasi": ["SALON", "YATAK ODASI 3"], "duvar_ucu": "sol"}
+  ],
+  "cati": {
+    "tip": "besik",
+    "egim_yuzde": 32.88,
+    "sacak_cm": 30,
+    "topuk_cm": 10,
+    "makas_yonu": "kisa_kenar",
+    "makas_ekseni": "y"
+  },
+  "ozellikler": {"Panel Türü": "Press Panel", "Çatı Şekli": "Beşik", "Çatı Kaplaması": "Trapez (80 cm kapatır)", "Çatı Kaplama Rengi": "Antrasit", "Dış Kapı": "Çelik", "İç Kapılar": "Amerikan Panel", "Tavan Şekli": "Ters tavan", "Saçak Rengi": "Antrasit", "Saçak Çıkması": "30 cm", "Yağmur Oluğu": "Metal", "Yağmur Oluğu Rengi": "Antrasit"},
+  "alici_ait": {"kalemler": [], "kaynak": "paftanın özellik tablosu: alıcıya ait kalem yazılmamış (boya, iniş borusu ve açıklama boş)"},
+  "cikti": {
+    "pdf": true,
+    "dxf": true,
+    "pafta": "A2",
+    "icerik": ["aksli_plan", "alanli_kopya", "montaj_kopyasi", "on_gorunus", "cati_profili", "ozellik_tablosu"]
+  },
+  "varsayimlar": [
+    "Ölçüler montaj paftasından (s. 1 müşteri onay paftası, s. 2 montaj ve elektrik planı, s. 3 H profil planı, s. 7 makas planı; mahal adları s. 11 elektrik planından): 1139,5 × 835,75, bina yüksekliği 250, dış duvar 100, iç duvar 60 mm. Köşe ve ızgara AP-03'teki gibi (paftada aynı): makas y'yi geçer (makas planında 10 makas, aralar 130,5 · 125,5 … 130,5); ön ve arka duvar köşeden geçer, x ızgarası duvar ekseninden (5 + 125,5k); yan duvarların panoları ön ve arka duvarın iç yüzünden (10 + 125,5k).",
+    "Pano dizilimi paftadaki gibi: sol duvarda WC penceresi ortalı (dizilim.dis_pano_dayanagi: 261 · 323,75 · 449,25 · 512); önde ortadaki yatak odasının duvarı 251'lik tek karkaslı pano, 120/120 pencere ortasında (dizilim.karkasli_panolar; paftada mor çizgi, H planında arada H yok).",
+    "Mahaller: arkada solda yatak odası 1, sağda salon (mutfak salonda); solda WC, WC'nin sağında salona açık hol; önde solda L biçimli yatak odası 2 (holün altına uzanır), ortada yatak odası 3; sağ önde veranda (önü ve sağı açık, 502 × 376,5). Mahal ölçüleri paftadan: yatak odaları 368,5 × 310,75 ve 243 × 370,5, salon 745 × 439,25, WC 243 × 182,25.",
+    "Pencereler paftadaki panoda: 5 × 120/120, 1 × 120/180 sürgülü (salondan verandaya), 1 × 60/40 (WC). Kapılar paftadaki kanat izinden; genişlikler paftada yazılı değil: dış kapı 90 (verandadan salona, çelik), iç kapı 82 (Motor'un ölçüsü).",
+    "Çatı: beşik, makas y'yi geçer, saçak 30 (özellik tablosu), topuk 10; paftada kesit yok, eğim %32,88 (18,2°; öteki AIPrefabrik paftalarının kesiti; aşık planında yüz 475'lik sacla örtülür). Çatı kaplaması trapez, kaplama planında (s. 10) 80 cm kapatır, 475'lik 30 adet: İş Emri'ne \"(80 cm kapatır)\" ile yazıldı (D-50, M-11). Yağmur oluğu metal antrasit; iniş borusu, boya ve açıklama paftada boş."
+  ],
+  "eksikler": []
+}
