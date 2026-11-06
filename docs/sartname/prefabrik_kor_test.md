@@ -130,3 +130,13 @@ O zamana kadar her yeni proje kör testtir; sonra katalog modellerine geçilir (
 - 18 projede kendi listemiz bugünkü Motor'la (üretici 1.10) yeniden üretildi, sonuçlar `--sonuc-yaz` ile yeniden yazıldı (adım 7; Patron
   onayı D-45). On ev: doğru 674 / 1248 (%54,0; önce 600 / 1295, atık suyun 47 satırı artık paydada değil). Açık sekiz: 561 / 847 (önce 557). PR-2 (pencere veri tabanı, kısaltma yok; AP-11, 14, 26'nın sürgülüleri paftadaki ölçüsüyle): on ev 678 / 1248 (%54,3).
   Satır raporları proje dosyalarında (`Prefabrik_28_Olcum/IE-27_olcum/`); iş emri `docs/is_emirleri/IE-27.md`.
+
+## Durum (4 Kasım 2026, İE-28)
+
+- Lokman'ın kararıyla (4 Kasım 04:35, kart "Paftadan, ev ev"; `KARARLAR/D-46.md`) paftadaki karkaslı kaplama duvar panosu Motor'da:
+  AP-11, 14, 18, 25 ve 26'nın İş Emri'sine paftadaki yeriyle yazıldı (`yapi.dizilim.karkasli_panolar`), beş evin kendi listemiz üretici
+  1.11 ile kıyastan önce yeniden üretildi, sonuçlar `--sonuc-yaz` ile yeniden yazıldı (adım 7). Sözlük 4: Motor'un karkaslı kaplama duvar
+  panosu karkaslı panolar grubunda.
+- Beş ev: AP-11 72 → 77, AP-14 62 → 74, AP-18 65 → 70, AP-25 66 → 75, AP-26 62 → 69. On ev: 686 → 724 / 1248 (%55,0 → %58,0). Bozulan
+  üç eski tutan satır: AP-18 100'lük çektirme U'su adayı ve çelik dübel, AP-25 60'lık çektirme U'su. Satır raporları proje dosyalarında
+  (`Prefabrik_28_Olcum/IE-28_olcum/`); iş emri `docs/is_emirleri/IE-28.md`.

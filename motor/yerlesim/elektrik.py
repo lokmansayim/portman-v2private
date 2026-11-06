@@ -133,8 +133,8 @@ def _bosluklar(P, yon: str, yuz: float) -> list[tuple[float, float]]:
         if d.yon != yon or abs(abs(yuz - d.c) - d.h) > 1.0:
             continue
         for p in d.panolar:
-            if p.acilim:
-                g = p.gap()
+            for a in p.aciklar:                                # D-46: karkaslı panoda birden çok açıklık
+                g = p.bosluk_dortgeni(a)
                 out.append((g[0], g[2]) if yon == "x" else (g[1], g[3]))
     return out
 
@@ -227,13 +227,15 @@ def uzun_duvarlar(poly) -> list[tuple[str, float, float, float, int]]:
     return out
 
 
-def _kapi_bilgisi(d, p) -> dict:
+def _kapi_bilgisi(d, p, a=None) -> dict:
+    """Kapının bilgisi; `a` panonun kapısı (karkaslı panoda birden çok açıklıktan biri, D-46), yoksa `p.acilim`. `k["a"]` kapının kendisi."""
     from motor.geometry import mentese_ucu
-    g = p.gap()
+    a = a or p.acilim
+    g = p.bosluk_dortgeni(a)
     g0, g1 = (g[0], g[2]) if d.yon == "x" else (g[1], g[3])
-    u = mentese_ucu(p.acilim) if p.acilim.icine_normal else 0
+    u = mentese_ucu(a) if a.icine_normal else 0
     kol, mentese = ((g1, 1), (g0, -1)) if u == 0 else ((g0, -1), (g1, 1))
-    return {"d": d, "p": p, "g0": g0, "g1": g1, "kol": kol, "mentese": mentese, "orta": (p.a0 + p.a1) / 2 + p.acilim.kayma}
+    return {"d": d, "p": p, "a": a, "g0": g0, "g1": g1, "kol": kol, "mentese": mentese, "orta": (p.a0 + p.a1) / 2 + a.kayma}
 
 
 def _yuz(poly, k: dict) -> tuple[float, int] | None:
@@ -266,15 +268,15 @@ def katman(ie: dict, plan: dict, D: dict, K: dict) -> dict:
         parcalar.append({"kural": KURAL, "parca": ad_, "geo": {"tip": "kutu", "kutu": geo} if isinstance(geo, list) else geo,
                          "bilgi": {"Mahal": mahal, "Yer": yer, **bilgi}, "aciklama": aciklama})
 
-    kapilar = [_kapi_bilgisi(d, p) for d in P.duvarlar for p in d.panolar if p.acilim and p.acilim.tur in KAPILAR and p.acilim.arasi]
-    kapi_sayisi = Counter(a for k in kapilar for a in k["p"].acilim.arasi)
-    giris = next((k for k in kapilar if k["p"].acilim.tur == "dis_kapi" and k["d"].tur == "dis"), None)   # liste üreteci gibi: dış duvardaki
+    kapilar = [_kapi_bilgisi(d, p, a) for d in P.duvarlar for p in d.panolar for a in p.aciklar if a.tur in KAPILAR and a.arasi]
+    kapi_sayisi = Counter(a for k in kapilar for a in k["a"].arasi)
+    giris = next((k for k in kapilar if k["a"].tur == "dis_kapi" and k["d"].tur == "dis"), None)   # liste üreteci gibi: dış duvardaki
 
     def oda_kapilari(o) -> list[dict]:
         """Odanın kapıları, anahtarın aranacağı sırayla: giriş kapısı, sonra komşusunun en çok kapısı olan (sirkülasyon), sonra planın sırası."""
         def komsu(k):
-            return next((a for a in k["p"].acilim.arasi if a != o["ad"]), o["ad"])
-        aday = [(i, k) for i, k in enumerate(kapilar) if o["ad"] in k["p"].acilim.arasi]
+            return next((a for a in k["a"].arasi if a != o["ad"]), o["ad"])
+        aday = [(i, k) for i, k in enumerate(kapilar) if o["ad"] in k["a"].arasi]
         return [k for _, k in sorted(aday, key=lambda x: (x[1] is not giris, -kapi_sayisi[komsu(x[1])], x[0]))]
 
     for o in odalar:
@@ -334,7 +336,7 @@ def katman(ie: dict, plan: dict, D: dict, K: dict) -> dict:
     sig_nokta = None
     if giris is not None:
         d = giris["d"]
-        ic_oda = next((o for o in kapali if o["ad"] in giris["p"].acilim.arasi and o["poly"] is not None), None)
+        ic_oda = next((o for o in kapali if o["ad"] in giris["a"].arasi and o["poly"] is not None), None)
         yuz = _yuz(ic_oda["poly"], giris) if ic_oda else None
         if yuz is None:                                                    # kapalı tarafı bulunamadı: kapının +normal yüzü
             yuz = (d.c + d.h, 1)
@@ -355,7 +357,7 @@ def katman(ie: dict, plan: dict, D: dict, K: dict) -> dict:
                   f"{mahal}, giriş kapısının iç yüzü, kapının üstü")
         sig_nokta = (d.yon, yuz[0] + yuz[1] * dd / 2, giris["orta"])
         dis = (d.c - d.h, -1) if yuz[1] == 1 else (d.c + d.h, 1)
-        dis_mahal = next((a for a in giris["p"].acilim.arasi if a != mahal), "dış")
+        dis_mahal = next((a for a in giris["a"].arasi if a != mahal), "dış")
         dis_poly = next((o["poly"] for o in odalar if o["acik"] and o["ad"] == dis_mahal and o["poly"] is not None), None)
         fp, bos, b = P.footprint(), _bosluklar(P, d.yon, dis[0]), S["zil"][0]
 
@@ -514,15 +516,13 @@ def _veranda_glopu(P, o: dict, n: int, giris, kapilar, D: dict, tavan_z: float, 
             parca("glop", ad, "tavan", _kutu_tavan(x, y, S["glop"], tavan_z), f"{ad}, tavan ({x:g}, {y:g})")
         return
     yol = linemerge(MultiLineString(parcalar))
-    kapi = giris if giris is not None and ad in giris["p"].acilim.arasi else next((k for k in kapilar if ad in k["p"].acilim.arasi), None)
+    kapi = giris if giris is not None and ad in giris["a"].arasi else next((k for k in kapilar if ad in k["a"].arasi), None)
     if yol.geom_type != "LineString":
         yol = max(yol.geoms, key=lambda g: (kapi is not None and g.distance(_kapi_noktasi(kapi)) < 1.0, g.length))
     bos, s_kapi = [], None
     for d in P.duvarlar:
-        for p in d.panolar:
-            if not p.acilim:
-                continue
-            kes = yol.intersection(box(*p.gap()).buffer(0.6))
+        for p, g_ in ((p, p.bosluk_dortgeni(a)) for p in d.panolar for a in p.aciklar):
+            kes = yol.intersection(box(*g_).buffer(0.6))
             if kes.is_empty:
                 continue
             s = [yol.project(Point(q)) for g in getattr(kes, "geoms", [kes]) for q in g.coords]

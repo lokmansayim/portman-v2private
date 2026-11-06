@@ -70,7 +70,8 @@ def gorunur(plan: G.Plan, d, dis: str) -> bool:
 
 
 def cephe(plan: G.Plan, taraf: str) -> dict:
-    """{"en": cephenin eni, "derz": [u], "acikliklar": [{"tur": pencere | dis_kapi, "u0", "u1", "z0", "z1", "olcu", "acilis"}]} (soldan sağa)."""
+    """{"en": cephenin eni, "derz": [u], "acikliklar": [{"tur": pencere | dis_kapi, "u0", "u1", "z0", "z1", "olcu", "acilis", "bolmeler",
+    "kapi_turu", "mentese"}]} (soldan sağa; `mentese` yalnız türü yazılı dış kapıda, görünüşte menteşenin yanı, D-52)."""
     yon, dis = _YON[taraf]
     u, _, en = eksen(plan, taraf)
     uu = (lambda a: u(a, 0.0)) if yon == "x" else (lambda a: u(0.0, a))
@@ -84,11 +85,10 @@ def cephe(plan: G.Plan, taraf: str) -> dict:
             us.add(uu(d.c - d.h)); us.add(uu(d.c + d.h))
     ac = []
     for d in duvarlar:
-        for p in d.panolar:
-            a = p.acilim
-            if not a or a.tur not in ("pencere", "dis_kapi"):
+        for p, a in ((p, a) for p in d.panolar for a in p.aciklar):     # D-46: karkaslı panoda birden çok açıklık
+            if a.tur not in ("pencere", "dis_kapi"):
                 continue
-            g = p.gap()
+            g = p.bosluk_dortgeni(a)
             u0, u1 = sorted((uu(g[0]), uu(g[2])) if yon == "x" else (uu(g[1]), uu(g[3])))
             ust = G.ust_kot()                                           # BK-23 (D-55): `yapi.lento_cm` yoksa 200
             if a.tur == "pencere":                                      # İE-27 madde 11: 200'ü geçen pencere döşemeden, üstü boyu kadar
@@ -97,8 +97,21 @@ def cephe(plan: G.Plan, taraf: str) -> dict:
             else:
                 z0, z1 = 0.0, ust
             ac.append({"tur": a.tur, "u0": u0, "u1": u1, "z0": z0, "z1": z1,
-                       "olcu": a.olcu if a.tur == "pencere" else None, "acilis": a.acilis})
+                       "olcu": a.olcu if a.tur == "pencere" else None, "acilis": a.acilis,
+                       "bolmeler": a.bolmeler, "kapi_turu": a.kapi_turu,
+                       "mentese": kapi_mentese_yani(plan, a, g, uu, yon) if a.kapi_turu else None})
     return {"en": en, "derz": sorted(v for v in us if 1e-6 < v < en - 1e-6), "acikliklar": sorted(ac, key=lambda k: k["u0"])}
+
+
+def kapi_mentese_yani(plan: G.Plan, a, g, uu, yon: str) -> str:
+    """D-52: dış kapının menteşesi görünüşte bakanın solunda mı sağında mı ("sol" | "sag"). Menteşe ucu planın kapı sembolüyle aynı
+    (`bayi_gorseli._mentese_a0_ucunda`: `dizilim.kapi: mantik`ta `G.mentese_ucu`); `g` açıklığın boşluk dörtgeni, `uu` duvar boyunca
+    koordinattan görünüşün yatayına, `yon` duvarın yönü."""
+    from .bayi_gorseli import _mentese_a0_ucunda
+    mantik = ((plan.is_emri.get("yapi") or {}).get("dizilim") or {}).get("kapi") == "mantik"
+    lo, hi = (g[0], g[2]) if yon == "x" else (g[1], g[3])
+    um = uu(lo if _mentese_a0_ucunda(a, mantik) else hi)
+    return "sol" if um <= min(uu(lo), uu(hi)) + 1e-6 else "sag"
 
 
 def mahya_boylari(plan: G.Plan, ie: dict) -> list[float]:
