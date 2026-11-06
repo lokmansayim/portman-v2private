@@ -1,0 +1,13 @@
+{
+ "kod": "AP-01",
+ "ap": "AP-01",
+ "kip": "motor",
+ "girdi": {
+  "is_emri": "testler/kor/projeler/AP01/is_emri.json"
+ },
+ "bizim_liste": "bizim_liste.json",
+ "liste_sha256": "042fab25db1f856370997bcb39d36835e2becb6ecaa55c3c767380cfd0be9c8e",
+ "sayfa": null,
+ "kapi": true,
+ "not": "İE-33 ölçümü (açık sekiz; liste 13 Ekim'de örnek olarak okundu, kör değil). Geometri İE-17'nin İş Emri'si (testler/cizim/evler/AP01.json; değişmedi), özellikler paftanın tablosundan; dörtomuz kırmanın makas planı paftanın s. 6'sından (İE-33, üretici 1.16)."
+}
