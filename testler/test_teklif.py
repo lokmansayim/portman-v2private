@@ -19,6 +19,7 @@ from araclar import teklif as TK  # noqa: E402
 from motor import prefabrik_liste as PL  # noqa: E402
 
 IE = KOK / "testler" / "teklif" / "TK01_is_emri_r05.json"
+ESKI_DEFTER = ["--defter", str(KOK / "kurallar" / "fiyat" / "defter_2026-10.json")]   # toplamlar r10 defteriyle; eski defter eski teklifi aynen verir (D-62)
 GRUPLAR = ["PANEL", "METAL AKSAM", "KAPI VE PENCERE", "TAVAN", "MAKAS", "ÇATI", "ELEKTRİK", "VİDA", "DEPO", "SIHHİ TESİSAT", "DERE", "BOYA"]
 SUTUN = ["Ölçü", "Birim", "Adet", "Birim fiyat", "Tutar", "Not"]
 
@@ -30,7 +31,7 @@ def _oku(p):
 @pytest.fixture(scope="module")
 def cikti(tmp_path_factory):
     d = tmp_path_factory.mktemp("teklif")
-    assert TK.main([str(IE), str(d), "--tavan", "asma,ters"]) == 0
+    assert TK.main([str(IE), str(d), "--tavan", "asma,ters", *ESKI_DEFTER]) == 0
     return d
 
 
@@ -219,7 +220,7 @@ def test_ozet_ve_kosullar(cikti, T, tmp_path):
     assert len(fiyatsiz) == 1 and not any(v.startswith(("Vitrifiye", "Makas", "Yavru makas", "Özel pencere karkası")) for v in fiyatsiz)   # D-37: makaslar fiyatlı; r09: 120 × 180 karkas fiyatlı
     assert any(v.startswith("Çırpı ipi") for v in fiyatsiz) and not any(v.startswith("Trapez vida 5,5 × 25") for v in fiyatsiz)   # İE-27 satırı r07'de fiyatlı
     (tmp_path / "k.json").write_text(json.dumps({"kosullar": {"Teslim süresi": "DENEME 1", "Ödeme şekli": "DENEME 2"}}, ensure_ascii=False), encoding="utf-8")
-    assert TK.main([str(IE), str(tmp_path / "c"), "--kosullar", str(tmp_path / "k.json")]) == 0
+    assert TK.main([str(IE), str(tmp_path / "c"), "--kosullar", str(tmp_path / "k.json"), *ESKI_DEFTER]) == 0
     J = _oku(tmp_path / "c" / "TK01_teklif.json")
     assert J["kosullar"] == {"Teslim süresi": "DENEME 1", "Ödeme şekli": "DENEME 2"} and [s["ad"] for s in J["secenekler"]] == ["Asma tavan"]
     oz2 = load_workbook(tmp_path / "c" / "TK01_teklif.xlsx")["Özet"]
@@ -272,13 +273,13 @@ def test_is_emrindeki_teklif_bolumu(tmp_path):
     ie = _oku(IE)
     ie["teklif"] = {"tavan": ["asma", "ters"], "kosullar": {"Ödeme şekli": "DENEME İE"}}
     (tmp_path / "ie.json").write_text(json.dumps(ie, ensure_ascii=False), encoding="utf-8")
-    assert TK.main([str(tmp_path / "ie.json"), str(tmp_path / "a")]) == 0
+    assert TK.main([str(tmp_path / "ie.json"), str(tmp_path / "a"), *ESKI_DEFTER]) == 0
     J = _oku(tmp_path / "a" / "TK01_teklif.json")
     assert [s["ad"] for s in J["secenekler"]] == ["Asma tavan", "Ters tavan"]
     assert [s["fiyat"]["ozet"]["toplam"] for s in J["secenekler"]] == [465703.13, 464882.13]      # Motor teklif bölümünü okumaz (r09)
     assert J["kosullar"] == {"Teslim süresi": None, "Ödeme şekli": "DENEME İE"}
     (tmp_path / "k.json").write_text(json.dumps({"kosullar": {"Ödeme şekli": "DENEME DOSYA"}}, ensure_ascii=False), encoding="utf-8")
-    assert TK.main([str(tmp_path / "ie.json"), str(tmp_path / "b"), "--tavan", "ters", "--kosullar", str(tmp_path / "k.json")]) == 0
+    assert TK.main([str(tmp_path / "ie.json"), str(tmp_path / "b"), "--tavan", "ters", "--kosullar", str(tmp_path / "k.json"), *ESKI_DEFTER]) == 0
     J = _oku(tmp_path / "b" / "TK01_teklif.json")
     assert [s["ad"] for s in J["secenekler"]] == ["Ters tavan"] and J["kosullar"]["Ödeme şekli"] == "DENEME DOSYA"
     (tmp_path / "duz.json").write_text(json.dumps({"Ödeme şekli": "sarmalayıcısız"}, ensure_ascii=False), encoding="utf-8")
@@ -303,7 +304,7 @@ def test_fiyat_kaynagi(cikti, T):
 
 
 def test_ayni_girdi_ayni_json(T, tmp_path):
-    assert TK.main([str(IE), str(tmp_path), "--tavan", "asma,ters"]) == 0
+    assert TK.main([str(IE), str(tmp_path), "--tavan", "asma,ters", *ESKI_DEFTER]) == 0
     assert _oku(tmp_path / "TK01_teklif.json") == T
 
 

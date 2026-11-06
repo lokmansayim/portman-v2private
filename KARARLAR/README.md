@@ -102,7 +102,11 @@ Biçim: karar · gerekçe · reddedilen seçenekler · geri alma yolu · kim ve 
 | [D-53](D-53.md) | Saçak omegası kuralı (M-01) beşik + cumba çatıda da (kural aynı; mühür açıldı ve yeniden mühürlendi); kart modeli ve montaj rehberi beşik + çıkıntısız çapraz cumbayı kurar, yeni kart MA-05 yavru makas; trapez sac çatı kart modelinde ve rehberde, yeni kartlar KP-03 trapez sac ve CK-07 trapez sac mahyası (D-50 okunur) (İE-15 K6; TK-04 r05, AP-13, AP-16) | 4.11 (Lokman 20:51 kartı) |
 | [D-56](D-56.md) | AP-26'nın teras panelinde yan kiriş yok, gerçek liste gibi: kiriş yalnız dış kenarda, panel duvara ve dış kirişe oturur; listede iki dış kiriş, planda, görünüşte ve 3B'de yan kiriş yok; M-12 açılıp bu kararla kapandı | 5.11 (Lokman 10:48) |
 | [D-57](D-57.md) | Prefabrik teras panelinde damlalık: L 2800, ön ve arka terasın genişliği birlikte ÷ 2,8, yukarı (`prefabrik.json` › `teras_damlaligi`); ana çatıda damlalık yine yok | 5.11 (Lokman 11:02) |
+| [D-58](D-58.md) | TK-04 r07: veranda 30 cm saçak kalacak kadar içeri (ön kiriş ön dış yüzden 37,5; girinti + ek aks), kirişin salon duvarına geldiği yere 250 cm kolon (İş Emri dikmesi); çizimde içeri alınan verandanın ağzı da profil (İş Emri `girinti_kirisi`). r08: kirişin yüzündeki ara aks ve verandanın şerit ölçüsü çizilmez; salon–veranda duvarının panoları ızgarada (İş Emri `dizilim.dis_pano_dayanagi`) (PC-36; BK-24) | 5.11 (Lokman 11:00, 22:08; plan onayı 22:29) |
 | [D-59](D-59.md) | Birleştirmeyi Lokman yapar: oturum PR'ı hazırlar, doğrulamayı koşturur (kırmızıda kendisi düzeltir), yeşilse bağlantıyı verir; `main`'e birleştirmez ve denemez. D-43'ün birleştirme kısmının yerini alır | 5.11 (Lokman 12:35) |
+| [D-61](D-61.md) | TK-04 listesi: çıkıntısız çapraz cumbanın ana çatı üstündeki makası kısa (boy çatı tanımından), cumba ile ana çatının köşesinde tek iniş, iki ucu kolonlu açık kenarda kiriş kolonun yüzünden yüzüne (− 2 × 10; M-05 açıldı ve bu kararla kapandı); saçak omegası 7 (M-01) | 5.11 (Lokman 22:49 kartı "Öneriyle düzelt"; 6.11 07:56 M-05 kartı "Evet, kurala işle") |
+| [D-62](D-62.md) | Prefabrik fiyatlar 45. hafta listesinden: yeni defter `kurallar/fiyat/defter_2026-11.json` (r11, araçların varsayılanı); TK-04'ün listede karşılığı olan bütün kalemleri onaylı (birebir, yöntemle hesap, yakın), listede olmayan eski fiyatında; r10 defteri eski teklifi aynen verir | 5.11 (Lokman 23:00 "fiyatları buradan al", 23:10 "Hepsini al") |
+| [D-64](D-64.md) | Bayiye giden teklif ve satış onay formu (`araclar/teklif.py --bayi`): fiyat pazarın kuralıyla (`kurallar/teklif/fiyatlandirma.json`; yurt dışı taban × 1,30, KDV %0); TASLAK ve uyarı yok, ürün "Tek Kat Prefabrik Yapı", Ek-1'de fiyat sütunları boş; standart dışı değer 04'te kalın (2500 mm, 100 mm, 60 mm, trapez sac); bayinin kendi telefonu açık (D-33 istisnası) | 6.11 (Lokman 08:38; 09:01 kartı "Açık yazılsın") |
 
 ## Numara defteri (14 Ekim 2026, BK-08; CIO planı › Görev 3)
 
@@ -155,10 +159,14 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | D | D-55 | İş Emri'nde `yapi.lento_cm` (BK-23, TK-05) | ayrıldı (başka iş dalında) |
 | D | D-56 | AP-26'nın teras panelinde yan kiriş yok, gerçek liste gibi (İE-30; Lokman 5.11 10:48 kartı "Kaldır, gerçek liste gibi"; M-12 açılıp kapandı) | yazıldı (5.11; İE-30, `claude/project-thread-qnu2k8`) |
 | D | D-57 | Prefabrik teras panelinde damlalık L 2800, terasların genişliği ÷ 2,8 (İE-30; Lokman 5.11 11:02) | yazıldı (5.11; İE-30, `claude/project-thread-qnu2k8`) |
-| D | D-58 | TK-04 r07: girintiye bakan veranda ağzı ve 250 kolon (BK-24) | ayrıldı (başka iş dalında) |
+| D | D-58 | TK-04 r07 veranda içeri, salon duvarına kolon; içeri alınan veranda ağzı çizimde profil; r08 ara aks ve şerit ölçüsü yok, D aksı ızgarada (Lokman 5.11 11:00, 22:08) | yazıldı (5.11; BK-24, `claude/project-thread-jlqian`, PR #128) |
 | D | D-59 | Birleştirmeyi Lokman yapar; oturum PR'ı hazırlar, doğrulamayı koşturur, yeşilse bağlantıyı verir (PR #127) | yazıldı (5.11; PR #127) |
 | D | D-60 | TK-05 160'lık dış duvar (BK-25) | ayrıldı (başka iş dalında) |
-| D | **D-61** | — | **sıradaki boş** |
+| D | D-61 | TK-04 listesi: kısa cumba makası, köşede tek iniş, iki kolon arası kiriş (Lokman 5.11 22:49 kartı) | yazıldı (5.11; İE-13 PR-10, `claude/project-thread-tr7mtv`) |
+| D | D-62 | 45. hafta fiyat listesi, defter r11 `defter_2026-11.json` (Lokman 5.11 23:00, 23:10) | yazıldı (5.11; İE-13 PR-10, `claude/project-thread-tr7mtv`) |
+| D | D-63 | 280'lik prefabrikte lento 80, TK-05'in pencere panelleri yeni boylarla (BK-25; Lokman 6.11 07:50) | yazıldı (6.11; BK-25, PR #130) |
+| D | D-64 | Bayiye giden teklif formu: yurt dışı × 1,30 KDV 0, standart dışı kalın, Ek-1 fiyatsız, bayinin telefonu açık (Lokman 6.11 08:38, 09:01) | yazıldı (6.11; İE-13 PR-11, `claude/project-thread-jdxkbl`, PR #132) |
+| D | **D-65** | — | **sıradaki boş** |
 | İE | İE-01–İE-08 | bu depo (`main`) | yazıldı |
 | İE | İE-09 | model atölyesi: kontrollü model üretimi ve banka hattı (Görev 6e; pano 30; P6001 güncellemesi kapsam dışı) | alındı (16.10; `claude/gorev-6e-model-atolyesi-rnhtcp`; PR-1 banka hattı 29.10, `claude/project-thread-rhjgzv`) |
 | İE | İE-10, İE-11, İE-12 | prefabrik hattı (PR #12, PR #14, `ie-12-prefabrik-bayi-paftasi`) | `main`'e BK-12 ile (PR-1: motor ve bayi paftası; liste ve mühür kıyası sonraki PR'larda) |
@@ -181,7 +189,9 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | İE | İE-28 | uzun karkaslı pencereli pano: paftadaki tek parça karkaslı kaplama duvar panosu ve odaya ortalı geniş pencere Motor'da (Lokman 3.11 20:44 kartı "Ayrı iş olarak açılsın"; M-02'ye dokunur, plan önce Lokman'a) | alındı (3.11; `claude/project-thread-qnu2k8`) |
 | İE | İE-29 | kör kalan evlerin geometrisi (pano 145; D-47; PR #119) | alındı (3.11) |
 | İE | İE-30 | AP-26'nın pencereleri ve terası paftadan (Lokman 4.11 20:42; D-52) | alındı (4.11; `claude/project-thread-qnu2k8`) |
-| İE | **İE-31** | — | **sıradaki boş** |
+| İE | İE-31 | çıkıntısız çapraz cumbanın r07 tekniği AP-06, AP-13, AP-16'ya (Lokman 5.11 12:45; TK-04 plan thread'i) | alındı (5.11) |
+| İE | İE-32 | montaj rehberinin altında ön onay sayfası: TK-01 r07 hedef örneği, kilit testi, mühür M-13 (pano 146; özellik D-53 madde 6, PR #124) | alındı (6.11; `claude/project-thread-bij4mz`) |
+| İE | **İE-33** | — | **sıradaki boş** |
 | BK | BK-01–BK-08 | bu depo; BK-08 8a sonrası temizlik (`bk-08-8a-temizlik`) | yazıldı |
 | BK | BK-09 | metin ve çizim düzeltmeleri, G1 (`bk-09-metin-cizim`, `bk-09-cizim-g1`) | alındı (14.10) |
 | BK | BK-10 | 8b sonrası küçük işler (DXF `.txt` notu, geç gelen Excel, panelden Excel, plan değişince kontrol kapanır, D-19 24 saat kuralı, düğmeli mesajda satır sonları, `YENI-` kodu ve ilk çelik planda LLM özeti bayiye gitmez, komut freni metni; pano satır 15; çelikte kapı değişikliği kapsam dışı) | alındı (30.10; `claude/project-thread-h64uz2`) |

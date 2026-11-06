@@ -882,6 +882,69 @@
     "testler/motor/test_m12_ap26.py::test_m12_hedef_ornek_izi",
     "testler/motor/test_m12_ap26.py::test_m12_teraslar_paftadaki_gibi"
    ]
+  },
+  {
+   "kod": "PC-35",
+   "baslik": "Kubbe: duvarı 203 cm, üç yüzlü çatısının tepesi 35 cm, saçağı 18,5 cm",
+   "kural": "İş Emri'nin `kubbeler` anahtarıyla gelen kubbenin (taban 251, çıkma 58,61) görünüşte duvarları zeminden 203 cm çizilir; üstündeki ana duvar bandı (50'lik parça, uçlardan 3 cm kertilir) ana duvarın üstüne kadar görünür. Kubbenin çatısı üç üçgen yüz: tepe düz duvarda kubbenin ortasında, kubbe duvarının üstünden 35 cm; her yüzün saçağı kubbenin dış çizgisinden 18,5 cm dışarıda, köşeler gönye, yan yüzlerin saçağı düz duvarın yüzüne kadar; saçakta topuk şeridi (`cati.topuk_cm`). Ana çatının bakana yakın parçaları kubbeyi örter. Kubbesiz İş Emri'nde görünüş aynen. Kaynak: Lokman 5 Kasım 10:41 kubbe detayı (üç makas, 350) ve 12:05 düzeltmesi.",
+   "karar": "D-54",
+   "madde": 1,
+   "lokman": {
+    "tarih": "2026-11-05",
+    "saat": "12:05",
+    "soz": "kubbenin saçakları 18.5 cm olacak 30 cm cm değil, 253 cm yükseklik mühendis tarafından sehven yazılmış kubbenin çıkıntılı tarafı 203 cm geliyor üstüne koyulan 50 cm lik parça uçlardan 3 cm kertiliyor ki alttan alçıpan vurunca saçak omegası ile aynı seviyede olsun bu bilgiler ışığında düzeltme yap"
+   },
+   "kod_yeri": [
+    "motor/geometry.py::KUBBE",
+    "motor/geometry.py::kubbe_sacagi",
+    "motor/cephe_gorunus.py::_kubbe_gorunusu"
+   ],
+   "sabitler": [
+    {
+     "yer": "motor/geometry.py::KUBBE",
+     "deger": {
+      "taban_cm": 251.0,
+      "cikma_cm": 58.61,
+      "yan_pano_cm": 79.0,
+      "on_pano_cm": 125.5,
+      "on_pencere": "105x170",
+      "yan_pencere": "59x170",
+      "duvar_cm": 203.0,
+      "tepe_cm": 35.0,
+      "sacak_cm": 18.5,
+      "makas": 3
+     }
+    }
+   ],
+   "test": [
+    "testler/cizim/test_ie29_cizim.py::test_ap17_kubbe_gorunusu",
+    "testler/cizim/test_ie29_cizim.py::test_ap24_kubbe_ve_alanlar",
+    "testler/cizim/test_ie29_cizim.py::test_ap23_kubbe_ve_alanlar"
+   ]
+  },
+  {
+   "kod": "PC-36",
+   "baslik": "Veranda içeri alınınca ağzındaki kiriş de çizilir; ara aks ve şerit ölçüsü çizilmez",
+   "kural": "Veranda içeri alınınca (İş Emri `girintiler` ile; önündeki şerit bina dışı) İş Emri verandanın mahalinde `girinti_kirisi: true` yazar; o verandanın girintiye bakan açık kenarı da veranda profilidir (kiriş): dış yüzü kenarda, iç çizgisi 10 cm mahalin içinde ve iki uçta 10 cm kısa, uçlardaki kolonların yüzünde biter (TK-04 r07: ön kiriş ön dış yüzden 37,5 içeride, uçlarda köşe kolonu ve salon duvarının dibindeki İş Emri dikmesi; çatının saçağı kirişin önünde 30 cm). Kirişin duvara geldiği yerdeki kolon İş Emri'nin `dikmeler`'ine yazılır (250 cm; listede kolon). Verandanın önündeki şerit girinti sayılmaz: İş Emri'nin bütün girintileri böyle şeritse dış parça ölçüleri (D-34) çizilmez, kirişin dış yüzündeki ek aks (TK-04 r07: 1′) çizgisi, adı ve aks zincirindeki ölçüsüyle çizilmez; plan r06'daki gibi ölçülür (Lokman, 5 Kasım 2026 22:08: \"aks çizgisini bozma nasıl ki 62,75'e aks çizmiyoruz bina sonu özel ölçü olmadığı sürece çizme ... neden orada 155,75 bir pano veya ölçü olsun\"). Gerçek girintisi de olan planda dış parça ölçüleri çizilir; yazıları dolu sayılır, özel pano ölçüsü üstlerine binmez. Aynı sözle salon–veranda duvarının panoları ızgaraya dayanır (1. ile 2. aks arası tam pano); bu İş Emri'ne yazılır (`dizilim.dis_pano_dayanagi`, TK-04 r08), kural değişmez. Anahtarsız İş Emri aynen (PC-01…PC-32): depoda girintiye bakan veranda kenarı olan AP-15, AP-18, AP-22, AP-25 (AP-15 ve AP-22 M-07 ile mühürlü) bugünkü gibi çizilir; onlara yaymak Lokman'ın kararıdır.",
+   "karar": "D-58",
+   "lokman": {
+    "tarih": "2026-11-05",
+    "saat": "11:00",
+    "soz": "veranda da saçak oturmadığı için verandayı 30cm saçak olacak şekilde içeri almamız gerekiyor çatı kısmi naif bir L olacak ayrıca kiriş profilin boşta kalmaması için köşe direğine vidalayamıyoruz o yüzden tam geldiği yerede bir tane 250cm kolon koyması gerekiyor"
+   },
+   "kod_yeri": [
+    "motor/dxf_out.py::Cizici.ciz_plan",
+    "motor/dxf_out.py::Cizici._girinti_acik_kenari",
+    "motor/dxf_out.py::Cizici._dis_parca_olculeri",
+    "motor/dxf_out.py::Cizici._yalniz_kiris_girintisi",
+    "motor/dxf_out.py::Cizici._gizli_ek_akslar"
+   ],
+   "test": [
+    "testler/motor/test_d58.py::test_veranda_ice_alinir",
+    "testler/motor/test_d58.py::test_girinti_kenarinda_profil",
+    "testler/motor/test_d58.py::test_ara_aks_ve_olcu_yok",
+    "testler/motor/test_d58.py::test_d_aksi_izgarada"
+   ]
   }
  ]
 }

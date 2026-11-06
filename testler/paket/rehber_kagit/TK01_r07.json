@@ -1,0 +1,20 @@
+{
+ "aciklama": "İE-32 · Montaj rehberinin altında ön onay sayfası, hedef örnek (mühür M-13). Rehber aynen kalır; evin altına Motor'un tek sayfalık A4 ön onay PDF'i gerçek ölçekte serilir, kat planı duvarların tam altına oturur. Girdi İş Emri; çıktı sayfanın kat planı çerçevesindeki yeri (cm; x sol dış yüzden sağa, y ön dış yüzden arkaya; motor/dxf_out.a4_cercevesi, manifestte a4_sayfa_cm) ve sayfanın görüntüsü (300 dpi, araclar/paket/rehber/kagit.py). Çerçeve Lokman'ın gördüğü ve 5 Kasım 2026 00:53'te gönderdiği TK-01 r07 sayfasınınkiyle aynı (D-53 madde 6).",
+ "onay": {
+  "lokman": [
+   {"tarih": "2026-11-04 00:36", "soz": "rehber aynı şekilde kalsın sadece altına PDF gelsin"},
+   {"tarih": "2026-11-04 00:50", "soz": "aynen şu anki halini repoda mühürleyelim ama bundan Portman Proje (koordinatöründe) haberi olsun yoksa PR lar çakışıyor"},
+   {"tarih": "2026-11-05 00:53", "soz": "biz dün en son bunda kalmıştık ama bulamaman gayet normal çünkü başka oturumda başka sohbette ben bunu oluşturdum altta diğer sohbette oluşturduğumuz kat planı var"}
+  ],
+  "dayanak": "D-53 madde 6 (İE-15 K6, PR #124); İE-32; Kurulum Panosu satır 146"
+ },
+ "is_emri": "testler/motor/veri/TK01_r07.json",
+ "a4_sayfa_cm": {
+  "x": [-495.515, 1249.017],
+  "y": [-787.038, 1680.229],
+  "olcek_mm_cm": 0.120376
+ },
+ "sayfa_mm": [210, 297],
+ "dpi": 300,
+ "piksel": [2481, 3508]
+}
