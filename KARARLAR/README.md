@@ -165,7 +165,9 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | D | D-62 | 45. hafta fiyat listesi, defter r11 `defter_2026-11.json` (Lokman 5.11 23:00, 23:10) | yazıldı (5.11; İE-13 PR-10, `claude/project-thread-tr7mtv`) |
 | D | D-63 | 280'lik prefabrikte lento 80, TK-05'in pencere panelleri yeni boylarla (BK-25; Lokman 6.11 07:50) | yazıldı (6.11; BK-25, PR #130) |
 | D | D-64 | bayi teklif formu, yurt dışı (İE-13 PR-11) | ayrıldı (başka iş dalında, `claude/project-thread-jdxkbl`) |
-| D | **D-65** | — | **sıradaki boş** |
+| D | D-65 | Teklifte çırpı ipi 0 TL (hediye); bütün tekliflerde teslim süresi 10 gün, ödeme nakit (Lokman 6.11 21:29, 21:31) | yazıldı (6.11; İE-13 PR-12, `claude/project-thread-tr7mtv`) |
+| D | D-66 | iki uçlu (dörtomuz) kırmanın listesi, makas planı AP-01 paftasından (İE-33 PR-2; Lokman 6.11 21:23 kartı) | yazıldı (6.11; İE-33 PR-2, `claude/project-thread-qk5l1s`) |
+| D | **D-67** | — | **sıradaki boş** |
 | İE | İE-01–İE-08 | bu depo (`main`) | yazıldı |
 | İE | İE-09 | model atölyesi: kontrollü model üretimi ve banka hattı (Görev 6e; pano 30; P6001 güncellemesi kapsam dışı) | alındı (16.10; `claude/gorev-6e-model-atolyesi-rnhtcp`; PR-1 banka hattı 29.10, `claude/project-thread-rhjgzv`) |
 | İE | İE-10, İE-11, İE-12 | prefabrik hattı (PR #12, PR #14, `ie-12-prefabrik-bayi-paftasi`) | `main`'e BK-12 ile (PR-1: motor ve bayi paftası; liste ve mühür kıyası sonraki PR'larda) |
