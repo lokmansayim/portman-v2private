@@ -76,35 +76,35 @@ def plan_gorseli(ie: dict, yol: Path, v: dict | None = None, genislik_px: int = 
         for p in d.panolar:
             for (x0, y0, x1, y1) in p.rects():
                 ax.add_patch(Rectangle((x0, y0), x1 - x0, y1 - y0, facecolor=DUVAR, edgecolor=DUVAR, linewidth=0.5, zorder=4))
-            g = p.gap()
-            if not g or not p.acilim or p.acilim.tur == "kubbe":      # İE-29: kubbenin tabanı boşluk; kubbe aşağıda
-                continue
-            x0, y0, x1, y1 = g
-            if p.acilim.tur == "pencere":
-                ax.add_patch(Rectangle((x0, y0), x1 - x0, y1 - y0, facecolor="white", edgecolor=PENCERE, linewidth=1.2, zorder=4))
-                if d.yon == "x":
-                    ax.plot([x0, x1], [(y0 + y1) / 2] * 2, color=PENCERE, linewidth=1.0, zorder=5)
-                    ax.text((x0 + x1) / 2, y1 + 9 if d.c < H / 2 else y0 - 9, p.acilim.olcu, ha="center", va="bottom" if d.c < H / 2 else "top",
-                            fontsize=7, color=PENCERE, zorder=5)
-                else:
-                    ax.plot([(x0 + x1) / 2] * 2, [y0, y1], color=PENCERE, linewidth=1.0, zorder=5)
-                    ax.text(x1 + 9 if d.c < W / 2 else x0 - 9, (y0 + y1) / 2, p.acilim.olcu, ha="left" if d.c < W / 2 else "right", va="center",
-                            fontsize=7, color=PENCERE, rotation=90, zorder=5)
-            else:
-                ax.add_patch(Rectangle((x0, y0), x1 - x0, y1 - y0, facecolor="white", edgecolor="white", linewidth=0.5, zorder=4))
-                if p.acilim.tur == "gecis":                 # İE-24: kapısız geçiş (merdiven ağzı) boşluktur, kanat yayı çizilmez (DXF'te de "OPEN")
+            for ac_ in p.aciklar:                           # D-46: karkaslı panoda birden çok açıklık
+                if ac_.tur == "kubbe":                    # İE-29: kubbenin tabanı boşluk; kubbe aşağıda
                     continue
-                w = p.acilim.genislik
-                if d.yon == "x":
-                    yon = 1 if (p.acilim.icine_normal or "+y").endswith("y") and (p.acilim.icine_normal or "+y").startswith("+") else -1
-                    cx = x0 if _mentese_a0_ucunda(p.acilim, kapi_mantik) else x1
-                    ax.add_patch(Arc((cx, (y0 + y1) / 2), 2 * w, 2 * w, angle=0, theta1=0 if (cx == x0 and yon > 0) else (90 if (cx == x1 and yon > 0) else (180 if cx == x1 else 270)),
-                                     theta2=(90 if (cx == x0 and yon > 0) else (180 if (cx == x1 and yon > 0) else (270 if cx == x1 else 360))), color=KAPI, linewidth=1.0, zorder=5))
+                x0, y0, x1, y1 = p.bosluk_dortgeni(ac_)
+                if ac_.tur == "pencere":
+                    ax.add_patch(Rectangle((x0, y0), x1 - x0, y1 - y0, facecolor="white", edgecolor=PENCERE, linewidth=1.2, zorder=4))
+                    if d.yon == "x":
+                        ax.plot([x0, x1], [(y0 + y1) / 2] * 2, color=PENCERE, linewidth=1.0, zorder=5)
+                        ax.text((x0 + x1) / 2, y1 + 9 if d.c < H / 2 else y0 - 9, ac_.olcu, ha="center", va="bottom" if d.c < H / 2 else "top",
+                                fontsize=7, color=PENCERE, zorder=5)
+                    else:
+                        ax.plot([(x0 + x1) / 2] * 2, [y0, y1], color=PENCERE, linewidth=1.0, zorder=5)
+                        ax.text(x1 + 9 if d.c < W / 2 else x0 - 9, (y0 + y1) / 2, ac_.olcu, ha="left" if d.c < W / 2 else "right", va="center",
+                                fontsize=7, color=PENCERE, rotation=90, zorder=5)
                 else:
-                    yon = 1 if (p.acilim.icine_normal or "+x").startswith("+") else -1
-                    cy = y0 if _mentese_a0_ucunda(p.acilim, kapi_mantik) else y1
-                    ax.add_patch(Arc(((x0 + x1) / 2, cy), 2 * w, 2 * w, angle=0, theta1=0 if (cy == y0 and yon > 0) else (270 if (cy == y1 and yon > 0) else (90 if cy == y0 else 180)),
-                                     theta2=(90 if (cy == y0 and yon > 0) else (360 if (cy == y1 and yon > 0) else (180 if cy == y0 else 270))), color=KAPI, linewidth=1.0, zorder=5))
+                    ax.add_patch(Rectangle((x0, y0), x1 - x0, y1 - y0, facecolor="white", edgecolor="white", linewidth=0.5, zorder=4))
+                    if ac_.tur == "gecis":                 # İE-24: kapısız geçiş (merdiven ağzı) boşluktur, kanat yayı çizilmez (DXF'te de "OPEN")
+                        continue
+                    w = ac_.genislik
+                    if d.yon == "x":
+                        yon = 1 if (ac_.icine_normal or "+y").endswith("y") and (ac_.icine_normal or "+y").startswith("+") else -1
+                        cx = x0 if _mentese_a0_ucunda(ac_, kapi_mantik) else x1
+                        ax.add_patch(Arc((cx, (y0 + y1) / 2), 2 * w, 2 * w, angle=0, theta1=0 if (cx == x0 and yon > 0) else (90 if (cx == x1 and yon > 0) else (180 if cx == x1 else 270)),
+                                         theta2=(90 if (cx == x0 and yon > 0) else (180 if (cx == x1 and yon > 0) else (270 if cx == x1 else 360))), color=KAPI, linewidth=1.0, zorder=5))
+                    else:
+                        yon = 1 if (ac_.icine_normal or "+x").startswith("+") else -1
+                        cy = y0 if _mentese_a0_ucunda(ac_, kapi_mantik) else y1
+                        ax.add_patch(Arc(((x0 + x1) / 2, cy), 2 * w, 2 * w, angle=0, theta1=0 if (cy == y0 and yon > 0) else (270 if (cy == y1 and yon > 0) else (90 if cy == y0 else 180)),
+                                         theta2=(90 if (cy == y0 and yon > 0) else (360 if (cy == y1 and yon > 0) else (180 if cy == y0 else 270))), color=KAPI, linewidth=1.0, zorder=5))
     for k in plan.koseler:
         x0, y0, x1, y1 = k.rect
         ax.add_patch(Rectangle((x0, y0), x1 - x0, y1 - y0, facecolor=DUVAR, edgecolor=DUVAR, linewidth=0.5, zorder=4))

@@ -1,0 +1,176 @@
+{
+ "is_emri_no": "PM-TK05-21M2",
+ "revizyon": 6,
+ "talep": {
+  "bayi": {
+   "kod": "TK05",
+   "ad": "Bayi TK-05"
+  },
+  "musteri_adi": "TK-05",
+  "metin": "Bayi mesajı (Patron, 5 Kasım 2026 10:47): \"abim bu 20m2lik 2x2 banyo 16 m2 yatak odasi kaca mal olur?\". Patron: prefabrik; dış duvarlar 160'lık (yalnız içindeki strafor kalınlaşır), iç duvarlar bildiğimiz 100'lük pano; yükseklik 280 cm, lento 70; aks sistemi korunur. Çizim yok, ölçü yok; çatı talepte yok."
+ },
+ "yapi": {
+  "sistem": "prefabrik",
+  "kat_sayisi": 1,
+  "duvar_yuksekligi_cm": 280,
+  "lento_cm": 70,
+  "duvar_kalinligi_cm": {
+   "dis": 16,
+   "ic": 10
+  },
+  "olcu_kaynagi": "dis_olcu",
+  "dis_olcu_cm": {
+   "x": 408.5,
+   "y": 518
+  },
+  "referans_model": "TK-05",
+  "grid": {
+   "x_pano": 3,
+   "y_pano": 4
+  },
+  "kisa_kenar": "x",
+  "giris_cephesi": "on",
+  "dis_dusey_duvar": "cevre_aks_disinda",
+  "dizilim": {
+   "baslangic": "arka-sol",
+   "hiza": "izgara",
+   "dis_duvar_t_bolme": true,
+   "pencere": "oda_ortasi",
+   "kapi": "mantik",
+   "kose": "oda",
+   "dis_pano_dayanagi": [
+    {
+     "x": 204.25,
+     "aralik_cm": [
+      16,
+      267
+     ],
+     "cephe": "on"
+    }
+   ]
+  },
+  "ek_akslar_cm": {
+   "x": [],
+   "y": []
+  }
+ },
+ "mahaller": [
+  {
+   "ad": "YATAK ODASI",
+   "tur": "yatak_odasi",
+   "konum_cm": [
+    [
+     16,
+     8,
+     267,
+     510
+    ],
+    [
+     267,
+     321.75,
+     392.5,
+     510
+    ]
+   ]
+  },
+  {
+   "ad": "BANYO",
+   "tur": "banyo",
+   "konum_cm": [
+    [
+     267,
+     8,
+     392.5,
+     321.75
+    ]
+   ]
+  }
+ ],
+ "acik_sinirlar": [],
+ "acikliklar": [
+  {
+   "tur": "pencere",
+   "olcu": "120x180",
+   "mahal": "YATAK ODASI",
+   "duvar": "on"
+  },
+  {
+   "tur": "pencere",
+   "olcu": "120x120",
+   "mahal": "YATAK ODASI",
+   "duvar": "sol"
+  },
+  {
+   "tur": "pencere",
+   "olcu": "60x40",
+   "mahal": "BANYO",
+   "duvar": "arka"
+  },
+  {
+   "tur": "dis_kapi",
+   "olcu": 90,
+   "arasi": [
+    "__DIS__",
+    "YATAK ODASI"
+   ],
+   "duvar": "on",
+   "pano": 2
+  },
+  {
+   "tur": "ic_kapi",
+   "olcu": 82,
+   "arasi": [
+    "YATAK ODASI",
+    "BANYO"
+   ],
+   "pano": 0,
+   "mentese": "sol"
+  }
+ ],
+ "cati": {
+  "tip": "besik",
+  "egim_yuzde": 33,
+  "sacak_cm": 30,
+  "topuk_cm": 10,
+  "makas_yonu": "kisa_kenar",
+  "makas_ekseni": "x"
+ },
+ "cikti": {
+  "pdf": true,
+  "dxf": true,
+  "pafta": "A2",
+  "icerik": [
+   "aksli_plan",
+   "alanli_kopya",
+   "montaj_kopyasi",
+   "on_gorunus",
+   "cati_profili",
+   "ozellik_tablosu"
+  ]
+ },
+ "ozellikler": {},
+ "alici_ait": {
+  "kalemler": [],
+  "kaynak": "Talepte alıcıya ait kalem yok"
+ },
+ "pafta_uyarilari": [],
+ "varsayimlar": [
+  "Duvar: dış 160 mm, iç 100 mm (Patron, 5 Kasım 2026 10:47); İş Emri'nde `yapi.duvar_kalinligi_cm` {dis 16, ic 10}, D-12 müşteri seçeneği (`kurallar/model/secenekler/duvar_kalinligi_160_100.json`). Pano 125,5 modülü aynı; makasın geçtiği kenarda dış ölçü 16 + 125,5 × n + 16, öteki kenarda 8 + 125,5 × n + 8 (6 Ekim 3+1 denemesindeki aks düzeni).",
+  "Yükseklik 280 (D-14), lento 70 (Patron): İş Emri'nde `yapi.lento_cm` 70 (BK-23 / D-55); pencere ve kapı üst kotu 210.",
+  "Ölçü talepte yok: \"20 m²\" = 16 m² yatak odası + 2 × 2 banyo okundu; makas kısa kenarı (x, 3 pano) geçer.",
+  "Ölçü B seçildi (Patron, 5 Kasım 2026 11:10: \"B Olsun\"): 3 × 4,5 pano; sonra öndeki yarım pano çıkarıldı (Patron, 11:28: \"aks 1 ve 2 arasındaki yarım panoyu komple kaldır\"): 3 × 4 pano, 408,5 × 518.",
+  "Banyo C–D aksları arası 1 pano, arkadan 2,5 pano (aks 5'ten aks 2 ile 3'ün ortasına), arka sağ köşede; 60x40 vasistas banyonun arka duvarında, r01'deki gibi (Patron, 5 Kasım 2026 11:18: \"... 60/40 vasistas banyoyu aksları 4 ve 6 arasına al vasistası arkaya aç bir önceki modelde olduğu gibi\"; 11:30: \"Banyoyu yarım pano aks 2 ile 3 arasına doğru büyüt\"). Akslar önden: 1 ön duvar; yatak odası L.",
+  "Ön pencere 120x180, dış kapının solundaki A–C duvarında tam ortada, iki yanı 62,75 (Patron, 11:10: \"öndeki 120/120 pencereyi tam ortala yani sağına ve soluna 62,75 pano koy ve 120/180 yap\"); İş Emri'nde `dizilim.dis_pano_dayanagi` x 204,25, aralık 16–267, cephe on (ekler 78,75 ve 204,25; yalnız ön duvar, BK-23). Dış kapı 90 önden C–D panosunda doğrudan yatak odasına; yatak odasında solda 120x120; banyo kapısı 82 (ölçü varsayım).",
+  "Çatı talepte yok (M-08): plan onayından sonra çatı seçimi; bu çizimdeki beşik %33 / saçak 30 / topuk 10 yer tutucudur.",
+  "Banyo kapısı yatak odası ile banyo arasındaki C aksı duvarında, aks 4–5 arasındaki panoda; banyoya açılır, menteşe arka tarafta (Patron, 5 Kasım 2026 11:32: \"banyo kapısını aks 4 ile 5 arasına al ve binanın arkasına doğru aç yani menteşeler solda olsun\"); İş Emri'nde `pano` 0, `mentese` sol (açılma yönünde yürürken sol = arka)."
+ ],
+ "eksikler": [
+  "Dış ölçü ve oda ölçüleri (bayi yalnız m² verdi)",
+  "Pencere ve kapı yerleri",
+  "Çatı tipi",
+  "Tavan (asma / ters)",
+  "Çatı kaplaması"
+ ],
+ "dikmeler": [],
+ "verandalar": []
+}

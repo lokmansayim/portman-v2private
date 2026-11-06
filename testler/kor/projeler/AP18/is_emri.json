@@ -26,7 +26,11 @@
       "kapi": "mantik",
       "kose": "oda",
       "son_pano": "kosu",
-      "kapi_yeri": "ortada"
+      "kapi_yeri": "ortada",
+      "karkasli_panolar": [
+        {"yon": "x", "eksen_cm": 1144.5, "aralik_cm": [5, 381.5]},
+        {"yon": "y", "eksen_cm": 381.5, "aralik_cm": [888.5, 1139.5]}
+      ]
     },
     "ek_akslar_cm": {"x": [], "y": [768, 924.5]}
   },
@@ -81,7 +85,8 @@
     "Veranda sağ önde, gövdenin içinde (502 × 156,5; paftada), ön ve sağ açık; ön kenarı paftadaki kirişin hattı (dış yüzü 929,5; ek aks 924,5); arka duvarı dış duvar (ek aks 768). Sağ ön köşede 10 × 10 dikme (paftanın A ve B detayı).",
     "Hol 125,5 × 125,5, salonla arası açık (paftada duvar yok; acik_sinirlar); banyo ve iki yatak odası holden, üçüncü yatak odası salondan açılır. Oda adları paftada yazılı değil: yatak odası, banyo, hol ve salon (mutfak salonda sayıldı) paftanın ölçülerinden ve kapılarından.",
     "Pencereler ve kapılar paftadaki yerine en yakın Motor panosunda (pano dizini; paftanın pencere yazıları). Salonun girintiye bakan 180/180'i paftada sürgülü yazılı. Kapı genişlikleri paftada yazılı değil: dış kapı 90, iç kapı 82 (Motor'un ölçüsü).",
-    "Çatı: beşik + çapraz cumba (paftanın çatı şekli). Ana beşik makas y'yi geçer, mahya x boyunca; salonun öne çıkan bölümünün üstünde çapraz cumba 0–386,5, ön cepheden 220 çıkıntılı (paftanın cumba kesiti 446,5 = 386,5 + 2 × 30; makas planında MK09–MK12). Eğim %32,88 (18,2°; paftanın kesitinde eğik 520,97 / yarım açıklık 494,75), saçak 30 (paftanın özellik tablosu), topuk 10. Kaplama OSB + nem bariyeri + tek kat panel (paftanın özellik tablosu ve OSB planı, 42 adet). Özellikler paftanın özellik tablosundan ve açıklamasından; boya ve iniş borusu satırları tabloda boş."
+    "Çatı: beşik + çapraz cumba (paftanın çatı şekli). Ana beşik makas y'yi geçer, mahya x boyunca; salonun öne çıkan bölümünün üstünde çapraz cumba 0–386,5, ön cepheden 220 çıkıntılı (paftanın cumba kesiti 446,5 = 386,5 + 2 × 30; makas planında MK09–MK12). Eğim %32,88 (18,2°; paftanın kesitinde eğik 520,97 / yarım açıklık 494,75), saçak 30 (paftanın özellik tablosu), topuk 10. Kaplama OSB + nem bariyeri + tek kat panel (paftanın özellik tablosu ve OSB planı, 42 adet). Özellikler paftanın özellik tablosundan ve açıklamasından; boya ve iniş borusu satırları tabloda boş.",
+    "Karkaslı kaplama duvar panoları paftadan (İE-28, D-46): cumbanın ön duvarı tek parça 376,5 (iki 120/180), 180/180 sürgülünün duvarı 251. Paftanın bu evdeki renkleri pano pano okunmadı (İE-27 PR-3 okuması ve gerçek liste: pencere karkaslı pano 376,5 ve 251); pencereler Motor'un yerinde."
   ],
   "eksikler": [],
   "girintiler": [[381.5, 924.5, 883.5, 1139.5]]

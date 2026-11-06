@@ -31,7 +31,9 @@ def dogrula(doc, plan: G.Plan, is_emri: dict) -> dict:
     hatalar = []
     # İE-11: boşluğu panoda kaydırılmış açıklıklar (kapı mantığı); anahtar yoksa hepsi 0 → eski denetim
     _r3 = lambda r: tuple(round(v, 3) for v in r)
-    kayma_of = {_r3(pn.rect()): pn.acilim.kayma for pn in plan.panolar if pn.acilim and abs(pn.acilim.kayma) > 1e-9}
+    kayma_of = {_r3(pn.rect()): pn.acilim.kayma for pn in plan.panolar if pn.acilim and abs(pn.acilim.kayma) > 1e-9 and not pn.karkasli}
+    # D-46: karkaslı kaplama panosunun açıklıkları Plan'daki yerleriyle (duvar boyunca ortaları, sırayla)
+    karkas_of = {_r3(pn.rect()): sorted(sum(pn.bosluk(a)) / 2.0 for a in pn.aciklar) for pn in plan.panolar if pn.karkasli}
     panels, koseler, gaps = [], [], []
     kinds = collections.Counter()
     for e in msp:
@@ -54,6 +56,26 @@ def dogrula(doc, plan: G.Plan, is_emri: dict) -> dict:
             if abs(min(outer[2] - outer[0], outer[3] - outer[1]) - th) > 1e-6:
                 hatalar.append(f"Duvar kalınlığı uyuşmuyor: {e.dxf.name} {outer}")
             panels.append({"name": e.dxf.name, "layer": L, "rect": outer, "rects": rs})
+            toks = e.dxf.name.split("_")
+            if "KARKAS" in toks:                                # D-46: n açıklık → n + 1 dolu parça; türler blok adında sırayla
+                turler = [t_ for t_ in toks[toks.index("KARKAS") + 1].split("-") if t_ != "DOLU"]
+                vertical = outer[3] - outer[1] > outer[2] - outer[0]
+                rs_ = sorted(rs, key=lambda r: r[1] if vertical else r[0])
+                if len(rs_) != len(turler) + 1:
+                    hatalar.append(f"Beklenmeyen karkaslı pano yapısı: {e.dxf.name}"); continue
+                ortalar = []
+                for a, b in zip(rs_, rs_[1:]):
+                    gap = (outer[0], a[3], outer[2], b[1]) if vertical else (a[2], outer[1], b[0], outer[3])
+                    ortalar.append(((gap[1] + gap[3]) / 2) if vertical else ((gap[0] + gap[2]) / 2))
+                    tok = turler[len(ortalar) - 1]
+                    kind = "pencere" if tok.startswith("P") else "kapi"
+                    kinds[kind] += 1
+                    length = (gap[3] - gap[1]) if vertical else (gap[2] - gap[0])
+                    gaps.append({"kind": kind, "name": e.dxf.name, "gap": gap, "length": round(length, 6)})
+                bek = karkas_of.get(_r3(outer))
+                if bek is None or len(bek) != len(ortalar) or any(abs(x - y) > 1e-6 for x, y in zip(ortalar, bek)):
+                    hatalar.append(f"Karkaslı panonun açıklıkları Plan'daki yerinde değil: {e.dxf.name}")
+                continue
             if len(rs) == 2:
                 a, b = sorted(rs)
                 vertical = outer[3] - outer[1] > outer[2] - outer[0]
@@ -128,24 +150,23 @@ def dogrula(doc, plan: G.Plan, is_emri: dict) -> dict:
     # İE-11 `dizilim.kapi: mantik`: kapı kanadının süpürdüğü alan (kare, kanat boyu) başka kanatla ya da duvarla çakışmaz
     if ((is_emri.get("yapi", {}).get("dizilim") or {}).get("kapi")) == "mantik":
         sup = []
-        for pn in plan.panolar:
-            ac = pn.acilim
-            if not ac or ac.tur not in ("ic_kapi", "dis_kapi") or not ac.icine_normal:
+        for pn, ac in ((pn, ac) for pn in plan.panolar for ac in pn.aciklar):
+            if ac.tur not in ("ic_kapi", "dis_kapi") or not ac.icine_normal:
                 continue
-            g = pn.gap(); dd = pn.duvar; w = ac.genislik; n = ac.icine_normal
+            g = pn.bosluk_dortgeni(ac); dd = pn.duvar; w = ac.genislik; n = ac.icine_normal
             if dd.yon == "y":
                 x0 = dd.c + dd.h if n == "+x" else dd.c - dd.h - w
-                sup.append((pn, box(x0, g[1], x0 + w, g[3])))
+                sup.append((ac, box(x0, g[1], x0 + w, g[3])))
             else:
                 y0 = dd.c + dd.h if n == "+y" else dd.c - dd.h - w
-                sup.append((pn, box(g[0], y0, g[2], y0 + w)))
+                sup.append((ac, box(g[0], y0, g[2], y0 + w)))
         duvar_govde = unary_union([box(*r) for p_ in panels for r in p_["rects"]] + [box(*k) for k in koseler])
         for i, (pa, ba) in enumerate(sup):
             if ba.intersection(duvar_govde).area > 1e-6:
-                hatalar.append(f"Kapı kanadı duvara çarpıyor: {'–'.join(pa.acilim.arasi)}")
+                hatalar.append(f"Kapı kanadı duvara çarpıyor: {'–'.join(pa.arasi)}")
             for pb, bb in sup[i + 1:]:
                 if ba.intersection(bb).area > 1e-6:
-                    hatalar.append(f"Kapı kanatları çakışıyor: {'–'.join(pa.acilim.arasi)} / {'–'.join(pb.acilim.arasi)}")
+                    hatalar.append(f"Kapı kanatları çakışıyor: {'–'.join(pa.arasi)} / {'–'.join(pb.arasi)}")
     # H bağlantıları
     hs = [e for e in msp.query(f'INSERT[layer=="{G.katman("IC_UCLU_H_60")}"]') if e.dxf.insert.x < limit]
     hs_dis = [e for e in msp.query(f'INSERT[layer=="{G.katman("DIS_UCLU_H_100")}"]') if e.dxf.insert.x < limit]   # İE-11
@@ -163,9 +184,9 @@ def dogrula(doc, plan: G.Plan, is_emri: dict) -> dict:
         if not all(ok):
             hatalar.append(f"H bağlantısı ({x},{y}) kanallarında pano yok: {ok}")
     # beklenen adetler
-    exp_pen = sum(1 for p in plan.panolar if p.acilim and p.acilim.tur == "pencere")
-    exp_kap = sum(1 for p in plan.panolar if p.acilim and p.acilim.tur in ("ic_kapi", "dis_kapi"))
-    exp_gec = sum(1 for p in plan.panolar if p.acilim and p.acilim.tur == "gecis")
+    exp_pen = sum(1 for p in plan.panolar for a in p.aciklar if a.tur == "pencere")
+    exp_kap = sum(1 for p in plan.panolar for a in p.aciklar if a.tur in ("ic_kapi", "dis_kapi"))
+    exp_gec = sum(1 for p in plan.panolar for a in p.aciklar if a.tur == "gecis")
     if kinds["pencere"] != exp_pen or kinds["kapi"] != exp_kap or kinds["gecis"] != exp_gec:
         hatalar.append(f"Açıklık adedi dosya {dict(kinds)} / plan pencere {exp_pen} kapı {exp_kap} geçiş {exp_gec}")
     if len(panels) != len(plan.panolar) - len(kubbe_pano):

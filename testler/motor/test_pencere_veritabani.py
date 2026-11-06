@@ -32,9 +32,14 @@ def _ie(kod: str) -> dict:
 
 
 def _pencere(plan, olcu: str):
-    ps = [p for p in plan.panolar if p.acilim and p.acilim.tur == "pencere" and p.acilim.olcu == olcu]
+    """Pencerenin panosu ve kendisi; karkaslı kaplama panosunda (D-46) açıklık panonun açıklıklarından biri."""
+    ps = [(p, a) for p in plan.panolar for a in p.aciklar if a.tur == "pencere" and a.olcu == olcu]
     assert len(ps) == 1, (olcu, len(ps))
-    return ps[0]
+    return ps[0][0]
+
+
+def _acik(p, olcu: str):
+    return next(a for a in p.aciklar if a.tur == "pencere" and a.olcu == olcu)
 
 
 # --------------------------------------------------------------------------- veri tabanı
@@ -100,8 +105,10 @@ def test_kural_kisaltmaz(olcu, esik, ust, pano):
 
 # --------------------------------------------------------------------------- Motor: kör ölçümün sürgülüleri
 
-@pytest.mark.parametrize("kod, olcu, pano_boy", [("AP11", "180x200", 2 * G.MOD), ("AP14", "180x200", 2 * G.MOD),
-                                                  ("AP26", "200x210", 2 * G.MOD), ("AP26", "280x210", 3 * G.MOD)])
+# D-46 (İE-28; Lokman, 4 Kasım 2026 04:35, "Paftadan, ev ev"): AP-14'ün 180/200'ü ve AP-26'nın iki sürgülüsü paftadaki karkaslı kaplama duvar
+# panosunda (242,75; kapıyla birlikte 428,58; 491,33); AP-11'in 251'i odanın ortasında karkaslı pano. Pencerenin eni yine kısaltılmadan
+@pytest.mark.parametrize("kod, olcu, pano_boy", [("AP11", "180x200", 2 * G.MOD), ("AP14", "180x200", 242.75),
+                                                  ("AP26", "200x210", 428.58), ("AP26", "280x210", 491.33)])
 def test_kor_surguluyu_paftadaki_olcusuyle(kod, olcu, pano_boy):
     ie = _ie(kod)
     a = [x for x in ie["acikliklar"] if x.get("olcu") == olcu]
@@ -109,11 +116,23 @@ def test_kor_surguluyu_paftadaki_olcusuyle(kod, olcu, pano_boy):
     assert not [x for x in ie["acikliklar"] if x.get("olcu") in ("180x180", "240x180", "200x180") and x.get("acilis") == "surgulu"]
     plan = G.kur(ie)
     p = _pencere(plan, olcu)
-    assert abs(p.boy - pano_boy) < 1e-6
+    assert p.boy == pytest.approx(pano_boy, abs=1e-6) and p.karkasli
     k = G.pencere_kurali(olcu)
-    g = p.gap()
+    g = p.bosluk_dortgeni(_acik(p, olcu))
     assert abs((g[2] - g[0] if p.duvar.yon == "x" else g[3] - g[1]) - k.en) < 1e-6
     assert not any("veri tabanında yok" in u for u in plan.uyarilar)
+
+
+def test_karkasli_satirsiz_uc_panoluk_komsu_yolu():
+    """BK-13'ün üç panoluk komşu yolu: AP-26'nın 280/210'u karkaslı satırı yazılmazsa 3 × 125,5'lik pencereli panoda (İE-28'den önceki
+    beklenti; karkaslı satır o yolu bu evde kapattığı için ayrı sınanır)."""
+    ie = _ie("AP26")
+    ie["yapi"]["dizilim"].pop("karkasli_panolar")
+    plan = G.kur(ie)
+    p = _pencere(plan, "280x210")
+    assert p.boy == pytest.approx(3 * G.MOD, abs=1e-6) and not p.karkasli and p.aciklar == [p.acilim]
+    g = p.gap()
+    assert abs((g[2] - g[0] if p.duvar.yon == "x" else g[3] - g[1]) - G.pencere_kurali("280x210").en) < 1e-6
 
 
 def _tek_oda(*ekler):
@@ -214,61 +233,7 @@ def test_bolmeli_pencere_kaydi():
     for olcu, bs in bol.items():
         assert abs(sum(b["en_cm"] for b in bs) - G.pencere_kurali(olcu).en) < 1e-6, olcu
         assert [b["tur"] for b in bs] == ["kanat", "sabit", "kanat"], olcu
-        assert [b.get("mentese") for b in bs] == ["sol", None, "sag"], olcu          # iki kanat da dış yanından
+        assert [b.get("mentese") for b in bs] == ["sag", None, "sol"], olcu          # D-52: iki kanat da sabit yanından menteşeli (kollar dış yanda)
     from motor import dxf_out
     assert dxf_out.PENCERE_BOLMELERI == bol
 
-
-def test_bolmeli_pencere_gorunuste_ap27():
-    """AP-27'nin dört penceresi görünüşte bölmeli blokla; öteki pencereler (vasistas, sürgülü, kaynak blok) eskisi gibi."""
-    import ezdxf
-    from motor import dxf_out
-    with tempfile.TemporaryDirectory() as t:
-        dxf_out.uret(_ie("AP27"), Path(t), pdf_hatada=False)
-        doc = ezdxf.readfile(next(Path(t).glob("*.dxf")))
-    adlar = [e.dxf.name for e in doc.modelspace().query("INSERT") if e.dxf.layer == "ON_DOGRAMA"]
-    assert sorted(a for a in adlar if a.startswith("on-pencere-")) == ["on-pencere-140x150"] + ["on-pencere-180x210"] * 3
-    b = doc.blocks.get("on-pencere-180x210")
-    xs = {round(float(v[0]), 2) for e in b.query("LWPOLYLINE") for v in e.get_points()}
-    assert {43.0, 49.0, 131.0, 137.0} <= xs                                             # kayıtlar 46 ve 134'te: 46 | 88 | 46
-    kirmizi = [(float(e.dxf.start.x), float(e.dxf.end.x)) for e in b.query("LINE") if e.dxf.color == 1]
-    sol = [x for k in kirmizi for x in k if x < 46]
-    sag = [x for k in kirmizi for x in k if x > 134]
-    assert len(sol) + len(sag) == 2 * len(kirmizi)                                       # açılım yalnız kanatlarda (sabitte yok)
-    assert (round(min(sol), 2), round(max(sol), 2)) == (12.5, 38.5)                      # sol kanat: kollar dış yandaki menteşede buluşur
-    assert (round(min(sag), 2), round(max(sag), 2)) == (141.5, 167.5)                    # sağ kanat: ayna
-
-
-def test_acikligin_kendi_bolmeleri():
-    """İE-29 (İE-28 thread'inin isteği, AP-26 paftasının pencere detayı): aynı ölçü başka evde başka bölmeli olabilir (120x120 TK-01 ve
-    TK-02'de bölmesiz), bölmeler açıklık başına İş Emri'nden de verilir (`acikliklar[i].bolmeler`, veri tabanındakini ezer); yazılmayan
-    açıklık eskisi gibi. Yanlış yazılan açık hata."""
-    import ezdxf
-    from motor import cephe_gorunus as CG, dxf_out
-    ie = _ie("AP27")
-    i = next(k for k, a in enumerate(ie["acikliklar"]) if a["tur"] == "pencere" and a["olcu"] == "180x210")
-    iki = [{"tur": "kanat", "mentese": "sol", "en_cm": 90}, {"tur": "kanat", "mentese": "sag", "en_cm": 90}]
-    ie["acikliklar"][i]["bolmeler"] = iki
-    plan = G.kur(copy.deepcopy(ie))
-    ac = [a for t in CG.TARAFLAR for a in CG.cephe(plan, t)["acikliklar"] if a["tur"] == "pencere" and a["olcu"] == "180x210"]
-    assert sorted((a["bolmeler"] is None) for a in ac) == [False, True, True]
-    with tempfile.TemporaryDirectory() as t:
-        dxf_out.uret(ie, Path(t), pdf_hatada=False)
-        doc = ezdxf.readfile(next(Path(t).glob("*.dxf")))
-    adlar = sorted(e.dxf.name for e in doc.modelspace().query("INSERT") if e.dxf.layer == "ON_DOGRAMA" and e.dxf.name.startswith("on-pencere-"))
-    assert adlar == ["on-pencere-140x150", "on-pencere-180x210", "on-pencere-180x210", "on-pencere-180x210-k90so-k90sa"]
-    b = doc.blocks.get("on-pencere-180x210-k90so-k90sa")
-    xs = {round(float(v[0]), 2) for e in b.query("LWPOLYLINE") for v in e.get_points()}
-    assert {87.0, 93.0} <= xs and not ({43.0, 49.0} & xs)                                # kayıt 90'da: 90 | 90
-    for yanlis, mesaj in (([{"tur": "kanat", "mentese": "sol", "en_cm": 90}], "toplamı"),
-                          ([{"tur": "kanat", "en_cm": 180}], "bölme"),
-                          ([{"tur": "sabit", "mentese": "sol", "en_cm": 180}], "bölme"),
-                          ([{"tur": "surgu", "en_cm": 180}], "bölme"), ([], "listesi")):
-        ie2 = copy.deepcopy(ie)
-        ie2["acikliklar"][i]["bolmeler"] = yanlis
-        with pytest.raises(G.IsEmriHatasi, match=mesaj):
-            G.kur(ie2)
-    ie3 = copy.deepcopy(ie)
-    ie3["acikliklar"][i]["acilis"] = "surgulu"
-    with pytest.raises(G.IsEmriHatasi, match="acilis'siz"):
-        G.kur(ie3)

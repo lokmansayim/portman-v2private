@@ -81,7 +81,7 @@ def alt_cerceve(ie: dict, D: dict, G_: dict) -> tuple[list[dict], list[dict]]:
     P = G.kur(copy.deepcopy(ie))
     turler = set(D["kesilen_bosluklar"])
     pay, kanat, t = G_["alt_cerceve"]["pay"], G_["alt_cerceve"]["kanat"], G_["sac"]
-    bosluklar = [(d.yon, p.gap()) for d in P.duvarlar for p in d.panolar if p.acilim and p.acilim.tur in turler]
+    bosluklar = [(d.yon, p.bosluk_dortgeni(a)) for d in P.duvarlar for p in d.panolar for a in p.aciklar if a.tur in turler]
     T = max(2 * d.h for d in P.duvarlar if d.tur == "dis")
     hatlar = []
     fp = P.footprint()
@@ -118,7 +118,7 @@ def alt_cerceve(ie: dict, D: dict, G_: dict) -> tuple[list[dict], list[dict]]:
         kosular.append(k)
         cerceve = "100'lük" if round(2 * d.h * 10) >= D["ic_100_esigi_mm"] else "60'lık"
         for k in kosular:
-            kes = [((g[0], g[2]) if d.yon == "x" else (g[1], g[3])) for g in (p.gap() for p in k if p.acilim and p.acilim.tur in turler)]
+            kes = [((g[0], g[2]) if d.yon == "x" else (g[1], g[3])) for g in (p.bosluk_dortgeni(a) for p in k for a in p.aciklar if a.tur in turler)]
             hatlar.append({"duvar": "iç", "cerceve": cerceve, "yon": d.yon, "c0": d.c - d.h - pay - t, "c1": d.c + d.h + pay + t, "eksen": d.c,
                            "a0": k[0].a0, "a1": k[-1].a1, "boy": sum(p.boy for p in k), "kesikler": kes, "kalinlik_cm": 2 * d.h})
     hatlar.sort(key=lambda h: (h["duvar"] != "dış", h["yon"], h["eksen"], h["a0"]))
@@ -209,12 +209,17 @@ def sacak_saci(g: dict, G_: dict, F: dict | None = None) -> list[dict]:
     return out
 
 
-def mahya(g: dict, G_: dict, kesit: dict, F: dict | None = None) -> list[dict]:
+def mahya(g: dict, G_: dict, kesit: dict, F: dict | None = None, trapez_m: float | None = None) -> list[dict]:
+    """Mahya kaplamanın üstünde saçak ucundan ucuna. `trapez_m` verilirse (trapez sac kaplama, İE-15 K6) trapez sac mahyası (CK-07): parça
+    boyu sacın kapatması (`ParcaBoyu_m`; D-50, M-11), kesit metal kiremit mahyasınınki (gösterim)."""
     F = F or cati.cerceve(g)
     t, w = G_["sac"], G_["mahya"]["kanat"] * F["kos"]
     dz = kesit["asik"][0] + kesit["kaplama"]
     L, M, R = ([u, cati._ust(F, u) + dz] for u in (F["um"] - w, F["um"], F["um"] + w))
     kesit_ = [L, M, R, [R[0], R[1] + t], [M[0], M[1] + t], [L[0], L[1] + t]]
+    if trapez_m:
+        return [{"kural": "mahya_yerlesimi", "parca": "trapez_mahya", "boy_cm": _r(F["v1"] - F["v0"]), "geo": cati._prizma(F, kesit_, F["v0"], F["v1"]),
+                 "bilgi": {"ParcaBoyu_m": trapez_m}, "aciklama": f"trapez sac mahyası, {F['v1'] - F['v0']:g} cm (saçak ucundan ucuna)"}]
     return [{"kural": "mahya_yerlesimi", "parca": "mahya", "boy_cm": _r(F["v1"] - F["v0"]), "geo": cati._prizma(F, kesit_, F["v0"], F["v1"]),
              "bilgi": {}, "aciklama": f"mahya, {F['v1'] - F['v0']:g} cm (saçak ucundan ucuna)"}]
 
@@ -249,7 +254,9 @@ def kalkan_kenarlari(g: dict, G_: dict, kesit: dict, kurallar: set[str], F: dict
             return min(a_, b_), max(a_, b_)
         for yuz, u0, u1 in (yuzler or (("sol", -F["s"], F["um"]), ("sag", F["um"], F["aciklik"] + F["s"]))):
             bilgi = {"Makas": m["ad"], "Yuz": yuz}
-            egik = F["egik"] if yuzler is None else (u1 - u0) / F["kos"]
+            # çatının kenarından verilen parça (`yuzler`) liste üreteci gibi milimetreye: liste çatı kenarını `round(boy / 100, 3)` m okur
+            # (`prefabrik_liste._capraz_cumba_catilari`, İE-24); sayı onun yoluyla (AP-16: 25,30 m ÷ 2,3 = 11; geometri hakemi, İE-15 K6)
+            egik = F["egik"] if yuzler is None else round((u1 - u0) / F["kos"], 1)
             ortak = {"boy_cm": _r(egik), "bilgi": bilgi}
             if "bas_makas_z_yerlesimi" in kurallar:
                 kes = [(_bant(F, u0, u1, 0.0, t), *v(v_dis, v_dis - s * Z["ust_kanat"])),
@@ -294,8 +301,10 @@ def katman(ie: dict, g: dict, D: dict, kesit: dict, K: dict) -> dict:
     (`motor.yerlesim.degerler`); `kesit`: K2'nin gösterim kesitleri (aşığın yüksekliği, kaplama ve betopan kalınlığı); `K`: yerleşim
     kuralları (`cati_tipleri` kuralın kendisinden okunur, K2'deki gibi: yazılı değilse her çatı)."""
     G_ = D[GOSTERIM]["kesit_cm"]
-    from . import kaplama_kalinlasma, kaplama_turu
+    from . import kaplama_kalinlasma, kaplama_turu, kaplama_yazisi, trapez_kapatma_m
     dk = kaplama_kalinlasma(D["cati_kaplamasi"], kaplama_turu(g, D["cati_kaplamasi"])[0])
+    # İE-15 K6: trapez sac kaplamada mahya trapez sac mahyasıdır (CK-07), parçası sacın kapatması kadar (D-50, M-11; liste üreteciyle aynı okuma)
+    tm = trapez_kapatma_m(g, D["cati_kaplamasi"]) if D["mahya_yerlesimi"]["trapez_yazisi"] in kaplama_yazisi(g) else None
     if dk:                                      # D-40: sandviç panelde kaplama kalınlaşır, alın sacının alnı o kadar genişler; başka parça değişmez
         kesit = {**kesit, "kaplama": kesit["kaplama"] + dk}
         G_ = {**G_, "alin_saci": {**G_["alin_saci"], "alin": G_["alin_saci"]["alin"] + dk}}
@@ -308,12 +317,6 @@ def katman(ie: dict, g: dict, D: dict, kesit: dict, K: dict) -> dict:
         if izin and g["cati_tipi"] not in izin:
             kural_yok.append({"parca": adi, "sinif": sinif, "neden": girdi.cati_disi(g["cati_tipi"], ad, izin), "cati": g["cati_tipi"]})
             continue
-        if ad == "mahya_yerlesimi":
-            yazili = girdi.kucuk(next((v for k, v in g["ozellikler"].items() if girdi.kucuk(k) == "çatı kaplaması"), ""))
-            if D[ad]["trapez_yazisi"] in yazili:
-                kural_yok.append({"parca": adi, "sinif": sinif, "neden": f"İş Emri'nin çatı kaplaması \"{yazili}\": mahya trapez sac mahyasıdır "
-                                                                          "(ayrı ürün, kartı yok)"})
-                continue
         if ad in ("alin_saci_yerlesimi", "bas_makas_z_yerlesimi", "c_kapama_yerlesimi") and not any(m["rol"] == "bas" for m in g["makaslar"]):
             kural_yok.append({"parca": adi, "sinif": sinif, "neden": f"{ad}: bugünkü IFC'de baş makas yok (kalkan kenarı kurulamaz)"})
             continue
@@ -327,7 +330,7 @@ def katman(ie: dict, g: dict, D: dict, kesit: dict, K: dict) -> dict:
         from motor.genel import cati_genel
 
         from . import serit
-        parcalar += serit.kenarlar(g, cati_genel.cati_kur(serit_), G_, kesit, kurulan, levhalar)
+        parcalar += serit.kenarlar(g, cati_genel.cati_kur(serit_), G_, kesit, kurulan, levhalar, trapez_m=tm)
     v_omega = [sacak_omegasi(g, G_, F, levhalar) if omega else [] for F in verandalar]
     if not serit_:
         if omega:
@@ -336,7 +339,7 @@ def katman(ie: dict, g: dict, D: dict, kesit: dict, K: dict) -> dict:
             parcalar += sacak_saci(g, G_)
         parcalar += kalkan_kenarlari(g, G_, kesit, kurulan)
         if "mahya_yerlesimi" in kurulan:
-            parcalar += mahya(g, G_, kesit)
+            parcalar += mahya(g, G_, kesit, trapez_m=tm)
     # K5b: taşan verandaların çatı kenarları (çerçeveyi kuramayan verandanın "kural yok"u yerleşimin çatı katmanlarında yazılı)
     for F, vo in zip(verandalar, v_omega):
         vp = list(vo)
@@ -345,6 +348,6 @@ def katman(ie: dict, g: dict, D: dict, kesit: dict, K: dict) -> dict:
         vp += kalkan_kenarlari(g, G_, kesit, kurulan & {"alin_saci_yerlesimi", "bas_makas_z_yerlesimi", "c_kapama_yerlesimi"}, F,
                                [veranda.kalkan(F, kesit["betopan"])])
         if "mahya_yerlesimi" in kurulan:
-            vp += mahya(g, G_, kesit, F)
+            vp += mahya(g, G_, kesit, F, trapez_m=tm)
         parcalar += veranda.isaretle(vp, F)
     return {"parcalar": parcalar, "kural_yok": kural_yok, "uyarilar": uyarilar, "hatlar": hatlar}
