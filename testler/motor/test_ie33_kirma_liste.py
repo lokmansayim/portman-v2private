@@ -5,8 +5,8 @@ AP-01'in geometrisi İE-17'nin İş Emri'si (`testler/cizim/evler/AP01.json`; ö
 dere yerleşim planından (s. 6): M10–M20 ana makas (mahyaya dik, 11), M02–M08 ve M22–M28 kırma uçlarındaki kısa makaslar (7 + 7), M01, M09,
 M21, M29 köşelerdeki çapraz makas (4); kırma uçlarının altında CP1–CP6 çatı paneli. Paftadaki ölçüler makas yüzünden yüzünedir
 (117,5 + 8 = 125,5; 54,75 + 8 = 62,75): makaslar saçak duvarının pano eklemlerinde. Kendi listemiz gerçek liste açılmadan önce commit'lendi
-(cd3a443); gerçek listede "ÇATI MAKAS PANELLERİ" 29 ve "ÇATI PANELLERİ" 6. Mahyası y boyunca olan iki uçlu kırma paftayla kıyaslanmadı:
-liste yazılmaz. LLM yok.
+(cd3a443); gerçek listede "ÇATI MAKAS PANELLERİ" 29 ve "ÇATI PANELLERİ" 6. Paftanın dışında kalan iki uçlu kırmada (mahya y boyunca,
+girintili gövde, taşan veranda, paftadan geniş makas aralığı; geometri hakemi, 6 Kasım) liste yazılmaz (D-66). LLM yok.
 """
 from __future__ import annotations
 
@@ -22,7 +22,7 @@ from motor import prefabrik_liste as PL  # noqa: E402
 
 AP01 = KOK / "testler" / "cizim" / "evler" / "AP01.json"
 AP01_KOR = KOK / "testler" / "kor" / "projeler" / "AP01" / "is_emri.json"
-AP15 = KOK / "testler" / "cizim" / "evler" / "AP15.json"
+AP09 = KOK / "testler" / "cizim" / "evler" / "AP09.json"
 AP27 = KOK / "testler" / "kor" / "projeler" / "AP27" / "is_emri.json"
 
 
@@ -80,14 +80,36 @@ def test_kor_is_emri_geometrisi_ayni():
 
 
 def test_mahyasi_y_boyunca_yazilmaz():
-    ie = _ie(AP15)
-    ie["cati"] = {k: v for k, v in ie["cati"].items() if k in ("egim_yuzde", "sacak_cm", "topuk_cm", "makas_yonu", "makas_ekseni")}
-    ie["cati"]["tip"] = "kirma"
-    with pytest.raises(PL.ListeYazilmaz, match="mahya y boyunca"):
-        PL.model_motor(ie)
+    with pytest.raises(PL.ListeYazilmaz, match="mahya y boyunca"):     # AP-09'un dikdörtgen gövdesi kırmayla: mahya y boyunca
+        PL.model_motor(_kirma(AP09))
 
 
 def test_tek_uclu_kirma_aynen():
     """AP-27'nin tek uçlu kırması (İE-29) aynen: 25 makas, 6 panel."""
     L = PL.is_emrinden(_ie(AP27))
     assert L["girdi_ozeti"]["makas"] == 25 and _adet(L, "Çatı paneli") == {"Çatı paneli (makas arası) · ana çatı": 6}
+
+
+AP22 = KOK / "testler" / "cizim" / "evler" / "AP22.json"
+
+
+def _kirma(yol: Path) -> dict:
+    ie = _ie(yol)
+    ie["cati"] = {k: v for k, v in ie["cati"].items() if k in ("egim_yuzde", "sacak_cm", "topuk_cm", "makas_yonu", "makas_ekseni")}
+    ie["cati"]["tip"] = "kirma"
+    return ie
+
+
+def test_paftanin_disinda_yazilmaz():
+    """Geometri hakemi (6 Kasım): paftanın dışında kalan iki uçlu kırma sessizce eksik satırla yazılmaz, liste durur."""
+    ie = _ie(AP01)                                                   # taşan veranda: verandanın çatısı kırmayla kıyaslanmadı
+    ie["verandalar"] = [{"ad": "ARKA VERANDA", "cephe": "arka", "bas_cm": 0, "bit_cm": 261, "derinlik_cm": 130,
+                         "cati": {"tip": "besik", "egim_yuzde": 33}}]
+    with pytest.raises(PL.ListeYazilmaz, match="taşan veranda"):
+        PL.model_motor(ie)
+    ie = _ie(AP01)                                                   # arka duvarda 251'lik pano: iki ana makasın arası 125,5'ten geniş
+    next(a for a in ie["acikliklar"] if a.get("mahal") == "YATAK ODASI 2" and a["tur"] == "pencere")["olcu"] = "200x120"
+    with pytest.raises(PL.ListeYazilmaz, match="iki ana makasın arası"):
+        PL.model_motor(ie)
+    with pytest.raises(PL.ListeYazilmaz, match="girintili gövde"):  # AP-22'nin girintili gövdesi kırmayla
+        PL.model_motor(_kirma(AP22))
