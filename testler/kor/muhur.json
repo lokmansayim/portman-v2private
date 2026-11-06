@@ -1,13 +1,13 @@
 {
- "aciklama": "Kör test mührü (BK-12 PR-3, M7). Kayıt başına kod (PK ve AP), dosya türü, uzantı, bayt, SHA-256 ve durum; dosya adı ve kişi adı yazılmaz. Durum: acik (13 Ekim'de açıldı; İE-26'nın on evi Patron'un açılış kaydıyla 2 Kasım'da açıldı, İE-27'de (3 Kasım, D-45) kaydı `acik`a geçti; İE-29'da (3 Kasım, D-47) AP-06, AP-13, AP-16 aynı kararla açıldı, kaydı `acik`: açılmış liste artık kör değil, kurallar değiştikçe açıkça yeniden ölçülür), kor (kör 19: açılış kaydı olmadan açılmaz), kapali (açılmadı; kör sayılmaz ama açılış kaydı olmadan o da açılmaz), kaynak (montaj paftası ya da detay; liste değil, araç okumaz). Açılış kaydı: proje kodu → tarih, kendi listemizin commit'i ve saatler (13 Ekim'in açık sekiz projesi). Kör ya da kapalı bir kayıt açılacaksa Patron kararıyla `acilislar`'a ayrı commit'le eklenir: {\"karar\": <Patron kararı ve saati>, \"tarih\": …, \"sha256\": <açılacak dosyanın özeti>, \"liste_commit\": <kendi listemizin commit'i>, \"sozluk_commit\": <sözlüğün commit'i>}; araç özet ya da liste commit'i tutmazsa açmaz, sözlük açılıştan sonra değişmişse sonuçta ve raporda yazar.",
+ "aciklama": "Kör test mührü (BK-12 PR-3, M7). Kayıt başına kod (PK ve AP), dosya türü, uzantı, bayt, SHA-256 ve durum; dosya adı ve kişi adı yazılmaz. Durum: acik (13 Ekim'de açıldı; İE-26'nın on evi Patron'un açılış kaydıyla 2 Kasım'da açıldı, İE-27'de (3 Kasım, D-45) kaydı `acik`a geçti; İE-29'da (3 Kasım, D-47) AP-06, AP-13, AP-16 ve İE-29 PR-2'de (4 Kasım, D-48) AP-27 ve AP-12, 5 Kasım'da (D-54) kubbeli AP-17, AP-24 ve AP-23 aynı kararla açıldı, kaydı `acik`: açılmış liste artık kör değil, kurallar değiştikçe açıkça yeniden ölçülür), kor (kör 19: açılış kaydı olmadan açılmaz), kapali (açılmadı; kör sayılmaz ama açılış kaydı olmadan o da açılmaz), kaynak (montaj paftası ya da detay; liste değil, araç okumaz). Açılış kaydı: proje kodu → tarih, kendi listemizin commit'i ve saatler (13 Ekim'in açık sekiz projesi). Kör ya da kapalı bir kayıt açılacaksa Patron kararıyla `acilislar`'a ayrı commit'le eklenir: {\"karar\": <Patron kararı ve saati>, \"tarih\": …, \"sha256\": <açılacak dosyanın özeti>, \"liste_commit\": <kendi listemizin commit'i>, \"sozluk_commit\": <sözlüğün commit'i>}; araç özet ya da liste commit'i tutmazsa açmaz, sözlük açılıştan sonra değişmişse sonuçta ve raporda yazar.",
  "kaynaklar": [
   "13 Ekim 2026 kör test serisi mührü (`ie-11-pr2-kor-test` dalı, `deneme/2026-10-13_aiprefabrik` mühür kaydı; adlı satırlar orada kalır)",
   "docs/notlar/2026-10-18_AIPrefabrik_muhur.md (AP kodlarıyla 61 dosya; 28 DWG'nin SHA'sı ilk indirmede alınır, bu dosyada yok)"
  ],
  "sayilar": {
-  "acik": 30,
+  "acik": 35,
   "kaynak": 32,
-  "kor": 6,
+  "kor": 1,
   "kapali": 14
  },
  "acilislar": {
@@ -194,6 +194,51 @@
    "liste_commit_saati": "22:25:37",
    "sozluk_commit": "deb02c9",
    "dayanak": "İE-29: kendi listemiz ve İş Emri önce commit'lendi ve dala gönderildi, sonra bu açılış kaydı (ayrı commit), sonra mühür denetimi ve kıyas"
+  },
+  "AP-27": {
+   "karar": "Patron (Lokman), karar kartı 2 Kasım 2026 21:48:56 UTC: \"Hepsi açılsın\" (soru: \"Kör 19 evin gerçek listeleri bu ölçümde açılsın mı?\"; AP-20 çift kat, ölçüm dışı). İE-26 ve İE-29 PR-1'de Motor liste yazmadığı için açılmamıştı; İE-29 PR-2'de (pano 145) çizim Lokman'ın karar kartıyla onaylandı (4 Kasım 2026 05:19 UTC \"Onaylıyorum\"; sonucu: \"AP-27'nin listesini kırma kurallarıyla yazar, kör ölçümünü koşarım\") ve Motor tek uçlu kırmada liste yazıyor (D-48)",
+   "tarih": "2026-11-04",
+   "sha256": "dc0ebc6924a41c4a566112cf195667544c3ff944fa1db5b0a05a30d6fb0787dc",
+   "liste_commit": "f4476db",
+   "liste_commit_saati": "06:21:10",
+   "sozluk_commit": "f4476db",
+   "dayanak": "İE-29 PR-2: kendi listemiz, İş Emri ve sözlük (surum 4) önce commit'lendi ve dala gönderildi, sonra bu açılış kaydı (ayrı commit), sonra mühür denetimi ve kıyas"
+  },
+  "AP-12": {
+   "karar": "Patron (Lokman), karar kartı 2 Kasım 2026 21:48:56 UTC: \"Hepsi açılsın\" (soru: \"Kör 19 evin gerçek listeleri bu ölçümde açılsın mı?\"; AP-20 çift kat, ölçüm dışı). İE-26 ve İE-29 PR-1'de Motor liste yazmadığı için açılmamıştı; İE-29 PR-2'de (pano 145) çizim Lokman'ın karar kartıyla onaylandı (4 Kasım 2026 21:35 UTC \"Onaylıyorum\"; sonucu: \"AP-12'nin listesini beşik ve cumba kurallarıyla yazarım, sonra kör ölçümünü koşarım\") ve Motor yan yana iki cumbalı beşikte liste yazıyor",
+   "tarih": "2026-11-04",
+   "sha256": "89fe8d529aef5a8dcb2b0ed25678663d3eafbac05069585e69267dd6d0f87060",
+   "liste_commit": "f13ad5b",
+   "liste_commit_saati": "21:53:47",
+   "sozluk_commit": "f4476db",
+   "dayanak": "İE-29 PR-2: kendi listemiz ve İş Emri önce commit'lendi ve dala gönderildi, sonra bu açılış kaydı (ayrı commit), sonra mühür denetimi ve kıyas"
+  },
+  "AP-17": {
+   "karar": "Patron (Lokman), karar kartı 2 Kasım 2026 21:48:56 UTC: \"Hepsi açılsın\" (soru: \"Kör 19 evin gerçek listeleri bu ölçümde açılsın mı?\"; AP-20 çift kat, ölçüm dışı). İE-26 ve İE-29 PR-1'de Motor liste yazmadığı için açılmamıştı; İE-29 PR-2'de (pano 145) kubbe Lokman'ın 5 Kasım detayı ve düzeltmesiyle çizildi (D-54) ve çizim Lokman'ın karar kartıyla onaylandı (5 Kasım 2026 12:34 UTC \"Onaylıyorum\"; sonucu: \"AP-17, AP-24 ve AP-23'ün listesini kubbe takımı ve kaplamasıyla yazar, kör ölçümünü koşarım\") ve Motor kubbeli evde liste yazıyor",
+   "tarih": "2026-11-05",
+   "sha256": "4aa3c0e2f0f765830505768bcfcf1302ed9bf6c3d9f2107439d7bd9d6b9f8afa",
+   "liste_commit": "711d4eb4",
+   "liste_commit_saati": "13:01:49",
+   "sozluk_commit": "f4476db",
+   "dayanak": "İE-29 PR-2: kendi listemiz ve İş Emri önce commit'lendi ve dala gönderildi, sonra bu açılış kaydı (ayrı commit), sonra mühür denetimi ve kıyas"
+  },
+  "AP-24": {
+   "karar": "Patron (Lokman), karar kartı 2 Kasım 2026 21:48:56 UTC: \"Hepsi açılsın\" (soru: \"Kör 19 evin gerçek listeleri bu ölçümde açılsın mı?\"; AP-20 çift kat, ölçüm dışı). İE-26 ve İE-29 PR-1'de Motor liste yazmadığı için açılmamıştı; İE-29 PR-2'de (pano 145) kubbe Lokman'ın 5 Kasım detayı ve düzeltmesiyle çizildi (D-54) ve çizim Lokman'ın karar kartıyla onaylandı (5 Kasım 2026 12:34 UTC \"Onaylıyorum\"; sonucu: \"AP-17, AP-24 ve AP-23'ün listesini kubbe takımı ve kaplamasıyla yazar, kör ölçümünü koşarım\") ve Motor kubbeli evde liste yazıyor",
+   "tarih": "2026-11-05",
+   "sha256": "40934fd0cec22709119bf1c558f52be1e4093aaba81f3603745c5df05c715e56",
+   "liste_commit": "711d4eb4",
+   "liste_commit_saati": "13:01:49",
+   "sozluk_commit": "f4476db",
+   "dayanak": "İE-29 PR-2: kendi listemiz ve İş Emri önce commit'lendi ve dala gönderildi, sonra bu açılış kaydı (ayrı commit), sonra mühür denetimi ve kıyas"
+  },
+  "AP-23": {
+   "karar": "Patron (Lokman), karar kartı 2 Kasım 2026 21:48:56 UTC: \"Hepsi açılsın\" (soru: \"Kör 19 evin gerçek listeleri bu ölçümde açılsın mı?\"; AP-20 çift kat, ölçüm dışı). İE-26 ve İE-29 PR-1'de Motor liste yazmadığı için açılmamıştı; İE-29 PR-2'de (pano 145) kubbe Lokman'ın 5 Kasım detayı ve düzeltmesiyle çizildi (D-54) ve çizim Lokman'ın karar kartıyla onaylandı (5 Kasım 2026 12:34 UTC \"Onaylıyorum\"; sonucu: \"AP-17, AP-24 ve AP-23'ün listesini kubbe takımı ve kaplamasıyla yazar, kör ölçümünü koşarım\") ve Motor kubbeli evde liste yazıyor",
+   "tarih": "2026-11-05",
+   "sha256": "7abb57e4ea90bd7e242bd593b2c793cdf96d717507af7ec5f896c4b022b08223",
+   "liste_commit": "711d4eb4",
+   "liste_commit_saati": "13:01:49",
+   "sozluk_commit": "f4476db",
+   "dayanak": "İE-29 PR-2: kendi listemiz ve İş Emri önce commit'lendi ve dala gönderildi, sonra bu açılış kaydı (ayrı commit), sonra mühür denetimi ve kıyas"
   }
  },
  "dosyalar": [
@@ -454,7 +499,8 @@
    "uzanti": ".pdf",
    "bayt": 232344,
    "sha256": "89fe8d529aef5a8dcb2b0ed25678663d3eafbac05069585e69267dd6d0f87060",
-   "durum": "kor"
+   "durum": "acik",
+   "not": "çizim için pafta görüldü (İE-29 PR-2, 4 Kasım 2026: montaj paftası kat planı, çatı ve görünüş çizimine kaynak); liste İE-29 PR-2'de İE-26 kararıyla açıldı (4 Kasım 2026)"
   },
   {
    "kod": [
@@ -557,7 +603,8 @@
    "uzanti": ".pdf",
    "bayt": 222642,
    "sha256": "4aa3c0e2f0f765830505768bcfcf1302ed9bf6c3d9f2107439d7bd9d6b9f8afa",
-   "durum": "kor"
+   "durum": "acik",
+   "not": "çizim için pafta görüldü (İE-29 PR-2, 4 Kasım 2026: montaj paftası kat planı, kubbe, çatı ve görünüş çizimine kaynak); liste İE-29 PR-2'de İE-26 kararıyla ve Lokman'ın 5 Kasım 12:34 çizim onayıyla açıldı (5 Kasım 2026)"
   },
   {
    "kod": [
@@ -688,7 +735,8 @@
    "uzanti": ".pdf",
    "bayt": 145195,
    "sha256": "7abb57e4ea90bd7e242bd593b2c793cdf96d717507af7ec5f896c4b022b08223",
-   "durum": "kor"
+   "durum": "acik",
+   "not": "çizim için pafta görüldü (İE-29 PR-2, 4 Kasım 2026: montaj paftası kat planı, kubbe, ortak duvar, çatı ve görünüş çizimine kaynak; makas ve aşık planı çatıya); liste İE-29 PR-2'de İE-26 kararıyla ve Lokman'ın 5 Kasım 12:34 çizim onayıyla açıldı (5 Kasım 2026)"
   },
   {
    "kod": [
@@ -708,7 +756,8 @@
    "uzanti": ".pdf",
    "bayt": 159213,
    "sha256": "40934fd0cec22709119bf1c558f52be1e4093aaba81f3603745c5df05c715e56",
-   "durum": "kor"
+   "durum": "acik",
+   "not": "çizim için pafta görüldü (İE-29 PR-2, 4 Kasım 2026: montaj paftası kat planı, kubbe, çatı ve görünüş çizimine kaynak; makas ve aşık planı çatıya); liste İE-29 PR-2'de İE-26 kararıyla ve Lokman'ın 5 Kasım 12:34 çizim onayıyla açıldı (5 Kasım 2026)"
   },
   {
    "kod": [
@@ -768,7 +817,8 @@
    "uzanti": ".pdf",
    "bayt": 236224,
    "sha256": "dc0ebc6924a41c4a566112cf195667544c3ff944fa1db5b0a05a30d6fb0787dc",
-   "durum": "kor"
+   "durum": "acik",
+   "not": "çizim için pafta görüldü (İE-29 PR-2, 4 Kasım 2026: montaj paftası kat planı, çatı ve görünüş çizimine kaynak); liste İE-29 PR-2'de İE-26 kararıyla açıldı (4 Kasım 2026)"
   },
   {
    "kod": [
