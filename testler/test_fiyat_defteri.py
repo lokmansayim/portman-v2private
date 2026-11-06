@@ -16,7 +16,8 @@ KOK = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(KOK))
 from araclar import fiyatla as F  # noqa: E402
 
-DEFTER = KOK / "kurallar" / "fiyat" / "defter_2026-10.json"
+DEFTER = KOK / "kurallar" / "fiyat" / "defter_2026-10.json"           # r10'a kadarki kurallar bu dosyada sınanır; r11 (45. hafta) test_fiyat_defteri_45.py
+DEFTERLER = sorted((KOK / "kurallar" / "fiyat").glob("defter_*.json"))  # biçim ve kişisel veri her defterde
 KOR = sorted((KOK / "testler" / "kor" / "projeler").glob("*/bizim_liste.json"))
 DURUMLAR = {"eşleşti", "bant", "öneri onaylı", "ikinci kaynak", "yedek öneri", "hesap", "kaynakta yok", "yakın", "TK-01 onaylı kalemle aynı", "Patron verdi",
             "eşdeğer"}
@@ -32,7 +33,9 @@ def _pre(kalem, olcu, adet, grup="1001"):
     return {"grup": grup, "grup_adi": "Panel", "kalem": kalem, "olcu": olcu, "adet": adet, "birim": "adet"}
 
 
-def test_defter_bicimi(defter):
+@pytest.mark.parametrize("yol", DEFTERLER, ids=[p.stem for p in DEFTERLER])
+def test_defter_bicimi(yol):
+    defter = json.loads(yol.read_text(encoding="utf-8"))
     assert defter["sema"] == "portman.fiyat_defteri/1"
     assert set(defter["hatlar"]) == {"prefabrik", "celik"}
     for v in defter["kaynaklar"].values():                                      # kısa ad liste ve tarih: çıktının kaynak sütunu
@@ -67,9 +70,10 @@ def test_defter_bicimi(defter):
             assert not [k for k in H["kalemler"] if any(k.startswith(b) for b in m["kalem_baslar"])]   # kaydı olan anahtar kurala düşmez
 
 
-def test_defterde_kisisel_veri_yok():
+@pytest.mark.parametrize("yol", DEFTERLER, ids=[p.stem for p in DEFTERLER])
+def test_defterde_kisisel_veri_yok(yol):
     """Kaynak dosyalarda kişi adı, telefon, IBAN, T.C. no var; deftere yalnız kalem ve fiyat girer."""
-    txt = DEFTER.read_text(encoding="utf-8")
+    txt = yol.read_text(encoding="utf-8")
     assert not re.search(r"\b0?5\d{2}[ ]?\d{3}[ ]?\d{2}[ ]?\d{2}\b", txt)     # cep telefonu
     assert not re.search(r"\b0?[2-4]\d{2}[ ]?\d{3}[ ]?\d{2}[ ]?\d{2}\b", txt)  # sabit hat
     assert not re.search(r"\bTR\d{2}[ ]?\d{4}", txt)                         # IBAN

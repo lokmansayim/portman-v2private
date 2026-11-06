@@ -104,6 +104,8 @@ Biçim: karar · gerekçe · reddedilen seçenekler · geri alma yolu · kim ve 
 | [D-57](D-57.md) | Prefabrik teras panelinde damlalık: L 2800, ön ve arka terasın genişliği birlikte ÷ 2,8, yukarı (`prefabrik.json` › `teras_damlaligi`); ana çatıda damlalık yine yok | 5.11 (Lokman 11:02) |
 | [D-58](D-58.md) | TK-04 r07: veranda 30 cm saçak kalacak kadar içeri (ön kiriş ön dış yüzden 37,5; girinti + ek aks), kirişin salon duvarına geldiği yere 250 cm kolon (İş Emri dikmesi); çizimde içeri alınan verandanın ağzı da profil (İş Emri `girinti_kirisi`). r08: kirişin yüzündeki ara aks ve verandanın şerit ölçüsü çizilmez; salon–veranda duvarının panoları ızgarada (İş Emri `dizilim.dis_pano_dayanagi`) (PC-36; BK-24) | 5.11 (Lokman 11:00, 22:08; plan onayı 22:29) |
 | [D-59](D-59.md) | Birleştirmeyi Lokman yapar: oturum PR'ı hazırlar, doğrulamayı koşturur (kırmızıda kendisi düzeltir), yeşilse bağlantıyı verir; `main`'e birleştirmez ve denemez. D-43'ün birleştirme kısmının yerini alır | 5.11 (Lokman 12:35) |
+| [D-61](D-61.md) | TK-04 listesi: çıkıntısız çapraz cumbanın ana çatı üstündeki makası kısa (boy çatı tanımından), cumba ile ana çatının köşesinde tek iniş, iki ucu kolonlu açık kenarda kiriş kolonun yüzünden yüzüne (− 2 × 10; M-05 açıldı ve bu kararla kapandı); saçak omegası 7 (M-01) | 5.11 (Lokman 22:49 kartı "Öneriyle düzelt"; 6.11 07:56 M-05 kartı "Evet, kurala işle") |
+| [D-62](D-62.md) | Prefabrik fiyatlar 45. hafta listesinden: yeni defter `kurallar/fiyat/defter_2026-11.json` (r11, araçların varsayılanı); TK-04'ün listede karşılığı olan bütün kalemleri onaylı (birebir, yöntemle hesap, yakın), listede olmayan eski fiyatında; r10 defteri eski teklifi aynen verir | 5.11 (Lokman 23:00 "fiyatları buradan al", 23:10 "Hepsini al") |
 
 ## Numara defteri (14 Ekim 2026, BK-08; CIO planı › Görev 3)
 
@@ -159,7 +161,11 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | D | D-58 | TK-04 r07 veranda içeri, salon duvarına kolon; içeri alınan veranda ağzı çizimde profil; r08 ara aks ve şerit ölçüsü yok, D aksı ızgarada (Lokman 5.11 11:00, 22:08) | yazıldı (5.11; BK-24, `claude/project-thread-jlqian`, PR #128) |
 | D | D-59 | Birleştirmeyi Lokman yapar; oturum PR'ı hazırlar, doğrulamayı koşturur, yeşilse bağlantıyı verir (PR #127) | yazıldı (5.11; PR #127) |
 | D | D-60 | TK-05 160'lık dış duvar (BK-25) | ayrıldı (başka iş dalında) |
-| D | **D-61** | — | **sıradaki boş** |
+| D | D-61 | TK-04 listesi: kısa cumba makası, köşede tek iniş, iki kolon arası kiriş (Lokman 5.11 22:49 kartı) | yazıldı (5.11; İE-13 PR-10, `claude/project-thread-tr7mtv`) |
+| D | D-62 | 45. hafta fiyat listesi, defter r11 `defter_2026-11.json` (Lokman 5.11 23:00, 23:10) | yazıldı (5.11; İE-13 PR-10, `claude/project-thread-tr7mtv`) |
+| D | D-63 | 280'lik prefabrikte lento 80, TK-05'in pencere panelleri yeni boylarla (BK-25; Lokman 6.11 07:50) | yazıldı (6.11; BK-25, PR #130) |
+| D | D-64 | bayi teklif formu, yurt dışı (İE-13 PR-11) | ayrıldı (başka iş dalında, `claude/project-thread-jdxkbl`) |
+| D | **D-65** | — | **sıradaki boş** |
 | İE | İE-01–İE-08 | bu depo (`main`) | yazıldı |
 | İE | İE-09 | model atölyesi: kontrollü model üretimi ve banka hattı (Görev 6e; pano 30; P6001 güncellemesi kapsam dışı) | alındı (16.10; `claude/gorev-6e-model-atolyesi-rnhtcp`; PR-1 banka hattı 29.10, `claude/project-thread-rhjgzv`) |
 | İE | İE-10, İE-11, İE-12 | prefabrik hattı (PR #12, PR #14, `ie-12-prefabrik-bayi-paftasi`) | `main`'e BK-12 ile (PR-1: motor ve bayi paftası; liste ve mühür kıyası sonraki PR'larda) |

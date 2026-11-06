@@ -61,9 +61,10 @@ def test_kart_modeli_listeyle_ayni(tk04):
     assert {k: adet[k] for k in yerlesen} == {k: _liste(L, on) for k, on in yerlesen.items()} == {
         "MA-01": 2, "MA-02": 6, "MA-05": 2, "KP-03": 26, "BT-01": 9}
     # iniş: cumba ile verandanın köşesinde tek iniş (Lokman, 5 Kasım 2026 12:51: "cumba ile veranda köşesindeki dere inişi de tam köşenin
-    # iç tarafına gelsin"; önce cumbanın kısa saçağının ve ön saçağın inişi aynı köşede ikiydi): kart modeli 6, liste "ek çatı parçası başına
-    # 2" ile 7; liste adımında Lokman'a sorulur
-    assert (adet["DR-02"], _liste(L, "Metal dere inişi aparatı")) == (6, 7)
+    # iç tarafına gelsin"; önce cumbanın kısa saçağının ve ön saçağın inişi aynı köşede ikiydi): kart modeli 6; liste de 6 (D-61 madde 2,
+    # Lokman'ın kartı 5 Kasım 22:49; önce "ek çatı parçası başına 2" ile 7)
+    assert (adet["DR-02"], _liste(L, "Metal dere inişi aparatı")) == (6, 6)
+    assert (_liste(L, "70 mm PVC dere iniş borusu"), _liste(L, "Açık dirsek"), _liste(L, "Kapalı dirsek"), _liste(L, "PVC iniş kelepçesi")) == (12, 12, 6, 12)
     stok = {k: say["kesim_plani"][k]["stok"] for k in ("AS-01", "CK-02", "CK-03", "CK-04", "CK-07")}
     boyla = {"AS-01": "Aşık", "CK-02": "Saçak sacı", "CK-03": "Alın sacı", "CK-04": "Baş makas Z'si", "CK-07": "Trapez sac mahyası"}
     assert stok == {k: _liste(L, on) for k, on in boyla.items()} == {"AS-01": 44, "CK-02": 7, "CK-03": 11, "CK-04": 10, "CK-07": 13}
@@ -140,6 +141,9 @@ def test_makaslar(tk04):
     # 256'daki ana makaslara oturur, uçları onlardan 36,3 taşar (198,1 cm); önce 130,5'te, dereler arasında 73 cm idi
     assert (ara["konum"], ara["bas"], ara["son"]) == (56.75, 94.2, 292.3)
     assert ana[1] == 130.5 and ana[2] == 256.0 and ara["bas"] < ana[1] < ana[2] < ara["son"]
+    # D-61 madde 1 (Lokman, kart 5 Kasım 22:49): listede de kısa, boyu çatının tanımından (uçtan uca 198,1); baş makas yavru makas boyuyla
+    assert sorted((s["olcu"], s["adet"]) for s in L if s["kalem"] == "Yavru makas · cumba") == [("L 1981", 1), ("L 4465", 1)]
+    assert round((ara["son"] - ara["bas"]) * 10) == 1981
 
 
 def test_yavru_makas_ap06_paftasindaki_gibi(tk04):
@@ -386,7 +390,13 @@ def test_r07_veranda_sacak_kadar_icerde(tk04_r07):
     assert say["kural_yok"] == [] and say["sema_hatasi"] == {"bugunku_ifc": 0, "kart_modeli": 0}
     adet = {k["kod"]: k["adet"] for k in say["kartlar"]}
     assert {k: adet[k] for k in ("MA-01", "MA-02", "MA-05", "KP-03", "DR-02")} == {"MA-01": 2, "MA-02": 6, "MA-05": 2, "KP-03": 26, "DR-02": 6}
-    assert {s["olcu"] for s in L if s["kalem"].startswith("Makas (")} == {"açıklık 8610"} and _liste(L, "Metal dere inişi aparatı") == 7
+    assert {s["olcu"] for s in L if s["kalem"].startswith("Makas (")} == {"açıklık 8610"} and _liste(L, "Metal dere inişi aparatı") == 6
+    # D-61 madde 3 (Lokman, kart 5 Kasım 22:49): ön kiriş iki kolonun arasında, yüzünden yüzüne (502 − 2 × 10); sağ kiriş 155,75 − 10
+    assert sorted(s["olcu"] for s in L if s["kalem"].startswith("Kutu profil (kiriş)")) == ["L 1457,5", "L 4820"]
+    # rehber kirişin boyunu listeden okur (D-28 madde 1): iki ucunda kolon olan ön kiriş L 482, liste satırına bağlı
+    assert {k["bu"].split(":")[0]: k["liste"] for v in d["verandalar"] for k in v["kiris"]} == {
+        "veranda · ön kiriş · L 482 cm": "Kutu profil (kiriş) 100 × 100 L 4820 · 1 adet",
+        "veranda · sağ yan kiriş · L 145,75 cm": "Kutu profil (kiriş) 100 × 100 L 1457,5 · 1 adet"}
     f = ifcopenshell.open(str(tk04_r07["kart"] / "TK04_model.ifc"))
     st = ifcopenshell.geom.settings()
     st.set(st.USE_WORLD_COORDS, True)
