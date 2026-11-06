@@ -4,7 +4,8 @@ Lokman, 6 Kasım 2026 08:38 (TK-05, yurt dışı bayi): TASLAK ve kırmızı uya
 tavan yazmaz, birim fiyat taban + %30 (kâr %20 + KDV'nin yarısı), KDV 0; açıklama bayinin anlayacağı dille; 03 teslim süresi, teslim
 şekli, ödeme şekli; 04'te standart dışı değer kalın (2500 mm, 100 mm, 60 mm, trapez sac dışındakiler; iç teklifte de); Ek-1'de malzeme
 listesi, birim fiyat ve tutar boş, "Motor" ve "fiyatsız satır" yazmaz. Oranlar kural kitabında (`kurallar/teklif/fiyatlandirma.json`).
-Girdi TK-01 r05 İş Emri'yle ve sahte bayi bilgisiyle; telefon D-33'e göre maskeli. Formun kendisi henüz hedef örnek değildir (D-28
+Girdi TK-01 r05 İş Emri'yle ve sahte bayi bilgisiyle; bayinin telefonu açık (Lokman 6 Kasım 09:01 kartı), kural "maskeli" derse son dört
+hane. Formun kendisi henüz hedef örnek değildir (D-28
 madde 2: Lokman'ın önizleme onayı bekleniyor); bu test sayıları teklifin JSON'una ve kurala karşı sınar.
 """
 import json
@@ -21,7 +22,7 @@ from araclar import teklif_pdf as TP  # noqa: E402
 
 IE = KOK / "testler" / "teklif" / "TK01_is_emri_r05.json"
 BAYRAK = pymupdf.TEXTFLAGS_TEXT & ~pymupdf.TEXT_PRESERVE_LIGATURES
-SAHTE_NUMARA = "+00 000 000 1234"                          # sahte; maskeli yazılır (D-33)
+SAHTE_NUMARA = "+00 000 000 1234"                          # sahte numara
 GIRDI = {"pazar": "yurt_disi",
          "bilgi": {"Bayi": "ÖRNEK BAYİ - Deneme Bey", "İletişim (GSM)": SAHTE_NUMARA, "Adres": "Örnek Ülke"},
          "kosullar": {"Teslim süresi": "1 Hafta", "Teslim şekli": "Fabrika Teslim", "Ödeme şekli": "Peşin"}}
@@ -76,16 +77,16 @@ def test_bayi_formu_ve_json(cikti, T):
 
 
 def test_ilk_sayfa(cikti, T):
-    """TASLAK, uyarı, Motor, defter ve fiyatsız satır yazmaz; ürün tavansız; birim fiyat dört yerde; KDV %0; 01 ve 03 girdiden; telefon
-    maskeli; açıklama KDV'nin neden yok olduğunu söyler."""
+    """TASLAK, uyarı, Motor, defter ve fiyatsız satır yazmaz; ürün tavansız; birim fiyat dört yerde; KDV %0; 01 ve 03 girdiden; bayinin
+    telefonu açık (D-64 madde 6); açıklama KDV'nin neden yok olduğunu söyler."""
     s1 = _metin(cikti / "TK01_teklif_formu.pdf")[0]
     b = T["bayi_formu"]
-    for x in ["TEKLİF VE SATIŞ ONAY FORMU", "Tarih: 06.11.2026", "1 Tek Kat Prefabrik Yapı", "ÖRNEK BAYİ - Deneme Bey", "…1234",
+    for x in ["TEKLİF VE SATIŞ ONAY FORMU", "Tarih: 06.11.2026", "1 Tek Kat Prefabrik Yapı", "ÖRNEK BAYİ - Deneme Bey", SAHTE_NUMARA,
               "Örnek Ülke", "Teslim süresi 1 Hafta", "Teslim şekli Fabrika Teslim", "Ödeme şekli Peşin", "%0",
               "Yurt dışı satış olduğu için KDV uygulanmaz.", "Müşteri / proje"]:
         assert x in s1, x
     assert s1.count(TP.tl(b["birim"])) == 4
-    for x in ["TASLAK", "fiyatsız", "Fiyatı olmayan", "Motor", "defter", "öneri", "Asma tavan", SAHTE_NUMARA, "000 1234",
+    for x in ["TASLAK", "fiyatsız", "Fiyatı olmayan", "Motor", "defter", "öneri", "Asma tavan", "…1234",
               TP.tl(T["secenekler"][0]["fiyat"]["ozet"]["toplam"])]:
         assert x not in s1, x
 
@@ -153,6 +154,16 @@ def test_girdi_denetimi(girdi, tmp_path, capsys):
     p.write_text(json.dumps(dict(GIRDI, kosullar={})), encoding="utf-8")
     assert TK.main([str(IE), str(tmp_path / "bos"), "--tavan", "asma", "--bayi", str(p)]) == 1
     assert not (tmp_path / "bos").exists()
+
+
+def test_telefon_kurali():
+    """Kural "acik": numara girdideki gibi (D-64 madde 6); "maskeli": son dört hane (D-33 madde 3). Kural kitabında bugün "acik"."""
+    form, ie = TP.form_oku(), _oku(IE)
+    assert form["bayi_formu"]["telefon"] == "acik"
+    acik = dict(TP.bayi_hazirla(GIRDI, ie, 100, form)["bilgi"])
+    assert acik["İletişim (GSM)"] == SAHTE_NUMARA
+    maskeli = dict(form, bayi_formu=dict(form["bayi_formu"], telefon="maskeli"))
+    assert dict(TP.bayi_hazirla(GIRDI, ie, 100, maskeli)["bilgi"])["İletişim (GSM)"] == "…1234"
 
 
 def test_ayni_girdi_ayni_form(cikti, girdi, tmp_path):

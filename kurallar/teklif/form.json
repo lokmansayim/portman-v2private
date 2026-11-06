@@ -44,8 +44,8 @@
   "bilgi_satirlari": ["Bayi", "Müşteri / proje", "İletişim (GSM)", "Adres"],
   "zorunlu_bilgi": ["Bayi"],
   "odeme_satirlari": ["Teslim süresi", "Teslim şekli", "Ödeme şekli"],
-  "telefon": "maskeli",
-  "telefon_dayanagi": "D-33 madde 3: telefon numarası her yerde maskelenir (son dört hane kalır, beyin/numara.py). Bayi formunda açık yazılması Lokman'ın kararını bekliyor (6 Kasım 2026).",
+  "telefon": "acik",
+  "telefon_dayanagi": "Bayi formunda bayinin kendi telefonu açık yazılır: Lokman, 6 Kasım 2026 09:01 UTC, karar kartı \"Bayi formunda bayinin telefonu açık yazılsın mı?\" → \"Açık yazılsın\" (D-64; D-33 madde 3'ün istisnası). \"maskeli\" verilirse son dört hane kalır (beyin/numara.py). Numara depoya ve teklifin JSON'una girmez; girdi proje klasöründe.",
   "fiyat_aciklamasi": "Birim fiyat; 04'teki teknik özellikler ve Ek-1'deki malzeme listesiyle paketin satış fiyatıdır, teslim ve ödeme koşulları 03'tedir. {kdv_notu} Alan, yapının brüt alanıdır (varsa verandalar dahil).",
   "ek_basligi": "EK-1 · MALZEME LİSTESİ",
   "alt_yazi": "teklif ve satış onay formu"

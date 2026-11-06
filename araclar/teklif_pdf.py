@@ -13,7 +13,7 @@ Standart dışı değer 04'te kalın (D-64): satırın yalnız standarttan ayrı
 `form.json › standart`'ta. İki formda da.
 
 Bayi formu (D-64; `araclar/teklif.py --bayi <girdi>`): bayiye giden teklif ve satış onay formu, tek seçenek. TASLAK ve uyarı satırı yok;
-01 bayinin bilgileri girdiden (telefon `form.json › bayi_formu.telefon`'a göre maskeli, D-33); 02'de ürün tanımı tavansız ("Tek Kat
+01 bayinin bilgileri girdiden (telefon `form.json › bayi_formu.telefon`'a göre: açık, D-64; "maskeli" ise son dört hane); 02'de ürün tanımı tavansız ("Tek Kat
 Prefabrik Yapı"), birim fiyat teklifin toplamından pazarın kuralıyla (`kurallar/teklif/fiyatlandirma.json`: taban × (1 + kâr + KDV ×
 fiyata katılan pay)), KDV pazarın fatura oranıyla; 03 girdiden, boş satırla form üretilmez; Ek-1'de malzeme listesi, birim fiyat ve tutar
 boş, ara ve genel toplam yok, "Motor" ve "fiyatsız satır" yazılmaz.
@@ -225,7 +225,8 @@ def bayi_hazirla(girdi: dict, ie: dict, taban: float, form: dict | None = None, 
     """Bayi formunun girdisini denetler ve formun değerlerini hazırlar. Girdi (proje klasöründe; depoya girmez):
     `{"pazar": "yurt_disi", "bilgi": {"Bayi": …, "İletişim (GSM)": …, "Adres": …}, "kosullar": {"Teslim süresi": …, …}}`.
     Bilinmeyen alan, tanımsız pazar, boş zorunlu bilgi ya da boş ödeme satırı durur (ValueError): form uydurmaz, TASLAK yazmaz.
-    "Müşteri / proje" girdide yoksa İş Emri'nin müşteri adı. Telefon `bayi_formu.telefon` "maskeli" ise son dört hane (D-33)."""
+    "Müşteri / proje" girdide yoksa İş Emri'nin müşteri adı. Telefon `bayi_formu.telefon` "acik" ise olduğu gibi (D-64; Lokman 6 Kasım
+    09:01), "maskeli" ise son dört hane (D-33 madde 3)."""
     from beyin import numara
     form = form or form_oku()
     kural = kural or fiyatlandirma_oku()
