@@ -182,6 +182,10 @@
    "islak",
    "lavabo"
   ],
+  "prefabrik.karkasli_kaplama_panosu.boy": "gercek_boy",
+  "prefabrik.karkasli_kaplama_panosu.ic_pencereye_ozel_karkas": false,
+  "prefabrik.karkasli_kaplama_panosu.ic_pencereye_ust_alt_panel": false,
+  "prefabrik.karkasli_kaplama_panosu.kalem": "Karkaslı kaplama duvar panosu",
   "prefabrik.kosebent": 7,
   "prefabrik.kosebent_aday": 3,
   "prefabrik.kubbe_takimi": [
@@ -261,6 +265,7 @@
   "prefabrik.tavan_omegasi.ek": 5,
   "prefabrik.tavan_omegasi.pay_m": 0.1,
   "prefabrik.tavan_omegasi_aralik_m.asma": 1.255,
+  "prefabrik.teras_damlaligi.parca_boyu_m": 2.8,
   "prefabrik.tesisat_takimi": [
    [
     "Temiz su borusu",

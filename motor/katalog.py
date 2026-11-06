@@ -75,6 +75,10 @@ class Katalog:
         key = (fam, L, kind, kal, round(yukseklik_cm * 10, 1))
         if key in self._index:
             return self._index[key]
+        if kind == "KARKAS":                                  # D-46 (İE-28): paftadaki tek parça karkaslı kaplama duvar panosu
+            return self._tahsis(fam, key, "Karkaslı kaplama duvar panosu", "Dış duvar panoları" if dis else "İç duvar panoları",
+                                [L, int(kal) if kal == int(kal) else kal, round(yukseklik_cm * 10)],
+                                note="İş Emri'nden (D-46); içindeki pencere ve kapı ayrı kalem, üst ve alt panel yok. " + OTOMATIK_NOT)
         m = re.fullmatch(r"P(\d+)x(\d+)", kind)              # BK-13: üç ölçü dışındaki pencereli pano
         if m:
             en, boy = int(m[1]), int(m[2])

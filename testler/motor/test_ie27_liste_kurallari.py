@@ -66,7 +66,10 @@ def test_uclu_h_dis_duvarin_ekine_gelen_ic_duvarda(listeler):
     assert _adet(L, "3'lü H standart 60 (iç T)") == 3
 
 
-AP_UCLU_DIS = {"AP09": 3, "AP11": 3, "AP14": 3, "AP15": 1, "AP18": 4, "AP21": 4, "AP22": 5, "AP25": 5, "AP26": 4, "AP28": 4}
+# D-46 (İE-28; Lokman, 4 Kasım 2026 04:35, "Paftadan, ev ev"): karkaslı kaplama duvar panosu paftadaki yerinde. AP-14 3 → 4 (yatak odası 2'nin
+# 236,67'lik panosu 507'deki iç duvarın aksından başlıyor: o T artık pano ekinde), AP-25 5 → 6 (sol duvarın 188,25'lik panosu iç duvarın aksında
+# bitiyor), AP-26 4 → 3 (arka duvarın 428,58'lik panosunun ortasından iç duvar geçiyor: pano ekinde değil, çektirme U'su)
+AP_UCLU_DIS = {"AP09": 3, "AP11": 3, "AP14": 4, "AP15": 1, "AP18": 4, "AP21": 4, "AP22": 5, "AP25": 6, "AP26": 3, "AP28": 4}
 
 
 @pytest.mark.parametrize("kod", sorted(AP_UCLU_DIS))

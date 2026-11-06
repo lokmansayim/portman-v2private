@@ -1,0 +1,218 @@
+{
+ "aciklama": "İE-28 / D-46 hedef örneği: beş evin montaj paftasından okunan karkaslı kaplama duvar panoları ve aynı duvarın öteki panoları (yalnız sayılar; pafta depoya girmez). Pafta: kör test mührünün `montaj paftası` kaydı (`testler/kor/muhur.json` › dosyalar, SHA-256 aşağıda). Okuma: plan sayfasının vektör çizimi, siyah dikdörtgen 125,5'lik standart pano, mavi standart dışı; ölçek 125,5 ÷ siyah pano boyu (± 0,5 cm). Değerler Motor'un kurduğu planın çerçevesinde (cm; `G.kur` sonrası: arka-sol dizilimde İş Emri'nin y değerleri arkadan sayılır, buradakiler planın kendi y'si): AP-14, AP-25 ve AP-26'nın paftası döndürülmüş (pafta x → y, pafta y → x; AP-25'te y'ye + 59,9). AP-11 ve AP-18'in paftası başka renk ve çizimle: vektör yöntemi bu sayfalarda kısmen okunuyor, yalnız karkaslı panoların boyu (İE-27 PR-3 okuması; gerçek listede de aynı boy). Kıyas `testler/kor/test_pafta_panolari.py` (tolerans 3 cm); kalan farklar adıyla `bilinen_farklar`'da. Onay: Lokman, 4 Kasım 2026 04:35, kart \"Paftadan, ev ev\" (D-46).",
+ "karar": "D-46",
+ "tolerans_cm": 3.0,
+ "evler": {
+  "AP14": {
+   "pafta_sha256": "c46b277bdd3874ebd8475d2620278d1e440198ea40009a00b4dc99b2394f3b1a",
+   "duvarlar": [
+    {
+     "yon": "x",
+     "eksen_cm": 5.0,
+     "panolar": [
+      [
+       4.9,
+       67.7
+      ],
+      [
+       67.7,
+       256.1,
+       "K"
+      ],
+      [
+       256.1,
+       312.8
+      ]
+     ],
+     "not": "salon ön duvarı: 62,75 + 188,25 (120/180) + 56,5"
+    },
+    {
+     "yon": "x",
+     "eksen_cm": 199.1,
+     "panolar": [
+      [
+       312.8,
+       438.4
+      ],
+      [
+       438.4,
+       681.1,
+       "K"
+      ],
+      [
+       681.1,
+       743.9
+      ]
+     ],
+     "not": "veranda duvarı: kapılı pano + 242,75 (180/200) + 62,75"
+    },
+    {
+     "yon": "x",
+     "eksen_cm": 816.4,
+     "panolar": [
+      [
+       4.9,
+       256.1,
+       "K"
+      ],
+      [
+       256.1,
+       381.7
+      ],
+      [
+       381.7,
+       507.3
+      ],
+      [
+       507.3,
+       743.9,
+       "K"
+      ]
+     ],
+     "not": "arka duvar: yatak odası 1 tek 251, yatak odası 2 tek 236,67 (ikisi de 120/120)"
+    }
+   ],
+   "bilinen_farklar": [
+    {
+     "yon": "x",
+     "eksen_cm": 816.4,
+     "aralik_cm": [
+      256.0,
+      507.0
+     ],
+     "pafta": [
+      125.5,
+      125.5
+     ],
+     "motor": [
+      56.5,
+      125.5,
+      69.0
+     ],
+     "neden": "İş Emri'nin `dis_pano_dayanagi` satırı (x 312,5, aralık 312,5–743,67; İE-27 PR-3) veranda duvarı için yazıldı; PC-29 (D-34, mühür M-02) aralığa düşen her dış duvara uygular, arka duvar da o aksa dayanıyor. Karkaslı panolar paftadaki gibi; aradaki iki standart pano bu işte değişmez."
+    }
+   ]
+  },
+  "AP25": {
+   "pafta_sha256": "4e272f02243e46459b93dd9c29b869b25070dcb73cb10dde3a342bcd8cd851ed",
+   "duvarlar": [
+    {
+     "yon": "y",
+     "eksen_cm": 5.0,
+     "panolar": [
+      [
+       65.1,
+       145.5
+      ],
+      [
+       145.5,
+       270.9
+      ],
+      [
+       270.9,
+       333.5
+      ],
+      [
+       333.5,
+       521.7,
+       "K"
+      ],
+      [
+       521.7,
+       647.1
+      ],
+      [
+       647.1,
+       772.5
+      ],
+      [
+       772.5,
+       897.9
+      ],
+      [
+       897.9,
+       1023.3
+      ]
+     ],
+     "not": "sol duvar: 62,6 + 188,2 (120/120)"
+    }
+   ],
+   "bilinen_farklar": []
+  },
+  "AP26": {
+   "pafta_sha256": "a2546b338839b51f0249cb42002c7496f0773aa483b6e117de088a28764a735e",
+   "duvarlar": [
+    {
+     "yon": "x",
+     "eksen_cm": 5.0,
+     "panolar": [
+      [
+       5.0,
+       130.6
+      ],
+      [
+       130.6,
+       193.3
+      ],
+      [
+       193.3,
+       684.9,
+       "K"
+      ]
+     ],
+     "not": "ön duvar: kapılı pano + 62,75 + 491,6 (280/210, köşeye kadar)"
+    },
+    {
+     "yon": "x",
+     "eksen_cm": 1314.7,
+     "panolar": [
+      [
+       5.0,
+       130.6
+      ],
+      [
+       130.6,
+       256.1
+      ],
+      [
+       256.1,
+       684.9,
+       "K"
+      ]
+     ],
+     "not": "arka duvar: 125,5 + 125,5 + 428,8 (kapı + 200/210, köşeye kadar)"
+    }
+   ],
+   "bilinen_farklar": []
+  },
+  "AP11": {
+   "pafta_sha256": "39080728d4059d360cb454f5fc306f34c604e72a0ae8d07e427afc4528dd8947",
+   "karkasli_boylari_cm": [
+    194.0,
+    251.0
+   ],
+   "dizi": [
+    {
+     "yon": "x",
+     "eksen_cm": 209.0,
+     "boylar": [
+      62.75,
+      251.0,
+      62.75
+     ],
+     "karkasli": 1,
+     "not": "180/200 odaya ortalı (genis_pencere: oda_ortasi)"
+    }
+   ],
+   "bilinen_farklar": []
+  },
+  "AP18": {
+   "pafta_sha256": "daa7b84ca5456de3d239b3fe67bfc9cb8fc69816442f56e476692f9dc4eed0a1",
+   "karkasli_boylari_cm": [
+    251.0,
+    376.5
+   ],
+   "bilinen_farklar": []
+  }
+ }
+}
