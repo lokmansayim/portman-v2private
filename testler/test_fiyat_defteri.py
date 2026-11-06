@@ -296,7 +296,7 @@ def test_r08_trapez_cati(defter):
 def test_r09_patron_fiyati(defter):
     """r09 (4 Kasım 2026): 120 × 180 özel pencere karkası iki listede de yoktu; Lokman TK-04 teklif PDF'inde bu satıra 23:20'de "700 TL olarak
     yaz" dedi. Kaynak `PATRON` (Patron'un verdiği fiyat; liste yok), durum "Patron verdi", onaylı; notunda sözü ve mesaj numarası."""
-    assert defter["surum"] == "2026-11-04-r09"
+    assert defter["surum"] == "2026-11-05-r10"
     pk = defter["kaynaklar"]["PATRON"]
     assert pk["patron_verdi"] and pk["kisa"] == "Patron, 04.11.2026"
     k = defter["hatlar"]["prefabrik"]["kalemler"]["Özel pencere karkası (120×180) (100'lük çektirme U'su + 100'lük H geçen) | 1200 × 1800"]
@@ -330,6 +330,41 @@ def test_r09_metal_tahta(defter, tmp_path):
     F.excel_yaz(R, tmp_path / "l.xlsx", "deneme")
     hucre = [(r[0], r[1]) for r in openpyxl.load_workbook(tmp_path / "l.xlsx").active.iter_rows(values_only=True)]
     assert ("Metal tahta (galvaniz)", "L 2800") in hucre and not any(a_ == "Ters mahya kenar kutusu" for a_, _ in hucre)
+
+
+def test_r10_tk05_160_ve_280(defter):
+    """r10 (5 Kasım 2026, D-60, BK-25): TK-05'in (160'lık dış duvar, 280, sandviç panel çatı) iki listede olmayan kalemleri. Kaynak `L45`
+    (45. hafta listesi; Lokman 12:37 "bu belgede tüm fiyatlar var", patron_verdi). Listede birebir olan parça onaylı; hesaplanan fiyat
+    (280 pano = 250 × 1,12, 160 pano = 100'lük + strafor farkı, ortalama, oran, boyla orantılı) öneridir, Patron onayı bekler. Var olan
+    kalemlerin fiyatı değişmez (TK-01 ve TK-04 teklif testleri aynı toplamı verir)."""
+    k45 = defter["kaynaklar"]["L45"]
+    assert k45["patron_verdi"] and k45["kisa"] == "45. hafta listesi, 03.11.2026" and "12:37" in k45["not"]
+    P = defter["hatlar"]["prefabrik"]["kalemler"]
+    birebir = {"16'lık köşe direği 160 × 160 | 160 × 160 × 2800": 935.67, "10'luk köşe direği 100 × 100 | 100 × 100 × 2800": 723.02,
+               "Çektirme U'su 160 | 160 × 2740": 196.38, "Çektirme U'su 100 (iç duvar) | 100 × 2740": 138.32,
+               "160'lık pencere U'su H geçen | L 2500": 186.10, "160'lık saçak omegası | 160 × 2500": 216.40}
+    for a, f in birebir.items():
+        assert (P[a]["fiyat"], P[a]["kaynak"], P[a]["durum"], P[a]["onay"]) == (f, "L45", "eşleşti", True), a
+    assert (P["Prefabrik çelik kapı (SAĞ) | 900 × 2000"]["fiyat"], P["Prefabrik çelik kapı (SAĞ) | 900 × 2000"]["kaynak_satir"]) == (7500, [106])
+    assert P["Trapez vida 5,5 × 110 (sandviç panel) | adet"]["fiyat"] == 3 and P["Trapez vida 5,5 × 110 (sandviç panel) | adet"]["onay"]
+    eps = (1265.73 - 723.28) / 3.5                                               # 140 − 80 mm EPS, TL/m²
+    hesap = {"100'lük yapıştırma dolu pano | 100 × 1250 × 2800": 2100 * 1.12, "100'lük yapıştırma dolu pano | 100 × 625 × 2800": 1050 * 1.12,
+             "160'lık yapıştırma dolu pano | 160 × 1250 × 2800": 2100 * 1.12 + eps * 3.5,
+             "160'lık yapıştırma dolu pano | 160 × 625 × 2800": 1050 * 1.12 + eps * 1.75,
+             "Karkaslı çelik kapı panosu | 160 × 1250 × 2800": 2200 * 1.12 + eps * (3.5 - 0.95 * 2.05),
+             "Pencere üst panel | 160 × 1250 × 800": 420 * 1.6 + eps * 1.0,      # lento 80 (D-63)
+             "Pencere alt panel (120/120) | 160 × 1250 × 800": 700 + eps * 1.0, "Pencere alt panel (120/180) | 160 × 1250 × 200": 210 + eps * 0.25,
+             "H 160 (dış pano eki) | 160 × 160 × 2800": (431.42 * 7 + 424.29 * 4) / 11,
+             "160'lık alt çerçeve | 160 × 3750": 186.85 * 3750 / 2510}
+    for a, f in hesap.items():
+        assert P[a]["fiyat"] == pytest.approx(f, abs=0.006) and P[a]["onay"] is False and P[a]["durum"] == "hesap", a
+    sb = [b for b in defter["hatlar"]["prefabrik"]["boy_onerileri"] if b.get("kalem_baslar") == "Sandviç panel (100 cm kapatır) · "]
+    assert [(b["boy_mm"], b["fiyat"], b["kaynak"], b["onay"]) for b in sb] == [(1000, 554.79, "L45", False)]
+    R = F.fiyatla({"satirlar": [_pre("Sandviç panel (100 cm kapatır) · ana çatı", "L 2520", 12, "1006"),
+                                _pre("160'lık yapıştırma dolu pano", "160 × 1250 × 2800", 7)]}, defter)
+    assert [(s["birim_fiyat"], s["durum"]) for s in R["satirlar"]] == [(None, "öneri boy, onay bekliyor"), (None, "öneri, onay bekliyor")]
+    R = F.fiyatla({"satirlar": [_pre("Sandviç panel (100 cm kapatır) · ana çatı", "L 2520", 12, "1006")]}, defter, oneri=True)
+    assert (R["satirlar"][0]["birim_fiyat"], R["satirlar"][0]["tutar"]) == (1398.07, 16776.84)
 
 
 def test_miktari_olmayan_fiyatli_satir(defter):
