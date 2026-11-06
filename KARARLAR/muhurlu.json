@@ -361,7 +361,8 @@
    "konu": "Kirişler askıda kalmaz",
    "kural": "Gövdenin içindeki açık mahalin (balkon, köşe verandası) iki açık kenarının birleştiği köşeye Motor 10 × 10 kolon koyar (PC-30); kirişler kolonlu verandanın kuralıyla (dış ölçü − 10). Montaj rehberinde baş makas betopanı uçta da baş makas omegasının U'sunun içinde.",
    "kararlar": [
-    "D-38"
+    "D-38",
+    "D-61"
    ],
    "pr": [
     87
@@ -399,7 +400,15 @@
     }
    ],
    "durum": "mühürlü",
-   "gecmis": []
+   "gecmis": [
+    {
+     "tarih": "2026-11-06 07:56",
+     "soz": "Karar kartı \"482 cm ön kiriş için mühürlü 'kirişler askıda kalmaz' kuralını güncelleyeyim mi?\" → \"Evet, kurala işle\" (5 Kasım 22:49 kartında \"Öneriyle düzelt\": \"Kısa makas, tek iniş ve 482 cm ön kiriş listeye girer; saçak omegası 7 kalır.\"; 22:44 \"Ön kiriş iki kolonun arasında olduğu için 482 cm olsun\" önerisine)",
+     "mesaj": "cmsg_01UAFvcnfVuTR1wfFux5fQPPVdNDVHGatgTE2yewiKZbMk",
+     "kapanis": "2026-11-06T07:58Z",
+     "karar": "D-61"
+    }
+   ]
   },
   {
    "kod": "M-06",
