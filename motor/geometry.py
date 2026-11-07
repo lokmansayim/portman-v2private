@@ -1254,7 +1254,9 @@ def _kur(is_emri: dict) -> Plan:
             son, n_ = (X_SON, grid_nx) if d.yon == "x" else (Y_SON, grid_ny)
             if son is not None and abs(d.a1 - son) < 1e-6:
                 bas_ = ilk_aks(d.yon) + MOD * (n_ - 1)
-                if son - bas_ < MOD - 1e-6 and d.a0 + 1e-6 < bas_ < d.a1 - 1e-6 and not any(abs(bas_ - v) < 1e-6 for v in splits):
+                # D-69 (BK-26): son pano kesilmemişse de (tam 125,5; yarım ızgarada n − 1 yarım akstadır) başı derzdir; yoksa `tam_izgara`
+                # tam aksları son panonun başında kestiği için önündeki yarım pano onunla birleşip 188,25'lik açıklıksız pano kalıyordu
+                if son - bas_ < MOD + 1e-6 and d.a0 + 1e-6 < bas_ < d.a1 - 1e-6 and not any(abs(bas_ - v) < 1e-6 for v in splits):
                     splits.append(bas_)
         kubbe_d = [(q0, q1) for did, q0, q1, _k in kubbe_hedef if did == d.id]    # İE-29: dizilim kubbenin iki ucundan da başlar
         splits += [q for q0, q1 in kubbe_d for q in (q0, q1) if d.a0 + 1e-6 < q < d.a1 - 1e-6]
@@ -1592,7 +1594,21 @@ def _kur(is_emri: dict) -> Plan:
         _karkasli_panolar(plan, karkasli_satirlar, ayna_y)
     _dis_verandalar(plan, is_emri)
     _kubbe_geometrisi(plan, kubbe_panolari)
+    genis_pano_denetimi(plan)                                 # D-69: bütün dizilim yollarından sonra, planın son hâlinde
     return plan
+
+
+def genis_pano_denetimi(plan: "Plan") -> None:
+    """D-69 (BK-26; Lokman, 7 Kasım 2026 14:33): 125,5 aks aralığını aşan pano ancak içinde pencere ya da kapı gibi bir boşlukla olur.
+    Panodan geniş pencere için iki tam pano (251) birleşir, boşluk ortadadır (BK-13); karkaslı kaplama panosu (D-46) ve kubbenin tabanı da
+    açıklık taşır. Açıklıksız pano en çok 125,5'tir. Planın son hâlinde bütün duvarların (dış ve iç) panoları denetlenir; aykırı pano açık
+    hatadır (K21), Motor onu sessizce bölmez ya da kısaltmaz. Yalnız denetler: kurala uyan planı değiştirmez (çizim ve liste bayt bayt aynı)."""
+    aykiri = [p for d in plan.duvarlar for p in d.panolar if p.boy > MOD + 1e-6 and not p.aciklar]
+    if aykiri:
+        yazi = "; ".join(f"{'dış' if p.duvar.tur == 'dis' else 'iç'} duvar {p.duvar.id} ({p.duvar.yon} boyunca, eksen {p.duvar.c:g}) "
+                         f"{p.a0:g}–{p.a1:g}, boy {p.boy:g}" for p in aykiri[:4])
+        raise IsEmriHatasi(f"125,5'i aşan açıklıksız pano ({len(aykiri)} adet: {yazi}{' …' if len(aykiri) > 4 else ''}); 125,5 aks aralığını "
+                           "aşan pano ancak içinde pencere ya da kapı gibi bir boşlukla olur (D-69)")
 
 
 def _kubbe_geometrisi(plan: "Plan", kubbe_panolari: list) -> None:
