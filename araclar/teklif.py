@@ -1,6 +1,7 @@
 """İE-13 PR-2 · Teklif: İş Emri → Motor'un yükleme listesi → fiyat defteri → teklif Excel ve JSON. D-28: teklif yalnız bu komutla üretilir.
 
     python3 araclar/teklif.py <İş Emri.json> <çıktı klasörü> [--tavan asma,ters] [--kosullar <json>] [--defter <json>] [--oneri] [--tarih GG.AA.YYYY]
+                              [--bayi <bayi formu girdisi.json>]
 
 Liste dosyası almaz: listeyi İş Emri'nden Motor'la kendisi üretir (`motor/prefabrik_liste.is_emrinden`, paket üreteciyle ortak). Elle
 düzeltilmiş liste giremez, adet düzeltmesi yoktur: düzeltme kural kitabına ya da İş Emri'ne işlenir (D-28). Fiyat `araclar/fiyatla.py`
@@ -19,6 +20,11 @@ ile defterden; fiyat uydurulmaz, fiyatı olmayan satır boş kalır ve sayılır
   sayfa, Fiyat kaynağı. Liste sayfasının yazıcısı `araclar/liste_excel.py`; `fiyatla.py --excel` de onu kullanır (tek yazıcı).
 - Teklif PDF'i (T5, PR-6): her seçenek bir PDF, Patron'un teklif formunun düzeninde (`araclar/teklif_pdf.py`, `kurallar/teklif/form.json`);
   sayılar bu komutun JSON'undan, fiyatı olmayan satır boş. `--tarih` formun tarihi (verilmezse bugün).
+- Bayi formu (D-64): `--bayi <girdi>` tek seçenekli teklife bayiye giden teklif ve satış onay formunu da yazar (`<kod>_teklif_formu.pdf`):
+  fiyat seçeneğin toplamından pazarın kuralıyla (`kurallar/teklif/fiyatlandirma.json`), bayinin bilgileri ve ödeme satırları girdiden
+  (`araclar/teklif_pdf.bayi_hazirla`). Girdi bayinin iletişim bilgisini taşır, depoya girmez. Teklifin JSON'una `bayi_formu` (pazar,
+  oranlar, taban, birim, KDV, toplam; iletişim bilgisi yok) eklenir. Girdide eksik ya da bilinmeyen satır, tanımsız pazar ya da birden
+  çok seçenek durur; hiçbir dosya yazılmaz.
 """
 from __future__ import annotations
 
@@ -260,6 +266,7 @@ def main(argv: list[str] | None = None) -> int:
     a.add_argument("--kosullar", type=Path, help="projeye özel teklif koşulları (kurallar/teklif/kosullar.json biçimi)")
     a.add_argument("--defter", type=Path, default=F.DEFTER); a.add_argument("--oneri", action="store_true")
     a.add_argument("--tarih", help="teklif PDF'inin tarihi, GG.AA.YYYY (verilmezse bugün)")
+    a.add_argument("--bayi", type=Path, help="bayi formunun girdisi (D-64; pazar, bayinin bilgileri, ödeme satırları)")
     o = a.parse_args(argv)
     if o.tarih and not re.fullmatch(r"\d{2}\.\d{2}\.\d{4}", o.tarih):
         a.error(f"--tarih GG.AA.YYYY olmalı: {o.tarih}")
@@ -271,16 +278,37 @@ def main(argv: list[str] | None = None) -> int:
     except PL.ListeYazilmaz as e:
         print(f"teklif: {e.neden}", file=sys.stderr)
         return 1
+    from araclar import teklif_pdf
+    bayi = None
+    if o.bayi:
+        if len(T["secenekler"]) != 1:
+            print(f"DUR: bayi formu tek seçenekle üretilir ({len(T['secenekler'])} seçenek var); --tavan asma gibi", file=sys.stderr)
+            return 1
+        try:
+            bayi = teklif_pdf.bayi_hazirla(json.loads(o.bayi.read_text(encoding="utf-8")), ie, T["secenekler"][0]["fiyat"]["ozet"]["toplam"])
+        except ValueError as h:
+            print(f"DUR: {h}", file=sys.stderr)
+            return 1
+        P = bayi["pazar_kurali"]
+        T["bayi_formu"] = {"pazar": bayi["pazar"], "oranlar": {k: P[k] for k in ("kar_orani", "kdv_orani", "fiyata_katilan_kdv_payi",
+                                                                                "faturada_kdv_orani")}, **bayi["fiyat"]}
     kod = str(T["kod"]).replace("-", "")
     o.cikti.mkdir(parents=True, exist_ok=True)
     (o.cikti / f"{kod}_teklif.json").write_text(json.dumps(T, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
     excel_yaz(T, defter, o.cikti / f"{kod}_teklif.xlsx")
-    from araclar import teklif_pdf
     pdfler = [teklif_pdf.pdf_yaz(T, ie, sec, o.cikti / teklif_pdf.dosya_adi(T, sec), tarih=o.tarih) for sec in T["secenekler"]]
+    if bayi:
+        pdfler.append(teklif_pdf.pdf_yaz(T, ie, T["secenekler"][0], o.cikti / teklif_pdf.bayi_dosya_adi(T), tarih=o.tarih, bayi=bayi))
     for sec in T["secenekler"]:
         oz = sec["fiyat"]["ozet"]
         print(f"{T['kod']} · {sec['ad']}: {oz['toplam']:,.2f} TL · {oz['fiyatli']}/{oz['satir']} satır fiyatlı, {len(oz['fiyatsiz'])} fiyatsız")
     print("koşullar:", ", ".join(f"{k} {v or 'yok (Patron’dan)'}" for k, v in T["kosullar"].items()))
+    if bayi:
+        b, oz = T["bayi_formu"], T["secenekler"][0]["fiyat"]["ozet"]
+        print(f"bayi formu ({bayi['pazar_kurali']['ad']}): {b['taban']:,.2f} × {1 + b['artis_orani']:g} = {b['birim']:,.2f} TL, "
+              f"KDV %{b['kdv_orani'] * 100:g}, toplam {b['toplam']:,.2f} TL"
+              + (f"; DİKKAT {len(oz['fiyatsiz'])} satır fiyatsız (taban eksik, formda yazmaz)" if oz["fiyatsiz"] else "")
+              + ("; DİKKAT onaysız öneriler dahil" if T["oneri_dahil"] else ""))
     print("\n".join(f"→ {p}" for p in [o.cikti / f"{kod}_teklif.xlsx", *pdfler]))
     return 0
 

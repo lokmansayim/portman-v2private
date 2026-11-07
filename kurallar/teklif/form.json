@@ -26,6 +26,30 @@
  "deger_yazisi": {
   "Tavan": {"Asma": "Alçıpan Dizme (Asma)", "Ters": "Ters Tavan"}
  },
+ "standart": {
+  "aciklama": "04'te standart dışı değer kalın yazılır; satırın yalnız standarttan ayrılan kısmı (D-64). 'deger' satırdaki yerin yazısı ({kat_mm}, {dis_mm}, {ic_mm} İş Emri'nin yapısından), 'standart' o yerin standart yazısı; 'standart_sozcuk' verilen satır bu sözcüğü içermiyorsa satırın değeri bütünüyle kalın. Satır yoksa (İş Emri'nde özellik yok) kalın yok.",
+  "dayanak": "Lokman, 6 Kasım 2026 08:38, madde 6: \"genel kural bizim standartlarımızın dışında bir özellik olursa orayı bolt yapıyoruz mesala yükseklik 2800 bizim standartımız 2500 orayı bolt yap, Dış cephe panelleri bizim standartımız 100 lük sen sadece 160 mm olan kısmı bolt yap, İç cephe panelleri standardımız 60 mm Sen sadece 100 mm Kısmını bolt yap gerisi sandviç paneli bolt yap prefabrik standardımız Trapez sac\"",
+  "satirlar": {
+   "Kat Yüksekliği": {"deger": "{kat_mm} mm", "standart": "2500 mm"},
+   "Dış Cephe Panelleri": {"deger": "{dis_mm} mm", "standart": "100 mm"},
+   "İç Cephe Panelleri": {"deger": "{ic_mm} mm", "standart": "60 mm"},
+   "Çatı Kaplaması": {"standart_sozcuk": "trapez"}
+  }
+ },
+ "bayi_formu": {
+  "aciklama": "Bayiye giden teklif ve satış onay formu (D-64; araclar/teklif.py --bayi <girdi>). İç teklifin PDF'inden farkı: TASLAK ve uyarı satırı yok; 01 bayinin bilgileri girdiden; 02'de ürün tanımı tavansız, birim fiyat kurallar/teklif/fiyatlandirma.json'daki pazarın kuralıyla, KDV pazarın oranıyla; 03 girdiden, boş satırla form üretilmez; Ek-1'de malzeme listesi birim fiyat ve tutar boş, ara ve genel toplam yok, adedi 0 olan satır yok. Girdi depoya girmez (bayinin iletişim bilgisi); proje klasöründe durur.",
+  "dosya": "{kod}_teklif_formu.pdf",
+  "urun": "{kat} Prefabrik Yapı",
+  "kat_adi": {"1": "Tek Kat"},
+  "bilgi_satirlari": ["Bayi", "Müşteri / proje", "İletişim (GSM)", "Adres"],
+  "zorunlu_bilgi": ["Bayi"],
+  "odeme_satirlari": ["Teslim süresi", "Teslim şekli", "Ödeme şekli"],
+  "telefon": "acik",
+  "telefon_dayanagi": "Bayi formunda bayinin kendi telefonu açık yazılır: Lokman, 6 Kasım 2026 09:01 UTC, karar kartı \"Bayi formunda bayinin telefonu açık yazılsın mı?\" → \"Açık yazılsın\" (D-64; D-33 madde 3'ün istisnası). \"maskeli\" verilirse son dört hane kalır (beyin/numara.py). Numara depoya ve teklifin JSON'una girmez; girdi proje klasöründe.",
+  "fiyat_aciklamasi": "Birim fiyat; 04'teki teknik özellikler ve Ek-1'deki malzeme listesiyle paketin satış fiyatıdır, teslim ve ödeme koşulları 03'tedir. {kdv_notu} Alan, yapının brüt alanıdır (varsa verandalar dahil).",
+  "ek_basligi": "EK-1 · MALZEME LİSTESİ",
+  "alt_yazi": "teklif ve satış onay formu"
+ },
  "kapsam_disi": [
   "Zemin betonu, hafriyat ve çevre düzenlemesi işleri.",
   "Şap atılması ve ıslak/kuru zemin kaplamaları (parke, fayans, seramik).",
