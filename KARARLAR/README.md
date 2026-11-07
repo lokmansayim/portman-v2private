@@ -106,6 +106,7 @@ Biçim: karar · gerekçe · reddedilen seçenekler · geri alma yolu · kim ve 
 | [D-59](D-59.md) | Birleştirmeyi Lokman yapar: oturum PR'ı hazırlar, doğrulamayı koşturur (kırmızıda kendisi düzeltir), yeşilse bağlantıyı verir; `main`'e birleştirmez ve denemez. D-43'ün birleştirme kısmının yerini alır | 5.11 (Lokman 12:35) |
 | [D-61](D-61.md) | TK-04 listesi: çıkıntısız çapraz cumbanın ana çatı üstündeki makası kısa (boy çatı tanımından), cumba ile ana çatının köşesinde tek iniş, iki ucu kolonlu açık kenarda kiriş kolonun yüzünden yüzüne (− 2 × 10; M-05 açıldı ve bu kararla kapandı); saçak omegası 7 (M-01) | 5.11 (Lokman 22:49 kartı "Öneriyle düzelt"; 6.11 07:56 M-05 kartı "Evet, kurala işle") |
 | [D-62](D-62.md) | Prefabrik fiyatlar 45. hafta listesinden: yeni defter `kurallar/fiyat/defter_2026-11.json` (r11, araçların varsayılanı); TK-04'ün listede karşılığı olan bütün kalemleri onaylı (birebir, yöntemle hesap, yakın), listede olmayan eski fiyatında; r10 defteri eski teklifi aynen verir | 5.11 (Lokman 23:00 "fiyatları buradan al", 23:10 "Hepsini al") |
+| [D-65](D-65.md) | Teklifte çırpı ipi 0 TL, hediye (defter r12, prefabrik ve çelik); bütün tekliflerin koşulları teslim süresi 10 gün, ödeme nakit (`kurallar/teklif/kosullar.json`); D-36'nın çırpı ipi maddesinin yerine | 6.11 (Lokman 21:29 "çırpı ipini hediye veriyoruz ona değer 0 yaz", 21:31 "hepsine teslim süresi 10 gün ödeme nakit yaz") |
 
 ## Numara defteri (14 Ekim 2026, BK-08; CIO planı › Görev 3)
 
@@ -165,7 +166,8 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | D | D-62 | 45. hafta fiyat listesi, defter r11 `defter_2026-11.json` (Lokman 5.11 23:00, 23:10) | yazıldı (5.11; İE-13 PR-10, `claude/project-thread-tr7mtv`) |
 | D | D-63 | 280'lik prefabrikte lento 80, TK-05'in pencere panelleri yeni boylarla (BK-25; Lokman 6.11 07:50) | yazıldı (6.11; BK-25, PR #130) |
 | D | D-64 | bayi teklif formu, yurt dışı (İE-13 PR-11) | ayrıldı (başka iş dalında, `claude/project-thread-jdxkbl`) |
-| D | **D-65** | — | **sıradaki boş** |
+| D | D-65 | Teklifte çırpı ipi 0 TL (hediye); bütün tekliflerde teslim süresi 10 gün, ödeme nakit (Lokman 6.11 21:29, 21:31) | yazıldı (6.11; İE-13 PR-12, `claude/project-thread-tr7mtv`) |
+| D | **D-66** | — | **sıradaki boş** |
 | İE | İE-01–İE-08 | bu depo (`main`) | yazıldı |
 | İE | İE-09 | model atölyesi: kontrollü model üretimi ve banka hattı (Görev 6e; pano 30; P6001 güncellemesi kapsam dışı) | alındı (16.10; `claude/gorev-6e-model-atolyesi-rnhtcp`; PR-1 banka hattı 29.10, `claude/project-thread-rhjgzv`) |
 | İE | İE-10, İE-11, İE-12 | prefabrik hattı (PR #12, PR #14, `ie-12-prefabrik-bayi-paftasi`) | `main`'e BK-12 ile (PR-1: motor ve bayi paftası; liste ve mühür kıyası sonraki PR'larda) |
