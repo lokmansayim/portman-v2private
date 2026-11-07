@@ -20,6 +20,10 @@
   (`motor/cati_capraz.py`; çatı kuralları ve MA-01/MA-02 eşlemesi "besik_cumba"da da, yavru makas MA-05). Bu dosyada cumbalı iki ev için
   "kural yok" ve "kurulmadı" beklentisi kalktı: çatıya bağlı kartlar kurulur, yerleşen adetle sayılanlar listeyle aynı, kural yok boş.
   Kırma (AP-01) aynen. TK-04'ün çatı kartları listeyle `test_k6.py`'de.
+- İE-33 PR-2 (6 Kasım 2026; Lokman AP-01'in çizimini 21:23'te onayladı): iki ucu kırmada (AP-01) liste yazılır, makas planı paftadan
+  (`testler/motor/test_ie33_kirma_liste.py`). Kart modelinin liste sütunu üretecin sayısı (nedeni yok), çatı kenarı kartları modelde yine
+  "kurulmadı" (kırmanın kartları kart modelinin işi, ayrı). Bu dosyanın üç vakası buna göre değişti (`test_kirmada_liste_yazilir`,
+  `test_komut_cizim`, `test_komut_excel`); "liste yazılmaz" çiziminin örneği `test_k3b.py`'de (PK-01 kırma: mahya y boyunca, liste yazılmaz).
 """
 from __future__ import annotations
 
@@ -151,12 +155,16 @@ def test_cati_adi_ve_nedeni():
 
 # ----------------------------------------------------------------------------- liste sütunu
 @pytest.mark.parametrize("ev", [e for e, t in TIP.items() if t == "kirma"])
-def test_liste_yazilmaz(evler, ev):
+def test_kirmada_liste_yazilir(evler, ev):
+    """İE-33 PR-2: iki ucu kırmada liste yazılır; kart modelinin liste sütunu üretecin sayısı, çatı kenarı kartları yine "kurulmadı"."""
     k, t = evler[ev]["say"]["kenar"], evler[ev]["ikiz"]["kenar"]
-    with pytest.raises(PL.ListeYazilmaz) as hata:
-        PL.is_emrinden(copy.deepcopy(evler[ev]["ie"]))
-    assert set(k["liste"].values()) == {KM.LISTE_YAZILMAZ} and set(k["liste"]) == set(t["liste"])
-    assert k["liste_yazilmaz"] == hata.value.neden and TIP_ADI[TIP[ev]] in k["liste_yazilmaz"]
+    Lk = PL.is_emrinden(copy.deepcopy(evler[ev]["ie"]))
+    sk: dict = {}
+    for x in Lk["satirlar"]:
+        sk[x["kalem"]] = sk.get(x["kalem"], 0) + x["adet"]
+    kalem_k = {c["kod"]: (c["liste"]["satirlar"] or [None])[0] for c in _oku(KM.KARTLAR)["kartlar"] if c["kod"] in k["liste"]}
+    assert k["liste"] == {kod: (sk.get(ad, 0) if ad else None) for kod, ad in kalem_k.items()} and set(k["liste"]) == set(t["liste"])
+    assert KM.LISTE_YAZILMAZ not in k["liste"].values() and "liste_yazilmaz" not in k
     assert k["kurulmadi"] == list(CATI_KENARI)
     L = PL.is_emrinden(_ikiz(evler[ev]["ie"]))                             # ikizde liste üretecinin sayısı (kör protokolü: gerçek liste açılmaz)
     satir = {}
@@ -212,10 +220,11 @@ def test_komut_cizim(komut):
     ikiz_makas = _makas_dolgusu(komut["i"] / "AP01_yerlesim_planlari.pdf")
     assert _makas_dolgusu(komut["c"] / "AP01_yerlesim_planlari.pdf") == [0] * 7 and ikiz_makas[1] and ikiz_makas[6]   # 2. ve 7. sayfa
     assert "baş makas yok" not in metin[2]
+    liste = _oku(komut["c"] / "AP01_kart_sayim.json")["kenar"]["liste"]          # İE-33 PR-2: iki ucu kırmada liste yazılır
     for kod in ("AC-01", "AC-02"):
-        assert f"model {_stok(komut, kod)} boy · liste yazılmaz" in metin[6]
-    assert metin[6].count("model kurulmadı · liste yazılmaz") == 6 and "C kapama model kurulmadı · listede yok" not in metin[6]
-    assert metin[6].count("liste yazılmaz") >= 8 and "≠" not in metin[6] and "Liste üreteci: kırma ana çatının" in metin[6]
+        assert f"model {_stok(komut, kod)} boy · liste {liste[kod]}" in metin[6]
+    assert metin[6].count("model kurulmadı") == 6 and "C kapama model kurulmadı · listede yok" in metin[6]
+    assert "liste yazılmaz" not in metin[6] and "Liste üreteci:" not in metin[6]
     for ad in ("saçak omegası", "saçak sacı", "alın sacı", "baş makas Z'si", "C kapama", "mahya"):
         assert f"Kurulmadı: {ad}: kırma çatı" in metin[6]
     for i, ad in ((1, "dere ve iniş"), (2, "baş makas betopanı"), (3, "aşık"), (4, "çatı kaplaması")):
@@ -240,10 +249,10 @@ def test_komut_excel(komut):
     ws = load_workbook(komut["c"] / "AP01_kart_katalogu.xlsx")["Alt çerçeve ve çatı kenarı"]
     satir = [[c.value for c in r] for r in ws.iter_rows()]
     ozet = {r[0]: (r[1], r[2]) for r in satir[satir.index(["Kart", "Model (kesim planı)", "Liste üreteci", None, None, None]) + 1:]}
-    say = _oku(komut["c"] / "AP01_kart_sayim.json")
-    assert ozet.pop("Liste yazılmaz") == (None, say["kenar"]["liste_yazilmaz"])
-    assert ozet == {"AC-01": (_stok(komut, "AC-01"), "liste yazılmaz"), "AC-02": (_stok(komut, "AC-02"), "liste yazılmaz"),
-                    **{k: ("kurulmadı", "liste yazılmaz") for k in CATI_KENARI}}
+    liste = _oku(komut["c"] / "AP01_kart_sayim.json")["kenar"]["liste"]          # İE-33 PR-2: iki ucu kırmada liste yazılır
+    assert "Liste yazılmaz" not in ozet
+    assert ozet == {"AC-01": (_stok(komut, "AC-01"), liste["AC-01"]), "AC-02": (_stok(komut, "AC-02"), liste["AC-02"]),
+                    **{k: ("kurulmadı", "listede yok" if liste[k] is None else liste[k]) for k in CATI_KENARI}}
     wi = load_workbook(komut["i"] / "AP01_kart_katalogu.xlsx")["Alt çerçeve ve çatı kenarı"]
     assert not any(c.value in ("kurulmadı", "liste yazılmaz", "Liste yazılmaz") for r in wi.iter_rows() for c in r)
 

@@ -108,10 +108,10 @@ def test_ap03_gercek_listeyle_tutanlar(listeler):
     assert sorted(x["olcu"] for x in L["satirlar"] if x["kalem"] == "Kutu profil (kiriş) 100 × 100") == ["L 1155", "L 4342,5"]
 
 
-def test_kirma_ana_cati_yazilmaz():
-    """Kırma ana çatının (AP-01) prefabrik kuralı kitapta yok: liste yazılmaz."""
-    with pytest.raises(PL.ListeYazilmaz, match="kırmada kitapta prefabrik kural yok"):
-        PL.is_emrinden(_ie("AP01"))
+def test_kirma_ana_cati_yazilir():
+    """Kırma ana çatının (AP-01) listesi İE-17'de yazılmıyordu (kitapta kural yoktu). İE-33 PR-2'den beri (Lokman çizimi 6 Kasım 2026
+    21:23'te onayladı) makas planı paftadan yazılır: 29 makas (`test_ie33_kirma_liste.py`)."""
+    assert PL.is_emrinden(_ie("AP01"))["girdi_ozeti"]["makas"] == 29
 
 
 def test_m07_makas_sayilari(listeler):
