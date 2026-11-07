@@ -44,6 +44,10 @@ ACILAN_IE26 = ["AP-09", "AP-11", "AP-14", "AP-15", "AP-18", "AP-21", "AP-22", "A
 ACILAN_IE29 = ["AP-06", "AP-13", "AP-16"]
 ACILAN_IE29_PR2 = ["AP-12", "AP-17", "AP-23", "AP-24", "AP-27"]
 ACILAN = sorted(ACILAN_IE26 + ACILAN_IE29 + ACILAN_IE29_PR2)
+# İE-33 (6 Kasım 2026; pano 70): açık sekiz evden AP setinde kendi klasörü olmayanlar Motor kipinde ölçülür. Listeleri 13 Ekim'den beri
+# `acik` (AP-01…05 örnek olarak okundu, E1–E5; AP-07 = TS-01, AP-08 = PK-07): açılış kararı gerekmez, kör değildir. Kendi listemiz yine
+# kıyastan önce commit'lenir (protokol adım 3); açılış kaydı 13 Ekim'inki.
+ACIK_IE33 = {"AP-02": "AP-01…05", "AP-03": "AP-01…05", "AP-05": "AP-01…05", "AP-04": "AP-01…05"}
 KOR_KALAN = [k for k in KOR19 if k not in ACILAN]
 IE26_KARAR = "karar kartı 2 Kasım 2026 21:48:56 UTC: \"Hepsi açılsın\""
 # Mühürde kodların durumu (bir dosya birden çok kod taşıyabilir; kod bir kez sayılır her dosya için). Değişirse açılış Patron kararıdır.
@@ -493,12 +497,18 @@ def test_cizim_icin_pafta_gorulen_kor_liste_kapali(muhur):
 
 def test_acik_sekiz_projenin_listesi_acik_kayitta(muhur):
     """Açık sekiz projenin ve İE-26'nın on projesinin listesi `acik` kayıtta. On projenin açılış kaydı Patron'un kararını ve açılıştan
-    önce commit'lenmiş kendi listemizi taşır: o commit bugünkü listenin geçmişinde (İE-27'de liste yeniden üretildi, D-45)."""
-    assert sorted(_oku(p / "proje.json")["kod"] for p in PROJELER) == sorted(ACIK8 + ACILAN)
+    önce commit'lenmiş kendi listemizi taşır: o commit bugünkü listenin geçmişinde (İE-27'de liste yeniden üretildi, D-45). İE-33'ün
+    AP projeleri 13 Ekim'in açılışıyla; kendi listemizin commit'i kıyasın commit'inin geçmişinde."""
+    assert sorted(_oku(p / "proje.json")["kod"] for p in PROJELER) == sorted(ACIK8 + ACILAN + list(ACIK_IE33))
     for p in PROJELER:
         P = _oku(p / "proje.json")
         r = [r for r in muhur["dosyalar"] if r["sha256"] == P["liste_sha256"]]
         assert len(r) == 1 and r[0]["durum"] == "acik" and P["kod"] in r[0]["kod"], P["kod"]
+        if P["kod"] in ACIK_IE33:                                      # İE-33: 13 Ekim'in açılışı; kendi listemiz kıyastan önce commit'li
+            assert muhur["acilislar"][ACIK_IE33[P["kod"]]]["tarih"] == "2026-10-13", P["kod"]
+            kayit = _oku(p / "sonuc.json")
+            assert K._git(KOK, "merge-base", "--is-ancestor", kayit["bizim_liste"]["commit"], kayit["kiyas_commit"]).returncode == 0
+            continue
         a = muhur["acilislar"][P["kod"]]
         assert a["liste_commit"]
         if P["kod"] in ACILAN:

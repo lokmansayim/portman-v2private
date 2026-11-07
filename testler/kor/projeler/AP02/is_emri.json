@@ -1,0 +1,297 @@
+{
+ "is_emri_no": "KOR-AP02",
+ "revizyon": 1,
+ "talep": {
+  "bayi": {
+   "kod": "AP02",
+   "ad": "Bayi AP-02"
+  },
+  "musteri_adi": "AP-02",
+  "metin": "İE-33 ölçüm: AP-02 (65 m², beşik + kubbe, AP-03'ün kubbeli hâli) montaj paftasından okundu (6 Kasım 2026). Konumlar cm, aks; x sol dış yüzden; dizilim arka-sol olduğundan mahallerin y'si arka dış yüzden (Motor'un kuralı), açıklıkların cepheleri gerçek çerçevede (paftanın üstü arka)."
+ },
+ "yapi": {
+  "sistem": "prefabrik",
+  "kat_sayisi": 1,
+  "duvar_yuksekligi_cm": 250,
+  "duvar_kalinligi_cm": {
+   "dis": 10,
+   "ic": 6
+  },
+  "olcu_kaynagi": "dis_olcu",
+  "dis_olcu_cm": {
+   "x": 763,
+   "y": 835.75
+  },
+  "referans_model": "AP-02",
+  "grid": {
+   "x_pano": 6,
+   "y_pano": 6.5
+  },
+  "kisa_kenar": "y",
+  "giris_cephesi": "on",
+  "dis_dusey_duvar": "cevre_aks_disinda",
+  "dizilim": {
+   "baslangic": "arka-sol",
+   "hiza": "tam_izgara",
+   "dis_duvar_t_bolme": false,
+   "pencere": "oda_ortasi",
+   "kapi": "mantik",
+   "kose": "oda",
+   "son_pano": "son_aks",
+   "kapi_yeri": "ortada",
+   "dis_pano_dayanagi": [
+    {
+     "y": 449.25,
+     "aralik_cm": [
+      323.75,
+      825.75
+     ],
+     "ic_duvarlar": true
+    }
+   ]
+  },
+  "ek_akslar_cm": {
+   "x": [],
+   "y": []
+  }
+ },
+ "mahaller": [
+  {
+   "ad": "SALON+MUTFAK",
+   "tur": "salon",
+   "konum_cm": [
+    [
+     5,
+     10,
+     632.5,
+     449.25
+    ]
+   ]
+  },
+  {
+   "ad": "VERANDA",
+   "tur": "veranda",
+   "konum_cm": [
+    [
+     632.5,
+     10,
+     758,
+     449.25
+    ]
+   ]
+  },
+  {
+   "ad": "ÇOCUK ODASI",
+   "tur": "yatak_odasi",
+   "konum_cm": [
+    [
+     5,
+     449.25,
+     256,
+     825.75
+    ]
+   ]
+  },
+  {
+   "ad": "HOL",
+   "tur": "antre_hol",
+   "konum_cm": [
+    [
+     256,
+     449.25,
+     444.25,
+     574.75
+    ]
+   ]
+  },
+  {
+   "ad": "BANYO",
+   "tur": "banyo",
+   "konum_cm": [
+    [
+     256,
+     574.75,
+     444.25,
+     825.75
+    ]
+   ]
+  },
+  {
+   "ad": "YATAK ODASI",
+   "tur": "yatak_odasi",
+   "konum_cm": [
+    [
+     444.25,
+     449.25,
+     758,
+     825.75
+    ]
+   ]
+  }
+ ],
+ "acik_sinirlar": [],
+ "acikliklar": [
+  {
+   "tur": "pencere",
+   "olcu": "120x120",
+   "mahal": "SALON+MUTFAK",
+   "duvar": "arka",
+   "pano": 1
+  },
+  {
+   "tur": "pencere",
+   "olcu": "120x120",
+   "mahal": "SALON+MUTFAK",
+   "duvar": "arka",
+   "pano": 3
+  },
+  {
+   "tur": "pencere",
+   "olcu": "120x180",
+   "mahal": "SALON+MUTFAK",
+   "duvar": "sag",
+   "pano": 1,
+   "acilis": "surgulu"
+  },
+  {
+   "tur": "pencere",
+   "olcu": "120x120",
+   "mahal": "ÇOCUK ODASI",
+   "duvar": "on"
+  },
+  {
+   "tur": "pencere",
+   "olcu": "60x40",
+   "mahal": "BANYO",
+   "duvar": "on",
+   "pano": 0
+  },
+  {
+   "tur": "pencere",
+   "olcu": "120x180",
+   "mahal": "YATAK ODASI",
+   "duvar": "on",
+   "pano": 0
+  },
+  {
+   "tur": "dis_kapi",
+   "olcu": 90,
+   "arasi": [
+    "VERANDA",
+    "SALON+MUTFAK"
+   ],
+   "duvar_ucu": "on"
+  },
+  {
+   "tur": "ic_kapi",
+   "olcu": 82,
+   "arasi": [
+    "HOL",
+    "SALON+MUTFAK"
+   ],
+   "duvar_ucu": "sag"
+  },
+  {
+   "tur": "ic_kapi",
+   "olcu": 82,
+   "arasi": [
+    "HOL",
+    "BANYO"
+   ],
+   "pano": 0,
+   "kapi_yeri": "mentese_ucu"
+  },
+  {
+   "tur": "ic_kapi",
+   "olcu": 82,
+   "arasi": [
+    "HOL",
+    "ÇOCUK ODASI"
+   ],
+   "pano": 0,
+   "kapi_yeri": "mentese_ucu"
+  },
+  {
+   "tur": "ic_kapi",
+   "olcu": 82,
+   "arasi": [
+    "HOL",
+    "YATAK ODASI"
+   ],
+   "pano": 0,
+   "kapi_yeri": "mentese_ucu"
+  }
+ ],
+ "dikmeler": [
+  [
+   753,
+   825.75
+  ]
+ ],
+ "cati": {
+  "tip": "besik",
+  "egim_yuzde": 32.88,
+  "sacak_cm": 30,
+  "topuk_cm": 10,
+  "makas_yonu": "uzun_kenar",
+  "makas_ekseni": "y",
+  "mahal_catilari": [
+   {
+    "mahal": "VERANDA",
+    "tip": "kirma",
+    "yuksek_yan": "sol"
+   }
+  ]
+ },
+ "cikti": {
+  "pdf": true,
+  "dxf": true,
+  "pafta": "A2",
+  "icerik": [
+   "aksli_plan",
+   "alanli_kopya",
+   "montaj_kopyasi",
+   "on_gorunus",
+   "cati_profili",
+   "ozellik_tablosu"
+  ]
+ },
+ "varsayimlar": [
+  "Ölçüler montaj paftasından (s. 2 montaj planı; mahal adları müşteri onay paftasından): 763 × 835,75, bina yüksekliği 250, dış duvar 100, iç duvar 60 mm. Gövde, mahaller ve iç duvarlar AP-03'ünkiyle aynı (aynı modelin kubbeli hâli; paftanın iç ölçüleri 617,5 · 436,25 · 243 · 182,25 · 305,75 · 119,5 · 248 · 373,5 AP-03'ün akslarına denk). Köşe ve ızgara AP-03'teki gibi (İE-17 kuralı): makas y'yi geçer, kısa kenar y; ön ve arka duvar köşeden geçer, x ızgarası duvar ekseninden (5 + 125,5k); yan duvarlar araya girer, y ızgarası iç yüzden (10 + 125,5k).",
+  "Gövde 763 × 835,75 dikdörtgen; veranda gövdenin içinde sağ arkada (125,5 × 444,25; paftanın üstü arka), arka ve sağ açık; arka-sağ köşede 10 × 10 dikme (paftada).",
+  "Pencereler paftadaki panoda ve yazısıyla (s. 2 ve s. 1 pencere detayı): salonun arkasında iki 120/120, çocuk odasının önünde 120/120, banyoda 60/40, yatak odasının önünde 120/180 ve verandaya bakan salon penceresi 120/180 (AP-03'te ikisi 120/120). Verandaya açılan salon penceresi sürgülü (TK-02 r09 başlangıcı, AP-03'teki gibi).",
+  "Kubbe (D-54): yatak odasının sağ duvarında, iki yanında 62,75'lik pano (paftada KUBBE-DUVAR-1…4; yan panolar 59/170, ön pano 105/170, AP-17 ve AP-24'le aynı modül); taban dış yüzde önden 72,61'den başlar (AP-24'le aynı yer). Kubbe çatısı D-54'ün kuralıyla (duvar 203, tepe 35, saçak 18,5).",
+  "Kapılar: salon–hol kapısı paftadaki gibi salona açılır; dış kapı ve salon–hol kapısı ortak duvarın ucundaki kavşaktan tam panoda (duvar_ucu; paftada 125,5); holden açılan üç kapı menteşe ucunda (kapi_yeri: mentese_ucu; paftada kavşaktan 11–13 cm). Kapı genişlikleri paftada yazılı değil: dış kapı 90, iç kapı 82 (Motor'un ölçüsü).",
+  "Çatı (paftanın s. 7 makas ve s. 9 aşık planı): ana beşik makas y'yi geçer, mahya x boyunca (157,25 = 10 topuk + 447,9 × 0,3288; Motor'da ana çatı salonun sağ duvarına kadar, şeritlerden); sağ öndeki yatak odası bölümünün üstünde paralel cumba (paftanın sağ kesiti 456,5, mahya 85,04; Motor'da 451,5 duvarın dış yüzünden). Veranda köşesi: Lokman'ın kararı (1 Kasım 2026 10:17, karar kartı \"Paftadaki gibi köşe kırma\") — veranda çatısı ana çatının eğimi ve saçağıyla sağa iner (MK9–12 kısa makaslar), arkada ana çatının arka yüzüyle 45° kırma (MK13 çapraz makas), önde cumbanın arka yüzüyle dere (`cati.mahal_catilari` tip kirma). Aşık planıyla aynı: veranda yüzü paralelkenar, aşık 444,25; ana çatının arka yüzü 823; cumbanın arka yüzünde aşık 155,5. AP-02'nin paftası (s. 7 makas ve dere yerleşim planı, s. 8 kesitler) AP-03'ünkiyle aynı; ek olarak kubbede üç kubbe makası (K-MK14…16).",
+  "Okuma düzeltmesi (6 Kasım 2026, kıyastan sonra): paftanın çatı kaplaması planı trapez sacın 80 cm kapattığını yazıyor (\"ANTRASİT TRAPEZ SAÇ (80 KAPATIR)\"); İş Emri'nin çatı kaplamasına \"(80 cm kapatır)\" eklendi (D-50, M-11; öteki on bir trapez evin okuması gibi). Kayıtlı ölçüm (bizim_liste.json, sonuc.json) düzeltmeden önceki okumayladır ve değişmedi; düzeltilmiş okumayla trapez sac ve mahya satırlarından ikisi daha tutar (İE-33 sonuç tablosu)."
+ ],
+ "eksikler": [],
+ "ozellikler": {
+  "Panel Türü": "Pres Panel",
+  "Çatı Şekli": "Beşik + Kubbe",
+  "Çatı Kaplaması": "Trapez Kaplama + OSB + Nem Bariyeri (80 cm kapatır)",
+  "Çatı Kaplama Rengi": "Antrasit Gri",
+  "Dış Kapı": "Çelik Standart",
+  "İç Kapılar": "Standart Amerikan",
+  "Dış Cephe Boya": "Alıcıya ait",
+  "İç Cephe Boya": "Alıcıya ait",
+  "Pencere Rengi": "Beyaz",
+  "Tavan": "Ters",
+  "Saçak ve Alın Rengi": "Antrasit Gri",
+  "Açıklama": "1- Vitrifiye grubu alıcıya aittir."
+ },
+ "alici_ait": {
+  "kalemler": [
+   "boya",
+   "vitrifiye"
+  ],
+  "kaynak": "paftanın özellik tablosu (dış ve iç cephe boyası alıcıya ait) ve açıklaması (vitrifiye grubu alıcıya ait)"
+ },
+ "kubbeler": [
+  {
+   "cephe": "sag",
+   "mahal": "YATAK ODASI",
+   "bas_cm": 72.61
+  }
+ ]
+}
