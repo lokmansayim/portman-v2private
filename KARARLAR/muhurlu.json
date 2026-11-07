@@ -913,6 +913,81 @@
     }
    ],
    "durum": "mühürlü"
+  },
+  {
+   "kod": "M-14",
+   "konu": "Bayiye giden teklif ve satış onay formu",
+   "kural": "Bayiye giden teklif ve satış onay formu (araclar/teklif.py --bayi <girdi>, <kod>_teklif_formu.pdf) bugünkü hâliyle. Fiyat: birim = taban × (1 + kâr oranı + KDV oranı × fiyata katılan KDV payı), formdaki KDV = birim × faturada KDV oranı (araclar/teklif_pdf.py › bayi_fiyati); yurt dışı pazarı kâr 0,20, KDV 0,20, pay 0,5, faturada 0 → taban × 1,30, KDV %0, toplam = birim (kurallar/teklif/fiyatlandirma.json › pazarlar.yurt_disi); oranı tanımlı olmayan pazarla form üretilmez. Yüz: TASLAK, kırmızı uyarı satırı, Motor, defter ve fiyatsız satır yazısı yok; 01 bayinin bilgileri girdiden, bayinin kendi telefonu açık (D-33 istisnası; numara depoya ve teklifin JSON'una girmez); 02 ürün \"Tek Kat Prefabrik Yapı\" (tavan yazısı yok), açıklama bayinin anlayacağı dille; 03 teslim süresi, teslim şekli, ödeme şekli girdiden, boş satırla form üretilmez (kurallar/teklif/form.json › bayi_formu). 04'te standart dışı değer kalın, yalnız ayrılan kısım; standart kat 2500 mm, dış cephe 100 mm, iç cephe 60 mm, çatı trapez sac; iki formda da (form.json › standart). Ek-1 malzeme listesi: birim fiyat ve tutar boş, ara ve genel toplam yok, adedi 0 olan satır yok. Davranışı testler/test_teklif_bayi_formu.py sabitler; onaylı hedef örnek dosyası yok (TK-05 önizlemesi bayinin bilgisini taşır, depoya girmez). Yurt içi pazarın oranları ve bayiye ek notlar bu mühürde değil: yeni pazar eklemek serbest, ek not bayi_formu'nu değiştirir (Lokman'ın sözüyle açılır).",
+   "kararlar": [
+    "D-64",
+    "İE-13"
+   ],
+   "pr": [
+    132
+   ],
+   "lokman": [
+    {
+     "tarih": "2026-11-06 08:38",
+     "soz": "bayiye gidecek kısmı bu yurt dışı olduğu için KDV'yi yarım alacağız kar marjını %20 de tutacağız bayi karı KDV falan değişkenlik gösterebilir kural olacaklar"
+    },
+    {
+     "tarih": "2026-11-06 08:38",
+     "soz": "6. Paket İçeriği ve Teknik Özellikler: genel kural bizim standartlarımızın dışında bir özellik olursa orayı bolt yapıyoruz mesala yükseklik 2800 bizim standartımız 2500 orayı bolt yap, Dış cephe panelleri bizim standartımız 100 lük sen sadece 160 mm olan kısmı bolt yap, İç cephe panelleri standardımız 60 mm Sen sadece 100 mm Kısmını bolt yap gerisi sandviç paneli bolt yap prefabrik standardımız Trapez sac,"
+    },
+    {
+     "tarih": "2026-11-06 09:01",
+     "soz": "Karar kartı \"Bayi formunda bayinin telefonu açık yazılsın mı?\" → \"Açık yazılsın\""
+    },
+    {
+     "tarih": "2026-11-07 13:29",
+     "soz": "bu şekilde birleşecek şekilde mühürle sonra gerekirse düzeltme yaparız kurallar mühürlü şekilde repoya girsin",
+     "mesaj": "cmsg_01UAFvcnfVuTR1wfFux5fQPPJUcPy9j7y3FMQ5mawnqnC1"
+    }
+   ],
+   "kilitler": [
+    {
+     "yer": "kurallar/teklif/fiyatlandirma.json#pazarlar.yurt_disi",
+     "iz": "681750fd5e1617b0"
+    },
+    {
+     "yer": "kurallar/teklif/form.json#standart",
+     "iz": "3ef465d3e79ea864"
+    },
+    {
+     "yer": "kurallar/teklif/form.json#bayi_formu",
+     "iz": "9f268cab47a3dc7f"
+    },
+    {
+     "yer": "araclar/teklif_pdf.py::bayi_fiyati",
+     "iz": "d7107b7468f9a9bf"
+    },
+    {
+     "yer": "testler/test_teklif_bayi_formu.py::test_fiyat_kuralı_pazardan",
+     "iz": "14c3a06553d0e7d9"
+    },
+    {
+     "yer": "testler/test_teklif_bayi_formu.py::test_ilk_sayfa",
+     "iz": "9c89cbdd558ccda0"
+    },
+    {
+     "yer": "testler/test_teklif_bayi_formu.py::test_ek1_fiyatsiz",
+     "iz": "bd50e07a8ab91a39"
+    },
+    {
+     "yer": "testler/test_teklif_bayi_formu.py::test_standart_disi_kalin",
+     "iz": "f5f0e3e36dea14a5"
+    },
+    {
+     "yer": "testler/test_teklif_bayi_formu.py::test_kalin_pdfte",
+     "iz": "508c78ec03368155"
+    },
+    {
+     "yer": "testler/test_teklif_bayi_formu.py::test_telefon_kurali",
+     "iz": "25f524d9056755fb"
+    }
+   ],
+   "durum": "mühürlü",
+   "gecmis": []
   }
  ]
 }
