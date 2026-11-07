@@ -27,6 +27,20 @@ Notion › "Claude ile Çalışma Düzeni · Devir Notu ve Tarama Kaydı" (30 Ek
 > 7. Konu dışına çıkmaz, yan konu açmaz.
 > 8. Projelere kodla değil gerçek adla hitap eder.
 > 9. Bağlam ağırlaşınca bunu kendisi söyler. Bir sohbet = bir konu. Önemli olan her şey dosyada durur.
+>
+> 10–20, TK-04 plan sohbetinin vaka analizinden (öneriler Ö-1…Ö-11). Lokman, 7 Kasım 2026 14:33 UTC: "Tüm önerilerini kabul ediyorum". Karar D-68.
+>
+> 10. Bir sohbet, bir ev, bir çıktı. Motor kuralı değişikliği ayrı bir bakım sohbetine, başka evlere yayma ayrı bir sohbete gider. Bağlam bir kez dolunca sohbet bunu söyler ve yeni sohbet önerir.
+> 11. Onay açık sözdür: "onaylıyorum", "onay" ya da karttan seçim. Övgü, yorum ya da yönlendirme onay sayılmaz; sohbet kartla sorar. Karar dosyası onayı kelimesi kelimesine ve saatiyle yazar.
+> 12. Plan değişikliği Lokman'a önce pano diziliminde gelir: önce ve sonra yan yana, değişen panolar renkli, değişmeyen yerler "aynı" diye işaretli. Ardından ön onay PDF'i, DXF ve WhatsApp görseli. m² ve ölçü yazısı tek başına anlatım sayılmaz.
+> 13. Çizime eklenen her yeni ölçü, aks ya da işaret ayrıca söylenir: "Çizime şu ölçü eklendi, kalsın mı?" İç teknik çözüm (ek aks, girinti) sorulmadan çizime çıkmaz. İstenmeyen hiçbir şey eklenmez ya da değiştirilmez.
+> 14. Önce eskiz, sonra kod. Geometri değişikliği (makas, saçak, veranda, köşe) önce eskizle ya da önce/sonra resimle sorulur; "doğru" dendikten sonra koda girer. Tek seferde tek değişiklik.
+> 15. Lokman'ın sözü veriden önce gelir. Söz bir listeyle çelişiyorsa sohbet çelişkiyi tek cümleyle sorar; kendi okumasını kartta önerilen seçenek yapmaz, karara ya da koda işlemez. Aynı şey ikinci kez söylenince sohbet durur ve neyi yanlış anladığını yazar. Söz iki türlü okunabiliyorsa biri sessizce seçilmez, iki okuma birlikte gösterilir.
+> 16. Yeni evde ilk adım: benzer onaylı model ve AIPrefabrik'teki gerçek montaj paftası aranır; şablondan sıfırdan kurulmaz. Bulunamazsa Lokman'a sorulur.
+> 17. Göndermeden önce kontrol listesi. Sohbet her çizimden önce kendisi uygular, sonucu mesajda bir satırla yazar: benzer onaylı model bakıldı mı; standart dışı, yarım ya da iki parçalı pano var mı, nedeni ne; DXF ekli mi; çizime yeni ölçü ya da aks girdi mi; bu çıktıyı bekleyen sohbet hangisi; değişiklik öteki evleri ya da mühürlü konuları etkiliyor mu; son değişiklikten sonra tam doğrulama koştu mu.
+> 18. Bağlı işin sahibi koordinatördür. Plan onaylanmadan başlayan liste, teklif ya da rehber "taslak" diye işaretlenir ve bu Lokman'a baştan bir satırla söylenir. Bir sohbet aynı evin planına, çatısına ya da listesine dokunan bir değişiklik yaparsa koordinatör öteki sohbetlerden etki denetimi ister; dosya taşımayı Lokman yapmaz.
+> 19. Birleşmemiş dalın üstüne PR kurulmaz; zorunluysa sıra Lokman'a baştan söylenir. Fren ya da birleştirme kuralı değişince koordinatör açık PR'lar için tek bir "sizden şu adım" notu verir. Çizim kuralı numaraları (PC) da karar numaraları gibi numara defterinden alınır.
+> 20. Lokman'a giden mesajda kod adı geçmez; aks adı, pano, oda ve ev adı kullanılır. PR, etiket ya da karar numarası yalnız ondan bir adım gerekiyorsa, tek satırla ve ne yapacağıyla birlikte yazılır.
 
 Aynı sayfa, soru 15: "AP-01…AP-28 = Mac'teki Desktop/AIPrefabrik klasörünün alfabetik sırası … Konuşurken gerçek ad kullanılır." Adlı eşleme depoya ve paylaşılan klasöre girmez (`docs/notlar/2026-10-18_AIPrefabrik_muhur.md`, `docs/notlar/2026-10-25_AICelik_muhur.md`).
 
