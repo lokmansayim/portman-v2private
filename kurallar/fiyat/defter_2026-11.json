@@ -1,6 +1,6 @@
 {
  "sema": "portman.fiyat_defteri/1",
- "surum": "2026-11-05-r11",
+ "surum": "2026-11-06-r12",
  "aciklama": "Yükleme listesi × birim fiyat (İE-13, Z-10'un liste yöntemi). Anahtar Motor'un liste satırı: prefabrikte 'kalem | olcu' (motor/prefabrik_liste.py), çelikte 'kalem | boyut' (motor/genel yükleme listesi). Fiyat uydurulmaz: kaynağı olmayan kalemde fiyat boş kalır.",
  "para_birimi": "TL",
  "kdv": "kaynak listelerde yazmıyor",
@@ -29,10 +29,10 @@
   },
   "PATRON": {
    "ad": "Patron'un thread'de verdiği birim fiyat (listelerde olmayan kalem)",
-   "kisa": "Patron, 04.11.2026",
+   "kisa": "Patron, 04.11.2026 ve 06.11.2026",
    "tarih": "2026-11-04",
    "patron_verdi": true,
-   "not": "Patron'un kendi sözüyle verdiği fiyat; kalemin notunda sözü kelimesi kelimesine, saati ve mesaj numarası. Kaynak listesi yok."
+   "not": "Patron'un kendi sözüyle verdiği fiyat; kalemin notunda sözü kelimesi kelimesine, saati ve mesaj numarası. Kaynak listesi yok. r09'da 4 Kasım (karkas 700, metal tahta 100); r12'de 6 Kasım (çırpı ipi 0, hediye; D-65). Kısa adı r12'de iki tarihle (kalemin tarihi notunda)."
   },
   "L45": {
    "ad": "45. hafta malzeme satış fiyat listesi (birim fiyat sütunu)",
@@ -1233,14 +1233,14 @@
      "not": "r11 (D-62): Patron 5 Kasım 23:00 \"fiyatları buradan al\"; önceki 155,00 (EKIM87)"
     },
     "Çırpı ipi | adet": {
-     "fiyat": null,
+     "fiyat": 0,
      "birim": "adet",
-     "kaynak": null,
+     "kaynak": "PATRON",
      "kaynak_satir": null,
-     "kaynak_kalem": "",
-     "durum": "kaynakta yok",
-     "onay": false,
-     "not": "Fiyat verilmez, boş kalır (Lokman 31 Ekim 2026 15:27: \"çırpı ipine fiyat verme boş kalsın\"; D-36); bir daha sorulmaz. Önceki not: 87 m² listesinde: kaynakta satır fiyatsız; Haziran listesinde yok; Fiyat boş."
+     "kaynak_kalem": "Lokman, TK-04 teklif thread'i",
+     "durum": "Patron verdi",
+     "onay": true,
+     "not": "r12 (D-65): Lokman 6 Kasım 2026 21:29 UTC, TK-04 teklif thread'i (mesaj cmsg_01UAFvcnfVuTR1wfFux5fQPPN8WThMkGtPNdJhvntFgMkM): \"çırpı ipini hediye veriyoruz ona değer 0 yaz\". Önceki not: Fiyat verilmez, boş kalır (Lokman 31 Ekim 2026 15:27: \"çırpı ipine fiyat verme boş kalsın\"; D-36). 87 m² listesinde: kaynakta satır fiyatsız; Haziran listesinde yok."
     },
     "8'lik trapez uç | adet": {
      "fiyat": 79.52,
@@ -3171,16 +3171,14 @@
      "not": "CTKB 55."
     },
     "Çırpı ipi | adet": {
-     "fiyat": null,
+     "fiyat": 0,
      "birim": "adet",
-     "kaynak": null,
-     "kaynak_satir": [
-      150
-     ],
-     "kaynak_kalem": "Çırpı ipi, fiyatsız",
-     "durum": "kaynakta yok",
-     "onay": false,
-     "not": "Üç listede de fiyatsız."
+     "kaynak": "PATRON",
+     "kaynak_satir": null,
+     "kaynak_kalem": "Lokman, TK-04 teklif thread'i",
+     "durum": "Patron verdi",
+     "onay": true,
+     "not": "r12 (D-65): Lokman 6 Kasım 2026 21:29 UTC, TK-04 teklif thread'i (mesaj cmsg_01UAFvcnfVuTR1wfFux5fQPPN8WThMkGtPNdJhvntFgMkM): \"çırpı ipini hediye veriyoruz ona değer 0 yaz\"; hediye her teklifte, çelikte de. Önceki not: üç listede de fiyatsız (kaynak satırı CTKB 150)."
     },
     "Temiz su borusu | L 4000": {
      "fiyat": 255,

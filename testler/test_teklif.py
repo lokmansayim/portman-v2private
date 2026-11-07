@@ -204,11 +204,17 @@ def test_vitrifiye_banyo_basina():
 
 
 def test_ozet_ve_kosullar(cikti, T, tmp_path):
-    """Koşul değeri yoksa sarı "Patron'dan"; projeye özel dosya verilince değer yazılır, sarı kalkar."""
+    """Genel koşullar Patron'dan (D-65, Lokman 6 Kasım 21:31: "hepsine teslim süresi 10 gün ödeme nakit yaz"); koşul değeri yoksa sarı
+    "Patron'dan"; projeye özel dosya verilince değer yazılır, sarı kalkar."""
     oz = load_workbook(cikti / "TK01_teklif.xlsx")["Özet"]
     rows = {r[0].value: r for r in oz.iter_rows() if r[0].value}
+    for k, v in (("Teslim süresi", "10 gün"), ("Ödeme şekli", "Nakit")):
+        assert rows[k][1].value == v and not rows[k][1].fill.fgColor.rgb.endswith("FFF2A8") and not rows[k][3].value
+    (tmp_path / "bos.json").write_text(json.dumps({"kosullar": {"Teslim süresi": None, "Ödeme şekli": None}}), encoding="utf-8")
+    assert TK.main([str(IE), str(tmp_path / "bos"), "--tavan", "asma", "--kosullar", str(tmp_path / "bos.json"), *ESKI_DEFTER]) == 0
+    bos = {r[0].value: r for r in load_workbook(tmp_path / "bos" / "TK01_teklif.xlsx")["Özet"].iter_rows() if r[0].value}
     for k in ("Teslim süresi", "Ödeme şekli"):
-        assert rows[k][1].value is None and rows[k][1].fill.fgColor.rgb.endswith("FFF2A8") and rows[k][3].value == "Patron'dan"
+        assert bos[k][1].value is None and bos[k][1].fill.fgColor.rgb.endswith("FFF2A8") and bos[k][3].value == "Patron'dan"
     assert rows["Asma tavan"][1].value == 465703.13 and rows["Ters tavan"][1].value == 464882.13          # r09: 120 × 180 karkas 700 TL
     for k in ("Asma tavan", "Ters tavan"):                  # CIO, 28 Ekim: toplamın yanında belirgin uyarı
         u = rows[k][4]
@@ -277,7 +283,7 @@ def test_is_emrindeki_teklif_bolumu(tmp_path):
     J = _oku(tmp_path / "a" / "TK01_teklif.json")
     assert [s["ad"] for s in J["secenekler"]] == ["Asma tavan", "Ters tavan"]
     assert [s["fiyat"]["ozet"]["toplam"] for s in J["secenekler"]] == [465703.13, 464882.13]      # Motor teklif bölümünü okumaz (r09)
-    assert J["kosullar"] == {"Teslim süresi": None, "Ödeme şekli": "DENEME İE"}
+    assert J["kosullar"] == {"Teslim süresi": "10 gün", "Ödeme şekli": "DENEME İE"}                # genel değerin üstüne (D-65)
     (tmp_path / "k.json").write_text(json.dumps({"kosullar": {"Ödeme şekli": "DENEME DOSYA"}}, ensure_ascii=False), encoding="utf-8")
     assert TK.main([str(tmp_path / "ie.json"), str(tmp_path / "b"), "--tavan", "ters", "--kosullar", str(tmp_path / "k.json"), *ESKI_DEFTER]) == 0
     J = _oku(tmp_path / "b" / "TK01_teklif.json")

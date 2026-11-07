@@ -1,0 +1,13 @@
+{
+ "kod": "AP-03",
+ "ap": "AP-03",
+ "kip": "motor",
+ "girdi": {
+  "is_emri": "testler/kor/projeler/AP03/is_emri.json"
+ },
+ "bizim_liste": "bizim_liste.json",
+ "liste_sha256": "6af9731912e0653fb286be0574d814131134806ccd7e6e2739bd9628a6890b88",
+ "sayfa": null,
+ "kapi": true,
+ "not": "İE-33 ölçümü (açık sekiz; liste 13 Ekim'de örnek olarak okundu, kör değil). Geometri İE-17 PR-2'nin İş Emri'si (M-07, testler/cizim/evler/AP03.json; değişmedi); özellikler paftanın tablosundan."
+}

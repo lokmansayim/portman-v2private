@@ -71,16 +71,16 @@ def test_her_secenege_bir_pdf(cikti, T):
 
 def test_ilk_sayfa_formun_duzeni(cikti, T):
     """Başlık, tarih, beş bölüm; 02'de seçeneğin toplamı (Tutar, Toplam, Gen. Toplam) JSON'un toplamı; alan Motor'un brüt alanı; 03'te
-    koşullar boşsa boş ve uyarıda; fiyatsız satır varken TASLAK."""
+    koşullar genel değerle (D-65: 10 gün, nakit); fiyatsız satır varken TASLAK (TK-01 eski defterle: çırpı ipi fiyatsız)."""
     for sec in T["secenekler"]:
         s1 = _metin(cikti / TP.dosya_adi(T, sec))[0]
         for x in ["PORTATİF EV", "Tarih: 03.11.2026", "TEKLİF VE SATIŞ ONAY FORMU · TASLAK", *BOLUMLER, "Gen. Toplam",
-                  f"PREFABRİK YAPI · {sec['ad']}", "Teslim süresi", "Ödeme şekli"]:
+                  f"PREFABRİK YAPI · {sec['ad']}", "Teslim süresi 10 gün", "Ödeme şekli Nakit"]:
             assert x in s1, (sec["ad"], x)
         toplam = TP.tl(sec["fiyat"]["ozet"]["toplam"])
         assert s1.count(toplam) == 4, (sec["ad"], toplam)                     # birim fiyat, tutar, toplam, genel toplam
         assert f"{TP.sayi(sec['liste']['girdi_ozeti']['brut_m2'])} m²" in s1
-        assert "1 satır fiyatsız, toplam eksik; Teslim süresi, Ödeme şekli boş (Patron'dan)" in s1      # r09: 120 × 180 karkas fiyatlı
+        assert "1 satır fiyatsız, toplam eksik. Fiyatı olmayan satırlar Ek-1'de boş." in s1 and "boş (Patron'dan)" not in s1   # r09; D-65
         assert "sayfa 1 / " in s1
 
 
@@ -149,6 +149,9 @@ def test_kosullar_dolu_ve_fiyatsiz_yoksa_taslak_yok(T):
     assert ">30 gün<" in h and ">Peşin<" in h
     T3 = dict(T2, oneri_dahil=True)
     assert "Onaysız öneriler dahil" in TP.ilk_sayfa(T3, _oku(IE), sec, TP.form_oku(), "03.11.2026")
+    T4 = dict(T2, kosullar={"Teslim süresi": None, "Ödeme şekli": "Nakit"})            # boş koşul yine TASLAK ve uyarıda (D-65'ten önceki hâl)
+    h4 = TP.ilk_sayfa(T4, _oku(IE), sec, TP.form_oku(), "03.11.2026")
+    assert "TASLAK" in h4 and "Teslim süresi boş (Patron&#x27;dan)" in h4
 
 
 def test_ayni_girdi_ayni_pdf(cikti, T, tmp_path):
