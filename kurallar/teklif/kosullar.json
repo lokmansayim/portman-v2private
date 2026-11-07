@@ -1,9 +1,9 @@
 {
  "sema": "portman.teklif_kosullari/1",
  "aciklama": "Teklifin koşulları (İE-13 PR-2, araclar/teklif.py). Değer yalnız Patron'dan; uydurulmaz. Boş değer teklifte sarı 'Patron'dan' yazar. Projeye özel değer teklif komutuna --kosullar ile aynı biçimde verilir.",
- "dayanak": "Patron 28 Ekim 2026 06:51 (altın set kartı): bayi teslim süresini ya da ödeme şeklini sorarsa Portman 'teklifle birlikte bildirilir' der; bu yüzden teklifte iki satır bulunur.",
+ "dayanak": "Patron 28 Ekim 2026 06:51 (altın set kartı): bayi teslim süresini ya da ödeme şeklini sorarsa Portman 'teklifle birlikte bildirilir' der; bu yüzden teklifte iki satır bulunur. Değerler: Lokman 6 Kasım 2026 21:31 UTC, TK-04 teklif thread'i (mesaj cmsg_01UAFvcnfVuTR1wfFux5fQPPC739gvELiUFZneMnRkzA7Y): \"hepsine teslim süresi 10 gün ödeme nakit yaz\" (D-65); bütün tekliflerin varsayılanı, projeye özel değer İş Emri'nin `teklif.kosullar`'ıyla ya da --kosullar ile üstüne yazılır.",
  "kosullar": {
-  "Teslim süresi": null,
-  "Ödeme şekli": null
+  "Teslim süresi": "10 gün",
+  "Ödeme şekli": "Nakit"
  }
 }

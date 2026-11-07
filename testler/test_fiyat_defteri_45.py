@@ -31,24 +31,33 @@ def _pre(kalem, olcu, adet, grup="1001", **ek):
 
 def test_varsayilan_defter_r11(defter):
     """Araçların (fiyatla, teklif) varsayılanı 45. hafta defteri; eski defter yerinde ve r10."""
-    assert F.DEFTER == YENI and defter["surum"] == "2026-11-05-r11" and defter["onceki_defter"].startswith("defter_2026-10.json")
+    assert F.DEFTER == YENI and defter["surum"] == "2026-11-06-r12" and defter["onceki_defter"].startswith("defter_2026-10.json")   # r12: D-65
     assert F.oku(ESKI)["surum"] == "2026-11-05-r10"
     k = defter["kaynaklar"]["L45"]
     assert k["patron_verdi"] and k["kisa"] == "45. hafta listesi, 03.11.2026"
     assert '"fiyatları buradan al"' in k["not"] and '"Hepsini al"' in k["not"] and "23:00" in k["not"] and "23:10" in k["not"]
     assert "önce L45" in defter["onay_kurali"]
-    assert defter["hatlar"]["celik"] == F.oku(ESKI)["hatlar"]["celik"]                 # çelik hattı değişmedi
+    C, CE = (dict(d["hatlar"]["celik"]["kalemler"]) for d in (defter, F.oku(ESKI)))
+    assert C.pop("Çırpı ipi | adet")["fiyat"] == 0 and CE.pop("Çırpı ipi | adet")["fiyat"] is None    # r12, D-65
+    assert C == CE and {k: v for k, v in defter["hatlar"]["celik"].items() if k != "kalemler"} == \
+        {k: v for k, v in F.oku(ESKI)["hatlar"]["celik"].items() if k != "kalemler"}       # çelik hattında başka değişiklik yok
 
 
 def test_tk04_r08_toplami(tmp_path):
     """TK-04 r08 (asma tavan): 45. hafta defteriyle 335.467,98 TL (Patron'a 23:10 kartında söylenen önizleme), r10 defteriyle 374.965,01 TL
-    (22:49 kartı). 121 satır, fiyatsız yalnız çırpı ipi (bilerek boş), onay bekleyen öneri yok."""
-    for ad, ek, toplam in (("yeni", [], 335467.98), ("eski", ["--defter", str(ESKI)], 374965.01)):
+    (22:49 kartı). 121 satır, onay bekleyen öneri yok. Çırpı ipi r10'da fiyatsız (bilerek boş, D-36); r12'de 0 TL, hediye (D-65, Lokman 6 Kasım
+    21:29): satır fiyatlı, toplam aynı."""
+    for ad, ek, toplam, fiyatsiz in (("yeni", [], 335467.98, []), ("eski", ["--defter", str(ESKI)], 374965.01, ["Çırpı ipi | adet"])):
         assert TK.main([str(TK04), str(tmp_path / ad), "--tavan", "asma", "--tarih", "05.11.2026", *ek]) == 0
         T = json.loads((tmp_path / ad / "TK04_teklif.json").read_text(encoding="utf-8"))
         oz = T["secenekler"][0]["fiyat"]["ozet"]
         assert (oz["toplam"], oz["satir"], [f["anahtar"] for f in oz["fiyatsiz"]], oz["oneri_bekleyen"]["satir"]) == \
-            (toplam, 121, ["Çırpı ipi | adet"], 0), ad
+            (toplam, 121, fiyatsiz, 0), ad
+    cirpi = [r for r in T["secenekler"][0]["fiyat"]["satirlar"] if r["kalem"] == "Çırpı ipi"]
+    assert [(r["birim_fiyat"], r["tutar"]) for r in cirpi] == [(None, None)]                 # eski defter (son koşu)
+    T = json.loads((tmp_path / "yeni" / "TK04_teklif.json").read_text(encoding="utf-8"))
+    cirpi = [r for r in T["secenekler"][0]["fiyat"]["satirlar"] if r["kalem"] == "Çırpı ipi"]
+    assert [(r["birim_fiyat"], r["tutar"], r["durum"]) for r in cirpi] == [(0, 0, "onaylı")]
 
 
 def test_yakin_eslesmeler_onayli(defter):
@@ -84,10 +93,10 @@ def test_kalem_fiyatlari(defter, anahtar, fiyat, satir):
 
 def test_eski_kaynakta_kalanlar(defter):
     """45. hafta listesinde karşılığı olmayan ya da henüz eşlenmeyen kalem önceki kaynağında ve fiyatında: makas kuralı, pencere karkası,
-    metal tahta, tek kat panel, metal kiremit mahyası."""
+    metal tahta, tek kat panel, metal kiremit mahyası. Çırpı ipi r12'de Patron'dan 0 TL (D-65; `test_cirpi_ipi_hediye`)."""
     P, E = defter["hatlar"]["prefabrik"], F.oku(ESKI)["hatlar"]["prefabrik"]
     for k in ("Özel pencere karkası (120×180) (100'lük çektirme U'su + 100'lük H geçen) | 1200 × 1800", "Ters mahya kenar kutusu | L 21 × 40 × 21 × 2800",
-              "Tek kat çatı paneli · ana çatı | L 5100", "Metal kiremit mahyası | L 2800", "Mahya bandı | rulo 10 m", "Çırpı ipi | adet"):
+              "Tek kat çatı paneli · ana çatı | L 5100", "Metal kiremit mahyası | L 2800", "Mahya bandı | rulo 10 m"):
         assert P["kalemler"][k] == E["kalemler"][k], k
     assert P["makas_kurali"] == E["makas_kurali"]
     tk = [b for b in P["boy_onerileri"] if b.get("kalem_baslar") == "Tek kat çatı paneli · "]
@@ -129,3 +138,17 @@ def test_tk05_hesaplari_yeni_tabandan(defter):
     for a in ("16'lık köşe direği 160 × 160 | 160 × 160 × 2800", "Çektirme U'su 160 | 160 × 2740", "H 160 (dış pano eki) | 160 × 160 × 2800",
               "160'lık alt çerçeve | 160 × 3750", "Özel pencere karkası (120×120) (160'lık çektirme U'su + 160'lık H geçen) | 1200 × 1200"):
         assert P[a] == E[a], a
+
+
+def test_cirpi_ipi_hediye(defter):
+    """D-65 (Lokman 6 Kasım 2026 21:29, TK-04 teklif thread'i): "çırpı ipini hediye veriyoruz ona değer 0 yaz". r12'de prefabrik ve çelik
+    hattında çırpı ipi 0 TL, kaynak PATRON, onaylı; notunda sözü. r10 defteri eski teklif için değişmedi (fiyatsız)."""
+    E = F.oku(ESKI)
+    for hat in ("prefabrik", "celik"):
+        g = defter["hatlar"][hat]["kalemler"]["Çırpı ipi | adet"]
+        assert (g["fiyat"], g["kaynak"], g["onay"], g["durum"]) == (0, "PATRON", True, "Patron verdi"), hat
+        assert '"çırpı ipini hediye veriyoruz ona değer 0 yaz"' in g["not"] and "21:29" in g["not"], hat
+        assert E["hatlar"][hat]["kalemler"]["Çırpı ipi | adet"]["fiyat"] is None, hat
+    assert defter["kaynaklar"]["PATRON"]["kisa"] == "Patron, 04.11.2026 ve 06.11.2026" and defter["kaynaklar"]["PATRON"]["patron_verdi"]
+    R = F.fiyatla({"satirlar": [_pre("Çırpı ipi", "adet", 1, "1020")]}, defter)
+    assert [(s["birim_fiyat"], s["tutar"], s["durum"]) for s in R["satirlar"]] == [(0, 0, "onaylı")]

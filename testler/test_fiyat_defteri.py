@@ -48,8 +48,8 @@ def test_defter_bicimi(yol):
             assert g["birim"] in BIRIMLER, (k, g["birim"])
             assert isinstance(g["onay"], bool), k
             assert all(isinstance(g[a], str) and g[a] for a in F.YAZILAN if a in g), k   # teklifte yazılan ad ve ölçü (r09)
-            if g["fiyat"] is not None:
-                assert g["fiyat"] > 0, k
+            if g["fiyat"] is not None:                          # 0 yalnız Patron'un sözüyle (D-65: çırpı ipi hediye)
+                assert g["fiyat"] > 0 or (g["fiyat"] == 0 and g["kaynak"] == "PATRON" and g["onay"]), k
                 assert g["kaynak"] in defter["kaynaklar"], (k, g["kaynak"])
             if g["onay"]:                                       # onaylı fiyat Patron'un verdiği listeden ya da onayladığı öneriden
                 assert g["fiyat"] is not None and defter["kaynaklar"][g["kaynak"]]["patron_verdi"], k
