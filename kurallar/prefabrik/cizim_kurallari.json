@@ -945,6 +945,28 @@
     "testler/motor/test_d58.py::test_ara_aks_ve_olcu_yok",
     "testler/motor/test_d58.py::test_d_aksi_izgarada"
    ]
+  },
+  {
+   "kod": "PC-37",
+   "baslik": "125,5 aks aralığını aşan pano yalnız açıklıkla olur",
+   "kural": "Açıklıksız pano en çok 125,5 cm'dir; 125,5 aks aralığını aşan panonun ortasında pencere ya da kapı gibi bir boşluk olur. Panodan geniş pencere (ör. 180/180) için iki tam pano birleşir (251) ve boşluk ortadadır (BK-13); karkaslı kaplama panosu (D-46, PC-33) ve kubbenin tabanı (PC-35) da açıklık taşır. Motor planın son hâlinde bütün duvarların (dış ve iç) panolarını denetler (`geometry.genis_pano_denetimi`, `_kur`'un son adımı): panoda en az bir açıklık olup olmadığına bakar, açıklığın yerini sabitlemez (paftadan yazılan karkaslı panoda yer paftadan; AP-18, AP-26). Açıklıksız 125,5'i aşan pano kalırsa açık hata (K21), sessizce bölünmez ya da kısaltılmaz, İş Emri çizilmez. Dizilimin bu kurala aykırı bıraktığı tek yol düzeltildi (Lokman, 7 Kasım 2026 15:48, kart \"Motor düzeltilsin\"): `tam_izgara` + `son_aks`'ta son pano kesilmemişse de (yarım ızgarada tam 125,5) başı derzdir, önüne 62,75 yarım pano gelir (M-07 testindeki aynalı hayali planda 188,25 yerine 125,5 + 62,75). 7 Kasım 2026 taramasında depodaki prefabrik İş Emri dosyalarının hepsi kurala uyuyordu, dizilimleri düzeltmeden önce ve sonra aynı (BK-26); hiçbir evin çizimi ve listesi değişmedi. Örnekteki lento 50, 250'lik evin lentosudur (h − 200; D-14, D-63); bu satır lentoyu değiştirmez. TK-04 r07'deki 155,75 bir pano değil, verandanın yan kenarının ölçüsüydü (37,5 + 155,75; sağ kiriş 155,75 − 10); D-58 madde 4 ile çizimden kalktı, salon–veranda duvarının panoları ızgarada.",
+   "karar": "D-69",
+   "lokman": {
+    "tarih": "2026-11-07",
+    "saat": "14:33",
+    "soz": "bizde karkaslı bir pano yani örneğin 180/180 bir pencere 125.5 cm lik bir aks aralığına oturmayacağı için özel karkaslı pano yapıyoruz onuda 2 tam pano yapıyoruz ortasına pencereyi koyuyoruz 2 tam pano 251 ortasında lento 50 eni 180 boyu 180 bir boşluk bırakıyoruz yani teknik olarak 155,75 ölçüsünü verdiğin pano olamaz bunu kesin bir kural olarak koy 125.5 aks aralığını aşma durumlarımız ortasında ya bir pencere ya bir kapı gibi bir boşluk olması gerekiyor"
+   },
+   "kod_yeri": [
+    "motor/geometry.py::genis_pano_denetimi",
+    "motor/geometry.py::_kur"
+   ],
+   "test": [
+    "testler/motor/test_d69.py::test_acikliksiz_genis_pano_hata",
+    "testler/motor/test_d69.py::test_aciklikli_genis_pano_gecer",
+    "testler/motor/test_d69.py::test_kur_son_adimda_denetler",
+    "testler/motor/test_d69.py::test_depodaki_is_emirleri_kurala_uyar",
+    "testler/motor/test_d69.py::test_tam_izgara_son_aks_yarim_pano"
+   ]
   }
  ]
 }
