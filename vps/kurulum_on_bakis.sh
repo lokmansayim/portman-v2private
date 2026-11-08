@@ -10,7 +10,7 @@
 #      mesaj gitmez);
 #   5. ayarlar: kanal açık mı, dry_run, mesaj katmanı, 3D adresi dolu mu, plan üretimi ve LLM-önce revizyon, yeni sürümün dört yeni
 #      özelliği (banka_germe, gorsel_okuma, talep_formu, bayi_kaydi; ayarda yoksa kapalıdır, kanal/ayarlar.py VARSAYILAN);
-#   6. son yedeğin yaşı (nabız dosyası).
+#   6. son yedeğin yaşı (nabız dosyası) ve öz-test sonucu (yoksa ajan kurulumdan sonra öz-testi koşar: LLM anahtarı varsa 1 ücretli çağrı).
 # Sunucuda kopyası yok (sürümle gelir); kopyası olmayan geçici betik gibi koşulur (AGENTS.md › Sunucu erişimi). Mac'te, commit'e sabit:
 #   curl -fsSL https://raw.githubusercontent.com/lokmansayim/portman-v2private/<commit>/vps/kurulum_on_bakis.sh \
 #     | ssh portman-vps 'timeout 120 bash -s -- v2026.11.08' > kurulum_on_bakis.txt 2>&1
@@ -104,10 +104,17 @@ else
   echo "   okunamadı: $DATA/settings.json"; DUR+=("settings.json okunamadı")
 fi
 
-echo "-- [6/6] son yedek"
+echo "-- [6/6] son yedek ve öz-test"
 YZ="$(python3 -c 'import json,sys; print(int(json.load(open(sys.argv[1])).get("zaman", 0)))' "$DATA/nabiz/yedek.json" 2>/dev/null || echo 0)"
-if [ "$YZ" = "0" ]; then echo "   kayıt yok ($DATA/nabiz/yedek.json)"
-else echo "   $(( (SIMDI - YZ) / 3600 )) saat önce ($(date -d "@$YZ" '+%Y-%m-%d %H:%M %Z' 2>/dev/null || echo "$YZ"))"; fi
+if [ "$YZ" = "0" ]; then echo "   son yedek: kayıt yok ($DATA/nabiz/yedek.json)"
+else echo "   son yedek: $(( (SIMDI - YZ) / 3600 )) saat önce ($(date -d "@$YZ" '+%Y-%m-%d %H:%M %Z' 2>/dev/null || echo "$YZ"))"; fi
+# Ajan öz-testi (kanal/worker.py › oz_test) data/self-test-result.json yoksa koşar ve LLM anahtarı varsa 1 ücretli çağrı yapar.
+if [ -f "$DATA/self-test-result.json" ]; then
+  OZ="$(python3 -c 'import json,sys; d=json.load(open(sys.argv[1])); print(d.get("surum") or "?", d.get("state") or "?")' "$DATA/self-test-result.json" 2>/dev/null || echo '? ?')"
+  echo "   öz-test sonucu var (sürüm ${OZ% *}, ${OZ#* }): kurulumda öz-test yeniden koşmaz, LLM çağrısı yok"
+else
+  echo "   DİKKAT: öz-test sonucu yok: kurulumdan sonra ajan öz-testi koşar; LLM anahtarı varsa 1 ücretli çağrı (~0,03 \$)"
+fi
 
 if [ "${#DUR[@]}" -eq 0 ]; then
   echo "== sonuç: KURULABİLİR (hiçbir şey değişmedi)"

@@ -32,7 +32,7 @@ def _git(calisma: Path, *a):
     return subprocess.run(["git", "-C", str(calisma), *a], check=True, capture_output=True, text=True, env={**os.environ, **GIT_ENV})
 
 
-def _ortam(tmp_path: Path, ayar: dict) -> dict:
+def _ortam(tmp_path: Path, ayar: dict, oz_test: bool = True) -> dict:
     bare = tmp_path / "kaynak.git"; calisma = tmp_path / "calisma"
     subprocess.run(["git", "init", "-q", "--bare", "-b", "main", str(bare)], check=True)
     subprocess.run(["git", "clone", "-q", str(bare), str(calisma)], check=True, capture_output=True)
@@ -47,6 +47,8 @@ def _ortam(tmp_path: Path, ayar: dict) -> dict:
     (kok / "data" / "nabiz").mkdir(parents=True)
     (kok / "data" / "settings.json").write_text(json.dumps(ayar, ensure_ascii=False))
     (kok / "data" / "nabiz" / "yedek.json").write_text(json.dumps({"zaman": 1_762_562_511}))
+    if oz_test:
+        (kok / "data" / "self-test-result.json").write_text(json.dumps({"state": "done", "surum": "v2026.10.15"}))
     psql = tmp_path / "psql"; psql.write_text(SAHTE_PSQL); psql.chmod(0o755)
     return {"PM_KOK": str(kok), "PM_ETC": str(tmp_path / "etc"), "PM_PSQL": str(psql), "PM_GIT_URL": str(bare), "PM_TEST": "1",
             "PM_EN_AZ_MB": "1", "PM_SIMDI": str(1_762_562_511 + 13 * 3600)}
@@ -86,13 +88,14 @@ def test_temiz_sunucu_kurulabilir_ve_yeni_ozellikler_kapali(tmp_path):
     for k in ("banka_germe", "gorsel_okuma", "talep_formu", "bayi_kaydi"):
         assert f"{k} (" in out
     assert out.count("ayarda yok → kapalı") == 4 and "yeni özelliklerin hepsi kapalı" in out
-    assert "13 saat önce" in out
+    assert "son yedek: 13 saat önce" in out
+    assert "öz-test sonucu var (sürüm v2026.10.15, done): kurulumda öz-test yeniden koşmaz, LLM çağrısı yok" in out
     assert out.rstrip().endswith("== sonuç: KURULABİLİR (hiçbir şey değişmedi)")
     assert _iz(Path(env["PM_KOK"])) == once                                                      # salt okunur
 
 
 def test_engeller_beklet_der_ve_d19_bildirimini_soyler(tmp_path):
-    env = _ortam(tmp_path, {"enabled": True, "bayi_kaydi": {"acik": True}, "talep_formu": {"acik": False}})
+    env = _ortam(tmp_path, {"enabled": True, "bayi_kaydi": {"acik": True}, "talep_formu": {"acik": False}}, oz_test=False)
     r = _kos(env, "v2026.11.09", is_=0, giden=2, mk=3, mk24=2, patron=1, rev=4)
     out = r.stdout + r.stderr
     assert r.returncode == 0, out
@@ -101,6 +104,7 @@ def test_engeller_beklet_der_ve_d19_bildirimini_soyler(tmp_path):
     assert "kararı bekleyen mühendis kontrolü: 3 (24 saati geçmiş: 2) · fiyat hatırlatması bekleyen: 1 · onay bekleyen revizyon: 4" in out
     assert "NOT: 24 saati geçmiş 2 kontrol" in out and "ücretli şablon" in out
     assert "bayi_kaydi (WhatsApp'tan bayi kaydı, İE-22, satır 111): açık" in out and "DİKKAT: açık yeni özellik: bayi_kaydi" in out
+    assert "DİKKAT: öz-test sonucu yok" in out and "1 ücretli çağrı (~0,03 $)" in out
     assert "bekle: etiket açıklamalı değil" in out and "bekle: bekleyen giden 0 değil" in out
     assert out.rstrip().endswith("== sonuç: BEKLE (2 madde; hiçbir şey değişmedi)")
 
