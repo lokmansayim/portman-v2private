@@ -31,7 +31,7 @@ def _pre(kalem, olcu, adet, grup="1001", **ek):
 
 def test_varsayilan_defter_r11(defter):
     """Araçların (fiyatla, teklif) varsayılanı 45. hafta defteri; eski defter yerinde ve r10."""
-    assert F.DEFTER == YENI and defter["surum"] == "2026-11-06-r12" and defter["onceki_defter"].startswith("defter_2026-10.json")   # r12: D-65
+    assert F.DEFTER == YENI and defter["surum"] == "2026-11-07-r13" and defter["onceki_defter"].startswith("defter_2026-10.json")   # r12: D-65; r13: D-67
     assert F.oku(ESKI)["surum"] == "2026-11-05-r10"
     k = defter["kaynaklar"]["L45"]
     assert k["patron_verdi"] and k["kisa"] == "45. hafta listesi, 03.11.2026"
@@ -122,7 +122,8 @@ def test_bant_ve_boy_kurallari(defter):
 
 def test_tk05_hesaplari_yeni_tabandan(defter):
     """TK-05'in r10'da 250'lik tabandan hesaplanan 280 / 160 kalemleri (BK-25): yöntem aynı (280 = 250 × 1,12; 160 = 100'lük + strafor farkı),
-    taban 45. hafta fiyatı; Patron onayı bekleyen öneri kalır. Listede birebir olan 160 / 280 profilleri değişmez."""
+    taban 45. hafta fiyatı. r13'te Patron onayladı (D-67, Lokman 7 Kasım 2026 13:39); fiyatlar aynı. Listede birebir olan 160 / 280 profilleri
+    değişmez; r10 defteri eski teklif için değişmedi (hesaplananlar orada öneri)."""
     P, E = defter["hatlar"]["prefabrik"]["kalemler"], F.oku(ESKI)["hatlar"]["prefabrik"]["kalemler"]
     eps = (1265.73 - 723.28) / 3.5
     hesap = {"100'lük yapıştırma dolu pano | 100 × 1250 × 2800": 2371.09 * 1.12, "100'lük yapıştırma dolu pano | 100 × 625 × 2800": 1185.55 * 1.12,
@@ -134,10 +135,13 @@ def test_tk05_hesaplari_yeni_tabandan(defter):
              "Pencere alt panel (120/180) | 160 × 1250 × 200": 267.43 + eps * 0.25,
              "Pencere üst panel | 160 × 1250 × 800": 668.58 * 1.6 + eps * 1.0}
     for a, f in hesap.items():
-        assert P[a]["fiyat"] == pytest.approx(f, abs=0.006) and P[a]["onay"] is False and P[a]["durum"] == "hesap" and P[a]["kaynak"] == "L45", a
-    for a in ("16'lık köşe direği 160 × 160 | 160 × 160 × 2800", "Çektirme U'su 160 | 160 × 2740", "H 160 (dış pano eki) | 160 × 160 × 2800",
-              "160'lık alt çerçeve | 160 × 3750", "Özel pencere karkası (120×120) (160'lık çektirme U'su + 160'lık H geçen) | 1200 × 1200"):
+        assert P[a]["fiyat"] == pytest.approx(f, abs=0.006) and P[a]["onay"] is True and P[a]["durum"] == "hesap" and P[a]["kaynak"] == "L45", a
+    for a in ("16'lık köşe direği 160 × 160 | 160 × 160 × 2800", "Çektirme U'su 160 | 160 × 2740"):
         assert P[a] == E[a], a
+    for a in ("H 160 (dış pano eki) | 160 × 160 × 2800", "160'lık alt çerçeve | 160 × 3750",
+              "Özel pencere karkası (120×120) (160'lık çektirme U'su + 160'lık H geçen) | 1200 × 1200"):   # r13: yalnız onay ve not
+        assert {k: v for k, v in P[a].items() if k not in ("onay", "not")} == {k: v for k, v in E[a].items() if k not in ("onay", "not")}, a
+        assert P[a]["onay"] and not E[a]["onay"] and P[a]["not"].endswith(E[a]["not"]), a
 
 
 def test_cirpi_ipi_hediye(defter):
@@ -152,3 +156,46 @@ def test_cirpi_ipi_hediye(defter):
     assert defter["kaynaklar"]["PATRON"]["kisa"] == "Patron, 04.11.2026 ve 06.11.2026" and defter["kaynaklar"]["PATRON"]["patron_verdi"]
     R = F.fiyatla({"satirlar": [_pre("Çırpı ipi", "adet", 1, "1020")]}, defter)
     assert [(s["birim_fiyat"], s["tutar"], s["durum"]) for s in R["satirlar"]] == [(0, 0, "onaylı")]
+
+
+TK05 = KOK / "testler" / "motor" / "veri" / "TK05_r06.json"
+ONAY_SOZU = '"tamamdır fiyatları kontrol ettim onaylıyorum"'
+
+
+def test_tk05_onayi_r13(defter):
+    """D-67 (Lokman 7 Kasım 2026 13:39 UTC, TK-05 liste ve teklif thread'i): "tamamdır fiyatları kontrol ettim onaylıyorum". TK-05
+    önizlemesinin (main 3da5a4f, r12) onay bekleyen 20 satırının kaydı r13'te onaylı: 19 kalem ve sandviç panelin metre fiyatı (boy kuralı);
+    fiyatlar aynı, notunda ve dayanağında sözü. Prefabrik kalemlerde ve boy kurallarında onay bekleyen öneri kalmadı; çeyrek pano bandı öneri."""
+    P, E = defter["hatlar"]["prefabrik"], F.oku(ESKI)["hatlar"]["prefabrik"]
+    onaylanan = [k for k, g in P["kalemler"].items() if "r13 (D-67)" in g["not"]]
+    assert len(onaylanan) == 19 and not [k for k, g in P["kalemler"].items() if not g["onay"]]
+    for k in onaylanan:
+        g = P["kalemler"][k]
+        assert g["onay"] and ONAY_SOZU in g["not"] and "13:39" in g["not"] and defter["kaynaklar"][g["kaynak"]]["patron_verdi"], k
+    sb = [b for b in P["boy_onerileri"] if b.get("kalem_baslar") == "Sandviç panel (100 cm kapatır) · "]
+    assert [(b["boy_mm"], b["fiyat"], b["kaynak"], b["onay"]) for b in sb] == [(1000, 554.79, "L45", True)]
+    assert ONAY_SOZU in sb[0]["dayanak"] and "D-36" in sb[0]["dayanak"] and "onayı bekler" not in sb[0]["dayanak"]
+    assert not [b for b in P["boy_onerileri"] if not b["onay"]]
+    assert [(b["kalem"], a["en_mm"]) for b in P["bantlar"] for a in b["araliklar"] if not a["onay"]] == [
+        ("100'lük yapıştırma dolu pano", [225, 225]), ("60'lık yapıştırma dolu pano", [175, 320])]
+
+
+def test_tk05_teklifi_onayli_fiyatlarla(tmp_path):
+    """TK-05 r06 (müşterinin seçtiği plan; lento 80, D-63; beşik sandviç panel çatı, antrasit, asma tavan; proje dosyalarındaki İş Emri bu
+    vakanın lento 80'li hâli): r13 defteriyle `--oneri` olmadan asma tavan 172.548,93 TL, 110 satır, fiyatsız ve onay bekleyen satır yok.
+    Toplam Lokman'a 7 Kasım 13:34'te önizlemeyle (r12, `--oneri`) söylenen tutardır; onay fiyatı değiştirmedi."""
+    from motor import geometry as G
+    ie = json.loads(TK05.read_text(encoding="utf-8"))
+    ie["yapi"]["lento_cm"] = 80
+    ie["ozellikler"] = {"Çatı Şekli": "Beşik", "Çatı Kaplaması": "Sandviç Panel", "Çatı Kaplama Rengi": "Antrasit Gri", "Tavan": "Asma"}
+    yol = tmp_path / "TK05_r06_lento80.json"
+    yol.write_text(json.dumps(ie, ensure_ascii=False), encoding="utf-8")
+    try:
+        assert TK.main([str(yol), str(tmp_path / "c"), "--tavan", "asma", "--tarih", "07.11.2026"]) == 0
+    finally:
+        G.lento_ayarla({})
+    T = json.loads((tmp_path / "c" / "TK05_teklif.json").read_text(encoding="utf-8"))
+    assert T["defter_surumu"] == "2026-11-07-r13" and not T["oneri_dahil"]
+    oz = T["secenekler"][0]["fiyat"]["ozet"]
+    assert (oz["toplam"], oz["satir"], oz["fiyatsiz"], oz["oneri_bekleyen"]) == (172548.93, 110, [], {"satir": 0, "tutar": 0.0})
+    assert not [s for s in T["secenekler"][0]["fiyat"]["satirlar"] if "öneri" in s["durum"]]

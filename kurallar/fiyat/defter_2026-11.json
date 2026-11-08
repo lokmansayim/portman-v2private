@@ -1,10 +1,10 @@
 {
  "sema": "portman.fiyat_defteri/1",
- "surum": "2026-11-06-r12",
+ "surum": "2026-11-07-r13",
  "aciklama": "Yükleme listesi × birim fiyat (İE-13, Z-10'un liste yöntemi). Anahtar Motor'un liste satırı: prefabrikte 'kalem | olcu' (motor/prefabrik_liste.py), çelikte 'kalem | boyut' (motor/genel yükleme listesi). Fiyat uydurulmaz: kaynağı olmayan kalemde fiyat boş kalır.",
  "para_birimi": "TL",
  "kdv": "kaynak listelerde yazmıyor",
- "onay_kurali": "onay true: Patron'un verdiği listeden (patron_verdi) ya da onayladığı öneriden, kalemin kendisi için. onay false: öneri (yakın ürün, hesap ya da Patron'un vermediği kaynak); araclar/fiyatla.py bunları yalnız --oneri ile uygular. Kaynak sırası (r11, Patron 5 Kasım 2026 23:00, TK-04: \"fiyatları buradan al\"; D-62): önce L45 (45. hafta listesi); L45'le henüz eşlenmeyen kalem önceki kaynağında kalır (EKIM87, HAZ, PATRON); hiçbirinde yoksa CTKB; birebir eşleşme yakından önce. r11'de L45'le eşlenenler: TK-04 r08'in listede karşılığı olan bütün kalemleri (birebir, Patron'un var olan yöntemiyle hesap ve yakın; yakınlar Patron 23:10 \"Hepsini al\"), aynı kalemin öteki boyları (pano eni, kiriş boyu), D-36 eşdeğerleri ve TK-05'in r10'da 250'lik tabandan hesaplanan 280 / 160 kalemleri (yöntem aynı, taban yeni). Patron'un 27 Ekim 22:00 kararı ('son listeler') genel kaynaktır: iki listeden birebir eşleşen kalem çelikte de onaylı (r02); çelik hattı r11'de değişmedi.",
+ "onay_kurali": "onay true: Patron'un verdiği listeden (patron_verdi) ya da onayladığı öneriden, kalemin kendisi için. onay false: öneri (yakın ürün, hesap ya da Patron'un vermediği kaynak); araclar/fiyatla.py bunları yalnız --oneri ile uygular. Kaynak sırası (r11, Patron 5 Kasım 2026 23:00, TK-04: \"fiyatları buradan al\"; D-62): önce L45 (45. hafta listesi); L45'le henüz eşlenmeyen kalem önceki kaynağında kalır (EKIM87, HAZ, PATRON); hiçbirinde yoksa CTKB; birebir eşleşme yakından önce. r11'de L45'le eşlenenler: TK-04 r08'in listede karşılığı olan bütün kalemleri (birebir, Patron'un var olan yöntemiyle hesap ve yakın; yakınlar Patron 23:10 \"Hepsini al\"), aynı kalemin öteki boyları (pano eni, kiriş boyu), D-36 eşdeğerleri ve TK-05'in r10'da 250'lik tabandan hesaplanan 280 / 160 kalemleri (yöntem aynı, taban yeni). r13'te (D-67; Lokman 7 Kasım 2026 13:39 \"tamamdır fiyatları kontrol ettim onaylıyorum\") TK-05'in hesaplanan 280 / 160 kalemleri, sandviç panel metre fiyatı ve kapaması onaylı (fiyatlar aynı). Patron'un 27 Ekim 22:00 kararı ('son listeler') genel kaynaktır: iki listeden birebir eşleşen kalem çelikte de onaylı (r02); çelik hattı r11'de değişmedi.",
  "kaynaklar": {
   "EKIM87": {
    "ad": "87 m² tek kat prefabrik yükleme listesi (birim fiyat sütunu)",
@@ -39,7 +39,7 @@
    "kisa": "45. hafta listesi, 03.11.2026",
    "tarih": "2026-11-03",
    "patron_verdi": true,
-   "not": "Patron 5 Kasım 2026 12:37'de TK-05 için verdi (\"bu belgede tüm fiyatlar var\"; 12:42 \"bu belgeyide senin düzenlemen gerekiyor bizde yok\"; D-60). Deftere yalnız 87 m² listesinde ve Haziran listesinde olmayan kalemler (160'lık dış duvar, 280 yükseklik, sandviç panel) girdi; var olan kalemlerin fiyatı değişmedi. Dosyanın sözleşme ve müşteri alanları boş; deftere yalnız kalem ve fiyat alındı. kaynak_satir 'bölüm-sıra' (ör. '2-2': 2 Köşe direği, 2. satır). KDV durumu listede yazmıyor. Listenin pano fiyatları yalnız 100 mm dış / 60 mm iç / 2500 mm seçimi için: 160'lık ve 280'lik pano fiyatı listede yok, defterde hesapla önerildi. r11 (defter_2026-11.json, D-62): Patron 5 Kasım 2026 23:00 UTC'de TK-04 için \"fiyatları buradan al\" (mesaj cmsg_01UAFvcnfVuTR1wfFux5fQPP7bNvsqwq6nZ9sSh93oBh8h); yakın eşleşen 28 kalem için 23:10'da karar kartında \"Hepsini al\" (kart cmsg_01UAFvcnfVuTR1wfFux5fQPPXmWjxkka3L1jae6PhyRfL7). Prefabrik fiyatların ilk kaynağı bu liste; TK-04 r08'in listede karşılığı olan bütün kalemleri buradan (durum: eşleşti, hesap, yakın; hepsi onaylı)."
+   "not": "Patron 5 Kasım 2026 12:37'de TK-05 için verdi (\"bu belgede tüm fiyatlar var\"; 12:42 \"bu belgeyide senin düzenlemen gerekiyor bizde yok\"; D-60). Deftere yalnız 87 m² listesinde ve Haziran listesinde olmayan kalemler (160'lık dış duvar, 280 yükseklik, sandviç panel) girdi; var olan kalemlerin fiyatı değişmedi. Dosyanın sözleşme ve müşteri alanları boş; deftere yalnız kalem ve fiyat alındı. kaynak_satir 'bölüm-sıra' (ör. '2-2': 2 Köşe direği, 2. satır). KDV durumu listede yazmıyor. Listenin pano fiyatları yalnız 100 mm dış / 60 mm iç / 2500 mm seçimi için: 160'lık ve 280'lik pano fiyatı listede yok, defterde hesaplandı (r10 öneri; r13'te Patron onayladı, D-67). r11 (defter_2026-11.json, D-62): Patron 5 Kasım 2026 23:00 UTC'de TK-04 için \"fiyatları buradan al\" (mesaj cmsg_01UAFvcnfVuTR1wfFux5fQPP7bNvsqwq6nZ9sSh93oBh8h); yakın eşleşen 28 kalem için 23:10'da karar kartında \"Hepsini al\" (kart cmsg_01UAFvcnfVuTR1wfFux5fQPPXmWjxkka3L1jae6PhyRfL7). Prefabrik fiyatların ilk kaynağı bu liste; TK-04 r08'in listede karşılığı olan bütün kalemleri buradan (durum: eşleşti, hesap, yakın; hepsi onaylı)."
   }
  },
  "hatlar": {
@@ -1826,8 +1826,8 @@
      ],
      "kaynak_kalem": "KULAKLI & DÜBELLİ H -2 | 160x160x2800 mm; DÜBELLİ H -2 | 160x160x2800 mm",
      "durum": "hesap",
-     "onay": false,
-     "not": "r10 (TK-05, D-60): kaynakta kulaklı 431,42, dübelli 424,29; listenin adayı kulaklı 7 / dübelli 4 → ortalama (TK-01'deki H 100'ün yöntemi, Patron 27 Ekim 22:08)"
+     "onay": true,
+     "not": "r13 (D-67): Patron onayladı. Lokman 7 Kasım 2026 13:39 UTC, TK-05 liste ve teklif thread'i (mesaj cmsg_01UAFvcnfVuTR1wfFux5fQPPJdL2tBJuBy9WE4KZDZwaoZ): \"tamamdır fiyatları kontrol ettim onaylıyorum\" (TK-05 önizlemesinin onay bekleyen 20 satırı, main 3da5a4f, r12). Fiyat değişmedi. r10 (TK-05, D-60): kaynakta kulaklı 431,42, dübelli 424,29; listenin adayı kulaklı 7 / dübelli 4 → ortalama (TK-01'deki H 100'ün yöntemi, Patron 27 Ekim 22:08)"
     },
     "H standart 100 (iç pano eki) | 100 × 100 × 2800": {
      "fiyat": 334.38,
@@ -1839,8 +1839,8 @@
      ],
      "kaynak_kalem": "KULAKLI & DÜBELLİ H -5 | 100x100x2800 mm; DÜBELLİ H -5 | 100x100x2800 mm",
      "durum": "hesap",
-     "onay": false,
-     "not": "r10 (TK-05, D-60): iç ve dış H 100'lükse aynı fiyat (D-36): dış H 100'ün 2800'ü; kaynakta kulaklı 337,94, dübelli 330,82 → ortalama"
+     "onay": true,
+     "not": "r13 (D-67): Patron onayladı. Lokman 7 Kasım 2026 13:39 UTC, TK-05 liste ve teklif thread'i (mesaj cmsg_01UAFvcnfVuTR1wfFux5fQPPJdL2tBJuBy9WE4KZDZwaoZ): \"tamamdır fiyatları kontrol ettim onaylıyorum\" (TK-05 önizlemesinin onay bekleyen 20 satırı, main 3da5a4f, r12). Fiyat değişmedi. r10 (TK-05, D-60): iç ve dış H 100'lükse aynı fiyat (D-36): dış H 100'ün 2800'ü; kaynakta kulaklı 337,94, dübelli 330,82 → ortalama"
     },
     "3'lü H 160 × 160 × 100 (dış duvar T'si) | L 2800": {
      "fiyat": 558.58,
@@ -1852,8 +1852,8 @@
      ],
      "kaynak_kalem": "ÜÇLÜ H KULAKLI & DÜBELLİ-5 | 160x100x2800 mm; ÜÇLÜ H DÜBELLİ-5 | 160x100x2800 mm",
      "durum": "hesap",
-     "onay": false,
-     "not": "r10 (TK-05, D-60): kaynakta kulaklı 562,14, dübelli 555,02; listenin adayı kulaklı 1 / dübelli 1 → ortalama (TK-01'deki 3'lü H'nın yöntemi)"
+     "onay": true,
+     "not": "r13 (D-67): Patron onayladı. Lokman 7 Kasım 2026 13:39 UTC, TK-05 liste ve teklif thread'i (mesaj cmsg_01UAFvcnfVuTR1wfFux5fQPPJdL2tBJuBy9WE4KZDZwaoZ): \"tamamdır fiyatları kontrol ettim onaylıyorum\" (TK-05 önizlemesinin onay bekleyen 20 satırı, main 3da5a4f, r12). Fiyat değişmedi. r10 (TK-05, D-60): kaynakta kulaklı 562,14, dübelli 555,02; listenin adayı kulaklı 1 / dübelli 1 → ortalama (TK-01'deki 3'lü H'nın yöntemi)"
     },
     "3'lü H standart 100 (iç T) | L 2800": {
      "fiyat": 334.12,
@@ -1864,8 +1864,8 @@
      ],
      "kaynak_kalem": "ÜÇLÜ H -17 | 60x60x2800 mm",
      "durum": "eşdeğer",
-     "onay": false,
-     "not": "r10 (TK-05, D-60): 3'lü H'da 60'lık 3'lü H ile aynı fiyat (D-36; 2500'de 389): 60'lık standart 3'lü H'nın 2800'ü"
+     "onay": true,
+     "not": "r13 (D-67): Patron onayladı. Lokman 7 Kasım 2026 13:39 UTC, TK-05 liste ve teklif thread'i (mesaj cmsg_01UAFvcnfVuTR1wfFux5fQPPJdL2tBJuBy9WE4KZDZwaoZ): \"tamamdır fiyatları kontrol ettim onaylıyorum\" (TK-05 önizlemesinin onay bekleyen 20 satırı, main 3da5a4f, r12). Fiyat değişmedi. r10 (TK-05, D-60): 3'lü H'da 60'lık 3'lü H ile aynı fiyat (D-36; 2500'de 389): 60'lık standart 3'lü H'nın 2800'ü"
     },
     "160'lık alt çerçeve | 160 × 3750": {
      "fiyat": 279.16,
@@ -1876,8 +1876,8 @@
      ],
      "kaynak_kalem": "ALT ÇERÇEVE-1 | 160x2510 mm",
      "durum": "hesap",
-     "onay": false,
-     "not": "r10 (TK-05, D-60): kaynakta 160 × 2510 (186,85); boyla orantılı (60'lık alt çerçevenin yöntemi, Patron 27 Ekim 22:08)"
+     "onay": true,
+     "not": "r13 (D-67): Patron onayladı. Lokman 7 Kasım 2026 13:39 UTC, TK-05 liste ve teklif thread'i (mesaj cmsg_01UAFvcnfVuTR1wfFux5fQPPJdL2tBJuBy9WE4KZDZwaoZ): \"tamamdır fiyatları kontrol ettim onaylıyorum\" (TK-05 önizlemesinin onay bekleyen 20 satırı, main 3da5a4f, r12). Fiyat değişmedi. r10 (TK-05, D-60): kaynakta 160 × 2510 (186,85); boyla orantılı (60'lık alt çerçevenin yöntemi, Patron 27 Ekim 22:08)"
     },
     "Özel pencere karkası (120×120) (160'lık çektirme U'su + 160'lık H geçen) | 1200 × 1200": {
      "fiyat": 705.76,
@@ -1888,8 +1888,8 @@
      ],
      "kaynak_kalem": "ÖZEL PENCERE KARKASI (120X120) (100 LÜK ÇEKTİRME U SU + 100 LÜK H GEÇEN) - X | 1200*1200",
      "durum": "hesap",
-     "onay": false,
-     "not": "r10 (TK-05, D-60): 100'lük karkas 515 × 160/100 oranı 1.3704 (45. hafta listesi: 160'lık çektirme U'su 174,88 + 160'lık H geçen 186,10 = 360,98; 100'lük 123,18 + 140,23 = 263,41)"
+     "onay": true,
+     "not": "r13 (D-67): Patron onayladı. Lokman 7 Kasım 2026 13:39 UTC, TK-05 liste ve teklif thread'i (mesaj cmsg_01UAFvcnfVuTR1wfFux5fQPPJdL2tBJuBy9WE4KZDZwaoZ): \"tamamdır fiyatları kontrol ettim onaylıyorum\" (TK-05 önizlemesinin onay bekleyen 20 satırı, main 3da5a4f, r12). Fiyat değişmedi. r10 (TK-05, D-60): 100'lük karkas 515 × 160/100 oranı 1.3704 (45. hafta listesi: 160'lık çektirme U'su 174,88 + 160'lık H geçen 186,10 = 360,98; 100'lük 123,18 + 140,23 = 263,41)"
     },
     "Özel pencere karkası (120×180) (160'lık çektirme U'su + 160'lık H geçen) | 1200 × 1800": {
      "fiyat": 959.29,
@@ -1898,8 +1898,8 @@
      "kaynak_satir": null,
      "kaynak_kalem": "Lokman, TK-04 teklif PDF'inin bu satırına yorum (100'lük, 700 TL)",
      "durum": "hesap",
-     "onay": false,
-     "not": "r10 (TK-05, D-60): 100'lük karkas 700 (Patron, 4 Kasım 23:20) × 160/100 oranı 1.3704 (45. hafta listesi, 120×120'deki gibi)"
+     "onay": true,
+     "not": "r13 (D-67): Patron onayladı. Lokman 7 Kasım 2026 13:39 UTC, TK-05 liste ve teklif thread'i (mesaj cmsg_01UAFvcnfVuTR1wfFux5fQPPJdL2tBJuBy9WE4KZDZwaoZ): \"tamamdır fiyatları kontrol ettim onaylıyorum\" (TK-05 önizlemesinin onay bekleyen 20 satırı, main 3da5a4f, r12). Fiyat değişmedi. r10 (TK-05, D-60): 100'lük karkas 700 (Patron, 4 Kasım 23:20) × 160/100 oranı 1.3704 (45. hafta listesi, 120×120'deki gibi)"
     },
     "100'lük yapıştırma dolu pano | 100 × 1250 × 2800": {
      "fiyat": 2655.62,
@@ -1910,8 +1910,8 @@
      ],
      "kaynak_kalem": "DIŞ DOLU DUVAR · Pres Panel",
      "durum": "hesap",
-     "onay": false,
-     "not": "r11 (D-62): r10'un yöntemi, taban 45. hafta listesinden (100'lük yapıştırma dolu pano 2.371,09, r10'da 2100); önceki 2.352,00. r10 (TK-05, D-60): tabanı 2.371,09 × 1,12; 280'lik pano 250'liğin 2800/2500 = 1,12 katı (45. hafta listesinde EPS, levha, köşe ve H'ın 2800'ü 2500'ünün tam 1,12 katı; D-36 boyla orantılı)"
+     "onay": true,
+     "not": "r13 (D-67): Patron onayladı. Lokman 7 Kasım 2026 13:39 UTC, TK-05 liste ve teklif thread'i (mesaj cmsg_01UAFvcnfVuTR1wfFux5fQPPJdL2tBJuBy9WE4KZDZwaoZ): \"tamamdır fiyatları kontrol ettim onaylıyorum\" (TK-05 önizlemesinin onay bekleyen 20 satırı, main 3da5a4f, r12). Fiyat değişmedi. r11 (D-62): r10'un yöntemi, taban 45. hafta listesinden (100'lük yapıştırma dolu pano 2.371,09, r10'da 2100); önceki 2.352,00. r10 (TK-05, D-60): tabanı 2.371,09 × 1,12; 280'lik pano 250'liğin 2800/2500 = 1,12 katı (45. hafta listesinde EPS, levha, köşe ve H'ın 2800'ü 2500'ünün tam 1,12 katı; D-36 boyla orantılı)"
     },
     "100'lük yapıştırma dolu pano | 100 × 1200 × 2800": {
      "fiyat": 2655.62,
@@ -1922,8 +1922,8 @@
      ],
      "kaynak_kalem": "DIŞ DOLU DUVAR · Pres Panel",
      "durum": "hesap",
-     "onay": false,
-     "not": "r11 (D-62): r10'un yöntemi, taban 45. hafta listesinden (100'lük yapıştırma dolu pano 2.371,09, r10'da 2100); önceki 2.352,00. r10 (TK-05, D-60): tabanı 2.371,09 × 1,12; 280'lik pano 250'liğin 2800/2500 = 1,12 katı (45. hafta listesinde EPS, levha, köşe ve H'ın 2800'ü 2500'ünün tam 1,12 katı; D-36 boyla orantılı); 1190 ve 1250 enli pano aynı fiyat (bant)"
+     "onay": true,
+     "not": "r13 (D-67): Patron onayladı. Lokman 7 Kasım 2026 13:39 UTC, TK-05 liste ve teklif thread'i (mesaj cmsg_01UAFvcnfVuTR1wfFux5fQPPJdL2tBJuBy9WE4KZDZwaoZ): \"tamamdır fiyatları kontrol ettim onaylıyorum\" (TK-05 önizlemesinin onay bekleyen 20 satırı, main 3da5a4f, r12). Fiyat değişmedi. r11 (D-62): r10'un yöntemi, taban 45. hafta listesinden (100'lük yapıştırma dolu pano 2.371,09, r10'da 2100); önceki 2.352,00. r10 (TK-05, D-60): tabanı 2.371,09 × 1,12; 280'lik pano 250'liğin 2800/2500 = 1,12 katı (45. hafta listesinde EPS, levha, köşe ve H'ın 2800'ü 2500'ünün tam 1,12 katı; D-36 boyla orantılı); 1190 ve 1250 enli pano aynı fiyat (bant)"
     },
     "100'lük yapıştırma dolu pano | 100 × 625 × 2800": {
      "fiyat": 1327.82,
@@ -1934,8 +1934,8 @@
      ],
      "kaynak_kalem": "DIŞ DOLU DUVAR · Pres Panel",
      "durum": "hesap",
-     "onay": false,
-     "not": "r11 (D-62): r10'un yöntemi, taban 45. hafta listesinden (100'lük yapıştırma dolu pano 1.185,55, r10'da 1050); önceki 1.176,00. r10 (TK-05, D-60): tabanı 1.185,55 × 1,12; 280'lik pano 250'liğin 2800/2500 = 1,12 katı (45. hafta listesinde EPS, levha, köşe ve H'ın 2800'ü 2500'ünün tam 1,12 katı; D-36 boyla orantılı); 627,5'e kadar yarım pano (Patron 27 Ekim 22:08)"
+     "onay": true,
+     "not": "r13 (D-67): Patron onayladı. Lokman 7 Kasım 2026 13:39 UTC, TK-05 liste ve teklif thread'i (mesaj cmsg_01UAFvcnfVuTR1wfFux5fQPPJdL2tBJuBy9WE4KZDZwaoZ): \"tamamdır fiyatları kontrol ettim onaylıyorum\" (TK-05 önizlemesinin onay bekleyen 20 satırı, main 3da5a4f, r12). Fiyat değişmedi. r11 (D-62): r10'un yöntemi, taban 45. hafta listesinden (100'lük yapıştırma dolu pano 1.185,55, r10'da 1050); önceki 1.176,00. r10 (TK-05, D-60): tabanı 1.185,55 × 1,12; 280'lik pano 250'liğin 2800/2500 = 1,12 katı (45. hafta listesinde EPS, levha, köşe ve H'ın 2800'ü 2500'ünün tam 1,12 katı; D-36 boyla orantılı); 627,5'e kadar yarım pano (Patron 27 Ekim 22:08)"
     },
     "100'lük karkaslı + kasalı pano | 100 × 1170 × 2800": {
      "fiyat": 3199.6,
@@ -1946,8 +1946,8 @@
      ],
      "kaynak_kalem": "DIŞ KAPILI · Pres Panel",
      "durum": "hesap",
-     "onay": false,
-     "not": "r11 (D-62): r10'un yöntemi, taban 45. hafta listesinden (Karkaslı çelik kapı panosu 2.856,79, r10'da 2200); önceki 2.464,00. r10 (TK-05, D-60): tabanı 2.856,79 × 1,12; 280'lik pano 250'liğin 2800/2500 = 1,12 katı (45. hafta listesinde EPS, levha, köşe ve H'ın 2800'ü 2500'ünün tam 1,12 katı; D-36 boyla orantılı); iç ve dış karkaslı pano aynı (D-36), en 1070–1250 bandı"
+     "onay": true,
+     "not": "r13 (D-67): Patron onayladı. Lokman 7 Kasım 2026 13:39 UTC, TK-05 liste ve teklif thread'i (mesaj cmsg_01UAFvcnfVuTR1wfFux5fQPPJdL2tBJuBy9WE4KZDZwaoZ): \"tamamdır fiyatları kontrol ettim onaylıyorum\" (TK-05 önizlemesinin onay bekleyen 20 satırı, main 3da5a4f, r12). Fiyat değişmedi. r11 (D-62): r10'un yöntemi, taban 45. hafta listesinden (Karkaslı çelik kapı panosu 2.856,79, r10'da 2200); önceki 2.464,00. r10 (TK-05, D-60): tabanı 2.856,79 × 1,12; 280'lik pano 250'liğin 2800/2500 = 1,12 katı (45. hafta listesinde EPS, levha, köşe ve H'ın 2800'ü 2500'ünün tam 1,12 katı; D-36 boyla orantılı); iç ve dış karkaslı pano aynı (D-36), en 1070–1250 bandı"
     },
     "160'lık yapıştırma dolu pano | 160 × 1250 × 2800": {
      "fiyat": 3198.07,
@@ -1958,8 +1958,8 @@
      ],
      "kaynak_kalem": "DIŞ DOLU DUVAR · Pres Panel",
      "durum": "hesap",
-     "onay": false,
-     "not": "r11 (D-62): r10'un yöntemi, taban 45. hafta listesinden (100'lük yapıştırma dolu pano 2.371,09, r10'da 2100); önceki 2.894,45. r10 (TK-05, D-60): tabanı 2.371,09 × 1,12 + EPS 3,5 m²; 280'lik pano 250'liğin 2800/2500 = 1,12 katı (45. hafta listesinde EPS, levha, köşe ve H'ın 2800'ü 2500'ünün tam 1,12 katı; D-36 boyla orantılı); 160'lık pano 100'lüğün üstüne strafor farkı: 140 mm EPS − 80 mm EPS, 1250 × 2800'de 1.265,73 − 723,28 = 542,45 TL (154,9857 TL/m²), panonun dolu alanı kadar"
+     "onay": true,
+     "not": "r13 (D-67): Patron onayladı. Lokman 7 Kasım 2026 13:39 UTC, TK-05 liste ve teklif thread'i (mesaj cmsg_01UAFvcnfVuTR1wfFux5fQPPJdL2tBJuBy9WE4KZDZwaoZ): \"tamamdır fiyatları kontrol ettim onaylıyorum\" (TK-05 önizlemesinin onay bekleyen 20 satırı, main 3da5a4f, r12). Fiyat değişmedi. r11 (D-62): r10'un yöntemi, taban 45. hafta listesinden (100'lük yapıştırma dolu pano 2.371,09, r10'da 2100); önceki 2.894,45. r10 (TK-05, D-60): tabanı 2.371,09 × 1,12 + EPS 3,5 m²; 280'lik pano 250'liğin 2800/2500 = 1,12 katı (45. hafta listesinde EPS, levha, köşe ve H'ın 2800'ü 2500'ünün tam 1,12 katı; D-36 boyla orantılı); 160'lık pano 100'lüğün üstüne strafor farkı: 140 mm EPS − 80 mm EPS, 1250 × 2800'de 1.265,73 − 723,28 = 542,45 TL (154,9857 TL/m²), panonun dolu alanı kadar"
     },
     "160'lık yapıştırma dolu pano | 160 × 625 × 2800": {
      "fiyat": 1599.04,
@@ -1970,8 +1970,8 @@
      ],
      "kaynak_kalem": "DIŞ DOLU DUVAR · Pres Panel",
      "durum": "hesap",
-     "onay": false,
-     "not": "r11 (D-62): r10'un yöntemi, taban 45. hafta listesinden (100'lük yapıştırma dolu pano 1.185,55, r10'da 1050); önceki 1.447,23. r10 (TK-05, D-60): tabanı 1.185,55 × 1,12 + EPS 1,75 m²; 280'lik pano 250'liğin 2800/2500 = 1,12 katı (45. hafta listesinde EPS, levha, köşe ve H'ın 2800'ü 2500'ünün tam 1,12 katı; D-36 boyla orantılı); 160'lık pano 100'lüğün üstüne strafor farkı: 140 mm EPS − 80 mm EPS, 1250 × 2800'de 1.265,73 − 723,28 = 542,45 TL (154,9857 TL/m²), panonun dolu alanı kadar; yarım pano"
+     "onay": true,
+     "not": "r13 (D-67): Patron onayladı. Lokman 7 Kasım 2026 13:39 UTC, TK-05 liste ve teklif thread'i (mesaj cmsg_01UAFvcnfVuTR1wfFux5fQPPJdL2tBJuBy9WE4KZDZwaoZ): \"tamamdır fiyatları kontrol ettim onaylıyorum\" (TK-05 önizlemesinin onay bekleyen 20 satırı, main 3da5a4f, r12). Fiyat değişmedi. r11 (D-62): r10'un yöntemi, taban 45. hafta listesinden (100'lük yapıştırma dolu pano 1.185,55, r10'da 1050); önceki 1.447,23. r10 (TK-05, D-60): tabanı 1.185,55 × 1,12 + EPS 1,75 m²; 280'lik pano 250'liğin 2800/2500 = 1,12 katı (45. hafta listesinde EPS, levha, köşe ve H'ın 2800'ü 2500'ünün tam 1,12 katı; D-36 boyla orantılı); 160'lık pano 100'lüğün üstüne strafor farkı: 140 mm EPS − 80 mm EPS, 1250 × 2800'de 1.265,73 − 723,28 = 542,45 TL (154,9857 TL/m²), panonun dolu alanı kadar; yarım pano"
     },
     "160'lık yapıştırma dolu vasistaslı pano (60/40) | 160 × 1250 × 2800": {
      "fiyat": 3287.12,
@@ -1982,8 +1982,8 @@
      ],
      "kaynak_kalem": "VASİSTASLI · Pres Panel",
      "durum": "hesap",
-     "onay": false,
-     "not": "r11 (D-62): r10'un yöntemi, taban 45. hafta listesinden (100'lük yapıştırma dolu vasistaslı pano (60/40) 2.483,81, r10'da 2100); önceki 2.857,25. r10 (TK-05, D-60): tabanı 2.483,81 × 1,12 + EPS 3,26 m²; 280'lik pano 250'liğin 2800/2500 = 1,12 katı (45. hafta listesinde EPS, levha, köşe ve H'ın 2800'ü 2500'ünün tam 1,12 katı; D-36 boyla orantılı); 160'lık pano 100'lüğün üstüne strafor farkı: 140 mm EPS − 80 mm EPS, 1250 × 2800'de 1.265,73 − 723,28 = 542,45 TL (154,9857 TL/m²), panonun dolu alanı kadar; vasistas boşluğu (60 × 40) düşüldü"
+     "onay": true,
+     "not": "r13 (D-67): Patron onayladı. Lokman 7 Kasım 2026 13:39 UTC, TK-05 liste ve teklif thread'i (mesaj cmsg_01UAFvcnfVuTR1wfFux5fQPPJdL2tBJuBy9WE4KZDZwaoZ): \"tamamdır fiyatları kontrol ettim onaylıyorum\" (TK-05 önizlemesinin onay bekleyen 20 satırı, main 3da5a4f, r12). Fiyat değişmedi. r11 (D-62): r10'un yöntemi, taban 45. hafta listesinden (100'lük yapıştırma dolu vasistaslı pano (60/40) 2.483,81, r10'da 2100); önceki 2.857,25. r10 (TK-05, D-60): tabanı 2.483,81 × 1,12 + EPS 3,26 m²; 280'lik pano 250'liğin 2800/2500 = 1,12 katı (45. hafta listesinde EPS, levha, köşe ve H'ın 2800'ü 2500'ünün tam 1,12 katı; D-36 boyla orantılı); 160'lık pano 100'lüğün üstüne strafor farkı: 140 mm EPS − 80 mm EPS, 1250 × 2800'de 1.265,73 − 723,28 = 542,45 TL (154,9857 TL/m²), panonun dolu alanı kadar; vasistas boşluğu (60 × 40) düşüldü"
     },
     "Karkaslı çelik kapı panosu | 160 × 1250 × 2800": {
      "fiyat": 3440.22,
@@ -1994,8 +1994,8 @@
      ],
      "kaynak_kalem": "DIŞ KAPILI · Pres Panel",
      "durum": "hesap",
-     "onay": false,
-     "not": "r11 (D-62): r10'un yöntemi, taban 45. hafta listesinden (Karkaslı çelik kapı panosu 2.856,79, r10'da 2200); önceki 2.704,62. r10 (TK-05, D-60): tabanı 2.856,79 × 1,12 + EPS 1,5525 m²; 280'lik pano 250'liğin 2800/2500 = 1,12 katı (45. hafta listesinde EPS, levha, köşe ve H'ın 2800'ü 2500'ünün tam 1,12 katı; D-36 boyla orantılı); 160'lık pano 100'lüğün üstüne strafor farkı: 140 mm EPS − 80 mm EPS, 1250 × 2800'de 1.265,73 − 723,28 = 542,45 TL (154,9857 TL/m²), panonun dolu alanı kadar; kapı boşluğu (95 × 205) düşüldü"
+     "onay": true,
+     "not": "r13 (D-67): Patron onayladı. Lokman 7 Kasım 2026 13:39 UTC, TK-05 liste ve teklif thread'i (mesaj cmsg_01UAFvcnfVuTR1wfFux5fQPPJdL2tBJuBy9WE4KZDZwaoZ): \"tamamdır fiyatları kontrol ettim onaylıyorum\" (TK-05 önizlemesinin onay bekleyen 20 satırı, main 3da5a4f, r12). Fiyat değişmedi. r11 (D-62): r10'un yöntemi, taban 45. hafta listesinden (Karkaslı çelik kapı panosu 2.856,79, r10'da 2200); önceki 2.704,62. r10 (TK-05, D-60): tabanı 2.856,79 × 1,12 + EPS 1,5525 m²; 280'lik pano 250'liğin 2800/2500 = 1,12 katı (45. hafta listesinde EPS, levha, köşe ve H'ın 2800'ü 2500'ünün tam 1,12 katı; D-36 boyla orantılı); 160'lık pano 100'lüğün üstüne strafor farkı: 140 mm EPS − 80 mm EPS, 1250 × 2800'de 1.265,73 − 723,28 = 542,45 TL (154,9857 TL/m²), panonun dolu alanı kadar; kapı boşluğu (95 × 205) düşüldü"
     },
     "Pencere alt panel (120/120) | 160 × 1250 × 800": {
      "fiyat": 1224.73,
@@ -2006,8 +2006,8 @@
      ],
      "kaynak_kalem": "PENCERELİ · Pres Panel 1.738,32",
      "durum": "hesap",
-     "onay": false,
-     "not": "r11 (D-62): r10'un yöntemi, taban 45. hafta listesinden (Pencere alt panel (120/120) 1.069,74, r10'da 700); önceki 854,99. r10 (TK-05, D-60, D-63): tabanı 1.069,74 × 1,0 + EPS 1,0 m²; 280'lik pano 250'liğin 2800/2500 = 1,12 katı (45. hafta listesinde EPS, levha, köşe ve H'ın 2800'ü 2500'ünün tam 1,12 katı; D-36 boyla orantılı); 160'lık pano 100'lüğün üstüne strafor farkı: 140 mm EPS − 80 mm EPS, 1250 × 2800'de 1.265,73 − 723,28 = 542,45 TL (154,9857 TL/m²), panonun dolu alanı kadar; boy 800 (lento 80, H 2800; D-63)"
+     "onay": true,
+     "not": "r13 (D-67): Patron onayladı. Lokman 7 Kasım 2026 13:39 UTC, TK-05 liste ve teklif thread'i (mesaj cmsg_01UAFvcnfVuTR1wfFux5fQPPJdL2tBJuBy9WE4KZDZwaoZ): \"tamamdır fiyatları kontrol ettim onaylıyorum\" (TK-05 önizlemesinin onay bekleyen 20 satırı, main 3da5a4f, r12). Fiyat değişmedi. r11 (D-62): r10'un yöntemi, taban 45. hafta listesinden (Pencere alt panel (120/120) 1.069,74, r10'da 700); önceki 854,99. r10 (TK-05, D-60, D-63): tabanı 1.069,74 × 1,0 + EPS 1,0 m²; 280'lik pano 250'liğin 2800/2500 = 1,12 katı (45. hafta listesinde EPS, levha, köşe ve H'ın 2800'ü 2500'ünün tam 1,12 katı; D-36 boyla orantılı); 160'lık pano 100'lüğün üstüne strafor farkı: 140 mm EPS − 80 mm EPS, 1250 × 2800'de 1.265,73 − 723,28 = 542,45 TL (154,9857 TL/m²), panonun dolu alanı kadar; boy 800 (lento 80, H 2800; D-63)"
     },
     "Pencere alt panel (120/180) | 160 × 1250 × 200": {
      "fiyat": 306.18,
@@ -2018,8 +2018,8 @@
      ],
      "kaynak_kalem": "PENCERELİ · Pres Panel 1.738,32",
      "durum": "hesap",
-     "onay": false,
-     "not": "r11 (D-62): r10'un yöntemi, taban 45. hafta listesinden (Pencere alt panel (120/180) 267,43, r10'da 210); önceki 248,75. r10 (TK-05, D-60, D-63): tabanı 267,43 × 1,0 + EPS 0,25 m²; 280'lik pano 250'liğin 2800/2500 = 1,12 katı (45. hafta listesinde EPS, levha, köşe ve H'ın 2800'ü 2500'ünün tam 1,12 katı; D-36 boyla orantılı); 160'lık pano 100'lüğün üstüne strafor farkı: 140 mm EPS − 80 mm EPS, 1250 × 2800'de 1.265,73 − 723,28 = 542,45 TL (154,9857 TL/m²), panonun dolu alanı kadar; boy 200 (lento 80, H 2800; D-63)"
+     "onay": true,
+     "not": "r13 (D-67): Patron onayladı. Lokman 7 Kasım 2026 13:39 UTC, TK-05 liste ve teklif thread'i (mesaj cmsg_01UAFvcnfVuTR1wfFux5fQPPJdL2tBJuBy9WE4KZDZwaoZ): \"tamamdır fiyatları kontrol ettim onaylıyorum\" (TK-05 önizlemesinin onay bekleyen 20 satırı, main 3da5a4f, r12). Fiyat değişmedi. r11 (D-62): r10'un yöntemi, taban 45. hafta listesinden (Pencere alt panel (120/180) 267,43, r10'da 210); önceki 248,75. r10 (TK-05, D-60, D-63): tabanı 267,43 × 1,0 + EPS 0,25 m²; 280'lik pano 250'liğin 2800/2500 = 1,12 katı (45. hafta listesinde EPS, levha, köşe ve H'ın 2800'ü 2500'ünün tam 1,12 katı; D-36 boyla orantılı); 160'lık pano 100'lüğün üstüne strafor farkı: 140 mm EPS − 80 mm EPS, 1250 × 2800'de 1.265,73 − 723,28 = 542,45 TL (154,9857 TL/m²), panonun dolu alanı kadar; boy 200 (lento 80, H 2800; D-63)"
     },
     "Pencere üst panel | 160 × 1250 × 800": {
      "fiyat": 1224.71,
@@ -2030,8 +2030,8 @@
      ],
      "kaynak_kalem": "PENCERELİ · Pres Panel 1.738,32",
      "durum": "hesap",
-     "onay": false,
-     "not": "r11 (D-62): r10'un yöntemi, taban 45. hafta listesinden (Pencere üst panel 668,58, r10'da 420); önceki 826,99. r10 (TK-05, D-60, D-63): tabanı 668,58 × 1,6 + EPS 1,0 m²; 280'lik pano 250'liğin 2800/2500 = 1,12 katı (45. hafta listesinde EPS, levha, köşe ve H'ın 2800'ü 2500'ünün tam 1,12 katı; D-36 boyla orantılı); 160'lık pano 100'lüğün üstüne strafor farkı: 140 mm EPS − 80 mm EPS, 1250 × 2800'de 1.265,73 − 723,28 = 542,45 TL (154,9857 TL/m²), panonun dolu alanı kadar; boy 500 → 800 (lento 80, H 2800; D-63)"
+     "onay": true,
+     "not": "r13 (D-67): Patron onayladı. Lokman 7 Kasım 2026 13:39 UTC, TK-05 liste ve teklif thread'i (mesaj cmsg_01UAFvcnfVuTR1wfFux5fQPPJdL2tBJuBy9WE4KZDZwaoZ): \"tamamdır fiyatları kontrol ettim onaylıyorum\" (TK-05 önizlemesinin onay bekleyen 20 satırı, main 3da5a4f, r12). Fiyat değişmedi. r11 (D-62): r10'un yöntemi, taban 45. hafta listesinden (Pencere üst panel 668,58, r10'da 420); önceki 826,99. r10 (TK-05, D-60, D-63): tabanı 668,58 × 1,6 + EPS 1,0 m²; 280'lik pano 250'liğin 2800/2500 = 1,12 katı (45. hafta listesinde EPS, levha, köşe ve H'ın 2800'ü 2500'ünün tam 1,12 katı; D-36 boyla orantılı); 160'lık pano 100'lüğün üstüne strafor farkı: 140 mm EPS − 80 mm EPS, 1250 × 2800'de 1.265,73 − 723,28 = 542,45 TL (154,9857 TL/m²), panonun dolu alanı kadar; boy 500 → 800 (lento 80, H 2800; D-63)"
     },
     "Sandviç panel kapaması | L 2500": {
      "fiyat": 308.04,
@@ -2042,8 +2042,8 @@
      ],
      "kaynak_kalem": "Sandviç panel kapaması L 2800",
      "durum": "hesap",
-     "onay": false,
-     "not": "r10 (TK-05, D-60): kaynakta L 2800 (345); boyla orantılı; Motor'un sandviç panel kapaması L 2500 (kitap)"
+     "onay": true,
+     "not": "r13 (D-67): Patron onayladı. Lokman 7 Kasım 2026 13:39 UTC, TK-05 liste ve teklif thread'i (mesaj cmsg_01UAFvcnfVuTR1wfFux5fQPPJdL2tBJuBy9WE4KZDZwaoZ): \"tamamdır fiyatları kontrol ettim onaylıyorum\" (TK-05 önizlemesinin onay bekleyen 20 satırı, main 3da5a4f, r12). Fiyat değişmedi. r10 (TK-05, D-60): kaynakta L 2800 (345); boyla orantılı; Motor'un sandviç panel kapaması L 2500 (kitap)"
     },
     "Çektirme U'su 60 | 60 × 2740": {
      "fiyat": 102.46,
@@ -2313,8 +2313,8 @@
       "12-15"
      ],
      "kaynak_kalem": "SANDAWİÇ PANEL-2 | 40 mm SANDAWİÇ PANEL 0,30 sac RAL7016 | 1.000 mm",
-     "onay": false,
-     "dayanak": "r10 (TK-05, D-60): sandviç panel metre fiyatından, yani boyla orantılı (100 cm kapatır; tek kat panelin D-36 yöntemi, Lokman 31 Ekim 2026 15:26 \"m² birim fiyat üzerinden git\"). 45. hafta listesinde 40 mm antrasit sandviç panel 1.000 mm 554,79 TL (yalıtımın 40 mm'si D-40'ın satıcı stok standardı; 20 mm 416,82). Kuruşa yuvarlanır. Patron onayı bekler."
+     "onay": true,
+     "dayanak": "r13 (D-67): Patron onayladı. Lokman 7 Kasım 2026 13:39 UTC, TK-05 liste ve teklif thread'i (mesaj cmsg_01UAFvcnfVuTR1wfFux5fQPPJdL2tBJuBy9WE4KZDZwaoZ): \"tamamdır fiyatları kontrol ettim onaylıyorum\" (TK-05 önizlemesinin onay bekleyen 20 satırı, main 3da5a4f, r12). Fiyat değişmedi. r10 (TK-05, D-60): sandviç panel metre fiyatından, yani boyla orantılı (100 cm kapatır; tek kat panelin D-36 yöntemi, Lokman 31 Ekim 2026 15:26 \"m² birim fiyat üzerinden git\"). 45. hafta listesinde 40 mm antrasit sandviç panel 1.000 mm 554,79 TL (yalıtımın 40 mm'si D-40'ın satıcı stok standardı; 20 mm 416,82). Kuruşa yuvarlanır."
     }
    ],
    "makas_kurali": {
