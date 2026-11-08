@@ -43,6 +43,6 @@ Lokman'ın metninde dördüncü satır "Senden ne lazım:" diye geçer. Lokman'a
 ## Var olan kurallarla ilişki
 
 - Bu kural hiçbir kuralı kaldırmaz. Şu kurallarla birlikte geçerlidir: `CLAUDE.md` › Oturum başında 5 (iki cümle, tek soru), çalışma kuralları 3 ("Geçti" demez), 11 (onay açık sözdür) ve 20 (mesajda kod adı yok).
-- `/kapanis` Lokman'a özeti bu şablonla yazar (`.claude/skills/kapanis/SKILL.md`).
+- `/kapanis` Lokman'a özeti de bu şablonla yazar. Kapanış dosyasında (`.claude/skills/kapanis/SKILL.md`) hâlâ "6 satırlık özet" yazar. Dosya korunan dosyadır; metni Lokman'ın onayıyla ayrı işte değişir. O güne kadar bu şablon geçerlidir.
 - Var olan bayi mesajı şablonları, bayi rehberi ve montaj rehberi metinleri 8 Kasım 2026'da bu kurala göre yeniden yazılmadı. Onları çevirmek ayrı iştir. Bayiye giden metin bir çıktıdır: hedef örnek ve harness vakası yalnız Lokman'ın onayıyla değişir (D-02, D-28).
 - Portman Sözlüğü ayrı görevdir. Lokman: proje kartı görevi bittikten sonra açılır.
