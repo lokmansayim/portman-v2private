@@ -170,6 +170,11 @@ def pafta_oku(yol: Path) -> dict:
     }
 
 
+def _ilk_sayi(t):
+    m = re.search(r"\d+", t or "")
+    return int(m.group()) if m else None
+
+
 def _katla(s) -> str:
     return re.sub(r"\s+", " ", str(s if s is not None else "")).strip()
 
@@ -177,6 +182,8 @@ def _katla(s) -> str:
 def liste_ham(yol: Path) -> tuple[dict, list[dict]]:
     """Listenin ham hücreleri (kaynak sütunu): başlıktaki m²/kat/yükseklik ve malzeme satırları (satır no ile).
     Başlık bloğundan yalnız 'BİNA M2 / KAT ADEDİ / KAT YÜKSEKLİĞİ' satırı alınır; ad ve telefon satırları okunmaz."""
+    if yol.suffix.lower() != ".xlsx":
+        return {}, []  # PDF listede ham hücre yok; kaynak kıyası kartı denetleyen okumada
     wb = openpyxl.load_workbook(yol, data_only=True, read_only=True)
     ws = wb.worksheets[0]
     bas, satirlar, grup, basladi = {}, [], None, False
@@ -236,14 +243,14 @@ def kart_cikar(kod: str, pafta: Path, liste_yolu: Path, is_emri: Path | None) ->
           "Tek kat prefabrik" if bas.get("kat") == 1 else f"kat {bas.get('kat')}", f"liste satır {bas.get('satir')} (kat adedi)"),
         k("Panel türü", t.get("Panel Türü"), "pafta s.1 teknik tablo", "Pres Panel" if ham_ara(r"YAPIŞTIRMA DOLU PANO") else None,
           "liste: yapıştırma dolu pano satırları"),
-        k("Dış ölçü (genişlik × derinlik)", f"{W:g} × {D:g}", "pafta s.1 genel ölçü",
+        k("Dış ölçü (genişlik × derinlik)", f"{W or 0:g} × {D or 0:g}", "pafta s.1 genel ölçü",
           f"{ie_olcu.get('x', 0):g} × {ie_olcu.get('y', 0):g}" if ie_olcu else None, "depo: PK-01 İş Emri", "cm"),
         k("Brüt oturum (veranda dahil)", brut, "pafta s.1: genişlik × derinlik", bas.get("m2"), f"liste satır {bas.get('satir')}", "m²"),
         k("Duvar yüksekliği", yuk_mm, "pafta s.1 teknik tablo",
-          round(bas["yukseklik_m"] * 1000) if bas.get("yukseklik_m") else None, f"liste satır {bas.get('satir')}", "mm"),
-        k("Dış duvar kalınlığı", int(re.search(r"\d+", t.get("Dış Duvarlar", "0")).group()), "pafta s.1 teknik tablo",
+          round(bas["yukseklik_m"] * 1000) if isinstance(bas.get("yukseklik_m"), (int, float)) else bas.get("yukseklik_m"), f"liste satır {bas.get('satir')}", "mm"),
+        k("Dış duvar kalınlığı", _ilk_sayi(t.get("Dış Duvarlar")), "pafta s.1 teknik tablo",
           ie_kal.get("dis", 0) * 10 if ie_kal else None, "depo: PK-01 İş Emri", "mm"),
-        k("İç duvar kalınlığı", int(re.search(r"\d+", t.get("İç Duvarlar", "0")).group()), "pafta s.1 teknik tablo",
+        k("İç duvar kalınlığı", _ilk_sayi(t.get("İç Duvarlar")), "pafta s.1 teknik tablo",
           ie_kal.get("ic", 0) * 10 if ie_kal else None, "depo: PK-01 İş Emri", "mm"),
         k("Oda sayısı (yatak + salon)", f"{yatak}+{salon}", "pafta s.1 mahal yazıları",
           f"{ie_yatak}+{ie_salon}" if ie else None, "depo: PK-01 İş Emri"),
@@ -275,7 +282,7 @@ def kart_cikar(kod: str, pafta: Path, liste_yolu: Path, is_emri: Path | None) ->
             hi += 1
         h = ham[hi] if hi < len(ham) else None
         hi += 1
-        fark = [] if h else ["kaynakta yok"]
+        fark = [] if h else (["kaynakta yok"] if ham else [])
         if h:
             if _katla(o["boyut"]) != h["boyut"]:
                 fark.append("boyut")
