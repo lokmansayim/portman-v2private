@@ -117,3 +117,14 @@ def test_etiket_yoksa_ve_guncelse_bekle(tmp_path):
     assert "bekle: v2026.10.16 zaten guncel" in r.stdout
     r = _kos(env, "2026.11.08")
     assert "bekle: etiket biçimi" in r.stdout
+
+
+def test_stdin_ile_bash_s_betigin_tamami_kosar(tmp_path):
+    """Sunucuda kopyası olmadığı için Mac'ten `… | ssh portman-vps 'bash -s -- <etiket>'` ile koşar: psql, git ve ssh betiğin kalanını
+    stdin'den yutmamalı (gövde işlevde, komutların stdin'i /dev/null)."""
+    env = _ortam(tmp_path, {})
+    yutan = Path(env["PM_PSQL"]); yutan.write_text(SAHTE_PSQL.replace('q="$2"', 'q="$2"; cat > /dev/null'))   # stdin'i sonuna kadar okur
+    r = subprocess.run(["bash", "-s", "--", "v2026.11.08"], input=BETIK.read_text(encoding="utf-8"), env={**os.environ, **env},
+                       capture_output=True, text=True, timeout=120)
+    assert r.returncode == 0, r.stdout + r.stderr
+    assert "-- [6/6] son yedek ve öz-test" in r.stdout and r.stdout.rstrip().endswith("== sonuç: KURULABİLİR (hiçbir şey değişmedi)")

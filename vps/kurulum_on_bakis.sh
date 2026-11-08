@@ -17,6 +17,9 @@
 # Sınama: PM_KOK, PM_ETC, PM_PSQL, PM_GIT_URL (yerel çıplak depo olabilir), PM_GIT_ATLA=1 (etiket denetimi atlanır), PM_TEST=1 (root
 # denetimi atlanır), PM_SIMDI (saniye; yedek yaşı için), PM_EN_AZ_MB (boş disk sınırı, varsayılan 2048).
 set -uo pipefail
+# Gövde bir işlevde: `bash -s` ile stdin'den okunurken betiğin tamamı önce okunur, komutlar stdin olarak /dev/null alır
+# (psql, git, ssh betiğin kalanını yutamaz).
+ana() {
 ETIKET="${1:-}"
 KOK="${PM_KOK:-/opt/portman}"; ETC="${PM_ETC:-/etc/portman}"; DATA="$KOK/data"
 PSQL="${PM_PSQL:-sudo -u postgres psql -X -q -tA -d portman}"
@@ -122,3 +125,5 @@ else
   printf '   bekle: %s\n' "${DUR[@]}"
   echo "== sonuç: BEKLE (${#DUR[@]} madde; hiçbir şey değişmedi)"
 fi
+}
+ana "$@" < /dev/null
