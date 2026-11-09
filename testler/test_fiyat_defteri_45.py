@@ -29,8 +29,11 @@ def _pre(kalem, olcu, adet, grup="1001", **ek):
     return {"grup": grup, "grup_adi": "Panel", "kalem": kalem, "olcu": olcu, "adet": adet, "birim": "adet", **ek}
 
 
-def test_varsayilan_defter_r11(defter):
-    """Araçların (fiyatla, teklif) varsayılanı 45. hafta defteri; eski defter yerinde ve r10."""
+def test_son_elle_defter_r13(defter):
+    """Son elle defter 45. hafta defteri (r13); eski defter yerinde ve r10. D-72'den (9 Kasım 2026, M-15) beri araçların varsayılan defteri
+    yok: yeni teklif CRM'den (`test_crm_fiyat.py`), kapanmış teklif (TK-04 r08, TK-05) bu defterle açıkça `--defter` ile."""
+    with pytest.raises(SystemExit):
+        F.defter_sec()
     assert F.DEFTER == YENI and defter["surum"] == "2026-11-07-r13" and defter["onceki_defter"].startswith("defter_2026-10.json")   # r12: D-65; r13: D-67
     assert F.oku(ESKI)["surum"] == "2026-11-05-r10"
     k = defter["kaynaklar"]["L45"]
@@ -47,7 +50,7 @@ def test_tk04_r08_toplami(tmp_path):
     """TK-04 r08 (asma tavan): 45. hafta defteriyle 335.467,98 TL (Patron'a 23:10 kartında söylenen önizleme), r10 defteriyle 374.965,01 TL
     (22:49 kartı). 121 satır, onay bekleyen öneri yok. Çırpı ipi r10'da fiyatsız (bilerek boş, D-36); r12'de 0 TL, hediye (D-65, Lokman 6 Kasım
     21:29): satır fiyatlı, toplam aynı."""
-    for ad, ek, toplam, fiyatsiz in (("yeni", [], 335467.98, []), ("eski", ["--defter", str(ESKI)], 374965.01, ["Çırpı ipi | adet"])):
+    for ad, ek, toplam, fiyatsiz in (("yeni", ["--defter", str(YENI)], 335467.98, []), ("eski", ["--defter", str(ESKI)], 374965.01, ["Çırpı ipi | adet"])):
         assert TK.main([str(TK04), str(tmp_path / ad), "--tavan", "asma", "--tarih", "05.11.2026", *ek]) == 0
         T = json.loads((tmp_path / ad / "TK04_teklif.json").read_text(encoding="utf-8"))
         oz = T["secenekler"][0]["fiyat"]["ozet"]
@@ -191,7 +194,7 @@ def test_tk05_teklifi_onayli_fiyatlarla(tmp_path):
     yol = tmp_path / "TK05_r06_lento80.json"
     yol.write_text(json.dumps(ie, ensure_ascii=False), encoding="utf-8")
     try:
-        assert TK.main([str(yol), str(tmp_path / "c"), "--tavan", "asma", "--tarih", "07.11.2026"]) == 0
+        assert TK.main([str(yol), str(tmp_path / "c"), "--tavan", "asma", "--tarih", "07.11.2026", "--defter", str(YENI)]) == 0   # kapanmış teklif (D-72)
     finally:
         G.lento_ayarla({})
     T = json.loads((tmp_path / "c" / "TK05_teklif.json").read_text(encoding="utf-8"))

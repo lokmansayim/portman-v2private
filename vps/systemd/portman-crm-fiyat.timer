@@ -1,0 +1,10 @@
+[Unit]
+Description=Portman CRM fiyat zamanlayıcısı (her gün 06:15)
+
+[Timer]
+OnCalendar=*-*-* 06:15:00
+Persistent=true
+RandomizedDelaySec=300
+
+[Install]
+WantedBy=timers.target
