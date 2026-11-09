@@ -1,0 +1,2084 @@
+{
+ "sema": 1,
+ "surum": "2026-11-09-r01",
+ "karar": "D-72",
+ "muhur": "M-15",
+ "aciklama": "Fiyat defteri kaleminin CRM stok fiyatları API'sindeki karşılığı ve fiyatın nasıl hesaplandığı (İE-35). Fiyat yazmaz: fiyat her gün CRM'den gelir, `araclar/crm_fiyat.py` bu dosyayla defter üretir. Anahtarlar ve birimler fiyat defterinin (defter_2026-11 r13) kalemleri; Motor'un listesindeki anahtar. Eşleme değişikliği (yeni kalem, Lokman'ın birim cevabı, Samet'in CRM'e eklediği ürün) bu dosyaya PR'la girer; `kaynak` bölümü mühürlü (M-15).",
+ "kaynak": {
+  "tek_kaynak": "CRM",
+  "ad": "CRM stok fiyatları API",
+  "adres": "https://crm.ikranuryapi.com.tr/api/stok-fiyatlari",
+  "yontem": "POST",
+  "cekim": "her gün (sunucu zamanlayıcısı portman-crm-fiyat.timer)",
+  "diger_listeler": "konu dışı",
+  "lokman": [
+   {
+    "tarih": "2026-11-09 13:10",
+    "mesaj": "cmsg_01UAFvcnfVuTR1wfFux5fQPP5CD8Jd3zkKEqHVsxvJr2Bm",
+    "soz": "bunu kural olarak al ve mühürle bundan sonra tek fiyat kaynağımız bu api olacak ve hergün fiyatları çek"
+   },
+   {
+    "tarih": "2026-11-09 13:10",
+    "mesaj": "cmsg_01UAFvcnfVuTR1wfFux5fQPPLbKmUwo4imiS1pZ699zLxq",
+    "soz": "diğer tüm listeler konu dışı"
+   }
+  ]
+ },
+ "esleme_turleri": {
+  "birebir": "aynı ürün, aynı ölçü; CRM fiyatı doğrudan; onaylı",
+  "kural": "aynı ürün; Lokman'ın onaylı hesap kuralı (tam/yarım pano, kulaklı/dübelli ortalaması, boyla orantı, D-36); onaylı",
+  "yakın": "benzer ürün ya da parça parça; öneri, onay bekler",
+  "birim varsayımı": "CRM'deki birim belirsiz, bir varsayımla hesaplanır; öneri, Lokman'ın birim cevabına kadar onay bekler",
+  "birim sorusu": "birim anlaşılmadı; fiyatsız",
+  "CRM'de yok": "ürün CRM'de yok; fiyatsız, CRM'e eklenmeli",
+  "karar": "Lokman'ın kararıyla sabit fiyat (çırpı ipi hediye, D-65); liste fiyatı değil"
+ },
+ "fiyatsiz_durumlar": {
+  "CRM'de fiyat 0": "kod CRM'de var, o günkü fiyatı 0 ya da boş; fiyatsız (Samet fiyatı girince kendiliğinden fiyatlanır)",
+  "CRM'de kod yok": "eşlemedeki kod o günkü CRM listesinde yok ya da birden çok satırda; fiyatsız"
+ },
+ "hesaplar": {
+  "ayni": "CRM fiyatı",
+  "oran": "CRM fiyatı × pay ÷ payda (boyla orantı)",
+  "carp": "CRM fiyatı × carpan",
+  "boy_m": "CRM fiyatı × L ÷ 1000 (anahtardaki L, m² ya da metre fiyatı)",
+  "ort": "kodların fiyatlarının agirlik'la ağırlıklı ortalaması",
+  "toplam": "kodların fiyatlarının toplamı",
+  "yuvarlama": "sonuç kuruşa (0,01) yarım yukarı; kalemde `yuvarlama` varsa o adıma (kutu profil 1: tam TL, D-36)"
+ },
+ "hatlar": {
+  "prefabrik": {
+   "anahtar": "kalem | olcu",
+   "kalemler": {
+    "100'lük yapıştırma dolu pano | 100 × 1250 × 2500": {
+     "kod": "YP1",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet"
+    },
+    "100'lük yapıştırma dolu pano | 100 × 1245 × 2500": {
+     "kod": "YP1",
+     "hesap": "ayni",
+     "esleme": "kural",
+     "birim": "adet",
+     "not": "627,5 mm'den geniş pano tam pano fiyatı (defterin kuralı)"
+    },
+    "100'lük yapıştırma dolu pano | 100 × 640 × 2500": {
+     "kod": "YP1",
+     "hesap": "ayni",
+     "esleme": "kural",
+     "birim": "adet",
+     "not": "627,5 mm'den geniş pano tam pano fiyatı (defterin kuralı)"
+    },
+    "100'lük yapıştırma dolu pano | 100 × 635 × 2500": {
+     "kod": "YP1",
+     "hesap": "ayni",
+     "esleme": "kural",
+     "birim": "adet",
+     "not": "627,5 mm'den geniş pano tam pano fiyatı (defterin kuralı)"
+    },
+    "100'lük yapıştırma dolu pano | 100 × 625 × 2500": {
+     "kod": "YP4",
+     "hesap": "ayni",
+     "esleme": "kural",
+     "birim": "adet",
+     "not": "627,5 mm'ye kadar yarım pano fiyatı (defterin kuralı)"
+    },
+    "100'lük yapıştırma dolu pano | 100 × 620 × 2500": {
+     "kod": "YP4",
+     "hesap": "ayni",
+     "esleme": "kural",
+     "birim": "adet",
+     "not": "627,5 mm'ye kadar yarım pano fiyatı (defterin kuralı)"
+    },
+    "100'lük yapıştırma dolu pano | 100 × 610 × 2500": {
+     "kod": "YP4",
+     "hesap": "ayni",
+     "esleme": "kural",
+     "birim": "adet",
+     "not": "627,5 mm'ye kadar yarım pano fiyatı (defterin kuralı)"
+    },
+    "100'lük yapıştırma dolu vasistaslı pano (60/40) | 100 × 1250 × 2500": {
+     "kod": null,
+     "esleme": "CRM'de yok",
+     "birim": "adet",
+     "not": "CRM'de vasistaslı pano yok"
+    },
+    "60'lık karkaslı + kasalı pano | 60 × 1250 × 2500": {
+     "kod": "KP1",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet"
+    },
+    "60'lık karkaslı + kasalı pano | 60 × 1220 × 2500": {
+     "kod": "KP1",
+     "hesap": "ayni",
+     "esleme": "kural",
+     "birim": "adet",
+     "not": "1190–1250 enli pano aynı fiyat"
+    },
+    "60'lık karkaslı + kasalı pano | 60 × 1190 × 2500": {
+     "kod": "KP1",
+     "hesap": "ayni",
+     "esleme": "kural",
+     "birim": "adet",
+     "not": "1190–1250 enli pano aynı fiyat"
+    },
+    "60'lık yapıştırma dolu pano | 60 × 1250 × 2500": {
+     "kod": "YP7",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet",
+     "not": "CRM ölçüsünde 100*1250*2500 yazıyor; adı 60'lık"
+    },
+    "60'lık yapıştırma dolu pano | 60 × 1245 × 2500": {
+     "kod": "YP7",
+     "hesap": "ayni",
+     "esleme": "kural",
+     "birim": "adet",
+     "not": "tam pano fiyatı; CRM ölçüsünde 100*1250*2500 yazıyor"
+    },
+    "60'lık yapıştırma dolu pano | 60 × 1220 × 2500": {
+     "kod": "YP7",
+     "hesap": "ayni",
+     "esleme": "kural",
+     "birim": "adet",
+     "not": "tam pano fiyatı; CRM ölçüsünde 100*1250*2500 yazıyor"
+    },
+    "60'lık yapıştırma dolu pano | 60 × 1200 × 2500": {
+     "kod": "YP7",
+     "hesap": "ayni",
+     "esleme": "kural",
+     "birim": "adet",
+     "not": "tam pano fiyatı; CRM ölçüsünde 100*1250*2500 yazıyor"
+    },
+    "60'lık yapıştırma dolu pano | 60 × 1195 × 2500": {
+     "kod": "YP7",
+     "hesap": "ayni",
+     "esleme": "kural",
+     "birim": "adet",
+     "not": "tam pano fiyatı; CRM ölçüsünde 100*1250*2500 yazıyor"
+    },
+    "60'lık yapıştırma dolu pano | 60 × 1190 × 2500": {
+     "kod": "YP7",
+     "hesap": "ayni",
+     "esleme": "kural",
+     "birim": "adet",
+     "not": "tam pano fiyatı; CRM ölçüsünde 100*1250*2500 yazıyor"
+    },
+    "60'lık yapıştırma dolu pano | 60 × 595 × 2500": {
+     "kod": "YP10",
+     "hesap": "ayni",
+     "esleme": "kural",
+     "birim": "adet",
+     "not": "yarım pano; CRM ölçüsünde 100*625*2500 yazıyor"
+    },
+    "Karkaslı çelik kapı panosu | 100 × 1250 × 2500": {
+     "kod": "KP10",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet",
+     "not": "CRM adı: 100'lük dış çelik kapı panosu"
+    },
+    "Pencere alt panel (120/120) | 100 × 1250 × 800": {
+     "kod": "YP16",
+     "hesap": "ayni",
+     "esleme": "birim varsayımı",
+     "birim": "adet",
+     "not": "CRM'de pencere alt panel, ölçü özel, birim Adet; fiyatı bir panelin fiyatı sayılır"
+    },
+    "Pencere alt panel (120/180) | 100 × 1250 × 200": {
+     "kod": "YP16",
+     "hesap": "ayni",
+     "esleme": "birim varsayımı",
+     "birim": "adet",
+     "not": "CRM'de pencere alt panel, ölçü özel, birim Adet; fiyatı bir panelin fiyatı sayılır"
+    },
+    "Pencere üst panel | 100 × 1250 × 500": {
+     "kod": "YP13",
+     "hesap": "ayni",
+     "esleme": "birim varsayımı",
+     "birim": "adet",
+     "not": "CRM'de pencere üst panel, ölçü özel, birim Adet; fiyatı bir panelin fiyatı sayılır"
+    },
+    "10'luk köşe direği 100 × 100 | 100 × 100 × 2500": {
+     "kod": "MA1",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet"
+    },
+    "6'lık köşe direği 60 × 60 | 60 × 60 × 2500": {
+     "kod": "MA4",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet"
+    },
+    "Köşebent | L 2500": {
+     "kod": "MA36",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet"
+    },
+    "Özel kutu profil (kolon) 100 × 100 | L 2500": {
+     "kod": "MA12",
+     "hesap": "boy_m",
+     "yuvarlama": 1,
+     "esleme": "birim varsayımı",
+     "birim": "adet",
+     "not": "Kutu profil boyla orantılı (D-36). CRM'de flanşlı kolon, ölçü özel; fiyatı metre fiyatı sayılır"
+    },
+    "Kutu profil (kiriş) 100 × 100 | L 3760": {
+     "kod": "MA11",
+     "hesap": "boy_m",
+     "yuvarlama": 1,
+     "esleme": "birim varsayımı",
+     "birim": "adet",
+     "not": "Kutu profil boyla orantılı (D-36). CRM'de kiriş kutu profil, ölçü özel; fiyatı metre fiyatı sayılır"
+    },
+    "Kutu profil (kiriş) 100 × 100 | L 1710": {
+     "kod": "MA11",
+     "hesap": "boy_m",
+     "yuvarlama": 1,
+     "esleme": "birim varsayımı",
+     "birim": "adet",
+     "not": "Kutu profil boyla orantılı (D-36). CRM'de kiriş kutu profil, ölçü özel; fiyatı metre fiyatı sayılır"
+    },
+    "Kutu profil (kiriş) 100 × 100 | L 2510": {
+     "kod": "MA11",
+     "hesap": "boy_m",
+     "yuvarlama": 1,
+     "esleme": "birim varsayımı",
+     "birim": "adet",
+     "not": "Kutu profil boyla orantılı (D-36). CRM'de kiriş kutu profil, ölçü özel; fiyatı metre fiyatı sayılır"
+    },
+    "Kutu profil (kiriş) 100 × 100 | L 1200": {
+     "kod": "MA11",
+     "hesap": "boy_m",
+     "yuvarlama": 1,
+     "esleme": "birim varsayımı",
+     "birim": "adet",
+     "not": "Kutu profil boyla orantılı (D-36). CRM'de kiriş kutu profil, ölçü özel; fiyatı metre fiyatı sayılır"
+    },
+    "Kutu profil (kiriş) 100 × 100 | L 3860": {
+     "kod": "MA11",
+     "hesap": "boy_m",
+     "yuvarlama": 1,
+     "esleme": "birim varsayımı",
+     "birim": "adet",
+     "not": "Kutu profil boyla orantılı (D-36). CRM'de kiriş kutu profil, ölçü özel; fiyatı metre fiyatı sayılır"
+    },
+    "Kutu profil (kiriş) 100 × 100 | L 2610": {
+     "kod": "MA11",
+     "hesap": "boy_m",
+     "yuvarlama": 1,
+     "esleme": "birim varsayımı",
+     "birim": "adet",
+     "not": "Kutu profil boyla orantılı (D-36). CRM'de kiriş kutu profil, ölçü özel; fiyatı metre fiyatı sayılır"
+    },
+    "Kutu profil (kiriş) 100 × 100 | L 1255": {
+     "kod": "MA11",
+     "hesap": "boy_m",
+     "yuvarlama": 1,
+     "esleme": "birim varsayımı",
+     "birim": "adet",
+     "not": "Kutu profil boyla orantılı (D-36). CRM'de kiriş kutu profil, ölçü özel; fiyatı metre fiyatı sayılır"
+    },
+    "H 100 (dış pano eki) | 100 × 100 × 2500": {
+     "kod": [
+      "MA15",
+      "MA18"
+     ],
+     "hesap": "ort",
+     "agirlik": [
+      11,
+      9
+     ],
+     "esleme": "kural",
+     "birim": "adet",
+     "not": "kulaklı 11 / dübelli 9 ağırlıklı ortalama (defterin kuralı)"
+    },
+    "H standart 60 (iç pano eki) | 60 × 60 × 2500": {
+     "kod": "MA21",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet"
+    },
+    "3'lü H 100 × 100 × 60 (dış duvar T'si) | L 2500": {
+     "kod": [
+      "MA24",
+      "MA27"
+     ],
+     "hesap": "ort",
+     "agirlik": [
+      3,
+      5
+     ],
+     "esleme": "kural",
+     "birim": "adet",
+     "not": "kulaklı 3 / dübelli 5 ağırlıklı ortalama (defterin kuralı)"
+    },
+    "3'lü H standart 60 (iç T) | L 2500": {
+     "kod": "MA30",
+     "hesap": "ayni",
+     "esleme": "kural",
+     "birim": "adet",
+     "not": "3'lü H'da 60'lık standart 3'lü H fiyatı (D-36)"
+    },
+    "Özel pencere karkası (120×120) (100'lük çektirme U'su + 100'lük H geçen) | 1200 × 1200": {
+     "kod": null,
+     "esleme": "CRM'de yok",
+     "birim": "adet",
+     "not": "CRM'de özel pencere karkası yok (D-72: yalnız CRM; CRM'e eklenmeli)"
+    },
+    "Özel pencere karkası (120×180) (100'lük çektirme U'su + 100'lük H geçen) | 1200 × 1800": {
+     "kod": null,
+     "esleme": "CRM'de yok",
+     "birim": "adet",
+     "not": "CRM'de özel pencere karkası yok (D-72: yalnız CRM; CRM'e eklenmeli)"
+    },
+    "Çektirme U'su 100 | 100 × 2440": {
+     "kod": "MA39",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet"
+    },
+    "100'lük pencere U'su H geçen | L 2500": {
+     "kod": "MA65",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet",
+     "not": "CRM adı: 100'lük pencere H geçen"
+    },
+    "Çektirme U'su 60 | 60 × 2440": {
+     "kod": "MA41",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet"
+    },
+    "60'lık duvar omegası (asma dizme tavan) | 60 × 3750": {
+     "kod": "MA44",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet",
+     "not": "CRM adı: 60'lük duvar omegası (tavan) L 3750"
+    },
+    "100'lük duvar omegası | 100 × 2500": {
+     "kod": "MA43",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet"
+    },
+    "100'lük saçak omegası | 100 × 2500": {
+     "kod": "MA45",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet"
+    },
+    "Saçak sacı (30'luk, 3'ü menfezli) | 300 × 2500": {
+     "kod": "MA50",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet",
+     "not": "antrasit"
+    },
+    "Alın sacı (30'luk) | 300 × 2500": {
+     "kod": "MA56",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet",
+     "not": "antrasit"
+    },
+    "Baş makas omegası | L 2500": {
+     "kod": "MA48",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet"
+    },
+    "Baş makas Z'si | L 2800": {
+     "kod": "MA60",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet"
+    },
+    "Baş makas betopanı | 1250 × 2500": {
+     "kod": "HM1",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet",
+     "not": "CRM adı: düz betopan 8 mm L 2500"
+    },
+    "100'lük alt çerçeve | 100 × 3750": {
+     "kod": "MA63",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet"
+    },
+    "60'lık alt çerçeve | 60 × 3750": {
+     "kod": "MA64",
+     "hesap": "oran",
+     "pay": 3750,
+     "payda": 2500,
+     "esleme": "kural",
+     "birim": "adet",
+     "not": "CRM'de L 2500; boyla orantılı (defterin kuralı)"
+    },
+    "Prefabrik çelik kapı (SOL) | 900 × 2000": {
+     "kod": "PK5",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet"
+    },
+    "Amerikan kapı (80'lik kanat) (SAĞ) | 82 × 196": {
+     "kod": "PK2",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet",
+     "not": "CRM adı: Amerikan panel kapı (sağ, sol)"
+    },
+    "Amerikan kapı (80'lik kanat) (SOL) | 82 × 196": {
+     "kod": "PK2",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet",
+     "not": "CRM adı: Amerikan panel kapı (sağ, sol)"
+    },
+    "PVC pencere | 120/120": {
+     "kod": null,
+     "esleme": "CRM'de yok",
+     "birim": "adet",
+     "not": "CRM'de PVC pencere yok; Lokman 9 Kasım kartı: pencere de CRM'den fiyatlanır, Samet CRM'e ekler (D-72)"
+    },
+    "PVC pencere | 120/180": {
+     "kod": null,
+     "esleme": "CRM'de yok",
+     "birim": "adet",
+     "not": "CRM'de PVC pencere yok; Lokman 9 Kasım kartı: pencere de CRM'den fiyatlanır, Samet CRM'e ekler (D-72)"
+    },
+    "PVC vasistas | 60/40": {
+     "kod": null,
+     "esleme": "CRM'de yok",
+     "birim": "adet",
+     "not": "CRM'de PVC pencere yok; Lokman 9 Kasım kartı: pencere de CRM'den fiyatlanır, Samet CRM'e ekler (D-72)"
+    },
+    "Tavan beyaz alçıpan | 1200 × 2500": {
+     "kod": "HM38",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet"
+    },
+    "Tavan yeşil alçıpan | 1200 × 2500": {
+     "kod": "HM39",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet"
+    },
+    "Tavan H'ı L 1185 (asma dizme tavan) | adet": {
+     "kod": "DG1",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet"
+    },
+    "PVC omega kapak L 3750 (asma dizme tavan) | adet": {
+     "kod": "DG2",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet"
+    },
+    "Çatı şiltesi / izolasyonu (9,6 m²/paket) | paket": {
+     "kod": "HM45",
+     "hesap": "carp",
+     "carpan": 9.6,
+     "esleme": "birim varsayımı",
+     "birim": "adet",
+     "not": "CRM'de cam yünü 9,6 m² paket; fiyatı m² fiyatı sayıldı (× 9,6)"
+    },
+    "Aşık | L 4200": {
+     "kod": "MA66",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet"
+    },
+    "Tek kat çatı paneli · ana çatı | L 5100": {
+     "kod": "CG6",
+     "hesap": "boy_m",
+     "esleme": "birim varsayımı",
+     "birim": "adet",
+     "not": "CRM'de antrasit tek kat panel, ölçü özel; fiyatı m² fiyatı sayıldı (en 1 m × boy)"
+    },
+    "Tek kat çatı paneli · ön veranda çatısı | L 2400": {
+     "kod": "CG6",
+     "hesap": "boy_m",
+     "esleme": "birim varsayımı",
+     "birim": "adet",
+     "not": "CRM'de antrasit tek kat panel, ölçü özel; fiyatı m² fiyatı sayıldı (en 1 m × boy)"
+    },
+    "Tek kat çatı paneli · arka veranda çatısı | L 1750": {
+     "kod": "CG6",
+     "hesap": "boy_m",
+     "esleme": "birim varsayımı",
+     "birim": "adet",
+     "not": "CRM'de antrasit tek kat panel, ölçü özel; fiyatı m² fiyatı sayıldı (en 1 m × boy)"
+    },
+    "Metal kiremit mahyası | L 2800": {
+     "kod": "MA68",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet",
+     "not": "CRM adı: antrasit mahya sacı L 2800"
+    },
+    "Trapez sac mahyası | L 1000": {
+     "kod": "MA79",
+     "hesap": "ayni",
+     "esleme": "yakın",
+     "birim": "adet",
+     "not": "CRM'de trapez mahya yalnız L 800 var (M-11: prefabrikte mahya L 1000)"
+    },
+    "Ters mahya (dere içi) | L 2800": {
+     "kod": "MA71",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet",
+     "not": "CRM adı: antrasit vadi sacı (ters mahya) L 2800"
+    },
+    "Ters mahya kenar kutusu | L 21 × 40 × 21 × 2800": {
+     "kod": null,
+     "esleme": "CRM'de yok",
+     "birim": "adet",
+     "not": "CRM'de ters mahya kenar kutusu yok (D-72: yalnız CRM; CRM'e eklenmeli)"
+    },
+    "Mahya bandı | rulo 10 m": {
+     "kod": "CG23",
+     "hesap": "ayni",
+     "esleme": "birim sorusu",
+     "birim": "adet",
+     "not": "CRM'de mahya bandı 20 cm, birim m²; defterde rulo 10 m. Birim anlaşılmadı, hesaplanmaz"
+    },
+    "Tijli duy | adet": {
+     "kod": "E36",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet",
+     "not": "CRM adı: tij duy kablolu"
+    },
+    "Yuvarlak glop | adet": {
+     "kod": "E2",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet"
+    },
+    "Ampul | adet": {
+     "kod": "E3",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet",
+     "not": "CRM adı: LED ampul"
+    },
+    "Tekli anahtar (takım) | adet": {
+     "kod": "E14",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet"
+    },
+    "Çiftli anahtar (takım) | adet": {
+     "kod": "E15",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet"
+    },
+    "Tekli priz (takım) | adet": {
+     "kod": "E16",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet"
+    },
+    "Çiftli priz (takım) | adet": {
+     "kod": "E17",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet"
+    },
+    "Uydu prizi (takım) | adet": {
+     "kod": "E18",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet"
+    },
+    "Zil | adet": {
+     "kod": "E32",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet"
+    },
+    "Sigorta kutusu (12'li) | adet": {
+     "kod": "E22",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet"
+    },
+    "Buat kasa | adet": {
+     "kod": "E20",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet",
+     "not": "CRM adı: buat kasa (alçıpan için)"
+    },
+    "NYM kablo 3 × 2,5 | metre": {
+     "kod": "E7",
+     "hesap": "ayni",
+     "esleme": "birim varsayımı",
+     "birim": "m",
+     "not": "CRM'de birim 'Adet' yazıyor; metre fiyatı sayıldı"
+    },
+    "NYM kablo 2 × 1,5 | metre": {
+     "kod": "E8",
+     "hesap": "ayni",
+     "esleme": "birim varsayımı",
+     "birim": "m",
+     "not": "CRM'de birim 'Adet' yazıyor; metre fiyatı sayıldı"
+    },
+    "Uydu kablo | metre": {
+     "kod": "E10",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "m"
+    },
+    "Besleme kablosu | metre": {
+     "kod": "E12",
+     "hesap": "ayni",
+     "esleme": "birim varsayımı",
+     "birim": "m",
+     "not": "CRM'de besleme kablosu 5 × 6 (E12), birim adet yazıyor; metre fiyatı sayıldı. CRM'de NYM 5 × 6 metre (E76) da var"
+    },
+    "Besleme kablo borusu | metre": {
+     "kod": "E7",
+     "hesap": "carp",
+     "carpan": 2,
+     "esleme": "birim varsayımı",
+     "birim": "m",
+     "not": "NYM 3 × 2,5 metre fiyatının iki katı (D-36); NYM fiyatı CRM'de birim varsayımıyla (Adet → metre)"
+    },
+    "İzole bant | adet": {
+     "kod": "E28",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet",
+     "not": "CRM adı: elektrik bandı"
+    },
+    "Kaçak akım rölesi (ikili) | adet": {
+     "kod": "E26",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet",
+     "not": "CRM'de ikili (2'li) ayrı satır"
+    },
+    "W otomat 16 A | adet": {
+     "kod": "E23",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet"
+    },
+    "16 mm betopan ve kapı kolu vidası (3,9 × 32) | adet": {
+     "kod": "V7",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet"
+    },
+    "Trapez vida 5,5 × 76 (tek kat panel) | adet": {
+     "kod": "V12",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet"
+    },
+    "Prefabrik pencere vidası (4,8 × 70) | adet": {
+     "kod": "V9",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet"
+    },
+    "Trapez vida 5,5 × 25 (aşık ve omega) | adet": {
+     "kod": "V10",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet"
+    },
+    "Trapez vida 5,5 × 60 (trapez sac / metal kiremit) | adet": {
+     "kod": "V11",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet"
+    },
+    "Trapez vida 5,5 × 60 (trapez sac) | adet": {
+     "kod": "V11",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet"
+    },
+    "230'luk kesme taşı | adet": {
+     "kod": "DG8",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet"
+    },
+    "Çırpı ipi | adet": {
+     "kod": null,
+     "sabit": 0,
+     "dayanak": "D-65",
+     "esleme": "karar",
+     "birim": "adet",
+     "not": "hediye, 0 TL (Lokman 6 Kasım 21:29, D-65); liste fiyatı değil"
+    },
+    "8'lik trapez uç | adet": {
+     "kod": "DG5",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet"
+    },
+    "PH2 uç | adet": {
+     "kod": "DG6",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet"
+    },
+    "İnox taş | adet": {
+     "kod": "DG9",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet"
+    },
+    "Alçıpan vidası | adet": {
+     "kod": "V5",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet"
+    },
+    "RYSB pul başlı vida | adet": {
+     "kod": "V3",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet"
+    },
+    "PVC plastik betopan H'ı | adet": {
+     "kod": "DG3",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet"
+    },
+    "Acil müdahale kapağı | adet": {
+     "kod": "DG11",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet"
+    },
+    "Şase pul | adet": {
+     "kod": null,
+     "esleme": "CRM'de yok",
+     "birim": "adet",
+     "not": "CRM'de şase pul yok"
+    },
+    "Çelik dübel | adet": {
+     "kod": "DG4",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet",
+     "not": "CRM adı: çelik dübel (klipsli)"
+    },
+    "Temiz su borusu | L 4000": {
+     "kod": "MT1",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet"
+    },
+    "Normal dirsek 20 mm | adet": {
+     "kod": "MT2",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet"
+    },
+    "Kulaklı dirsek 20 mm | adet": {
+     "kod": "MT3",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet"
+    },
+    "Düz T 20 mm | adet": {
+     "kod": "MT4",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet"
+    },
+    "Maşon 20 mm | adet": {
+     "kod": "MT5",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet"
+    },
+    "İç dişli T 20 mm | adet": {
+     "kod": "MT7",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet"
+    },
+    "Atlama parçası yarım parmak | adet": {
+     "kod": "MT8",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet"
+    },
+    "Vitrifiye ve batarya (duş teknesi, klozet, lavabo, batarya grubu) | takım": {
+     "kod": null,
+     "esleme": "CRM'de yok",
+     "birim": "adet",
+     "not": "CRM'de takım yok; parçalar: klozet VG2, ayaklı lavabo VG9, lavabo bataryası VG5, banyo bataryası VG7, taharet musluğu VG8; duş teknesi yok"
+    },
+    "Metal dere | L 4000": {
+     "kod": "DR1",
+     "hesap": "ayni",
+     "esleme": "birim sorusu",
+     "birim": "adet",
+     "not": "CRM'de antrasit metal dere birimi metre; defterde L 4000 parça. Birim anlaşılmadı, hesaplanmaz"
+    },
+    "Dere kelepçesi | adet": {
+     "kod": "DR6",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet"
+    },
+    "Metal dere inişi aparatı | adet": {
+     "kod": "DR7",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet",
+     "not": "CRM adı: dere iniş aparatı (zıvana)"
+    },
+    "70 mm PVC dere iniş borusu | L 2000": {
+     "kod": "DR8",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet"
+    },
+    "70 mm PVC dere iniş borusu | L 500": {
+     "kod": "DR9",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet"
+    },
+    "Açık dirsek | adet": {
+     "kod": "DR10",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet",
+     "not": "PVC 70 mm; metal açık dirsek ayrı satır (DR15)"
+    },
+    "Kapalı dirsek | adet": {
+     "kod": "DR11",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet",
+     "not": "PVC 70 mm; metal kapalı dirsek ayrı satır (DR17)"
+    },
+    "PVC iniş kelepçesi | adet": {
+     "kod": "DR12",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet",
+     "not": "PVC; metal iniş kelepçesi ayrı satır (DR19)"
+    },
+    "Dere kapağı | adet": {
+     "kod": "DR4",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet",
+     "not": "antrasit"
+    },
+    "Dış cephe boya (17,5 kg kova) | kova": {
+     "kod": "B3",
+     "hesap": "ayni",
+     "esleme": "birim varsayımı",
+     "birim": "adet",
+     "not": "CRM'de ölçü '1 Litre', birim 'Boy'; fiyat defterdeki kova fiyatıyla aynı, kova sayıldı"
+    },
+    "İç cephe boya (17,5 kg kova) | kova": {
+     "kod": "B2",
+     "hesap": "ayni",
+     "esleme": "birim varsayımı",
+     "birim": "adet",
+     "not": "CRM'de ölçü '1 Litre', birim 'Boy'; fiyat defterdeki kova fiyatıyla aynı, kova sayıldı"
+    },
+    "Kenarlar için boya | 10 kg": {
+     "kod": "B2",
+     "hesap": "oran",
+     "pay": 10,
+     "payda": 17.5,
+     "esleme": "birim varsayımı",
+     "birim": "adet",
+     "not": "iç cephe boyasının kg fiyatı × 10 kg (D-36); iç cephe boyası CRM'de birim varsayımıyla (1 Litre, Boy → kova)"
+    },
+    "Tavan boya (17,5 kg kova) | kova": {
+     "kod": "B11",
+     "hesap": "ayni",
+     "esleme": "yakın",
+     "birim": "adet",
+     "not": "CRM'de genel 'Tavan boyası' (B8) fiyatı 0; en yakın Fawori Extra tavan boyası 17,5"
+    },
+    "Astar (17,5 kg kova) | kova": {
+     "kod": "B12",
+     "hesap": "ayni",
+     "esleme": "yakın",
+     "birim": "adet",
+     "not": "CRM'de genel astar yok; en yakın Polisan üniversal astar 20 kg"
+    },
+    "Silikonize mastik | adet": {
+     "kod": "DG14",
+     "icerir": "beyaz",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet",
+     "not": "CRM adı: mastik; renkler aynı fiyat"
+    },
+    "Dayson (çatı renginde) | adet": {
+     "kod": "DG13",
+     "icerir": "antrasit",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet"
+    },
+    "Poliüretan köpük | adet": {
+     "kod": "DG12",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet"
+    },
+    "60'lık tavan omegası (ters tavan) | 60 × 3750": {
+     "kod": "MA44",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet",
+     "not": "CRM adı: 60'lük duvar omegası (tavan) L 3750"
+    },
+    "H standart 100 (iç pano eki) | 100 × 100 × 2500": {
+     "kod": [
+      "MA15",
+      "MA18"
+     ],
+     "hesap": "ort",
+     "agirlik": [
+      11,
+      9
+     ],
+     "esleme": "kural",
+     "birim": "adet",
+     "not": "kulaklı 11 / dübelli 9 ağırlıklı ortalama (defterin kuralı)"
+    },
+    "Çektirme U'su 100 (iç duvar) | 100 × 2440": {
+     "kod": "MA39",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet"
+    },
+    "3'lü H 100 × 100 × 100 (dış duvar T'si) | L 2500": {
+     "kod": [
+      "MA24",
+      "MA27"
+     ],
+     "hesap": "ort",
+     "agirlik": [
+      3,
+      5
+     ],
+     "esleme": "kural",
+     "birim": "adet",
+     "not": "kulaklı 3 / dübelli 5 ağırlıklı ortalama (defterin kuralı)"
+    },
+    "3'lü H standart 100 (iç T) | L 2500": {
+     "kod": "MA30",
+     "hesap": "ayni",
+     "esleme": "kural",
+     "birim": "adet",
+     "not": "3'lü H'da 60'lık standart 3'lü H fiyatı (D-36)"
+    },
+    "16'lık köşe direği 160 × 160 | 160 × 160 × 2800": {
+     "kod": null,
+     "esleme": "CRM'de yok",
+     "birim": "adet",
+     "not": "CRM'de 160'lık parça yok"
+    },
+    "10'luk köşe direği 100 × 100 | 100 × 100 × 2800": {
+     "kod": "MA2",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet"
+    },
+    "Çektirme U'su 160 | 160 × 2740": {
+     "kod": null,
+     "esleme": "CRM'de yok",
+     "birim": "adet",
+     "not": "CRM'de 160'lık parça yok"
+    },
+    "Çektirme U'su 100 (iç duvar) | 100 × 2740": {
+     "kod": "MA40",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet"
+    },
+    "160'lık pencere U'su H geçen | L 2500": {
+     "kod": null,
+     "esleme": "CRM'de yok",
+     "birim": "adet",
+     "not": "CRM'de 160'lık parça yok"
+    },
+    "160'lık saçak omegası | 160 × 2500": {
+     "kod": null,
+     "esleme": "CRM'de yok",
+     "birim": "adet",
+     "not": "CRM'de 160'lık parça yok"
+    },
+    "Prefabrik çelik kapı (SAĞ) | 900 × 2000": {
+     "kod": "PK5",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet"
+    },
+    "Trapez vida 5,5 × 110 (sandviç panel) | adet": {
+     "kod": "V13",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet"
+    },
+    "H 160 (dış pano eki) | 160 × 160 × 2800": {
+     "kod": null,
+     "esleme": "CRM'de yok",
+     "birim": "adet",
+     "not": "CRM'de 160'lık parça yok"
+    },
+    "H standart 100 (iç pano eki) | 100 × 100 × 2800": {
+     "kod": [
+      "MA16",
+      "MA19"
+     ],
+     "hesap": "ort",
+     "agirlik": [
+      1,
+      1
+     ],
+     "esleme": "kural",
+     "birim": "adet",
+     "not": "kulaklı ve dübelli ortalaması (defterin kuralı)"
+    },
+    "3'lü H 160 × 160 × 100 (dış duvar T'si) | L 2800": {
+     "kod": null,
+     "esleme": "CRM'de yok",
+     "birim": "adet",
+     "not": "CRM'de 160'lık parça yok"
+    },
+    "3'lü H standart 100 (iç T) | L 2800": {
+     "kod": "MA31",
+     "hesap": "ayni",
+     "esleme": "kural",
+     "birim": "adet",
+     "not": "3'lü H'da 60'lık standart 3'lü H fiyatı (D-36)"
+    },
+    "160'lık alt çerçeve | 160 × 3750": {
+     "kod": null,
+     "esleme": "CRM'de yok",
+     "birim": "adet",
+     "not": "CRM'de 160'lık parça yok"
+    },
+    "Özel pencere karkası (120×120) (160'lık çektirme U'su + 160'lık H geçen) | 1200 × 1200": {
+     "kod": null,
+     "esleme": "CRM'de yok",
+     "birim": "adet",
+     "not": "CRM'de özel pencere karkası yok (D-72: yalnız CRM; CRM'e eklenmeli)"
+    },
+    "Özel pencere karkası (120×180) (160'lık çektirme U'su + 160'lık H geçen) | 1200 × 1800": {
+     "kod": null,
+     "esleme": "CRM'de yok",
+     "birim": "adet",
+     "not": "CRM'de özel pencere karkası yok (D-72: yalnız CRM; CRM'e eklenmeli)"
+    },
+    "100'lük yapıştırma dolu pano | 100 × 1250 × 2800": {
+     "kod": "YP2",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet"
+    },
+    "100'lük yapıştırma dolu pano | 100 × 1200 × 2800": {
+     "kod": "YP2",
+     "hesap": "ayni",
+     "esleme": "kural",
+     "birim": "adet",
+     "not": "1190–1250 enli pano aynı fiyat"
+    },
+    "100'lük yapıştırma dolu pano | 100 × 625 × 2800": {
+     "kod": "YP5",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet"
+    },
+    "100'lük karkaslı + kasalı pano | 100 × 1170 × 2800": {
+     "kod": "KP11",
+     "hesap": "ayni",
+     "esleme": "kural",
+     "birim": "adet",
+     "not": "iç ve dış karkaslı pano aynı fiyat (D-36); CRM adı: 100'lük dış çelik kapı panosu h:2800"
+    },
+    "160'lık yapıştırma dolu pano | 160 × 1250 × 2800": {
+     "kod": null,
+     "esleme": "CRM'de yok",
+     "birim": "adet",
+     "not": "CRM'de 160'lık parça yok"
+    },
+    "160'lık yapıştırma dolu pano | 160 × 625 × 2800": {
+     "kod": null,
+     "esleme": "CRM'de yok",
+     "birim": "adet",
+     "not": "CRM'de 160'lık parça yok"
+    },
+    "160'lık yapıştırma dolu vasistaslı pano (60/40) | 160 × 1250 × 2800": {
+     "kod": null,
+     "esleme": "CRM'de yok",
+     "birim": "adet",
+     "not": "CRM'de 160'lık parça yok"
+    },
+    "Karkaslı çelik kapı panosu | 160 × 1250 × 2800": {
+     "kod": null,
+     "esleme": "CRM'de yok",
+     "birim": "adet",
+     "not": "CRM'de 160'lık parça yok"
+    },
+    "Pencere alt panel (120/120) | 160 × 1250 × 800": {
+     "kod": null,
+     "esleme": "CRM'de yok",
+     "birim": "adet",
+     "not": "CRM'de 160'lık parça yok"
+    },
+    "Pencere alt panel (120/180) | 160 × 1250 × 200": {
+     "kod": null,
+     "esleme": "CRM'de yok",
+     "birim": "adet",
+     "not": "CRM'de 160'lık parça yok"
+    },
+    "Pencere üst panel | 160 × 1250 × 800": {
+     "kod": null,
+     "esleme": "CRM'de yok",
+     "birim": "adet",
+     "not": "CRM'de 160'lık parça yok"
+    },
+    "Sandviç panel kapaması | L 2500": {
+     "kod": "MA75",
+     "hesap": "oran",
+     "pay": 2500,
+     "payda": 2800,
+     "esleme": "kural",
+     "birim": "adet",
+     "not": "CRM'de L 2800 (tek kat ve sandviç panel uç kapaması); boyla orantılı"
+    },
+    "Çektirme U'su 60 | 60 × 2740": {
+     "kod": "MA42",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet"
+    },
+    "100'lük yapıştırma dolu pano | 100 × 575 × 2500": {
+     "kod": "YP4",
+     "hesap": "ayni",
+     "esleme": "kural",
+     "birim": "adet",
+     "not": "627,5 mm'ye kadar yarım pano fiyatı (defterin kuralı)"
+    },
+    "60'lık yapıştırma dolu pano | 60 × 575 × 2500": {
+     "kod": "YP10",
+     "hesap": "ayni",
+     "esleme": "kural",
+     "birim": "adet",
+     "not": "yarım pano; CRM ölçüsünde 100*625*2500 yazıyor"
+    },
+    "Kutu profil (kiriş) 100 × 100 | L 4820": {
+     "kod": "MA11",
+     "hesap": "boy_m",
+     "yuvarlama": 1,
+     "esleme": "birim varsayımı",
+     "birim": "adet",
+     "not": "Kutu profil boyla orantılı (D-36). CRM'de kiriş kutu profil, ölçü özel; fiyatı metre fiyatı sayılır"
+    },
+    "Kutu profil (kiriş) 100 × 100 | L 1457,5": {
+     "kod": "MA11",
+     "hesap": "boy_m",
+     "yuvarlama": 1,
+     "esleme": "birim varsayımı",
+     "birim": "adet",
+     "not": "Kutu profil boyla orantılı (D-36). CRM'de kiriş kutu profil, ölçü özel; fiyatı metre fiyatı sayılır"
+    }
+   },
+   "bantlar": [
+    {
+     "kalem": "100'lük yapıştırma dolu pano",
+     "kalinlik_mm": 100,
+     "yukseklik_mm": 2500,
+     "araliklar": [
+      {
+       "en_mm": [
+        627.5,
+        1250
+       ],
+       "alt_haric": true,
+       "kod": "YP1",
+       "hesap": "ayni",
+       "esleme": "kural",
+       "not": "627,5'ten geniş tam (Patron 27 Ekim 22:08)"
+      },
+      {
+       "en_mm": [
+        340,
+        627.5
+       ],
+       "alt_haric": false,
+       "kod": "YP4",
+       "hesap": "ayni",
+       "esleme": "kural",
+       "not": "627,5'e kadar yarım (Patron 27 Ekim 22:08); CRM'de yarım pano satırı"
+      },
+      {
+       "en_mm": [
+        225,
+        225
+       ],
+       "alt_haric": false,
+       "kod": "YP1",
+       "hesap": "carp",
+       "carpan": 0.25,
+       "esleme": "yakın",
+       "not": "öneri: tam panonun dörtte biri; CRM'de çeyrek pano yok"
+      }
+     ]
+    },
+    {
+     "kalem": "60'lık yapıştırma dolu pano",
+     "kalinlik_mm": 60,
+     "yukseklik_mm": 2500,
+     "araliklar": [
+      {
+       "en_mm": [
+        627.5,
+        1250
+       ],
+       "alt_haric": true,
+       "kod": "YP7",
+       "hesap": "ayni",
+       "esleme": "kural",
+       "not": "627,5'ten geniş tam (Patron 27 Ekim 22:08)"
+      },
+      {
+       "en_mm": [
+        350,
+        627.5
+       ],
+       "alt_haric": false,
+       "kod": "YP10",
+       "hesap": "ayni",
+       "esleme": "kural",
+       "not": "627,5'e kadar yarım (Patron 27 Ekim 22:08); CRM'de yarım pano satırı"
+      },
+      {
+       "en_mm": [
+        175,
+        320
+       ],
+       "alt_haric": false,
+       "kod": "YP7",
+       "hesap": "carp",
+       "carpan": 0.25,
+       "esleme": "yakın",
+       "not": "öneri: tam panonun dörtte biri; CRM'de çeyrek pano yok"
+      }
+     ]
+    },
+    {
+     "kalem": "60'lık karkaslı + kasalı pano",
+     "kalinlik_mm": 60,
+     "yukseklik_mm": 2500,
+     "araliklar": [
+      {
+       "en_mm": [
+        1070,
+        1250
+       ],
+       "alt_haric": false,
+       "kod": "KP1",
+       "hesap": "ayni",
+       "esleme": "kural",
+       "not": "en 1070–1250 aynı fiyat"
+      }
+     ]
+    },
+    {
+     "kalem": "100'lük karkaslı + kasalı pano",
+     "kalinlik_mm": 100,
+     "yukseklik_mm": 2500,
+     "araliklar": [
+      {
+       "en_mm": [
+        1070,
+        1250
+       ],
+       "alt_haric": false,
+       "kod": "KP10",
+       "hesap": "ayni",
+       "esleme": "kural",
+       "not": "iç ve dış karkaslı pano aynı fiyat (D-36); CRM adı: 100'lük dış çelik kapı panosu h:2500"
+      }
+     ]
+    },
+    {
+     "kalem": "Karkaslı çelik kapı panosu",
+     "kalinlik_mm": 100,
+     "yukseklik_mm": 2500,
+     "araliklar": [
+      {
+       "en_mm": [
+        1070,
+        1250
+       ],
+       "alt_haric": false,
+       "kod": "KP10",
+       "hesap": "ayni",
+       "esleme": "kural",
+       "not": "en 1070–1250 aynı fiyat; CRM adı: 100'lük dış çelik kapı panosu h:2500"
+      }
+     ]
+    }
+   ],
+   "boy_onerileri": [
+    {
+     "kalem": "Kutu profil (kiriş) 100 × 100",
+     "kod": "MA11",
+     "hesap": "ayni",
+     "boy_mm": 1000,
+     "esleme": "birim varsayımı",
+     "not": "Kutu profil boyla orantılı, her boy (Lokman 31 Ekim 15:25, D-36). CRM'de kiriş kutu profil, ölçü özel; fiyatı metre fiyatı sayılır"
+    },
+    {
+     "kalem": "Özel kutu profil (kolon) 100 × 100",
+     "kod": "MA12",
+     "hesap": "ayni",
+     "boy_mm": 1000,
+     "esleme": "birim varsayımı",
+     "not": "Kolon da kutu profil, boyla orantılı (D-36). CRM'de flanşlı kolon kutu profil, ölçü özel; fiyatı metre fiyatı sayılır"
+    },
+    {
+     "kalem_baslar": "Tek kat çatı paneli · ",
+     "kod": "CG6",
+     "hesap": "ayni",
+     "boy_mm": 1000,
+     "yuvarlama": 0.01,
+     "esleme": "birim varsayımı",
+     "not": "Tek kat çatı paneli m² fiyatından, boyla orantılı (D-36). CRM'de antrasit tek kat panel, ölçü özel; fiyatı m² fiyatı sayıldı (en 1 m)"
+    },
+    {
+     "kalem_baslar": "Trapez sac · ",
+     "kod": "CG14",
+     "hesap": "ayni",
+     "boy_mm": 1000,
+     "kapatma_m": 1.0,
+     "yuvarlama": 0.01,
+     "esleme": "birim varsayımı",
+     "not": "Trapez sac m² fiyatından (D-51), 100 cm kapatır (M-11). CRM'de antrasit trapez sac, ölçü özel; fiyatı m² fiyatı sayıldı"
+    },
+    {
+     "kalem": "Trapez sac mahyası",
+     "kod": "MA79",
+     "hesap": "ayni",
+     "boy_mm": 800,
+     "yuvarlama": 0.01,
+     "esleme": "yakın",
+     "not": "Mahya boyla orantılı (D-51); prefabrikte mahya L 1000 (M-11), CRM'de yalnız antrasit L 800 var"
+    },
+    {
+     "kalem_baslar": "Sandviç panel (100 cm kapatır) · ",
+     "kod": "CG2",
+     "hesap": "ayni",
+     "boy_mm": 1000,
+     "yuvarlama": 0.01,
+     "esleme": "birim varsayımı",
+     "not": "Sandviç panel m² fiyatından, boyla orantılı (D-67). CRM'de antrasit sandviç panel, ölçü özel; fiyatı m² fiyatı sayıldı"
+    }
+   ],
+   "makas_kurali": {
+    "kalem_baslar": [
+     "Makas (baş) · ",
+     "Makas (orta) · ",
+     "Yavru makas · ",
+     "Cumba makası · "
+    ],
+    "kg_m": 5.5,
+    "sacak_mm": 300,
+    "kod": "HM14",
+    "hesap": "ayni",
+    "esleme": "birim varsayımı",
+    "not": "Makasın kg'ı makas boyuyla orantılı, 5,50 kg/m, saçak 30 cm (D-37; kg 87 m² projesinin makas planından, fiyat değil). kg fiyatı CRM'de rulo çelik 0,8 × 176 (birim adet yazıyor; kg fiyatı sayıldı)"
+   },
+   "atla": []
+  },
+  "celik": {
+   "anahtar": "kalem | boyut",
+   "kg_notu": "birim 'kg' olan kalemde tutar satırın kg'ı × fiyat",
+   "kalemler": {
+    "Dış cephe duvar panelleri | 80 × 45 × 1,2": {
+     "kod": "HM16",
+     "hesap": "ayni",
+     "esleme": "birim varsayımı",
+     "birim": "kg",
+     "not": "CRM'de rulo çelik 1,2 × 176, birim adet yazıyor; kg fiyatı sayıldı"
+    },
+    "İç cephe duvar panelleri | 80 × 45 × 1,2": {
+     "kod": "HM16",
+     "hesap": "ayni",
+     "esleme": "birim varsayımı",
+     "birim": "kg",
+     "not": "CRM'de rulo çelik 1,2 × 176, birim adet yazıyor; kg fiyatı sayıldı"
+    },
+    "Veranda dikmeleri (kolon paneli) | 80 × 45 × 1,2": {
+     "kod": "HM16",
+     "hesap": "ayni",
+     "esleme": "birim varsayımı",
+     "birim": "kg",
+     "not": "CRM'de rulo çelik 1,2 × 176, birim adet yazıyor; kg fiyatı sayıldı"
+    },
+    "Veranda kirişleri (kiriş paneli) | 80 × 45 × 1,2": {
+     "kod": "HM16",
+     "hesap": "ayni",
+     "esleme": "birim varsayımı",
+     "birim": "kg",
+     "not": "CRM'de rulo çelik 1,2 × 176, birim adet yazıyor; kg fiyatı sayıldı"
+    },
+    "Çatı makas panelleri | 80 × 45 × 0,8": {
+     "kod": "HM14",
+     "hesap": "ayni",
+     "esleme": "birim varsayımı",
+     "birim": "kg",
+     "not": "CRM'de rulo çelik 0,8 × 176, birim adet yazıyor; kg fiyatı sayıldı"
+    },
+    "Tavan paneli (makas arası) | roll form çelik": {
+     "kod": "HM14",
+     "hesap": "ayni",
+     "esleme": "yakın",
+     "birim": "kg",
+     "not": "kalınlık makasınki (0,8); CRM'de rulo çelik 0,8 × 176, birim adet yazıyor; kg fiyatı sayıldı"
+    },
+    "Çatı paneli (makas üstü, sırt 80 mm) | roll form çelik": {
+     "kod": "HM14",
+     "hesap": "ayni",
+     "esleme": "yakın",
+     "birim": "kg",
+     "not": "kalınlık makasınki (0,8); CRM'de rulo çelik 0,8 × 176, birim adet yazıyor; kg fiyatı sayıldı"
+    },
+    "Boy C profil | 80 × 45 × 0,8": {
+     "kod": "HM14",
+     "hesap": "ayni",
+     "esleme": "birim varsayımı",
+     "birim": "kg",
+     "not": "CRM'de rulo çelik 0,8 × 176, birim adet yazıyor; kg fiyatı sayıldı"
+    },
+    "Boy C profil | 80 × 45 × 1,2": {
+     "kod": "HM16",
+     "hesap": "ayni",
+     "esleme": "birim varsayımı",
+     "birim": "kg",
+     "not": "CRM'de rulo çelik 1,2 × 176, birim adet yazıyor; kg fiyatı sayıldı"
+    },
+    "Saçaklar için Boardex | 12,5 × 1200 × 2400": {
+     "kod": "HM40",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet"
+    },
+    "Saçak yüzü için Boardex | 12,5 × 1200 × 2400": {
+     "kod": "HM40",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet"
+    },
+    "Köşebent | L 2500": {
+     "kod": "MA36",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet"
+    },
+    "Dış cephe Boardex | 12,5 × 1200 × 2400": {
+     "kod": "HM40",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet"
+    },
+    "Veranda tavanı (Boardex) | 12,5 × 1200 × 2400": {
+     "kod": "HM40",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet"
+    },
+    "Duvar alçıpan beyaz | 1200 × 2500": {
+     "kod": "HM38",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet"
+    },
+    "Duvar alçıpan yeşil | 1200 × 2500": {
+     "kod": "HM39",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet"
+    },
+    "Tavan alçıpan beyaz | 1200 × 2500": {
+     "kod": "HM38",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet"
+    },
+    "Tavan alçıpan yeşil | 1200 × 2500": {
+     "kod": "HM39",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet"
+    },
+    "OSB (TV ve mutfak dolabı arkası takviyesi) | 11 × 1220 × 2440": {
+     "kod": "HM41",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet",
+     "not": "CRM adı: OSB tam 11 × 1220 × 2440"
+    },
+    "Duvar izolasyonu | paket 8,64 m²": {
+     "kod": "HM44",
+     "hesap": "carp",
+     "carpan": 8.64,
+     "esleme": "birim varsayımı",
+     "birim": "adet",
+     "not": "CRM'de Knauf mineral yünü 8,64 m² paket; fiyatı m² fiyatı sayıldı (× 8,64)"
+    },
+    "Tek kat panel | L 4330 · 100 cm kapatır": {
+     "kod": "CG6",
+     "hesap": "boy_m",
+     "esleme": "birim varsayımı",
+     "birim": "adet",
+     "not": "CRM'de antrasit tek kat panel, ölçü özel; fiyatı m² fiyatı sayıldı (en 1 m × boy)"
+    },
+    "Metal kiremit mahyası | L 2800": {
+     "kod": "MA68",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet",
+     "not": "CRM adı: antrasit mahya sacı L 2800"
+    },
+    "Mahya bandı | rulo / 10 m": {
+     "kod": "CG23",
+     "hesap": "ayni",
+     "esleme": "birim sorusu",
+     "birim": "adet",
+     "not": "CRM'de mahya bandı 20 cm, birim m²; defterde rulo 10 m. Birim anlaşılmadı, hesaplanmaz"
+    },
+    "Acil müdahale kapağı | adet": {
+     "kod": "DG11",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet"
+    },
+    "Çatı şiltesi 80 mm | 9,0 m²/adet": {
+     "kod": "HM45",
+     "hesap": "carp",
+     "carpan": 9.0,
+     "esleme": "birim varsayımı",
+     "birim": "adet",
+     "not": "CRM'de cam yünü 9,6 m² paket; fiyatı m² fiyatı sayıldı (× 9,0)"
+    },
+    "Metal dere | L 4000": {
+     "kod": "DR1",
+     "hesap": "ayni",
+     "esleme": "birim sorusu",
+     "birim": "adet",
+     "not": "CRM'de antrasit metal dere birimi metre; defterde L 4000 parça. Birim anlaşılmadı, hesaplanmaz"
+    },
+    "Dere iniş borusu | L 3000": {
+     "kod": "DR13",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet",
+     "not": "CRM adı: antrasit metal iniş borusu L 3000"
+    },
+    "Dere iniş aparatı | adet": {
+     "kod": "DR7",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet",
+     "not": "CRM adı: dere iniş aparatı (zıvana)"
+    },
+    "Açık dirsek | adet": {
+     "kod": "DR10",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet",
+     "not": "PVC 70 mm; metal açık dirsek ayrı satır (DR15)"
+    },
+    "Kapalı dirsek | adet": {
+     "kod": "DR11",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet",
+     "not": "PVC 70 mm; metal kapalı dirsek ayrı satır (DR17)"
+    },
+    "İniş kelepçesi | adet": {
+     "kod": "DR12",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet",
+     "not": "PVC; metal iniş kelepçesi ayrı satır (DR19)"
+    },
+    "Dere kelepçesi | adet": {
+     "kod": "DR6",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet"
+    },
+    "Melamin kapı (80'lik kanat) | 90 × 214": {
+     "kod": null,
+     "esleme": "CRM'de yok",
+     "birim": "adet",
+     "not": "CRM'de melamin kapı yok (Amerikan panel kapı ayrı ürün)"
+    },
+    "Kompozit çelik kapı | 90 × 210": {
+     "kod": "PK9",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet",
+     "not": "CRM'de ölçü 'özel'"
+    },
+    "PVC pencere | 120/180": {
+     "kod": null,
+     "esleme": "CRM'de yok",
+     "birim": "adet",
+     "not": "CRM'de PVC pencere yok; Lokman 9 Kasım kartı: pencere de CRM'den fiyatlanır, Samet CRM'e ekler (D-72)"
+    },
+    "PVC vasistas | 60/40": {
+     "kod": null,
+     "esleme": "CRM'de yok",
+     "birim": "adet",
+     "not": "CRM'de PVC pencere yok; Lokman 9 Kasım kartı: pencere de CRM'den fiyatlanır, Samet CRM'e ekler (D-72)"
+    },
+    "PVC pencere | 120/100": {
+     "kod": null,
+     "esleme": "CRM'de yok",
+     "birim": "adet",
+     "not": "CRM'de PVC pencere yok; Lokman 9 Kasım kartı: pencere de CRM'den fiyatlanır, Samet CRM'e ekler (D-72)"
+    },
+    "PVC pencere | 180/180": {
+     "kod": null,
+     "esleme": "CRM'de yok",
+     "birim": "adet",
+     "not": "CRM'de PVC pencere yok; Lokman 9 Kasım kartı: pencere de CRM'den fiyatlanır, Samet CRM'e ekler (D-72)"
+    },
+    "Tijli duy | adet": {
+     "kod": "E36",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet",
+     "not": "CRM adı: tij duy kablolu"
+    },
+    "Yuvarlak glop | adet": {
+     "kod": "E2",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet"
+    },
+    "Ampul | adet": {
+     "kod": "E3",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet",
+     "not": "CRM adı: LED ampul"
+    },
+    "Tekli anahtar | adet": {
+     "kod": "E14",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet"
+    },
+    "Çiftli anahtar | adet": {
+     "kod": "E15",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet"
+    },
+    "Tekli priz | adet": {
+     "kod": "E16",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet"
+    },
+    "Çiftli priz | adet": {
+     "kod": "E17",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet"
+    },
+    "Uydu prizi | adet": {
+     "kod": "E18",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet"
+    },
+    "W otomat (sigorta) | adet": {
+     "kod": "E23",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet"
+    },
+    "NYM kablo (3 × 2,5) | metre": {
+     "kod": "E7",
+     "hesap": "ayni",
+     "esleme": "birim varsayımı",
+     "birim": "metre",
+     "not": "CRM'de birim 'Adet' yazıyor; metre fiyatı sayıldı"
+    },
+    "NYM kablo (2 × 1,5) | metre": {
+     "kod": "E8",
+     "hesap": "ayni",
+     "esleme": "birim varsayımı",
+     "birim": "metre",
+     "not": "CRM'de birim 'Adet' yazıyor; metre fiyatı sayıldı"
+    },
+    "Buat kasa | adet": {
+     "kod": "E20",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet",
+     "not": "CRM adı: buat kasa (alçıpan için)"
+    },
+    "Uydu kablo | metre": {
+     "kod": "E10",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "metre"
+    },
+    "Besleme kablosu (sigorta kutuları arası) | metre": {
+     "kod": "E12",
+     "hesap": "ayni",
+     "esleme": "birim varsayımı",
+     "birim": "metre",
+     "not": "CRM'de besleme kablosu 5 × 6 (E12), birim adet yazıyor; metre fiyatı sayıldı. CRM'de NYM 5 × 6 metre (E76) da var"
+    },
+    "Besleme kablo borusu | metre": {
+     "kod": "E7",
+     "hesap": "carp",
+     "carpan": 2,
+     "esleme": "birim varsayımı",
+     "birim": "metre",
+     "not": "NYM 3 × 2,5 metre fiyatının iki katı (D-36); NYM fiyatı CRM'de birim varsayımıyla (Adet → metre)"
+    },
+    "Zil | adet": {
+     "kod": "E32",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet"
+    },
+    "Sigorta kutusu (12'li) | adet": {
+     "kod": "E22",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet"
+    },
+    "İzole bant | adet": {
+     "kod": "E28",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet",
+     "not": "CRM adı: elektrik bandı"
+    },
+    "Kaçak akım rölesi | adet": {
+     "kod": "E27",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet",
+     "not": "dörtlü"
+    },
+    "RYSB pul başlı (3,9 × 32) | adet": {
+     "kod": "V3",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet"
+    },
+    "Alçıpan vidası (3,5 × 35) | adet": {
+     "kod": "V5",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet"
+    },
+    "OSB ve yalıpan vidası (3,9 × 32) | adet": {
+     "kod": "V8",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet"
+    },
+    "Pencere vidası (4,8 × 70) | adet": {
+     "kod": "V9",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet"
+    },
+    "Trapez vida (5,5 × 25) | adet": {
+     "kod": "V10",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet"
+    },
+    "Trapez vida (5,5 × 60) | adet": {
+     "kod": "V11",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet"
+    },
+    "Trapez vida (5,5 × 76; tek kat panel) | adet": {
+     "kod": "V12",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet"
+    },
+    "Çelik dübel (klipsli) | adet": {
+     "kod": "DG4",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet",
+     "not": "CRM adı: çelik dübel (klipsli)"
+    },
+    "Şase pul | adet": {
+     "kod": null,
+     "esleme": "CRM'de yok",
+     "birim": "adet",
+     "not": "CRM'de şase pul yok"
+    },
+    "8'lik trapez uç | adet": {
+     "kod": "DG5",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet"
+    },
+    "PH2 uç | adet": {
+     "kod": "DG6",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet"
+    },
+    "230'luk kesme taşı | adet": {
+     "kod": "DG8",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet"
+    },
+    "İnox taş | adet": {
+     "kod": "DG9",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet"
+    },
+    "Çırpı ipi | adet": {
+     "kod": null,
+     "sabit": 0,
+     "dayanak": "D-65",
+     "esleme": "karar",
+     "birim": "adet",
+     "not": "hediye, 0 TL (Lokman 6 Kasım 21:29, D-65); liste fiyatı değil"
+    },
+    "Temiz su borusu | L 4000": {
+     "kod": "MT1",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet"
+    },
+    "Normal dirsek 20 mm | adet": {
+     "kod": "MT2",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet"
+    },
+    "Kulaklı dirsek 20 mm | adet": {
+     "kod": "MT3",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet"
+    },
+    "Düz T 20 mm | adet": {
+     "kod": "MT4",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet"
+    },
+    "Maşon 20 mm | adet": {
+     "kod": "MT5",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet"
+    },
+    "İç dişli T 20 mm | adet": {
+     "kod": "MT7",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet"
+    },
+    "Atlama parçası (yarım parmak) | adet": {
+     "kod": "MT8",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet"
+    },
+    "Duşakabin (90 × 90) | takım": {
+     "kod": "VG1",
+     "hesap": "ayni",
+     "esleme": "yakın",
+     "birim": "adet",
+     "not": "CRM'de genel duşakabin, ölçüsüz; ayrıca duşakabin 90 × 90 siyah karolaj (VG56)"
+    },
+    "Klozet | takım": {
+     "kod": "VG2",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet",
+     "not": "CRM adı: klozet (duvara sıfır)"
+    },
+    "Banyo dolabı | takım": {
+     "kod": "VG10",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet",
+     "not": "CRM'de genel banyo dolabı; ayrıca ölçülü dolaplar İdeal 65 cm (VG65), Galata 80 cm (VG32)"
+    },
+    "Banyo batarya grubu | takım": {
+     "kod": [
+      "VG5",
+      "VG7"
+     ],
+     "hesap": "toplam",
+     "esleme": "yakın",
+     "birim": "adet",
+     "not": "CRM'de parça parça: lavabo bataryası 950 + banyo bataryası ve başlığı 300"
+    },
+    "Taharet musluğu 20 mm | adet": {
+     "kod": "MT6",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet"
+    },
+    "Dış cephe boyası | kova 17,5 kg": {
+     "kod": "B3",
+     "hesap": "ayni",
+     "esleme": "birim varsayımı",
+     "birim": "adet",
+     "not": "CRM'de ölçü '1 Litre', birim 'Boy'; fiyat defterdeki kova fiyatıyla aynı, kova sayıldı"
+    },
+    "İç cephe boyası | kova 17,5 kg": {
+     "kod": "B2",
+     "hesap": "ayni",
+     "esleme": "birim varsayımı",
+     "birim": "adet",
+     "not": "CRM'de ölçü '1 Litre', birim 'Boy'; fiyat defterdeki kova fiyatıyla aynı, kova sayıldı"
+    },
+    "Tavan boyası | kova 17,5 kg": {
+     "kod": "B11",
+     "hesap": "ayni",
+     "esleme": "yakın",
+     "birim": "adet",
+     "not": "CRM'de genel 'Tavan boyası' (B8) fiyatı 0; en yakın Fawori Extra tavan boyası 17,5"
+    },
+    "Astar | kova 17,5 kg": {
+     "kod": "B12",
+     "hesap": "ayni",
+     "esleme": "yakın",
+     "birim": "adet",
+     "not": "CRM'de genel astar yok; en yakın Polisan üniversal astar 20 kg"
+    },
+    "Silikonize mastik | adet": {
+     "kod": "DG14",
+     "icerir": "beyaz",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet",
+     "not": "CRM adı: mastik; renkler aynı fiyat"
+    },
+    "Dayson | adet": {
+     "kod": "DG13",
+     "icerir": "antrasit",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet"
+    },
+    "Poliüretan köpük | adet": {
+     "kod": "DG12",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet"
+    },
+    "Alın (kalkan kenarı) için Boardex | 12,5 × 1200 × 2400": {
+     "kod": "HM40",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet"
+    },
+    "Alın kapama | L 2500": {
+     "kod": "MA75",
+     "hesap": "oran",
+     "pay": 2500,
+     "payda": 2800,
+     "esleme": "kural",
+     "birim": "adet",
+     "not": "CRM'de L 2800 (tek kat ve sandviç panel uç kapaması); boyla orantılı"
+    },
+    "Tek kat panel | L 3740 · 100 cm kapatır": {
+     "kod": "CG6",
+     "hesap": "boy_m",
+     "esleme": "birim varsayımı",
+     "birim": "adet",
+     "not": "CRM'de antrasit tek kat panel, ölçü özel; fiyatı m² fiyatı sayıldı (en 1 m × boy)"
+    },
+    "Tek kat panel | L 2480 · 100 cm kapatır": {
+     "kod": "CG6",
+     "hesap": "boy_m",
+     "esleme": "birim varsayımı",
+     "birim": "adet",
+     "not": "CRM'de antrasit tek kat panel, ölçü özel; fiyatı m² fiyatı sayıldı (en 1 m × boy)"
+    },
+    "Ters mahya | L 2800": {
+     "kod": "MA71",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet",
+     "not": "CRM adı: antrasit vadi sacı (ters mahya) L 2800"
+    },
+    "Ters mahya kenar kutusu | L 21 × 40 × 21 × 2800": {
+     "kod": null,
+     "esleme": "CRM'de yok",
+     "birim": "adet",
+     "not": "CRM'de ters mahya kenar kutusu yok (D-72: yalnız CRM; CRM'e eklenmeli)"
+    },
+    "Dere kapağı | adet": {
+     "kod": "DR4",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet",
+     "not": "antrasit"
+    },
+    "PVC pencere | 80/180": {
+     "kod": null,
+     "esleme": "CRM'de yok",
+     "birim": "adet",
+     "not": "CRM'de PVC pencere yok; Lokman 9 Kasım kartı: pencere de CRM'den fiyatlanır, Samet CRM'e ekler (D-72)"
+    },
+    "PVC pencere | 120/120": {
+     "kod": null,
+     "esleme": "CRM'de yok",
+     "birim": "adet",
+     "not": "CRM'de PVC pencere yok; Lokman 9 Kasım kartı: pencere de CRM'den fiyatlanır, Samet CRM'e ekler (D-72)"
+    }
+   },
+   "bantlar": [],
+   "atla": [
+    "Toplam (adedi ve kg'ı bilinenler)"
+   ]
+  }
+ }
+}
