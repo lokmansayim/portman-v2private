@@ -355,10 +355,36 @@ AccuracySec=30s
 WantedBy=timers.target
 EOF
   ;;
+  portman-crm-fiyat.service) cat <<'EOF'
+[Unit]
+Description=Portman CRM stok fiyatları günlük çekimi (D-72: tek fiyat kaynağı; data/crm → Drive)
+After=network-online.target
+Wants=network-online.target
+ConditionPathExists=/opt/portman/guncel/vps/crm_fiyat.sh
+
+[Service]
+Type=oneshot
+ExecStart=/bin/bash /opt/portman/guncel/vps/crm_fiyat.sh
+TimeoutStartSec=300
+EOF
+  ;;
+  portman-crm-fiyat.timer) cat <<'EOF'
+[Unit]
+Description=Portman CRM fiyat zamanlayıcısı (her gün 06:15)
+
+[Timer]
+OnCalendar=*-*-* 06:15:00
+Persistent=true
+RandomizedDelaySec=300
+
+[Install]
+WantedBy=timers.target
+EOF
+  ;;
   *) return 1 ;;
   esac
 }
-BIRIMLER="portman-webhook.service portman-panel.service portman-agent.service portman-gonderici.service portman-yedek.service portman-yedek.timer portman-nabiz.service portman-nabiz.timer"
+BIRIMLER="portman-webhook.service portman-panel.service portman-agent.service portman-gonderici.service portman-yedek.service portman-yedek.timer portman-nabiz.service portman-nabiz.timer portman-crm-fiyat.service portman-crm-fiyat.timer"
 
 [ -n "${PM_YALNIZ_ISLEVLER:-}" ] && return 0 2>/dev/null   # sınama: yalnız işlevleri yükle
 
@@ -527,10 +553,10 @@ install -d -m 755 "$SYSTEMD_DIR" "$LOGROTATE_DIR"
 for b in $BIRIMLER; do birim_sablon "$b" > "$SYSTEMD_DIR/$b"; done
 logrotate_sablon > "$LOGROTATE_DIR/portman"
 $SYSTEMCTL daemon-reload
-$SYSTEMCTL enable portman-webhook portman-agent portman-gonderici portman-panel portman-yedek.timer portman-nabiz.timer >/dev/null 2>&1 || true
-$SYSTEMCTL start portman-nabiz.timer portman-yedek.timer >/dev/null 2>&1 || true
+$SYSTEMCTL enable portman-webhook portman-agent portman-gonderici portman-panel portman-yedek.timer portman-nabiz.timer portman-crm-fiyat.timer >/dev/null 2>&1 || true
+$SYSTEMCTL start portman-nabiz.timer portman-yedek.timer portman-crm-fiyat.timer >/dev/null 2>&1 || true
 echo "   birimler: $BIRIMLER"
-echo "   servisler ilk sürümle başlar (guncelle.sh); zamanlayıcılar açık (yedek 03:40, nabız 5 dk)"
+echo "   servisler ilk sürümle başlar (guncelle.sh); zamanlayıcılar açık (yedek 03:40, nabız 5 dk, CRM fiyat 06:15)"
 
 echo "== [8/9] ayarlar ve panel oturum anahtarı"
 if [ ! -f "$KOK/data/settings.json" ]; then

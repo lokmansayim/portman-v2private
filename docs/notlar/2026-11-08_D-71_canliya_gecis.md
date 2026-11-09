@@ -148,4 +148,51 @@ Var olan ayarlar (`enabled`, `dry_run`, `mesaj_katmani`, `plan_uretimi`, `llm_on
 
 ## Sonuç
 
-(Lokman'ın çıktıları gelince buraya tarihle yazılır.)
+Lokman komutları 9 Kasım 2026'da Mac'inden koştu (saatler İstanbul, +03). Çıktılar PF `Canliya_Gecis/ciktilar_2026-11-09/`'da.
+
+**0 · Etiket (12:24):** `v2026.11.08` açıklamalı, `d7fdd75b`; konu "Kontrollü canlı geçiş (D-71; Lokman 8 Kasım 16:25 kartı)".
+GitHub'da `refs/tags/v2026.11.08` → `657e647d` (etiket nesnesi) → `d7fdd75b`.
+
+**1 · Tatbikat (satır 13):**
+- Kapı 10 (12:25:33; `tatbikat_kapi10_1108.txt`): 18 tablonun 18'i canlıyla `AYNI`, `satır sayısı farkı olan tablo: 0`,
+  `dump şema sürümü: 8 · canlı: 8`, deneme veritabanı silindi, `canlıya dokunulmadı`. Beklenenle aynı.
+- Kapı 12 (12:25:39–12:25:50; `tatbikat_kapi12_1108.txt`): `ön kontrol: açık iş 0 · bekleyen giden 0 (şablon 0) · sağlık HTTP 200`;
+  `v2026.10.16 → v2026.10.15` (sağlık geldi) → `v2026.10.16` (`sürüm zaten kurulu`, `uygulanan göçler: yok (güncel)`, sağlık geldi);
+  nabız zamanlayıcısı tatbikatta durdu, sonunda başladı; `== çıkış 0`. Beklenenle aynı.
+
+**2a · Ön bakış (12:26:40; `kurulum_on_bakis.txt`):** `== sonuç: KURULABİLİR (hiçbir şey değişmedi)`. Disk 170.452 MB boş; etiket
+`var: v2026.11.08 → d7fdd75b0788 (açıklamalı)`; `açık iş 0 · bekleyen giden 0 · şema 8`; mühendis kontrolü 0 (24 saati geçmiş 0), fiyat
+hatırlatması 0, onay bekleyen revizyon 7 (bayi yeniden yazınca kapanır, mesaj gitmez); dört yeni özellik `ayarda yok → kapalı`, 3D adresi
+boş; plan üretimi (İE-14) canlıda açık (`v2026.10.16`'da da açıktı; kurulum ayarı değiştirmez); öz-test sonucu var, LLM çağrısı yok; son
+yedek 8 saat önce.
+
+**2b · Kurulum (satır 119; 12:30:39–12:32:19; `kurulum_v2026.11.08.txt`):** `== bitti: v2026.11.08 etkin`, `== çıkış 0`.
+- `dosyalar açıldı (737 dosya; .git yok)`; `içe aktarma tamam: python 3.12.3 · numpy 2.5.4 …`; perspektif `TAMAM`; genel motor `AYNI
+  (… liste 93 satır, pdf var; 18.4 s)`; `uygulanan göçler: [9, 10, 11]`; `guncel → …/v2026.11.08 · onceki → …/v2026.10.16`;
+  `sağlık: sürüm v2026.11.08, Postgres bağlı`.
+- `yayın: /opt/portman/data/yayin/3d hazır (755; data 751) · başkasına açıktı, kapatıldı: nabiz · sahibi portman değil, dokunulmadı:
+  settings.json`. İkincisi tasarım gereği: `settings.json`'u root `ayar.sh` ile yazar, sır içermez; `nginx_uygula.sh` sahibi portman
+  olmayan girdinin yalnız adını yazar (servis okuyamaz olmasın).
+- `nginx: uygulandı (80+443; /panel/ 12m; nginx -t tamam, yeniden yüklendi) · yedek: …/portman.conf.onceki-20261109123218`.
+- Durum: 9 servisin 9'u `active` (nabız zamanlayıcısı dahil); sağlık HTTP 200, `sorunlar: []`; şema 11; açık iş 0, bekleyen giden 0.
+- Etiket satırındaki tarih `2026-11-09` (etiketin açıldığı gün); beklenen satırda `2026-11-08` yazıyordu. Fark yalnız tarihte.
+
+**Ayarlar (`ayarlar_v2026.11.08.txt`; `ayar.sh` birleşik görünümü, `kanal/ayarlar.py` › VARSAYILAN ile):** `enabled: true`,
+`dry_run: false`, `mesaj_katmani: true`, `ucb_taban_url: null`; `banka_germe`, `gorsel_okuma`, `talep_formu`, `bayi_kaydi` dördü
+`acik: false` (dosyada yok, varsayılandan); `plan_uretimi.acik: true`, `llm_once_revizyon.acik: false`. Beklenenle aynı.
+
+**Bulgu · kurulum iki kez başladı.** `guncelle.sh v2026.11.08` iki kez başlatıldı; iki süreç aynı çıktı dosyasına yazdı.
+- 12:30:39'da başlayan ikinci koşu, birincinin kurmakta olduğu `surumler/v2026.11.08`'i (henüz `KURULDU` yok) "yarım kalmış" sayıp
+  `surumler/.yarim-v2026.11.08-20261109…` adıyla kenara aldı (silmedi) ve kurulumu baştan sona yaptı.
+- Birinci koşunun pip'i klasörü kaybedince `ERROR: Could not install packages due to an OSError` ile düştü; `dur()` yalnız çıkar:
+  bağlantı, servis, göç ve nginx adımlarına gelmedi.
+- Çıktı dosyasındaki bozuk satır budur: birinci koşunun hata yazısı ikinci koşunun aynı satırının son 20 baytının (zaman damgasının
+  sonu, ` (silinmedi)` ve satır sonu) üstüne düştü; görünen parça `ERROR: Could not ins` (20 bayt); birinci koşunun kalan satırlarını ikinci koşu sonradan ezdi.
+- Etkisi yok: ikinci koşunun bütün kapıları geçti, sağlık yeni sürümde. Sunucuda `.yarim-…` klasörü duruyor (gizli; sürüm sayısına
+  girmez); silinmesi Lokman'ın onayıyla.
+- `guncelle.sh`'te ikinci koşuyu durduran kilit yok. Öneri (ayrı iş, Lokman'ın onayıyla): `flock` ile tek koşu; ikinci koşu "kurulum
+  sürüyor" deyip çıkar.
+
+**Durum:** Canlı `v2026.11.08` (9 Kasım 12:32). Lokman sonucu kabul etti, 9 Kasım 2026 09:44:31 UTC (12:44 İstanbul), sunucu
+sohbeti: "evet kabul ediyorum". Satır 13 ve 119 kapandı. Sıradaki: satır 80, 83, 110, 111, her biri ayrı onayla
+(yukarıdaki "3 · Özellikleri açma").

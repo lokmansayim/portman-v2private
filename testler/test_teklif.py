@@ -141,7 +141,7 @@ def test_liste_yazilmaz(tmp_path, capsys):
         PL.is_emrinden(ie)
     assert "liste yazılmaz" in e.value.neden
     (tmp_path / "ie.json").write_text(json.dumps(ie, ensure_ascii=False), encoding="utf-8")
-    assert TK.main([str(tmp_path / "ie.json"), str(tmp_path / "c")]) == 1 and not (tmp_path / "c").exists()
+    assert TK.main([str(tmp_path / "ie.json"), str(tmp_path / "c"), *ESKI_DEFTER]) == 1 and not (tmp_path / "c").exists()
     assert "liste yazılmaz" in capsys.readouterr().err
 
 
@@ -290,13 +290,13 @@ def test_is_emrindeki_teklif_bolumu(tmp_path):
     assert [s["ad"] for s in J["secenekler"]] == ["Ters tavan"] and J["kosullar"]["Ödeme şekli"] == "DENEME DOSYA"
     (tmp_path / "duz.json").write_text(json.dumps({"Ödeme şekli": "sarmalayıcısız"}, ensure_ascii=False), encoding="utf-8")
     with pytest.raises(SystemExit):                                           # sessizce yok sayılmaz
-        TK.main([str(tmp_path / "ie.json"), str(tmp_path / "c"), "--kosullar", str(tmp_path / "duz.json")])
+        TK.main([str(tmp_path / "ie.json"), str(tmp_path / "c"), "--kosullar", str(tmp_path / "duz.json"), *ESKI_DEFTER])
     assert TK.secenekler({"teklif": {"tavan": "asma, ters"}}, None) == [("Asma tavan", {"Tavan": "Asma"}), ("Ters tavan", {"Tavan": "Ters"})]
     assert TK.secenekler({"ozellikler": {"tavan": "Ters"}}, None) == [("Ters tavan", {})]    # Motor gibi küçük harfle
     ie["teklif"]["kosullar"] = {"Teslim suresi": "x"}
     (tmp_path / "ie.json").write_text(json.dumps(ie, ensure_ascii=False), encoding="utf-8")
     with pytest.raises(SystemExit):
-        TK.main([str(tmp_path / "ie.json"), str(tmp_path / "c")])
+        TK.main([str(tmp_path / "ie.json"), str(tmp_path / "c"), *ESKI_DEFTER])
 
 
 def test_fiyat_kaynagi(cikti, T):
@@ -318,7 +318,7 @@ def test_fiyatla_excel_ayni_yazici(tmp_path):
     """`fiyatla.py --excel` liste sayfasını teklifin yazıcısıyla yazar; Durum ve Kaynak sütunlarıyla."""
     L = PL.is_emrinden(_oku(IE))
     (tmp_path / "l.json").write_text(json.dumps(L, ensure_ascii=False), encoding="utf-8")
-    assert F.main([str(tmp_path / "l.json"), "--excel", str(tmp_path / "f.xlsx")]) == 0
+    assert F.main([str(tmp_path / "l.json"), "--excel", str(tmp_path / "f.xlsx"), *ESKI_DEFTER]) == 0
     rows = list(load_workbook(tmp_path / "f.xlsx").active.iter_rows(values_only=True))
     assert ("PANEL", *SUTUN, "Durum", "Kaynak") in [tuple(r[:9]) for r in rows]
 

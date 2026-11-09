@@ -23,6 +23,7 @@ from araclar import teklif_pdf as TP  # noqa: E402
 IE = KOK / "testler" / "teklif" / "TK01_is_emri_r05.json"
 BAYRAK = pymupdf.TEXTFLAGS_TEXT & ~pymupdf.TEXT_PRESERVE_LIGATURES
 SAHTE_NUMARA = "+00 000 000 1234"                          # sahte numara
+DEFTER = ["--defter", str(KOK / "kurallar" / "fiyat" / "defter_2026-11.json")]   # D-72'den beri kaynak açıkça; form kuralı kaynaktan bağımsız
 GIRDI = {"pazar": "yurt_disi",
          "bilgi": {"Bayi": "ÖRNEK BAYİ - Deneme Bey", "İletişim (GSM)": SAHTE_NUMARA, "Adres": "Örnek Ülke"},
          "kosullar": {"Teslim süresi": "1 Hafta", "Teslim şekli": "Fabrika Teslim", "Ödeme şekli": "Peşin"}}
@@ -47,7 +48,7 @@ def girdi(tmp_path_factory):
 @pytest.fixture(scope="module")
 def cikti(tmp_path_factory, girdi):
     d = tmp_path_factory.mktemp("bayi_formu")
-    assert TK.main([str(IE), str(d), "--tavan", "asma", "--tarih", "06.11.2026", "--bayi", str(girdi)]) == 0
+    assert TK.main([str(IE), str(d), "--tavan", "asma", "--tarih", "06.11.2026", "--bayi", str(girdi), *DEFTER]) == 0
     return d
 
 
@@ -148,11 +149,11 @@ def test_girdi_denetimi(girdi, tmp_path, capsys):
                          (dict(GIRDI, fiyat=1), "bilinmeyen alan")]:
         with pytest.raises(ValueError, match=ileti):
             TP.bayi_hazirla(bozuk, ie, 100)
-    assert TK.main([str(IE), str(tmp_path / "iki"), "--tavan", "asma,ters", "--bayi", str(girdi)]) == 1
+    assert TK.main([str(IE), str(tmp_path / "iki"), "--tavan", "asma,ters", "--bayi", str(girdi), *DEFTER]) == 1
     assert "tek seçenekle" in capsys.readouterr().err and not (tmp_path / "iki").exists()
     p = tmp_path / "bos.json"
     p.write_text(json.dumps(dict(GIRDI, kosullar={})), encoding="utf-8")
-    assert TK.main([str(IE), str(tmp_path / "bos"), "--tavan", "asma", "--bayi", str(p)]) == 1
+    assert TK.main([str(IE), str(tmp_path / "bos"), "--tavan", "asma", "--bayi", str(p), *DEFTER]) == 1
     assert not (tmp_path / "bos").exists()
 
 
@@ -167,5 +168,5 @@ def test_telefon_kurali():
 
 
 def test_ayni_girdi_ayni_form(cikti, girdi, tmp_path):
-    assert TK.main([str(IE), str(tmp_path), "--tavan", "asma", "--tarih", "06.11.2026", "--bayi", str(girdi)]) == 0
+    assert TK.main([str(IE), str(tmp_path), "--tavan", "asma", "--tarih", "06.11.2026", "--bayi", str(girdi), *DEFTER]) == 0
     assert (tmp_path / "TK01_teklif_formu.pdf").read_bytes() == (cikti / "TK01_teklif_formu.pdf").read_bytes()

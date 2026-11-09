@@ -430,7 +430,7 @@ def test_kor_listeleri_fiyatlanir(defter, yol):
 
 def test_komut_satiri(tmp_path, capsys):
     yol = KOR[0]
-    assert F.main([str(yol), "--oneri", "--alan", "60", "--m2-fiyat", "5000", "--esik", "15",
+    assert F.main([str(yol), "--defter", str(DEFTER), "--oneri", "--alan", "60", "--m2-fiyat", "5000", "--esik", "15",
                    "--json", str(tmp_path / "f.json"), "--excel", str(tmp_path / "f.xlsx")]) == 0
     R = json.loads((tmp_path / "f.json").read_text(encoding="utf-8"))
     assert R["m2"]["basit_toplam"] == 300000 and R["oneri_dahil"]
