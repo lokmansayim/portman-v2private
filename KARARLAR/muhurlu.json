@@ -988,6 +988,56 @@
    ],
    "durum": "mühürlü",
    "gecmis": []
+  },
+  {
+   "kod": "M-15",
+   "konu": "Tek fiyat kaynağı CRM, fiyatlar her gün çekilir",
+   "kural": "Yeni teklifin ve fiyatlı listenin her fiyatı CRM stok fiyatları API'sinden gelir (POST https://crm.ikranuryapi.com.tr/api/stok-fiyatlari); öteki listeler (87 m² listesi, Haziran listesi, 45. hafta listesi, Eylül çelik tablosu, sohbette verilen tekil fiyatlar) konu dışı; tek istisna D-65 (çırpı ipi hediye, 0 TL). Pencere de CRM'den (13:15 kartı \"Samet CRM'e eklesin\"); eklenene kadar fiyatsız. Eşleme kurallar/fiyat/crm_esleme.json (kaynak bölümü mühürlü; kalemler PR'la değişir), araç araclar/crm_fiyat.py; araclar/fiyatla.py ve araclar/teklif.py --crm <anlık görüntü> alır, varsayılan defter yok: kaynak verilmezse durur (fiyatla.defter_sec). Kapanmış teklif (TK-04 r08, TK-05) o günkü defterle --defter ile aynen. Sunucu her gün 06:15'te çeker (vps/crm_fiyat.sh, portman-crm-fiyat.timer).",
+   "kararlar": [
+    "D-72"
+   ],
+   "pr": [],
+   "lokman": [
+    {
+     "tarih": "2026-11-09 13:10",
+     "soz": "bunu kural olarak al ve mühürle bundan sonra tek fiyat kaynağımız bu api olacak ve hergün fiyatları çek",
+     "mesaj": "cmsg_01UAFvcnfVuTR1wfFux5fQPP5CD8Jd3zkKEqHVsxvJr2Bm"
+    },
+    {
+     "tarih": "2026-11-09 13:10",
+     "soz": "diğer tüm listeler konu dışı",
+     "mesaj": "cmsg_01UAFvcnfVuTR1wfFux5fQPPLbKmUwo4imiS1pZ699zLxq"
+    },
+    {
+     "tarih": "2026-11-09 13:15",
+     "soz": "Karar kartı \"PVC pencere fiyatı CRM'de yok; pencere nereden fiyatlansın?\" → \"Samet CRM'e eklesin\"",
+     "mesaj": "cmsg_01UAFvcnfVuTR1wfFux5fQPP1fyvXMJtAramytv8kX7mmm"
+    }
+   ],
+   "kilitler": [
+    {
+     "yer": "kurallar/fiyat/crm_esleme.json#kaynak",
+     "iz": "aa180ed495328947"
+    },
+    {
+     "yer": "araclar/fiyatla.py::defter_sec",
+     "iz": "d72c019733b076a0"
+    },
+    {
+     "yer": "araclar/fiyatla.py::KAYNAK_YOK",
+     "iz": "ff3d56d5c9ec6ac6"
+    },
+    {
+     "yer": "vps/systemd/portman-crm-fiyat.timer",
+     "iz": "bb8491b47b0f42da"
+    },
+    {
+     "yer": "testler/test_crm_fiyat.py::test_tek_kaynak_crm",
+     "iz": "cce37e0b3ed404a0"
+    }
+   ],
+   "durum": "mühürlü",
+   "gecmis": []
   }
  ]
 }

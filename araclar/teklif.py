@@ -1,11 +1,15 @@
 """İE-13 PR-2 · Teklif: İş Emri → Motor'un yükleme listesi → fiyat defteri → teklif Excel ve JSON. D-28: teklif yalnız bu komutla üretilir.
 
-    python3 araclar/teklif.py <İş Emri.json> <çıktı klasörü> [--tavan asma,ters] [--kosullar <json>] [--defter <json>] [--oneri] [--tarih GG.AA.YYYY]
-                              [--bayi <bayi formu girdisi.json>]
+    python3 araclar/teklif.py <İş Emri.json> <çıktı klasörü> (--crm <CRM anlık görüntüsü.json> | --defter <eski defter.json>)
+                              [--tavan asma,ters] [--kosullar <json>] [--oneri] [--tarih GG.AA.YYYY] [--bayi <bayi formu girdisi.json>]
 
 Liste dosyası almaz: listeyi İş Emri'nden Motor'la kendisi üretir (`motor/prefabrik_liste.is_emrinden`, paket üreteciyle ortak). Elle
 düzeltilmiş liste giremez, adet düzeltmesi yoktur: düzeltme kural kitabına ya da İş Emri'ne işlenir (D-28). Fiyat `araclar/fiyatla.py`
 ile defterden; fiyat uydurulmaz, fiyatı olmayan satır boş kalır ve sayılır. LLM yok, ağ yok.
+
+- Fiyat kaynağı (D-72, mühür M-15): yeni teklif `--crm` ile CRM'in o günkü fiyatından (sunucunun günlük anlık görüntüsü,
+  `araclar/crm_fiyat.py`). `--defter` yalnız kapanmış teklifi o günkü defteriyle aynen vermek için (TK-04 r08, TK-05). Kaynak
+  verilmezse teklif üretilmez (`fiyatla.defter_sec`).
 
 - Proje kararları İş Emri'ndedir (D-28): isteğe bağlı `teklif` bölümü, `{"tavan": ["asma", "ters"], "kosullar": {...}}`. Motor bu
   bölümü okumaz.
@@ -264,7 +268,8 @@ def main(argv: list[str] | None = None) -> int:
     a.add_argument("is_emri", type=Path); a.add_argument("cikti", type=Path)
     a.add_argument("--tavan", help="seçenekler, virgülle: asma,ters")
     a.add_argument("--kosullar", type=Path, help="projeye özel teklif koşulları (kurallar/teklif/kosullar.json biçimi)")
-    a.add_argument("--defter", type=Path, default=F.DEFTER); a.add_argument("--oneri", action="store_true")
+    a.add_argument("--crm", type=Path, help="CRM anlık görüntüsü (D-72: tek fiyat kaynağı)")
+    a.add_argument("--defter", type=Path, help="kapanmış teklifin o günkü defteri"); a.add_argument("--oneri", action="store_true")
     a.add_argument("--tarih", help="teklif PDF'inin tarihi, GG.AA.YYYY (verilmezse bugün)")
     a.add_argument("--bayi", type=Path, help="bayi formunun girdisi (D-64; pazar, bayinin bilgileri, ödeme satırları)")
     o = a.parse_args(argv)
@@ -272,7 +277,7 @@ def main(argv: list[str] | None = None) -> int:
         a.error(f"--tarih GG.AA.YYYY olmalı: {o.tarih}")
     ie = json.loads(o.is_emri.read_text(encoding="utf-8"))
     secim = secenekler(ie, [t.strip() for t in o.tavan.split(",")] if o.tavan else None)
-    defter = F.oku(o.defter)
+    defter = F.defter_sec(o.crm, o.defter)
     try:
         T = uret(ie, defter, secim, kosullari_oku(o.kosullar, ie), o.oneri)
     except PL.ListeYazilmaz as e:

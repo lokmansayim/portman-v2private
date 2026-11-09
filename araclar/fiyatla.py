@@ -1,7 +1,11 @@
 """İE-13 · Yükleme listesi × fiyat defteri (Z-10'un liste yöntemi) ve basit yöntemle (alan × m² fiyatı) yan yana fark.
 
-    python3 araclar/fiyatla.py <liste.json> [--defter kurallar/fiyat/defter_2026-11.json] [--hat prefabrik|celik] [--oneri]
-        [--duzeltme duzeltmeler.json] [--alan <m²> --m2-fiyat <TL/m²> [--esik <yüzde>]] [--json <çıktı.json>] [--excel <çıktı.xlsx>]
+    python3 araclar/fiyatla.py <liste.json> (--crm <CRM anlık görüntüsü.json> | --defter <eski defter.json>) [--hat prefabrik|celik]
+        [--oneri] [--duzeltme duzeltmeler.json] [--alan <m²> --m2-fiyat <TL/m²> [--esik <yüzde>]] [--json <çıktı.json>] [--excel <çıktı.xlsx>]
+
+Fiyat kaynağı (D-72, mühür M-15; Lokman 9 Kasım 2026 13:10 "bundan sonra tek fiyat kaynağımız bu api olacak"): yeni fiyat yalnız CRM'den,
+`--crm` sunucunun günlük çektiği anlık görüntüyle (`araclar/crm_fiyat.py` onu defter şemasına çevirir). `--defter` yalnız kapanmış teklifi
+o günkü defteriyle aynen vermek içindir (TK-04 r08, TK-05: `defter_2026-11.json`). İkisi de yoksa araç durur; varsayılan defter yok.
 
 Liste: prefabrik Motor'un listesi (`motor/prefabrik_liste.py`, satırda `olcu`) ya da genel motorun yükleme listesi
 (`python -m motor.genel.uret` → `<kod>_yukleme.json`, satırda `boyut`); hat satırlardan anlaşılır. Anahtar defterdeki gibi
@@ -21,7 +25,27 @@ import argparse, json, re, sys
 from pathlib import Path
 
 KOK = Path(__file__).resolve().parents[1]
-DEFTER = KOK / "kurallar" / "fiyat" / "defter_2026-11.json"   # r11: 45. hafta listesi (D-62); eski teklif eski defterle (--defter defter_2026-10.json)
+DEFTER = KOK / "kurallar" / "fiyat" / "defter_2026-11.json"   # son elle defter (r13); D-72'den beri varsayılan değil: kapanmış teklif --defter ile
+KAYNAK_YOK = ("DUR: fiyat yalnız CRM'den (D-72, M-15): --crm <CRM anlık görüntüsü> verin; kapanmış teklifi aynen vermek için "
+              "--defter <o günkü defter>")
+
+
+def defter_sec(crm: Path | str | None = None, defter: Path | str | None = None) -> dict:
+    """Fiyat kaynağı (D-72, M-15): `crm` verilirse CRM anlık görüntüsünden defter (`araclar/crm_fiyat.defter_uret`), `defter` verilirse
+    o dosya (kapanmış teklif). İkisi birden ya da hiçbiri verilmez: varsayılan kaynak yok, yeni teklif sessizce eski listeden fiyatlanmaz."""
+    if crm and defter:
+        raise SystemExit("DUR: --crm ve --defter birlikte verilmez; yeni teklif --crm, kapanmış teklif --defter")
+    if defter:
+        return oku(defter)
+    if not crm:
+        raise SystemExit(KAYNAK_YOK)
+    if str(KOK) not in sys.path:
+        sys.path.insert(0, str(KOK))
+    from araclar import crm_fiyat
+    try:
+        return crm_fiyat.defter_uret(crm_fiyat.anlik_oku(crm))
+    except crm_fiyat.CrmHatasi as e:
+        raise SystemExit(f"DUR: CRM anlık görüntüsü: {e}") from None
 
 
 def oku(p: Path | str) -> dict:
@@ -205,11 +229,13 @@ def excel_yaz(R: dict, yol: Path, baslik: str) -> None:
 
 def main(argv=None) -> int:
     a = argparse.ArgumentParser(description=__doc__.split("\n")[0])
-    a.add_argument("liste"); a.add_argument("--defter", default=str(DEFTER)); a.add_argument("--hat", choices=["prefabrik", "celik"])
+    a.add_argument("liste"); a.add_argument("--hat", choices=["prefabrik", "celik"])
+    a.add_argument("--crm", help="CRM anlık görüntüsü (sunucunun günlük çekimi; D-72 tek fiyat kaynağı)")
+    a.add_argument("--defter", help="kapanmış teklifin o günkü defteri (ör. kurallar/fiyat/defter_2026-11.json)")
     a.add_argument("--oneri", action="store_true"); a.add_argument("--alan", type=float); a.add_argument("--m2-fiyat", type=float)
     a.add_argument("--esik", type=float); a.add_argument("--json"); a.add_argument("--excel"); a.add_argument("--duzeltme")
     o = a.parse_args(argv)
-    L, D = oku(o.liste), oku(o.defter)
+    L, D = oku(o.liste), defter_sec(o.crm, o.defter)
     if o.duzeltme:
         L = duzelt(L, json.loads(Path(o.duzeltme).read_text(encoding="utf-8")), o.hat or hat_bul(L))
     R = fiyatla(L, D, o.hat, o.oneri)
