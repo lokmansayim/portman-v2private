@@ -193,5 +193,6 @@ yedek 8 saat önce.
 - `guncelle.sh`'te ikinci koşuyu durduran kilit yok. Öneri (ayrı iş, Lokman'ın onayıyla): `flock` ile tek koşu; ikinci koşu "kurulum
   sürüyor" deyip çıkar.
 
-**Durum:** Canlı `v2026.11.08` (9 Kasım 12:32). Kurulumun kabulü Lokman'da. Sıradaki: satır 80, 83, 110, 111, her biri ayrı onayla
+**Durum:** Canlı `v2026.11.08` (9 Kasım 12:32). Lokman sonucu kabul etti, 9 Kasım 2026 09:44:31 UTC (12:44 İstanbul), sunucu
+sohbeti: "evet kabul ediyorum". Satır 13 ve 119 kapandı. Sıradaki: satır 80, 83, 110, 111, her biri ayrı onayla
 (yukarıdaki "3 · Özellikleri açma").
