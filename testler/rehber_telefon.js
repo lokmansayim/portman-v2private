@@ -1,7 +1,7 @@
 // İE-34 · Montaj rehberi telefonda, nginx'in verdiği baytlar ve başlıklarla (testler/test_rehber_yayin.py).
 //   THREE_DIR=<three@0.160.0> node testler/rehber_telefon.js <adres> <gövde.html> <başlıklar.json> <ekran.png> <sonuç.json>
 // iPhone 13 öykünmesi. Test sayfayı yerel nginx'ten HTTPS ile alır (gerçek yapılandırma); tarayıcıdaki adres isteği o gövde ve o başlıklarla
-// (CSP dahil) karşılanır. Tarayıcı CSP'yi bu başlıktan uygular. three.js 0.160.0 isteği jsDelivr adresiyle yapılır ve THREE_DIR'den karşılanır
+// (CSP dahil) karşılanır. Tarayıcı CSP'yi bu başlıktan uygular. Ortamda WebGL olup olmadığı ayrıca yazılır (`webgl`). three.js 0.160.0 isteği jsDelivr adresiyle yapılır ve THREE_DIR'den karşılanır
 // (CSP adrese bakar: izin yalnız cdn.jsdelivr.net'e), Google Fonts boş CSS döner; başka her istek kesilir ve yazılır. CSP ihlali, sayfa hatası,
 // sahne (canvas), adım sayısı ve son adımın başlığı yazılır. Ağ yok, LLM yok.
 const { chromium, devices } = require('playwright');
@@ -15,6 +15,11 @@ const fs = require('fs');
   });
   const c = await b.newContext({ ...devices['iPhone 13'] });
   const p = await c.newPage();
+  // Ortamda WebGL var mı: CSP'siz boş sayfada sına. Yoksa (CI koşucusu GPU sürecini açamıyor) three.js'in WebGL bağlam iletileri
+  // beklenir ve sahne çizilmez; testin öteki denetimleri (CSP, sayfa hatası, adımlar, telefon düzeni) aynı kalır.
+  const sina = await c.newPage();
+  const webgl = await sina.evaluate(() => { const t = document.createElement('canvas'); return !!(t.getContext('webgl2') || t.getContext('webgl')); });
+  await sina.close();
   const T = process.env.THREE_DIR;
   const disari = [];
   await p.route('https://cdn.jsdelivr.net/npm/three@0.160.0/**', r => r.fulfill({ path: T + '/' + r.request().url().replace('https://cdn.jsdelivr.net/npm/three@0.160.0/', ''), contentType: 'application/javascript' }));
@@ -27,7 +32,7 @@ const fs = require('fs');
   p.on('pageerror', e => hatalar.push(String(e)));
   p.on('console', m => { if (m.type() === 'error') hatalar.push(`konsol: ${m.text()}`); });
   const r = await p.goto(adres);
-  const sonuc = { http: r.status(), csp_basligi: (await r.allHeaders())['content-security-policy'] || null };
+  const sonuc = { http: r.status(), csp_basligi: (await r.allHeaders())['content-security-policy'] || null, webgl };
   try {
     await p.waitForFunction(() => window.__montaj, null, { timeout: 60000 });
     const ilk = await p.evaluate(() => ({ baslik: document.title, N: window.__montaj.N, adim: document.getElementById('stepTitle').textContent,

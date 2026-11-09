@@ -31,6 +31,7 @@ import rehber_yayin as RY     # noqa: E402
 import ucb_yayin as UY        # noqa: E402
 
 ALAN = "portman.ornek.invalid"
+WEBGL_YOK = ("konsol: THREE.WebGLRenderer: A WebGL context could not be created", "konsol: THREE.WebGLRenderer: Error creating WebGL context")
 TABAN = f"https://{ALAN}/rehber"
 CONF = KOK / "vps" / "nginx" / "portman.conf"
 
@@ -288,7 +289,7 @@ def test_nginx_yalniz_anahtarli_rehberi_sunar(nginx_sunucu):
 
 def test_telefonda_rehber_acilir(nginx_sunucu, tmp_path):
     """iPhone 13 öykünmesi (`testler/rehber_telefon.js`): nginx'in gerçek yapılandırmayla verdiği gövde ve başlıklar (CSP dahil) tarayıcıda
-    açılır; CSP ihlali yok, sayfa hatası yok, sahne (canvas) çizilir, adımlar ilerler. three.js 0.160.0 jsDelivr adresinden istenir,
+    açılır; CSP ihlali yok, sayfa hatası yok, sahne (canvas) çizilir (ortamda WebGL varsa), adımlar ilerler. three.js 0.160.0 jsDelivr adresinden istenir,
     THREE_DIR'den karşılanır. Node, Playwright ve THREE_DIR yoksa atlanır (CI'da kalan işte kurulu)."""
     from araclar.paket.rehber import iz
     if iz.hazir():
@@ -305,7 +306,11 @@ def test_telefonda_rehber_acilir(nginx_sunucu, tmp_path):
     t = json.loads(cikti.read_text(encoding="utf-8"))
     assert t["http"] == 200 and t["csp_basligi"] == basliklar["content-security-policy"]
     assert "bekleme_hatasi" not in t, t
-    assert t["csp"] == [] and t["hatalar"] == [] and t["disari"] == [], t
-    assert t["baslik"].endswith(" Montaj Rehberi") and t["N"] > 1 and t["adim"] and t["son_adim"] and t["tuval"] and min(t["tuval"]) > 0
+    hatalar = t["hatalar"]
+    if not t["webgl"]:   # ortamda WebGL yok (GitHub koşucusu GPU sürecini açamıyor; 9.11.2026, PR #147): yalnız three.js'in bağlam iletisi beklenir
+        hatalar = [h for h in hatalar if not h.startswith(WEBGL_YOK)]
+    assert t["csp"] == [] and hatalar == [] and t["disari"] == [], t
+    assert t["baslik"].endswith(" Montaj Rehberi") and t["N"] > 1 and t["adim"] and t["son_adim"]
+    assert not t["webgl"] or (t["tuval"] and min(t["tuval"]) > 0), t    # WebGL olan ortamda sahne çizilir
     assert t["genislik"] == 390                       # iPhone 13: telefon düzeni (Lokman 9 Kasım 13:36 kartı "Evet, telefon düzeni"); ayarsız 980
     assert ekran.stat().st_size > 10_000
