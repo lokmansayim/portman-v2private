@@ -179,7 +179,9 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | D | D-69 | 125,5 aks aralığını aşan pano yalnız ortasında açıklıkla (BK-26, PC-37; Lokman 7.11 14:33, 15:48 kartı) | yazıldı (7.11; BK-26, `claude/project-thread-hgjkfl`) |
 | D | D-70 | Portman Yazım Kuralı · Sade Teknik Türkçe, Lokman'a rapor 5 satırlık şablonla (Lokman 8.11 14:20) | yazıldı (8.11; `claude/project-thread-3vlwpn`) |
 | D | D-71 | Canlıya kontrollü geçiş: bugünkü liste isabetiyle, özellikler kapalı, önce tatbikat (Lokman 8.11 16:25 kartı) | yazıldı (8.11; sunucu sohbeti, `claude/project-thread-e4j22y`) |
-| D | **D-72** | — | **sıradaki boş** |
+| D | D-72 | CRM stok fiyatları API'si tek fiyat kaynağı, her gün çekim (Lokman 9.11 13:10; CRM sohbeti) | alındı (9.11; `claude/project-thread-03tosk`) |
+| D | D-73 | montaj rehberinde baş makas Z'si ve alın sacı (Lokman 9.11 13:45–19:57) | alındı (9.11; canlı geçiş sohbetinde başladı, montaj rehberi sohbetine devredildi) |
+| D | **D-74** | — | **sıradaki boş** |
 | İE | İE-01–İE-08 | bu depo (`main`) | yazıldı |
 | İE | İE-09 | model atölyesi: kontrollü model üretimi ve banka hattı (Görev 6e; pano 30; P6001 güncellemesi kapsam dışı) | alındı (16.10; `claude/gorev-6e-model-atolyesi-rnhtcp`; PR-1 banka hattı 29.10, `claude/project-thread-rhjgzv`) |
 | İE | İE-10, İE-11, İE-12 | prefabrik hattı (PR #12, PR #14, `ie-12-prefabrik-bayi-paftasi`) | `main`'e BK-12 ile (PR-1: motor ve bayi paftası; liste ve mühür kıyası sonraki PR'larda) |
@@ -205,7 +207,9 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | İE | İE-31 | çıkıntısız çapraz cumbanın r07 tekniği AP-06, AP-13, AP-16'ya (Lokman 5.11 12:45; TK-04 plan thread'i) | alındı (5.11) |
 | İE | İE-32 | montaj rehberinin altında ön onay sayfası: TK-01 r07 hedef örneği, kilit testi, mühür M-13 (pano 146; özellik D-53 madde 6, PR #124) | alındı (6.11; `claude/project-thread-bij4mz`) |
 | İE | İE-33 | açık evlerin ölçümü: AP-01…05 Motor kipinde (pano 70; Lokman 6.11 18:57; ilk commit'lerde "İE-32") | alındı (6.11; `claude/project-thread-qk5l1s`) |
-| İE | **İE-34** | — | **sıradaki boş** |
+| İE | İE-34 | bayiye montaj rehberi: sunucuda /rehber/<anahtar>/, yayın betiği, onaylı İş Emri'nin alınması (Lokman 9.11 13:06, kart 13:16; CIO 13:08 plan A) | alındı (9.11; `claude/project-thread-e4j22y`) |
+| İE | İE-35 | CRM stok fiyatları tek fiyat kaynağı (D-72; Lokman 9.11 13:10; CRM sohbeti) | alındı (9.11; `claude/project-thread-03tosk`) |
+| İE | **İE-36** | — | **sıradaki boş** |
 | BK | BK-01–BK-08 | bu depo; BK-08 8a sonrası temizlik (`bk-08-8a-temizlik`) | yazıldı |
 | BK | BK-09 | metin ve çizim düzeltmeleri, G1 (`bk-09-metin-cizim`, `bk-09-cizim-g1`) | alındı (14.10) |
 | BK | BK-10 | 8b sonrası küçük işler (DXF `.txt` notu, geç gelen Excel, panelden Excel, plan değişince kontrol kapanır, D-19 24 saat kuralı, düğmeli mesajda satır sonları, `YENI-` kodu ve ilk çelik planda LLM özeti bayiye gitmez, komut freni metni; pano satır 15; çelikte kapı değişikliği kapsam dışı) | alındı (30.10; `claude/project-thread-h64uz2`) |
