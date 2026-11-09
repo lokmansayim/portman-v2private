@@ -1262,10 +1262,10 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
         "izo_liste": ls("Çatı şiltesi"),
         "tersmahya": {"ad": "—", "gorev": "—", "liste": "—"},
         "alin": {"ad": "Alın sacı",
-                 "alin": "~{h} cm: kaplamanın kenar hadvesinden saçak altının 6 cm altına; dereyi de içine alır, ayrı alt uç parçası yok (Lokman, 26.10.2026)",
+                 "alin": "{h} cm: kaplamanın kenar hadvesinden saçak altının 6 cm altına; abkantta tek biçim, 250 ve 280 boyda aynı; köşede derenin ucunu örter, ucu derenin biçiminde kesilir; ayrı alt uç parçası yok (Lokman, 26.10.2026; 9.11.2026)",
                  "kaynak": "Lokman çizimleri (24.10.2026)",
                  "profil": "tırnak 3 (baş makas Z'sine) → saçak altı 30 → alın → hadve üstünden kıvrım → hadveyi kavrayan kıvrım",
-                 "uc": "saçak altı kolu makasın topuğuna dayanır, orada kesilir; alın yüzü ve üst kıvrım derenin ucunu kapatmak için devam eder (Lokman, 26.10.2026)",
+                 "uc": "saçak altı kolu makasın topuğuna dayanır, orada kesilir; alın yüzü derenin ucunu örter, ucu derenin biçiminde kesilir (Lokman, 26.10.2026; 9.11.2026)",
                  "proje": ("alın ~{h} cm: sandviç panelin kalınlaşması kadar 62 m² rehberindekinden geniş (Lokman, 1.11.2026; D-40); kesin ölçü teyit bekler"
                            if KPR["yalitim"] else
                            "alın ~{h} cm: 62 m² rehberindeki gibi; kesin ölçü teyit bekler"),
