@@ -205,7 +205,7 @@ def liste_ham(yol: Path) -> tuple[dict, list[dict]]:
 
 def kart_cikar(kod: str, pafta: Path, liste_yolu: Path, is_emri: Path | None) -> dict:
     p = pafta_oku(pafta)
-    okunan = oku(liste_yolu, liste_yolu.suffix.lower())
+    okunan = oku(liste_yolu, liste_yolu.suffix.lower(), tam=True)  # proje kartı okuması (9 Kasım)
     bas, ham = liste_ham(liste_yolu)
     ie = json.loads(is_emri.read_text(encoding="utf-8")) if is_emri else None
 
@@ -296,13 +296,14 @@ def kart_cikar(kod: str, pafta: Path, liste_yolu: Path, is_emri: Path | None) ->
             ic = h["kesin_hesap"]
         liste.append({"durum": "aynı" if not fark else "fark: " + ", ".join(fark),
                       "grup": o["grup"], "malzeme": o["malzeme"], "boyut": o["boyut"], "adet": o["adet"],
-                      "k_satir": h and h["satir"], "k_boyut": h and h["boyut"], "k_adet": h and h["adet"],
+                      "adet_yazi": o.get("adet_yazi"), "k_satir": h and h["satir"], "k_boyut": h and h["boyut"], "k_adet": h and h["adet"],
                       "kesin_hesap_farkli": ic})
     while hi < len(ham):
         liste.append({"durum": "okuyucuda yok", **{f"k_{x}": ham[hi][x] for x in ("satir", "grup", "malzeme", "boyut", "adet")}})
         hi += 1
 
-    kart_liste = [{"grup": r["grup"], "kalem": r["malzeme"], "boyut": r["boyut"], "adet": r["adet"]}
+    kart_liste = [{"grup": r["grup"], "kalem": r["malzeme"], "boyut": r["boyut"], "adet": r["adet"],
+                   **({"adet_yazi": r["adet_yazi"]} if r.get("adet_yazi") else {})}
                   for r in liste if r.get("malzeme") and r.get("adet") not in (0,)]
     sifir = sum(1 for r in liste if r.get("adet") == 0)
     kart = {

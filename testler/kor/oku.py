@@ -96,7 +96,20 @@ def _satir(grup, malzeme, boyut, adet, damga=False, sayac: dict | None = None) -
     return s
 
 
-def pdf_oku(yol: Path, sayac: dict | None = None) -> list[dict]:
+ALICI = re.compile(r"ALICI(YA)?\s+(A[İI]T|KAR[ŞS]ILIYOR)", re.I)
+
+
+def _acik_parantez(t: str) -> bool:
+    """Ad sürüyor mu: kapanmamış parantez ya da virgülle biten satır (iki-üç satıra bölünmüş kalem adı)."""
+    return t.count("(") > t.count(")") or t.rstrip().endswith(",")
+
+
+def pdf_oku(yol: Path, sayac: dict | None = None, tam: bool = False) -> list[dict]:
+    """`tam=False` (kör test, varsayılan): 13 Ekim okuyucusu, bayt bayt aynı. `tam=True` (proje kartı, 9 Kasım 2026, Lokman
+    "evet düzelt"): adet yerine "ALICIYA AİT / ALICI KARŞILIYOR" yazısı `adet_yazi`'de kalır; iki-üç satıra bölünmüş ad
+    birleşir; adı olmayan satır bekleyen adla kalem olur; adet ve boyutu boş satırlar (birleşik hücre) düşmez; "TOPLAM"
+    satırı okunmaz; boyut sütunu başlığın solundan başlasa da (makas grubu) boyut ada yapışmaz; boyutu "ADET" olan satır
+    başlık sanılmaz."""
     import pymupdf
 
     doc = pymupdf.open(str(yol))
@@ -121,7 +134,12 @@ def pdf_oku(yol: Path, sayac: dict | None = None) -> list[dict]:
         bekleyen = []
         for k in kumeler:
             ps = sorted(k["p"], key=lambda p: p["x0"])
-            if any(p["t"] in ("BOYUT", "BOYUT/ÖLÇÜ", "ADET") for p in ps) and not any(re.fullmatch(r"[\d.,]+", p["t"]) for p in ps):
+            baslik = any(p["t"] in ("BOYUT", "BOYUT/ÖLÇÜ", "ADET") for p in ps) and not any(re.fullmatch(r"[\d.,]+", p["t"]) for p in ps)
+            if tam and baslik:
+                baslik = any(p["t"] in ("BOYUT", "BOYUT/ÖLÇÜ") for p in ps)
+            if baslik:
+                if tam:
+                    _bekleyen_yaz(satirlar, bekleyen, sno, grup)
                 g = [p["t"] for p in ps if p["t"] not in ("BOYUT", "BOYUT/ÖLÇÜ", "ADET", "KG", "MAKİNE", "NO")]
                 grup = re.sub(r"^NO\s+", "", " ".join(g)).strip() or grup
                 kolon = {"no": any(p["t"] == "NO" or p["t"].startswith("NO ") for p in ps)}
@@ -136,9 +154,15 @@ def pdf_oku(yol: Path, sayac: dict | None = None) -> list[dict]:
                 continue
             if kolon is None:
                 continue  # başlık bloğu: okunmaz
-            mal, boy, adet, kg, ek = [], [], [], [], []
+            mal, boy, adet, kg, ek, yazi = [], [], [], [], [], []
             for p in ps:
                 xc = (p["x0"] + p["x1"]) / 2
+                if tam and ALICI.search(p["t"]) and p["x0"] > 150:
+                    yazi.append(ALICI.search(p["t"]).group(0).upper())
+                    continue
+                if tam and mal and p["x0"] >= kolon.get("boyut", 280) - 45 and p["x1"] < kolon.get("boyut", 280) + 4:
+                    boy.append(p["t"])
+                    continue
                 if p["x1"] < kolon.get("boyut", 280) + 4:
                     if kolon["no"] and re.fullmatch(r"\d{1,3}", p["t"]) and p["x1"] < 66:
                         continue
@@ -152,33 +176,95 @@ def pdf_oku(yol: Path, sayac: dict | None = None) -> list[dict]:
                     boy.append(p["t"])
                 else:
                     ek.append(p["t"])
-            if mal and not adet and not boy and not kg:
-                if satirlar and satirlar[-1]["_sayfa"] == sno and k["y"] - satirlar[-1]["_y"] < 7:
+            if mal and not adet and not boy and not kg and not yazi:
+                if satirlar and satirlar[-1]["_sayfa"] == sno and (k["y"] - satirlar[-1]["_y"] < 7 or (
+                        tam and k["y"] - satirlar[-1]["_y"] < 12 and _acik_parantez(satirlar[-1]["malzeme"]))) \
+                        and not (tam and bekleyen):
                     satirlar[-1]["malzeme"] += " " + " ".join(mal)
+                    satirlar[-1]["_y"] = k["y"] if tam else satirlar[-1]["_y"]
+                    continue
+                if tam and min(p["x0"] for p in ps) > 150:
+                    continue  # sayfa başlığı ("FORMU" gibi): ad sütununda başlamayan yazı kalem değil
+                if tam and bekleyen and k["y"] - bekleyen[-1][0] < 12 and _acik_parantez(bekleyen[-1][1]):
+                    bekleyen[-1] = (k["y"], bekleyen[-1][1] + " " + " ".join(mal))
                     continue
                 bekleyen.append((k["y"], " ".join(mal)))
                 continue
+            if tam and not mal and yazi and not adet and not boy and satirlar and satirlar[-1]["_sayfa"] == sno \
+                    and not bekleyen and k["y"] - satirlar[-1]["_y"] < 6:
+                satirlar[-1].setdefault("adet_yazi", yazi[0])
+                continue
+            if tam and not mal and (boy or yazi) and bekleyen:
+                mal = [bekleyen.pop()[1]]
             if not mal and not adet and not kg:
                 continue
             if not mal and not adet and not boy:
                 continue  # satıra bağlı olmayan not: okunmaz
             ad = " ".join(mal)
-            if bekleyen and (not ad or k["y"] - bekleyen[-1][0] < 7):
-                ad = (" ".join(b[1] for b in bekleyen) + " " + ad).strip()
+            if tam and _katla(ad) == "TOPLAM":
+                continue
+            if bekleyen and (not ad or k["y"] - bekleyen[-1][0] < 7 or (
+                    tam and k["y"] - bekleyen[-1][0] < 12 and _acik_parantez(bekleyen[-1][1]))):
+                if tam:  # yalnız bitişik ad satırı birleşir; öncekiler ayrı kalem (birleşik hücreli satırlar)
+                    son = bekleyen.pop()
+                    _bekleyen_yaz(satirlar, bekleyen, sno, grup)
+                    ad = (son[1] + " " + ad).strip()
+                else:
+                    ad = (" ".join(b[1] for b in bekleyen) + " " + ad).strip()
+                bekleyen = []
+            elif tam and bekleyen:
+                _bekleyen_yaz(satirlar, bekleyen, sno, grup)
                 bekleyen = []
             if not ad and satirlar and satirlar[-1]["_sayfa"] == sno and k["y"] - satirlar[-1]["_y"] < 6:
                 s = satirlar[-1]
                 if adet and s["adet"] is None:
                     s["adet"] = sayi(adet[0])
                 continue
-            satirlar.append({"_sayfa": sno, "_y": k["y"], "grup": grup, "malzeme": ad, "boyut": " ".join(boy) or None,
-                             "adet": sayi(adet[0]) if adet else None, "_damga": any(DAMGA in e.upper() for e in ek)})
+            yeni = {"_sayfa": sno, "_y": k["y"], "grup": grup, "malzeme": ad, "boyut": " ".join(boy) or None,
+                    "adet": sayi(adet[0]) if adet else None, "_damga": any(DAMGA in e.upper() for e in ek)}
+            if tam and yazi:
+                yeni["adet_yazi"] = yazi[0]
+            satirlar.append(yeni)
+        if tam:
+            _bekleyen_yaz(satirlar, bekleyen, sno, grup)
+            bekleyen = []
+    if tam:
+        _birlesik_hucre(satirlar)
     sonuc = []
     for s in satirlar:
         r = _satir(s["grup"], s["malzeme"], s["boyut"], s["adet"], s["_damga"], sayac)
         if r:
+            if tam and s.get("adet_yazi"):
+                r["adet_yazi"] = s["adet_yazi"]
             sonuc.append(r)
     return sonuc
+
+
+def _bekleyen_yaz(satirlar: list, bekleyen: list, sno: int, grup) -> None:
+    """`tam`: boyutu ve adedi boş ad satırları ayrı kalem olur (birleşik hücre: değer komşu satırda)."""
+    for y, ad in bekleyen:
+        satirlar.append({"_sayfa": sno, "_y": y, "grup": grup, "malzeme": ad, "boyut": None, "adet": None,
+                         "_damga": False, "_bos": True})
+    bekleyen.clear()
+
+
+def _birlesik_hucre(satirlar: list) -> None:
+    """`tam`: boş satırlar ve "ALICIYA AİT" yazılı komşusu aynı birleşik hücrenin parçasıysa yazı hepsine geçer."""
+    satirlar.sort(key=lambda s: (s["_sayfa"], s["_y"]))
+    i = 0
+    while i < len(satirlar):
+        j = i
+        while j + 1 < len(satirlar) and satirlar[j + 1]["_sayfa"] == satirlar[i]["_sayfa"] \
+                and satirlar[j + 1]["grup"] == satirlar[i]["grup"] and satirlar[j + 1]["_y"] - satirlar[j]["_y"] < 11 \
+                and (satirlar[j + 1].get("_bos") or satirlar[j].get("_bos")):
+            j += 1
+        blok = satirlar[i:j + 1]
+        yazili = [s for s in blok if s.get("adet_yazi") and s["adet"] is None and s["boyut"] is None]
+        if len(blok) > 1 and len(yazili) == 1:
+            for s in blok:
+                if s.get("_bos"):
+                    s["adet_yazi"] = yazili[0]["adet_yazi"]
+        i = j + 1
 
 
 def _excel_basligi(hucre: dict) -> dict | None:
@@ -231,11 +317,12 @@ def excel_oku(yol: Path, sayfa: int | None = None, sayac: dict | None = None) ->
     return secilen
 
 
-def oku(yol: Path, uzanti: str, sayfa: int | None = None, sayac: dict | None = None) -> list[dict]:
-    """Malzeme satırları. `sayac` verilirse okunmayan satırların sayısı yazılır: {"baslik", "personel", "adetli"}."""
+def oku(yol: Path, uzanti: str, sayfa: int | None = None, sayac: dict | None = None, tam: bool = False) -> list[dict]:
+    """Malzeme satırları. `sayac` verilirse okunmayan satırların sayısı yazılır: {"baslik", "personel", "adetli"}.
+    `tam=True` yalnız proje kartı içindir (`pdf_oku`); kör test varsayılanla okur."""
     uzanti = uzanti.lower()
     if uzanti == ".pdf":
-        return pdf_oku(yol, sayac)
+        return pdf_oku(yol, sayac, tam)
     if uzanti in (".xlsx", ".xlsm"):
         return excel_oku(yol, sayfa, sayac)
     raise OkumaHatasi(f"okunamayan dosya türü: {uzanti}")

@@ -97,7 +97,7 @@ def main(argv=None):
             f"<td class='d'>{_h(kart.get('brut_oturum_m2'))}</td><td class='d'>{_h(kart.get('liste_bina_m2'))}</td>"
             f"<td class='d'>{_h(kart.get('oda_sayisi'))}</td><td class='d'>{kart['yukleme_listesi']['kalem_sayisi']}</td>"
             f"<td class='d'>{len(kart.get('belirsiz', []))}</td>"
-            f"<td class='d'>{'—' if dog is None else len(yf)}</td><td class='d'>{len(yd)}</td><td class='d'>{'—' if dog is None else len(lf)}</td></tr>")
+            f"<td class='d'>{'—' if dog is None else len(yf)}</td><td class='d'>{len(yd)}</td><td class='d'>{'—' if dog is None else len(lf)}</td><td class='d'>{len(ly.get('cozulen', []))}</td></tr>")
         yt = "".join(
             f"<tr class='{'duz' if r.get('duzeltildi') else ('' if r.get('ayni') else 'fark')}'><td>{_h(r.get('alan'))}</td><td>{_h(r.get('kart'))}{' → düzeltildi' if r.get('duzeltildi') else ''}</td>"
             f"<td>{_h(r.get('kaynak'))}</td><td class='yer'>{_h(r.get('kaynak_yeri'))}</td><td class='yer'>{_h(r.get('not'))}</td></tr>"
@@ -105,7 +105,10 @@ def main(argv=None):
         lt = "".join(
             f"<tr class='fark'><td>{_h(r.get('malzeme'))}</td><td>{_h(r.get('boyut_kart'))}</td><td>{_h(r.get('boyut_kaynak'))}</td>"
             f"<td class='d'>{_h(r.get('adet_kart'))}</td><td class='d'>{_h(r.get('adet_kaynak'))}</td><td class='yer'>{_h(r.get('tur'))} · {_h(r.get('kaynak_yeri'))}</td></tr>"
-            for r in lf)
+            for r in lf) + "".join(
+            f"<tr class='duz'><td>{_h(r.get('malzeme'))}</td><td>{_h(r.get('boyut_kart'))}</td><td>{_h(r.get('boyut_kaynak'))}</td>"
+            f"<td class='d'>{_h(r.get('adet_kart'))}</td><td class='d'>{_h(r.get('adet_kaynak'))}</td><td class='yer'>{_h(r.get('tur'))} · düzeltildi (okuyucu)</td></tr>"
+            for r in ly.get("cozulen", []))
         bel = "".join(f"<li>{_h(b)}</li>" for b in kart.get("belirsiz", []))
         bolumler.append(f"""<details id="{d.name}"><summary><b>{d.name}</b> · {_h(o.get('genislik'))} × {_h(o.get('derinlik'))} cm · {_h(kart.get('brut_oturum_m2'))} m² · {_h(kart.get('oda_sayisi'))} · yapı farkı {len(yf)}, liste farkı {len(lf)}</summary>
 <div class="ust"><div><img alt="Kat planı {d.name}" src="data:image/png;base64,{plan_gorseli(d / 'pafta.pdf')}">
@@ -125,10 +128,10 @@ th,td{{border-bottom:1px solid var(--cizgi);padding:4px 6px;text-align:left;vert
 .yer,.ozet,.bos{{color:var(--ince);font-size:12px}} tr.fark td{{color:var(--kirmizi);background:var(--kirmizi-bg)}} tr.duz td{{color:var(--yesil);background:var(--yesil-bg)}}
 details{{border:1px solid var(--cizgi);border-radius:6px;margin:10px 0;padding:8px}} summary{{cursor:pointer}}
 .ust{{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.4fr);gap:16px;margin-top:8px}} @media(max-width:800px){{.ust{{grid-template-columns:1fr}}}}
-img{{width:100%;height:auto;border:1px solid var(--cizgi);background:#fff}} a{{color:inherit}}
+img{{width:100%;height:auto;border:1px solid var(--cizgi);background:#fff}} a{{color:inherit}} td:first-child{{white-space:nowrap}}
 </style></head><body><h1>Proje kartları · AIPrefabrik</h1>
-<p class="ozet">Kırmızı: hakemin kaynakta okuduğu değer kartla farklı. Yeşil: kart 9 Kasım'da hakemin okuduğu kaynak değerle düzeltildi (Kart sütunu eski değeri gösterir). Kart: yapı değerlerini okuyan ajan, listeyi depodaki liste okuyucusu çıkardı. Kaynak: hakemin montaj paftası ve yükleme listesinden kendi okuması.</p>
-<div class="tw"><table><tr><th>Kod</th><th>Yapı</th><th>Dış ölçü (cm)</th><th>Brüt m²</th><th>Liste m²</th><th>Oda</th><th>Liste kalemi</th><th>Belirsiz</th><th>Yapı farkı</th><th>Düzeltilen</th><th>Liste farkı</th></tr>{''.join(satirlar)}</table></div>
+<p class="ozet">Kırmızı: hakemin kaynakta okuduğu değer kartla farklı. Yeşil: 9 Kasım'da düzeltildi; yapı satırında kart hakemin okuduğu kaynak değerle, liste satırında liste okuyucusu (Kart sütunu eski değeri gösterir). Kart: yapı değerlerini okuyan ajan, listeyi depodaki liste okuyucusu çıkardı. Kaynak: hakemin montaj paftası ve yükleme listesinden kendi okuması.</p>
+<div class="tw"><table><tr><th>Kod</th><th>Yapı</th><th>Dış ölçü (cm)</th><th>Brüt m²</th><th>Liste m²</th><th>Oda</th><th>Liste kalemi</th><th>Belirsiz</th><th>Yapı farkı</th><th>Düzeltilen</th><th>Liste farkı</th><th>Liste düzeltilen</th></tr>{''.join(satirlar)}</table></div>
 {''.join(bolumler)}</body></html>"""
     (cikti / "ozet.html").write_text(sayfa, encoding="utf-8")
     print(f"{len(satirlar)} proje → {cikti / 'ozet.html'}")
