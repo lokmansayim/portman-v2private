@@ -32,6 +32,15 @@ Bu dosya her ajanın okuduğu ortak kuraldır. Claude'a özgü oturum akışı `
 - **Kanıt.** Kanıt olmadan "çalışıyor" yazılmaz. Motor'un `passed` sonucu kaynağa uygunluk değildir.
 - **P6001.** Referans ve gerileme testidir. Harness, altın testler, `testler/referans/` ve `deneme/2026-09-23/yeniden_kos.py` çıktıları değişmemeli. P6001 kilit değildir (Lokman, 29 Ekim 2026; `KARARLAR/D-29.md` madde 6): Lokman'ın çizim yorumundan çıkan Motor düzeltmesi P6001 dahil bütün prefabrik çizimlere uygulanır; değişen referans çıktısı incelenir, beklenen farksa o kararla yeniden dondurulur (D-02), beklenmeyen fark hatadır.
 
+## Yazım kuralı: Sade Teknik Türkçe (D-70; Lokman, 8 Kasım 2026)
+
+Lokman'a rapor, bayi mesajı, bayi rehberi ve montaj rehberi bu kuralla yazılır. Kod ve commit mesajı kapsam dışıdır. Tam metin `.claude/rules/yazim.md`'dedir; dosya her oturumda yüklenir, öteki ajanlar elle okur. Kaynak ASD-STE100 (Simplified Technical English, Issue 9) uyarlamasıdır; resmi metin değildir.
+
+- **Kelime:** bir kavram tek terim, bir kelime tek anlam; belirsiz kelime yerine sayı, ölçü ve birim; kısaltma ilk geçtiği yerde açılır.
+- **Cümle:** bir cümle bir iş; talimat en çok 15, açıklama en çok 20 kelime; talimatta emir kipi; yapan belli; ek zinciri yok; çift olumsuz yok.
+- **Düzen:** paragraf tek konu, en çok 4 cümle; sıralı iş numaralı liste; risk varsa adımdan önce "DİKKAT:"; sayı rakam ve birimle (125,5 cm).
+- **Lokman'a rapor (en çok 5 satır):** Ne yapıldı / Sonuç (sayıyla) / Sorun var mı / Sizden ne lazım / Sonraki tek adım. "Bitti" ya da "geçti" demeden önce sonuç görsel olarak gösterilir ve onay beklenir.
+
 ## Üretim kuralı: tek kod, onaylı hedef örnek, otomatik kıyas (D-28; Lokman, 28 Ekim 2026)
 
 Bağlayıcıdır; her iş, her oturum ve her ajan için geçerlidir.

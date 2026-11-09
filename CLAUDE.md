@@ -10,7 +10,7 @@ Ortak kurallar yukarıdaki `AGENTS.md`'den gelir; burada yalnız Claude'a özgü
 2. **Ortamı kur:** `bash araclar/ortam_kur.sh` (gerileme için `--dogrula`).
 3. **Yeni işe Plan modunda başla.** Plan Lokman'ın onayından sonra uygulanır; iş emri belgesi `/is-emri` ile açılır. Diff'i tek cümleyle anlatılabilen küçük düzeltmelerde plan atlanabilir. Project thread'inde plan modu yoktur: plan CIO'ya gider, CIO kurallarla kıyaslayıp başlatır; Lokman'a sonuç, birleştirme, canlı, ücretli deneme, silme ve gerçek karar gider (Lokman, 27 Ekim 2026 18:12, CIO'nun önerisine: "Evet öyle yapalım").
 4. **Üretim kuralı (D-28, `AGENTS.md`).** Bayiye, mühendise ya da Lokman'a gidecek bir çıktıyı (çizim, liste, rehber, teklif) yalnız `main`'e girmiş kodla üret. Oturumun kendi betiğiyle, proje dosyalarındaki bir araçla ya da elle düzeltilmiş çıktı teslim edilmez; eksik varsa önce kod düzeltilir. Hedef örnek ve kıyas testi yoksa o çıktı için "çalışıyor" yazılmaz.
-5. **Lokman'a anlatım.** Her adımda ne yapıldığı iki cümleyle Türkçe söylenir; onayı gereken yerde tek soru sorulur; beklemeye düşülmez, kendi başına devam edilir.
+5. **Lokman'a anlatım.** Her adımda ne yapıldığı iki cümleyle Türkçe söylenir; onayı gereken yerde tek soru sorulur; beklemeye düşülmez, kendi başına devam edilir. Rapor, bayi mesajı, bayi rehberi ve montaj rehberi Sade Teknik Türkçe ile yazılır; Lokman'a rapor beş satırlık şablonla gider (D-70, `.claude/rules/yazim.md`; dosya her oturumda yüklenir).
 
 ## Lokman'la çalışma düzeni
 
