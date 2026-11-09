@@ -87,6 +87,7 @@ def main(argv=None):
         (cikti / d.name / "kart.json").write_text(json.dumps(kart, ensure_ascii=False, indent=1), encoding="utf-8")
         dog = json.loads((d / "dogrulama.json").read_text(encoding="utf-8")) if (d / "dogrulama.json").exists() else None
         yf = [r for r in (dog or {}).get("yapi", []) if not r.get("ayni")]
+        yd = [r for r in (dog or {}).get("yapi", []) if r.get("duzeltildi")]
         ly = (dog or {}).get("liste", {})
         lf = ly.get("farklar", [])
         o = kart.get("dis_olcu_cm") or {}
@@ -96,9 +97,9 @@ def main(argv=None):
             f"<td class='d'>{_h(kart.get('brut_oturum_m2'))}</td><td class='d'>{_h(kart.get('liste_bina_m2'))}</td>"
             f"<td class='d'>{_h(kart.get('oda_sayisi'))}</td><td class='d'>{kart['yukleme_listesi']['kalem_sayisi']}</td>"
             f"<td class='d'>{len(kart.get('belirsiz', []))}</td>"
-            f"<td class='d'>{'—' if dog is None else len(yf)}</td><td class='d'>{'—' if dog is None else len(lf)}</td></tr>")
+            f"<td class='d'>{'—' if dog is None else len(yf)}</td><td class='d'>{len(yd)}</td><td class='d'>{'—' if dog is None else len(lf)}</td></tr>")
         yt = "".join(
-            f"<tr class='{'' if r.get('ayni') else 'fark'}'><td>{_h(r.get('alan'))}</td><td>{_h(r.get('kart'))}</td>"
+            f"<tr class='{'duz' if r.get('duzeltildi') else ('' if r.get('ayni') else 'fark')}'><td>{_h(r.get('alan'))}</td><td>{_h(r.get('kart'))}{' → düzeltildi' if r.get('duzeltildi') else ''}</td>"
             f"<td>{_h(r.get('kaynak'))}</td><td class='yer'>{_h(r.get('kaynak_yeri'))}</td><td class='yer'>{_h(r.get('not'))}</td></tr>"
             for r in (dog or {}).get("yapi", []))
         lt = "".join(
@@ -115,19 +116,19 @@ def main(argv=None):
 </div></div></details>""")
     sayfa = f"""<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Proje kartları</title><style>
-:root{{--bg:#fff;--fg:#1d1d1f;--ince:#6b6b70;--cizgi:#ddd;--kirmizi:#c62828;--kirmizi-bg:#fdecea}}
-@media (prefers-color-scheme: dark){{:root:not([data-theme="light"]){{--bg:#17171a;--fg:#ececf0;--ince:#a0a0a8;--cizgi:#333;--kirmizi:#ff6b6b;--kirmizi-bg:#3a1d1d}}}}
-:root[data-theme="dark"]{{--bg:#17171a;--fg:#ececf0;--ince:#a0a0a8;--cizgi:#333;--kirmizi:#ff6b6b;--kirmizi-bg:#3a1d1d}}
+:root{{--bg:#fff;--fg:#1d1d1f;--ince:#6b6b70;--cizgi:#ddd;--kirmizi:#c62828;--kirmizi-bg:#fdecea;--yesil:#1b6e2a;--yesil-bg:#e8f5e9}}
+@media (prefers-color-scheme: dark){{:root:not([data-theme="light"]){{--bg:#17171a;--fg:#ececf0;--ince:#a0a0a8;--cizgi:#333;--kirmizi:#ff6b6b;--kirmizi-bg:#3a1d1d;--yesil:#7fd68a;--yesil-bg:#1d3a22}}}}
+:root[data-theme="dark"]{{--bg:#17171a;--fg:#ececf0;--ince:#a0a0a8;--cizgi:#333;--kirmizi:#ff6b6b;--kirmizi-bg:#3a1d1d;--yesil:#7fd68a;--yesil-bg:#1d3a22}}
 body{{background:var(--bg);color:var(--fg);font:14px/1.45 -apple-system,Segoe UI,Roboto,sans-serif;padding:16px;max-width:1300px;margin:auto}}
 h1{{font-size:20px}} .tw{{overflow-x:auto}} table{{border-collapse:collapse;width:100%;font-size:13px}}
 th,td{{border-bottom:1px solid var(--cizgi);padding:4px 6px;text-align:left;vertical-align:top}} td.d{{text-align:right;white-space:nowrap}}
-.yer,.ozet,.bos{{color:var(--ince);font-size:12px}} tr.fark td{{color:var(--kirmizi);background:var(--kirmizi-bg)}}
+.yer,.ozet,.bos{{color:var(--ince);font-size:12px}} tr.fark td{{color:var(--kirmizi);background:var(--kirmizi-bg)}} tr.duz td{{color:var(--yesil);background:var(--yesil-bg)}}
 details{{border:1px solid var(--cizgi);border-radius:6px;margin:10px 0;padding:8px}} summary{{cursor:pointer}}
 .ust{{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.4fr);gap:16px;margin-top:8px}} @media(max-width:800px){{.ust{{grid-template-columns:1fr}}}}
 img{{width:100%;height:auto;border:1px solid var(--cizgi);background:#fff}} a{{color:inherit}}
 </style></head><body><h1>Proje kartları · AIPrefabrik</h1>
-<p class="ozet">Kırmızı: hakemin kaynakta okuduğu değer kartla farklı. Kart: yapı değerlerini okuyan ajan, listeyi depodaki liste okuyucusu çıkardı. Kaynak: hakemin montaj paftası ve yükleme listesinden kendi okuması.</p>
-<div class="tw"><table><tr><th>Kod</th><th>Yapı</th><th>Dış ölçü (cm)</th><th>Brüt m²</th><th>Liste m²</th><th>Oda</th><th>Liste kalemi</th><th>Belirsiz</th><th>Yapı farkı</th><th>Liste farkı</th></tr>{''.join(satirlar)}</table></div>
+<p class="ozet">Kırmızı: hakemin kaynakta okuduğu değer kartla farklı. Yeşil: kart 9 Kasım'da hakemin okuduğu kaynak değerle düzeltildi (Kart sütunu eski değeri gösterir). Kart: yapı değerlerini okuyan ajan, listeyi depodaki liste okuyucusu çıkardı. Kaynak: hakemin montaj paftası ve yükleme listesinden kendi okuması.</p>
+<div class="tw"><table><tr><th>Kod</th><th>Yapı</th><th>Dış ölçü (cm)</th><th>Brüt m²</th><th>Liste m²</th><th>Oda</th><th>Liste kalemi</th><th>Belirsiz</th><th>Yapı farkı</th><th>Düzeltilen</th><th>Liste farkı</th></tr>{''.join(satirlar)}</table></div>
 {''.join(bolumler)}</body></html>"""
     (cikti / "ozet.html").write_text(sayfa, encoding="utf-8")
     print(f"{len(satirlar)} proje → {cikti / 'ozet.html'}")
