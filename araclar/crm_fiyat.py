@@ -16,6 +16,9 @@ Lokman, 9 Kasım 2026 13:10: "bunu kural olarak al ve mühürle bundan sonra tek
   ve `CRM'de yok` fiyatsızdır. Kodun o günkü fiyatı 0 ya da boşsa, kod listede yoksa ya da birden çok satırdaysa kalem fiyatsızdır
   (fiyat uydurulmaz). Çırpı ipi Lokman'ın kararıyla 0 TL (D-65). `bekletme`: Lokman'ın kararıyla şimdilik fiyatsız, CRM'de fiyatı
   olsa da yazılmaz (banyo dolabı, D-75); Samet'e giden eksik listesine girmez.
+- **KDV (D-76):** eşlemenin `kdv` bölümü varsa defterin her kaydı KDV oranını ve grubunu taşır (`kdv`, `kdv_grubu`). Grup sırayla:
+  kalemin `kdv_grubu`'su, kodun `kdv.kodlar` kaydı, CRM satırının kategorisi (`kdv.kategoriler`). Grubu bulunmayan ya da kodları iki
+  ayrı orana düşen kaydın oranı yoktur (None); oran uydurulmaz. CRM fiyatı KDV hariçtir; KDV'yi `araclar/fiyatla.py` hesaplar.
 - **Çıktı:** `kurallar/fiyat/defter_2026-11.json` ile aynı şemada defter (`portman.fiyat_defteri/1`); `araclar/fiyatla.py` ve
   `araclar/teklif.py` onu okur. Yalnız standart kütüphane: sunucuda sistem python3'üyle koşar.
 """
@@ -150,13 +153,51 @@ def hesapla(g: dict, dizin: dict, anahtar: str = "") -> dict:
     return dict(sonuc, fiyat=_yuvarla(x, g.get("yuvarlama", 0.01)), durum=None)
 
 
+def kdv_bul(K: dict | None, g: dict, dizin: dict) -> tuple[float | None, str | None]:
+    """Kaydın KDV oranı ve grubu (D-76): (oran, grup) ya da (None, None). Grup sırayla kaydın `kdv_grubu`'su, kodun `K.kodlar` kaydı
+    (null: grubu bilinmiyor), CRM satırının kategorisi (`K.kategoriler`). Kodları ayrı orana düşen kaydın oranı yok; kodsuz kaydın grubu
+    yalnız `kdv_grubu`'ndan."""
+    if not K:
+        return None, None
+    grup = g.get("kdv_grubu")
+    if grup is None:
+        kodlar = g.get("kod") if isinstance(g.get("kod"), list) else [g.get("kod")]
+        bulunan: set = set()
+        for k in kodlar:
+            if not k:
+                return None, None
+            if k in K["kodlar"]:
+                bulunan.add(K["kodlar"][k])
+                continue
+            satirlar = [x for x in dizin.get(k) or [] if not g.get("icerir") or g["icerir"].lower() in (x.get("urunadi") or "").lower()]
+            kat = {x.get("kategori") for x in satirlar}
+            bulunan.add(K["kategoriler"].get(kat.pop()) if len(kat) == 1 else None)
+        if None in bulunan or len({K["gruplar"][b] for b in bulunan}) != 1:
+            return None, None
+        grup = " + ".join(sorted(bulunan))
+        return K["gruplar"][next(iter(bulunan))], grup
+    return K["gruplar"][grup], grup
+
+
 def esleme_denetle(E: dict) -> list[str]:
     """Eşleme dosyasının tutarlılığı (testler ve `defter_uret` çağırır): boş liste beklenir."""
     sorun = []
     if (E.get("kaynak") or {}).get("tek_kaynak") != "CRM":
         sorun.append("kaynak.tek_kaynak CRM değil (D-72, M-15)")
 
+    K = E.get("kdv")
+    if K is not None:                                           # D-76
+        G = K.get("gruplar") or {}
+        if not K.get("dayanak") or not G or any(not isinstance(v, (int, float)) or isinstance(v, bool) or not 0 <= v < 1 for v in G.values()):
+            sorun.append("kdv: dayanak ve gruplar (0 ile 1 arası oran) olur")
+        for yer in ("kategoriler", "kodlar"):
+            for k, v in (K.get(yer) or {}).items():
+                if v is not None and v not in G or v is None and yer == "kategoriler":
+                    sorun.append(f"kdv › {yer} › {k}: bilinmeyen grup {v!r}")
+
     def kayit(yer: str, g: dict, anahtar: str = "") -> None:
+        if "kdv_grubu" in g and (K is None or g["kdv_grubu"] not in (K.get("gruplar") or {})):
+            sorun.append(f"{yer}: bilinmeyen KDV grubu {g['kdv_grubu']!r}")
         tur = g.get("esleme")
         if tur not in E["esleme_turleri"]:
             sorun.append(f"{yer}: bilinmeyen eşleme türü {tur!r}")
@@ -238,6 +279,7 @@ def defter_uret(A: dict, E: dict | None = None) -> dict:
     }
     sayim: dict[str, int] = {}
     fiyatsiz_kurallar: list[dict] = []
+    K = E.get("kdv")
 
     def kalem(k: str, g: dict) -> dict:
         tur = g["esleme"]
@@ -257,6 +299,8 @@ def defter_uret(A: dict, E: dict | None = None) -> dict:
                  "kaynak_satir": h["kodlar"], "kaynak_kalem": " + ".join(h["adlar"]) or None,
                  "durum": h["durum"] if h["fiyat"] is None else DURUM[tur], "onay": not fiyatsiz and tur in ONAYLI,
                  "not": _not(g, h)}
+        if K:                                                   # D-76: oran ve grup (fiyatsız kalemde de; fiyat gelince geçerli)
+            d["kdv"], d["kdv_grubu"] = kdv_bul(K, g, dizin)
         sayim[d["durum"]] = sayim.get(d["durum"], 0) + 1
         return d
 
@@ -266,7 +310,7 @@ def defter_uret(A: dict, E: dict | None = None) -> dict:
             fiyatsiz_kurallar.append({"hat": hat, "yer": yer, "kodlar": h["kodlar"], "durum": h["durum"]})
             return None
         return {"fiyat": h["fiyat"], "onay": g["esleme"] in ONAYLI, "kaynak_satir": h["kodlar"], "kaynak_kalem": " + ".join(h["adlar"]),
-                "dayanak": _not(g, h)}
+                "dayanak": _not(g, h), **(dict(zip(("kdv", "kdv_grubu"), kdv_bul(K, g, dizin))) if K else {})}
 
     hatlar = {}
     for hat, H in E["hatlar"].items():
@@ -281,7 +325,7 @@ def defter_uret(A: dict, E: dict | None = None) -> dict:
                 f = kural(f"bant {b['kalem']} {a['en_mm']}", a)
                 if f:
                     araliklar.append({"en_mm": a["en_mm"], "alt_haric": a["alt_haric"], "fiyat": f["fiyat"], "onay": f["onay"],
-                                      "dayanak": f["dayanak"]})
+                                      "dayanak": f["dayanak"], **{x: f[x] for x in ("kdv", "kdv_grubu") if x in f}})
             if araliklar:
                 bantlar.append({k: b[k] for k in ("kalem", "kalinlik_mm", "yukseklik_mm")} | {"kaynak": "CRM", "araliklar": araliklar})
         cikti["bantlar"] = bantlar
@@ -293,7 +337,7 @@ def defter_uret(A: dict, E: dict | None = None) -> dict:
                     boy.append({a: b[a] for a in ("kalem", "kalem_baslar") if a in b}
                                | {"boy_mm": b["boy_mm"], "fiyat": f["fiyat"], **{a: b[a] for a in ("yuvarlama", "kapatma_m") if a in b},
                                   "kaynak": "CRM", "kaynak_satir": f["kaynak_satir"], "kaynak_kalem": f["kaynak_kalem"], "onay": f["onay"],
-                                  "dayanak": f["dayanak"]})
+                                  "dayanak": f["dayanak"], **{x: f[x] for x in ("kdv", "kdv_grubu") if x in f}})
             cikti["boy_onerileri"] = boy
         if H.get("makas_kurali"):
             m = H["makas_kurali"]
@@ -301,7 +345,7 @@ def defter_uret(A: dict, E: dict | None = None) -> dict:
             if f:
                 cikti["makas_kurali"] = {"kalem_baslar": m["kalem_baslar"], "kg_m": m["kg_m"], "kg_fiyat": f["fiyat"], "sacak_mm": m["sacak_mm"],
                                          "kaynak": "CRM", "kaynak_satir": f["kaynak_satir"], "kaynak_kalem": f["kaynak_kalem"],
-                                         "onay": f["onay"], "dayanak": f["dayanak"]}
+                                         "onay": f["onay"], "dayanak": f["dayanak"], **{x: f[x] for x in ("kdv", "kdv_grubu") if x in f}}
         cikti["atla"] = H.get("atla") or []
         hatlar[hat] = cikti
     return {
@@ -310,7 +354,8 @@ def defter_uret(A: dict, E: dict | None = None) -> dict:
         "aciklama": ("CRM stok fiyatlarından üretilen defter (İE-35, D-72): `araclar/crm_fiyat.py`, eşleme "
                      f"`kurallar/fiyat/crm_esleme.json` ({E.get('surum')}). Elle düzeltilmez; düzeltme eşlemeye ya da CRM'e girer."),
         "para_birimi": "TL",
-        "kdv": "CRM yanıtında KDV yazmıyor",
+        "kdv": ({"dayanak": K["dayanak"], "not": "CRM fiyatı KDV hariç; kaydın oranı `kdv`, grubu `kdv_grubu` (None: oran yok, uydurulmaz)",
+                 "gruplar": K["gruplar"]} if K else "CRM yanıtında KDV yazmıyor"),
         "onay_kurali": ("Tek kaynak CRM (D-72, M-15). onay true: eşleme birebir ya da Lokman'ın onaylı hesap kuralı. onay false: yakın "
                         "ürün ya da birim varsayımı; araclar/fiyatla.py bunları yalnız --oneri ile uygular. Fiyatı 0 olan, CRM'de "
                         "bulunmayan ve birimi anlaşılmayan kalem fiyatsız."),

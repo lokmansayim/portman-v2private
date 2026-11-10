@@ -14,6 +14,11 @@ profilin ya da panelin tam boyunun fiyatından boyla orantılı; `boy_onerileri`
 onaylı), o da yoksa makas kuralı (makasın kg'ı saçaktan saçağa boyuyla orantılı × kg fiyatı; `makas_kurali`; D-37). Birimi `kg` olan
 kalemde tutar satırın kg'ı × fiyat, öteki kalemlerde adet × fiyat.
 
+KDV (D-76): CRM'den üretilen defter kayıtlarında KDV oranını taşır (`araclar/crm_fiyat.kdv_bul`; defterin `kdv`'si sözlük). O zaman
+fiyatlı her satır `kdv_orani`, `kdv_grubu`, `kdv_tutari` (tutar × oran, kuruşa), özet `kdv` (KDV hariç, oranlara göre KDV, KDV dahil, oranı
+olmayan satırlar) taşır. Oranı olmayan satırın KDV'si boş kalır, KDV dahil toplam eksik sayılır; oran uydurulmaz. Eski defterle
+(`--defter`, KDV'siz) çıktı aynen eskisi gibidir.
+
 Fiyat uydurulmaz: defterde `onay: false` olan fiyat (yedek kaynaktan öneri) yalnız `--oneri` ile uygulanır ve "öneri" diye
 işaretlenir; fiyatı olmayan satır boş kalır, özette sayılır. Uygulanmayan önerinin birim fiyatı satırda `oneri_fiyat` olarak durur
 (toplama girmez; teklif sarı gösterir, özette `oneri_bekleyen`). Defterde kaydı olan anahtar yalnız kendi kaydıyla fiyatlanır, banda
@@ -142,32 +147,33 @@ def fiyatla(L: dict, defter: dict, hat: str | None = None, oneri: bool = False) 
     kalemler, atla = H["kalemler"], set(H.get("atla") or [])
     satirlar, gruplar, fiyatsiz = [], {}, []
     toplam = onayli = oneri_toplam = 0.0
+    kdv_kip = isinstance(defter.get("kdv"), dict)              # D-76: CRM defteri kayıtta oran taşır
     bekleyen = {"satir": 0, "tutar": 0.0}                       # uygulanmayan öneriler (toplama girmez)
     for i, s in enumerate(L["satirlar"], 1):
         if s.get("kalem") in atla:
             continue
         k = anahtar(s, hat)
         g = kalemler.get(k)
-        fiyat = tutar = oneri_fiyat = None
+        fiyat = tutar = oneri_fiyat = kayit = None
         durum, kaynak, birim = "fiyat yok", None, (g or {}).get("birim") or s.get("birim")
         if g is not None:                                          # defterde kaydı olan anahtar kendi kaydıyla; banda düşmez
             if g.get("fiyat") is not None and (g["onay"] or oneri):
-                fiyat, kaynak, durum = g["fiyat"], g["kaynak"], ("onaylı" if g["onay"] else "öneri")
+                fiyat, kaynak, durum, kayit = g["fiyat"], g["kaynak"], ("onaylı" if g["onay"] else "öneri"), g
             elif g.get("fiyat") is not None:
                 durum, oneri_fiyat = "öneri, onay bekliyor", g["fiyat"]
         elif hat == "prefabrik" and (b := bant_bul(s, H.get("bantlar") or [])):
             if b[1]["onay"] or oneri:
-                fiyat, kaynak, durum = b[1]["fiyat"], b[0]["kaynak"], ("onaylı bant" if b[1]["onay"] else "öneri bant")
+                fiyat, kaynak, durum, kayit = b[1]["fiyat"], b[0]["kaynak"], ("onaylı bant" if b[1]["onay"] else "öneri bant"), b[1]
             else:
                 durum, oneri_fiyat = "öneri bant, onay bekliyor", b[1]["fiyat"]
         elif hat == "prefabrik" and (bo := boy_onerisi_bul(s, H.get("boy_onerileri") or [])):
             if bo[0]["onay"] or oneri:
-                fiyat, kaynak, durum = bo[1], bo[0]["kaynak"], ("onaylı boy" if bo[0]["onay"] else "öneri boy")
+                fiyat, kaynak, durum, kayit = bo[1], bo[0]["kaynak"], ("onaylı boy" if bo[0]["onay"] else "öneri boy"), bo[0]
             else:
                 durum, oneri_fiyat = "öneri boy, onay bekliyor", bo[1]
         elif hat == "prefabrik" and (mk := makas_bul(s, H.get("makas_kurali"))):
             if mk[0]["onay"] or oneri:
-                fiyat, kaynak, durum = mk[1], mk[0]["kaynak"], ("onaylı makas kuralı" if mk[0]["onay"] else "öneri makas kuralı")
+                fiyat, kaynak, durum, kayit = mk[1], mk[0]["kaynak"], ("onaylı makas kuralı" if mk[0]["onay"] else "öneri makas kuralı"), mk[0]
             else:
                 durum, oneri_fiyat = "öneri makas kuralı, onay bekliyor", mk[1]
         else:
@@ -196,10 +202,52 @@ def fiyatla(L: dict, defter: dict, hat: str | None = None, oneri: bool = False) 
                          "durum": durum, "kaynak": kaynak, "kaynak_adi": (defter["kaynaklar"].get(kaynak) or {}).get("kisa") if kaynak else None,
                          **({"oneri_fiyat": oneri_fiyat} if oneri_fiyat is not None else {}),
                          **{a: g[a] for a in YAZILAN if g and g.get(a)}})
-    return {"hat": hat, "defter_surumu": defter.get("surum"), "oneri_dahil": oneri, "satirlar": satirlar,
-            "ozet": {"toplam": round(toplam, 2), "onayli_fiyatlarla": round(onayli, 2), "onerilerle": round(oneri_toplam, 2),
-                     "satir": len(satirlar), "fiyatli": sum(1 for x in satirlar if x["tutar"] is not None),
-                     "fiyatsiz": fiyatsiz, "oneri_bekleyen": {"satir": bekleyen["satir"], "tutar": round(bekleyen["tutar"], 2)}, "gruplar": gruplar}}
+        if kdv_kip:                                                # D-76: oran yalnız fiyatı olan satırda; yoksa boş
+            oran = (kayit or {}).get("kdv") if tutar is not None else None
+            satirlar[-1] |= {"kdv_orani": oran, "kdv_grubu": (kayit or {}).get("kdv_grubu") if oran is not None else None,
+                             "kdv_tutari": round(tutar * oran, 2) if oran is not None else None}
+    ozet = {"toplam": round(toplam, 2), "onayli_fiyatlarla": round(onayli, 2), "onerilerle": round(oneri_toplam, 2),
+            "satir": len(satirlar), "fiyatli": sum(1 for x in satirlar if x["tutar"] is not None),
+            "fiyatsiz": fiyatsiz, "oneri_bekleyen": {"satir": bekleyen["satir"], "tutar": round(bekleyen["tutar"], 2)}, "gruplar": gruplar}
+    if kdv_kip:
+        ozet["kdv"] = kdv_ozeti(satirlar, ozet["toplam"], defter["kdv"].get("dayanak"))
+    return {"hat": hat, "defter_surumu": defter.get("surum"), "oneri_dahil": oneri, "satirlar": satirlar, "ozet": ozet}
+
+
+def oran_yazi(oran: float) -> str:
+    return f"%{oran * 100:g}"
+
+
+def kdv_ozeti(satirlar: list[dict], haric: float, dayanak: str | None = None) -> dict:
+    """D-76: KDV hariç toplam (fiyatlı satırlar), oranlara göre matrah ve KDV (satır KDV'lerinin toplamı), KDV dahil. Tutarı olup oranı
+    olmayan satır (0 TL'lik satır hariç) `oransiz`'da sayılır; KDV'si yoktur, KDV dahil toplam o satırlar için eksiktir (`eksik`)."""
+    oranlar: dict[str, dict] = {}
+    oransiz = []
+    for s in satirlar:
+        if not s.get("tutar"):
+            continue
+        if s.get("kdv_orani") is None:
+            oransiz.append({"sira": s["sira"], "kalem": s["kalem"], "olcu": s.get("olcu"), "tutar": s["tutar"]})
+            continue
+        o = oranlar.setdefault(oran_yazi(s["kdv_orani"]), {"oran": s["kdv_orani"], "matrah": 0.0, "kdv": 0.0, "satir": 0})
+        o["matrah"] += s["tutar"]; o["kdv"] += s["kdv_tutari"]; o["satir"] += 1
+    for o in oranlar.values():
+        o["matrah"], o["kdv"] = round(o["matrah"], 2), round(o["kdv"], 2)
+    kdv = round(sum(o["kdv"] for o in oranlar.values()), 2)
+    return {"dayanak": dayanak, "haric": round(haric, 2), "kdv": kdv, "dahil": round(haric + kdv, 2),
+            "oranlar": dict(sorted(oranlar.items(), key=lambda x: -x[1]["oran"])),
+            "oransiz": {"satir": len(oransiz), "tutar": round(sum(x["tutar"] for x in oransiz), 2), "satirlar": oransiz},
+            "eksik": bool(oransiz)}
+
+
+def kdv_yazi(k: dict) -> str:
+    """Özetin KDV satırı (komut, teklif Özet'i, PDF): oranlara göre KDV ve oranı olmayan satırlar."""
+    def tl(x: float) -> str:                                    # Türkçe yazım: 1.234,50
+        return f"{x:,.2f}".replace(",", " ").replace(".", ",").replace(" ", ".")
+    parca = [f"{a} KDV {tl(o['kdv'])} TL ({o['satir']} satır)" for a, o in k["oranlar"].items()]
+    if k["oransiz"]["satir"]:
+        parca.append(f"{k['oransiz']['satir']} satırın KDV oranı yok ({tl(k['oransiz']['tutar'])} TL), KDV dahil toplam eksik")
+    return "; ".join(parca)
 
 
 def m2_kiyasi(liste_toplami: float, alan: float, m2_fiyat: float, esik: float | None = None) -> dict:
@@ -246,6 +294,9 @@ def main(argv=None) -> int:
     print(f"{ad} · {R['hat']} · defter {R['defter_surumu']}{' · öneriler dahil' if o.oneri else ''}")
     print(f"  toplam {oz['toplam']:,.2f} TL (onaylı fiyatlarla {oz['onayli_fiyatlarla']:,.2f}, önerilerle {oz['onerilerle']:,.2f}) · "
           f"{oz['fiyatli']}/{oz['satir']} satır fiyatlı, {len(oz['fiyatsiz'])} satır fiyatsız")
+    if oz.get("kdv"):
+        k = oz["kdv"]
+        print(f"  KDV ({k['dayanak']}): KDV hariç {k['haric']:,.2f} + KDV {k['kdv']:,.2f} = KDV dahil {k['dahil']:,.2f} TL · {kdv_yazi(k)}")
     for f in oz["fiyatsiz"]:
         print(f"  fiyatsız: {f['anahtar']} ({f['durum']}, miktar {f['miktar']})")
     if R.get("m2"):
