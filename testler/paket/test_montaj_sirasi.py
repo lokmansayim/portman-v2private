@@ -51,6 +51,7 @@ def test_kural_kitabi():
     assert [k["no"] for k in ks] == [f"MS-{i:02d}" for i in range(1, len(ks) + 1)]   # sıralı, boşluksuz
     for k in ks:
         assert k["kural"] and k["soz"].startswith("Lokman, ") and k["ust"]["ad"] and k["ust"]["adim"] and k["alt"]["adim"], k["no"]
+    # MS-01'in alt parçaları kaplama adımının hepsi: mahya türü ne olursa olsun alın sacının altına girer (Lokman, 10 Kasım 21:01)
     assert ks[0]["ust"] == {"adim": "alin", "ad": "Alın sacı", "bu_icerir": "üst kıvrım"} and ks[0]["alt"] == {"adim": "kaplama"}
 
 

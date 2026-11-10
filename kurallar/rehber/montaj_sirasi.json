@@ -3,10 +3,16 @@
   "kurallar": [
     {
       "no": "MS-01",
-      "kural": "Alın sacı trapez sacı ve mahyayı örter. Önce trapez sac ve mahya gelir, sonra alın sacı üstünü örter. Alın sacının alnının ve üst kıvrımının üstünde (çatı yüzüne dik doğrultuda, 50 cm içinde) trapez sac, panel ya da mahya olmaz.",
-      "ust": {"adim": "alin", "ad": "Alın sacı", "bu_icerir": "üst kıvrım"},
-      "alt": {"adim": "kaplama"},
-      "soz": "Lokman, 10 Kasım 2026 20:16 UTC: \"mantiken sıralamarda bile böyle birşey olmaz önce trapez sac ve mahya gelir sonra alın sacı üzerini örter\"",
+      "kural": "Alın sacı trapez sacı ve mahyayı örter. Önce trapez sac ve mahya gelir, sonra alın sacı üstünü örter. Mahya, türü ne olursa olsun (hadveli trapez sac mahyası, düz mahya, metal kiremit mahyası), alın sacının altına girer; yoksa bina yağmurda su alır. Alın sacının alnının ve üst kıvrımının üstünde (çatı yüzüne dik doğrultuda, 50 cm içinde) trapez sac, panel ya da mahya olmaz.",
+      "ust": {
+        "adim": "alin",
+        "ad": "Alın sacı",
+        "bu_icerir": "üst kıvrım"
+      },
+      "alt": {
+        "adim": "kaplama"
+      },
+      "soz": "Lokman, 10 Kasım 2026 20:16 UTC: \"mantiken sıralamarda bile böyle birşey olmaz önce trapez sac ve mahya gelir sonra alın sacı üzerini örter\"; 21:01 UTC: \"mahya ne olursa olsun alın sacının altına girecek yoksa bina yağmurlarda su alır\"",
       "onay": null
     }
   ]
