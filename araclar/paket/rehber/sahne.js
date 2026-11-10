@@ -804,7 +804,59 @@ const [RIB_SAC, RIB_IC] = (() => {
   // Mahya: her beşiğin mahyası, hadve tepelerinin üstünde; yüksekliği verideki çatının (topR) mahyasından
   // kanat her yanda D.kaplama.mahya_kanat cm (trapez sac mahyası 35, metal kiremit mahyası 26; kart modelinin gösterim kesiti), mahyayı 1 cm aşar
   const KN = D.kaplama.mahya_kanat, KO = KN / 2 - 1;
-  D.kaplama.mahya.forEach((e, j) => {
+  // Trapez sac mahyası sacla aynı biçimde (27/200) preslidir: iki kanadı mahyanın iki yanında KN cm, her hadvesi sacın hadvesinin üstüne oturur;
+  // boyu levhanın kapattığı kadar, her levhanın üstünde bir mahya, bindirme yok (Lokman, 10.11.2026 04:45: bağlantıdaki "Trapez Mahya",
+  // "Trapez mahya L:100 ve 35x35"; 17:01: "mahya düz"). Kanatlar iki yüzün kendi çerçevesinde kurulur, mahyanın üstünde birleşir.
+  if (D.kaplama.mahya_hadveli) {
+    const MK = 0.06;   // mahya sacın üstünde 0,6 mm
+    const n0 = TR1 + MK, n1 = n0 + 0.05, nh = TU1 + MK;
+    const planda = (w, sx, hy, z) => { const v = new THREE.Vector3(sx / 100, hy / 100, z / 100).applyMatrix4(w.matrixWorld); return [(v.x + D.dis[0] / 200) * 100, (D.dis[1] / 200 - v.z) * 100]; };
+    // Kalkan ucunda mahya alın sacının üst kıvrımlarına değer, girmez: alının yüzünden kenar hadvesinin iç tabanına kadar (RIB_KENAR + RIB_TABAN / 2)
+    // mahya yok (Lokman, 9.11.2026: "çakışma olmasın tam değme olsun"; M-17)
+    const KK = KALKAN.map(G => { const w = cerceve(G.r, ...G.O); w.updateMatrixWorld(); return { G, w, s0: Math.min(G.uc.A, G.uc.B) - 1, s1: Math.max(G.uc.A, G.uc.B) + 1 }; });
+    const kalkanUcu = ([x, y]) => KK.some(({ G, w, s0, s1 }) => { const v = w.worldToLocal(new THREE.Vector3(X(x), 0, Z(y))); return Math.abs(v.z * 100 - G.oTip) < 1.5 && v.x * 100 > s0 && v.x * 100 < s1; });
+    const KES = RIB_KENAR + RIB_TABAN / 2 + 0.1;
+    let mo = 0;
+    D.kaplama.mahya.forEach(e => {
+      const R = RF[e.R], w = cerceve(e.r, ...e.O); w.updateMatrixWorld();
+      const yuzler = Object.values(YUZ).filter(Y => Y.R === R && Y.serit);
+      // her yüzün levhaları (plan ekseni boyunca) ve mahyanın o yüzdeki t aralığı
+      const kanat = yuzler.map(Y => {
+        const enine = Y.eksen === 'y', tAt = v => enine ? Y.tOf(Y.E[0], v) : Y.tOf(v, Y.E[1]);
+        const sM = Math.max(...Y.P.map(p => p[0])), tn = Math.tan(R.th);
+        const Pe = ccw(Y.P.map(([s_, t_]) => [s_ >= sM - 0.01 ? sM + 3 : s_, t_]));
+        const uc = e.z.map(z => planda(w, e.s0, 0, z)), tu = uc.map(p => Y.tOf(...p));
+        const [tm0, tm1] = tu.map((t, k) => kalkanUcu(uc[k]) ? t + Math.sign(tu[1 - k] - t) * KES : t).sort((a, b) => a - b);
+        const ribs = D.kaplama.hadve[Y.hadve].map(tAt);
+        const levhalar = dizi(Y.serit.bas, Y.serit.son, Y.serit.yon).map(([v0, v1]) => [tAt(v0), tAt(v1)].sort((a, b) => a - b))
+          .map(([t0, t1]) => [Math.max(t0, tm0), Math.min(t1, tm1)]).filter(([t0, t1]) => t1 - t0 > 1);
+        return { Y, sM, tn, Pe, ribs, levhalar };
+      });
+      const sayi = Math.max(0, ...kanat.map(k => k.levhalar.length));
+      for (let i = 0; i < sayi; i++) {
+        const parca = new THREE.Group(); let boy = 0;
+        kanat.forEach(({ Y, sM, tn, Pe, ribs, levhalar }) => {
+          const lv = levhalar[i]; if (!lv) return;
+          const [t0, t1] = lv; boy = Math.max(boy, t1 - t0);
+          const g = Y.grup(), m = mat('ridge', AD.kaplama), sA = sM - KN;
+          const kes = sB => { const C = dikd(sA, sB, t0, t1); return Y.icbukey ? kirp(Pe, C) : kirp(C, Pe); };
+          const Q = kes(sM + n1 * tn); if (!Q) return;
+          g.add(levha(Q, n0, n1, m));
+          const Qr = kes(sM + (nh + RIBH) * tn);
+          ribs.forEach(tc => {
+            if (tc < t0 - 0.01 || tc >= t1 - 0.01 || !Qr) return;
+            const iv = aralik(Qr, 1, Math.min(Math.max(tc, t0 + 0.05), t1 - 0.05)); if (!iv || iv[1] - iv[0] < 4) return;
+            const rb = mesh(new THREE.ExtrudeGeometry(RIB, { depth: (iv[1] - iv[0]) / 100, bevelEnabled: false }), m);
+            rb.rotation.y = Math.PI / 2; rb.position.set(iv[0] / 100, nh / 100, tc / 100); g.add(rb);
+          });
+          parca.add(g);
+        });
+        if (!parca.children.length) continue;
+        add(AD.kaplama, parca, 9 + mo++ * 0.3, { kod: KB('mahya'), ad: KM.mahya_ad, satir: [['Bu parça', `${e.ad} · ${fmtc(boy)} cm`], ['Biçim', KM.mahya_bicim],
+          ['Liste', KM.mahya_liste], ...kartSat(KB('mahya'))] });
+      }
+    });
+  } else D.kaplama.mahya.forEach((e, j) => {
     const R = RF[e.R], T = RF[e.topR], top = ysR(T, T.M) + (PTOP + 0.8) / T.cos, [z0, z1] = e.z;
     [1, -1].forEach((side, i) => {
       const w = cerceve(e.r, ...e.O), o = lb(-KN / 2, KN / 2, -0.3, 0.3, z0, z1, mat('ridge', AD.kaplama));

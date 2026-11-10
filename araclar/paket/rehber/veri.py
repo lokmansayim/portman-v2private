@@ -1072,11 +1072,6 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
                              ("" if "profil" in KAP else "; kart modelinin kuralında kaplama profili yok"))
     KPR = KAP["profil"][next(iter(kap_tur))] if next(iter(kap_tur)) in KAP["profil"] else KAP["profil"][KAP["profil_esi"][next(iter(kap_tur))]]
     renk = kucuk(OZ.get("çatı kaplama rengi", "") or "")
-    # hadve aralığı kuraldan: tek kat panelde 20 cm (27/200), sandviç panelde 25 cm (5 hadvenin biri bindirme hadvesi; Lokman 1.11.2026 10:46)
-    hadve, HA = {}, KPR["hadve_araligi"]
-    for k, (lo_, hi_) in hadve_ar.items():
-        n = max(1, round((hi_ - lo_ - 2 * KPR["kenar"]) / HA))
-        hadve[k] = [_r(lo_ + KPR["kenar"] + i * (hi_ - lo_ - 2 * KPR["kenar"]) / n, 3) for i in range(n + 1)]
     if GIR or CAP:                                # levhalar kitabın çok düzlemli diziliminin ilk şeridinden (liste ve kart modeli aynı)
         for Y in yuz.values():
             Y["serit"] = {"ad": " · ".join(f"{boy.get(p_, '')} ({p_})" for p_ in Y.pop("_parcalar")), "bas": _r(Y.pop("_bas")),
@@ -1098,6 +1093,22 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
             # mahya ana yüzün devamı olan yüzle biter (ötesi ana çatının yüzü); devam yoksa gövdeye kadar
             lo_, hi_ = hadve_ar[f"H{v['R']}{'R' if v['sag_devam'] and not v['sol_devam'] else 'L'}"]
             mahya.append({"R": v["R"], "topR": v["R"], "r": 0, "O": [0, 0], "s0": v["M"], "z": [_r(-hi_), _r(-lo_)], "ad": f"{kucuk(v['ad'])} mahyası"})
+    # hadve aralığı kuraldan: tek kat panelde ve trapez sacta 20 cm (27/200), sandviç panelde 25 cm (5 hadvenin biri bindirme hadvesi; Lokman 1.11.2026 10:46).
+    # Hadveler levhalarla birlikte dizilir: ilk levhanın başladığı kalkan kenarından `kenar` içeride ilk hadve, sonra tam aralıkla; son levha
+    # kesilir, aralık değişmez (Lokman, 10.11.2026 17:01: "Trapez sacında Hadveleri ölçülü değil"). Aynı listeyi paylaşan yüzler aynı
+    # başlangıçtan dizilir; mahyanın iki yanındaki hadveler üst üste gelir.
+    # Tek kat panelde ve sandviç panelde (M-06) hadveler bugünkü gibi iki uç arasında eşit aralıkla.
+    hadve, HA = {}, KPR["hadve_araligi"]
+    for k, (lo_, hi_) in hadve_ar.items():
+        if not TR_:
+            n = max(1, round((hi_ - lo_ - 2 * KPR["kenar"]) / HA))
+            hadve[k] = [_r(lo_ + KPR["kenar"] + i * (hi_ - lo_ - 2 * KPR["kenar"]) / n, 3) for i in range(n + 1)]
+            continue
+        Yk = next((Y for Y in yuz.values() if Y["hadve"] == k), None)
+        bas, yon = (Yk["serit"]["bas"], Yk["serit"]["yon"]) if Yk else (lo_, 1)
+        ilk, son_ = bas + yon * KPR["kenar"], (hi_ if yon > 0 else lo_)
+        yer = [ilk + yon * HA * i for i in range(int(abs(son_ - ilk) // HA) + 1)]
+        hadve[k] = sorted(_r(v, 3) for v in yer if lo_ + KPR["taban"] / 2 - 0.01 <= v <= hi_ - KPR["taban"] / 2 + 0.01)
     # mahyanın kanadı (her yanda, cm) kart modelinin gösterim kesitinden: trapez sac mahyası 35 (CK-07; Lokman, 10.11.2026: "Trapez mahya
     # L:100 ve 35x35"; D-74), metal kiremit mahyası 26 (`kenar_gosterim.kesit_cm`)
     KG = (((SAYIM.get("kenar") or {}).get("degerler") or {}).get("kenar_gosterim") or {}).get("kesit_cm") or {}
@@ -1107,7 +1118,7 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
     kaplama = {
         "profil": {"hadve": KPR["hadve"], "tepe": KPR["tepe"], "taban": KPR["taban"], "kenar": KPR["kenar"], "kapatir": kap_cm,
                    **({"yalitim": KPR["yalitim"]} if KPR["yalitim"] else {})},
-        "hadve": hadve, "mahya": mahya, "mahya_kanat": mahya_kanat,
+        "hadve": hadve, "mahya": mahya, "mahya_kanat": mahya_kanat, "mahya_hadveli": bool(TR_),
         "metin": {"ad": f"{kap_ad} {{ad}}", "kesim": f"{kap_ad} · kesim parçası", "say_onek": kap_ad,
                   "profil": (f"100 cm kapatır, {KPR['hadve_sayisi']} hadveli (Lokman, 1.11.2026); hadve {fmtc(KPR['hadve'] * 10)} mm (üretici tablosu); "
                              f"yalıtım {fmtc(KPR['yalitim'] * 10)} mm (satıcının stok standardı, varsayım); hadveler {fmtc(KPR['hadve_araligi'])} cm arayla, "
@@ -1121,7 +1132,9 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
                   "dizilim": f"kalkan kenarından başlayarak, her levha {fmt(kap_cm)} cm kapatır; boy eğim boyunca (liste kuralı)",
                   "renk": renk or "—",
                   "liste": "; ".join(f"{s['kalem']} {s['olcu']} · {s['adet']} adet" for s in KAPS),
-                  "mahya_ad": MAH, "mahya_liste": f"{ls(MAH)}; {ls('Mahya bandı')}"},
+                  "mahya_ad": MAH, "mahya_liste": f"{ls(MAH)}; {ls('Mahya bandı')}",
+                  **({"mahya_bicim": f"sacla aynı 27/200 biçiminde presli; kanat {fmtc(mahya_kanat)} + {fmtc(mahya_kanat)} cm, boyu levhanın kapattığı kadar "
+                                     f"({fmt(kap_cm)} cm); her hadvesi sacın hadvesinin üstüne oturur (Lokman, 10.11.2026)"} if TR_ else {})},
     }
 
     # ---------- izolasyon ----------
