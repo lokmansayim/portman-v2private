@@ -12,7 +12,10 @@ Kural:
 - kural kitabının `baz_paket_cati_kaplamasi` = `tek_kat_panel` çeliğin standardıdır, prefabrikte okunmaz (`kitapla_farkli`);
 - yazılı kaplama (opsiyon) aynen okunur: tek kat panel, sandviç panel, kiremit desen sac bugünkü satırlarıyla;
 - trapez sac mahyasının kanadı her yanda 35 cm (kart CK-07, kart modelinin gösterimi);
-- TK-01 r08 (yalnız çatı kaplaması "Trapez Saç"): çatı satırları Lokman'a gösterilen önce/sonra görseliyle aynı; r07 (M-02 hedef örneği) aynen.
+- tek kat panelde mahya düz mahya L 2800 (Lokman, 10 Kasım 2026 08:33: "Tek kat panelde mahya değişmiyor Düz Mahya L: 2800");
+- trapez sacta 5,5 × 60 vida tek satır, kaplama vidası (Lokman, 08:38, karar kartı: "Hayır, bugünkü tek satır kalsın");
+- TK-01 r08 (yalnız çatı kaplaması "Trapez Saç"): çatı satırları Lokman'ın 08:33'te onayladığı önce/sonrayla aynı ("tüm hepsine onaylıyorum");
+  r07 (M-02 hedef örneği) aynen.
 """
 from __future__ import annotations
 
@@ -121,6 +124,18 @@ def test_tk01_r08_once_sonra(kurallar):
     assert sonra == {"Trapez sac · ana çatı": ("L 5100", 20), "Trapez sac · ön veranda çatısı": ("L 2400", 5),
                      "Trapez sac · arka veranda çatısı": ("L 1770", 4), "Trapez sac mahyası": ("L 1000", 15),
                      "Mahya bandı": ("rulo 10 m", 2), "Trapez vida 5,5 × 60 (trapez sac)": ("adet", 600)}
+
+
+def test_trapez_sacta_vida_tek_satir(N, kurallar):
+    """Lokman, 10 Kasım 2026 08:38, karar kartı ("Trapez sacta m² × 2,5 vidası ayrı satır olarak eklensin mi?"): "Hayır, bugünkü tek satır
+    kalsın". Trapez sacta 5,5 × 60 vida yalnız kaplama vidası satırı (panel boyundan); m² × 2,5 satırı tek kat panelde ve sandviç panelde.
+    Gerçek listeler: kapatması bilinen 7 trapez evde 5,5 × 60 tek satır, kaplama vidası hesabıyla tutuyor; tek kat panelli evde m² satırı var."""
+    m2 = "Trapez vida 5,5 × 60 (trapez sac / metal kiremit)"
+    for kaplama in (None, "Trapez Saç"):
+        c = _cati(_liste(N, kurallar, kaplama))
+        assert m2 not in c and [k for k in c if k.startswith("Trapez vida 5,5 × 60")] == ["Trapez vida 5,5 × 60 (trapez sac)"], kaplama
+    for kaplama in ("Tek Kat Panel", "Sandviç Panel"):
+        assert _cati(_liste(N, kurallar, kaplama))[m2] == ("adet", 200), kaplama          # PK-01: m² × 2,5, 100'e yukarı
 
 
 @pytest.mark.parametrize("eski, yeni", [("TK01_r07", "TK01_r08"), ("TK02", "TK02_r04")])
