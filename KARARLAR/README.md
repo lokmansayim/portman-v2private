@@ -185,7 +185,7 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | D | D-73 | Montaj rehberinde baş makas Z'si ve alın sacı: Lokman'ın çizimi, alın tek biçim, köşede derenin biçiminde kesilir (Lokman 9.11 15:16 kartı, 19:57) | yazıldı (9.11; montaj rehberi sohbeti, `claude/project-thread-756g5a`) |
 | D | D-74 | prefabrik çatı kaplama standardı trapez sac, çelikte tek kat panel (Lokman 10.11 04:58 "kesin mühürle") | alındı (10.11; bakım sohbeti, PR #151) |
 | D | D-75 | CRM eşlemesi: kutu profil 6 metrelik boyun fiyatından, pencere paneli tam panodan (üst 1/5, alt 1/3), banyo dolabı şimdilik boş (İE-35; Lokman 10.11 10:01) | yazıldı (10.11; CRM sohbeti, `claude/project-thread-03tosk`) |
-| D | D-76 | CRM fiyatına KDV oranı malzeme grubuna göre: %20, %10, KDV'siz; fiyatlı liste ve teklif KDV hariç, KDV ve KDV dahil yazar; listede olmayan kalemde oran uydurulmaz (İE-35; Lokman 10.11 16:51–16:56) | yazıldı (10.11; CRM sohbeti, `claude/project-thread-03tosk`) |
+| D | D-76 | CRM fiyatına KDV oranı malzeme grubuna göre: %20, %10, KDV'siz; fiyatlı liste ve teklif KDV hariç, KDV ve KDV dahil yazar; listede olmayan 8 kalem %20, bayi formu aynen (kart 18:01); listede adı geçmeyen yerler de kural (18:05); grubu olmayan kalemde oran uydurulmaz (İE-35; Lokman 10.11 16:51–16:58, 18:01, 18:05) | yazıldı (10.11; CRM sohbeti, `claude/project-thread-03tosk`) |
 | D | **D-77** | — | **sıradaki boş** |
 | İE | İE-01–İE-08 | bu depo (`main`) | yazıldı |
 | İE | İE-09 | model atölyesi: kontrollü model üretimi ve banka hattı (Görev 6e; pano 30; P6001 güncellemesi kapsam dışı) | alındı (16.10; `claude/gorev-6e-model-atolyesi-rnhtcp`; PR-1 banka hattı 29.10, `claude/project-thread-rhjgzv`) |

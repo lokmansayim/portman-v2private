@@ -49,7 +49,7 @@
  },
  "kdv": {
   "dayanak": "D-76",
-  "aciklama": "KDV oranı (D-76; Lokman 10 Kasım 2026 16:51:25 \"listeye Tam KDV kesilenler var Hiç KDV almayanlar var ve %10 KDV alanlar var\", 16:54 el yazısı liste, 16:55:54 \"Çelik Paneller %20, Shingle %20, Çatı İzolasynonu %20\"). CRM fiyatı KDV hariçtir. Kalemin grubu sırayla: kalemin `kdv_grubu`'su, kodun `kodlar` kaydı, CRM satırının kategorisi (`kategoriler`). `kodlar`'da null: grubu bilinmiyor, kategoriden de alınmaz. Grubu bulunmayan ya da kodları iki ayrı orana düşen kalemin oranı yoktur; oran uydurulmaz, fiyatlı listede 'KDV oranı yok' yazar ve KDV dahil toplam eksik sayılır. Bayiye giden formun fiyatı (M-14) bu oranları okumaz.",
+  "aciklama": "KDV oranı (D-76; Lokman 10 Kasım 2026 16:51:25 \"listeye Tam KDV kesilenler var Hiç KDV almayanlar var ve %10 KDV alanlar var\", 16:54 el yazısı liste, 16:55:54 \"Çelik Paneller %20, Shingle %20, Çatı İzolasynonu %20\"; 18:01:47 kart seçimi \"Hepsi %20, form aynen\": listede olmayan 8 kalem (yapıştırma pano, kapı panoları, tek kat panel, tavan H'ı, PVC omega kapak, PVC betopan H'ı, acil müdahale kapağı, baca) %20, CRM fiyatı KDV hariç, bayi formu bugünkü gibi; 18:05:03 \"hepsini kural olarak kayda geç\": çelik sohbetinin Lokman'a yazdığı yerler de kuraldır, `listede_adi_yok`; `okuma` Lokman'a gösterilmemiş eş anlamlılar). CRM fiyatı KDV hariçtir. Kalemin grubu sırayla: kalemin `kdv_grubu`'su, kodun `kodlar` kaydı, CRM satırının kategorisi (`kategoriler`). `kodlar`'da null: grubu bilinmiyor, kategoriden de alınmaz. Grubu bulunmayan ya da kodları iki ayrı orana düşen kalemin oranı yoktur; oran uydurulmaz, fiyatlı listede 'KDV oranı yok' yazar ve KDV dahil toplam eksik sayılır. Bayiye giden formun fiyatı (M-14) bu oranları okumaz.",
   "gruplar": {
    "Metal aksam": 0.2,
    "Betopan": 0.2,
@@ -76,7 +76,15 @@
    "Vitrifiye": 0.0,
    "Trapez": 0.1,
    "Sandviç panel": 0.1,
-   "Kutu profil": 0.1
+   "Kutu profil": 0.1,
+   "Yapıştırma pano": 0.2,
+   "Kapı panoları": 0.2,
+   "Tek kat panel": 0.2,
+   "Tavan H'ı": 0.2,
+   "PVC omega kapak": 0.2,
+   "PVC betopan H'ı": 0.2,
+   "Acil müdahale kapağı": 0.2,
+   "Baca": 0.2
   },
   "kategoriler": {
    "Metal Aksam Grubu": "Metal aksam",
@@ -156,19 +164,44 @@
    "DG6": "Vida",
    "DG7": "Vida",
    "DG8": "Vida",
-   "DG9": "Vida"
+   "DG9": "Vida",
+   "YP1": "Yapıştırma pano",
+   "YP2": "Yapıştırma pano",
+   "YP4": "Yapıştırma pano",
+   "YP5": "Yapıştırma pano",
+   "YP7": "Yapıştırma pano",
+   "YP10": "Yapıştırma pano",
+   "KP1": "Kapı panoları",
+   "KP10": "Kapı panoları",
+   "KP11": "Kapı panoları",
+   "CG6": "Tek kat panel",
+   "DG1": "Tavan H'ı",
+   "DG2": "PVC omega kapak",
+   "DG3": "PVC betopan H'ı",
+   "DG11": "Acil müdahale kapağı",
+   "DG15": "Baca",
+   "DG16": "Baca",
+   "DG17": "Baca",
+   "DG18": "Baca",
+   "DG19": "Baca",
+   "DG20": "Baca"
   },
-  "okuma": {
-   "aciklama": "Lokman'ın listesinde adıyla geçmeyen, gruba okumayla konan yerler. Çelik fiyat sohbeti okumayı 10 Kasım 16:54:38'de Lokman'a yazdı; Lokman sonraki mesajında itiraz etmedi (açık onay değil, D-68 kural 11).",
+  "listede_adi_yok": {
+   "aciklama": "Lokman'ın listesinde adıyla geçmeyen, grubuna konan yerler. Çelik fiyat sohbeti bunları 10 Kasım 16:54:38 ve 17:01'de Lokman'a yazdı (DIAMOND 82 listesinin mor hücreleri; temiz su borusu %20). Lokman 18:05:03: \"hepsini kural olarak kayda geç\" (D-76). Kuraldır.",
    "yerler": [
     "kategori Mekanik Tesisat → Su tesisatı",
-    "DG4–DG9 (dübel, uç, kesme taşı) → Vida",
+    "DG4–DG9 (dübel, uç, kesme taşı), Şase pul, Çırpı ipi → Vida",
     "DG12–DG14 (köpük, dayson, mastik) → Boya grubu",
+    "MA68 (metal kiremit mahyası), MA75 (panel kapaması), MA79 (trapez sac mahyası) kategorisinden → Metal aksam",
+    "VG1 (duşakabin), VG5 ve VG7 (banyo batarya grubu) kategorisinden, Banyo dolabı → Vitrifiye"
+   ]
+  },
+  "okuma": {
+   "aciklama": "Lokman'a gösterilmemiş, adın eş anlamlısıyla gruba konan yerler. Okumadır, Lokman'ın sözü değildir (D-68 kural 11); Lokman düzeltirse eşleme PR'ıyla değişir.",
+   "yerler": [
     "HM46, HM47 (strafor) → EPS",
     "CG10–CG13 (metal kiremit) → Kiremit desen sac",
-    "MA75 (panel uç kapaması), MA79 (trapez sac mahyası) kategorisinden → Metal aksam",
-    "PK2 (Amerikan panel kapı), Melamin kapı → İç kapı",
-    "Şase pul → Vida"
+    "PK2 (Amerikan panel kapı), Melamin kapı → İç kapı"
    ]
   }
  },
@@ -868,7 +901,8 @@
      "dayanak": "D-65",
      "esleme": "karar",
      "birim": "adet",
-     "not": "hediye, 0 TL (Lokman 6 Kasım 21:29, D-65); liste fiyatı değil"
+     "not": "hediye, 0 TL (Lokman 6 Kasım 21:29, D-65); liste fiyatı değil",
+     "kdv_grubu": "Vida"
     },
     "8'lik trapez uç | adet": {
      "kod": "DG5",
@@ -2036,7 +2070,8 @@
      "dayanak": "D-65",
      "esleme": "karar",
      "birim": "adet",
-     "not": "hediye, 0 TL (Lokman 6 Kasım 21:29, D-65); liste fiyatı değil"
+     "not": "hediye, 0 TL (Lokman 6 Kasım 21:29, D-65); liste fiyatı değil",
+     "kdv_grubu": "Vida"
     },
     "Temiz su borusu | L 4000": {
      "kod": "MT1",
@@ -2099,7 +2134,8 @@
      "esleme": "bekletme",
      "dayanak": "D-75",
      "birim": "adet",
-     "not": "Lokman 10 Kasım 10:01: \"Banyo dolabı şimdilik boş kalsın, Yükleme listesini ben kontrol ettikten sonra fiyat vereceğim\". CRM'de genel banyo dolabı VG10; ölçülü dolaplar İdeal 65 cm (VG65), Galata 80 cm (VG32)"
+     "not": "Lokman 10 Kasım 10:01: \"Banyo dolabı şimdilik boş kalsın, Yükleme listesini ben kontrol ettikten sonra fiyat vereceğim\". CRM'de genel banyo dolabı VG10; ölçülü dolaplar İdeal 65 cm (VG65), Galata 80 cm (VG32)",
+     "kdv_grubu": "Vitrifiye"
     },
     "Banyo batarya grubu | takım": {
      "kod": [

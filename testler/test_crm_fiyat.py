@@ -249,6 +249,8 @@ KDV_LOKMAN = {**{g: 0.2 for g in ("Metal aksam", "Betopan", "EPS", "Kiremit dese
                                   "Shingle", "Çatı izolasyonu")},
               **{g: 0.0 for g in ("İç kapı", "Dış (çelik) kapı", "Elektrik", "Vitrifiye")},
               **{g: 0.1 for g in ("Trapez", "Sandviç panel", "Kutu profil")}}
+KDV_KART = {g: 0.2 for g in ("Yapıştırma pano", "Kapı panoları", "Tek kat panel", "Tavan H'ı", "PVC omega kapak", "PVC betopan H'ı",
+                             "Acil müdahale kapağı", "Baca")}       # Lokman 10 Kasım 18:01:47 kart: "Hepsi %20, form aynen"
 KATEGORI = {"MA": "Metal Aksam Grubu", "E": "Elektrik Grubu", "VG": "Vitrifiye Grubu", "DR": "Dere Grubu", "V": "Vida Grubu",
             "MT": "Mekanik Tesisat", "YP": "Yapıştırma Panel Grubu", "KP": "Karkaslı Kaplamalı Panoları", "CG": "Özel Çatı Grubu",
             "HM": "Ham Malzeme Grubu", "DG": "Depo Grubu", "PK": "Kapı ve Pencere Grubu", "B": "Özel Boya Grubu"}
@@ -264,13 +266,25 @@ def kategorili(A: dict) -> dict:
 
 def test_d76_kdv_gruplari_lokmanin_listesi(E):
     """D-76: eşlemenin KDV grupları ve oranları Lokman'ın listesi (10 Kasım 16:54 el yazısı, 16:55:54 "Çelik Paneller %20, Shingle %20,
-    Çatı İzolasynonu %20"). Kutu profil Metal Aksam kategorisinde olsa da %10; MA10'un grubu bilinmiyor (adında kutu profil geçer)."""
+    Çatı İzolasynonu %20"), kartı (18:01:47: listede olmayan 8 kalem %20) ve 18:05:03 sözü ("hepsini kural olarak kayda geç"). Kutu profil Metal Aksam kategorisinde olsa da %10; MA10'un
+    grubu bilinmiyor (adında kutu profil geçer). Kartın 8 kalemi yalnız kodlarıyla: yapıştırma panel kategorisinin pencere panelleri
+    (YP13–YP18) ve karkaslı panoların öteki kodları kartta yok."""
     K = E["kdv"]
-    assert (K["dayanak"], K["gruplar"]) == ("D-76", KDV_LOKMAN)
+    assert (K["dayanak"], K["gruplar"]) == ("D-76", {**KDV_LOKMAN, **KDV_KART})
     assert K["kodlar"]["MA11"] == K["kodlar"]["MA12"] == "Kutu profil" and K["kodlar"]["MA10"] is None
     assert {K["kodlar"][k] for k in ("CG14", "CG2", "HM14", "HM45", "PK2", "PK5")} == \
            {"Trapez", "Sandviç panel", "Çelik paneller", "Çatı izolasyonu", "İç kapı", "Dış (çelik) kapı"}
-    assert "Yapıştırma Panel Grubu" not in K["kategoriler"] and not any(k.startswith(("YP", "KP")) for k in K["kodlar"])
+    kart = {k: g for k, g in K["kodlar"].items() if g in KDV_KART}
+    assert kart == {**{k: "Yapıştırma pano" for k in ("YP1", "YP2", "YP4", "YP5", "YP7", "YP10")},
+                    **{k: "Kapı panoları" for k in ("KP1", "KP10", "KP11")}, "CG6": "Tek kat panel", "DG1": "Tavan H'ı",
+                    "DG2": "PVC omega kapak", "DG3": "PVC betopan H'ı", "DG11": "Acil müdahale kapağı",
+                    **{f"DG{i}": "Baca" for i in range(15, 21)}}
+    assert not {"Yapıştırma Panel Grubu", "Karkaslı Kaplamalı Panoları", "Özel Çatı Grubu", "Depo Grubu"} & set(K["kategoriler"])
+    # Lokman 18:05:03 "hepsini kural olarak kayda geç": çelik listesinde adı geçmeyen yerler kural (çırpı ipi vida, banyo dolabı vitrifiye)
+    assert "18:05:03" in K["listede_adi_yok"]["aciklama"] and "Lokman'ın sözü değildir" in K["okuma"]["aciklama"]
+    H = E["hatlar"]
+    assert H["prefabrik"]["kalemler"]["Çırpı ipi | adet"]["kdv_grubu"] == H["celik"]["kalemler"]["Çırpı ipi | adet"]["kdv_grubu"] == "Vida"
+    assert H["celik"]["kalemler"]["Banyo dolabı | takım"]["kdv_grubu"] == "Vitrifiye"
     pencere = [g for _, g, k in _kayitlar(E) if k.startswith(("PVC pencere", "PVC vasistas"))]
     assert pencere and all(g["kdv_grubu"] == "Pencereler" for g in pencere)
     X = copy.deepcopy(E)
@@ -282,25 +296,25 @@ def test_d76_kdv_gruplari_lokmanin_listesi(E):
 
 
 def test_d76_kdv_defter_ve_fiyatli_liste(E, A, tmp_path):
-    """Defterin her kaydı oranını taşır: kod kaydı, sonra CRM kategorisi; listede olmayan grup (yapıştırma pano) oransız. Fiyatlı liste
-    satırda KDV oranı ve tutarı (tutar × oran, kuruşa), özette KDV hariç, oranlara göre KDV, KDV dahil, oranı olmayan satırlar; Excel'de
-    KDV sütunları ve KDV DAHİL TOPLAM."""
+    """Defterin her kaydı oranını taşır: kod kaydı, sonra CRM kategorisi. Fiyatlı liste satırda KDV oranı ve tutarı (tutar × oran,
+    kuruşa), özette KDV hariç, oranlara göre KDV, KDV dahil; Excel'de KDV sütunları ve KDV DAHİL TOPLAM. Grubu bulunmayan kod (burada
+    kayıtları silinmiş yapıştırma panolar) oransız: satırda oran yok, KDV dahil toplam eksik."""
     from openpyxl import load_workbook
 
     from motor import prefabrik_liste as PL
     B = kategorili(A)
     D = C.defter_uret(C.denetle(B), E)
-    assert D["kdv"]["dayanak"] == "D-76" and D["kdv"]["gruplar"] == KDV_LOKMAN
+    assert D["kdv"]["dayanak"] == "D-76" and D["kdv"]["gruplar"] == {**KDV_LOKMAN, **KDV_KART}
     P = D["hatlar"]["prefabrik"]
     beklenen = {"Kutu profil (kiriş) 100 × 100 | L 3760": (0.1, "Kutu profil"),       # MA11 Metal Aksam'da, kod kaydı önce gelir
                 "100'lük duvar omegası | 100 × 2500": (0.2, "Metal aksam"),          # kategoriden
-                "100'lük yapıştırma dolu pano | 100 × 1250 × 2500": (None, None),    # Yapıştırma Panel Grubu: listede yok
+                "100'lük yapıştırma dolu pano | 100 × 1250 × 2500": (0.2, "Yapıştırma pano"),   # YP1, kart
                 "PVC pencere | 120/120": (0.2, "Pencereler")}                         # kodsuz; kalemin kdv_grubu
     for k, (o, g) in beklenen.items():
         assert (P["kalemler"][k]["kdv"], P["kalemler"][k]["kdv_grubu"]) == (o, g), k
     assert P["kalemler"]["PVC pencere | 120/120"]["fiyat"] is None
     assert {(b.get("kalem") or b["kalem_baslar"]): b["kdv"] for b in P["boy_onerileri"]}["Trapez sac · "] == 0.1
-    assert P["makas_kurali"]["kdv"] == 0.2 and all(a["kdv"] is None for b in P["bantlar"] for a in b["araliklar"])
+    assert P["makas_kurali"]["kdv"] == 0.2 and {a["kdv"] for b in P["bantlar"] for a in b["araliklar"]} == {0.2}
     L = PL.is_emrinden(_oku(IE_TK04))
     R = F.fiyatla(L, D, "prefabrik")
     k = R["ozet"]["kdv"]
@@ -309,13 +323,22 @@ def test_d76_kdv_defter_ve_fiyatli_liste(E, A, tmp_path):
             assert s["kdv_tutari"] is None
         else:
             assert s["kdv_tutari"] == round(s["tutar"] * s["kdv_orani"], 2)
-    oransiz = [s for s in R["satirlar"] if s["tutar"] and s["kdv_orani"] is None]
+    assert not [s for s in R["satirlar"] if s["tutar"] and s["kdv_orani"] is None]
     assert k["haric"] == R["ozet"]["toplam"] and k["kdv"] == round(sum(s["kdv_tutari"] or 0 for s in R["satirlar"]), 2)
     assert k["dahil"] == round(k["haric"] + k["kdv"], 2) and k["kdv"] > 0
-    assert (k["oransiz"]["satir"], k["eksik"]) == (len(oransiz), True) and oransiz
-    assert any(s["kalem"].startswith("100'lük yapıştırma dolu pano") for s in oransiz)
-    assert set(k["oranlar"]) <= {"%20", "%10", "%0"} and sum(o["satir"] for o in k["oranlar"].values()) + len(oransiz) == \
+    assert (k["oransiz"]["satir"], k["eksik"]) == (0, False)
+    assert set(k["oranlar"]) <= {"%20", "%10", "%0"} and sum(o["satir"] for o in k["oranlar"].values()) == \
         sum(1 for s in R["satirlar"] if s["tutar"])
+    X = copy.deepcopy(E)                                   # grubu bulunmayan kod: oran uydurulmaz
+    for kod in ("YP1", "YP2", "YP4", "YP5", "YP7", "YP10"):
+        del X["kdv"]["kodlar"][kod]
+    RX = F.fiyatla(L, C.defter_uret(C.denetle(B), X), "prefabrik")
+    kx = RX["ozet"]["kdv"]
+    oransiz = [s for s in RX["satirlar"] if s["tutar"] and s["kdv_orani"] is None]
+    assert (kx["oransiz"]["satir"], kx["eksik"]) == (len(oransiz), True) and oransiz
+    assert all(s["kalem"].startswith(("100'lük yapıştırma dolu pano", "60'lık yapıştırma dolu pano", "Pencere")) for s in oransiz)
+    assert kx["oransiz"]["tutar"] == round(sum(s["tutar"] for s in oransiz), 2)
+    assert sum(o["satir"] for o in kx["oranlar"].values()) + len(oransiz) == sum(1 for s in RX["satirlar"] if s["tutar"])
     p = tmp_path / "anlik.json"
     p.write_text(json.dumps(B, ensure_ascii=False), encoding="utf-8")
     (tmp_path / "l.json").write_text(json.dumps(L, ensure_ascii=False), encoding="utf-8")

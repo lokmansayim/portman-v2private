@@ -21,6 +21,10 @@ Lokman, 9 Kasım 2026 13:10: "bunu kural olarak al ve mühürle bundan sonra tek
 - **KDV (D-76, 10 Kasım).** CRM fiyatı KDV hariçtir. Oran malzeme grubundan (Lokman'ın listesi): %20 metal aksam, betopan, EPS, kiremit
   desen sac, Boardex, alçıpan, OSB, Knauf, pencereler, vida, su tesisatı, boya grubu, dereler, mahya bandı, membran, PVC iniş, çelik
   paneller, shingle, çatı izolasyonu; KDV'siz iç kapı, dış (çelik) kapı, elektrik, vitrifiye; %10 trapez, sandviç panel, kutu profil.
+  Listede olmayan 8 kalem %20 (Lokman'ın kartı, 10 Kasım 18:01): yapıştırma pano, kapı panoları, tek kat panel, tavan H'ı, PVC omega
+  kapak, PVC betopan H'ı, acil müdahale kapağı, baca. Listede adı geçmeyen yerler de kuraldır (Lokman 18:05 "hepsini kural olarak
+  kayda geç"): mahya, damlalık, panel kapaması metal aksam; uç, taş, dübel, şase pul, çırpı ipi vida; mastik, dayson, köpük boya
+  grubu; duşakabin, banyo dolabı, batarya vitrifiye.
   Eşlemenin `kdv` bölümü: grup sırayla kalemin `kdv_grubu`'su, kodun `kodlar` kaydı, CRM satırının kategorisi (`kategoriler`).
   Grubu olmayan kalemin oranı yoktur (uydurulmaz): fiyatlı listede "KDV oranı yok", KDV dahil toplam eksik. Fiyatlı liste ve teklif
   satırda KDV oranı ve tutarı, toplamda KDV hariç, KDV ve KDV dahil yazar. Bayi formu (M-14) bu oranları okumaz.
