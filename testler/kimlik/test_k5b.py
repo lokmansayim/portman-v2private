@@ -8,13 +8,16 @@
   "gerçek listeye uy": gerçek PK-01, PK-02, PK-03 listeleri saçak boyuyla tutuyor; K3b'deki fark kapandı). On dört kalem aynı. "Kural yok" 0
   (K5'te 8). OM-01 taşan verandanın tavanında da (İE-24, pano 73.5: yavru makasların altında; `test_tasan_veranda_tavan_omegasi`).
 - Kör protokolü: gerçek liste açılmaz; kıyas liste üretecimizin çıktısıyla (CIO, 27 Ekim 22:02).
-- Kural birimleri: kaplamanın okunması (sandviç, tek kat, varsayılan tek kat ve uyarı, trapez sac (İE-15 K6), kiremit "kural yok"); taşan veranda
+- Kural birimleri: kaplamanın okunması (sandviç, tek kat, yazılmamışsa trapez sac ve uyarı (D-74), trapez sac (İE-15 K6), kiremit "kural yok"); taşan veranda
   kaplaması iki yüz birlikte (⌈2 × mahya boyu ÷ kapatma⌉, artanlar bir panele sığarsa bir panelden, sığmazsa duvarda kesilir); dikey
   betopan (H5 sayısı, levhalar örtüşmez, artan uçları kapatır, uç en dıştaki levhanın); dere kesimi hatlar arasında (PK-01 6, TK-01 7);
   yavru makas (J8 sayısı, ilki dış kirişte, sonuncusu duvar dibinde); tek yön ve çapraz veranda çatısı "kural yok" (K6).
 - Adlar: veranda parçaları `VERANDA_` önekli, kendi sırasıyla; ana çatının adları değişmez (montaj rehberi ana çatıyı adıyla okur).
 - Çizim: yavru makas makas planında, veranda kalkanı betopan sayfasında, tek kat panel kaplama sayfasında, kenar notu yedinci sayfada.
 - PK-01 değişmez (öteki test dosyaları; burada yeni kartlar 0).
+- D-74 (Lokman, 10 Kasım 2026 04:58: "Trapez Sac bizim Prefabrik evlerde Standardımız"): çatı kaplaması yazılmamış prefabrik ev artık trapez
+  sac sayılır (liste ve kart modeli, uyarıyla). K5b tek kat panelin kabulüdür: TK-01 kabulü (`tk01`, `tk01_k`) kaplamayı açıkça "Tek Kat
+  Panel" yazarak koşar, sayılar ve çizim aynen; kaplama uyarısı bu yüzden yok. Kural biriminde yazılmamış kaplama trapez sac ve uyarı.
 """
 from __future__ import annotations
 
@@ -60,11 +63,19 @@ def _metre(formul: str, ad: str) -> float:
     return float(re.search(rf"{ad} ([\d,]+) m", formul).group(1).replace(",", "."))
 
 
+def _tek_kat(ie: dict) -> dict:
+    """D-74: yazılmamış kaplama prefabrik standardı trapez sac; K5b'nin kabulü tek kat panelde, kaplama açıkça yazılır."""
+    t = copy.deepcopy(ie)
+    t["ozellikler"] = {**t["ozellikler"], "Çatı Kaplaması": "Tek Kat Panel"}
+    return t
+
+
 @pytest.fixture(scope="module")
 def tk01(tmp_path_factory):
-    d = tmp_path_factory.mktemp("k5b")
-    assert KM.main([str(TK01), str(d), "--kod", "TK01"]) == 0                  # kural yok yok: komut 0
-    ie = _oku(TK01)
+    d, g = tmp_path_factory.mktemp("k5b"), tmp_path_factory.mktemp("k5b_girdi") / "TK01.json"
+    ie = _tek_kat(_oku(TK01))
+    g.write_text(json.dumps(ie, ensure_ascii=False), encoding="utf-8")
+    assert KM.main([str(g), str(d), "--kod", "TK01"]) == 0                     # kural yok yok: komut 0
     return {"ie": ie, "say": _oku(d / "TK01_kart_sayim.json"), "klasor": d, "liste": _Liste(ie)}
 
 
@@ -77,7 +88,7 @@ def _katmanlar(ie: dict, klasor: Path, ad: str) -> dict:
 
 @pytest.fixture(scope="module")
 def tk01_k(tmp_path_factory):
-    return _katmanlar(_oku(TK01), tmp_path_factory.mktemp("k5b_k"), "TK01")
+    return _katmanlar(_tek_kat(_oku(TK01)), tmp_path_factory.mktemp("k5b_k"), "TK01")
 
 
 def _parcalar(say: dict, kod: str, cati_: str | None = "*") -> list[dict]:
@@ -89,8 +100,7 @@ def test_tk01_kural_yok_yok(tk01):
     say = tk01["say"]
     assert say["kural_yok"] == [] and say["sema_hatasi"] == {"bugunku_ifc": 0, "kart_modeli": 0}
     assert {p["bilgi"].get("Cati") for p in say["yerlesim"]["parcalar"]} == {None, "ÖN VERANDA", "ARKA VERANDA"}
-    assert [u for u in say["yerlesim"]["uyarilar"] if u["katman"] == "çatı kaplaması"] == [
-        {"katman": "çatı kaplaması", "metin": "İş Emri'nin çatı kaplaması \"yazılı değil\"; tek kat panel sayıldı (liste üreteciyle aynı okuma)"}]
+    assert [u for u in say["yerlesim"]["uyarilar"] if u["katman"] == "çatı kaplaması"] == []     # D-74: kaplama yazılı (Tek Kat Panel)
 
 
 def test_tk01_model_liste_ile_ayni(tk01):
@@ -207,7 +217,7 @@ def test_tk01_kenarlar_verandada(tk01):
 
 
 # ----------------------------------------------------------------------------- kural birimleri
-@pytest.mark.parametrize("yazi, tur, uyari", [("Sandviç Panel", "sandvi", False), ("Tek Kat Panel", "tek kat", False), ("", "tek kat", True),
+@pytest.mark.parametrize("yazi, tur, uyari", [("Sandviç Panel", "sandvi", False), ("Tek Kat Panel", "tek kat", False), ("", "trapez", True),
                                               ("Antrasit", "tek kat", True), ("Trapez Sac", "trapez", False), ("Metal Kiremit", None, False)])
 def test_kaplama_okumasi(yazi, tur, uyari):
     D = Y.degerler(_oku(KM.YERLESIM), _oku(KM.LISTE_KURALLARI))["cati_kaplamasi"]

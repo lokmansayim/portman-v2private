@@ -949,14 +949,14 @@
    "kod": "CK-07",
    "ad": "Trapez sac mahyası",
    "liste": {"grup": "1006", "satirlar": ["Trapez sac mahyası"]},
-   "olcu": "Boyu trapez sacın kapatması (L 1000; 80'lik sacta L 800); mahyanın iki yanında kanat (metal kiremit mahyası gibi, gösterim); mahyanın boyu parçada",
+   "olcu": "Boyu trapez sacın kapatması (L 1000; 80'lik sacta L 800); mahyanın iki yanında 35 × 35 cm kanat (Lokman, 10 Kasım 2026 04:45: \"Trapez mahya L:100 ve 35x35 olarak al\"; D-74); mahyanın boyu parçada",
    "birim": "adet",
    "nerede": "Trapez sac kaplamalı çatıda her beşiğin mahyası boyunca (ana çatı ve cumba ayrı), saçak ucundan ucuna, kaplamanın üstünde; hat başına ⌈mahya boyu ÷ kapatma⌉, bindirme yok (`mahya_yerlesimi`)",
    "sayim": "boy_kesim",
    "ifc": {"sinif": "IfcCoveringType", "alt_tur": "ROOFING"},
    "pafta": [],
    "yerlesim": {"kural": "mahya_yerlesimi", "parca": "trapez_mahya", "sinif": "IfcCovering", "kesim": {"yontem": "trapez_yontem", "parca_boyu": "bilgi:ParcaBoyu_m"}},
-   "kaynak": {"durum": "lokman", "tarih": "2026-11-04", "dayanak": "D-50 (Lokman, 4 Kasım 2026 20:49): \"yalnız trapez mahya sac kaç kapatırsa o kadar kapatır yani sac 100 kapatırsa trapez mahyada 100 kapatır\"; 20:47 \"Trapez mahya olacak\"; M-11. Liste satırı \"Trapez sac mahyası\" (her beşiğin mahyası ÷ kapatma, yukarı). Kart İE-15'le anlaşılan sırayla sona eklendi (K6, TK-04 montaj rehberi)"}
+   "kaynak": {"durum": "lokman", "tarih": "2026-11-04", "dayanak": "D-50 (Lokman, 4 Kasım 2026 20:49): \"yalnız trapez mahya sac kaç kapatırsa o kadar kapatır yani sac 100 kapatırsa trapez mahyada 100 kapatır\"; 20:47 \"Trapez mahya olacak\"; M-11. Liste satırı \"Trapez sac mahyası\" (her beşiğin mahyası ÷ kapatma, yukarı). Kart İE-15'le anlaşılan sırayla sona eklendi (K6, TK-04 montaj rehberi). D-74 (Lokman, 10 Kasım 2026 04:58): prefabrikte çatı kaplamasının standardı trapez sac, mahyası bu kart; kanat 35 × 35 cm (04:45)"}
   }
  ],
  "gorunum": [

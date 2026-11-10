@@ -211,9 +211,10 @@ def sacak_saci(g: dict, G_: dict, F: dict | None = None) -> list[dict]:
 
 def mahya(g: dict, G_: dict, kesit: dict, F: dict | None = None, trapez_m: float | None = None) -> list[dict]:
     """Mahya kaplamanın üstünde saçak ucundan ucuna. `trapez_m` verilirse (trapez sac kaplama, İE-15 K6) trapez sac mahyası (CK-07): parça
-    boyu sacın kapatması (`ParcaBoyu_m`; D-50, M-11), kesit metal kiremit mahyasınınki (gösterim)."""
+    boyu sacın kapatması (`ParcaBoyu_m`; D-50, M-11), kesiti metal kiremit mahyasınınki gibi, kanatları her yanda 35 cm (`trapez_mahya`;
+    Lokman, 10 Kasım 2026 04:45: "Trapez mahya L:100 ve 35x35"; D-74)."""
     F = F or cati.cerceve(g)
-    t, w = G_["sac"], G_["mahya"]["kanat"] * F["kos"]
+    t, w = G_["sac"], G_["trapez_mahya" if trapez_m else "mahya"]["kanat"] * F["kos"]
     dz = kesit["asik"][0] + kesit["kaplama"]
     L, M, R = ([u, cati._ust(F, u) + dz] for u in (F["um"] - w, F["um"], F["um"] + w))
     kesit_ = [L, M, R, [R[0], R[1] + t], [M[0], M[1] + t], [L[0], L[1] + t]]

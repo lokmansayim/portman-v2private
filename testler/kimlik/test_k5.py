@@ -24,6 +24,9 @@
   (`testler/motor/test_ie33_kirma_liste.py`). Kart modelinin liste sütunu üretecin sayısı (nedeni yok), çatı kenarı kartları modelde yine
   "kurulmadı" (kırmanın kartları kart modelinin işi, ayrı). Bu dosyanın üç vakası buna göre değişti (`test_kirmada_liste_yazilir`,
   `test_komut_cizim`, `test_komut_excel`); "liste yazılmaz" çiziminin örneği `test_k3b.py`'de (PK-01 kırma: mahya y boyunca, liste yazılmaz).
+- D-74 (Lokman, 10 Kasım 2026 04:58: "Trapez Sac bizim Prefabrik evlerde Standardımız"): çatı kaplaması yazılmamış prefabrik ev artık trapez
+  sac sayılır. Üç evin İş Emri'si kaplamayı yazmaz; K5 tek kat panelle kabul edildi: evler kaplamayı açıkça "Tek Kat Panel" yazarak koşar
+  (`_ev`), sayılar aynen.
 """
 from __future__ import annotations
 
@@ -52,6 +55,13 @@ CATI_KENARI = ("CK-01", "CK-02", "CK-03", "CK-04", "CK-05", "CK-06")
 
 def _oku(p: Path) -> dict:
     return json.loads(Path(p).read_text(encoding="utf-8"))
+
+
+def _ev(ev: str) -> dict:
+    """İE-17'nin evi, çatı kaplaması açıkça tek kat panel (D-74: yazılmamış kaplama trapez sac; K5'in kabulü tek kat panelde)."""
+    ie = _oku(EVLER / f"{ev}.json")
+    ie["ozellikler"] = {**ie.get("ozellikler", {}), "Çatı Kaplaması": "Tek Kat Panel"}
+    return ie
 
 
 def _ikiz(ie: dict) -> dict:
@@ -85,7 +95,7 @@ def evler(tmp_path_factory):
     d = tmp_path_factory.mktemp("k5")
     out = {}
     for ev in TIP:
-        ie = _oku(EVLER / f"{ev}.json")
+        ie = _ev(ev)
         assert ie["cati"]["tip"] == TIP[ev]
         out[ev] = {"ie": ie, "say": _model(ie, d, ev), "ikiz": _model(_ikiz(ie), d, f"{ev}_ikiz")}
     return out
@@ -200,9 +210,10 @@ def test_cikintisiz_cumbada_liste_yazilir(evler, ev):
 @pytest.fixture(scope="module")
 def komut(tmp_path_factory):
     d = tmp_path_factory.mktemp("k5_komut")
-    ie = _oku(EVLER / "AP01.json")
+    ie = _ev("AP01")
     (d / "ikiz.json").write_text(json.dumps(_ikiz(ie), ensure_ascii=False), encoding="utf-8")
-    return {"kod": KM.main([str(EVLER / "AP01.json"), str(d / "c"), "--kod", "AP01"]), "ikiz_kod": KM.main([str(d / "ikiz.json"), str(d / "i"), "--kod", "AP01"]),
+    (d / "AP01.json").write_text(json.dumps(ie, ensure_ascii=False), encoding="utf-8")
+    return {"kod": KM.main([str(d / "AP01.json"), str(d / "c"), "--kod", "AP01"]), "ikiz_kod": KM.main([str(d / "ikiz.json"), str(d / "i"), "--kod", "AP01"]),
             "c": d / "c", "i": d / "i"}
 
 

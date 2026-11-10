@@ -33,6 +33,9 @@ T76 denemesinin cevapları (BK-12 PR-2d; Lokman, 20 Ekim 20:45 ve kart 20:59): 1
 kipinde kapalı kısmın dış sınırı), 100'lük iç duvar varsa onların altına da; trapez çatıda panel kapaması yazılmaz; satır yazılarında "kalkan"
 yerine "baş makas".
 
+Çatı kaplamasının standardı (D-74; Lokman, 10 Kasım 2026 04:58, "Trapez Sac bizim Prefabrik evlerde Standardımız"): İş Emri çatı kaplamasını
+yazmazsa trapez sac (`prefabrik.json › baz_cati_kaplamasi`, `cati_kaplamasi_yazisi`); kitabın tek kat paneli çeliğin standardıdır.
+
 Elektrik oda kuralı (BK-12 PR-2f; Lokman, 18 Ekim 19:52, kartlar 19 Ekim 16:50 ve 22 Ekim 11:09–11:10): paftada elektrik sayımı yoksa noktalar
 odalardan sayılır (`elektrik_oda`): oda başına 2 tekli priz, 1 tekli anahtar, 1 duy; açık mahale 2 glop, 1 çiftli anahtar; 15 m²'yi geçen her
 15 m²'ye bir takım daha (yukarı); banyo, WC, mutfak ve hol kitabın sayılarıyla (ıslak hacimler banyo, koridor hol gibi); mutfağı ayrı mahal
@@ -57,7 +60,7 @@ ISARET_YOLU = KOK / "kurallar" / "liste" / "prefabrik_isaret.json"
 TEK_KAYNAK = "Tek kaynak (zayıf)"
 ISARETLI = ("pencere_u_h_gecen", "omega_kapak")   # satırı `zayif(...)` ile yazılan kurallar (BK-12 PR-2c)
 
-SURUM = "1.16 (6 Kasım 2026; İE-33: iki uçlu (dörtomuz) kırmanın çatı satırları (AP-01; Lokman çizimi 6 Kasım 21:23'te onayladı; makas planı paftadan: ana makaslar mahyaya dik, kesintisiz saçak duvarının pano eklemlerinde, uç duvardan en az bir pano içeride; kırma uçlarında kısa makaslar uç duvarın pano eklemlerinde ve kırma noktalarında; köşelerde çapraz makas; kırma uçlarının altındaki gözler çatı paneli); iki ucu kırmada liste artık yazılır; paftanın dışında kalanda (mahya y boyunca, girintili gövde, taşan veranda, paftadan geniş makas aralığı) yazılmaz; 1.15, 6 Kasım 2026; D-61, Lokman 5 Kasım 22:49 (TK-04 kartı \"Öneriyle düzelt\"): çıkıntısız çapraz cumbanın kısa makası boyu çatı tanımından (\"Yavru makas · cumba\" iki satır, adet aynı); cumba ile ana çatının köşesinde iki dere tek inişte (`ana_makas: cumba_makasindan`); iki ucu kolonlu açık kenarın kirişi kolon yüzünden yüzüne (− 2 × 10; M-05, Lokman 6 Kasım 07:56); 1.14, 6 Kasım 2026; İE-29 PR-2, main'in 1.12 (İE-28) ve 1.13 (İE-30) sürümünün üstüne: D-54 madde 2 (Lokman 5 Kasım 10:41, 12:05): kubbeli İş Emri'nde kitabın kubbe takımı (R6) kubbe başına; kubbenin panoları (yan 79, ön 125,5; 203 boyunda) karkaslı özel pencere panosu, tabanı pano değil ve iki ucunda H yok; kubbenin üç yüzüne standart aşık, kubbe duvarlarına saçak omegası; kubbesiz evin listesi aynen; İE-29 PR-2: girintili gövdede iki saçak duvarının ortak pano eki her zaman makas alır (AP-12 paftası: ana çatıda 13 makas; öteki evlerin makas yeri aynı); İE-29: tek uçlu kırmanın çatı satırları (AP-27; makas planı paftadan: ana makas mahyaya paralel, saçak bantlarında kısa makas, kırma köşesinde çapraz ve köşe kısa makası; kaplama kitabın kırma çatı dizilimiyle); 1.13, 5 Kasım 2026; İE-30, D-52 (M-12, Lokman 5 Kasım 10:17): teras panelli verandanın kolonu dış kirişin altına kadar (Motor), yan kiriş yok, yalnız dış kiriş (D-56, Lokman 10:48), teras panelinde damlalık L 2800, terasların genişliği ÷ 2,8 (D-57, Lokman 11:02), teras başına bir panel (8 cm C, 80 × 0,8), komple cam PVC kapı ayrı satır (900 × 2100); 1.12, 4 Kasım 2026; İE-28, Lokman 4 Kasım 04:35 (D-46): karkaslı kaplama duvar panosu İş Emri'nden (paftadaki tek parça pano), içindeki pencereye üst ve alt panel ile özel pencere karkası yok; 1.11, 4 Kasım 2026; D-50, Lokman 4 Kasım 20:49–21:20 (M-11): trapez sac standart 100 cm kapatır, mahya sacın kapattığı kadar kapatır (L 1000, ÷ 1, bindirme yok); İş Emri'nin çatı kaplaması başka kapatma yazıyorsa o; trapez sac satırında `kapatma_m` (D-51, fiyat m²'den); 1.10, 3 Kasım 2026: İE-27, Lokman 3 Kasım 09:52 (D-45): 3'lü H dış duvarda da (iç duvarın T'si pano ekleminde); çektirme U'su 60 yerinden (eklemsiz T, dış köşe, serbest uç); köşe direği tipsiz (özel köşe 100'lük köşeye katılır); mahya bandı mahya boyundan; temiz su ıslak hacim başına; trapez vida 5,5 × 25 aşık ve omegadan; 1.9, 30 Ekim: K5b TK-01 kıyası (CIO onayı 30 Ekim 14:20): aşık sırası beşikte karar C (Lokman 24 Ekim); baş makas betopanı ve Z'si taşan verandanın kirişli kalkanında da (D-32 madde 2); 1.8, 30 Ekim: asma dizme tavanda da 100'lük iç duvarın üstü 100'lük duvar omegası, ayrı satır yok (Lokman 30 Ekim 07:04, D-32 ek); 1.7, 29 Ekim: baş makas omegası saçak ucundan saçak ucuna, taşan verandanın dış kirişindeki dahil (Lokman 29 Ekim 13:12, D-32); 1.6, 28 Ekim: vitrifiye banyo başına (İE-13 PR-2; Lokman onayı 28 Ekim, PR-3); nişin ağzındaki kiriş (BK-14 ek); taşan verandanın dış kirişi kolonun dış yüzünden dış yüzüne (Lokman, kart 28 Ekim); 1.5, 22 Ekim: kör test üreteci 7.3, kurallar kural kitabında; orta iniş 9 m, kitapla farklı on yedi kalemde kitap; PK-07 hedef örnek; T76 cevapları; 100'lük duvar omegası kirişlerin de üstünde; elektrik oda kuralı)"
+SURUM = "1.17 (10 Kasım 2026; D-74, Lokman 10 Kasım 04:58: prefabrikte çatı kaplamasının standardı trapez sac; İş Emri çatı kaplamasını yazmazsa liste trapez sac ve trapez sac mahyası (L 1000) yazar, önce tek kat panel ve metal kiremit mahyası yazıyordu; yazılı kaplama aynen; 1.16, 6 Kasım 2026; İE-33: iki uçlu (dörtomuz) kırmanın çatı satırları (AP-01; Lokman çizimi 6 Kasım 21:23'te onayladı; makas planı paftadan: ana makaslar mahyaya dik, kesintisiz saçak duvarının pano eklemlerinde, uç duvardan en az bir pano içeride; kırma uçlarında kısa makaslar uç duvarın pano eklemlerinde ve kırma noktalarında; köşelerde çapraz makas; kırma uçlarının altındaki gözler çatı paneli); iki ucu kırmada liste artık yazılır; paftanın dışında kalanda (mahya y boyunca, girintili gövde, taşan veranda, paftadan geniş makas aralığı) yazılmaz; 1.15, 6 Kasım 2026; D-61, Lokman 5 Kasım 22:49 (TK-04 kartı \"Öneriyle düzelt\"): çıkıntısız çapraz cumbanın kısa makası boyu çatı tanımından (\"Yavru makas · cumba\" iki satır, adet aynı); cumba ile ana çatının köşesinde iki dere tek inişte (`ana_makas: cumba_makasindan`); iki ucu kolonlu açık kenarın kirişi kolon yüzünden yüzüne (− 2 × 10; M-05, Lokman 6 Kasım 07:56); 1.14, 6 Kasım 2026; İE-29 PR-2, main'in 1.12 (İE-28) ve 1.13 (İE-30) sürümünün üstüne: D-54 madde 2 (Lokman 5 Kasım 10:41, 12:05): kubbeli İş Emri'nde kitabın kubbe takımı (R6) kubbe başına; kubbenin panoları (yan 79, ön 125,5; 203 boyunda) karkaslı özel pencere panosu, tabanı pano değil ve iki ucunda H yok; kubbenin üç yüzüne standart aşık, kubbe duvarlarına saçak omegası; kubbesiz evin listesi aynen; İE-29 PR-2: girintili gövdede iki saçak duvarının ortak pano eki her zaman makas alır (AP-12 paftası: ana çatıda 13 makas; öteki evlerin makas yeri aynı); İE-29: tek uçlu kırmanın çatı satırları (AP-27; makas planı paftadan: ana makas mahyaya paralel, saçak bantlarında kısa makas, kırma köşesinde çapraz ve köşe kısa makası; kaplama kitabın kırma çatı dizilimiyle); 1.13, 5 Kasım 2026; İE-30, D-52 (M-12, Lokman 5 Kasım 10:17): teras panelli verandanın kolonu dış kirişin altına kadar (Motor), yan kiriş yok, yalnız dış kiriş (D-56, Lokman 10:48), teras panelinde damlalık L 2800, terasların genişliği ÷ 2,8 (D-57, Lokman 11:02), teras başına bir panel (8 cm C, 80 × 0,8), komple cam PVC kapı ayrı satır (900 × 2100); 1.12, 4 Kasım 2026; İE-28, Lokman 4 Kasım 04:35 (D-46): karkaslı kaplama duvar panosu İş Emri'nden (paftadaki tek parça pano), içindeki pencereye üst ve alt panel ile özel pencere karkası yok; 1.11, 4 Kasım 2026; D-50, Lokman 4 Kasım 20:49–21:20 (M-11): trapez sac standart 100 cm kapatır, mahya sacın kapattığı kadar kapatır (L 1000, ÷ 1, bindirme yok); İş Emri'nin çatı kaplaması başka kapatma yazıyorsa o; trapez sac satırında `kapatma_m` (D-51, fiyat m²'den); 1.10, 3 Kasım 2026: İE-27, Lokman 3 Kasım 09:52 (D-45): 3'lü H dış duvarda da (iç duvarın T'si pano ekleminde); çektirme U'su 60 yerinden (eklemsiz T, dış köşe, serbest uç); köşe direği tipsiz (özel köşe 100'lük köşeye katılır); mahya bandı mahya boyundan; temiz su ıslak hacim başına; trapez vida 5,5 × 25 aşık ve omegadan; 1.9, 30 Ekim: K5b TK-01 kıyası (CIO onayı 30 Ekim 14:20): aşık sırası beşikte karar C (Lokman 24 Ekim); baş makas betopanı ve Z'si taşan verandanın kirişli kalkanında da (D-32 madde 2); 1.8, 30 Ekim: asma dizme tavanda da 100'lük iç duvarın üstü 100'lük duvar omegası, ayrı satır yok (Lokman 30 Ekim 07:04, D-32 ek); 1.7, 29 Ekim: baş makas omegası saçak ucundan saçak ucuna, taşan verandanın dış kirişindeki dahil (Lokman 29 Ekim 13:12, D-32); 1.6, 28 Ekim: vitrifiye banyo başına (İE-13 PR-2; Lokman onayı 28 Ekim, PR-3); nişin ağzındaki kiriş (BK-14 ek); taşan verandanın dış kirişi kolonun dış yüzünden dış yüzüne (Lokman, kart 28 Ekim); 1.5, 22 Ekim: kör test üreteci 7.3, kurallar kural kitabında; orta iniş 9 m, kitapla farklı on yedi kalemde kitap; PK-07 hedef örnek; T76 cevapları; 100'lük duvar omegası kirişlerin de üstünde; elektrik oda kuralı)"
 GRUPLAR = {"1001": "Panel", "1002": "Metal aksam", "1003": "Kapı ve pencere", "1004": "Tavan", "1005": "Makas", "1006": "Çatı",
            "1007": "Elektrik", "1008": "Vida", "1009": "Depo", "1010": "Sıhhi tesisat", "1011": "Dere", "1012": "Boya"}
 TAVAN = lambda x: int(math.ceil(x - 1e-9))
@@ -982,6 +985,22 @@ def trapez_kapatma_ie(kap: str) -> float | None:
     return float(m.group(1).replace(",", ".")) / 100 if m else None
 
 
+def cati_kaplamasi_yazisi(ozellikler: dict | None, kurallar: dict | None = None) -> tuple[str, bool]:
+    """D-74 (Lokman, 10 Kasım 2026 04:58: "Trapez Sac bizim Prefabrik evlerde Standardımız"): İş Emri'nin "Çatı Kaplaması" özelliği küçük
+    harfle ve standarttan mı geldiği. Yazılı değilse prefabriğin standardı (`baz_cati_kaplamasi`; kural kitabının `cati_kaplama` anahtarı,
+    "trapez_sac" → "trapez sac"); kitabın `baz_paket_cati_kaplamasi`'sı (tek kat panel) çeliğin standardıdır, burada okunmaz. Yazılı kaplama
+    opsiyondur, aynen döner. Liste (› 1006 Çatı) ve kart modeli (`motor/yerlesim.kaplama_yazisi`) buradan okur (D-28 madde 1)."""
+    yazili = next((_kucuk(v) for a, v in (ozellikler or {}).items() if _kucuk(a) == "çatı kaplaması"), "")
+    if yazili.strip():
+        return yazili, False
+    kurallar = kurallar or kurallari_oku()
+    anahtar = _pr(kurallar["prefabrik"], "baz_cati_kaplamasi")
+    if anahtar not in kurallar["ortak"]["cati_kaplama"]["deger"]:
+        raise ValueError(f"baz_cati_kaplamasi: {anahtar!r} kural kitabının çatı kaplamalarından değil "
+                         f"({', '.join(kurallar['ortak']['cati_kaplama']['deger'])})")
+    return anahtar.replace("_", " "), True
+
+
 def asik_mesafeleri(egik_cm: float, aralik_cm: float, sacak_esigi_cm: float, esik: float = 1e-6) -> list[float]:
     """Karar C (Lokman, 24 Ekim 2026 "Mahyadan 60"; `kurallar/yerlesim/prefabrik.json › asik_sirasi`): bir beşik yüzünde aşık sıralarının
     mahyadan eğik uzaklıkları (cm). İlk sıra mahyada, sonra aralıkla; saçağa aralıktan az kalınca saçakta bir sıra daha; saçağa
@@ -1690,7 +1709,8 @@ def liste(N: dict, kurallar: dict | None = None, pafta: dict | None = None) -> d
         kubbe_takimi("1005")
 
     # ── 1006 Çatı ───────────────────────────────────────────────────────────
-    kap = oz.get("çatı kaplaması", "")
+    kap, kap_std = cati_kaplamasi_yazisi(N.get("ozellikler"), kurallar)   # D-74: yazılı değilse prefabrik standardı trapez sac
+    std_notu = "; çatı kaplaması İş Emri'nde yazılı değil: prefabrik standardı trapez sac (D-74)" if kap_std else ""
     sandvic = "sandvi" in kap
     trapez = "trapez" in kap
     kiremit = "kiremit" in kap and not (sandvic or trapez)          # 7.3: metal kiremit (TS-01 kaplama paftası "Kapatır: 105 cm")
@@ -1728,7 +1748,7 @@ def liste(N: dict, kurallar: dict | None = None, pafta: dict | None = None) -> d
             ekle("1006", f"{ad_} · {ana.get('ad', 'çatı')}", f"L {round(b * 10)}", n, "Kural (P3, çok düzlemli çatı)",
                  f"kırma çatının {len(ck_['duzlemler'])} yüzü gerçek boyutuyla, {sy(kap_m * 100)} cm'lik şeritler saçağın ucundan; boy eğik + "
                  f"taşma {sy(tasma)} m, {yuvarla_mm} mm'ye yukarı (kitap `cok_duzlemli_cati`, `kirma_cati_dizilim`)",
-                 "İE-29: tek uçlu kırma (AP-27); paftanın kaplama planında üç yüzün eğik boyu aynı (562,91)",
+                 "İE-29: tek uçlu kırma (AP-27); paftanın kaplama planında üç yüzün eğik boyu aynı (562,91)" + std_notu,
                  **({"kapatma_m": kap_m} if trapez else {}))   # D-51: fiyat defteri trapez sacı m² fiyatıyla
     for c, o in (C if not (ck_ is not None and (sandvic or kirma_ana)) else ()):
         L_pan = boy_mm(o["egik"])
@@ -1739,7 +1759,7 @@ def liste(N: dict, kurallar: dict | None = None, pafta: dict | None = None) -> d
         ekle("1006", f"{ad} · {c.get('ad', 'çatı')}", f"L {L_pan}", n, "Kural (P3, O9)",
              (f"{o['yuz']} yüz × ⌈{od(o['mahya_boy'])} m ÷ {sy(kap_m)}⌉" if c is ana else f"⌈{o['yuz']} yüz × {od(o['mahya_boy'])} m ÷ {sy(kap_m)}⌉")
              + f"; boy eğik {od(o['egik'], 3)} + taşma {sy(tasma)} m, {yuvarla_mm} mm'ye yukarı (kitap)",
-             "PK-01 22, PK-07 18 (yüz başına) tuttu", pafta=("sandvic_panel",) if c is ana else None,
+             "PK-01 22, PK-07 18 (yüz başına) tuttu" + std_notu, pafta=("sandvic_panel",) if c is ana else None,
              aday=TAVAN(o["yuz"] * o["mahya_boy"] / kap_m) if c is ana and o["yuz"] > 1 else None,
              aday_notu="Şablon B (PK-02 17 ✓): iki yüz toplam yukarı" if c is ana and o["yuz"] > 1 else "",
              **({"kapatma_m": kap_m} if trapez else {}))   # D-51: fiyat defteri trapez sacı m² fiyatıyla, satırın kapatmasından
@@ -1753,7 +1773,7 @@ def liste(N: dict, kurallar: dict | None = None, pafta: dict | None = None) -> d
         mahya = sum(TAVAN(o["mahya_boy"] / kap_m) for c, o in C if c["tip"] in IKI_YUZ) + sum(TAVAN(x / kap_m) for x in kh_)
         ekle("1006", "Trapez sac mahyası", f"L {mm_m(kap_m)}", mahya, "Kural (Lokman 4.11 20:49 ve 21:20, D-50)",
              ("her beşiğin mahyası" if not kh_ else f"mahya ve kırma hatları ({' + '.join(od(x) for x in kh_)} m), hat başına") + f" ÷ {sy(kap_m)}, yukarı (mahya, trapez sacın kapattığı {sy(kap_m * 100)} cm'yi kapatır; bindirme düşülmez)",
-             "AP-06, AP-11, AP-14, AP-15, AP-16, AP-26, PK-03, PK-08 gerçek listelerinin adedi tuttu (eski ÷ 0,6 yalnız AP-25)")
+             "AP-06, AP-11, AP-14, AP-15, AP-16, AP-26, PK-03, PK-08 gerçek listelerinin adedi tuttu (eski ÷ 0,6 yalnız AP-25)" + std_notu)
     else:
         mahya = TAVAN(sum(o["mahya_boy"] for c, o in C if c["tip"] in IKI_YUZ) / (pm - bm))   # O10: toplam ÷ 2,6 (PK-06 6, PK-07 4)
         ekle("1006", "Metal kiremit mahyası", f"L {mm_m(pm)}", mahya, "Kural (O10)", f"beşik mahyalarının toplamı ÷ {sy(pm - bm)}", "PK-01, PK-02, PK-06, PK-07 tuttu")

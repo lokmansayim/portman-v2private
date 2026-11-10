@@ -10,11 +10,12 @@ Lokman, 9 Kasım 2026 13:10: "bunu kural olarak al ve mühürle bundan sonra tek
 - **Anlık görüntü:** CRM'in `POST /api/stok-fiyatlari` yanıtı (`{success, count, currency, generated_at, data: [...]}`). Sunucu her gün
   çeker (`vps/crm_fiyat.sh`, `portman-crm-fiyat.timer`); `denetle` biçimi sınar ve satırda yalnız `ALANLAR`'ı bırakır.
 - **Eşleme:** `kurallar/fiyat/crm_esleme.json`. Defterin her kalemi (Motor'un liste anahtarı) bir CRM koduna ve hesaba bağlıdır;
-  dosya fiyat yazmaz. Hesaplar: aynı, oran, çarp, boy (anahtardaki L), ağırlıklı ortalama, toplam; sonuç kuruşa yarım yukarı (kutu
-  profil tam TL'ye, D-36).
+  dosya fiyat yazmaz. Hesaplar: aynı, oran, çarp, boy (anahtardaki L; esas boy metre ya da kutu profilde 6 m, D-75), ağırlıklı
+  ortalama, toplam; sonuç kuruşa yarım yukarı (kutu profil tam TL'ye, D-36).
 - **Onay:** eşleme `birebir` ya da `kural` ise onaylı; `yakın` ve `birim varsayımı` öneridir (`fiyatla.py --oneri`); `birim sorusu`
   ve `CRM'de yok` fiyatsızdır. Kodun o günkü fiyatı 0 ya da boşsa, kod listede yoksa ya da birden çok satırdaysa kalem fiyatsızdır
-  (fiyat uydurulmaz). Çırpı ipi Lokman'ın kararıyla 0 TL (D-65).
+  (fiyat uydurulmaz). Çırpı ipi Lokman'ın kararıyla 0 TL (D-65). `bekletme`: Lokman'ın kararıyla şimdilik fiyatsız, CRM'de fiyatı
+  olsa da yazılmaz (banyo dolabı, D-75); Samet'e giden eksik listesine girmez.
 - **Çıktı:** `kurallar/fiyat/defter_2026-11.json` ile aynı şemada defter (`portman.fiyat_defteri/1`); `araclar/fiyatla.py` ve
   `araclar/teklif.py` onu okur. Yalnız standart kütüphane: sunucuda sistem python3'üyle koşar.
 """
@@ -36,7 +37,7 @@ ONERI = {"yakın", "birim varsayımı"}
 FIYATSIZ = {"birim sorusu", "CRM'de yok"}
 HESAPLAR = {"ayni", "oran", "carp", "boy_m", "ort", "toplam"}
 DURUM = {"birebir": "eşleşti", "kural": "hesap", "yakın": "yakın", "birim varsayımı": "birim varsayımı", "birim sorusu": "birim sorusu",
-         "CRM'de yok": "kaynakta yok", "karar": "Patron verdi"}
+         "CRM'de yok": "kaynakta yok", "karar": "Patron verdi", "bekletme": "Lokman fiyat verecek"}
 DUSUS_SINIRI = 0.8              # günlük çekimde kalem sayısı bir öncekinin %80'inin altına düşerse görüntü alınmaz
 
 
@@ -137,8 +138,8 @@ def hesapla(g: dict, dizin: dict, anahtar: str = "") -> dict:
         x = p[0] * Decimal(str(g["pay"])) / Decimal(str(g["payda"]))
     elif h == "carp":
         x = p[0] * Decimal(str(g["carpan"]))
-    elif h == "boy_m":
-        x = p[0] * _boy(anahtar) / 1000
+    elif h == "boy_m":                                           # esas boy: metre (1000) ya da kutu profilde 6 m (6000, D-75)
+        x = p[0] * _boy(anahtar) / Decimal(str(g.get("esas_boy_mm", 1000)))
     elif h == "ort":
         w = [Decimal(str(a)) for a in g["agirlik"]]
         x = sum(a * b for a, b in zip(p, w)) / sum(w)
@@ -167,6 +168,10 @@ def esleme_denetle(E: dict) -> list[str]:
             if g.get("kod") is not None:
                 sorun.append(f"{yer}: CRM'de yok ama kodu var")
             return
+        if tur == "bekletme":
+            if g.get("kod") is not None or not g.get("dayanak"):
+                sorun.append(f"{yer}: bekletme kaydı kodsuz ve dayanaklı olur")
+            return
         kodlar = g.get("kod") if isinstance(g.get("kod"), list) else [g.get("kod")]
         if not kodlar or not all(isinstance(k, str) and k for k in kodlar):
             sorun.append(f"{yer}: kod yok")
@@ -183,6 +188,8 @@ def esleme_denetle(E: dict) -> list[str]:
                 _boy(anahtar)
             except CrmHatasi as e:
                 sorun.append(f"{yer}: {e}")
+        if "esas_boy_mm" in g and (h != "boy_m" or not isinstance(g["esas_boy_mm"], (int, float)) or g["esas_boy_mm"] <= 0):
+            sorun.append(f"{yer}: esas_boy_mm yalnız boy hesabında ve sıfırdan büyük olur")
 
     for hat, H in E["hatlar"].items():
         for k, g in H["kalemler"].items():
@@ -240,6 +247,9 @@ def defter_uret(A: dict, E: dict | None = None) -> dict:
         elif tur == "CRM'de yok":
             d = {"fiyat": None, "birim": g["birim"], "kaynak": None, "kaynak_satir": None, "kaynak_kalem": None,
                  "durum": DURUM[tur], "onay": False, "not": _not(g, None, "CRM'e eklenmeli (D-72)")}
+        elif tur == "bekletme":
+            d = {"fiyat": None, "birim": g["birim"], "kaynak": None, "kaynak_satir": None, "kaynak_kalem": None,
+                 "durum": DURUM[tur], "onay": False, "not": _not(g, None, g["dayanak"])}
         else:
             h = hesapla(g, dizin, k)
             fiyatsiz = tur in FIYATSIZ or h["fiyat"] is None
@@ -313,12 +323,13 @@ def defter_uret(A: dict, E: dict | None = None) -> dict:
 
 
 def eksikler(A: dict, E: dict | None = None) -> dict:
-    """CRM'e eklenecek ya da fiyatı girilecek kalemler (Samet'e liste): CRM'de yok, fiyatı 0, kod bulunamadı, birim sorusu."""
+    """CRM'e eklenecek ya da fiyatı girilecek kalemler (Samet'e liste): CRM'de yok, fiyatı 0, kod bulunamadı, birim sorusu. Lokman'ın
+    beklettiği kalem (`bekletme`, D-75) Samet'in işi değil, listeye girmez."""
     D = defter_uret(A, E)
     gruplar: dict[str, list[dict]] = {}
     for hat, H in D["hatlar"].items():
         for k, g in H["kalemler"].items():
-            if g["fiyat"] is None:
+            if g["fiyat"] is None and g["durum"] != DURUM["bekletme"]:
                 gruplar.setdefault(g["durum"], []).append({"hat": hat, "kalem": k, "kodlar": g["kaynak_satir"], "not": g["not"]})
     for r in D["crm"]["fiyatsiz_kurallar"]:
         gruplar.setdefault(r["durum"], []).append({"hat": r["hat"], "kalem": r["yer"], "kodlar": r["kodlar"], "not": "kural"})

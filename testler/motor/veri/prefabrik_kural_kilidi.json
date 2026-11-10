@@ -128,6 +128,7 @@
   "prefabrik.bas_makas_betopani.katsayi": 1.5,
   "prefabrik.bas_makas_betopani.levha_m2": 3.125,
   "prefabrik.bas_makas_omegasi_bolen_m": 2.5,
+  "prefabrik.baz_cati_kaplamasi": "trapez_sac",
   "prefabrik.boya.astar": 1,
   "prefabrik.boya.kenar": 1,
   "prefabrik.boya.tavan": 1,
@@ -325,6 +326,10 @@
  },
  "kitapla_farkli": [
   [
+   "Baz paketin çatı kaplaması",
+   false
+  ],
+  [
    "Baş makas Z'si",
    false
   ],
@@ -432,7 +437,6 @@
  "kitaptan_okunmayan": [
   "baca_ici",
   "bayi_kurali",
-  "baz_paket_cati_kaplamasi",
   "boya.mastik_mantolamasiz_m2_basina",
   "cati_cikis_kapagi",
   "cati_yontemi",

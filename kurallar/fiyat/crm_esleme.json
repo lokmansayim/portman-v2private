@@ -1,6 +1,6 @@
 {
  "sema": 1,
- "surum": "2026-11-09-r01",
+ "surum": "2026-11-10-r02",
  "karar": "D-72",
  "muhur": "M-15",
  "aciklama": "Fiyat defteri kaleminin CRM stok fiyatları API'sindeki karşılığı ve fiyatın nasıl hesaplandığı (İE-35). Fiyat yazmaz: fiyat her gün CRM'den gelir, `araclar/crm_fiyat.py` bu dosyayla defter üretir. Anahtarlar ve birimler fiyat defterinin (defter_2026-11 r13) kalemleri; Motor'un listesindeki anahtar. Eşleme değişikliği (yeni kalem, Lokman'ın birim cevabı, Samet'in CRM'e eklediği ürün) bu dosyaya PR'la girer; `kaynak` bölümü mühürlü (M-15).",
@@ -31,7 +31,8 @@
   "birim varsayımı": "CRM'deki birim belirsiz, bir varsayımla hesaplanır; öneri, Lokman'ın birim cevabına kadar onay bekler",
   "birim sorusu": "birim anlaşılmadı; fiyatsız",
   "CRM'de yok": "ürün CRM'de yok; fiyatsız, CRM'e eklenmeli",
-  "karar": "Lokman'ın kararıyla sabit fiyat (çırpı ipi hediye, D-65); liste fiyatı değil"
+  "karar": "Lokman'ın kararıyla sabit fiyat (çırpı ipi hediye, D-65); liste fiyatı değil",
+  "bekletme": "Lokman'ın kararıyla şimdilik fiyatsız; CRM'de fiyatı olsa da yazılmaz, Samet'e giden eksik listesine girmez (banyo dolabı, D-75)"
  },
  "fiyatsiz_durumlar": {
   "CRM'de fiyat 0": "kod CRM'de var, o günkü fiyatı 0 ya da boş; fiyatsız (Samet fiyatı girince kendiliğinden fiyatlanır)",
@@ -41,7 +42,7 @@
   "ayni": "CRM fiyatı",
   "oran": "CRM fiyatı × pay ÷ payda (boyla orantı)",
   "carp": "CRM fiyatı × carpan",
-  "boy_m": "CRM fiyatı × L ÷ 1000 (anahtardaki L, m² ya da metre fiyatı)",
+  "boy_m": "CRM fiyatı × L ÷ esas_boy_mm (anahtardaki L). esas_boy_mm yoksa 1000: m² ya da metre fiyatı; kutu profilde 6000: CRM fiyatı 6 metrelik boyun fiyatı (D-75)",
   "ort": "kodların fiyatlarının agirlik'la ağırlıklı ortalaması",
   "toplam": "kodların fiyatlarının toplamı",
   "yuvarlama": "sonuç kuruşa (0,01) yarım yukarı; kalemde `yuvarlama` varsa o adıma (kutu profil 1: tam TL, D-36)"
@@ -181,25 +182,31 @@
      "not": "CRM adı: 100'lük dış çelik kapı panosu"
     },
     "Pencere alt panel (120/120) | 100 × 1250 × 800": {
-     "kod": "YP16",
-     "hesap": "ayni",
-     "esleme": "birim varsayımı",
+     "kod": "YP1",
+     "hesap": "oran",
+     "pay": 1,
+     "payda": 3,
+     "esleme": "kural",
      "birim": "adet",
-     "not": "CRM'de pencere alt panel, ölçü özel, birim Adet; fiyatı bir panelin fiyatı sayılır"
+     "not": "Tam pano (100 × 1250 × 2500, YP1) fiyatının 1/3'ü (Lokman 10 Kasım 10:01 \"Pencere üst panel tek 100x2500 panel kaç para ise 5 te 1'i fiyatını yaz pencere üst panelde 3 te 1 fiyatını yaz\", D-75; üst panel 1/5, alt panel 1/3). CRM'deki pencere paneli satırı (YP13, YP16) kullanılmaz"
     },
     "Pencere alt panel (120/180) | 100 × 1250 × 200": {
-     "kod": "YP16",
-     "hesap": "ayni",
-     "esleme": "birim varsayımı",
+     "kod": "YP1",
+     "hesap": "oran",
+     "pay": 1,
+     "payda": 3,
+     "esleme": "kural",
      "birim": "adet",
-     "not": "CRM'de pencere alt panel, ölçü özel, birim Adet; fiyatı bir panelin fiyatı sayılır"
+     "not": "Tam pano (100 × 1250 × 2500, YP1) fiyatının 1/3'ü (Lokman 10 Kasım 10:01 \"Pencere üst panel tek 100x2500 panel kaç para ise 5 te 1'i fiyatını yaz pencere üst panelde 3 te 1 fiyatını yaz\", D-75; üst panel 1/5, alt panel 1/3). CRM'deki pencere paneli satırı (YP13, YP16) kullanılmaz"
     },
     "Pencere üst panel | 100 × 1250 × 500": {
-     "kod": "YP13",
-     "hesap": "ayni",
-     "esleme": "birim varsayımı",
+     "kod": "YP1",
+     "hesap": "oran",
+     "pay": 1,
+     "payda": 5,
+     "esleme": "kural",
      "birim": "adet",
-     "not": "CRM'de pencere üst panel, ölçü özel, birim Adet; fiyatı bir panelin fiyatı sayılır"
+     "not": "Tam pano (100 × 1250 × 2500, YP1) fiyatının 1/5'i (Lokman 10 Kasım 10:01 \"Pencere üst panel tek 100x2500 panel kaç para ise 5 te 1'i fiyatını yaz pencere üst panelde 3 te 1 fiyatını yaz\", D-75; üst panel 1/5, alt panel 1/3). CRM'deki pencere paneli satırı (YP13, YP16) kullanılmaz"
     },
     "10'luk köşe direği 100 × 100 | 100 × 100 × 2500": {
      "kod": "MA1",
@@ -222,66 +229,74 @@
     "Özel kutu profil (kolon) 100 × 100 | L 2500": {
      "kod": "MA12",
      "hesap": "boy_m",
+     "esas_boy_mm": 6000,
      "yuvarlama": 1,
-     "esleme": "birim varsayımı",
+     "esleme": "kural",
      "birim": "adet",
-     "not": "Kutu profil boyla orantılı (D-36). CRM'de flanşlı kolon, ölçü özel; fiyatı metre fiyatı sayılır"
+     "not": "Kutu profil 6 metrelik boyun fiyatından boyla orantılı, tam TL (D-36; Lokman 10 Kasım 10:01 \"Profili yine 6 metresi kaç paraysa ona göre orantıla\", D-75). CRM'de flanşlı kolon kutu profil; CRM'deki fiyatı 6 metrelik boyun fiyatı"
     },
     "Kutu profil (kiriş) 100 × 100 | L 3760": {
      "kod": "MA11",
      "hesap": "boy_m",
+     "esas_boy_mm": 6000,
      "yuvarlama": 1,
-     "esleme": "birim varsayımı",
+     "esleme": "kural",
      "birim": "adet",
-     "not": "Kutu profil boyla orantılı (D-36). CRM'de kiriş kutu profil, ölçü özel; fiyatı metre fiyatı sayılır"
+     "not": "Kutu profil 6 metrelik boyun fiyatından boyla orantılı, tam TL (D-36; Lokman 10 Kasım 10:01 \"Profili yine 6 metresi kaç paraysa ona göre orantıla\", D-75). CRM'de kiriş kutu profil; CRM'deki fiyatı 6 metrelik boyun fiyatı"
     },
     "Kutu profil (kiriş) 100 × 100 | L 1710": {
      "kod": "MA11",
      "hesap": "boy_m",
+     "esas_boy_mm": 6000,
      "yuvarlama": 1,
-     "esleme": "birim varsayımı",
+     "esleme": "kural",
      "birim": "adet",
-     "not": "Kutu profil boyla orantılı (D-36). CRM'de kiriş kutu profil, ölçü özel; fiyatı metre fiyatı sayılır"
+     "not": "Kutu profil 6 metrelik boyun fiyatından boyla orantılı, tam TL (D-36; Lokman 10 Kasım 10:01 \"Profili yine 6 metresi kaç paraysa ona göre orantıla\", D-75). CRM'de kiriş kutu profil; CRM'deki fiyatı 6 metrelik boyun fiyatı"
     },
     "Kutu profil (kiriş) 100 × 100 | L 2510": {
      "kod": "MA11",
      "hesap": "boy_m",
+     "esas_boy_mm": 6000,
      "yuvarlama": 1,
-     "esleme": "birim varsayımı",
+     "esleme": "kural",
      "birim": "adet",
-     "not": "Kutu profil boyla orantılı (D-36). CRM'de kiriş kutu profil, ölçü özel; fiyatı metre fiyatı sayılır"
+     "not": "Kutu profil 6 metrelik boyun fiyatından boyla orantılı, tam TL (D-36; Lokman 10 Kasım 10:01 \"Profili yine 6 metresi kaç paraysa ona göre orantıla\", D-75). CRM'de kiriş kutu profil; CRM'deki fiyatı 6 metrelik boyun fiyatı"
     },
     "Kutu profil (kiriş) 100 × 100 | L 1200": {
      "kod": "MA11",
      "hesap": "boy_m",
+     "esas_boy_mm": 6000,
      "yuvarlama": 1,
-     "esleme": "birim varsayımı",
+     "esleme": "kural",
      "birim": "adet",
-     "not": "Kutu profil boyla orantılı (D-36). CRM'de kiriş kutu profil, ölçü özel; fiyatı metre fiyatı sayılır"
+     "not": "Kutu profil 6 metrelik boyun fiyatından boyla orantılı, tam TL (D-36; Lokman 10 Kasım 10:01 \"Profili yine 6 metresi kaç paraysa ona göre orantıla\", D-75). CRM'de kiriş kutu profil; CRM'deki fiyatı 6 metrelik boyun fiyatı"
     },
     "Kutu profil (kiriş) 100 × 100 | L 3860": {
      "kod": "MA11",
      "hesap": "boy_m",
+     "esas_boy_mm": 6000,
      "yuvarlama": 1,
-     "esleme": "birim varsayımı",
+     "esleme": "kural",
      "birim": "adet",
-     "not": "Kutu profil boyla orantılı (D-36). CRM'de kiriş kutu profil, ölçü özel; fiyatı metre fiyatı sayılır"
+     "not": "Kutu profil 6 metrelik boyun fiyatından boyla orantılı, tam TL (D-36; Lokman 10 Kasım 10:01 \"Profili yine 6 metresi kaç paraysa ona göre orantıla\", D-75). CRM'de kiriş kutu profil; CRM'deki fiyatı 6 metrelik boyun fiyatı"
     },
     "Kutu profil (kiriş) 100 × 100 | L 2610": {
      "kod": "MA11",
      "hesap": "boy_m",
+     "esas_boy_mm": 6000,
      "yuvarlama": 1,
-     "esleme": "birim varsayımı",
+     "esleme": "kural",
      "birim": "adet",
-     "not": "Kutu profil boyla orantılı (D-36). CRM'de kiriş kutu profil, ölçü özel; fiyatı metre fiyatı sayılır"
+     "not": "Kutu profil 6 metrelik boyun fiyatından boyla orantılı, tam TL (D-36; Lokman 10 Kasım 10:01 \"Profili yine 6 metresi kaç paraysa ona göre orantıla\", D-75). CRM'de kiriş kutu profil; CRM'deki fiyatı 6 metrelik boyun fiyatı"
     },
     "Kutu profil (kiriş) 100 × 100 | L 1255": {
      "kod": "MA11",
      "hesap": "boy_m",
+     "esas_boy_mm": 6000,
      "yuvarlama": 1,
-     "esleme": "birim varsayımı",
+     "esleme": "kural",
      "birim": "adet",
-     "not": "Kutu profil boyla orantılı (D-36). CRM'de kiriş kutu profil, ölçü özel; fiyatı metre fiyatı sayılır"
+     "not": "Kutu profil 6 metrelik boyun fiyatından boyla orantılı, tam TL (D-36; Lokman 10 Kasım 10:01 \"Profili yine 6 metresi kaç paraysa ona göre orantıla\", D-75). CRM'de kiriş kutu profil; CRM'deki fiyatı 6 metrelik boyun fiyatı"
     },
     "H 100 (dış pano eki) | 100 × 100 × 2500": {
      "kod": [
@@ -1195,18 +1210,20 @@
     "Kutu profil (kiriş) 100 × 100 | L 4820": {
      "kod": "MA11",
      "hesap": "boy_m",
+     "esas_boy_mm": 6000,
      "yuvarlama": 1,
-     "esleme": "birim varsayımı",
+     "esleme": "kural",
      "birim": "adet",
-     "not": "Kutu profil boyla orantılı (D-36). CRM'de kiriş kutu profil, ölçü özel; fiyatı metre fiyatı sayılır"
+     "not": "Kutu profil 6 metrelik boyun fiyatından boyla orantılı, tam TL (D-36; Lokman 10 Kasım 10:01 \"Profili yine 6 metresi kaç paraysa ona göre orantıla\", D-75). CRM'de kiriş kutu profil; CRM'deki fiyatı 6 metrelik boyun fiyatı"
     },
     "Kutu profil (kiriş) 100 × 100 | L 1457,5": {
      "kod": "MA11",
      "hesap": "boy_m",
+     "esas_boy_mm": 6000,
      "yuvarlama": 1,
-     "esleme": "birim varsayımı",
+     "esleme": "kural",
      "birim": "adet",
-     "not": "Kutu profil boyla orantılı (D-36). CRM'de kiriş kutu profil, ölçü özel; fiyatı metre fiyatı sayılır"
+     "not": "Kutu profil 6 metrelik boyun fiyatından boyla orantılı, tam TL (D-36; Lokman 10 Kasım 10:01 \"Profili yine 6 metresi kaç paraysa ona göre orantıla\", D-75). CRM'de kiriş kutu profil; CRM'deki fiyatı 6 metrelik boyun fiyatı"
     }
    },
    "bantlar": [
@@ -1352,17 +1369,17 @@
      "kalem": "Kutu profil (kiriş) 100 × 100",
      "kod": "MA11",
      "hesap": "ayni",
-     "boy_mm": 1000,
-     "esleme": "birim varsayımı",
-     "not": "Kutu profil boyla orantılı, her boy (Lokman 31 Ekim 15:25, D-36). CRM'de kiriş kutu profil, ölçü özel; fiyatı metre fiyatı sayılır"
+     "boy_mm": 6000,
+     "esleme": "kural",
+     "not": "Kutu profil 6 metrelik boyun fiyatından boyla orantılı, her boy (D-36; Lokman 10 Kasım 10:01 \"Profili yine 6 metresi kaç paraysa ona göre orantıla\", D-75). CRM'de kiriş kutu profil; CRM'deki fiyatı 6 metrelik boyun fiyatı"
     },
     {
      "kalem": "Özel kutu profil (kolon) 100 × 100",
      "kod": "MA12",
      "hesap": "ayni",
-     "boy_mm": 1000,
-     "esleme": "birim varsayımı",
-     "not": "Kolon da kutu profil, boyla orantılı (D-36). CRM'de flanşlı kolon kutu profil, ölçü özel; fiyatı metre fiyatı sayılır"
+     "boy_mm": 6000,
+     "esleme": "kural",
+     "not": "Kutu profil 6 metrelik boyun fiyatından boyla orantılı, her boy (D-36; Lokman 10 Kasım 10:01 \"Profili yine 6 metresi kaç paraysa ona göre orantıla\", D-75). CRM'de flanşlı kolon kutu profil; CRM'deki fiyatı 6 metrelik boyun fiyatı"
     },
     {
      "kalem_baslar": "Tek kat çatı paneli · ",
@@ -1942,11 +1959,11 @@
      "not": "CRM adı: klozet (duvara sıfır)"
     },
     "Banyo dolabı | takım": {
-     "kod": "VG10",
-     "hesap": "ayni",
-     "esleme": "birebir",
+     "kod": null,
+     "esleme": "bekletme",
+     "dayanak": "D-75",
      "birim": "adet",
-     "not": "CRM'de genel banyo dolabı; ayrıca ölçülü dolaplar İdeal 65 cm (VG65), Galata 80 cm (VG32)"
+     "not": "Lokman 10 Kasım 10:01: \"Banyo dolabı şimdilik boş kalsın, Yükleme listesini ben kontrol ettikten sonra fiyat vereceğim\". CRM'de genel banyo dolabı VG10; ölçülü dolaplar İdeal 65 cm (VG65), Galata 80 cm (VG32)"
     },
     "Banyo batarya grubu | takım": {
      "kod": [
