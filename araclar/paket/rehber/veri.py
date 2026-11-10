@@ -380,6 +380,15 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
                     return [-1, 0], _r(py1 - py0)
         return None, None
 
+    def kartsiz_dis_uclu_h() -> tuple[str, str]:
+        """Kart modelinin kart vermediği dış duvar T'sinin (üçlü H) adı ve "Liste" satırı listeden (D-28 madde 1; kartsız panonun adı da
+        listeden). Bugün 160'lık dış duvarda: D-60 listeye "3'lü H 160 × 160 × <iç>" satırını koydu, kimlik kartı yok (H-04/05/08/09
+        100'lük dış duvarın); kart modeli parçayı "kural yok" bırakır. Ad boş kalırsa sayfa açılmaz (TK-05 r07, 9 Kasım 2026)."""
+        adlar = sorted({s["kalem"] for s in L if re.fullmatch(r"3'lü H .+ \(dış duvar T'si\)", s["kalem"]) and (s["adet"] or 0) > 0})
+        if len(adlar) != 1:
+            raise Desteklenmiyor(f"kartsız dış duvar T'si: listede {len(adlar)} satır {adlar}; rehber adı tek satırdan alır")
+        return adlar[0], ls(adlar[0])
+
     hs = []
     for i, e in enumerate(HZ.get("pano_ekleri") or []):
         x0, y0, x1, y1 = e["rect"]
@@ -389,13 +398,19 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
         dis, uclu = e["duvar"] == "dis", e["cins"] == "uclu"
         ad_ifc = f"H_{'UCLU' if uclu else 'PANO_EKI'}_{'DIS' if dis else 'IC'}_{i:03d}"
         h = HT.get(GOR.get(ad_ifc, ad_ifc))
+        ad = liste = None
         if dis and h:
             card, tur = h["kart"], ("uclu_" if uclu else "") + h["tur"]
+        elif dis and uclu:                                  # kartsız dış duvar T'si: iç H değil; dübelli (her dış H gibi), makasa denkliği kartsız okunmaz
+            card, tur = None, "uclu_dubelli"
+            ad, liste = kartsiz_dis_uclu_h()
+        elif dis:
+            raise Desteklenmiyor(f"{ad_ifc}: dış pano ekinin H'ı kart modelinde kartsız; rehber H türünü (kulaklı / dübelli) karttan okur")
         else:                                               # iç H: kartı modelden (60'lıkta H-03 / H-06, 100'lükte H-07 / H-10)
             card, tur = KART_IFC.get(GOR.get(ad_ifc, ad_ifc)), "uclu_standart" if uclu else "standart"
         stub, stub_t = stub_bul(o, a, perp, t) if uclu else (None, None)
         xy = [_r(a), _r(perp)] if o == "h" else [_r(perp), _r(a)]
-        k = {"xy": xy, "o": o, "t": t, "tur": tur, "card": card, "ad": None, "stub": stub, "stub_t": stub_t}
+        k = {"xy": xy, "o": o, "t": t, "tur": tur, "card": card, "ad": ad, "stub": stub, "stub_t": stub_t, **({"liste": liste} if liste else {})}
         probes = [(xy[0] + u, xy[1] + w) for u in (-t / 2 - 15, t / 2 + 15) for w in (-t / 2 - 15, t / 2 + 15)]
         oda = oda_sec(probes)
         k.update(room=KIM[oda], step=ADIM_ODA[oda])
@@ -450,6 +465,12 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
         k.update(room=KIM[oda], step=ADIM_ODA[oda])
         posts.append(k)
         oge[oda].append(((cx, cy), 0, k))
+
+    # Her pano, H ve köşe direği kartıyla ya da listedeki adıyla gelir: adsız parça sayfayı açılmaz yapar (sahnenin liste sıralaması
+    # adı okur); üretimde durur, bayiye boş sayfa gitmez
+    adsiz = [x.get("id") or f"H {x['xy']}" for x in panels + hs + posts if not (x.get("card") or x.get("ad"))]
+    if adsiz:
+        raise Desteklenmiyor(f"kartı ve adı olmayan parça: {', '.join(map(str, adsiz))}")
 
     # Oda içinde sıra: dizilimin başladığı köşeden (odanın arka-sol köşesi) uzaklık; köşe direği aynı yerdeki panodan önce
     for ad, lst in oge.items():

@@ -327,7 +327,7 @@ D.hs.forEach(h => {
     g.add(bp(a - 7, a + 7, Math.min(c0, c1), Math.max(c0, c1), H - 16, H, m));
   }
   const yer = { dubelli_kulakli: 'dış duvar, makasa denk gelen ek', dubelli: 'dış duvar, makasa denk gelmeyen ek', standart: 'iç duvar eki', uclu_dubelli_kulakli: 'dış duvar T’si, makasa denk', uclu_dubelli: 'dış duvar T’si', uclu_standart: 'iç duvar T’si', ozel_c: 'ön duvar eki; veranda kirişi buna bağlanır (paftada C)' }[h.tur];
-  add(s, g, h.order, { kod: h.card, ad: kart(h.card, h.ad), satir: [['Bu parça', yer], ['Oda', roomName(h.room)], ...(h.card ? kartSat(h.card) : [['Liste', M.ozel_h_liste]])] });
+  add(s, g, h.order, { kod: h.card, ad: kart(h.card, h.ad), satir: [['Bu parça', yer], ['Oda', roomName(h.room)], ...(h.card ? kartSat(h.card) : [['Liste', h.liste || M.ozel_h_liste]])] });
   if (dis) {   // çelik dübel: dübelli H'ların dibinde, dış yüzde
     const f0 = perp + out * h.t / 2, md = mat('dubel', s), d = new THREE.Group();
     const rng = (u0, u1) => [Math.min(perp + out * u0, perp + out * u1), Math.max(perp + out * u0, perp + out * u1)];

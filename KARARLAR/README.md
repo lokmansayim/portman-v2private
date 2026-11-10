@@ -209,7 +209,7 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | İE | İE-31 | çıkıntısız çapraz cumbanın r07 tekniği AP-06, AP-13, AP-16'ya (Lokman 5.11 12:45; TK-04 plan thread'i) | alındı (5.11) |
 | İE | İE-32 | montaj rehberinin altında ön onay sayfası: TK-01 r07 hedef örneği, kilit testi, mühür M-13 (pano 146; özellik D-53 madde 6, PR #124) | alındı (6.11; `claude/project-thread-bij4mz`) |
 | İE | İE-33 | açık evlerin ölçümü: AP-01…05 Motor kipinde (pano 70; Lokman 6.11 18:57; ilk commit'lerde "İE-32") | alındı (6.11; `claude/project-thread-qk5l1s`) |
-| İE | İE-34 | bayiye montaj rehberi: onaylı modelin rehberi bağlantıyla (Lokman 9.11 13:06) | alındı (9.11; sunucu sohbeti, `claude/project-thread-e4j22y`) |
+| İE | İE-34 | bayiye montaj rehberi: sunucuda /rehber/<anahtar>/, yayın betiği, onaylı İş Emri'nin alınması (Lokman 9.11 13:06, kart 13:16; CIO 13:08 plan A) | alındı (9.11; `claude/project-thread-e4j22y`) |
 | İE | İE-35 | tek fiyat kaynağı CRM: eşleme, CRM'den defter, `--crm`, günlük çekim zamanlayıcısı, mühür M-15 (D-72; pano 148) | alındı (9.11; CRM sohbeti, `claude/project-thread-03tosk`) |
 | İE | **İE-36** | — | **sıradaki boş** |
 | BK | BK-01–BK-08 | bu depo; BK-08 8a sonrası temizlik (`bk-08-8a-temizlik`) | yazıldı |
