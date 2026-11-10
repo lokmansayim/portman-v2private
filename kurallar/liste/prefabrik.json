@@ -169,6 +169,11 @@
    "durum": "lokman",
    "kaynak": "Lokman, 4 Kasım 2026 20:49 (D-50; TK-04 teklifinde trapez çatı): \"yalnız trapez mahya sac kaç kapatırsa o kadar kapatır yani sac 100 kapatırsa trapez mahyada 100 kapatır\"; 21:16: \"Trapez Mahyayıda 100 al\"; 21:20: \"Trapez Mahyada Sacda 100 kapatır olarak kuralla ve mühürle\" (M-11). Uygulama 'sac_kapatmasi': her beşiğin mahyası ÷ trapez sacın kapatması, yukarı; bindirme düşülmez; parça boyu kapatma kadar. Standart sac 100 cm kapatır (`trapez_kapatma_m`): mahya L 1000, ÷ 1; İş Emri 80'lik sac yazarsa L 800, ÷ 0,8. Kitabın parça boyu (`parca_boyu_m.trapez_mahyasi`, L 800) ve 20 cm bindirmesi (`bindirme_m.trapez_mahyasi`) prefabrikte okunmaz (`kitapla_farkli`). Gerçek listelerle (İE-27 ve İE-29 ölçümleri): kural 80 cm kapatan sacla AP-06 15, AP-11 16, AP-14 11, AP-15 12, AP-16 14, AP-26 10, PK-03 15 tuttu; 100 cm kapatan PK-08'de L 1000; eski ÷ 0,6 kuralı yalnız AP-25'te (19) tutuyordu."
   },
+  "baz_cati_kaplamasi": {
+   "deger": "trapez_sac",
+   "durum": "lokman",
+   "kaynak": "Lokman, 10 Kasım 2026 04:58 (D-74): \"daha önce bunu başka sohbette söylemiştim ama yine bu project kısmındada tekrar edeyim bunu kesin mühürle, Trapez Sac bizim Prefabrik evlerde Standardımız, Tek kat panel, Sandviç Panel, OSB+ Nem Bariyeri/Membar+Kiremit Desen Sac, OSB+membran+Shingle da opsiyonlar ayrıca Tek Kat Panel Çelik Konstrüksiyon yapılarda Standardı Prefabrik çatı kaplama opsiyonları Çelik Konstrüksiyon içinde aynı\"; 04:45 (TK-01 montaj rehberinin 20. adımı): \"20. adımda koyduğun Tek Kat panel değil Trapez sac ve Trapez Mahya olacak Düz mahya'yı Sandviç Panel ve Kiremit Desen Sac'da kullanıyoruz https://www.kalelicati.com/trapez-sac-mahyasi linkini paylaştığı mahya 'Trapez Mahya' web'ten de bulabilirsin farklı ölçüler var bizim ki Trapez Sac 100 kapatır ve Trapez mahya L:100 ve 35x35 olarak al\". Prefabrikte çatı kaplamasının standardı trapez sac: İş Emri'nin \"Çatı Kaplaması\" özelliği yazılı değilse liste ve kart modeli trapez sac sayar (değer kural kitabının `cati_kaplama` anahtarı; adı oradan, \"Trapez Saç\"). Sac 100 cm kapatır, mahya trapez sac mahyası L 1000 (D-50, M-11). Kitabın `baz_paket_cati_kaplamasi`'sı (tek kat panel; Lokman 4 Ekim 2026 01:42) çeliğin standardıdır, prefabrikte okunmaz (`kitapla_farkli`). Yazılı kaplama opsiyondur, İş Emri'nin yazdığı okunur (Lokman'ın opsiyonları: tek kat panel, sandviç panel, OSB + nem bariyeri / membran + kiremit desen sac, OSB + membran + shingle). Liste bugün shingle'ı tanımaz; tanımadığı yazıyı D-74'ten önceki gibi tek kat panel sayar (ayrı iş)."
+  },
   "teras_damlaligi": {
    "deger": {
     "parca_boyu_m": 2.8
@@ -729,6 +734,14 @@
    "tur": "deger",
    "karar_bekliyor": false,
    "not": "Prefabrik 1,0 (100 cm kapatır; Lokman 4 Kasım 2026 21:20, D-50, M-11: \"bundan sonra standart olarak 100 kapatır\"); kitap 0,8 (Excel motoru, mühendisin 10 × 10 metrajı; çelikte duruyor). İş Emri'nin çatı kaplaması başka kapatma yazarsa Motor onu alır."
+  },
+  {
+   "konu": "Baz paketin çatı kaplaması",
+   "prefabrik": "baz_cati_kaplamasi",
+   "kitap": "baz_paket_cati_kaplamasi",
+   "tur": "deger",
+   "karar_bekliyor": false,
+   "not": "Prefabrik trapez sac (Lokman, 10 Kasım 2026 04:58, D-74: \"Trapez Sac bizim Prefabrik evlerde Standardımız\"); kitap tek kat panel (Lokman, 4 Ekim 2026 01:42; D-74'ten beri çeliğin standardı: \"Tek Kat Panel Çelik Konstrüksiyon yapılarda Standardı\"). İş Emri'nin çatı kaplaması yazılıysa o okunur. 10 Kasım'a kadar prefabrik kitabınkini okuyordu (yazılmamış kaplama tek kat panel)."
   }
  ],
  "kitaptan_okunmayan": [
@@ -815,10 +828,6 @@
   {
    "kitap": "motorda_olup_listede_olmayanlar",
    "neden": "boş liste"
-  },
-  {
-   "kitap": "baz_paket_cati_kaplamasi",
-   "neden": "aynı: kaplama yazılmamışsa prefabrik de tek kat panel sayar"
   },
   {
    "kitap": "bayi_kurali",

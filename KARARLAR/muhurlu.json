@@ -1040,6 +1040,67 @@
    ],
    "durum": "mühürlü",
    "gecmis": []
+  },
+  {
+   "kod": "M-16",
+   "konu": "Prefabrik çatı kaplamasının standardı trapez sac",
+   "kural": "Prefabrikte çatı kaplamasının standardı trapez sac (100 cm kapatır, M-11): İş Emri'nin \"Çatı Kaplaması\" özelliği yazılı değilse yükleme listesi ve kart modeli trapez sac sayar (kurallar/liste/prefabrik.json › baz_cati_kaplamasi = trapez_sac; motor/prefabrik_liste.py › cati_kaplamasi_yazisi; kart modeli aynı işlevden okur, uyarıyla). Beşiğin mahyası trapez sac mahyası L 1000, kanat her yanda 35 cm (kart CK-07; kart modelinde kenar_gosterim.kesit_cm.trapez_mahya). Trapez sacta 5,5 × 60 vida tek satır, kaplama vidası (m² × 2,5 satırı yok). Opsiyonlar İş Emri'ne yazılır: tek kat panel (mahyası düz mahya L 2800), sandviç panel, OSB + nem bariyeri / membran + kiremit desen sac, OSB + membran + shingle. Çelikte (genel motor) standart tek kat panel: kural kitabının baz_paket_cati_kaplamasi aynen. TK-01 r08 (yalnız çatı kaplaması \"Trapez Saç\") Lokman'ın onayladığı önce/sonra; TK-01 r07 ve TK-02 M-02 hedef örneği olarak aynen.",
+   "kararlar": [
+    "D-74"
+   ],
+   "pr": [
+    151
+   ],
+   "lokman": [
+    {
+     "tarih": "2026-11-10 04:45",
+     "soz": "20. adımda koyduğun Tek Kat panel değil Trapez sac ve Trapez Mahya olacak Düz mahya'yı Sandviç Panel ve Kiremit Desen Sac'da kullanıyoruz https://www.kalelicati.com/trapez-sac-mahyasi linkini paylaştığı mahya 'Trapez Mahya' web'ten de bulabilirsin farklı ölçüler var bizim ki Trapez Sac 100 kapatır ve Trapez mahya L:100 ve 35x35 olarak al",
+     "mesaj": "cmsg_01UAFvcnfVuTR1wfFux5fQPP7KZNWrpJMHmb5kSKNytzea"
+    },
+    {
+     "tarih": "2026-11-10 04:58",
+     "soz": "daha önce bunu başka sohbette söylemiştim ama yine bu project kısmındada tekrar edeyim bunu kesin mühürle, Trapez Sac bizim Prefabrik evlerde Standardımız, Tek kat panel, Sandviç Panel, OSB+ Nem Bariyeri/Membar+Kiremit Desen Sac, OSB+membran+Shingle da opsiyonlar ayrıca Tek Kat Panel Çelik Konstrüksiyon yapılarda Standardı Prefabrik çatı kaplama opsiyonları Çelik Konstrüksiyon içinde aynı",
+     "mesaj": "cmsg_01UAFvcnfVuTR1wfFux5fQPPR3mipPn3EntAKZQ7XhHF7D"
+    },
+    {
+     "tarih": "2026-11-10 08:33",
+     "soz": "tüm hepsine onaylıyorum ancak sadece Tek kat Panelde kural olan m² x 2,5  Trapez vida (5,5 x60) aynen Trapez Sac'da da geçerli / Tek kat panelde mahya değişmiyor Düz Mahya L: 2800",
+     "mesaj": "cmsg_01UAFvcnfVuTR1wfFux5fQPPUt6d6wnZq9eNiUT1Kd5d7V"
+    },
+    {
+     "tarih": "2026-11-10 08:38",
+     "soz": "Karar kartı \"Trapez sacta m² × 2,5 vidası ayrı satır olarak eklensin mi?\" → \"Hayır, bugünkü tek satır kalsın\"",
+     "mesaj": "cmsg_01UAFvcnfVuTR1wfFux5fQPPKkgzLu4JFxhHV2QF2n2nKg"
+    }
+   ],
+   "kilitler": [
+    {
+     "yer": "kurallar/liste/prefabrik.json#kurallar.baz_cati_kaplamasi.deger",
+     "iz": "a7814bebd48aa911"
+    },
+    {
+     "yer": "motor/prefabrik_liste.py::cati_kaplamasi_yazisi",
+     "iz": "9345525188980ba7"
+    },
+    {
+     "yer": "kurallar/yerlesim/prefabrik.json#kurallar.kenar_gosterim.kesit_cm.deger.trapez_mahya",
+     "iz": "0cc8032d5896892d"
+    },
+    {
+     "yer": "kurallar/urun/kartlar.json#kartlar[kod=CK-07].olcu",
+     "iz": "633c96dbe34f8a09"
+    },
+    {
+     "yer": "testler/motor/veri/TK01_r08.json",
+     "iz": "e6bfd72f754befa5"
+    },
+    {
+     "yer": "testler/motor/test_d74_cati_kaplama.py",
+     "iz": "870b04847f533283"
+    }
+   ],
+   "durum": "mühürlü",
+   "gecmis": []
   }
  ]
 }

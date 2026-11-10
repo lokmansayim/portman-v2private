@@ -4,7 +4,11 @@ gövde ve açık mahalin kendi çatısı `cati_serit`'ten, beşik + çapraz cumb
 
 Makas yerleri (Lokman, 2 Kasım 2026 16:50, karar kartı: cumbanın iç ucuna makas "Bugünkü gibi konmasın"): orta makaslar saçak duvarının
 pano eklerinde, ilk makas baş makasın kalkan duvarı kalınlığı kadar ötesine kadar; cumbada baş makas dış uçta, iç uçta makas yok.
-AP-03'ün gerçek yükleme listesiyle kıyas (13 Ekim kaydı, E3) `docs/is_emirleri/IE-17.md` › PR-1b/K7 tablosunda."""
+AP-03'ün gerçek yükleme listesiyle kıyas (13 Ekim kaydı, E3) `docs/is_emirleri/IE-17.md` › PR-1b/K7 tablosunda.
+
+D-74 (Lokman, 10 Kasım 2026 04:58: "Trapez Sac bizim Prefabrik evlerde Standardımız"): çatı kaplaması yazılmamış prefabrik ev artık trapez sac
+sayılır. Dört evin İş Emri'si (M-07) kaplamayı yazmaz; bu liste tek kat panelle sabitlendi: listeler kaplamayı açıkça "Tek Kat Panel" yazarak
+koşar (`_tek_kat`), sayılar aynen. Makas sayıları ve çatı kenarları kaplamadan bağımsız."""
 from __future__ import annotations
 import copy
 import json
@@ -24,9 +28,14 @@ def _ie(kod: str) -> dict:
     return json.loads((EVLER / f"{kod}.json").read_text(encoding="utf-8"))
 
 
+def _tek_kat(ie: dict) -> dict:
+    ie["ozellikler"] = {**ie.get("ozellikler", {}), "Çatı Kaplaması": "Tek Kat Panel"}
+    return ie
+
+
 @pytest.fixture(scope="module")
 def listeler():
-    return {k: PL.is_emrinden(_ie(k)) for k in ("AP15", "AP09", "AP03", "AP22")}
+    return {k: PL.is_emrinden(_tek_kat(_ie(k))) for k in ("AP15", "AP09", "AP03", "AP22")}
 
 
 @pytest.fixture(scope="module")
