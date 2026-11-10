@@ -182,7 +182,9 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | D | D-71 | Canlıya kontrollü geçiş: bugünkü liste isabetiyle, özellikler kapalı, önce tatbikat (Lokman 8.11 16:25 kartı) | yazıldı (8.11; sunucu sohbeti, `claude/project-thread-e4j22y`) |
 | D | D-72 | Tek fiyat kaynağı CRM, her gün çekim; öteki listeler konu dışı; pencere de CRM'den (İE-35, M-15; Lokman 9.11 13:10, 13:15 kartı) | yazıldı (9.11; CRM sohbeti, `claude/project-thread-03tosk`) |
 | D | D-73 | montaj rehberinde baş makas Z'si ve alın sacı (Lokman 9.11 13:45–19:57) | alındı (9.11; canlı geçiş sohbetinde başladı, montaj rehberi sohbetine devredildi) |
-| D | **D-74** | — | **sıradaki boş** |
+| D | D-74 | prefabrik çatı kaplama standardı trapez sac, çelikte tek kat panel (Lokman 10.11 04:58 "kesin mühürle") | alındı (10.11; bakım sohbeti, PR #151) |
+| D | D-75 | CRM eşlemesi: kutu profil 6 metrelik boyun fiyatından, pencere paneli tam panodan (üst 1/5, alt 1/3), banyo dolabı şimdilik boş (İE-35; Lokman 10.11 10:01) | yazıldı (10.11; CRM sohbeti, `claude/project-thread-03tosk`) |
+| D | **D-76** | — | **sıradaki boş** |
 | İE | İE-01–İE-08 | bu depo (`main`) | yazıldı |
 | İE | İE-09 | model atölyesi: kontrollü model üretimi ve banka hattı (Görev 6e; pano 30; P6001 güncellemesi kapsam dışı) | alındı (16.10; `claude/gorev-6e-model-atolyesi-rnhtcp`; PR-1 banka hattı 29.10, `claude/project-thread-rhjgzv`) |
 | İE | İE-10, İE-11, İE-12 | prefabrik hattı (PR #12, PR #14, `ie-12-prefabrik-bayi-paftasi`) | `main`'e BK-12 ile (PR-1: motor ve bayi paftası; liste ve mühür kıyası sonraki PR'larda) |
