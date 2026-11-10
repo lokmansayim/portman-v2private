@@ -1,6 +1,6 @@
 {
  "sema": 1,
- "surum": "2026-11-10-r02",
+ "surum": "2026-11-10-r03",
  "karar": "D-72",
  "muhur": "M-15",
  "aciklama": "Fiyat defteri kaleminin CRM stok fiyatları API'sindeki karşılığı ve fiyatın nasıl hesaplandığı (İE-35). Fiyat yazmaz: fiyat her gün CRM'den gelir, `araclar/crm_fiyat.py` bu dosyayla defter üretir. Anahtarlar ve birimler fiyat defterinin (defter_2026-11 r13) kalemleri; Motor'un listesindeki anahtar. Eşleme değişikliği (yeni kalem, Lokman'ın birim cevabı, Samet'in CRM'e eklediği ürün) bu dosyaya PR'la girer; `kaynak` bölümü mühürlü (M-15).",
@@ -848,9 +848,9 @@
     "Metal dere | L 4000": {
      "kod": "DR1",
      "hesap": "ayni",
-     "esleme": "birim sorusu",
+     "esleme": "kural",
      "birim": "adet",
-     "not": "CRM'de antrasit metal dere birimi metre; defterde L 4000 parça. Birim anlaşılmadı, hesaplanmaz"
+     "not": "Lokman 10 Kasım 16:15 UTC kartı (kart cmsg_01UAFvcnfVuTR1wfFux5fQPPTxhiqaV8GaungmBqQA2v37, \"Metal derenin 4 metrelik parçası kaç TL?\" sorusunda parça fiyatı seçeneği; DIAMOND 82 çelik fiyat sohbeti): CRM'deki antrasit metal dere fiyatı 4 metrelik parçanın fiyatı. CRM'de birim \"Metre\" yazıyor; birim parça sayılır"
     },
     "Dere kelepçesi | adet": {
      "kod": "DR6",
@@ -1609,9 +1609,9 @@
     "Metal dere | L 4000": {
      "kod": "DR1",
      "hesap": "ayni",
-     "esleme": "birim sorusu",
+     "esleme": "kural",
      "birim": "adet",
-     "not": "CRM'de antrasit metal dere birimi metre; defterde L 4000 parça. Birim anlaşılmadı, hesaplanmaz"
+     "not": "Lokman 10 Kasım 16:15 UTC kartı (kart cmsg_01UAFvcnfVuTR1wfFux5fQPPTxhiqaV8GaungmBqQA2v37, \"Metal derenin 4 metrelik parçası kaç TL?\" sorusunda parça fiyatı seçeneği; DIAMOND 82 çelik fiyat sohbeti): CRM'deki antrasit metal dere fiyatı 4 metrelik parçanın fiyatı. CRM'de birim \"Metre\" yazıyor; birim parça sayılır"
     },
     "Dere iniş borusu | L 3000": {
      "kod": "DR13",
