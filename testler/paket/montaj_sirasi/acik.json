@@ -1,0 +1,48 @@
+{
+  "aciklama": "Montaj sırası hakeminin (araclar/paket/rehber/sira.py) bugün açık bulduğu yerler: main 6279620, 10 Kasım 2026. Cırcır: testler/paket/test_montaj_sirasi.py her evin bulgularını bu listeyle birebir kıyaslar. Listede olmayan yeni bir yer testi kırmızı yapar (montaj sırası bozuldu). Düzelen yer de testi kırmızı yapar: o satır buradan çıkarılır ve düzelme Lokman'a resimle gösterilir. Bu listeye yer eklemek yalnız Lokman'ın onayıyla olur (D-02); testi geçirmek için yer eklenmez.",
+  "evler": {
+    "62 m²": {
+      "girdi": "testler/paket/rehber62/veri.json",
+      "acik": {
+        "MS-01 · sol kalkan (MKS01) · ön/sol yüz · kaplama üstünde": "köşe: ana kalkanın alın sacının ucunda alt çatının (cumba) sacı alın sacının üstünde; D-73 › Açık kalan (veranda ve cumba köşesi); düzeltme rehber sohbetinde"
+      }
+    },
+    "TK-01": {
+      "girdi": "testler/motor/veri/TK01_r08.json",
+      "acik": {
+        "MS-01 · arka kalkan (MKS08) · ön/sol yüz · kaplama üstünde": "köşe: ana kalkanın alın sacının ucunda alt çatının (arka veranda) sacı alın sacının üstünde; D-73 › Açık kalan (veranda ve cumba köşesi); düzeltme rehber sohbetinde"
+      }
+    },
+    "TK-02": {
+      "girdi": "testler/motor/veri/TK02_r04.json",
+      "acik": {
+        "MS-01 · arka kalkan (MKS08) · ön/sol yüz · kaplama üstünde": "köşe: ana kalkanın alın sacının ucunda alt çatının (arka veranda) sacı alın sacının üstünde; D-73 › Açık kalan (veranda ve cumba köşesi); düzeltme rehber sohbetinde"
+      }
+    },
+    "TK-03": {
+      "girdi": "testler/motor/veri/TK03.json",
+      "acik": {
+        "MS-01 · ana çatı sağ kalkanı (MKS08) · arka/sağ yüz · mahya üstünde": "mahya ucu: düz mahya yolu (metal kiremit mahyası) kalkan ucunda alın sacından önce kesilmiyor, mahya alın sacının üstünde; düzeltme rehber sohbetinde",
+        "MS-01 · ana çatı sağ kalkanı (MKS08) · ön/sol yüz · kaplama üstünde": "köşe: ana kalkanın alın sacının ucunda alt çatının (sağ cumba) sacı alın sacının üstünde; D-73 › Açık kalan (veranda ve cumba köşesi); düzeltme rehber sohbetinde",
+        "MS-01 · ana çatı sağ kalkanı (MKS08) · ön/sol yüz · mahya üstünde": "mahya ucu: düz mahya yolu (metal kiremit mahyası) kalkan ucunda alın sacından önce kesilmiyor, mahya alın sacının üstünde; düzeltme rehber sohbetinde; köşede sağ cumbanın mahyası da",
+        "MS-01 · ana çatı sol kalkanı (MKS06) · arka/sağ yüz · kaplama üstünde": "köşe: ana kalkanın alın sacının ucunda alt çatının (sol cumba) sacı alın sacının üstünde; D-73 › Açık kalan (veranda ve cumba köşesi); düzeltme rehber sohbetinde",
+        "MS-01 · ana çatı sol kalkanı (MKS06) · arka/sağ yüz · mahya üstünde": "mahya ucu: düz mahya yolu (metal kiremit mahyası) kalkan ucunda alın sacından önce kesilmiyor, mahya alın sacının üstünde; düzeltme rehber sohbetinde; köşede sol cumbanın mahyası da",
+        "MS-01 · ana çatı sol kalkanı (MKS06) · ön/sol yüz · mahya üstünde": "mahya ucu: düz mahya yolu (metal kiremit mahyası) kalkan ucunda alın sacından önce kesilmiyor, mahya alın sacının üstünde; düzeltme rehber sohbetinde",
+        "MS-01 · sağ cumba sağ kalkanı (MKS12) · arka/sağ yüz · mahya üstünde": "mahya ucu: düz mahya yolu (metal kiremit mahyası) kalkan ucunda alın sacından önce kesilmiyor, mahya alın sacının üstünde; düzeltme rehber sohbetinde",
+        "MS-01 · sağ cumba sağ kalkanı (MKS12) · ön/sol yüz · mahya üstünde": "mahya ucu: düz mahya yolu (metal kiremit mahyası) kalkan ucunda alın sacından önce kesilmiyor, mahya alın sacının üstünde; düzeltme rehber sohbetinde",
+        "MS-01 · sol cumba sol kalkanı (MKS01) · arka/sağ yüz · mahya üstünde": "mahya ucu: düz mahya yolu (metal kiremit mahyası) kalkan ucunda alın sacından önce kesilmiyor, mahya alın sacının üstünde; düzeltme rehber sohbetinde",
+        "MS-01 · sol cumba sol kalkanı (MKS01) · ön/sol yüz · mahya üstünde": "mahya ucu: düz mahya yolu (metal kiremit mahyası) kalkan ucunda alın sacından önce kesilmiyor, mahya alın sacının üstünde; düzeltme rehber sohbetinde"
+      }
+    },
+    "TK-04": {
+      "girdi": "testler/motor/veri/TK04_r08.json",
+      "acik": {
+        "MS-01 · ana çatı sol kalkanı (MKS01) · ön/sol yüz · kaplama üstünde": "köşe: ana kalkanın alın sacının ucunda alt çatının (cumba) sacı alın sacının üstünde; D-73 › Açık kalan (veranda ve cumba köşesi); düzeltme rehber sohbetinde"
+      }
+    },
+    "TK-05": {
+      "girdi": "testler/motor/veri/TK05_r07.json",
+      "acik": {}
+    }
+  }
+}

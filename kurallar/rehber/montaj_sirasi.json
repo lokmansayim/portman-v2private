@@ -1,0 +1,13 @@
+{
+  "aciklama": "Montaj rehberinde montaj sırası: sonra gelen ve öncekini örten parça (üst), örttüğü parçaların (alt) üstündedir. Denetleyen araclar/paket/rehber/sira.py (sira.js); test testler/paket/test_montaj_sirasi.py. Her kural tek ilişkidir; Lokman'ın sözüyle ve onayıyla tek tek eklenir (Lokman, 10 Kasım 2026 20:17: \"en küçük adımlarla gidelim çizgi çizgi gidelim\"). Adımlar rehber verisinin S anahtarlarıyla yazılır (alin, kaplama, ...).",
+  "kurallar": [
+    {
+      "no": "MS-01",
+      "kural": "Alın sacı trapez sacı ve mahyayı örter. Önce trapez sac ve mahya gelir, sonra alın sacı üstünü örter. Alın sacının alnının ve üst kıvrımının üstünde (çatı yüzüne dik doğrultuda, 50 cm içinde) trapez sac, panel ya da mahya olmaz.",
+      "ust": {"adim": "alin", "ad": "Alın sacı", "bu_icerir": "üst kıvrım"},
+      "alt": {"adim": "kaplama"},
+      "soz": "Lokman, 10 Kasım 2026 20:16 UTC: \"mantiken sıralamarda bile böyle birşey olmaz önce trapez sac ve mahya gelir sonra alın sacı üzerini örter\"",
+      "onay": null
+    }
+  ]
+}
