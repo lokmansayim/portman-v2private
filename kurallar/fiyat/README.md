@@ -14,7 +14,10 @@ Lokman, 9 Kasım 2026 13:10: "bunu kural olarak al ve mühürle bundan sonra tek
 - **Eşleme** `crm_esleme.json`: defterin kalemi (Motor'un liste anahtarı) → CRM kodu ve hesap (aynı, oran, çarp, boy, ağırlıklı ortalama,
   toplam). Fiyat yazmaz. `kaynak` bölümü mühürlü; kalemler PR'la değişir (yeni kalem, Lokman'ın birim cevabı, Samet'in eklediği ürün).
 - **Onay.** Eşleme `birebir` ya da `kural` ise onaylı; `yakın` ve `birim varsayımı` öneri (`--oneri`); `birim sorusu` ve `CRM'de yok`
-  fiyatsız. O gün fiyatı 0 ya da boş olan kod, listede olmayan kod ve birden çok satırdaki kod fiyatsız.
+  fiyatsız. O gün fiyatı 0 ya da boş olan kod, listede olmayan kod ve birden çok satırdaki kod fiyatsız. `bekletme`: Lokman'ın kararıyla şimdilik
+  fiyatsız, CRM'de fiyatı olsa da yazılmaz (banyo dolabı, D-75).
+- **Lokman'ın hesap kuralları (D-75, 10 Kasım).** Kutu profilin (kiriş ve kolon) CRM fiyatı 6 metrelik boyun fiyatıdır; parça fiyatı
+  boyla orantılı, tam TL. Pencere üst paneli tam panonun (100 × 1250 × 2500) 1/5'i, alt paneli 1/3'ü.
 - **Araç.** `araclar/crm_fiyat.py defter <görüntü> <defter.json>` görüntüyü bu şemada deftere çevirir; `fiyatla.py` ve `teklif.py`
   `--crm <görüntü>` ile aynısını yapar. Varsayılan defter yoktur: kaynak verilmezse araç durur. Kapanmış teklif: `--defter <o günkü defter>`
   (TK-04 r08 ve TK-05 `defter_2026-11.json`, TK-01 `defter_2026-10.json`). Fiyatsız kalemler: `crm_fiyat.py eksik <görüntü>`.

@@ -6,7 +6,8 @@ Lokman, 9 Kasım 2026 13:10: "bunu kural olarak al ve mühürle bundan sonra tek
 Gerçek CRM listesi depoya girmez: anlık görüntü burada sahte, eşlemedeki her kod için uydurma fiyatla kurulur. Sınanan: eşleme
 tutarlı ve fiyat yazmaz, defterin bütün kalemlerini kapsar; hesaplar (aynı, oran, çarp, boy, ortalama, toplam; kuruşa, kutu profil tam
 TL'ye); fiyatı 0 ya da kodu olmayan kalem fiyatsız; onay eşleme türünden; kaynak yalnız CRM (ve D-65 çırpı ipi); kaynaksız teklif
-durur; günlük çekim betiği (sahte curl ve rclone) ve kurulum betiği (sahte systemctl).
+durur; günlük çekim betiği (sahte curl ve rclone) ve kurulum betiği (sahte systemctl). D-75 (Lokman 10 Kasım 10:01): kutu profil 6
+metrelik boyun fiyatından, pencere paneli tam panodan, banyo dolabı şimdilik boş.
 """
 from __future__ import annotations
 
@@ -131,7 +132,7 @@ def test_esleme_tutarli_ve_fiyat_yazmaz(E):
     assert '"fiyat"' not in metin and '"kg_fiyat"' not in metin                 # fiyat her gün CRM'den
     for yer, g, _ in _kayitlar(E):                                            # kararın kendisi (çırpı ipi 0 TL) dışında notta tutar yok
         assert g["esleme"] == "karar" or not re.search(r"\d[\d.]*,?\d* TL|\d\.\d{3}\b", g.get("not") or ""), yer
-    assert set(E["esleme_turleri"]) == {"birebir", "kural", "yakın", "birim varsayımı", "birim sorusu", "CRM'de yok", "karar"}
+    assert set(E["esleme_turleri"]) == {"birebir", "kural", "yakın", "birim varsayımı", "birim sorusu", "CRM'de yok", "karar", "bekletme"}
 
 
 def test_esleme_son_defterin_butun_kalemlerini_kapsar(E):
@@ -171,8 +172,8 @@ def test_hesaplar(A, D):
     g = P["H 100 (dış pano eki) | 100 × 100 × 2500"]                         # kulaklı 11 / dübelli 9
     assert (g["fiyat"], g["onay"], g["durum"]) == (_kurus((_fiyat(A, "MA15") * 11 + _fiyat(A, "MA18") * 9) / 20), True, "hesap")
     assert P["60'lık alt çerçeve | 60 × 3750"]["fiyat"] == _kurus(_fiyat(A, "MA64") * 3750 / 2500)
-    g = P["Kutu profil (kiriş) 100 × 100 | L 1457,5"]                          # boyla orantı, tam TL (D-36); birim varsayımı → öneri
-    assert (g["fiyat"], g["onay"]) == (_kurus(_fiyat(A, "MA11") * Decimal("1457.5") / 1000, "1"), False)
+    g = P["Kutu profil (kiriş) 100 × 100 | L 1457,5"]                          # 6 m fiyatından boyla orantı, tam TL (D-36, D-75); kural
+    assert (g["fiyat"], g["onay"]) == (_kurus(_fiyat(A, "MA11") * Decimal("1457.5") / 6000, "1"), True)
     assert P["Tek kat çatı paneli · ana çatı | L 5100"]["fiyat"] == _kurus(_fiyat(A, "CG6") * Decimal("5.1"))
     g = P["Besleme kablo borusu | metre"]                                      # NYM'nin iki katı; NYM birimi varsayım → öneri
     assert (g["fiyat"], g["onay"]) == (_kurus(_fiyat(A, "E7") * 2), False)
@@ -191,6 +192,50 @@ def test_hesaplar(A, D):
         ([225, 225], _kurus(_fiyat(A, "YP1") / 4), False)]
     m = D["hatlar"]["prefabrik"]["makas_kurali"]
     assert (m["kg_fiyat"], m["kg_m"], m["sacak_mm"], m["onay"]) == (_kurus(_fiyat(A, "HM14")), 5.5, 300, False)
+
+
+def test_d75_kutu_profil_pencere_paneli_banyo_dolabi(E, A, D, tmp_path):
+    """D-75 (Lokman 10 Kasım 10:01): "Profili yine 6 metresi kaç paraysa ona göre orantıla"; pencere üst paneli tam panonun (100 ×
+    1250 × 2500) 1/5'i, alt paneli 1/3'ü; "Banyo dolabı şimdilik boş kalsın". Kutu profilin CRM fiyatı 6 metrelik boyun fiyatı: her
+    kalem ve listede olmayan boy (boy kuralı) fiyat × L ÷ 6000, tam TL, onaylı. Pencere paneli CRM'in kendi satırından değil YP1'den.
+    Banyo dolabı CRM'de fiyatı olsa da fiyatsız ve Samet'e giden eksik listesinde yok."""
+    P, Cl = D["hatlar"]["prefabrik"], D["hatlar"]["celik"]["kalemler"]
+    for k, g in E["hatlar"]["prefabrik"]["kalemler"].items():
+        if g.get("kod") in ("MA11", "MA12"):
+            boy = Decimal(k.split("| L ")[1].replace(",", "."))
+            d = P["kalemler"][k]
+            assert (g["esas_boy_mm"], g["esleme"]) == (6000, "kural"), k
+            assert (d["fiyat"], d["onay"], d["durum"]) == (_kurus(_fiyat(A, g["kod"]) * boy / 6000, "1"), True, "hesap"), k
+    assert P["kalemler"]["Kutu profil (kiriş) 100 × 100 | L 3760"]["fiyat"] == _kurus(_fiyat(A, "MA11") * Decimal("3.76") / 6, "1")
+    boy = {b["kalem"]: b for b in P["boy_onerileri"] if b.get("kalem")}
+    for ad, kod in (("Kutu profil (kiriş) 100 × 100", "MA11"), ("Özel kutu profil (kolon) 100 × 100", "MA12")):
+        b = boy[ad]
+        assert (b["boy_mm"], b["fiyat"], b["onay"], b["kaynak_satir"]) == (6000, _kurus(_fiyat(A, kod)), True, [kod])
+        s = {"anahtar": f"{ad} | L 3000", "kalem": ad, "olcu": "L 3000"}
+        assert F.boy_onerisi_bul(s, P["boy_onerileri"])[1] == _kurus(_fiyat(A, kod) / 2, "1")     # 3 m = 6 m'nin yarısı
+    tam = _fiyat(A, "YP1")
+    for k, payda in (("Pencere üst panel | 100 × 1250 × 500", 5), ("Pencere alt panel (120/120) | 100 × 1250 × 800", 3),
+                     ("Pencere alt panel (120/180) | 100 × 1250 × 200", 3)):
+        d = P["kalemler"][k]
+        assert (d["fiyat"], d["onay"], d["durum"], d["kaynak_satir"]) == (_kurus(tam / payda), True, "hesap", ["YP1"]), k
+    assert not any(g.get("kod") in ("YP13", "YP16") for _, g, _ in _kayitlar(E))
+    g = E["hatlar"]["celik"]["kalemler"]["Banyo dolabı | takım"]
+    assert (g["kod"], g["esleme"], g["dayanak"]) == (None, "bekletme", "D-75") and "Banyo dolabı şimdilik boş kalsın" in g["not"]
+    d = Cl["Banyo dolabı | takım"]
+    assert (d["fiyat"], d["kaynak"], d["onay"], d["durum"]) == (None, None, False, "Lokman fiyat verecek")
+    B = copy.deepcopy(A)                                   # VG10 CRM'de fiyatlansa da banyo dolabı boş
+    B["data"].append({"id": 99998, "urunkodu": "VG10", "urunadi": "Banyo dolabı", "olcu": "X", "birim": "Adet", "fiyat": 4321,
+                      "kategori": None})
+    B["count"] = len(B["data"])
+    assert C.defter_uret(C.denetle(B), E)["hatlar"]["celik"]["kalemler"]["Banyo dolabı | takım"]["fiyat"] is None
+    X = C.eksikler(C.denetle(A), E)
+    assert "Lokman fiyat verecek" not in X["gruplar"]
+    assert not any(r["kalem"] == "Banyo dolabı | takım" for v in X["gruplar"].values() for r in v)
+    Y = copy.deepcopy(E)                                   # denetim: bekletme kodsuz ve dayanaklı; esas boy yalnız boy hesabında
+    Y["hatlar"]["celik"]["kalemler"]["Banyo dolabı | takım"]["kod"] = "VG10"
+    Y["hatlar"]["prefabrik"]["kalemler"]["Kutu profil (kiriş) 100 × 100 | L 3760"]["esas_boy_mm"] = 0
+    Y["hatlar"]["prefabrik"]["kalemler"]["Pencere üst panel | 100 × 1250 × 500"]["esas_boy_mm"] = 6000
+    assert len(C.esleme_denetle(Y)) == 3
 
 
 def test_onay_esleme_turunden(E, D):
