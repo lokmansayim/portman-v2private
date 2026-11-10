@@ -802,11 +802,13 @@ const [RIB_SAC, RIB_IC] = (() => {
     });
   });
   // Mahya: her beşiğin mahyası, hadve tepelerinin üstünde; yüksekliği verideki çatının (topR) mahyasından
+  // kanat her yanda D.kaplama.mahya_kanat cm (trapez sac mahyası 35, metal kiremit mahyası 26; kart modelinin gösterim kesiti), mahyayı 1 cm aşar
+  const KN = D.kaplama.mahya_kanat, KO = KN / 2 - 1;
   D.kaplama.mahya.forEach((e, j) => {
     const R = RF[e.R], T = RF[e.topR], top = ysR(T, T.M) + (PTOP + 0.8) / T.cos, [z0, z1] = e.z;
     [1, -1].forEach((side, i) => {
-      const w = cerceve(e.r, ...e.O), o = lb(-13, 13, -0.3, 0.3, z0, z1, mat('ridge', AD.kaplama));
-      o.position.x = (e.s0 - side * R.cos * 12) / 100; o.position.y = (top - R.sin * 12 + 1) / 100; o.rotation.z = side * R.th; w.add(o);
+      const w = cerceve(e.r, ...e.O), o = lb(-KN / 2, KN / 2, -0.3, 0.3, z0, z1, mat('ridge', AD.kaplama));
+      o.position.x = (e.s0 - side * R.cos * KO) / 100; o.position.y = (top - R.sin * KO + 1) / 100; o.rotation.z = side * R.th; w.add(o);
       add(AD.kaplama, w, 9 + (j * 2 + i) * 0.3, { kod: KB('mahya'), ad: KM.mahya_ad, satir: [['Bu parça', `${e.ad} · ${fmtc(z1 - z0)} cm`], ['Liste', KM.mahya_liste], ...kartSat(KB('mahya'))] });
     });
   });

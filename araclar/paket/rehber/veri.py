@@ -1098,10 +1098,16 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
             # mahya ana yüzün devamı olan yüzle biter (ötesi ana çatının yüzü); devam yoksa gövdeye kadar
             lo_, hi_ = hadve_ar[f"H{v['R']}{'R' if v['sag_devam'] and not v['sol_devam'] else 'L'}"]
             mahya.append({"R": v["R"], "topR": v["R"], "r": 0, "O": [0, 0], "s0": v["M"], "z": [_r(-hi_), _r(-lo_)], "ad": f"{kucuk(v['ad'])} mahyası"})
+    # mahyanın kanadı (her yanda, cm) kart modelinin gösterim kesitinden: trapez sac mahyası 35 (CK-07; Lokman, 10.11.2026: "Trapez mahya
+    # L:100 ve 35x35"; D-74), metal kiremit mahyası 26 (`kenar_gosterim.kesit_cm`)
+    KG = (((SAYIM.get("kenar") or {}).get("degerler") or {}).get("kenar_gosterim") or {}).get("kesit_cm") or {}
+    mahya_kanat = (KG.get("trapez_mahya" if TR_ else "mahya") or {}).get("kanat")
+    if mahya_kanat is None:
+        raise Desteklenmiyor("kart modelinin gösterim kesitinde mahyanın kanadı yok (`kenar_gosterim.kesit_cm`)")
     kaplama = {
         "profil": {"hadve": KPR["hadve"], "tepe": KPR["tepe"], "taban": KPR["taban"], "kenar": KPR["kenar"], "kapatir": kap_cm,
                    **({"yalitim": KPR["yalitim"]} if KPR["yalitim"] else {})},
-        "hadve": hadve, "mahya": mahya,
+        "hadve": hadve, "mahya": mahya, "mahya_kanat": mahya_kanat,
         "metin": {"ad": f"{kap_ad} {{ad}}", "kesim": f"{kap_ad} · kesim parçası", "say_onek": kap_ad,
                   "profil": (f"100 cm kapatır, {KPR['hadve_sayisi']} hadveli (Lokman, 1.11.2026); hadve {fmtc(KPR['hadve'] * 10)} mm (üretici tablosu); "
                              f"yalıtım {fmtc(KPR['yalitim'] * 10)} mm (satıcının stok standardı, varsayım); hadveler {fmtc(KPR['hadve_araligi'])} cm arayla, "

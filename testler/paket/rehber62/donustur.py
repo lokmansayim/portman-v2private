@@ -16,6 +16,8 @@ import math
 from pathlib import Path
 
 B = Path(__file__).resolve().parent
+# trapez sac mahyasının kanadı her yanda (cm), kart modelinin gösterim kesitinden (CK-07; Lokman, 10.11.2026: "Trapez mahya L:100 ve 35x35"; D-74)
+MAHYA_KANAT = json.loads((B.parents[2] / "kurallar/yerlesim/prefabrik.json").read_text(encoding="utf-8"))["kurallar"]["kenar_gosterim"]["kesit_cm"]["deger"]["trapez_mahya"]["kanat"]
 
 
 def R(k, ad, v, src):
@@ -96,6 +98,7 @@ def veri() -> dict:
                   "RY": [y for y in (-180.2 + 4.5 + i * 20 for i in range(25)) if y < 300]},
         "mahya": [{"R": "AN", "topR": "AN", "r": math.pi / 2, "O": [0, 0], "s0": 300, "z": [-30.2, 930.2], "ad": "ana mahya"},
                   {"R": "CU", "topR": "AN", "r": math.pi, "O": [287.375, 0], "s0": 0, "z": [-180.2, 300], "ad": "cumba mahyası"}],
+        "mahya_kanat": MAHYA_KANAT,
         "metin": {"ad": "Trapez sac {ad} × 100", "kesim": "Trapez sac · kesim parçası", "say_onek": "Trapez sac",
                   "profil": "27/200-6: hadve 27 mm, adım 200 mm, tepe 42 / taban 74 mm; 6 hadve, 100 cm kapatır; 0,5 mm (Lokman)",
                   "dizilim": "modelde 100’lük levhayla; paftadaki dizilim 80’lik levhaya göre çizilmiş", "renk": "antrasit",
