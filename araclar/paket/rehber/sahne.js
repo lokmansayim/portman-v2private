@@ -1080,7 +1080,9 @@ const SAY = {
   omega_ic_m: fmt(D.omega_duvar.filter(o => o.tur === 'ic').reduce((a, o) => a + o.a1 - o.a0, 0) / 100),
   izo_n: parts.filter(q => q.step === AD.izo).length,
   izo_m2: fmt(parts.filter(q => q.step === AD.izo).reduce((t, q) => t + q.obj.children[0].geometry.parameters.width * q.obj.children[0].geometry.parameters.depth, 0), 0),
-  kaplama_n: parts.filter(q => q.step === AD.kaplama && q.obj.userData.info.ad.startsWith(D.kaplama.metin.say_onek)).length,
+  // levha ve kesim parçası; mahya ("Trapez sac mahyası" da aynı önekle başlar) sayılmaz
+  kaplama_n: parts.filter(q => q.step === AD.kaplama && q.obj.userData.info.ad.startsWith(D.kaplama.metin.say_onek)
+    && q.obj.userData.info.ad !== D.kaplama.metin.mahya_ad).length,
 };
 const satir = r => r.map((c, j) => j === 2 && typeof c === 'string' ? yaz(c, SAY) : c);
 const STEPS = D.adimlar.map(a => {
