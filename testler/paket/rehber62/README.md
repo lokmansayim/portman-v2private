@@ -11,3 +11,4 @@
 | Bilinçli fark | Dübelin adı "Çelik dübel" (karar verilmiş kalem); iz aynı düzeltmeyle alındı |
 | Kıyas | `testler/paket/test_rehber.py`: şablon (`araclar/paket/rehber/sahne.js` + `kabuk.html`) + `veri.json` → sayfa → iz = `iz.json`. CI'da "kalan" işinde koşar (`.github/workflows/dogrulama.yml`) |
 | Değişme yolu | Yalnız gerekçeli bir kararla (D-02); testi geçirmek için iz yeniden alınmaz |
+| Yeniden alınışlar | D-38 (31 Ekim 2026: baş makas betopanı uçta omeganın içinde); D-73 (9 Kasım 2026: baş makas Z'si 4/7/3 cm 30°, alın sacı tek biçim, köşede derenin biçiminde kesilir, parçalar değer ama girmez; Lokman 20:42 "var kabul ederek onaylıyorum"): 419 parçanın 95'i değişti (aşık 57, alın sacı 12, makas 10, Z 6, C kapama 6, dere 4), adımlar ve parça sayısı aynı |

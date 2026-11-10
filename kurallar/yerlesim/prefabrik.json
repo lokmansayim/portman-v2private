@@ -394,7 +394,7 @@
    "not": "Modelde saçak kenarı başına bir parça; stok boyları kesim planında. Saçak altının genişliği çatının saçağıdır (İş Emri; rehberde 30)."
   },
   "alin_saci_yerlesimi": {
-   "kural": "Alın sacı kalkanların iki eğik kenarında (her baş makasın iki kenarı), saçak ucundan mahyaya; tırnağı baş makas Z'sine girer (taşan verandanın kirişli dış kalkanında da Z var: kalkan betopanlı, D-32 madde 2; K5b TK-01 kıyası, 30 Ekim), makas üstünün 3 cm altından başlar, kalkan saçağının altını kapatır, alnı aşık uçlarının (C kapamanın) önünde; alt ucu derenin önüne iner. Sayı ⌈kenarların toplamı ÷ (parça boyu − bindirme)⌉ (liste üretecinin kuralı).",
+   "kural": "Alın sacı kalkanların iki eğik kenarında (her baş makasın iki kenarı), saçak ucundan mahyaya; tırnağı baş makas Z'sine girer (taşan verandanın kirişli dış kalkanında da Z var: kalkan betopanlı, D-32 madde 2; K5b TK-01 kıyası, 30 Ekim), 3 cm tırnağı Z'nin gövdesi boyunca iner ve Z'nin tırnağının iç yüzüne değer; saçak altı tırnağın üst ucunda (makas üstünün 3,6 cm altı), kalkan saçağının altını kapatır, alnı aşık uçlarının (C kapamanın) önünde; alın sacı abkantta tek biçimde bükülür (250 ve 280 boyda aynı): kenar boyunca saçak altının 6 cm altına iner; saçak sacıyla birleştiği köşede derenin ucunu örter, ucu derenin biçiminde kesilir (Lokman, 9 Kasım 2026, D-73). Sayı ⌈kenarların toplamı ÷ (parça boyu − bindirme)⌉ (liste üretecinin kuralı).",
    "parca_boyu": {"okunan": "kitap › parca_boyu_m.alin_saci"},
    "bindirme": {"okunan": "kitap › bindirme_m.alin_saci"},
    "yontem": {
@@ -404,13 +404,13 @@
     "not": "K3b planı §2 (Lokman, 25 Ekim 17:47 \"Uygula\"): liste üretecinin sayma yolu, boy modelden."
    },
    "cati_tipleri": ["besik", "besik_cumba"],
-   "durum": "varsayim",
+   "durum": "lokman",
    "tarih": "2026-10-25",
-   "kaynak": "Montaj rehberi (Lokman'ın 24 Ekim çizimleri): profil saçak sacınınki ve kenar hadvesini kavrayan kıvrım; alt ucun kesim yüksekliği teyit bekliyor (Lokman, 25 Ekim 09:10: \"Varsayım kalsın\"). Sayı liste kuralından (PK-01 ve PK-02 tuttu).",
+   "kaynak": "Montaj rehberi (Lokman'ın 24 Ekim çizimleri): profil saçak sacınınki ve kenar hadvesini kavrayan kıvrım. Tırnak, saçak altı ve alt uç Lokman'ın 9 Kasım 2026 çiziminden ve seçiminden (D-73): 15:12 \"kendim düzelttim\", 15:16 \"B yi seçiyorum ama bir şartım var çakışma olmasın tame değme olsun ama çakışma olmasın\", 19:57 \"alın sacını dereyi kapattığı yeri derenin deseninde kes önce doğru sora olan değil alın sacı çizdiğin şekilde abkantta bükülüyor yani 280 veya 250 boyunda aynı formda oluyor\" (16:04'teki köşe basamağının yerine). Sayı liste kuralından (PK-01 ve PK-02 tuttu).",
    "not": "Modelde kenar başına bir parça (eğik boy). Kalkanlar bugünkü IFC'nin baş makaslarıdır (PK-01'de 2)."
   },
   "bas_makas_z_yerlesimi": {
-   "kural": "Baş makas Z'si her baş makasın iki eğik kenarında, saçak ucundan mahyaya; üst kanadı makasın ve betopanın üstünden geçer, 3 cm çentik, 3 cm dış kanat. Sayı kenar başına ⌈eğik boy ÷ parça boyu⌉ (kitap: kenar kenar; liste üretecinin O7'si).",
+   "kural": "Baş makas Z'si her baş makasın iki eğik kenarında, saçak ucundan mahyaya; üst kanadı 4 cm, makasın ve betopanın üstünde; gövdesi 7 cm, betopanın dış yüzünde; tırnağı 3 cm, gövdeyle 30°, dışa ve yukarı (Lokman, 9 Kasım 2026, D-73). Sayı kenar başına ⌈eğik boy ÷ parça boyu⌉ (kitap: kenar kenar; liste üretecinin O7'si).",
    "parca_boyu": {"okunan": "kitap › bas_makas_z.parca_boyu_m"},
    "yontem": {
     "deger": "kenar",
@@ -419,13 +419,13 @@
     "not": "K3b planı §2 (Lokman, 25 Ekim 17:47 \"Uygula\"): liste üretecinin sayma yolu (O7; kitabın `bas_makas_z.kenar_kenar`'ı), boy modelden."
    },
    "cati_tipleri": ["besik", "besik_cumba"],
-   "durum": "varsayim",
+   "durum": "lokman",
    "tarih": "2026-10-25",
-   "kaynak": "Montaj rehberi (Lokman'ın 24 Ekim çizimleri): üst kanat makas ve betopan üstünde, 3 cm çentik, 3 cm dış kanat, sac 1 mm. Teyit bekleyen maddeler varsayım (Lokman, 25 Ekim 09:10). Sayı liste kuralından (O7; PK-02, PK-06, PK-07 tuttu).",
+   "kaynak": "Lokman, 9 Kasım 2026 13:45 (fotoğraf ve eskiz): \"Montaj Rehberinde Baş makas Z'si yanlış çiziliyor düzeltilmiş halini atıyorum\"; üst kanat 4, gövde 7, tırnak 3 cm, 30°; sac 1 mm (D-73). Önceki kesit (24 Ekim çizimleri: 3 cm çentik, 3 cm dış kanat) yerine. Sayı liste kuralından (O7; PK-02, PK-06, PK-07 tuttu).",
    "not": "Modelde kenar başına bir parça (eğik boy); stok boyları kesim planında."
   },
   "c_kapama_yerlesimi": {
-   "kural": "C kapama kalkan saçağında, aşık uçlarında: aşığın üstünden alın sacının saçak altına iner; alın sacı önüne gelir. Kalkanın iki eğik kenarı boyunca (her baş makasın iki kenarı). Listede satırı yok; stok boyu bilinmediği için metreyle sayılır.",
+   "kural": "C kapama kalkan saçağında, aşık uçlarında: üst kanadı aşıkların üstünde, gövdesi aşık uçlarının önünde (aşık gövdeye değer), alt kanadı alın sacının saçak altında; alın sacı önüne gelir. Kalkanın iki eğik kenarı boyunca (her baş makasın iki kenarı). Listede satırı yok; stok boyu bilinmediği için metreyle sayılır.",
    "yontem": {
     "deger": "metre",
     "durum": "lokman",
@@ -481,11 +481,11 @@
     },
     "durum": "varsayim",
     "tarih": "2026-10-25",
-    "not": "Yalnız 3B gösterim (cm): sacın çizilen kalınlığı (gerçeği 1 mm), alt çerçevenin duvarın iki yüzünden payı ve kanadı, saçak omegasının ters U'su [genişlik, yükseklik], sacların tırnağı, alnı ve kıvrımı, alın sacının makas üstünden aşağı başladığı yer, Z'nin çentiği, dış kanadı ve makasın üstündeki kanadı, C kapamanın gövdesi ve kanadı, mahyanın kanadı. Montaj rehberinden (Lokman'ın 24 Ekim çizimleri). Sayı, boy ve metre bunlardan çıkmaz. Trapez sac mahyasının (CK-07) kanadı her yanda 35 cm (`trapez_mahya`; Lokman, 10 Kasım 2026 04:45: \"Trapez mahya L:100 ve 35x35 olarak al\"; D-74); metal kiremit mahyasınınki 26 cm."
+    "not": "Montaj rehberi Z'yi ve alın sacının tırnağını Lokman'ın 9 Kasım 2026 çizimiyle çizer (D-73; araclar/paket/rehber/sahne.js); buradaki bas_makas_z ve alin_saci.makas_ustunden kart modelinin eski kesitidir, ayrı işte değişir. Yalnız 3B gösterim (cm): sacın çizilen kalınlığı (gerçeği 1 mm), alt çerçevenin duvarın iki yüzünden payı ve kanadı, saçak omegasının ters U'su [genişlik, yükseklik], sacların tırnağı, alnı ve kıvrımı, alın sacının makas üstünden aşağı başladığı yer, Z'nin çentiği, dış kanadı ve makasın üstündeki kanadı, C kapamanın gövdesi ve kanadı, mahyanın kanadı. Montaj rehberinden (Lokman'ın 24 Ekim çizimleri). Sayı, boy ve metre bunlardan çıkmaz. Trapez sac mahyasının (CK-07) kanadı her yanda 35 cm (`trapez_mahya`; Lokman, 10 Kasım 2026 04:45: \"Trapez mahya L:100 ve 35x35 olarak al\"; D-74); metal kiremit mahyasınınki 26 cm."
    },
    "durum": "varsayim",
    "tarih": "2026-10-25",
-   "not": "Alt çerçeve zeminde: tabanı panonun altında, kanatları duvarın iki yüzünde. Saçak omegası saçak duvarının üstünde; saçak sacının saçak altı omeganın üstü kotunda, alnı saçak ucunda; mahya kaplamanın üstünde. Kalkan kenarlarında Z baş makasın üstünden betopanın dışına iner; alın sacının saçak altı makas üstünün 3 cm altında, uç duvardan saçak ucuna; C kapama saçak ucunda aşık uçlarında; alın sacının alnı en önde."
+   "not": "Alt çerçeve zeminde: tabanı panonun altında, kanatları duvarın iki yüzünde. Saçak omegası saçak duvarının üstünde; saçak sacının saçak altı omeganın üstü kotunda, alnı saçak ucunda; mahya kaplamanın üstünde. Kalkan kenarlarında Z baş makasın üstünden betopanın dışına iner; alın sacının saçak altı makas üstünün 3 cm altında (kart modeli; montaj rehberinde 3,6 cm, D-73), uç duvardan saçak ucuna; C kapama saçak ucunda aşık uçlarında; alın sacının alnı en önde."
   },
   "cumba_yavru_makasi": {
    "kural": "Çıkıntısız çapraz cumbanın ana çatının üstündeki makası (yavru makas, MA-05; D-47'nin paftadaki \"iki ana makasın arasında kısa\" makası) cumba mahyasının iki yanındaki ana makasların üst başlığına oturur, iki ucu ana makasların ekseninden dışarı taşar; baş makasın arkasında, yüzden yüze net aralıkla. Yalnız 3B'deki yer ve boy (bugünkü IFC, kart modeli, montaj rehberi; çatı tanımı `motor/cati_capraz.py`). Makas sayısı ve listedeki satır D-47'den, değişmez. Cumbada ana çatının üstünde birden çok makas varsa yalnız ilki bu kuralla; ötekiler D-47'nin 125,5 aralığında, dereler arasında.",
