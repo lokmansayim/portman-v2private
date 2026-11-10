@@ -16,6 +16,8 @@ import math
 from pathlib import Path
 
 B = Path(__file__).resolve().parent
+# trapez sac mahyasının kanadı her yanda (cm), kart modelinin gösterim kesitinden (CK-07; Lokman, 10.11.2026: "Trapez mahya L:100 ve 35x35"; D-74)
+MAHYA_KANAT = json.loads((B.parents[2] / "kurallar/yerlesim/prefabrik.json").read_text(encoding="utf-8"))["kurallar"]["kenar_gosterim"]["kesit_cm"]["deger"]["trapez_mahya"]["kanat"]
 
 
 def R(k, ad, v, src):
@@ -92,15 +94,18 @@ def veri() -> dict:
     }}
     d["kaplama"] = {
         "profil": {"hadve": 2.7, "tepe": 4.2, "taban": 7.4, "kenar": 4.5, "kapatir": 100},   # trapez 27/200-6, 100 cm kapatır, 0,5 mm
-        "hadve": {"RX": [-30.2 + 4.5 + i * (960.4 - 9) / 48 for i in range(49)],
+        # hadveler levhalarla ön kalkandan, tam 20 cm arayla; son levha kesilir, aralık değişmez (Lokman, 10.11.2026 17:01; D-74)
+        "hadve": {"RX": [-30.2 + 4.5 + i * 20 for i in range(48)],
                   "RY": [y for y in (-180.2 + 4.5 + i * 20 for i in range(25)) if y < 300]},
         "mahya": [{"R": "AN", "topR": "AN", "r": math.pi / 2, "O": [0, 0], "s0": 300, "z": [-30.2, 930.2], "ad": "ana mahya"},
                   {"R": "CU", "topR": "AN", "r": math.pi, "O": [287.375, 0], "s0": 0, "z": [-180.2, 300], "ad": "cumba mahyası"}],
+        "mahya_kanat": MAHYA_KANAT, "mahya_hadveli": True,
         "metin": {"ad": "Trapez sac {ad} × 100", "kesim": "Trapez sac · kesim parçası", "say_onek": "Trapez sac",
                   "profil": "27/200-6: hadve 27 mm, adım 200 mm, tepe 42 / taban 74 mm; 6 hadve, 100 cm kapatır; 0,5 mm (Lokman)",
                   "dizilim": "modelde 100’lük levhayla; paftadaki dizilim 80’lik levhaya göre çizilmiş", "renk": "antrasit",
                   "liste": "TRAPEZ SAC 3500 · 21 adet, 3400 · 8 adet", "mahya_ad": "Trapez sac mahyası",
-                  "mahya_liste": "TRAPEZ SAC MAHYASI L 800 · 25 adet; mahya bandı 4 rulo"},
+                  "mahya_liste": "TRAPEZ SAC MAHYASI L 800 · 25 adet; mahya bandı 4 rulo",
+                  "mahya_bicim": f"sacla aynı 27/200 biçiminde presli; kanat {MAHYA_KANAT} + {MAHYA_KANAT} cm, boyu levhanın kapattığı kadar (100 cm); her hadvesi sacın hadvesinin üstüne oturur (Lokman, 10.11.2026)"},
     }
     CB = sorted(m["konum"] for m in k["makas"] if m["aile"] == "cumba")
     d["izo"] = {
