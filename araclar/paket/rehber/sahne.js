@@ -759,6 +759,11 @@ const [RIB_SAC, RIB_IC] = (() => {
   const sekil = P => { const s = new THREE.Shape(); P.forEach(([x, y], i) => i ? s.lineTo(x, y) : s.moveTo(x, y)); s.closePath(); return s; };
   return [sekil([...dis, ...ic]), sekil([...ic].reverse())];
 })();
+// Düz mahya (trapez sac dışındaki kaplamalar) hadvelerin tepesine oturur: trapez mahya gibi 0,6 mm üstünde, 0,5 mm (DM0 → DM1). Ucu kalkandaysa
+// alın sacının iç yüzüne kadar uzanır; alın sacı en son takılır, üst kıvrımı mahyanın ucunu örter (Lokman, 10.11.2026 20:16: "önce trapez sac ve
+// mahya gelir sonra alın sacı üzerini örter"; 21:01: "mahya ne olursa olsun alın sacının altına girecek yoksa bina yağmurlarda su alır").
+// MAHYA_KALKAN: ucunda düz mahya biten kalkanlar (alın sacı orada mahyanın üstüne yatar).
+const DM0 = TU1 + RIBH + 0.06, DM1 = DM0 + 0.05, MAHYA_KALKAN = new Set();
 {
   let ro = 0;
   // Ters mahya (dere hattı sacı): dere (vadi) hatlarında, her iki yüzde 20 cm, aşıkların üstünde, kaplamanın altında
@@ -807,10 +812,10 @@ const [RIB_SAC, RIB_IC] = (() => {
   // Trapez sac mahyası sacla aynı biçimde (27/200) preslidir: iki kanadı mahyanın iki yanında KN cm, her hadvesi sacın hadvesinin üstüne oturur;
   // boyu levhanın kapattığı kadar, her levhanın üstünde bir mahya, bindirme yok (Lokman, 10.11.2026 04:45: bağlantıdaki "Trapez Mahya",
   // "Trapez mahya L:100 ve 35x35"; 17:01: "mahya düz"). Kanatlar iki yüzün kendi çerçevesinde kurulur, mahyanın üstünde birleşir.
+  const planda = (w, sx, hy, z) => { const v = new THREE.Vector3(sx / 100, hy / 100, z / 100).applyMatrix4(w.matrixWorld); return [(v.x + D.dis[0] / 200) * 100, (D.dis[1] / 200 - v.z) * 100]; };
   if (D.kaplama.mahya_hadveli) {
     const MK = 0.06;   // mahya sacın üstünde 0,6 mm
     const n0 = TR1 + MK, n1 = n0 + 0.05, nh = TU1 + MK;
-    const planda = (w, sx, hy, z) => { const v = new THREE.Vector3(sx / 100, hy / 100, z / 100).applyMatrix4(w.matrixWorld); return [(v.x + D.dis[0] / 200) * 100, (D.dis[1] / 200 - v.z) * 100]; };
     // Kalkan ucunda mahya alın sacının üst kıvrımlarına değer, girmez: alının yüzünden kenar hadvesinin iç tabanına kadar (RIB_KENAR + RIB_TABAN / 2)
     // mahya yok (Lokman, 9.11.2026: "çakışma olmasın tam değme olsun"; M-17)
     const KK = KALKAN.map(G => { const w = cerceve(G.r, ...G.O); w.updateMatrixWorld(); return { G, w, s0: Math.min(G.uc.A, G.uc.B) - 1, s1: Math.max(G.uc.A, G.uc.B) + 1 }; });
@@ -856,14 +861,23 @@ const [RIB_SAC, RIB_IC] = (() => {
           ['Liste', KM.mahya_liste], ...kartSat(KB('mahya'))] });
       }
     });
-  } else D.kaplama.mahya.forEach((e, j) => {
-    const R = RF[e.R], T = RF[e.topR], top = ysR(T, T.M) + (PTOP + 0.8) / T.cos, [z0, z1] = e.z;
-    [1, -1].forEach((side, i) => {
-      const w = cerceve(e.r, ...e.O), o = lb(-KN / 2, KN / 2, -0.3, 0.3, z0, z1, mat('ridge', AD.kaplama));
-      o.position.x = (e.s0 - side * R.cos * KO) / 100; o.position.y = (top - R.sin * KO + 1) / 100; o.rotation.z = side * R.th; w.add(o);
-      add(AD.kaplama, w, 9 + (j * 2 + i) * 0.3, { kod: KB('mahya'), ad: KM.mahya_ad, satir: [['Bu parça', `${e.ad} · ${fmtc(z1 - z0)} cm`], ['Liste', KM.mahya_liste], ...kartSat(KB('mahya'))] });
+  } else {
+    // Düz mahya: iki kanat, her biri kendi yüzünde hadvelerin tepesinde (DM0 → DM1, eğime dik); kanat iki düzlemin kesiştiği tepeden 1 cm öteden KN − 1 cm'ye.
+    // Ucu kalkandaysa (alın sacının yüzünde) o kalkan MAHYA_KALKAN'a girer; mahya alın sacının iç yüzüne kadar, alın sacı üstünden örter.
+    const KC = KALKAN.map(G => { const w = cerceve(G.r, ...G.O); w.updateMatrixWorld(); return { G, w, s0: Math.min(G.uc.A, G.uc.B) - 1, s1: Math.max(G.uc.A, G.uc.B) + 1 }; });
+    const kalkanBul = ([x, y]) => (KC.find(({ G, w, s0, s1 }) => { const v = w.worldToLocal(new THREE.Vector3(X(x), 0, Z(y))); return Math.abs(v.z * 100 - G.oTip) < 0.05 && v.x * 100 > s0 && v.x * 100 < s1; }) || {}).G;
+    D.kaplama.mahya.forEach((e, j) => {
+      const R = RF[e.R], T = RF[e.topR], tepe = ysR(T, T.M), [z0, z1] = e.z, p = (DM0 + DM1) / 2;
+      const wp = cerceve(e.r, ...e.O); wp.updateMatrixWorld();
+      e.z.forEach(z => { const G = kalkanBul(planda(wp, e.s0, 0, z)); if (G) MAHYA_KALKAN.add(G); });
+      [1, -1].forEach((side, i) => {
+        const w = cerceve(e.r, ...e.O), o = lb(-KN / 2, KN / 2, -(DM1 - DM0) / 2, (DM1 - DM0) / 2, z0, z1, mat('ridge', AD.kaplama));
+        // kanat yüzün hadve tepesi düzleminde; iki yüzün düzlemi mahyanın üstünde (aşık oturma çizgisinin tepesinden p / cos yukarıda) kesişir
+        o.position.x = (e.s0 - side * R.cos * KO) / 100; o.position.y = (tepe + p / R.cos - R.sin * KO) / 100; o.rotation.z = side * R.th; w.add(o);
+        add(AD.kaplama, w, 9 + (j * 2 + i) * 0.3, { kod: KB('mahya'), ad: KM.mahya_ad, satir: [['Bu parça', `${e.ad} · ${fmtc(z1 - z0)} cm`], ['Liste', KM.mahya_liste], ...kartSat(KB('mahya'))] });
+      });
     });
-  });
+  }
 }
 
 /* Alın sacı (kalkanlar), dere ve iniş */
@@ -910,8 +924,19 @@ KALKAN.forEach(G => ['A', 'B'].forEach(end => {
   const hu = [ot - RIB_KENAR - RIB_UST / 2, TU1 + RIBH], hd = [ot - RIB_KENAR - RIB_TABAN / 2, TU1];   // kenar hadvesinin iç yanağı: tepe ve taban köşesi
   const [kx0, kx1] = KU.catida(hd[0]);
   const hl = Math.hypot(hu[0] - hd[0], hu[1] - hd[1]), hn = [-(hu[1] - hd[1]) / hl * (SAC / 2 + 0.01), (hu[0] - hd[0]) / hl * (SAC / 2 + 0.01)], hk = 0.5 / RIBH;
-  KU.lev(hu[0], ot + SAC, PTOP - 0.1, PTOP, kx0, kx1);    // kıvrım: kenar hadvesinin tepesinin üstünden içeri
-  KU.egik(hu[0] + hn[0], hu[1] + hn[1], hd[0] + (hu[0] - hd[0]) * hk + hn[0], hd[1] + (hu[1] - hd[1]) * hk + hn[1], kx0, kx1);   // hadveyi kavrayan kıvrım: hadvenin iç yanağı boyunca aşağı
+  // Düz mahya bu kalkanda bitiyorsa mahyanın kanadı boyunca (tepeden KN − 1 cm) üst kıvrım mahyanın üstüne yatar, alın o kadar uzar;
+  // hadveyi kavrayan iç kıvrım orada kesilir (mahya hadvenin üstünden alına kadar geçer). Alın sacının biçimi aynı (Lokman, 10.11.2026 21:01;
+  // kesit eskizi, 21:20: "montajcı ... Sandviç panel hadvelerine bindirdiği kıvrımı tam tepede Düz mahyaya bastırarak vidalıyor ... önerin doğru sayılır").
+  const zm = MAHYA_KALKAN.has(G) ? Math.min(D.kaplama.mahya_kanat - 1, KU.Ls) : 0, xz = KU.dir * (KU.Ls / 2 - zm);
+  const [[a0, a1], [m0, m1]] = KU.dir > 0 ? [[kx0, Math.min(kx1, xz)], [Math.max(kx0, xz), kx1]] : [[Math.max(kx0, xz), kx1], [kx0, Math.min(kx1, xz)]];
+  if (a1 - a0 > 0.01) {
+    KU.lev(hu[0], ot + SAC, PTOP - 0.1, PTOP, a0, a1);    // kıvrım: kenar hadvesinin tepesinin üstünden içeri
+    KU.egik(hu[0] + hn[0], hu[1] + hn[1], hd[0] + (hu[0] - hd[0]) * hk + hn[0], hd[1] + (hu[1] - hd[1]) * hk + hn[1], a0, a1);   // hadveyi kavrayan kıvrım: hadvenin iç yanağı boyunca aşağı
+  }
+  if (zm && m1 - m0 > 0.01) {
+    KU.lev(hu[0], ot + SAC, DM1, DM1 + 0.1, m0, m1);      // kıvrım mahyanın üstünde
+    KU.lev(ot, ot + SAC, PTOP, DM1 + 0.1, m0, m1);        // alın mahyanın kalınlığı kadar uzar
+  }
   const nm = `${G.ad} · ${end === 'A' ? 'ön/sol' : 'arka/sağ'} yüz`;
   add(AD.alin, KU.w, to++ * 0.5, { kod: KB('alin'), ad: MA.ad, satir: [['Bu parça', `${nm} · alın ve üst kıvrımlar${kose ? '; köşede derenin ucunu örter, ucu derenin biçiminde kesilir' : ''}`], ['Alın', yaz(MA.alin, { h: ALIN_H })], ['Kaynak', MA.kaynak], ...kartSat(KB('alin'))] });
   add(AD.alin, K.w, to++ * 0.5, { kod: KB('alin'), ad: MA.ad, satir: [['Bu parça', `${nm} · L ${Math.round(K.Ls)} cm`], ['Profil', MA.profil], ['Uçta', MA.uc], ['Bu proje', yaz(MA.proje, { h: ALIN_H })], ['Liste', MA.liste], ...kartSat(KB('alin'))] });
