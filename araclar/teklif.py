@@ -24,6 +24,9 @@ ile defterden; fiyat uydurulmaz, fiyatı olmayan satır boş kalır ve sayılır
   sayfa, Fiyat kaynağı. Liste sayfasının yazıcısı `araclar/liste_excel.py`; `fiyatla.py --excel` de onu kullanır (tek yazıcı).
 - Teklif PDF'i (T5, PR-6): her seçenek bir PDF, Patron'un teklif formunun düzeninde (`araclar/teklif_pdf.py`, `kurallar/teklif/form.json`);
   sayılar bu komutun JSON'undan, fiyatı olmayan satır boş. `--tarih` formun tarihi (verilmezse bugün).
+- KDV (D-76): CRM defteriyle her seçeneğin özeti KDV hariç, oranlara göre KDV ve KDV dahil tutarı taşır (`fiyatla.kdv_ozeti`); Excel'in
+  liste sayfasında KDV sütunları, Özet'te KDV satırları. Oranı olmayan satır sayılır, KDV dahil toplam eksik yazılır. Bayi formunun
+  fiyatı (M-14) bu oranları okumaz. Eski defterle (`--defter`) teklif aynen eskisi gibidir.
 - Bayi formu (D-64): `--bayi <girdi>` tek seçenekli teklife bayiye giden teklif ve satış onay formunu da yazar (`<kod>_teklif_formu.pdf`):
   fiyat seçeneğin toplamından pazarın kuralıyla (`kurallar/teklif/fiyatlandirma.json`), bayinin bilgileri ve ödeme satırları girdiden
   (`araclar/teklif_pdf.bayi_hazirla`). Girdi bayinin iletişim bilgisini taşır, depoya girmez. Teklifin JSON'una `bayi_formu` (pazar,
@@ -200,6 +203,18 @@ def excel_yaz(T: dict, defter: dict, yol: Path) -> None:
     if len(T["secenekler"]) == 2:
         a, b = (s["fiyat"]["ozet"]["toplam"] for s in T["secenekler"])
         oz.append([f"Fark ({T['secenekler'][1]['ad']} − {T['secenekler'][0]['ad']})", round(b - a, 2)]); oz.cell(oz.max_row, 2).number_format = TL
+    if any(s["fiyat"]["ozet"].get("kdv") for s in T["secenekler"]):   # D-76: KDV satırları (CRM defteri)
+        oz.append([])
+        oz.append(["KDV (D-76; CRM fiyatı KDV hariç, oran kalem grubundan)", "KDV hariç", "KDV", "KDV dahil", "Oranlar"])
+        for c in oz[oz.max_row]: c.font = B
+        for sec in T["secenekler"]:
+            k = sec["fiyat"]["ozet"]["kdv"]
+            oz.append([sec["ad"], k["haric"], k["kdv"], k["dahil"], F.kdv_yazi(k)])
+            for i in (2, 3, 4): oz.cell(oz.max_row, i).number_format = TL
+            oz.cell(oz.max_row, 4).font = B
+            if k["eksik"]:
+                oz.cell(oz.max_row, 4).fill = oz.cell(oz.max_row, 5).fill = dolgu["sari"]
+                oz.cell(oz.max_row, 5).font = Font(bold=True, color="C00000")
     oz.append(["Toplam yalnız fiyatı olan satırların toplamıdır; fiyatı olmayan satırlar aşağıda."])
     oz.append([])
     oz.append(["Teklif koşulları", "Değer", "", "Açıklama"])
@@ -307,6 +322,9 @@ def main(argv: list[str] | None = None) -> int:
     for sec in T["secenekler"]:
         oz = sec["fiyat"]["ozet"]
         print(f"{T['kod']} · {sec['ad']}: {oz['toplam']:,.2f} TL · {oz['fiyatli']}/{oz['satir']} satır fiyatlı, {len(oz['fiyatsiz'])} fiyatsız")
+        if oz.get("kdv"):
+            k = oz["kdv"]
+            print(f"  KDV ({k['dayanak']}): {k['kdv']:,.2f} TL, KDV dahil {k['dahil']:,.2f} TL · {F.kdv_yazi(k)}")
     print("koşullar:", ", ".join(f"{k} {v or 'yok (Patron’dan)'}" for k, v in T["kosullar"].items()))
     if bayi:
         b, oz = T["bayi_formu"], T["secenekler"][0]["fiyat"]["ozet"]

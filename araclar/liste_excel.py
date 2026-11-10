@@ -3,6 +3,10 @@
 Düzen Patron'un yükleme listesinin düzeni (28 Ekim 06:40–06:41): grup adı sütun değil, grubun üstünde başlık satırı ve altında ara toplam;
 tek "Adet" sütunu; ölçüsü birim sözcüğü olan satırda (adet, metre, kova, paket, takım) ölçü boş, birim o. Genel toplam ve fiyatı olmayan
 satır sayısı `fiyatla.fiyatla`'nın özetinden; sayfa saymaz, yazar. Motor'u yüklemez (yalnız openpyxl).
+
+KDV (D-76): özet `kdv` taşıyorsa (CRM defteri) Tutar'ın yanında "KDV %" ve "KDV" sütunları, ara toplamda grubun KDV'si, genel toplamın
+altında KDV ve KDV DAHİL TOPLAM satırları (Lokman 10 Kasım 16:56, çelik fiyat sohbeti: "bir satır daha aç ve yanlarına yaz"). Oranı
+olmayan satırın KDV hücreleri boş ve sarı. Özette `kdv` yoksa sayfa eskisi gibidir.
 """
 from __future__ import annotations
 
@@ -12,6 +16,7 @@ TL = "#,##0.00"
 RENK = {"sari": "FFF2A8", "gri": "E7E7E7", "baslik": "D9E1F2", "cizgi": "8EA9DB",
         "öneri onaylı": "FCE4D6", "ikinci kaynak": "DDEBF7", "öneri": "FFF2A8"}
 GENEL = "GENEL TOPLAM (fiyatı olan satırlar)"
+KDV_SUTUN = ["KDV %", "KDV"]
 
 
 def buyuk(s: str) -> str:
@@ -57,9 +62,12 @@ def liste_sayfasi(ws, R: dict, baslik: str, aciklama: str, renk=None, kaynak_sut
     satır sayısı (R'nin özetinden). `renk(satır)` birim fiyat hücresinin dolgusunu (RENK anahtarı) verir. `kaynak_sutunu`: fiyatla.py'nin
     defter görünümü için Durum ve Kaynak sütunları. Ara toplamların toplamı özetin toplamını tutmazsa durur."""
     Alignment, Border, Font, dolgu, Side = _stil()
+    from openpyxl.utils import get_column_letter
     satirlar, ozet = R["satirlar"], R["ozet"]
     kg = any(s.get("kg") is not None for s in satirlar)
-    sutun = ["Ölçü", "Birim", "Adet"] + (["kg"] if kg else []) + ["Birim fiyat", "Tutar", "Not"] + (["Durum", "Kaynak"] if kaynak_sutunu else [])
+    K = ozet.get("kdv")                                     # D-76: CRM defteriyle KDV sütunları
+    sutun = (["Ölçü", "Birim", "Adet"] + (["kg"] if kg else []) + ["Birim fiyat", "Tutar"] + (KDV_SUTUN if K else []) + ["Not"]
+             + (["Durum", "Kaynak"] if kaynak_sutunu else []))
     n = 1 + len(sutun)
     i_bf, i_tut, i_not = (sutun.index(x) + 2 for x in ("Birim fiyat", "Tutar", "Not"))    # sayfadaki sütun (1'den; A Kalem)
     ws.append([baslik]); ws["A1"].font = Font(bold=True, size=13)
@@ -78,26 +86,44 @@ def liste_sayfasi(ws, R: dict, baslik: str, aciklama: str, renk=None, kaynak_sut
             olcu, birim = gorunen(s.get("teklif_olcu") or s.get("olcu"), s.get("birim"))
             neden = eksik(s)
             notu = neden or (fiyat_notu(s) if s["birim_fiyat"] is None else "")
-            ws.append([s.get("teklif_adi") or s["kalem"], olcu, birim, s.get("adet")] + ([s.get("kg")] if kg else []) + [s["birim_fiyat"], s["tutar"], notu]
+            if K and s["tutar"] and s.get("kdv_orani") is None:
+                notu = "; ".join(x for x in (notu, "KDV oranı yok") if x)
+            ws.append([s.get("teklif_adi") or s["kalem"], olcu, birim, s.get("adet")] + ([s.get("kg")] if kg else []) + [s["birim_fiyat"], s["tutar"]]
+                      + ([s.get("kdv_orani"), s.get("kdv_tutari")] if K else []) + [notu]
                       + ([s["durum"], s.get("kaynak_adi") or s.get("kaynak")] if kaynak_sutunu else []))
             r = ws[ws.max_row]
             r[i_bf - 1].number_format = r[i_tut - 1].number_format = TL
+            if K:
+                r[i_tut].number_format, r[i_tut + 1].number_format = "0%", TL
+                if s["tutar"] and s.get("kdv_orani") is None:
+                    r[i_tut].fill = r[i_tut + 1].fill = dolgu["sari"]
             k = renk(s) if renk else None
             if neden:
                 for c in r: c.fill = dolgu["gri"]
             elif k:
                 r[i_bf - 1].fill = dolgu[k]
         toplam += ara
-        ws.append([f"{ad} toplamı"] + [""] * (i_tut - 2) + [ara])
+        ws.append([f"{ad} toplamı"] + [""] * (i_tut - 2) + [ara] + (["", round(sum(s.get("kdv_tutari") or 0 for s in ss), 2)] if K else []))
         r = ws[ws.max_row]; r[0].font = r[i_tut - 1].font = Font(bold=True); r[i_tut - 1].number_format = TL
+        if K:
+            r[i_tut + 1].font = Font(bold=True); r[i_tut + 1].number_format = TL
         for c in r[:n]: c.border = Border(top=Side(style="thin", color=RENK["cizgi"]))
     if abs(toplam - ozet["toplam"]) > 0.005:
         raise ValueError(f"liste sayfası: ara toplamların toplamı {toplam:.2f}, özetin toplamı {ozet['toplam']:.2f}")
     ws.append([])
-    ws.append([GENEL] + [""] * (i_tut - 2) + [ozet["toplam"], f"fiyatı olmayan satır: {len(ozet['fiyatsiz'])}"])
+    ws.append([GENEL] + [""] * (i_tut - 2) + [ozet["toplam"]] + (["", ""] if K else []) + [f"fiyatı olmayan satır: {len(ozet['fiyatsiz'])}"])
     r = ws[ws.max_row]; r[0].font = r[i_tut - 1].font = Font(bold=True, size=12); r[i_tut - 1].number_format = TL
-    for col, w in zip("ABCDEFGHIJ", [62, 20, 9, 8] + ([9] if kg else []) + [13, 14, 30] + ([16, 30] if kaynak_sutunu else [])):
-        ws.column_dimensions[col].width = w
+    if K:                                                   # D-76: KDV ve KDV dahil, genel toplamın altında
+        from araclar.fiyatla import kdv_yazi
+        for ad, x, notu in (("KDV (kalem grubunun oranıyla)", K["kdv"], kdv_yazi(K)), ("KDV DAHİL TOPLAM", K["dahil"],
+                            "eksik: oranı olmayan satırların KDV'si yok" if K["eksik"] else "")):
+            ws.append([ad] + [""] * (i_tut - 2) + [x, "", "", notu])
+            r = ws[ws.max_row]; r[0].font = r[i_tut - 1].font = Font(bold=True, size=12); r[i_tut - 1].number_format = TL
+            if K["eksik"]:
+                r[i_tut - 1].fill = dolgu["sari"]
+    genislik = [62, 20, 9, 8] + ([9] if kg else []) + [13, 14] + ([8, 13] if K else []) + [30] + ([16, 30] if kaynak_sutunu else [])
+    for i, w in enumerate(genislik, 1):
+        ws.column_dimensions[get_column_letter(i)].width = w
     for row in ws.iter_rows(min_row=3):
         for c in row:
             if c.column in (3, 4): c.alignment = Alignment(horizontal="center")

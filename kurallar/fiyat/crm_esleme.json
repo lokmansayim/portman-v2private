@@ -1,6 +1,6 @@
 {
  "sema": 1,
- "surum": "2026-11-10-r03",
+ "surum": "2026-11-10-r04",
  "karar": "D-72",
  "muhur": "M-15",
  "aciklama": "Fiyat defteri kaleminin CRM stok fiyatları API'sindeki karşılığı ve fiyatın nasıl hesaplandığı (İE-35). Fiyat yazmaz: fiyat her gün CRM'den gelir, `araclar/crm_fiyat.py` bu dosyayla defter üretir. Anahtarlar ve birimler fiyat defterinin (defter_2026-11 r13) kalemleri; Motor'un listesindeki anahtar. Eşleme değişikliği (yeni kalem, Lokman'ın birim cevabı, Samet'in CRM'e eklediği ürün) bu dosyaya PR'la girer; `kaynak` bölümü mühürlü (M-15).",
@@ -46,6 +46,131 @@
   "ort": "kodların fiyatlarının agirlik'la ağırlıklı ortalaması",
   "toplam": "kodların fiyatlarının toplamı",
   "yuvarlama": "sonuç kuruşa (0,01) yarım yukarı; kalemde `yuvarlama` varsa o adıma (kutu profil 1: tam TL, D-36)"
+ },
+ "kdv": {
+  "dayanak": "D-76",
+  "aciklama": "KDV oranı (D-76; Lokman 10 Kasım 2026 16:51:25 \"listeye Tam KDV kesilenler var Hiç KDV almayanlar var ve %10 KDV alanlar var\", 16:54 el yazısı liste, 16:55:54 \"Çelik Paneller %20, Shingle %20, Çatı İzolasynonu %20\"). CRM fiyatı KDV hariçtir. Kalemin grubu sırayla: kalemin `kdv_grubu`'su, kodun `kodlar` kaydı, CRM satırının kategorisi (`kategoriler`). `kodlar`'da null: grubu bilinmiyor, kategoriden de alınmaz. Grubu bulunmayan ya da kodları iki ayrı orana düşen kalemin oranı yoktur; oran uydurulmaz, fiyatlı listede 'KDV oranı yok' yazar ve KDV dahil toplam eksik sayılır. Bayiye giden formun fiyatı (M-14) bu oranları okumaz.",
+  "gruplar": {
+   "Metal aksam": 0.2,
+   "Betopan": 0.2,
+   "EPS": 0.2,
+   "Kiremit desen sac": 0.2,
+   "Boardex": 0.2,
+   "Alçıpan": 0.2,
+   "OSB": 0.2,
+   "Knauf": 0.2,
+   "Pencereler": 0.2,
+   "Vida": 0.2,
+   "Su tesisatı": 0.2,
+   "Boya grubu": 0.2,
+   "Dereler": 0.2,
+   "Mahya bandı": 0.2,
+   "Membran": 0.2,
+   "PVC iniş": 0.2,
+   "Çelik paneller": 0.2,
+   "Shingle": 0.2,
+   "Çatı izolasyonu": 0.2,
+   "İç kapı": 0.0,
+   "Dış (çelik) kapı": 0.0,
+   "Elektrik": 0.0,
+   "Vitrifiye": 0.0,
+   "Trapez": 0.1,
+   "Sandviç panel": 0.1,
+   "Kutu profil": 0.1
+  },
+  "kategoriler": {
+   "Metal Aksam Grubu": "Metal aksam",
+   "Elektrik Grubu": "Elektrik",
+   "Vitrifiye Grubu": "Vitrifiye",
+   "Dere Grubu": "Dereler",
+   "Vida Grubu": "Vida",
+   "Mekanik Tesisat": "Su tesisatı"
+  },
+  "kodlar": {
+   "MA11": "Kutu profil",
+   "MA12": "Kutu profil",
+   "MA10": null,
+   "HM1": "Betopan",
+   "HM2": "Betopan",
+   "HM3": "Betopan",
+   "HM4": "Betopan",
+   "HM5": "Betopan",
+   "HM6": "Betopan",
+   "HM7": "Betopan",
+   "HM8": "Betopan",
+   "HM9": "Betopan",
+   "HM10": "Betopan",
+   "HM11": "Betopan",
+   "HM12": "Betopan",
+   "HM13": "Betopan",
+   "HM14": "Çelik paneller",
+   "HM15": "Çelik paneller",
+   "HM16": "Çelik paneller",
+   "HM17": "Çelik paneller",
+   "HM18": "Çelik paneller",
+   "HM19": "Çelik paneller",
+   "HM20": "Çelik paneller",
+   "HM21": "Çelik paneller",
+   "HM22": "Çelik paneller",
+   "HM23": "Çelik paneller",
+   "HM24": "Çelik paneller",
+   "HM25": "Çelik paneller",
+   "HM38": "Alçıpan",
+   "HM39": "Alçıpan",
+   "HM40": "Boardex",
+   "HM41": "OSB",
+   "HM42": "OSB",
+   "HM44": "Knauf",
+   "HM45": "Çatı izolasyonu",
+   "HM46": "EPS",
+   "HM47": "EPS",
+   "HM52": "Membran",
+   "HM53": "Membran",
+   "HM63": "Membran",
+   "HM64": "Membran",
+   "CG2": "Sandviç panel",
+   "CG3": "Sandviç panel",
+   "CG4": "Sandviç panel",
+   "CG5": "Sandviç panel",
+   "CG10": "Kiremit desen sac",
+   "CG11": "Kiremit desen sac",
+   "CG12": "Kiremit desen sac",
+   "CG13": "Kiremit desen sac",
+   "CG14": "Trapez",
+   "CG15": "Trapez",
+   "CG16": "Trapez",
+   "CG17": "Trapez",
+   "CG23": "Mahya bandı",
+   "PK2": "İç kapı",
+   "PK5": "Dış (çelik) kapı",
+   "PK9": "Dış (çelik) kapı",
+   "B2": "Boya grubu",
+   "B3": "Boya grubu",
+   "B11": "Boya grubu",
+   "B12": "Boya grubu",
+   "DG12": "Boya grubu",
+   "DG13": "Boya grubu",
+   "DG14": "Boya grubu",
+   "DG4": "Vida",
+   "DG5": "Vida",
+   "DG6": "Vida",
+   "DG7": "Vida",
+   "DG8": "Vida",
+   "DG9": "Vida"
+  },
+  "okuma": {
+   "aciklama": "Lokman'ın listesinde adıyla geçmeyen, gruba okumayla konan yerler. Çelik fiyat sohbeti okumayı 10 Kasım 16:54:38'de Lokman'a yazdı; Lokman sonraki mesajında itiraz etmedi (açık onay değil, D-68 kural 11).",
+   "yerler": [
+    "kategori Mekanik Tesisat → Su tesisatı",
+    "DG4–DG9 (dübel, uç, kesme taşı) → Vida",
+    "DG12–DG14 (köpük, dayson, mastik) → Boya grubu",
+    "HM46, HM47 (strafor) → EPS",
+    "CG10–CG13 (metal kiremit) → Kiremit desen sac",
+    "MA75 (panel uç kapaması), MA79 (trapez sac mahyası) kategorisinden → Metal aksam",
+    "PK2 (Amerikan panel kapı), Melamin kapı → İç kapı",
+    "Şase pul → Vida"
+   ]
+  }
  },
  "hatlar": {
   "prefabrik": {
@@ -461,19 +586,22 @@
      "kod": null,
      "esleme": "CRM'de yok",
      "birim": "adet",
-     "not": "CRM'de PVC pencere yok; Lokman 9 Kasım kartı: pencere de CRM'den fiyatlanır, Samet CRM'e ekler (D-72)"
+     "not": "CRM'de PVC pencere yok; Lokman 9 Kasım kartı: pencere de CRM'den fiyatlanır, Samet CRM'e ekler (D-72)",
+     "kdv_grubu": "Pencereler"
     },
     "PVC pencere | 120/180": {
      "kod": null,
      "esleme": "CRM'de yok",
      "birim": "adet",
-     "not": "CRM'de PVC pencere yok; Lokman 9 Kasım kartı: pencere de CRM'den fiyatlanır, Samet CRM'e ekler (D-72)"
+     "not": "CRM'de PVC pencere yok; Lokman 9 Kasım kartı: pencere de CRM'den fiyatlanır, Samet CRM'e ekler (D-72)",
+     "kdv_grubu": "Pencereler"
     },
     "PVC vasistas | 60/40": {
      "kod": null,
      "esleme": "CRM'de yok",
      "birim": "adet",
-     "not": "CRM'de PVC pencere yok; Lokman 9 Kasım kartı: pencere de CRM'den fiyatlanır, Samet CRM'e ekler (D-72)"
+     "not": "CRM'de PVC pencere yok; Lokman 9 Kasım kartı: pencere de CRM'den fiyatlanır, Samet CRM'e ekler (D-72)",
+     "kdv_grubu": "Pencereler"
     },
     "Tavan beyaz alçıpan | 1200 × 2500": {
      "kod": "HM38",
@@ -788,7 +916,8 @@
      "kod": null,
      "esleme": "CRM'de yok",
      "birim": "adet",
-     "not": "CRM'de şase pul yok"
+     "not": "CRM'de şase pul yok",
+     "kdv_grubu": "Vida"
     },
     "Çelik dübel | adet": {
      "kod": "DG4",
@@ -843,7 +972,8 @@
      "kod": null,
      "esleme": "CRM'de yok",
      "birim": "adet",
-     "not": "CRM'de takım yok; parçalar: klozet VG2, ayaklı lavabo VG9, lavabo bataryası VG5, banyo bataryası VG7, taharet musluğu VG8; duş teknesi yok"
+     "not": "CRM'de takım yok; parçalar: klozet VG2, ayaklı lavabo VG9, lavabo bataryası VG5, banyo bataryası VG7, taharet musluğu VG8; duş teknesi yok",
+     "kdv_grubu": "Vitrifiye"
     },
     "Metal dere | L 4000": {
      "kod": "DR1",
@@ -1658,7 +1788,8 @@
      "kod": null,
      "esleme": "CRM'de yok",
      "birim": "adet",
-     "not": "CRM'de melamin kapı yok (Amerikan panel kapı ayrı ürün)"
+     "not": "CRM'de melamin kapı yok (Amerikan panel kapı ayrı ürün)",
+     "kdv_grubu": "İç kapı"
     },
     "Kompozit çelik kapı | 90 × 210": {
      "kod": "PK9",
@@ -1671,25 +1802,29 @@
      "kod": null,
      "esleme": "CRM'de yok",
      "birim": "adet",
-     "not": "CRM'de PVC pencere yok; Lokman 9 Kasım kartı: pencere de CRM'den fiyatlanır, Samet CRM'e ekler (D-72)"
+     "not": "CRM'de PVC pencere yok; Lokman 9 Kasım kartı: pencere de CRM'den fiyatlanır, Samet CRM'e ekler (D-72)",
+     "kdv_grubu": "Pencereler"
     },
     "PVC vasistas | 60/40": {
      "kod": null,
      "esleme": "CRM'de yok",
      "birim": "adet",
-     "not": "CRM'de PVC pencere yok; Lokman 9 Kasım kartı: pencere de CRM'den fiyatlanır, Samet CRM'e ekler (D-72)"
+     "not": "CRM'de PVC pencere yok; Lokman 9 Kasım kartı: pencere de CRM'den fiyatlanır, Samet CRM'e ekler (D-72)",
+     "kdv_grubu": "Pencereler"
     },
     "PVC pencere | 120/100": {
      "kod": null,
      "esleme": "CRM'de yok",
      "birim": "adet",
-     "not": "CRM'de PVC pencere yok; Lokman 9 Kasım kartı: pencere de CRM'den fiyatlanır, Samet CRM'e ekler (D-72)"
+     "not": "CRM'de PVC pencere yok; Lokman 9 Kasım kartı: pencere de CRM'den fiyatlanır, Samet CRM'e ekler (D-72)",
+     "kdv_grubu": "Pencereler"
     },
     "PVC pencere | 180/180": {
      "kod": null,
      "esleme": "CRM'de yok",
      "birim": "adet",
-     "not": "CRM'de PVC pencere yok; Lokman 9 Kasım kartı: pencere de CRM'den fiyatlanır, Samet CRM'e ekler (D-72)"
+     "not": "CRM'de PVC pencere yok; Lokman 9 Kasım kartı: pencere de CRM'den fiyatlanır, Samet CRM'e ekler (D-72)",
+     "kdv_grubu": "Pencereler"
     },
     "Tijli duy | adet": {
      "kod": "E36",
@@ -1868,7 +2003,8 @@
      "kod": null,
      "esleme": "CRM'de yok",
      "birim": "adet",
-     "not": "CRM'de şase pul yok"
+     "not": "CRM'de şase pul yok",
+     "kdv_grubu": "Vida"
     },
     "8'lik trapez uç | adet": {
      "kod": "DG5",
@@ -2083,13 +2219,15 @@
      "kod": null,
      "esleme": "CRM'de yok",
      "birim": "adet",
-     "not": "CRM'de PVC pencere yok; Lokman 9 Kasım kartı: pencere de CRM'den fiyatlanır, Samet CRM'e ekler (D-72)"
+     "not": "CRM'de PVC pencere yok; Lokman 9 Kasım kartı: pencere de CRM'den fiyatlanır, Samet CRM'e ekler (D-72)",
+     "kdv_grubu": "Pencereler"
     },
     "PVC pencere | 120/120": {
      "kod": null,
      "esleme": "CRM'de yok",
      "birim": "adet",
-     "not": "CRM'de PVC pencere yok; Lokman 9 Kasım kartı: pencere de CRM'den fiyatlanır, Samet CRM'e ekler (D-72)"
+     "not": "CRM'de PVC pencere yok; Lokman 9 Kasım kartı: pencere de CRM'den fiyatlanır, Samet CRM'e ekler (D-72)",
+     "kdv_grubu": "Pencereler"
     }
    },
    "bantlar": [],
