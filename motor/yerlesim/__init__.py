@@ -84,11 +84,16 @@ def _cm(m: float) -> float:
 
 def kaplama_turu(g: dict, C: dict, uyarilar: list | None = None) -> tuple[str | None, str | None]:
     """Liste üretecinin okuması (`motor/prefabrik_liste.py` › 1006 Çatı): "Çatı Kaplaması"nda sandviç geçiyorsa sandviç, trapez geçiyorsa
-    trapez sac (İE-15 K6); kiremit geçiyorsa kartı yok ("kural yok" nedeni döner); değilse tek kat panel (yazılı değilse uyarı)."""
-    yazili = kaplama_yazisi(g)
+    trapez sac (İE-15 K6); kiremit geçiyorsa kartı yok ("kural yok" nedeni döner); değilse tek kat panel (uyarıyla). Yazılı değilse
+    prefabriğin standardı trapez sac (D-74; Lokman, 10 Kasım 2026 04:58), uyarıyla: liste üreteci de satırın kaynağına yazar."""
+    from motor.prefabrik_liste import cati_kaplamasi_yazisi
+    yazili, standart = cati_kaplamasi_yazisi(g["ozellikler"])
     vars_ = C["varsayilan"]
     tur = next((t for t in C["kaplamalar"] if t != vars_ and t in yazili), None)
     if tur:
+        if standart and uyarilar is not None:
+            uyarilar.append({"katman": "çatı kaplaması", "metin": f"İş Emri'nin çatı kaplaması \"yazılı değil\"; prefabrik standardı "
+                                                                  f"{C['kaplamalar'][tur]} sayıldı (D-74; liste üreteciyle aynı okuma)"})
         return tur, None
     yok = next((ad for t, ad in C["kurulmayan"].items() if t in yazili), None)
     if yok:
@@ -101,8 +106,10 @@ def kaplama_turu(g: dict, C: dict, uyarilar: list | None = None) -> tuple[str | 
 
 
 def kaplama_yazisi(g: dict) -> str:
-    """İş Emri'nin "Çatı Kaplaması" özelliği, küçük harfle."""
-    return girdi.kucuk(next((v for k, v in g["ozellikler"].items() if girdi.kucuk(k) == "çatı kaplaması"), ""))
+    """İş Emri'nin "Çatı Kaplaması" özelliği, küçük harfle; yazılı değilse prefabriğin standardı (trapez sac; D-74, liste üretecinin
+    `cati_kaplamasi_yazisi`'ndan: aynı okuma, D-28 madde 1)."""
+    from motor.prefabrik_liste import cati_kaplamasi_yazisi
+    return cati_kaplamasi_yazisi(g["ozellikler"])[0]
 
 
 def trapez_kapatma_m(g: dict, C: dict) -> float:

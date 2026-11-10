@@ -115,6 +115,10 @@ def dokuz(tmp_path_factory):
     out = {}
     for ad, yol in IS_EMIRLERI.items():
         ie = _oku(yol)
+        # D-74 (Lokman, 10 Kasım 2026 04:58): yazılmamış kaplama prefabrik standardı trapez sac. K3b'nin kenar kartları (CK-06 düz mahya
+        # dahil) tek kat panelle kabul edildi: kaplamayı yazmayan sekiz İş Emri açıkça "Tek Kat Panel" yazılarak koşar, sayılar aynen.
+        if not any(girdi.kucuk(k) == "çatı kaplaması" for k in ie.get("ozellikler", {})):
+            ie["ozellikler"] = {**ie.get("ozellikler", {}), "Çatı Kaplaması": "Tek Kat Panel"}
         out[ad] = _model(ie, d, ad) | {"ie": ie}
     return out
 

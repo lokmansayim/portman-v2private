@@ -141,7 +141,7 @@
     "deger": "tek kat",
     "durum": "muhendis",
     "tarih": "2026-10-30",
-    "not": "Liste üretecinin okuması: kaplama sandviç, trapez ya da kiremit değilse (yazılı değilse de) tek kat panel sayılır (kapatması `tek_kat_panel_kapatma_m`). Kart modeli aynı okur; kaplama yazılı değilse uyarı yazar (K5b)."
+    "not": "Liste üretecinin okuması: kaplama sandviç, trapez ya da kiremit değilse (yazılı değilse de) tek kat panel sayılır (kapatması `tek_kat_panel_kapatma_m`). Kart modeli aynı okur; kaplama yazılı değilse uyarı yazar (K5b). D-74'ten beri (Lokman, 10 Kasım 2026 04:58: \"Trapez Sac bizim Prefabrik evlerde Standardımız\") yazılı olmayan kaplama prefabriğin standardı trapez sacdır (liste üretecinin `cati_kaplamasi_yazisi`); bu değer yalnız tanınmayan yazıda (ör. shingle) kalır."
    },
    "profil": {
     "deger": {
@@ -439,7 +439,7 @@
    "not": "Modelde kenar başına bir parça (eğik boy); metre parçaların toplamı."
   },
   "mahya_yerlesimi": {
-   "kural": "Metal kiremit mahyası mahya boyunca, saçak ucundan ucuna, kaplamanın üstünde; iki yanında kanat. Sayı ⌈mahya boyu ÷ (parça boyu − bindirme)⌉ (liste üretecinin O10'u). Çatı kaplamasında trapez sac varsa mahya trapez sac mahyasıdır (kart CK-07; İE-15 K6): aynı yerde, her beşiğin mahyası (ana çatı, cumba) bir hat, hat başına ⌈mahya boyu ÷ sacın kapattığı⌉ parça, bindirme düşülmez (D-50, M-11: \"trapez mahya sac kaç kapatırsa o kadar kapatır\"; liste üreteciyle aynı). Parçanın boyu trapez sacın kapatması (`kapatma_trapez`; İş Emri kapatmayı yazıyorsa o).",
+   "kural": "Metal kiremit mahyası mahya boyunca, saçak ucundan ucuna, kaplamanın üstünde; iki yanında kanat. Sayı ⌈mahya boyu ÷ (parça boyu − bindirme)⌉ (liste üretecinin O10'u). Çatı kaplamasında trapez sac varsa mahya trapez sac mahyasıdır (kart CK-07; İE-15 K6): aynı yerde, her beşiğin mahyası (ana çatı, cumba) bir hat, hat başına ⌈mahya boyu ÷ sacın kapattığı⌉ parça, bindirme düşülmez (D-50, M-11: \"trapez mahya sac kaç kapatırsa o kadar kapatır\"; liste üreteciyle aynı). Parçanın boyu trapez sacın kapatması (`kapatma_trapez`; İş Emri kapatmayı yazıyorsa o); kanatları her yanda 35 cm (`kenar_gosterim › trapez_mahya`; Lokman, 10 Kasım 2026 04:45, D-74). İş Emri çatı kaplamasını yazmazsa kaplama prefabriğin standardı trapez sacdır (D-74), mahyası trapez sac mahyası.",
    "parca_boyu": {"okunan": "kitap › parca_boyu_m.mahya"},
    "bindirme": {"okunan": "kitap › bindirme_m.mahya"},
    "yontem": {
@@ -476,11 +476,12 @@
      "alin_saci": {"makas_ustunden": 3, "alin": 13, "kivrim": 10},
      "bas_makas_z": {"centik": 3, "dis_kanat": 3, "ust_kanat": 5},
      "c_kapama": {"govde": 6, "kanat": 2},
-     "mahya": {"kanat": 26}
+     "mahya": {"kanat": 26},
+     "trapez_mahya": {"kanat": 35}
     },
     "durum": "varsayim",
     "tarih": "2026-10-25",
-    "not": "Yalnız 3B gösterim (cm): sacın çizilen kalınlığı (gerçeği 1 mm), alt çerçevenin duvarın iki yüzünden payı ve kanadı, saçak omegasının ters U'su [genişlik, yükseklik], sacların tırnağı, alnı ve kıvrımı, alın sacının makas üstünden aşağı başladığı yer, Z'nin çentiği, dış kanadı ve makasın üstündeki kanadı, C kapamanın gövdesi ve kanadı, mahyanın kanadı. Montaj rehberinden (Lokman'ın 24 Ekim çizimleri). Sayı, boy ve metre bunlardan çıkmaz."
+    "not": "Yalnız 3B gösterim (cm): sacın çizilen kalınlığı (gerçeği 1 mm), alt çerçevenin duvarın iki yüzünden payı ve kanadı, saçak omegasının ters U'su [genişlik, yükseklik], sacların tırnağı, alnı ve kıvrımı, alın sacının makas üstünden aşağı başladığı yer, Z'nin çentiği, dış kanadı ve makasın üstündeki kanadı, C kapamanın gövdesi ve kanadı, mahyanın kanadı. Montaj rehberinden (Lokman'ın 24 Ekim çizimleri). Sayı, boy ve metre bunlardan çıkmaz. Trapez sac mahyasının (CK-07) kanadı her yanda 35 cm (`trapez_mahya`; Lokman, 10 Kasım 2026 04:45: \"Trapez mahya L:100 ve 35x35 olarak al\"; D-74); metal kiremit mahyasınınki 26 cm."
    },
    "durum": "varsayim",
    "tarih": "2026-10-25",
