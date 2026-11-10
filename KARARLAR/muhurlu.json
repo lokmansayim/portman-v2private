@@ -1101,6 +1101,76 @@
    ],
    "durum": "mühürlü",
    "gecmis": []
+  },
+  {
+   "kod": "M-17",
+   "konu": "Montaj rehberinde baş makas Z'si ve alın sacı",
+   "kural": "Montaj rehberi baş makas Z'sini Lokman'ın ölçüsüyle çizer: üst kanat 4 cm (makasın ve betopanın üstünde), gövde 7 cm (betopanın dış yüzünde), tırnak 3 cm, gövdeyle 30°, dışa ve yukarı; sac 1 mm. Alın sacının 3 cm tırnağı Z'nin gövdesi boyunca iner, alt ucu Z'nin tırnağının iç yüzüne değer. Alın sacı abkantta tek biçimde bükülür, 250 ve 280 boyda aynı: alın kenar boyunca saçak altının 6 cm altına iner. Saçak sacıyla birleştiği köşede alın derenin ucunu örter, alının ucu derenin biçiminde kesilir; sıradan montajcının 5 cm bükme yolu çizilmez. Kalkan kenarında Z, alın sacı ve C kapama başka parçanın içine girmez, yüzleri değer (62 m² hedef örneğinde çakışma 0; araclar/paket/rehber/cakisma.js). Veranda ya da cumba çatısının ana kalkana değdiği köşe açık konudur (D-73 › Açık kalan). Kart modelinin (IFC) Z kesiti bu mühürde değil.",
+   "kararlar": [
+    "D-73"
+   ],
+   "pr": [
+    149
+   ],
+   "lokman": [
+    {
+     "tarih": "2026-11-09 13:45",
+     "soz": "Montaj Rehberinde Baş makas Z'si yanlış çiziliyor düzeltilmiş halini atıyorum"
+    },
+    {
+     "tarih": "2026-11-09 15:01",
+     "soz": "içine tam otursun Alın Sacı tırnağı Başmakas Z nin tırnağına tam oturacak tırnakta 3 cm yani saçak sacı yukarıda kalmayacak"
+    },
+    {
+     "tarih": "2026-11-09 15:16",
+     "soz": "B yi seçiyorum ama bir şartım var çakışma olmasın tame değme olsun ama çakışma olmasın"
+    },
+    {
+     "tarih": "2026-11-09 19:57",
+     "soz": "öncesi doğru ama bizim github repo da en son mühürlediğimiz model 62 m² olan değil ama alın sacı ve baş makas omegası yerleşimin doğru alın sacını dereyi kapattığı yeri derenin deseninde kes önce doğru sora olan değil alın sacı çizdiğin şekilde abkantta bükülüyor yani 280 veya 250 boyunda aynı formda oluyor"
+    },
+    {
+     "tarih": "2026-11-09 20:42",
+     "soz": "şuan çizimde aşık görünmüyor ama var kabul ederek onaylıyorum"
+    },
+    {
+     "tarih": "2026-11-09 21:27",
+     "soz": "en son baş makas Z sini onayladım en son Repoya giren Montaj Rehberine uygulayıp yeniden çıktı olarak verir misin? sonra mühürleyelim"
+    },
+    {
+     "tarih": "2026-11-10 16:58",
+     "soz": "Karar kartı \"Baş makas Z'si ve alın sacını şimdi mühürleyelim mi?\" → \"Evet, mühürle\"",
+     "mesaj": "cmsg_01UAFvcnfVuTR1wfFux5fQPPEWtbgqV7HKud3mLyuPEJAV"
+    }
+   ],
+   "kilitler": [
+    {
+     "yer": "araclar/paket/rehber/sahne.js@^const (Z_UST|ALIN_ALT|DERE_K) ",
+     "iz": "385b405d50f1a816"
+    },
+    {
+     "yer": "kurallar/yerlesim/prefabrik.json#kurallar.bas_makas_z_yerlesimi.kural",
+     "iz": "ebd5f43144360357"
+    },
+    {
+     "yer": "kurallar/yerlesim/prefabrik.json#kurallar.alin_saci_yerlesimi.kural",
+     "iz": "5445961b5e2c5cdd"
+    },
+    {
+     "yer": "kurallar/urun/kartlar.json#kartlar[kod=CK-03].olcu",
+     "iz": "e2ff6cb3708031cb"
+    },
+    {
+     "yer": "kurallar/urun/kartlar.json#kartlar[kod=CK-04].olcu",
+     "iz": "5c2f21395d8f0d96"
+    },
+    {
+     "yer": "testler/paket/test_rehber_cakisma.py",
+     "iz": "733a0bafb224d0cb"
+    }
+   ],
+   "durum": "mühürlü",
+   "gecmis": []
   }
  ]
 }
