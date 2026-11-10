@@ -184,8 +184,11 @@ def test_hesaplar(A, D):
         assert (g["fiyat"], g["kaynak"], g["onay"], g["durum"]) == (0, "PATRON", True, "Patron verdi")
     g = P["PVC pencere | 120/120"]                                             # 13:15 kartı: pencere de CRM'den; CRM'e eklenene kadar fiyatsız
     assert (g["fiyat"], g["durum"], g["onay"]) == (None, "kaynakta yok", False)
-    g = P["Metal dere | L 4000"]
+    g = P["Mahya bandı | rulo 10 m"]
     assert (g["fiyat"], g["durum"]) == (None, "birim sorusu")
+    for c in (P, Cl):                                                          # Lokman 10 Kasım 16:15 kartı: 4 m parça = CRM fiyatı
+        g = c["Metal dere | L 4000"]
+        assert (g["fiyat"], g["onay"], g["durum"]) == (_kurus(_fiyat(A, "DR1")), True, "hesap")
     b = D["hatlar"]["prefabrik"]["bantlar"][0]
     assert [(a["en_mm"], a["fiyat"], a["onay"]) for a in b["araliklar"]] == [
         ([627.5, 1250], _kurus(_fiyat(A, "YP1")), True), ([340, 627.5], _kurus(_fiyat(A, "YP4")), True),
