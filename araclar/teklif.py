@@ -48,7 +48,7 @@ KOK = Path(__file__).resolve().parents[1]
 if str(KOK) not in sys.path:
     sys.path.insert(0, str(KOK))
 from araclar import fiyatla as F  # noqa: E402
-from araclar.liste_excel import RENK, TL, _stil, buyuk, eksik, gorunen, liste_sayfasi, tl_yazi  # noqa: E402,F401
+from araclar.liste_excel import RENK, TL, _stil, buyuk, eksik, gorunen, liste_sayfasi, onbellek_yaz, tl_yazi  # noqa: E402,F401
 from motor import prefabrik_liste as PL  # noqa: E402
 
 KOSULLAR = KOK / "kurallar" / "teklif" / "kosullar.json"
@@ -295,6 +295,7 @@ def excel_yaz(T: dict, defter: dict, yol: Path) -> None:
     oz.sheet_properties.pageSetUpPr.fitToPage = True; oz.page_setup.fitToWidth, oz.page_setup.fitToHeight = 1, 0
     yol.parent.mkdir(parents=True, exist_ok=True)
     wb.save(yol)
+    onbellek_yaz(yol)                                       # formüllerin sonucu hücrede de: önizleme boş göstermez (Lokman 11:31)
 
 
 def main(argv: list[str] | None = None) -> int:

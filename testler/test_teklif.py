@@ -201,8 +201,16 @@ def test_formul_ve_kar_marji(cikti, T):
     """Lokman, 11 Kasım 2026 10:54–10:55 UTC (TK-07): "excel'i tüm kalemleri formülleriyle ver birim fiyatı veya adeti değiştirdiğimde
     toplamda değişsin"; "en sona kar marjı yüzdesi koy ben belirleyeyim". Adet ya da birim fiyat değişince tutar, ara toplam, genel toplam
     ve Özet değişir; fiyatsız satıra fiyat yazılınca toplama girer, fiyatsız sayısı düşer. Kâr marjı en sonda, sarı, ilk değer %0; kâr
-    maliyetin üstüne: kâr dahil toplam = toplam × (1 + kâr %)."""
+    maliyetin üstüne: kâr dahil toplam = toplam × (1 + kâr %). Lokman 11:31: formülün sonucu hücrede de yazılı (önbellek değeri);
+    formül hesaplamayan görüntüleyici boş göstermez."""
     wb = load_workbook(cikti / "TK01_teklif.xlsx")
+    wv = load_workbook(cikti / "TK01_teklif.xlsx", data_only=True)                # önbellek değerleri (onbellek_yaz)
+    for ad in wb.sheetnames:
+        for satir in wb[ad].iter_rows():
+            for c in satir:
+                if isinstance(c.value, str) and c.value.startswith("="):
+                    beklenen = formul_degeri(wb[ad], c.coordinate)
+                    assert wv[ad][c.coordinate].value == (beklenen if beklenen != "" else None), (ad, c.coordinate)   # boş sonuç: boş hücre
     for s in T["secenekler"]:
         ws, toplam = wb[s["ad"]], s["fiyat"]["ozet"]["toplam"]
         satir = {ws.cell(r, 1).value: r for r in range(1, ws.max_row + 1) if ws.cell(r, 1).value}

@@ -16,7 +16,8 @@ Formüllü sayfa (`formullu=True`, teklif Excel'i): Tutar = adet (kg'lı kalemde
 toplam, KDV ve KDV dahil toplam Excel formülüdür; en altta kâr marjı yüzdesi (Lokman yazar, ilk değer %0), kâr ve kâr dahil toplamlar.
 Kâr maliyetin üstüne eklenir: kâr = KDV hariç toplam × kâr %; KDV de aynı oranla büyür. Lokman, 11 Kasım 2026 10:54 UTC (TK-07 teklifi):
 "excel'i tüm kalemleri formülleriyle ver birim fiyatı veya adeti değiştirdiğimde toplamda değişsin"; 10:55: "en sona kar marjı yüzdesi koy
-ben belirleyeyim". Üretimde formüllerin sonucu JSON'un sayılarıyla aynıdır (sayfa yazılırken denetlenir).
+ben belirleyeyim". Üretimde formüllerin sonucu JSON'un sayılarıyla aynıdır (sayfa yazılırken denetlenir). Kayıttan sonra
+`onbellek_yaz` sonuçları hücreye önbellek değeri olarak da yazar: formül hesaplamayan görüntüleyici boş göstermez (Lokman 11:31).
 """
 from __future__ import annotations
 
@@ -119,6 +120,46 @@ def formul_degeri(ws, ref: str):
     if re.fullmatch(r"(?:'(?:[^']|'')+'!)?[A-Z]+\d+", f):
         return hucre(f)
     raise ValueError(f"{ws.title}!{ref}: bilinmeyen formül {v}")
+
+
+def onbellek_yaz(yol) -> int:
+    """Kayıtlı dosyadaki formüllerin sonucunu hücrenin önbellek değerine (<v>) yazar (`formul_degeri` ile). Formül hesaplamayan
+    görüntüleyici (telefon, dosya önizlemesi) de sayıyı gösterir; Excel açılışta yine hesaplar (openpyxl'in `fullCalcOnLoad`'u).
+    Lokman, 11 Kasım 2026 11:31 UTC (TK-07): "adet * birim fiyat = tutar sütünunu niye girmedin ve KDV". Döner: yazılan hücre sayısı."""
+    import posixpath
+    import re
+    import xml.etree.ElementTree as ET
+    import zipfile
+    from xml.sax.saxutils import escape
+
+    from openpyxl import load_workbook
+    wb = load_workbook(yol)
+    with zipfile.ZipFile(yol) as z:
+        dosya = [(i, z.read(i.filename)) for i in z.infolist()]
+    icerik = {i.filename: b for i, b in dosya}
+    ns_r = "{http://schemas.openxmlformats.org/officeDocument/2006/relationships}id"
+    rel = {e.get("Id"): e.get("Target") for e in ET.fromstring(icerik["xl/_rels/workbook.xml.rels"])}
+    sayfa = {}
+    for e in ET.fromstring(icerik["xl/workbook.xml"]).iter("{http://schemas.openxmlformats.org/spreadsheetml/2006/main}sheet"):
+        t = rel[e.get(ns_r)]
+        sayfa[t.lstrip("/") if t.startswith("/") else posixpath.normpath(posixpath.join("xl", t))] = wb[e.get("name")]
+    n = 0
+
+    def yaz(ws, m) -> str:
+        nonlocal n
+        v = formul_degeri(ws, m["ref"])
+        att = re.sub(r'\s+t="[^"]*"', "", m["att"])
+        n += 1
+        if isinstance(v, (int, float)) and not isinstance(v, bool):
+            return f'<c r="{m["ref"]}"{att}><f>{m["f"]}</f><v>{v!r}</v></c>'
+        return f'<c r="{m["ref"]}"{att} t="str"><f>{m["f"]}</f><v>{escape(str(v))}</v></c>'
+    for p, ws in sayfa.items():
+        x = icerik[p].decode("utf-8")
+        icerik[p] = re.sub(r'<c r="(?P<ref>[A-Z]+\d+)"(?P<att>[^>]*)><f>(?P<f>[^<]*)</f><v\s*/></c>', lambda m: yaz(ws, m), x).encode("utf-8")
+    with zipfile.ZipFile(yol, "w", zipfile.ZIP_DEFLATED) as z:
+        for i, _ in dosya:
+            z.writestr(i, icerik[i.filename])
+    return n
 
 
 def _hucre(sutun: int, satir: int) -> str:
