@@ -85,12 +85,19 @@ def bant_bul(s: dict, bantlar: list[dict]) -> tuple[dict, dict] | None:
     return None
 
 
+def boy_tamamla(n: float, adim: float) -> float:
+    """Boyu `adim`ın katına yukarı tamamlar; tam katı aynen kalır (D-79)."""
+    k = round(n / adim, 9)
+    return float(int(k) + (k > int(k))) * adim
+
+
 def boy_onerisi_bul(s: dict, oneriler: list[dict]) -> tuple[dict, float] | None:
     """Kesilen parçanın boyu (ölçü "L <mm>"): kaydın tam boy fiyatından boyla orantılı birim fiyat (kayıt, fiyat). Kayıt kalemi adıyla
     (`kalem`) ya da adının başıyla (`kalem_baslar`; ör. her çatının tek kat paneli) eşler; yuvarlama `yuvarlama` adımına yarım yukarı
     (varsayılan tam TL). Kaydın `onay`ını çağıran değerlendirir: D-36'ten beri (Lokman 31 Ekim) kutu profil ve tek kat çatı paneli
     kuralı onaylı, her boy için. Kayıt `kapatma_m` taşıyorsa (D-51, trapez sac) fiyat satırın kapatmasıyla da orantılıdır (m² fiyatı
-    aynı): satırın `kapatma_m`'si yoksa kural uygulanmaz."""
+    aynı): satırın `kapatma_m`'si yoksa kural uygulanmaz. Kayıt `boy_adim_mm` taşıyorsa (D-79, metal kiremit) boy önce bu adımın
+    katına yukarı tamamlanır, fiyat tamamlanan boydan."""
     olcu = (s.get("olcu") or "").strip()
     if not re.fullmatch(r"L \d+(?:[.,]\d+)?", olcu):
         return None
@@ -98,6 +105,8 @@ def boy_onerisi_bul(s: dict, oneriler: list[dict]) -> tuple[dict, float] | None:
     for b in oneriler:
         if b.get("kalem") == kalem or ("kalem_baslar" in b and kalem.startswith(b["kalem_baslar"])):
             adim = b.get("yuvarlama", 1)
+            if "boy_adim_mm" in b:                               # D-79: levha boyu adımın katına yukarı (ör. 50 mm: 3740 → 3750)
+                n = boy_tamamla(n, b["boy_adim_mm"])
             oran = 1.0
             if "kapatma_m" in b:                                 # D-51 (Lokman 4 Kasım 2026 21:37): kapatması farklı sacın m² fiyatı aynı;
                 if not s.get("kapatma_m"):                       # satırın kapatması yoksa fiyat uydurulmaz

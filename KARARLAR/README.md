@@ -188,7 +188,8 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | D | D-76 | CRM fiyatına KDV oranı malzeme grubuna göre: %20, %10, KDV'siz; fiyatlı liste ve teklif KDV hariç, KDV ve KDV dahil yazar; listede olmayan 8 kalem %20, bayi formu aynen (kart 18:01); listede adı geçmeyen yerler de kural (18:05); grubu olmayan kalemde oran uydurulmaz (İE-35; Lokman 10.11 16:51–16:58, 18:01, 18:05) | yazıldı (10.11; CRM sohbeti, `claude/project-thread-03tosk`) |
 | D | D-77 | Bayi formunun ekleri (fiyatsız ek ürün satırı, ek kalın yazı, satırı kapsam dışına, 2. sayfa ön onay paftası, Lokman'ın verdiği sabit fiyat), yurt içi pazarı (kâr %20 + KDV %20, toplam KDV dahil) ve bu eve özel fiyat ve adet (`--proje-fiyat`; TK-06, münferit) (Lokman 11.11 09:02–09:18) | yazıldı (11.11; TK-06 sohbeti, `claude/project-thread-aceh7t`) |
 | D | D-78 | Montaj rehberinde saçak sacının 10 cm kıvrımı son aşığın üstünde, trapez sacın altında; 62 m² örneğinin izi yeniden alındı (Lokman 11.11 15:34, 15:59 kartı) | yazıldı (11.11; TK-03 / kampanyalı ev rehberleri sohbeti, `claude/project-thread-nobqp6`) |
-| D | **D-79** | — | **sıradaki boş** |
+| D | D-79 | CRM eşlemesi: metal kiremidin CRM fiyatı m² fiyatı; levha 100 cm kapatır, boyu 5 cm'nin katına yukarı (3740 → 3750), fiyat m² fiyatı × boy (İE-35; Lokman 11.11 20:24, 20:29 kartı) | yazıldı (11.11; CRM sohbeti, `claude/project-thread-03tosk`) |
+| D | **D-80** | — | **sıradaki boş** |
 | İE | İE-01–İE-08 | bu depo (`main`) | yazıldı |
 | İE | İE-09 | model atölyesi: kontrollü model üretimi ve banka hattı (Görev 6e; pano 30; P6001 güncellemesi kapsam dışı) | alındı (16.10; `claude/gorev-6e-model-atolyesi-rnhtcp`; PR-1 banka hattı 29.10, `claude/project-thread-rhjgzv`) |
 | İE | İE-10, İE-11, İE-12 | prefabrik hattı (PR #12, PR #14, `ie-12-prefabrik-bayi-paftasi`) | `main`'e BK-12 ile (PR-1: motor ve bayi paftası; liste ve mühür kıyası sonraki PR'larda) |

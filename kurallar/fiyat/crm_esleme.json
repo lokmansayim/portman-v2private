@@ -1703,6 +1703,16 @@
      "yuvarlama": 0.01,
      "esleme": "birim varsayımı",
      "not": "Sandviç panel m² fiyatından, boyla orantılı (D-67). CRM'de antrasit sandviç panel, ölçü özel; fiyatı m² fiyatı sayıldı"
+    },
+    {
+     "kalem_baslar": "Metal kiremit (100 cm kapatır) · ",
+     "kod": "CG10",
+     "hesap": "ayni",
+     "boy_mm": 1000,
+     "boy_adim_mm": 50,
+     "yuvarlama": 0.01,
+     "esleme": "kural",
+     "not": "D-79 (Lokman 11 Kasım 20:24): CRM'deki metal kiremit (antrasit) fiyatı m² fiyatı; levha 100 cm kapatır; boy 50 mm'nin katına yukarı tamamlanır (3740 → 3750), fiyat m² fiyatı × tamamlanan boy (m)"
     }
    ],
    "makas_kurali": {

@@ -151,7 +151,7 @@ def test_esleme_son_defterin_butun_kalemlerini_kapsar(E):
                [(b["kalem"], b["kalinlik_mm"], b["yukseklik_mm"], [(a["en_mm"], a.get("alt_haric", False)) for a in b["araliklar"]]) for b in R["bantlar"]]
     P, RP = E["hatlar"]["prefabrik"], S["hatlar"]["prefabrik"]
     assert [(b.get("kalem"), b.get("kalem_baslar"), b.get("kapatma_m")) for b in P["boy_onerileri"]] == \
-           [(b.get("kalem"), b.get("kalem_baslar"), b.get("kapatma_m")) for b in RP["boy_onerileri"]]
+           [(b.get("kalem"), b.get("kalem_baslar"), b.get("kapatma_m")) for b in RP["boy_onerileri"]] + [(None, "Metal kiremit (100 cm kapatır) · ", None)]
     assert {k: P["makas_kurali"][k] for k in ("kalem_baslar", "kg_m", "sacak_mm")} == {k: RP["makas_kurali"][k] for k in ("kalem_baslar", "kg_m", "sacak_mm")}
 
 
@@ -327,6 +327,26 @@ def test_r06_mahya_bandi_ve_metal_kiremit_vidasi(E, A):
         assert (g["fiyat"], g["onay"], g["kdv"]) == (_kurus(_fiyat(A, "CG23")), True, 0.2)
     g = PD["Trapez vida 5,5 × 60 (metal kiremit) | adet"]
     assert (g["fiyat"], g["onay"], g["kdv"]) == (_kurus(_fiyat(A, "V11")), True, 0.2)
+
+
+def test_d79_metal_kiremit_m2_fiyati_ve_boy_adimi(E, A):
+    """D-79 (Lokman 11 Kasım 20:24): CRM'deki metal kiremit fiyatı m² fiyatı; levha 100 cm kapatır; boy 50 mm'nin katına yukarı
+    tamamlanır (3740 → 3750), levhanın fiyatı m² fiyatı × tamamlanan boy (m). Kural onaylı, her çatının metal kiremidi için."""
+    b = [x for x in E["hatlar"]["prefabrik"]["boy_onerileri"] if x.get("kalem_baslar") == "Metal kiremit (100 cm kapatır) · "]
+    assert len(b) == 1 and {k: b[0][k] for k in ("kod", "hesap", "boy_mm", "boy_adim_mm", "esleme")} == \
+           {"kod": "CG10", "hesap": "ayni", "boy_mm": 1000, "boy_adim_mm": 50, "esleme": "kural"}
+    assert [F.boy_tamamla(n, 50) for n in (3740, 3750, 3751, 1550, 1549)] == [3750, 3750, 3800, 1550, 1550]
+    D = C.defter_uret(C.denetle(kategorili(A)), E)
+    mk = [x for x in D["hatlar"]["prefabrik"]["boy_onerileri"] if x.get("kalem_baslar") == "Metal kiremit (100 cm kapatır) · "]
+    assert len(mk) == 1 and (mk[0]["fiyat"], mk[0]["onay"], mk[0]["boy_mm"], mk[0]["boy_adim_mm"], mk[0]["kdv"]) == \
+           (_kurus(_fiyat(A, "CG10")), True, 1000, 50, 0.2)
+    m2 = Decimal(str(_fiyat(A, "CG10")))
+    for olcu, boy_m in (("L 3740", "3.75"), ("L 3750", "3.75"), ("L 2410", "2.45")):
+        s = {"kalem": "Metal kiremit (100 cm kapatır) · ana çatı", "olcu": olcu, "adet": 22, "birim": "adet", "grup": "1006"}
+        assert F.boy_onerisi_bul(s, D["hatlar"]["prefabrik"]["boy_onerileri"])[1] == _kurus(m2 * Decimal(boy_m)), olcu
+    X = copy.deepcopy(E)
+    next(x for x in X["hatlar"]["prefabrik"]["boy_onerileri"] if x.get("kalem_baslar", "").startswith("Metal kiremit"))["boy_adim_mm"] = 0
+    assert any("boy_adim_mm" in x for x in C.esleme_denetle(X))
 
 
 # ── D-76: KDV ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
