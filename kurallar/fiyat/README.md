@@ -20,6 +20,7 @@ Lokman, 9 Kasım 2026 13:10: "bunu kural olarak al ve mühürle bundan sonra tek
   fiyatsız, CRM'de fiyatı olsa da yazılmaz (banyo dolabı, D-75).
 - **Lokman'ın hesap kuralları (D-75, 10 Kasım).** Kutu profilin (kiriş ve kolon) CRM fiyatı 6 metrelik boyun fiyatıdır; parça fiyatı
   boyla orantılı, tam TL. Pencere üst paneli tam panonun (100 × 1250 × 2500) 1/5'i, alt paneli 1/3'ü.
+  Mahya bandının CRM fiyatı bir rulonun (10 m) fiyatıdır (Lokman'ın kartı, 11 Kasım 11:14; eşleme r06).
 - **KDV (D-76, 10 Kasım).** CRM fiyatı KDV hariçtir. Oran malzeme grubundan (Lokman'ın listesi): %20 metal aksam, betopan, EPS, kiremit
   desen sac, Boardex, alçıpan, OSB, Knauf, pencereler, vida, su tesisatı, boya grubu, dereler, mahya bandı, membran, PVC iniş, çelik
   paneller, shingle, çatı izolasyonu; KDV'siz iç kapı, dış (çelik) kapı, elektrik, vitrifiye; %10 trapez, sandviç panel, kutu profil.
