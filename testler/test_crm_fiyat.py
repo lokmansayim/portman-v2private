@@ -466,8 +466,19 @@ def test_teklif_crm_ile(A, tmp_path):
     R = T["secenekler"][0]["fiyat"]
     assert {s["kaynak"] for s in R["satirlar"] if s["tutar"] is not None} <= {"CRM", "PATRON"}
     assert R["ozet"]["fiyatli"] > 0 and any(f["anahtar"] == "PVC pencere | 120/120" for f in R["ozet"]["fiyatsiz"])
-    ozet = [c for r in load_workbook(tmp_path / "t" / "TK04_teklif.xlsx")["Özet"].iter_rows(values_only=True) for c in r if isinstance(c, str)]
+    wb = load_workbook(tmp_path / "t" / "TK04_teklif.xlsx")
+    ozet = [c for r in wb["Özet"].iter_rows(values_only=True) for c in r if isinstance(c, str)]
     assert any(c.startswith("Kaynaklar: CRM stok fiyatları, 09.11.2026") for c in ozet)
+    from araclar.liste_excel import formul_degeri          # formüllü Excel (Lokman 11 Kasım 10:54–10:55): KDV ve kâr da formül
+    ws, k = wb["Asma tavan"], R["ozet"]["kdv"]
+    satir = {ws.cell(r, 1).value: r for r in range(1, ws.max_row + 1) if ws.cell(r, 1).value}
+    deger = {a: formul_degeri(ws, f"F{satir[a]}") for a in ("KDV (kalem grubunun oranıyla)", "KDV DAHİL TOPLAM", "KDV · kâr dahil",
+                                                             "TEKLİF TOPLAMI · kâr dahil, KDV dahil")}
+    assert list(deger.values()) == [k["kdv"], k["dahil"], k["kdv"], k["dahil"]]
+    ws.cell(satir["KÂR MARJI %"], 6).value = 0.1
+    assert formul_degeri(ws, f"F{satir['KDV · kâr dahil']}") == round(k["kdv"] * 1.1, 2)
+    kdvli = next(r for r in range(3, satir["KDV (kalem grubunun oranıyla)"]) if isinstance(ws.cell(r, 7).value, (int, float)) and ws.cell(r, 7).value)
+    assert ws.cell(kdvli, 8).value == f'=IF(AND(ISNUMBER(F{kdvli}),ISNUMBER(G{kdvli})),ROUND(F{kdvli}*G{kdvli},2),"")'
     from motor import prefabrik_liste as PL
     (tmp_path / "l.json").write_text(json.dumps(PL.is_emrinden(_oku(IE_TK04)), ensure_ascii=False), encoding="utf-8")
     assert F.main([str(tmp_path / "l.json"), "--crm", str(p), "--json", str(tmp_path / "f.json")]) == 0

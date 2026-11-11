@@ -22,6 +22,9 @@ ile defterden; fiyat uydurulmaz, fiyatı olmayan satır boş kalır ve sayılır
 - Excel düzeni Patron'un yükleme listesinin düzeni (28 Ekim 06:40–06:41): grup adı sütun değil, grubun üstünde başlık satırı ve altında
   ara toplam; tek "Adet" sütunu; ölçüsü birim olan satırda (adet, metre, kova …) ölçü boş, birim o. Sayfalar: Özet, her seçenek bir
   sayfa, Fiyat kaynağı. Liste sayfasının yazıcısı `araclar/liste_excel.py`; `fiyatla.py --excel` de onu kullanır (tek yazıcı).
+- Teklif Excel'i formüllüdür (Lokman, 11 Kasım 2026 10:54–10:55 UTC, TK-07): tutar, ara toplam, genel toplam, KDV ve KDV dahil toplam
+  formül; seçeneğin sayfasının en altında kâr marjı yüzdesi (Lokman yazar) ve kâr dahil toplamlar; Özet'in toplamları o hücrelere
+  bağlıdır. JSON ve PDF formülsüzdür, sayılar aynı.
 - Teklif PDF'i (T5, PR-6): her seçenek bir PDF, Patron'un teklif formunun düzeninde (`araclar/teklif_pdf.py`, `kurallar/teklif/form.json`);
   sayılar bu komutun JSON'undan, fiyatı olmayan satır boş. `--tarih` formun tarihi (verilmezse bugün).
 - KDV (D-76): CRM defteriyle her seçeneğin özeti KDV hariç, oranlara göre KDV ve KDV dahil tutarı taşır (`fiyatla.kdv_ozeti`); Excel'in
@@ -185,8 +188,13 @@ def excel_yaz(T: dict, defter: dict, yol: Path) -> None:
             + ("; onaysız öneriler dahil" if T["oneri_dahil"] else "") + "). Fiyatı boş satır toplama girmez. "
             "Birim fiyat rengi: turuncu onaylı öneri, mavi Haziran malzeme listesi, sarı onay bekleyen öneri (Not'ta; toplama girmez), gri fiyat yok. "
             "Gri satır: Motor'da kuralı yok.")
+    adres = {}                                              # seçeneğin toplam hücreleri: Özet formülle bağlanır (Lokman 11 Kasım 10:54)
     for sec in T["secenekler"]:
-        liste_sayfasi(wb.create_sheet(sec["ad"]), sec["fiyat"], f"{T['kod']} · teklif · {sec['ad']} · TASLAK", acik, durum_renk)
+        a = liste_sayfasi(wb.create_sheet(sec["ad"]), sec["fiyat"], f"{T['kod']} · teklif · {sec['ad']} · TASLAK", acik, durum_renk,
+                          formullu=True)
+        sayfa = "'" + sec["ad"].replace("'", "''") + "'"
+        adres[sec["ad"]] = {k: f"={sayfa}!{v}" for k, v in a.items() if k not in ("tutar_araliklari", "kalem_sayisi")}
+        adres[sec["ad"]]["fiyatsiz"] = f"={a['kalem_sayisi']}-COUNT({','.join(f'{sayfa}!{x}' for x in a['tutar_araliklari'])})"
 
     # Özet
     oz.append([f"{T['kod']} · teklif · TASLAK"]); oz["A1"].font = Font(bold=True, size=13)
@@ -196,26 +204,37 @@ def excel_yaz(T: dict, defter: dict, yol: Path) -> None:
     for c in oz[oz.max_row]: c.font = B
     for sec in T["secenekler"]:
         o = sec["fiyat"]["ozet"]
-        oz.append([sec["ad"], o["toplam"], len(o["fiyatsiz"]), f"{o['satir']} satır, {o['fiyatli']} fiyatlı", uyari(o)])
+        oz.append([sec["ad"], adres[sec["ad"]]["genel"], adres[sec["ad"]]["fiyatsiz"], f"{o['satir']} satır, {o['fiyatli']} fiyatlı", uyari(o)])
         oz.cell(oz.max_row, 2).number_format = TL; oz.cell(oz.max_row, 2).font = B
         if o["fiyatsiz"]:                                   # CIO, 28 Ekim: toplamın eksik olduğu toplamın yanında belirgin
             oz.cell(oz.max_row, 5).font = Font(bold=True, color="C00000"); oz.cell(oz.max_row, 5).fill = dolgu["sari"]
     if len(T["secenekler"]) == 2:
-        a, b = (s["fiyat"]["ozet"]["toplam"] for s in T["secenekler"])
-        oz.append([f"Fark ({T['secenekler'][1]['ad']} − {T['secenekler'][0]['ad']})", round(b - a, 2)]); oz.cell(oz.max_row, 2).number_format = TL
+        r = oz.max_row
+        oz.append([f"Fark ({T['secenekler'][1]['ad']} − {T['secenekler'][0]['ad']})", f"=B{r}-B{r - 1}"]); oz.cell(oz.max_row, 2).number_format = TL
     if any(s["fiyat"]["ozet"].get("kdv") for s in T["secenekler"]):   # D-76: KDV satırları (CRM defteri)
         oz.append([])
         oz.append(["KDV (D-76; CRM fiyatı KDV hariç, oran kalem grubundan)", "KDV hariç", "KDV", "KDV dahil", "Oranlar"])
         for c in oz[oz.max_row]: c.font = B
         for sec in T["secenekler"]:
-            k = sec["fiyat"]["ozet"]["kdv"]
-            oz.append([sec["ad"], k["haric"], k["kdv"], k["dahil"], F.kdv_yazi(k)])
+            k, a = sec["fiyat"]["ozet"]["kdv"], adres[sec["ad"]]
+            oz.append([sec["ad"], a["genel"], a["kdv"], a["dahil"], "üretimde " + F.kdv_yazi(k)])
             for i in (2, 3, 4): oz.cell(oz.max_row, i).number_format = TL
             oz.cell(oz.max_row, 4).font = B
             if k["eksik"]:
                 oz.cell(oz.max_row, 4).fill = oz.cell(oz.max_row, 5).fill = dolgu["sari"]
                 oz.cell(oz.max_row, 5).font = Font(bold=True, color="C00000")
-    oz.append(["Toplam yalnız fiyatı olan satırların toplamıdır; fiyatı olmayan satırlar aşağıda."])
+    oz.append([])                                           # kâr marjı her seçeneğin sayfasının en altında (Lokman 11 Kasım 10:55)
+    kdvli = any(s["fiyat"]["ozet"].get("kdv") for s in T["secenekler"])
+    oz.append(["Kâr dahil teklif (kâr marjı seçeneğin sayfasının en altında)", "Kâr marjı", "Kâr", "Kâr dahil, KDV hariç"]
+              + (["Kâr dahil, KDV dahil"] if kdvli else []))
+    for c in oz[oz.max_row]: c.font = B
+    for sec in T["secenekler"]:
+        a = adres[sec["ad"]]
+        oz.append([f"{sec['ad']} · kâr dahil", a["kar"], a["kar_tutari"], a["kar_haric"]] + ([a.get("kar_dahil", "")] if kdvli else []))
+        oz.cell(oz.max_row, 2).number_format = "0%"
+        for i in range(3, 5 + kdvli): oz.cell(oz.max_row, i).number_format = TL
+        oz.cell(oz.max_row, 4 + kdvli).font = B
+    oz.append(["Toplam yalnız fiyatı olan satırların toplamıdır; fiyatı olmayan satırlar aşağıda. Toplamlar seçeneğin sayfasından formülle gelir."])
     oz.append([])
     oz.append(["Teklif koşulları", "Değer", "", "Açıklama"])
     for c in oz[oz.max_row]: c.font = B
