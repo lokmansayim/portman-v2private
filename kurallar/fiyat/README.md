@@ -13,6 +13,8 @@ Lokman, 9 Kasım 2026 13:10: "bunu kural olarak al ve mühürle bundan sonra tek
   `Portman-Fiyat/`. Oturum teklifi o günün en yeni görüntüsüyle üretir.
 - **Eşleme** `crm_esleme.json`: defterin kalemi (Motor'un liste anahtarı) → CRM kodu ve hesap (aynı, oran, çarp, boy, ağırlıklı ortalama,
   toplam). Fiyat yazmaz. `kaynak` bölümü mühürlü; kalemler PR'la değişir (yeni kalem, Lokman'ın birim cevabı, Samet'in eklediği ürün).
+  Defter D-72'den sonra kapandı: Motor'un yeni anahtarı yalnız eşlemeye, hattın kalemlerinin sonuna girer (r05: TK-06'nın 15 kalemi;
+  OSB, duvar alçıpanı, kiriş, pencere panelleri, nem bariyeri, alçıpan destek straforu, pencere karkası ve PVC pencereler).
 - **Onay.** Eşleme `birebir` ya da `kural` ise onaylı; `yakın` ve `birim varsayımı` öneri (`--oneri`); `birim sorusu` ve `CRM'de yok`
   fiyatsız. O gün fiyatı 0 ya da boş olan kod, listede olmayan kod ve birden çok satırdaki kod fiyatsız. `bekletme`: Lokman'ın kararıyla şimdilik
   fiyatsız, CRM'de fiyatı olsa da yazılmaz (banyo dolabı, D-75).

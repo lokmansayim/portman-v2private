@@ -137,12 +137,15 @@ def test_esleme_tutarli_ve_fiyat_yazmaz(E):
 
 
 def test_esleme_son_defterin_butun_kalemlerini_kapsar(E):
-    """Eşlemenin anahtarları ve birimleri son elle defterin (r13) kalemleri; bant, boy ve makas kuralı aynı kalemlerde."""
+    """Eşlemenin anahtarları ve birimleri son elle defterin (r13) kalemleri, aynı sırayla; bant, boy ve makas kuralı aynı kalemlerde.
+    D-72'den sonra yeni kalem (Motor'un listesinde olup defterde olmayan anahtar) yalnız eşlemeye girer: kapanmış defter değişmez. Yeni
+    anahtarlar defterin kalemlerinden sonra gelir (PR-5, TK-06'nın 15 anahtarı; `test_pr5_tk06_anahtarlari`)."""
     S = _oku(SON_DEFTER)
     for hat in ("prefabrik", "celik"):
         H, R = E["hatlar"][hat], S["hatlar"][hat]
-        assert list(H["kalemler"]) == list(R["kalemler"]) and H["anahtar"] == R["anahtar"] and H["atla"] == R["atla"]
-        assert {k: g["birim"] for k, g in H["kalemler"].items()} == {k: g["birim"] for k, g in R["kalemler"].items()}
+        assert list(H["kalemler"])[:len(R["kalemler"])] == list(R["kalemler"]) and H["anahtar"] == R["anahtar"] and H["atla"] == R["atla"]
+        assert {k: H["kalemler"][k]["birim"] for k in R["kalemler"]} == {k: g["birim"] for k, g in R["kalemler"].items()}
+        assert set(H["kalemler"]) - set(R["kalemler"]) == (set(PR5_ANAHTARLAR) if hat == "prefabrik" else set())
         assert [(b["kalem"], b["kalinlik_mm"], b["yukseklik_mm"], [(a["en_mm"], a["alt_haric"]) for a in b["araliklar"]]) for b in H["bantlar"]] == \
                [(b["kalem"], b["kalinlik_mm"], b["yukseklik_mm"], [(a["en_mm"], a.get("alt_haric", False)) for a in b["araliklar"]]) for b in R["bantlar"]]
     P, RP = E["hatlar"]["prefabrik"], S["hatlar"]["prefabrik"]
@@ -240,6 +243,65 @@ def test_d75_kutu_profil_pencere_paneli_banyo_dolabi(E, A, D, tmp_path):
     Y["hatlar"]["prefabrik"]["kalemler"]["Kutu profil (kiriş) 100 × 100 | L 3760"]["esas_boy_mm"] = 0
     Y["hatlar"]["prefabrik"]["kalemler"]["Pencere üst panel | 100 × 1250 × 500"]["esas_boy_mm"] = 6000
     assert len(C.esleme_denetle(Y)) == 3
+
+
+# ── PR-5: TK-06'nın (Doğan Prefabrik) eşlemede olmayan 15 anahtarı ─────────────────────────────────────────────────────────────
+
+PR5_ANAHTARLAR = {
+    "OSB 11 mm (çatı) | 1220 × 2440": ("HM41", "birebir"),
+    "Duvar alçıpanı beyaz | 1200 × 2500": ("HM38", "birebir"),
+    "Duvar alçıpanı yeşil | 1200 × 2500": ("HM39", "birebir"),
+    "Kutu profil (kiriş) 100 × 100 | L 3150": ("MA11", "kural"),
+    "Kutu profil (kiriş) 100 × 100 | L 4342,5": ("MA11", "kural"),
+    "Pencere alt panel (120/100) | 100 × 1250 × 1000": ("YP1", "kural"),
+    "Pencere alt panel (120/160) | 100 × 1250 × 400": ("YP1", "kural"),
+    "Nem bariyeri | m²": ("HM49", "birim varsayımı"),
+    "Alçıpan destek straforu | paket / 60 m²": ("HM48", "birim sorusu"),
+    "Özel pencere karkası (120×100) (100'lük çektirme U'su + 100'lük H geçen) | 1200 × 1000": (None, "CRM'de yok"),
+    "Özel pencere karkası (120×160) (100'lük çektirme U'su + 100'lük H geçen) | 1200 × 1600": (None, "CRM'de yok"),
+    "Karkaslı özel pencere panosu (160/180) | 100 × 2500 × 2500": (None, "CRM'de yok"),
+    "PVC pencere | 120/100": (None, "CRM'de yok"),
+    "PVC pencere | 120/160": (None, "CRM'de yok"),
+    "PVC pencere | 160/180": (None, "CRM'de yok"),
+}
+
+
+def test_pr5_tk06_anahtarlari(E, A):
+    """TK-06'nın 15 anahtarı: CRM'de aynı ürün birebir; kutu profil ve pencere alt paneli D-75 kuralıyla (kardeşleriyle aynı kayıt);
+    nem bariyeri 150 m² paketten m² fiyatı, öneri (onay bekler); destek straforu birim sorusu (CRM paketi 50 m², liste 60 m²); CRM'de
+    olmayanlar fiyatsız. Fiyatlı listede öneri toplama girmez, fiyatsız satır "fiyat yok" yazar, sıfır yazmaz (koordinatör, 11 Kasım)."""
+    P = E["hatlar"]["prefabrik"]["kalemler"]
+    for k, (kod, tur) in PR5_ANAHTARLAR.items():
+        assert (P[k]["kod"], P[k]["esleme"]) == (kod, tur), k
+    kp, ap = P["Kutu profil (kiriş) 100 × 100 | L 3760"], P["Pencere alt panel (120/120) | 100 × 1250 × 800"]
+    assert P["Kutu profil (kiriş) 100 × 100 | L 3150"] == P["Kutu profil (kiriş) 100 × 100 | L 4342,5"] == kp
+    assert P["Pencere alt panel (120/100) | 100 × 1250 × 1000"] == P["Pencere alt panel (120/160) | 100 × 1250 × 400"] == ap
+    assert all(P[f"PVC pencere | {o}"]["kdv_grubu"] == "Pencereler" for o in ("120/100", "120/160", "160/180"))
+    nem = P["Nem bariyeri | m²"]
+    assert (nem["hesap"], nem["pay"], nem["payda"], nem["birim"]) == ("oran", 1, 150, "m²")
+    assert (E["kdv"]["kodlar"]["HM49"], E["kdv"]["kodlar"]["HM48"]) == ("Membran", "EPS")
+    B = kategorili(A)
+    for x in B["data"]:                                    # sahte görüntüde bu kodlar CRM'deki gibi
+        x.update({"HM49": {"birim": "Paket", "olcu": "150 M2"}, "HM48": {"birim": "Paket", "olcu": "50 M2"}}.get(x["urunkodu"], {}))
+    D = C.defter_uret(C.denetle(B), E)
+    PD = D["hatlar"]["prefabrik"]["kalemler"]
+    assert (PD["Nem bariyeri | m²"]["fiyat"], PD["Nem bariyeri | m²"]["onay"], PD["Nem bariyeri | m²"]["kdv"]) == \
+           (_kurus(_fiyat(A, "HM49") / 150), False, 0.2)
+    assert (PD["OSB 11 mm (çatı) | 1220 × 2440"]["fiyat"], PD["OSB 11 mm (çatı) | 1220 × 2440"]["onay"]) == (_kurus(_fiyat(A, "HM41")), True)
+    for k in ("Alçıpan destek straforu | paket / 60 m²", "PVC pencere | 160/180", "Karkaslı özel pencere panosu (160/180) | 100 × 2500 × 2500"):
+        assert PD[k]["fiyat"] is None, k
+    from motor import prefabrik_liste as PL
+    L = PL.is_emrinden(_oku(IE_TK04))
+    ornek = L["satirlar"][0]
+    L["satirlar"] = [{**ornek, "kalem": k.split(" | ")[0], "olcu": k.split(" | ")[1], "adet": 3, "birim": "m²" if k.startswith("Nem") else "adet"}
+                     for k in PR5_ANAHTARLAR]
+    R = F.fiyatla(L, D, "prefabrik")
+    s = {f"{x['kalem']} | {x['olcu']}": x for x in R["satirlar"]}
+    assert s["Nem bariyeri | m²"]["tutar"] is None and s["Nem bariyeri | m²"]["durum"].startswith("öneri")
+    for k in ("Alçıpan destek straforu | paket / 60 m²", "PVC pencere | 160/180", "Karkaslı özel pencere panosu (160/180) | 100 × 2500 × 2500"):
+        assert (s[k]["tutar"], s[k]["birim_fiyat"], s[k]["durum"]) == (None, None, "fiyat yok"), k
+    assert s["OSB 11 mm (çatı) | 1220 × 2440"]["tutar"] == round(3 * _kurus(_fiyat(A, "HM41")), 2)
+    assert R["ozet"]["toplam"] == round(sum(x["tutar"] or 0 for x in R["satirlar"]), 2)
 
 
 # ── D-76: KDV ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -386,7 +448,8 @@ def test_defter_bicimi(D):
     assert all(re.search(r"\d{2}\.\d{2}\.\d{4}$", v["kisa"]) and v["patron_verdi"] for v in D["kaynaklar"].values())
     for hat, H in D["hatlar"].items():
         for k, g in H["kalemler"].items():
-            assert g["durum"] in set(C.DURUM.values()) | {"CRM'de fiyat 0", "CRM'de kod yok"} and g["birim"] in {"adet", "metre", "m", "kg"}
+            # m²: Motor'un nem bariyeri satırı (PR-5); liste_excel'in BIRIM_SOZCUK'unda zaten var
+            assert g["durum"] in set(C.DURUM.values()) | {"CRM'de fiyat 0", "CRM'de kod yok"} and g["birim"] in {"adet", "metre", "m", "kg", "m²"}
             assert g["fiyat"] is None or g["fiyat"] > 0 or (g["fiyat"] == 0 and g["kaynak"] == "PATRON" and g["onay"])
         for b in H["bantlar"]:
             assert all(a["fiyat"] > 0 and a["dayanak"] for a in b["araliklar"])
