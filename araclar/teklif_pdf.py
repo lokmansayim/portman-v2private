@@ -74,13 +74,14 @@ def kucuk(s: str) -> str:
     return str(s).replace("I", "ı").replace("İ", "i").lower().strip()
 
 
-def satir(ad, deger, kalin: str | None = None) -> str:
+def satir(ad, deger, kalin: str | list[str] | tuple[str, ...] | None = None) -> str:
     """Etiketli iki sütunlu satır (01, 03, 04). Genişlik hücrenin stilinde, nokta olarak: MuPDF sınıftaki ve yüzdeli genişliği
     uygulamıyor, değeri boş sütunu daraltıyor; toplam sayfanın yazı alanını (523 nk) aşmaz. `kalin` değerin kalın yazılan kısmı (ilk
-    geçtiği yer; D-64)."""
+    geçtiği yer; D-64); bayi formunun ek kalınlarıyla (D-77) birden çok kısım olabilir, her biri ilk geçtiği yerde."""
     d = e(deger)
-    if kalin and e(kalin) in d:
-        d = d.replace(e(kalin), f"<b>{e(kalin)}</b>", 1)
+    for k in ([kalin] if isinstance(kalin, str) else list(kalin or [])):
+        if k and e(k) in d and f"<b>{e(k)}</b>" not in d:
+            d = d.replace(e(k), f"<b>{e(k)}</b>", 1)
     return f"<tr><td style='width:130px' class='kalin'>{e(ad)}</td><td style='width:370px'>{d}</td></tr>"
 
 
@@ -157,20 +158,48 @@ def _bas(form: dict, tarih: str, kimlik: str, ek: str = "") -> str:
             f"<td class='sag nw'>{e(kimlik)}</td></tr></table>")
 
 
-def _urun(ad: str, alan, birim: float, kdv: str, toplam: float) -> str:
-    """02'nin tablosu: tek satır (miktar 1, tutar = birim fiyat) ve genel toplam."""
+def _urun(ad: str, alan, birim: float, kdv: str, toplam: float, ek: list[str] | tuple[str, ...] = ()) -> str:
+    """02'nin tablosu: tek satır (miktar 1, tutar = birim fiyat) ve genel toplam. `ek` bayi formunun ek ürün satırları (D-77): yalnız
+    tanım, numara, alan, miktar ve fiyat hücreleri boş; genel toplam değişmez."""
+    ek_satir = "".join(f"<tr><td></td><td>{e(x)}</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>" for x in ek)
     return ("<h2>02 &nbsp; ÜRÜN DETAYI</h2><table><tr><th>No</th><th>Ürün Tanımı</th><th class='sag'>Alan</th><th class='orta'>Mkt</th>"
             "<th class='sag'>Birim Fiyatı</th><th class='sag'>Tutar</th><th class='orta'>Kdv</th><th class='sag'>Toplam</th></tr>"
             f"<tr><td>1</td><td>{e(ad)}</td><td class='sag nw'>{e(sayi(alan) + ' m²' if alan else '')}</td>"
             f"<td class='orta'>1</td><td class='sag nw'>{tl(birim)}</td><td class='sag nw'>{tl(birim)}</td><td class='orta'>{e(kdv)}</td>"
-            f"<td class='sag nw'>{tl(toplam)}</td></tr>"
+            f"<td class='sag nw'>{tl(toplam)}</td></tr>{ek_satir}"
             f"<tr class='ara'><td colspan='7' class='sag'>Gen. Toplam</td><td class='sag nw'>{tl(toplam)}</td></tr></table>")
 
 
-def _teknik_kapsam(form: dict, ie: dict, sec: dict) -> str:
-    """04 (standart dışı kalın) ve 05."""
+def teknik_ekleri(teknik: list[list[str]], kapsam: list[str], kalin: dict[str, str], ek: dict | None) -> tuple[list, list, dict]:
+    """Bayi formunun 04 ve 05 ekleri (D-77; girdiden, `bayi_hazirla`): `ek_yazi` satırın değerinin sonuna " - <yazı>" ekler, yazı kalın;
+    `kalin` satırın değerini bütünüyle kalın yapar; `kapsam_disina` satırı 04'ten çıkarır, 05'in başına "<ad>: <değer>" diye bütünüyle
+    koyar. Satır adı 04'te yoksa durur (ValueError). Sonuç (04 satırları, 05 maddeleri, {satır: kalın kısımlar})."""
+    k = {ad: [v] for ad, v in kalin.items()}
+    if not ek:
+        return teknik, kapsam, k
+    teknik = [list(r) for r in teknik]
+    adlar = lambda: [kucuk(a) for a, _ in teknik]                            # noqa: E731
+
+    def bul(ad: str) -> list[str]:
+        if kucuk(ad) not in adlar():
+            raise ValueError(f"bayi formu: 04'te '{ad}' satırı yok; satırlar {[a for a, _ in teknik]}")
+        return teknik[adlar().index(kucuk(ad))]
+    for ad, yazi in (ek.get("ek_yazi") or {}).items():
+        r = bul(ad)
+        r[1] = f"{r[1]} - {yazi}"
+        k.setdefault(r[0], []).append(str(yazi))
+    for ad in ek.get("kalin") or []:
+        r = bul(ad)
+        k[r[0]] = [r[1]]
+    cik = [bul(ad) for ad in ek.get("kapsam_disina") or []]
+    teknik = [r for r in teknik if r not in cik]
+    return teknik, [f"{a}: {v}" for a, v in cik] + list(kapsam), k
+
+
+def _teknik_kapsam(form: dict, ie: dict, sec: dict, ek: dict | None = None) -> str:
+    """04 (standart dışı kalın) ve 05; `ek` bayi formunun ekleri (D-77, `teknik_ekleri`)."""
     teknik, kapsam = teknik_ve_kapsam(form, ie, sec["ozellikler"])
-    kalin = standart_disi(form, ie, teknik)
+    teknik, kapsam, kalin = teknik_ekleri(teknik, kapsam, standart_disi(form, ie, teknik), ek)
     k = ["<h2>04 &nbsp; PAKET İÇERİĞİ VE TEKNİK ÖZELLİKLERİ</h2><table>"]
     k += [satir(ad, v, kalin.get(ad)) for ad, v in teknik]
     k.append("</table><h2>05 &nbsp; KAPSAM DIŞI İŞLER (BAYİ/SAHA SORUMLULUKLARI)</h2><table>")
@@ -227,6 +256,44 @@ def bayi_fiyati(taban: float, pazar: dict) -> dict:
             "kdv": kdv, "toplam": round(birim + kdv, 2)}
 
 
+EKLER = ("urun_ek_satirlari", "ek_yazi", "kalin", "kapsam_disina", "on_onay_paftasi", "sabit_fiyat")
+
+
+def ekleri_denetle(girdi: dict) -> dict:
+    """Bayi formunun isteğe bağlı ekleri (D-77; Lokman, 11 Kasım 2026 09:02, TK-06): `urun_ek_satirlari` 02'ye fiyatsız ürün satırları
+    ["İç Cephe Alçıpan Kaplama"]; `ek_yazi` {"Çatı Kaplaması": "Antrasit Gri"} 04'teki satırın sonuna " - Antrasit Gri", kalın; `kalin`
+    ["Tavan"] 04'teki satırın değeri bütünüyle kalın; `kapsam_disina` ["Pencereler"] 04'teki satır bütünüyle 05'e; `on_onay_paftasi`
+    true ise 2. sayfa Motor'un ön onay paftası (`motor/dxf_out.uret`'in A4 PDF'i, `araclar/teklif.py` üretir; Lokman 09:17:35 "2. sayfaya
+    png yi değil ön onay paftasını koy"); `sabit_fiyat` {"birim": 550000, "kdv_orani": 0} 02'nin fiyatı Lokman'ın verdiği tutar, pazarın
+    hesabı JSON'da kalır, açıklamada KDV cümlesi yazmaz (Lokman 09:17:35 "birim fiyatı 550.000 TL yap KDV yi 0 Yap … ürün detayı
+    açıklama kısmına yazdığın KDV detayını sil"). Ek yoksa form eskisiyle aynı. Biçimi bozuk ek durur (ValueError)."""
+    ek = {k: girdi[k] for k in EKLER if k in girdi}
+    liste = lambda v: isinstance(v, list) and all(isinstance(x, str) and x.strip() for x in v)    # noqa: E731
+    for k in ("urun_ek_satirlari", "kalin", "kapsam_disina"):
+        if k in ek and not liste(ek[k]):
+            raise ValueError(f"bayi formu: {k} boş olmayan yazılardan bir liste olmalı: {ek[k]!r}")
+    if "ek_yazi" in ek and not (isinstance(ek["ek_yazi"], dict) and all(isinstance(v, str) and v.strip() for v in ek["ek_yazi"].values())):
+        raise ValueError(f"bayi formu: ek_yazi {{satır: yazı}} olmalı: {ek['ek_yazi']!r}")
+    if "on_onay_paftasi" in ek and not isinstance(ek["on_onay_paftasi"], bool):
+        raise ValueError(f"bayi formu: on_onay_paftasi true ya da false olmalı: {ek['on_onay_paftasi']!r}")
+    if "sabit_fiyat" in ek:
+        sf = ek["sabit_fiyat"]
+        sayi_mi = lambda v: isinstance(v, (int, float)) and not isinstance(v, bool)          # noqa: E731
+        if not (isinstance(sf, dict) and set(sf) == {"birim", "kdv_orani"} and sayi_mi(sf["birim"]) and sf["birim"] > 0
+                and sayi_mi(sf["kdv_orani"]) and 0 <= sf["kdv_orani"] <= 1):
+            raise ValueError(f"bayi formu: sabit_fiyat {{\"birim\": > 0, \"kdv_orani\": 0–1}} olmalı: {sf!r}")
+    return ek
+
+
+def sabit_fiyatla(hesap: dict, sabit: dict) -> dict:
+    """Lokman'ın verdiği fiyat (D-77): birim ve KDV oranı girdiden; taban ve pazarın hesabı (`hesaplanan`) kayıtta kalır."""
+    birim = round(float(sabit["birim"]), 2)
+    kdv = round(birim * sabit["kdv_orani"], 2)
+    return {"taban": hesap["taban"], "artis_orani": round(birim / hesap["taban"] - 1, 6) if hesap["taban"] else None, "birim": birim,
+            "kdv_orani": sabit["kdv_orani"], "kdv": kdv, "toplam": round(birim + kdv, 2), "sabit": True,
+            "hesaplanan": {k: hesap[k] for k in ("artis_orani", "birim", "kdv_orani", "kdv", "toplam")}}
+
+
 def bayi_hazirla(girdi: dict, ie: dict, taban: float, form: dict | None = None, kural: dict | None = None) -> dict:
     """Bayi formunun girdisini denetler ve formun değerlerini hazırlar. Girdi (proje klasöründe; depoya girmez):
     `{"pazar": "yurt_disi", "bilgi": {"Bayi": …, "İletişim (GSM)": …, "Adres": …}, "kosullar": {"Teslim süresi": …, …}}`.
@@ -237,7 +304,7 @@ def bayi_hazirla(girdi: dict, ie: dict, taban: float, form: dict | None = None, 
     form = form or form_oku()
     kural = kural or fiyatlandirma_oku()
     B = form["bayi_formu"]
-    if bilinmeyen := sorted(set(girdi) - {"sema", "aciklama", "pazar", "bilgi", "kosullar"}):
+    if bilinmeyen := sorted(set(girdi) - {"sema", "aciklama", "pazar", "bilgi", "kosullar"} - set(EKLER)):
         raise ValueError(f"bayi formu: bilinmeyen alan {bilinmeyen}")
     pazar = kural["pazarlar"].get(girdi.get("pazar"))
     if pazar is None:
@@ -253,12 +320,15 @@ def bayi_hazirla(girdi: dict, ie: dict, taban: float, form: dict | None = None, 
         raise ValueError(f"bayi formu: boş satır {eksik}; değer girdiden verilir, uydurulmaz")
     if B.get("telefon") == "maskeli":
         bilgi = {k: numara.maskele(str(v), son_dort=True) for k, v in bilgi.items()}
+    ekler = ekleri_denetle(girdi)
     kat = B["kat_adi"].get(str((ie.get("yapi") or {}).get("kat_sayisi", 1)))
     if kat is None:
         raise ValueError(f"bayi formu: {(ie.get('yapi') or {}).get('kat_sayisi')} katın ürün adı yok (form.json › bayi_formu.kat_adi)")
     return {"pazar": girdi["pazar"], "pazar_kurali": pazar, "urun": B["urun"].format(kat=kat),
             "bilgi": [(k, str(bilgi.get(k) or "")) for k in B["bilgi_satirlari"]],
-            "kosullar": [(k, str(kosul[k])) for k in B["odeme_satirlari"]], "fiyat": bayi_fiyati(taban, pazar)}
+            "kosullar": [(k, str(kosul[k])) for k in B["odeme_satirlari"]],
+            "fiyat": sabit_fiyatla(bayi_fiyati(taban, pazar), ekler["sabit_fiyat"]) if "sabit_fiyat" in ekler else bayi_fiyati(taban, pazar),
+            "ekler": ekler}
 
 
 def bayi_dosya_adi(T: dict, form: dict | None = None) -> str:
@@ -272,11 +342,13 @@ def bayi_ilk_sayfa(T: dict, ie: dict, sec: dict, form: dict, tarih: str, bayi: d
     alan = (sec["liste"].get("girdi_ozeti") or {}).get("brut_m2")
     k = [_bas(form, tarih, _kimlik(T)), "<h2>01 &nbsp; BAYİ / FİRMA BİLGİLERİ</h2><table>"]
     k += [satir(ad, v) for ad, v in bayi["bilgi"]] + ["</table>"]
-    k.append(_urun(bayi["urun"], alan, Fy["birim"], f"%{sayi(Fy['kdv_orani'] * 100)}", Fy["toplam"]))
-    k.append(f"<p class='soluk'>{e(form['bayi_formu']['fiyat_aciklamasi'].format(kdv_notu=P.get('kdv_notu') or '').strip())}</p>")
+    ek = bayi.get("ekler") or {}
+    k.append(_urun(bayi["urun"], alan, Fy["birim"], f"%{sayi(Fy['kdv_orani'] * 100)}", Fy["toplam"], ek.get("urun_ek_satirlari") or ()))
+    kdv_notu = "" if Fy.get("sabit") else (P.get("kdv_notu") or "")          # D-77: sabit fiyatta KDV cümlesi yok
+    k.append(f"<p class='soluk'>{e(' '.join(form['bayi_formu']['fiyat_aciklamasi'].format(kdv_notu=kdv_notu).split()))}</p>")
     k.append("<h2>03 &nbsp; ÖDEME</h2><table>")
     k += [satir(ad, v) for ad, v in bayi["kosullar"]] + ["</table>"]
-    k.append(_teknik_kapsam(form, ie, sec))
+    k.append(_teknik_kapsam(form, ie, sec, ek))
     return "".join(k)
 
 
@@ -378,6 +450,9 @@ def pdf_yaz(T: dict, ie: dict, sec: dict, yol: Path, form: dict | None = None, t
     bos, _ = s1.insert_htmlbox(alan, ilk, css=CSS, scale_low=0.5)
     if bos < 0:
         raise ValueError(f"teklif PDF'i: ilk sayfa yarı ölçekte de sığmadı ({kimlik})")
+    if bayi and bayi.get("on_onay_pdf"):                    # D-77: 2. sayfa Motor'un ön onay paftası; alt yazıya yer bırakır
+        with pymupdf.open(bayi["on_onay_pdf"]) as pafta:
+            doc.new_page(width=A4[0], height=A4[1]).show_pdf_page(pymupdf.Rect(0, 0, A4[0], A4[1] - 30), pafta, 0, keep_proportion=True)
     with pymupdf.open() as deneme:
         def sigar(h: str) -> bool:
             sayfa = deneme.new_page(width=A4[0], height=A4[1])

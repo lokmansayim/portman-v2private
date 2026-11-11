@@ -10,6 +10,15 @@
    "faturada_kdv_orani": 0.0,
    "kdv_notu": "Yurt dışı satış olduğu için KDV uygulanmaz.",
    "dayanak": "Lokman, 6 Kasım 2026 08:38 (TK-05 bayi formu, Romanya): \"bu yurt dışı olduğu için KDV'yi yarım alacağız kar marjını %20 de tutacağız bayi karı KDV falan değişkenlik gösterebilir kural olacaklar\"; madde 4: \"Birim fiyata + %30 ekle ... KDV'ye 0 (yurt dışı KDV yok) yaz\". %30 = kâr %20 + KDV'nin (%20) yarısı %10, toplanarak."
+  },
+  "yurt_ici": {
+   "ad": "Yurt içi",
+   "kar_orani": 0.20,
+   "kdv_orani": 0.20,
+   "fiyata_katilan_kdv_payi": 0,
+   "faturada_kdv_orani": 0.20,
+   "kdv_notu": "KDV (%20) birim fiyatın üstüne eklenir; toplam fiyata KDV dahildir.",
+   "dayanak": "D-77. Lokman, 11 Kasım 2026 09:02 UTC (TK-06 bayi formu, Doğan Prefabrik, Keşan): \"(Toplam Fiyata KDV dahil) %20 ekle\"; 09:05:45 UTC karar kartı \"Bayi formunda fiyatı hangi hesapla yazayım?\" → \"Kâr %20 + KDV %20: 550.535,63 TL\" (KDV hariç 382.316,41 × 1,20 = 458.779,69 birim; üstüne tek oran KDV %20 = 91.755,94; toplam KDV dahil 550.535,63)."
   }
  }
 }

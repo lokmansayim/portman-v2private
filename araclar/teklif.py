@@ -2,6 +2,7 @@
 
     python3 araclar/teklif.py <İş Emri.json> <çıktı klasörü> (--crm <CRM anlık görüntüsü.json> | --defter <eski defter.json>)
                               [--tavan asma,ters] [--kosullar <json>] [--oneri] [--tarih GG.AA.YYYY] [--bayi <bayi formu girdisi.json>]
+                              [--proje-fiyat <bu eve özel fiyat ve adet.json>]
 
 Liste dosyası almaz: listeyi İş Emri'nden Motor'la kendisi üretir (`motor/prefabrik_liste.is_emrinden`, paket üreteciyle ortak). Elle
 düzeltilmiş liste giremez, adet düzeltmesi yoktur: düzeltme kural kitabına ya da İş Emri'ne işlenir (D-28). Fiyat `araclar/fiyatla.py`
@@ -27,6 +28,10 @@ ile defterden; fiyat uydurulmaz, fiyatı olmayan satır boş kalır ve sayılır
 - KDV (D-76): CRM defteriyle her seçeneğin özeti KDV hariç, oranlara göre KDV ve KDV dahil tutarı taşır (`fiyatla.kdv_ozeti`); Excel'in
   liste sayfasında KDV sütunları, Özet'te KDV satırları. Oranı olmayan satır sayılır, KDV dahil toplam eksik yazılır. Bayi formunun
   fiyatı (M-14) bu oranları okumaz. Eski defterle (`--defter`) teklif aynen eskisi gibidir.
+- Bu eve özel fiyat (D-77; Lokman 11 Kasım 2026 09:09, TK-06: "şimdilik bu işi münferit olarak tamamlayalım"): `--proje-fiyat <json>`
+  Lokman'ın bir ev için kontrol edip yazdığı birim fiyatları ve adetleri o evin teklifine işler (`proje_fiyat_uygula`). CRM yine kaynaktır;
+  dosyadaki anahtar CRM'in kaydının üstüne yazılır, kaynağı "PROJE" ve dosyanın dayanağıdır. Her anahtar listede tam bir satıra denk
+  gelmeli, yoksa durur. Dosya proje klasöründe durur; başka evin teklifine girmez. Genel kural değildir (M-15 aynen).
 - Bayi formu (D-64): `--bayi <girdi>` tek seçenekli teklife bayiye giden teklif ve satış onay formunu da yazar (`<kod>_teklif_formu.pdf`):
   fiyat seçeneğin toplamından pazarın kuralıyla (`kurallar/teklif/fiyatlandirma.json`), bayinin bilgileri ve ödeme satırları girdiden
   (`araclar/teklif_pdf.bayi_hazirla`). Girdi bayinin iletişim bilgisini taşır, depoya girmez. Teklifin JSON'una `bayi_formu` (pazar,
@@ -126,17 +131,67 @@ def ayni_kalemi_topla(satirlar: list[dict]) -> list[dict]:
     return sonuc
 
 
-def uret(ie: dict, defter: dict, secim: list[tuple[str, dict]], kosullar: dict, oneri: bool = False) -> dict:
-    """Her seçenek için Motor'un listesi ve fiyatı; teklifin JSON'u (zaman damgası yok: aynı girdi aynı çıktıyı verir)."""
+def proje_fiyat_oku(yol: Path | str) -> dict:
+    """Bu eve özel fiyat ve adet dosyası (D-77): `{"dayanak": …, "kaynak": {"kisa": …, "tarih": …}, "fiyatlar": [{"anahtar": "kalem |
+    ölçü", "fiyat": 0+, "kdv": 0–1, "kdv_grubu": …, "not": …, "teklif_adi"?}], "adetler": [{"anahtar", "adet", "not"}]}`. Biçim bozuksa
+    durur; dayanak (Lokman'ın sözü) boş olamaz."""
+    d = json.loads(Path(yol).read_text(encoding="utf-8"))
+    if not str(d.get("dayanak") or "").strip() or not (d.get("kaynak") or {}).get("kisa"):
+        raise SystemExit(f"DUR: {yol}: proje fiyatının dayanağı (Lokman'ın sözü) ve kaynak.kisa yazılmalı")
+    for f in d.get("fiyatlar") or []:
+        if not (isinstance(f.get("anahtar"), str) and isinstance(f.get("fiyat"), (int, float)) and f["fiyat"] >= 0
+                and isinstance(f.get("kdv"), (int, float)) and 0 <= f["kdv"] <= 1):
+            raise SystemExit(f"DUR: {yol}: fiyat satırı bozuk: {f}")
+    for a in d.get("adetler") or []:
+        if not (isinstance(a.get("anahtar"), str) and isinstance(a.get("adet"), (int, float)) and a["adet"] >= 0):
+            raise SystemExit(f"DUR: {yol}: adet satırı bozuk: {a}")
+    return d
+
+
+def proje_fiyat_uygula(L: dict, defter: dict, proje: dict | None, hat: str = "prefabrik") -> tuple[dict, dict]:
+    """(liste, defter) kopyaları, bu eve özel adet ve fiyatla (D-77). Adet `fiyatla.duzelt` ile; fiyat defterin kalemine "PROJE"
+    kaynağıyla, onaylı, KDV oranı dosyadan. Her anahtar listede tam bir satıra denk gelir, yoksa durur."""
+    if not proje:
+        return L, defter
+    L = F.duzelt(L, proje.get("adetler") or [], hat)
+    sayi = {}
+    for s in L["satirlar"]:
+        sayi[F.anahtar(s, hat)] = sayi.get(F.anahtar(s, hat), 0) + 1
+    if yok := [f["anahtar"] for f in proje.get("fiyatlar") or [] if sayi.get(f["anahtar"]) != 1]:
+        raise SystemExit(f"DUR: proje fiyatının anahtarı listede tam bir satıra denk gelmiyor: {yok}")
+    return L, proje_defteri(defter, proje, {F.anahtar(s, hat): s.get("birim") for s in L["satirlar"]}, hat)
+
+
+def proje_defteri(defter: dict, proje: dict | None, birim: dict[str, str | None], hat: str = "prefabrik") -> dict:
+    """Defterin kopyası, bu eve özel fiyatlar "PROJE" kaynağıyla kaleminde (D-77); Excel'in Fiyat kaynağı sayfası da bunu okur."""
+    if not proje:
+        return defter
+    defter = json.loads(json.dumps(defter))
+    defter["kaynaklar"]["PROJE"] = {"ad": proje["kaynak"]["kisa"], "kisa": proje["kaynak"]["kisa"], "tarih": proje["kaynak"].get("tarih"),
+                                    "patron_verdi": True, "not": proje["dayanak"]}
+    K = defter["hatlar"][hat]["kalemler"]
+    for f in proje.get("fiyatlar") or []:
+        K[f["anahtar"]] = {"fiyat": float(f["fiyat"]), "birim": birim[f["anahtar"]], "kaynak": "PROJE", "durum": "proje fiyatı",
+                           "onay": True, "not": f.get("not") or "", "kdv": f["kdv"], "kdv_grubu": f.get("kdv_grubu"),
+                           **({"teklif_adi": f["teklif_adi"]} if f.get("teklif_adi") else {})}
+    return defter
+
+
+def uret(ie: dict, defter: dict, secim: list[tuple[str, dict]], kosullar: dict, oneri: bool = False, proje: dict | None = None) -> dict:
+    """Her seçenek için Motor'un listesi ve fiyatı; teklifin JSON'u (zaman damgası yok: aynı girdi aynı çıktıyı verir). `proje` bu eve
+    özel fiyat ve adet (D-77, `proje_fiyat_oku`)."""
     sec, kod = [], None
     for ad, oz in secim:
         L = PL.is_emrinden(ie, ozellikler=oz)
         kod = kod or L.get("kod")
-        R = F.fiyatla(dict(L, satirlar=ayni_kalemi_topla(L["satirlar"])), defter, "prefabrik", oneri)
+        Lt, Dt = proje_fiyat_uygula(dict(L, satirlar=ayni_kalemi_topla(L["satirlar"])), defter, proje)
+        R = F.fiyatla(Lt, Dt, "prefabrik", oneri)
         sec.append({"ad": ad, "ozellikler": oz, "liste": {k: L[k] for k in ("uretici_surum", "kural_seti", "girdi_ozeti", "ozet")}, "fiyat": R})
     return {"sema": "portman.teklif/1", "kod": kod or ie.get("is_emri_no"),
             "is_emri_no": ie.get("is_emri_no"), "revizyon": ie.get("revizyon"), "defter_surumu": defter.get("surum"),
-            "oneri_dahil": oneri, "kosullar": kosullar, "secenekler": sec}
+            "oneri_dahil": oneri, "kosullar": kosullar, "secenekler": sec,
+            **({"proje_fiyat": {"kaynak": proje["kaynak"], "dayanak": proje["dayanak"], "fiyat": len(proje.get("fiyatlar") or []),
+                                "adet": len(proje.get("adetler") or [])}} if proje else {})}
 
 
 # ── Excel ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -287,6 +342,7 @@ def main(argv: list[str] | None = None) -> int:
     a.add_argument("--defter", type=Path, help="kapanmış teklifin o günkü defteri"); a.add_argument("--oneri", action="store_true")
     a.add_argument("--tarih", help="teklif PDF'inin tarihi, GG.AA.YYYY (verilmezse bugün)")
     a.add_argument("--bayi", type=Path, help="bayi formunun girdisi (D-64; pazar, bayinin bilgileri, ödeme satırları)")
+    a.add_argument("--proje-fiyat", type=Path, help="bu eve özel fiyat ve adet (D-77; Lokman'ın kontrolü)")
     o = a.parse_args(argv)
     if o.tarih and not re.fullmatch(r"\d{2}\.\d{2}\.\d{4}", o.tarih):
         a.error(f"--tarih GG.AA.YYYY olmalı: {o.tarih}")
@@ -294,7 +350,8 @@ def main(argv: list[str] | None = None) -> int:
     secim = secenekler(ie, [t.strip() for t in o.tavan.split(",")] if o.tavan else None)
     defter = F.defter_sec(o.crm, o.defter)
     try:
-        T = uret(ie, defter, secim, kosullari_oku(o.kosullar, ie), o.oneri)
+        proje = proje_fiyat_oku(o.proje_fiyat) if o.proje_fiyat else None
+        T = uret(ie, defter, secim, kosullari_oku(o.kosullar, ie), o.oneri, proje)
     except PL.ListeYazilmaz as e:
         print(f"teklif: {e.neden}", file=sys.stderr)
         return 1
@@ -309,16 +366,33 @@ def main(argv: list[str] | None = None) -> int:
         except ValueError as h:
             print(f"DUR: {h}", file=sys.stderr)
             return 1
+        try:                                                    # D-77: ekin satır adı 04'te yoksa dosya yazılmadan durur
+            teklif_pdf.teknik_ekleri(*teklif_pdf.teknik_ve_kapsam(teklif_pdf.form_oku(), ie, T["secenekler"][0]["ozellikler"]), {},
+                                     bayi["ekler"])
+        except ValueError as h:
+            print(f"DUR: {h}", file=sys.stderr)
+            return 1
         P = bayi["pazar_kurali"]
         T["bayi_formu"] = {"pazar": bayi["pazar"], "oranlar": {k: P[k] for k in ("kar_orani", "kdv_orani", "fiyata_katilan_kdv_payi",
-                                                                                "faturada_kdv_orani")}, **bayi["fiyat"]}
+                                                                                "faturada_kdv_orani")}, **bayi["fiyat"],
+                           **({"ekler": bayi["ekler"]} if bayi["ekler"] else {})}
     kod = str(T["kod"]).replace("-", "")
     o.cikti.mkdir(parents=True, exist_ok=True)
     (o.cikti / f"{kod}_teklif.json").write_text(json.dumps(T, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
-    excel_yaz(T, defter, o.cikti / f"{kod}_teklif.xlsx")
+    excel_yaz(T, proje_defteri(defter, proje, {F.anahtar(s, "prefabrik"): s.get("birim") for sec in T["secenekler"]
+                                               for s in sec["fiyat"]["satirlar"]}), o.cikti / f"{kod}_teklif.xlsx")
     pdfler = [teklif_pdf.pdf_yaz(T, ie, sec, o.cikti / teklif_pdf.dosya_adi(T, sec), tarih=o.tarih) for sec in T["secenekler"]]
     if bayi:
-        pdfler.append(teklif_pdf.pdf_yaz(T, ie, T["secenekler"][0], o.cikti / teklif_pdf.bayi_dosya_adi(T), tarih=o.tarih, bayi=bayi))
+        import tempfile
+        with tempfile.TemporaryDirectory() as gec:
+            if bayi["ekler"].get("on_onay_paftasi"):            # D-77: 2. sayfa Motor'un ön onay paftası (M-02; bayinin onayladığı)
+                from motor import dxf_out
+                m = dxf_out.uret(ie, Path(gec))
+                if not m.get("pdf"):
+                    print(f"DUR: ön onay paftası üretilmedi (Motor doğrulaması geçmedi): {m.get('pdf_skipped_reason')}", file=sys.stderr)
+                    return 1
+                bayi["on_onay_pdf"] = Path(gec) / m["pdf"]
+            pdfler.append(teklif_pdf.pdf_yaz(T, ie, T["secenekler"][0], o.cikti / teklif_pdf.bayi_dosya_adi(T), tarih=o.tarih, bayi=bayi))
     for sec in T["secenekler"]:
         oz = sec["fiyat"]["ozet"]
         print(f"{T['kod']} · {sec['ad']}: {oz['toplam']:,.2f} TL · {oz['fiyatli']}/{oz['satir']} satır fiyatlı, {len(oz['fiyatsiz'])} fiyatsız")
