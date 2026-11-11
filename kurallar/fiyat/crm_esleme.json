@@ -1,9 +1,9 @@
 {
  "sema": 1,
- "surum": "2026-11-10-r04",
+ "surum": "2026-11-11-r05",
  "karar": "D-72",
  "muhur": "M-15",
- "aciklama": "Fiyat defteri kaleminin CRM stok fiyatları API'sindeki karşılığı ve fiyatın nasıl hesaplandığı (İE-35). Fiyat yazmaz: fiyat her gün CRM'den gelir, `araclar/crm_fiyat.py` bu dosyayla defter üretir. Anahtarlar ve birimler fiyat defterinin (defter_2026-11 r13) kalemleri; Motor'un listesindeki anahtar. Eşleme değişikliği (yeni kalem, Lokman'ın birim cevabı, Samet'in CRM'e eklediği ürün) bu dosyaya PR'la girer; `kaynak` bölümü mühürlü (M-15).",
+ "aciklama": "Fiyat defteri kaleminin CRM stok fiyatları API'sindeki karşılığı ve fiyatın nasıl hesaplandığı (İE-35). Fiyat yazmaz: fiyat her gün CRM'den gelir, `araclar/crm_fiyat.py` bu dosyayla defter üretir. Anahtarlar ve birimler fiyat defterinin (defter_2026-11 r13) kalemleri; Motor'un listesindeki anahtar. D-72'den sonra defter kapandı: Motor'un yeni anahtarı yalnız buraya, hattın kalemlerinin sonuna girer (r05, TK-06). Eşleme değişikliği (yeni kalem, Lokman'ın birim cevabı, Samet'in CRM'e eklediği ürün) bu dosyaya PR'la girer; `kaynak` bölümü mühürlü (M-15).",
  "kaynak": {
   "tek_kaynak": "CRM",
   "ad": "CRM stok fiyatları API",
@@ -184,7 +184,9 @@
    "DG17": "Baca",
    "DG18": "Baca",
    "DG19": "Baca",
-   "DG20": "Baca"
+   "DG20": "Baca",
+   "HM48": "EPS",
+   "HM49": "Membran"
   },
   "listede_adi_yok": {
    "aciklama": "Lokman'ın listesinde adıyla geçmeyen, grubuna konan yerler. Çelik fiyat sohbeti bunları 10 Kasım 16:54:38 ve 17:01'de Lokman'a yazdı (DIAMOND 82 listesinin mor hücreleri; temiz su borusu %20). Lokman 18:05:03: \"hepsini kural olarak kayda geç\" (D-76). Kuraldır.",
@@ -197,11 +199,12 @@
    ]
   },
   "okuma": {
-   "aciklama": "Lokman'a gösterilmemiş, adın eş anlamlısıyla gruba konan yerler. Okumadır, Lokman'ın sözü değildir (D-68 kural 11); Lokman düzeltirse eşleme PR'ıyla değişir.",
+   "aciklama": "Lokman'ın KDV listesinde adıyla geçmeyen, eş anlamlı adıyla gruba konan yerler. KDV için Lokman'ın sözü değildir (D-68 kural 11); Lokman düzeltirse eşleme PR'ıyla değişir.",
    "yerler": [
-    "HM46, HM47 (strafor) → EPS",
+    "HM46, HM47 (strafor), HM48 (alçıpan destek straforu) → EPS",
     "CG10–CG13 (metal kiremit) → Kiremit desen sac",
-    "PK2 (Amerikan panel kapı), Melamin kapı → İç kapı"
+    "PK2 (Amerikan panel kapı), Melamin kapı → İç kapı",
+    "HM49 (nem bariyeri) → Membran (Lokman 10 Kasım 04:58, D-74: \"OSB+ Nem Bariyeri/Membar+Kiremit Desen Sac\")"
    ]
   }
  },
@@ -1388,6 +1391,118 @@
      "esleme": "kural",
      "birim": "adet",
      "not": "Kutu profil 6 metrelik boyun fiyatından boyla orantılı, tam TL (D-36; Lokman 10 Kasım 10:01 \"Profili yine 6 metresi kaç paraysa ona göre orantıla\", D-75). CRM'de kiriş kutu profil; CRM'deki fiyatı 6 metrelik boyun fiyatı"
+    },
+    "OSB 11 mm (çatı) | 1220 × 2440": {
+     "kod": "HM41",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet",
+     "not": "CRM adı: Osb TAM 11 × 1220 × 2440 (TK-06, PR-5)"
+    },
+    "Duvar alçıpanı beyaz | 1200 × 2500": {
+     "kod": "HM38",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet",
+     "not": "CRM adı: Beyaz Alçıpan 12 × 1200 × 2500; tavan beyaz alçıpanıyla aynı ürün (TK-06, PR-5)"
+    },
+    "Duvar alçıpanı yeşil | 1200 × 2500": {
+     "kod": "HM39",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet",
+     "not": "CRM adı: Yeşil Alçıpan 12 × 1200 × 2500; tavan yeşil alçıpanıyla aynı ürün (TK-06, PR-5)"
+    },
+    "Kutu profil (kiriş) 100 × 100 | L 3150": {
+     "kod": "MA11",
+     "hesap": "boy_m",
+     "esas_boy_mm": 6000,
+     "yuvarlama": 1,
+     "esleme": "kural",
+     "birim": "adet",
+     "not": "Kutu profil 6 metrelik boyun fiyatından boyla orantılı, tam TL (D-36; Lokman 10 Kasım 10:01 \"Profili yine 6 metresi kaç paraysa ona göre orantıla\", D-75). CRM'de kiriş kutu profil; CRM'deki fiyatı 6 metrelik boyun fiyatı"
+    },
+    "Kutu profil (kiriş) 100 × 100 | L 4342,5": {
+     "kod": "MA11",
+     "hesap": "boy_m",
+     "esas_boy_mm": 6000,
+     "yuvarlama": 1,
+     "esleme": "kural",
+     "birim": "adet",
+     "not": "Kutu profil 6 metrelik boyun fiyatından boyla orantılı, tam TL (D-36; Lokman 10 Kasım 10:01 \"Profili yine 6 metresi kaç paraysa ona göre orantıla\", D-75). CRM'de kiriş kutu profil; CRM'deki fiyatı 6 metrelik boyun fiyatı"
+    },
+    "Pencere alt panel (120/100) | 100 × 1250 × 1000": {
+     "kod": "YP1",
+     "hesap": "oran",
+     "pay": 1,
+     "payda": 3,
+     "esleme": "kural",
+     "birim": "adet",
+     "not": "Tam pano (100 × 1250 × 2500, YP1) fiyatının 1/3'ü (Lokman 10 Kasım 10:01 \"Pencere üst panel tek 100x2500 panel kaç para ise 5 te 1'i fiyatını yaz pencere üst panelde 3 te 1 fiyatını yaz\", D-75; üst panel 1/5, alt panel 1/3). CRM'deki pencere paneli satırı (YP13, YP16) kullanılmaz"
+    },
+    "Pencere alt panel (120/160) | 100 × 1250 × 400": {
+     "kod": "YP1",
+     "hesap": "oran",
+     "pay": 1,
+     "payda": 3,
+     "esleme": "kural",
+     "birim": "adet",
+     "not": "Tam pano (100 × 1250 × 2500, YP1) fiyatının 1/3'ü (Lokman 10 Kasım 10:01 \"Pencere üst panel tek 100x2500 panel kaç para ise 5 te 1'i fiyatını yaz pencere üst panelde 3 te 1 fiyatını yaz\", D-75; üst panel 1/5, alt panel 1/3). CRM'deki pencere paneli satırı (YP13, YP16) kullanılmaz"
+    },
+    "Nem bariyeri | m²": {
+     "kod": "HM49",
+     "hesap": "oran",
+     "pay": 1,
+     "payda": 150,
+     "esleme": "birim varsayımı",
+     "birim": "m²",
+     "not": "CRM'de nem bariyeri 150 m² paket; paket fiyatı ÷ 150 m² fiyatı sayıldı. Öneri: Lokman'ın birim cevabına kadar onay bekler (TK-06, PR-5)"
+    },
+    "Alçıpan destek straforu | paket / 60 m²": {
+     "kod": "HM48",
+     "hesap": "ayni",
+     "esleme": "birim sorusu",
+     "birim": "adet",
+     "not": "CRM'de alçıpan destek straforu 50 m² paket; listede paket 60 m². Birim anlaşılmadı, hesaplanmaz (TK-06, PR-5)"
+    },
+    "Özel pencere karkası (120×100) (100'lük çektirme U'su + 100'lük H geçen) | 1200 × 1000": {
+     "kod": null,
+     "esleme": "CRM'de yok",
+     "birim": "adet",
+     "not": "CRM'de özel pencere karkası yok (D-72: yalnız CRM; CRM'e eklenmeli)"
+    },
+    "Özel pencere karkası (120×160) (100'lük çektirme U'su + 100'lük H geçen) | 1200 × 1600": {
+     "kod": null,
+     "esleme": "CRM'de yok",
+     "birim": "adet",
+     "not": "CRM'de özel pencere karkası yok (D-72: yalnız CRM; CRM'e eklenmeli)"
+    },
+    "Karkaslı özel pencere panosu (160/180) | 100 × 2500 × 2500": {
+     "kod": null,
+     "esleme": "CRM'de yok",
+     "birim": "adet",
+     "not": "CRM'de yalnız 250/180 var (KP13, 100 × 3750 × 2500); 160/180 yok (D-72: CRM'e eklenmeli; TK-06, PR-5)"
+    },
+    "PVC pencere | 120/100": {
+     "kod": null,
+     "esleme": "CRM'de yok",
+     "birim": "adet",
+     "not": "CRM'de PVC pencere yok; Lokman 9 Kasım kartı: pencere de CRM'den fiyatlanır, Samet CRM'e ekler (D-72)",
+     "kdv_grubu": "Pencereler"
+    },
+    "PVC pencere | 120/160": {
+     "kod": null,
+     "esleme": "CRM'de yok",
+     "birim": "adet",
+     "not": "CRM'de PVC pencere yok; Lokman 9 Kasım kartı: pencere de CRM'den fiyatlanır, Samet CRM'e ekler (D-72)",
+     "kdv_grubu": "Pencereler"
+    },
+    "PVC pencere | 160/180": {
+     "kod": null,
+     "esleme": "CRM'de yok",
+     "birim": "adet",
+     "not": "CRM'de PVC pencere yok; Lokman 9 Kasım kartı: pencere de CRM'den fiyatlanır, Samet CRM'e ekler (D-72)",
+     "kdv_grubu": "Pencereler"
     }
    },
    "bantlar": [
