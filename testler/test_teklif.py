@@ -16,6 +16,7 @@ KOK = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(KOK))
 from araclar import fiyatla as F  # noqa: E402
 from araclar import teklif as TK  # noqa: E402
+from araclar.liste_excel import formul_degeri  # noqa: E402
 from motor import prefabrik_liste as PL  # noqa: E402
 
 IE = KOK / "testler" / "teklif" / "TK01_is_emri_r05.json"
@@ -157,7 +158,9 @@ def test_duzeltme_yok_ve_secenek_denetimi(tmp_path):
 
 
 def test_excel_duzeni(cikti, T):
-    """Patron 28 Ekim 06:40–06:41: grup adı sütun değil başlık satırı, altında ara toplam; tek Adet sütunu; birim olan ölçü boş."""
+    """Patron 28 Ekim 06:40–06:41: grup adı sütun değil başlık satırı, altında ara toplam; tek Adet sütunu; birim olan ölçü boş.
+    Lokman 11 Kasım 2026 10:46 (TK-07): adedi 0 olan satır (bu evde kullanılmayan kalem) yazılmaz; adedi olmayan (kuralsız) satır kalır.
+    Lokman 11 Kasım 10:54 (TK-07): tutar ve toplamlar formül; formülün sonucu JSON'un sayısı."""
     wb = load_workbook(cikti / "TK01_teklif.xlsx")
     assert wb.sheetnames == ["Özet", "Asma tavan", "Ters tavan", "Fiyat kaynağı"]
     for s in T["secenekler"]:
@@ -169,13 +172,17 @@ def test_excel_duzeni(cikti, T):
         assert [rows[i][0] for i in basliklar] == GRUPLAR
         for i in basliklar:
             assert list(rows[i][1:7]) == SUTUN and ws.cell(i + 1, 1).font.b
-        satirlar = iter(s["fiyat"]["satirlar"])
+        assert 0 not in [r[3] for r in rows]                                     # adedi 0 olan satır yok
+        assert any(x.get("adet") == 0 for x in s["fiyat"]["satirlar"])            # sınamanın anlamı: listede adedi 0 olan kalem var
+        satirlar = iter(x for x in s["fiyat"]["satirlar"] if x.get("adet") != 0)
         for g in basliklar:
             son = next(j for j in range(g + 1, len(rows)) if isinstance(rows[j][0], str) and rows[j][0].endswith(" toplamı"))
             ara = 0.0
             for j in range(g + 1, son):
                 x = next(satirlar)
-                assert rows[j][0] == x["kalem"] and rows[j][3] == x["adet"] and rows[j][4] == x["birim_fiyat"] and rows[j][5] == x["tutar"]
+                assert rows[j][0] == x["kalem"] and rows[j][3] == x["adet"] and rows[j][4] == x["birim_fiyat"]
+                assert rows[j][5] == f'=IF(AND(ISNUMBER(D{j + 1}),ISNUMBER(E{j + 1})),ROUND(D{j + 1}*E{j + 1},2),"")'   # adet × birim fiyat
+                assert formul_degeri(ws, f"F{j + 1}") == ("" if x["tutar"] is None else x["tutar"])
                 olcu, birim = TK.gorunen(x["olcu"], x["birim"])
                 assert (rows[j][1] or "", rows[j][2]) == (olcu, birim)
                 if x["olcu"] in ("adet", "kova", "metre", "paket", "takım"):
@@ -183,10 +190,50 @@ def test_excel_duzeni(cikti, T):
                 elif not any(c.isdigit() for c in x["olcu"]):
                     assert rows[j][1] == x["olcu"] and rows[j][2]              # "—": ölçü yerinde, birim kaybolmaz
                 ara += x["tutar"] or 0
-            assert rows[son][5] == round(ara, 2), rows[son]
+            assert rows[son][5] == f"=SUM(F{g + 2}:F{son})" and abs(formul_degeri(ws, f"F{son + 1}") - ara) < 0.005, rows[son]
         assert next(satirlar, None) is None
-        genel = next(r for r in rows if r[0] == "GENEL TOPLAM (fiyatı olan satırlar)")
-        assert genel[5] == s["fiyat"]["ozet"]["toplam"] and genel[6] == f"fiyatı olmayan satır: {len(s['fiyat']['ozet']['fiyatsiz'])}"
+        genel = next(i for i, r in enumerate(rows, 1) if r[0] == "GENEL TOPLAM (fiyatı olan satırlar)")
+        assert formul_degeri(ws, f"F{genel}") == s["fiyat"]["ozet"]["toplam"]
+        assert formul_degeri(ws, f"G{genel}") == f"fiyatı olmayan satır: {len(s['fiyat']['ozet']['fiyatsiz'])}"
+
+
+def test_formul_ve_kar_marji(cikti, T):
+    """Lokman, 11 Kasım 2026 10:54–10:55 UTC (TK-07): "excel'i tüm kalemleri formülleriyle ver birim fiyatı veya adeti değiştirdiğimde
+    toplamda değişsin"; "en sona kar marjı yüzdesi koy ben belirleyeyim". Adet ya da birim fiyat değişince tutar, ara toplam, genel toplam
+    ve Özet değişir; fiyatsız satıra fiyat yazılınca toplama girer, fiyatsız sayısı düşer. Kâr marjı en sonda, sarı, ilk değer %0; kâr
+    maliyetin üstüne: kâr dahil toplam = toplam × (1 + kâr %). Lokman 11:31: formülün sonucu hücrede de yazılı (önbellek değeri);
+    formül hesaplamayan görüntüleyici boş göstermez."""
+    wb = load_workbook(cikti / "TK01_teklif.xlsx")
+    wv = load_workbook(cikti / "TK01_teklif.xlsx", data_only=True)                # önbellek değerleri (onbellek_yaz)
+    for ad in wb.sheetnames:
+        for satir in wb[ad].iter_rows():
+            for c in satir:
+                if isinstance(c.value, str) and c.value.startswith("="):
+                    beklenen = formul_degeri(wb[ad], c.coordinate)
+                    assert wv[ad][c.coordinate].value == (beklenen if beklenen != "" else None), (ad, c.coordinate)   # boş sonuç: boş hücre
+    for s in T["secenekler"]:
+        ws, toplam = wb[s["ad"]], s["fiyat"]["ozet"]["toplam"]
+        satir = {ws.cell(r, 1).value: r for r in range(1, ws.max_row + 1) if ws.cell(r, 1).value}
+        genel, kar = satir["GENEL TOPLAM (fiyatı olan satırlar)"], satir["KÂR MARJI %"]
+        assert kar == ws.max_row - 2 and ws.cell(kar, 6).value == 0 and ws.cell(kar, 6).fill.fgColor.rgb.endswith("FFF2A8")
+        assert ws.cell(kar, 6).number_format == "0%"
+        sonuc = {k: formul_degeri(ws, f"F{satir[k]}") for k in ("Kâr (KDV hariç toplam × kâr marjı)", "TEKLİF TOPLAMI · kâr dahil, KDV hariç")}
+        assert list(sonuc.values()) == [0, toplam]
+        ws.cell(kar, 6).value = 0.25
+        assert formul_degeri(ws, f"F{satir['TEKLİF TOPLAMI · kâr dahil, KDV hariç']}") == round(toplam + round(toplam * 0.25, 2), 2)
+        x = next(r for r in range(3, genel) if isinstance(ws.cell(r, 5).value, (int, float)) and isinstance(ws.cell(r, 4).value, int))
+        ws.cell(x, 4).value += 1                                                  # adet bir artar: toplam birim fiyat kadar
+        assert formul_degeri(ws, f"F{genel}") == round(toplam + ws.cell(x, 5).value, 2)
+        ws.cell(x, 4).value -= 1
+        y = next(r for r in range(3, genel) if ws.cell(r, 5).value is None and isinstance(ws.cell(r, 4).value, int) and ws.cell(r, 4).value)
+        ws.cell(y, 5).value = 100                                                 # fiyatsız satıra fiyat: toplama girer
+        assert formul_degeri(ws, f"F{genel}") == round(toplam + ws.cell(y, 4).value * 100, 2)
+        assert formul_degeri(ws, f"G{genel}") == f"fiyatı olmayan satır: {len(s['fiyat']['ozet']['fiyatsiz']) - 1}"
+        oz = wb["Özet"]
+        r = next(r for r in oz.iter_rows() if r[0].value == s["ad"])
+        assert formul_degeri(oz, r[1].coordinate) == formul_degeri(ws, f"F{genel}")
+        k = next(r for r in oz.iter_rows() if r[0].value == f"{s['ad']} · kâr dahil")
+        assert formul_degeri(oz, k[1].coordinate) == 0.25 and formul_degeri(oz, k[3].coordinate) == formul_degeri(ws, f"F{kar + 2}")
 
 
 def test_vitrifiye_banyo_basina():
@@ -215,7 +262,9 @@ def test_ozet_ve_kosullar(cikti, T, tmp_path):
     bos = {r[0].value: r for r in load_workbook(tmp_path / "bos" / "TK01_teklif.xlsx")["Özet"].iter_rows() if r[0].value}
     for k in ("Teslim süresi", "Ödeme şekli"):
         assert bos[k][1].value is None and bos[k][1].fill.fgColor.rgb.endswith("FFF2A8") and bos[k][3].value == "Patron'dan"
-    assert rows["Asma tavan"][1].value == 465703.13 and rows["Ters tavan"][1].value == 464882.13          # r09: 120 × 180 karkas 700 TL
+    deger = lambda c: formul_degeri(oz, c.coordinate)     # noqa: E731 (Özet'in toplamı seçeneğin sayfasından formülle)
+    assert deger(rows["Asma tavan"][1]) == 465703.13 and deger(rows["Ters tavan"][1]) == 464882.13          # r09: 120 × 180 karkas 700 TL
+    assert rows["Asma tavan"][1].value.startswith("='Asma tavan'!F") and deger(rows["Asma tavan"][2]) == 1
     for k in ("Asma tavan", "Ters tavan"):                  # CIO, 28 Ekim: toplamın yanında belirgin uyarı
         u = rows[k][4]
         assert u.value == "1 satır fiyatsız, toplam eksik"
