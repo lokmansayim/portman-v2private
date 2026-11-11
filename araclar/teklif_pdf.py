@@ -284,7 +284,7 @@ def ek_satirlari(T: dict, sec: dict, bayi_basligi: str | None = None) -> tuple[s
     """Ek-1'in parçaları: (başlık, tablo başı, satırlar, son). Satır (tür, grup, html); tür "grup", "kalem", "ara" ya da "genel". Motor'un
     listesi grup grup, birim fiyat ve tutarla (Excel'in seçenek sayfasıyla aynı satırlar ve toplamlar); ara toplamların toplamı özetin
     toplamını tutmazsa durur. `bayi_basligi` verilirse bayi formunun eki (D-64): o başlık, aynı satırlar, birim fiyat ve tutar boş, ara
-    ve genel toplam yok, son yok; adedi 0 olan satır (pakette yok) yazılmaz."""
+    ve genel toplam yok, son yok. Adedi 0 olan satır (pakette yok) iki ekte de yazılmaz (Excel'in liste sayfası gibi; Lokman 11 Kasım 2026 10:46)."""
     bayi = bayi_basligi is not None
     from araclar.liste_excel import GENEL, buyuk, eksik, gorunen
     R = sec["fiyat"]; o = R["ozet"]
@@ -305,7 +305,7 @@ def ek_satirlari(T: dict, sec: dict, bayi_basligi: str | None = None) -> tuple[s
     satir: list[tuple[str, str, str]] = []
     toplam = 0.0
     for ad, ss in gruplar.items():
-        gorunur = [s for s in ss if not (bayi and s.get("adet") == 0)]      # bayi formunda adedi 0 olan satır yazılmaz
+        gorunur = [s for s in ss if s.get("adet") != 0]      # adedi 0 olan satır yazılmaz (bayi formunda D-64; teklifte Lokman 11.11.2026 10:46)
         if gorunur:
             satir.append(("grup", ad, f"<tr class='grup'><td colspan='{n}'>{e(buyuk(ad))}</td></tr>"))
         for s in gorunur:

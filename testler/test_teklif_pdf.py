@@ -86,12 +86,13 @@ def test_ilk_sayfa_formun_duzeni(cikti, T):
 
 def test_ek_satirlari_json_ile_ayni_fiyatsiz_bos(cikti, T):
     """Ek-1'in her kalem satırı Motor'un listesindeki sırayla; birim fiyat ve tutar JSON'dakinin yazısı; fiyatı olmayan satırda ikisi de
-    boş (fiyat uydurulmaz). Sonda genel toplam ve fiyatı olmayan satır sayısı."""
+    boş (fiyat uydurulmaz). Sonda genel toplam ve fiyatı olmayan satır sayısı. Adedi 0 olan satır yazılmaz (Lokman 11 Kasım 2026 10:46)."""
     for sec in T["secenekler"]:
         yol = cikti / TP.dosya_adi(T, sec)
         pdf = _ek_satirlari(yol)
-        js = sec["fiyat"]["satirlar"]
-        assert len(pdf) == len(js) == sec["fiyat"]["ozet"]["satir"]
+        sifir = [s for s in sec["fiyat"]["satirlar"] if s.get("adet") == 0]
+        js = [s for s in sec["fiyat"]["satirlar"] if s.get("adet") != 0]
+        assert sifir and len(pdf) == len(js) == sec["fiyat"]["ozet"]["satir"] - len(sifir)
         for p, s in zip(pdf, js):
             assert p[0] == " ".join(s["kalem"].split()), (p, s["kalem"])
             assert p[3] == ("" if s.get("adet") is None else str(s["adet"])), (p, s)

@@ -4,6 +4,10 @@ Düzen Patron'un yükleme listesinin düzeni (28 Ekim 06:40–06:41): grup adı 
 tek "Adet" sütunu; ölçüsü birim sözcüğü olan satırda (adet, metre, kova, paket, takım) ölçü boş, birim o. Genel toplam ve fiyatı olmayan
 satır sayısı `fiyatla.fiyatla`'nın özetinden; sayfa saymaz, yazar. Motor'u yüklemez (yalnız openpyxl).
 
+Adedi 0 olan satır (kalem bu evde yok: 60'lık köşe direği, 3'lü H …) sayfaya yazılmaz; adedi olmayan (Motor'da kuralı yok) satır gri
+kalır. Lokman, 11 Kasım 2026 10:46 UTC (TK-07 teklifi): "hiç kullanılmayan malzemeyi listeden çıkar mesala 6'lık köşe direği 60 x 60
+listeden kaldır". Teklif PDF'inin Ek-1'i de aynı satırları yazar (`teklif_pdf.ek_satirlari`; bayi formunda D-64'ten beri böyle).
+
 KDV (D-76): özet `kdv` taşıyorsa (CRM defteri) Tutar'ın yanında "KDV %" ve "KDV" sütunları, ara toplamda grubun KDV'si, genel toplamın
 altında KDV ve KDV DAHİL TOPLAM satırları (Lokman 10 Kasım 16:56, çelik fiyat sohbeti: "bir satır daha aç ve yanlarına yaz"). Oranı
 olmayan satırın KDV hücreleri boş ve sarı. Özette `kdv` yoksa sayfa eskisi gibidir.
@@ -78,6 +82,9 @@ def liste_sayfasi(ws, R: dict, baslik: str, aciklama: str, renk=None, kaynak_sut
         gruplar.setdefault(s.get("grup_adi") or str(s.get("grup") or ""), []).append(s)
     toplam = 0.0
     for ad, ss in gruplar.items():
+        ss = [s for s in ss if s.get("adet") != 0]          # adedi 0 olan satır (pakette yok) yazılmaz (Lokman, 11 Kasım 2026 10:46 UTC)
+        if not ss:
+            continue
         ws.append([]); ws.append([buyuk(ad), *sutun])
         for c in ws[ws.max_row]:
             c.font = Font(bold=True); c.fill = dolgu["baslik"]

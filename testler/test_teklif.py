@@ -157,7 +157,8 @@ def test_duzeltme_yok_ve_secenek_denetimi(tmp_path):
 
 
 def test_excel_duzeni(cikti, T):
-    """Patron 28 Ekim 06:40–06:41: grup adı sütun değil başlık satırı, altında ara toplam; tek Adet sütunu; birim olan ölçü boş."""
+    """Patron 28 Ekim 06:40–06:41: grup adı sütun değil başlık satırı, altında ara toplam; tek Adet sütunu; birim olan ölçü boş.
+    Lokman 11 Kasım 2026 10:46 (TK-07): adedi 0 olan satır (bu evde kullanılmayan kalem) yazılmaz; adedi olmayan (kuralsız) satır kalır."""
     wb = load_workbook(cikti / "TK01_teklif.xlsx")
     assert wb.sheetnames == ["Özet", "Asma tavan", "Ters tavan", "Fiyat kaynağı"]
     for s in T["secenekler"]:
@@ -169,7 +170,9 @@ def test_excel_duzeni(cikti, T):
         assert [rows[i][0] for i in basliklar] == GRUPLAR
         for i in basliklar:
             assert list(rows[i][1:7]) == SUTUN and ws.cell(i + 1, 1).font.b
-        satirlar = iter(s["fiyat"]["satirlar"])
+        assert 0 not in [r[3] for r in rows]                                     # adedi 0 olan satır yok
+        assert any(x.get("adet") == 0 for x in s["fiyat"]["satirlar"])            # sınamanın anlamı: listede adedi 0 olan kalem var
+        satirlar = iter(x for x in s["fiyat"]["satirlar"] if x.get("adet") != 0)
         for g in basliklar:
             son = next(j for j in range(g + 1, len(rows)) if isinstance(rows[j][0], str) and rows[j][0].endswith(" toplamı"))
             ara = 0.0
