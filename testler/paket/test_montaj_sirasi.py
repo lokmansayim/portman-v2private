@@ -7,13 +7,14 @@ Kurallar `kurallar/rehber/montaj_sirasi.json`'da, her biri tek ilişki (MS-01: a
 
 Cırcır: her evin bulguları `montaj_sirasi/acik.json`'daki bugünkü açık yerlerle birebir aynı olmalı. Yeni yer kırmızıdır (bir düzeltme başka
 yeri bozdu). Düzelen yer de kırmızıdır: satır listeden çıkarılır, düzelme Lokman'a resimle gösterilir. Hakemin kör olmadığı iki yolla
-sınanır: her kalkanın iki alın sacı da denetlenir, ve 16:22 sayfasındaki hata (düz mahya alın sacının üstünde) 62 m²'de yeniden kurulunca
-hakem 6 mahya ucunun 6'sını bulur. Node, Playwright ve three.js 0.160.0 (`THREE_DIR`) ister; yoksa atlanır, CI'da kurulur (`dogrulama.yml`).
+sınanır: her kalkanın iki alın sacı da denetlenir, ve 16:22 sayfasının şablonu (git geçmişinden) 62 m²'de kurulunca hakem 6 mahya
+ucunun 6'sını bulur. Düz mahya da alın sacının altındadır (Lokman, 10 Kasım 21:01). Node, Playwright ve three.js 0.160.0 (`THREE_DIR`) ister; yoksa atlanır, CI'da kurulur (`dogrulama.yml`).
 """
 from __future__ import annotations
 
 import copy
 import json
+import subprocess
 import sys
 from pathlib import Path
 
@@ -77,13 +78,39 @@ def test_montaj_sirasi(ev, tmp_path):
     assert not duzelen, f"{ev}: {len(duzelen)} yer düzeldi; montaj_sirasi/acik.json'dan çıkarın ve Lokman'a resimle gösterin: {duzelen}"
 
 
+ESKI = "4c15f54b"   # main, 10 Kasım 2026 16:13 (PR #149): 16:22 sayfalarının şablonu; düz mahya kalkan ucuna kadar sürer, alın sacının üstüne biner
+
+
+def _git(yol: str) -> str | None:
+    r = subprocess.run(["git", "-C", str(KOK), "show", f"{ESKI}:{yol}"], capture_output=True, text=True)
+    return r.stdout if r.returncode == 0 else None
+
+
 @HAZIR
-def test_hakem_eski_hatayi_yakalar(tmp_path):
-    """16:22 sayfasının hatası (Lokman, 10 Kasım 20:15: "trapez sacı alın sacının üzerine koymuşsun"): düz mahya kalkan ucuna kadar sürer
-    ve alın sacının üstüne biner. 62 m²'nin verisinde hadveli mahya kapatılınca rehber o yoldan çizer; hakem 6 mahya ucunun 6'sını bulur."""
-    d = json.loads((KOK / ACIK["62 m²"]["girdi"]).read_text(encoding="utf-8"))
-    d["kaplama"]["mahya_hadveli"] = False
+def test_hakem_eski_hatayi_yakalar(tmp_path, monkeypatch):
+    """Hakem kör değil: 16:22 sayfasının hatası (Lokman, 10 Kasım 20:15: "trapez sacı alın sacının üzerine koymuşsun"). O günkü şablon
+    (`sahne.js`) ve 62 m² verisi git geçmişinden alınır (CI tam geçmişle koşar); hakem 6 mahya ucunun 6'sını bulur."""
+    from araclar.paket.rehber import sayfa
+    sahne, veri_ = _git("araclar/paket/rehber/sahne.js"), _git("testler/paket/rehber62/veri.json")
+    if sahne is None or veri_ is None:
+        pytest.skip(f"{ESKI} git geçmişinde yok (sığ klon: git fetch --unshallow)")
+    eski = tmp_path / "sablon"
+    eski.mkdir()
+    (eski / "kabuk.html").write_text((sayfa.D / "kabuk.html").read_text(encoding="utf-8"), encoding="utf-8")
+    (eski / "sahne.js").write_text(sahne, encoding="utf-8")
+    monkeypatch.setattr(sayfa, "D", eski)
+    d = json.loads(veri_)
     bul = sira.anahtarlar(_denetle(d, tmp_path))
     mahya = sorted(a for a in bul if a.endswith("mahya üstünde"))
     assert len(mahya) == 2 * len(d["kalkan"]) == 6, bul
     assert all(bul[a] > 50 for a in mahya), bul
+
+
+@HAZIR
+def test_duz_mahya_da_alin_sacinin_altinda(tmp_path):
+    """Lokman, 10 Kasım 21:01: "mahya ne olursa olsun alın sacının altına girecek". 62 m²'nin verisinde hadveli mahya kapatılınca rehber
+    düz mahya yolundan çizer (TK-03'ün metal kiremit mahyası gibi; PR #157): hiçbir mahya ucu alın sacının üstünde değildir."""
+    d = json.loads((KOK / ACIK["62 m²"]["girdi"]).read_text(encoding="utf-8"))
+    d["kaplama"]["mahya_hadveli"] = False
+    bul = sira.anahtarlar(_denetle(d, tmp_path))
+    assert not [a for a in bul if a.endswith("mahya üstünde")], bul
