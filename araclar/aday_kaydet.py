@@ -3,13 +3,15 @@
 
     python3 araclar/aday_kaydet.py <is_emri.json> --kod TEST01 --durum test --katalog-m2 94 [--referans P9401] [--kaynak "…"] [--not "…"]
                                    [--ayna x|y] [--test-dosyasi]
+    python3 araclar/aday_kaydet.py <is_emri.json> --kod PA-04 --durum gecerli --karar D-80 --katalog-m2 80 [--referans PA-04] [--kaynak "…"]
     python3 araclar/aday_kaydet.py --motor genel --tanim modeller/C8801.json [--kod Ç8801] [--durum gecerli] [--referans Ç8801]
                                    [--varyantlar Ç8801K,Ç8801L] [--kat 1] [--musteri-projesi] [--kaynak "…"] [--not "…"] [--perspektifsiz]
 
 Yazdıkları (prefabrik): is_emri/adaylar/<kod>.json (şablon; is_emri_no PM-ADAY-<kod>, revizyon 1), is_emri/adaylar/<kod>.png (bayi görseli),
-beyin/veri/adaylar.json (ya da --test-dosyasi ile adaylar_test.json) içinde <kod> satırı (varsa yenilenir).
+beyin/veri/adaylar_prefabrik.json (İE-36; ya da --test-dosyasi ile adaylar_test.json) içinde <kod> satırı (varsa yenilenir).
 Özet Motor doğrulamasından gelir (oda alanları, pano, pencere, kapı, dış ölçü); kapalı alan = dış kutu − veranda (kutu içi).
-Prefabrikte 'gecerli' durum burada verilmez: K-A9 denetimi ve K-A10 kabulü Postgres'te kayıtlıyken ayrıca verilir (IE-04-aday-teslimi.md).
+Prefabrikte 'gecerli' yalnız Lokman'ın kararıyla verilir (`--karar D-NN`, dosyası KARARLAR/'da; İE-36, D-80: sekiz ev). Bayiye sunulma
+yine K-A10 kabul kaydına bağlıdır: Katalog 'gecerli' prefabrik adayı yalnız kabul kümesinde açıkça varsa gösterir (IE-04-aday-teslimi.md).
 
 Çelik (İE-08 Adım 8; D-08 madde 4, D-10): tanım `modeller/` altında durur (gömülmez; sha256 kayda yazılır), çizim `motor.genel.uret` ile
 geçici klasörde koşar (perspektifli: aday kartında ön-sağ ve arka-sağ perspektif, VTK yoksa görünüşler), bayi görseli
@@ -42,19 +44,27 @@ def main() -> int:
     ap.add_argument("--kat", type=int, default=None); ap.add_argument("--musteri-projesi", action="store_true")
     ap.add_argument("--perspektifsiz", action="store_true", help="çelik: aday kartında perspektif yerine görünüşler")
     ap.add_argument("--test-dosyasi", action="store_true", help="kaydı beyin/veri/adaylar_test.json'a yaz (yalnız yerel testlerde yüklenir)")
+    ap.add_argument("--karar", default=None, help="prefabrik 'gecerli' için Lokman'ın kararı (KARARLAR/<D-NN>.md; İE-36)")
+    ap.add_argument("--gosterim", default=None, help="prefabrik: bayinin gördüğü kod (varsayılan --kod; ör. PA-04)")
     a = ap.parse_args()
     if a.motor == "genel":
         return genel(a)
-    if not a.is_emri or not a.kod or a.katalog_m2 is None:
-        print("DUR: prefabrik aday için <is_emri.json>, --kod ve --katalog-m2 gerekir"); return 2
+    if not a.is_emri or not a.kod:
+        print("DUR: prefabrik aday için <is_emri.json> ve --kod gerekir"); return 2
     if a.durum == "gecerli":
-        print("DUR: prefabrik adayda 'gecerli' burada verilmez (K-A9/K-A10, IE-04-aday-teslimi.md)"); return 2
-    from motor import dxf_out, bayi_gorseli as BG
+        karar_yolu = KOK / "KARARLAR" / f"{a.karar}.md" if a.karar and re.fullmatch(r"D-\d{2,3}", a.karar) else None
+        kod_yazisi = (a.gosterim or a.kod).strip().upper()
+        if not (karar_yolu and karar_yolu.exists() and kod_yazisi in karar_yolu.read_text(encoding="utf-8").upper()):
+            # geometri hakemi: karar dosyası bu adayın kodunu (bayinin gördüğü) yazmalı; başka bir karar 'gecerli' yazdırmaz
+            print("DUR: prefabrik adayda 'gecerli' yalnız Lokman'ın kararıyla (--karar D-NN; KARARLAR/<D-NN>.md adayın kodunu yazar; "
+                  "IE-04-aday-teslimi.md, İE-36)"); return 2
+    from motor import dxf_out, bayi_gorseli as BG, geometry as G, prefabrik_liste as PL
     from beyin import varyant
     ie = json.loads(Path(a.is_emri).read_text(encoding="utf-8"))
     if a.ayna:
         ie = varyant.ayna(ie, a.ayna)
-    kod = a.kod.upper()
+    kod = kod_normalize(a.kod)                                                 # PA-04 → PA04 (kayıt kodu); bayinin gördüğü `gosterim`
+    gosterim = (a.gosterim or a.kod).strip().upper()
     ie["is_emri_no"] = f"PM-ADAY-{kod}"; ie["revizyon"] = 1
     ie.setdefault("yapi", {})["referans_model"] = a.referans or ie.get("yapi", {}).get("referans_model")
     ie["talep"] = {"bayi": {"kod": "ADAY", "ad": "Aday kaydı"}, "musteri_adi": f"ADAY {kod}", "metin": a.kaynak or ie.get("talep", {}).get("metin", "")}
@@ -65,18 +75,27 @@ def main() -> int:
             print("DUR: Motor doğrulaması geçmedi:", v.get("errors")); return 1
         rooms = v.get("rooms_m2") or {}
         W, H = v.get("outer_cm") or [0, 0]
-        veranda = round(sum(m2 for ad, m2 in rooms.items() if ad.upper().startswith(("VERANDA", "SUNDURMA", "BALKON", "TERAS"))), 2)
-        kapali = round(W * H / 1e4 - veranda, 1)
+        # İE-36: brüt m² ön onay antedindeki ve listedeki `bina_m2`'nin tek kaynağından (D-49, K-A1; D-28 madde 1): veranda dahil, taşan
+        # veranda da. Veranda = Motor'un açık mahalleri (`alan_yazisi`'nın net alanının dışında kalanlar: veranda, giriş nişi, balkon;
+        # geometri hakemi: adla ikinci bir sınıflama yok); kapalı = brüt − veranda.
+        plan = G.kur(json.loads(json.dumps(ie)))
+        brut = PL.bina_brut_cm2(plan) / 1e4
+        katalog_m2 = float(round(brut)) if a.katalog_m2 is None else a.katalog_m2
+        if abs(katalog_m2 - brut) >= 1:
+            print(f"UYARI: --katalog-m2 {katalog_m2:g}, Motor'un brüt alanı {brut:.2f} m² (D-49)")
+        veranda = round(sum(mh.alan_m2 for mh in plan.mahaller.values() if mh.acik), 2)
+        kapali = round(brut - veranda, 1)
         oda_prog = ie.get("oda_programi") or _oda_programi(ie)
         sablon_dir = KOK / "is_emri" / "adaylar"; sablon_dir.mkdir(parents=True, exist_ok=True)
         (sablon_dir / f"{kod}.json").write_text(json.dumps(ie, ensure_ascii=False, indent=1), encoding="utf-8")
         BG.plan_gorseli(ie, sablon_dir / f"{kod}.png", v)
-        kayit = {"kod": kod, "durum": a.durum, "sablon": f"adaylar/{kod}.json", "gorsel": f"adaylar/{kod}.png", "referans_model": ie["yapi"].get("referans_model"),
-                 "yapi_turu": "prefabrik", "oda_programi": oda_prog, "katalog_m2": a.katalog_m2, "kapali_m2": kapali, "veranda_m2": veranda,
-                 "ozet": {"grid": ie["yapi"]["grid"], "dis_olcu_cm": [W, H], "pano": v.get("panel_count"), "pencere": v.get("windows"), "kapi": v.get("doors"),
+        kayit = {"kod": kod, "gosterim": gosterim, "durum": a.durum, "sablon": f"adaylar/{kod}.json", "gorsel": f"adaylar/{kod}.png",
+                 "referans_model": ie["yapi"].get("referans_model"), "yapi_turu": "prefabrik", "kat": int(a.kat or 1),
+                 "oda_programi": oda_prog, "katalog_m2": katalog_m2, "kapali_m2": kapali, "veranda_m2": veranda,
+                 "ozet": {"grid": ie["yapi"]["grid"], "dis_olcu_cm": [W, H], "brut_m2": round(brut, 2), "pano": v.get("panel_count"), "pencere": v.get("windows"), "kapi": v.get("doors"),
                           "odalar": {k: round(x, 2) for k, x in rooms.items()}},
-                 "kaynak": {"metin": a.kaynak, "dosya": str(Path(a.is_emri)), "ayna": a.ayna}, "not": a.not_}
-    _yaz(kayit, a.test_dosyasi)
+                 "kaynak": {"metin": a.kaynak, "dosya": str(Path(a.is_emri)), "ayna": a.ayna, "karar": a.karar}, "not": a.not_}
+    _yaz(kayit, a.test_dosyasi, dosya="adaylar_prefabrik.json")
     return 0
 
 
@@ -142,9 +161,9 @@ def genel(a) -> int:
     return 0
 
 
-def _yaz(kayit: dict, test_dosyasi: bool) -> None:
+def _yaz(kayit: dict, test_dosyasi: bool, dosya: str = "adaylar.json") -> None:
     kod = kayit["kod"]
-    yol = KOK / "beyin" / "veri" / ("adaylar_test.json" if test_dosyasi else "adaylar.json")
+    yol = KOK / "beyin" / "veri" / ("adaylar_test.json" if test_dosyasi else dosya)
     liste = json.loads(yol.read_text(encoding="utf-8")) if yol.exists() else []
     liste = [x for x in liste if str(x.get("kod")).upper() != kod] + [kayit]
     yol.write_text(json.dumps(liste, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")

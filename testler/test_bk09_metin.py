@@ -1,7 +1,8 @@
 """BK-09 PR-1 · 14 Ekim canlı denemesinin üç metin kusuru (LLM'siz, Postgres'siz).
 
 M1: kod bir değişiklik uyguladıysa bayi mesajına ve PDF açıklamasına (`talep.metin`) LLM özeti yazılmaz; "Uygulanan: …" yazılır.
-M2: çelik seçenek listesinde örnek bir çelik kodudur; prefabrikte "P9401" aynen.
+M2: çelik seçenek listesinde örnek bir çelik kodudur (listedeki ilk aday). İE-36 (D-80, 11.11.2026): prefabrikte de listedeki ilk aday;
+sabit "P9401" setin dışında bir katalog koduydu (PA-01 … PA-08 setinde bayiyi şablonsuz modele yönlendirirdi).
 M3: sıfır kesinti ("alan farkı %0 → −0") yazılmaz; puan hesabı aynı.
 """
 from __future__ import annotations
@@ -55,10 +56,11 @@ def test_m2_celik_setinde_ornek_celik_kodu():
     assert 'örn. "Ç8801 olsun"' in m and "P9401" not in m and "%0" not in m, m
 
 
-def test_m2_prefabrik_ornek_aynen():
+def test_m2_prefabrik_ornek_ilk_aday():
+    # İE-36 (D-80): eski beklenti 'örn. "P9401 olsun"' (sabit) idi; örnek artık listedeki ilk adayın gösterimi (gerekçe İE-36.md)
     sira = S.puanla([_aday("P8801", 88, "prefabrik"), _aday("P9401", 94, "prefabrik"), _aday("P7201", 72, "prefabrik")],
                     {"alan_m2": 88, "oda_programi": "2+1"})
-    assert 'örn. "P9401 olsun"' in S.mesaj_metni(sira, {"alan_m2": 88, "oda_programi": "2+1"})
+    assert 'örn. "P8801 olsun"' in S.mesaj_metni(sira, {"alan_m2": 88, "oda_programi": "2+1"})
 
 
 def test_m3_kucuk_fark_yuvarlanip_sifir_yazilmaz():

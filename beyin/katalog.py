@@ -13,6 +13,7 @@ KATALOG_JSON = Path(__file__).resolve().parent / "veri" / "katalog_37_proje_v2.j
 KATALOG_DONDURULMUS_JSON = Path(__file__).resolve().parent / "veri" / "katalog_37_proje.json"   # referans girdi; okunmaz, değişmez
 ADAYLAR_JSON = Path(__file__).resolve().parent / "veri" / "adaylar.json"      # İE-04 aday kaydı (şablonlar is_emri/adaylar/)
 ADAYLAR_TEST_JSON = Path(__file__).resolve().parent / "veri" / "adaylar_test.json"   # yalnız test_adaylari=True iken yüklenir
+ADAYLAR_PREFABRIK_JSON = Path(__file__).resolve().parent / "veri" / "adaylar_prefabrik.json"   # İE-36 (D-80): prefabrik adaylar (PA-01…); yeni dosya, adaylar.json aynen
 SABLON_DIR = ROOT / "is_emri"
 ADAY_SABLON_DIR = SABLON_DIR / "adaylar"
 SABLONLAR = {"P6001": "P6001_2plus1_6x6.json"}          # kodlanmış katalog modelleri (büyüyecek)
@@ -31,13 +32,15 @@ class Katalog:
     Aday kaydı (veri/adaylar.json): [{"kod", "durum": test|kosullu|gecerli, "sablon": "adaylar/<kod>.json", "referans_model",
     "oda_programi", "katalog_m2", "kapali_m2", "veranda_m2", "ozet": {...}, "kaynak": {...}, "gorsel": "adaylar/<kod>.png"}].
     Görünürlük: 'test' yalnız test_adaylari=True iken (yerel); 'gecerli' ancak kabul_edilmis verilmişse o kümede olanlar
-    (kalıcı mod: mühendis kabulü kayıtlı olanlar, K-A10), verilmemişse hepsi; 'kosullu' hiçbir zaman sunulmaz.
+    (kalıcı mod: mühendis kabulü kayıtlı olanlar, K-A10), verilmemişse çelik adayların hepsi; 'kosullu' hiçbir zaman sunulmaz.
+    İE-36 (D-80): prefabrik adaylar `veri/adaylar_prefabrik.json`'dan (adaylar.json'un ardından; çakışan kod alınmaz) ve 'gecerli'
+    prefabrik aday yalnız kabul kümesinde açıkça varsa görünür (küme verilmediyse görünmez: harness ve kabulsüz yerel yol aynen).
     İE-09 (D-20): atölyede kabul edilen modeller (`beyin/banka.py`, `modeller/banka/`) adaylar.json'un ardından okunur; çekirdek bankayla
     çakışan kod alınmaz. Atölye modeli yalnız kabul kümesinde açıkça varsa görünür (küme verilmediyse görünmez); çatı varyantı ayrı
     model olarak hiç sunulmaz."""
 
     def __init__(self, path: Path = KATALOG_JSON, adaylar_path: Path = ADAYLAR_JSON, test_adaylari: bool = False,
-                 kabul_edilmis: set | None = None, banka: bool = True):
+                 kabul_edilmis: set | None = None, banka: bool = True, prefabrik_path: Path | None = ADAYLAR_PREFABRIK_JSON):
         self.modeller = {m["code"].upper(): m for m in json.loads(path.read_text(encoding="utf-8"))}
         self.test_adaylari = bool(test_adaylari)
         self.kabul_edilmis = set(kabul_edilmis) if kabul_edilmis is not None else None
@@ -45,6 +48,10 @@ class Katalog:
         if self.test_adaylari and ADAYLAR_TEST_JSON.exists():          # test verisi ayrı dosyada; canlı pakette yüklenmez
             ham = list(ham) + [dict(a, durum="test") for a in json.loads(ADAYLAR_TEST_JSON.read_text(encoding="utf-8"))]
         self.adaylar = {str(a["kod"]).upper(): a for a in ham if isinstance(a, dict) and a.get("kod")}
+        if prefabrik_path is not None and Path(prefabrik_path).exists():  # İE-36 (D-80): prefabrik aday kaydı ayrı dosyada
+            for a in json.loads(Path(prefabrik_path).read_text(encoding="utf-8")):
+                if isinstance(a, dict) and a.get("kod"):
+                    self.adaylar.setdefault(str(a["kod"]).upper(), a)
         if banka:
             from beyin import banka as B
             for a in B.kayitlar():
@@ -58,7 +65,9 @@ class Katalog:
         if d == "test":
             return self.test_adaylari
         if d == "gecerli":
-            return self.kabul_edilmis is None or str(a["kod"]).upper() in self.kabul_edilmis
+            if self.kabul_edilmis is None:                 # İE-36 (D-80): kabulsüz yolda yalnız çelik (İE-08); prefabrik aday K-A10 kaydıyla
+                return a.get("yapi_turu", "prefabrik") == "celik"
+            return str(a["kod"]).upper() in self.kabul_edilmis
         return False
 
     def aday(self, kod: str | None) -> dict | None:
@@ -78,7 +87,8 @@ class Katalog:
 
     @staticmethod
     def kod_normalize(s: str | None) -> str | None:
-        """P6001, Ç8201, 6001 → P6001, C8801 → Ç8801; İE-08: çelik varyant harfi ve müşteri projesi kodu da (Ç8801-K → Ç8801K, KT-01 → KT01).
+        """P6001, Ç8201, 6001 → P6001, C8801 → Ç8801; İE-08: çelik varyant harfi ve müşteri projesi kodu da (Ç8801-K → Ç8801K, KT-01 → KT01);
+        İE-36: prefabrik aday kodu (PA-04 → PA04).
         Prefabrik kodda harf eki yoktur ("P6001-A" kod değildir; bugünkü davranış — geometri hakemi 12.10)."""
         if not s:
             return None
@@ -86,7 +96,7 @@ class Katalog:
         t = "Ç" + t[1:] if re.fullmatch(r"C\d{4}[A-Z]?", t) else t
         if re.fullmatch(r"\d{4}", t):
             t = "P" + t
-        return t if re.fullmatch(r"Ç\d{4}[A-Z]?|P\d{4}|KT\d{2}", t) else s.strip().upper()
+        return t if re.fullmatch(r"Ç\d{4}[A-Z]?|P\d{4}|KT\d{2}|PA\d{2}", t) else s.strip().upper()
 
     @staticmethod
     def taban_kod(s: str | None) -> str | None:

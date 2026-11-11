@@ -1,0 +1,330 @@
+{
+ "is_emri_no": "PM-ADAY-PA04",
+ "revizyon": 1,
+ "talep": {
+  "bayi": {
+   "kod": "ADAY",
+   "ad": "Aday kaydı"
+  },
+  "musteri_adi": "ADAY PA04",
+  "metin": "TK-04 r08, kampanyalı ev (çizim D-58, Lokman 5 Kasım 2026 22:08). Aday: D-80."
+ },
+ "yapi": {
+  "sistem": "prefabrik",
+  "kat_sayisi": 1,
+  "duvar_yuksekligi_cm": 250,
+  "duvar_kalinligi_cm": {
+   "dis": 10,
+   "ic": 6
+  },
+  "olcu_kaynagi": "dis_olcu",
+  "dis_olcu_cm": {
+   "x": 888.5,
+   "y": 898.5
+  },
+  "referans_model": "PA-04",
+  "grid": {
+   "x_pano": 7,
+   "y_pano": 7
+  },
+  "kisa_kenar": "y",
+  "giris_cephesi": "on",
+  "dis_dusey_duvar": "cevre_aks_disinda",
+  "dizilim": {
+   "baslangic": "arka-sol",
+   "hiza": "izgara",
+   "dis_duvar_t_bolme": true,
+   "pencere": "oda_ortasi",
+   "kapi": "mantik",
+   "kose": "oda",
+   "dis_pano_dayanagi": [
+    {
+     "y": 888.5,
+     "aralik_cm": [
+      637.5,
+      888.5
+     ]
+    }
+   ]
+  },
+  "ek_akslar_cm": {
+   "x": [],
+   "y": [
+    861.0
+   ]
+  },
+  "birlesimler": [
+   {
+    "nokta_cm": [
+     381.5,
+     386.5
+    ],
+    "kose": "x"
+   },
+   {
+    "nokta_cm": [
+     318.75,
+     386.5
+    ],
+    "t": "cektirme_u"
+   }
+  ]
+ },
+ "mahaller": [
+  {
+   "ad": "YATAK ODASI 1",
+   "tur": "yatak_odasi",
+   "konum_cm": [
+    [
+     5,
+     10,
+     318.75,
+     386.5
+    ]
+   ]
+  },
+  {
+   "ad": "BANYO",
+   "tur": "banyo",
+   "konum_cm": [
+    [
+     318.75,
+     10,
+     507,
+     261
+    ]
+   ]
+  },
+  {
+   "ad": "YATAK ODASI 2",
+   "tur": "yatak_odasi",
+   "konum_cm": [
+    [
+     507,
+     10,
+     883.5,
+     386.5
+    ]
+   ]
+  },
+  {
+   "ad": "HOL",
+   "tur": "antre_hol",
+   "konum_cm": [
+    [
+     318.75,
+     261,
+     507,
+     386.5
+    ],
+    [
+     381.5,
+     386.5,
+     507,
+     700.25
+    ]
+   ]
+  },
+  {
+   "ad": "SALON",
+   "tur": "salon",
+   "konum_cm": [
+    [
+     5,
+     386.5,
+     381.5,
+     888.5
+    ]
+   ]
+  },
+  {
+   "ad": "MUTFAK",
+   "tur": "mutfak",
+   "konum_cm": [
+    [
+     507,
+     386.5,
+     883.5,
+     700.25
+    ]
+   ]
+  },
+  {
+   "ad": "VERANDA",
+   "tur": "veranda",
+   "konum_cm": [
+    [
+     381.5,
+     700.25,
+     883.5,
+     861.0
+    ]
+   ],
+   "girinti_kirisi": true
+  }
+ ],
+ "acik_sinirlar": [],
+ "acikliklar": [
+  {
+   "tur": "pencere",
+   "olcu": "120x120",
+   "mahal": "YATAK ODASI 1",
+   "duvar": "sol"
+  },
+  {
+   "tur": "pencere",
+   "olcu": "60x40",
+   "mahal": "BANYO",
+   "duvar": "arka"
+  },
+  {
+   "tur": "pencere",
+   "olcu": "120x120",
+   "mahal": "YATAK ODASI 2",
+   "duvar": "sag"
+  },
+  {
+   "tur": "pencere",
+   "olcu": "120x120",
+   "mahal": "SALON",
+   "duvar": "sol",
+   "pano": 1
+  },
+  {
+   "tur": "pencere",
+   "olcu": "120x180",
+   "mahal": "SALON",
+   "duvar": "on"
+  },
+  {
+   "tur": "pencere",
+   "olcu": "120x180",
+   "mahal": "MUTFAK",
+   "duvar": "on"
+  },
+  {
+   "tur": "dis_kapi",
+   "olcu": 90,
+   "arasi": [
+    "VERANDA",
+    "HOL"
+   ]
+  },
+  {
+   "tur": "ic_kapi",
+   "olcu": 82,
+   "arasi": [
+    "HOL",
+    "BANYO"
+   ]
+  },
+  {
+   "tur": "ic_kapi",
+   "olcu": 82,
+   "arasi": [
+    "HOL",
+    "YATAK ODASI 1"
+   ]
+  },
+  {
+   "tur": "ic_kapi",
+   "olcu": 82,
+   "arasi": [
+    "HOL",
+    "YATAK ODASI 2"
+   ]
+  },
+  {
+   "tur": "ic_kapi",
+   "olcu": 82,
+   "arasi": [
+    "HOL",
+    "SALON"
+   ]
+  },
+  {
+   "tur": "ic_kapi",
+   "olcu": 82,
+   "arasi": [
+    "HOL",
+    "MUTFAK"
+   ]
+  }
+ ],
+ "cati": {
+  "tip": "besik_cumba",
+  "egim_yuzde": 33,
+  "sacak_cm": 30,
+  "topuk_cm": 10,
+  "makas_yonu": "uzun_kenar",
+  "makas_ekseni": "y",
+  "cumbalar": [
+   {
+    "cephe": "on",
+    "bas_cm": 0,
+    "bit_cm": 386.5,
+    "cikinti_cm": 0,
+    "ana_makas": "cumba_makasindan"
+   }
+  ]
+ },
+ "cikti": {
+  "pdf": true,
+  "dxf": true,
+  "pafta": "A2",
+  "icerik": [
+   "aksli_plan",
+   "alanli_kopya",
+   "montaj_kopyasi",
+   "on_gorunus",
+   "cati_profili",
+   "ozellik_tablosu"
+  ]
+ },
+ "ozellikler": {
+  "Çatı Şekli": "Beşik + Cumba",
+  "Çatı Kaplaması": "Trapez Saç",
+  "Çatı Kaplama Rengi": "Antrasit",
+  "Tavan": "Asma"
+ },
+ "alici_ait": {
+  "kalemler": [],
+  "kaynak": "Krokide alıcıya ait kalem yok; TK-01 gibi hepsi bize ait varsayıldı"
+ },
+ "pafta_uyarilari": [],
+ "varsayimlar": [
+  "Kroki 840 × 900 cm, dış 10 / iç 6 cm duvarla okunuyor: x 10 + 294 + 6 + 220 + 6 + 294 + 10 = 840; y 10 + 380 + 6 + 494 + 10 = 900; sağ sütun 10 + 380 + 6 + 304 + 10 + 190 = 900.",
+  "r02 (Patron, 4 Kasım 14:13): \"çatının yönünü değiş ve çatıyı dik kesen salon tarafına cumba makası ekle yani makası uzun tarafa doğru uzat cumba makasınıda salonun çıkıntısının üzerine koy bu modeli daha önce çizmiştik\". Daha önce çizilen model AP-06 (çıkıntısız çapraz cumba, D-47): ana beşiğin mahyası x boyunca, makaslar derinliği (y, uzun kenar) geçer; ön-sol salonun üstünde çıkıntısız çapraz cumba 0–386,5.",
+  "Ölçü kuralı (Patron, 4 Kasım 14:01): kısa kenar 10 + 125,5 × n + 10, uzun kenar 5 + 125,5 × n + 5, yarım pano olabilir, özel ölçü yok. Makas y'yi geçtiği için 10'lu kenar y (kisa_kenar y, AP-06 gibi): y 900 → 7 pano = 898,5 (−1,5). x: r03'te yarım pano sağa uzatıldı (Patron, 4 Kasım 19:50: \"yarım pano sağa uzat\"): 7 pano = 888,5 (kroki 840, +48,5; r02'de 6,5 pano = 825,75).",
+  "Akslar (x, soldan, duvar ekseninden): yatak odası 1 2,5 pano (5–318,75), banyo 1,5 pano (318,75–507; TK-01'in banyosu gibi), yatak odası 2 3 pano (507–883,5; r03'te yarım pano sağa uzadı). Salon–hol duvarı 381,5 (hol 1 pano, krokideki 120'lik koridor). Mutfak ve veranda da sağa 62,75 uzadı (mutfak 507–883,5, veranda 381,5–883,5).",
+  "Akslar (y, arkadan, iç yüzden): banyo 2 pano (10–261), yatak odaları 3 pano (10–386,5), mutfak 2,5 pano (386,5–700,25), veranda 1,5 pano (700,25–888,5; kroki 190), salon 4 pano (386,5–888,5).",
+  "Hol iki parça: banyonun altında iki yatak odası arasında 1,5 pano, oradan girişe 1 pano genişliğinde koridor (krokideki gibi).",
+  "Veranda gövdenin içinde, ön sağ köşede; iki açık kenarı (ön ve sağ) kirişli, köşesine Motor kolon koyar (PC-30, D-38).",
+  "Pencereler: önde (salon ve verandaya bakan mutfak) 120x180 (Patron, 4 Kasım 14:14: \"ön pencereleri 120x180 yap\"); yan pencereler 120x120, banyo vasistas 60x40 (krokide boy yok); konumları oda ortası (Motor kuralı).",
+  "Salonun sol duvarındaki pencere aks boyunca, 3. ve 4. yatay aksın (önden sayılınca) arasındaki tam panoda (Patron, 4 Kasım 19:50: \"yataydaki 3. ve 4. aks ortasındaki 62,75 panoları aks boyunca al\"): İş Emri'nde `pano: 1` (sol duvarın dizini arkadan sayılır); r02'de pencere 3. aksa ortalıydı, iki yanı 62,75 (D-29 madde 2).",
+  "5. aks ile D aksının iç köşesinde 5. aks boyunca uzanan duvar geçer, salon–hol duvarı onun yüzünde biter (Patron, 4 Kasım 19:59: \"5 numaralı aks ile D aksının kesiştiği iç köşenin yönünü değiştir\"); salon kapısının panosu 122,5. 5. akstaki C–D panosu tam pano, ortasına yatak odası 1 – hol duvarı T ile gelir: 3'lü H yerine çektirme U'su (İş Emri `yapi.birlesimler`, D-49 madde 3).",
+  "Dış kapı 90 (veranda–hol), iç kapılar 82 (çalışma kabulü); kapıların panodaki yeri Motor'un kuralından.",
+  "Çatı eğimi %33, saçak 30, topuk 10 (kitap, TK-01); asma tavan (TK-01 standardı; Patron, 4 Kasım 20:44: \"teklifi sadece dizme olarak çıkar ters tavana gerek yok\", \"standart bina olacak\"). Çatı kaplaması trapez sac, mahyası trapez mahya, antrasit (Patron, 4 Kasım 20:47 teklif PDF'ine yorum: \"çatı paneli tek kat değil Trapez olacak\", \"Trapez mahya olacak\"; r05).",
+  "r06 (Patron, 5 Kasım 2026 07:19–10:15; D-53 madde 7): ana makaslar kesilmez, geri çekilir: cumba makasının arkasından 10 cm topukla başlar, arka 30 cm saçak aynı; makas kısalır, mahyası arkaya kayar, ön saçak (verandanın üstü dahil) içeri çekilir, cumbanın iki yanında dere oluşur (`cumbalar[0].ana_makas` \"cumba_makasindan\"). 07:23: \"kesme yapmayacağız makasları geri çekeceğiz ama arka taraftaki 30 cm saçağıda bozmayacağız ...\"; 10:15 eskize: \"evet doğru gözüküyor\".",
+  "r07 (Lokman, 5 Kasım 2026 11:00): veranda 30 cm saçak kalacak şekilde içeri alındı; ön kiriş ön dış yüzden 37,5 cm içeride (ana çatının saçağı 7,5'ta biter), salon ve cumba önü yerinde (hafif L). Kirişin salon duvarına geldiği yere 250 cm kolon (İş Emri dikmesi, gerçek çerçevede 386,5; 37,5). Arka çerçevede ek aks y 861 ve girinti [381,5; 861; 883,5; 888,5] (D-58, BK-24).",
+  "r08 (Lokman, 5 Kasım 2026 22:08): \"aks çizgisini bozma nasıl ki 62,75'e aks çizmiyoruz bina sonu özel ölçü olmadığı sürece çizme ... salonun en öndeki 1. panosu yani 1. aks ile 2 aks arasındaki pano yani A ve D aksındaki ponalar standart mantık yürüt neden orada 155,75 bir pano veya ölçü olsun\". Salon–veranda duvarının (D aksı) panoları ızgaraya dayanır: 1. ile 2. aks arası tam pano 125,5, arta kalan 57,75 mutfak köşesinde (r07'de önde 62,75 + 120,5; `dizilim.dis_pano_dayanagi` y 888,5, aralık 637,5–888,5; A aksı zaten ızgarada). Çizimde ara aks 1′ ve verandanın 37,5 + 155,75 ölçüsü yok; plan r06'daki gibi ölçülür (D-58)."
+ ],
+ "eksikler": [
+  "Yan pencerelerin boyu (krokide yalnız en 120 var; 120x120 alındı)."
+ ],
+ "dikmeler": [
+  [
+   386.5,
+   37.5
+  ]
+ ],
+ "verandalar": [],
+ "girintiler": [
+  [
+   381.5,
+   861.0,
+   883.5,
+   888.5
+  ]
+ ]
+}
