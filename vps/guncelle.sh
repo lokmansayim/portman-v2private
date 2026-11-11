@@ -5,14 +5,18 @@
 # BK-07: sağlık geçince sürümdeki nginx yapılandırmasını uygular (vps/nginx_uygula.sh; nginx -t, yedek, reload; hata sürümü düşürmez).
 #   ssh portman-vps 'bash -s' < vps/guncelle.sh v2026.10.XX > ie06_4_surum.txt 2>&1      (tarihli: İE-06 ilk kurulum, depo sunucuda yokken)
 #   ssh -n portman-vps "setsid nohup bash -c 'bash /opt/portman/guncel/vps/guncelle.sh v2026.10.XX; echo == çıkış \$?' \
-#       > /root/guncelle_v2026.10.XX.txt 2>&1 < /dev/null &"                    (sonrakiler; BK-09 kuralı: uzun iş oturumdan ayrı,
+#       >> /root/guncelle_v2026.10.XX.txt 2>&1 < /dev/null &"                   (sonrakiler; BK-09 kuralı: uzun iş oturumdan ayrı,
 #   ssh -n portman-vps 'tail -5 /root/guncelle_v2026.10.XX.txt' > surum.txt      SSH koparsa yarım kalmaz; son satır "== çıkış N" değilse
 #                                                                                 sürüyor. timeout yok: yarıda kesilirse geri_don koşmaz)
 # DURUR: etiket biçimi (vYYYY.AA.GG[a-z]); etiket açıklamalı (annotated) değilse; etiket origin/main üzerinde değilse; içe aktarma
 # denetimi düşerse (sürüm etkinleşmez); göç hatası. Hiçbir şey SİLMEZ: yarım kalmış sürüm dizini '.yarim-…' adıyla kenara alınır,
 # eski sürümler durur (surum_temizle.sh ayrı kapıdır). Çıktıda sır yok.
+# TEK KOŞU (pano 192; D-71 bulgusu, 9 Kasım: kurulum iki kez başladı, ikinci koşu birincinin yarım dizinini kenara aldı): flock kilidi
+# (/run/portman-guncelle.lock). Kilit tutuluyken ikinci koşu hiçbir şeye dokunmadan durur (çıkış 1) ve kilidi tutan koşuyu yazar;
+# kilit süreç bitince kendiliğinden bırakılır. Çıktı dosyasına '>>' ile yazılır: ikinci koşu ilkinin çıktısını ezmez, sona ekler.
 # Sınama: PM_KOK, PM_ETC, PM_GIT_URL (yerel çıplak depo olabilir), PM_PYTHON, PM_VENV_ATLA=1 (venv yerine PM_PYTHON bağlanır),
-# PM_SYSTEMCTL, PM_OLARAK (göç komutunun önüne; boş olabilir), PM_PG_DSN, PM_SAGLIK_URL, PM_SAGLIK_BEKLE, PM_TEST=1 (durum.sh atlanır).
+# PM_SYSTEMCTL, PM_OLARAK (göç komutunun önüne; boş olabilir), PM_PG_DSN, PM_SAGLIK_URL, PM_SAGLIK_BEKLE, PM_TEST=1 (durum.sh atlanır),
+# PM_KILIT (kilit dosyası).
 set -euo pipefail
 ETIKET="${1:-}"
 KOK="${PM_KOK:-/opt/portman}"; ETC="${PM_ETC:-/etc/portman}"
@@ -27,9 +31,16 @@ SERVISLER="portman-webhook portman-gonderici portman-agent portman-panel"
 KAYNAK="$KOK/kaynak"; SURUMLER="$KOK/surumler"; HEDEF="$SURUMLER/$ETIKET"
 
 dur() { echo "DUR: $*" >&2; echo "== bitti (durdu; sürüm etkinleşmedi)"; exit 1; }
-echo "== Portman sürüm kurulumu (İE-06) · betik 2026-10-09 · $(date '+%Y-%m-%d %H:%M:%S %Z') · etiket: ${ETIKET:-?}"
+echo "== Portman sürüm kurulumu (İE-06) · betik 2026-11-11 · $(date '+%Y-%m-%d %H:%M:%S %Z') · etiket: ${ETIKET:-?}"
 [[ "$ETIKET" =~ ^v20[0-9]{2}\.[0-9]{2}\.[0-9]{2}[a-z]?$ ]] || dur "etiket biçimi vYYYY.AA.GG[a-z] olmalı (ör. v2026.10.12); verilen: '${ETIKET}'"
 if [ -z "$TEST" ]; then [ "$(id -u)" = "0" ] || dur "root olarak çalıştırılmalı"; fi
+KILIT="${PM_KILIT:-/run/portman-guncelle.lock}"           # tek koşu: kilit bu süreç bitene kadar fd 9'da tutulur
+exec 9>>"$KILIT" || dur "kilit dosyası açılamadı: $KILIT"
+if ! flock -n 9; then
+  dur "başka bir sürüm kurulumu sürüyor ($(head -c 200 "$KILIT" 2>/dev/null | tr -d '\n' || true)); bu koşu hiçbir şeye dokunmadı. İlkinin bitmesini bekleyin: tail -5 /root/guncelle_<etiket>.txt"
+fi
+: > "$KILIT"; printf 'pid %s · %s · başladı %s\n' "$$" "$ETIKET" "$(date '+%Y-%m-%d %H:%M:%S %Z')" >&9
+echo "   kilit: $KILIT (tek koşu)"
 cd /tmp
 umask 022
 if [ -f "$ETC/deploy_key" ] && [[ "$GIT_URL" != /* ]]; then

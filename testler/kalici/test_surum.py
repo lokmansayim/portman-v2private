@@ -122,7 +122,7 @@ def surum_ortam(tmp_path, kaynak):
                                             "surum": surum_dosyasi.read_text().strip() if surum_dosyasi.exists() else None})
     env = {"PM_KOK": str(kok), "PM_ETC": str(etc), "PM_GIT_URL": str(kaynak), "PM_PYTHON": sys.executable, "PM_VENV_ATLA": "1", "PM_SYSTEMCTL": systemctl,
            "PM_SYSTEMCTL_LOG": str(log), "PM_OLARAK": "", "PM_PG_DSN": dsn(ad), "PM_SAGLIK_URL": saglik.url + "/saglik", "PM_SAGLIK_BEKLE": "4", "PM_TEST": "1",
-           "PM_NGINX_DIR": str(nginx_dir), "PM_LE_DIR": str(tmp_path / "le")}
+           "PM_NGINX_DIR": str(nginx_dir), "PM_LE_DIR": str(tmp_path / "le"), "PM_KILIT": str(tmp_path / "guncelle.kilit")}
     yield {"env": env, "kok": kok, "log": log, "saglik": saglik, "db": ad, "nginx": nginx_dir}
     saglik.kapat()
     with _admin() as c:
@@ -221,6 +221,29 @@ def test_etiket_denetimleri_hicbir_sey_kurmaz(surum_ortam):
         r = _kos("guncelle.sh", env, *([etiket] if etiket else []))
         assert r.returncode == 1 and beklenen in r.stderr, (etiket, r.stdout[-400:], r.stderr[-400:])
     assert not list((kok / "surumler").glob("*")) and not (kok / "guncel").exists()
+
+
+def test_guncelle_tek_kosu_kilit_tutuluyken_hicbir_seye_dokunmaz(surum_ortam):
+    """Pano 192 (D-71 bulgusu, 9 Kasım: kurulum iki kez başladı): kilidi başka bir süreç tutarken ikinci koşu kaynağa, sürüm dizinine,
+    bağlantılara ve servislere dokunmadan çıkış 1 ile durur ve kilidi tutan koşuyu yazar. Kilit bırakılınca kurulum yürür; biten koşu
+    kilidi kendiliğinden bırakır (art arda ikinci kurulum da yürür)."""
+    import fcntl
+    env, kok, log = surum_ortam["env"], surum_ortam["kok"], surum_ortam["log"]
+    kilit = Path(env["PM_KILIT"])
+    with open(kilit, "a", encoding="utf-8") as f:
+        fcntl.flock(f, fcntl.LOCK_EX | fcntl.LOCK_NB)                     # ilk kurulum sürüyormuş gibi
+        f.write("pid 4242 · v2026.10.09 · başladı 2026-11-09 12:30:39 +03\n"); f.flush()
+        r = _kos("guncelle.sh", env, "v2026.10.09")
+    assert r.returncode == 1, r.stdout[-400:] + r.stderr[-400:]
+    assert "DUR: başka bir sürüm kurulumu sürüyor (pid 4242 · v2026.10.09 · başladı 2026-11-09 12:30:39 +03)" in r.stderr
+    assert "bu koşu hiçbir şeye dokunmadı" in r.stderr and "== bitti (durdu; sürüm etkinleşmedi)" in r.stdout and "-- [1/7]" not in r.stdout
+    assert not (kok / "kaynak").exists() and not (kok / "surumler").exists() and not (kok / "guncel").exists() and not log.exists()
+    assert kilit.read_text(encoding="utf-8") == "pid 4242 · v2026.10.09 · başladı 2026-11-09 12:30:39 +03\n"   # kilidi tutanın izi ezilmedi
+    r = _kos("guncelle.sh", env, "v2026.10.09")                              # kilit bırakıldı: kurulum yürür
+    assert r.returncode == 0 and f"kilit: {kilit} (tek koşu)" in r.stdout, r.stdout[-400:] + r.stderr[-400:]
+    assert kilit.read_text(encoding="utf-8").startswith("pid ") and " · v2026.10.09 · başladı " in kilit.read_text(encoding="utf-8")
+    assert _kos("guncelle.sh", env, "v2026.10.12").returncode == 0             # biten koşu kilidi bıraktı
+    assert os.readlink(kok / "guncel") == str(kok / "surumler" / "v2026.10.12")
 
 
 def test_saglik_dusunce_kendiliginden_geri_doner(surum_ortam):
