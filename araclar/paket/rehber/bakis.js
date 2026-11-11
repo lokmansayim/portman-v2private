@@ -2,9 +2,10 @@
 // Kampanyalı evin cumba köşesi için yazıldı (Lokman, 11.11.2026 08:52 UTC: "tam arkadan bakınca baş makas omegası ve cumba makası
 // görünmeyecek"). Pencere dünya koordinatındadır (m): `bas` köşesi, `u` ve `v` kenarları, `nu` × `nv` ışın, `yon` bakış yönü.
 // Parçaların arka yüzleri de sayılır (iki yüzlü). Sonuç: ilk çarpılan parçaya göre ışın sayısı ("ad · bu"), boşa gidenler "", bir parçanın
-// içinden başlayanlar "(parçanın içinden)".
+// içinden başlayanlar "(parçanın içinden)". İstekte `dahil` (düzenli ifade) varsa yalnız adı ("ad · bu") ona uyan parçalar sayılır,
+// öteki parçalar yokmuş gibi (saçak sacının kıvrımı ile son aşık, 11.11.2026: kaplama kaldırılmış hâlde hangisi üstte).
 //   THREE_DIR=<three@0.160.0 klasörü> node bakis.js <rehber.html> <istek.json> <sonuc.json>
-//   istek: {"bas": [x, y, z], "u": [x, y, z], "v": [x, y, z], "nu": 60, "nv": 24, "yon": [x, y, z]}
+//   istek: {"bas": [x, y, z], "u": [x, y, z], "v": [x, y, z], "nu": 60, "nv": 24, "yon": [x, y, z], "dahil": "Aşık|Saçak sacı"}
 const { chromium } = require('playwright');
 const fs = require('fs');
 (async () => {
@@ -21,10 +22,11 @@ const fs = require('fs');
   await p.waitForFunction(() => window.__montaj, null, { timeout: 60000 });
   const sonuc = await p.evaluate(q => {
     const M = window.__montaj, THREE = M.THREE, V = a => new THREE.Vector3(...a);
-    const meshler = [], ad = new Map();
+    const meshler = [], ad = new Map(), D = q.dahil ? new RegExp(q.dahil) : null;
     M.parts.forEach(pt => {
       pt.obj.updateWorldMatrix(true, true);
       const info = pt.obj.userData.info || {}, bu = ((info.satir || []).find(r => r[0] === 'Bu parça') || [, ''])[1];
+      if (D && !D.test(`${info.ad} · ${bu}`)) return;
       pt.obj.traverse(m => { if (m.isMesh) { meshler.push(m); ad.set(m, `${info.ad} · ${bu}`); (Array.isArray(m.material) ? m.material : [m.material]).forEach(x => { x.side = THREE.DoubleSide; }); } });
     });
     const rc = new THREE.Raycaster(), bas = V(q.bas), u = V(q.u), v = V(q.v), yon = V(q.yon).normalize(), ilk = {};

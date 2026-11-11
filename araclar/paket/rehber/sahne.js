@@ -416,9 +416,16 @@ function serit(o, perp, out) {   // hat çerçevesi: yerel x hattan dışa, yere
 const SACAK = D.sacak.map(e => ({ ...e, R: RF[e.R] }));
 {
   let to = 0;
-  const hs = TB - 0.05, ht = hs + 13;
+  const hs = TB - 0.05;
+  // Kıvrım son aşığın üstünde, kaplamanın altında kalır (Lokman, 11.11.2026: "saçak sacı son koyulan aşığın üzerine gelecek"; 15:59
+  // eskiz kartı "Doğru, böyle yap"): kıvrımın alt yüzü aşık oturma yüzünden eğime dik AH - SAC (aşığın üstü) yukarıda; makasın ucu duvarın 30 cm dışında, alın
+  // 30,2'de. Kalkan köşesinde kıvrımın son 2,2 cm'si C kapamanın üst kanadının üstüne biner (1 mm yukarıda; C kapama aşık adımında takılır).
+  const KAL = D.kalkan.map(G => { const w = cerceve(G.r, ...G.O); w.updateMatrixWorld(); return { w, s0: Math.min(G.uc.A, G.uc.B) - 1, s1: Math.max(G.uc.A, G.uc.B) + 1 }; });
+  const kalkanda = q => KAL.some(({ w, s0, s1 }) => { const v = w.worldToLocal(q.clone()); return Math.abs(v.z * 100 - 30.2) < 0.5 && v.x * 100 > s0 && v.x * 100 < s1; });
   SACAK.forEach(e => {
     const S = serit(e.o, e.face, e.out), n = Math.ceil((e.a1 - e.a0) / 250 - 1e-6);
+    const ht = TB + HEEL - 0.2 * e.R.tan + (AH - SAC / 2) / e.R.cos, dk = SAC / e.R.cos, CK = 2.2;
+    const ucK = [e.f0, e.f1].map(a => { const g = S.yeni(); g.updateMatrixWorld(); return kalkanda(new THREE.Vector3(0.2, 0, S.zOf(a) / 100).applyMatrix4(g.matrixWorld)); });
     for (let k = 0; k < n; k++) {
       const a0 = e.a0 + k * 250, a1 = Math.min(e.a1, a0 + 250), [z0, z1] = [S.zOf(a0), S.zOf(a1)].sort((p, q) => p - q);
       const g = S.yeni(), m = mat('trim', AD.sacak);
@@ -426,12 +433,18 @@ const SACAK = D.sacak.map(e => ({ ...e, R: RF[e.R] }));
       if (t1 > t0) { const [u0, u1] = [S.zOf(t0), S.zOf(t1)].sort((p, q) => p - q); g.add(lb(-2.8, 30.2, hs - SAC, hs, u0, u1, m)); }   // tırnak + saçak altı
       const f0 = Math.max(a0, e.f0), f1 = Math.min(a1, e.f1);
       if (f1 > f0) {
-        const [y0, y1] = [S.zOf(f0), S.zOf(f1)].sort((p, q) => p - q);
-        g.add(lb(30.2, 30.2 + SAC, hs - SAC, ht, y0, y1, m));           // alın 13 cm
-        const fl = lb(-5, 5, -SAC / 2, SAC / 2, y0, y1, m);             // makasa doğru 10 cm kıvrım: aşığın üstünden trapezin altına
-        fl.position.x = (30.2 - 5 * e.R.cos) / 100; fl.position.y = (ht + 5 * e.R.sin) / 100; fl.rotation.z = -e.R.th; g.add(fl);
+        const kes = [f0, f1];
+        if (ucK[0] && f0 < e.f0 + CK && f1 > e.f0 + CK) kes.splice(1, 0, e.f0 + CK);
+        if (ucK[1] && f1 > e.f1 - CK && f0 < e.f1 - CK) kes.splice(kes.length - 1, 0, e.f1 - CK);
+        for (let j = 0; j + 1 < kes.length; j++) {
+          const b0 = kes[j], b1 = kes[j + 1], h = ht + ((ucK[0] && b1 <= e.f0 + CK + 1e-6) || (ucK[1] && b0 >= e.f1 - CK - 1e-6) ? dk : 0);
+          const [y0, y1] = [S.zOf(b0), S.zOf(b1)].sort((p, q) => p - q);
+          g.add(lb(30.2, 30.2 + SAC, hs - SAC, h, y0, y1, m));            // alın 13 cm (eğimden 13,2)
+          const fl = lb(-5, 5, -SAC / 2, SAC / 2, y0, y1, m);             // makasa doğru 10 cm kıvrım: aşığın üstünde, trapezin altında
+          fl.position.x = (30.2 - 5 * e.R.cos) / 100; fl.position.y = (h + 5 * e.R.sin) / 100; fl.rotation.z = -e.R.th; g.add(fl);
+        }
       }
-      add(AD.sacak, g, to++ * 0.5, { kod: KB('sacak'), ad: 'Saçak sacı', satir: [['Bu parça', `${e.ad} · L ${fmtc(a1 - a0)} cm`], ['Profil', 'tırnak 3 → saçak altı 30 → alın 13 → makasa doğru kıvrım 10; açınım ≈ 56 cm'], ['Sıra', 'aşıklardan sonra, dereden önce (Lokman, 26.10.2026)'], ['Uçta', 'saçak altı baş makasın (betopanının) hizasında kesilir; alın ve kıvrım köşeye, alın sacına kadar devam eder (Lokman, 26.10.2026)'], ...(e.not ? [['Bu çatıda', e.not]] : []), ['Liste', M.sacak_liste], ...kartSat(KB('sacak'))] });
+      add(AD.sacak, g, to++ * 0.5, { kod: KB('sacak'), ad: 'Saçak sacı', satir: [['Bu parça', `${e.ad} · L ${fmtc(a1 - a0)} cm`], ['Profil', 'tırnak 3 → saçak altı 30 → alın 13 → makasa doğru kıvrım 10; açınım ≈ 56 cm'], ['Kıvrım', 'son aşığın üstünde, trapez sacın altında kalır; alt yüzü aşığın üst kanadı hizasında; kalkan köşesinde C kapamanın üstüne biner (Lokman, 11.11.2026)'], ['Sıra', 'aşıklardan sonra, dereden önce (Lokman, 26.10.2026)'], ['Uçta', 'saçak altı baş makasın (betopanının) hizasında kesilir; alın ve kıvrım köşeye, alın sacına kadar devam eder (Lokman, 26.10.2026)'], ...(e.not ? [['Bu çatıda', e.not]] : []), ['Liste', M.sacak_liste], ...kartSat(KB('sacak'))] });
     }
   });
 }
