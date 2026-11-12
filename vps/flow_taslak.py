@@ -19,9 +19,10 @@ Koşum (Mac'ten; sunucuda kopyası yoksa geçici betik, AGENTS.md › Sunucu eri
       | ssh portman-vps 'timeout 120 python3 -' > flow_taslak.txt 2>&1
 Sunucuda kopyası varsa:
     ssh -n portman-vps 'timeout 120 python3 /opt/portman/guncel/vps/flow_taslak.py' > flow_taslak.txt 2>&1
-Seçenekler: --waba <kimlik> · --kok <dizin> (formların sürümü; varsayılan betiğin deposu, yoksa /opt/portman/guncel) · --bak (Meta'da
-hiçbir şeyi kurmaz ve değiştirmez; yalnız var olanı listeler). Çıkış: 0 tamam, 2 Meta doğrulama hatası buldu, 1 durdu.
-Test için: PM_ETC, PM_GRAPH_BASE (ağa çıkılmaz).
+Seçenekler: --waba <kimlik> · --kok <dizin> (formların sürümü; varsayılan betiğin deposu, yoksa /opt/portman/guncel) · --kaynak <commit>
+(iki formun JSON'u sunucudaki sürümden değil, depodaki o commit'ten okunur; 40 haneli; sürüm kurulmadan düzeltilmiş formu taslağa
+yüklemek için; diske yazılmaz) · --bak (Meta'da hiçbir şeyi kurmaz ve değiştirmez; yalnız var olanı listeler). Çıkış: 0 tamam, 2 Meta
+doğrulama hatası buldu, 1 durdu. Test için: PM_ETC, PM_GRAPH_BASE, PM_RAW_BASE (ağa çıkılmaz).
 """
 from __future__ import annotations
 
@@ -41,6 +42,7 @@ from pathlib import Path
 
 ETC = os.environ.get("PM_ETC", "/etc/portman")
 GUNCEL = "/opt/portman/guncel"
+RAW = os.environ.get("PM_RAW_BASE", "https://raw.githubusercontent.com/lokmansayim/portman-v2private").rstrip("/")
 TURLER = ("talep", "revizyon")
 AD = {"talep": "Portman Talep Formu", "revizyon": "Portman Revizyon Formu"}
 KATEGORI = ["OTHER"]
@@ -138,6 +140,16 @@ def talep_formu_modulu(kok: Path):
     return m
 
 
+def kaynaktan(commit: str, tur: str) -> dict:
+    """Formun JSON'u depodaki commit'ten (raw.githubusercontent.com; belirteç gitmez; diske yazılmaz)."""
+    req = urllib.request.Request(f"{RAW}/{commit}/kanal/formlar/{tur}.json", headers={"User-Agent": "portman-flow-taslak"})
+    with urllib.request.urlopen(req, timeout=30) as r:
+        t = json.loads(r.read().decode("utf-8"))
+    if not isinstance(t, dict) or not t.get("version") or not t.get("screens"):
+        raise ValueError("Flow JSON değil")
+    return t
+
+
 def onizleme_verisi(tf, tur: str, tanim: dict) -> dict:
     """Etkileşimli önizlemenin ekran verisi: talep → kartı ve taslağı olmayan yeni bayiye sunulan veri; revizyon → formun örnek değeri."""
     if tur == "talep":
@@ -159,6 +171,8 @@ def hatalar(liste) -> list[str]:
         if isinstance(h, dict):
             yer = f"satır {h.get('line_start')}" if h.get("line_start") is not None else ""
             yol = h.get("pointers") or h.get("path") or ""
+            if isinstance(yol, list):
+                yol = ", ".join(str(x.get("path") if isinstance(x, dict) else x) for x in yol)
             out.append(maskele(" · ".join(str(x) for x in (h.get("error") or h.get("error_type"), h.get("message"), yer, yol) if x))[:300])
         else:
             out.append(maskele(str(h))[:300])
@@ -254,6 +268,7 @@ def main(argv: list[str]) -> int:
     p = argparse.ArgumentParser(prog="flow_taslak.py", description="Talep ve revizyon formunu Meta'da taslak kurar (yayımlamaz).")
     p.add_argument("--waba")
     p.add_argument("--kok")
+    p.add_argument("--kaynak")
     p.add_argument("--bak", action="store_true")
     a = p.parse_args(argv)
     print(f"== PORTMAN · WhatsApp formları Meta'da taslak ({time.strftime('%Y-%m-%d %H:%M', time.gmtime())} UTC)"
@@ -266,11 +281,19 @@ def main(argv: list[str]) -> int:
     kok = kok_bul(a.kok)
     try:
         tf = talep_formu_modulu(kok)
-        tanimlar = {t: tf.tanim(t) for t in TURLER}
     except (OSError, ValueError, AttributeError) as e:
-        print(f"DUR: formlar okunamadı ({kok}/kanal: {type(e).__name__}); sürüm kurulu mu?")
+        print(f"DUR: form modülü okunamadı ({kok}/kanal: {type(e).__name__}); sürüm kurulu mu?")
         return 1
-    print(f"   formlar: {kok}/kanal/formlar · " + " · ".join(f"{t} Flow JSON {tanimlar[t].get('version')}" for t in TURLER))
+    if a.kaynak is not None and not re.fullmatch(r"[0-9a-f]{40}", a.kaynak):
+        print("DUR: --kaynak 40 haneli commit olmalı")
+        return 1
+    try:
+        tanimlar = {t: (kaynaktan(a.kaynak, t) if a.kaynak else tf.tanim(t)) for t in TURLER}
+    except (OSError, ValueError) as e:
+        print(f"DUR: formlar okunamadı ({'depo ' + a.kaynak[:8] if a.kaynak else str(kok) + '/kanal/formlar'}: {type(e).__name__})")
+        return 1
+    yer = f"depo commit {a.kaynak[:8]} (--kaynak)" if a.kaynak else f"{kok}/kanal/formlar"
+    print(f"   formlar: {yer} · " + " · ".join(f"{t} Flow JSON {tanimlar[t].get('version')}" for t in TURLER))
     waba, kaynak = waba_bul(a.waba)
     if not waba:
         print(f"DUR: WABA kimliği yok: {kaynak}")
