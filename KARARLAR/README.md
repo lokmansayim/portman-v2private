@@ -191,7 +191,9 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | D | D-79 | CRM eşlemesi: metal kiremidin CRM fiyatı m² fiyatı; levha 100 cm kapatır, boyu 5 cm'nin katına yukarı (3740 → 3750), fiyat m² fiyatı × boy (İE-35; Lokman 11.11 20:24, 20:29 kartı) | yazıldı (11.11; CRM sohbeti, `claude/project-thread-03tosk`) |
 | D | D-80 | Bayiye üç seçenek: sekiz prefabrik ev aday kaydına, kodları PA-01 … PA-08 (İE-36; Lokman 11.11 20:42, 20:47, 20:58 kartları) | yazıldı (11.11; aday ev sohbeti, `claude/project-thread-0yp292`) |
 | D | D-81 | Portman Sözlüğü: 89 kavram, bir kavram tek terim (D-70 madde 1); Lokman'ın seçtiği 6 kavram: kalkan, vadi, trapez mahya, kiremit desen sac, nem bariyeri ve membran ayrı, cumba makası ve yavru makas (Lokman 11.11 20:49–20:52) | yazıldı (11.11; Sözlük sohbeti, `claude/project-thread-82u5ox`) |
-| D | **D-82** | — | **sıradaki boş** |
+| D | D-82 | Sözlük: "kimlik kartı" tek başına parçanın kartı (Lokman 12.11 08:31 kartı) | alındı (12.11; Sözlük sohbeti, `claude/project-thread-82u5ox`) |
+| D | D-83 | Prefabrik evde çatı seçimi: PA-06'ya üç çatı, evin çatısı, PA-06-K kırma, PA-06-C beşik mahya önde + salonda cumba (İE-37; Lokman 12.11 08:36:09, 08:41:09) | yazıldı (12.11; çatı seçimi sohbeti, `claude/project-thread-91gav7`) |
+| D | **D-84** | — | **sıradaki boş** |
 | İE | İE-01–İE-08 | bu depo (`main`) | yazıldı |
 | İE | İE-09 | model atölyesi: kontrollü model üretimi ve banka hattı (Görev 6e; pano 30; P6001 güncellemesi kapsam dışı) | alındı (16.10; `claude/gorev-6e-model-atolyesi-rnhtcp`; PR-1 banka hattı 29.10, `claude/project-thread-rhjgzv`) |
 | İE | İE-10, İE-11, İE-12 | prefabrik hattı (PR #12, PR #14, `ie-12-prefabrik-bayi-paftasi`) | `main`'e BK-12 ile (PR-1: motor ve bayi paftası; liste ve mühür kıyası sonraki PR'larda) |
@@ -220,7 +222,8 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | İE | İE-34 | bayiye montaj rehberi: sunucuda /rehber/<anahtar>/, yayın betiği, onaylı İş Emri'nin alınması (Lokman 9.11 13:06, kart 13:16; CIO 13:08 plan A) | alındı (9.11; `claude/project-thread-e4j22y`) |
 | İE | İE-35 | tek fiyat kaynağı CRM: eşleme, CRM'den defter, `--crm`, günlük çekim zamanlayıcısı, mühür M-15 (D-72; pano 148) | alındı (9.11; CRM sohbeti, `claude/project-thread-03tosk`) |
 | İE | İE-36 | bayiye üç seçenek: sekiz prefabrik ev aday kaydında, görünürlük K-A10 kabulüyle (pano 115 madde 2; D-80) | alındı (11.11; `claude/project-thread-0yp292`) |
-| İE | **İE-37** | — | **sıradaki boş** |
+| İE | İE-37 | prefabrik evde plan seçilince çatı seçimi (pano 41 prefabrik kolu; D-83): seçenekler ayrı kayıtta, görünürlük K-A10 kabulüyle | alındı (12.11; `claude/project-thread-91gav7`) |
+| İE | **İE-38** | — | **sıradaki boş** |
 | BK | BK-01–BK-08 | bu depo; BK-08 8a sonrası temizlik (`bk-08-8a-temizlik`) | yazıldı |
 | BK | BK-09 | metin ve çizim düzeltmeleri, G1 (`bk-09-metin-cizim`, `bk-09-cizim-g1`) | alındı (14.10) |
 | BK | BK-10 | 8b sonrası küçük işler (DXF `.txt` notu, geç gelen Excel, panelden Excel, plan değişince kontrol kapanır, D-19 24 saat kuralı, düğmeli mesajda satır sonları, `YENI-` kodu ve ilk çelik planda LLM özeti bayiye gitmez, komut freni metni; pano satır 15; çelikte kapı değişikliği kapsam dışı) | alındı (30.10; `claude/project-thread-h64uz2`) |

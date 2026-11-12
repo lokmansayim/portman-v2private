@@ -1495,9 +1495,10 @@ def a4_cercevesi(kutu, yer: tuple, olcek: float) -> dict:
             "olcek_mm_cm": round(olcek, 6)}
 
 
-def a4_bayi_sayfasi(doc, bolgeler: dict, cfg, cerceve: dict | None = None) -> bytes:
+def a4_bayi_sayfasi(doc, bolgeler: dict, cfg, cerceve: dict | None = None, yerler: dict | None = None) -> bytes:
     """Tek sayfalı PDF: dikey A4 bayi sayfası (`a4_yerlesim`). `cerceve` verilirse sayfanın kat planı çerçevesindeki yeri yazılır
-    (`a4_cercevesi`); sayfanın baytları aynı."""
+    (`a4_cercevesi`); `yerler` verilirse her bölgenin sayfadaki yeri (mm; x, y, en, boy; İE-37 çatı görseli, `bayi_gorseli.cati_gorseli`).
+    Sayfanın baytları ikisinde de aynı."""
     kutu = {}
     for ad in A4_BOLGELER:
         b = ebbox.extents([doc.entitydb[h] for h in bolgeler.get(ad, []) if h in doc.entitydb])
@@ -1522,6 +1523,8 @@ def a4_bayi_sayfasi(doc, bolgeler: dict, cfg, cerceve: dict | None = None) -> by
             sayfa.show_pdf_page(fitz.Rect(x * pt, y * pt, (x + w) * pt, (y + h) * pt), parca, 0)
     if cerceve is not None:
         cerceve.update(a4_cercevesi(kutu["plan"], yer["plan"], yer["olcek"]["plan"]))
+    if yerler is not None:
+        yerler.update({ad: [round(float(v), 3) for v in yer[ad]] for ad in kutu})
     return out.tobytes(garbage=3, deflate=True, no_new_id=True)
 
 
@@ -1549,9 +1552,10 @@ def _cati_adi(cati: dict) -> str:
     return tip.capitalize()
 
 
-def uret(is_emri: dict, cikti_dir: Path, ad_govde: str | None = None, pdf_hatada: bool = False) -> dict:
+def uret(is_emri: dict, cikti_dir: Path, ad_govde: str | None = None, pdf_hatada: bool = False, bolge_yerleri: dict | None = None) -> dict:
     """İş Emri → DXF (kaydet, yeniden aç, doğrula) → PDF. Doğrulama GEÇMEZSE teslim edilebilir PDF üretilmez (denetim bulgusu F08);
-    pdf_hatada=True yalnız tanı için '<ad>.HATALI.pdf' yazar. Dönen manifest'te 'pdf' o zaman None, 'validation_passed' False."""
+    pdf_hatada=True yalnız tanı için '<ad>.HATALI.pdf' yazar. Dönen manifest'te 'pdf' o zaman None, 'validation_passed' False.
+    `bolge_yerleri` (İE-37) verilirse PDF'teki bölgelerin yerleri (mm) ona yazılır; çıktı dosyaları aynı."""
     from . import validate as V
     cikti_dir = Path(cikti_dir); cikti_dir.mkdir(parents=True, exist_ok=True)
     plan = G.kur(is_emri)
@@ -1665,7 +1669,7 @@ def uret(is_emri: dict, cikti_dir: Path, ad_govde: str | None = None, pdf_hatada
             pdf = cikti_dir / f"{stem}.HATALI.pdf"      # yalnız tanı; teslim edilmez
         backend = pymupdf.PyMuPdfBackend()
         cfg = config.Configuration(background_policy=config.BackgroundPolicy.WHITE, color_policy=config.ColorPolicy.COLOR, min_lineweight=0.15)
-        pdf.write_bytes(a4_bayi_sayfasi(saved, c.bolgeler, cfg, a4))
+        pdf.write_bytes(a4_bayi_sayfasi(saved, c.bolgeler, cfg, a4, bolge_yerleri))
         with fitz.open(pdf) as document:
             if len(document) != 1 or not document[0].get_drawings():
                 raise RuntimeError("PDF boş veya tek sayfa değil")

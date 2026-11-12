@@ -155,16 +155,20 @@ def aciklama(a: dict) -> str:
 
 
 def cati_mesaji(siralanmis: list[dict], referans: dict) -> str:
-    """Çatı seçenek mesajı (tek görselde üç çatı; plan aynı): 'Ç8801 için üç çatı seçeneği: 1 katalog çatısı, 2 K, 3 L…'."""
+    """Çatı seçenek mesajı (tek görselde üç çatı; plan aynı): 'Ç8801 için üç çatı seçeneği: 1 katalog çatısı, 2 K, 3 L…'.
+    İE-37: prefabrik evde ilk satır "evin çatısı"; örnek yazı varyantın kodu ("PA-06-K olsun"): prefabrikte "çatı K olsun" okunmaz."""
     g = gosterim(referans); m2 = referans.get("katalog_m2"); oda = referans.get("oda_programi") or ""
+    prefabrik = referans.get("motor") != "genel" and referans.get("yapi_turu", "prefabrik") != "celik"
     satirlar = []
     for a in siralanmis:
         ca = (a.get("sunum") or {}).get("cati_adi") or ""
-        etiket = "katalog çatısı" if str(a["kod"]).upper() == str(referans["kod"]).upper() else f"çatı {gosterim(a)[-1]}"
+        etiket = ("evin çatısı" if prefabrik else "katalog çatısı") if str(a["kod"]).upper() == str(referans["kod"]).upper() \
+            else f"çatı {gosterim(a)[-1]}"
         satirlar.append(f"{a['sira']}. {gosterim(a)} · {etiket}" + (f" ({ca})" if ca else ""))
+    ornek = next((gosterim(a) for a in siralanmis if str(a["kod"]).upper() != str(referans["kod"]).upper()), g) if prefabrik else ""
     govde = (f"{g} için {len(siralanmis)} çatı seçeneği. Plan {'üçünde' if len(siralanmis) == 3 else 'hepsinde'} aynı"
              + (f" ({m2:g} m², {oda})" if isinstance(m2, (int, float)) else "") + "; fark çatıda.\n\n" + "\n".join(satirlar)
-             + "\n\nBirini seçin ya da yazın (örn. \"çatı K olsun\").")
+             + (f"\n\nBirini seçin ya da yazın (örn. \"{ornek} olsun\")." if prefabrik else "\n\nBirini seçin ya da yazın (örn. \"çatı K olsun\")."))
     return govde[:1024]
 
 

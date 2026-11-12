@@ -1,0 +1,100 @@
+{
+ "taban": "PA06",
+ "cati_adi": "Beşik, kalkan önde",
+ "cati_gorsel": "adaylar/PA06_cati.png",
+ "karar": "D-83",
+ "varyantlar": [
+  {
+   "kod": "PA06K",
+   "gosterim": "PA-06-K",
+   "durum": "gecerli",
+   "taban": "PA06",
+   "sablon": "adaylar/PA06K.json",
+   "gorsel": "adaylar/PA06K.png",
+   "cati_adi": "Kırma",
+   "referans_model": "PA-06-K",
+   "yapi_turu": "prefabrik",
+   "kat": 1,
+   "oda_programi": "2+1",
+   "katalog_m2": 87.0,
+   "kapali_m2": 72.6,
+   "veranda_m2": 14.44,
+   "ozet": {
+    "grid": {
+     "x_pano": 6.5,
+     "y_pano": 9
+    },
+    "dis_olcu_cm": [
+     800.0,
+     1088.0
+    ],
+    "brut_m2": 87.04,
+    "pano": 54,
+    "pencere": 7,
+    "kapi": 6,
+    "odalar": {
+     "YATAK ODASI 1": 13.4,
+     "YATAK ODASI 2": 14.16,
+     "BANYO": 6.16,
+     "HOL": 5.15,
+     "MUTFAK": 9.5,
+     "SALON": 19.12,
+     "VERANDA": 14.44
+    }
+   },
+   "uyarilar": [],
+   "kaynak": {
+    "metin": "Lokman 12 Kasım 2026 08:41:09 UTC: \"burada 1, 2 ve 5 sunulsun\" (D-83)",
+    "karar": "D-83",
+    "ev": "PA-06"
+   }
+  },
+  {
+   "kod": "PA06C",
+   "gosterim": "PA-06-C",
+   "durum": "gecerli",
+   "taban": "PA06",
+   "sablon": "adaylar/PA06C.json",
+   "gorsel": "adaylar/PA06C.png",
+   "cati_adi": "Beşik + salonda cumba",
+   "referans_model": "PA-06-C",
+   "yapi_turu": "prefabrik",
+   "kat": 1,
+   "oda_programi": "2+1",
+   "katalog_m2": 87.0,
+   "kapali_m2": 72.6,
+   "veranda_m2": 14.44,
+   "ozet": {
+    "grid": {
+     "x_pano": 6.5,
+     "y_pano": 9
+    },
+    "dis_olcu_cm": [
+     800.0,
+     1088.0
+    ],
+    "brut_m2": 87.04,
+    "pano": 54,
+    "pencere": 7,
+    "kapi": 6,
+    "odalar": {
+     "YATAK ODASI 1": 13.4,
+     "YATAK ODASI 2": 14.16,
+     "BANYO": 6.16,
+     "HOL": 5.15,
+     "MUTFAK": 9.5,
+     "SALON": 19.12,
+     "VERANDA": 14.44
+    }
+   },
+   "uyarilar": [
+    "Makas y'yi geçiyor ama kisa_kenar x: montaj paftalarında köşe makasın oturduğu duvarlardadır; pano ızgarası iki yönde 5 cm kayık olabilir, kisa_kenar: y doğrulanmalı"
+   ],
+   "kaynak": {
+    "metin": "Lokman 12 Kasım 2026 08:41:09 UTC: \"burada 1, 2 ve 5 sunulsun\" (D-83)",
+    "karar": "D-83",
+    "ev": "PA-06"
+   }
+  }
+ ]
+}

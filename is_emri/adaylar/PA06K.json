@@ -1,0 +1,300 @@
+{
+  "is_emri_no": "PM-ADAY-PA06K",
+  "revizyon": 1,
+  "talep": {
+    "bayi": {
+      "kod": "ADAY",
+      "ad": "Aday kaydı"
+    },
+    "musteri_adi": "ADAY PA06",
+    "metin": "TK-06 r02 (plan Lokman 11 Kasım 2026 07:16:50, 'A ile onaylıyorum'). Aday: D-80."
+  },
+  "yapi": {
+    "sistem": "prefabrik",
+    "kat_sayisi": 1,
+    "duvar_yuksekligi_cm": 250,
+    "duvar_kalinligi_cm": {
+      "dis": 10,
+      "ic": 6
+    },
+    "olcu_kaynagi": "dis_olcu",
+    "dis_olcu_cm": {
+      "x": 800,
+      "y": 1088
+    },
+    "referans_model": "PA-06-K",
+    "grid": {
+      "x_pano": 6.5,
+      "y_pano": 9
+    },
+    "kisa_kenar": "x",
+    "giris_cephesi": "on",
+    "dis_dusey_duvar": "cevre_aks_disinda",
+    "dizilim": {
+      "baslangic": "arka-sol",
+      "hiza": "izgara",
+      "dis_duvar_t_bolme": true,
+      "pencere": "oda_ortasi",
+      "kapi": "mantik",
+      "kose": "oda",
+      "dis_pano_dayanagi": [
+        {
+          "x": 323.75,
+          "aralik_cm": [
+            323.75,
+            790
+          ],
+          "cephe": "arka"
+        },
+        {
+          "x": 323.75,
+          "aralik_cm": [
+            10,
+            323.75
+          ],
+          "duvar_cm": 758
+        },
+        {
+          "y": 758,
+          "aralik_cm": [
+            444.25,
+            758
+          ],
+          "cephe": "sol"
+        }
+      ]
+    },
+    "ek_akslar_cm": {
+      "x": [],
+      "y": []
+    }
+  },
+  "mahaller": [
+    {
+      "ad": "YATAK ODASI 1",
+      "tur": "yatak_odasi",
+      "konum_cm": [
+        [
+          10,
+          5,
+          323.75,
+          444.25
+        ]
+      ]
+    },
+    {
+      "ad": "YATAK ODASI 2",
+      "tur": "yatak_odasi",
+      "konum_cm": [
+        [
+          323.75,
+          5,
+          790,
+          318.75
+        ]
+      ]
+    },
+    {
+      "ad": "BANYO",
+      "tur": "banyo",
+      "konum_cm": [
+        [
+          449.25,
+          318.75,
+          790,
+          507
+        ]
+      ]
+    },
+    {
+      "ad": "HOL",
+      "tur": "antre_hol",
+      "konum_cm": [
+        [
+          323.75,
+          318.75,
+          449.25,
+          758
+        ]
+      ]
+    },
+    {
+      "ad": "MUTFAK",
+      "tur": "mutfak",
+      "konum_cm": [
+        [
+          10,
+          444.25,
+          323.75,
+          758
+        ]
+      ]
+    },
+    {
+      "ad": "SALON",
+      "tur": "salon",
+      "konum_cm": [
+        [
+          449.25,
+          507,
+          790,
+          1083
+        ]
+      ]
+    },
+    {
+      "ad": "VERANDA",
+      "tur": "veranda",
+      "konum_cm": [
+        [
+          10,
+          758,
+          449.25,
+          1083
+        ]
+      ]
+    }
+  ],
+  "acik_sinirlar": [],
+  "acikliklar": [
+    {
+      "tur": "pencere",
+      "olcu": "120x120",
+      "mahal": "YATAK ODASI 1",
+      "duvar": "arka",
+      "pano": 1
+    },
+    {
+      "tur": "pencere",
+      "olcu": "120x120",
+      "mahal": "YATAK ODASI 2",
+      "duvar": "arka"
+    },
+    {
+      "tur": "pencere",
+      "olcu": "60x40",
+      "mahal": "BANYO",
+      "duvar": "sag"
+    },
+    {
+      "tur": "pencere",
+      "olcu": "120x100",
+      "mahal": "MUTFAK",
+      "duvar": "sol"
+    },
+    {
+      "tur": "pencere",
+      "olcu": "160x180",
+      "mahal": "MUTFAK",
+      "duvar": "on"
+    },
+    {
+      "tur": "pencere",
+      "olcu": "120x120",
+      "mahal": "SALON",
+      "duvar": "sag"
+    },
+    {
+      "tur": "pencere",
+      "olcu": "120x160",
+      "mahal": "SALON",
+      "duvar": "on"
+    },
+    {
+      "tur": "dis_kapi",
+      "olcu": 90,
+      "arasi": [
+        "VERANDA",
+        "HOL"
+      ]
+    },
+    {
+      "tur": "ic_kapi",
+      "olcu": 82,
+      "arasi": [
+        "HOL",
+        "YATAK ODASI 1"
+      ]
+    },
+    {
+      "tur": "ic_kapi",
+      "olcu": 82,
+      "arasi": [
+        "HOL",
+        "YATAK ODASI 2"
+      ]
+    },
+    {
+      "tur": "ic_kapi",
+      "olcu": 82,
+      "arasi": [
+        "HOL",
+        "BANYO"
+      ]
+    },
+    {
+      "tur": "ic_kapi",
+      "olcu": 82,
+      "arasi": [
+        "HOL",
+        "SALON"
+      ]
+    },
+    {
+      "tur": "ic_kapi",
+      "olcu": 82,
+      "arasi": [
+        "HOL",
+        "MUTFAK"
+      ]
+    }
+  ],
+  "cati": {
+    "tip": "kirma",
+    "egim_yuzde": 33,
+    "sacak_cm": 30,
+    "topuk_cm": 10,
+    "makas_yonu": "kisa_kenar",
+    "makas_ekseni": "x"
+  },
+  "cikti": {
+    "pdf": true,
+    "dxf": true,
+    "pafta": "A2",
+    "icerik": [
+      "aksli_plan",
+      "alanli_kopya",
+      "montaj_kopyasi",
+      "on_gorunus",
+      "cati_profili",
+      "ozellik_tablosu"
+    ]
+  },
+  "ozellikler": {
+    "Çatı Şekli": "Beşik",
+    "Çatı Kaplaması": "OSB + Nem Bariyeri + Trapez Saç",
+    "Tavan": "Ters",
+    "İç Cephe Kaplaması": "Alçıpan"
+  },
+  "alici_ait": {
+    "kalemler": [],
+    "kaynak": "Bayinin planında alıcıya ait kalem yok; TK-01 gibi hepsi bize ait varsayıldı"
+  },
+  "pafta_uyarilari": [],
+  "varsayimlar": [
+    "Bayinin planı 800 × 1088 cm, dış 10 / iç 6 cm duvarla okunuyor. x: sol sütun 10 + 2,5 pano + 3 = 326,75 (planda 326,75); sağ sütun 3 + 3,5 pano + 27 + 10 = 473,25 (planda 473,25). Alt: veranda 10 + 3,5 pano + 3 = 452,25 (planda 452,25), salon 347,75.",
+    "y (arkadan, duvar ekseninden): yatak odası 1 5 + 3,5 pano = 444,25 (planda 444,25); yatak odası 2 5 + 2,5 pano = 318,75 (planda 318,75); banyo 1,5 pano = 188,25 (planda 188,25); salon 507'den ön yüze 581 (planda 581). Mutfak–veranda duvarı 6. aksta 758 (planda 763, 5 cm fark).",
+    "Kısa kenar x: makas 800'lük kenarı geçer, mahya uzun kenar boyunca (beşik; planda çatı yok, aynı bayinin 80 m² projesinde beşik). x'te köşe iç yüzden (10 + 125,5k), y'de duvar ekseninden (5 + 125,5k).",
+    "Dış ölçü bayinin ölçüsü (ölçüye kesim): x 6,5 pano 800'e kesilir (sağda son pano 27 cm), y 9 pano 1088'e kesilir (önde son pano 74 cm). Tam pano karşılığı 773 × 1076,75 (6 × 8,5 pano) ya da 835,75 × 1076,75.",
+    "Hol 1 pano (planda net 122,5), yatak odası 2'nin altından verandaya iner; dış kapı 90 veranda–hol, iç kapılar 82 (çalışma kabulü), panodaki yerleri Motor'un kuralından.",
+    "Veranda gövdenin içinde, ön sol köşede; iki açık kenarı (ön ve sol) kirişli, köşesine Motor kolon koyar (PC-30, D-38).",
+    "Pencereler planın yazısından (EN/BOY): yatak odaları arkada 120x120, banyo sağda 60x40, mutfak solda 120x100 ve verandaya 160x180, salon sağda 120x120 ve önde 120x160; yerleri oda ortası (Motor kuralı).",
+    "Çatı eğimi %33, saçak 30, topuk 10 (kitap, TK-01). Duvar yüksekliği 250 (planda yazmıyor, standart).",
+    "r02 (Lokman, 11 Kasım 2026 07:08 UTC): \"Yatak odası 1 arka sol 1 tam pano sonra pencere sonra yarım pano şeklinde git yatak odası 2 de ise tam pano ile başla sonra pencere sonra tam pano en sona ne kalırsa yatak odası 1 sol taraf dizilim doğru ama mutfak sol yarım pano ile başla pencere sonra tam pano mutfak ön yani veranda tarafı yarım pano ile başla sonra 251 özel pano ortası pencere salon ön tam pano sonra pencere en sona ne kalırsa\". Yatak odası 1 arka duvar soldan 125,5 + pencere + 62,75 (pencere pano 1); yatak odası 2 arka duvar 1–2 duvarının aksından 125,5 + pencere + 125,5 + 89,75 (dış pano dayanağı x 323,75, arka cephe); mutfak sol duvar arkadan (yatak odası 1 tarafından) 62,75 + pencere + 125,5 (A okuması; dış pano dayanağı y 758, sol cephe: panolar ızgarada 444,25–507–632,5–758); mutfağın veranda duvarı soldan 62,75 + 251'lik pencereli pano (dış pano dayanağı x 323,75, duvar y 758); salon ön 125,5 + pencere + 89,75 (r01'deki gibi)."
+  ],
+  "eksikler": [
+    "Çatı kaplaması OSB + nem bariyeri + trapez sac D-74 opsiyon listesinde yok: listeden önce nasıl sayılacağı (mahya türü dahil) Lokman'a sorulacak."
+  ],
+  "dikmeler": [],
+  "verandalar": []
+}

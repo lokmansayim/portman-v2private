@@ -348,6 +348,10 @@ def _karar_ver(talep: Talep, k: Konusma, bayi: dict | None, katalog: Katalog, me
         if aday is not None and aday.get("motor") == "genel":      # İE-08 A2/A3: çelik aday (genel motor): çatı seçenekleri ya da r01
             return _celik_dali(k, bayi, katalog, aday, ts)
         kod = aday["kod"] if aday else model["code"]
+        if aday is not None and aday.get("varyantlar") and _prefabrik_cati_sorulur(k, aday):
+            secenek = _prefabrik_cati_seti(k, katalog, aday, ts)       # İE-37 (D-83): prefabrik evde plan seçildi, çatı sonra
+            if secenek is not None:
+                return secenek
         yol = katalog.sablon_yolu(kod)
         if yol is None:
             return _bitir(k, Karar(eylem="yonlendir", gerekce="şablon kodlanmamış",
@@ -580,6 +584,36 @@ def _cati_varyant_seti(k: Konusma, bayi: dict, katalog: Katalog, taban: dict, ts
     k.d["soru_sayisi"] = max(0, int(k.d.get("soru_sayisi") or 0) - 1)   # çatı seti planın seçimiyle aynı soru (hakem ikinci tur 3: MAX_SORU)
     return _secenekler(k, katalog, ts, uygun=SC.cati_seti(uygun), tur="cati_varyanti", referans=taban,
                        ek_not=CELIK_ISTEK_NOTU if saklandi else "")
+
+
+def _prefabrik_cati_sorulur(k: Konusma, aday: dict) -> bool:
+    """İE-37 (D-83; Lokman, 12 Kasım 2026): çatı seçenekli prefabrik ev seçildi; çatı seti sunulur mu? Çatı setinden seçimde (evin kendi çatısı
+    düğmesi ya da kodu) ve aynı evin çizilmiş planının revizyonunda sunulmaz: plan o çatıyla çizilir."""
+    st = k.d.get("secenek_seti") or {}
+    if st.get("durum") == "acik" and st.get("tur") == "cati_varyanti":
+        return False
+    son = ((k.d.get("son_is_emri") or {}).get("talep") or {}).get("kaynak")
+    return not (son and Katalog.taban_kod(son) == Katalog.taban_kod(aday.get("kod")))
+
+
+def _prefabrik_cati_seti(k: Konusma, katalog: Katalog, taban: dict, ts: dict) -> Karar | None:
+    """İE-37 (D-83): prefabrik ev alan setinden (ya da kodla) seçildi, çatı yazılmadı → evin çatı seti (evin kendi çatısı ve kayıtlı çatı
+    seçenekleri; tek görsel, numara ve düğme; öncelik sorusu yok). Kartın görseli çatının ön ve sol görünüşü (`cati_gorsel`), adı
+    `cati_adi`. Görünür seçenek yoksa (K-A10 kabul kaydı yok) None: plan evin kendi çatısıyla çizilir (bugünkü yol)."""
+    uygun = [taban] + [v for v in (katalog.aday(x) for x in taban.get("varyantlar") or []) if v is not None]
+    if len(uygun) < 2:
+        return None
+    _seti_kapat(k, taban["kod"])
+    k.d["taslak"]["katalog_kodu"] = taban["kod"]
+    eski = k.d.get("secenek_seti")
+    if eski and eski.get("durum") == "secildi":
+        k.d.setdefault("eski_setler", []).append(eski)
+        k.d["eski_setler"] = k.d["eski_setler"][-5:]
+    k.not_dus("kural", f"plan seçildi, çatı sonra: {taban['kod']} çatı seti (prefabrik)")
+    k.d["soru_sayisi"] = max(0, int(k.d.get("soru_sayisi") or 0) - 1)   # çatı seti planın seçimiyle aynı soru (İE-25 gibi)
+    sunulan = [{**a, "sunum": {**(a.get("sunum") or {}), "cati_adi": a.get("cati_adi")}, "gorsel": a.get("cati_gorsel") or a.get("gorsel")}
+               for a in uygun]
+    return _secenekler(k, katalog, ts, uygun=SC.cati_seti(sunulan), tur="cati_varyanti", referans=sunulan[0])
 
 
 def _aday_mahalleri(aday: dict) -> list[dict]:
@@ -1472,7 +1506,8 @@ def _sozcukler(metin: str | None, katalog: Katalog) -> list[tuple[int, str, str 
         elif a.upper() in ("KT", "PA") and i + 1 < len(toks) and re.fullmatch(r"\d{2}", toks[i + 1]):        # İE-08: "KT-01", "KT 01"; İE-36: "PA-04"
             a = a + toks[i + 1]; i += 1
         # İE-08: varyant harfi ayrı belirteçse ("Ç8801-K", "Ç8801 K") ve o aday kayıtlıysa birleşir; LLM'siz, yalnız kayıtlı kodlar
-        if re.fullmatch(r"[PÇC]\d{4}", a.upper()) and i + 1 < len(toks) and re.fullmatch(r"[A-Za-z]", toks[i + 1]) and katalog.aday(a + toks[i + 1].upper()):
+        # İE-37: prefabrik çatı seçeneği de ("PA-06-K", "PA 06 K"; yalnız kayıtlı ve görünür kod)
+        if re.fullmatch(r"[PÇC]\d{4}|PA\d{2}", a.upper()) and i + 1 < len(toks) and re.fullmatch(r"[A-Za-z]", toks[i + 1]) and katalog.aday(a + toks[i + 1].upper()):
             a = a + toks[i + 1].upper(); i += 1
         m = katalog.bul(a)
         ad = katalog.aday(a) if m is None else None
@@ -1603,7 +1638,7 @@ def _secenekler(k: Konusma, katalog: Katalog, ts: dict, uygun: list[dict] | None
     if not uygun:
         return None
     celik_mi = ts.get("yapi_turu") == "celik" or SC.celik_seti_mi(uygun)
-    if ts.get("oncelik") is None and len(uygun) >= 2 and not celik_mi:
+    if ts.get("oncelik") is None and len(uygun) >= 2 and not celik_mi and tur != "cati_varyanti":   # İE-37: çatı setinde öncelik yok
         k.d["taslak"]["oncelik_soruldu"] = True
         return _soru(k, "oncelik", "Sıralamada ne öne çıksın: bütçe mi, yaşam alanı mı, kısa montaj mı? Fark etmezse \"fark etmez\" yazın.",
                      butonlar=[{"id": "q:oncelik:butce", "baslik": "Bütçe önce"}, {"id": "q:oncelik:yasam", "baslik": "Yaşam alanı önce"},
