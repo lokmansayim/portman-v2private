@@ -37,7 +37,7 @@
                            {"id": "teras", "title": "Teras (düz)"}]},
           {"type": "RadioButtonsGroup", "name": "veranda", "label": "Veranda", "required": true, "init-value": "${data.veranda}",
            "data-source": [{"id": "on", "title": "Önde"}, {"id": "yan", "title": "Yanda"}, {"id": "arka", "title": "Arkada"}, {"id": "kose", "title": "Köşede"}]},
-          {"type": "TextArea", "name": "not", "label": "Not", "required": false, "max-length": "600", "helper-text": "Varsa özel isteğiniz"},
+          {"type": "TextArea", "name": "not", "label": "Not", "required": false, "max-length": 600, "helper-text": "Varsa özel isteğiniz"},
           {"type": "DocumentPicker", "name": "dosya", "label": "Çizim ya da plan (isteğe bağlı)",
            "description": "El çizimi, plan resmi ya da PDF; tek dosya, en çok 20 MB", "min-uploaded-documents": 0, "max-uploaded-documents": 1,
            "max-file-size-kb": 20480, "allowed-mime-types": ["image/jpeg", "image/png", "image/webp", "application/pdf"]},
