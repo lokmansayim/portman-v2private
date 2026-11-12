@@ -66,12 +66,18 @@ def main(argv: list[str] | None = None) -> int:
         from beyin import banka
         kodlar_var = {str(x["kod"]).upper() for x in adaylar}
         adaylar = adaylar + [x for x in banka.kayitlar() if str(x["kod"]).upper() not in kodlar_var]
+    if Path(a.adaylar).resolve() == (KOK / "beyin" / "veri" / "adaylar_prefabrik.json").resolve():   # İE-37 (D-83): evlerin çatı seçenekleri
+        from beyin.katalog import CATI_VARYANT_DIR                                     # (her kod ayrı kabul; Katalog'la aynı kaynak)
+        kodlar_var = {str(x["kod"]).upper() for x in adaylar}
+        for yol in sorted(CATI_VARYANT_DIR.glob("*.json")):
+            adaylar = adaylar + [x for x in json.loads(yol.read_text(encoding="utf-8")).get("varyantlar") or []
+                                 if str(x.get("kod")).upper() not in kodlar_var]
     varyant = sorted(str(x["kod"]) for x in adaylar if x.get("banka") and x.get("taban_model") and str(x["kod"]).upper() in kodlar)
     if varyant:                                     # Katalog bankanın çatı varyantını ayrı model sunmaz (`beyin/banka.py`); çatı setine girmesi ayrı iş
         print("DUR: model bankasının çatı varyantı bayiye ayrı model olarak sunulmaz, kabul kaydı yazılmaz:", ", ".join(varyant)); return 2
     kayitlar, yok = kabul_kayitlari(adaylar, kodlar, a.kim.strip(), a.tarih, a.not_.strip(), a.paket.strip())
     if yok:
-        print("DUR: adaylar.json'da ve model bankasında olmayan kod:", ", ".join(yok)); return 2
+        print("DUR: aday kaydında, çatı seçeneklerinde ve model bankasında olmayan kod:", ", ".join(yok)); return 2
     if not kayitlar:
         print("DUR: kod verilmedi"); return 2
     kim_izi = a.kim.strip()[0] + "…"                 # ad çıktıya girmez (K09; kişisel veri)

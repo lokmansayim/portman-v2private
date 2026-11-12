@@ -348,7 +348,15 @@ def _karar_ver(talep: Talep, k: Konusma, bayi: dict | None, katalog: Katalog, me
         if aday is not None and aday.get("motor") == "genel":      # İE-08 A2/A3: çelik aday (genel motor): çatı seçenekleri ya da r01
             return _celik_dali(k, bayi, katalog, aday, ts)
         kod = aday["kod"] if aday else model["code"]
-        if aday is not None and aday.get("varyantlar") and _prefabrik_cati_sorulur(k, aday):
+        cati_istegi = None
+        if aday is not None and any(v.get("tur") == "cati_degistir" for v in ts.get("varyantlar") or []):
+            cati_istegi = _prefabrik_cati_istegi(k, katalog, aday, ts)  # İE-37 (hakem): çatı isteği seçenekle karşılanır
+            if isinstance(cati_istegi, Karar):
+                return cati_istegi
+            if cati_istegi:
+                aday, kod = katalog.aday(cati_istegi), cati_istegi
+                ts["katalog_kodu"] = kod
+        if aday is not None and aday.get("varyantlar") and not cati_istegi and _prefabrik_cati_sorulur(k, aday):
             secenek = _prefabrik_cati_seti(k, katalog, aday, ts)       # İE-37 (D-83): prefabrik evde plan seçildi, çatı sonra
             if secenek is not None:
                 return secenek
@@ -614,6 +622,42 @@ def _prefabrik_cati_seti(k: Konusma, katalog: Katalog, taban: dict, ts: dict) ->
     sunulan = [{**a, "sunum": {**(a.get("sunum") or {}), "cati_adi": a.get("cati_adi")}, "gorsel": a.get("cati_gorsel") or a.get("gorsel")}
                for a in uygun]
     return _secenekler(k, katalog, ts, uygun=SC.cati_seti(sunulan), tur="cati_varyanti", referans=sunulan[0])
+
+
+def _prefabrik_cati_istegi(k: Konusma, katalog: Katalog, aday: dict, ts: dict) -> str | Karar | None:
+    """İE-37 (geometri hakemi, 12 Kasım 2026): LLM bir çatı isteği okuduysa (`cati_degistir`; "PA-06 olsun, çatı kırma olsun") ve evin
+    görünür çatı seçenekleri varsa istek seçenekle karşılanır; şablona uygulanmaz (uygulansa yönlendirmeye düşüyordu, set sonuçsuz kalıyordu).
+    Bayinin sözündeki çatı adı (çatı tipinin sözcükleri: kırma, cumba, beşik; K18) en çok sözcükle tek seçeneğe uyuyorsa o seçeneğin kodu
+    döner. Uymuyor, eşit uyuyor ya da söz olumsuzsa tahmin edilmez (K21): çatı seti sunulur; set zaten açıksa hangi çatının seçileceği sorulur.
+    İstek her iki yolda tüketilir (sessizce düşmez: seçimin ya da setin cevabıdır). Görünür seçenek yoksa None: bugünkü yol (yönlendirme)."""
+    taban = katalog.aday(Katalog.taban_kod(aday.get("kod")))
+    if taban is None or not taban.get("varyantlar"):
+        return None
+    uygun = [taban] + [v for v in (katalog.aday(x) for x in taban["varyantlar"]) if v is not None]
+    if len(uygun) < 2:
+        return None
+    istekler = [v for v in ts.get("varyantlar") or [] if v.get("tur") == "cati_degistir"]
+    ts["varyantlar"] = [v for v in ts.get("varyantlar") or [] if v.get("tur") != "cati_degistir"]
+    sozler = CO.norm(k.d.get("son_metin") or " ".join(str(v.get("aciklama") or "") for v in istekler)).split()
+    puan: dict[str, int] = {}
+    if not any(CO._OLUMSUZ_FIIL_T.fullmatch(w) for w in sozler):
+        for a in uygun:
+            yol = katalog.sablon_yolu(a["kod"])
+            tip = str(((json.loads(yol.read_text(encoding="utf-8")) if yol else {}).get("cati") or {}).get("tip") or "")
+            puan[a["kod"]] = sum(1 for kok in {CO.norm(x) for x in tip.split("_") if x} if any(w.startswith(kok) for w in sozler))
+    en = max(puan.values(), default=0)
+    secilen = [c for c, p in puan.items() if p == en] if en else []
+    if len(secilen) == 1:
+        _seti_kapat(k, secilen[0])
+        k.not_dus("kural", f"çatı isteği seçenekle karşılandı: {secilen[0]}")
+        return secilen[0]
+    k.not_dus("kural", "çatı isteği tek seçeneğe uymadı: çatı seti")
+    st = k.d.get("secenek_seti") or {}
+    if st.get("durum") == "acik" and st.get("tur") == "cati_varyanti":
+        satirlar = "\n".join(f"{a.get('sira')}. {SC.gosterim(a)}" + (f" ({ad})" if (ad := (a.get("sunum") or {}).get("cati_adi")) else "")
+                             for a in st.get("adaylar") or [])
+        return _soru(k, "secenek", f"Hangi çatı olsun?\n\n{satirlar}\n\nNumarasını ya da kodunu yazın.")
+    return _prefabrik_cati_seti(k, katalog, taban, ts)
 
 
 def _aday_mahalleri(aday: dict) -> list[dict]:
