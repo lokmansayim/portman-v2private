@@ -636,7 +636,9 @@ _CATI_BAGLAM = {"olsun", "olacak", "olur", "olabilir", "olsa", "olmali", "mu", "
                 "evde", "model", "modeli", "plan", "plani", "olarak", "tipi", "tip", "seklinde", "sekli", "farkli", "baska", "ustunde",
                 "ustune", "uzerinde", "uzerine", "lutfen", "tamam", "evet", "seciyorum", "sectim", "rica", "ederim", "ederiz", "olan",
                 "olani", "olsun", "onu", "bunu", "ilk", "birinci", "ikinci", "ucuncu", "son", "sonuncu", "ortadaki", "sondaki",
-                "gorelim", "bakalim", "olmasi", "yapilmasi", "istek", "istegi", "isteniyor"}
+                "gorelim", "bakalim", "olmasi", "yapilmasi", "istek", "istegi", "isteniyor", "ama", "fakat", "yap", "yapalim", "yapsin",
+                "yapiyoruz", "yapacagiz", "gecelim", "gecin", "gecsin", "gecilsin", "gecis", "alalim", "alacagiz", "aliyoruz",
+                "secildi", "secilsin", "secilen", "secim", "secimi", "kullanalim", "kullanilsin", "uygulayin", "uygulansin"}
 _NUMARA = {"numarali", "numara", "nolu", "no", "sira", "sirada", "secenek", "secenegi"}
 _SIRA_SOZU = {"ilk": "1", "birinci": "1", "ikinci": "2", "ucuncu": "3"}            # açık sette sıra sözü numaradır ("ikinci çatı olsun")
 _KALSIN_BAGLAM = {"simdilik", "oldugu", "gibi", "hali", "haliyle", "mevcut", "kendi", "eski"}  # "çatı olduğu gibi kalsın"
@@ -689,7 +691,7 @@ def _cati_sorusu(k: Konusma, st: dict) -> Karar:
 
 
 def _prefabrik_cati_istegi(k: Konusma, katalog: Katalog, aday: dict, ts: dict) -> str | Karar | None:
-    """İE-37 (geometri hakemi, 12 Kasım 2026; yedi tur): çatı seçenekli prefabrik evde bayinin bu mesajı cümle cümle okunur (K18).
+    """İE-37 (geometri hakemi, 12 Kasım 2026; sekiz tur): çatı seçenekli prefabrik evde bayinin bu mesajı cümle cümle okunur (K18).
     - Çatıyı yalnız kod seçer: seçeneğin kodu ("PA-06-K olsun"), açık çatı setinde evin kodu ya da etiket harfi ("çatı K olsun"), düğme,
       numara. Tek kod, olumsuz söz yok ve aynı mesajdaki çatı adları o seçeneğin adıysa kod döner; kod ile çelişen ad ("PA-06-K olsun,
       cumbalı olsun"), iki kod ya da olumsuz söz kararsızlıktır: çatı seti (set açıksa soru). Tahmin yok (K21).
@@ -733,7 +735,7 @@ def _prefabrik_cati_istegi(k: Konusma, katalog: Katalog, aday: dict, ts: dict) -
         if set_acik and len(sayi) == 1 and all(w.isdigit() or w in sira or w in _CATI_BAGLAM or w.startswith("cati") or w in _NUMARA
                                                for w in kalan):
             kodlar |= {a["kod"] for a in st.get("adaylar") or [] if str(a.get("sira")) == sayi[0]}   # "2 numaralı", "ikinci çatı olsun"
-            okunan |= set(kalan)
+            okunan |= set(kalan) | set(sayi)
             continue
         if any(CO._KALSIN_T.fullmatch(w) or w == "ayni" for w in kalan) and all(
                 CO._KALSIN_T.fullmatch(w) or w == "ayni" or w in _KALSIN_BAGLAM or w in _CATI_BAGLAM or w.startswith("cati")

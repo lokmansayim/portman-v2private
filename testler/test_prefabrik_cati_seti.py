@@ -264,7 +264,10 @@ def test_cati_istegi_seceneklerin_disindaysa_yonlendirilir(tmp_path, metin):
     ("PA-06 olsun, kırma çatı olsun, zemin kaplaması laminat olsun", "kırma çatı olsun", "secenek"),
     ("PA-06 olsun, kırma çatı yapılsın", "kırma çatı yapılması", "secenek"),
     ("PA-06-C olsun, cumba kalsın", "cumba kalsın", "is_emri"), ("PA-06-C olsun, cumba kalsın", None, "is_emri"),
-    ("PA-06-K olsun, cumba kalsın", None, "secenek"),
+    ("PA-06-K olsun, cumba kalsın", None, "secenek"), ("PA-06-K'yı alalım", "PA-06-K'yı alalım", "is_emri"),
+    ("PA-06-K modelini alalım", "PA-06-K modelini alalım", "is_emri"), ("PA-06-K olsun", "kırma çatıya geçiş", "is_emri"),
+    ("PA-06-K olsun", "PA-06-K kırma çatı seçildi", "is_emri"), ("PA-06 olsun, kırma çatı yapalım", "kırma çatı yap", "secenek"),
+    ("PA-06 olsun ama kırma çatı olsun", "kırma çatı olsun", "secenek"), ("PA-06 olsun, çatıyı kırma yap", "çatıyı kırma yap", "secenek"),
 ])
 def test_llm_cati_istegi_okunan_cumleyle_kiyaslanir(tmp_path, metin, aciklama, eylem):
     """Hakem yedinci tur: LLM'in çatı isteği bu mesajda okunan cümlelerle karşılanıyorsa (bayinin sözü ya da adlaştırması) seçim ya da set;
@@ -273,9 +276,21 @@ def test_llm_cati_istegi_okunan_cumleyle_kiyaslanir(tmp_path, metin, aciklama, e
     k = s.yaz(metin, katalog_kodu=metin[:5], yapi_turu="prefabrik", varyantlar=[var("cati_degistir", aciklama)] if aciklama else [])
     assert k.eylem == eylem, k.mesaj
     if eylem == "is_emri":
-        assert k.is_emri["talep"]["kaynak"] == "PA06C", k.mesaj
+        assert k.is_emri["talep"]["kaynak"] == ("PA06C" if "PA-06-C" in metin else "PA06K"), k.mesaj
     else:
         assert s.k.d["secenek_seti"]["tur"] == "cati_varyanti", k.mesaj
+
+
+@pytest.mark.parametrize("metin,kod", [("PA-06-K'ya geçelim", "PA06K"), ("PA-06-C'ye geçelim", "PA06C"), ("PA-06-K modeline geçelim", "PA06K")])
+def test_revizyonda_kodla_gecis_llm_okumasiyla(tmp_path, metin, kod):
+    """Hakem sekizinci tur: r01 evin çatısıyla; LLM bayinin sözünü `aciklama`ya yazsa da kodla geçiş seçimdir (yönlendirilmez)."""
+    s, _ = _cati_seti(tmp_path)
+    s.dugme("s:{set}:PA06")
+    k = s.yaz(metin, katalog_kodu=metin[:7], varyantlar=[var("cati_degistir", metin)])
+    assert k.eylem == "is_emri" and k.revizyon == 2 and k.is_emri["talep"]["kaynak"] == kod, k.mesaj
+    s, _ = _cati_seti(tmp_path / "b")
+    k = s.yaz("ikinci çatı olsun", varyantlar=[var("cati_degistir", "2. çatı")])
+    assert k.eylem == "is_emri" and k.is_emri["talep"]["kaynak"] == "PA06K", k.mesaj
 
 
 def test_cumba_kalsin_kodla_celisirse_sorulur(tmp_path):
