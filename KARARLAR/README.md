@@ -239,7 +239,9 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | BK | BK-20 | mühürlü konular freni: kayıt, hook, CI kilit testi (D-42; `claude/project-thread-evp64h`) | alındı (1.11) |
 | BK | BK-21 | frenler thread'lerin okuduğu yerde: `.claude/rules/frenler.md`, `araclar/fren.py`, CI "Korunan dosya onayı" (Lokman'ın `patron-onayi` etiketi); BK-17 `main`'e (`claude/project-thread-7n2p8x`) | alındı (4.11) |
 | BK | BK-22 | ön onay çiziminde verandalı brüt m², ortalanan pencerenin yanı tek pano, İş Emri'nde tek birleşim (D-49; `claude/project-thread-jlqian`, PR #122) | alındı (4.11) |
-| BK | **BK-23** | — | **sıradaki boş** |
+| BK | BK-23 … BK-27 | iş emri belgelerinde (`docs/is_emirleri/`) ve dallarında; bu tabloya yazılmadı | alındı |
+| BK | BK-28 | bayiye giden tanıtım metinleri ("Nasıl çalışır?" sayfası, selam örneği) bugünkü sisteme göre; prefabrik onayında Patron'a bildirim (pano 196, 197, 199; D-84; `claude/project-thread-iv2z5f`) | alındı (12.11; CIO) |
+| BK | **BK-29** | — | **sıradaki boş** |
 
 ## 27 Eylülde Lokman'ın verdiği kararlar
 

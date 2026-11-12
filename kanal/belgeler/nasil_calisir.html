@@ -1,33 +1,37 @@
 <!-- İE-08 8b M4: karşılama şablonunun "Nasıl çalışır?" düğmesine giden tek sayfa (bayi rehberi §1–3). Kaynak: Görev 9 taslağı
      "Portman · Nasıl çalışır? (bayi tek sayfa)", Claude Docs rev 5, 14 Ekim 2026 (CIO). Lokman metni düzeltince bu dosya aynı
-     metinle güncellenir; PDF sunucuda bundan üretilir (kanal/muhendis.nasil_calisir_pdf). Kişi adı ve numara yazılmaz.
+     metinle güncellenir; PDF sunucuda bundan üretilir (kanal/worker.nasil_calisir_pdf). Kişi adı ve numara yazılmaz.
      İE-25 (1 Kasım 2026): §1 "beş bilgi, çatı tipi" → dört bilgi; çatı plan seçildikten sonra, modelin kendi çatılarından (Lokman karar
-     kartı ve aynı gün "var olan modeller üzerinden"). Rehber pano 52'de. -->
+     kartı ve aynı gün "var olan modeller üzerinden"). Rehber pano 52'de.
+     BK-28 (12 Kasım 2026, pano 197): canlı v2026.11.12'ye göre (sekiz prefabrik ev, çatı seçimi, çelikte yeni plan, prefabrik onayı);
+     Sade Teknik Türkçe (D-70). Hedef örnek testler/bayi_metinleri/nasil_calisir_hedef.txt (Lokman'ın onayıyla; D-28). -->
 <h1>Portman · Nasıl çalışır?</h1>
-<p>Portman, PortatifEv bayilerinin WhatsApp'tan yazdığı talebi plana, plan onaylanınca da teklife çevirir.</p>
+<p>Portman, PortatifEv bayilerinin WhatsApp'tan yazdığı talebi plana çevirir. Plan onaylanınca teklifi PortatifEv hazırlar.</p>
 <h2>1. Ne gönderirsiniz</h2>
-<p>Talebinizi yazıyla gönderin. İyi bir talepte dört bilgi bulunur: <b>yapı tipi</b> (prefabrik ya da çelik), <b>kat sayısı</b>, <b>alan ya da dış ölçü</b> ve <b>oda sayısı</b>. Eksik olanı Portman sorar. Çatı tipini yazmanız gerekmez: seçtiğiniz modelin birden çok çatısı varsa plan seçildikten sonra çatı seçenekleri gelir.</p>
+<p>Talebinizi yazıyla gönderin. İyi bir talepte dört bilgi bulunur: <b>yapı tipi</b> (prefabrik ya da çelik), <b>kat sayısı</b>, <b>alan ya da dış ölçü</b> ve <b>oda sayısı</b>. Eksik olanı Portman sorar. Çatı tipini yazmanız gerekmez.</p>
 <ul>
-<li>Örnek: "Tek kat çelik, 2+1, 88 m² civarı, beşik çatı."</li>
-<li>Katalogdan bir proje beğendiyseniz kodunu yazın: "Ç8801".</li>
+<li>Prefabrik örneği: "Tek kat prefabrik, 2+1, 85 m²."</li>
+<li>Çelik örneği: "Tek kat çelik, 2+1, 88 m²."</li>
+<li>Katalogdan bir model beğendiyseniz kodunu yazın: "Ç8801".</li>
 </ul>
-<p>Kurulacağı il ve ilçe ilk taslak için gerekmez; fiyat aşamasında sorulur.</p>
+<p>Portman, yazdığınız alandan en çok %10 küçük ya da büyük planları gönderir. Kurulacağı il ve ilçe ilk taslak için gerekmez; fiyat aşamasında sorulur.</p>
 <h2>2. Adım adım</h2>
 <ol>
-<li><b>Seçin.</b> Portman en çok üç seçenek gönderir; her birinde plan görseli ve alan vardır. Birini düğmeyle seçin.</li>
-<li><b>Taslağı inceleyin.</b> Plan görseli ve TASLAK yazılı PDF gelir. Altında iki düğme vardır: Onayla ve Revize et.</li>
-<li><b>Gerekirse düzelttirin.</b> "Revize et"e basın ya da doğrudan yazın: "mutfak penceresi 120x120 olsun", "çatı L olsun". Her düzeltme yeni bir revizyondur (R2, R3…). Dört hakkınız var; sonrasında planı mühendis düzeltir.</li>
-<li><b>Onaylayın.</b> "Onayla"ya basın. Plan mühendisin teknik kontrolüne gider; bu sırada sizden bir şey beklenmez.</li>
-<li><b>Teklifi alın.</b> Fiyat için gerekirse birkaç özellik sorulur (dış duvar, çatı kaplaması, pencere rengi). Teklif aynı sohbete gelir.</li>
+<li><b>Seçin.</b> Portman en çok üç plan gönderir. Her planda resim ve alan vardır. Birini düğmeyle seçin. Prefabrikte önce sıralama sorulur: bütçe, yaşam alanı ya da kısa montaj.</li>
+<li><b>Çatıyı seçin.</b> Modelin birden çok çatısı varsa "Çatı seçin" resmi gelir. Plan aynıdır, fark çatıdadır.</li>
+<li><b>Taslağı inceleyin.</b> Plan resmi ve TASLAK yazılı PDF gelir. Altında iki düğme vardır: Onayla ve Revize et.</li>
+<li><b>Gerekirse düzelttirin.</b> "Revize et"e basın ya da doğrudan yazın: "mutfak penceresi 120x120 olsun". Çelikte "çatı L olsun" ve "dışlar 140'lık olsun" da yazabilirsiniz. Her düzeltme yeni bir revizyondur (R2, R3…). Dört hakkınız var; sonra talep PortatifEv'e iletilir.</li>
+<li><b>Onaylayın.</b> "Onayla"ya basın. Onayınız PortatifEv'e iletilir. Çelik planı ayrıca mühendisin teknik kontrolünden geçer.</li>
+<li><b>Teklifi alın.</b> Teklifi PortatifEv hazırlar ve aynı sohbete gönderir. Gerekirse birkaç özellik sorulur: dış duvar, çatı kaplaması, pencere rengi.</li>
 </ol>
 <h2>3. Bugün ne çalışıyor (pilot dönemi)</h2>
-<p>Pilot döneminde Portman aşağıdaki projeleri çizer. Çizemediği talebi PortatifEv'e iletir; size oradan dönülür.</p>
+<p>Pilot döneminde Portman aşağıdaki planları çizer. Çizemediği talebi PortatifEv'e iletir; size oradan dönülür.</p>
 <table>
 <tr><th>Talep</th><th>Bugün</th><th>Not</th></tr>
-<tr><td>Tek kat çelik</td><td>Yedi model: Ç8201, Ç8801 ve iki çatı varyantı, üç proje</td><td>Seçenek, taslak ve revizyon (pencere ölçüsü, çatı tipi)</td></tr>
-<tr><td>Tek kat prefabrik</td><td>P6001</td><td>Öteki prefabrik talepler PortatifEv'e iletilir</td></tr>
+<tr><td>Tek kat prefabrik</td><td>8 ev: 2+1 için 60, 64, 70, 78, 82 ve 87 m²; 3+1 için 90 ve 140 m². Katalogdan P6001.</td><td>87 m² evde 3 çatı seçeneği var. Revizyon: pencere ölçüsü.</td></tr>
+<tr><td>Tek kat çelik</td><td>6 plan: 2+1 için 82, 88, 92, 94 ve 99 m²; 4+1 için 124 m².</td><td>88 m² modelde 3 çatı seçeneği var. Revizyon: pencere ölçüsü, çatı tipi, dış duvar 140.</td></tr>
+<tr><td>Uyan plan yoksa</td><td>Çelikte Portman yeni bir plan taslağı çizer. Prefabrikte talep PortatifEv'e iletilir.</td><td>Yeni planda adımlar aynıdır.</td></tr>
 <tr><td>Çift kat (çelik ve prefabrik)</td><td>Henüz yok</td><td>PortatifEv'e iletilir</td></tr>
-<tr><td>Uyan model yoksa</td><td>PortatifEv'e iletilir</td><td>Model hazırlanıp size gönderilir</td></tr>
 <tr><td>Fotoğraf, el çizimi, PDF, sesli mesaj</td><td>Henüz okunmuyor</td><td>Talebinizi yazıyla gönderin</td></tr>
 </table>
 <h2>4. Bilmeniz gerekenler</h2>
@@ -37,5 +41,5 @@
 <li><b>Onayınız planı onaylar, siparişi değil.</b> Üretim ayrı bir adımdır.</li>
 <li><b>Görseller temsilidir.</b> Ölçü, adet ve fiyat için pafta ve teklif formu esastır.</li>
 <li><b>Aynı anda tek proje.</b> Biri bitmeden ikincisini açmayın.</li>
-<li><b>Yalnız kayıtlı bayi numaralarına cevap verilir.</b></li>
+<li><b>Plan yalnız kayıtlı bayi numaralarına çizilir.</b></li>
 </ul>

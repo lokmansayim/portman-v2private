@@ -129,6 +129,24 @@ def onay_kancasi(depo: Depo, gelen: dict, d: dict | None, cikti: dict, simdi: fl
     sonuc["muhendis"] = {"durum": durum}
 
 
+def prefabrik_onay_kancasi(gelen: dict, d: dict | None, cikti: dict) -> None:
+    """BK-28 (pano 199): prefabrik planın onayı revizyona bağlandıysa Patron'a metin + şablon (pencere kapalıysa şablon gider). Mühendis
+    kontrolü yok (yalnız çelik, `onay_kancasi`); teklif kendiliğinden gitmez, Patron verir. Bayinin numarası metne yazılmaz (bayi kodu)."""
+    sonuc = cikti.get("sonuc") or {}
+    onay = sonuc.get("onay") or {}
+    if (gelen.get("role") or "bayi") not in ("bayi", "test") or celik_plani_mi(d) or sonuc.get("gerekce") != "plan onaylandı" \
+            or not onay.get("kabul") or not onay.get("is_emri_no"):
+        return
+    no, rev = str(onay["is_emri_no"]), int(onay.get("rev") or 1)
+    kod = S.bayi_kodu(gelen.get("bayi"), gelen["sender"])
+    satirlar = cikti["satirlar"]
+    sira = max((int(s.get("seq") or 0) for s in satirlar), default=0) + 1
+    satirlar.append(W.giden_metin(gelen, f"Portman: {kod} kodlu bayi {_etiket(no, rev)} prefabrik planını onayladı. Teklif sizde; "
+                                         "konuşma panelde.", sira, "PATRON", "bildirim"))
+    satirlar.append(S.patron_bildirim_satiri(gelen, sira + 1, gelen.get("bayi"), no, None))
+    sonuc["patron_bildirimi"] = "prefabrik onayı"
+
+
 # ───────────────────────── 2–3 · mühendisin mesajları ─────────────────────────
 class _Cikti:
     def __init__(self, gelen: dict):

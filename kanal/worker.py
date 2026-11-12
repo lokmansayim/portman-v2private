@@ -334,7 +334,8 @@ def isle(gelen: dict, settings: dict, k=None, cikarim: dict | None = None, proje
     medya = gorsel_acik(settings) and (gelen.get("type") in GORSEL_TURLERI      # İE-20: çizim okunur (kalıcı akış dosyayı indirip okur)
                                        or (form is not None and form.get("tur") == "talep" and bool(form.get("dosyalar"))))
     if not medya and (gelen.get("type") not in GELEN_YAZILI or not ((gelen.get("text") or "").strip() or gelen.get("reply_id"))):
-        ekle("Şu an yalnız yazılı talepleri işleyebiliyorum. Talebinizi yazıyla iletirseniz (örn. \"P6001 aynalı\" ya da \"7x4 m, 2+1, ön verandalı\") ön onay planını hazırlarım."
+        from beyin.karar import ORNEK_METNI                # BK-28 (pano 196): çalışan örnekler, tek kaynak
+        ekle(f"Şu an yalnız yazılı talepleri işleyebiliyorum. Talebinizi yazıyla iletirseniz (örn. {ORNEK_METNI}) ön onay planını hazırlarım."
              + ("" if patron_mu else " Gönderdiğiniz dosyayı Lokman Bey'e ilettim."))
         patrona(f"Portman: {kim} yazılı olmayan mesaj gönderdi (tür: {gelen.get('type')}). Panelden bakabilirsiniz.")
         sonuc.update(eylem="cevapla", gerekce="metin dışı mesaj")
@@ -920,7 +921,7 @@ def cizim_karari(gelen: dict, settings: dict, k, talep, etk, medya: bool, cikari
         if etk is not None and etk.get("tur") == "cizim":
             k.not_dus("gelen", f"buton {etk.get('kimlik')}", {"niyet": "buton", "guven": "yuksek"})
             return KR._bitir(k, KR.Karar(eylem="cevapla", gerekce="çizim okuması kapalı",
-                                         mesaj="Çizimden talep şu an kapalı. Talebinizi yazıyla iletirseniz (örn. \"7x4 m, 2+1, ön verandalı\") "
+                                         mesaj=f"Çizimden talep şu an kapalı. Talebinizi yazıyla iletirseniz (örn. {KR.ORNEK_METNI}) "
                                                "ön onay planını hazırlarım.")), {}
         return None
     if etk is not None and etk.get("tur") == "cizim":
