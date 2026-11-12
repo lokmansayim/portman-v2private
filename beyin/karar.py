@@ -637,6 +637,9 @@ _CATI_BAGLAM = {"olsun", "olacak", "olur", "olabilir", "olsa", "olmali", "mu", "
                 "ustune", "uzerinde", "uzerine", "lutfen", "tamam", "evet", "seciyorum", "sectim", "rica", "ederim", "ederiz", "olan",
                 "olani", "olsun", "onu", "bunu", "ilk", "birinci", "ikinci", "ucuncu", "son", "sonuncu", "ortadaki", "sondaki"}
 _NUMARA = {"numarali", "numara", "nolu", "no", "sira", "sirada", "secenek", "secenegi"}
+_SIRA_SOZU = {"ilk": "1", "birinci": "1", "ikinci": "2", "ucuncu": "3"}            # açık sette sıra sözü numaradır ("ikinci çatı olsun")
+_KALSIN_BAGLAM = {"simdilik", "oldugu", "gibi", "hali", "haliyle", "mevcut", "kendi", "eski"}  # "çatı olduğu gibi kalsın"
+_CATI_DISI = ("zemin", "doseme", "duvar", "rampa", "merdiven", "parke", "laminat", "seramik", "fayans")   # zayıf kökün çatı dışı öznesi
 _CATI_EKLERI = {"", "i", "a", "e", "u", "si", "su", "yi", "yu", "ya", "ye", "ni", "nu", "da", "de", "ta", "te", "in", "un", "nin", "nun",
                 "dan", "den", "nda", "nde", "ndan", "nden", "li", "lu", "siz", "suz", "sini", "sinin", "sina", "sinda", "ler", "lar"}
 
@@ -659,7 +662,7 @@ def _cati_sorusu(k: Konusma, st: dict) -> Karar:
 
 
 def _prefabrik_cati_istegi(k: Konusma, katalog: Katalog, aday: dict, ts: dict) -> str | Karar | None:
-    """İE-37 (geometri hakemi, 12 Kasım 2026; dört tur): çatı seçenekli prefabrik evde bayinin bu mesajı cümle cümle okunur (K18).
+    """İE-37 (geometri hakemi, 12 Kasım 2026; altı tur): çatı seçenekli prefabrik evde bayinin bu mesajı cümle cümle okunur (K18).
     - Çatıyı yalnız kod seçer: seçeneğin kodu ("PA-06-K olsun"), açık çatı setinde evin kodu ya da etiket harfi ("çatı K olsun"), düğme,
       numara. Tek kod, olumsuz söz yok ve aynı mesajdaki çatı adları o seçeneğin adıysa kod döner; kod ile çelişen ad ("PA-06-K olsun,
       cumbalı olsun"), iki kod ya da olumsuz söz kararsızlıktır: çatı seti (set açıksa soru). Tahmin yok (K21).
@@ -704,13 +707,19 @@ def _prefabrik_cati_istegi(k: Konusma, katalog: Katalog, aday: dict, ts: dict) -
         if etiket and all(w in harfler or w in _CATI_BAGLAM or w.startswith("cati") for w in kalan):
             kodlar |= {harfler[w] for w in etiket}             # "çatı K olsun", "K olsun": set mesajının etiketi
             continue
-        sayi = [w for w in kalan if w.isdigit()]
-        if set_acik and len(sayi) == 1 and all(w in sayi or w in _CATI_BAGLAM or w.startswith("cati") or w in _NUMARA for w in kalan):
-            kodlar |= {a["kod"] for a in st.get("adaylar") or [] if str(a.get("sira")) == sayi[0]}   # "2 numaralı çatı olsun"
+        sayi = [w for w in kalan if w.isdigit()] + [_SIRA_SOZU[w] for w in kalan if w in _SIRA_SOZU]
+        if set_acik and len(sayi) == 1 and all(w.isdigit() or w in _SIRA_SOZU or w in _CATI_BAGLAM or w.startswith("cati") or w in _NUMARA
+                                               for w in kalan):
+            kodlar |= {a["kod"] for a in st.get("adaylar") or [] if str(a.get("sira")) == sayi[0]}   # "2 numaralı", "ikinci çatı olsun"
             continue
-        if any(CO._KALSIN_T.fullmatch(w) or w == "ayni" for w in kalan):
-            continue                                           # "çatı aynı kalsın", "kırma kalsın": istek değil (13.10 kuralı)
-        if not any(w.startswith(c) for w in kalan for c in _CATI_KOKLERI + (_CATI_ZAYIF if istekler else ())):
+        if any(CO._KALSIN_T.fullmatch(w) or w == "ayni" for w in kalan) and all(
+                CO._KALSIN_T.fullmatch(w) or w == "ayni" or w in _KALSIN_BAGLAM or w in _CATI_BAGLAM or w.startswith("cati")
+                or _cati_adi_mi(w, tum_ad) for w in kalan):
+            continue                                           # "çatı aynı kalsın", "kırma kalsın": istek değil (13.10 kuralı); "cumba yatak
+                                                               # odasının üstünde kalacak" bir istektir, aşağıda okunur (hakem altıncı tur)
+        guclu = any(w.startswith(c) for w in kalan for c in _CATI_KOKLERI)
+        zayif = istekler and any(w.startswith(c) for w in kalan for c in _CATI_ZAYIF) and not any(w.startswith(_CATI_DISI) for w in kalan)
+        if not (guclu or zayif):
             continue                                           # çatı cümlesi değil (pencere, oda, zemin, rampa …): kendi yolundan
         if not all(w in _CATI_BAGLAM or w.startswith(("cati", "degis")) or _cati_adi_mi(w, tum_ad)
                    or CO._OLUMSUZ_FIIL_T.fullmatch(w) for w in kalan):

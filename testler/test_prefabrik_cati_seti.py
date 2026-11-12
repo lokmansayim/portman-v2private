@@ -229,6 +229,7 @@ def test_cati_kodu_secer(tmp_path, metin, kod):
     "PA-06 olsun, PA-06-K mı PA-06-C mi", "PA-06 olsun, PA-06-K olmasın", "PA-06 olsun, PA-06-K olsun, cumbalı olsun",
     "PA-06 olsun, PA-06-C olsun, kırma olsun", "şimdilik PA-06 olsun, PA-06-K'yı da görelim", "PA-06 olsun, çatı PA-06-K olsun",
     "PA-06 olsun, kırma çatıyı seçiyorum", "PA-06 olsun, kırma çatı olsun rica ederim", "PA-06 olsun, kırma çatılı olanı istiyoruz",
+    "PA-06 olsun, kırma çatı olsun, zemin kaplaması laminat olsun",
 ])
 def test_cati_adi_seti_getirir_secilen_cizilir(tmp_path, metin):
     """Çatının adı, olumsuz ya da kararsız söz: çatı seti (istek setin cevabı); setten seçilen çatı çizilir, yönlendirmeye düşmez."""
@@ -247,6 +248,8 @@ def test_cati_adi_seti_getirir_secilen_cizilir(tmp_path, metin):
     "PA-06 olsun, iki cumba olsun", "PA-06 olsun, mutfak duvarını kırmak istiyoruz, çatıyı da değiştirelim",
     "PA-06 olsun, salona cumba pencere olsun, çatı da değişsin", "PA-06 olsun, mutfak ve salonun üstüne cumba olsun",
     "PA-06 olsun, yatak odası ve salonun üstünde cumba olsun", "PA-06 olsun, çatı kalkar mı",
+    "PA-06-C olsun, yatak odasının üstüne de aynı cumbadan olsun", "PA-06-C olsun, cumba yatak odasının üstünde kalacak",
+    "PA-06-C olsun, cumba arka cephede dursun", "PA-06 olsun, cumbalı olsun, arka cepheye de aynı cumbadan yapın",
 ])
 def test_cati_istegi_seceneklerin_disindaysa_yonlendirilir(tmp_path, metin):
     """Seçeneklerin adı dışında bir şey isteyen çatı cümlesi (eğim, saçak, kaplama, başka oda ya da cephe, sayı) bugünkü gibi
@@ -280,6 +283,11 @@ def test_cati_seti_acikken_ve_revizyonda_secenek_disi_istek(tmp_path):
     s.dugme("s:{set}:PA06")
     k = s.yaz("çatı eğimi %40 olsun", varyantlar=[var("cati_degistir", "çatı eğimi %40")])
     assert k.eylem == "yonlendir" and "otomatik yapılamıyor" in k.mesaj, k.mesaj
+    s, _ = _cati_seti(tmp_path / "c")                      # hakem altıncı tur: "kalacak" sözlü istek düşmez, r02 çizilmez
+    s.dugme("s:{set}:PA06K")
+    m = "PA-06-C olsun, cumba yatak odasının üstünde kalacak"
+    k = s.yaz(m, katalog_kodu="PA-06-C", varyantlar=[var("cati_degistir", "cumba yatak odasının üstünde")])
+    assert k.eylem == "yonlendir" and k.mesaj.startswith('"cumba yatak odasının üstünde kalacak" isteği otomatik'), k.mesaj
 
 
 @pytest.mark.parametrize("metin", ["kırma olsun", "kırmadan farklı olsun", "cumbasız olsun"])
@@ -303,14 +311,12 @@ def test_cati_seti_acikken_etiket_ve_evin_kodu(tmp_path, metin, kod):
 
 @pytest.mark.parametrize("metin,alan", [
     ("kırma olsun", {}), ("cumbalı olan", {}), ("tamam", {}), ("kırma çatıyı seçiyorum", {}), ("kırma olsun", {"niyet": "revizyon"}),
-    ("ikinci çatı olsun", {}),
 ])
 def test_cati_seti_acikken_secim_yoksa_evin_catisi_cizilmez(tmp_path, metin, alan):
-    """Hakem dördüncü tur: set açıkken kodsuz ve varyantsız mesaj evin çatısıyla çizilmiyor; soru gelir (ya da yazılı numara seçer)."""
+    """Hakem dördüncü tur: set açıkken kodsuz ve varyantsız mesaj evin çatısıyla çizilmiyor; "Hangi çatı olsun?" sorulur."""
     s, _ = _cati_seti(tmp_path)
     k = s.yaz(metin, **alan)
-    assert not (k.eylem == "is_emri" and k.is_emri["talep"]["kaynak"] == "PA06"), k.mesaj
-    assert k.eylem == "sor" and "Hangi çatı olsun?" in k.mesaj or (k.eylem == "is_emri" and k.is_emri["talep"]["kaynak"] == "PA06K"), k.mesaj
+    assert k.eylem == "sor" and "Hangi çatı olsun?" in k.mesaj and s.k.d["secenek_seti"]["durum"] == "acik", k.mesaj
 
 
 def test_cati_seti_acikken_pencere_istegi_bekler(tmp_path):
@@ -334,6 +340,7 @@ def test_cati_istegi_olmayan_cumle_bugunku_yol(tmp_path, metin):
 
 @pytest.mark.parametrize("metin,pencere", [("banyo penceresi 120x50 olsun, çatı aynı kalsın", True),
                                            ("kırma kalsın, banyo penceresi 120x50 olsun", True),
+                                           ("banyo penceresi 120x50 olsun, çatı olduğu gibi kalsın", True),
                                            ("salonun zemin kaplaması laminat olsun", False)])
 def test_cati_secenekli_evde_revizyon_yonlenmez(tmp_path, metin, pencere):
     """r01 PA-06-K; pencere revizyonu ve çatıyı koruyan söz çatı okumasına takılmaz: r02 aynı çatıyla."""
@@ -346,7 +353,8 @@ def test_cati_secenekli_evde_revizyon_yonlenmez(tmp_path, metin, pencere):
         assert [a["olcu"] for a in k.is_emri["acikliklar"] if a.get("mahal") == "BANYO"] == ["120x50"], k.mesaj
 
 
-@pytest.mark.parametrize("metin,kod", [("2 numaralı çatı olsun", "PA06K"), ("3 numaralı olsun", "PA06C")])
+@pytest.mark.parametrize("metin,kod", [("2 numaralı çatı olsun", "PA06K"), ("3 numaralı olsun", "PA06C"), ("ikinci çatı olsun", "PA06K"),
+                                      ("birinci çatı olsun", "PA06"), ("üçüncü olsun", "PA06C")])
 def test_cati_seti_acikken_numarali_secim(tmp_path, metin, kod):
     s, _ = _cati_seti(tmp_path)
     k = s.yaz(metin)
