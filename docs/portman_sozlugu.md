@@ -1,10 +1,10 @@
 # Portman Sözlüğü
 
-Sürüm r02, 11 Kasım 2026. Karar: `KARARLAR/D-81.md`. Yazım kuralının (D-70, `.claude/rules/yazim.md`) madde 1 ve 2'si bu sözlüğe dayanır.
+Sürüm r03, 12 Kasım 2026. Kararlar: `KARARLAR/D-81.md`, `KARARLAR/D-82.md`. Yazım kuralının (D-70, `.claude/rules/yazim.md`) madde 1 ve 2'si bu sözlüğe dayanır.
 
 ## Nasıl okunur
 
-Bu sözlük 89 kavram için tek terim verir. Lokman'a rapor, bayi mesajı, bayi rehberi ve montaj rehberi bu terimlerle yazılır. Koddaki anahtar adları ve commit mesajları kapsam dışıdır.
+Bu sözlük 91 kavram için tek terim verir. Lokman'a rapor, bayi mesajı, bayi rehberi ve montaj rehberi bu terimlerle yazılır. Koddaki anahtar adları ve commit mesajları kapsam dışıdır.
 
 - **Terim:** yazıda kullanılacak tek kelime.
 - **Kullanma:** aynı kavram için kullanılmış öteki kelimeler. Yeni metinde bunlar yazılmaz.
@@ -28,6 +28,8 @@ Bu 6 kavramda iki kelime yaşıyordu. Lokman 11 Kasım 2026 20:49–20:52 UTC ar
 | 4 | Kiremit desenli metal çatı levhası | metal kiremit | kiremit desen sac | 10 Kasım 04:58: "Kiremit Desen Sac"; 11 Kasım 20:24: "metal kiremit konusunda" | metal kiremit 56 (gerçek listelerde 11, CRM stok adı); kiremit desen sac 25 | Kart, 11 Kasım 20:50: kiremit desen sac |
 | 5 | OSB'nin üstündeki örtü | nem bariyeri ile membran aynı ürün, tek terim | iki ayrı ürün, ikisi de kalır | 10 Kasım 04:58: "OSB+ Nem Bariyeri/Membar+Kiremit Desen Sac, OSB+membran+Shingle" | membran 35, nem bariyeri 29; CRM'de ayrı stok kalemi: HM49 nem bariyeri, HM52/53/63/64 membran | Mesaj, 11 Kasım 20:52: iki ayrı ürün |
 | 6 | Cumbanın çatısındaki makas | cumba makası | yavru makas | 5 Kasım 06:20: "cumba makasının tam araksında bitmesi lazım" | cumba makası 48; yavru makas 71 (gerçek listede "YAVRU MAKAS"; veranda çatısının makası da bu adla) | Mesaj, 11 Kasım 20:52: cumba makası cumbada da verandada da; yavru makas ana makasla cumba makası arasındaki geniş boşlukta |
+
+İkinci tur, 12 Kasım 2026: "kimlik kartı" üç şey için geçiyordu (parçanın kartı, Proje Kimlik Kartı, bayi kimlik kartı). Lokman 08:31 UTC kartla seçti: tek başına "kimlik kartı" parçanın kartıdır; öteki ikisi hep tam adıyla yazılır. Sözü kelimesi kelimesine `KARARLAR/D-82.md`'de.
 
 ## Çatı
 
@@ -136,7 +138,9 @@ Bu 6 kavramda iki kelime yaşıyordu. Lokman 11 Kasım 2026 20:49–20:52 UTC ar
 | brüt oturum | brüt alan, brüt m² | Evin dış ölçüsünden alanı, veranda dahil. | Yazım kuralı madde 14: "60 m² (brüt oturum)"; 4 Kasım 14:24, Lokman |
 | net alan | — | Odanın iç alanı. Kat planında oda adının altında yazılır. | D-31 madde 15 |
 | hedef örnek | — | Lokman'ın onayladığı örnek çıktı. Kod değişince çıktı bununla kıyaslanır. | D-28 |
-| Proje Kimlik Kartı | kontrol sayfası | Atölyede modelin teknik kontrol PDF'i. Bayiye gitmez. | 30 Ekim, Lokman |
+| Proje Kimlik Kartı | kontrol sayfası | Atölyede modelin teknik kontrol PDF'i. Bayiye gitmez. Hep tam adıyla yazılır. | 30 Ekim, Lokman; tam adı 12 Kasım 08:31 kartı (D-82) |
+| kimlik kartı | parça kartı, ürün kartı | Parçanın kartı: listedeki adı, ölçüsü, nerede durduğu, nasıl sayıldığı. Montaj rehberinde parçaya dokununca açılır (ör. "cumba makasının kimlik kartı MA-04"). | 12 Kasım 08:31, Lokman (kart): "Parçanın kartı" (D-82); D-24, İE-15 |
+| bayi kimlik kartı | — | Bayinin kaydı: ad, hitap, firma, bölge, rol. Hep tam adıyla yazılır. | D-05, D-06 (bayi rehberi §9); tam adı 12 Kasım 08:31 kartı (D-82) |
 
 ## Bir kelime, iki anlam (yazım kuralı madde 2)
 
@@ -150,7 +154,7 @@ Bu kelimeler bugün iki ayrı şey için kullanılıyor.
 | panel | Çatı ve teras levhası: tek kat panel, sandviç panel, teras paneli | Çelikte duvar elemanı ("duvar paneli") | Prefabrik duvarda yalnız "pano". "Pencere üst paneli" ve "pencere alt paneli" Lokman'ın sözü (10 Kasım); kalır. |
 | bölme | Oda ("her bölmenin adının altında net m²") | İç duvar ("bölme duvarı", "oda bölmesi") | Oda için "oda"; duvar için "iç duvar". |
 | rehber | Montaj rehberi | Bayi rehberi | "Rehber" tek başına yazılmaz. |
-| kimlik kartı | Parçanın ürün kartı (rehberde "cumba makasının kimlik kartı MA-04") | Proje Kimlik Kartı (atölye kontrol PDF'i) | Açık. Parça kartı için iki ad var ("parça kartı" 5, "ürün kimlik kartı" dosya adı); ikinci turda Lokman'a sorulur. |
+| kimlik kartı | Parçanın kartı (rehberde "cumba makasının kimlik kartı MA-04") | Proje Kimlik Kartı (atölyenin kontrol PDF'i); bayi kimlik kartı (bayinin kaydı) | Tek başına "kimlik kartı" parçanın kartıdır (Lokman, 12 Kasım 08:31, kart). Ötekiler hep tam adıyla: "Proje Kimlik Kartı", "bayi kimlik kartı". |
 | sözlük | Portman Sözlüğü (bu belge) | Listelerin kalem sözlükleri (kör test ve çelik kıyası araçları) | "Sözlük" tek başına Portman Sözlüğü; ötekiler "kalem sözlüğü". |
 
 Ayrıca: "aks" ve "eksen" ayrı şeylerdir. Aks pano ızgarasının çizgisi, eksen bir duvarın orta çizgisidir.
@@ -163,4 +167,3 @@ Sözlük hiçbir çıktıyı değiştirmez. Montaj rehberi, liste satırları, C
 - Liste ana çatı dışındaki bazı çatı parçalarının makasını "Yavru makas · …" diye yazıyor (`motor/prefabrik_liste.py`). Lokman'ın sözüne göre yavru makas yalnız ana makasla cumba makası arasındaki geniş boşluktaki makastır; cumba makası verandanın üstüne de gelebilir.
 - CRM eşlemesi (`kurallar/fiyat/crm_esleme.json` › `okuma`) KDV grubu için nem bariyerini (HM49) "Membran" grubunda sayıyor. Lokman: ikisi ayrı ürün. KDV ikisinde %20; tutar değişmez, yalnız grup düzelir.
 - Montaj rehberinde "dere (vadi)" ve "dere (vadi) hattı" yazıları var; terim "vadi". Listede "Ters mahya (dere içi)" de öyle.
-- "kimlik kartı" iki anlamda (parça kartı ve Proje Kimlik Kartı): ikinci turda Lokman'a sorulur.
