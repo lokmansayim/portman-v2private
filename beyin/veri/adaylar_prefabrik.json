@@ -1,0 +1,357 @@
+[
+ {
+  "kod": "PA01",
+  "gosterim": "PA-01",
+  "durum": "gecerli",
+  "sablon": "adaylar/PA01.json",
+  "gorsel": "adaylar/PA01.png",
+  "referans_model": "PA-01",
+  "yapi_turu": "prefabrik",
+  "kat": 1,
+  "oda_programi": "2+1",
+  "katalog_m2": 60.0,
+  "kapali_m2": 51.7,
+  "veranda_m2": 8.33,
+  "ozet": {
+   "grid": {
+    "x_pano": 6,
+    "y_pano": 6.5
+   },
+   "dis_olcu_cm": [
+    763.0,
+    800.75
+   ],
+   "brut_m2": 60.04,
+   "pano": 38,
+   "pencere": 5,
+   "kapi": 4,
+   "odalar": {
+    "YATAK ODASI 1": 10.7,
+    "SALON+MUTFAK": 20.53,
+    "BANYO": 4.43,
+    "YATAK ODASI 2": 12.16,
+    "VERANDA": 8.33
+   }
+  },
+  "kaynak": {
+   "metin": "AP-15 montaj paftasından İş Emri (İE-17 PR-2; çizim M-07, Lokman 1 Kasım 2026). Aday: D-80 (Lokman 11 Kasım 2026 20:42, 20:47).",
+   "dosya": "testler/cizim/evler/AP15.json",
+   "ayna": null,
+   "karar": "D-80"
+  },
+  "not": ""
+ },
+ {
+  "kod": "PA02",
+  "gosterim": "PA-02",
+  "durum": "gecerli",
+  "sablon": "adaylar/PA02.json",
+  "gorsel": "adaylar/PA02.png",
+  "referans_model": "PA-02",
+  "yapi_turu": "prefabrik",
+  "kat": 1,
+  "oda_programi": "2+1",
+  "katalog_m2": 64.0,
+  "kapali_m2": 58.2,
+  "veranda_m2": 5.58,
+  "ozet": {
+   "grid": {
+    "x_pano": 6,
+    "y_pano": 6.5
+   },
+   "dis_olcu_cm": [
+    763.0,
+    835.75
+   ],
+   "brut_m2": 63.77,
+   "pano": 41,
+   "pencere": 6,
+   "kapi": 5,
+   "odalar": {
+    "SALON+MUTFAK": 26.94,
+    "VERANDA": 5.58,
+    "ÇOCUK ODASI": 9.08,
+    "HOL": 2.18,
+    "BANYO": 4.52,
+    "YATAK ODASI": 11.39
+   }
+  },
+  "kaynak": {
+   "metin": "AP-03 montaj paftasından İş Emri (İE-17 PR-2; çizim M-07, Lokman 1 Kasım 2026 11:20). Aday: D-80.",
+   "dosya": "testler/cizim/evler/AP03.json",
+   "ayna": null,
+   "karar": "D-80"
+  },
+  "not": ""
+ },
+ {
+  "kod": "PA03",
+  "gosterim": "PA-03",
+  "durum": "gecerli",
+  "sablon": "adaylar/PA03.json",
+  "gorsel": "adaylar/PA03.png",
+  "referans_model": "PA-03",
+  "yapi_turu": "prefabrik",
+  "kat": 1,
+  "oda_programi": "2+1",
+  "katalog_m2": 70.0,
+  "kapali_m2": 60.6,
+  "veranda_m2": 9.32,
+  "ozet": {
+   "grid": {
+    "x_pano": 6,
+    "y_pano": 7.5
+   },
+   "dis_olcu_cm": [
+    740.0,
+    944.5
+   ],
+   "brut_m2": 69.89,
+   "pano": 42,
+   "pencere": 7,
+   "kapi": 4,
+   "odalar": {
+    "ODA 1": 9.14,
+    "BANYO": 3.29,
+    "ODA 2": 11.38,
+    "SALON+MUTFAK": 32.53,
+    "VERANDA": 9.32
+   }
+  },
+  "kaynak": {
+   "metin": "AP-09 montaj paftasından İş Emri (İE-17 PR-2; çizim M-07, Lokman 1 Kasım 2026). Aday: D-80.",
+   "dosya": "testler/cizim/evler/AP09.json",
+   "ayna": null,
+   "karar": "D-80"
+  },
+  "not": ""
+ },
+ {
+  "kod": "PA04",
+  "gosterim": "PA-04",
+  "durum": "gecerli",
+  "sablon": "adaylar/PA04.json",
+  "gorsel": "adaylar/PA04.png",
+  "referans_model": "PA-04",
+  "yapi_turu": "prefabrik",
+  "kat": 1,
+  "oda_programi": "2+1",
+  "katalog_m2": 78.0,
+  "kapali_m2": 70.1,
+  "veranda_m2": 7.82,
+  "ozet": {
+   "grid": {
+    "x_pano": 7,
+    "y_pano": 7
+   },
+   "dis_olcu_cm": [
+    888.5,
+    898.5
+   ],
+   "brut_m2": 77.95,
+   "pano": 50,
+   "pencere": 6,
+   "kapi": 6,
+   "odalar": {
+    "YATAK ODASI 1": 11.42,
+    "BANYO": 4.52,
+    "YATAK ODASI 2": 13.76,
+    "HOL": 5.9,
+    "SALON": 18.35,
+    "MUTFAK": 11.27,
+    "VERANDA": 7.82
+   }
+  },
+  "kaynak": {
+   "metin": "TK-04 r08, kampanyalı ev (çizim D-58, Lokman 5 Kasım 2026 22:08). Aday: D-80.",
+   "dosya": "testler/motor/veri/TK04_r08.json",
+   "ayna": null,
+   "karar": "D-80"
+  },
+  "not": ""
+ },
+ {
+  "kod": "PA05",
+  "gosterim": "PA-05",
+  "durum": "gecerli",
+  "sablon": "adaylar/PA05.json",
+  "gorsel": "adaylar/PA05.png",
+  "referans_model": "PA-05",
+  "yapi_turu": "prefabrik",
+  "kat": 1,
+  "oda_programi": "2+1",
+  "katalog_m2": 82.0,
+  "kapali_m2": 74.8,
+  "veranda_m2": 7.12,
+  "ozet": {
+   "grid": {
+    "x_pano": 8,
+    "y_pano": 6.5
+   },
+   "dis_olcu_cm": [
+    1014.0,
+    835.75
+   ],
+   "brut_m2": 81.96,
+   "pano": 51,
+   "pencere": 6,
+   "kapi": 6,
+   "odalar": {
+    "YATAK ODASI": 14.51,
+    "BANYO": 6.08,
+    "ÇOCUK ODASI": 13.76,
+    "HOL": 7.95,
+    "SALON": 16.09,
+    "MUTFAK": 11.45,
+    "VERANDA": 7.12
+   }
+  },
+  "kaynak": {
+   "metin": "AP-22 montaj paftasından İş Emri (İE-17 PR-2; çizim M-07, Lokman 1 Kasım 2026). Aday: D-80.",
+   "dosya": "testler/cizim/evler/AP22.json",
+   "ayna": null,
+   "karar": "D-80"
+  },
+  "not": ""
+ },
+ {
+  "kod": "PA06",
+  "gosterim": "PA-06",
+  "durum": "gecerli",
+  "sablon": "adaylar/PA06.json",
+  "gorsel": "adaylar/PA06.png",
+  "referans_model": "PA-06",
+  "yapi_turu": "prefabrik",
+  "kat": 1,
+  "oda_programi": "2+1",
+  "katalog_m2": 87.0,
+  "kapali_m2": 72.6,
+  "veranda_m2": 14.44,
+  "ozet": {
+   "grid": {
+    "x_pano": 6.5,
+    "y_pano": 9
+   },
+   "dis_olcu_cm": [
+    800.0,
+    1088.0
+   ],
+   "brut_m2": 87.04,
+   "pano": 54,
+   "pencere": 7,
+   "kapi": 6,
+   "odalar": {
+    "YATAK ODASI 1": 13.4,
+    "YATAK ODASI 2": 14.16,
+    "BANYO": 6.16,
+    "HOL": 5.15,
+    "MUTFAK": 9.5,
+    "SALON": 19.12,
+    "VERANDA": 14.44
+   }
+  },
+  "kaynak": {
+   "metin": "TK-06 r02 (plan Lokman 11 Kasım 2026 07:16:50, 'A ile onaylıyorum'). Aday: D-80.",
+   "dosya": "testler/motor/veri/TK06_r02.json",
+   "ayna": null,
+   "karar": "D-80"
+  },
+  "not": ""
+ },
+ {
+  "kod": "PA07",
+  "gosterim": "PA-07",
+  "durum": "gecerli",
+  "sablon": "adaylar/PA07.json",
+  "gorsel": "adaylar/PA07.png",
+  "referans_model": "PA-07",
+  "yapi_turu": "prefabrik",
+  "kat": 1,
+  "oda_programi": "3+1",
+  "katalog_m2": 90.0,
+  "kapali_m2": 78.4,
+  "veranda_m2": 11.89,
+  "ozet": {
+   "grid": {
+    "x_pano": 7,
+    "y_pano": 7
+   },
+   "dis_olcu_cm": [
+    898.5,
+    888.5
+   ],
+   "brut_m2": 90.28,
+   "pano": 60,
+   "pencere": 8,
+   "kapi": 8,
+   "odalar": {
+    "YATAK ODASI 1": 10.64,
+    "E. BANYO": 2.9,
+    "BANYO": 4.43,
+    "YATAK ODASI 2": 12.2,
+    "HOL": 5.91,
+    "GİRİŞ": 1.45,
+    "SALON": 18.43,
+    "YATAK ODASI 3": 9.15,
+    "MUTFAK": 9.05,
+    "ÖN VERANDA": 6.99,
+    "ARKA VERANDA": 3.46
+   }
+  },
+  "kaynak": {
+   "metin": "TK-01 r08 (M-16 hedef örneği, D-74). Aday: D-80.",
+   "dosya": "testler/motor/veri/TK01_r08.json",
+   "ayna": null,
+   "karar": "D-80"
+  },
+  "not": ""
+ },
+ {
+  "kod": "PA08",
+  "gosterim": "PA-08",
+  "durum": "gecerli",
+  "sablon": "adaylar/PA08.json",
+  "gorsel": "adaylar/PA08.png",
+  "referans_model": "PA-08",
+  "yapi_turu": "prefabrik",
+  "kat": 1,
+  "oda_programi": "3+1",
+  "katalog_m2": 140.0,
+  "kapali_m2": 117.5,
+  "veranda_m2": 22.47,
+  "ozet": {
+   "grid": {
+    "x_pano": 11.5,
+    "y_pano": 8
+   },
+   "dis_olcu_cm": [
+    1400.0,
+    1000.0
+   ],
+   "brut_m2": 140.0,
+   "pano": 83,
+   "pencere": 8,
+   "kapi": 10,
+   "odalar": {
+    "SALON": 25.79,
+    "VERANDA": 22.47,
+    "HOL VE KORİDOR": 14.97,
+    "MUTFAK": 13.48,
+    "EBV BANYO 1": 2.82,
+    "GENEL BANYO": 3.23,
+    "YATAK ODASI 1": 15.33,
+    "YATAK ODASI 2": 13.84,
+    "EBV BANYO 2": 2.96,
+    "EBV BANYO 3": 2.96,
+    "YATAK ODASI 3": 14.77
+   }
+  },
+  "kaynak": {
+   "metin": "AP-01 montaj paftasından İş Emri (İE-33; çizim Lokman 6 Kasım 2026 21:23). Aday: D-80.",
+   "dosya": "testler/cizim/evler/AP01.json",
+   "ayna": null,
+   "karar": "D-80"
+  },
+  "not": ""
+ }
+]

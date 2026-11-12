@@ -187,6 +187,6 @@ def mesaj_metni(siralanmis: list[dict], ts: dict, gerekli: int = GEREKEN_ADAY) -
         durum = f"Kurallardan geçen {n} seçenek var."
     govde = f"{bas} için seçenekler.{onc} {durum}"
     if satirlar:
-        ornek = gosterim(siralanmis[0]) if celik_seti_mi(siralanmis) else "P9401"      # BK-09 M2: çelik setinde örnek çelik kodu
+        ornek = gosterim(siralanmis[0])      # BK-09 M2: örnek listedeki ilk aday; İE-36: prefabrikte de (sabit "P9401" setin dışındaydı)
         govde += "\n\n" + "\n".join(satirlar) + f"\n\nBirini seçin ya da yazın (örn. \"{ornek} olsun\"); ölçü değişikliği de yazabilirsiniz."
     return govde[:1024]

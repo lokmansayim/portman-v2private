@@ -40,6 +40,10 @@ def ayna(is_emri: dict, eksen: str) -> dict:
     """eksen 'x': sol-sağ ayna (x' = nx - x). eksen 'y': ön-arka ayna (y' = ny - y)."""
     if eksen not in ("x", "y"):
         raise VaryantHatasi("eksen x veya y olmalı")
+    if any("konum_pano" not in m for m in is_emri.get("mahaller", [])):
+        # İE-36 (geometri hakemi): cm konumlu İş Emri'nde (PA-01 … PA-08, paftadan okunan evler) pano birimli ayna yok; KeyError değil
+        # açık hata: karar katmanı bayiyi yönlendirir (K21)
+        raise VaryantHatasi("bu planda simetri otomatik uygulanamıyor")
     ie = copy.deepcopy(is_emri)
     nx, ny = ie["yapi"]["grid"]["x_pano"], ie["yapi"]["grid"]["y_pano"]
 
@@ -118,6 +122,8 @@ def _aciklik_duvar_yonu(is_emri: dict, ac: dict) -> str:
 def _rects(is_emri: dict, ad: str):
     for m in is_emri["mahaller"]:
         if m["ad"] == ad:
+            if "konum_pano" not in m:                       # İE-36: cm konumlu mahal (pano birimli varyant uygulanmaz)
+                raise VaryantHatasi(f"{ad} pano biriminde değil")
             return m["konum_pano"]
     raise VaryantHatasi(f"mahal yok: {ad}")
 

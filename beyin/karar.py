@@ -1469,7 +1469,7 @@ def _sozcukler(metin: str | None, katalog: Katalog) -> list[tuple[int, str, str 
             i += 1; continue
         if a.upper() in ("P", "Ç", "C") and i + 1 < len(toks) and re.fullmatch(r"\d{4}", toks[i + 1]):
             a = a + toks[i + 1]; i += 1
-        elif a.upper() == "KT" and i + 1 < len(toks) and re.fullmatch(r"\d{2}", toks[i + 1]):        # İE-08: "KT-01", "KT 01"
+        elif a.upper() in ("KT", "PA") and i + 1 < len(toks) and re.fullmatch(r"\d{2}", toks[i + 1]):        # İE-08: "KT-01", "KT 01"; İE-36: "PA-04"
             a = a + toks[i + 1]; i += 1
         # İE-08: varyant harfi ayrı belirteçse ("Ç8801-K", "Ç8801 K") ve o aday kayıtlıysa birleşir; LLM'siz, yalnız kayıtlı kodlar
         if re.fullmatch(r"[PÇC]\d{4}", a.upper()) and i + 1 < len(toks) and re.fullmatch(r"[A-Za-z]", toks[i + 1]) and katalog.aday(a + toks[i + 1].upper()):
