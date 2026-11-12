@@ -229,7 +229,7 @@ def test_cati_kodu_secer(tmp_path, metin, kod):
     "PA-06 olsun, PA-06-K mı PA-06-C mi", "PA-06 olsun, PA-06-K olmasın", "PA-06 olsun, PA-06-K olsun, cumbalı olsun",
     "PA-06 olsun, PA-06-C olsun, kırma olsun", "şimdilik PA-06 olsun, PA-06-K'yı da görelim", "PA-06 olsun, çatı PA-06-K olsun",
     "PA-06 olsun, kırma çatıyı seçiyorum", "PA-06 olsun, kırma çatı olsun rica ederim", "PA-06 olsun, kırma çatılı olanı istiyoruz",
-    "PA-06 olsun, kırma çatı olsun, zemin kaplaması laminat olsun",
+    "PA-06-K olsun, cumba kalsın", "PA-06-K olsun, kalkan önde kalsın",
 ])
 def test_cati_adi_seti_getirir_secilen_cizilir(tmp_path, metin):
     """Çatının adı, olumsuz ya da kararsız söz: çatı seti (istek setin cevabı); setten seçilen çatı çizilir, yönlendirmeye düşmez."""
@@ -250,6 +250,7 @@ def test_cati_adi_seti_getirir_secilen_cizilir(tmp_path, metin):
     "PA-06 olsun, yatak odası ve salonun üstünde cumba olsun", "PA-06 olsun, çatı kalkar mı",
     "PA-06-C olsun, yatak odasının üstüne de aynı cumbadan olsun", "PA-06-C olsun, cumba yatak odasının üstünde kalacak",
     "PA-06-C olsun, cumba arka cephede dursun", "PA-06 olsun, cumbalı olsun, arka cepheye de aynı cumbadan yapın",
+    "PA-06-K olsun, duvar tarafına oluk olsun", "PA-06-K olsun, yağmur oluğu da olsun", "PA-06-K olsun, baca olsun",
 ])
 def test_cati_istegi_seceneklerin_disindaysa_yonlendirilir(tmp_path, metin):
     """Seçeneklerin adı dışında bir şey isteyen çatı cümlesi (eğim, saçak, kaplama, başka oda ya da cephe, sayı) bugünkü gibi
@@ -257,6 +258,36 @@ def test_cati_istegi_seceneklerin_disindaysa_yonlendirilir(tmp_path, metin):
     s = Sohbet(tmp_path, kabul=PA | CATILAR)
     k = s.yaz(metin, katalog_kodu=metin[:5], yapi_turu="prefabrik", varyantlar=[var("cati_degistir", metin.split(", ", 1)[1])])
     assert k.eylem == "yonlendir" and "otomatik yapılamıyor" in k.mesaj and "PA-06-K (Kırma)" in k.mesaj, k.mesaj
+
+
+@pytest.mark.parametrize("metin,aciklama,eylem", [
+    ("PA-06 olsun, kırma çatı olsun, zemin kaplaması laminat olsun", "kırma çatı olsun", "secenek"),
+    ("PA-06 olsun, kırma çatı yapılsın", "kırma çatı yapılması", "secenek"),
+    ("PA-06-C olsun, cumba kalsın", "cumba kalsın", "is_emri"), ("PA-06-C olsun, cumba kalsın", None, "is_emri"),
+    ("PA-06-K olsun, cumba kalsın", None, "secenek"),
+])
+def test_llm_cati_istegi_okunan_cumleyle_kiyaslanir(tmp_path, metin, aciklama, eylem):
+    """Hakem yedinci tur: LLM'in çatı isteği bu mesajda okunan cümlelerle karşılanıyorsa (bayinin sözü ya da adlaştırması) seçim ya da set;
+    çatı dışı cümle ("zemin kaplaması") isteği yönlendirtmez. "cumba kalsın" kodun çatısıyla çelişirse set, uyarsa o çatı."""
+    s = Sohbet(tmp_path, kabul=PA | CATILAR)
+    k = s.yaz(metin, katalog_kodu=metin[:5], yapi_turu="prefabrik", varyantlar=[var("cati_degistir", aciklama)] if aciklama else [])
+    assert k.eylem == eylem, k.mesaj
+    if eylem == "is_emri":
+        assert k.is_emri["talep"]["kaynak"] == "PA06C", k.mesaj
+    else:
+        assert s.k.d["secenek_seti"]["tur"] == "cati_varyanti", k.mesaj
+
+
+def test_cumba_kalsin_kodla_celisirse_sorulur(tmp_path):
+    """Set açıkken "ikinci çatı olsun, cumba kalsın" (kırma + cumba) seçim değil: soru; r01 PA-06-C'de revizyon "PA-06-K olsun, cumba
+    kalsın" çatı setini getirir, cumbasız plan çizilmez."""
+    s, _ = _cati_seti(tmp_path)
+    k = s.yaz("ikinci çatı olsun, cumba kalsın")
+    assert k.eylem == "sor" and "Hangi çatı olsun?" in k.mesaj, k.mesaj
+    s, _ = _cati_seti(tmp_path / "b")
+    s.dugme("s:{set}:PA06C")
+    k = s.yaz("PA-06-K olsun, cumba kalsın", katalog_kodu="PA-06-K", varyantlar=[var("cati_degistir", "PA-06-K olsun, cumba kalsın")])
+    assert k.eylem == "secenek" and s.k.d["secenek_seti"]["tur"] == "cati_varyanti", k.mesaj
 
 
 def test_yonlendirme_bayinin_cumlesini_aynen_yazar(tmp_path):
@@ -354,7 +385,7 @@ def test_cati_secenekli_evde_revizyon_yonlenmez(tmp_path, metin, pencere):
 
 
 @pytest.mark.parametrize("metin,kod", [("2 numaralı çatı olsun", "PA06K"), ("3 numaralı olsun", "PA06C"), ("ikinci çatı olsun", "PA06K"),
-                                      ("birinci çatı olsun", "PA06"), ("üçüncü olsun", "PA06C")])
+                                      ("birinci çatı olsun", "PA06"), ("üçüncü olsun", "PA06C"), ("son çatı olsun", "PA06C")])
 def test_cati_seti_acikken_numarali_secim(tmp_path, metin, kod):
     s, _ = _cati_seti(tmp_path)
     k = s.yaz(metin)
