@@ -36,7 +36,7 @@ Bu dosya her ajanın okuduğu ortak kuraldır. Claude'a özgü oturum akışı `
 
 Lokman'a rapor, bayi mesajı, bayi rehberi ve montaj rehberi bu kuralla yazılır. Kod ve commit mesajı kapsam dışıdır. Tam metin `.claude/rules/yazim.md`'dedir; dosya her oturumda yüklenir, öteki ajanlar elle okur. Kaynak ASD-STE100 (Simplified Technical English, Issue 9) uyarlamasıdır; resmi metin değildir.
 
-- **Kelime:** bir kavram tek terim, bir kelime tek anlam; belirsiz kelime yerine sayı, ölçü ve birim; kısaltma ilk geçtiği yerde açılır.
+- **Kelime:** bir kavram tek terim (Portman Sözlüğü `docs/portman_sozlugu.md`, D-81), bir kelime tek anlam; belirsiz kelime yerine sayı, ölçü ve birim; kısaltma ilk geçtiği yerde açılır.
 - **Cümle:** bir cümle bir iş; talimat en çok 15, açıklama en çok 20 kelime; talimatta emir kipi; yapan belli; ek zinciri yok; çift olumsuz yok.
 - **Düzen:** paragraf tek konu, en çok 4 cümle; sıralı iş numaralı liste; risk varsa adımdan önce "DİKKAT:"; sayı rakam ve birimle (125,5 cm).
 - **Lokman'a rapor (en çok 5 satır):** Ne yapıldı / Sonuç (sayıyla) / Sorun var mı / Sizden ne lazım / Sonraki tek adım. "Bitti" ya da "geçti" demeden önce sonuç görsel olarak gösterilir ve onay beklenir.

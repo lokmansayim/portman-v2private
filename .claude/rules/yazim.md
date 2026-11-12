@@ -7,7 +7,7 @@ Bu dosyanın yolu yoktur; her oturumda yüklenir. Codex ve öteki ajanlar bu dos
 
 ## Kelime
 
-1. Bir kavram = tek terim. Portman Sözlüğü'ndeki terimi kullan; eş anlamlı üretme. (Sözlük henüz yok. Hazır olana kadar mevcut kural dosyalarındaki terimleri kullan.)
+1. Bir kavram = tek terim. Portman Sözlüğü'ndeki terimi kullan; eş anlamlı üretme. Sözlük: `docs/portman_sozlugu.md` (D-81; Lokman'ın seçimleri 11 Kasım 2026). Sözlükte olmayan kavramda mevcut kural dosyalarındaki terimi kullan; yeni terim yalnız Lokman'ın sözüyle girer.
 2. Bir kelime = tek anlam. Aynı kelimeyi iki farklı şey için kullanma.
 3. Belirsiz kelime yok: "biraz, yaklaşık, uygun şekilde, gerekirse, vb." Yerine sayı, ölçü ve birim yaz.
 4. Kısaltmayı ilk geçtiği yerde aç.
@@ -45,4 +45,4 @@ Lokman'ın metninde dördüncü satır "Senden ne lazım:" diye geçer. Lokman'a
 - Bu kural hiçbir kuralı kaldırmaz. Şu kurallarla birlikte geçerlidir: `CLAUDE.md` › Oturum başında 5 (iki cümle, tek soru), çalışma kuralları 3 ("Geçti" demez), 11 (onay açık sözdür) ve 20 (mesajda kod adı yok).
 - `/kapanis` Lokman'a özeti de bu şablonla yazar. Kapanış dosyasında (`.claude/skills/kapanis/SKILL.md`) hâlâ "6 satırlık özet" yazar. Dosya korunan dosyadır; metni Lokman'ın onayıyla ayrı işte değişir. O güne kadar bu şablon geçerlidir.
 - Var olan bayi mesajı şablonları, bayi rehberi ve montaj rehberi metinleri 8 Kasım 2026'da bu kurala göre yeniden yazılmadı. Onları çevirmek ayrı iştir. Bayiye giden metin bir çıktıdır: hedef örnek ve harness vakası yalnız Lokman'ın onayıyla değişir (D-02, D-28).
-- Portman Sözlüğü ayrı görevdir. Lokman: proje kartı görevi bittikten sonra açılır.
+- Portman Sözlüğü `docs/portman_sozlugu.md`'dedir (D-81, 11 Kasım 2026). Sözlükle çelişen bugünkü metinler sözlüğün son bölümündedir; onları çevirmek de ayrı iştir.
