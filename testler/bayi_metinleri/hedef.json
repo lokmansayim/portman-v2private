@@ -1,6 +1,6 @@
 {
  "aciklama": "BK-28 (pano 196, 197): bayiye giden tanıtım metinlerinin hedef örneği. Kıyas testler/test_bayi_metinleri.py. Değişiklik yalnız Lokman'ın onayıyla (D-02, D-28).",
- "onay": "bekliyor",
+ "onay": "Lokman, 12 Kasım 2026 14:50:26 UTC, kart \"Yeni 'Nasıl çalışır?' sayfası ve 'Merhaba' cevabı bayiye gitsin mi?\" → \"Onaylıyorum\" (D-84)",
  "nasil_calisir": "testler/bayi_metinleri/nasil_calisir_hedef.txt",
  "selam_hitapli": "Merhaba Deneme Bayi. Hangi model ya da ölçü için ön onay planı hazırlayalım? Örnek: \"Tek kat prefabrik, 2+1, 85 m²\" veya \"Tek kat çelik, 2+1, 88 m²\".",
  "selam_hitapsiz": "Merhaba. Hangi model ya da ölçü için ön onay planı hazırlayalım? Örnek: \"Tek kat prefabrik, 2+1, 85 m²\" veya \"Tek kat çelik, 2+1, 88 m²\".",
