@@ -713,8 +713,9 @@ def secenek_satirlari(gelen: dict, karar, katalog, metin: str, proje_koku: Path 
         celik = any(a.get("motor") == "genel" for a in adaylar)      # İE-08: çelik kartı (plan + çatı planı + perspektif) daha geniş panelde okunur
         # İE-25: çatı setinin başlığı kodun metni (plan seçildi, çatı seçilecek); öteki setlerde bayinin mesajı (bugünkü gibi)
         baslik = "Çatı seçin: plan aynı, fark çatıda" if st.get("tur") == "cati_varyanti" else f"{gelen.get('text') or ''}"[:60]
-        yol = BG.bilesik_gorsel([{**a, "gorsel_yolu": (KT_KOK() / a["gorsel"]) if a.get("gorsel") else None} for a in adaylar[:SC.EN_COK_GORSEL]],
-                                kok / "secenekler.png", baslik=baslik, panel_px=600 if celik else 460)
+        cati_karti = st.get("tur") == "cati_varyanti" and not celik      # İE-37: prefabrik çatı setinde kart çatının adını söyler
+        yol = BG.bilesik_gorsel([{**a, "gorsel_yolu": (KT_KOK() / a["gorsel"]) if a.get("gorsel") else None, **({"cati_karti": True} if cati_karti else {})}
+                                 for a in adaylar[:SC.EN_COK_GORSEL]], kok / "secenekler.png", baslik=baslik, panel_px=600 if celik else 460)
         if yol:
             gorsel = {"file": str(yol), "filename": yol.name, "sha256": _sha(yol), "mime": "image/png"}
     except Exception as e:      # görsel üretilemezse metinli buton mesajı gider; akış durmaz

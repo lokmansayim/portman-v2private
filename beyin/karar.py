@@ -348,6 +348,18 @@ def _karar_ver(talep: Talep, k: Konusma, bayi: dict | None, katalog: Katalog, me
         if aday is not None and aday.get("motor") == "genel":      # İE-08 A2/A3: çelik aday (genel motor): çatı seçenekleri ya da r01
             return _celik_dali(k, bayi, katalog, aday, ts)
         kod = aday["kod"] if aday else model["code"]
+        cati_istegi = None
+        if aday is not None and aday.get("motor") != "genel":
+            cati_istegi = _prefabrik_cati_istegi(k, katalog, aday, ts)  # İE-37 (hakem): çatı sözü ve açık çatı seti bayinin sözünden
+            if isinstance(cati_istegi, Karar):
+                return cati_istegi
+            if cati_istegi:
+                aday, kod = katalog.aday(cati_istegi), cati_istegi
+                ts["katalog_kodu"] = kod
+        if aday is not None and aday.get("varyantlar") and not cati_istegi and _prefabrik_cati_sorulur(k, aday):
+            secenek = _prefabrik_cati_seti(k, katalog, aday, ts)       # İE-37 (D-83): prefabrik evde plan seçildi, çatı sonra
+            if secenek is not None:
+                return secenek
         yol = katalog.sablon_yolu(kod)
         if yol is None:
             return _bitir(k, Karar(eylem="yonlendir", gerekce="şablon kodlanmamış",
@@ -580,6 +592,199 @@ def _cati_varyant_seti(k: Konusma, bayi: dict, katalog: Katalog, taban: dict, ts
     k.d["soru_sayisi"] = max(0, int(k.d.get("soru_sayisi") or 0) - 1)   # çatı seti planın seçimiyle aynı soru (hakem ikinci tur 3: MAX_SORU)
     return _secenekler(k, katalog, ts, uygun=SC.cati_seti(uygun), tur="cati_varyanti", referans=taban,
                        ek_not=CELIK_ISTEK_NOTU if saklandi else "")
+
+
+def _prefabrik_cati_sorulur(k: Konusma, aday: dict) -> bool:
+    """İE-37 (D-83; Lokman, 12 Kasım 2026): çatı seçenekli prefabrik ev seçildi; çatı seti sunulur mu? Çatı setinden seçimde (evin kendi çatısı
+    düğmesi ya da kodu) ve aynı evin çizilmiş planının revizyonunda sunulmaz: plan o çatıyla çizilir."""
+    st = k.d.get("secenek_seti") or {}
+    if st.get("durum") == "acik" and st.get("tur") == "cati_varyanti":
+        return False
+    son = ((k.d.get("son_is_emri") or {}).get("talep") or {}).get("kaynak")
+    return not (son and Katalog.taban_kod(son) == Katalog.taban_kod(aday.get("kod")))
+
+
+def _prefabrik_cati_seti(k: Konusma, katalog: Katalog, taban: dict, ts: dict) -> Karar | None:
+    """İE-37 (D-83): prefabrik ev alan setinden (ya da kodla) seçildi, çatı yazılmadı → evin çatı seti (evin kendi çatısı ve kayıtlı çatı
+    seçenekleri; tek görsel, numara ve düğme; öncelik sorusu yok). Kartın görseli çatının ön ve sol görünüşü (`cati_gorsel`), adı
+    `cati_adi`. Görünür seçenek yoksa (K-A10 kabul kaydı yok) None: plan evin kendi çatısıyla çizilir (bugünkü yol)."""
+    uygun = [taban] + [v for v in (katalog.aday(x) for x in taban.get("varyantlar") or []) if v is not None]
+    if len(uygun) < 2:
+        return None
+    _seti_kapat(k, taban["kod"])
+    k.d["taslak"]["katalog_kodu"] = taban["kod"]
+    eski = k.d.get("secenek_seti")
+    if eski and eski.get("durum") == "secildi":
+        k.d.setdefault("eski_setler", []).append(eski)
+        k.d["eski_setler"] = k.d["eski_setler"][-5:]
+    k.not_dus("kural", f"plan seçildi, çatı sonra: {taban['kod']} çatı seti (prefabrik)")
+    k.d["soru_sayisi"] = max(0, int(k.d.get("soru_sayisi") or 0) - 1)   # çatı seti planın seçimiyle aynı soru (İE-25 gibi)
+    sunulan = [{**a, "sunum": {**(a.get("sunum") or {}), "cati_adi": a.get("cati_adi")}, "gorsel": a.get("cati_gorsel") or a.get("gorsel")}
+               for a in uygun]
+    return _secenekler(k, katalog, ts, uygun=SC.cati_seti(sunulan), tur="cati_varyanti", referans=sunulan[0])
+
+
+# İE-37 (geometri hakemi, üç tur): prefabrik evde bayinin çatı cümlesi. Bu köklerden birini taşıyan cümle çatı cümlesidir. Çatıyı yalnız
+# seçeneğin kodu seçer ("PA-06-K olsun"); çatının adı ("kırma", "cumbalı") seçtirmez, çatı setini getirir: ek ve kuruluş ("cumbasız",
+# "kırmadan farklı") okunmaz, tahmin yok (K21). Cümle yalnız seçeneklerin adı, model kodu ve bağlam sözcükleriyle kurulmamışsa (eğim,
+# saçak, kaplama, renk, başka oda ya da cephe, sayı) istek seçeneklerin dışındadır: bugünkü gibi yönlendirilir (13.10 kuralı).
+_CATI_KOKLERI = ("cati", "sacak", "mahya", "kiremit", "trapez", "shingle", "kalkan", "makas", "cumba", "kirma", "besik")
+_CATI_ZAYIF = ("egim", "kaplama", "sandvic", "membran", "oluk", "dere", "osb")     # yalnız LLM çatı isteği okuduysa çatı sözü
+_CATI_BAGLAM = {"olsun", "olacak", "olur", "olabilir", "olsa", "olmali", "mu", "mi", "misiniz", "musunuz", "yapin", "yapiniz", "yapalim",
+                "yapilsin", "yapilabilir", "yapar", "istiyoruz", "isteriz", "istiyorum", "isterim", "istiyor", "tercih", "ediyoruz", "ediyorum",
+                "edelim", "secelim", "sectik", "seciyoruz", "secin", "da", "de", "ile", "ve", "bir", "bu", "su", "o", "zaman", "ev", "evin",
+                "evde", "model", "modeli", "plan", "plani", "olarak", "tipi", "tip", "seklinde", "sekli", "farkli", "baska", "ustunde",
+                "ustune", "uzerinde", "uzerine", "lutfen", "tamam", "evet", "seciyorum", "sectim", "rica", "ederim", "ederiz", "olan",
+                "olani", "olsun", "onu", "bunu", "ilk", "birinci", "ikinci", "ucuncu", "son", "sonuncu", "ortadaki", "sondaki",
+                "gorelim", "bakalim", "olmasi", "yapilmasi", "istek", "istegi", "isteniyor", "ama", "fakat", "yap", "yapalim", "yapsin",
+                "yapiyoruz", "yapacagiz", "gecelim", "gecin", "gecsin", "gecilsin", "gecis", "alalim", "alacagiz", "aliyoruz",
+                "secildi", "secilsin", "secilen", "secim", "secimi", "kullanalim", "kullanilsin", "uygulayin", "uygulansin"}
+_NUMARA = {"numarali", "numara", "nolu", "no", "sira", "sirada", "secenek", "secenegi"}
+_SIRA_SOZU = {"ilk": "1", "birinci": "1", "ikinci": "2", "ucuncu": "3"}            # açık sette sıra sözü numaradır ("ikinci çatı olsun")
+_KALSIN_BAGLAM = {"simdilik", "oldugu", "gibi", "hali", "haliyle", "mevcut", "kendi", "eski"}  # "çatı olduğu gibi kalsın"
+_CATI_DISI = ("zemin", "doseme", "duvar", "rampa", "merdiven", "parke", "laminat", "seramik", "fayans")   # zayıf kökün çatı dışı öznesi
+_CATI_EKLERI = {"", "i", "a", "e", "u", "si", "su", "yi", "yu", "ya", "ye", "ni", "nu", "da", "de", "ta", "te", "in", "un", "nin", "nun",
+                "dan", "den", "nda", "nde", "ndan", "nden", "li", "lu", "siz", "suz", "sini", "sinin", "sina", "sinda", "ler", "lar"}
+
+
+def _cati_govdesi(w: str) -> str:
+    """Kart adındaki sözcüğün gövdesi ("salonda" → "salon"); gövde en az 4 harf kalır."""
+    return w[:-2] if w.endswith(("da", "de")) and len(w) >= 6 else w
+
+
+def _cati_adi_mi(w: str, adlar: set[str]) -> bool:
+    """Sözcük bir seçeneğin adının gövdesi, yalın ya da bilinen bir ekle ("salonun", "cumbalı", "kırmadan")."""
+    return any(w.startswith(g) and w[len(g):] in _CATI_EKLERI for g in adlar)
+
+
+def _kodlari_ayir(sozler: list[str], adlar: dict) -> tuple[list[str], set[str]]:
+    """Cümleden model kodlarını çıkarır ("pa 06 k", "pa06k", kesme ekiyle "pa 06 k yi"): kalan sözler ve yazılı kodlar. Harf yalnız
+    seçeneğin kodu olunca koda katılır ("PA-06 e" evin kodu)."""
+    i, kalan, yazili = 0, [], set()
+    while i < len(sozler):
+        w = sozler[i]
+        if re.fullmatch(r"pa\d{2}[a-z]?", w):
+            yazili.add(w.upper()); i += 1
+        elif w == "pa" and i + 1 < len(sozler) and re.fullmatch(r"\d{2}", sozler[i + 1]):
+            harf = sozler[i + 2] if i + 2 < len(sozler) and len(sozler[i + 2]) == 1 else ""
+            harf = harf if harf and f"PA{sozler[i + 1]}{harf.upper()}" in adlar else ""
+            yazili.add(f"PA{sozler[i + 1]}{harf.upper()}"); i += 3 if harf else 2
+        else:
+            kalan.append(w); i += 1
+            continue
+        if i < len(sozler) and sozler[i] and sozler[i] in _CATI_EKLERI:
+            i += 1                                             # kesme eki ("PA-06-K'yı")
+    return kalan, yazili
+
+
+def _okundu_mu(w: str, okunan: set[str]) -> bool:
+    """LLM'in çatı isteğindeki söz bu mesajda okunan bir cümlede ya da bağlamda var (ilk 4 harfi aynı: "yapılsın" ~ "yapılması")."""
+    return any(w == o or (len(w) >= 4 and len(o) >= 4 and w[:4] == o[:4] and (w.startswith(o) or o.startswith(w) or w[:5] == o[:5]))
+               for o in okunan | _CATI_BAGLAM)
+
+
+def _cati_sorusu(k: Konusma, st: dict) -> Karar:
+    """Açık çatı setinde seçim yapılmadı: "Hangi çatı olsun?" (set açık kalır; numara, kod ya da düğme seçer)."""
+    satirlar = "\n".join(f"{a.get('sira')}. {SC.gosterim(a)}" + (f" ({ad})" if (ad := (a.get("sunum") or {}).get("cati_adi")) else "")
+                         for a in st.get("adaylar") or [])
+    return _soru(k, "secenek", f"Hangi çatı olsun?\n\n{satirlar}\n\nNumarasını ya da kodunu yazın.")
+
+
+def _prefabrik_cati_istegi(k: Konusma, katalog: Katalog, aday: dict, ts: dict) -> str | Karar | None:
+    """İE-37 (geometri hakemi, 12 Kasım 2026; sekiz tur): çatı seçenekli prefabrik evde bayinin bu mesajı cümle cümle okunur (K18).
+    - Çatıyı yalnız kod seçer: seçeneğin kodu ("PA-06-K olsun"), açık çatı setinde evin kodu ya da etiket harfi ("çatı K olsun"), düğme,
+      numara. Tek kod, olumsuz söz yok ve aynı mesajdaki çatı adları o seçeneğin adıysa kod döner; kod ile çelişen ad ("PA-06-K olsun,
+      cumbalı olsun"), iki kod ya da olumsuz söz kararsızlıktır: çatı seti (set açıksa soru). Tahmin yok (K21).
+    - Çatının adı ("kırma", "salonun üstünde cumba"; bilinen eklerle) seçim yapmaz, çatı setini getirir; ek ve kuruluş okunmaz.
+    - Seçeneklerin dışında bir şey isteyen çatı cümlesi (eğim, saçak, kaplama, renk, başka oda ya da cephe, sayı) ve önceki mesajdan kalan
+      çatı isteği (LLM `cati_degistir`, bu mesajda çatı cümlesi yok) bugünkü gibi yönlendirilir; mesaj isteği ve seçilebilecek çatıları yazar
+      (13.10 kuralı: istek sessizce düşmez).
+    - Çatı seti açıkken seçim yoksa plan evin çatısıyla çizilmez: "Hangi çatı olsun?" (aynı mesajdaki pencere isteği taslakta bekler).
+    Çatı içeriği yoksa ve set açık değilse ya da evin görünür seçeneği yoksa None: bugünkü yol."""
+    taban = katalog.aday(Katalog.taban_kod(aday.get("kod")))
+    if taban is None or not taban.get("varyantlar"):
+        return None
+    uygun = [taban] + [v for v in (katalog.aday(x) for x in taban["varyantlar"]) if v is not None]
+    if len(uygun) < 2:
+        return None
+    st = k.d.get("secenek_seti") or {}
+    set_acik = st.get("durum") == "acik" and st.get("tur") == "cati_varyanti"
+    istekler = [v for v in ts.get("varyantlar") or [] if v.get("tur") == "cati_degistir"]
+    metin = k.d.get("son_metin") or ""
+    adlar: dict[str, set[str]] = {}                       # seçeneğin adı: çatı tipinin ve kart adının gövdeleri
+    for a in uygun:
+        yol = katalog.sablon_yolu(a["kod"])
+        tip = str(((json.loads(yol.read_text(encoding="utf-8")) if yol else {}).get("cati") or {}).get("tip") or "")
+        adlar[a["kod"]] = {_cati_govdesi(w) for w in CO.norm(tip.replace("_", " ") + " " + str(a.get("cati_adi") or "")).split() if len(w) >= 4}
+    tum_ad = set().union(*adlar.values())
+    harfler = {c[len(taban["kod"]):].lower(): c for c in adlar if c != taban["kod"]}       # etiket harfi: k → PA06K
+    olumsuz, uygulanamaz, cati_cumlesi, kodlar, ad_sozleri, yazili = False, [], False, set(), [], set()
+    kalsin_adlari, okunan = [], set()                          # "cumba kalsın" adları yalnız kodla çelişki için; okunan: LLM isteğinin kıyası
+    son_sira = str(max([int(a.get("sira") or 0) for a in st.get("adaylar") or []] or [0]))
+    for ham in re.split(r"[.,;:!?\n]+", metin):
+        kalan, kod_sozu = _kodlari_ayir(CO.norm(ham).split(), adlar)   # seçimi `_secim_kodlari` da okur
+        yazili |= kod_sozu
+        olumsuz = olumsuz or any(CO._OLUMSUZ_FIIL_T.fullmatch(w) for w in kalan)
+        etiket = [w for w in kalan if w in harfler]
+        if etiket and all(w in harfler or w in _CATI_BAGLAM or w.startswith("cati") for w in kalan):
+            kodlar |= {harfler[w] for w in etiket}             # "çatı K olsun", "K olsun": set mesajının etiketi
+            okunan |= set(kalan)
+            continue
+        sira = {**_SIRA_SOZU, "son": son_sira, "sonuncu": son_sira}
+        sayi = [w for w in kalan if w.isdigit()] + [sira[w] for w in kalan if w in sira]
+        if set_acik and len(sayi) == 1 and all(w.isdigit() or w in sira or w in _CATI_BAGLAM or w.startswith("cati") or w in _NUMARA
+                                               for w in kalan):
+            kodlar |= {a["kod"] for a in st.get("adaylar") or [] if str(a.get("sira")) == sayi[0]}   # "2 numaralı", "ikinci çatı olsun"
+            okunan |= set(kalan) | set(sayi)
+            continue
+        if any(CO._KALSIN_T.fullmatch(w) or w == "ayni" for w in kalan) and all(
+                CO._KALSIN_T.fullmatch(w) or w == "ayni" or w in _KALSIN_BAGLAM or w in _CATI_BAGLAM or w.startswith("cati")
+                or _cati_adi_mi(w, tum_ad) for w in kalan):
+            kalsin_adlari += [w for w in kalan if _cati_adi_mi(w, tum_ad)]   # "PA-06-K olsun, cumba kalsın": kodla çelişir (hakem yedinci tur)
+            okunan |= set(kalan)
+            continue                                           # "çatı aynı kalsın", "kırma kalsın": istek değil (13.10 kuralı); "cumba yatak
+                                                               # odasının üstünde kalacak" bir istektir, aşağıda okunur (hakem altıncı tur)
+        guclu = any(w.startswith(c) for w in kalan for c in _CATI_KOKLERI)
+        zayif = istekler and any(w.startswith(c) for w in kalan for c in _CATI_ZAYIF) and not any(w.startswith(_CATI_DISI) for w in kalan)
+        if not (guclu or zayif):
+            continue                                           # çatı cümlesi değil (pencere, oda, zemin, rampa …): kendi yolundan
+        if not all(w in _CATI_BAGLAM or w.startswith(("cati", "degis")) or _cati_adi_mi(w, tum_ad)
+                   or CO._OLUMSUZ_FIIL_T.fullmatch(w) for w in kalan):
+            if istekler:                                       # LLM çatı isteği okudu: seçeneklerin dışında, yönlendirilir
+                uygulanamaz.append(ham.strip())
+            continue                                           # okumadıysa bugünkü yol (cümle prefabrikte okunmuyordu)
+        cati_cumlesi = True
+        okunan |= set(kalan)
+        ad_sozleri += [w for w in kalan if _cati_adi_mi(w, tum_ad)]
+    yazili |= set(_secim_kodlari(metin, katalog))
+    kodlar |= {c for c in yazili if c in adlar and (c != taban["kod"] or set_acik)}
+    if taban["kod"] in yazili and any(c in adlar and c != taban["kod"] for c in yazili):
+        olumsuz = True                                         # evin kodu ve bir çatı kodu birlikte ("şimdilik PA-06, PA-06-K'yı da görelim")
+    if istekler and not cati_cumlesi and not kodlar:
+        uygulanamaz += [str(v.get("aciklama") or "çatı değişikliği") for v in istekler]   # önceki mesajın isteği: bugünkü gibi
+    for v in istekler:                                         # hakem yedinci tur: LLM'in okuduğu istek ("yağmur oluğu", "baca") okunan
+        soz, _ = _kodlari_ayir(CO.norm(str(v.get("aciklama") or "")).split(), adlar)     # cümlelerde yoksa kodla da düşmez: yönlendirilir
+        if any(not (_okundu_mu(w, okunan) or w.startswith(("cati", "degis")) or _cati_adi_mi(w, tum_ad) or w == "ayni"
+                    or CO._OLUMSUZ_FIIL_T.fullmatch(w) or CO._KALSIN_T.fullmatch(w)) for w in soz):
+            uygulanamaz.append(str(v.get("aciklama")))
+    if uygulanamaz:
+        secenek = ", ".join(SC.gosterim(a) + (f" ({a['cati_adi']})" if a.get("cati_adi") else "") for a in uygun)
+        return _bitir(k, Karar(eylem="yonlendir", gerekce="prefabrik çatı isteği seçeneklerin dışında",
+                                mesaj=f"\"{_kisalt(uygulanamaz[0])}\" isteği otomatik yapılamıyor; bu evde çatı için şunlar seçilebilir: {secenek}. "
+                                      + YONLENDIRME))
+    if not (kodlar or ad_sozleri or istekler or cati_cumlesi or set_acik):
+        return None                                            # çatı içeriği yok: bugünkü yol (evin kodu → çatı seti)
+    ts["varyantlar"] = [v for v in ts.get("varyantlar") or [] if v.get("tur") != "cati_degistir"]
+    if len(kodlar) == 1 and not olumsuz:
+        secilen = next(iter(kodlar))
+        if all(_cati_adi_mi(w, adlar[secilen]) for w in ad_sozleri + kalsin_adlari):
+            _seti_kapat(k, secilen)
+            k.not_dus("kural", f"çatı seçimi kodla: {secilen}")
+            return secilen
+    k.not_dus("kural", "çatı seçimi yok ya da kararsız: çatı seti")
+    if set_acik:
+        return _cati_sorusu(k, st)
+    return _prefabrik_cati_seti(k, katalog, taban, ts)
 
 
 def _aday_mahalleri(aday: dict) -> list[dict]:
@@ -1472,7 +1677,8 @@ def _sozcukler(metin: str | None, katalog: Katalog) -> list[tuple[int, str, str 
         elif a.upper() in ("KT", "PA") and i + 1 < len(toks) and re.fullmatch(r"\d{2}", toks[i + 1]):        # İE-08: "KT-01", "KT 01"; İE-36: "PA-04"
             a = a + toks[i + 1]; i += 1
         # İE-08: varyant harfi ayrı belirteçse ("Ç8801-K", "Ç8801 K") ve o aday kayıtlıysa birleşir; LLM'siz, yalnız kayıtlı kodlar
-        if re.fullmatch(r"[PÇC]\d{4}", a.upper()) and i + 1 < len(toks) and re.fullmatch(r"[A-Za-z]", toks[i + 1]) and katalog.aday(a + toks[i + 1].upper()):
+        # İE-37: prefabrik çatı seçeneği de ("PA-06-K", "PA 06 K"; yalnız kayıtlı ve görünür kod)
+        if re.fullmatch(r"[PÇC]\d{4}|PA\d{2}", a.upper()) and i + 1 < len(toks) and re.fullmatch(r"[A-Za-z]", toks[i + 1]) and katalog.aday(a + toks[i + 1].upper()):
             a = a + toks[i + 1].upper(); i += 1
         m = katalog.bul(a)
         ad = katalog.aday(a) if m is None else None
@@ -1603,7 +1809,7 @@ def _secenekler(k: Konusma, katalog: Katalog, ts: dict, uygun: list[dict] | None
     if not uygun:
         return None
     celik_mi = ts.get("yapi_turu") == "celik" or SC.celik_seti_mi(uygun)
-    if ts.get("oncelik") is None and len(uygun) >= 2 and not celik_mi:
+    if ts.get("oncelik") is None and len(uygun) >= 2 and not celik_mi and tur != "cati_varyanti":   # İE-37: çatı setinde öncelik yok
         k.d["taslak"]["oncelik_soruldu"] = True
         return _soru(k, "oncelik", "Sıralamada ne öne çıksın: bütçe mi, yaşam alanı mı, kısa montaj mı? Fark etmezse \"fark etmez\" yazın.",
                      butonlar=[{"id": "q:oncelik:butce", "baslik": "Bütçe önce"}, {"id": "q:oncelik:yasam", "baslik": "Yaşam alanı önce"},

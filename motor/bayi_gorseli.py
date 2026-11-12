@@ -138,6 +138,36 @@ def plan_gorseli(ie: dict, yol: Path, v: dict | None = None, genislik_px: int = 
     return yol
 
 
+CATI_GORUNUSLERI = ("on", "sol")           # İE-37: çatı görselinde ön görünüş üstte, sol görünüş altta (kalkan, kırma ve cumba ikisinde ayrılır)
+CATI_ZOOM = 4.0                              # pt → px (A4 bayi sayfasından kırpma; ~1150 px genişlik)
+
+
+def cati_gorseli(pdf: Path, yerler: dict, yol: Path, gorunusler: tuple = CATI_GORUNUSLERI) -> Path:
+    """İE-37 · çatı seçeneği görseli: Motor'un ön onay PDF'inden (`dxf_out.uret`, M-02) ön ve sol görünüş, alt alta (PNG). Görünüşler
+    sayfadaki bölgelerinden (`dxf_out.uret(bolge_yerleri=)`, mm) kırpılır; yeniden çizilmez. Çatı seti görselinde kart budur
+    (`bilesik_gorsel`); plan aynı olduğundan kat planı konmaz. Aynı PDF'ten aynı bayt."""
+    import fitz
+    from PIL import Image
+    mm = 72 / 25.4
+    parcalar = []
+    with fitz.open(str(pdf)) as d:
+        sayfa = d[0]
+        for ad in gorunusler:
+            if ad not in yerler:
+                raise ValueError(f"çatı görseli: PDF'te {ad} görünüşü yok (bölgeler: {', '.join(sorted(yerler))})")
+            x, y, w, h = (float(v) for v in yerler[ad])
+            pix = sayfa.get_pixmap(matrix=fitz.Matrix(CATI_ZOOM, CATI_ZOOM), clip=fitz.Rect(x * mm, y * mm, (x + w) * mm, (y + h) * mm), alpha=False)
+            parcalar.append(Image.frombytes("RGB", (pix.width, pix.height), pix.samples))
+    ara = 24
+    W = max(p.width for p in parcalar); H = sum(p.height for p in parcalar) + ara * (len(parcalar) - 1)
+    img = Image.new("RGB", (W, H), "white"); y = 0
+    for p in parcalar:
+        img.paste(p, ((W - p.width) // 2, y)); y += p.height + ara
+    yol = Path(yol); yol.parent.mkdir(parents=True, exist_ok=True)
+    img.save(str(yol), "PNG", optimize=True)
+    return yol
+
+
 def _tr(x) -> str:
     """Türkçe sayı: 74.33 → "74,3", 88.0 → "88" (Lokman, 12.10.2026 göz denetimi: "74,3 m²")."""
     try:
@@ -149,9 +179,13 @@ def _tr(x) -> str:
 
 def kart_altyazisi(a: dict) -> list[str]:
     """Seçenek görselinde kartın alt yazı satırları. Prefabrik: bugünkü tek satır (değişmez). Çelik (`motor == genel`, İE-08): iki satır —
-    m² Türkçe biçimde ("88 m² katalog · kapalı 74,3 m²") ve çatı adı ("Çatı: Beşik + cumba, doğu ucu kırma"); kesilmez, çizimde sığdırılır."""
+    m² Türkçe biçimde ("88 m² katalog · kapalı 74,3 m²") ve çatı adı ("Çatı: Beşik + cumba, doğu ucu kırma"); kesilmez, çizimde sığdırılır.
+    İE-37: prefabrik çatı setinin kartı (`cati_karti`, worker işaretler) önce çatı adı ("Çatı: Kırma"), sonra m²; iki satır, sığdırılır."""
     m2 = a.get("katalog_m2"); kapali = a.get("kapali_m2")
     cati = (a.get("sunum") or {}).get("cati_adi") if isinstance(a.get("sunum"), dict) else None     # çelik: çatı adı (K/L farkı)
+    if a.get("cati_karti") and a.get("motor") != "genel":                  # İE-37: prefabrik çatı setinde kart çatıyı söyler, m² ikinci satırda
+        return [s for s in ((f"Çatı: {cati}" if cati else ""),
+                            (f"{_tr(m2)} m² katalog" if m2 is not None else "") + (f" · kapalı {_tr(kapali)} m²" if kapali is not None else "")) if s]
     if a.get("motor") == "genel":
         satirlar = [(f"{_tr(m2)} m² katalog" if m2 is not None else "") + (f" · kapalı {_tr(kapali)} m²" if kapali is not None else "")]
         if cati:
@@ -203,7 +237,7 @@ def bilesik_gorsel(adaylar: list[dict], yol: Path, baslik: str = "", panel_px: i
         d.text((x + 8, y + panel_px + 8), f"{a.get('sira', i + 1)}. {a.get('gosterim') or a.get('kod', '')}", font=f_b, fill="#1f1f1f")
         puan = a.get("puan")
         satirlar = kart_altyazisi(a)
-        if a.get("motor") == "genel":                                         # çelik: satırlar sığdırılır; 1. satır puanın solunda kalır
+        if a.get("motor") == "genel" or a.get("cati_karti"):                  # çelik ve İE-37 prefabrik çatı kartı: satırlar sığdırılır; 1. satır puanın solunda
             for j, s in enumerate(satirlar[:2]):
                 genislik = panel_px - 16 - (96 if (puan is not None and j == 0) else 0)
                 f, s2 = _sigdir(d, s, font_yol, 16, genislik)

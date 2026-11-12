@@ -14,6 +14,7 @@ KATALOG_DONDURULMUS_JSON = Path(__file__).resolve().parent / "veri" / "katalog_3
 ADAYLAR_JSON = Path(__file__).resolve().parent / "veri" / "adaylar.json"      # İE-04 aday kaydı (şablonlar is_emri/adaylar/)
 ADAYLAR_TEST_JSON = Path(__file__).resolve().parent / "veri" / "adaylar_test.json"   # yalnız test_adaylari=True iken yüklenir
 ADAYLAR_PREFABRIK_JSON = Path(__file__).resolve().parent / "veri" / "adaylar_prefabrik.json"   # İE-36 (D-80): prefabrik adaylar (PA-01…); yeni dosya, adaylar.json aynen
+CATI_VARYANT_DIR = Path(__file__).resolve().parent / "veri" / "cati_varyantlari"   # İE-37 (D-83): prefabrik evin çatı seçenekleri, ev başına bir dosya
 SABLON_DIR = ROOT / "is_emri"
 ADAY_SABLON_DIR = SABLON_DIR / "adaylar"
 SABLONLAR = {"P6001": "P6001_2plus1_6x6.json"}          # kodlanmış katalog modelleri (büyüyecek)
@@ -37,10 +38,14 @@ class Katalog:
     prefabrik aday yalnız kabul kümesinde açıkça varsa görünür (küme verilmediyse görünmez: harness ve kabulsüz yerel yol aynen).
     İE-09 (D-20): atölyede kabul edilen modeller (`beyin/banka.py`, `modeller/banka/`) adaylar.json'un ardından okunur; çekirdek bankayla
     çakışan kod alınmaz. Atölye modeli yalnız kabul kümesinde açıkça varsa görünür (küme verilmediyse görünmez); çatı varyantı ayrı
-    model olarak hiç sunulmaz."""
+    model olarak hiç sunulmaz.
+    İE-37 (D-83): prefabrik evin çatı seçenekleri `veri/cati_varyantlari/<taban>.json`'dan (ev başına bir dosya; kayıt `araclar/
+    cati_varyanti_kaydet.py`). Varyant ayrı aday kaydıdır (kod PA06K, gösterim PA-06-K; `taban` evin kodu); evin kaydına (dosyası değişmez)
+    bellekte `varyantlar`, `cati_adi` ve `cati_gorsel` eklenir. Görünürlük öteki prefabrik adaylar gibi: yalnız kabul kümesinde (K-A10)."""
 
     def __init__(self, path: Path = KATALOG_JSON, adaylar_path: Path = ADAYLAR_JSON, test_adaylari: bool = False,
-                 kabul_edilmis: set | None = None, banka: bool = True, prefabrik_path: Path | None = ADAYLAR_PREFABRIK_JSON):
+                 kabul_edilmis: set | None = None, banka: bool = True, prefabrik_path: Path | None = ADAYLAR_PREFABRIK_JSON,
+                 cati_varyant_dir: Path | None = CATI_VARYANT_DIR):
         self.modeller = {m["code"].upper(): m for m in json.loads(path.read_text(encoding="utf-8"))}
         self.test_adaylari = bool(test_adaylari)
         self.kabul_edilmis = set(kabul_edilmis) if kabul_edilmis is not None else None
@@ -52,10 +57,28 @@ class Katalog:
             for a in json.loads(Path(prefabrik_path).read_text(encoding="utf-8")):
                 if isinstance(a, dict) and a.get("kod"):
                     self.adaylar.setdefault(str(a["kod"]).upper(), a)
+        if cati_varyant_dir is not None and Path(cati_varyant_dir).is_dir():
+            for f in sorted(Path(cati_varyant_dir).glob("*.json")):
+                self._cati_varyantlari(json.loads(f.read_text(encoding="utf-8")))
         if banka:
             from beyin import banka as B
             for a in B.kayitlar():
                 self.adaylar.setdefault(str(a["kod"]).upper(), a)
+
+    def _cati_varyantlari(self, kayit: dict) -> None:
+        """İE-37: bir evin çatı seçenekleri dosyası {taban, cati_adi, cati_gorsel, varyantlar: [aday kaydı]} → varyantlar aday olur, evin
+        kaydının kopyasına `varyantlar` (sırasıyla), `cati_adi`, `cati_gorsel` eklenir. Evin kaydı yoksa ya da kod çakışırsa alınmaz."""
+        taban = self.kod_normalize(kayit.get("taban"))
+        ev = self.adaylar.get(taban or "")
+        if ev is None or ev.get("yapi_turu", "prefabrik") == "celik":
+            return
+        kodlar = []
+        for v in kayit.get("varyantlar") or []:
+            k = str(v.get("kod") or "").upper()
+            if k and k not in self.adaylar and self.taban_kod(k) == taban:
+                self.adaylar[k] = v; kodlar.append(v["kod"])
+        if kodlar:
+            self.adaylar[taban] = {**ev, "varyantlar": kodlar, "cati_adi": kayit.get("cati_adi"), "cati_gorsel": kayit.get("cati_gorsel")}
 
     def aday_gorunur(self, a: dict) -> bool:
         if a.get("banka"):
@@ -88,7 +111,7 @@ class Katalog:
     @staticmethod
     def kod_normalize(s: str | None) -> str | None:
         """P6001, Ç8201, 6001 → P6001, C8801 → Ç8801; İE-08: çelik varyant harfi ve müşteri projesi kodu da (Ç8801-K → Ç8801K, KT-01 → KT01);
-        İE-36: prefabrik aday kodu (PA-04 → PA04).
+        İE-36: prefabrik aday kodu (PA-04 → PA04); İE-37: prefabrik çatı seçeneği (PA-06-K → PA06K).
         Prefabrik kodda harf eki yoktur ("P6001-A" kod değildir; bugünkü davranış — geometri hakemi 12.10)."""
         if not s:
             return None
@@ -96,16 +119,16 @@ class Katalog:
         t = "Ç" + t[1:] if re.fullmatch(r"C\d{4}[A-Z]?", t) else t
         if re.fullmatch(r"\d{4}", t):
             t = "P" + t
-        return t if re.fullmatch(r"Ç\d{4}[A-Z]?|P\d{4}|KT\d{2}|PA\d{2}", t) else s.strip().upper()
+        return t if re.fullmatch(r"Ç\d{4}[A-Z]?|P\d{4}|KT\d{2}|PA\d{2}[A-Z]?", t) else s.strip().upper()
 
     @staticmethod
     def taban_kod(s: str | None) -> str | None:
         """Çelik varyantın taban modeli: Ç8801K → Ç8801 (aynı tabandaki varyant başka model değildir; seçenek setinden seçim konuşmayı
-        sıfırlamaz). Prefabrik ve KT kodu olduğu gibi."""
+        sıfırlamaz); İE-37: prefabrik çatı seçeneği de (PA06K → PA06). P, KT ve PA kodu olduğu gibi."""
         k = Katalog.kod_normalize(s)
         if not k:
             return None
-        m = re.fullmatch(r"(Ç\d{4})[A-Z]?", k)
+        m = re.fullmatch(r"(Ç\d{4}|PA\d{2})[A-Z]?", k)
         return m.group(1) if m else k
 
     def bul(self, kod: str | None) -> dict | None:
