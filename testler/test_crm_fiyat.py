@@ -139,18 +139,19 @@ def test_esleme_tutarli_ve_fiyat_yazmaz(E):
 def test_esleme_son_defterin_butun_kalemlerini_kapsar(E):
     """Eşlemenin anahtarları ve birimleri son elle defterin (r13) kalemleri, aynı sırayla; bant, boy ve makas kuralı aynı kalemlerde.
     D-72'den sonra yeni kalem (Motor'un listesinde olup defterde olmayan anahtar) yalnız eşlemeye girer: kapanmış defter değişmez. Yeni
-    anahtarlar defterin kalemlerinden sonra gelir (PR-5, TK-06'nın 15 anahtarı; `test_pr5_tk06_anahtarlari`)."""
+    anahtarlar defterin kalemlerinden sonra gelir (PR-5, TK-06'nın 15 anahtarı; `test_pr5_tk06_anahtarlari`; r06, metal kiremit vidası;
+    `test_r06_mahya_bandi_ve_metal_kiremit_vidasi`)."""
     S = _oku(SON_DEFTER)
     for hat in ("prefabrik", "celik"):
         H, R = E["hatlar"][hat], S["hatlar"][hat]
         assert list(H["kalemler"])[:len(R["kalemler"])] == list(R["kalemler"]) and H["anahtar"] == R["anahtar"] and H["atla"] == R["atla"]
         assert {k: H["kalemler"][k]["birim"] for k in R["kalemler"]} == {k: g["birim"] for k, g in R["kalemler"].items()}
-        assert set(H["kalemler"]) - set(R["kalemler"]) == (set(PR5_ANAHTARLAR) if hat == "prefabrik" else set())
+        assert set(H["kalemler"]) - set(R["kalemler"]) == (set(PR5_ANAHTARLAR) | set(R06_ANAHTARLAR) if hat == "prefabrik" else set())
         assert [(b["kalem"], b["kalinlik_mm"], b["yukseklik_mm"], [(a["en_mm"], a["alt_haric"]) for a in b["araliklar"]]) for b in H["bantlar"]] == \
                [(b["kalem"], b["kalinlik_mm"], b["yukseklik_mm"], [(a["en_mm"], a.get("alt_haric", False)) for a in b["araliklar"]]) for b in R["bantlar"]]
     P, RP = E["hatlar"]["prefabrik"], S["hatlar"]["prefabrik"]
     assert [(b.get("kalem"), b.get("kalem_baslar"), b.get("kapatma_m")) for b in P["boy_onerileri"]] == \
-           [(b.get("kalem"), b.get("kalem_baslar"), b.get("kapatma_m")) for b in RP["boy_onerileri"]]
+           [(b.get("kalem"), b.get("kalem_baslar"), b.get("kapatma_m")) for b in RP["boy_onerileri"]] + [(None, "Metal kiremit (100 cm kapatır) · ", None)]
     assert {k: P["makas_kurali"][k] for k in ("kalem_baslar", "kg_m", "sacak_mm")} == {k: RP["makas_kurali"][k] for k in ("kalem_baslar", "kg_m", "sacak_mm")}
 
 
@@ -188,8 +189,8 @@ def test_hesaplar(A, D):
         assert (g["fiyat"], g["kaynak"], g["onay"], g["durum"]) == (0, "PATRON", True, "Patron verdi")
     g = P["PVC pencere | 120/120"]                                             # 13:15 kartı: pencere de CRM'den; CRM'e eklenene kadar fiyatsız
     assert (g["fiyat"], g["durum"], g["onay"]) == (None, "kaynakta yok", False)
-    g = P["Mahya bandı | rulo 10 m"]
-    assert (g["fiyat"], g["durum"]) == (None, "birim sorusu")
+    g = P["Mahya bandı | rulo 10 m"]                                           # Lokman 11 Kasım 11:14:48 kartı: 960 TL bir rulo (10 m)
+    assert (g["fiyat"], g["onay"], g["durum"]) == (_kurus(_fiyat(A, "CG23")), True, "hesap")
     for c in (P, Cl):                                                          # Lokman 10 Kasım 16:15 kartı: 4 m parça = CRM fiyatı
         g = c["Metal dere | L 4000"]
         assert (g["fiyat"], g["onay"], g["durum"]) == (_kurus(_fiyat(A, "DR1")), True, "hesap")
@@ -302,6 +303,50 @@ def test_pr5_tk06_anahtarlari(E, A):
         assert (s[k]["tutar"], s[k]["birim_fiyat"], s[k]["durum"]) == (None, None, "fiyat yok"), k
     assert s["OSB 11 mm (çatı) | 1220 × 2440"]["tutar"] == round(3 * _kurus(_fiyat(A, "HM41")), 2)
     assert R["ozet"]["toplam"] == round(sum(x["tutar"] or 0 for x in R["satirlar"]), 2)
+
+
+# ── r06: mahya bandının birimi (Lokman'ın kartı) ve metal kiremit vidası (60,8 m² teklifi) ─────────────────────────────────────────
+
+R06_ANAHTARLAR = {"Trapez vida 5,5 × 60 (metal kiremit) | adet": ("V11", "birebir")}
+
+
+def test_r06_mahya_bandi_ve_metal_kiremit_vidasi(E, A):
+    """Lokman 11 Kasım 11:14:48 kartı "960 TL bir rulo (10 m)": iki hatta mahya bandı CRM'deki fiyatla bir rulo, kural (birim sorusu
+    kapandı). Motor metal kiremitte vidayı "Trapez vida 5,5 × 60 (metal kiremit)" yazar; CRM'deki V11 (Trapez Sac / Metal Kiremit)
+    birebir, trapez sacın vidasıyla aynı kayıt."""
+    P, Cl = E["hatlar"]["prefabrik"]["kalemler"], E["hatlar"]["celik"]["kalemler"]
+    for g in (P["Mahya bandı | rulo 10 m"], Cl["Mahya bandı | rulo / 10 m"]):
+        assert (g["kod"], g["hesap"], g["esleme"], g["birim"]) == ("CG23", "ayni", "kural", "adet")
+    for k, (kod, tur) in R06_ANAHTARLAR.items():
+        assert (P[k]["kod"], P[k]["esleme"]) == (kod, tur), k
+    v = {a: b for a, b in P["Trapez vida 5,5 × 60 (metal kiremit) | adet"].items() if a != "not"}
+    assert v == P["Trapez vida 5,5 × 60 (trapez sac) | adet"]
+    D = C.defter_uret(C.denetle(kategorili(A)), E)
+    PD, CD = D["hatlar"]["prefabrik"]["kalemler"], D["hatlar"]["celik"]["kalemler"]
+    for g in (PD["Mahya bandı | rulo 10 m"], CD["Mahya bandı | rulo / 10 m"]):
+        assert (g["fiyat"], g["onay"], g["kdv"]) == (_kurus(_fiyat(A, "CG23")), True, 0.2)
+    g = PD["Trapez vida 5,5 × 60 (metal kiremit) | adet"]
+    assert (g["fiyat"], g["onay"], g["kdv"]) == (_kurus(_fiyat(A, "V11")), True, 0.2)
+
+
+def test_d79_metal_kiremit_m2_fiyati_ve_boy_adimi(E, A):
+    """D-79 (Lokman 11 Kasım 20:24): CRM'deki metal kiremit fiyatı m² fiyatı; levha 100 cm kapatır; boy 50 mm'nin katına yukarı
+    tamamlanır (3740 → 3750), levhanın fiyatı m² fiyatı × tamamlanan boy (m). Kural onaylı, her çatının metal kiremidi için."""
+    b = [x for x in E["hatlar"]["prefabrik"]["boy_onerileri"] if x.get("kalem_baslar") == "Metal kiremit (100 cm kapatır) · "]
+    assert len(b) == 1 and {k: b[0][k] for k in ("kod", "hesap", "boy_mm", "boy_adim_mm", "esleme")} == \
+           {"kod": "CG10", "hesap": "ayni", "boy_mm": 1000, "boy_adim_mm": 50, "esleme": "kural"}
+    assert [F.boy_tamamla(n, 50) for n in (3740, 3750, 3751, 1550, 1549)] == [3750, 3750, 3800, 1550, 1550]
+    D = C.defter_uret(C.denetle(kategorili(A)), E)
+    mk = [x for x in D["hatlar"]["prefabrik"]["boy_onerileri"] if x.get("kalem_baslar") == "Metal kiremit (100 cm kapatır) · "]
+    assert len(mk) == 1 and (mk[0]["fiyat"], mk[0]["onay"], mk[0]["boy_mm"], mk[0]["boy_adim_mm"], mk[0]["kdv"]) == \
+           (_kurus(_fiyat(A, "CG10")), True, 1000, 50, 0.2)
+    m2 = Decimal(str(_fiyat(A, "CG10")))
+    for olcu, boy_m in (("L 3740", "3.75"), ("L 3750", "3.75"), ("L 2410", "2.45")):
+        s = {"kalem": "Metal kiremit (100 cm kapatır) · ana çatı", "olcu": olcu, "adet": 22, "birim": "adet", "grup": "1006"}
+        assert F.boy_onerisi_bul(s, D["hatlar"]["prefabrik"]["boy_onerileri"])[1] == _kurus(m2 * Decimal(boy_m)), olcu
+    X = copy.deepcopy(E)
+    next(x for x in X["hatlar"]["prefabrik"]["boy_onerileri"] if x.get("kalem_baslar", "").startswith("Metal kiremit"))["boy_adim_mm"] = 0
+    assert any("boy_adim_mm" in x for x in C.esleme_denetle(X))
 
 
 # ── D-76: KDV ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────

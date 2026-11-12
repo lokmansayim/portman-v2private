@@ -502,7 +502,7 @@ const Z_UST = 4, Z_GOVDE = 7, Z_TIRNAK = 3, Z_ACI = Math.PI / 6, ALIN_TIRNAK = 3
 const ZT0 = [ZOB + SAC / 2, -Z_GOVDE + SAC / 2], ZT1 = [ZT0[0] + Z_TIRNAK * Math.sin(Z_ACI), ZT0[1] + Z_TIRNAK * Math.cos(Z_ACI)];   // Z'nin tırnağının orta çizgisi
 const TIRNAK_ALT = (ZT0[1] + SAC / 2 * Math.sin(Z_ACI)) + (ZOB + 2 * SAC - (ZT0[0] - SAC / 2 * Math.cos(Z_ACI))) / Math.tan(Z_ACI);   // değme noktası
 const SACAK_ALTI = TIRNAK_ALT + ALIN_TIRNAK;   // alın sacının saçak altının üst yüzü (makas üstünden, eğime dik)
-function rake(G, end, m, uzat = 0) {
+function rake(G, end, m, uzat = 0, komsu = false) {
   const sE = G.uc[end], dir = Math.sign(G.sm - sE), sT = sE - dir * (0.2 + uzat), sm = (sT + G.sm) / 2, Ls = Math.abs(G.sm - sT) / G.R.cos;
   const w = cerceve(G.r, ...G.O), g = new THREE.Group(); w.add(g);
   g.position.set(sm / 100, G.h(sm) / 100, 0); g.rotation.z = dir * G.R.th;
@@ -511,10 +511,20 @@ function rake(G, end, m, uzat = 0) {
   // Dereyle bitmeyen saçak ucunda (altUc yok: yanındaki saçak aynı düzlemde sürer, 62 m²'de cumba) aşık oturma yüzünün üstündeki kısım
   // da düşey kesilir; yandaki saçağın sacına değer, üstüne binmez.
   const tn = Math.tan(G.R.th), dusey = !G.altUc[end];
-  const uc = (x, p) => (Math.abs(x - dir * Ls / 2) < 1e-6 ? dir * (Ls / 2 + p * tn) : dusey && p > 0 && Math.abs(x + dir * Ls / 2) < 1e-6 ? dir * (-Ls / 2 + p * tn) : x);
+  // komsu (alın sacı): dereyle bitmeyen uçta yandaki çatının (veranda) yüzü ana saçağın altından geçiyorsa alın sacı o yüzün sacının üstüne
+  // oturur; sacın hadve tepelerinin düzleminin altında kalan kısmı kesilir, kesik hadvelere değer (Lokman, 10.11.2026: "önce trapez sac
+  // ve mahya gelir sonra alın sacı üzerini örter"; TK-01 ve TK-02'nin arka veranda köşesi, önce/sonra eskizine 21:17 kartı "Doğru, böyle yap")
+  let kv = null;
+  const uc0 = (x, p) => (Math.abs(x - dir * Ls / 2) < 1e-6 ? dir * (Ls / 2 + p * tn) : dusey && p > 0 && Math.abs(x + dir * Ls / 2) < 1e-6 ? dir * (-Ls / 2 + p * tn) : x);
+  const uc = (x, p, o) => {
+    const u = uc0(x, p);
+    if (!kv || Math.abs(x + dir * Ls / 2) > 1e-6) return u;
+    const v = kv(p, o);
+    return v === null ? u : dir > 0 ? Math.max(u, Math.min(v, Ls / 2)) : Math.min(u, Math.max(v, -Ls / 2));
+  };
   const parca = (kes, x0, x1) => {   // kes: kesitin dört köşesi [o, p] (sırayla); x0 < x1
     const c = [];
-    [x0, x1].forEach(x => kes.forEach(([o, p]) => c.push([uc(x, p), p, o])));
+    [x0, x1].forEach(x => kes.forEach(([o, p]) => c.push([uc(x, p, o), p, o])));
     g.add(mesh(hex(c), m));
   };
   const lev = (o0, o1, p0, p1, x0 = -Ls / 2, x1 = Ls / 2) => parca([[o0, p0], [o1, p0], [o1, p1], [o0, p1]], x0, x1);
@@ -532,6 +542,23 @@ function rake(G, end, m, uzat = 0) {
     for (let d = 0; d < 80; d += 0.25) if (yuzde(e + dir * d, o)) return d === 0 ? [x0, x1] : dir > 0 ? [e + d, x1] : [x0, e - d];
     return [x0, x1];
   };
+  if (komsu && dusey) {
+    // yandaki yüz: saçak ucunun 5 cm içinde, saçağın ortasında başka bir çatının yüzü
+    const q = plan(-dir * Ls / 2 + dir * 5, G.oTip / 2), Y = Object.values(YUZ).find(Y => Y.R !== G.R && cokgende(Y.P, Y.yerel(q)));
+    if (Y) {
+      const [dx, dy] = Y.d, c = Y.R.cos, s = Y.R.sin, nS = new THREE.Vector3(-dx * s, c, dy * s), O = new THREE.Vector3(X(Y.E[0]), (TB + HEEL) / 100, Z(Y.E[1]));
+      g.updateMatrixWorld(true);
+      const V = (x, p, o) => new THREE.Vector3(x / 100, p / 100, o / 100).applyMatrix4(g.matrixWorld);
+      const n = (x, p, o) => V(x, p, o).sub(O).dot(nS) * 100;   // cm, yüzün aşık oturma düzleminden
+      const HT = TU1 + RIBH;   // yandaki yüzün hadve tepeleri
+      // kesik yalnız yandaki yüzün üstünde: kesim noktasının planı o yüzün içinde değilse (yüz orada yok) uç olduğu gibi kalır
+      kv = (p, o) => {
+        const n0 = n(0, p, o), a = n(1, p, o) - n0; if (Math.abs(a) < 1e-9) return null;
+        const x = (HT - n0) / a, v = V(x, p, o), q = [(v.x + D.dis[0] / 200) * 100, (D.dis[1] / 200 - v.z) * 100];
+        return cokgende(Y.P, Y.yerel(q)) ? x : null;
+      };
+    }
+  }
   const xOf = (s, p = 0) => (s - sm + p * dir * Math.sin(G.R.th)) / G.R.cos;   // kalkan boyundaki s noktasının yerel x'i (p yüksekliğinde)
   return { w, Ls, lev, egik, dir, catida, xOf };
 }
@@ -979,12 +1006,12 @@ function alinKapak(G, end) {
   return { sB, sF, ciz, boy: y(sB, SACAK_ALTI) - OM.alt };
 }
 KALKAN.forEach(G => ['A', 'B'].forEach(end => {
-  const K = rake(G, end, mat('trim', AD.alin)), ot = G.oTip, kose = G.altUc[end], hiz = kose && hizaliDere(G, end), kap = hiz ? alinKapak(G, end) : null;
+  const K = rake(G, end, mat('trim', AD.alin), 0, true), ot = G.oTip, kose = G.altUc[end], hiz = kose && hizaliDere(G, end), kap = hiz ? alinKapak(G, end) : null;
   const xk = !kap ? [] : K.dir < 0 ? [-K.Ls / 2, K.xOf(kap.sB, SACAK_ALTI - SAC / 2)] : [K.xOf(kap.sB, SACAK_ALTI - SAC / 2), K.Ls / 2];   // köşede bükülen yerde biter
   K.lev(G.ob + SAC, G.ob + 2 * SAC, TIRNAK_ALT, SACAK_ALTI, ...xk); // tırnak: Z'nin gövdesi boyunca, alt ucu Z'nin tırnağına değer (Lokman, 9.11.2026)
   K.lev(G.ob + SAC, ot, SACAK_ALTI - SAC, SACAK_ALTI, ...xk);       // saçak altı: tırnağın üst ucundan alına
   if (kap) kap.ciz(K);                                              // köşede saçak altı dik aşağı bükülür
-  const KU = rake(G, end, mat('trim', AD.alin));
+  const KU = rake(G, end, mat('trim', AD.alin), 0, true);
   if (hiz) alinUzun(G, end, KU, ot);                          // alın: köşede düz biter, derenin ucu açık
   else if (kose) alinYuzu(G, end, KU, ot);                        // alın: tek biçim; köşede derenin ucunu örter, ucu derenin biçiminde
   else KU.lev(ot, ot + SAC, ALIN_ALT, PTOP);                 // alın: tek biçim, saçak altının 6 cm altından kenar hadvesinin üstüne
@@ -1173,7 +1200,9 @@ const SAY = {
   omega_ic_m: fmt(D.omega_duvar.filter(o => o.tur === 'ic').reduce((a, o) => a + o.a1 - o.a0, 0) / 100),
   izo_n: parts.filter(q => q.step === AD.izo).length,
   izo_m2: fmt(parts.filter(q => q.step === AD.izo).reduce((t, q) => t + q.obj.children[0].geometry.parameters.width * q.obj.children[0].geometry.parameters.depth, 0), 0),
-  kaplama_n: parts.filter(q => q.step === AD.kaplama && q.obj.userData.info.ad.startsWith(D.kaplama.metin.say_onek)).length,
+  // levha ve kesim parçası; mahya ("Trapez sac mahyası" da aynı önekle başlar) sayılmaz
+  kaplama_n: parts.filter(q => q.step === AD.kaplama && q.obj.userData.info.ad.startsWith(D.kaplama.metin.say_onek)
+    && q.obj.userData.info.ad !== D.kaplama.metin.mahya_ad).length,
 };
 const satir = r => r.map((c, j) => j === 2 && typeof c === 'string' ? yaz(c, SAY) : c);
 const STEPS = D.adimlar.map(a => {
