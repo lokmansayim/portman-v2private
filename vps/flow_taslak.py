@@ -11,7 +11,10 @@ Ne yapar (Meta Flows API, belge: developers.facebook.com › WhatsApp › Flows 
   4. Formun durumu, Meta'nın doğrulama hataları ve önizleme bağlantısı yazılır (GET /<flow>?fields=…,preview.invalidate(false)).
      Önizleme girişsiz açılır, telefonda tarayıcıda denenir, 30 gün geçerlidir (Meta). Etkileşimli bağlantı formu, canlı kodun yeni
      bayiye sunduğu veriyle açar (kanal/talep_formu.py › ekran_verisi).
-Ne yapmaz: mesaj göndermez (ücret yok), formu yayımlamaz (/publish çağrısı ve publish true yok), ayara ve sunucudaki dosyalara yazmaz,
+  5. Yalnız --yayimla ile (Lokman'ın onayıyla; Meta: yayımlanan form değiştirilemez ve silinemez): iki form da taslak ya da yayımlı ve
+     doğrulama hatası 0 ise taslaklar yayımlanır (POST /<flow>/publish); biri hazır değilse hiçbiri. Sonra durum PUBLISHED ve
+     gönderilebilirlik (health_status, kanalın numarasıyla) BLOCKED değil olmalı; yoksa çıkış 1, ayarı açan komut `&&` ile koşmaz.
+Ne yapmaz: mesaj göndermez (ücret yok), --yayimla olmadan formu yayımlamaz (publish true yok), ayara ve sunucudaki dosyalara yazmaz,
 servisleri yeniden başlatmaz, formu silmez, belirteci yazdırmaz (hata iletileri maskeli).
 
 Koşum (Mac'ten; sunucuda kopyası yoksa geçici betik, AGENTS.md › Sunucu erişimi):
@@ -21,7 +24,8 @@ Sunucuda kopyası varsa:
     ssh -n portman-vps 'timeout 120 python3 /opt/portman/guncel/vps/flow_taslak.py' > flow_taslak.txt 2>&1
 Seçenekler: --waba <kimlik> · --kok <dizin> (formların sürümü; varsayılan betiğin deposu, yoksa /opt/portman/guncel) · --kaynak <commit>
 (iki formun JSON'u sunucudaki sürümden değil, depodaki o commit'ten okunur; 40 haneli; sürüm kurulmadan düzeltilmiş formu taslağa
-yüklemek için; diske yazılmaz) · --bak (Meta'da hiçbir şeyi kurmaz ve değiştirmez; yalnız var olanı listeler). Çıkış: 0 tamam, 2 Meta
+yüklemek için; diske yazılmaz) · --bak (Meta'da hiçbir şeyi kurmaz ve değiştirmez; yalnız var olanı listeler) · --yayimla (5. adım;
+--bak ile olmaz). Çıkış: 0 tamam, 2 Meta
 doğrulama hatası buldu, 1 durdu. Test için: PM_ETC, PM_GRAPH_BASE, PM_RAW_BASE (ağa çıkılmaz).
 """
 from __future__ import annotations
@@ -48,6 +52,7 @@ AD = {"talep": "Portman Talep Formu", "revizyon": "Portman Revizyon Formu"}
 KATEGORI = ["OTHER"]
 KIMLIK = re.compile(r"^[0-9]{5,30}$")
 BELIRTEC: str = ""
+PNID: str = ""                                     # kanalın numara kimliği (WA_PHONE_NUMBER_ID; gönderilebilirlik denetimi)
 
 
 def iz(v: str) -> str:
@@ -263,21 +268,80 @@ def formu_kur(waba: str, tur: str, tanim: dict, var: list[dict], bak: bool) -> t
     return str(g["id"]), "yeni taslak kuruldu", hatalar(g.get("validation_errors"))
 
 
+def saglik(g: dict) -> tuple[str, list[str]]:
+    """Formun gönderilebilirliği (Meta `health_status`): (can_send_message, sorun satırları; maskeli). AVAILABLE gönderilir, LIMITED
+    sınırlı gönderilir, BLOCKED gönderilmez (Meta: bir şart karşılanmamış; `entities` › `errors`)."""
+    h = g.get("health_status") if isinstance(g.get("health_status"), dict) else {}
+    durum = str(h.get("can_send_message") or "?")
+    satirlar = []
+    for e in h.get("entities") or []:
+        if not isinstance(e, dict):
+            continue
+        for x in e.get("errors") or []:
+            if isinstance(x, dict):
+                satirlar.append(maskele(f"{e.get('entity_type', '?')}: {x.get('error_description') or x.get('message') or '?'}"
+                                        + (f" · çözüm: {x['possible_solution']}" if x.get("possible_solution") else ""))[:300])
+        if e.get("additional_info"):
+            satirlar.append(maskele(f"{e.get('entity_type', '?')}: {e['additional_info']}")[:300])
+    return durum, satirlar
+
+
+def yayimla(hazir: dict[str, dict]) -> tuple[int, list[str]]:
+    """İki formu yayımlar (Meta: POST /<flow>/publish; yayımlanan form değiştirilemez ve silinemez). Önce iki formun da hazır olduğu
+    denetlenir (taslak ya da yayımlı, doğrulama hatası 0); biri hazır değilse hiçbiri yayımlanmaz. Yayımdan sonra durum PUBLISHED ve
+    gönderilebilirlik BLOCKED değil olmalı; yoksa çıkış 1 (ayarı açan komut `&&` ile koşmaz). Dönen (çıkış, yayımlanan türler)."""
+    print("\n-- yayım (Meta: yayımlanan form değiştirilemez ve silinemez; düzeltme yeni form olarak kurulur)")
+    neden = [f"{t} formu bulunamadı" for t in TURLER if t not in hazir]
+    neden += [f"{t} formunda Meta doğrulama hatası {len(h['hata'])}" for t, h in hazir.items() if h["hata"]]
+    neden += [f"{t} formunun durumu {h['durum']}" for t, h in hazir.items() if h["durum"] not in ("DRAFT", "PUBLISHED")]
+    if neden:
+        print("   YAYIMLANMADI (iki form da hazır olmalı): " + "; ".join(neden))
+        return 1, []
+    yayimlanan, sonuc = [], 0
+    for tur in TURLER:
+        fid = hazir[tur]["kimlik"]
+        if hazir[tur]["durum"] == "DRAFT":
+            kod, g, h = istek("POST", f"{fid}/publish")
+            if kod != 200 or not (g or {}).get("success"):
+                print(f"   {tur} formu: DURDU, yayımlanamadı (POST /<flow>/publish: HTTP {kod} {h})".strip())
+                return 1, yayimlanan
+            yayimlanan.append(tur)
+        alanlar = "id,status" + (f",health_status.phone_number({PNID})" if KIMLIK.match(PNID) else ",health_status")
+        kod, g, h = istek("GET", fid, sorgu={"fields": alanlar})
+        if kod != 200 or g is None:
+            print(f"   {tur} formu: yayım sonrası bilgi alınamadı (HTTP {kod} {h})".strip())
+            sonuc = 1
+            continue
+        gonderim, sorunlar = saglik(g)
+        ne = "yayımlandı" if tur in yayimlanan else "zaten yayımlıydı"
+        print(f"   {tur} formu {ne} · kimlik {fid} · durum {g.get('status', '?')} · gönderilebilirlik {gonderim}")
+        for x in sorunlar:
+            print(f"   ! {x}")
+        if g.get("status") != "PUBLISHED" or gonderim == "BLOCKED":
+            sonuc = 1
+    return sonuc, yayimlanan
+
+
 def main(argv: list[str]) -> int:
-    global BELIRTEC
-    p = argparse.ArgumentParser(prog="flow_taslak.py", description="Talep ve revizyon formunu Meta'da taslak kurar (yayımlamaz).")
+    global BELIRTEC, PNID
+    p = argparse.ArgumentParser(prog="flow_taslak.py", description="Talep ve revizyon formunu Meta'da taslak kurar; --yayimla ile yayımlar.")
     p.add_argument("--waba")
     p.add_argument("--kok")
     p.add_argument("--kaynak")
     p.add_argument("--bak", action="store_true")
+    p.add_argument("--yayimla", action="store_true")
     a = p.parse_args(argv)
-    print(f"== PORTMAN · WhatsApp formları Meta'da taslak ({time.strftime('%Y-%m-%d %H:%M', time.gmtime())} UTC)"
-          f"{' · yalnız bakış (--bak)' if a.bak else ''}")
+    print(f"== PORTMAN · WhatsApp formları Meta'da {'taslak ve yayım' if a.yayimla else 'taslak'} "
+          f"({time.strftime('%Y-%m-%d %H:%M', time.gmtime())} UTC){' · yalnız bakış (--bak)' if a.bak else ''}")
+    if a.yayimla and a.bak:
+        print("DUR: --yayimla ve --bak birlikte olmaz")
+        return 1
     BELIRTEC = degisken(os.path.join(ETC, "whatsapp.env"), "WA_ACCESS_TOKEN") or ""
     if not BELIRTEC:
         print(f"DUR: {ETC}/whatsapp.env içinde WA_ACCESS_TOKEN yok (vps/sir_koy.py wa_token)")
         return 1
     print(f"   belirteç parmak izi {iz(BELIRTEC)} (değer yazılmaz)")
+    PNID = degisken(os.path.join(ETC, "whatsapp.env"), "WA_PHONE_NUMBER_ID") or ""
     kok = kok_bul(a.kok)
     try:
         tf = talep_formu_modulu(kok)
@@ -304,7 +368,7 @@ def main(argv: list[str]) -> int:
         print(f"DUR: formlar listelenemedi: {h}")
         return 1
     print(f"   hesapta {len(var)} form var")
-    sonuc, kimlikler = 0, {}
+    sonuc, kimlikler, hazir = 0, {}, {}
     for tur in TURLER:
         fid, ne, hata = formu_kur(waba, tur, tanimlar[tur], var, a.bak)
         print(f"\n-- {tur} formu ({AD[tur]}): {ne}")
@@ -319,6 +383,8 @@ def main(argv: list[str]) -> int:
             sonuc = max(sonuc, 1)
             continue
         hata = hatalar(g.get("validation_errors")) if "validation_errors" in g else hata
+        if not ne.startswith("DURDU"):
+            hazir[tur] = {"kimlik": fid, "durum": str(g.get("status") or "?"), "hata": hata}
         print(f"   kimlik {fid} · durum {g.get('status', '?')} · Flow JSON {g.get('json_version', '?')} · Meta doğrulama hatası {len(hata)}")
         for x in hata:
             print(f"   ! {x}")
@@ -332,9 +398,17 @@ def main(argv: list[str]) -> int:
             print(f"   düz önizleme: {on}")
         else:
             print("   önizleme bağlantısı gelmedi")
+    yayimlanan = []
+    if a.yayimla:
+        if sonuc == 1:
+            print("\n-- yayım: YAYIMLANMADI (yukarıdaki adım durdu)")
+        else:
+            y_sonuc, yayimlanan = yayimla(hazir)
+            sonuc = max(sonuc, y_sonuc)
     if kimlikler:
         print("\n== kimlikler (sır değil): " + " · ".join(f"{t}_flow_id {k}" for t, k in kimlikler.items()))
-    print("== mesaj gönderilmedi · form yayımlanmadı · ayar ve sunucudaki dosyalar değişmedi")
+    yayim = (" · ".join(f"{t} formu yayımlandı" for t in yayimlanan) + " (geri alınmaz)") if yayimlanan else "form yayımlanmadı"
+    print(f"== mesaj gönderilmedi · {yayim} · ayar ve sunucudaki dosyalar değişmedi")
     print(f"== sonuç: {'tamam' if sonuc == 0 else 'Meta doğrulama hatası var' if sonuc == 2 else 'durdu'}")
     return sonuc
 
