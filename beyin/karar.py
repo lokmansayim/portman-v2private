@@ -628,14 +628,15 @@ def _prefabrik_cati_seti(k: Konusma, katalog: Katalog, taban: dict, ts: dict) ->
 # seçeneğin kodu seçer ("PA-06-K olsun"); çatının adı ("kırma", "cumbalı") seçtirmez, çatı setini getirir: ek ve kuruluş ("cumbasız",
 # "kırmadan farklı") okunmaz, tahmin yok (K21). Cümle yalnız seçeneklerin adı, model kodu ve bağlam sözcükleriyle kurulmamışsa (eğim,
 # saçak, kaplama, renk, başka oda ya da cephe, sayı) istek seçeneklerin dışındadır: bugünkü gibi yönlendirilir (13.10 kuralı).
-_CATI_KOKLERI = ("cati", "egim", "sacak", "mahya", "kiremit", "kaplama", "sandvic", "trapez", "shingle", "membran", "kalkan", "makas",
-                 "cumba", "kirma", "besik", "oluk", "dere", "osb")
+_CATI_KOKLERI = ("cati", "sacak", "mahya", "kiremit", "trapez", "shingle", "kalkan", "makas", "cumba", "kirma", "besik")
+_CATI_ZAYIF = ("egim", "kaplama", "sandvic", "membran", "oluk", "dere", "osb")     # yalnız LLM çatı isteği okuduysa çatı sözü
 _CATI_BAGLAM = {"olsun", "olacak", "olur", "olabilir", "olsa", "olmali", "mu", "mi", "misiniz", "musunuz", "yapin", "yapiniz", "yapalim",
                 "yapilsin", "yapilabilir", "yapar", "istiyoruz", "isteriz", "istiyorum", "isterim", "istiyor", "tercih", "ediyoruz", "ediyorum",
                 "edelim", "secelim", "sectik", "seciyoruz", "secin", "da", "de", "ile", "ve", "bir", "bu", "su", "o", "zaman", "ev", "evin",
                 "evde", "model", "modeli", "plan", "plani", "olarak", "tipi", "tip", "seklinde", "sekli", "farkli", "baska", "ustunde",
                 "ustune", "uzerinde", "uzerine", "lutfen", "tamam", "evet", "seciyorum", "sectim", "rica", "ederim", "ederiz", "olan",
                 "olani", "olsun", "onu", "bunu", "ilk", "birinci", "ikinci", "ucuncu", "son", "sonuncu", "ortadaki", "sondaki"}
+_NUMARA = {"numarali", "numara", "nolu", "no", "sira", "sirada", "secenek", "secenegi"}
 _CATI_EKLERI = {"", "i", "a", "e", "u", "si", "su", "yi", "yu", "ya", "ye", "ni", "nu", "da", "de", "ta", "te", "in", "un", "nin", "nun",
                 "dan", "den", "nda", "nde", "ndan", "nden", "li", "lu", "siz", "suz", "sini", "sinin", "sina", "sinda", "ler", "lar"}
 
@@ -703,12 +704,20 @@ def _prefabrik_cati_istegi(k: Konusma, katalog: Katalog, aday: dict, ts: dict) -
         if etiket and all(w in harfler or w in _CATI_BAGLAM or w.startswith("cati") for w in kalan):
             kodlar |= {harfler[w] for w in etiket}             # "çatı K olsun", "K olsun": set mesajının etiketi
             continue
-        if not any(w.startswith(c) for w in kalan for c in _CATI_KOKLERI):
-            continue                                           # çatı cümlesi değil (pencere, oda …): kendi yolundan
-        cati_cumlesi = True
+        sayi = [w for w in kalan if w.isdigit()]
+        if set_acik and len(sayi) == 1 and all(w in sayi or w in _CATI_BAGLAM or w.startswith("cati") or w in _NUMARA for w in kalan):
+            kodlar |= {a["kod"] for a in st.get("adaylar") or [] if str(a.get("sira")) == sayi[0]}   # "2 numaralı çatı olsun"
+            continue
+        if any(CO._KALSIN_T.fullmatch(w) or w == "ayni" for w in kalan):
+            continue                                           # "çatı aynı kalsın", "kırma kalsın": istek değil (13.10 kuralı)
+        if not any(w.startswith(c) for w in kalan for c in _CATI_KOKLERI + (_CATI_ZAYIF if istekler else ())):
+            continue                                           # çatı cümlesi değil (pencere, oda, zemin, rampa …): kendi yolundan
         if not all(w in _CATI_BAGLAM or w.startswith(("cati", "degis")) or _cati_adi_mi(w, tum_ad)
                    or CO._OLUMSUZ_FIIL_T.fullmatch(w) for w in kalan):
-            uygulanamaz.append(ham.strip()); continue
+            if istekler:                                       # LLM çatı isteği okudu: seçeneklerin dışında, yönlendirilir
+                uygulanamaz.append(ham.strip())
+            continue                                           # okumadıysa bugünkü yol (cümle prefabrikte okunmuyordu)
+        cati_cumlesi = True
         ad_sozleri += [w for w in kalan if _cati_adi_mi(w, tum_ad)]
     yazili |= set(_secim_kodlari(metin, katalog))
     kodlar |= {c for c in yazili if c in adlar and (c != taban["kod"] or set_acik)}

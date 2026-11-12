@@ -323,6 +323,36 @@ def test_cati_seti_acikken_pencere_istegi_bekler(tmp_path):
     assert [a["olcu"] for a in k.is_emri["acikliklar"] if a.get("mahal") == "BANYO"] == ["120x50"], k.mesaj
 
 
+@pytest.mark.parametrize("metin", ["PA-06 olsun, çatı aynı kalsın", "PA-06 olsun, zemin kaplaması laminat olsun",
+                                   "PA-06 olsun, girişe eğimli rampa yapın"])
+def test_cati_istegi_olmayan_cumle_bugunku_yol(tmp_path, metin):
+    """Hakem beşinci tur: "kalsın" cümlesi ve çatı dışı "kaplama", "eğimli" sözü çatı isteği değildir; plan seçilince çatı seti (bugünkü)."""
+    s = Sohbet(tmp_path, kabul=PA | CATILAR)
+    k = s.yaz(metin, katalog_kodu="PA-06", yapi_turu="prefabrik")
+    assert k.eylem == "secenek" and s.k.d["secenek_seti"]["tur"] == "cati_varyanti", k.mesaj
+
+
+@pytest.mark.parametrize("metin,pencere", [("banyo penceresi 120x50 olsun, çatı aynı kalsın", True),
+                                           ("kırma kalsın, banyo penceresi 120x50 olsun", True),
+                                           ("salonun zemin kaplaması laminat olsun", False)])
+def test_cati_secenekli_evde_revizyon_yonlenmez(tmp_path, metin, pencere):
+    """r01 PA-06-K; pencere revizyonu ve çatıyı koruyan söz çatı okumasına takılmaz: r02 aynı çatıyla."""
+    s, _ = _cati_seti(tmp_path)
+    s.dugme("s:{set}:PA06K")
+    k = s.yaz(metin, pencereler=[pen("banyo", "120x50")] if pencere else [])
+    assert k.eylem != "yonlendir" or "çatı için" not in k.mesaj, k.mesaj
+    if pencere:
+        assert k.eylem == "is_emri" and k.revizyon == 2 and k.is_emri["talep"]["kaynak"] == "PA06K", k.mesaj
+        assert [a["olcu"] for a in k.is_emri["acikliklar"] if a.get("mahal") == "BANYO"] == ["120x50"], k.mesaj
+
+
+@pytest.mark.parametrize("metin,kod", [("2 numaralı çatı olsun", "PA06K"), ("3 numaralı olsun", "PA06C")])
+def test_cati_seti_acikken_numarali_secim(tmp_path, metin, kod):
+    s, _ = _cati_seti(tmp_path)
+    k = s.yaz(metin)
+    assert k.eylem == "is_emri" and k.is_emri["talep"]["kaynak"] == kod, k.mesaj
+
+
 def test_revizyonda_cati_adi_seti_getirir(tmp_path):
     """r01 evin çatısıyla; revizyonda "çatı kırma olsun" → çatı seti; seçilen çatıyla r02 (plan aynı)."""
     s, _ = _cati_seti(tmp_path)
