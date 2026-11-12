@@ -55,6 +55,9 @@ def test_form_tanimi_flow_json_sinirlari(tur):
                 assert GO.okunabilir_mi(mime, 1000) is None, mime
         for d in re.findall(r"\$\{data\.(\w+)\}", json.dumps(c)):
             assert d in ekran["data"], d
+        for k, v in c.items():                                    # Meta: sınır özellikleri tamsayı (12 Kasım: "max-length": "600" reddedildi)
+            if k.startswith(("max-", "min-")):
+                assert type(v) is int, (k, v)
     [footer] = [c for c in cocuklar if c["type"] == "Footer"]
     yuk = footer["on-click-action"]["payload"]
     assert footer["on-click-action"]["name"] == "complete"

@@ -20,6 +20,7 @@ KOK = Path(__file__).resolve().parents[1]
 BETIK = KOK / "vps" / "flow_taslak.py"
 BELIRTEC = "EAAB" + "x" * 80
 WABA = "777000111"
+COMMIT = "0123456789abcdef0123456789abcdef01234567"
 sys.path.insert(0, str(KOK / "kanal"))
 import talep_formu as TF  # noqa: E402
 
@@ -31,6 +32,7 @@ class SahteGraph:
         self.istekler, self.formlar, self.sayac = [], {}, 0
         self.numaralar = numaralar or {}                 # WABA → telefon numarası kimlikleri
         self.isletme = isletme or {}                     # işletme → sahip olduğu WABA'lar
+        self.depo = {}                                   # --kaynak: commit'teki formlar
         self.kapsam = kapsam if kapsam is not None else [{"scope": "whatsapp_business_management", "target_ids": [WABA]},
                                                           {"scope": "whatsapp_business_messaging", "target_ids": [WABA]}]
         self.dogrulama = dogrulama or []
@@ -47,8 +49,13 @@ class SahteGraph:
                 n = int(self.headers.get("Content-Length") or 0)
                 govde = self.rfile.read(n) if n else b""
                 u = urllib.parse.urlsplit(self.path)
-                yol, q = u.path.removeprefix("/v23.0/"), dict(urllib.parse.parse_qsl(u.query))
+                yol, q = (u.path if u.path.startswith("/raw/") else u.path.removeprefix("/v23.0/")), dict(urllib.parse.parse_qsl(u.query))
                 s.istekler.append({"m": self.command, "yol": yol, "q": q, "h": {k.lower(): v for k, v in self.headers.items()}, "govde": govde})
+                if yol.startswith("/raw/"):                      # raw.githubusercontent.com yerine: /raw/<commit>/kanal/formlar/<tur>.json
+                    parca = yol.split("/")
+                    if len(parca) == 6 and parca[2] == COMMIT and parca[3:5] == ["kanal", "formlar"]:
+                        return self._cevap(200, s.depo.get(parca[5].removesuffix(".json")) or {})
+                    return self._cevap(404, {})
                 if s.hata_mesaji:
                     return self._cevap(400, {"error": {"message": s.hata_mesaji, "type": "OAuthException", "code": 100}})
                 if yol == "debug_token":
@@ -103,7 +110,7 @@ def etc(tmp_path):
 
 
 def kos(etc: Path, graph: SahteGraph, *arg, stdin: bool = False) -> subprocess.CompletedProcess:
-    env = {"PM_ETC": str(etc), "PM_GRAPH_BASE": graph.url, "PATH": "/usr/bin:/bin"}
+    env = {"PM_ETC": str(etc), "PM_GRAPH_BASE": graph.url, "PM_RAW_BASE": graph.url.removesuffix("/v23.0") + "/raw", "PATH": "/usr/bin:/bin"}
     if stdin:
         return subprocess.run([sys.executable, "-", "--kok", str(KOK), *arg], input=BETIK.read_text(), env=env, capture_output=True,
                               text=True, timeout=60)
@@ -246,5 +253,29 @@ def test_mac_teki_gibi_stdin_den_kosar(etc):
         assert r.returncode == 0, r.stdout + r.stderr
         assert f"formlar: {KOK}/kanal/formlar · talep Flow JSON 7.3 · revizyon Flow JSON 7.3" in r.stdout
         assert len([i for i in g.istekler if i["m"] == "POST"]) == 2
+    finally:
+        g.kapat()
+
+
+def test_kaynak_commit_formlari_depodan_okur_taslagi_gunceller(etc):
+    """Sürüm kurulmadan düzeltilmiş formu taslağa yüklemek (12 Kasım: Meta "max-length" tamsayı istedi)."""
+    g = SahteGraph()
+    try:
+        g.formlar["91001"] = {"name": "Portman Talep Formu", "status": "DRAFT", "json": "{}"}
+        g.formlar["91002"] = {"name": "Portman Revizyon Formu", "status": "DRAFT", "json": "{}"}
+        g.depo = {t: {**TF.tanim(t), "_isaret": t} for t in ("talep", "revizyon")}
+        r = kos(etc, g, "--kaynak", COMMIT, stdin=True)
+        assert r.returncode == 0, r.stdout + r.stderr
+        assert f"formlar: depo commit {COMMIT[:8]} (--kaynak)" in r.stdout
+        raw = [i for i in g.istekler if i["yol"].startswith("/raw/")]
+        assert len(raw) == 2 and all("authorization" not in i["h"] for i in raw)          # belirteç GitHub'a gitmez
+        yaz = _yazma_istekleri(g)
+        assert [i["yol"] for i in yaz] == ["91001/assets", "91002/assets"]
+        for i, tur in zip(yaz, ("talep", "revizyon")):
+            icerik = i["govde"].split(b'filename="flow.json"\r\nContent-Type: application/json\r\n\r\n', 1)[1].rsplit(b"\r\n--", 1)[0]
+            assert json.loads(icerik)["_isaret"] == tur                                    # sunucudaki sürüm değil, commit'teki form
+        assert kos(etc, g, "--kaynak", "main").returncode == 1                             # yalnız 40 haneli commit
+        r = kos(etc, g, "--kaynak", "f" * 40)                                              # commit'te dosya yok: durur, Meta'ya yazmaz
+        assert r.returncode == 1 and "formlar okunamadı" in r.stdout and len(_yazma_istekleri(g)) == 2
     finally:
         g.kapat()
