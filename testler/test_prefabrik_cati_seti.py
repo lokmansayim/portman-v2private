@@ -19,7 +19,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from beyin import karar as K  # noqa: E402
 from beyin.katalog import ADAYLAR_PREFABRIK_JSON, CATI_VARYANT_DIR, SABLON_DIR, Katalog  # noqa: E402
-from test_celik_revizyon_karar import Sohbet, var  # noqa: E402
+from test_celik_revizyon_karar import Sohbet, pen, var  # noqa: E402
 
 PA = {f"PA0{i}" for i in range(1, 9)}
 CATILAR = {"PA06K", "PA06C"}
@@ -221,7 +221,8 @@ def test_cati_istegi_tek_secenege_uyarsa_secilir(tmp_path, metin, beklenen):
     assert k.eylem == "is_emri" and k.is_emri["talep"]["kaynak"] == beklenen and k.is_emri["cati"] == CATI[beklenen], k.mesaj
 
 
-@pytest.mark.parametrize("metin", ["PA-06 olsun, çatı beşik olsun", "PA-06 olsun, kırma çatı olmasın", "PA-06 olsun, çatıyı değiştirelim"])
+@pytest.mark.parametrize("metin", ["PA-06 olsun, çatı beşik olsun", "PA-06 olsun, kırma çatı olmasın", "PA-06 olsun, çatıyı değiştirelim",
+                                   "PA-06 olsun, cumba istemiyoruz kırma olsun", "PA-06 olsun, kırma ve cumba olsun"])
 def test_cati_istegi_belirsizse_set_ve_secilen_cizilir(tmp_path, metin):
     """Beşik iki çatıda, olumsuz söz, adsız istek: tahmin yok (K21), çatı seti; setten seçilen çatı çizilir (istek setin cevabı)."""
     s = Sohbet(tmp_path, kabul=PA | CATILAR)
@@ -229,6 +230,41 @@ def test_cati_istegi_belirsizse_set_ve_secilen_cizilir(tmp_path, metin):
     assert k.eylem == "secenek" and s.k.d["secenek_seti"]["tur"] == "cati_varyanti", k.mesaj
     k = s.dugme("s:{set}:PA06K")
     assert k.eylem == "is_emri" and k.is_emri["talep"]["kaynak"] == "PA06K", k.mesaj
+
+
+@pytest.mark.parametrize("metin", [
+    "PA-06 olsun, çatı eğimi %40 olsun", "PA-06 olsun, saçak 50 cm olsun", "PA-06 olsun, çatı kırmızı kiremit olsun",
+    "PA-06 olsun, çatı sandviç panel olsun", "PA-06 olsun, tek eğimli çatı olsun", "PA-06 olsun, mahya önde olsun",
+    "PA-06 olsun, çatı kırma olsun, eğim %40 olsun", "PA-06 olsun, kırma çatı olsun, saçak 60 cm",
+    "PA-06 olsun, yatak odasının üstüne cumba olsun", "PA-06 olsun, mutfağın üstüne cumba yapın", "PA-06 olsun, arka cepheye cumba olsun",
+    "PA-06 olsun, iki cumba olsun", "PA-06 olsun, mutfak duvarını kırmak istiyoruz, çatıyı da değiştirelim",
+    "PA-06 olsun, salona cumba pencere olsun, çatı da değişsin",
+])
+def test_cati_istegi_seceneklerin_disindaysa_yonlendirilir(tmp_path, metin):
+    """Hakem ikinci tur: seçeneklerin adı dışında bir şey isteyen çatı cümlesi (eğim, saçak, kaplama, başka oda ya da cephe, sayı) seçim
+    değildir; bugünkü gibi yönlendirilir, seçilebilecek çatılar yazılır. Salon cumbası başka odaya sorulmadan çizilmez; istek düşmez."""
+    s = Sohbet(tmp_path, kabul=PA | CATILAR)
+    k = s.yaz(metin, katalog_kodu="PA-06", yapi_turu="prefabrik", varyantlar=[var("cati_degistir", metin.split(", ", 1)[1])])
+    assert k.eylem == "yonlendir" and "otomatik yapılamıyor" in k.mesaj and "PA-06-K (Kırma)" in k.mesaj, k.mesaj
+
+
+def test_cati_istegi_ve_pencere_birlikte(tmp_path):
+    """Çatı cümlesi seçer, pencere cümlesi kendi yolundan uygulanır (aynı mesajda)."""
+    s = Sohbet(tmp_path, kabul=PA | CATILAR)
+    k = s.yaz("PA-06 olsun, çatı kırma olsun, banyo penceresi 120x50 olsun", katalog_kodu="PA-06", yapi_turu="prefabrik",
+              varyantlar=[var("cati_degistir", "çatı kırma olsun")], pencereler=[pen("banyo", "120x50")])
+    assert k.eylem == "is_emri" and k.is_emri["talep"]["kaynak"] == "PA06K" and k.is_emri["cati"]["tip"] == "kirma", k.mesaj
+    assert [a["olcu"] for a in k.is_emri["acikliklar"] if a.get("mahal") == "BANYO"] == ["120x50"], k.mesaj     # şablonda 60x40
+
+
+def test_cati_seti_acikken_ve_revizyonda_secenek_disi_istek(tmp_path):
+    s, _ = _cati_seti(tmp_path)
+    k = s.yaz("çatı eğimi %40 olsun", varyantlar=[var("cati_degistir", "çatı eğimi %40")])
+    assert k.eylem == "yonlendir" and "otomatik yapılamıyor" in k.mesaj, k.mesaj
+    s, _ = _cati_seti(tmp_path / "b")
+    s.dugme("s:{set}:PA06")
+    k = s.yaz("çatı eğimi %40 olsun", varyantlar=[var("cati_degistir", "çatı eğimi %40")])
+    assert k.eylem == "yonlendir" and "otomatik yapılamıyor" in k.mesaj, k.mesaj
 
 
 def test_cati_seti_acikken_cati_adi(tmp_path):
