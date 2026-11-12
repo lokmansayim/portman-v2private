@@ -191,7 +191,7 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | D | D-79 | CRM eşlemesi: metal kiremidin CRM fiyatı m² fiyatı; levha 100 cm kapatır, boyu 5 cm'nin katına yukarı (3740 → 3750), fiyat m² fiyatı × boy (İE-35; Lokman 11.11 20:24, 20:29 kartı) | yazıldı (11.11; CRM sohbeti, `claude/project-thread-03tosk`) |
 | D | D-80 | Bayiye üç seçenek: sekiz prefabrik ev aday kaydına, kodları PA-01 … PA-08 (İE-36; Lokman 11.11 20:42, 20:47, 20:58 kartları) | yazıldı (11.11; aday ev sohbeti, `claude/project-thread-0yp292`) |
 | D | D-81 | Portman Sözlüğü: 89 kavram, bir kavram tek terim (D-70 madde 1); Lokman'ın seçtiği 6 kavram: kalkan, vadi, trapez mahya, kiremit desen sac, nem bariyeri ve membran ayrı, cumba makası ve yavru makas (Lokman 11.11 20:49–20:52) | yazıldı (11.11; Sözlük sohbeti, `claude/project-thread-82u5ox`) |
-| D | D-82 | Sözlük: "kimlik kartı" tek başına parçanın kartı (Lokman 12.11 08:31 kartı) | alındı (12.11; Sözlük sohbeti, `claude/project-thread-82u5ox`) |
+| D | D-82 | Portman Sözlüğü ikinci tur: tek başına "kimlik kartı" parçanın kartı; "Proje Kimlik Kartı" ve "bayi kimlik kartı" hep tam adıyla; sözlük r03, 91 kavram (Lokman 12.11 08:31 kartı) | yazıldı (12.11; Sözlük sohbeti, `claude/project-thread-82u5ox`) |
 | D | D-83 | Prefabrik evde çatı seçimi: PA-06'ya üç çatı, evin çatısı, PA-06-K kırma, PA-06-C beşik mahya önde + salonda cumba (İE-37; Lokman 12.11 08:36:09, 08:41:09) | yazıldı (12.11; çatı seçimi sohbeti, `claude/project-thread-91gav7`) |
 | D | **D-84** | — | **sıradaki boş** |
 | İE | İE-01–İE-08 | bu depo (`main`) | yazıldı |
