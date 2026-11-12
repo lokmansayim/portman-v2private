@@ -240,6 +240,9 @@ def esleme_denetle(E: dict) -> list[str]:
                 kayit(f"{hat} › bant {b['kalem']} {a['en_mm']}", a)
         for b in H.get("boy_onerileri") or []:
             kayit(f"{hat} › boy {b.get('kalem') or b.get('kalem_baslar')}", b)
+            if "boy_adim_mm" in b and (isinstance(b["boy_adim_mm"], bool) or not isinstance(b["boy_adim_mm"], (int, float))
+                                       or b["boy_adim_mm"] <= 0):
+                sorun.append(f"{hat} › boy {b.get('kalem') or b.get('kalem_baslar')}: boy_adim_mm sıfırdan büyük sayı olur")
         if H.get("makas_kurali"):
             kayit(f"{hat} › makas", H["makas_kurali"])
     return sorun
@@ -335,7 +338,7 @@ def defter_uret(A: dict, E: dict | None = None) -> dict:
                 f = kural(f"boy {b.get('kalem') or b.get('kalem_baslar')}", b)
                 if f:
                     boy.append({a: b[a] for a in ("kalem", "kalem_baslar") if a in b}
-                               | {"boy_mm": b["boy_mm"], "fiyat": f["fiyat"], **{a: b[a] for a in ("yuvarlama", "kapatma_m") if a in b},
+                               | {"boy_mm": b["boy_mm"], "fiyat": f["fiyat"], **{a: b[a] for a in ("yuvarlama", "kapatma_m", "boy_adim_mm") if a in b},
                                   "kaynak": "CRM", "kaynak_satir": f["kaynak_satir"], "kaynak_kalem": f["kaynak_kalem"], "onay": f["onay"],
                                   "dayanak": f["dayanak"], **{x: f[x] for x in ("kdv", "kdv_grubu") if x in f}})
             cikti["boy_onerileri"] = boy

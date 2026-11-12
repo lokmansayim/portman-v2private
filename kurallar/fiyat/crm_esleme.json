@@ -1,6 +1,6 @@
 {
  "sema": 1,
- "surum": "2026-11-11-r05",
+ "surum": "2026-11-11-r06",
  "karar": "D-72",
  "muhur": "M-15",
  "aciklama": "Fiyat defteri kaleminin CRM stok fiyatları API'sindeki karşılığı ve fiyatın nasıl hesaplandığı (İE-35). Fiyat yazmaz: fiyat her gün CRM'den gelir, `araclar/crm_fiyat.py` bu dosyayla defter üretir. Anahtarlar ve birimler fiyat defterinin (defter_2026-11 r13) kalemleri; Motor'un listesindeki anahtar. D-72'den sonra defter kapandı: Motor'un yeni anahtarı yalnız buraya, hattın kalemlerinin sonuna girer (r05, TK-06). Eşleme değişikliği (yeni kalem, Lokman'ın birim cevabı, Samet'in CRM'e eklediği ürün) bu dosyaya PR'la girer; `kaynak` bölümü mühürlü (M-15).",
@@ -728,9 +728,9 @@
     "Mahya bandı | rulo 10 m": {
      "kod": "CG23",
      "hesap": "ayni",
-     "esleme": "birim sorusu",
+     "esleme": "kural",
      "birim": "adet",
-     "not": "CRM'de mahya bandı 20 cm, birim m²; defterde rulo 10 m. Birim anlaşılmadı, hesaplanmaz"
+     "not": "Lokman 11 Kasım 11:14:48 kartı, seçenek \"… bir rulo (10 m)\" (60,8 m² teklif sohbeti; D-72'nin birim cevabı): CRM'deki mahya bandının (20 cm, birim m²) fiyatı bir rulonun (10 m) fiyatı"
     },
     "Tijli duy | adet": {
      "kod": "E36",
@@ -1503,6 +1503,13 @@
      "birim": "adet",
      "not": "CRM'de PVC pencere yok; Lokman 9 Kasım kartı: pencere de CRM'den fiyatlanır, Samet CRM'e ekler (D-72)",
      "kdv_grubu": "Pencereler"
+    },
+    "Trapez vida 5,5 × 60 (metal kiremit) | adet": {
+     "kod": "V11",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet",
+     "not": "CRM adı: (5.5 × 60) Trapez Vida (Trapez Sac / Metal Kiremit); Motor metal kiremitte bu adı yazar (60,8 m² teklifi, r06)"
     }
    },
    "bantlar": [
@@ -1696,6 +1703,16 @@
      "yuvarlama": 0.01,
      "esleme": "birim varsayımı",
      "not": "Sandviç panel m² fiyatından, boyla orantılı (D-67). CRM'de antrasit sandviç panel, ölçü özel; fiyatı m² fiyatı sayıldı"
+    },
+    {
+     "kalem_baslar": "Metal kiremit (100 cm kapatır) · ",
+     "kod": "CG10",
+     "hesap": "ayni",
+     "boy_mm": 1000,
+     "boy_adim_mm": 50,
+     "yuvarlama": 0.01,
+     "esleme": "kural",
+     "not": "D-79 (Lokman 11 Kasım 20:24): CRM'deki metal kiremit (antrasit) fiyatı m² fiyatı; levha 100 cm kapatır; boy 50 mm'nin katına yukarı tamamlanır (3740 → 3750), fiyat m² fiyatı × tamamlanan boy (m)"
     }
    ],
    "makas_kurali": {
@@ -1867,9 +1884,9 @@
     "Mahya bandı | rulo / 10 m": {
      "kod": "CG23",
      "hesap": "ayni",
-     "esleme": "birim sorusu",
+     "esleme": "kural",
      "birim": "adet",
-     "not": "CRM'de mahya bandı 20 cm, birim m²; defterde rulo 10 m. Birim anlaşılmadı, hesaplanmaz"
+     "not": "Lokman 11 Kasım 11:14:48 kartı, seçenek \"… bir rulo (10 m)\" (60,8 m² teklif sohbeti; D-72'nin birim cevabı): CRM'deki mahya bandının (20 cm, birim m²) fiyatı bir rulonun (10 m) fiyatı"
     },
     "Acil müdahale kapağı | adet": {
      "kod": "DG11",
