@@ -38,3 +38,25 @@ def test_stdin_ile_gonderilse_de_kalan_satirlar_yutulmaz(tmp_path):
                        env={**_ortam(tmp_path), "PM_PYTHON": str(sahte)}, cwd=str(KOK / "vps"), timeout=120)
     assert r.returncode == 0, r.stderr
     assert "hiçbir şey yazılmadı" in r.stdout and "SONRAKI_SATIR_CALISTI" in r.stdout
+
+
+def test_prefabrik_kodlari_prefabrik_kaydindan_okunur(tmp_path):
+    """İE-36/İE-37 (D-80, D-83): sekiz ev ve PA-06'nın çatı seçenekleri `adaylar_prefabrik.json`'da; betik `adaylar.json`'u verseydi
+    K-A10 "olmayan kod" diye dururdu (12 Kasım 2026, sürüm hazırlığı)."""
+    r = subprocess.run(["bash", str(BETIK), "--kuru", "PA-01,PA-02,PA-03,PA-04,PA-05,PA-06,PA-07,PA-08,PA-06-K,PA-06-C", "Lokman", "2026-11-12"],
+                       capture_output=True, text=True, env=_ortam(tmp_path), timeout=120)
+    assert r.returncode == 0, r.stdout + r.stderr
+    assert "KURU: 10 kayıt yazılacak (PA01, PA02, PA03, PA04, PA05, PA06, PA07, PA08, PA06K, PA06C)" in r.stdout
+    assert "hiçbir şey yazılmadı" in r.stdout and "Lokman" not in r.stdout
+
+
+def test_celik_ve_banka_kodu_bugunku_kayittan(tmp_path):
+    r = subprocess.run(["bash", str(BETIK), "--kuru", "KT04", "Lokman", "2026-11-12"], capture_output=True, text=True, env=_ortam(tmp_path), timeout=120)
+    assert r.returncode == 0, r.stdout + r.stderr
+    assert "KURU: 1 kayıt yazılacak (KT04)" in r.stdout
+
+
+def test_prefabrik_ve_celik_kodu_ayni_kosuda_durur(tmp_path):
+    r = subprocess.run(["bash", str(BETIK), "--kuru", "PA-04,Ç8801", "Lokman", "2026-11-12"], capture_output=True, text=True, env=_ortam(tmp_path), timeout=120)
+    assert r.returncode == 1
+    assert "DUR: prefabrik (PA) ve çelik kodları aynı koşuda verilmez" in r.stderr and "KURU" not in r.stdout

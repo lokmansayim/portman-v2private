@@ -5,6 +5,9 @@
 # 2026): 2. argüman boşsa "Lokman". Bayi onayından sonraki teknik kontrol (8b mühendis adımı) ayrıdır, aynen kalır. Ad çıktıya girmez
 # (yalnız ilk harf). Canlı değişikliktir: Lokman'ın ayrı onayıyla, sürüm güncellendikten sonra, canlı A2 denemesinden önce koşar.
 #   ssh -n portman-vps 'timeout 120 bash /opt/portman/guncel/vps/ie08_adaylar.sh "Ç8801,Ç8801K,Ç8801L,Ç8201,KT01,KT02,KT03" "Lokman" 2026-10-13 "kabul notu" "2026-10-13"' > ie08_kabul.txt 2>&1
+#   Prefabrik evler (İE-36, D-80: PA-01 … PA-08) ve çatı seçenekleri (İE-37, D-83: PA-06-K, PA-06-C) ayrı kayıttadır
+#   (`beyin/veri/adaylar_prefabrik.json`, `beyin/veri/cati_varyantlari/`): kodların hepsi PA ise betik o kaydı okur; PA ile çelik kodu
+#   aynı koşuda karışmaz (DUR), ayrı koşulur. Ör. ... ie08_adaylar.sh "PA-01,PA-06,PA-06-K" "Lokman" 2026-11-12 "kabul notu" ...
 #   Sunucudaki sürüm kopyası koşulur; betik stdin'le (`bash -s < betik`, `git show … | ssh … 'bash -s'`) GÖNDERİLMEZ: 13 Ekim
 #   17:40 UTC'de yazma adımında takıldı (BK-08 madde 5). `-n` ve `timeout` takılmayı önler; Python çağrısının stdin'i de /dev/null.
 #   (tırnaklar uzak kabuğun komut dizesinin İÇİNDE olmalı: ssh argümanları boşlukla birleştirir, iki sözcüklü not bölünür.)
@@ -22,6 +25,18 @@ KOK="${PM_KOK:-/opt/portman}"; ETC="${PM_ETC:-/etc/portman}"
 GUNCEL="$KOK/guncel"; [ -d "$GUNCEL/araclar" ] || GUNCEL="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")/.." 2>/dev/null && pwd)"
 [ -f "$GUNCEL/araclar/aday_kabul.py" ] || dur "araclar/aday_kabul.py yok: sürüm İE-08 PR-2a'dan eski mi? ($GUNCEL)"
 [ -f "$GUNCEL/beyin/veri/adaylar.json" ] || dur "beyin/veri/adaylar.json sürümde yok"
+# İE-36/İE-37 (D-80, D-83): PA kodları prefabrik aday kaydından (çatı seçenekleri aday_kabul.py'de aynı kayıtla); karışık liste durur
+ADAYLAR="$GUNCEL/beyin/veri/adaylar.json"; PA=0; OTEKI=0
+IFS=',' read -r -a KOD_DIZI <<< "$KODLAR"
+for k in "${KOD_DIZI[@]}"; do
+    k="${k// /}"; [ -n "$k" ] || continue
+    if [[ "${k^^}" =~ ^PA-?[0-9]{2}(-?[A-Z])?$ ]]; then PA=$((PA + 1)); else OTEKI=$((OTEKI + 1)); fi
+done
+[ "$PA" -gt 0 ] && [ "$OTEKI" -gt 0 ] && dur "prefabrik (PA) ve çelik kodları aynı koşuda verilmez; iki ayrı komutla koşun"
+if [ "$PA" -gt 0 ]; then
+    ADAYLAR="$GUNCEL/beyin/veri/adaylar_prefabrik.json"
+    [ -f "$ADAYLAR" ] || dur "beyin/veri/adaylar_prefabrik.json sürümde yok: sürüm İE-36'dan eski mi? ($GUNCEL)"
+fi
 PY="${PM_PYTHON:-$GUNCEL/venv/bin/python}"; [ -x "$PY" ] || PY="$(command -v python3)"
 if [ -n "${PM_PG_DSN:-}" ]; then DSN="$PM_PG_DSN"
 elif [ -f "$ETC/agent.env" ]; then DSN="$(grep -E '^PORTMAN_PG_DSN=' "$ETC/agent.env" | head -1 | cut -d= -f2- | sed -e 's/^"//' -e 's/"$//')"
@@ -32,11 +47,12 @@ echo "   kodlar: $KODLAR · tarih: $TARIH · kabul eden: ${KIM:0:1}… (ad çık
 cd /tmp
 # Ajanla aynı kimlik ve DSN (systemd: PORTMAN_PG_DSN=dbname=portman, kullanıcı portman; guncelle.sh de göçleri böyle koşar)
 if [ -n "${PM_OLARAK+x}" ]; then read -r -a OLARAK <<< "$PM_OLARAK"; elif [ "$(id -u)" = "0" ] && id portman >/dev/null 2>&1; then OLARAK=(sudo -u portman); else OLARAK=(); fi
-"${OLARAK[@]}" env PORTMAN_PG_DSN="$DSN" HOME="${HOME:-/tmp}" "$PY" "$GUNCEL/araclar/aday_kabul.py" $KURU --kodlar "$KODLAR" --kim "$KIM" --tarih "$TARIH" --not "$NOT" --paket "$PAKET" < /dev/null
+"${OLARAK[@]}" env PORTMAN_PG_DSN="$DSN" HOME="${HOME:-/tmp}" "$PY" "$GUNCEL/araclar/aday_kabul.py" $KURU --kodlar "$KODLAR" --kim "$KIM" --tarih "$TARIH" --not "$NOT" --paket "$PAKET" --adaylar "$ADAYLAR" < /dev/null
 RC=$?
 [ "$RC" = "0" ] || dur "kabul kaydı yazılamadı (çıkış $RC)"
 if [ -n "$KURU" ]; then
     echo "   KURU: hiçbir şey yazılmadı; kaydı yazmak için aynı komutu --kuru olmadan koşun."
 else
-    echo "   tamam. Canlı A2 denemesi artık bu adayları sunar (bayi 'Ç8801' ya da '88 m² 2+1 çelik' yazınca)."
+    if [ "$PA" -gt 0 ]; then echo "   tamam. Kalıcı akış artık bu prefabrik evleri sunar (bayi 'PA-04' ya da '80 m² 2+1 prefabrik' yazınca)."
+    else echo "   tamam. Canlı A2 denemesi artık bu adayları sunar (bayi 'Ç8801' ya da '88 m² 2+1 çelik' yazınca)."; fi
 fi
