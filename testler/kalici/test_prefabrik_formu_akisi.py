@@ -61,6 +61,7 @@ def prefabrik_formu(depo, wa, s) -> tuple[dict, str]:
     [r] = isle_hepsi(depo, s)
     assert son_sonuc(depo)["form_sunuldu"] == "prefabrik", r
     satir, dis_form = form_satiri(depo, wa)
+    assert satir["body"] == "Prefabrik talep formunu doldurun. İsterseniz talebinizi yazın."
     p = parametreler(satir)
     assert p["flow_id"] == "3333333333" and p["flow_token"].startswith("pf:") and p["flow_action_payload"]["screen"] == "TALEP_P"
     return satir, dis_form
@@ -141,9 +142,14 @@ def test_celik_dugmesi_bugunku_formu_acar(depo, wa, tmp_path):
     [r] = isle_hepsi(depo, s)
     assert son_sonuc(depo)["form_sunuldu"] == "talep", r
     satir, _ = form_satiri(depo, wa)
+    assert satir["body"] == "Çelik için talep formunu doldurun. İsterseniz talebinizi yazın."
     p = parametreler(satir)
     assert p["flow_id"] == "1111111111" and p["flow_token"].startswith("tf:") and p["flow_action_payload"]["screen"] == "TALEP"
     assert p["flow_action_payload"]["data"]["yapi"] == "celik"
+    # bayi formu açmadan yazarsa soru bugünkü yoldan sürer
+    assert depo.mesaj_kaydet(mesaj("2+1", talep(ozet="2+1", oda_programi="2+1"), bayi=BAYI_KART))
+    [r] = isle_hepsi(depo, s)
+    assert r["eylem"] == "sor" and r["gerekce"] == "eksik: dis_olcu", r
 
 
 def test_kartta_prefabrik_dugmesiz_form(depo, wa, tmp_path):

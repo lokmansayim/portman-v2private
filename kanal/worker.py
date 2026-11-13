@@ -580,6 +580,8 @@ def isle(gelen: dict, settings: dict, k=None, cikarim: dict | None = None, proje
     elif butonlar:
         ekle_satir(giden_etkilesim(gelen, metin, 0, butonlar=butonlar))
     elif katman and (fs := form_sunusu(gelen, karar, k, bayi, settings, metin)) is not None:     # İE-20 PR-2: aynı metin + form düğmesi
+        if etk is not None and etk.get("tur") == "yapi" and karar.eylem == "sor" and fs[0] in YAPI_FORM_METNI:
+            metin = YAPI_FORM_METNI[fs[0]]        # İE-20 PR-6: yapı tipi düğmesinden sonra eksik bilgi sorusu yerine formun daveti
         ekle_satir(form_satiri(gelen, metin, fs, settings))
         sonuc["form_sunuldu"] = fs[0]
     else:
@@ -753,6 +755,8 @@ NASIL_TALEP = "Talebinizi bu sohbete yazabilirsiniz; örnek: \"Tek kat çelik, 2
 # prefabrik talep formu, çelik → bugünkü talep formu (çelik formu kurulana kadar). Düğme `y:<iz>:prefabrik|celik` (kanal/etkilesim.py).
 YAPI_SORUSU = "Formla iletmek için yapı tipini seçin."
 YAPI_DUGMELERI = (("prefabrik", "Prefabrik"), ("celik", "Çelik"))
+YAPI_FORM_METNI = {"prefabrik": "Prefabrik talep formunu doldurun. İsterseniz talebinizi yazın.",
+                   "talep": "Çelik için talep formunu doldurun. İsterseniz talebinizi yazın."}    # düğmeden sonra sunulan forma göre
 
 
 def form_kimligi(settings: dict, tur: str) -> str | None:
