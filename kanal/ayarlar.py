@@ -44,6 +44,9 @@ VARSAYILAN = {
     # İE-20 PR-2: talep formu ve revizyon formu (WhatsApp Flow, uç noktasız; kanal/formlar/). Meta'da kurulan formların kimlikleri
     # (`talep_flow_id`, `revizyon_flow_id`; rakam). `taslak`: true iken form yayımlanmamış (taslak) kipte gönderilir, yalnız WhatsApp
     # Manager'daki test numaralarında açılır. Kapalıyken (ya da kimlik yokken) bugünkü metin; gelen form cevabı her durumda LLM'siz işlenir.
+    # İE-20 PR-6 (D-88): `prefabrik_flow_id` (varsayılanda yok; `vps/flow_taslak.py --form prefabrik` ile kurulan prefabrik talep formunun
+    # kimliği) yazılınca yapı tipi bilinmeyen bayiye önce [Prefabrik] [Çelik] sorulur; prefabrik → o form, çelik → `talep_flow_id`.
+    # Anahtar yokken davranış bugünküyle aynıdır.
     "talep_formu": {"acik": False, "talep_flow_id": None, "revizyon_flow_id": None, "taslak": True},
     # İE-22: WhatsApp'tan bayi kaydı (kanal/kayit.py; LLM yok). Açıkken kartı hiç olmayan numaraya ad ve firma sorulur, Patron'a [Onayla]
     # [Reddet] gider; onayla kart açılır ve karşılama şablonu gider. `gunluk_en_cok`: 24 saatte açılan yeni talep tavanı (aşılırsa sabit

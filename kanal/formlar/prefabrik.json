@@ -1,0 +1,95 @@
+{
+  "version": "7.3",
+  "screens": [
+    {
+      "id": "TALEP_P",
+      "title": "Prefabrik talep formu",
+      "data": {
+        "bilinen": {"type": "string", "__example__": "Bildiğiniz kadarını doldurmanız yeterli; eksik kalanı sohbette sorarım."},
+        "kat": {"type": "string", "__example__": "1"},
+        "oda": {"type": "string", "__example__": "2+1"},
+        "alan": {"type": "string", "__example__": "70"},
+        "en": {"type": "string", "__example__": "7"},
+        "boy": {"type": "string", "__example__": ""}
+      },
+      "layout": {
+        "type": "SingleColumnLayout",
+        "children": [
+          {"type": "TextBody", "text": "${data.bilinen}"},
+          {"type": "RadioButtonsGroup", "name": "kat", "label": "Kat", "required": true, "init-value": "${data.kat}",
+           "data-source": [{"id": "1", "title": "Tek kat"}, {"id": "2", "title": "İki kat"}]},
+          {"type": "Dropdown", "name": "oda", "label": "Oda programı", "required": true, "init-value": "${data.oda}",
+           "data-source": [{"id": "1+0", "title": "Tek oda (1+0)"}, {"id": "1+1", "title": "1+1"}, {"id": "2+1", "title": "2+1"},
+                           {"id": "3+1", "title": "3+1"}, {"id": "4+1", "title": "4+1"}, {"id": "5+1", "title": "5+1"}]},
+          {"type": "TextInput", "name": "alan", "label": "Yaklaşık alan (m²)", "input-type": "number", "required": false,
+           "init-value": "${data.alan}", "helper-text": "İki kenarı da yazarsanız boş bırakabilirsiniz"},
+          {"type": "TextInput", "name": "en", "label": "Kısa kenar (m)", "input-type": "number", "required": false, "init-value": "${data.en}"},
+          {"type": "TextInput", "name": "boy", "label": "Uzun kenar (m)", "input-type": "number", "required": false, "init-value": "${data.boy}",
+           "helper-text": "Boş bırakırsanız m²'den hesaplarız. Ölçüyü pano katına yuvarlarız."},
+          {"type": "RadioButtonsGroup", "name": "oncelik", "label": "Önceliğiniz", "required": true,
+           "data-source": [{"id": "butce", "title": "Bütçe"}, {"id": "yasam", "title": "Yaşam alanı"}, {"id": "montaj", "title": "Kısa montaj"},
+                           {"id": "yok", "title": "Fark etmez"}]},
+          {"type": "Footer", "label": "Devam",
+           "on-click-action": {"name": "navigate", "next": {"type": "screen", "name": "OZELLIK_P"},
+                               "payload": {"kat": "${form.kat}", "oda": "${form.oda}", "alan": "${form.alan}", "en": "${form.en}",
+                                           "boy": "${form.boy}", "oncelik": "${form.oncelik}"}}}
+        ]
+      }
+    },
+    {
+      "id": "OZELLIK_P",
+      "title": "Standart özellikler",
+      "terminal": true,
+      "success": true,
+      "data": {
+        "kat": {"type": "string", "__example__": "1"},
+        "oda": {"type": "string", "__example__": "2+1"},
+        "alan": {"type": "string", "__example__": "70"},
+        "en": {"type": "string", "__example__": "7"},
+        "boy": {"type": "string", "__example__": ""},
+        "oncelik": {"type": "string", "__example__": "butce"}
+      },
+      "layout": {
+        "type": "SingleColumnLayout",
+        "children": [
+          {"type": "TextBody", "text": "Standart özellikler seçili gelir. İsterseniz değiştirin."},
+          {"type": "Dropdown", "name": "kaplama", "label": "Çatı kaplaması", "required": true, "init-value": "trapez",
+           "data-source": [{"id": "trapez", "title": "Trapez sac (standart)"}, {"id": "kiremit", "title": "Kiremit desen sac + OSB"},
+                           {"id": "tek_kat", "title": "Tek kat panel"}, {"id": "shingle", "title": "Shingle + OSB"},
+                           {"id": "sandvic", "title": "Sandviç panel"}]},
+          {"type": "Dropdown", "name": "cati_rengi", "label": "Çatı rengi", "required": true, "init-value": "antrasit",
+           "data-source": [{"id": "antrasit", "title": "Antrasit gri (standart)"}, {"id": "kirmizi", "title": "Kırmızı (RAL 3009)"}]},
+          {"type": "Dropdown", "name": "yukseklik", "label": "Pano yüksekliği", "required": true, "init-value": "250",
+           "data-source": [{"id": "250", "title": "250 cm (standart)"}, {"id": "280", "title": "280 cm"}, {"id": "300", "title": "300 cm"}]},
+          {"type": "Dropdown", "name": "dis_duvar", "label": "Dış duvar", "required": true, "init-value": "100",
+           "data-source": [{"id": "100", "title": "100 mm (standart)"}, {"id": "160", "title": "160 mm"}]},
+          {"type": "Dropdown", "name": "ic_duvar", "label": "İç duvar", "required": true, "init-value": "60",
+           "data-source": [{"id": "60", "title": "60 mm (standart)"}, {"id": "100", "title": "100 mm"}]},
+          {"type": "Dropdown", "name": "tavan", "label": "Tavan", "required": true, "init-value": "asma",
+           "data-source": [{"id": "asma", "title": "Asma tavan (standart)"}, {"id": "ters", "title": "Ters tavan"}]},
+          {"type": "Dropdown", "name": "pencere_rengi", "label": "Pencere rengi", "required": true, "init-value": "beyaz",
+           "data-source": [{"id": "beyaz", "title": "Beyaz (standart)"}, {"id": "antrasit", "title": "Antrasit gri"}]},
+          {"type": "CheckboxGroup", "name": "ek", "label": "Ek istekler", "required": false,
+           "data-source": [{"id": "alcipan", "title": "İç duvarda alçıpan kaplama"},
+                           {"id": "lata", "title": "Lata ve yalı baskı", "description": "H profilde lata, köşelerde yalı baskı"},
+                           {"id": "cift_yun", "title": "Çatıda çift kat mineral yün"}]},
+          {"type": "TextInput", "name": "musteri", "label": "Müşteri / proje adı", "input-type": "text", "required": false},
+          {"type": "TextInput", "name": "il", "label": "Teslim ili", "input-type": "text", "required": false},
+          {"type": "TextInput", "name": "ilce", "label": "Teslim ilçesi", "input-type": "text", "required": false},
+          {"type": "TextArea", "name": "not", "label": "Not", "required": false, "max-length": 600, "helper-text": "Varsa özel isteğiniz"},
+          {"type": "DocumentPicker", "name": "dosya", "label": "Çizim ya da plan (isteğe bağlı)",
+           "description": "El çizimi, plan resmi ya da PDF; tek dosya, en çok 20 MB", "min-uploaded-documents": 0, "max-uploaded-documents": 1,
+           "max-file-size-kb": 20480, "allowed-mime-types": ["image/jpeg", "image/png", "image/webp", "application/pdf"]},
+          {"type": "Footer", "label": "Gönder",
+           "on-click-action": {"name": "complete",
+                               "payload": {"kat": "${data.kat}", "oda": "${data.oda}", "alan": "${data.alan}", "en": "${data.en}",
+                                           "boy": "${data.boy}", "oncelik": "${data.oncelik}", "kaplama": "${form.kaplama}",
+                                           "cati_rengi": "${form.cati_rengi}", "yukseklik": "${form.yukseklik}",
+                                           "dis_duvar": "${form.dis_duvar}", "ic_duvar": "${form.ic_duvar}", "tavan": "${form.tavan}",
+                                           "pencere_rengi": "${form.pencere_rengi}", "ek": "${form.ek}", "musteri": "${form.musteri}",
+                                           "il": "${form.il}", "ilce": "${form.ilce}", "not": "${form.not}", "dosya": "${form.dosya}"}}}
+        ]
+      }
+    }
+  ]
+}

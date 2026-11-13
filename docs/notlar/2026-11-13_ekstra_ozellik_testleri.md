@@ -65,3 +65,59 @@ Tutmayan satırların gerçek değeri depoya girmez (Lokman, 23 Ekim 2026, kart 
 Okuma: 280'in kolon ve iniş borusu satırlarında veri bugünkü kuraldan farklı bir yön gösteriyor (iki proje). İniş borusu BK-25'in (D-60)
 kuralı; değişmesi Lokman'ın kararıdır. Ana çatı örtü adedi, örtü boyu ve ters tavan omegasında veriden tek kural çıkmadı (11 Kasım
 ölçümünün sonucuyla aynı yön: iniş, aşık ve dere kapağında da çıkmamıştı).
+
+## D. İkinci dilim · listenin okuduğu öteki anahtarlar (13 Kasım 2026 22:55–23:10 UTC; `main` 50e5027b)
+
+Yöntem aynı: dokuz havuz evi, İş Emri'ne yalnız özelliğin anahtarı. Listenin okuduğu bütün özellik anahtarları `motor/prefabrik_liste.py`'den
+çıkarıldı (`ozellikler` ve `alici_ait` okumaları); ilk dilimde olmayanlar denendi.
+
+| Özellik (İş Emri anahtarı) | Yükleme listesi (9 ev) | Teklif (fiyat eşlemesi) | Plan (3 ev) |
+|---|---|---|---|
+| Fugalı dış cephe (`ozellikler › Açıklama`: "Fugalı") | 9/9: 100'lük dış panolar aynı ölçü ve adetle "(FUGALI)" adını alır; H latası, köşe latası, pencere latası girer; pano sayısı aynı | Çalışmıyor: 12–18 satır "defterde yok" (fugalı pano kalemleri eşlemede yok); Kasım defteriyle toplam 50.000–88.500 TL düşük çıkıyor | 3/3 doğrulamadan geçti |
+| Metal iniş borusu (`Yağmur İniş Borusu`: "Metal") | 9/9: PVC borunun iki satırı çıkar, iniş başına bir "Metal iniş borusu L 3000" girer; yalnız Dere grubu | Çalışmıyor: "Metal iniş borusu L 3000" defterde yok | 3/3 |
+| Pencere alıcıya ait (`alici_ait.kalemler` ya da `Pencere Rengi`: "Alıcıya ait") | 9/9: pencere ve vasistas satırları, pencere vidası, mastik ve pencere U'su çıkar; "Pencere grubu" 0 adet; iki yazım aynı liste | Yerelde çalışıyor (yeni fiyatsız satır yok; toplam düşer) | 3/3 |
+| Dış kapı alıcıya ait (`Dış Kapı`: "Alıcıya ait") | 9/9: yalnız kapının adedi 0 olur | Yerelde çalışıyor | 3/3 |
+| Boya alıcıya ait (`alici_ait.kalemler` ya da iki boya özelliği) | 9/9: beş boya satırı çıkar, "Boya grubu" 0 adet; mastik kalır; iki yazım aynı liste | Yerelde çalışıyor | 3/3 |
+| Yükseklik 270 | 9/9: İş Emri durur ("Prefabrik pano yüksekliği 270 cm tanımlı değil; yalnız 250 / 280 / 300 cm") | — | — |
+
+Bileşim: bu beş özellik 280, iç duvar 100 ve sandviç panelle birlikte yazılınca dokunduğu gruplar aynı kalır (135 ikili, 9 ev).
+
+## E. Sözleşme formunun 25 grubu: Motor'da karşılığı var mı
+
+Kaynak: PF `Talep_Formu_ve_Gorsel/bayi_teklif_tarama/sozlesme_formu_ekstralar.md` (145 seçenek, 25 grup; taslak). "Karşılığı yok": İş Emri'ne
+yazılsa da liste değişmez (dokuz evde denendi); bayiye bu seçenek için bugün liste ve teklif verilemez.
+
+| # | Grup | Karşılığı olan seçenek (durum) | Karşılığı olmayan seçenek |
+|---|---|---|---|
+| 1 | Yapı türü | Prefabrik, çelik | Tiny House |
+| 2 | Kat adedi | 1 kat | 2 kat, 3 kat (pilot tek kat) |
+| 3 | Kat yüksekliği | 2800, 3000 (liste yerelde çalışıyor; teklif çalışmıyor: fiyat eşlemesi) | 2700 (prefabrikte tanımlı değil, İş Emri durur) |
+| 4 | Dış duvar kalınlığı | 160 (çalışmıyor: havuz evinde İş Emri durur) | 80, 90, 140 (çelik karkas) |
+| 5 | İç duvar kalınlığı | 100 (yerelde çalışıyor) | 80, 90 (çelik karkas) |
+| 6 | Duvar ısı yalıtımı | — | Mineral yün, strafor |
+| 7 | İç duvar kaplaması | Alçıpan (liste yerelde çalışıyor; destek straforunun fiyatı yok) | OSB, Boardex |
+| 8 | Dış duvar kaplaması | Fugalı (liste yerelde çalışıyor; teklif çalışmıyor) | Fugalı ahşap betopan, Boardex, OSB, betopan + yalıpan, nem bariyeri |
+| 9 | Tavan | Ters tavan (yerelde çalışıyor) | Üçgen tavan (yazılırsa asma tavan sayılıyor), ışık bandı, stropiyer |
+| 10 | Çatı şekli | Havuz evinin kendi çatı seçenekleri: PA-06C liste yerelde çalışıyor; PA-06K liste çalışmıyor | İkili beşik, gizli çatı; kubbe havuz evinde denenmedi |
+| 11 | Çatı kaplaması | Trapez, tek kat panel (yerelde çalışıyor); sandviç, kiremit desen sac (kısmen); shingle (çalışmıyor) | — |
+| 12 | Çatı alt katmanı | Trapez + OSB (yerelde çalışıyor) | Membran ve nem bariyeri yalnız kaplamayla birlikte |
+| 13 | Çatı rengi | Renk çizim tablosuna yazılır; liste değişmez | — |
+| 14 | Çatı ısı yalıtımı | — | Cam yünü, çift kat cam yünü |
+| 15 | Saçak | — | Boardex, saçak sacı rengi |
+| 16 | Dere ve iniş | Metal iniş borusu (liste yerelde çalışıyor; fiyatı yok) | PVC dere, renk |
+| 17 | Elektrik | — | Anahtar rengi, aydınlatma türü |
+| 18 | Pencere | Renk (liste değişmez), alıcıya ait (yerelde çalışıyor) | Alüminyum, PVC serisi, panjur, sineklik, denizlik |
+| 19 | Dış kapı | Alıcıya ait (yerelde çalışıyor) | Kompozit çelik, yavrulu, sac, alüminyum camlı |
+| 20 | İç kapı | — | Melamin, PVC ahşap, PVC doğramalı |
+| 21 | İç boya | Alıcıya ait (yerelde çalışıyor) | Saten alçı, fileli alçı, marka |
+| 22 | Dış cephe | — | Mantolama, sıva, doku, söve, marka |
+| 23 | Tavan boyası | — | Polisan |
+| 24 | Banyo | — | Duşakabin, karolaj, klozet türü, banyo dolabı |
+| 25 | Ek parçalar | — | Baca, giriş sundurması, çatı kapağı, korkuluk |
+
+İki gözlem (karar değil):
+
+- Grup 16: form taslağında bizim standart "renkli metal", ekstra "PVC" yazıyor. Motor'da standart iniş borusu PVC, metal İş Emri'ne
+  yazılırsa geliyor. Hangisinin standart olduğu Lokman'ın sözüyle netleşir.
+- Grup 9: "Üçgen tavan" İş Emri'ne yazılırsa liste sessizce asma tavan sayıyor (ters tavanlı PA-06'da asma tavana dönüyor).
+
