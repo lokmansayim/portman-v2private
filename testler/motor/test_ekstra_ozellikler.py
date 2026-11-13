@@ -16,6 +16,10 @@ Kurallar 13 Kasım 2026 keşfinden (9 ev × 13 özellik; PF `Ekstra_Ozellik_Test
   ötekilerde düz mahya L 2800.
 - Tavan (ters), iç cephe kaplaması (alçıpan), çatı ve pencere rengi.
 - Bileşim: çatı kaplaması ile yükseklik, iç 100, ters tavan ve alçıpan birbirinin satırına dokunmaz.
+- İkinci dilim (13 Kasım 23:05 UTC; listenin okuduğu öteki anahtarlar): fugalı dış cephe (`Açıklama`: 100'lük dış panolar aynı ölçü ve
+  adetle "(FUGALI)" adını alır, lata satırları girer), metal iniş borusu (`Yağmur İniş Borusu`: yalnız Dere grubu), alıcıya ait pencere,
+  dış kapı ve boya (`alici_ait.kalemler` ya da özelliğin "Alıcıya ait" değeri: kalem 0 adetle yazılır), 270 cm yükseklik (prefabrikte
+  tanımlı değil: İş Emri durur; Lokman, 13 Ekim 2026).
 
 Bugün çalışmayan yerler `xfail(strict=True)` ile yazılıdır (D-28: çalışmayan şey "çalışıyor" yazılmaz); biri düzelince test kırmızıya döner ve
 satır buradan kaldırılır: dış duvar 160 havuz evinde yalnız anahtarla açılmaz; PA-06K'nin (kırma) listesi yazılamaz; sandviç panelde
@@ -59,6 +63,12 @@ def _oz(ad, deger):
     return f
 
 
+def _alici(kalem):
+    def f(ie):
+        ie.setdefault("alici_ait", {}).setdefault("kalemler", []).append(kalem)
+    return f
+
+
 OZELLIK = {
     "ic_100": _yapi(duvar_kalinligi_cm={"ic": 10}),
     "dis_160": _yapi(duvar_kalinligi_cm={"dis": 16}),
@@ -74,6 +84,14 @@ OZELLIK = {
     "alcipan": _oz("İç Cephe Kaplaması", "Alçıpan"),
     "cati_rengi": _oz("Çatı Kaplama Rengi", "Antrasit"),
     "pencere_rengi": _oz("Pencere Rengi", "Antrasit"),
+    "h_270": _yapi(duvar_yuksekligi_cm=270),
+    "fugali": _oz("Açıklama", "Fugalı"),
+    "metal_inis": _oz("Yağmur İniş Borusu", "Metal"),
+    "pencere_alici": _alici("Pencere"),
+    "pencere_alici_renk": _oz("Pencere Rengi", "Alıcıya ait"),
+    "kapi_alici": _oz("Dış Kapı", "Alıcıya ait"),
+    "boya_alici": _alici("Boya"),
+    "boya_alici_oz": lambda ie: (_oz("Dış Cephe Boya", "Alıcıya ait")(ie), _oz("İç Cephe Boya", "Alıcıya ait")(ie)),
 }
 KAPLAMALAR = ["tek_kat", "sandvic", "kiremit", "shingle", "trapez_osb"]
 
@@ -282,3 +300,86 @@ def test_kiremit_panel_kapamasi_adedi(ev):
 def test_shingle_satiri(ev):
     kalemler = {k[1].lower() for k in _liste(ev, "shingle")}
     assert any("shingle" in k for k in kalemler) and not any(k.startswith("tek kat çatı paneli") for k in kalemler)
+
+
+# ── İkinci dilim: listenin okuduğu öteki anahtarlar (fugalı dış cephe, metal iniş borusu, alıcıya ait kalemler) ──────────────────────────────
+
+FUGALI = " (FUGALI)"
+
+
+@pytest.mark.parametrize("ev", EVLER)
+def test_fugali_dis_panolar_ayni_olcu_ve_adetle_fugali_adina_gecer(ev):
+    """`ozellikler › Açıklama` "Fugalı": 100'lük dış duvar panelleri aynı ölçü ve adetle "(FUGALI)" adını alır; lata satırları girer."""
+    taban, y = _liste(ev), _liste(ev, "fugali")
+    eklenen, cikan, degisen = _fark(taban, y)
+    assert not degisen
+    assert cikan and {k[0] for k in cikan} == {"Panel"}
+    panel = {k: v for k, v in eklenen.items() if k[0] == "Panel"}
+    assert {(g, ad + FUGALI, olcu): n for (g, ad, olcu), n in cikan.items()} == panel       # yalnız ad değişir
+    assert _pano(taban) == _pano(y)
+    lata = {k: v for k, v in eklenen.items() if k[0] != "Panel"}
+    assert lata and {k[0] for k in lata} == {"Tavan"} and all("lata" in k[1].lower() for k in lata)
+    assert not any(FUGALI in k[1] for k in y if k[1].startswith("60'lık"))                    # iç duvar panosu fugalı olmaz
+
+
+@pytest.mark.parametrize("ev", EVLER)
+def test_metal_inis_borusu_pvc_parcalarin_yerine_gecer(ev):
+    """`Yağmur İniş Borusu` "Metal": PVC borunun iki satırı çıkar, iniş başına bir metal boru girer; yalnız Dere grubu değişir."""
+    taban, y = _liste(ev), _liste(ev, "metal_inis")
+    eklenen, cikan, degisen = _fark(taban, y)
+    assert not degisen and _gruplar(eklenen, cikan) == {"Dere"}
+    assert all("PVC dere iniş borusu" in k[1] for k in cikan) and len(cikan) == 2
+    (k, n), = eklenen.items()
+    assert k[1] == "Metal iniş borusu"
+    assert n == next(v for kk, v in cikan.items() if kk[2] == "L 2000")                       # iniş sayısı aynı
+
+
+@pytest.mark.parametrize("ev", EVLER)
+def test_pencere_aliciya_aitse_pencere_ve_baglantilari_listeden_cikar(ev):
+    """Pencere alıcıya ait: pencere ve vasistas satırları çıkar, "Pencere grubu" 0 adetle yazılır; pano sayısı aynı kalır.
+    İki yazım (`alici_ait.kalemler` ve `Pencere Rengi: Alıcıya ait`) aynı listeyi verir."""
+    taban, y = _liste(ev), _liste(ev, "pencere_alici")
+    assert y == _liste(ev, "pencere_alici_renk")
+    eklenen, cikan, degisen = _fark(taban, y)
+    assert not degisen and eklenen == {("Kapı ve pencere", "Pencere grubu", "—"): 0}
+    assert _gruplar(cikan) <= {"Kapı ve pencere", "Boya", "Metal aksam", "Vida"}
+    assert not any(k[1].startswith(("PVC pencere", "PVC vasistas")) for k in y)
+    assert {k for k in taban if k[1].startswith(("PVC pencere", "PVC vasistas"))} <= set(cikan)
+    assert _pano(taban) == _pano(y)
+
+
+@pytest.mark.parametrize("ev", EVLER)
+def test_dis_kapi_aliciya_aitse_yalniz_kapinin_adedi_sifirlanir(ev):
+    taban, y = _liste(ev), _liste(ev, "kapi_alici")
+    eklenen, cikan, degisen = _fark(taban, y)
+    assert not eklenen and not cikan
+    assert degisen and all(k[0] == "Kapı ve pencere" and "kapı" in k[1].lower() and yeni == 0 for k, (_eski, yeni) in degisen.items())
+
+
+@pytest.mark.parametrize("ev", EVLER)
+def test_boya_aliciya_aitse_boya_satirlari_cikar(ev):
+    """Boya alıcıya ait: boya kovaları çıkar, "Boya grubu" 0 adetle yazılır; mastik kalır. İki yazım aynı listeyi verir."""
+    taban, y = _liste(ev), _liste(ev, "boya_alici")
+    assert y == _liste(ev, "boya_alici_oz")
+    eklenen, cikan, degisen = _fark(taban, y)
+    assert not degisen and eklenen == {("Boya", "Boya grubu", "—"): 0}
+    assert cikan and _gruplar(cikan) == {"Boya"} and not any("mastik" in k[1].lower() for k in cikan)
+
+
+@pytest.mark.parametrize("ev", EVLER)
+@pytest.mark.parametrize("ozellik", ["fugali", "metal_inis", "pencere_alici", "kapi_alici", "boya_alici"])
+@pytest.mark.parametrize("oteki", ["h_280", "ic_100", "sandvic"])
+def test_ikinci_dilim_oteki_ozelliklerle_karismaz(ev, ozellik, oteki):
+    """Özelliğin dokunduğu gruplar, öteki özellik yazılıyken de aynıdır (iki özellik birbirinin satırını bozmaz)."""
+    tek = _gruplar(*_fark(_liste(ev), _liste(ev, ozellik)))
+    birlikte = _gruplar(*_fark(_liste(ev, oteki), _liste(ev, oteki, ozellik)))
+    assert birlikte == tek
+
+
+@pytest.mark.parametrize("ev", EVLER)
+def test_yukseklik_270_prefabrikte_tanimli_degil(ev):
+    """Prefabrik pano yüksekliği yalnız 250 / 280 / 300 cm (Lokman, 13 Ekim 2026); 270 çelik karkasın yüksekliğidir. Liste sessizce
+    250 ya da 280 saymaz, İş Emri durur."""
+    with pytest.raises(G.IsEmriHatasi, match="270 cm tanımlı değil"):
+        _liste(ev, "h_270")
+
