@@ -135,6 +135,24 @@ def test_hazir_plan_yoksa_olcuyle_yonlendirilir(depo, wa, tmp_path):
     assert any(y["kind"] == "text" for y in bayiye(depo)) and patrona(depo)      # bayiye dürüst cevap, Lokman'a bildirim
 
 
+def test_katalog_onerisi_tasiyan_soru_davetle_ezilmez(depo, wa, tmp_path):
+    """Bayi prefabrik formla 2+1, 70 m² yazdı; sonra [Çelik] düğmesine bastı. Soru çelik katalog önerisini taşır: davet metni onu ezmez."""
+    kabul(depo)
+    s = pf_ayar(tmp_path)
+    ids, dis = yapi_dugmeleri(depo, wa, s)
+    assert depo.mesaj_kaydet(buton(ids[0], dis))
+    isle_hepsi(depo, s)
+    satir, dis_form = form_satiri(depo, wa)
+    form_cevabi(depo, tmp_path, parametreler(satir)["flow_token"], {**STD, "oncelik": "yok", "alan": "70"}, dis_form)
+    [r] = isle_hepsi(depo, s)
+    assert r["eylem"] == "secenek", r
+    assert depo.mesaj_kaydet(buton(ids[1], dis))
+    [r] = isle_hepsi(depo, s)
+    assert r["eylem"] == "sor" and son_sonuc(depo)["form_sunuldu"] == "talep", r
+    govde = [x["satir"]["body"] for x in bayiye(depo) if x["kind"] == "interactive" and x["satir"]["interactive"]["type"] == "flow"][-1]
+    assert "katalog önerilerim" in govde and "talep formunu doldurun" not in govde
+
+
 def test_celik_dugmesi_bugunku_formu_acar(depo, wa, tmp_path):
     s = pf_ayar(tmp_path)
     ids, dis = yapi_dugmeleri(depo, wa, s)

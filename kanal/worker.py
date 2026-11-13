@@ -580,8 +580,9 @@ def isle(gelen: dict, settings: dict, k=None, cikarim: dict | None = None, proje
     elif butonlar:
         ekle_satir(giden_etkilesim(gelen, metin, 0, butonlar=butonlar))
     elif katman and (fs := form_sunusu(gelen, karar, k, bayi, settings, metin)) is not None:     # İE-20 PR-2: aynı metin + form düğmesi
-        if etk is not None and etk.get("tur") == "yapi" and karar.eylem == "sor" and fs[0] in YAPI_FORM_METNI:
-            metin = YAPI_FORM_METNI[fs[0]]        # İE-20 PR-6: yapı tipi düğmesinden sonra eksik bilgi sorusu yerine formun daveti
+        if (etk is not None and etk.get("tur") == "yapi" and karar.eylem == "sor" and karar.soru_alani in YAPI_DAVET_SORULARI
+                and fs[0] in YAPI_FORM_METNI):
+            metin = YAPI_FORM_METNI[fs[0]]        # İE-20 PR-6: yapı tipi düğmesinden sonra "kaç oda?" yerine formun daveti
         ekle_satir(form_satiri(gelen, metin, fs, settings))
         sonuc["form_sunuldu"] = fs[0]
     else:
@@ -757,6 +758,7 @@ YAPI_SORUSU = "Formla iletmek için yapı tipini seçin."
 YAPI_DUGMELERI = (("prefabrik", "Prefabrik"), ("celik", "Çelik"))
 YAPI_FORM_METNI = {"prefabrik": "Prefabrik talep formunu doldurun. İsterseniz talebinizi yazın.",
                    "talep": "Çelik için talep formunu doldurun. İsterseniz talebinizi yazın."}    # düğmeden sonra sunulan forma göre
+YAPI_DAVET_SORULARI = ("oda_programi", "dis_olcu")      # katalog önerisi taşıyan soru ("model_veya_olcu") kendi metniyle gider
 
 
 def form_kimligi(settings: dict, tur: str) -> str | None:
