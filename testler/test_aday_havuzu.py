@@ -321,3 +321,15 @@ def test_kabul_betigi_celik_havuzu_tanir():
     assert r.returncode == 0 and "KURU: 4 kayıt yazılacak" in r.stdout, r.stdout + r.stderr
     r = subprocess.run(arac + ["--adaylar", str(ADAYLAR_PREFABRIK_JSON), "--kodlar", "KT-05"], capture_output=True, text=True, cwd=KOK)
     assert r.returncode == 2 and "olmayan kod: KT05" in r.stdout, r.stdout
+
+
+def test_koddan_secim_celik_havuz(tmp_path):
+    """Bayi çelik setten kodu yazarsa (LLM 'KT-06' okur) İş Emri havuzun tanımını taşır; tanımın sha'sı tutar."""
+    from beyin import celik as C
+    s = Sohbet(tmp_path, kabul=ESKI_CELIK | set(CELIK))
+    k = s.yaz("90 m2 2+1 çelik ev", alan_m2=90, oda_programi="2+1", yapi_turu="celik")
+    assert k.eylem == "secenek", k.mesaj
+    k = s.yaz("KT-06 olsun", katalog_kodu="kt 06", yapi_turu="celik")
+    assert k.eylem == "is_emri", k.mesaj
+    y = k.is_emri["yapi"]
+    assert (y["kod"], y["tanim"], y["sistem"]) == ("KT06", "modeller/havuz/KT06.json", "celik") and C.tanim_dogrula(y)
