@@ -124,6 +124,14 @@ def _karar_ver(talep: Talep, k: Konusma, bayi: dict | None, katalog: Katalog, me
         elif not _icerikli(t) and len((metin or "").split()) <= 4 and not _olcu_bul(metin or ""):
             k.not_dus("kural", "pencere_mahal cevabı anlaşılmadı: soru yinelendi")
             return _soru(k, "pencere_mahal", "Anlayamadım. " + ps.get("metin", ""), ps.get("butonlar"))
+    if k.d.get("son_soru_alani") == "pencere_olcu" and len((metin or "").split()) <= 6:
+        # BK-29 tur 4 (B4): "Pencereyi hangi ölçüye değiştirelim?" sorusunun cevabı ("120x150", "120x150 olsun") ölçüsü bekleyen pencere
+        # isteğine yazılır; LLM'in bu kısa cevaba verdiği içerik yok sayılır (şema listede olmayan ölçüyü taşımıyor). Canlıda soru yineleniyordu.
+        o = _sozdeki_yeni_olcu(metin)
+        if o and _bekleyen_olcuyu_yaz(k.d["taslak"], o):
+            k.d["son_soru_alani"] = None
+            k.not_dus("kural", f"pencere_olcu cevabı: {o}")
+            t = Talep(niyet="yeni_talep", guven=t.guven, ozet="")
     if k.d.get("son_soru_alani") == "pencere_secim" and k.d.get("pencere_secim"):
         ps = k.d["pencere_secim"]
         secim = _pencere_secim_cevabi(metin, ps.get("secenekler") or [])
@@ -1545,6 +1553,11 @@ def _is_emri_uret(k: Konusma, bayi: dict, katalog: Katalog, sablon: dict, kaynak
                 # varyant düşer (not iki kez yazılmaz); yoksa varyant, geldiği mesajdaki sözle satıra çevrilir. Oda parametrede değil yalnız
                 # açıklamada yazılı olsa da (Astra) söz belirsizse B1 sorar: pencere varyant yoluyla sessizce değişmez. BK-29 PR-2: önceki
                 # revizyonun aynı oda satırı varyantı düşürmez (yeni ölçü sessizce düşüyordu); son söz geçerli, seçilmiş pencere kalır.
+                # BK-29 tur 4 (canlı B5, 13 Kasım): LLM aynı isteği hem odasız pencere satırı hem varyant olarak yazabiliyor ("pencere
+                # 120x120 olsun"). Odası bulunan varyant aynı ölçülü odasız satırı da karşılar: oda ikinci kez sorulmaz, not iki kez yazılmaz.
+                ts["pencereler"] = [r for r in ts.get("pencereler") or []
+                                    if r.get("pencere_sira") is not None or r.get("mahal") or r.get("islem") not in (None, "degistir")
+                                    or r.get("olcu") not in (None, yeni)]
                 if varyant._norm(eslesen[0]) not in getattr(k, "bu_mesaj_mahalleri", set()):
                     ts["pencereler"] = [r for r in ts.get("pencereler") or []
                                         if r.get("pencere_sira") is not None or varyant._norm(r.get("mahal") or "") != varyant._norm(eslesen[0])]
@@ -1561,6 +1574,13 @@ def _is_emri_uret(k: Konusma, bayi: dict, katalog: Katalog, sablon: dict, kaynak
     # pencere listesi: 'degistir' → şablondaki mahalle eşleştirip ölçü değiştir; 'ekle'/'kaldir' → v0.1'de yönlendirme
     ie_pencere0 = json.loads(json.dumps(ie))          # BK-29 PR-2: seçilmiş pencerelerin notu şablondaki adlarıyla (son satırlardan)
     for p0 in list(ts.get("pencereler") or []):
+        if p0.get("pencere_sira") is None and p0.get("soz") and p0.get("islem") != "kaldir":
+            # BK-29 tur 4 (B4): ölçü bayinin sözünden. LLM ölçü vermediyse ya da verdiği ölçü sözde hiç geçmiyorsa (listedeki bir ölçüye
+            # kaymış) sözdeki yeni ölçü geçerlidir; söz satırın geldiği mesajdır (`soz`), ölçü kayda yazılır (sonraki revizyonlar da görür).
+            o = _odanin_yeni_olcusu(p0["soz"], ie, p0.get("mahal"))
+            if o and o != p0.get("olcu") and (not p0.get("olcu") or p0["olcu"] not in _olculer_metin(p0["soz"])):
+                k.not_dus("kural", f"pencere ölçüsü bayinin sözünden: {o}" + (f" (LLM: {p0['olcu']})" if p0.get("olcu") else ""))
+                p0["olcu"] = o
         p = {**p0, "islem": "degistir"} if p0.get("pencere_sira") is not None else p0    # seçilmiş pencere: ölçü değişikliği (hakem 1)
         if p.get("islem") in (None, "degistir", "ekle") and p.get("olcu") and p.get("mahal") and p.get("islem_kaynak") != "bayi cevabı" \
                 and p.get("pencere_sira") is None:
@@ -1629,8 +1649,10 @@ def _is_emri_uret(k: Konusma, bayi: dict, katalog: Katalog, sablon: dict, kaynak
         for r in ts["pencereler"]:
             oda_adi = r.pop("_oda", None)
             if oda_adi and r.get("pencere_sira"):
-                gruplar = [g for g in _pencere_gruplari(ie_pencere0, oda_adi) if set(g["sira"]) & set(r["pencere_sira"])]
+                gruplar = [_onceki_olcuyle(g, k.d.get("son_is_emri"), ie_pencere0, oda_adi, r["pencere_sira"], r["olcu"])
+                           for g in _pencere_gruplari(ie_pencere0, oda_adi) if set(g["sira"]) & set(r["pencere_sira"])]
                 notlar.append(f"{oda_adi} " + ", ".join(_grup_adi(g, kisa=True) for g in gruplar) + f" penceresi {r['olcu']}")
+    notlar = list(dict.fromkeys(notlar))              # BK-29 tur 4: aynı değişiklik iki kez yazılmaz (canlı B5: "ODA 1 …, ODA 1 …")
     seq = int(time.time()) % 100000
     ie["is_emri_no"] = f"PM-{bayi.get('kod','BAYI')}-{time.strftime('%Y%m%d')}-{seq}"
     # G-2 (29.09): numara, gönderilmiş son planın numarasından (konuşma sıfırlandıysa 1); sayaç plan sayısıyla eşitlenir.
@@ -2014,6 +2036,58 @@ def _olculer_metin(metin: str | None) -> list[str]:
     return [f"{a}x{b}" for a, b in re.findall(r"(\d{2,3})\s*[xX×*]\s*(\d{2,3})", metin or "")]
 
 
+# BK-29 tur 4 (pano 201, canlı B4): LLM şeması pencere ölçüsünü listeden seçer (`sema.Pencere.olcu`); listede olmayan ölçü ("120x150") null
+# döner ya da listedeki bir ölçüye kayar, bot ölçüyü yeniden sorar, "120x150" cevabını da almaz. Kayıtta olmayan ölçü kurulur (İE-27
+# madde 11; Lokman 3 Kasım 09:52 "hangisi geldiyse onu uygula"): yeni ölçüyü kod bayinin sözünden okur (K18).
+_YENI_OLCU_FIILI = re.compile(r"(olsun|olacak|olmali\w*|yap\w*|cevir\w*|degis\w*|buyut\w*|kucult\w*|ile|istiyor\w*|isteriz|lazim|gerek\w*)$")
+_OLCU_EKI = {"lik", "luk", "e", "a", "ye", "ya", "olarak", "cm"}
+
+
+def _pencere_olcusu_mu(o: str) -> bool:
+    en, yuk = (int(x) for x in o.split("x"))
+    return varyant.PENCERE_EN[0] <= en <= varyant.PENCERE_EN[1] and varyant.PENCERE_YUK[0] <= yuk <= varyant.PENCERE_YUK[1]
+
+
+def _sozdeki_yeni_olcu(metin: str | None) -> str | None:
+    """Sözdeki yeni pencere ölçüsü: ardından değiştirme sözü gelen ölçü ("120x150 olsun", "120x150'ye çevir", "120x150 yapın"); böyle
+    ölçü yoksa sözdeki tek ölçü. Eski ölçü sayılmaz: "pencere", "yerine" ya da "olan"dan önceki ölçü ("120x100 pencere", "120x100 olan").
+    Birden çok aday kalırsa okunmaz (soru gelir; K21). Pencere ölçüsü aralığı dışındaki sayı ("700x400" dış ölçü) ölçü sayılmaz."""
+    q = CO.norm(re.sub(r"(\d{2,3})\s*[xX×*]\s*(\d{2,3})", r" \1x\2 ", metin or ""))
+    toks = q.split()
+    yeni, eski, hepsi = set(), set(), set()
+    for i, t in enumerate(toks):
+        if not re.fullmatch(r"\d{2,3}x\d{2,3}", t) or not _pencere_olcusu_mu(t):
+            continue
+        hepsi.add(t)
+        j = i + 1
+        while j < len(toks) and toks[j] in _OLCU_EKI:
+            j += 1
+        sonraki = toks[j] if j < len(toks) else ""
+        if sonraki in ("yerine", "olan", "olani", "olanin") or sonraki.startswith("pencere"):
+            eski.add(t)
+        elif _YENI_OLCU_FIILI.match(sonraki):
+            yeni.add(t)
+    kalan = hepsi - eski
+    if yeni:                                          # "120x150 ve 120x180 olsun": sınıflanmayan ölçü varken okunmaz
+        return yeni.pop() if len(yeni) == 1 and kalan == yeni else None
+    return kalan.pop() if len(kalan) == 1 else None
+
+
+def _odanin_yeni_olcusu(soz: str | None, ie: dict, mahal: str | None) -> str | None:
+    """Pencere satırının yeni ölçüsü bayinin sözünden; söz birden çok odayı anıyorsa yalnız bu odanın parçası okunur ("Yatak odası 1
+    penceresi 120x150, salon 160x180 olsun" → yatak odası 1 için 120x150). Oda tek bir odayla eşleşmiyorsa bütün söz."""
+    odalar = [m["ad"] for m in ie.get("mahaller") or []]
+    eslesen = _mahal_eslestir(ie, mahal) if mahal else []
+    if len(eslesen) != 1:
+        return _sozdeki_yeni_olcu(soz)
+    oda, oteki = eslesen[0], [o for o in odalar if o != eslesen[0]]
+    parcalar = [x for x in re.split(r"[;,.!?\n]+", soz or "") if x.strip()]
+    ilgili = [_oda_parcasi(x, oda, oteki) for x in parcalar if _odayi_aniyor(x, oda)] \
+        or [x for x in parcalar if not any(_odayi_aniyor(x, o) for o in oteki)]
+    adaylar = {o for x in ilgili for o in [_sozdeki_yeni_olcu(x)] if o}
+    return adaylar.pop() if len(adaylar) == 1 else None
+
+
 def _duvarlar_metin(metin: str | None) -> set[str]:
     """Bayinin sözündeki duvar: "sol", "soldaki", "sağ duvarındaki", "ön cephedeki", "arkadaki" (İş Emri: sol, sag, on, arka)."""
     q = " " + _sozcuk_norm(metin or "") + " "
@@ -2044,6 +2118,20 @@ def _grup_adi(g: dict, kisa: bool = False) -> str:
     if kisa:                                          # düğme başlığı (en çok 20 karakter): "120x100 sol", "120x120 arka (2)"
         return (f"{g['olcu']} {d}".strip() + (f" ({n})" if n > 1 else ""))[:20]
     return str(g["olcu"]) + (f", {d} duvar" if d else "") + (f" ({n} pencere)" if n > 1 else "")
+
+
+def _onceki_olcuyle(g: dict, onceki: dict | None, ie0: dict, oda: str, sira: list[int], yeni: str) -> dict:
+    """Değişiklik notundaki pencere adı, bayinin önceki planda gördüğü ölçüyle (BK-29 tur 4, canlı gözlem 4: r02'de 120x120 olan sol
+    pencere r03'ün notunda "120x100 sol" anılıyordu). Pencere önceki planda zaten yeni ölçüdeyse (önceki revizyonun değişikliği sürer)
+    ya da önceki plan bu odada başka sayıda pencere taşıyorsa şablondaki ölçü kalır. Sıra şablonla aynıdır (`varyant.pencere_degistir`
+    pencereyi yerinde değiştirir)."""
+    p0, p1 = _oda_pencereleri(ie0, oda), _oda_pencereleri(onceki or {"acikliklar": []}, oda)
+    if len(p1) != len(p0):
+        return g
+    olculer = {p1[i].get("olcu") for i in set(g["sira"]) & set(sira) if i < len(p1)}
+    if len(olculer) == 1 and None not in olculer and yeni not in olculer:
+        return {**g, "olcu": olculer.pop()}
+    return g
 
 
 # çoğul söz: aynı ölçü ve duvardaki pencerelerin hepsi. Tekil kısıt ("biri", "sadece", "diğer pencereler kalsın") varsa çoğul değildir
@@ -2264,6 +2352,19 @@ def _pencere_odasi_yaz(ts: dict, hedef: dict, ad: str) -> bool:
                 p["mahal"] = ad
                 return True
     return False
+
+
+def _bekleyen_olcuyu_yaz(ts: dict, olcu: str) -> bool:
+    """Ölçü sorusunun cevabını ölçüsü olmayan bekleyen pencere isteğine yazar (pencere satırı ya da "pencere_degistir" varyantı)."""
+    yazildi = False
+    for p in ts.get("pencereler") or []:
+        if not p.get("olcu") and p.get("pencere_sira") is None and p.get("islem") in (None, "degistir"):
+            p["olcu"] = olcu; yazildi = True
+    for v in ts.get("varyantlar") or []:
+        prm = v.get("parametreler") or {}
+        if v.get("tur") == "pencere_degistir" and not (prm.get("yeni") or prm.get("olcu") or prm.get("yeni_olcu") or _olcu_bul(v.get("aciklama") or "")):
+            v["parametreler"] = {**prm, "yeni": olcu}; yazildi = True
+    return yazildi
 
 
 def _plan_ozu(ie: dict) -> str:
