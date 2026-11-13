@@ -15,6 +15,9 @@ Lokman, 9 Kasım 2026 13:10: "bunu kural olarak al ve mühürle bundan sonra tek
   toplam). Fiyat yazmaz. `kaynak` bölümü mühürlü; kalemler PR'la değişir (yeni kalem, Lokman'ın birim cevabı, Samet'in eklediği ürün).
   Defter D-72'den sonra kapandı: Motor'un yeni anahtarı yalnız eşlemeye, hattın kalemlerinin sonuna girer (r05: TK-06'nın 15 kalemi;
   OSB, duvar alçıpanı, kiriş, pencere panelleri, nem bariyeri, alçıpan destek straforu, pencere karkası ve PVC pencereler).
+  r07 (13 Kasım): 280 ve 300 cm yükseklik. Pano eni bantları 2800 ve 3000 için (bantların sonunda), H, 3'lü H, köşe direği, çektirme
+  U'su ve kolon CRM'deki aynı ürünün h:2800 / h:3000 koduyla, 2500'deki kuralla. Pencere üst paneli 800 / 1000 öneri (Lokman'ın sözü
+  yok). CRM'de olmayanlar fiyatsız: vasistaslı pano, karkaslı özel pencere panosu, 2940'lık çektirme U'su.
 - **Onay.** Eşleme `birebir` ya da `kural` ise onaylı; `yakın` ve `birim varsayımı` öneri (`--oneri`); `birim sorusu` ve `CRM'de yok`
   fiyatsız. O gün fiyatı 0 ya da boş olan kod, listede olmayan kod ve birden çok satırdaki kod fiyatsız. `bekletme`: Lokman'ın kararıyla şimdilik
   fiyatsız, CRM'de fiyatı olsa da yazılmaz (banyo dolabı, D-75).

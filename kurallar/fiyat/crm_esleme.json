@@ -1,9 +1,9 @@
 {
  "sema": 1,
- "surum": "2026-11-11-r06",
+ "surum": "2026-11-13-r07",
  "karar": "D-72",
  "muhur": "M-15",
- "aciklama": "Fiyat defteri kaleminin CRM stok fiyatları API'sindeki karşılığı ve fiyatın nasıl hesaplandığı (İE-35). Fiyat yazmaz: fiyat her gün CRM'den gelir, `araclar/crm_fiyat.py` bu dosyayla defter üretir. Anahtarlar ve birimler fiyat defterinin (defter_2026-11 r13) kalemleri; Motor'un listesindeki anahtar. D-72'den sonra defter kapandı: Motor'un yeni anahtarı yalnız buraya, hattın kalemlerinin sonuna girer (r05, TK-06). Eşleme değişikliği (yeni kalem, Lokman'ın birim cevabı, Samet'in CRM'e eklediği ürün) bu dosyaya PR'la girer; `kaynak` bölümü mühürlü (M-15).",
+ "aciklama": "Fiyat defteri kaleminin CRM stok fiyatları API'sindeki karşılığı ve fiyatın nasıl hesaplandığı (İE-35). Fiyat yazmaz: fiyat her gün CRM'den gelir, `araclar/crm_fiyat.py` bu dosyayla defter üretir. Anahtarlar ve birimler fiyat defterinin (defter_2026-11 r13) kalemleri; Motor'un listesindeki anahtar. D-72'den sonra defter kapandı: Motor'un yeni anahtarı yalnız buraya, hattın kalemlerinin sonuna girer (r05, TK-06); yeni bant aralığı da bantların sonuna (r07, 280 ve 300 cm yükseklik). Eşleme değişikliği (yeni kalem, Lokman'ın birim cevabı, Samet'in CRM'e eklediği ürün) bu dosyaya PR'la girer; `kaynak` bölümü mühürlü (M-15).",
  "kaynak": {
   "tek_kaynak": "CRM",
   "ad": "CRM stok fiyatları API",
@@ -186,7 +186,16 @@
    "DG19": "Baca",
    "DG20": "Baca",
    "HM48": "EPS",
-   "HM49": "Membran"
+   "HM49": "Membran",
+   "YP3": "Yapıştırma pano",
+   "YP6": "Yapıştırma pano",
+   "YP8": "Yapıştırma pano",
+   "YP9": "Yapıştırma pano",
+   "YP11": "Yapıştırma pano",
+   "YP12": "Yapıştırma pano",
+   "KP2": "Kapı panoları",
+   "KP3": "Kapı panoları",
+   "KP12": "Kapı panoları"
   },
   "listede_adi_yok": {
    "aciklama": "Lokman'ın listesinde adıyla geçmeyen, grubuna konan yerler. Çelik fiyat sohbeti bunları 10 Kasım 16:54:38 ve 17:01'de Lokman'a yazdı (DIAMOND 82 listesinin mor hücreleri; temiz su borusu %20). Lokman 18:05:03: \"hepsini kural olarak kayda geç\" (D-76). Kuraldır.",
@@ -1510,6 +1519,281 @@
      "esleme": "birebir",
      "birim": "adet",
      "not": "CRM adı: (5.5 × 60) Trapez Vida (Trapez Sac / Metal Kiremit); Motor metal kiremitte bu adı yazar (60,8 m² teklifi, r06)"
+    },
+    "6'lık köşe direği 60 × 60 | 60 × 60 × 2800": {
+     "kod": "MA5",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet",
+     "not": "CRM adı: iç köşe direği H:2800; CRM ölçüsünde 60*60*2700 yazıyor (r07)"
+    },
+    "H 100 (dış pano eki) | 100 × 100 × 2800": {
+     "kod": [
+      "MA16",
+      "MA19"
+     ],
+     "hesap": "ort",
+     "agirlik": [
+      11,
+      9
+     ],
+     "esleme": "kural",
+     "birim": "adet",
+     "not": "kulaklı 11 / dübelli 9 ağırlıklı ortalama (defterin kuralı, 2500'ünkü gibi); CRM'de H:2800 (r07)"
+    },
+    "H standart 60 (iç pano eki) | 60 × 60 × 2800": {
+     "kod": "MA22",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet",
+     "not": "CRM adı: H (standart) H:2800 (r07)"
+    },
+    "3'lü H 100 × 100 × 60 (dış duvar T'si) | L 2800": {
+     "kod": [
+      "MA25",
+      "MA28"
+     ],
+     "hesap": "ort",
+     "agirlik": [
+      3,
+      5
+     ],
+     "esleme": "kural",
+     "birim": "adet",
+     "not": "kulaklı 3 / dübelli 5 ağırlıklı ortalama (defterin kuralı, 2500'ünkü gibi); CRM'de H:2800 (r07)"
+    },
+    "3'lü H 100 × 100 × 100 (dış duvar T'si) | L 2800": {
+     "kod": [
+      "MA25",
+      "MA28"
+     ],
+     "hesap": "ort",
+     "agirlik": [
+      3,
+      5
+     ],
+     "esleme": "kural",
+     "birim": "adet",
+     "not": "kulaklı 3 / dübelli 5 ağırlıklı ortalama (defterin kuralı, 2500'ünkü gibi); 100'lük 3'lü H, 60'lık karşılığının fiyatı (D-36); CRM'de H:2800 (r07)"
+    },
+    "3'lü H standart 60 (iç T) | L 2800": {
+     "kod": "MA31",
+     "hesap": "ayni",
+     "esleme": "kural",
+     "birim": "adet",
+     "not": "3'lü H'da 60'lık standart 3'lü H fiyatı (D-36); CRM'de H:2800 (r07)"
+    },
+    "Çektirme U'su 100 | 100 × 2740": {
+     "kod": "MA40",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet",
+     "not": "CRM adı: 100'lük çektirme U'su 100*100*2740; iç duvarınkiyle aynı ürün (r07)"
+    },
+    "Özel kutu profil (kolon) 100 × 100 | L 2800": {
+     "kod": "MA12",
+     "hesap": "boy_m",
+     "esas_boy_mm": 6000,
+     "yuvarlama": 1,
+     "esleme": "kural",
+     "birim": "adet",
+     "not": "Kutu profil 6 metrelik boyun fiyatından boyla orantılı, tam TL (D-36; Lokman 10 Kasım 10:01 \"Profili yine 6 metresi kaç paraysa ona göre orantıla\", D-75). CRM'de flanşlı kolon kutu profil; CRM'deki fiyatı 6 metrelik boyun fiyatı"
+    },
+    "Pencere üst panel | 100 × 1250 × 800": {
+     "kod": "YP1",
+     "hesap": "oran",
+     "pay": 1,
+     "payda": 3,
+     "esleme": "yakın",
+     "birim": "adet",
+     "not": "öneri: aynı ölçüdeki pencere alt panelinin (100 × 1250 × 800) kaydı, tam panonun 1/3'ü (D-75). 280'lük evde üst kot 200, üst panel 800. D-75 üst paneli 1/5 dedi (500'lük panel); 800'lük üst panel için Lokman'ın sözü yok, onay bekler (r07)"
+    },
+    "100'lük yapıştırma dolu vasistaslı pano (60/40) | 100 × 1250 × 2800": {
+     "kod": null,
+     "esleme": "CRM'de yok",
+     "birim": "adet",
+     "not": "CRM'de vasistaslı pano yok (r07)"
+    },
+    "100'lük yapıştırma dolu vasistaslı pano (50/50) | 100 × 1250 × 2800": {
+     "kod": null,
+     "esleme": "CRM'de yok",
+     "birim": "adet",
+     "not": "CRM'de vasistaslı pano yok (r07)"
+    },
+    "Karkaslı özel pencere panosu (150/180) | 100 × 2500 × 2800": {
+     "kod": null,
+     "esleme": "CRM'de yok",
+     "birim": "adet",
+     "not": "CRM'de yalnız 250/180 var (KP13, 100 × 3750 × 2500); 150/180 H:2800 yok (r07; CRM'e eklenmeli)"
+    },
+    "Karkaslı özel pencere panosu (160/180) | 100 × 2500 × 2800": {
+     "kod": null,
+     "esleme": "CRM'de yok",
+     "birim": "adet",
+     "not": "CRM'de yalnız 250/180 var (KP13, 100 × 3750 × 2500); 160/180 H:2800 yok (r07; CRM'e eklenmeli)"
+    },
+    "Karkaslı özel pencere panosu (170/180) | 100 × 2125 × 2800": {
+     "kod": null,
+     "esleme": "CRM'de yok",
+     "birim": "adet",
+     "not": "CRM'de yalnız 250/180 var (KP13, 100 × 3750 × 2500); 170/180 H:2800 yok (r07; CRM'e eklenmeli)"
+    },
+    "10'luk köşe direği 100 × 100 | 100 × 100 × 3000": {
+     "kod": "MA3",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet",
+     "not": "CRM adı: dış köşe direği H:3000 (r07)"
+    },
+    "6'lık köşe direği 60 × 60 | 60 × 60 × 3000": {
+     "kod": "MA6",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet",
+     "not": "CRM adı: iç köşe direği H:3000 (r07)"
+    },
+    "H 100 (dış pano eki) | 100 × 100 × 3000": {
+     "kod": [
+      "MA17",
+      "MA20"
+     ],
+     "hesap": "ort",
+     "agirlik": [
+      11,
+      9
+     ],
+     "esleme": "kural",
+     "birim": "adet",
+     "not": "kulaklı 11 / dübelli 9 ağırlıklı ortalama (defterin kuralı, 2500'ünkü gibi); CRM'de H:3000 (r07)"
+    },
+    "H standart 100 (iç pano eki) | 100 × 100 × 3000": {
+     "kod": [
+      "MA17",
+      "MA20"
+     ],
+     "hesap": "ort",
+     "agirlik": [
+      11,
+      9
+     ],
+     "esleme": "kural",
+     "birim": "adet",
+     "not": "iç ve dış H 100'lükse aynı fiyat (D-36): dış H 100'ün H:3000'ü, kulaklı 11 / dübelli 9 (r07)"
+    },
+    "H standart 60 (iç pano eki) | 60 × 60 × 3000": {
+     "kod": "MA23",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet",
+     "not": "CRM adı: H (standart) H:3000 (r07)"
+    },
+    "3'lü H 100 × 100 × 60 (dış duvar T'si) | L 3000": {
+     "kod": [
+      "MA26",
+      "MA29"
+     ],
+     "hesap": "ort",
+     "agirlik": [
+      3,
+      5
+     ],
+     "esleme": "kural",
+     "birim": "adet",
+     "not": "kulaklı 3 / dübelli 5 ağırlıklı ortalama (defterin kuralı, 2500'ünkü gibi); CRM'de H:3000 (r07)"
+    },
+    "3'lü H 100 × 100 × 100 (dış duvar T'si) | L 3000": {
+     "kod": [
+      "MA26",
+      "MA29"
+     ],
+     "hesap": "ort",
+     "agirlik": [
+      3,
+      5
+     ],
+     "esleme": "kural",
+     "birim": "adet",
+     "not": "kulaklı 3 / dübelli 5 ağırlıklı ortalama (defterin kuralı, 2500'ünkü gibi); 100'lük 3'lü H, 60'lık karşılığının fiyatı (D-36); CRM'de H:3000 (r07)"
+    },
+    "3'lü H standart 60 (iç T) | L 3000": {
+     "kod": "MA32",
+     "hesap": "ayni",
+     "esleme": "kural",
+     "birim": "adet",
+     "not": "3'lü H'da 60'lık standart 3'lü H fiyatı (D-36); CRM'de H:3000 (r07)"
+    },
+    "3'lü H standart 100 (iç T) | L 3000": {
+     "kod": "MA32",
+     "hesap": "ayni",
+     "esleme": "kural",
+     "birim": "adet",
+     "not": "3'lü H'da 60'lık standart 3'lü H fiyatı (D-36); CRM'de H:3000 (r07)"
+    },
+    "Çektirme U'su 100 | 100 × 2940": {
+     "kod": null,
+     "esleme": "CRM'de yok",
+     "birim": "adet",
+     "not": "CRM'de çektirme U'su yalnız 2440 ve 2740; 2940 yok (r07; CRM'e eklenmeli)"
+    },
+    "Çektirme U'su 100 (iç duvar) | 100 × 2940": {
+     "kod": null,
+     "esleme": "CRM'de yok",
+     "birim": "adet",
+     "not": "CRM'de çektirme U'su yalnız 2440 ve 2740; 2940 yok (r07; CRM'e eklenmeli)"
+    },
+    "Çektirme U'su 60 | 60 × 2940": {
+     "kod": null,
+     "esleme": "CRM'de yok",
+     "birim": "adet",
+     "not": "CRM'de çektirme U'su yalnız 2440 ve 2740; 2940 yok (r07; CRM'e eklenmeli)"
+    },
+    "Özel kutu profil (kolon) 100 × 100 | L 3000": {
+     "kod": "MA12",
+     "hesap": "boy_m",
+     "esas_boy_mm": 6000,
+     "yuvarlama": 1,
+     "esleme": "kural",
+     "birim": "adet",
+     "not": "Kutu profil 6 metrelik boyun fiyatından boyla orantılı, tam TL (D-36; Lokman 10 Kasım 10:01 \"Profili yine 6 metresi kaç paraysa ona göre orantıla\", D-75). CRM'de flanşlı kolon kutu profil; CRM'deki fiyatı 6 metrelik boyun fiyatı"
+    },
+    "Pencere üst panel | 100 × 1250 × 1000": {
+     "kod": "YP1",
+     "hesap": "oran",
+     "pay": 1,
+     "payda": 3,
+     "esleme": "yakın",
+     "birim": "adet",
+     "not": "öneri: aynı ölçüdeki pencere alt panelinin (100 × 1250 × 1000) kaydı, tam panonun 1/3'ü (D-75). 300'lük evde üst kot 200, üst panel 1000. D-75 üst paneli 1/5 dedi (500'lük panel); 1000'lük üst panel için Lokman'ın sözü yok, onay bekler (r07)"
+    },
+    "100'lük yapıştırma dolu vasistaslı pano (60/40) | 100 × 1250 × 3000": {
+     "kod": null,
+     "esleme": "CRM'de yok",
+     "birim": "adet",
+     "not": "CRM'de vasistaslı pano yok (r07)"
+    },
+    "100'lük yapıştırma dolu vasistaslı pano (50/50) | 100 × 1250 × 3000": {
+     "kod": null,
+     "esleme": "CRM'de yok",
+     "birim": "adet",
+     "not": "CRM'de vasistaslı pano yok (r07)"
+    },
+    "Karkaslı özel pencere panosu (150/180) | 100 × 2500 × 3000": {
+     "kod": null,
+     "esleme": "CRM'de yok",
+     "birim": "adet",
+     "not": "CRM'de yalnız 250/180 var (KP13, 100 × 3750 × 2500); 150/180 H:3000 yok (r07; CRM'e eklenmeli)"
+    },
+    "Karkaslı özel pencere panosu (160/180) | 100 × 2500 × 3000": {
+     "kod": null,
+     "esleme": "CRM'de yok",
+     "birim": "adet",
+     "not": "CRM'de yalnız 250/180 var (KP13, 100 × 3750 × 2500); 160/180 H:3000 yok (r07; CRM'e eklenmeli)"
+    },
+    "Karkaslı özel pencere panosu (170/180) | 100 × 2125 × 3000": {
+     "kod": null,
+     "esleme": "CRM'de yok",
+     "birim": "adet",
+     "not": "CRM'de yalnız 250/180 var (KP13, 100 × 3750 × 2500); 170/180 H:3000 yok (r07; CRM'e eklenmeli)"
     }
    },
    "bantlar": [
@@ -1646,6 +1930,278 @@
        "hesap": "ayni",
        "esleme": "kural",
        "not": "en 1070–1250 aynı fiyat; CRM adı: 100'lük dış çelik kapı panosu h:2500"
+      }
+     ]
+    },
+    {
+     "kalem": "100'lük yapıştırma dolu pano",
+     "kalinlik_mm": 100,
+     "yukseklik_mm": 2800,
+     "araliklar": [
+      {
+       "en_mm": [
+        627.5,
+        1250
+       ],
+       "alt_haric": true,
+       "kod": "YP2",
+       "hesap": "ayni",
+       "esleme": "kural",
+       "not": "627,5'ten geniş tam (Patron 27 Ekim 22:08); 280'lük evin panosu, CRM'de h:2800 tam pano (r07)"
+      },
+      {
+       "en_mm": [
+        340,
+        627.5
+       ],
+       "alt_haric": false,
+       "kod": "YP5",
+       "hesap": "ayni",
+       "esleme": "kural",
+       "not": "627,5'e kadar yarım (Patron 27 Ekim 22:08); CRM'de h:2800 yarım pano (r07)"
+      },
+      {
+       "en_mm": [
+        225,
+        225
+       ],
+       "alt_haric": false,
+       "kod": "YP2",
+       "hesap": "carp",
+       "carpan": 0.25,
+       "esleme": "yakın",
+       "not": "öneri: h:2800 tam panonun dörtte biri; CRM'de çeyrek pano yok (2500'ün bandı gibi, r07)"
+      }
+     ]
+    },
+    {
+     "kalem": "60'lık yapıştırma dolu pano",
+     "kalinlik_mm": 60,
+     "yukseklik_mm": 2800,
+     "araliklar": [
+      {
+       "en_mm": [
+        627.5,
+        1250
+       ],
+       "alt_haric": true,
+       "kod": "YP8",
+       "hesap": "ayni",
+       "esleme": "kural",
+       "not": "627,5'ten geniş tam (Patron 27 Ekim 22:08); CRM'de h:2800 60'lık tam pano, ölçüsünde 100*1250*2800 yazıyor (r07)"
+      },
+      {
+       "en_mm": [
+        350,
+        627.5
+       ],
+       "alt_haric": false,
+       "kod": "YP11",
+       "hesap": "ayni",
+       "esleme": "kural",
+       "not": "627,5'e kadar yarım (Patron 27 Ekim 22:08); CRM'de h:2800 60'lık yarım pano, ölçüsünde 100*625*2800 yazıyor (r07)"
+      },
+      {
+       "en_mm": [
+        175,
+        320
+       ],
+       "alt_haric": false,
+       "kod": "YP8",
+       "hesap": "carp",
+       "carpan": 0.25,
+       "esleme": "yakın",
+       "not": "öneri: h:2800 tam panonun dörtte biri; CRM'de çeyrek pano yok (2500'ün bandı gibi, r07)"
+      }
+     ]
+    },
+    {
+     "kalem": "60'lık karkaslı + kasalı pano",
+     "kalinlik_mm": 60,
+     "yukseklik_mm": 2800,
+     "araliklar": [
+      {
+       "en_mm": [
+        1070,
+        1250
+       ],
+       "alt_haric": false,
+       "kod": "KP2",
+       "hesap": "ayni",
+       "esleme": "kural",
+       "not": "en 1070–1250 aynı fiyat; CRM adı: 60'lık karkaslı iç kapı panosu + kasalı h:2800 (r07)"
+      }
+     ]
+    },
+    {
+     "kalem": "100'lük karkaslı + kasalı pano",
+     "kalinlik_mm": 100,
+     "yukseklik_mm": 2800,
+     "araliklar": [
+      {
+       "en_mm": [
+        1070,
+        1250
+       ],
+       "alt_haric": false,
+       "kod": "KP11",
+       "hesap": "ayni",
+       "esleme": "kural",
+       "not": "iç ve dış karkaslı pano aynı fiyat (D-36); CRM adı: 100'lük dış çelik kapı panosu h:2800 (r07)"
+      }
+     ]
+    },
+    {
+     "kalem": "Karkaslı çelik kapı panosu",
+     "kalinlik_mm": 100,
+     "yukseklik_mm": 2800,
+     "araliklar": [
+      {
+       "en_mm": [
+        1070,
+        1250
+       ],
+       "alt_haric": false,
+       "kod": "KP11",
+       "hesap": "ayni",
+       "esleme": "kural",
+       "not": "en 1070–1250 aynı fiyat; CRM adı: 100'lük dış çelik kapı panosu h:2800 (r07)"
+      }
+     ]
+    },
+    {
+     "kalem": "100'lük yapıştırma dolu pano",
+     "kalinlik_mm": 100,
+     "yukseklik_mm": 3000,
+     "araliklar": [
+      {
+       "en_mm": [
+        627.5,
+        1250
+       ],
+       "alt_haric": true,
+       "kod": "YP3",
+       "hesap": "ayni",
+       "esleme": "kural",
+       "not": "627,5'ten geniş tam (Patron 27 Ekim 22:08); 300'lük evin panosu, CRM'de h:3000 tam pano (r07)"
+      },
+      {
+       "en_mm": [
+        340,
+        627.5
+       ],
+       "alt_haric": false,
+       "kod": "YP6",
+       "hesap": "ayni",
+       "esleme": "kural",
+       "not": "627,5'e kadar yarım (Patron 27 Ekim 22:08); CRM'de h:3000 yarım pano (r07)"
+      },
+      {
+       "en_mm": [
+        225,
+        225
+       ],
+       "alt_haric": false,
+       "kod": "YP3",
+       "hesap": "carp",
+       "carpan": 0.25,
+       "esleme": "yakın",
+       "not": "öneri: h:3000 tam panonun dörtte biri; CRM'de çeyrek pano yok (2500'ün bandı gibi, r07)"
+      }
+     ]
+    },
+    {
+     "kalem": "60'lık yapıştırma dolu pano",
+     "kalinlik_mm": 60,
+     "yukseklik_mm": 3000,
+     "araliklar": [
+      {
+       "en_mm": [
+        627.5,
+        1250
+       ],
+       "alt_haric": true,
+       "kod": "YP9",
+       "hesap": "ayni",
+       "esleme": "kural",
+       "not": "627,5'ten geniş tam (Patron 27 Ekim 22:08); CRM'de h:3000 60'lık tam pano, ölçüsünde 100*1250*3000 yazıyor (r07)"
+      },
+      {
+       "en_mm": [
+        350,
+        627.5
+       ],
+       "alt_haric": false,
+       "kod": "YP12",
+       "hesap": "ayni",
+       "esleme": "kural",
+       "not": "627,5'e kadar yarım (Patron 27 Ekim 22:08); CRM'de h:3000 60'lık yarım pano, ölçüsünde 100*625*3000 yazıyor (r07)"
+      },
+      {
+       "en_mm": [
+        175,
+        320
+       ],
+       "alt_haric": false,
+       "kod": "YP9",
+       "hesap": "carp",
+       "carpan": 0.25,
+       "esleme": "yakın",
+       "not": "öneri: h:3000 tam panonun dörtte biri; CRM'de çeyrek pano yok (2500'ün bandı gibi, r07)"
+      }
+     ]
+    },
+    {
+     "kalem": "60'lık karkaslı + kasalı pano",
+     "kalinlik_mm": 60,
+     "yukseklik_mm": 3000,
+     "araliklar": [
+      {
+       "en_mm": [
+        1070,
+        1250
+       ],
+       "alt_haric": false,
+       "kod": "KP3",
+       "hesap": "ayni",
+       "esleme": "kural",
+       "not": "en 1070–1250 aynı fiyat; CRM adı: 60'lık karkaslı iç kapı panosu + kasalı h:3000 (r07)"
+      }
+     ]
+    },
+    {
+     "kalem": "100'lük karkaslı + kasalı pano",
+     "kalinlik_mm": 100,
+     "yukseklik_mm": 3000,
+     "araliklar": [
+      {
+       "en_mm": [
+        1070,
+        1250
+       ],
+       "alt_haric": false,
+       "kod": "KP12",
+       "hesap": "ayni",
+       "esleme": "kural",
+       "not": "iç ve dış karkaslı pano aynı fiyat (D-36); CRM adı: 100'lük dış çelik kapı panosu h:3000 (r07)"
+      }
+     ]
+    },
+    {
+     "kalem": "Karkaslı çelik kapı panosu",
+     "kalinlik_mm": 100,
+     "yukseklik_mm": 3000,
+     "araliklar": [
+      {
+       "en_mm": [
+        1070,
+        1250
+       ],
+       "alt_haric": false,
+       "kod": "KP12",
+       "hesap": "ayni",
+       "esleme": "kural",
+       "not": "en 1070–1250 aynı fiyat; CRM adı: 100'lük dış çelik kapı panosu h:3000 (r07)"
       }
      ]
     }
