@@ -186,11 +186,18 @@ def test_cati_koduyla_ilk_mesaj_seti_atlar(tmp_path):
 
 
 def test_revizyonda_cati_seti_yeniden_gelmez(tmp_path):
-    """Evin kendi çatısıyla çizilmiş planın revizyonu çatıyı yeniden sormaz; plan aynı çatıyla r02 olur."""
+    """Evin kendi çatısıyla çizilmiş planın revizyonu çatıyı yeniden sormaz; plan aynı çatıyla kalır.
+    D-86 (Lokman 13 Kasım 2026 21:36:32 kartı "Değişmedi desin"): yalnız kodu yineleyen yazı ("PA-06 olsun") planı değiştirmez; yeni
+    revizyon numarası gitmez (önce aynı plan r02 diye yeniden çiziliyordu). Gerçek bir değişiklik r02 üretir: çatı seti yine gelmez,
+    LLM'in yinelediği kodla da plan evin çatısında (PA06) kalır."""
     s, _ = _cati_seti(tmp_path)
     k = s.dugme("s:{set}:PA06")
     assert k.eylem == "is_emri" and k.revizyon == 1
     k = s.yaz("PA-06 olsun", katalog_kodu="PA-06", niyet="revizyon")
+    assert (k.eylem, k.gerekce) == ("cevapla", K.PLAN_DEGISMEDI), k.mesaj
+    assert s.plan["revizyon"] == 1 and s.plan["talep"]["kaynak"] == "PA06"
+    assert (s.k.d.get("secenek_seti") or {}).get("durum") != "acik"          # çatı seti yeniden açılmadı
+    k = s.yaz("yatak odası 1 penceresi 120x180 olsun", katalog_kodu="PA-06", pencereler=[pen("yatak odası 1", "120x180")])
     assert k.eylem == "is_emri" and k.revizyon == 2 and k.is_emri["talep"]["kaynak"] == "PA06", k.mesaj
 
 
