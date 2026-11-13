@@ -359,3 +359,34 @@ def test_yayimla_gonderilemeyen_ya_da_reddedilen_formda_cikis_1(etc):
         assert "form yayımlanmadı" in cikti
     finally:
         g.kapat()
+
+
+def test_form_prefabrik_yalniz_o_formu_kurar_ve_yayimlar(etc):
+    """İE-20 PR-6: `--form prefabrik` yalnız prefabrik talep formunu kurar; yayımlı talep ve revizyon formuna dokunmaz."""
+    g = SahteGraph()
+    try:
+        assert kos(etc, g, "--yayimla").returncode == 0                      # bugünkü hâl: talep ve revizyon yayımlı (91001, 91002)
+        g.istekler.clear()
+        r = kos(etc, g, "--form", "prefabrik")
+        cikti = r.stdout + r.stderr
+        assert r.returncode == 0, cikti
+        [olustur] = _yazma_istekleri(g)
+        govde = json.loads(olustur["govde"])
+        assert olustur["yol"] == f"{WABA}/flows" and govde["name"] == "Portman Prefabrik Talep Formu" and govde["publish"] is False
+        assert json.loads(govde["flow_json"]) == TF.tanim("prefabrik")
+        assert "prefabrik_flow_id 91003" in cikti and "talep_flow_id" not in cikti and "== sonuç: tamam" in cikti
+        link = next(s.strip() for s in r.stdout.splitlines() if "interactive=true" in s and "91003" in s)
+        yuk = json.loads(dict(urllib.parse.parse_qsl(urllib.parse.urlsplit(link).query))["flow_action_payload"])
+        assert yuk == {"screen": "TALEP_P", "data": TF.prefabrik_ekran_verisi(None, None)}
+        g.istekler.clear()
+        r = kos(etc, g, "--form", "prefabrik", "--yayimla")
+        assert r.returncode == 0, r.stdout + r.stderr
+        assert [i["yol"] for i in _yazma_istekleri(g)] == ["91003/assets", "91003/publish"]
+        assert "prefabrik formu yayımlandı · kimlik 91003" in r.stdout
+        assert {k: f["status"] for k, f in g.formlar.items()} == {"91001": "PUBLISHED", "91002": "PUBLISHED", "91003": "PUBLISHED"}
+        # seçim verilmezse bugünkü davranış: yalnız talep ve revizyon; prefabrik forma bakılmaz
+        g.istekler.clear()
+        r = kos(etc, g)
+        assert r.returncode == 0 and not _yazma_istekleri(g) and "Prefabrik Talep Formu" not in r.stdout and "91003" not in r.stdout
+    finally:
+        g.kapat()
