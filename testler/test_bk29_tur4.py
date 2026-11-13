@@ -31,8 +31,10 @@ def s(tmp_path) -> Sohbet:
 # ── B5: aynı istek hem satır hem varyant ──────────────────────────────────────────────────────────────────────────────────────
 
 def _ikiz(s: Sohbet):
+    # D-86 (tur 5): canlıdaki cümle "pencere 120x120 olsun"du; ODA 1 penceresi PA-03'te zaten 120x120 olduğu için o cümle artık "plan
+    # değişmedi" cevabı alır (`test_bk29_tur5`). Bu testlerin konusu ikiz satırdır: gerçek bir değişiklikle (120x180) sürülür.
     _plan(s, "PA03")
-    k = s.yaz("pencere 120x120 olsun", pencereler=[pen(None, "120x120")], varyantlar=[_pv("120x120", "pencere 120x120 olsun")])
+    k = s.yaz("pencere 120x180 olsun", pencereler=[pen(None, "120x180")], varyantlar=[_pv("120x180", "pencere 120x180 olsun")])
     assert (k.eylem, k.soru_alani) == ("sor", "pencere_mahal")
     return k
 
@@ -42,8 +44,8 @@ def test_b5_yazili_oda_cevabi_ikizde_tek_soru(s):
     _ikiz(s)
     k = s.yaz("Oda 1", niyet="diger")
     assert k.eylem == "is_emri" and k.revizyon == 2, k.mesaj
-    assert k.mesaj.startswith("pencere 120x120 olsun (ODA 1 penceresi 120x120) Ön onay")
-    assert _pencereler(k, "ODA 1") == [("120x120", "sol")]
+    assert k.mesaj == "PA-03 r02. Değişiklik: ODA 1 penceresi 120x180. Ön onay planınız hazır; plan görseli ve PDF ektedir."   # tur 5 (pano 202): metin koddan
+    assert _pencereler(k, "ODA 1") == [("120x180", "sol")]
     assert [p["mahal"] for p in s.k.d["taslak"]["pencereler"]] == ["ODA 1"]
 
 
@@ -52,15 +54,15 @@ def test_b5_listeden_oda_ikizde_not_bir_kez(s):
     _ikiz(s)
     k = s.dugme("q:pencere_mahal:1")
     assert k.eylem == "is_emri" and k.revizyon == 2
-    assert k.gerekce == "şablon PA03 (ODA 1 penceresi 120x120)"
+    assert k.gerekce == "şablon PA03 (ODA 1 penceresi 120x180)"
 
 
 def test_b5_yazili_oda_llm_icerikli_cevap(s):
     """LLM kısa cevaba içerik yazsa da ("Oda 1" → oda 1 penceresi) cevap odadır; plan bir kez değişir."""
     _ikiz(s)
-    k = s.yaz("Oda 1", pencereler=[pen("oda 1", "120x120")])
+    k = s.yaz("Oda 1", pencereler=[pen("oda 1", "120x180")])
     assert k.eylem == "is_emri" and k.revizyon == 2
-    assert k.gerekce == "şablon PA03 (ODA 1 penceresi 120x120)"
+    assert k.gerekce == "şablon PA03 (ODA 1 penceresi 120x180)"
 
 
 def test_ikiz_ekleme_satiri_yutulmaz(s):
@@ -79,7 +81,7 @@ def test_b4_listede_olmayan_olcu_sozden_kurulur(s):
     k = s.yaz("Yatak odası 1 penceresi 120x150 olsun", pencereler=[pen("yatak odası 1", None)])
     assert k.eylem == "is_emri" and k.revizyon == 2, k.mesaj
     assert _pencereler(k, "YATAK ODASI 1") == [("120x150", "sol")]
-    assert "(YATAK ODASI 1 penceresi 120x150)" in k.mesaj
+    assert "Değişiklik: YATAK ODASI 1 penceresi 120x150." in k.mesaj
 
 
 def test_b4_llm_listedeki_olcuye_kaysa_soz_gecerli(s):
@@ -223,22 +225,26 @@ def test_hicbiri_yeni_revizyon_uretmez(tmp_path, ek):
 
 def test_yalniz_kod_ozeti_koddan(s):
     """Tur 3 gözlem 3 (pano 202): boş sohbette "PA-04" planı doğruydu, metin LLM'in özetiydi (""PA-04" yazdınız, ne istediğinizi
-    anlayamadık …"). Metin ve PDF başlığı kodun: "PA04 seçildi" (düğmeyle seçimin onaylı biçimi, `testler/cati_secimi/prefabrik_hedef.json`)."""
+    anlayamadık …"). Metin ve PDF başlığı kodun (tur 5, pano 202: Lokman'ın onayladığı metin)."""
     k = s.yaz("PA-04", niyet="diger", ozet='"PA-04" yazdınız, ne istediğinizi anlayamadık. Bir katalog kodu mu? Açıklar mısınız?')
     assert k.eylem == "is_emri"
-    assert k.mesaj == "PA04 seçildi Ön onay planını hazırlıyorum; birkaç dakika içinde PDF olarak göndereceğim."
-    assert k.is_emri["talep"]["metin"] == "PA04 seçildi" and k.is_emri["talep"]["metin_koddan"] is True
+    assert k.mesaj == "PA-04 seçildi. Ön onay planınız hazır; plan görseli ve PDF ektedir."
+    assert k.is_emri["talep"]["metin"] == "PA-04 seçildi" and k.is_emri["talep"]["metin_koddan"] is True
 
 
 def test_cati_setine_yazili_numara_pdf_basligi_koddan(s):
     """Tur 3: çatı setine yazılı "2" doğru planı getiriyordu, PDF başlığı LLM'in "… "2" diye cevap verdiniz; teyit …" özetiydi."""
     s.yaz("PA-06", niyet="diger")
     k = s.yaz("2", niyet="diger", ozet='Önceki seçenek sorusuna "2" diye cevap verdiniz; hangi seçeneği kastettiğinizi teyit edebilir misiniz?')
-    assert k.eylem == "is_emri" and k.mesaj.startswith("PA06K seçildi Ön onay")
-    assert k.is_emri["talep"]["metin"] == "PA06K seçildi" and k.is_emri["talep"]["metin_koddan"] is True
+    assert k.eylem == "is_emri" and k.mesaj == "PA-06-K seçildi. Ön onay planınız hazır; plan görseli ve PDF ektedir."
+    assert k.is_emri["talep"]["metin"] == "PA-06-K seçildi" and k.is_emri["talep"]["metin_koddan"] is True
 
 
-def test_dugmeyle_secimde_baslik_bugunku_gibi(s):
-    """Düğmeyle seçimde (LLM yok) metin_koddan işareti konmaz; PDF başlığı bugünkü gibi düğmenin özeti (onaylı hedef değişmez)."""
-    _plan(s, "PA04")
-    assert "metin_koddan" not in s.plan["talep"]
+def test_dugmeyle_secimde_metin_ayni(s):
+    """Tur 5 (pano 202): düğmeyle seçimde de metin ve PDF başlığı aynı kalıp; revizyonda değişiklik kodun notuyla."""
+    k = _plan(s, "PA04")
+    assert k.mesaj == "PA-04 seçildi. Ön onay planınız hazır; plan görseli ve PDF ektedir."
+    assert s.plan["talep"]["metin"] == "PA-04 seçildi" and s.plan["talep"]["metin_koddan"] is True
+    k = s.yaz("salonun sol penceresi 120x180 olsun", pencereler=[pen("salon", "120x180", duvar="sol")])
+    assert k.mesaj == "PA-04 r02. Değişiklik: SALON 120x120 sol penceresi 120x180. Ön onay planınız hazır; plan görseli ve PDF ektedir.", k.mesaj
+    assert k.is_emri["talep"]["metin"] == "PA-04 r02 · Değişiklik: SALON 120x120 sol penceresi 120x180"

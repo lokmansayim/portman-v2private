@@ -633,12 +633,14 @@
       ]
      },
      "karar": {
-      "eylem": "is_emri",
-      "plan_kodu": "P6001",
-      "revizyon": 2,
-      "gerekce": "YATAK ODASI 1 penceresi 120x120"
+      "eylem": "cevapla",
+      "gerekce": "plan değişmedi",
+      "mesaj_icerir": [
+       "değişmedi; YATAK ODASI 1 penceresi zaten 120x120."
+      ]
      },
-     "anlam": "yatak odası 1 penceresi 120x120"
+     "anlam": "yatak odası 1 penceresi 120x120 (planda zaten 120x120)",
+     "not": "D-86 (Lokman, 13 Kasım 2026 21:36 UTC kartı \"Değişmedi desin\"): aynı değişiklik yeniden istenince yeni revizyon gitmez. Önceki beklenen: is_emri, revizyon 2."
     },
     {
      "id": "D04",
@@ -657,10 +659,11 @@
      "karar": {
       "eylem": "is_emri",
       "plan_kodu": "P6001",
-      "revizyon": 3,
+      "revizyon": 2,
       "gerekce": "YATAK ODASI 1 penceresi 120x180"
      },
-     "anlam": "aynı pencere bu kez 120x180"
+     "anlam": "aynı pencere bu kez 120x180",
+     "not": "D-86: D03 revizyon üretmediği için bu plan r02 (önceki beklenen r03)."
     },
     {
      "id": "D05",
@@ -671,7 +674,7 @@
       "eylem": "cevapla",
       "gerekce": "eski buton"
      },
-     "anlam": "eski planın (r02) Onayla düğmesi",
+     "anlam": "eski planın (r01) Onayla düğmesi",
      "not": "Rehber: eski düğme çalışmaz, güncel planı hatırlatır."
     },
     {

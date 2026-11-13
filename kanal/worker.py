@@ -1386,7 +1386,7 @@ def cizim_genel(ie: dict, hedef: Path) -> dict:
 
 def ek_sozu(metin: str, gorsel_var: bool) -> str:
     """BK-08 madde 4: çelik plan mesajı "plan görseli ve PDF ektedir" der; görsel gitmiyorsa (mesaj katmanı kapalı ya da bayi görseli
-    üretilemedi) yalnız PDF'in ekte olduğu söylenir. Prefabrik metni bu sözü taşımaz, dokunulmaz."""
+    üretilemedi) yalnız PDF'in ekte olduğu söylenir. D-85'ten (13 Kasım 2026) beri prefabrik plan metni de aynı sözü taşır."""
     return metin if gorsel_var else metin.replace("plan görseli ve PDF ektedir", "PDF ektedir")
 
 

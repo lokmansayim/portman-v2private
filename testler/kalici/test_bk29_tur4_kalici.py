@@ -50,8 +50,11 @@ def test_yazili_oda_cevabi_ikiz_istekte_kalici(depo, wa, hizli_motor):
     assert [x["rev"] for x in sorgu(depo, "SELECT rev FROM revizyonlar ORDER BY rev")] == [1, 2]
     ie = tek(depo, "SELECT is_emri FROM revizyonlar WHERE rev = 2")["is_emri"]
     assert [a["olcu"] for a in ie["acikliklar"] if a["tur"] == "pencere" and a.get("mahal") == "YATAK ODASI 1"] == ["120x180"]
-    metinler = " ".join(_govde(x) for x in bayiye(depo, r3["mesaj_id"]))
-    assert metinler.count("YATAK ODASI 1 penceresi 120x180") == 1, metinler
+    satirlar = bayiye(depo, r3["mesaj_id"])
+    [plan] = [_govde(x) for x in satirlar if x["kind"] == "interactive"]
+    [pdf] = [_govde(x) for x in satirlar if x["kind"] == "document"]
+    # değişiklik bir kez yazılır: planla giden metinde bir kez, PDF başlığında bir kez (D-85: PDF başlığı da kodun metni)
+    assert plan.count("YATAK ODASI 1 penceresi 120x180") == 1 and pdf.count("YATAK ODASI 1 penceresi 120x180") == 1, (plan, pdf)
 
 
 def test_hicbiri_yeni_revizyon_uretmez_kalici(depo, wa, hizli_motor):
@@ -86,3 +89,6 @@ def test_yalniz_kod_plan_metni_ve_pdf_basligi_koddan(depo, wa, hizli_motor):
     assert belge and "anlayamadık" not in metin
     baslik = belge[0]["satir"]["body"]                                         # PDF açıklaması (`worker.giden_belge`)
     assert "anlayamadık" not in baslik and baslik.endswith("ÖN ONAYA SUNULAN TASLAK · P6001 seçildi"), baslik
+    # tur 5 (D-85): plan görseliyle giden metin planın hazır olduğunu söyler
+    [plan] = [_govde(x) for x in satirlar if x["kind"] == "interactive"]
+    assert plan == "P6001 seçildi. Ön onay planınız hazır; plan görseli ve PDF ektedir.", plan
