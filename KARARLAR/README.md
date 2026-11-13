@@ -194,6 +194,7 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | D | D-82 | Portman Sözlüğü ikinci tur: tek başına "kimlik kartı" parçanın kartı; "Proje Kimlik Kartı" ve "bayi kimlik kartı" hep tam adıyla; sözlük r03, 91 kavram (Lokman 12.11 08:31 kartı) | yazıldı (12.11; Sözlük sohbeti, `claude/project-thread-82u5ox`) |
 | D | D-83 | Prefabrik evde çatı seçimi: PA-06'ya üç çatı, evin çatısı, PA-06-K kırma, PA-06-C beşik mahya önde + salonda cumba (İE-37; Lokman 12.11 08:36:09, 08:41:09) | yazıldı (12.11; çatı seçimi sohbeti, `claude/project-thread-91gav7`) |
 | D | D-84 | Bayiye giden tanıtım metinleri: yeni "Nasıl çalışır?" sayfası (8 prefabrik ev, 6 çelik plan, çatı seçimi, onaydan sonrası) ve "Merhaba" cevabının çalışan örnekleri (BK-28; Lokman 12.11 14:50:26 kartı) | yazıldı (12.11; tanıtım metinleri sohbeti, `claude/project-thread-iv2z5f`) |
+| D | D-88 | Prefabrik talep formu: standart özellikler seçili, ölçü kodda hesaplanır (kısa kenar + m² → uzun kenar, yarım pano katı), formdan önce [Prefabrik] [Çelik] düğmeleri (İE-20 PR-6; Lokman 13.11 21:26:26, 21:32:39 kartı, 21:37:11) | yazıldı (13.11; talep formu sohbeti, `claude/project-thread-l5mh7r`) |
 | D | **D-85** | — | **sıradaki boş** |
 | İE | İE-01–İE-08 | bu depo (`main`) | yazıldı |
 | İE | İE-09 | model atölyesi: kontrollü model üretimi ve banka hattı (Görev 6e; pano 30; P6001 güncellemesi kapsam dışı) | alındı (16.10; `claude/gorev-6e-model-atolyesi-rnhtcp`; PR-1 banka hattı 29.10, `claude/project-thread-rhjgzv`) |

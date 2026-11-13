@@ -14,6 +14,7 @@ from . import secenek as SC
 from . import numara                     # BK-08 madde 9: gerekçedeki serbest metin maskelenir
 from . import celik                      # İE-08: çelik aday zarfı, D-09 antet bilgisi
 from . import celik_okuma as CO          # İE-08 PR-2b: çelik revizyonunda bayinin sözünden pencere / çatı / dış 140 okuması (K18)
+from . import form_ozellik               # İE-20 PR-6: prefabrik talep formundaki standart dışı seçimler İş Emri'ne
 
 MOD = 125.5
 ROOT = Path(__file__).resolve().parent.parent
@@ -514,7 +515,12 @@ def _karar_ver(talep: Talep, k: Konusma, bayi: dict | None, katalog: Katalog, me
     W, H = dis_olcu_cm(nx, ny)
     anahtar = (nx, ny, ts["oda_programi"])
     if anahtar not in GRID_SABLON:
-        secenek = _secenekler(k, katalog, {**ts, "alan_m2": None, "pano": {"nx": nx, "ny": ny}})     # İE-04: pano ızgarasıyla aday
+        if ts.get("alan_m2") and ts.get("pano"):
+            # İE-20 PR-6 (Lokman, 13 Kasım 2026 21:26 UTC): prefabrik talep formu ölçüyü pano katına yuvarlar, alanı da yazar. Bu ölçüyle
+            # birebir hazır plan çoğu ölçüde yoktur: seçenekler alana göre sunulur (bayi ölçüyü ön notta görür, `talep_formu.olcu_notu`).
+            secenek = _secenekler(k, katalog, {**ts, "pano": None})
+        else:
+            secenek = _secenekler(k, katalog, {**ts, "alan_m2": None, "pano": {"nx": nx, "ny": ny}})     # İE-04: pano ızgarasıyla aday
         if secenek is not None:
             return secenek
     if anahtar in GRID_SABLON:
@@ -1672,6 +1678,8 @@ def _is_emri_uret(k: Konusma, bayi: dict, katalog: Katalog, sablon: dict, kaynak
                    "sevk_adresi": (ts.get("musteri") or {}).get("sevk_adresi") or "", "tarih": time.strftime("%d/%m/%Y"),
                    "cizen": "Portman", "kontrol": "", "onay": ""}
     ie["bina_ozellikleri"] = {**ie.get("bina_ozellikleri", {}), **(ts.get("bina_ozellikleri") or {})}
+    # İE-20 PR-6: prefabrik talep formundaki standart dışı seçimler (pano yüksekliği, iç duvar, çatı kaplaması …) İş Emri'ne
+    notlar += form_ozellik.uygula(ie, ts.get("bina_ozellikleri"), k.d.get("son_is_emri"))
     ie["ozel_istekler"] = list(ts.get("ozel_istekler") or [])
     ie.setdefault("eksikler", [])
     son = k.d.get("son_is_emri") or {}
@@ -1980,6 +1988,9 @@ def _secenekler(k: Konusma, katalog: Katalog, ts: dict, uygun: list[dict] | None
     if not uygun:
         return None
     celik_mi = ts.get("yapi_turu") == "celik" or SC.celik_seti_mi(uygun)
+    if ts.get("oncelik") is None and getattr(k, "form_onceligi", None):      # İE-20 PR-6: öncelik formda seçildi; sohbette sorulmaz
+        k.d["taslak"]["oncelik"] = k.form_onceligi
+        ts = {**ts, "oncelik": k.form_onceligi}
     if ts.get("oncelik") is None and len(uygun) >= 2 and not celik_mi and tur != "cati_varyanti":   # İE-37: çatı setinde öncelik yok
         k.d["taslak"]["oncelik_soruldu"] = True
         return _soru(k, "oncelik", "Sıralamada ne öne çıksın: bütçe mi, yaşam alanı mı, kısa montaj mı? Fark etmezse \"fark etmez\" yazın.",

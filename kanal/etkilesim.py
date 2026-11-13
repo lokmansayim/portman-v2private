@@ -2,7 +2,8 @@
 
 Kimlik dilbilgisi (docs/is_emirleri/IE-04-mesaj-katmani.md): s:<set>:<kod> seçim · o:<is_emri_no>:<rev> onay ·
 r:<is_emri_no>:<rev> revizyon isteği · q:<alan>:<deger> bekleyen sorunun kısa cevabı · c:<iz>:d|z çizim okumasının teyidi (İE-20:
-Doğru / Düzelt; <iz> konuşmadaki `cizim_okuma.iz`).
+Doğru / Düzelt; <iz> konuşmadaki `cizim_okuma.iz`) · y:<iz>:prefabrik|celik yapı tipi (İE-20 PR-6: talep formundan önce iki düğme;
+<iz> sorunun gittiği mesajın izi, durum tutmaz).
 
 Kural: görünen başlık metni tek başına seçim kimliği sayılmaz. Kimlik çözülür; cevabın verildiği giden mesaj (context_id →
 giden satırı) bulunabiliyorsa kimliğin o mesajın butonları arasında olduğu doğrulanır; sonra güncellik denetlenir. Güncel
@@ -12,7 +13,8 @@ deterministik bir Talep'e çevrilir. Serbest metin bu dosyaya girmez (LLM yolu d
 from __future__ import annotations
 import re
 
-BUTON_ID = re.compile(r"^(s|o|r|q|c):([^:]{1,120}):([^:]{1,60})$")
+BUTON_ID = re.compile(r"^(s|o|r|q|c|y):([^:]{1,120}):([^:]{1,60})$")
+YAPI_TIPI = {"prefabrik": "prefabrik", "celik": "çelik"}       # y:<iz>:<deger> → bayinin sözü gibi okunan metin
 KISA_CEVAP = {  # q:<alan>:<deger> → kural katmanının okuyacağı metin
     "pencere_islem": {"degistir": "değiştir", "ekle": "ekle"},
     "yeni_mi_degisiklik": {"yeni": "yeni", "degisiklik": "değişiklik"},
@@ -99,6 +101,15 @@ def coz(gelen: dict, d: dict | None, giden_bul=None) -> dict:
                     "talep": _talep("onay", f"{a} r{rev:02d} onaylandı (buton)"), "not": f"onay butonu: {a} r{rev:02d}"}
         return {"gecerli": True, "tur": "revize", "kimlik": kimlik, "metin": "revize et",
                 "talep": _talep("red", f"{a} r{rev:02d} için değişiklik istendi (buton)"), "not": f"revizyon butonu: {a} r{rev:02d}"}
+    if tur == "y":                                   # İE-20 PR-6: yapı tipi düğmesi; bayi "prefabrik" ya da "çelik" yazmış gibi yeni talep
+        if b not in YAPI_TIPI:
+            return {"gecerli": False, "kimlik": kimlik, "neden": "bilinmeyen yapı tipi", "mesaj": "Bu cevabı tanıyamadım; lütfen yazarak cevaplayın."}
+        if guncel[0] and d.get("asama") in ("onay_bekliyor", "revizyon"):       # açık plan eski düğmeyle kapanmaz (yeni talep yazıyla açılır)
+            return {"gecerli": False, "kimlik": kimlik, "neden": "açık plan varken yapı tipi düğmesi",
+                    "mesaj": f"Bu düğme eski bir mesaja ait; güncel plan {guncel[0]} r{guncel[1]:02d}. Planı onaylayın ya da değişikliği yazın. "
+                             "Yeni talep için talebinizi yazın."}
+        return {"gecerli": True, "tur": "yapi", "secim": b, "kimlik": kimlik, "metin": YAPI_TIPI[b],
+                "talep": _talep("yeni_talep", f"Yapı tipi: {YAPI_TIPI[b]}", yapi_turu=b), "not": f"yapı tipi düğmesi: {b}"}
     if tur == "c":                                   # İE-20: çizim okumasının teyidi
         co = d.get("cizim_okuma") or {}
         if b not in ("d", "z"):
