@@ -336,7 +336,7 @@ def _karar_ver(talep: Talep, k: Konusma, bayi: dict | None, katalog: Katalog, me
         return _bitir(k, Karar(eylem="cevapla", gerekce="onaylanacak plan yok",
                                 mesaj="Onaylanacak açık bir plan görünmüyor. Yeni plan için model kodu ya da ölçü yazabilirsiniz."))
     if t.niyet == "red":
-        if k.d["asama"] in ("onay_bekliyor", "uretildi"):
+        if k.d["asama"] in ("onay_bekliyor", "uretildi") and not _iptal_sozu(metin):
             k.d["asama"] = "revizyon"
             return _bitir(k, Karar(eylem="sor", soru_alani="revizyon_ne", gerekce="plan reddedildi",
                                     mesaj="Anladım. " + _neyi_degistirelim(k)))
@@ -2027,6 +2027,17 @@ _DUVAR_SOZ = {"sol": re.compile(r"\bsol(da|daki|u|unda|undaki)?\b"),
               "arka": re.compile(r"\barka(da|daki|si|sinda|sindaki)?\b"),
               "on": re.compile(r"\b(onde|ondeki|onunde|onundeki)\b|\bon (duvar|cephe|taraf)\w*")}
 _ON_HAM = re.compile(r"(?<!\w)(ön|önde|öndeki|önü|önünde|önündeki)(?!\w)(?!\s+onay)")    # "ön onay planı" duvar değil (hakem 4)
+# BK-29 tur 5 (pano 216; tur 3 canlı gözlem 1): onay bekleyen planda "iptal" ilk yazışta "Anladım. Neyi değiştirelim?" alıyordu, talep
+# ikinci "iptal"le kapanıyordu. Bayinin açık iptal sözü (K18) talebi ilk yazışta kapatır; "beğenmedim", "olmadı", "hayır" revizyon sorusu alır.
+_IPTAL_SOZU = re.compile(r"(?:(?:bu |o )?(?:talebi|talep|plani|siparisi|isi) )?(?:iptal(?: e[td]\w*| olsun)?"
+                         r"|vazgec\w*)(?: lutfen| ltf)?$")
+_IPTAL_OLUMSUZ = re.compile(r"\b(?:e[td]|vazgec)\w*?m[ei](?:y|z|s|d|$|\s)")    # "iptal etmeyin", "etme", "edilmesin", "vazgeçmedim"
+
+
+def _iptal_sozu(metin: str | None) -> bool:
+    """Mesaj yalnız açık iptal sözü mü ("iptal", "iptal edin", "talebi iptal et", "vazgeçtik")? Olumsuz ve soru biçimi değil."""
+    q = _sozcuk_norm(metin or "")
+    return bool(_IPTAL_SOZU.match(q)) and not _IPTAL_OLUMSUZ.search(q)
 _NEYI_DEGISTIRELIM_PREFABRIK = "Neyi değiştirelim? Odayı ve pencere ölçüsünü yazın (örn. \"mutfak penceresi 120x120 olsun\")."
 
 
