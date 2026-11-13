@@ -193,7 +193,8 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | D | D-81 | Portman Sözlüğü: 89 kavram, bir kavram tek terim (D-70 madde 1); Lokman'ın seçtiği 6 kavram: kalkan, vadi, trapez mahya, kiremit desen sac, nem bariyeri ve membran ayrı, cumba makası ve yavru makas (Lokman 11.11 20:49–20:52) | yazıldı (11.11; Sözlük sohbeti, `claude/project-thread-82u5ox`) |
 | D | D-82 | Portman Sözlüğü ikinci tur: tek başına "kimlik kartı" parçanın kartı; "Proje Kimlik Kartı" ve "bayi kimlik kartı" hep tam adıyla; sözlük r03, 91 kavram (Lokman 12.11 08:31 kartı) | yazıldı (12.11; Sözlük sohbeti, `claude/project-thread-82u5ox`) |
 | D | D-83 | Prefabrik evde çatı seçimi: PA-06'ya üç çatı, evin çatısı, PA-06-K kırma, PA-06-C beşik mahya önde + salonda cumba (İE-37; Lokman 12.11 08:36:09, 08:41:09) | yazıldı (12.11; çatı seçimi sohbeti, `claude/project-thread-91gav7`) |
-| D | **D-84** | — | **sıradaki boş** |
+| D | D-84 | Bayiye giden tanıtım metinleri: yeni "Nasıl çalışır?" sayfası (8 prefabrik ev, 6 çelik plan, çatı seçimi, onaydan sonrası) ve "Merhaba" cevabının çalışan örnekleri (BK-28; Lokman 12.11 14:50:26 kartı) | yazıldı (12.11; tanıtım metinleri sohbeti, `claude/project-thread-iv2z5f`) |
+| D | **D-85** | — | **sıradaki boş** |
 | İE | İE-01–İE-08 | bu depo (`main`) | yazıldı |
 | İE | İE-09 | model atölyesi: kontrollü model üretimi ve banka hattı (Görev 6e; pano 30; P6001 güncellemesi kapsam dışı) | alındı (16.10; `claude/gorev-6e-model-atolyesi-rnhtcp`; PR-1 banka hattı 29.10, `claude/project-thread-rhjgzv`) |
 | İE | İE-10, İE-11, İE-12 | prefabrik hattı (PR #12, PR #14, `ie-12-prefabrik-bayi-paftasi`) | `main`'e BK-12 ile (PR-1: motor ve bayi paftası; liste ve mühür kıyası sonraki PR'larda) |
@@ -239,7 +240,9 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | BK | BK-20 | mühürlü konular freni: kayıt, hook, CI kilit testi (D-42; `claude/project-thread-evp64h`) | alındı (1.11) |
 | BK | BK-21 | frenler thread'lerin okuduğu yerde: `.claude/rules/frenler.md`, `araclar/fren.py`, CI "Korunan dosya onayı" (Lokman'ın `patron-onayi` etiketi); BK-17 `main`'e (`claude/project-thread-7n2p8x`) | alındı (4.11) |
 | BK | BK-22 | ön onay çiziminde verandalı brüt m², ortalanan pencerenin yanı tek pano, İş Emri'nde tek birleşim (D-49; `claude/project-thread-jlqian`, PR #122) | alındı (4.11) |
-| BK | **BK-23** | — | **sıradaki boş** |
+| BK | BK-23 … BK-27 | iş emri belgelerinde (`docs/is_emirleri/`) ve dallarında; bu tabloya yazılmadı | alındı |
+| BK | BK-28 | bayiye giden tanıtım metinleri ("Nasıl çalışır?" sayfası, selam örneği) bugünkü sisteme göre; prefabrik onayında Patron'a bildirim (pano 196, 197, 199; D-84; `claude/project-thread-iv2z5f`) | alındı (12.11; CIO) |
+| BK | **BK-29** | — | **sıradaki boş** |
 
 ## 27 Eylülde Lokman'ın verdiği kararlar
 

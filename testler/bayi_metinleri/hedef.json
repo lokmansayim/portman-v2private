@@ -1,0 +1,18 @@
+{
+ "aciklama": "BK-28 (pano 196, 197): bayiye giden tanıtım metinlerinin hedef örneği. Kıyas testler/test_bayi_metinleri.py. Değişiklik yalnız Lokman'ın onayıyla (D-02, D-28).",
+ "onay": "Lokman, 12 Kasım 2026 14:50:26 UTC, kart \"Yeni 'Nasıl çalışır?' sayfası ve 'Merhaba' cevabı bayiye gitsin mi?\" → \"Onaylıyorum\" (D-84)",
+ "nasil_calisir": "testler/bayi_metinleri/nasil_calisir_hedef.txt",
+ "selam_hitapli": "Merhaba Deneme Bayi. Hangi model ya da ölçü için ön onay planı hazırlayalım? Örnek: \"Tek kat prefabrik, 2+1, 85 m²\" veya \"Tek kat çelik, 2+1, 88 m²\".",
+ "selam_hitapsiz": "Merhaba. Hangi model ya da ölçü için ön onay planı hazırlayalım? Örnek: \"Tek kat prefabrik, 2+1, 85 m²\" veya \"Tek kat çelik, 2+1, 88 m²\".",
+ "anlasilmadi": "Anlayamadım. Ön onay planı için model kodu (örn. P6001) ya da ölçü ve oda programı (örn. \"Tek kat prefabrik, 2+1, 85 m²\") yazabilirsiniz.",
+ "yazili_olmayan": "Şu an yalnız yazılı talepleri işleyebiliyorum. Talebinizi yazıyla iletirseniz (örn. \"Tek kat prefabrik, 2+1, 85 m²\" veya \"Tek kat çelik, 2+1, 88 m²\") ön onay planını hazırlarım. Gönderdiğiniz dosyayı Lokman Bey'e ilettim.",
+ "ornekler": {
+  "Tek kat prefabrik, 2+1, 85 m²": {"talep": {"yapi_turu": "prefabrik", "kat_sayisi": 1, "oda_programi": "2+1", "alan_m2": 85}, "set": ["PA06", "PA05", "PA04"]},
+  "Tek kat çelik, 2+1, 88 m²": {"talep": {"yapi_turu": "celik", "kat_sayisi": 1, "oda_programi": "2+1", "alan_m2": 88}, "set": ["Ç8801", "KT02", "KT03", "Ç8201"]}
+ },
+ "sayfadaki_modeller": {
+  "prefabrik": {"2+1": [60, 64, 70, 78, 82, 87], "3+1": [90, 140]},
+  "celik": {"2+1": [82, 88, 92, 94, 99], "4+1": [124]}
+ },
+ "canli_kabul": ["KT01", "KT02", "KT03", "KT04", "PA01", "PA02", "PA03", "PA04", "PA05", "PA06", "PA06C", "PA06K", "PA07", "PA08", "Ç8201", "Ç8801", "Ç8801K", "Ç8801L"]
+}

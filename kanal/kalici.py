@@ -266,6 +266,7 @@ def bir_is(depo: Depo, settings: dict, sahip: str | None = None) -> dict | None:
                     cikti = _red_ciktisi(gelen, k, cikarim["talep"], denetim)
                 cikti["sonuc"]["onay"] = {a: denetim.get(a) for a in ("kabul", "is_emri_no", "rev", "pdf_wamid", "alinti_id", "sinir", "neden")}
                 MH.onay_kancasi(depo, gelen, d, cikti)          # İE-08 8b: çelik onayı → mühendis kontrol kaydı ve bildirimi (aynı işlemde)
+                MH.prefabrik_onay_kancasi(gelen, d, cikti)      # BK-28 (pano 199): prefabrik onayı → Patron'a metin + şablon
             MH.plan_degisti_kancasi(depo, gelen, d, cikti)      # BK-10: onaydan sonra yeni revizyon → önceki kontroller kapanır (aynı işlemde)
     except Exception:
         hata = traceback.format_exc()[-2500:]
