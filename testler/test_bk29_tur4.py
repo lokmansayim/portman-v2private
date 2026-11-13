@@ -31,8 +31,10 @@ def s(tmp_path) -> Sohbet:
 # ── B5: aynı istek hem satır hem varyant ──────────────────────────────────────────────────────────────────────────────────────
 
 def _ikiz(s: Sohbet):
+    # D-86 (tur 5): canlıdaki cümle "pencere 120x120 olsun"du; ODA 1 penceresi PA-03'te zaten 120x120 olduğu için o cümle artık "plan
+    # değişmedi" cevabı alır (`test_bk29_tur5`). Bu testlerin konusu ikiz satırdır: gerçek bir değişiklikle (120x180) sürülür.
     _plan(s, "PA03")
-    k = s.yaz("pencere 120x120 olsun", pencereler=[pen(None, "120x120")], varyantlar=[_pv("120x120", "pencere 120x120 olsun")])
+    k = s.yaz("pencere 120x180 olsun", pencereler=[pen(None, "120x180")], varyantlar=[_pv("120x180", "pencere 120x180 olsun")])
     assert (k.eylem, k.soru_alani) == ("sor", "pencere_mahal")
     return k
 
@@ -42,8 +44,8 @@ def test_b5_yazili_oda_cevabi_ikizde_tek_soru(s):
     _ikiz(s)
     k = s.yaz("Oda 1", niyet="diger")
     assert k.eylem == "is_emri" and k.revizyon == 2, k.mesaj
-    assert k.mesaj == "PA-03 r02. Değişiklik: ODA 1 penceresi 120x120. Ön onay planınız hazır; plan görseli ve PDF ektedir."   # tur 5 (pano 202): metin koddan
-    assert _pencereler(k, "ODA 1") == [("120x120", "sol")]
+    assert k.mesaj == "PA-03 r02. Değişiklik: ODA 1 penceresi 120x180. Ön onay planınız hazır; plan görseli ve PDF ektedir."   # tur 5 (pano 202): metin koddan
+    assert _pencereler(k, "ODA 1") == [("120x180", "sol")]
     assert [p["mahal"] for p in s.k.d["taslak"]["pencereler"]] == ["ODA 1"]
 
 
@@ -52,15 +54,15 @@ def test_b5_listeden_oda_ikizde_not_bir_kez(s):
     _ikiz(s)
     k = s.dugme("q:pencere_mahal:1")
     assert k.eylem == "is_emri" and k.revizyon == 2
-    assert k.gerekce == "şablon PA03 (ODA 1 penceresi 120x120)"
+    assert k.gerekce == "şablon PA03 (ODA 1 penceresi 120x180)"
 
 
 def test_b5_yazili_oda_llm_icerikli_cevap(s):
     """LLM kısa cevaba içerik yazsa da ("Oda 1" → oda 1 penceresi) cevap odadır; plan bir kez değişir."""
     _ikiz(s)
-    k = s.yaz("Oda 1", pencereler=[pen("oda 1", "120x120")])
+    k = s.yaz("Oda 1", pencereler=[pen("oda 1", "120x180")])
     assert k.eylem == "is_emri" and k.revizyon == 2
-    assert k.gerekce == "şablon PA03 (ODA 1 penceresi 120x120)"
+    assert k.gerekce == "şablon PA03 (ODA 1 penceresi 120x180)"
 
 
 def test_ikiz_ekleme_satiri_yutulmaz(s):
