@@ -6,6 +6,7 @@ hedef değerler proje kartı veri setinden (`testler/havuz/proje_kartlari.json`,
 görünürlük K-A10 kabul kaydıyla (kabulsüz yol, harness dahil, aynen).
 """
 from __future__ import annotations
+import hashlib
 import json
 import subprocess
 import sys
@@ -42,6 +43,16 @@ EVLER = {
     "PA22": ("AP-26", "testler/kor/projeler/AP26/is_emri.json", "2+1", 102.0),
 }
 PREFABRIK = {a["kod"]: a for a in havuz_kayitlari(yapi="prefabrik")}
+
+# D-87 › Havuza giren çelik projeler (PR-2): kod → (proje, tanımın kaynağı, oda programı, brüt m²; genel motorun `bina_m2`'si)
+CELIK = {
+    "KT05": ("ÇP-06", "testler/celik/projeler/CP06/CP06.json", "2+1", 90.0),
+    "KT06": ("ÇP-18", "testler/celik/projeler/CP18/CP18.json", "2+1", 90.0),
+    "KT07": ("ÇP-19", "testler/celik/projeler/CP19/CP19.json", "2+1", 90.0),
+    "KT08": ("ÇP-20", "testler/celik/projeler/CP20/CP20.json", "3+1", 90.0),
+}
+CELIK_KAYIT = {a["kod"]: a for a in havuz_kayitlari(yapi="celik")}
+ESKI_CELIK = {"Ç8801", "Ç8801K", "Ç8801L", "Ç8201", "KT01", "KT02", "KT03", "KT04"}
 D80 = {f"PA0{i}" for i in range(1, 9)}
 TUM_PA = D80 | {"PA06K", "PA06C"} | set(EVLER)
 
@@ -63,7 +74,7 @@ def _standart(ie: dict) -> dict:
 
 def test_havuz_kaydi_bicimi():
     assert set(PREFABRIK) == set(EVLER)
-    assert sorted(f.stem for f in HAVUZ_DIR.glob("*.json")) == sorted(EVLER)        # ev başına bir dosya, ad = kod
+    assert sorted(f.stem for f in HAVUZ_DIR.glob("*.json")) == sorted([*EVLER, *CELIK])  # ev başına bir dosya, ad = kod
     eski = {str(a["kod"]).upper() for a in json.loads(ADAYLAR_PREFABRIK_JSON.read_text(encoding="utf-8"))}
     assert not eski & set(EVLER) and eski == D80                                      # D-80 kaydı aynen
     for kod, a in PREFABRIK.items():
@@ -228,3 +239,85 @@ def test_kart_veri_seti():
     veri = json.loads((KOK / "testler/havuz/proje_kartlari.json").read_text(encoding="utf-8"))
     assert veri["kaynak"].startswith("Proje_Karti")
     assert sorted(veri["evler"]) == [f"AP-{i:02d}" for i in range(1, 29) if i != 20]
+
+
+# ── Çelik (PR-2) ──────────────────────────────────────────────────────────────────────────────────────────────────────────
+def test_celik_kaydi_bicimi():
+    assert set(CELIK_KAYIT) == set(CELIK)
+    for kod, a in CELIK_KAYIT.items():
+        proje, kaynak, oda, m2 = CELIK[kod]
+        g = kod[:2] + "-" + kod[2:]
+        assert (a["gosterim"], a["referans_model"], a["motor"], a["yapi_turu"], a["kat"]) == (g, kod, "genel", "celik", 1)
+        assert (a["durum"], a["oda_programi"], a["katalog_m2"], a["musteri_projesi"]) == ("gecerli", oda, m2, True), kod
+        assert a["sunum"]["ad"] == ""                                                    # KT müşteri projesi: bayiye adsız (D-08, D-33)
+        assert a["tanim"] == f"modeller/havuz/{kod}.json"
+        assert a["tanim_sha256"] == hashlib.sha256((KOK / a["tanim"]).read_bytes()).hexdigest()
+        kk = a["kaynak"]["kart_kiyasi"]
+        assert (a["kaynak"]["karar"], kk["kart"], kk["tanim"], kk["sonuc"]) == ("D-87", proje, kaynak, "geçti")
+        assert kk["tanim_sha256"] == hashlib.sha256((KOK / kaynak).read_bytes()).hexdigest() == HH.celik_kartlari()[proje]["tanim_sha256"]
+        assert f"| {g} | {proje} | `{kaynak}` |" in D87, kod
+        assert (a["veranda_m2"] or 0) > 0 and (SABLON_DIR / a["gorsel"]).stat().st_size > 10_000
+
+
+@pytest.mark.parametrize("kod", sorted(CELIK))
+def test_celik_tanim_kaynakla_ayni(kod):
+    """Havuzun tanımı İE-16 tanımının aynısı; yalnız kod ve ad farklı (KT-04 = ÇP-14 örneği gibi)."""
+    t = json.loads((KOK / CELIK_KAYIT[kod]["tanim"]).read_text(encoding="utf-8"))
+    k = json.loads((KOK / CELIK[kod][1]).read_text(encoding="utf-8"))
+    assert t["kod"] == kod[:2] + "-" + kod[2:] and CELIK[kod][0] in t["ad"]
+    assert {x: v for x, v in t.items() if x not in ("kod", "ad")} == {x: v for x, v in k.items() if x not in ("kod", "ad")}
+
+
+@pytest.mark.parametrize("kod", sorted(CELIK))
+def test_celik_hakem_gecer(kod):
+    """Genel motor çizer ve doğrular; brüt oturum antet m²'sinden en çok 0,5 m²; oda ve veranda antetle aynı (hakem yeniden koşar)."""
+    a = CELIK_KAYIT[kod]
+    bulgular, olc = HH.celik_denetle(KOK / a["tanim"], HH.celik_kartlari()[CELIK[kod][0]])
+    assert bulgular == [], (kod, bulgular)
+    assert olc == a["kaynak"]["kart_kiyasi"]["olcum"], kod
+
+
+def test_celik_disarida_kalanlar():
+    """Antette oda programı yok (ÇP-03, ÇP-04), verandasız (ÇP-08), aynı proje havuzda (ÇP-07, 13, 14, 17): hakem girdisi bunu söyler."""
+    kart = HH.celik_kartlari()
+    assert {k for k, v in kart.items() if not v["oda_programi"]} == {"ÇP-03", "ÇP-04"}
+    assert {k for k, v in kart.items() if not v["veranda"]} == {"ÇP-08", "ÇP-13"}
+    assert {k: v["havuzda"] for k, v in kart.items() if v["havuzda"]} == {"ÇP-07": "KT-03", "ÇP-13": "KT-01", "ÇP-14": "KT-04", "ÇP-17": "KT-02"}
+    gecen = {CELIK[k][0] for k in CELIK}
+    assert gecen == {k for k, v in kart.items() if v["oda_programi"] and v["veranda"] and not v["havuzda"]}
+    for satir in ("| ÇP-07, ÇP-13, ÇP-14, ÇP-17 |", "| ÇP-03 | Hakem kaldı", "| ÇP-04 | Hakem kaldı", "| ÇP-08 | Antette veranda yok"):
+        assert satir in D87
+
+
+def test_celik_kabulsuz_gorunmez():
+    """Kabulsüz yolda (harness) çelik adaylar görünür (İE-08); havuzun çelik kaydı görünmez: harness'in 22 vakası aynen."""
+    gor = {a["kod"] for a in Katalog().gorunur_adaylar()}
+    assert gor == ESKI_CELIK - {"KT04"} and not gor & set(CELIK)
+    assert Katalog(kabul_edilmis={"KT06"}).aday("KT-06")["kod"] == "KT06"
+
+
+SETLER_CELIK = {
+    (90, "2+1"): ["KT05", "KT06", "KT07", "KT02", "Ç8801", "KT03", "Ç8201", "KT01"],
+    (88, "2+1"): ["Ç8801", "KT05", "KT06", "KT07", "KT02", "KT03", "Ç8201"],
+    (90, "3+1"): ["KT08"],
+}
+
+
+@pytest.mark.parametrize("m2,oda", sorted(SETLER_CELIK))
+def test_tum_havuzla_celik_seti(tmp_path, m2, oda):
+    s = Sohbet(tmp_path, kabul=ESKI_CELIK | set(CELIK))
+    k = s.yaz(f"{m2} m2 {oda} çelik ev", alan_m2=m2, oda_programi=oda, yapi_turu="celik")
+    beklenen = SETLER_CELIK[(m2, oda)]
+    assert k.eylem == "secenek", k.mesaj
+    assert [a["kod"] for a in s.k.d["secenek_seti"]["adaylar"]] == beklenen
+    assert len(k.butonlar) == min(len(beklenen), S.EN_COK_GORSEL) and len(k.mesaj) <= 1024
+
+
+def test_kabul_betigi_celik_havuzu_tanir():
+    """Çelik kodlarıyla koşu (`adaylar.json`) havuzun çelik kayıtlarını tanır; prefabrik koşusu tanımaz."""
+    arac = [sys.executable, str(KOK / "araclar/aday_kabul.py"), "--tarih", "2026-11-14", "--kuru"]
+    r = subprocess.run(arac + ["--adaylar", str(KOK / "beyin/veri/adaylar.json"), "--kodlar", "KT-05,KT-06,KT-07,KT-08"],
+                       capture_output=True, text=True, cwd=KOK)
+    assert r.returncode == 0 and "KURU: 4 kayıt yazılacak" in r.stdout, r.stdout + r.stderr
+    r = subprocess.run(arac + ["--adaylar", str(ADAYLAR_PREFABRIK_JSON), "--kodlar", "KT-05"], capture_output=True, text=True, cwd=KOK)
+    assert r.returncode == 2 and "olmayan kod: KT05" in r.stdout, r.stdout
