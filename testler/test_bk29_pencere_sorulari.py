@@ -153,7 +153,10 @@ def test_b5_oda_sorusu_dugmeli_ve_yazili_cevap(s):
     assert [b["baslik"] for b in k.butonlar] == ["ODA 1", "BANYO", "ODA 2", "SALON+MUTFAK"]
     assert [b["id"] for b in k.butonlar] == [f"q:pencere_mahal:{i}" for i in range(1, 5)]
     k = s.yaz("Oda 1", niyet="diger")
-    assert k.eylem == "is_emri" and k.revizyon == 2 and "ODA 1 penceresi 120x120" in k.gerekce, k.mesaj
+    # D-86 (BK-29 tur 5; Lokman 13 Kasım 21:36 kartı): ODA 1 penceresi PA-03'te zaten 120x120; aynı plan yeni numarayla gitmez.
+    # Önceki beklenen: is_emri, r02, gerekçede "ODA 1 penceresi 120x120". Oda cevabının alındığı yine sınanır (soru yinelenmez).
+    assert (k.eylem, k.gerekce) == ("cevapla", K.PLAN_DEGISMEDI) and s.plan["revizyon"] == 1, k.mesaj
+    assert "değişmedi; ODA 1 penceresi zaten 120x120." in k.mesaj
 
 
 def test_oda_sorusu_dugmesi_ve_yalniz_numara(s):

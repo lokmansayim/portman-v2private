@@ -74,7 +74,8 @@ def test_oda_listesi_ve_pencere_dugmesi_kalici(depo, wa, hizli_motor):
     soru = bayiye_son(depo, r4["mesaj_id"])
     assert soru["satir"]["interactive"]["type"] == "button"
     assert ET.mesaj_kimlikleri(soru["satir"]) == {"q:pencere_secim:1", "q:pencere_secim:2"}
-    depo.mesaj_kaydet(cevap("1", "q:pencere_secim:1", soru["dis_id"], "button_reply"))
+    # D-86 (BK-29 tur 5): 1. düğme zaten 120x120 olan sol pencere (plan değişmez, yeni revizyon gitmez); 2. düğme 120x180 ön pencere
+    depo.mesaj_kaydet(cevap("2", "q:pencere_secim:2", soru["dis_id"], "button_reply"))
     [r5] = isle_hepsi(depo)
     assert r5["eylem"] == "is_emri", r5
     assert [x["rev"] for x in sorgu(depo, "SELECT rev FROM revizyonlar ORDER BY rev")] == [1, 2, 3]
