@@ -1,0 +1,72 @@
+{
+ "kod": "PA18",
+ "gosterim": "PA-18",
+ "durum": "gecerli",
+ "sablon": "adaylar/PA18.json",
+ "gorsel": "adaylar/PA18.png",
+ "referans_model": "PA-18",
+ "yapi_turu": "prefabrik",
+ "kat": 1,
+ "oda_programi": "2+1",
+ "katalog_m2": 60.0,
+ "kapali_m2": 53.3,
+ "veranda_m2": 6.68,
+ "ozet": {
+  "grid": {
+   "x_pano": 5,
+   "y_pano": 8
+  },
+  "dis_olcu_cm": [
+   600.0,
+   1000.0
+  ],
+  "brut_m2": 60.0,
+  "pano": 50,
+  "pencere": 6,
+  "kapi": 6,
+  "odalar": {
+   "YATAK ODASI 1": 7.58,
+   "BANYO": 4.43,
+   "YATAK ODASI 2": 7.39,
+   "HOL": 6.35,
+   "MUTFAK": 14.98,
+   "SALON": 8.13,
+   "VERANDA": 6.68
+  }
+ },
+ "kaynak": {
+  "metin": "AP-19 montaj paftasından İş Emri (PK-01 İş Emri, liste kilidi olan ev). Aday: D-87 (Lokman 13 Kasım 2026 21:41).",
+  "dosya": "testler/motor/veri/PK01.json",
+  "ayna": null,
+  "karar": "D-87",
+  "standart": true,
+  "kart_kiyasi": {
+   "kart": "AP-19",
+   "kart_sha256": "cfd5a08a1d171872f80411351535a111c099563fd28042974bd6837af5401682",
+   "sonuc": "geçti",
+   "olcum": {
+    "dis_olcu_cm": [
+     600.0,
+     1000.0
+    ],
+    "acikla_olcu_cm": [
+     600.0,
+     1000.0
+    ],
+    "brut_m2": 60.0,
+    "kubbe_m2": 0.0,
+    "yatak_odasi": 2,
+    "pencereler": {
+     "120x120": 3,
+     "120x180": 2,
+     "60x40": 1
+    },
+    "dis_kapi": 1,
+    "ic_kapi": 5,
+    "veranda": 1,
+    "kat": 1
+   }
+  }
+ },
+ "not": ""
+}
