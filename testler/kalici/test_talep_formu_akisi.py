@@ -244,6 +244,7 @@ def test_f3_revize_et_revizyon_formu_aciklama_okunur(depo, wa, tmp_path, hizli_m
     satir, dis = form_satiri(depo, wa)
     p = parametreler(satir)
     assert satir["body"].startswith("Anladım. Neyi değiştirelim?") and p["flow_id"] == "2222222222" and p["flow_cta"] == "Revizyon formu"
+    assert "veranda" not in satir["body"]                    # BK-29 PR-2 (pano 210): örnek yalnız yapılabilen iş
     assert p["flow_token"] == f"rv:{no}:1" and p["flow_action_payload"] == {"screen": "REVIZYON", "data": {
         "plan": f"{no} r01 planı için değişikliğinizi yazın; isterseniz dosya da ekleyin."}}
     # açıklama bayinin yazısı gibi okunur (kayıtlı LLM çıkarımı): r02
@@ -272,6 +273,7 @@ def test_f3_bos_ve_yalniz_dosyali_revizyon_formu(depo, wa, tmp_path, hizli_motor
     form_cevabi(depo, tmp_path, token, {"neyi": ["pencere"]}, dis)
     [r] = isle_hepsi(depo, s)
     assert r["gerekce"] == "form: bos" and bayiye(depo)[0]["govde"].startswith("Neyi nasıl değiştirelim?")
+    assert "veranda" not in bayiye(depo)[0]["govde"]          # BK-29 PR-2 (pano 210)
     d, _ = depo.konusma_oku(NUMARA_A)
     assert d["asama"] == "revizyon" and d["son_soru_alani"] == "revizyon_ne"
     form_cevabi(depo, tmp_path, token, {}, dis, dosya="application/pdf")

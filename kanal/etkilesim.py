@@ -18,6 +18,9 @@ KISA_CEVAP = {  # q:<alan>:<deger> → kural katmanının okuyacağı metin
     "yeni_mi_degisiklik": {"yeni": "yeni", "degisiklik": "değişiklik"},
     "oncelik": {"butce": "bütçe", "yasam": "yaşam alanı", "montaj": "kısa montaj", "yok": "fark etmez"},
     "okuma": {"1": "1", "2": "2", "0": "hiçbiri"},        # İE-08 PR-2b: çelik pencere okuması "1 / 2 / Hiçbiri"
+    # BK-29 PR-2 (pano 201, 210): prefabrik oda sorusu ("seçenek <n>"; yalnız numara oda adındaki numarayla karışır) ve pencere sorusu
+    "pencere_mahal": {str(i): f"seçenek {i}" for i in range(1, 11)},
+    "pencere_secim": {"0": "hiçbiri", **{str(i): str(i) for i in range(1, 11)}},
 }
 
 
