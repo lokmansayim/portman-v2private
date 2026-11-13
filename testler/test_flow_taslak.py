@@ -2,7 +2,8 @@
 
 Denenen: ilk koşu iki taslak kurar (publish false, /publish yok, flow_json depodaki formun aynısı); ikinci koşu taslağın JSON'unu
 /assets ile günceller (yeni form kurmaz); yayımlanmış forma dokunmaz; --bak hiçbir şey kurmaz; Meta doğrulama hatası çıkış 2; belirteç
-çıktıya girmez (hata iletisi dahil); WABA kimliği belirtecin kapsamından, birden çoksa durur; Mac'teki gibi stdin'den koşar."""
+çıktıya girmez (hata iletisi dahil); WABA kimliği belirtecin kapsamından, birden çoksa durur; Mac'teki gibi stdin'den koşar; --yayimla
+iki form hazırsa ikisini yayımlar, değilse hiçbirini, gönderilemeyen formda çıkış 1."""
 from __future__ import annotations
 
 import hashlib
@@ -28,8 +29,9 @@ import talep_formu as TF  # noqa: E402
 class SahteGraph:
     """Graph API'nin Flows uçları: debug_token, /<waba>/flows (GET, POST), /<flow>/assets (POST), /<flow> (GET)."""
 
-    def __init__(self, kapsam=None, dogrulama=None, hata_mesaji=None, numaralar=None, isletme=None):
+    def __init__(self, kapsam=None, dogrulama=None, hata_mesaji=None, numaralar=None, isletme=None, saglik="AVAILABLE", yayim_hatasi=None):
         self.istekler, self.formlar, self.sayac = [], {}, 0
+        self.saglik, self.yayim_hatasi = saglik, yayim_hatasi   # health_status.can_send_message · /publish'in hata iletisi
         self.numaralar = numaralar or {}                 # WABA → telefon numarası kimlikleri
         self.isletme = isletme or {}                     # işletme → sahip olduğu WABA'lar
         self.depo = {}                                   # --kaynak: commit'teki formlar
@@ -81,8 +83,20 @@ class SahteGraph:
                     fid = yol.split("/")[0]
                     s.formlar[fid]["json"] = govde
                     return self._cevap(200, {"success": True, "validation_errors": []})
+                if yol.endswith("/publish") and self.command == "POST":
+                    fid = yol.split("/")[0]
+                    if s.yayim_hatasi:
+                        return self._cevap(400, {"error": {"message": s.yayim_hatasi, "code": 139001}})
+                    s.formlar[fid]["status"] = "PUBLISHED"
+                    return self._cevap(200, {"success": True})
                 if yol in s.formlar and self.command == "GET":
                     f = s.formlar[yol]
+                    if "health_status" in q.get("fields", ""):
+                        hatalar = [{"error_code": 131000, "error_description": "app_check: You need to connect a Meta app to the flow",
+                                    "possible_solution": "Connect an app"}] if s.saglik == "BLOCKED" else []
+                        return self._cevap(200, {"id": yol, "status": f["status"], "health_status": {
+                            "can_send_message": s.saglik, "entities": [{"entity_type": "FLOW", "id": yol, "can_send_message": s.saglik,
+                                                                         "errors": hatalar}]}})
                     return self._cevap(200, {"id": yol, "name": f["name"], "status": f["status"], "json_version": "7.3",
                                              "validation_errors": s.dogrulama,
                                              "preview": {"preview_url": f"https://business.facebook.com/wa/manage/flows/{yol}/preview/?token=onz",
@@ -277,5 +291,71 @@ def test_kaynak_commit_formlari_depodan_okur_taslagi_gunceller(etc):
         assert kos(etc, g, "--kaynak", "main").returncode == 1                             # yalnız 40 haneli commit
         r = kos(etc, g, "--kaynak", "f" * 40)                                              # commit'te dosya yok: durur, Meta'ya yazmaz
         assert r.returncode == 1 and "formlar okunamadı" in r.stdout and len(_yazma_istekleri(g)) == 2
+    finally:
+        g.kapat()
+
+
+def _yayim_istekleri(g: SahteGraph) -> list[str]:
+    return [i["yol"] for i in g.istekler if i["m"] == "POST" and i["yol"].endswith("/publish")]
+
+
+def test_yayimla_iki_formu_yayimlar_sonra_dokunmaz(etc):
+    g = SahteGraph()
+    try:
+        assert kos(etc, g).returncode == 0                                   # önce iki taslak (bugünkü hâl)
+        g.istekler.clear()
+        r = kos(etc, g, "--yayimla")
+        cikti = r.stdout + r.stderr
+        assert r.returncode == 0, cikti
+        assert [i["yol"] for i in _yazma_istekleri(g)] == ["91001/assets", "91002/assets", "91001/publish", "91002/publish"]
+        assert {f["status"] for f in g.formlar.values()} == {"PUBLISHED"}
+        alanlar = [i["q"]["fields"] for i in g.istekler if i["m"] == "GET" and "health_status" in i["q"].get("fields", "")]
+        assert alanlar == ["id,status,health_status.phone_number(12345)"] * 2   # kanalın numarasıyla
+        assert "talep formu yayımlandı · kimlik 91001 · durum PUBLISHED · gönderilebilirlik AVAILABLE" in cikti
+        assert "talep formu yayımlandı · revizyon formu yayımlandı (geri alınmaz)" in cikti and "== sonuç: tamam" in cikti
+        for i, tur in zip([i for i in g.istekler if i["yol"].endswith("/assets")], ("talep", "revizyon")):
+            assert TF.tanim(tur) == json.loads(i["govde"].split(b'filename="flow.json"\r\nContent-Type: application/json\r\n\r\n', 1)[1]
+                                         .rsplit(b"\r\n--", 1)[0])                 # yayımlanan = depodaki
+        g.istekler.clear()
+        r = kos(etc, g, "--yayimla")                                         # yeniden: yayımlanmışa dokunmaz
+        assert r.returncode == 0 and not _yazma_istekleri(g), r.stdout
+        assert "talep formu zaten yayımlıydı" in r.stdout and "== mesaj gönderilmedi · form yayımlanmadı" in r.stdout
+    finally:
+        g.kapat()
+
+
+def test_yayimla_hazir_olmayan_formda_hicbirini_yayimlamaz(etc):
+    g = SahteGraph(dogrulama=[{"error": "INVALID_PROPERTY_TYPE", "message": "max-length", "pointers": []}])
+    try:
+        r = kos(etc, g, "--yayimla")
+        assert r.returncode == 2 and not _yayim_istekleri(g), r.stdout
+        assert "YAYIMLANMADI (iki form da hazır olmalı)" in r.stdout and "form yayımlanmadı" in r.stdout
+        assert {f["status"] for f in g.formlar.values()} == {"DRAFT"}
+    finally:
+        g.kapat()
+    g = SahteGraph()
+    try:
+        r = kos(etc, g, "--yayimla", "--bak")
+        assert r.returncode == 1 and not g.istekler and "DUR: --yayimla ve --bak birlikte olmaz" in r.stdout
+    finally:
+        g.kapat()
+
+
+def test_yayimla_gonderilemeyen_ya_da_reddedilen_formda_cikis_1(etc):
+    g = SahteGraph(saglik="BLOCKED")
+    try:
+        r = kos(etc, g, "--yayimla")
+        assert r.returncode == 1, r.stdout                                   # ayarı açan komut `&&` ile koşmaz
+        assert "gönderilebilirlik BLOCKED" in r.stdout and "! FLOW: app_check: You need to connect a Meta app" in r.stdout
+        assert "== sonuç: durdu" in r.stdout
+    finally:
+        g.kapat()
+    g = SahteGraph(yayim_hatasi=f"Flow cannot be published (token {BELIRTEC})")
+    try:
+        r = kos(etc, g, "--yayimla")
+        cikti = r.stdout + r.stderr
+        assert r.returncode == 1 and _yayim_istekleri(g) == ["91001/publish"], cikti   # ilki reddedilince ikincisi denenmez
+        assert "talep formu: DURDU, yayımlanamadı (POST /<flow>/publish: HTTP 400" in cikti and BELIRTEC not in cikti
+        assert "form yayımlanmadı" in cikti
     finally:
         g.kapat()
