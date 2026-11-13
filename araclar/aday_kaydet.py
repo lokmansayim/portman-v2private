@@ -49,7 +49,7 @@ def main() -> int:
     ap.add_argument("--test-dosyasi", action="store_true", help="kaydı beyin/veri/adaylar_test.json'a yaz (yalnız yerel testlerde yüklenir)")
     ap.add_argument("--karar", default=None, help="prefabrik 'gecerli' için Lokman'ın kararı (KARARLAR/<D-NN>.md; İE-36)")
     ap.add_argument("--gosterim", default=None, help="prefabrik: bayinin gördüğü kod (varsayılan --kod; ör. PA-04)")
-    ap.add_argument("--kart", default=None, help="prefabrik: proje kartı hakemi (İE-38, D-87; ör. AP-14): kart kıyası geçmezse kayıt yazılmaz")
+    ap.add_argument("--kart", default=None, help="proje kartı hakemi (İE-38, D-87; prefabrik AP-14, çelik ÇP-18): kıyas geçmezse kayıt yazılmaz")
     ap.add_argument("--havuz", action="store_true",
                     help="İE-38 (D-87): kaydı beyin/veri/havuz/<kod>.json'a yaz (ev başına bir dosya; adaylar.json ve adaylar_prefabrik.json aynen)")
     ap.add_argument("--standart", action="store_true",
@@ -137,6 +137,24 @@ def genel(a) -> int:
         print("DUR: tanım depo kökünün altında olmalı (modeller/<kod>.json):", tanim_yolu); return 2
     t = json.loads(tanim_yolu.read_text(encoding="utf-8"))
     kod = kod_normalize(a.kod or t["kod"])
+    if a.karar:                                                                # İE-38: karar dosyası bu adayın kodunu yazmalı (prefabrikteki gibi)
+        karar_yolu = KOK / "KARARLAR" / f"{a.karar.strip()}.md"
+        if not (karar_yolu.exists() and str(t["kod"]).upper() in karar_yolu.read_text(encoding="utf-8").upper()):
+            print(f"DUR: {a.karar} {t['kod']} kodunu yazmıyor (KARARLAR/)"); return 2
+    kart_kiyasi = None
+    if a.kart:                                                                 # İE-38 (D-87): çelik hakemi önce; geçmeyen proje havuza girmez
+        from araclar import havuz_hakemi as HH
+        kk = "ÇP-" + "".join(ch for ch in a.kart if ch.isdigit())[-2:].zfill(2)
+        kart = HH.celik_kartlari().get(kk)
+        if kart is None:
+            print(f"DUR: {kk} için çelik hedef değeri yok (testler/havuz/celik_kartlari.json)"); return 2
+        kaynak_t = json.loads((KOK / kart["tanim"]).read_text(encoding="utf-8"))
+        if {k: v for k, v in t.items() if k not in ("kod", "ad")} != {k: v for k, v in kaynak_t.items() if k not in ("kod", "ad")}:
+            print(f"DUR: tanım {kart['tanim']} ile aynı değil (yalnız kod ve ad farklı olabilir)"); return 1
+        bulgular, olc = HH.celik_denetle(tanim_yolu, kart)
+        if bulgular:
+            print(f"DUR: çelik hakemi geçmedi ({kk}):\n- " + "\n- ".join(bulgular)); return 1
+        kart_kiyasi = {"kart": kk, "tanim": kart["tanim"], "tanim_sha256": kart["tanim_sha256"], "sonuc": "geçti", "olcum": olc}
     with tempfile.TemporaryDirectory() as tmp:
         m = U.uret(tanim_yolu, Path(tmp), is_emri_no=None, revizyon=None, set_yolu=None, yontem="panel", perspektif=not a.perspektifsiz, bayi=True,
                    kaynak=f"Yapı Tanımı 0.5 ({tanim_yolu.name})")          # revizyon None: aday kartında "TASLAK", r01 yok (Lokman 12.10)
@@ -178,7 +196,8 @@ def genel(a) -> int:
                           "pencere": sum(1 for x in acl if x["tur"] == "pencere"), "kapi": sum(1 for x in acl if x["tur"] in ("dis_kapi", "ic_kapi")),
                           "cati": t.get("cati", {}).get("tip"), "liste_satir": v.get("liste_satir"), "kural_seti": Path(v.get("set", "")).name,
                           "perspektif": v.get("perspektif", {}).get("durum")},
-                 "kaynak": {"metin": a.kaynak, "dosya": gorece, "dogrulama": "çizim seti (İE-08, 12 Ekim 2026)", "karar": "D-08 madde 4; D-10"},
+                 "kaynak": {"metin": a.kaynak, "dosya": gorece, "dogrulama": "çizim seti (İE-08, 12 Ekim 2026)", "karar": a.karar or "D-08 madde 4; D-10",
+                            **({"kart_kiyasi": kart_kiyasi} if kart_kiyasi else {})},
                  "not": a.not_}
     _yaz(kayit, a.test_dosyasi, havuz=a.havuz)
     return 0
