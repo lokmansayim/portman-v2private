@@ -70,7 +70,10 @@ def karar_ver(talep: Talep, k: Konusma, bayi: dict | None, katalog: Katalog, met
     k.kullanilan_talep, k.bekleyen_not = None, ""
     k.son_llm = None                                # İE-08 A4: bu mesajın LLM ipuçları (yalnız bu çağrıda; `_karar_ver` doldurur)
     k.rev0 = int(k.d.get("revizyon") or 0)          # G-2: _bitir, plan üretmeyen turda sayacı buna geri alır
+    d0 = json.loads(json.dumps(k.d))                # BK-29 (pano 200): geri çevrilen istek açık planı kapatmaz; konuşma buna döner
     karar = _karar_ver(talep, k, bayi, katalog, metin)
+    if karar.eylem == "yonlendir":
+        _plani_acik_tut(k, d0, karar)
     if k.kullanilan_talep is not None:
         karar.kullanilan_talep = k.kullanilan_talep.model_dump(mode="json")
     if k.bekleyen_not:              # D-01: bekletilen mesaj işlenmeden düştüyse bayi bunu bu cevapta öğrenir
@@ -248,6 +251,7 @@ def _karar_ver(talep: Talep, k: Konusma, bayi: dict | None, katalog: Katalog, me
             k.d["asama"] = "onaylandi"
             k.d["son_soru_alani"] = None                       # askıdaki yeni plan sorusu onayla kapanır (soru kaydı açık kalmaz)
             rev = k.d["son_is_emri"].get("revizyon", k.d["revizyon"] + 1)   # gönderilen planın numarası (r01 = 1)
+            k.d["onaylanan"] = [k.d["son_is_emri"].get("is_emri_no"), int(rev)]   # BK-29: geri çevrilen sonraki istek onayı geri getirir
             # İE-08 8b (plan kararı 6, Lokman 14.10): çelik plan onaydan sonra mühendisin teknik kontrolüne gider (kanal/muhendis.py)
             sonraki = ("Plan teknik kontrole gönderildi; sonucu size bildireceğiz." if (k.d["son_is_emri"].get("yapi") or {}).get("sistem") == "celik"
                        else "Teklif aşamasına geçiliyor.")
@@ -1851,6 +1855,49 @@ def _soru(k: Konusma, alan: str, metin: str, butonlar: list[dict] | None = None)
     return _bitir(k, Karar(eylem="sor", soru_alani=alan, mesaj=metin, gerekce=f"eksik: {alan}", butonlar=butonlar))
 
 
+ACIK_PLAN_ASAMALARI = ("onay_bekliyor", "revizyon", "topluyor", "onaylandi")
+
+
+def _plani_acik_tut(k: Konusma, d0: dict, karar: Karar) -> None:
+    """BK-29 (pano 200; 13 Kasım 2026 WhatsApp denetimi): açık bir planın üstüne gelen istek geri çevrilince (yönlendirme) plan ölmez.
+    Konuşma bu mesajdan önceki hâline döner (taslak, revizyon sayacı, plan); askıdaki soru, saklanan istek ve açık set kapanır, soru hakkı
+    yenilenir. Plan onay bekliyorsa yine onay bekler (Onayla düğmesi ve "onaylıyorum" çalışır), onaylıysa onaylı kalır. Bayiye planın
+    durduğu söylenir; Patron'a bildirim bugünkü gibi gider (eylem değişmez). Konuşma bu mesajda sıfırlandıysa (yeni talep, başka model)
+    ya da plan zaten yoksa bugünkü yol: taslak kapanır."""
+    ie0 = d0.get("son_is_emri") or {}
+    ie = k.d.get("son_is_emri") or {}
+    no, rev = ie0.get("is_emri_no"), int(ie0.get("revizyon") or 1)
+    if not no or d0.get("asama") not in ACIK_PLAN_ASAMALARI or (ie.get("is_emri_no"), ie.get("revizyon")) != (no, ie0.get("revizyon")):
+        return
+    gecmis = k.d.get("gecmis") or []
+    k.d = json.loads(json.dumps(d0))
+    k.d["gecmis"] = gecmis
+    if isinstance(d0.get("plan_taslagi"), dict):
+        k.d["taslak"] = json.loads(json.dumps(d0["plan_taslagi"]))   # askıdaki sorunun isteği (ör. odası sorulan pencere) taslakta kalmaz
+    onayli = k.d.get("onaylanan") == [no, rev]
+    k.d["asama"] = "onaylandi" if onayli else "onay_bekliyor"
+    k.d["bekleyen_onay"] = no
+    k.d["son_soru_alani"] = None
+    k.d["soru_sayisi"] = 0
+    for a in ("okuma_bekleyen", "okuma_secilen", "okuma_hicbiri", "celik_istek", "pencere_islem_satiri", "pencere_islem_sorusu",
+              "eski_taslak_soru", "bekleyen_talep", "bekleyen_metin", "bekleyen_zamani"):
+        k.d.pop(a, None)
+    st = k.d.get("secenek_seti")
+    if st and st.get("durum") == "acik":
+        st["durum"] = "dustu"
+    etiket = f"{no} r{rev:02d}"
+    if onayli:
+        karar.mesaj += f" Onaylı planınız ({etiket}) değişmedi."
+    elif karar.gerekce == "revizyon sınırı":
+        karar.mesaj += f" Planınız ({etiket}) değişmedi; onaylayabilirsiniz."
+        karar.butonlar = [{"id": f"o:{no}:{rev}", "baslik": "Onayla"}]
+    else:
+        karar.mesaj += f" Planınız ({etiket}) değişmedi. Onaylayabilir ya da başka bir değişiklik yazabilirsiniz."
+        karar.butonlar = [{"id": f"o:{no}:{rev}", "baslik": "Onayla"}, {"id": f"r:{no}:{rev}", "baslik": "Revize et"}]
+    k.not_dus("kural", f"BK-29: istek geri çevrildi; plan {etiket} açık kaldı ({k.d['asama']})")
+    k.kaydet()
+
+
 def _bitir(k: Konusma, karar: Karar) -> Karar:
     if karar.eylem in ("is_emri", "yonlendir"):
         k.d["son_soru_alani"] = None                  # plan çıktı ya da insana devredildi: askıda soru kalmaz
@@ -1869,6 +1916,8 @@ def _bitir(k: Konusma, karar: Karar) -> Karar:
     if karar.eylem == "is_emri":
         k.d["bekleyen_onay"] = karar.is_emri.get("is_emri_no") if karar.is_emri else None
         k.d["asama"] = "onay_bekliyor"
+        k.d["soru_sayisi"] = 0      # BK-29: soru hakkı (MAX_SORU) her planda yenilenir; prefabrikte talebin soruları revizyonda tükeniyordu
+        k.d["plan_taslagi"] = json.loads(json.dumps(k.d.get("taslak") or {}))   # BK-29: planı üreten taslak; geri çevrilen istekten sonra buna dönülür
     elif karar.eylem == "yonlendir":
         k.d["asama"] = "yonlendirildi"; k.d["taslak"] = {}; k.d["soru_sayisi"] = 0   # insana devredildi; taslak kapanır
     rev0 = getattr(k, "rev0", None)
