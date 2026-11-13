@@ -90,6 +90,8 @@ def test_c4_celik_r03_ret_sonrasi_cati(s):
     assert k.eylem == "yonlendir" and "r03) değişmedi" in k.mesaj and _gecerli(s, "o")
     k = s.yaz("çatı K olsun")
     assert k.eylem == "is_emri" and k.revizyon == 4 and "çatı Ç8801-K" in k.mesaj
+    # Tur 1 canlı denetimi (13 Kasım, gözlem c): ret öncesi revizyonlar r04'te durur (dış 140 düşmez; mesaj yalnız son değişikliği yazar)
+    assert s.degisiklikler(k) == ["dis_karkas_140:", "cati_varyanti:Ç8801K"]
 
 
 def test_onayli_plan_onayli_kalir(s):
