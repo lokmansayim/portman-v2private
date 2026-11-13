@@ -1,11 +1,11 @@
 {
  "onay": {
   "kim": "Lokman",
-  "tarih": "2026-11-12T08:50:16Z",
-  "dayanak": "Proje thread'i \"Çatı seçenek adımını kurmak\" (pano 41, prefabrik kolu), karar kartı cmsg_01UAFvcnfVuTR1wfFux5fQPPGmBhHazMZhSyYrLmLgNTM9, Lokman'ın seçimi \"Onaylıyorum\". Soru: \"<ev> evinin çatı seti görselini hedef örnek olarak onaylıyor musunuz?\" (kartta evin gerçek adı yazılı; adlı eşleme depoya girmez, ev PA-06). Gösterilen: bayiye giden çatı seti görseli (1. PA-06 evin çatısı, 2. PA-06-K kırma, 3. PA-06-C beşik + salonda cumba), mesajı ve düğmeleri, PA-06-C r01 ön onay PDF'i. Aday: PF Portman_Proje_Dosyalari/Cati_Secimi/Prefabrik/ (görsel bu komutun çıktısıyla piksel piksel aynı).",
+  "tarih": "2026-11-13T19:15:09Z",
+  "dayanak": "Proje thread'i \"WhatsApp revizyon hatalarını düzelt\" (Kurulum Panosu satır 202, BK-29 tur 5), karar kartı cmsg_01UAFvcnfVuTR1wfFux5fQPP7yGcFnm9o6QyjeLPUrAcgG, Lokman'ın seçimi \"Yeni metin olsun\". Soru: \"Bayiye plan görseliyle giden metin değişsin mi?\" Seçenekte gösterilen: İlk plan: \"PA-06 seçildi. Ön onay planınız hazır; plan görseli ve PDF ektedir.\" Revizyonda \"Değişiklik: …\" eklenir. PDF başlığı da aynı. Bu yeniden dondurmada yalnız üç çatının r01 mesajı değişti; setlerin mesajı, düğmeleri, görsel izleri, kapanış ve r01 kararı aynı.",
   "komut": "python -m testler.cati_secimi.ornek_prefabrik <klasör> [--r01 PA06C]",
-  "kod": "dal claude/project-thread-91gav7, main 5debaa09 üstüne İE-37",
-  "karar": "İE-37 (docs/is_emirleri/IE-37.md), D-83; D-28 madde 2-3; yeniden dondurma yalnız Lokman'ın onayıyla ve gerekçeli kararla (D-02)"
+  "kod": "dal claude/project-thread-2ypd6m, BK-29 tur 5 (beyin/karar.py `_is_emri_uret` plan metni)",
+  "karar": "İE-37 (docs/is_emirleri/IE-37.md), D-83; r01 mesajı D-85 (KARARLAR/D-85.md, BK-29 tur 5); D-28 madde 2-3; yeniden dondurma yalnız Lokman'ın onayıyla ve gerekçeli kararla (D-02)"
  },
  "ozet": {
   "talep": "85 m² 2+1 prefabrik",
@@ -84,7 +84,7 @@
     },
     "sablon": "is_emri/adaylar/PA06.json",
     "sablon_sha256": "097798e4a9bcc07a4bf3ae18faae9476a699eae069132b5d9bf78b3f08135a76",
-    "mesaj": "PA06 seçildi Ön onay planını hazırlıyorum; birkaç dakika içinde PDF olarak göndereceğim."
+    "mesaj": "PA-06 seçildi. Ön onay planınız hazır; plan görseli ve PDF ektedir."
    },
    "PA06K": {
     "kaynak": "PA06K",
@@ -100,7 +100,7 @@
     },
     "sablon": "is_emri/adaylar/PA06K.json",
     "sablon_sha256": "723a4d89a1f16df68a1f9561582033b072acbd1b62d0c85ff0b538774d106fba",
-    "mesaj": "PA06K seçildi Ön onay planını hazırlıyorum; birkaç dakika içinde PDF olarak göndereceğim."
+    "mesaj": "PA-06-K seçildi. Ön onay planınız hazır; plan görseli ve PDF ektedir."
    },
    "PA06C": {
     "kaynak": "PA06C",
@@ -125,8 +125,18 @@
     },
     "sablon": "is_emri/adaylar/PA06C.json",
     "sablon_sha256": "926c61d2668e5fd47d93c2ee558f1a9e54608dc079e7c23f73321e6a20daa125",
-    "mesaj": "PA06C seçildi Ön onay planını hazırlıyorum; birkaç dakika içinde PDF olarak göndereceğim."
+    "mesaj": "PA-06-C seçildi. Ön onay planınız hazır; plan görseli ve PDF ektedir."
    }
   }
- }
+ },
+ "onceki_onaylar": [
+  {
+   "kim": "Lokman",
+   "tarih": "2026-11-12T08:50:16Z",
+   "dayanak": "Proje thread'i \"Çatı seçenek adımını kurmak\" (pano 41, prefabrik kolu), karar kartı cmsg_01UAFvcnfVuTR1wfFux5fQPPGmBhHazMZhSyYrLmLgNTM9, Lokman'ın seçimi \"Onaylıyorum\". Soru: \"<ev> evinin çatı seti görselini hedef örnek olarak onaylıyor musunuz?\" (kartta evin gerçek adı yazılı; adlı eşleme depoya girmez, ev PA-06). Gösterilen: bayiye giden çatı seti görseli (1. PA-06 evin çatısı, 2. PA-06-K kırma, 3. PA-06-C beşik + salonda cumba), mesajı ve düğmeleri, PA-06-C r01 ön onay PDF'i. Aday: PF Portman_Proje_Dosyalari/Cati_Secimi/Prefabrik/ (görsel bu komutun çıktısıyla piksel piksel aynı).",
+   "komut": "python -m testler.cati_secimi.ornek_prefabrik <klasör> [--r01 PA06C]",
+   "kod": "dal claude/project-thread-91gav7, main 5debaa09 üstüne İE-37",
+   "karar": "İE-37 (docs/is_emirleri/IE-37.md), D-83; D-28 madde 2-3; yeniden dondurma yalnız Lokman'ın onayıyla ve gerekçeli kararla (D-02)"
+  }
+ ]
 }
