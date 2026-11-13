@@ -158,6 +158,25 @@ def test_prefabrik_onayi_muhendise_gitmez(depo, wa, hizli_motor):
     assert not sorgu(depo, "SELECT 1 FROM giden WHERE alici = 'MUHENDIS'")
 
 
+def test_prefabrik_onayi_patrona_metin_ve_sablon(depo, wa, hizli_motor):
+    """BK-28 (pano 199): prefabrik onayı Patron'a bildirilir (metin + pencere kapalıysa şablon); numara metne girmez. Onaysız (red) yol bildirim
+    yazmaz; çelikte bildirim mühendis yolundan (yukarıdaki testler)."""
+    T_P = talep(ozet="P6001", katalog_kodu="P6001")
+    assert depo.mesaj_kaydet(mesaj("P6001", T_P)); isle_hepsi(depo, AYAR); kalici.gonder(depo, wa)
+    assert not sorgu(depo, "SELECT 1 FROM giden WHERE alici = 'PATRON'")              # plan gönderilirken bildirim yok
+    time.sleep(1.1)
+    o = mesaj("onaylıyorum", talep("onay", "onay"))
+    assert depo.mesaj_kaydet(o); [r] = isle_hepsi(depo, AYAR)
+    assert r["gerekce"] == "plan onaylandı"
+    rev = tek(depo, "SELECT is_emri_no FROM revizyonlar")
+    ss = satirlar(depo, o["id"])
+    assert ss[0]["_alici"] == NUMARA_A and ss[0]["body"].endswith("Teklif aşamasına geçiliyor.")
+    p, sab = [s for s in ss if s["_alici"] == "PATRON"]
+    assert p["kind"] == "text" and f"{BAYI_A['kod']} kodlu bayi {rev['is_emri_no']} r01 prefabrik planını onayladı" in p["body"]
+    assert NUMARA_A not in p["body"]
+    assert sab["kind"] == "template" and sab["pencere_kapaliysa"] is True and sab["sablon"]["govde"] == [BAYI_A["kod"], rev["is_emri_no"]]
+
+
 def test_muhendis_gonder_dosyalar_ve_dugmeler_llmsiz(depo, wa, genel_liste):
     muhendis_karti(depo)
     rev = celik_onay(depo, wa); no = rev["is_emri_no"]

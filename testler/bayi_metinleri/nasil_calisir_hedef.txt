@@ -1,0 +1,30 @@
+Portman · Nasıl çalışır?
+Portman, PortatifEv bayilerinin WhatsApp'tan yazdığı talebi plana çevirir. Plan onaylanınca teklifi PortatifEv hazırlar.
+1. Ne gönderirsiniz
+Talebinizi yazıyla gönderin. İyi bir talepte dört bilgi bulunur: yapı tipi (prefabrik ya da çelik), kat sayısı, alan ya da dış ölçü ve oda sayısı. Eksik olanı Portman sorar. Çatı tipini yazmanız gerekmez.
+Prefabrik örneği: "Tek kat prefabrik, 2+1, 85 m²."
+Çelik örneği: "Tek kat çelik, 2+1, 88 m²."
+Katalogdan bir model beğendiyseniz kodunu yazın: "Ç8801".
+Portman, yazdığınız alandan en çok %10 küçük ya da büyük planları gönderir. Kurulacağı il ve ilçe ilk taslak için gerekmez; fiyat aşamasında sorulur.
+2. Adım adım
+Seçin. Portman en çok üç plan gönderir. Her planda resim ve alan vardır. Birini düğmeyle seçin. Prefabrikte önce sıralama sorulur: bütçe, yaşam alanı ya da kısa montaj.
+Çatıyı seçin. Modelin birden çok çatısı varsa "Çatı seçin" resmi gelir. Plan aynıdır, fark çatıdadır.
+Taslağı inceleyin. Plan resmi ve TASLAK yazılı PDF gelir. Altında iki düğme vardır: Onayla ve Revize et.
+Gerekirse düzelttirin. "Revize et"e basın ya da doğrudan yazın: "mutfak penceresi 120x120 olsun". Çelikte "çatı L olsun" ve "dışlar 140'lık olsun" da yazabilirsiniz. Her düzeltme yeni bir revizyondur (R2, R3…). Dört hakkınız var; sonra talep PortatifEv'e iletilir.
+Onaylayın. "Onayla"ya basın. Onayınız PortatifEv'e iletilir. Çelik planı ayrıca mühendisin teknik kontrolünden geçer.
+Teklifi alın. Teklifi PortatifEv hazırlar ve aynı sohbete gönderir. Gerekirse birkaç özellik sorulur: dış duvar, çatı kaplaması, pencere rengi.
+3. Bugün ne çalışıyor (pilot dönemi)
+Pilot döneminde Portman aşağıdaki planları çizer. Çizemediği talebi PortatifEv'e iletir; size oradan dönülür.
+| Talep | Bugün | Not
+| Tek kat prefabrik | 8 ev: 2+1 için 60, 64, 70, 78, 82 ve 87 m²; 3+1 için 90 ve 140 m². Katalogdan P6001. | 87 m² evde 3 çatı seçeneği var. Revizyon: pencere ölçüsü.
+| Tek kat çelik | 6 plan: 2+1 için 82, 88, 92, 94 ve 99 m²; 4+1 için 124 m². | 88 m² modelde 3 çatı seçeneği var. Revizyon: pencere ölçüsü, çatı tipi, dış duvar 140.
+| Uyan plan yoksa | Çelikte Portman yeni bir plan taslağı çizer. Prefabrikte talep PortatifEv'e iletilir. | Yeni planda adımlar aynıdır.
+| Çift kat (çelik ve prefabrik) | Henüz yok | PortatifEv'e iletilir
+| Fotoğraf, el çizimi, PDF, sesli mesaj | Henüz okunmuyor | Talebinizi yazıyla gönderin
+4. Bilmeniz gerekenler
+Düğmeye basmak zorunlu değil. "Onaylıyorum" ya da "mutfak penceresi büyüsün" diye yazmak aynı işi görür.
+Eski düğmeler çalışmaz. Plan yenilendiyse önceki planın "Onayla" düğmesi geçersizdir.
+Onayınız planı onaylar, siparişi değil. Üretim ayrı bir adımdır.
+Görseller temsilidir. Ölçü, adet ve fiyat için pafta ve teklif formu esastır.
+Aynı anda tek proje. Biri bitmeden ikincisini açmayın.
+Plan yalnız kayıtlı bayi numaralarına çizilir.

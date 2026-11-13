@@ -22,6 +22,11 @@ BAYI_JSON = Path(__file__).resolve().parent / "veri" / "bayiler.json"
 GRID_SABLON = {(6.0, 8.0, "2+1"): "ALTIN_2plus1_6x8.json", (6.0, 8.5, "2+1"): "YAN_VERANDALI_2plus1_6x8p5.json",
                (6.0, 6.0, "2+1"): "P6001_2plus1_6x6.json"}
 YONLENDIRME = "Bu konuyu Lokman Bey'e iletiyorum; en kısa sürede dönüş yapılacak."
+# BK-28 (pano 196): bayiye giden örnek talepler. İkisi de canlıdaki modellerle seçenek setine gider (hedef: testler/bayi_metinleri/);
+# eski "7x4 m, 2+1, ön verandalı" örneği hazır plana gitmiyordu (yönlendirme).
+ORNEK_PREFABRIK = "Tek kat prefabrik, 2+1, 85 m²"
+ORNEK_CELIK = "Tek kat çelik, 2+1, 88 m²"
+ORNEK_METNI = f"\"{ORNEK_PREFABRIK}\" veya \"{ORNEK_CELIK}\""
 ESKI_TASLAK_SORUSU = "yeni_mi_degisiklik"      # D-01
 ESKI_TASLAK_EN_COK = 3                         # cevapsız kalırsa en çok bu kadar sorulur, sonra insana devredilir
 ESKI_SORU_SN = 24 * 3600                       # D-01 sorusu bu süreden sonra cevaplanırsa yok sayılır, mesaj normal işlenir
@@ -230,14 +235,14 @@ def _karar_ver(talep: Talep, k: Konusma, bayi: dict | None, katalog: Katalog, me
     # 1) niyete göre
     if t.niyet == "selam":
         return _bitir(k, Karar(eylem="cevapla", gerekce="selam",
-                                mesaj=f"Merhaba{(' ' + hitap) if hitap else ''}. Hangi model ya da ölçü için ön onay planı hazırlayalım? Örnek: \"P6001 aynalı\" veya \"7x4 m, 2+1, ön verandalı\"."))
+                                mesaj=f"Merhaba{(' ' + hitap) if hitap else ''}. Hangi model ya da ölçü için ön onay planı hazırlayalım? Örnek: {ORNEK_METNI}."))
     if t.niyet == "soru":
         ek = " Açık bir plan talebiniz devam ediyor; ölçü/model bilgisini yazınca planı hazırlarım." if k.d["asama"] == "topluyor" else ""
         return _bitir(k, Karar(eylem="cevapla", gerekce="genel soru",
                                 mesaj="Fiyat, süre ve teslim bilgisi ön onaylı planın ardından teklifle gelir. Plan için model kodu ya da ölçü/oda programı yazmanız yeterli." + ek))
     if t.niyet == "diger":
         return _bitir(k, Karar(eylem="cevapla", gerekce="anlaşılmadı",
-                                mesaj="Anlayamadım. Ön onay planı için model kodu (örn. P6001) ya da ölçü ve oda programı (örn. 7x4 m, 2+1) yazabilirsiniz."))
+                                mesaj=f"Anlayamadım. Ön onay planı için model kodu (örn. P6001) ya da ölçü ve oda programı (örn. \"{ORNEK_PREFABRIK}\") yazabilirsiniz."))
     if t.niyet == "onay":
         if k.d["asama"] == "onay_bekliyor" and k.d.get("son_is_emri"):
             k.d["asama"] = "onaylandi"
@@ -344,7 +349,7 @@ def _karar_ver(talep: Talep, k: Konusma, bayi: dict | None, katalog: Katalog, me
         aday = _aday_bul(k, katalog, ts["katalog_kodu"])          # İE-14: üretilen plan ("YENI-…") konuşmadaki kayıttan
         model = katalog.bul(ts["katalog_kodu"])
         if aday is None and model is None:
-            return _soru(k, "katalog_kodu", f"Katalogda \"{ts['katalog_kodu']}\" kodlu model bulamadım. Kodu kontrol eder misiniz? (örn. P6001, P7401, Ç8201)")
+            return _soru(k, "katalog_kodu", f"Katalogda \"{ts['katalog_kodu']}\" kodlu model bulamadım. Kodu kontrol eder misiniz? (örn. P6001, Ç8201, Ç8801)")
         if aday is not None and aday.get("motor") == "genel":      # İE-08 A2/A3: çelik aday (genel motor): çatı seçenekleri ya da r01
             return _celik_dali(k, bayi, katalog, aday, ts)
         kod = aday["kod"] if aday else model["code"]
