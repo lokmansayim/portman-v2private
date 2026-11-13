@@ -242,7 +242,8 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | BK | BK-22 | ön onay çiziminde verandalı brüt m², ortalanan pencerenin yanı tek pano, İş Emri'nde tek birleşim (D-49; `claude/project-thread-jlqian`, PR #122) | alındı (4.11) |
 | BK | BK-23 … BK-27 | iş emri belgelerinde (`docs/is_emirleri/`) ve dallarında; bu tabloya yazılmadı | alındı |
 | BK | BK-28 | bayiye giden tanıtım metinleri ("Nasıl çalışır?" sayfası, selam örneği) bugünkü sisteme göre; prefabrik onayında Patron'a bildirim (pano 196, 197, 199; D-84; `claude/project-thread-iv2z5f`) | alındı (12.11; CIO) |
-| BK | **BK-29** | — | **sıradaki boş** |
+| BK | BK-29 | WhatsApp revizyon diyaloğu, 13 Kasım denetimi: geri çevrilen istek planı kapatmaz, iki pencereli odada soru, prefabrik seçimde kod ve numara (pano 200, 201, 208, 210; `claude/project-thread-2ypd6m`) | alındı (13.11; CIO) |
+| BK | **BK-30** | — | **sıradaki boş** |
 
 ## 27 Eylülde Lokman'ın verdiği kararlar
 

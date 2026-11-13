@@ -1,6 +1,9 @@
 """BK-15 · çelik katalog modelinde oda ekleme isteğinin gerekçesi (O4). LLM oda varyantı işaretlemese de "Bir yatak odası daha ekleyelim"
 bayiye "Pencere ekleme …" diye yönlenmez; oda eklemeyi söyler. Pencere eklemesinin mesajı aynı kalır. LLM yok, Postgres yok, çizim yok
-(`test_celik_revizyon_karar.py`'nin sohbet düzeni)."""
+(`test_celik_revizyon_karar.py`'nin sohbet düzeni).
+
+BK-29 (pano 200, 13 Kasım 2026): yönlendirmeden sonra plan açık kalır; bayiye giden metnin sonuna "Planınız (… r01) değişmedi. …" eklenir
+(`ACIK_PLAN`). Metin yine bütünüyle denetlenir."""
 from __future__ import annotations
 
 import sys
@@ -16,6 +19,10 @@ from testler.test_celik_revizyon_karar import Sohbet, r01_k  # noqa: E402
 PENCERE_MESAJI = "Pencere ekleme ya da kaldırma çelik modelde otomatik yapılamıyor; mevcut pencerenin ölçüsünü değiştirebilirim. " + K.YONLENDIRME
 
 
+def ACIK_PLAN(s: Sohbet) -> str:
+    return f" Planınız ({s.plan['is_emri_no']} r01) değişmedi. Onaylayabilir ya da başka bir değişiklik yazabilirsiniz."
+
+
 @pytest.fixture
 def s(tmp_path) -> Sohbet:
     return Sohbet(tmp_path)
@@ -27,7 +34,7 @@ def test_oda_ekleme_dogru_gerekceyle_yonlenir(s, metin):
     r01_k(s)
     k = s.yaz(metin)
     assert k.eylem == "yonlendir"
-    assert k.mesaj == "Oda ekleme ya da kaldırma çelik modelde otomatik yapılamıyor. " + K.YONLENDIRME
+    assert k.mesaj == "Oda ekleme ya da kaldırma çelik modelde otomatik yapılamıyor. " + K.YONLENDIRME + ACIK_PLAN(s)
     assert k.gerekce == "çelik katalog modelinde oda ekleme/kaldırma otomatik yapılamıyor"
     assert metin not in k.gerekce and "Pencere" not in k.mesaj
 
@@ -36,7 +43,7 @@ def test_oda_ekleme_dogru_gerekceyle_yonlenir(s, metin):
 def test_pencere_eklemesinin_mesaji_ayni(s, metin):
     r01_k(s)
     k = s.yaz(metin)
-    assert k.eylem == "yonlendir" and k.mesaj == PENCERE_MESAJI
+    assert k.eylem == "yonlendir" and k.mesaj == PENCERE_MESAJI + ACIK_PLAN(s)
     assert k.gerekce == "çelikte pencere ekleme/kaldırma otomatik yapılamıyor (8a: yalnız ölçü)"
 
 
@@ -44,5 +51,6 @@ def test_oda_ve_pencere_birlikte(s):
     r01_k(s)
     k = s.yaz("Bir yatak odası daha ekleyelim. Salona bir pencere daha ekleyelim.")
     assert k.eylem == "yonlendir"
-    assert k.mesaj == "Oda ekleme ya da kaldırma ve pencere ekleme ya da kaldırma çelik modelde otomatik yapılamıyor. " + K.YONLENDIRME
+    assert k.mesaj == ("Oda ekleme ya da kaldırma ve pencere ekleme ya da kaldırma çelik modelde otomatik yapılamıyor. " + K.YONLENDIRME
+                       + ACIK_PLAN(s))
     assert k.gerekce == "çelik katalog modelinde oda ekleme/kaldırma otomatik yapılamıyor (pencere ekleme/kaldırma da: 8a yalnız ölçü)"
