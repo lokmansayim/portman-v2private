@@ -85,4 +85,4 @@ def test_yalniz_kod_plan_metni_ve_pdf_basligi_koddan(depo, wa, hizli_motor):
     belge = [x for x in satirlar if x["kind"] == "document"]
     assert belge and "anlayamadık" not in metin
     baslik = belge[0]["satir"]["body"]                                         # PDF açıklaması (`worker.giden_belge`)
-    assert "anlayamadık" not in baslik and baslik.endswith("ÖN ONAYA SUNULAN TASLAK · P6001 seçildi"), baslik
+    assert "anlayamadık" not in baslik and baslik.endswith("ÖN ONAYA SUNULAN TASLAK · P6001 seçildi")   # tur 5: aynı biçim, baslik

@@ -71,7 +71,6 @@ def karar_ver(talep: Talep, k: Konusma, bayi: dict | None, katalog: Katalog, met
     k.son_llm = None                                # İE-08 A4: bu mesajın LLM ipuçları (yalnız bu çağrıda; `_karar_ver` doldurur)
     k.rev0 = int(k.d.get("revizyon") or 0)          # G-2: _bitir, plan üretmeyen turda sayacı buna geri alır
     k.bu_mesaj_mahalleri, k.pencere_hicbiri = set(), False   # BK-29 PR-2: bu mesajın pencere satırlarının odaları; "Hangi pencere?" → hiçbiri
-    k.ozet_koddan = False                           # BK-29 tur 4 (pano 202): seçimi kod okudu; plan metni ve PDF başlığı kodun özeti ("PA04 seçildi")
     d0 = json.loads(json.dumps(k.d))                # BK-29 (pano 200): geri çevrilen istek açık planı kapatmaz; konuşma buna döner
     karar = _karar_ver(talep, k, bayi, katalog, metin)
     if karar.eylem == "yonlendir" or karar.gerekce == PLAN_DEGISMEDI:
@@ -253,7 +252,6 @@ def _karar_ver(talep: Talep, k: Konusma, bayi: dict | None, katalog: Katalog, me
                 k.not_dus("kural", f"seçenek setine yazılı numara: {no['secimler'][0] + 1} → {kod}")
                 metin = f"{kod} olsun"
                 t = Talep(niyet="yeni_talep", guven=t.guven, ozet=f"{kod} seçildi", katalog_kodu=kod)
-                k.ozet_koddan = True                # tur 3 canlı: PDF başlığı LLM'in "… "2" diye cevap verdiniz; teyit …" özetiydi
     # BK-29 PR-3 (pano 208; denetim A5, A7): bayinin yalnız model kodu yazdığı kısa mesaj ("PA-04", "PA-04 olsun") LLM kodu vermese de o
     # modelin seçimidir (K18: kural bayinin kendi sözünü okur). Açık sette "PA-04 olsun" aynı listeyi yeniden getiriyor, boş sohbette
     # "PA-04" "Anlayamadım" alıyordu. Yalnız açık set ya da açık plan olmayan konuşma; açık planın üstüne yazılan kod bugünkü yoldan gider.
@@ -261,9 +259,7 @@ def _karar_ver(talep: Talep, k: Konusma, bayi: dict | None, katalog: Katalog, me
         kod = _yalniz_kod(metin, katalog)
         if kod:
             k.not_dus("kural", f"mesajda yalnız model kodu: {kod}")
-            # tur 3 canlı (pano 202): plan doğru, metin LLM'in özetiydi (""PA-04" yazdınız, ne istediğinizi anlayamadık …"); özet kodun
-            t = t.model_copy(update={"niyet": "yeni_talep", "katalog_kodu": kod, "ozet": f"{kod} seçildi", "belirsizlikler": []})
-            k.ozet_koddan = True
+            t = t.model_copy(update={"niyet": "yeni_talep", "katalog_kodu": kod, "belirsizlikler": []})
 
     # D-01: askıda "yeni talep mi, önceki taslağın değişikliği mi?" sorusu varken gelen mesaj. Yalnız kısa ve saf bir cevap
     # ("yeni", "değişiklik", "önceki taslağın değişikliği") cevap sayılır; o zaman soruyu doğuran mesaj (bekletilen talep ve
@@ -1666,8 +1662,6 @@ def _is_emri_uret(k: Konusma, bayi: dict, katalog: Katalog, sablon: dict, kaynak
     k.d["revizyon"] = ie["revizyon"] - 1
     ie["talep"] = {"bayi": {"kod": bayi.get("kod"), "ad": bayi.get("ad")}, "kaynak": kaynak,
                    "musteri_adi": (ts.get("musteri") or {}).get("ad") or "", "metin": ts.get("ozet", "")}
-    if getattr(k, "ozet_koddan", False):
-        ie["talep"]["metin_koddan"] = True             # BK-29 tur 4: PDF başlığı LLM'in bu mesaja özeti değil, kodun özeti (`worker`, `ozet_baslik`)
     ie["kunye"] = {"proje_kodu": ie["is_emri_no"], "ilgili_kisi_telefon": f"{bayi.get('ad','')} / {k.gonderen}",
                    "sevk_adresi": (ts.get("musteri") or {}).get("sevk_adresi") or "", "tarih": time.strftime("%d/%m/%Y"),
                    "cizen": "Portman", "kontrol": "", "onay": ""}
@@ -1681,11 +1675,25 @@ def _is_emri_uret(k: Konusma, bayi: dict, katalog: Katalog, sablon: dict, kaynak
         return _bitir(k, Karar(eylem="cevapla", gerekce=PLAN_DEGISMEDI, mesaj=ts.pop("_on_not", "").strip()))
     k.d["son_is_emri"] = ie
     k.d["asama"] = "is_emri_hazir"
-    ozet = ts.get("ozet", "")
     ek = f" ({', '.join(notlar)})" if notlar else ""
     on_not = ts.pop("_on_not", "")
+    # BK-29 tur 5 (pano 202; Lokman'ın metin onayı): plan görseli ve PDF bu metinle birlikte gider. Metin planın hazır olduğunu söyler
+    # ("hazırlıyorum" demez); LLM'in talep özeti bayiye gitmez. Kodu bayinin gördüğü biçimde ("PA-06-K"), değişikliği kodun notuyla yazar.
+    # PDF başlığı da aynı metin (`worker`, `ozet_baslik`). Çelik metniyle aynı kalıp ("… Ön onay planınız hazır; plan görseli ve PDF ektedir.").
+    ad = _gorunen_kod(katalog, kaynak)
+    bas = f"{ad} seçildi" if ie["revizyon"] == 1 else f"{ad} r{ie['revizyon']:02d}"
+    degisiklik = f"Değişiklik: {', '.join(notlar)}" if notlar else ""
+    ie["talep"]["metin"] = " · ".join(x for x in (bas, degisiklik) if x)
+    ie["talep"]["metin_koddan"] = True
     return _bitir(k, Karar(eylem="is_emri", is_emri=ie, revizyon=ie["revizyon"], gerekce=f"şablon {kaynak}" + ek,
-                            mesaj=f"{on_not}{on_bilgi}{ozet}{ek} Ön onay planını hazırlıyorum; birkaç dakika içinde PDF olarak göndereceğim."))
+                            mesaj=f"{on_not}{on_bilgi}{bas}." + (f" {degisiklik}." if degisiklik else "")
+                                  + " Ön onay planınız hazır; plan görseli ve PDF ektedir."))
+
+
+def _gorunen_kod(katalog: Katalog, kod: str) -> str:
+    """Bayinin gördüğü kod: aday kaydının gösterimi ("PA06K" → "PA-06-K"); katalog modeli kendi kodu ("P6001")."""
+    a = (getattr(katalog, "adaylar", None) or {}).get(Katalog.kod_normalize(kod) or "")
+    return SC.gosterim(a) if a else str(kod)
 
 
 _TR = str.maketrans("ıİşŞğĞüÜöÖçÇâÂîÎûÛ", "iissgguuooccaaiiuu")
@@ -2398,9 +2406,6 @@ def _pencere_kopyalarini_dusur(k: Konusma) -> None:
     eski_bo = pt.get("bina_ozellikleri") or {}
     ts["bina_ozellikleri"] = {a: b for a, b in (ts.get("bina_ozellikleri") or {}).items()
                               if eski_bo.get(a) == b or "pencere" not in CO.norm(f"{a} {b}")}
-    if (ts.get("ozet") or "") != (pt.get("ozet") or ""):
-        ts["ozet"] = ""                                # pencere isteğinin özeti plan metnine ve PDF başlığına yazılmaz ("… 120x120 olmasını
-        k.ozet_koddan = True                           # istiyorsunuz", "… seçeneklerin hiçbirini istemiyorsunuz"); başka değişiklik notla yazılır
 
 
 def _bekleyen_olcuyu_yaz(ts: dict, olcu: str) -> bool:

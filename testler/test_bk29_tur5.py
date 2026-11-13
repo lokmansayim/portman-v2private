@@ -41,7 +41,7 @@ def test_iptalden_sonra_yalniz_kod_yeni_plan(s):
     assert s.yaz("iptal", niyet="red").mesaj == KAPANDI
     k = s.yaz("PA-04", niyet="diger", ozet='"PA-04" yazdınız, ne istediğinizi anlayamadık.')
     assert k.eylem == "is_emri" and s.plan["revizyon"] == 1, k.mesaj
-    assert k.mesaj.startswith("PA04 seçildi ")
+    assert k.mesaj.startswith("PA-04 seçildi. ")
 
 
 @pytest.mark.parametrize("soz", ["beğenmedim", "olmadı", "hayır", "iptal etmeyin", "iptal mi?"])
