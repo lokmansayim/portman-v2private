@@ -131,6 +131,24 @@ def test_b4_olcu_sorusuna_olcusuz_cevap_bugunku_yol(s):
     assert k.eylem == "is_emri" and _pencereler(k, "YATAK ODASI 1") == [("120x150", "sol")]
 
 
+def test_b4_olcu_sorusuna_baska_odanin_sozu_bekleyene_yazilmaz(s):
+    """Ölçü sorusu askıdayken başka odayı anan söz ("Yatak odası 2 penceresi 120x150 olsun") cevap sayılmaz: 120x150 yatak odası 1'e
+    yazılmaz (yalnız ölçüden oluşan cevap alınır)."""
+    _plan(s, "PA04")
+    s.yaz("Yatak odası 1 penceresini değiştirelim", pencereler=[pen("yatak odası 1", None)])
+    s.yaz("Yatak odası 2 penceresi 120x150 olsun", pencereler=[pen("yatak odası 2", None)])
+    yo1 = [p for p in s.k.d["taslak"]["pencereler"] if p["mahal"] == "yatak odası 1"]
+    assert yo1 and yo1[0]["olcu"] is None and s.plan["revizyon"] == 1
+
+
+@pytest.mark.parametrize("metin,beklenen", [
+    ("120x150", "120x150"), ("120 x 150 olsun", "120x150"), ("120x150'lik yapın lütfen", "120x150"),
+    ("mutfak penceresi 120x150 olsun", None), ("bilmiyorum", None), ("120x150 ve 120x180", None), ("7x4", None),
+])
+def test_yalniz_olcu_cevabi(metin, beklenen):
+    assert K._yalniz_olcu(metin) == beklenen
+
+
 @pytest.mark.parametrize("metin,beklenen", [
     ("Yatak odası 1 penceresi 120x150 olsun", "120x150"),
     ("120x100 yerine 120x150", "120x150"),

@@ -124,10 +124,11 @@ def _karar_ver(talep: Talep, k: Konusma, bayi: dict | None, katalog: Katalog, me
         elif not _icerikli(t) and len((metin or "").split()) <= 4 and not _olcu_bul(metin or ""):
             k.not_dus("kural", "pencere_mahal cevabı anlaşılmadı: soru yinelendi")
             return _soru(k, "pencere_mahal", "Anlayamadım. " + ps.get("metin", ""), ps.get("butonlar"))
-    if k.d.get("son_soru_alani") == "pencere_olcu" and len((metin or "").split()) <= 6:
+    if k.d.get("son_soru_alani") == "pencere_olcu":
         # BK-29 tur 4 (B4): "Pencereyi hangi ölçüye değiştirelim?" sorusunun cevabı ("120x150", "120x150 olsun") ölçüsü bekleyen pencere
         # isteğine yazılır; LLM'in bu kısa cevaba verdiği içerik yok sayılır (şema listede olmayan ölçüyü taşımıyor). Canlıda soru yineleniyordu.
-        o = _sozdeki_yeni_olcu(metin)
+        # Yalnız ölçüden oluşan cevap: oda ya da başka söz taşıyan mesaj ("mutfak penceresi 120x150 olsun") bugünkü yoldan gider.
+        o = _yalniz_olcu(metin)
         if o and _bekleyen_olcuyu_yaz(k.d["taslak"], o):
             k.d["son_soru_alani"] = None
             k.not_dus("kural", f"pencere_olcu cevabı: {o}")
@@ -2071,6 +2072,19 @@ def _sozdeki_yeni_olcu(metin: str | None) -> str | None:
     if yeni:                                          # "120x150 ve 120x180 olsun": sınıflanmayan ölçü varken okunmaz
         return yeni.pop() if len(yeni) == 1 and kalan == yeni else None
     return kalan.pop() if len(kalan) == 1 else None
+
+
+_OLCU_CEVABI_DOLGU = {"lik", "luk", "olsun", "olacak", "olmali", "olsa", "yap", "yapin", "yapiniz", "yapalim", "yapar", "misiniz", "cm",
+                      "lutfen", "olarak", "ebatinda", "olcusunde", "olcude", "tamam", "evet", "e", "a", "ye", "ya"}
+
+
+def _yalniz_olcu(metin: str | None) -> str | None:
+    """Ölçü sorusunun cevabı yalnız bir pencere ölçüsüyse ("120x150", "120 x 150 olsun", "120x150'lik yapın lütfen") o ölçü; değilse None."""
+    q = CO.norm(re.sub(r"(\d{2,3})\s*[xX×*]\s*(\d{2,3})", r" \1x\2 ", metin or "")).split()
+    olcu = [t for t in q if re.fullmatch(r"\d{2,3}x\d{2,3}", t)]
+    if len(olcu) != 1 or not _pencere_olcusu_mu(olcu[0]) or any(t not in _OLCU_CEVABI_DOLGU for t in q if t != olcu[0]):
+        return None
+    return olcu[0]
 
 
 def _odanin_yeni_olcusu(soz: str | None, ie: dict, mahal: str | None) -> str | None:
