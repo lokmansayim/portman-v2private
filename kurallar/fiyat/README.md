@@ -17,7 +17,8 @@ Lokman, 9 Kasım 2026 13:10: "bunu kural olarak al ve mühürle bundan sonra tek
   OSB, duvar alçıpanı, kiriş, pencere panelleri, nem bariyeri, alçıpan destek straforu, pencere karkası ve PVC pencereler).
   r07 (13 Kasım): 280 ve 300 cm yükseklik. Pano eni bantları 2800 ve 3000 için (bantların sonunda), H, 3'lü H, köşe direği, çektirme
   U'su ve kolon CRM'deki aynı ürünün h:2800 / h:3000 koduyla, 2500'deki kuralla. Pencere üst paneli 800 / 1000 öneri (Lokman'ın sözü
-  yok). CRM'de olmayanlar fiyatsız: vasistaslı pano, karkaslı özel pencere panosu, 2940'lık çektirme U'su.
+  yok). CRM'de olmayanlar fiyatsız: vasistaslı pano, karkaslı özel pencere panosu, 2940'lık çektirme U'su. Metal iniş borusu
+  L 3000 çelikteki kayıtla aynı (antrasit, `DR13`).
 - **Onay.** Eşleme `birebir` ya da `kural` ise onaylı; `yakın` ve `birim varsayımı` öneri (`--oneri`); `birim sorusu` ve `CRM'de yok`
   fiyatsız. O gün fiyatı 0 ya da boş olan kod, listede olmayan kod ve birden çok satırdaki kod fiyatsız. `bekletme`: Lokman'ın kararıyla şimdilik
   fiyatsız, CRM'de fiyatı olsa da yazılmaz (banyo dolabı, D-75).

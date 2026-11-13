@@ -1794,6 +1794,13 @@
      "esleme": "CRM'de yok",
      "birim": "adet",
      "not": "CRM'de yalnız 250/180 var (KP13, 100 × 3750 × 2500); 170/180 H:3000 yok (r07; CRM'e eklenmeli)"
+    },
+    "Metal iniş borusu | L 3000": {
+     "kod": "DR13",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet",
+     "not": "CRM adı: antrasit metal iniş borusu L 3000; çelikteki \"Dere iniş borusu | L 3000\" kaydının aynısı (r07, iniş borusu özelliği metal)"
     }
    },
    "bantlar": [

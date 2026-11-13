@@ -388,6 +388,7 @@ R07_ANAHTARLAR = {
     "Karkaslı özel pencere panosu (150/180) | 100 × 2500 × 3000": (None, "CRM'de yok"),
     "Karkaslı özel pencere panosu (160/180) | 100 × 2500 × 3000": (None, "CRM'de yok"),
     "Karkaslı özel pencere panosu (170/180) | 100 × 2125 × 3000": (None, "CRM'de yok"),
+    "Metal iniş borusu | L 3000": ("DR13", "birebir"),                 # iniş borusu özelliği metal (yükseklikten bağımsız)
 }
 R07_BANT_ARALIK = [("100'lük yapıştırma dolu pano", 100, [([627.5, 1250], True), ([340, 627.5], False), ([225, 225], False)]),
                    ("60'lık yapıştırma dolu pano", 60, [([627.5, 1250], True), ([350, 627.5], False), ([175, 320], False)]),
@@ -447,8 +448,16 @@ def test_r07_280_ve_300_yukseklik(E, A):
         (_kurus(_fiyat(A, "YP3")), True, 0.2), (_kurus(_fiyat(A, "YP6")), True, 0.2), (_kurus(_fiyat(A, "YP3") / 4), False, 0.2)]
     b = next(b for b in PD["bantlar"] if (b["kalem"], b["yukseklik_mm"]) == ("60'lık karkaslı + kasalı pano", 2800))
     assert [(a["fiyat"], a["onay"], a["kdv"]) for a in b["araliklar"]] == [(_kurus(_fiyat(A, "KP2")), True, 0.2)]
+    assert {a: K["Metal iniş borusu | L 3000"][a] for a in ("kod", "hesap", "esleme")} == \
+           {a: E["hatlar"]["celik"]["kalemler"]["Dere iniş borusu | L 3000"][a] for a in ("kod", "hesap", "esleme")}
+    g = PD["kalemler"]["Metal iniş borusu | L 3000"]
+    assert (g["fiyat"], g["onay"], g["kdv"]) == (_kurus(_fiyat(A, "DR13")), True, 0.2)
     from motor import prefabrik_liste as PL
     KU = PL.kurallari_oku()
+    ie = _oku(HAVUZ / "PA01.json")
+    ie.setdefault("ozellikler", {})["Yağmur İniş Borusu"] = "Metal"
+    s = [s for s in F.fiyatla(PL.is_emrinden(ie, KU), D, "prefabrik")["satirlar"] if s["kalem"] == "Metal iniş borusu"]
+    assert len(s) == 1 and s[0]["durum"].startswith("onaylı") and s[0]["tutar"], s
     for ev, ic in (("PA01", 6), ("PA06C", 6), ("PA01", 10)):              # iç 100'lü evde 100'lük iç eleman
         ie0 = _oku(HAVUZ / f"{ev}.json")
         ie0["yapi"].setdefault("duvar_kalinligi_cm", {})["ic"] = ic
