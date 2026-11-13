@@ -69,3 +69,32 @@ def test_revizyon_sorusundan_sonra_iptal_bugunku_gibi(s):
 ])
 def test_iptal_sozu(soz, beklenen):
     assert K._iptal_sozu(soz) is beklenen
+
+
+# ── D-85: plan metni kodun metni (pano 202; Lokman 13 Kasım 19:15:09 kartı "Yeni metin olsun") ────────────────────────────────
+
+HAZIR = "Ön onay planınız hazır; plan görseli ve PDF ektedir."
+
+
+def test_dis_olcuden_plan_metni(tmp_path):
+    """Dış ölçüden kurulan plan (GRID şablonu): baş yok, "Dış ölçü … pano)." ön bilgisi yeter; revizyonda "Plan r02"."""
+    from test_celik_revizyon_karar import pen
+    s = Sohbet(tmp_path)
+    k = s.yaz("7,73 x 10,14 m 2+1 tek kat prefabrik", dis_olcu={"en_m": 7.73, "boy_m": 10.14}, oda_programi="2+1",
+              yapi_turu="prefabrik", kat_sayisi=1, ozet="7,73 x 10,14 metre 2+1 prefabrik ev istiyorsunuz.")
+    assert k.eylem == "is_emri" and k.gerekce == "şablon GRID-6x8", k.mesaj
+    assert k.mesaj == f"Dış ölçü 7,73 m x 10,14 m (6x8 pano). {HAZIR}"
+    assert k.is_emri["talep"]["metin"] == "Dış ölçü 7,73 m x 10,14 m (6x8 pano)"
+    k = s.yaz("salonun sol penceresi 120x180 olsun", pencereler=[pen("salon", "120x180", duvar="sol")])
+    assert k.mesaj == f"Dış ölçü 7,73 m x 10,14 m (6x8 pano). Plan r02. Değişiklik: SALON 120x120 sol penceresi 120x180. {HAZIR}"
+    assert k.is_emri["talep"]["metin"] == "Plan r02 · Değişiklik: SALON 120x120 sol penceresi 120x180"
+
+
+@pytest.mark.parametrize("kaynak,rev,ozet,beklenen", [
+    ("PA06K", 1, "", "PA-06-K seçildi"), ("PA04", 3, "", "PA-04 r03"), ("P6001", 1, "LLM özeti", "P6001 seçildi"),
+    ("cizim-okuma", 1, "Çiziminizdeki plan (7,73 × 8,88 m, 2+1).", "Çiziminizdeki plan (7,73 × 8,88 m, 2+1)"),
+    ("cizim-okuma", 2, "Mutfak penceresi değişsin.", "Çiziminizdeki plan r02"), ("GRID-6x8", 1, "x", ""), ("GRID-6x8", 2, "x", "Plan r02"),
+])
+def test_plan_basi(kaynak, rev, ozet, beklenen):
+    from beyin.katalog import Katalog
+    assert K._plan_basi(Katalog(kabul_edilmis=KABUL), kaynak, rev, ozet) == beklenen

@@ -1680,14 +1680,29 @@ def _is_emri_uret(k: Konusma, bayi: dict, katalog: Katalog, sablon: dict, kaynak
     # BK-29 tur 5 (pano 202; Lokman'ın metin onayı): plan görseli ve PDF bu metinle birlikte gider. Metin planın hazır olduğunu söyler
     # ("hazırlıyorum" demez); LLM'in talep özeti bayiye gitmez. Kodu bayinin gördüğü biçimde ("PA-06-K"), değişikliği kodun notuyla yazar.
     # PDF başlığı da aynı metin (`worker`, `ozet_baslik`). Çelik metniyle aynı kalıp ("… Ön onay planınız hazır; plan görseli ve PDF ektedir.").
-    ad = _gorunen_kod(katalog, kaynak)
-    bas = f"{ad} seçildi" if ie["revizyon"] == 1 else f"{ad} r{ie['revizyon']:02d}"
+    bas = _plan_basi(katalog, kaynak, ie["revizyon"], ts.get("ozet") or "")
     degisiklik = f"Değişiklik: {', '.join(notlar)}" if notlar else ""
-    ie["talep"]["metin"] = " · ".join(x for x in (bas, degisiklik) if x)
+    ie["talep"]["metin"] = " · ".join(x for x in (bas or on_bilgi.strip().rstrip("."), degisiklik) if x)
     ie["talep"]["metin_koddan"] = True
     return _bitir(k, Karar(eylem="is_emri", is_emri=ie, revizyon=ie["revizyon"], gerekce=f"şablon {kaynak}" + ek,
-                            mesaj=f"{on_not}{on_bilgi}{bas}." + (f" {degisiklik}." if degisiklik else "")
-                                  + " Ön onay planınız hazır; plan görseli ve PDF ektedir."))
+                            mesaj=f"{on_not}{on_bilgi}" + "".join(f"{x}. " for x in (bas, degisiklik) if x)
+                                  + "Ön onay planınız hazır; plan görseli ve PDF ektedir."))
+
+
+_CIZIM_OKUMA = "cizim-okuma"                           # `gorsel_okuma.KAYNAK`: plan bayinin çiziminden okundu (İE-20)
+
+
+def _plan_basi(katalog: Katalog, kaynak: str, rev: int, ozet: str) -> str:
+    """D-85: prefabrik plan metninin başı, kodun metni. Model: "PA-06 seçildi" / "PA-06 r02". Çizimden okunan plan: r01'de okumanın
+    kod metni ("Çiziminizdeki plan (7,73 × 8,88 m, 2+1)", `worker`), sonra "Çiziminizdeki plan r02". Dış ölçüden kurulan plan (GRID):
+    r01'de baş yok ("Dış ölçü … pano)." ön bilgisi yeter), sonra "Plan r02"."""
+    if kaynak == _CIZIM_OKUMA:
+        ad = "Çiziminizdeki plan"
+        return (ozet.strip().rstrip(".") if ozet.startswith(ad) else ad) if rev == 1 else f"{ad} r{rev:02d}"
+    if str(kaynak).startswith("GRID-"):
+        return "" if rev == 1 else f"Plan r{rev:02d}"
+    ad = _gorunen_kod(katalog, kaynak)
+    return f"{ad} seçildi" if rev == 1 else f"{ad} r{rev:02d}"
 
 
 def _gorunen_kod(katalog: Katalog, kod: str) -> str:
