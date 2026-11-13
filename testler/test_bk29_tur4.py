@@ -186,3 +186,59 @@ def test_not_suren_onceki_degisiklik_sablon_olcusuyle(s):
     s.dugme("q:pencere_secim:1")
     k = s.yaz("mutfak ön penceresi 160x120 olsun", pencereler=[pen("mutfak", "160x120", duvar="on")])
     assert k.revizyon == 3 and k.gerekce == "şablon PA06 (MUTFAK 120x100 sol penceresi 120x120, MUTFAK 160x180 ön penceresi 160x120)"
+
+
+# ── Tur 3 canlı gözlemleri (pano 216, 202) ───────────────────────────────────────────────────────────────────────────────────────
+
+class CanliSohbet(Sohbet):
+    """Konuşma her mesajda kayıttan okunur (canlı gibi)."""
+    def __init__(self, kok, kabul=None):
+        super().__init__(kok, kabul=kabul)
+        self.kok = kok
+
+    def yaz(self, metin, **alan):
+        self.k = K.Konusma("900000000101", kok=self.kok)
+        return super().yaz(metin, **alan)
+
+    def dugme(self, kimlik):
+        self.k = K.Konusma("900000000101", kok=self.kok)
+        return super().dugme(kimlik)
+
+
+@pytest.mark.parametrize("ek", [{"ozel_istekler": ["Mutfak penceresi 120x120 olsun"]}, {"bina_ozellikleri": {"Mutfak penceresi": "120x120"}}, {}])
+def test_hicbiri_yeni_revizyon_uretmez(tmp_path, ek):
+    """Tur 3 gözlem 2: LLM pencere isteğini serbest istek ya da pafta alanı olarak da yazınca "hiçbiri" aynı planı r02 olarak çiziyordu
+    ("Tamam, o pencereyi değiştirmedim. … 120x120 olmasını istiyorsunuz. Ön onay planını hazırlıyorum"). Plan aynı numarayla kalır."""
+    s = CanliSohbet(tmp_path, kabul=KABUL)
+    s.yaz("PA-06", niyet="diger")
+    assert s.yaz("2", niyet="diger").revizyon == 1
+    k = s.yaz("mutfak penceresi 120x120 olsun", pencereler=[pen("mutfak", "120x120")], ozet="Mutfak penceresinin 120x120 olmasını istiyorsunuz.", **ek)
+    assert k.soru_alani == "pencere_secim"
+    k = s.yaz("hiçbiri", niyet="revizyon", ozet="Pencere seçimi için sunulan seçeneklerin hiçbirini istemiyorsunuz.")
+    no = s.plan["is_emri_no"]
+    assert (k.eylem, k.gerekce) == ("cevapla", K.PLAN_DEGISMEDI) and s.plan["revizyon"] == 1
+    assert k.mesaj == (f"Tamam, o pencereyi değiştirmedim. Planınız ({no} r01) değişmedi. "
+                       "Onaylayabilir ya da başka bir değişiklik yazabilirsiniz.")
+
+
+def test_yalniz_kod_ozeti_koddan(s):
+    """Tur 3 gözlem 3 (pano 202): boş sohbette "PA-04" planı doğruydu, metin LLM'in özetiydi (""PA-04" yazdınız, ne istediğinizi
+    anlayamadık …"). Metin ve PDF başlığı kodun: "PA04 seçildi" (düğmeyle seçimin onaylı biçimi, `testler/cati_secimi/prefabrik_hedef.json`)."""
+    k = s.yaz("PA-04", niyet="diger", ozet='"PA-04" yazdınız, ne istediğinizi anlayamadık. Bir katalog kodu mu? Açıklar mısınız?')
+    assert k.eylem == "is_emri"
+    assert k.mesaj == "PA04 seçildi Ön onay planını hazırlıyorum; birkaç dakika içinde PDF olarak göndereceğim."
+    assert k.is_emri["talep"]["metin"] == "PA04 seçildi" and k.is_emri["talep"]["metin_koddan"] is True
+
+
+def test_cati_setine_yazili_numara_pdf_basligi_koddan(s):
+    """Tur 3: çatı setine yazılı "2" doğru planı getiriyordu, PDF başlığı LLM'in "… "2" diye cevap verdiniz; teyit …" özetiydi."""
+    s.yaz("PA-06", niyet="diger")
+    k = s.yaz("2", niyet="diger", ozet='Önceki seçenek sorusuna "2" diye cevap verdiniz; hangi seçeneği kastettiğinizi teyit edebilir misiniz?')
+    assert k.eylem == "is_emri" and k.mesaj.startswith("PA06K seçildi Ön onay")
+    assert k.is_emri["talep"]["metin"] == "PA06K seçildi" and k.is_emri["talep"]["metin_koddan"] is True
+
+
+def test_dugmeyle_secimde_baslik_bugunku_gibi(s):
+    """Düğmeyle seçimde (LLM yok) metin_koddan işareti konmaz; PDF başlığı bugünkü gibi düğmenin özeti (onaylı hedef değişmez)."""
+    _plan(s, "PA04")
+    assert "metin_koddan" not in s.plan["talep"]
