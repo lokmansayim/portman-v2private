@@ -360,7 +360,7 @@ def isle(gelen: dict, settings: dict, k=None, cikarim: dict | None = None, proje
             metin_kural = ""                          # formun özeti kural katmanına bayinin sözü diye gitmez
             if form.get("form") == "prefabrik":       # İE-20 PR-6: öncelik formda seçildi (sohbette sorulmaz); ölçü ve seçimler ön notta
                 import talep_formu as TF
-                k.form_onceligi = TF.oncelik(form)
+                k.prefabrik_formu = {"oncelik": TF.oncelik(form)}     # `karar._form_izi` taslağa yazar
             if form.get("dosyalar") and not form_on:
                 patrona(f"Portman: {kim} talep formuna dosya ekledi (çizim okuması kapalı); panelden bakabilirsiniz.")
             k.d.pop("cizim_okuma", None)              # formla gelen talep açık çizim okumasının yerine geçer
@@ -797,7 +797,9 @@ def talep_formu_sunusu(gelen: dict, bayi: dict | None, taslak: dict | None, sett
 def form_satiri(gelen: dict, metin: str, fs: tuple, settings: dict) -> dict:
     """`form_sunusu` / `talep_formu_sunusu` sonucunun giden satırı: form düğmeli mesaj ya da (yapı tipi bilinmiyorsa) iki düğme."""
     if fs[0] == "yapi_sor":
-        govde = (metin.strip() + "\n\n" + YAPI_SORUSU) if len(metin.strip()) + len(YAPI_SORUSU) + 2 <= WA_GOVDE else YAPI_SORUSU
+        govde = metin.strip()                    # sığmazsa sorunun metni aynen gider; düğmeler kendini anlatır (metin düşmez)
+        if not govde or len(govde) + len(YAPI_SORUSU) + 2 <= WA_GOVDE:
+            govde = (govde + "\n\n" if govde else "") + YAPI_SORUSU
         return giden_etkilesim(gelen, govde, 0, butonlar=[(f"y:{fs[1]}:{deger}", baslik) for deger, baslik in YAPI_DUGMELERI])
     return giden_form(gelen, metin, 0, fs[0], settings, fs[1], fs[2], is_emri_no=fs[3], revizyon=fs[4])
 

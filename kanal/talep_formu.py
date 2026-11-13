@@ -313,7 +313,7 @@ def talep(oz: dict) -> dict:
 def _prefabrik_talebi(oz: dict, t: dict) -> dict:
     """Prefabrik talep formu → Talep. Ölçü pano katına yuvarlanır; talebe pano adedi ve o ölçünün alanı yazılır (`beyin/karar`: ikisi
     birlikteyse hazır planlar alana göre sunulur, uyan yoksa ölçüyle yönlendirilir); bayiye ölçü `olcu_notu` ile söylenir. Seçimlerin hepsi `bina_ozellikleri`'ne yazılır
-    (standart da: bayi formda gördü ve onayladı); pano yüksekliği ayrıca `yukseklik_cm`. Müşteri adı ve teslim yeri `musteri`."""
+    (standart da: bayi formda gördü ve onayladı; İş Emri'ne `beyin/form_ozellik` işler). Müşteri adı ve teslim yeri `musteri`."""
     from beyin import numara
     a = oz.get("alanlar") or {}
     t["yapi_turu"] = "prefabrik"
@@ -332,8 +332,6 @@ def _prefabrik_talebi(oz: dict, t: dict) -> dict:
         bo[EK_OZELLIK] = "; ".join(EK[x] for x in a["ek"])
     if bo:
         t["bina_ozellikleri"] = bo
-    if a.get("yukseklik"):
-        t["yukseklik_cm"] = int(a["yukseklik"])
     yer = ", ".join(x for x in (a.get("ilce"), a.get("il")) if x)
     if a.get("musteri") or yer:
         t["musteri"] = {**({"ad": numara.maskele(a["musteri"])} if a.get("musteri") else {}),

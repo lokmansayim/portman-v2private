@@ -1,6 +1,7 @@
 """İE-20 PR-6 · Prefabrik talep formundaki standart dışı seçimlerin İş Emri'ne işlenmesi (LLM yok; kod karar verir).
 
-Girdi taslağın `bina_ozellikleri`'dir; anahtarlar ve değerler formun kendi yazılarıdır (`kanal/talep_formu.OZELLIKLER`; ikisinin aynı
+Yalnız prefabrik talep formundan gelen talepte çağrılır (`karar._is_emri_uret`; taslakta `form = "prefabrik"`). Girdi taslağın
+`bina_ozellikleri`'dir; anahtarlar ve değerler formun kendi yazılarıdır (`kanal/talep_formu.OZELLIKLER`; ikisinin aynı
 olduğunu `testler/kalici/test_prefabrik_formu.py` denetler). Yalnız birebir tanınan değer işlenir: LLM'in serbest yazdığı özellik
 (ör. "Çatı Kaplaması: kiremit") bugünkü gibi yalnız kayıtta kalır.
   - Plana işlenen: pano yüksekliği 280 / 300 cm (`yapi.duvar_yuksekligi_cm`; D-14), iç duvar 100 mm (`yapi.duvar_kalinligi_cm.ic`; BK-18).
@@ -14,8 +15,8 @@ standart seçim hiçbir şeyi değiştirmez: o formun İş Emri bugünkü İş E
 """
 from __future__ import annotations
 
-YUKSEKLIK_CM = {"280 cm": 280, "300 cm": 300}
-IC_DUVAR_CM = {"100 mm": 10}
+YUKSEKLIK_CM = {"250 cm": 250, "280 cm": 280, "300 cm": 300}
+IC_DUVAR_CM = {"60 mm": 6, "100 mm": 10}
 # formun yazısı → İş Emri'nin teknik özelliği (yükleme listesi "trapez", "kiremit", "osb", "sandviç" sözcüklerine bakar: prefabrik_liste)
 CATI_KAPLAMASI = {"trapez sac": "Trapez Sac", "kiremit desen sac + OSB + nem bariyeri": "Kiremit Desen Sac + OSB + Nem Bariyeri",
                   "tek kat panel": "Tek Kat Panel", "shingle + OSB + membran": "Shingle + OSB + Membran", "sandviç panel": "Sandviç Panel"}
@@ -46,17 +47,28 @@ def uygula(ie: dict, bina_ozellikleri: dict | None, onceki: dict | None = None) 
         return []
     eski = (onceki or {}).get("yapi") or {}
     notlar = []
+    # Pano yüksekliği ve iç duvar: seçim şablondan büyükse plana işlenir (Motor 250'den 280 ve 300'e, 60'tan 100'e çiziyor; 13 Kasım
+    # denemesi). Seçim şablondan küçükse plan küçültülmez (denenmedi; kapı, pencere ve lento ölçüsü şablonun yüksekliğine göre):
+    # şablonun değeri kalır ve bayiye söylenir.
     h = YUKSEKLIK_CM.get(bo.get("Pano Yüksekliği"))
-    if h and float(yapi.get("duvar_yuksekligi_cm", 250)) != h:
+    simdi = float(yapi.get("duvar_yuksekligi_cm", 250))
+    onceki_h = float(eski.get("duvar_yuksekligi_cm", 250))
+    if h and h > simdi:
         yapi["duvar_yuksekligi_cm"] = h
-        if float(eski.get("duvar_yuksekligi_cm", 250)) != h:
+        if onceki_h != h:
             notlar.append(f"pano yüksekliği {h} cm")
+    elif h and h < simdi and (not onceki or onceki_h != simdi):
+        notlar.append(f"bu hazır plan {simdi:g} cm pano yüksekliğiyle çizilir; formdaki {h} cm işlenmedi")
     ic = IC_DUVAR_CM.get(bo.get("İç Duvar"))
     kal = yapi.get("duvar_kalinligi_cm") or {}
-    if ic and float(kal.get("ic", 6)) != ic:
+    simdi_ic = float(kal.get("ic", 6))
+    onceki_ic = float((eski.get("duvar_kalinligi_cm") or {}).get("ic", 6))
+    if ic and ic > simdi_ic:
         yapi["duvar_kalinligi_cm"] = {"dis": kal.get("dis", 10), **kal, "ic": ic}
-        if float((eski.get("duvar_kalinligi_cm") or {}).get("ic", 6)) != ic:
+        if onceki_ic != ic:
             notlar.append(f"iç duvar {ic * 10} mm")
+    elif ic and ic < simdi_ic and (not onceki or onceki_ic != simdi_ic):
+        notlar.append(f"bu hazır plan {simdi_ic * 10:g} mm iç duvarla çizilir; formdaki {ic * 10} mm işlenmedi")
     mevcut = dict(ie.get("ozellikler") or {})
     oz = dict(mevcut)
     for satir, sozluk in SATIRLAR.items():

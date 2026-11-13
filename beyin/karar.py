@@ -52,6 +52,36 @@ def bayileri_yukle() -> dict:
     return json.loads(BAYI_JSON.read_text(encoding="utf-8")) if BAYI_JSON.exists() else {}
 
 
+def _form_izi(k: Konusma, t: Talep) -> None:
+    """İE-20 PR-6: prefabrik talep formundan gelen talebin izi taslakta. Form mesajında (`k.prefabrik_formu`; `kanal/worker` yazar):
+    `form = "prefabrik"` (formdaki seçimler İş Emri'ne işlenir, `form_ozellik`), öncelik taslağa yazılır (sohbette sorulmaz; plan başka
+    bir mesajda çıksa da), ölçü "formdan" diye işaretlenir (pano + m² birlikte: hazır planlar m²'ye göre). Sonraki bir mesajda bayi
+    ölçüyü sohbette yazarsa ölçü izi kalkar; plan henüz çıkmadıysa formun hesapladığı öteki değer de düşer: bayinin son sözü bugünkü
+    yoldan okunur (pano ya da dış ölçü yazdıysa m², m² yazdıysa pano)."""
+    ts = k.d["taslak"]
+    form = getattr(k, "prefabrik_formu", None)
+    k.prefabrik_formu = None                      # yalnız bu mesaj için (aynı konuşma nesnesi sonraki mesajda da kullanılırsa kalmasın)
+    if form is not None:
+        ts["form"] = "prefabrik"
+        ts["olcu_formdan"] = True
+        if form.get("oncelik"):
+            ts["oncelik"] = form["oncelik"]
+        return
+    if not ts.get("olcu_formdan"):
+        return
+    yeni_pano = t.pano is not None
+    yeni_olcu = t.dis_olcu is not None and bool(t.dis_olcu.en_m or t.dis_olcu.boy_m)
+    if not (yeni_pano or yeni_olcu or t.alan_m2 is not None):
+        return
+    ts.pop("olcu_formdan", None)
+    if (k.d.get("son_is_emri") or {}).get("is_emri_no"):
+        return                                    # plan çıktıktan sonra taslağa dokunulmaz (revizyon bugünkü yoldan)
+    if not yeni_pano:
+        ts.pop("pano", None)
+    if (yeni_pano or yeni_olcu) and t.alan_m2 is None:
+        ts.pop("alan_m2", None)
+
+
 def pano_sayisi(metre: float, kose_cm: float) -> float:
     """Metre → pano adedi (0,5 adım). kose_cm: o kenardaki toplam köşe payı (20 kısa / 10 uzun)."""
     return round(max(1.0, (metre * 100 - kose_cm) / MOD) * 2) / 2
@@ -408,6 +438,7 @@ def _karar_ver(talep: Talep, k: Konusma, bayi: dict | None, katalog: Katalog, me
             k.not_dus("kural", "çatı seti açıkken talep bilgisi değişti: set eskidi, talep yeniden okundu")
     t = _pencere_varyantlarina_soz_isle(t, metin)    # G-3/G-4 (29.09): pencere değişikliği tek yoldan, B1 kurallarıyla
     k.birlestir(t.model_dump())
+    _form_izi(k, t)                               # İE-20 PR-6: prefabrik talep formunun önceliği ve ölçü izi taslakta
     k.d["asama"] = "topluyor"
     k.d["son_metin"] = (metin or "").strip()      # sıfırlama(lar)dan SONRA: kurallar bayinin bu mesajdaki sözünü okur
     # İE-08 A4 (kapanış incelemesi 13.10): çelik okuması yalnız BU mesajın LLM ipuçlarına bakar; taslakta biriken eski pencere/varyant
@@ -515,9 +546,10 @@ def _karar_ver(talep: Talep, k: Konusma, bayi: dict | None, katalog: Katalog, me
     W, H = dis_olcu_cm(nx, ny)
     anahtar = (nx, ny, ts["oda_programi"])
     if anahtar not in GRID_SABLON:
-        if ts.get("alan_m2") and ts.get("pano"):
+        if ts.get("olcu_formdan") and ts.get("alan_m2") and ts.get("pano"):
             # İE-20 PR-6 (Lokman, 13 Kasım 2026 21:26 UTC): prefabrik talep formu ölçüyü pano katına yuvarlar, alanı da yazar. Bu ölçüyle
             # birebir hazır plan çoğu ölçüde yoktur: seçenekler alana göre sunulur (bayi ölçüyü ön notta görür, `talep_formu.olcu_notu`).
+            # Yalnız formdan gelen ölçüde (`_form_izi`); sohbette yazılan pano ölçüsü bugünkü gibi pano ızgarasıyla aranır.
             secenek = _secenekler(k, katalog, {**ts, "pano": None})
         else:
             secenek = _secenekler(k, katalog, {**ts, "alan_m2": None, "pano": {"nx": nx, "ny": ny}})     # İE-04: pano ızgarasıyla aday
@@ -1679,7 +1711,8 @@ def _is_emri_uret(k: Konusma, bayi: dict, katalog: Katalog, sablon: dict, kaynak
                    "cizen": "Portman", "kontrol": "", "onay": ""}
     ie["bina_ozellikleri"] = {**ie.get("bina_ozellikleri", {}), **(ts.get("bina_ozellikleri") or {})}
     # İE-20 PR-6: prefabrik talep formundaki standart dışı seçimler (pano yüksekliği, iç duvar, çatı kaplaması …) İş Emri'ne
-    notlar += form_ozellik.uygula(ie, ts.get("bina_ozellikleri"), k.d.get("son_is_emri"))
+    if ts.get("form") == "prefabrik":
+        notlar += form_ozellik.uygula(ie, ts.get("bina_ozellikleri"), k.d.get("son_is_emri"))
     ie["ozel_istekler"] = list(ts.get("ozel_istekler") or [])
     ie.setdefault("eksikler", [])
     son = k.d.get("son_is_emri") or {}
@@ -1988,9 +2021,6 @@ def _secenekler(k: Konusma, katalog: Katalog, ts: dict, uygun: list[dict] | None
     if not uygun:
         return None
     celik_mi = ts.get("yapi_turu") == "celik" or SC.celik_seti_mi(uygun)
-    if ts.get("oncelik") is None and getattr(k, "form_onceligi", None):      # İE-20 PR-6: öncelik formda seçildi; sohbette sorulmaz
-        k.d["taslak"]["oncelik"] = k.form_onceligi
-        ts = {**ts, "oncelik": k.form_onceligi}
     if ts.get("oncelik") is None and len(uygun) >= 2 and not celik_mi and tur != "cati_varyanti":   # İE-37: çatı setinde öncelik yok
         k.d["taslak"]["oncelik_soruldu"] = True
         return _soru(k, "oncelik", "Sıralamada ne öne çıksın: bütçe mi, yaşam alanı mı, kısa montaj mı? Fark etmezse \"fark etmez\" yazın.",

@@ -100,7 +100,9 @@ def test_form_secenekleri_cozumleyiciyle_ayni_ve_standartlar_secili():
     yazi = json.dumps(TF.tanim("prefabrik"), ensure_ascii=False).lower()
     assert "ısıtma" not in yazi and "veranda" not in yazi and "yapi" not in c1 and "cati" not in c1
     # formun yazıları ile İş Emri'ne işleyen sözlük aynı kelimeler (beyin/form_ozellik.py)
-    assert set(FO.YUKSEKLIK_CM) <= set(TF.YUKSEKLIK.values()) and set(FO.IC_DUVAR_CM) <= set(TF.IC_DUVAR.values())
+    assert set(FO.YUKSEKLIK_CM) == set(TF.YUKSEKLIK.values()) and set(FO.IC_DUVAR_CM) == set(TF.IC_DUVAR.values())
+    assert {y: f"{cm} cm" for y, cm in FO.YUKSEKLIK_CM.items()} == {y: y for y in FO.YUKSEKLIK_CM}
+    assert {y: f"{cm * 10} mm" for y, cm in FO.IC_DUVAR_CM.items()} == {y: y for y in FO.IC_DUVAR_CM}
     assert set(FO.CATI_KAPLAMASI) == set(TF.KAPLAMA.values()) and set(FO.CATI_RENGI) == set(TF.CATI_RENGI.values())
     assert set(FO.TAVAN) == set(TF.TAVAN.values()) and FO.ALCIPAN == TF.EK["alcipan"]
     assert FO.STANDART == {"Çatı Kaplaması": TF.KAPLAMA[TF.STANDART["kaplama"]], "Çatı Kaplama Rengi": TF.CATI_RENGI[TF.STANDART["cati_rengi"]],
@@ -134,10 +136,15 @@ def test_olcu_hesabi_kenarlar():
     assert TF.olcu_hesabi(None, None, 70) is None and TF.olcu_hesabi(7, None, None) is None and TF.olcu_hesabi(None, None, None) is None
     o = TF.olcu_hesabi(9, None, 60)                                                    # m² kısa kenara göre küçük: hesaplanan kenar kısa kalır
     assert o["en_cm"] <= o["boy_cm"]
-    # Beyin'in yuvarlaması ile aynı formül (karar.pano_sayisi); karar.py'ye dokunmadan
-    for m in (3, 4.4, 5, 6.27, 7, 7.73, 9.99, 10.14, 12.5):
-        assert TF.pano(m, 20) == KR.pano_sayisi(m, 20) and TF.pano(m, 10) == KR.pano_sayisi(m, 10)
-    assert KR.dis_olcu_cm(5.5, 8) == (710.25, 1014.0) and TF.MODUL_CM == KR.MOD
+    # Beyin'in yuvarlaması ile aynı sonuç (karar.pano_sayisi, karar.dis_olcu_cm): hesap iki yerde, kıyas burada (webhook hafif kalsın
+    # diye `talep_formu` Beyin'in karar modülünü içe aktarmaz). 1,00 m'den 40,00 m'ye her santimetre.
+    for cm in range(100, 4001):
+        m = cm / 100
+        assert TF.pano(m, TF.KOSE_KISA_CM) == KR.pano_sayisi(m, 20) and TF.pano(m, TF.KOSE_UZUN_CM) == KR.pano_sayisi(m, 10), m
+    for nx, ny in ((5.5, 8), (4, 10.5), (6, 8), (3, 3.5)):
+        o = TF.olcu_hesabi((KR.MOD * nx + 20) / 100, (KR.MOD * ny + 10) / 100, None)
+        assert (o["nx"], o["ny"]) == (nx, ny) and (o["en_cm"], o["boy_cm"]) == KR.dis_olcu_cm(nx, ny)
+    assert TF.MODUL_CM == KR.MOD
 
 
 # ─── cevap → talep ───
@@ -156,7 +163,7 @@ def test_cevap_ozeti_ve_talep():
                                      "Pano Yüksekliği": "280 cm", "Dış Duvar": "160 mm", "İç Duvar": "100 mm", "Tavan": "alçıpan asma tavan",
                                      "Pencere Rengi": "beyaz",
                                      "Ek İstekler": "iç duvarlarda alçıpan kaplama; H profilde lata, köşelerde yalı baskı"}
-    assert t["yukseklik_cm"] == 280 and t["musteri"] == {"ad": "Ahmet Yılmaz", "sevk_adresi": "Nilüfer, Bursa"}
+    assert "yukseklik_cm" not in t and t["musteri"] == {"ad": "Ahmet Yılmaz", "sevk_adresi": "Nilüfer, Bursa"}
     assert len(t["ozel_istekler"]) == 1 and "111 22 33" not in t["ozel_istekler"][0]            # not: numara maskeli
     assert t["ozet"] == TF.set_basligi(oz) == "Prefabrik, tek kat, 2+1, 72 m²"
     assert "veranda" not in t and "cati" not in t                                              # formda yok; v1'deki sabit beşik + ön veranda yazılmaz
@@ -171,7 +178,7 @@ def test_talep_yalniz_m2_ve_standartlar():
     t = TF.talep(oz)
     Talep.model_validate(t)
     assert t["alan_m2"] == 70.0 and "pano" not in t and t["kat_sayisi"] == 2 and t["oda_programi"] == "3+1"
-    assert t["yukseklik_cm"] == 250 and t["bina_ozellikleri"]["Pano Yüksekliği"] == "250 cm"
+    assert t["bina_ozellikleri"]["Pano Yüksekliği"] == "250 cm"
     assert TF.standart_disi(oz) == [] and TF.olcu_notu(oz) == "" and TF.set_basligi(oz) == "Prefabrik, iki kat, 3+1, 70 m²"
     assert TF.oncelik(oz) == "yok"
     # ölçü hiç yok: talep ölçüsüz; eksik bilgi sohbette sorulur
@@ -246,6 +253,13 @@ def test_form_ozellik_standart_disi_isler():
     assert FO.uygula(ie2, bo, onceki=ie) == [] and ie2["yapi"]["duvar_yuksekligi_cm"] == 280 and ie2["ozellikler"] == ie["ozellikler"]
     ie3 = _ie()
     assert FO.uygula(ie3, {"Pano Yüksekliği": "300 cm"}, onceki=ie) == ["pano yüksekliği 300 cm"] and ie3["yapi"]["duvar_yuksekligi_cm"] == 300
+    # seçim şablondan küçükse plan küçültülmez; bayiye söylenir (bir kez)
+    ie4 = {"yapi": {"sistem": "prefabrik", "duvar_yuksekligi_cm": 280, "duvar_kalinligi_cm": {"dis": 10, "ic": 10}}}
+    std = TF.talep(_cevap(alan="70"))["bina_ozellikleri"]
+    assert FO.uygula(ie4, std) == ["bu hazır plan 280 cm pano yüksekliğiyle çizilir; formdaki 250 cm işlenmedi",
+                                   "bu hazır plan 100 mm iç duvarla çizilir; formdaki 60 mm işlenmedi"]
+    assert ie4["yapi"] == {"sistem": "prefabrik", "duvar_yuksekligi_cm": 280, "duvar_kalinligi_cm": {"dis": 10, "ic": 10}}
+    assert FO.uygula(copy.deepcopy(ie4), std, onceki=ie4) == []
     # çelik İş Emri'ne dokunulmaz
     celik = {"yapi": {"sistem": "celik"}}
     assert FO.uygula(celik, bo) == [] and celik == {"yapi": {"sistem": "celik"}}
@@ -318,6 +332,9 @@ def test_hangi_form_sunulur():
     assert i["type"] == "button" and satir["body"] == "Merhaba. Talebinizi yazın.\n\n" + W.YAPI_SORUSU
     assert [(b["reply"]["id"], b["reply"]["title"]) for b in i["action"]["buttons"]] == [(f"y:{fs[1]}:prefabrik", "Prefabrik"), (f"y:{fs[1]}:celik", "Çelik")]
     assert all(ET.BUTON_ID.match(b["reply"]["id"]) for b in i["action"]["buttons"])
+    uzun = "x" * (W.WA_GOVDE - 10)                                             # soru sığmıyorsa metin düşmez; düğmeler yine gider
+    satir = W.form_satiri(GELEN, uzun, fs, AYAR_PF)
+    assert satir["body"] == uzun and len(satir["interactive"]["action"]["buttons"]) == 2
     M.mesaj_yuku(satir, "905550000001")                                                           # gönderici aynı denetimden geçirir
     # taslakta ya da bayi kartında prefabrik: doğrudan prefabrik form
     for bayi, taslak in ((None, {"yapi_turu": "prefabrik", "oda_programi": "2+1"}), ({"varsayilanlar": {"yapi_turu": "prefabrik"}}, None)):
