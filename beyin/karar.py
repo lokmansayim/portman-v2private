@@ -230,9 +230,10 @@ def _karar_ver(talep: Talep, k: Konusma, bayi: dict | None, katalog: Katalog, me
         t = t.model_copy(update={"niyet": "revizyon" if k.d.get("son_is_emri") else "yeni_talep"})
         k.not_dus("kural", "okuma_metin cevabı: çelik revizyon isteği")
     # İE-08 A2 (kapanış incelemesi 13.10): açık çelik seçenek setine yazılı numara ("3", "üçüncü") düğmeyle aynıdır; LLM'in bu kısa
-    # cevaba verdiği içerik yok sayılır. Prefabrik setler değişmez (A5). İE-25 (geometri hakemi üçüncü tur 2): oda programı ("1+1 olsun",
-    # "3+1") numara değildir; talep değişikliğidir, aşağıda okunur.
-    if k.d.get("son_soru_alani") == "secenek" and _celik_seti_acik(k) and not _ODA_PROGRAMI.search(metin or ""):
+    # cevaba verdiği içerik yok sayılır. İE-25 (geometri hakemi üçüncü tur 2): oda programı ("1+1 olsun", "3+1") numara değildir; talep
+    # değişikliğidir, aşağıda okunur. BK-29 PR-3 (pano 208; 13 Kasım 2026 denetimi A6): prefabrik sette de ("3" aynı listeyi yeniden
+    # getiriyordu; İE-08 A5'in "prefabrik setler değişmez" sınırı kalktı).
+    if k.d.get("son_soru_alani") == "secenek" and _set_acik(k) and not _ODA_PROGRAMI.search(metin or ""):
         st = k.d["secenek_seti"]
         no = CO.okuma_cevabi(metin, {"tur": "secim", "adaylar": st.get("adaylar") or []})
         if no and len(no.get("secimler") or []) == 1:
@@ -241,6 +242,14 @@ def _karar_ver(talep: Talep, k: Konusma, bayi: dict | None, katalog: Katalog, me
                 k.not_dus("kural", f"seçenek setine yazılı numara: {no['secimler'][0] + 1} → {kod}")
                 metin = f"{kod} olsun"
                 t = Talep(niyet="yeni_talep", guven=t.guven, ozet=f"{kod} seçildi", katalog_kodu=kod)
+    # BK-29 PR-3 (pano 208; denetim A5, A7): bayinin yalnız model kodu yazdığı kısa mesaj ("PA-04", "PA-04 olsun") LLM kodu vermese de o
+    # modelin seçimidir (K18: kural bayinin kendi sözünü okur). Açık sette "PA-04 olsun" aynı listeyi yeniden getiriyor, boş sohbette
+    # "PA-04" "Anlayamadım" alıyordu. Yalnız açık set ya da açık plan olmayan konuşma; açık planın üstüne yazılan kod bugünkü yoldan gider.
+    if t.katalog_kodu is None and (_set_acik(k) or not _acik_plan_var(k)):
+        kod = _yalniz_kod(metin, katalog)
+        if kod:
+            k.not_dus("kural", f"mesajda yalnız model kodu: {kod}")
+            t = t.model_copy(update={"niyet": "yeni_talep", "katalog_kodu": kod})
 
     # D-01: askıda "yeni talep mi, önceki taslağın değişikliği mi?" sorusu varken gelen mesaj. Yalnız kısa ve saf bir cevap
     # ("yeni", "değişiklik", "önceki taslağın değişikliği") cevap sayılır; o zaman soruyu doğuran mesaj (bekletilen talep ve
@@ -1002,6 +1011,32 @@ def plan_sonucu(k: Konusma, katalog: Katalog, sonuc: dict, kart=None) -> Karar:
     k.not_dus("kural", f"yeni plan üretildi: {', '.join(y['kod'] for y in yeniler)} ({sonuc.get('yol') or 'yeni'})")
     return _bitir(k, Karar(eylem="secenek", soru_alani="secenek", mesaj=mesaj, secenek_seti=st, butonlar=butonlar,
                            gerekce=f"seçenek seti {st['id']}: yeni plan {' + '.join(y['kod'] for y in yeniler)} + bankadan {len(banka)}"))
+
+
+def _set_acik(k: Konusma) -> bool:
+    """Açık bir seçenek seti var mı (alan seti ya da çatı seti; prefabrik ya da çelik)?"""
+    return (k.d.get("secenek_seti") or {}).get("durum") == "acik"
+
+
+def _acik_plan_var(k: Konusma) -> bool:
+    """Konuşmada bayiye gitmiş ve kapanmamış bir plan var mı (onay bekleyen, revizyondaki ya da onaylı)?"""
+    return bool(k.d.get("son_is_emri")) and k.d.get("asama") in ACIK_PLAN_ASAMALARI
+
+
+# BK-29 PR-3: model kodunun yanında seçim anlamı taşıyan sözcükler (normalize). Başka sözcük varsa (istek, olumsuz söz) mesaj LLM'in
+# okumasıyla gider: "PA-04 olmasın", "PA-04 ile PA-05 farkı ne?", "PA-04'te mutfak penceresi 120x120" yalnız kod değildir.
+_KOD_DOLGU = {"olsun", "olur", "istiyorum", "istiyoruz", "isterim", "isteriz", "seciyorum", "seciyoruz", "sectim", "sectik", "secelim",
+              "alalim", "alayim", "lutfen", "tamam", "evet", "ok", "bu", "model", "modeli", "modelini", "plan", "plani", "planini",
+              "secenek", "secenegi", "secenegini", "uygun", "iyi", "guzel", "hazirlayin", "hazirlar", "misiniz", "musunuz", "cizin", "gonderin"}
+
+
+def _yalniz_kod(metin: str | None, katalog: Katalog) -> str | None:
+    """Mesaj yalnız bir model kodu (ve seçim sözcükleri) taşıyorsa o kod (katalogda ya da aday kaydında görünür olmalı); değilse None."""
+    kodlar, kalan = _model_kodlari_ve_kalan(metin, katalog)
+    kodlar = list(dict.fromkeys(str(Katalog.kod_normalize(c) or "").upper() for c in kodlar))
+    if len(kodlar) != 1 or any(w not in _KOD_DOLGU for w in CO.norm(kalan).split()):
+        return None
+    return kodlar[0]
 
 
 def _celik_seti_acik(k: Konusma) -> bool:
