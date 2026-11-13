@@ -567,6 +567,9 @@ def isle(gelen: dict, settings: dict, k=None, cikarim: dict | None = None, proje
     elif cizim_ek.get("gorsel") and katman:                     # İE-20: soru ya da çizilemezlik: görsel + altyazı
         g = cizim_ek["gorsel"]
         ekle_satir(giden_gorsel(gelen, Path(g["file"]), g["filename"], metin, 0, g["sha256"]))
+    elif butonlar and len(butonlar) > WA_BUTON:                 # BK-29 PR-2: 3'ten çok kısa cevap (oda, pencere) liste olarak
+        ekle_satir(giden_etkilesim(gelen, metin, 0, liste={"dugme": "Seçenekler", "bolumler": [
+            {"baslik": "Seçenekler", "satirlar": [{"id": bid, "baslik": bas} for bid, bas in butonlar]}]}))
     elif butonlar:
         ekle_satir(giden_etkilesim(gelen, metin, 0, butonlar=butonlar))
     elif katman and (fs := form_sunusu(gelen, karar, k, bayi, settings, metin)) is not None:     # İE-20 PR-2: aynı metin + form düğmesi
@@ -807,8 +810,10 @@ def form_cikarimi(gelen: dict, d: dict | None, giden_bul=None) -> dict | None:
     if oz.get("dosyalar"):
         return {"durum": "dosya", "no": no, "rev": rev,
                 "mesaj": "Dosyanızı Lokman Bey'e ilettim. Değişikliği kısaca yazarsanız (örn. \"mutfak penceresi 120x120\") planı hemen güncellerim."}
+    celik = ((d.get("son_is_emri") or {}).get("yapi") or {}).get("sistem") == "celik"     # BK-29 (pano 210): yalnız yapılabilen örnek
     return {"durum": "bos", "no": no, "rev": rev,
-            "mesaj": "Neyi nasıl değiştirelim? Kısaca yazmanız yeterli; örneğin \"mutfak penceresi 120x120\" ya da \"veranda arkada olsun\"."}
+            "mesaj": "Neyi nasıl değiştirelim? Kısaca yazmanız yeterli; örneğin \"mutfak penceresi 120x120\""
+                     + (" ya da \"dışlar 140'lık olsun\"." if celik else ".")}
 
 
 def form_dosyasi_okunur(cikarim: dict | None, settings: dict) -> bool:

@@ -218,12 +218,14 @@ if pytest is not None:
         (_, k2), _ = senaryo((0, BELIRSIZ, T_B1(None)), (0, "aynalı olsun", ayna))
         assert (k2.eylem, k2.soru_alani) == ("sor", "pencere_islem")
 
-    @pytest.mark.parametrize("metin, islem", [("P6001, yaşam alanı, 120x180", None),
-                                              ("P6001 yaşam alanı penceresi 120x180 olsun", None),
-                                              ("P6001 yaşam alanına bir tane daha 120x180 pencere ekle", "degistir")])
-    def test_b1_cok_pencereli_odada_pencere_sessizce_degismez(metin, islem):
+    # BK-29 PR-2 (pano 201, 13 Kasım 2026 denetimi): birden çok pencereli odada pencere yine sessizce değişmez; yönlendirme yerine
+    # sorulur. Söz belirsizse önce "değiştir mi, ekle mi?", açık değiştirme sözünde "Hangi pencere?" (düğmeli); ekleme yine yönlendirilir.
+    @pytest.mark.parametrize("metin, islem, beklenen", [("P6001, yaşam alanı, 120x180", None, ("sor", "pencere_islem")),
+                                                        ("P6001 yaşam alanı penceresi 120x180 olsun", None, ("sor", "pencere_secim")),
+                                                        ("P6001 yaşam alanına bir tane daha 120x180 pencere ekle", "degistir", ("yonlendir", None))])
+    def test_b1_cok_pencereli_odada_pencere_sessizce_degismez(metin, islem, beklenen):
         (k1,), _ = senaryo((0, metin, T_ODA("Yaşam Alanı", "120x180", islem)))
-        assert k1.eylem == "yonlendir"
+        assert (k1.eylem, k1.soru_alani) == beklenen and k1.is_emri is None
 
     def test_b1_cevap_yalniz_sorulan_satiri_cozer():
         """İki belirsiz satır: YO1 sorulur, 'değiştir' yalnız YO1'i çözer; sonra YO2 ayrıca sorulur."""

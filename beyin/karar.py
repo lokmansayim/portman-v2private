@@ -8,7 +8,7 @@ from pathlib import Path
 
 from .sema import Talep, Karar
 from .katalog import Katalog
-from .konusma import Konusma, MAX_REVIZYON, MAX_SORU, ESKI_TASLAK_SN
+from .konusma import Konusma, MAX_REVIZYON, MAX_SORU, ESKI_TASLAK_SN, _tekillestir
 from . import varyant
 from . import secenek as SC
 from . import numara                     # BK-08 madde 9: gerekçedeki serbest metin maskelenir
@@ -70,9 +70,10 @@ def karar_ver(talep: Talep, k: Konusma, bayi: dict | None, katalog: Katalog, met
     k.kullanilan_talep, k.bekleyen_not = None, ""
     k.son_llm = None                                # İE-08 A4: bu mesajın LLM ipuçları (yalnız bu çağrıda; `_karar_ver` doldurur)
     k.rev0 = int(k.d.get("revizyon") or 0)          # G-2: _bitir, plan üretmeyen turda sayacı buna geri alır
+    k.bu_mesaj_mahalleri, k.pencere_hicbiri = set(), False   # BK-29 PR-2: bu mesajın pencere satırlarının odaları; "Hangi pencere?" → hiçbiri
     d0 = json.loads(json.dumps(k.d))                # BK-29 (pano 200): geri çevrilen istek açık planı kapatmaz; konuşma buna döner
     karar = _karar_ver(talep, k, bayi, katalog, metin)
-    if karar.eylem == "yonlendir":
+    if karar.eylem == "yonlendir" or karar.gerekce == PLAN_DEGISMEDI:
         _plani_acik_tut(k, d0, karar)
     if k.kullanilan_talep is not None:
         karar.kullanilan_talep = k.kullanilan_talep.model_dump(mode="json")
@@ -108,6 +109,58 @@ def _karar_ver(talep: Talep, k: Konusma, bayi: dict | None, katalog: Katalog, me
             k.not_dus("kural", "pencere_islem cevabı olumsuz ya da soru biçimli: soru yinelendi")
             return _soru(k, "pencere_islem", "Anlayamadım. " + (k.d.get("pencere_islem_sorusu") or
                          "Mevcut pencerenin ölçüsünü mü değiştirelim, yoksa ikinci bir pencere mi ekleyelim? \"değiştir\" ya da \"ekle\" yazmanız yeterli."))
+
+    # BK-29 PR-2 (pano 201, 210; 13 Kasım 2026 denetimi): askıdaki "Hangi odanın penceresi?" ve "Hangi pencere?" sorularının cevabı.
+    # Düğme (q:pencere_mahal:<n> → "seçenek <n>", q:pencere_secim:<n> → "<n>") ya da kısa yazı ("Oda 1", "soldaki", "120x100", "ikisi de")
+    # bekleyen pencere isteğine işlenir; LLM'in bu kısa cevaba verdiği içerik yok sayılır (K18). İçerikli yeni istek soruyu düşürür (bayiye
+    # söylenir); kısa ama anlaşılmayan cevap soruyu yineler.
+    if k.d.get("son_soru_alani") == "pencere_mahal" and k.d.get("pencere_mahal_sorusu"):
+        ps = k.d["pencere_mahal_sorusu"]
+        ad = _oda_cevabi(metin, ps.get("odalar") or [])
+        if ad and _pencere_odasi_yaz(k.d["taslak"], ps.get("hedef") or {}, ad):
+            k.d.pop("pencere_mahal_sorusu", None); k.d["son_soru_alani"] = None
+            k.not_dus("kural", f"pencere_mahal cevabı: {ad}")
+            t = Talep(niyet="yeni_talep", guven=t.guven, ozet="")
+        elif not _icerikli(t) and len((metin or "").split()) <= 4 and not _olcu_bul(metin or ""):
+            k.not_dus("kural", "pencere_mahal cevabı anlaşılmadı: soru yinelendi")
+            return _soru(k, "pencere_mahal", "Anlayamadım. " + ps.get("metin", ""), ps.get("butonlar"))
+    if k.d.get("son_soru_alani") == "pencere_secim" and k.d.get("pencere_secim"):
+        ps = k.d["pencere_secim"]
+        secim = _pencere_secim_cevabi(metin, ps.get("secenekler") or [])
+        if secim is not None:
+            for p in k.d["taslak"].get("pencereler") or []:
+                if list(_pencere_anahtari(p)) == ps.get("satir") and p.get("pencere_sira") is None:
+                    if secim == "hicbiri":
+                        p["_dusur"] = True
+                    else:
+                        p["pencere_sira"] = sorted({i for j in secim for i in ps["secenekler"][j]["sira"]})
+                        p["islem"] = "degistir"               # hakem 1: soru değiştirme sözünden doğdu; LLM'in "ekle"si kalmaz
+            k.d["taslak"]["pencereler"] = [p for p in k.d["taslak"].get("pencereler") or [] if not p.get("_dusur")]
+            k.d.pop("pencere_secim", None); k.d["son_soru_alani"] = None
+            if secim == "hicbiri":
+                k.pencere_hicbiri = True
+                k.bekleyen_not = "Tamam, o pencereyi değiştirmedim. "
+            k.not_dus("kural", "pencere_secim cevabı: " + ("hiçbiri" if secim == "hicbiri" else ", ".join(str(j + 1) for j in secim)))
+            t = Talep(niyet="yeni_talep", guven=t.guven, ozet="")
+        elif len(ps.get("secenekler") or []) == 1 and _BIRI.search(" " + CO.norm(metin or "") + " ") \
+                and len((metin or "").split()) <= 6 and not _olcu_bul(metin or ""):
+            # "İkisini de … yapalım mı?" sorusuna "sadece biri": aynı ölçü ve duvardaki pencereyi bayi ayırt edemez, kod da seçemez
+            # (soru döngüye girmesin; hakem ikinci tur 2). Plan açık kalır (`_plani_acik_tut`), Patron'a bildirim gider.
+            k.not_dus("kural", "pencere_secim: aynı duvardaki pencerelerden yalnız biri istendi")
+            return _bitir(k, Karar(eylem="yonlendir", gerekce="aynı ölçü ve duvardaki pencerelerden biri seçilemiyor",
+                                   mesaj="Aynı duvardaki aynı ölçülü pencerelerden yalnız birini otomatik seçemiyorum. " + YONLENDIRME))
+        elif not _icerikli(t) and len((metin or "").split()) <= 6 and not _olcu_bul(metin or ""):
+            k.not_dus("kural", "pencere_secim cevabı anlaşılmadı: soru yinelendi")
+            return _soru(k, "pencere_secim", "Anlayamadım. " + ps.get("metin", ""), ps.get("butonlar"))
+        else:
+            k.d["taslak"]["pencereler"] = [p for p in k.d["taslak"].get("pencereler") or []
+                                           if not (list(_pencere_anahtari(p)) == ps.get("satir") and p.get("pencere_sira") is None)]
+            k.d.pop("pencere_secim", None); k.d["son_soru_alani"] = None
+            ayni_oda = varyant._norm(ps.get("mahal") or "") in {varyant._norm(x.mahal or "") for x in t.pencereler} | \
+                {varyant._norm(str((v.parametreler or {}).get("mahal") or "")) for v in t.varyantlar if v.tur == "pencere_degistir"}
+            if not ayni_oda:                                  # aynı odanın penceresini yeniden yazdıysa bu mesaj sorunun yerine geçer
+                k.bekleyen_not = "Önceki pencere sorumu cevaplamadığınız için o değişikliği uygulamadım; bu mesajınızı işliyorum. "
+            k.not_dus("kural", "pencere_secim sorusu cevaplanmadan yeni istek geldi: soru düştü")
 
     # İE-04: askıdaki öncelik sorusunun cevabı ("bütçe", "yaşam alanı", "kısa montaj", "fark etmez"; buton kimliği q:oncelik:<deger>
     # aynı metne çevrilir). Kısa ve açık cevap taslağa yazılır; LLM'in bu kısa cevaba verdiği içerik yok sayılır. Cevap değilse
@@ -263,7 +316,7 @@ def _karar_ver(talep: Talep, k: Konusma, bayi: dict | None, katalog: Katalog, me
         if k.d["asama"] in ("onay_bekliyor", "uretildi"):
             k.d["asama"] = "revizyon"
             return _bitir(k, Karar(eylem="sor", soru_alani="revizyon_ne", gerekce="plan reddedildi",
-                                    mesaj="Anladım. Neyi değiştirelim? (pencere, kapı, veranda, oda yerleşimi, ölçü…)"))
+                                    mesaj="Anladım. " + _neyi_degistirelim(k)))
         k.sifirla()
         return _bitir(k, Karar(eylem="cevapla", gerekce="iptal", mesaj="Talep kapatıldı. Yeni bir plan istediğinizde yazmanız yeterli."))
 
@@ -296,7 +349,15 @@ def _karar_ver(talep: Talep, k: Konusma, bayi: dict | None, katalog: Katalog, me
     dusen_not = ""
     if k.d.get("son_soru_alani") in ("pencere_mahal", "pencere_olcu") and not t.pencereler \
             and not any(v.tur.startswith("pencere") for v in t.varyantlar):
-        k.d["taslak"].pop("pencereler", None); k.d["son_soru_alani"] = None
+        # BK-29 PR-2: planı üreten taslak varsa yalnız askıdaki istek düşer (eski revizyonların pencereleri kalır); odası sorulan
+        # pencere varyantı da düşer (kalınca her mesajda aynı soru yineleniyordu: 13 Kasım denetimi, "Oda 1")
+        pt = k.d.get("plan_taslagi")
+        if isinstance(pt, dict):
+            k.d["taslak"]["pencereler"] = json.loads(json.dumps(pt.get("pencereler") or []))
+        else:
+            k.d["taslak"].pop("pencereler", None)
+        k.d["taslak"]["varyantlar"] = [v for v in k.d["taslak"].get("varyantlar") or [] if v.get("tur") != "pencere_degistir"]
+        k.d.pop("pencere_mahal_sorusu", None); k.d["son_soru_alani"] = None
         dusen_not = "Önceki pencere değişikliğini netleştirmediğiniz için uygulamadım; isterseniz sonra ekleriz. "
     # İE-25 (geometri hakemi bulgu 5; ikinci tur 1–2): çatı seti açıkken gelen m², dış ölçü, oda, kat ya da yapı türü değişikliği sessizce
     # düşmez: çatı seti "eskidi" kapanır (eski düğmesi geçmez), seçilen model bırakılır, talep yeni bilgisiyle yeniden okunur (yeni set, soru
@@ -340,11 +401,14 @@ def _karar_ver(talep: Talep, k: Konusma, bayi: dict | None, katalog: Katalog, me
     if t.pencereler:
         yeni_anahtarlar = {_pencere_anahtari(p) for p in t.model_dump()["pencereler"]}
         yeni_mahaller = {varyant._norm(a[0]) for a in yeni_anahtarlar}
+        k.bu_mesaj_mahalleri = set(yeni_mahaller)
         ts["pencereler"] = [p for p in ts.get("pencereler") or []
-                            if _pencere_anahtari(p) in yeni_anahtarlar or varyant._norm(_pencere_anahtari(p)[0]) not in yeni_mahaller]
+                            if _pencere_anahtari(p) in yeni_anahtarlar or p.get("pencere_sira") is not None
+                            or varyant._norm(_pencere_anahtari(p)[0]) not in yeni_mahaller]   # BK-29 PR-2: seçilmiş pencere kalır
         for p in ts["pencereler"]:
-            if _pencere_anahtari(p) in yeni_anahtarlar and p.get("islem_kaynak") != "bayi cevabı":
+            if _pencere_anahtari(p) in yeni_anahtarlar and p.get("islem_kaynak") != "bayi cevabı" and p.get("pencere_sira") is None:
                 p["soz_niyeti"] = _pencere_soz_niyeti(metin, p.get("mahal"), p.get("olcu"))
+                p["soz"] = (metin or "").strip()[:300]   # BK-29 PR-2: "Hangi pencere?" bu sözden okunur (sonraki cevap mesajından değil)
     if dusen_not:
         ts["_on_not"] = dusen_not
 
@@ -1441,12 +1505,14 @@ def _is_emri_uret(k: Konusma, bayi: dict, katalog: Katalog, sablon: dict, kaynak
                 mahal = p.get("mahal")
                 eslesen = _mahal_eslestir(ie, mahal) if mahal else _mahal_eslestir_metinde(ie, acik)
                 if len(eslesen) != 1:
-                    secenek = ", ".join(m["ad"] for m in ie["mahaller"] if any(a.get("mahal") == m["ad"] for a in ie["acikliklar"] if a["tur"] == "pencere"))
-                    return _soru(k, "pencere_mahal", f"Hangi odanın penceresini {yeni} yapalım? Seçenekler: {secenek}.")
-                # G-3/G-4 (29.09): oda ve ölçü belli; değişikliği satır yolu B1 kurallarıyla uygular. Aynı odanın satırı varsa varyant
-                # düşer (not iki kez yazılmaz); yoksa varyant, geldiği mesajdaki sözle satıra çevrilir. Oda parametrede değil yalnız
-                # açıklamada yazılı olsa da (Astra) söz belirsizse B1 sorar: pencere varyant yoluyla sessizce değişmez.
-                if not any(varyant._norm(r.get("mahal") or "") == varyant._norm(eslesen[0]) for r in ts.get("pencereler") or []):
+                    return _oda_sorusu(k, ie, f"Hangi odanın penceresini {yeni} yapalım?", {"tur": "varyant", "aciklama": acik}, eslesen)
+                # G-3/G-4 (29.09): oda ve ölçü belli; değişikliği satır yolu B1 kurallarıyla uygular. Bu mesajda aynı odanın satırı varsa
+                # varyant düşer (not iki kez yazılmaz); yoksa varyant, geldiği mesajdaki sözle satıra çevrilir. Oda parametrede değil yalnız
+                # açıklamada yazılı olsa da (Astra) söz belirsizse B1 sorar: pencere varyant yoluyla sessizce değişmez. BK-29 PR-2: önceki
+                # revizyonun aynı oda satırı varyantı düşürmez (yeni ölçü sessizce düşüyordu); son söz geçerli, seçilmiş pencere kalır.
+                if varyant._norm(eslesen[0]) not in getattr(k, "bu_mesaj_mahalleri", set()):
+                    ts["pencereler"] = [r for r in ts.get("pencereler") or []
+                                        if r.get("pencere_sira") is not None or varyant._norm(r.get("mahal") or "") != varyant._norm(eslesen[0])]
                     satir = {"mahal": eslesen[0], "olcu": yeni, "adet": None, "duvar": None, "islem": "degistir"}
                     if p.get("soz_niyeti"):
                         satir["soz_niyeti"] = p["soz_niyeti"]
@@ -1458,8 +1524,11 @@ def _is_emri_uret(k: Konusma, bayi: dict, katalog: Katalog, sablon: dict, kaynak
         except varyant.VaryantHatasi as e:
             return _bitir(k, Karar(eylem="yonlendir", gerekce=f"varyant hatası: {e}", mesaj=f"Değişiklik uygulanamadı ({e}). " + YONLENDIRME))
     # pencere listesi: 'degistir' → şablondaki mahalle eşleştirip ölçü değiştir; 'ekle'/'kaldir' → v0.1'de yönlendirme
-    for p in ts.get("pencereler") or []:
-        if p.get("islem") in (None, "degistir", "ekle") and p.get("olcu") and p.get("mahal") and p.get("islem_kaynak") != "bayi cevabı":
+    ie_pencere0 = json.loads(json.dumps(ie))          # BK-29 PR-2: seçilmiş pencerelerin notu şablondaki adlarıyla (son satırlardan)
+    for p0 in list(ts.get("pencereler") or []):
+        p = {**p0, "islem": "degistir"} if p0.get("pencere_sira") is not None else p0    # seçilmiş pencere: ölçü değişikliği (hakem 1)
+        if p.get("islem") in (None, "degistir", "ekle") and p.get("olcu") and p.get("mahal") and p.get("islem_kaynak") != "bayi cevabı" \
+                and p.get("pencere_sira") is None:
             # Mahalde zaten TEK pencere varsa ölçüt bayinin KENDİ sözüdür, LLM'in işlem alanı ya da özeti değil (K18, K21; 22.09 canlı
             # hata: LLM 'ekle' dedi; B1: LLM boş ya da 'degistir' verince belirsiz söz sessizce değişiklik sayılıyordu):
             #   açık değiştirme sözü → ölçü değişikliği; açık ekleme sözü → ekleme (v0.1'de yönlendirme); ikisi de yoksa → SORULUR.
@@ -1471,13 +1540,18 @@ def _is_emri_uret(k: Konusma, bayi: dict, katalog: Katalog, sablon: dict, kaynak
                 niyet = "degistir" if k.d.get("son_is_emri") else _pencere_soz_niyeti(k.d.get("son_metin") or p.get("aciklama") or "",
                                                                                      p.get("mahal"), p.get("olcu"))
             if len(eslesen) == 1 and len(mevcut) > 1:
+                # BK-29 PR-2 (pano 201): birden çok pencereli oda. Açık ekleme sözü → ekleme; açık değiştirme sözü → hangi pencere olduğu
+                # aşağıda bayinin sözünden (duvar, eski ölçü) okunur ya da düğmeyle sorulur; söz belirsizse önce "değiştir mi, ekle mi?"
                 if niyet == "ekle":
                     p = {**p, "islem": "ekle"}
-                else:           # hangi pencere? otomatik seçilmez (v0.1'de soru yerine devir)
+                elif niyet == "degistir":
+                    p = {**p, "islem": "degistir"}
+                else:
                     olculer = ", ".join(a.get("olcu", "?") for a in mevcut)
-                    return _bitir(k, Karar(eylem="yonlendir", gerekce=f"{eslesen[0]}: {len(mevcut)} pencere, hangisi belirsiz",
-                                           mesaj=f"{eslesen[0]} odasında {len(mevcut)} pencere var ({olculer}); hangisinin {p['olcu']} "
-                                                 "olacağını otomatik seçemiyorum. " + YONLENDIRME))
+                    k.d["pencere_islem_satiri"] = list(_pencere_anahtari(p))
+                    k.d["pencere_islem_sorusu"] = (f"{eslesen[0]} odasında {len(mevcut)} pencere var ({olculer}). Birinin ölçüsünü {p['olcu']} "
+                                                   "yapalım mı, yoksa yeni bir pencere mi ekleyelim? \"değiştir\" ya da \"ekle\" yazmanız yeterli.")
+                    return _soru(k, "pencere_islem", k.d["pencere_islem_sorusu"])
             if len(eslesen) == 1 and len(mevcut) == 1:
                 if niyet == "degistir":
                     if p.get("islem") == "ekle":
@@ -1498,12 +1572,30 @@ def _is_emri_uret(k: Konusma, bayi: dict, katalog: Katalog, sablon: dict, kaynak
                 return _soru(k, "pencere_olcu", "Pencereyi hangi ölçüye değiştirelim? (120x120, 120x180, 60x40 …)")
             eslesen = _mahal_eslestir(ie, p.get("mahal"))
             if len(eslesen) != 1:
-                secenek = ", ".join(m["ad"] for m in ie["mahaller"] if any(a.get("mahal") == m["ad"] for a in ie["acikliklar"] if a["tur"] == "pencere"))
-                return _soru(k, "pencere_mahal", f"Hangi odanın penceresi? Seçenekler: {secenek}.")
+                return _oda_sorusu(k, ie, "Hangi odanın penceresi?", {"tur": "satir", "anahtar": list(_pencere_anahtari(p0))}, eslesen)
+            oda = _oda_pencereleri(ie, eslesen[0])
+            sira = p0.get("pencere_sira")
+            if sira is None and len(oda) > 1:                  # BK-29 PR-2: hangi pencere? sözden ya da soruyla (pencere_sira kayda yazılır)
+                secim = _pencere_secimi(k, ie, eslesen[0], p0)
+                if isinstance(secim, Karar):
+                    return secim
+                p0["pencere_sira"] = sira = list(secim)
+                p0["islem"] = "degistir"
             try:
-                ie = varyant.pencere_degistir(ie, eslesen[0], None, p["olcu"]); notlar.append(f"{eslesen[0]} penceresi {p['olcu']}")
+                ie = varyant.pencere_degistir(ie, eslesen[0], None, p["olcu"], sira=sira if len(oda) > 1 else None)
+                if len(oda) == 1:
+                    notlar.append(f"{eslesen[0]} penceresi {p['olcu']}")
+                else:
+                    p0["_oda"] = eslesen[0]                 # not aşağıda, örtüşmeler ayrıldıktan sonra
             except varyant.VaryantHatasi as e:
                 return _bitir(k, Karar(eylem="yonlendir", gerekce=f"pencere hatası: {e}", mesaj=f"Pencere değişikliği uygulanamadı ({e}). " + YONLENDIRME))
+    if ts.get("pencereler"):
+        ts["pencereler"] = _tekillestir(_secilenleri_ayir(ts["pencereler"]), "pencereler")   # seçilen pencerenin eski satırı düşer
+        for r in ts["pencereler"]:
+            oda_adi = r.pop("_oda", None)
+            if oda_adi and r.get("pencere_sira"):
+                gruplar = [g for g in _pencere_gruplari(ie_pencere0, oda_adi) if set(g["sira"]) & set(r["pencere_sira"])]
+                notlar.append(f"{oda_adi} " + ", ".join(_grup_adi(g, kisa=True) for g in gruplar) + f" penceresi {r['olcu']}")
     seq = int(time.time()) % 100000
     ie["is_emri_no"] = f"PM-{bayi.get('kod','BAYI')}-{time.strftime('%Y%m%d')}-{seq}"
     # G-2 (29.09): numara, gönderilmiş son planın numarasından (konuşma sıfırlandıysa 1); sayaç plan sayısıyla eşitlenir.
@@ -1517,6 +1609,11 @@ def _is_emri_uret(k: Konusma, bayi: dict, katalog: Katalog, sablon: dict, kaynak
     ie["bina_ozellikleri"] = {**ie.get("bina_ozellikleri", {}), **(ts.get("bina_ozellikleri") or {})}
     ie["ozel_istekler"] = list(ts.get("ozel_istekler") or [])
     ie.setdefault("eksikler", [])
+    son = k.d.get("son_is_emri") or {}
+    if son and getattr(k, "pencere_hicbiri", False) and (son.get("talep") or {}).get("kaynak") == kaynak and _plan_ozu(ie) == _plan_ozu(son):
+        # BK-29 PR-2: "Hangi pencere?" sorusuna "hiçbiri" dendi ve mesajda başka değişiklik yok: aynı plan yeniden çizilmez, revizyon
+        # hakkı harcanmaz; plan açık kalır (karar_ver → _plani_acik_tut). Öteki aynı-plan revizyonları bugünkü gibi çizilir (altın set D03).
+        return _bitir(k, Karar(eylem="cevapla", gerekce=PLAN_DEGISMEDI, mesaj=ts.pop("_on_not", "").strip()))
     k.d["son_is_emri"] = ie
     k.d["asama"] = "is_emri_hazir"
     ozet = ts.get("ozet", "")
@@ -1855,6 +1952,293 @@ def _soru(k: Konusma, alan: str, metin: str, butonlar: list[dict] | None = None)
     return _bitir(k, Karar(eylem="sor", soru_alani=alan, mesaj=metin, gerekce=f"eksik: {alan}", butonlar=butonlar))
 
 
+# ───────────────────────── BK-29 PR-2 (pano 201, 210): oda ve pencere soruları, plan değişmedi ─────────────────────────
+# 13 Kasım 2026 WhatsApp denetimi: iki pencereli odada bot soru sormadan yönlendiriyordu ("mutfak penceresi 120x120 olsun", PA-06);
+# "salonun sol penceresi" sözündeki "sol" okunmuyordu; "Hangi odanın penceresi?" sorusuna "Oda 1" cevabı anlaşılmıyordu.
+PLAN_DEGISMEDI = "plan değişmedi"
+_DUVAR_ADI = {"sol": "sol", "sag": "sağ", "on": "ön", "arka": "arka"}
+_DUVAR_SOZ = {"sol": re.compile(r"\bsol(da|daki|u|unda|undaki)?\b"),
+              "sag": re.compile(r"\bsag(da|daki|i|inda|indaki)?\b"),
+              "arka": re.compile(r"\barka(da|daki|si|sinda|sindaki)?\b"),
+              "on": re.compile(r"\b(onde|ondeki|onunde|onundeki)\b|\bon (duvar|cephe|taraf)\w*")}
+_ON_HAM = re.compile(r"(?<!\w)(ön|önde|öndeki|önü|önünde|önündeki)(?!\w)(?!\s+onay)")    # "ön onay planı" duvar değil (hakem 4)
+_NEYI_DEGISTIRELIM_PREFABRIK = "Neyi değiştirelim? Odayı ve pencere ölçüsünü yazın (örn. \"mutfak penceresi 120x120 olsun\")."
+
+
+def _neyi_degistirelim(k: Konusma) -> str:
+    """"Revize et" cevabı: yalnız otomatik yapılabilen değişiklikler örnek gösterilir (pano 210; kapı, veranda, oda yerleşimi yok)."""
+    ie = k.d.get("son_is_emri") or {}
+    if str((k.d.get("taslak") or {}).get("katalog_kodu") or "").startswith(YENI_ONEK):
+        return _NEYI_DEGISTIRELIM_YENI
+    if (ie.get("yapi") or {}).get("sistem") == "celik":
+        return _NEYI_DEGISTIRELIM
+    return _NEYI_DEGISTIRELIM_PREFABRIK
+
+
+def _olculer_metin(metin: str | None) -> list[str]:
+    return [f"{a}x{b}" for a, b in re.findall(r"(\d{2,3})\s*[xX×*]\s*(\d{2,3})", metin or "")]
+
+
+def _duvarlar_metin(metin: str | None) -> set[str]:
+    """Bayinin sözündeki duvar: "sol", "soldaki", "sağ duvarındaki", "ön cephedeki", "arkadaki" (İş Emri: sol, sag, on, arka)."""
+    q = " " + _sozcuk_norm(metin or "") + " "
+    out = {d for d, rx in _DUVAR_SOZ.items() if rx.search(q)}
+    if _ON_HAM.search((metin or "").lower()):
+        out.add("on")
+    return out
+
+
+def _oda_pencereleri(ie: dict, mahal: str) -> list[dict]:
+    return [a for a in ie.get("acikliklar", []) if a["tur"] == "pencere" and a.get("mahal") == mahal]
+
+
+def _pencere_gruplari(ie: dict, mahal: str) -> list[dict]:
+    """Odanın pencereleri, bayinin ayırt edebildiği gibi: aynı ölçü ve aynı duvardakiler tek seçenek. sira: odadaki pencere sırası (0'dan)."""
+    gruplar: list[dict] = []
+    for i, a in enumerate(_oda_pencereleri(ie, mahal)):
+        g = next((g for g in gruplar if (g["olcu"], g["duvar"]) == (a.get("olcu"), a.get("duvar"))), None)
+        if g is None:
+            gruplar.append({"olcu": a.get("olcu"), "duvar": a.get("duvar"), "sira": [i]})
+        else:
+            g["sira"].append(i)
+    return gruplar
+
+
+def _grup_adi(g: dict, kisa: bool = False) -> str:
+    d, n = _DUVAR_ADI.get(g.get("duvar") or "", ""), len(g.get("sira") or [])
+    if kisa:                                          # düğme başlığı (en çok 20 karakter): "120x100 sol", "120x120 arka (2)"
+        return (f"{g['olcu']} {d}".strip() + (f" ({n})" if n > 1 else ""))[:20]
+    return str(g["olcu"]) + (f", {d} duvar" if d else "") + (f" ({n} pencere)" if n > 1 else "")
+
+
+# çoğul söz: aynı ölçü ve duvardaki pencerelerin hepsi. Tekil kısıt ("biri", "sadece", "diğer pencereler kalsın") varsa çoğul değildir
+# (hakem ikinci tur 1: "arka pencerelerinden biri" ikisini birden değiştiriyordu)
+_COGUL = re.compile(r"\b(pencereler|pencereleri|pencerelerin|pencerelerini|pencerelerinin|ikisi de|ikiside|ikisini de|her ikisi\w*|"
+                    r"hepsi|hepsini|tumu|tumunu|butun pencere\w*|tum pencere\w*)\b")
+# "İkisini de … yapalım mı?" sorusuna "yalnız biri" anlamı taşıyan cevap (yönlendirilir); "diğer her şey kalsın", "tek kanat" değil
+_BIRI = re.compile(r"\b(biri|birini|birisi|birisini|bir tane\w*|1 tane\w*|tek tane\w*|tekini|sadece bir\w*|yalniz bir\w*|yalnizca bir\w*|"
+                   r"sadece 1|yalniz 1|ilki\w*|ilkini|birinci\w*|ikinci\w*|sonuncu\w*|soldaki\w*|sagdaki\w*)\b")
+_TEKIL = re.compile(r"\b(biri|birini|birinin|birisi|birisini|tek|tekini|sadece|yalniz|yalnizca|diger\w*|kalsin|haric|\w+den biri)\b")
+
+
+def _govde(w: str) -> str:
+    """Oda adı sözcüğünün eksiz gövdesi: "mutfak" → "mutfa" ("mutfağın"), "yatak" → "yata" ("yatağın"); sayı olduğu gibi."""
+    return w[:-1] if len(w) > 3 and not w.isdigit() and w[-1] in "kptc" else w
+
+
+def _odayi_aniyor(parca: str, mahal: str) -> bool:
+    """Cümle bu odayı anıyor mu (eklerle: "mutfağın", "salonun", "yatak odası 1'in")? "SALON+MUTFAK" parçalarından biri yeter; öteki
+    adlarda bütün sözcükler (numara dahil) geçmeli."""
+    soz = CO.norm(parca).split()
+    if not soz:
+        return False
+    adlar = [CO.norm(x).split() for x in str(mahal).split("+")] if "+" in str(mahal) else [CO.norm(mahal).split()]
+    for ad in adlar:
+        if ad and all(any((t == w) if w.isdigit() else t.startswith(_govde(w)) for t in soz) for w in ad):
+            return True
+    return False
+
+
+def _oda_parcasi(parca: str, mahal: str, oteki: list[str]) -> str:
+    """Cümle birden çok odayı anıyorsa bu odanın kendi parçası: odanın adından öteki bir odanın adına kadar ("Salonun ön penceresi ile
+    mutfak penceresi 120x180 olsun" → mutfak için "mutfak penceresi 120x180 olsun"). Duvar ve eski ölçü odanın adından sonra yazılır
+    ("mutfağın sol penceresi"); adından önce yazılan söz okunmaz, soru gelir (güvenli yön)."""
+    if not any(_odayi_aniyor(parca, o) for o in oteki):
+        return parca
+    toks = parca.split()
+
+    def basi(ad: str) -> set[int]:
+        out = set()
+        for parca_ad in str(ad).split("+"):
+            w = CO.norm(parca_ad).split()
+            if w:
+                out |= {i for i, t in enumerate(toks) if any(x.startswith(_govde(w[0])) for x in CO.norm(t).split())}
+        return out
+
+    bu = sorted(basi(mahal))
+    if not bu:
+        return parca
+    obur = sorted(set().union(*(basi(o) for o in oteki)) - set(bu))
+    son = next((i for i in obur if i > bu[0]), len(toks))
+    if son < len(toks):
+        # öteki odanın adından önceki sıfat ("ile öndeki salon", "ve ön cephedeki salon") o odanındır: parça bağlaçta biter
+        # (hakem üçüncü tur 2); bağlaç yoksa iki odanın sözü ayrılamaz, yalnız oda adı kalır (duvar okunmaz, soru gelir)
+        # öteki odaya en yakın bağlaç: odanın kendi içindeki "sol ve ön pencereleri" bölünmez (hakem dördüncü tur)
+        baglac = next((i for i in range(son - 1, bu[0], -1) if CO.norm(toks[i]) in ("ile", "ve", "veya", "ya", "yada")), None)
+        son = baglac if baglac is not None else bu[0] + 1
+    return " ".join(toks[bu[0]:son])
+
+
+def _sozle_daralt(metin: str | None, yeni: str | None, gruplar: list[dict], mahal: str = "", odalar: list[str] | None = None) \
+        -> tuple[list[int], bool]:
+    """Bayinin sözünde pencereyi ayıran eski ölçü ve duvar (K18): "Mutfağın sol duvarındaki 120x100 pencere 120x120 olsun",
+    "salonun sol penceresi 120x180 olsun". Okunan cümleler (hakem 3: başka odanın cümlesi okunmaz): yeni ölçünün geçtiği ve bu odayı anan
+    cümle; yoksa yeni ölçünün geçtiği ve hiçbir odayı anmayan cümle; yoksa bu odayı anan cümle. Döner: (kalan grupların sırası, çoğul söz
+    var mı: "pencereleri", "ikisi de"). Söylenen ölçü ya da duvar odada yoksa o ipucu daraltmaz (soru gelir)."""
+    parcalar = [x for x in re.split(r"[;,.!?\n]+", metin or "") if x.strip()]
+    oteki = [o for o in odalar or [] if o != mahal]
+    olculu = [x for x in parcalar if yeni and yeni in _olculer_metin(x)]
+    ilgili = [x for x in olculu if _odayi_aniyor(x, mahal)] \
+        or [x for x in olculu if not any(_odayi_aniyor(x, o) for o in oteki)] \
+        or [x for x in parcalar if _odayi_aniyor(x, mahal)]
+    ilgili = [_oda_parcasi(x, mahal, oteki) for x in ilgili]       # hakem ikinci tur 3: cümlede öteki odanın sözü okunmaz
+    eski = {o for x in ilgili for o in _olculer_metin(x)} - ({yeni} if yeni else set())
+    duvarlar: set[str] = set()
+    for x in ilgili:
+        duvarlar |= _duvarlar_metin(x)
+    kalan = list(range(len(gruplar)))
+    if eski:
+        kalan = [i for i in kalan if gruplar[i]["olcu"] in eski] or kalan
+    if duvarlar:
+        kalan = [i for i in kalan if gruplar[i]["duvar"] in duvarlar] or kalan
+    q = [" " + CO.norm(x) + " " for x in ilgili]
+    return kalan, any(_COGUL.search(x) for x in q) and not any(_TEKIL.search(x) for x in q)
+
+
+def _secilenleri_ayir(satirlar: list[dict]) -> list[dict]:
+    """Aynı odada seçilmiş pencere satırları örtüşmez: bir pencere en son hangi satırla değiştiyse o satırda kalır, eski satırdan çıkar;
+    penceresi kalmayan eski satır düşer (hakem 2: r03 "ikisi de" [0, 1], r04 ön [1]; sonraki revizyonda ön pencere r03'ün ölçüsüne
+    dönüyordu). Sıra korunur; seçilmemiş satırlar olduğu gibi."""
+    alinan: dict[str, set[int]] = {}
+    out: list[dict] = []
+    for r in reversed(satirlar):
+        if r.get("pencere_sira") is None:
+            out.append(r); continue
+        oda = varyant._norm(r.get("mahal") or "")
+        kalan = [i for i in r["pencere_sira"] if i not in alinan.setdefault(oda, set())]
+        if not kalan:
+            continue
+        alinan[oda] |= set(kalan)
+        out.append({**r, "pencere_sira": kalan} if kalan != list(r["pencere_sira"]) else r)
+    return list(reversed(out))
+
+
+def _pencere_secimi(k: Konusma, ie: dict, mahal: str, p0: dict) -> list[int] | Karar:
+    """Birden çok pencereli odada değişecek pencere: bayinin sözü ayırıyorsa o, ayırmıyorsa "Hangi pencere?" (her pencereye bir düğme;
+    3'ten çoksa liste). Aynı ölçü ve aynı duvardaki pencereler bayi için ayırt edilemez, birlikte değişir. Döner: odadaki pencere sırası."""
+    gruplar = _pencere_gruplari(ie, mahal)
+    kalan, cogul = _sozle_daralt(p0.get("soz") or k.d.get("son_metin"), p0.get("olcu"), gruplar, mahal,
+                                 [m["ad"] for m in ie.get("mahaller") or []])
+    if kalan and (cogul or (len(kalan) == 1 and len(gruplar[kalan[0]]["sira"]) == 1)):
+        # tek pencere ya da çoğul söz ("mutfak pencereleri", "sol ve ön pencereleri", "arka pencereleri"): sözün kapsadığı hepsi
+        k.not_dus("kural", f"BK-29: {mahal} penceresi bayinin sözünden seçildi ({'; '.join(_grup_adi(gruplar[i]) for i in kalan)})")
+        return sorted(i for j in kalan for i in gruplar[j]["sira"])
+    n = len(_oda_pencereleri(ie, mahal))
+    if len(kalan) == 1:
+        # hakem 5: aynı ölçü ve aynı duvardaki pencereleri bayi ayırt edemez; tekil sözle hepsi sessizce değişmez, sorulur
+        g = gruplar[kalan[0]]
+        m = len(g["sira"])
+        yer = f"{_DUVAR_ADI[g['duvar']]} duvarında" if g.get("duvar") in _DUVAR_ADI else "aynı duvarda"
+        hepsi = "İkisini de" if m == 2 else "Hepsini"
+        secenekler = [g]
+        metin = f"{mahal} odasının {yer} {m} adet {g['olcu']} pencere var. {hepsi} {p0['olcu']} yapalım mı?"
+        butonlar = [{"id": "q:pencere_secim:1", "baslik": "İkisi de" if m == 2 else "Hepsi"},
+                    {"id": "q:pencere_secim:0", "baslik": "Hiçbiri"}]
+    else:
+        secenekler = [gruplar[i] for i in kalan][:10]
+        liste = "; ".join(f"{i}) {_grup_adi(g)}" for i, g in enumerate(secenekler, 1))
+        metin = f"{mahal} odasında {n} pencere var. Hangisini {p0['olcu']} yapalım? {liste}."
+        butonlar = [{"id": f"q:pencere_secim:{i}", "baslik": _grup_adi(g, kisa=True)} for i, g in enumerate(secenekler, 1)]
+    k.d["pencere_secim"] = {"mahal": mahal, "olcu": p0["olcu"], "satir": list(_pencere_anahtari(p0)), "secenekler": secenekler,
+                            "metin": metin, "butonlar": butonlar}
+    return _soru(k, "pencere_secim", metin, butonlar)
+
+
+# tek seçenekli onay sorusunun cevabı yalnız bu sözcüklerden oluşursa onaydır; "evet sadece biri", "olur mu", "tamam ama birini" değildir
+# (hakem ikinci tur 2): soru yinelenir
+_ONAY_OLUMLU = {"evet", "olur", "tamam", "ok", "ikisi", "ikiside", "ikisini", "ikisinide", "hepsi", "hepsini", "tumu", "tumunu", "yapalim", "yapin",
+                "degistir", "degistirin", "degistirelim"}
+_ONAY_SOZ = _ONAY_OLUMLU | {"de", "da", "her", "olsun", "lutfen", "evet,", "aynen"}
+
+
+def _pencere_secim_cevabi(metin: str | None, secenekler: list[dict]) -> list[int] | str | None:
+    """"Hangi pencere?" sorusunun cevabı: numara ("1", "ikinci", "1 ve 2"), "ikisi de"/"hepsi", "hiçbiri", eski ölçü ("120x100") ya da
+    duvar ("soldaki"). Döner: seçeneklerin sırası (0'dan), "hicbiri" ya da None (cevap değil)."""
+    if not metin or not secenekler:
+        return None
+    c = CO.okuma_cevabi(metin, {"tur": "secim", "adaylar": secenekler})
+    soz = CO.norm(metin).split()
+    if len(secenekler) == 1:
+        # "İkisini de … yapalım mı?": düğme ("1", "hiçbiri"), olumsuz cevap ya da yalın onay ("evet", "ikisi de", "olur"). Sayı
+        # ayrıştırması yok: "bir tane", "ilki" tek pencere ister, onay değildir (hakem üçüncü tur 1)
+        if c is not None and c.get("hicbiri"):
+            return "hicbiri"
+        if soz == ["1"] or (soz and set(soz) <= _ONAY_SOZ and set(soz) & _ONAY_OLUMLU):
+            return [0]
+        return None
+    if c is not None and (c.get("hicbiri") or c.get("secimler")):
+        return "hicbiri" if c.get("hicbiri") else list(c["secimler"])
+    if len(metin.split()) > 6:
+        return None
+    olc = _olculer_metin(metin)
+    if olc and not set(olc) <= {g["olcu"] for g in secenekler}:
+        return None                                   # yeni ölçü taşıyan cevap yeni istektir
+    duvarlar = _duvarlar_metin(metin)
+    if not olc and not duvarlar:
+        return None
+    kalan = [i for i, g in enumerate(secenekler) if (not olc or g["olcu"] in olc) and (not duvarlar or g["duvar"] in duvarlar)]
+    return kalan if len(kalan) == 1 else None
+
+
+def _oda_sorusu(k: Konusma, ie: dict, soru: str, hedef: dict, eslesen: list[str] | None = None) -> Karar:
+    """"Hangi odanın penceresi?" sorusu; seçenekler pencereli odalar (bayinin sözü birkaç odaya uyuyorsa yalnız onlar), her odaya bir
+    düğme (3'ten çoksa liste; q:pencere_mahal:<n>). hedef: cevabın yazılacağı bekleyen istek (varyant ya da pencere satırı)."""
+    odalar = [m["ad"] for m in ie["mahaller"] if any(a.get("mahal") == m["ad"] for a in ie["acikliklar"] if a["tur"] == "pencere")]
+    if eslesen and len(eslesen) > 1:
+        odalar = [o for o in odalar if o in eslesen] or odalar
+    metin = f"{soru} Seçenekler: {', '.join(odalar)}."
+    butonlar = [{"id": f"q:pencere_mahal:{i}", "baslik": ad[:20]} for i, ad in enumerate(odalar[:10], 1)]
+    k.d["pencere_mahal_sorusu"] = {"odalar": odalar[:10], "hedef": hedef, "metin": metin, "butonlar": butonlar}
+    return _soru(k, "pencere_mahal", metin, butonlar)
+
+
+def _oda_cevabi(metin: str | None, odalar: list[str]) -> str | None:
+    """Oda sorusunun kısa cevabı: düğme ("seçenek 2") ya da oda adı ("Oda 1", "ODA 1", "salon"). Yalnız numara yazılırsa oda adındaki
+    numarayla karışır ("2" → "ODA 2" mi ikinci seçenek mi?): cevap sayılmaz, soru yinelenir (K21)."""
+    if not metin or not odalar or len(metin.split()) > 4 or _olcu_bul(metin):
+        return None
+    m = re.fullmatch(r"\s*se[cç]enek\s+(\d{1,2})\s*", metin, re.IGNORECASE)
+    if m:
+        i = int(m.group(1))
+        return odalar[i - 1] if 1 <= i <= len(odalar) else None
+    q = varyant._norm(metin)
+    if not q or q.isdigit():
+        return None
+    tam = [o for o in odalar if varyant._norm(o) == q]
+    if len(tam) == 1:
+        return tam[0]
+    icinde = [o for o in odalar if varyant._norm(o) and varyant._norm(o) in q]
+    if icinde:
+        en_uzun = max(len(varyant._norm(o)) for o in icinde)
+        aday = [o for o in icinde if len(varyant._norm(o)) == en_uzun]
+        return aday[0] if len(aday) == 1 else None
+    kapsayan = [o for o in odalar if q in varyant._norm(o)]
+    return kapsayan[0] if len(kapsayan) == 1 else None
+
+
+def _pencere_odasi_yaz(ts: dict, hedef: dict, ad: str) -> bool:
+    """Oda sorusunun cevabını bekleyen isteğe yazar (pencere varyantının odası ya da pencere satırının odası)."""
+    if hedef.get("tur") == "varyant":
+        for v in ts.get("varyantlar") or []:
+            if v.get("tur") == "pencere_degistir" and (v.get("aciklama") or "") == (hedef.get("aciklama") or ""):
+                v["parametreler"] = {**(v.get("parametreler") or {}), "mahal": ad}
+                return True
+    elif hedef.get("tur") == "satir":
+        for p in ts.get("pencereler") or []:
+            if list(_pencere_anahtari(p)) == hedef.get("anahtar") and p.get("pencere_sira") is None:
+                p["mahal"] = ad
+                return True
+    return False
+
+
+def _plan_ozu(ie: dict) -> str:
+    """Planın bayinin gördüğü içeriği (numara, tarih, varsayım notları ve talep metni hariç): aynıysa plan değişmemiştir."""
+    o = {a: b for a, b in ie.items() if a not in ("is_emri_no", "revizyon", "talep", "kunye", "varsayimlar")}
+    o["_musteri"] = (ie.get("talep") or {}).get("musteri_adi") or ""
+    o["_sevk"] = (ie.get("kunye") or {}).get("sevk_adresi") or ""
+    return json.dumps(o, sort_keys=True, ensure_ascii=False)
+
+
 ACIK_PLAN_ASAMALARI = ("onay_bekliyor", "revizyon", "topluyor", "onaylandi")
 
 
@@ -1880,21 +2264,23 @@ def _plani_acik_tut(k: Konusma, d0: dict, karar: Karar) -> None:
     k.d["son_soru_alani"] = None
     k.d["soru_sayisi"] = 0
     for a in ("okuma_bekleyen", "okuma_secilen", "okuma_hicbiri", "celik_istek", "pencere_islem_satiri", "pencere_islem_sorusu",
-              "eski_taslak_soru", "bekleyen_talep", "bekleyen_metin", "bekleyen_zamani"):
+              "eski_taslak_soru", "bekleyen_talep", "bekleyen_metin", "bekleyen_zamani", "pencere_mahal_sorusu", "pencere_secim"):
         k.d.pop(a, None)
     st = k.d.get("secenek_seti")
     if st and st.get("durum") == "acik":
         st["durum"] = "dustu"
     etiket = f"{no} r{rev:02d}"
     if onayli:
-        karar.mesaj += f" Onaylı planınız ({etiket}) değişmedi."
+        cumle = f"Onaylı planınız ({etiket}) değişmedi."
     elif karar.gerekce == "revizyon sınırı":
-        karar.mesaj += f" Planınız ({etiket}) değişmedi; onaylayabilirsiniz."
+        cumle = f"Planınız ({etiket}) değişmedi; onaylayabilirsiniz."
         karar.butonlar = [{"id": f"o:{no}:{rev}", "baslik": "Onayla"}]
     else:
-        karar.mesaj += f" Planınız ({etiket}) değişmedi. Onaylayabilir ya da başka bir değişiklik yazabilirsiniz."
+        cumle = f"Planınız ({etiket}) değişmedi. Onaylayabilir ya da başka bir değişiklik yazabilirsiniz."
         karar.butonlar = [{"id": f"o:{no}:{rev}", "baslik": "Onayla"}, {"id": f"r:{no}:{rev}", "baslik": "Revize et"}]
-    k.not_dus("kural", f"BK-29: istek geri çevrildi; plan {etiket} açık kaldı ({k.d['asama']})")
+    karar.mesaj = f"{karar.mesaj} {cumle}".strip()
+    neden = "plan değişmedi" if karar.gerekce == PLAN_DEGISMEDI else "istek geri çevrildi"
+    k.not_dus("kural", f"BK-29: {neden}; plan {etiket} açık kaldı ({k.d['asama']})")
     k.kaydet()
 
 
@@ -1913,6 +2299,10 @@ def _bitir(k: Konusma, karar: Karar) -> Karar:
     if k.d.get("son_soru_alani") not in ("okuma", "okuma_olcu"):
         k.d.pop("okuma_bekleyen", None)               # PR-2b: okuma adayları yalnız soru askıdayken tutulur
         k.d.pop("okuma_secilen", None)
+    if k.d.get("son_soru_alani") != "pencere_mahal":
+        k.d.pop("pencere_mahal_sorusu", None)         # BK-29 PR-2: oda ve pencere sorularının seçenekleri yalnız soru askıdayken
+    if k.d.get("son_soru_alani") != "pencere_secim":
+        k.d.pop("pencere_secim", None)
     if karar.eylem == "is_emri":
         k.d["bekleyen_onay"] = karar.is_emri.get("is_emri_no") if karar.is_emri else None
         k.d["asama"] = "onay_bekliyor"

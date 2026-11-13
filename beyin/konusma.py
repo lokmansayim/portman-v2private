@@ -26,7 +26,12 @@ def _anahtar(v, alan: str):
             return (tur, str(p.get("mahal") or v.get("aciklama") or "").strip().lower())
         return (tur, json.dumps(p, sort_keys=True, ensure_ascii=False), str(v.get("aciklama") or "").strip().lower())
     if alan == "pencereler":
-        return (str(v.get("mahal") or "").strip().lower(), v.get("islem"), v.get("duvar"))
+        oda = str(v.get("mahal") or "").strip().lower()
+        # BK-29 PR-2: birden çok pencereli odada seçilen pencere (pencere_sira) satırın kimliğidir: aynı pencereye yeni
+        # ölçü eskisinin yerine geçer (duvar sözle ya da seçimle gelmiş olabilir), aynı odanın öteki penceresi düşmez
+        if v.get("pencere_sira") is not None:
+            return (oda, "pencere_sira", tuple(v["pencere_sira"]))
+        return (oda, v.get("islem"), v.get("duvar"))
     return ("_", json.dumps(v, sort_keys=True, ensure_ascii=False))
 
 

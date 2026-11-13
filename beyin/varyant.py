@@ -128,13 +128,17 @@ def _rects(is_emri: dict, ad: str):
     raise VaryantHatasi(f"mahal yok: {ad}")
 
 
-def pencere_degistir(is_emri: dict, mahal: str | None, eski: str | None, yeni: str) -> dict:
-    """Mahal (ve varsa eski ölçü) eşleşen pencerelerin ölçüsünü değiştirir. Eşleşme yoksa hata."""
+def pencere_degistir(is_emri: dict, mahal: str | None, eski: str | None, yeni: str, sira: list[int] | None = None) -> dict:
+    """Mahal (ve varsa eski ölçü) eşleşen pencerelerin ölçüsünü değiştirir. Eşleşme yoksa hata.
+    sira (BK-29 PR-2): yalnız bu sıradaki pencereler (eşleşen pencereler arasında 0'dan sayılır; birden çok pencereli odada seçilen)."""
     ie = copy.deepcopy(is_emri)
     n = 0
+    j = -1
     for ac in ie["acikliklar"]:
         if ac["tur"] != "pencere": continue
         if mahal and _norm(ac["mahal"]) != _norm(mahal): continue
+        j += 1
+        if sira is not None and j not in sira: continue
         if eski and ac["olcu"] != eski: continue
         ac["olcu"] = yeni; n += 1
     if n == 0:
