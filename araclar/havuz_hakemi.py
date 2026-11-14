@@ -15,7 +15,8 @@ Kalemler (her biri paftanın 1. sayfasındaki değerle):
 
 Çelik (AICelik): proje kartı yok. Hedef değerler İE-16'da müşteri onay paftasından okunan tanımın adından (`testler/havuz/
 celik_kartlari.json`: antet m², oda programı, veranda): genel motor çizer ve doğrular, brüt oturum antet m²'sinden en çok 0,5 m² sapar,
-oda programı antette yazılı ve aynı, veranda var, tek kat; aynı proje havuzda başka kodla varsa (ÇP-14 = KT-04) girmez.
+oda programı antette yazılı ve aynı, antet verandalıysa Motor'da da veranda var, tek kat; aynı proje havuzda başka kodla varsa
+(ÇP-14 = KT-04) girmez. Veranda bir oda gibi sayılır; verandasız proje de girer (Lokman, 14 Kasım 2026 07:34 UTC; D-87 › Veranda).
 
     python3 araclar/havuz_hakemi.py testler/celik/projeler/CP18/CP18.json --kart ÇP-18
 """
@@ -143,10 +144,8 @@ def celik_denetle(tanim_yolu: Path, kart: dict) -> tuple[list[str], dict]:
         b.append(f"oda programı: antette yok (Motor {o['oda_programi']}); doğrulanamadı")
     elif kart["oda_programi"] != o["oda_programi"]:
         b.append(f"oda programı: Motor {o['oda_programi']}, antet {kart['oda_programi']}")
-    if not kart.get("veranda"):
-        b.append("veranda: antette veranda yok (verandasız teklif olmaz; Lokman, 27 Ekim 2026)")
-    elif o["veranda_m2"] <= 0:
-        b.append("veranda: Motor'da veranda yok")
+    if kart.get("veranda") and o["veranda_m2"] <= 0:                           # veranda bir oda gibi: antette varsa Motor'da da olmalı;
+        b.append("veranda: antet verandalı, Motor'da veranda yok")               # verandasız proje de girer (Lokman, 14 Kasım 2026; D-87)
     if int(kart.get("kat_adedi") or 1) != 1 or o["kat"] != 1:
         b.append("kat: havuz yalnız tek kat")
     return b, o
