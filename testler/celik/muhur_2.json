@@ -64,6 +64,12 @@
    "tarih": "2026-11-14",
    "sha256": "cf0850aee6ef76429c5b2268d4eb62da5e6029f62f7b48c74c322bcee26769ff",
    "liste_commit": "8c08a7f6585bdb2cba1ab98939473a792c7eba81"
+  },
+  "ÇP-23": {
+   "karar": "Lokman, 14 Kasım 2026 09:53 UTC açılış kartı (\"Dört evin gerçek çelik listeleri açılsın ve iş birleştirmeye hazırlansın mı?\"): \"Dördü açılsın, birleşsin\" (ÇP-22, 23, 24, 25)",
+   "tarih": "2026-11-14",
+   "sha256": "31d06909d5543d38eaa80016aa6e23efd3f43d8a189d76e319581d05e3734941",
+   "liste_commit": "8c08a7f6585bdb2cba1ab98939473a792c7eba81"
   }
  },
  "ilk_indirmeler": {
