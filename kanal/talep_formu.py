@@ -38,7 +38,10 @@ ODA = ("1+0", "1+1", "2+1", "3+1", "4+1", "5+1")
 CATI = {"besik": "beşik çatı", "tek_egimli": "tek eğimli çatı", "kirma": "kırma çatı", "teras": "teras çatı"}
 VERANDA = {"on": "önde", "yan": "yanda", "arka": "arkada", "kose": "köşede"}
 NEYI = {"oda": "oda yerleşimi", "pencere": "pencere", "kapi": "kapı", "veranda": "veranda", "olcu": "ölçü", "cati": "çatı"}
-# Kartta varsayılan yoksa formun seçili geleceği değer (bayi değiştirebilir). Veranda: verandasız teklif yok (Patron, 27 Ekim 2026).
+# Kartta varsayılan yoksa formun seçili geleceği değer (bayi değiştirebilir). Veranda "on": ilk talep formunda (`talep.json`, yayımlı)
+# veranda zorunlu sorudur ve "Yok" seçeneği yoktur; bu yüzden bir değer seçili gelir. Bu bir kural değildir: Lokman, 14 Kasım 2026
+# 07:34 UTC: "Verandasız teklif olmaz diye bir şey söylemedim veranda ayrıca var mı yok mu belirtilmez verandayı da bir oda gibi kabul
+# et". Prefabrik formda veranda sorusu yok (D-88). İlk formdaki soru yeni formla kalkar (yayımlı form değişmez); karar Lokman'da.
 SABIT_VARSAYILAN = {"yapi": "prefabrik", "kat": "1", "cati": "besik", "veranda": "on"}
 KART_ALANLARI = {"yapi_turu": ("yapi", YAPI), "kat_sayisi": ("kat", KAT), "cati": ("cati", CATI), "veranda": ("veranda", VERANDA)}
 
