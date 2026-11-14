@@ -108,17 +108,18 @@ def karar_ver(talep: Talep, k: Konusma, bayi: dict | None, katalog: Katalog, met
     k.cati_secimi, k.cati_metni, k.cati_adi = None, "", ""          # İE-42 (D-94): onaydan sonraki çatı setinde bu mesajın seçimi ve plan metninin başı
     k.cati_adimi_secimi, k.cati_adimi_metni = None, None      # İE-42 (hakem tur 1, bulgu 6, 8): onaydan sonraki çatı setinde bu mesajın seçimi
     k.cati_sorusu_notu = ""                         # İE-42: "Hangi çatı olsun?" sorusunda aynı mesajın uygulanmayan isteği
-    k.cati_ek, k.cati_uygulanmaz, k.cati_on_not = False, False, ""   # İE-42 (hakem tur 2): çatıyla aynı mesajdaki istek; cevabın başı
+    k.cati_ek, k.cati_icerik, k.cati_on_not = False, [], ""   # İE-42 (hakem tur 2, 3): çatıyla aynı mesajdaki istek cümleleri; cevabın başı
+    k.degismedi_sayisi = 0                          # İE-42 (hakem tur 3): D-86 notunda bu mesajın kaç isteği planda zaten var
     d0 = json.loads(json.dumps(k.d))                # BK-29 (pano 200): geri çevrilen istek açık planı kapatmaz; konuşma buna döner
     karar = _karar_ver(talep, k, bayi, katalog, metin)
     secim, ca0 = k.cati_adimi_secimi, d0.get("cati_adimi") or {}
     if secim and ca0 and karar.eylem != "is_emri" and karar.gerekce != PLAN_ONAYI and not _cati_soruyla_bekler(k, karar, secim):
-        # İE-42 (hakem tur 1, bulgu 6): çatı seçildi ama aynı mesajdaki istek plan çizdirmedi. Evin çatısı + planda zaten olan istek (D-86
-        # notu var, Motor'un uygulamadığı istek yok): r01 onaylanır. Öteki sonuç (yönlendirme, okunamayan istek sorusu, Motor'un uygulamadığı
-        # istek; hakem tur 2, Y1): plan değişmez, set açık kalır, çatı seçimi kaydedilmez ve bayiye yazılır (seçim ve istek sessizce düşmez,
-        # onaylanmamış çatı "seçildi" sayılmaz).
+        # İE-42 (hakem tur 1, bulgu 6): çatı seçildi ama aynı mesajdaki istek plan çizdirmedi. Evin çatısı + bu mesajın her istek cümlesi
+        # planda zaten var (D-86 notu bu mesajın odalarından, en az istek cümlesi kadar; hakem tur 3): r01 onaylanır. Öteki sonuç
+        # (yönlendirme, okunamayan istek sorusu, Motor'un uygulamadığı istek; hakem tur 2, Y1): plan değişmez, set açık kalır, çatı seçimi
+        # kaydedilmez ve bayiye yazılır (seçim ve istek sessizce düşmez, onaylanmamış çatı "seçildi" sayılmaz).
         if karar.gerekce == PLAN_DEGISMEDI and str(secim).upper() == str(ca0.get("kod") or "").upper() \
-                and k.degismedi_notu and not k.cati_uygulanmaz:
+                and k.degismedi_notu and k.degismedi_sayisi >= len(k.cati_icerik):
             karar = _cati_degismedi_onayi(k, d0, katalog, secim)
         else:
             if karar.eylem not in ("yonlendir", "cevapla"):
@@ -128,6 +129,12 @@ def karar_ver(talep: Talep, k: Konusma, bayi: dict | None, katalog: Katalog, met
         _plani_acik_tut(k, d0, karar)
     if k.cati_on_not:                # İE-42 (hakem tur 2, O1): çatı seçimi talebin değişikliğiyle kaydedilmedi; bayiye yazılır
         karar.mesaj = k.cati_on_not + karar.mesaj
+    elif ca0 and karar.gerekce != "iptal":
+        # İE-42 (hakem tur 3): çatı seti açıkken konuşma başka bir eve ya da talebe geçti (başka model, yeni talep, başka müşteri: plan
+        # kapandı ya da yeni plan r01). Set mesajı "Planınız onaylandı (r01)" demişti; onay çatı seçilmeden kaydedilmez, bayiye yazılır.
+        no0, rev0 = ca0.get("is_emri_no"), int(ca0.get("rev") or 1)
+        if no0 and (not (k.d.get("son_is_emri") or {}).get("is_emri_no") or (karar.eylem == "is_emri" and int(karar.revizyon or 0) <= 1)):
+            karar.mesaj = f"Önceki planınızın ({no0} r{rev0:02d}) onayı kaydedilmedi; çatısı seçilmemişti. " + (karar.mesaj or "")
     if k.kullanilan_talep is not None:
         karar.kullanilan_talep = k.kullanilan_talep.model_dump(mode="json")
     if k.bekleyen_not:              # D-01: bekletilen mesaj işlenmeden düştüyse bayi bunu bu cevapta öğrenir
@@ -1011,26 +1018,38 @@ def _celik_cati_adimi_okumasi(k: Konusma, katalog: Katalog, taban: dict, metin: 
 
 
 def _cumleler(metin: str | None) -> list[str]:
-    """Mesajın cümle parçaları, sonlarındaki noktalama işaretiyle ("PA-06-K nasıl bir çatı?" → soru işareti parçada kalır)."""
-    return [h for h in re.findall(r"[^.,;:!?\n]+[.,;:!?\n]*", metin or "") if h.strip()]
+    """Mesajın cümle parçaları, sonlarındaki noktalama işaretiyle ("PA-06-K nasıl bir çatı?" → soru işareti parçada kalır). İki rakamın
+    arasındaki virgül ve nokta bölmez ("85,5 m2", "7,5x11,5", "1,20x1,20"; hakem tur 3)."""
+    korunan = re.sub(r"(?<=\d)([.,])(?=\d)", lambda m: "\x00" if m.group(1) == "," else "\x01", metin or "")
+    return [h.replace("\x00", ",").replace("\x01", ".") for h in re.findall(r"[^.,;:!?\n]+[.,;:!?\n]*", korunan) if h.strip()]
 
 
 def _cumle_temiz(h: str) -> str:
     return h.strip().rstrip(".,;:!\n").strip()
 
 
-# İE-42 (hakem tur 2, O2 ve D4): onay ya da soru sözüyle gelen mesajda çatıyı yalnız soru olmayan cümle seçer; onay sözü cümleden çıkar.
+# İE-42 (hakem tur 2, O2 ve D4; tur 3): çatıyı yalnız soru olmayan cümle seçer (her niyette); onay sözü cümleden çıkar.
 _SORU_SOZU = {"ne", "neden", "niye", "nedir", "nasil", "nasildir", "kac", "kaca", "hangi", "hangisi", "mi", "mu", "misiniz", "musunuz",
               "midir", "mudur", "misin", "musun", "miyiz", "muyuz"}
+_NE_UNLEM = {"guzel", "hos", "iyi", "harika", "guzelmis", "hosmus", "iyiymis"}       # "ne güzel olmuş" soru değil
 _ONAY_SOZU = re.compile(r"\b(?:onay\w*|tamam\w*|evet)\b", re.IGNORECASE)
 
 
+def _soru_cumlesi(ham: str) -> bool:
+    """Cümle soru mu: soru işareti ya da soru sözcüğü ("PA-06-K nasıl bir çatı", "K mi C mi"). "ne güzel" ünlemdir, soru değil."""
+    if "?" in ham:
+        return True
+    w = CO.norm(ham).split()
+    return any(x in _SORU_SOZU and not (x == "ne" and i + 1 < len(w) and w[i + 1] in _NE_UNLEM) for i, x in enumerate(w))
+
+
 def _cati_adimi_secim_metni(metin: str | None) -> str:
-    """Onay ya da soru niyetli mesajın çatı seçimi okunan kısmı: soru cümleleri ("PA-06-K nasıl bir çatı?", "Ç8801K'nın fiyatı ne kadar?")
-    çıkar, onay sözü ("onaylıyorum", "tamam", "evet") cümleden silinir ("2 olsun onaylıyorum" → "2 olsun"). Seçim değil, sorudur (K21)."""
+    """Çatı setinde mesajın çatı seçimi ve plan isteği okunan kısmı: soru cümleleri ("PA-06-K nasıl bir çatı?", "Ç8801K'nın fiyatı ne
+    kadar?", "100 m2 olur mu?") çıkar, onay sözü ("onaylıyorum", "tamam", "evet") cümleden silinir ("2 olsun onaylıyorum" → "2 olsun").
+    Soru seçim ve istek değildir (K21); soru cümlesindeki istek bayiye "uygulayamadım" diye yazılır (`_cati_icerik_cumleleri` sayar)."""
     parcalar = []
     for ham in _cumleler(metin):
-        if "?" in ham or any(w in _SORU_SOZU for w in CO.norm(ham).split()):
+        if _soru_cumlesi(ham):
             continue
         parca = _cumle_temiz(_ONAY_SOZU.sub(" ", ham))
         if CO.norm(parca):
@@ -1038,43 +1057,171 @@ def _cati_adimi_secim_metni(metin: str | None) -> str:
     return ", ".join(parcalar)
 
 
-def _musteri_degisti(ts: dict, t: Talep) -> bool:
-    """Bu mesaj müşteri adı ya da sevk adresi yazıyor ve taslaktakinden farklı mı (LLM'in bağlamdan yinelediği aynı değer değil)?"""
-    m = t.musteri.model_dump() if t.musteri else {}
-    eski = ts.get("musteri") or {}
-    return any(m.get(a) and str(m[a]).strip() != str(eski.get(a) or "").strip() for a in ("ad", "sevk_adresi"))
+# İE-42 (hakem tur 3, Y1): çatı setinde seçim cümlesini kuran sözcükler. Bu sözcüklerin dışında bir sözcük taşıyan cümle istek ya da bilgidir.
+_SECIM_DOLGU = {"evet", "ok", "okey", "peki", "anladim", "anlasildi", "tabi", "tabii", "super", "guzel", "harika", "cok", "olmus",
+                "gorunuyor", "begendik", "begendim", "kalsin", "olmasin", "istemiyoruz", "istemiyorum", "istemeyiz", "degil", "yerine",
+                "vazgectik", "vazgectim", "daha", "simdi", "artik", "hemen", "bence", "bizce", "yani", "icin", "dedik", "dedim", "diyoruz",
+                "diyelim", "lazim", "yok", "degisiklik", "degismesin", "ayni", "aynen", "calismalar", "ederiz", "ederim", "sagolun",
+                "kolay", "rica", "hos", "iyi", "prefabrik", "celik", "tek", "kat", "katli",
+                # kararsızlık sözü ("çatı K mı L mi bilemedim"): seçim yok, istek de yok → "Hangi çatı olsun?"
+                "bilemedim", "bilemedik", "bilmiyorum", "bilmiyoruz", "karar", "veremedim", "veremedik", "kararsiz", "kararsizim",
+                "kaldik", "kaldim", "arasinda", "dusunuyoruz", "dusunuyorum", "emin", "degilim", "degiliz",
+                # hitap, kısaltma ve dua sözleri ("1 olsun kardeşim", "tmm 2", "Allah razı olsun")
+                "kardes", "kardesim", "usta", "ustam", "reis", "abla", "efendim", "hanimefendi", "tmm", "tm", "tsk", "tskler", "eyv",
+                "eyw", "eyvallah", "allah", "razi", "insallah", "hepsi", "en", "iyisi", "guzeli", "uygun", "pdf", "gorsel", "gorseli",
+                "cizim", "cizimi", "sonra"}
+_SECIM_KOKU = ("cati", "onay", "tamam", "tesekkur", "sagol", "besik", "kirma", "kalkan", "cumba", "katalog", "numara", "sira", "model",
+               "sec", "tercih", "plan", "ilk", "birinci", "ikinci", "ucuncu", "sonuncu", "musteri", "gonder")
+# soru cümlesinde fiyat, teslim ve süre sorusu planın isteği değildir ("1 olsun, fiyatı ne olur?": teklif cevaplar)
+_SORU_DOLGU_KOKU = ("fiyat", "ucret", "tutar", "para", "kadar", "teslim", "sure", "zaman", "nakliye", "odeme", "kdv", "dahil", "ucuz",
+                    "pahali", "olur", "gun", "hafta")
+
+
+def _secim_sozcugu(w: str, adlar: set[str]) -> bool:
+    return (w in _CATI_BAGLAM or w in _NUMARA or w in _SIRA_SOZU or w in ("son", "sonuncu") or w in _KALSIN_BAGLAM or w in _SELAM
+            or w in _KOD_DOLGU or w in _CATI_EKLERI or w in _SORU_SOZU or w in _SECIM_DOLGU or w in adlar
+            or len(w) == 1 or (w.isdigit() and len(w) <= 2) or w.startswith(_SECIM_KOKU))
+
+
+def _cati_icerik_cumleleri(metin: str | None, katalog: Katalog, taban: dict, st: dict) -> list[str]:
+    """İE-42 (hakem tur 3, Y1): çatı setinde bu mesajın çatı seçimi dışındaki cümleleri, bayinin kendi sözünden (K18). LLM'in alanlarına
+    bakılmaz: LLM bağlamdan değer yineler ("tamam" → kartın 87 m²'si, eski pencere), sözsüz isteği de hiç yazmayabilir ("kapılar ahşap
+    olsun", "çatı kaplaması kiremit olsun"). Cümle yalnız setin kodları, etiket harfi, numara ya da sıra sözü, çatı ve seçim sözcükleri,
+    setteki çatıların adları, onay, selam, teşekkür ve soru sözcüklerinden kurulmuşsa seçimdir ya da dolgudur ("PA-06-K nasıl bir çatı?",
+    "teşekkürler"). Öteki her cümle istek ya da bilgidir: pencere, yükseklik, kapı, kaplama, renk, müşteri, fiyat sorusu, başka evin kodu.
+    Bu cümleler varsa evin kendi çatısı seçilse de onay o an kaydedilmez (istek sessizce düşmez; Lokman, 13 Ekim)."""
+    tk = Katalog.taban_kod(taban.get("kod"))
+    adlar: set[str] = set()                                    # setteki çatıların adları ("kalkan önde"); oda adı ("salonda cumba") yalnız
+    oda_adlari: set[str] = set()                               # çatı sözüyle aynı cümlede ("salonda pencere" istektir)
+    for x in st.get("adaylar") or []:
+        a = katalog.aday(x.get("kod"))
+        for w in CO.norm(_cati_adi(a) if a else "").split():
+            (oda_adlari if _alan_disi(w) or _alan_disi(_cati_govdesi(w)) else adlar).add(w)
+    def ev_olcusu(m: re.Match) -> str:                         # evin dış ölçüsü (3–30 m); pencere ölçüsü ("120x120") içeriktir
+        a, b = (float(x.replace(",", ".")) for x in m.groups())
+        return " " if 3 <= a <= 30 and 3 <= b <= 30 else m.group(0)
+    out = []
+    for h in _cumleler(metin):
+        # evin m²'si, oda programı ve dış ölçüsü talebin bilgisidir: değiştiyse `_cati_adiminda_talep_degisti` okur, aynıysa ("85 m2 2+1
+        # olsun") istek değildir. Oda, veranda ya da arsa m²'si ("salon 25 m2", "veranda 12 m2") içerik kalır.
+        q = h.lower()
+        # soru cümlesindeki m², oda ve ölçü sorudur ("100 m2 olur mu?"): talep değişikliği sayılmaz, içerik kalır (cevapsız düşmez)
+        h2 = q if _soru_cumlesi(h) else _OLCU_SOZU.sub(ev_olcusu, _ODA_SOZU.sub(" ", _M2_SOZU.sub(
+            lambda m: " " if _ev_m2_mi(q, m) else m.group(0), q)))
+        sozler = CO.norm(h2).split()
+        cati_sozu = any(w.startswith(("cati", "cumba", "kirma", "besik", "kalkan")) for w in sozler)
+        izinli = adlar | (oda_adlari if cati_sozu else set())
+        soru = _soru_cumlesi(h)
+        icerik = False
+        for _, soz, kod in _sozcukler(h2, katalog):
+            if kod and Katalog.taban_kod(kod) == tk:
+                continue                                       # bu evin ve setin kodu (başka evin kodu istektir)
+            if any(not (_secim_sozcugu(w, izinli) or (soru and w.startswith(_SORU_DOLGU_KOKU))) for w in CO.norm(soz).split()):
+                icerik = True
+                break
+        if icerik:
+            out.append(_cumle_temiz(h))
+    return out
 
 
 _M2_SOZU = re.compile(r"(?<![\d.,x×])(\d{2,3}(?:[.,]\d+)?)\s*(?:m2|m²|mt2|metre\s*kare|metrekare)", re.IGNORECASE)
 _ODA_SOZU = re.compile(r"(?<![\d.,])(\d)\s*\+\s*(\d)(?![\d.,])")
 _OLCU_SOZU = re.compile(r"(?<![\d.,])(\d{1,2}(?:[.,]\d+)?)\s*(?:m\s*|metre\s*)?[x×*]\s*(\d{1,2}(?:[.,]\d+)?)(?![\d.,])", re.IGNORECASE)
 _KENAR_SOZU = re.compile(r"(?<![\d.,x×])(\d{1,2}(?:[.,]\d+)?)\s*(?:m|mt|metre)(?![a-z0-9²])", re.IGNORECASE)
+# m² sözünün evin alanı olmadığını gösteren sözcükler: oda, veranda, arsa, çatı, pencere ("salon 25 m2", "veranda 12 m2", "arsa 500 m2")
+_ALAN_DISI_KOK = ("salon", "oturma", "yatak", "mutfa", "banyo", "wc", "tuvalet", "antre", "hol", "koridor", "veranda", "teras", "balkon",
+                  "arsa", "bahce", "parsel", "depo", "kiler", "giyinme", "cati", "ofis", "dukkan", "garaj", "odasi", "odanin", "odaya",
+                  "odalar", "pencere", "kapi", "vasistas", "cam")
+
+
+def _alan_disi(w: str) -> bool:
+    return w == "oda" or w.startswith(_ALAN_DISI_KOK)
+
+
+def _ev_m2_mi(q: str, m: re.Match) -> bool:
+    """Cümledeki m² sözü evin alanı mı: önündeki üç sözcükte ya da hemen ardında oda, veranda, arsa ya da çatı sözü olan m² evin alanı
+    değildir ("salon 25 m2", "veranda 12 m2 olsun", "12 m2 veranda", "arsa 500 m2"); "85 m2 verandalı" evin alanıdır."""
+    once, sonra = CO.norm(q[:m.start()]).split()[-3:], CO.norm(q[m.end():]).split()[:1]
+    return not (any(_alan_disi(w) for w in once) or (sonra and _alan_disi(sonra[0]) and not re.search(r"l[iu]$", sonra[0])))
+
+
+def _ev_m2_sozleri(metin: str | None) -> list[float]:
+    """Bayinin yazdığı evin m²'leri (`_ev_m2_mi`)."""
+    out = set()
+    for h in _cumleler(metin):
+        q = h.lower()
+        out |= {float(m.group(1).replace(",", ".")) for m in _M2_SOZU.finditer(q) if _ev_m2_mi(q, m)}
+    return sorted(out)
+
+
+def _m2_sozle_destekli(metin: str | None, deger: float) -> bool:
+    """LLM'in okuduğu m² bayinin sözünde var mı ("alanı 100 olsun", "yüz metrekare"): oda, veranda, arsa ya da pencere sözü olmayan bir
+    cümlede sayının kendisi ya da m²/alan sözü. Bağlamdan yinelenen değer ("tamam" → 87) sözde yoktur."""
+    sayilar = {f"{deger:g}", f"{deger:g}".replace(".", ",")}
+    for h in _cumleler(metin):
+        if any(_alan_disi(w) for w in CO.norm(h).split()):
+            continue
+        ham = h.lower()
+        if re.search(r"m2|m²|mt2|metre\s*kare|metrekare|\balan", ham) or any(
+                re.search(rf"(?<![\d.,x×]){re.escape(s)}(?![\d.,x×])", ham) for s in sayilar):
+            return True
+    return False
+
+
+def _dis_olcu_sozu(metin: str | None, t: Talep) -> dict | None:
+    """Bayinin yazdığı dış ölçü (metre): iki kenar ("8x11", "7,5 x 11,5 m"; her kenar 3–30 m, pencere ya da kapı sözü olmayan cümlede)
+    ya da LLM'in okuduğu bir kenarla aynı tek kenar ("boyu 8 metre"). Pencere ölçüsü ("60x40", "1,20x1,20") dış ölçü değildir."""
+    def uygun(h: str) -> bool:
+        n = CO.norm(h).split()
+        return "cm" not in n and not any(w.startswith(("pencere", "kapi", "vasistas", "cam", "dolap")) for w in n)
+    llm = t.dis_olcu.model_dump() if t.dis_olcu is not None else {}
+    for h in _cumleler(metin):
+        if not uygun(h):
+            continue
+        for a, b in _OLCU_SOZU.findall(h.lower()):
+            en, boy = sorted((float(a.replace(",", ".")), float(b.replace(",", "."))))
+            if 3 <= en <= 30 and 3 <= boy <= 30:
+                return {"en_m": en, "boy_m": boy}
+    kenarlar = [float(v) for v in (llm.get("en_m"), llm.get("boy_m")) if v]
+    for h in _cumleler(metin):
+        if not uygun(h):
+            continue
+        for x in _KENAR_SOZU.findall(_M2_SOZU.sub(" ", h.lower())):
+            v = float(x.replace(",", "."))
+            if 3 <= v <= 30 and any(abs(v - e) <= 0.05 for e in kenarlar):
+                return {a: v for a, v in llm.items() if v}
+    return None
 
 
 def _cati_adiminda_talep_degisti(k: Konusma, t: Talep, metin: str | None, taban: dict) -> dict:
-    """İE-42 (hakem tur 2, O1, O4, O8): çatı seti açıkken bu mesaj talebi değiştiriyor mu? Bayinin kendi sözünden okunur (K18): m² sayısı,
-    oda programı ("3+1"), dış ölçü ya da kenar (metre), kat ve yapı türü (yalnız sözü geçerse). Kıyas taslaktaki ve evin kartındaki değerle;
-    ikisinden de farklı (m²'de 0,5 m²'den çok) olan değer değişikliktir. LLM'in bağlamdan yinelediği değer ("tamam" → kartın 87 m²'si) ve
-    evin kendi değeri ("85 m2 2+1") değişiklik değildir. Dönen sözlük değişen alanlar (yoksa boş)."""
+    """İE-42 (hakem tur 2, O1, O4, O8; tur 3): çatı seti açıkken bu mesaj talebi değiştiriyor mu? Bayinin kendi sözünden okunur (K18;
+    `metin` soru cümleleri çıkmış metindir: "100 m2 olur mu?" talep değildir): evin m²'si (`_ev_m2_sozleri`; LLM'in m²'si yalnız sözde
+    varsa, `_m2_sozle_destekli`), oda programı ("3+1"), dış ölçü (`_dis_olcu_sozu`), kat ve yapı türü (yalnız sözü geçerse). Kıyas
+    taslaktaki ve evin kartındaki değerle; ikisinden de farklı (m²'de 0,5 m²'den çok) olan değer değişikliktir. Dönen sözlük değişen
+    alanlar (yoksa boş)."""
     ts, model = k.d.get("taslak") or {}, taban or {}
     q = (metin or "").lower()
     n = CO.norm(metin)
     yeni: dict = {}
     m2_ref = [float(v) for v in (ts.get("alan_m2"), model.get("katalog_m2")) if isinstance(v, (int, float))]
-    m2ler = sorted({float(x.replace(",", ".")) for x in _M2_SOZU.findall(q)})
-    farkli = [v for v in m2ler if not m2_ref or all(abs(v - r) > 0.5 for r in m2_ref)]
-    if farkli:
-        yeni["alan_m2"] = float(t.alan_m2) if isinstance(t.alan_m2, (int, float)) and float(t.alan_m2) in farkli else farkli[0]
+    farkli = lambda v: not m2_ref or all(abs(v - r) > 0.5 for r in m2_ref)
+    m2ler = [v for v in _ev_m2_sozleri(metin) if farkli(v)]
+    llm_m2 = float(t.alan_m2) if isinstance(t.alan_m2, (int, float)) else None
+    if m2ler:
+        yeni["alan_m2"] = llm_m2 if llm_m2 in m2ler else m2ler[0]
+    elif llm_m2 is not None and farkli(llm_m2) and _m2_sozle_destekli(metin, llm_m2):
+        yeni["alan_m2"] = llm_m2
     oda_ref = {str(v) for v in (ts.get("oda_programi"), model.get("oda_programi")) if v}
     odalar = [f"{a}+{b}" for a, b in _ODA_SOZU.findall(q)]
     farkli_oda = [o for o in odalar if o not in oda_ref]
     if farkli_oda:
         yeni["oda_programi"] = t.oda_programi if t.oda_programi in farkli_oda else farkli_oda[0]
-    if t.dis_olcu is not None and (t.dis_olcu.en_m or t.dis_olcu.boy_m) and (_OLCU_SOZU.search(q) or _KENAR_SOZU.search(_M2_SOZU.sub(" ", q))):
-        d, e = t.dis_olcu.model_dump(), ts.get("dis_olcu") or {}
-        if not (e.get("en_m") and e.get("boy_m") and d.get("en_m") and d.get("boy_m")
-                and sorted(map(float, (d["en_m"], d["boy_m"]))) == sorted(map(float, (e["en_m"], e["boy_m"])))):
-            yeni["dis_olcu"] = {a: v for a, v in d.items() if v}
+    olcu = _dis_olcu_sozu(metin, t)
+    if olcu:
+        e = ts.get("dis_olcu") or {}
+        if not (e.get("en_m") and e.get("boy_m") and olcu.get("en_m") and olcu.get("boy_m")
+                and sorted(map(float, (olcu["en_m"], olcu["boy_m"]))) == sorted(map(float, (e["en_m"], e["boy_m"])))):
+            yeni["dis_olcu"] = olcu
     if t.kat_sayisi and re.search(r"\b(?:kat|katli|dubleks|tripleks)\b", n):
         kat_ref = {int(v) for v in (ts.get("kat_sayisi"), model.get("kat")) if isinstance(v, (int, float)) or str(v or "").isdigit()}
         if kat_ref and int(t.kat_sayisi) not in kat_ref:
@@ -1087,64 +1234,41 @@ def _cati_adiminda_talep_degisti(k: Konusma, t: Talep, metin: str | None, taban:
     return yeni
 
 
-def _cati_adiminda_uygulanmaz(k: Konusma, t: Talep) -> bool:
-    """Çatıyla aynı mesajda plana Motor'un şablon revizyonunda işlemediği istek var mı (yükseklik, dış ya da iç kapı, veranda, pencere ve
-    çatı dışı varyant; taslaktakinden farklı)? Varsa evin çatısıyla "plan değişmedi" sonucu onay sayılmaz (hakem tur 2, Y1)."""
-    ts = k.d.get("taslak") or {}
-    for a in ("yukseklik_cm", "dis_kapi", "ic_kapi"):
-        v = getattr(t, a, None)
-        if v not in (None, "") and str(v) != str(ts.get(a) or ""):
-            return True
-    if t.veranda is not None and t.veranda.istiyor is not None and t.veranda.model_dump() != (ts.get("veranda") or {}):
-        return True
-    return any(v.tur != "cati_degistir" and not str(v.tur).startswith("pencere") for v in t.varyantlar)
+def _yeni_musteri(k: Konusma, t: Talep, metin: str | None) -> bool:
+    """Bu mesaj başka bir müşterinin talebi mi: LLM'in okuduğu müşteri adı bayinin sözünde geçiyor ve adı taslaktaki müşterinin adından
+    farklı ("Mehmet Deneme için 60 m2 1+1 lazım"; taslakta Ayşe Deneme). Taslakta müşteri yoksa ad bu planın bilgisidir; ilk adı aynı olan
+    ad düzeltmedir ("Ayşe Deneme Yılmaz") (hakem tur 3, O5, O6)."""
+    yeni = CO.norm(t.musteri.ad if t.musteri is not None and t.musteri.ad else "")
+    eski = CO.norm(((k.d.get("taslak") or {}).get("musteri") or {}).get("ad"))
+    if not yeni or not eski or yeni.split()[0] == eski.split()[0]:
+        return False
+    sozler = set(CO.norm(metin).split())
+    return all(w in sozler for w in yeni.split() if len(w) >= 2)
 
 
-def _cati_adiminda_ek(k: Konusma, t: Talep, metin: str | None, taban: dict) -> bool:
-    """İE-42 (hakem tur 1, bulgu 2): çatı seçimiyle aynı mesajda başka bir istek ya da bilgi var mı? Pencere, çatı dışı değişiklik, pano komutu,
-    özel istek, bina özelliği, yükseklik, kapı, veranda, müşteri adı ya da sevk adresi, m², oda, dış ölçü (taslaktakinden farklı; LLM'in
-    bağlamdan yinelediği aynı değer sayılmaz; m², oda ve ölçü bayinin sözünden, hakem tur 2). Varsa evin kendi çatısı seçilse de onay o an
-    kaydedilmez: bilgi plana işlenir, yeni revizyon çizilir (aynı mesajdaki bilgi sessizce düşmez; Lokman, 13 Ekim)."""
-    ts = k.d.get("taslak") or {}
-    if t.pencereler or [v for v in t.varyantlar if v.tur != "cati_degistir"] or CO.degisiklik_var(metin) or any(YPO.oku(metin)):
-        return True
-    if [s for s in t.ozel_istekler if s not in (ts.get("ozel_istekler") or [])]:
-        return True
-    eski_bo = ts.get("bina_ozellikleri") or {}
-    if any(b and str(eski_bo.get(a) or "") != str(b) for a, b in (t.bina_ozellikleri or {}).items()):
-        return True
-    if _cati_adiminda_uygulanmaz(k, t):
-        return True
-    return _musteri_degisti(ts, t) or bool(_cati_adiminda_talep_degisti(k, t, metin, taban))
-
-
-def _cati_adiminda_istek_yok(k: Konusma, t: Talep, metin: str | None, taban: dict) -> bool:
-    """Çatı sözü olmayan mesaj bir istek taşımıyor mu ("tamam", "bakalım"; LLM'in bağlamdan yinelediği kod, m², oda programı)? Öyleyse
-    çatı sorulur, set açık kalır. İstek ya da bilgi taşıyan mesaj (pencere, ölçü, varyant, özel istek, müşteri bilgisi, başka model, iptal,
-    pano komutu, açık yeni talep sözü) seti kapatır ve bugünkü yoldan gider: değişiklik isteği sessizce düşmez (Lokman, 13 Ekim). Hakem
-    tur 1 (bulgu 3, 5): yalnız müşteri bilgisi taşıyan mesaj da istektir; içeriksiz "tamam", "bakalım" LLM "yeni talep" okusa da konuşmayı
-    sıfırlamaz."""
-    if _iptal_sozu(metin) or _acik_yeni_talep(metin) or CO.hizli_istek(metin) or any(YPO.oku(metin)):
+def _cati_adiminda_istek_yok(k: Konusma, t: Talep, metin: str | None, secim_metni: str = "") -> bool:
+    """Çatı sözü olmayan mesaj bir istek taşımıyor mu ("tamam", "bakalım", "teşekkürler"; LLM'in bağlamdan yinelediği kod, m², oda, ölçü,
+    veranda, yükseklik sayılmaz: hakem tur 3, O4)? Öyleyse çatı sorulur, set açık kalır. İstek ya da bilgi taşıyan mesaj (bayinin sözünde
+    istek cümlesi, `k.cati_ek`; iptal, pano komutu, açık yeni talep sözü) seti kapatır ve bugünkü yoldan gider: değişiklik isteği sessizce
+    düşmez (Lokman, 13 Ekim). Hızlı istek ve pano komutu soru cümlesinde aranmaz ("Ç8801K mi Ç8801L mi olsun?" kararsızlıktır)."""
+    if _iptal_sozu(metin) or _acik_yeni_talep(metin) or CO.hizli_istek(secim_metni) or any(YPO.oku(secim_metni)):
         return False
     if t.niyet not in ("diger", "revizyon", "yeni_talep"):
         return False
-    if t.katalog_kodu and Katalog.taban_kod(t.katalog_kodu) != Katalog.taban_kod(taban.get("kod")):
-        return False
-    if t.pano is not None and (t.pano.nx or t.pano.ny):
-        return False
-    if t.cati is not None and any(v not in (None, "") for v in t.cati.model_dump().values()):
-        return False                                           # çatının şekli, eğimi, kaplaması ya da rengi: istek (seçim değil)
-    return not _cati_adiminda_ek(k, t, metin, taban)
+    return not getattr(k, "cati_ek", False)
 
 
-def _cati_adimi_yeni_talep(k: Konusma, t: Talep, taban: dict, degisen: dict) -> Talep:
+def _cati_adimi_yeni_talep(k: Konusma, t: Talep, taban: dict, degisen: dict, yeni_musteri: bool = False) -> Talep:
     """Hakem tur 1 bulgu 9 ve tur 2 (O1, O6): çatı seti açıkken talep değişti (m², dış ölçü, oda, kat ya da yapı türü). Talep yeni talep olarak
     okunur; önceki mesajların bilgisi düşmez: müşteri (birleşir), özel istekler (birleşir), bina özellikleri (birleşir), oda programı, kat ve
     yapı türü (yazılmadıysa taslaktan, yoksa evin kartından; yapı türü yoksa planın sisteminden). Yeni dış ölçü eski m²'nin, yeni m² eski dış
-    ölçünün yerine geçer. Pencereler bu mesajınkiler (eski evin pencereleri yeni eve taşınmaz)."""
+    ölçünün yerine geçer. Pencereler bu mesajınkiler (eski evin pencereleri yeni eve taşınmaz). Hakem tur 3 (O6): talep başka bir müşterinin
+    (`_yeni_musteri`) ise eski müşterinin adı, sevk adresi, özel istekleri ve bina özellikleri taşınmaz."""
     ts, model = k.d.get("taslak") or {}, taban or {}
     sistem = ((k.d.get("son_is_emri") or {}).get("yapi") or {}).get("sistem")
-    m = {**(ts.get("musteri") or {}), **{a: v for a, v in (t.musteri.model_dump() if t.musteri else {}).items() if v}}
+    bu_musteri = {a: v for a, v in (t.musteri.model_dump() if t.musteri else {}).items() if v}
+    eski_ozel = list(ts.get("ozel_istekler") or [])
+    m = bu_musteri if yeni_musteri else {**(ts.get("musteri") or {}), **bu_musteri}
     yeni_olcu = "dis_olcu" in degisen
     if "alan_m2" in degisen:
         alan = degisen["alan_m2"]
@@ -1161,8 +1285,10 @@ def _cati_adimi_yeni_talep(k: Konusma, t: Talep, taban: dict, degisen: dict) -> 
         "yapi_turu": degisen.get("yapi_turu") or ts.get("yapi_turu") or model.get("yapi_turu")
                      or ("celik" if sistem == "celik" else "prefabrik"),
         "musteri": m or None,
-        "ozel_istekler": list(dict.fromkeys(list(ts.get("ozel_istekler") or []) + list(t.ozel_istekler))),
-        "bina_ozellikleri": {**(ts.get("bina_ozellikleri") or {}), **(t.bina_ozellikleri or {})},
+        "ozel_istekler": ([s for s in t.ozel_istekler if s not in eski_ozel] if yeni_musteri
+                          else list(dict.fromkeys(eski_ozel + list(t.ozel_istekler)))),
+        "bina_ozellikleri": ({**(t.bina_ozellikleri or {})} if yeni_musteri
+                             else {**(ts.get("bina_ozellikleri") or {}), **(t.bina_ozellikleri or {})}),
     })
     if d["kat_sayisi"] is not None and not isinstance(d["kat_sayisi"], int):
         d["kat_sayisi"] = int(d["kat_sayisi"]) if str(d["kat_sayisi"]).isdigit() else None
@@ -1172,15 +1298,18 @@ def _cati_adimi_yeni_talep(k: Konusma, t: Talep, taban: dict, degisen: dict) -> 
 def _cati_adimi(k: Konusma, t: Talep, metin: str | None, katalog: Katalog) -> tuple[Talep, Karar | None]:
     """Onaydan sonraki çatı seti açıkken gelen mesaj. Dönen (talep, karar): karar varsa o; yoksa talep bugünkü yoldan işlenir.
     - selam: bugünkü cevap, set açık kalır. Ret ("Revize et"): set kapanır.
-    - Talep değişti (m², oda, dış ölçü, kat, yapı türü; bayinin sözünden, `_cati_adiminda_talep_degisti`): çatı seçiminden önce gelir. Set
-      kapanır, talep önceki bilgisiyle yeni talep olur; aynı mesajda çatı seçildiyse kaydedilmediği bayiye yazılır (hakem tur 2, O1, O6).
+    - Mesaj bayinin sözünden okunur (K18; hakem tur 3): soru cümlesi seçim ve istek değildir (`_cati_adimi_secim_metni`, her niyette),
+      seçim dışındaki cümleler istek ya da bilgidir (`_cati_icerik_cumleleri`; LLM'in alanlarına bakılmaz).
+    - Talep değişti (m², oda, dış ölçü, kat, yapı türü; `_cati_adiminda_talep_degisti`, her niyette): çatı seçiminden önce gelir. Set
+      kapanır, talep önceki bilgisiyle yeni talep olur (başka müşterininse bilgisi taşınmaz); bayiye r01 onayının geçersiz kaldığı ve aynı
+      mesajın çatı seçiminin kaydedilmediği yazılır (hakem tur 2, O1, O6; tur 3).
     - Çatı seçimi (düğme, numara, sıra sözü, kod, etiket; prefabrikte `_prefabrik_cati_istegi`, çelikte `_celik_cati_adimi_okumasi`):
-      evin kendi çatısı ve başka istek ya da bilgi yok (`_cati_adiminda_ek`) → onay kaydedilir, plan aynen; başka çatı (ya da istek ve
-      bilgiyle birlikte) → talep o çatının revizyonu olur (`k.cati_secimi`; revizyon hakkına takılmaz, söz yeniden okunmaz), mesajın başı
-      "Çatı: … (kod)." İstek geri çevrilir ya da plan değişmezse `karar_ver` çatı seçimini ayrıca ele alır (`k.cati_adimi_secimi`).
-    - Onay ve soru (hakem tur 1, bulgu 8; tur 2, O2 ve D4): soru olmayan cümlede açık çatı seçimi varsa ("K olsun, onaylıyorum", "2 olsun
-      onaylıyorum") seçimdir; soru cümlesindeki kod seçim değildir. Seçim yoksa onay "Hangi çatı olsun?", soru bugünkü cevap.
-    - Niyet "diğer" okunan istek ya da bilgi revizyondur (hakem tur 2, O5).
+      evin kendi çatısı ve istek cümlesi yok → onay kaydedilir, plan aynen; başka çatı (ya da istekle birlikte) → talep o çatının revizyonu
+      olur (`k.cati_secimi`; revizyon hakkına takılmaz), metni soru cümlesiz söz (`k.cati_adimi_metni`), LLM'in talep alanları (m², oda,
+      ölçü, kat, yapı) taşınmaz; istek cümlesi yoksa LLM'in pencere, varyant ve özel istek yinelemesi de taşınmaz. Mesajın başı "Çatı: …
+      (kod)." İstek geri çevrilir ya da plan değişmezse `karar_ver` çatı seçimini ayrıca ele alır (`k.cati_adimi_secimi`).
+    - Onay ve soru (hakem tur 1, bulgu 8; tur 2, O2 ve D4): seçim yoksa onay "Hangi çatı olsun?", soru bugünkü cevap.
+    - Niyet "diğer" ya da "yeni talep" okunan istek ve bilgi revizyondur (hakem tur 2, O5); başka müşterinin talebi değildir (tur 3).
     - Çatı sözü olmayan mesaj: istek taşımıyorsa soru (`_cati_adiminda_istek_yok`); taşıyorsa set kapanır, mesaj bugünkü yoldan
       (planın değişikliği; onay düşer, "r01 onayınızı geçersiz kıldı")."""
     ca = k.d.get("cati_adimi")
@@ -1201,26 +1330,31 @@ def _cati_adimi(k: Konusma, t: Talep, metin: str | None, katalog: Katalog) -> tu
     son_metin0 = k.d.get("son_metin")
     celik_mi = (ie.get("yapi") or {}).get("sistem") == "celik"
     onay_soru = t.niyet in ("onay", "soru")
-    secim_metni = _cati_adimi_secim_metni(metin) if onay_soru else (metin or "")
+    secim_metni = _cati_adimi_secim_metni(metin)
     k.d["son_metin"] = secim_metni.strip()
     k.cati_numara_metni = None
-    ek = _cati_adiminda_ek(k, t, metin, taban)
-    k.cati_ek, k.cati_uygulanmaz = ek, _cati_adiminda_uygulanmaz(k, t)
+    icerik = _cati_icerik_cumleleri(metin, katalog, taban, st)
+    ek = bool(icerik) or any(YPO.oku(metin))
+    k.cati_icerik, k.cati_ek = icerik, ek
     baska = [c for c in _secim_kodlari(metin, katalog) if Katalog.taban_kod(c) != Katalog.taban_kod(taban["kod"])]   # bayinin yazdığı başka ev
     baska_llm = bool(t.katalog_kodu and Katalog.taban_kod(t.katalog_kodu) != Katalog.taban_kod(taban["kod"]))
     yeni_soz = _iptal_sozu(metin) or _acik_yeni_talep(metin)
-    if t.niyet in ("diger", "yeni_talep") and ek and not baska and not baska_llm and not yeni_soz:
-        # hakem tur 2, O5: "diğer" ya da "yeni talep" okunan istek ve bilgi (başka ev, iptal ve açık yeni talep sözü yok) planın
-        # değişikliğidir; yalnız müşteri bilgisi konuşmayı sıfırlamaz. Talebin kendisi değiştiyse aşağıda yeni talep olur.
+    yeni_musteri = _yeni_musteri(k, t, metin)
+    if t.niyet in ("diger", "yeni_talep") and ek and not baska and not baska_llm and not yeni_soz and not yeni_musteri:
+        # hakem tur 2, O5: "diğer" ya da "yeni talep" okunan istek ve bilgi (başka ev, başka müşteri, iptal ve açık yeni talep sözü yok)
+        # planın değişikliğidir; yalnız müşteri bilgisi konuşmayı sıfırlamaz. Talebin kendisi değiştiyse aşağıda yeni talep olur.
         t = t.model_copy(update={"niyet": "revizyon"})
     if ek:
         # çatı sözü kararsızsa "Hangi çatı olsun?" sorulur; aynı mesajın öteki isteği bu soruyla uygulanmaz, bayiye yazılır (sessiz düşmez)
         k.cati_sorusu_notu = "Mesajınızdaki öteki isteği uygulamadım. Önce çatıyı seçin, sonra o isteği yeniden yazın."
+    rev = int(ca.get("rev") or 1)
 
     def oku():
         if celik_mi:
-            return _celik_cati_adimi_okumasi(k, katalog, taban, secim_metni, st, cati_istegi=any(v.tur == "cati_degistir" for v in t.varyantlar))
-        return _prefabrik_cati_istegi(k, katalog, taban, {"varyantlar": [v.model_dump(mode="json") for v in t.varyantlar]}, bos_ise_yok=True)
+            return _celik_cati_adimi_okumasi(k, katalog, taban, secim_metni, st,
+                                             cati_istegi=bool(CO.norm(secim_metni)) and any(v.tur == "cati_degistir" for v in t.varyantlar))
+        vary = [v.model_dump(mode="json") for v in t.varyantlar] if CO.norm(secim_metni) else []   # soru cümlesinin LLM okuması seçim değil
+        return _prefabrik_cati_istegi(k, katalog, taban, {"varyantlar": vary}, bos_ise_yok=True)
 
     def izsiz_oku():                                            # okumanın izi kalmaz (durum, notlar, son metin)
         yedek, notlar = json.loads(json.dumps(k.d)), len(getattr(k, "yeni_notlar", None) or [])
@@ -1230,23 +1364,26 @@ def _cati_adimi(k: Konusma, t: Talep, metin: str | None, katalog: Katalog) -> tu
             del k.yeni_notlar[notlar:]
         return s
 
-    if not onay_soru and not yeni_soz and not baska:
-        degisen = _cati_adiminda_talep_degisti(k, t, metin, taban)
+    if not yeni_soz and not baska:
+        degisen = _cati_adiminda_talep_degisti(k, t, secim_metni, taban)
         if degisen:
-            # Hakem tur 1 bulgu 9, tur 2 O1 (İE-25 kuralı: çatı seti açıkken m², dış ölçü, oda, kat ya da yapı türü değişikliği sessizce
-            # düşmez): istek bu evin planı değil, başka bir ev ister. Talep değişikliği çatı seçiminden önce gelir: set kapanır, talep yeni
-            # talep olarak okunur; aynı mesajın çatı seçimi kaydedilmez ve bayiye yazılır.
+            # Hakem tur 1 bulgu 9, tur 2 O1, tur 3 (İE-25 kuralı: çatı seti açıkken m², dış ölçü, oda, kat ya da yapı türü değişikliği sessizce
+            # düşmez): istek bu evin planı değil, başka bir ev ister. Talep değişikliği çatı seçiminden önce gelir (onay ve soru sözüyle de):
+            # set kapanır, talep yeni talep olarak okunur; r01 onayının geçersiz kaldığı ve aynı mesajın çatı seçiminin kaydedilmediği yazılır.
             s = izsiz_oku()
             k.d["son_metin"] = son_metin0
+            on = f"Talebiniz değişti; bu değişiklik r{rev:02d} onayınızı geçersiz kıldı. "
             if isinstance(s, str) and s:
                 a = katalog.aday(s)
-                k.cati_on_not = f"Çatı seçiminizi ({SC.gosterim(a) if a else s}) kaydetmedim. Talebiniz değişti; önce plan seçilir. "
+                on += f"Çatı seçiminizi ({SC.gosterim(a) if a else s}) kaydetmedim. "
             elif isinstance(s, Karar):
-                k.cati_on_not = "Çatı isteğinizi uygulamadım. Talebiniz değişti; önce plan seçilir. "
+                on += "Çatı isteğinizi uygulamadım. "
+            k.cati_on_not = on + "Önce yeni plan seçilir. "
             _cati_adimini_kapat(k, st, f"talep bilgisi değişti ({', '.join(degisen)})")
             k.d.pop("cati_onayi_dustu", None)
-            k.not_dus("kural", "onaydan sonraki çatı setinde talep bilgisi değişti: yeni talep olarak okundu")
-            return _cati_adimi_yeni_talep(k, t, taban, degisen), None
+            k.not_dus("kural", "onaydan sonraki çatı setinde talep bilgisi değişti: yeni talep olarak okundu"
+                      + (" (başka müşteri)" if yeni_musteri else ""))
+            return _cati_adimi_yeni_talep(k, t, taban, degisen, yeni_musteri), None
 
     if onay_soru:
         yedek, notlar = json.loads(json.dumps(k.d)), len(getattr(k, "yeni_notlar", None) or [])
@@ -1266,33 +1403,44 @@ def _cati_adimi(k: Konusma, t: Talep, metin: str | None, katalog: Katalog) -> tu
     if isinstance(secim, Karar):
         return t, secim
     if not secim:
-        if _cati_adiminda_istek_yok(k, t, metin, taban):
+        k.d["son_metin"] = son_metin0
+        if _cati_adiminda_istek_yok(k, t, metin, secim_metni):
             k.not_dus("kural", "onaydan sonraki çatı setinde seçim ve istek yok: soru")
             return t, _cati_sorusu(k, st)
         _cati_adimini_kapat(k, st, "çatı seçimi yerine başka istek")
+        if not (baska or yeni_soz or yeni_musteri):
+            # hakem tur 3: talep bayinin sözünde değişmedi (yukarıda okundu); LLM'in m², oda, ölçü, kat ve yapı okuması ("salon 25 m2" →
+            # evin alanı 25) ya da bağlamdan yinelemesi taslağa yazılmaz
+            t = t.model_copy(update={"alan_m2": None, "oda_programi": None, "dis_olcu": None, "kat_sayisi": None, "yapi_turu": None})
         return t, None
     secim = str(secim)
     a0 = katalog.aday(secim)
     gosterim = SC.gosterim(a0) if a0 else secim
     if celik_mi and k.cati_numara_metni is not None:           # çelik: numara cümlesi revizyonda koda çevrilir (hakem tur 2, O7)
         k.cati_adimi_metni = f"{gosterim} olsun" + (f", {k.cati_numara_metni}" if ek and k.cati_numara_metni else "")
-    elif onay_soru:                                            # onay sözü ve soru istek değildir (çelikte cümle cümle okunurdu)
+    else:                                                      # soru cümlesi ve onay sözü revizyona girmez (hakem tur 3)
         k.cati_adimi_metni = secim_metni if ek else f"{gosterim} olsun"
     _seti_kapat(k, secim)
     _cati_secildi(k, secim)
     k.d.pop("cati_adimi", None)
     k.cati_adimi_secimi = secim                                # `karar_ver`: istek geri çevrilir ya da plan değişmezse çatı seçimi düşmez
     if secim.upper() == str(ca["kod"]).upper() and not ek:
-        k.not_dus("kural", f"onaydan sonraki çatı setinde evin çatısı: {secim}; plan r{int(ca['rev']):02d} onaylandı")
+        k.not_dus("kural", f"onaydan sonraki çatı setinde evin çatısı: {secim}; plan r{rev:02d} onaylandı")
         return t, _onay_kaydet(k, katalog, cati=secim)
     k.cati_secimi = secim
     k.cati_adi = _cati_adi(a0) if a0 else ""
     k.cati_metni = f"Çatı: {k.cati_adi} ({gosterim})." if a0 else ""
     if ek:
-        k.d["cati_onayi_dustu"] = int(ca["rev"])               # çatıyla birlikte plan da değişiyor: onay düşer (yalnız çatı değişirse
+        k.d["cati_onayi_dustu"] = rev                          # çatıyla birlikte plan da değişiyor: onay düşer (yalnız çatı değişirse
                                                                # `_is_emri_uret`/`_celik_is_emri_uret` bu notu kaldırır: "Plan aynı.")
     k.not_dus("kural", f"onaydan sonraki çatı setinden seçim: {secim}" + (" (mesajda başka istek ya da bilgi de var)" if ek else ""))
-    return t.model_copy(update={"niyet": "revizyon", "katalog_kodu": secim}), None
+    # hakem tur 3: çatı seçiminin revizyonu LLM'in talep alanlarını taşımaz (talep değişikliği yukarıda bayinin sözünden okundu); istek
+    # cümlesi yoksa LLM'in bağlamdan yinelediği pencere, varyant ve özel istek de taşınmaz
+    temiz = {"niyet": "revizyon", "katalog_kodu": secim, "alan_m2": None, "oda_programi": None, "dis_olcu": None, "kat_sayisi": None,
+             "yapi_turu": None}
+    if not ek:
+        temiz.update({"pencereler": [], "varyantlar": [v for v in t.varyantlar if v.tur == "cati_degistir"], "ozel_istekler": []})
+    return t.model_copy(update=temiz), None
 
 
 def _prefabrik_cati_seti(k: Konusma, katalog: Katalog, taban: dict, ts: dict) -> Karar | None:
@@ -2099,7 +2247,8 @@ def _celik_is_emri_uret(k: Konusma, bayi: dict, katalog: Katalog, aday: dict, ts
     if cati_metni:                                             # İE-42 (D-94): onaydan sonraki çatı setinden seçim
         if yeni and all(d.get("op") == "cati_varyanti" for d in yeni):
             k.d.pop("cati_onayi_dustu", None)                  # hakem tur 1, bulgu 7: yalnız çatı değişti, "onayınızı geçersiz kıldı" yazılmaz
-            uyg_yok = "; isteğinizi plana uygulayamadım" if getattr(k, "cati_uygulanmaz", False) and not kod_metni else ""   # hakem tur 2
+            # hakem tur 2 ve 3: mesajın istek cümlesi (bayinin sözü) planı değiştirmedi ve bilgi de değil: sessiz düşmez
+            uyg_yok = "; isteğinizi plana uygulayamadım" if getattr(k, "cati_ek", False) and not bilgi and not kod_metni else ""
             mesaj = f"{on_not}{cati_metni} Plan aynı{uyg_yok}. Ön onay planınız hazır (r{ie['revizyon']:02d})."
         else:
             mesaj = f"{on_not}{cati_metni} " + mesaj[len(on_not):]
@@ -2294,7 +2443,10 @@ def _is_emri_uret(k: Konusma, bayi: dict, katalog: Katalog, sablon: dict, kaynak
         # gözlem 3, …4303 r03 → …4342 r04): aynı değişiklik yeniden istenince de aynı plan yeni numarayla çizilmez; bayiye "Planınız (… rNN)
         # değişmedi; YATAK ODASI 1 penceresi zaten 100x140." gider (altın set D03 bu kararla değişti).
         bu = getattr(k, "bu_mesaj_mahalleri", set())   # yalnız bu mesajın odaları yazılır (önceki revizyonların notları değil)
-        k.degismedi_notu = _zaten_notu([n for n in notlar if any(varyant._norm(n).startswith(m) for m in bu if m)] or notlar)
+        eslesen = [n for n in notlar if any(varyant._norm(n).startswith(m) for m in bu if m)]
+        k.degismedi_sayisi = len(eslesen)
+        # İE-42 (hakem tur 3): çatı setinde önceki revizyonun notu bu mesajın isteği sayılmaz (onayı o not kaydettirmez)
+        k.degismedi_notu = _zaten_notu(eslesen if getattr(k, "cati_adimi_secimi", None) else (eslesen or notlar))
         return _bitir(k, Karar(eylem="cevapla", gerekce=PLAN_DEGISMEDI, mesaj=ts.pop("_on_not", "").strip()))
     k.d["son_is_emri"] = ie
     k.d["asama"] = "is_emri_hazir"
@@ -2320,8 +2472,9 @@ def _is_emri_uret(k: Konusma, bayi: dict, katalog: Katalog, sablon: dict, kaynak
             cati_adi = SC._kucuk(getattr(k, "cati_adi", "") or "yeni")          # eskiz: "PDF'teki 4 görünüş kırma çatıyı gösterir"
             k.d.pop("cati_onayi_dustu", None)                  # hakem tur 1, bulgu 7: yalnız çatı değişti, "onayınızı geçersiz kıldı" yazılmaz
             bu = getattr(k, "bu_mesaj_mahalleri", set())       # aynı mesajın planda zaten olan isteği (D-86 gibi); yalnız bu mesajın odaları
-            zaten = _zaten_notu([n for n in notlar if any(varyant._norm(n).startswith(m) for m in bu if m)])   # (hakem tur 2, D1)
-            if getattr(k, "cati_uygulanmaz", False):           # hakem tur 2 (Y1 gibi): yükseklik, kapı, veranda planı değiştirmedi, sessiz düşmez
+            eslesen = [n for n in notlar if any(varyant._norm(n).startswith(m) for m in bu if m)]   # (hakem tur 2, D1)
+            zaten = _zaten_notu(eslesen)
+            if len(getattr(k, "cati_icerik", None) or []) > len(eslesen):   # hakem tur 2, 3: bayinin istek cümlesi planı değiştirmedi
                 zaten = f"{zaten}; öteki isteğinizi plana uygulayamadım" if zaten else "isteğinizi plana uygulayamadım"
             mesaj = (f"{on_not}{cati_metni} Plan aynı{'; ' + zaten if zaten else ''}. Ön onay planınız hazır (r{ie['revizyon']:02d}); "
                      f"PDF'teki 4 görünüş {cati_adi} çatıyı gösterir.")

@@ -269,4 +269,5 @@ def test_prefabrik_cati_ve_m2_degisikligi_yeni_talep(depo, wa, hizli_motor):
     assert tek(depo, "SELECT durum FROM revizyonlar WHERE id = %s", rev["id"])["durum"] != "onaylandi"
     assert tek(depo, "SELECT durum FROM secenek_setleri WHERE id = %s", st["id"])["durum"] != "acik"
     assert not sorgu(depo, "SELECT 1 FROM giden WHERE alici = 'PATRON'")
-    assert satirlar(depo, g["id"])[0]["body"].startswith("Çatı seçiminizi (PA-06-K) kaydetmedim. Talebiniz değişti; önce plan seçilir.")
+    assert satirlar(depo, g["id"])[0]["body"].startswith(
+        "Talebiniz değişti; bu değişiklik r01 onayınızı geçersiz kıldı. Çatı seçiminizi (PA-06-K) kaydetmedim. Önce yeni plan seçilir.")

@@ -745,3 +745,25 @@ def test_hakem2_celik_virgulsuz_onay_ve_sira_sozu(s, metin):
     cati_seti(s)
     k = s.yaz(metin, niyet="onay")
     assert k.eylem == "is_emri" and k.revizyon == 2 and s.plan["yapi"]["kod"] == "Ç8801L", k.mesaj
+
+
+# ── İE-42 · geometri hakemi üçüncü tur (14 Kasım 2026 gecesi): istek bayinin sözünden, LLM'in alanından değil (K18) ─────────────────────
+@pytest.mark.parametrize("metin", ["1 olsun, kapılar ahşap olsun", "1 olsun, banyoya küvet koyalım", "1 olsun, mutfak duvarını kaldırın",
+                                   "1 olsun, yükseklik 300 olsun", "Ç8801 olsun, iç kapılar ahşap olsun"])
+def test_hakem3_celik_evin_catisi_ve_sozdeki_istek(s, metin):
+    """Y1 (genel): katalog çatısıyla aynı mesajdaki istek LLM'in okuduğu bir alan taşımasa da istektir. Onay kaydedilmez (mühendis
+    kontrolüne gitmez), set açık kalır, bayiye isteğin durumu ve çatı seçiminin kaydedilmediği yazılır."""
+    cati_seti(s)
+    k = s.yaz(metin)
+    assert K.PLAN_ONAYI not in k.gerekce and not s.k.d.get("onaylanan") and s.plan["revizyon"] == 1, k.mesaj
+    assert k.mesaj.endswith("Çatı seçiminizi (Ç8801) kaydetmedim; çatıyı yeniden seçin."), k.mesaj
+    assert s.k.d.get("cati_adimi") and s.k.d["secenek_seti"]["durum"] == "acik"
+
+
+@pytest.mark.parametrize("metin, alan", [("1 olsun, salon 30 m2 olsun", {"ozel_istekler": ["salon 30 m2"], "alan_m2": 30}),
+                                         ("tamam", {"niyet": "yeni_talep", "katalog_kodu": "Ç8801", "alan_m2": 88, "yukseklik_cm": 280})])
+def test_hakem3_celik_oda_m2_si_ve_yanki_talep_degil(s, metin, alan):
+    """Bulgu 1, 10: oda m²'si ve LLM'in yinelediği değerler talebi değiştirmez (konuşma sıfırlanmaz, plan düşmez)."""
+    cati_seti(s)
+    k = s.yaz(metin, **alan)
+    assert "Talebiniz değişti" not in k.mesaj and s.plan["revizyon"] == 1 and s.k.d.get("cati_adimi"), k.mesaj
