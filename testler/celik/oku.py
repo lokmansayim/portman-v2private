@@ -19,9 +19,15 @@ TOPLAM yazısı boyut sütununa taşabilir. Bu dosya o grup için ayrıca okur:
   olmalı, değilse okuma durur.
 Çelik panel satırları türe ayrılır (`TURLER`; paftadaki etiket harfiyle): duvar paneli ve korkuluk (D), kolon-kiriş paneli ve veranda
 desteği (K; veranda desteği PR-5'ten beri, Lokman 28 Ekim 2026), makas (M),
-çatı paneli (C), tavan paneli (T), baca paneli (B), boy C profil (paftada etiketi yok). Türü bilinmeyen ya da iki türe uyan, adedi
+çatı paneli (C), tavan paneli (T), baca paneli (B), boy C profil (paftada etiketi yok), özel panel (niş, kemer, gömme rezervuar;
+paftada etiketi yok; İE-16 PR-7). Türü bilinmeyen ya da iki türe uyan, adedi
 okunamayan satır okumayı durdurur; kg'ı okunamayan satır da durdurur, yalnız boy C profilin kg'ı boş olabilir (`KG_SIZ`; o türün kg'ı
 `None` kalır, sıfır sayılmaz; `kgsiz_turler`). Sessiz sayı yok. Hata iletisinde satırın adı yalnız çelik sözcükleriyle yazılır (`guvenli`).
+
+İE-16 PR-7 (ikinci kör küme; Lokman, 14 Kasım 2026 11:15 UTC kartı "Evet, üçü de ölçülsün"; beyan İE-16 › Değişiklik (PR-7)): Excel'de
+çelik panel grubu birden çok sayfadaysa boş şablon sayfası sayılmaz (`bos_sablon_mu`: bütün satırların adedi ve kg'ı boş, TOPLAM'ı yok ya
+da 0 adet 0 kg). Geriye tek sayfa kalmazsa okuma eskisi gibi durur; şablon olmayan iki sayfa varsa da durur. Kör listede sayfa elle
+seçilmez. Niş, kemer ve gömme rezervuar panelleri "özel panel" türüdür ve toplama girer.
 
 Veri, talimat değildir: hücre yazıları yalnız eşleme için kullanılır.
 """
@@ -43,6 +49,7 @@ TURLER = (  # (tür, paftadaki harf, katlanmış adda desen; ayraç içi açıkl
     ("tavan_paneli", "T", r"^(?!.*\bMAKAS).*\bTAVAN\b.*\bPANEL"),
     ("baca_paneli", "B", r"\bBACA"),
     ("c_profil", None, r"\bC\s*PROFIL"),
+    ("ozel_panel", None, r"\bNIS\b|\bKEMER|\bREZERVUAR"),    # İE-16 PR-7: niş, kemer, gömme rezervuar panelleri (toplama girer)
 )
 HARF = {t: h for t, h, _ in TURLER}
 KG_BASLIKLARI = ("KG", "AGIRLIK", "AGIRLIK (KG)", "AGIRLIK(KG)")
@@ -64,7 +71,7 @@ SOZLUK = {"DUVAR", "PANEL", "PANELI", "PANELLERI", "PANELLER", "KOLON", "KIRIS",
           "TAVAN", "BOY", "C", "PROFIL", "PROFILI", "IC", "DIS", "VERANDA", "SUNDURMA", "KAPI", "PENCERE", "BASLIK", "LENTO", "ARA",
           "UST", "ALT", "BAS", "YAN", "ON", "ARKA", "KOSE", "DERE", "ASIK", "OMEGA", "GRUBU", "TOPLAM", "ZEMIN", "KAT", "CEPHE",
           "PARCA", "CERCEVE", "MUSTEMILAT", "KORKULUK", "BACA", "VEANDA", "DIKME", "DIKMELERI", "ARASI", "USTU", "SIRT", "MM",
-          "DESTEK", "DESTEGI"}
+          "DESTEK", "DESTEGI", "NIS", "KEMER", "GOMME", "REZERVUAR"}
 
 
 def guvenli(ad) -> str:
@@ -175,6 +182,13 @@ def _yazi(v):
     return re.sub(r"\s+", " ", str(v)).strip() if v not in (None, "") else None
 
 
+def bos_sablon_mu(c: dict) -> bool:
+    """Boş şablon sayfası: çelik grubunun bütün satırlarında adet ve kg boş; TOPLAM yok ya da 0 adet 0 kg (İE-16 PR-7)."""
+    T = c.get("toplam") or {}
+    return (all(s["adet"] is None and s["kg"] is None for s in c["satirlar"])
+            and all(T.get(k) in (None, 0) for k in ("adet", "kg")))
+
+
 def excel_celik(yol: Path, sayfa: int | None = None) -> dict:
     import openpyxl
 
@@ -188,6 +202,11 @@ def excel_celik(yol: Path, sayfa: int | None = None) -> dict:
     adaylar = [(i, c) for i, c in adaylar if c is not None]
     if not adaylar:
         raise OkumaHatasi("Excel'de çelik panel grubu yok")
+    if sayfa is None and len(adaylar) > 1:              # İE-16 PR-7: boş şablon sayfası sayılmaz
+        dolu = [(i, c) for i, c in adaylar if not bos_sablon_mu(c)]
+        if not dolu:
+            raise OkumaHatasi(f"{len(adaylar)} sayfadaki çelik panel grubunun hepsi boş şablon")
+        adaylar = dolu
     if len(adaylar) > 1:
         raise OkumaHatasi(f"{len(adaylar)} sayfada çelik panel grubu var; `sayfa` verilmeli")
     return {"sayfa": adaylar[0][0], **adaylar[0][1]}

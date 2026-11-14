@@ -1,0 +1,51 @@
+{
+ "aciklama": "Çelik hakeminin sonucu (İE-16). Yalnız tutanlar: çelik kg kapısının sonucu (farkı yalnız geçtiyse), adedi tutan çelik türleri ve adedi tutan öteki satırlar (anahtar ve bizim adedimiz). Tutmayan satırların gerçek değeri depoya girmez; sayilar kıyasın özetidir.",
+ "kod": "ÇP-24",
+ "tarih": "2026-11-14",
+ "kiyas_commit": "7fdc7c422c8a74fb75b1c3fbe0e275a6347b3677",
+ "bizim_liste": {
+  "yol": "testler/celik/projeler/CP24/bizim_liste.json",
+  "commit": "8d118160323c7d1a72d4f8c28ef7339f7a352a06"
+ },
+ "muhur": {
+  "sha256": "e2c0028f43feaf819a477950cc86c31cce567ac1d05e54df2faccb1b5bd2fd56",
+  "bayt": 59207,
+  "durum": "kor",
+  "kayit_durumu": "kor",
+  "liste_sayfasi": 0,
+  "muhur_commit": "30878e4b95ba086a179f1d388a123e81169dbc92"
+ },
+ "celik_kg_kapisi": {
+  "sonuc": "geçmedi",
+  "pay_yuzde": 3.0,
+  "kapi_disi": [
+   "c_profil"
+  ],
+  "kapi_disi_bizim_kg": 30.0,
+  "fark_yuzde": null
+ },
+ "celik_turleri_tutan": [
+  {
+   "tur": "c_profil",
+   "adet": 6
+  }
+ ],
+ "sayilar": {
+  "aynı": 9,
+  "farklı": 25,
+  "adet okunamadı": 8,
+  "bizde yok": 56,
+  "bizde fazla": 48
+ },
+ "tutanlar": [
+  {"grup": "METAL AKSAM", "ad": "BAS MAKAS Z SI", "olcu": [2800.0], "adet": 12},
+  {"grup": "KAPI VE PENCERE", "ad": "KOMPOZIT CELIK KAPI", "olcu": [90.0, 210.0], "adet": 1},
+  {"grup": "ELEKTRIK", "ad": "UYDU KABLO", "olcu": [], "adet": 25},
+  {"grup": "ELEKTRIK", "ad": "TEKLI PRIZ", "olcu": [], "adet": 21},
+  {"grup": "ELEKTRIK", "ad": "UYDU PRIZ", "olcu": [], "adet": 1},
+  {"grup": "ELEKTRIK", "ad": "SIGORTA KUTUSU", "olcu": [12.0], "adet": 1},
+  {"grup": "ELEKTRIK", "ad": "ZIL", "olcu": [], "adet": 1},
+  {"grup": "DEPO", "ad": "ACIL MUDAHELE KAPAGI", "olcu": [], "adet": 1},
+  {"grup": "DEPO", "ad": "POLURETAN KOPUK", "olcu": [], "adet": 2}
+ ]
+}

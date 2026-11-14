@@ -168,6 +168,12 @@
    "sag-1": "veranda",
    "on+1": "veranda",
    "on-1": "veranda"
+  },
+  "PA27": {
+   "sag+1": "girinti",
+   "sag-1": "girinti",
+   "on+1": "girinti",
+   "on-1": "girinti"
   }
  }
 }
