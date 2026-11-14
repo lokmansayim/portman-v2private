@@ -229,6 +229,8 @@ def bir_is(depo: Depo, settings: dict, sahip: str | None = None) -> dict | None:
         if gelen.get("reply_id"):                    # İE-04: buton/liste cevabı; LLM çağrılmaz, kimlik kayıtla doğrulanır
             etk = ET.coz(gelen, d, depo.giden_satiri)
             cikarim = {"etkilesim": etk, "talep": etk.get("talep"), "meta": {"backend": "etkilesim", "kimlik": etk.get("kimlik"), "gecerli": etk.get("gecerli")}}
+        elif W.nasil_calisir_mesaji(gelen):          # BK-29 tur 6 (D3): yazıyla "Nasıl çalışır?"; LLM çağrılmaz, `W.isle` düğmenin yolundan cevaplar
+            cikarim = {"talep": None, "meta": {"backend": "kural", "kural": "nasil_calisir"}}
         else:
             try:
                 talep, meta = W.cikar(gelen, settings, k)
