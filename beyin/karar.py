@@ -15,6 +15,8 @@ from . import numara                     # BK-08 madde 9: gerekçedeki serbest m
 from . import celik                      # İE-08: çelik aday zarfı, D-09 antet bilgisi
 from . import celik_okuma as CO          # İE-08 PR-2b: çelik revizyonunda bayinin sözünden pencere / çatı / dış 140 okuması (K18)
 from . import form_ozellik               # İE-20 PR-6: prefabrik talep formundaki standart dışı seçimler İş Emri'ne
+from . import yarim_pano as YP            # İE-39 (D-90): havuz evinde dış duvar yarım pano kayar
+from . import yarim_pano_okuma as YPO     # İE-39 PR-2: bayinin "sağa yarım pano uzat" sözü (K18; ayar `yarim_pano.acik`)
 
 MOD = 125.5
 ROOT = Path(__file__).resolve().parent.parent
@@ -447,7 +449,16 @@ def _karar_ver(talep: Talep, k: Konusma, bayi: dict | None, katalog: Katalog, me
             k.not_dus("kural", "çatı seti açıkken talep bilgisi değişti: set eskidi, talep yeniden okundu")
     t = _yinelenen_kodu_birak(k, t, metin, katalog)
     t = _pencere_varyantlarina_soz_isle(t, metin)    # G-3/G-4 (29.09): pencere değişikliği tek yoldan, B1 kurallarıyla
+    yp_komut = []
+    if getattr(k, "yarim_pano", False):              # İE-39 PR-2 (D-90): ayar `yarim_pano.acik`; kapalıyken bugünkü yol
+        yp = _yarim_pano_sozu(k, t, metin, katalog)
+        if isinstance(yp, Karar):
+            return yp
+        if yp is not None:
+            t, yp_komut = yp
     k.birlestir(t.model_dump())
+    if yp_komut:
+        k.d["taslak"]["yarim_pano"] = list(k.d["taslak"].get("yarim_pano") or []) + yp_komut
     _form_izi(k, t)                               # İE-20 PR-6: prefabrik talep formunun önceliği ve ölçü izi taslakta
     k.d["asama"] = "topluyor"
     k.d["son_metin"] = (metin or "").strip()      # sıfırlama(lar)dan SONRA: kurallar bayinin bu mesajdaki sözünü okur
@@ -1667,6 +1678,12 @@ def _is_emri_uret(k: Konusma, bayi: dict, katalog: Katalog, sablon: dict, kaynak
                                         mesaj=f"\"{v.get('aciklama','')}\" değişikliği otomatik yapılamıyor. " + YONLENDIRME))
         except varyant.VaryantHatasi as e:
             return _bitir(k, Karar(eylem="yonlendir", gerekce=f"varyant hatası: {e}", mesaj=f"Değişiklik uygulanamadı ({e}). " + YONLENDIRME))
+    if ts.get("yarim_pano"):                          # İE-39 PR-2 (D-90): bayinin yarım pano komutları, şablondan sırayla
+        yp = _yarim_pano_uygula(k, ie, ts)
+        if isinstance(yp, Karar):
+            return yp
+        ie, yp_notlar = yp
+        notlar += yp_notlar
     # pencere listesi: 'degistir' → şablondaki mahalle eşleştirip ölçü değiştir; 'ekle'/'kaldir' → v0.1'de yönlendirme
     ie_pencere0 = json.loads(json.dumps(ie))          # BK-29 PR-2: seçilmiş pencerelerin notu şablondaki adlarıyla (son satırlardan)
     for p0 in list(ts.get("pencereler") or []):
@@ -1788,6 +1805,97 @@ def _is_emri_uret(k: Konusma, bayi: dict, katalog: Katalog, sablon: dict, kaynak
     return _bitir(k, Karar(eylem="is_emri", is_emri=ie, revizyon=ie["revizyon"], gerekce=f"şablon {kaynak}" + ek,
                             mesaj=f"{on_not}{on_bilgi}" + "".join(f"{x}. " for x in (bas, degisiklik) if x)
                                   + "Ön onay planınız hazır; plan görseli ve PDF ektedir."))
+
+
+# ── İE-39 PR-2 (D-90) · havuz evinde bayinin "sağa yarım pano uzat" komutu ────────────────────────────────────────────────────────
+# Kural bayinin kendi sözünü okur (`yarim_pano_okuma`, K18); LLM'in bu cümleden yazdığı değişiklik ve özel istek kopyası taslağa girmez.
+# Komut taslakta birikir (`taslak.yarim_pano`) ve her revizyonda şablondan sırayla uygulanır (duvar başına toplam). Kural tutmazsa komut
+# durur, bayiye gerekçe gider ve plan açık kalır (`_plani_acik_tut`). Ayar kapalıyken (varsayılan) bugünkü yol: LLM'in değişikliği.
+_YP_NEDEN = {
+    "dilim": "bugün yalnız sağ ve ön duvar uzatılıp kısaltılabiliyor",
+    "muhur": "bu evin planı sabit, değiştirilemiyor",
+    "sistem": "bu komut yalnız prefabrik evde çalışıyor",
+    "motor": "yeni plan kurulamadı",
+    "cizim": "yeni plan kurulamadı",
+    "konum": "evin planı bu komuta uygun değil",
+    "veranda": "veranda bu duvara değiyor; veranda uzamaz",
+    "karkasli": "bu duvarda karkaslı pano var",
+    "girinti": "bu duvarda girinti var",
+    "kubbe": "bu duvarda kubbe var",
+    "cumba": "bu duvarda cumba var",
+    "aciklik": "kapı ya da pencere yerinde kalmıyor",
+    "cati": "çatının açıklığı değişiyor",
+    "olcu": "dış ölçü yarım panoya uymuyor",
+    "dizilim": "öteki duvarlardaki panolar da değişiyor",
+}
+_YP_HARIC_TUR = ("ayna_x", "ayna_y", "pencere_degistir", "pencere_ekle", "pencere_kaldir", "cati_degistir")
+
+
+def _yp_miktar(adim: int) -> str:
+    """Yarım pano sayısının bayinin sözüyle yazılışı: 1 → "yarım pano", 2 → "1 pano", 3 → "3 yarım pano"."""
+    n = abs(int(adim))
+    return "yarım pano" if n == 1 else (f"{n // 2} pano" if n % 2 == 0 else f"{n} yarım pano")
+
+
+def _yp_istek(cephe: str, adim: int) -> str:
+    return f"{YP.CEPHE_ADI[cephe].capitalize()} duvarı {_yp_miktar(adim)} {'uzatma' if adim > 0 else 'kısaltma'}"
+
+
+def _yarim_pano_sozu(k: Konusma, t: Talep, metin: str | None, katalog: Katalog):
+    """Bu mesajdaki yarım pano sözü. Komut yoksa ya da ev seçilmemişse (çelik ev dahil) None: bugünkü yol. Komut varsa (Talep, komutlar):
+    LLM'in aynı cümleden yazdığı değişiklik ve özel istek kopyası düşer. Açık planda okunamayan pano isteği bayiye söylenir (K21)."""
+    komutlar, belirsiz = YPO.oku(metin)
+    if not komutlar and not belirsiz:
+        return None
+    kod = t.katalog_kodu or k.d["taslak"].get("katalog_kodu")
+    aday = _aday_bul(k, katalog, kod) if kod else None
+    if aday is None or aday.get("motor") == "genel":
+        return None
+    if belirsiz:
+        if not k.d.get("son_is_emri") or k.d.get("asama") not in ACIK_PLAN_ASAMALARI:
+            return None                               # ilk plan: bugünkü yol (ev seçimi düşmez)
+        b = belirsiz[0]
+        k.not_dus("kural", f"İE-39: yarım pano sözü komut sayılmadı ({b.neden})")
+        if b.neden.startswith("oda adı"):
+            return _bitir(k, Karar(eylem="yonlendir", gerekce="yarım pano: oda büyütme",
+                                    mesaj=f"\"{b.soz}\" isteği otomatik yapılamıyor: yarım pano komutu evin dış duvarını kaydırır, odayı "
+                                          "büyütmez. " + YONLENDIRME))
+        ornek = "Örnek: \"sağa yarım pano uzat\" ya da \"öne 1 pano kısalt\"."
+        return _bitir(k, Karar(eylem="cevapla", gerekce=PLAN_DEGISMEDI,
+                                mesaj=f"\"{b.soz}\" isteğini uygulamadım: {b.neden}. {ornek}"))
+    varyantlar = [v for v in t.varyantlar if v.tur in _YP_HARIC_TUR or not YPO.soz_komut_mu(v.aciklama, komutlar)]
+    ozel = [s for s in t.ozel_istekler if not YPO.soz_komut_mu(s, komutlar)]
+    if len(varyantlar) != len(t.varyantlar) or len(ozel) != len(t.ozel_istekler):
+        k.not_dus("kural", f"İE-39: yarım pano sözünün LLM kopyası düştü ({len(t.varyantlar) - len(varyantlar)} değişiklik, "
+                           f"{len(t.ozel_istekler) - len(ozel)} özel istek)")
+    t = t.model_copy(update={"varyantlar": varyantlar, "ozel_istekler": ozel})
+    k.not_dus("kural", "İE-39: yarım pano komutu " + ", ".join(f"{c.cephe} {c.adim:+d}" for c in komutlar))
+    return t, [{"cephe": c.cephe, "adim": c.adim, "soz": c.soz[:200]} for c in komutlar]
+
+
+def _yarim_pano_uygula(k: Konusma, ie: dict, ts: dict):
+    """Taslaktaki komutlar şablondan sırayla (duvar başına toplam). Dönüş (İş Emri, notlar) ya da yönlendirme Karar'ı (K21)."""
+    notlar = []
+    toplam = YPO.birlestir(ts.get("yarim_pano") or [])
+    for cephe in dict.fromkeys(c["cephe"] for c in ts.get("yarim_pano") or []):
+        if cephe not in {c["cephe"] for c in toplam}:     # uzatıp kısaltınca duvar ilk yerine döner; bayi bunu da okur
+            notlar.append(f"{YP.CEPHE_ADI[cephe]} duvar ilk yerine döndü")
+    for c in toplam:
+        try:
+            s = YP.uygula(ie, c["cephe"], c["adim"])
+        except YP.KomutDurdu as e:
+            k.not_dus("kural", f"İE-39: komut durdu ({e.kod}): {e.neden}")
+            return _bitir(k, Karar(eylem="yonlendir", gerekce=f"yarım pano komutu durdu: {e.kod}",
+                                    mesaj=f"{_yp_istek(c['cephe'], c['adim'])} isteği bu evde otomatik yapılamıyor: "
+                                          f"{_YP_NEDEN.get(e.kod, 'kural tutmuyor')}. " + YONLENDIRME))
+        ie = s["is_emri"]
+        (W0, H0), (W1, H1) = s["dis_olcu"]["once"], s["dis_olcu"]["sonra"]
+        odalar = "; ".join(f"{u['ad']} {_m2(u['once_m2'])} → {_m2(u['sonra_m2'])} m²" for u in s["uzayan"])
+        birikti = sum(1 for x in ts.get("yarim_pano") or [] if x["cephe"] == c["cephe"]) > 1     # notlar evin ilk hâline göre
+        notlar.append(f"{YP.CEPHE_ADI[c['cephe']]} duvar {'toplam ' if birikti else ''}{_yp_miktar(c['adim'])} "
+                      f"{'uzadı' if c['adim'] > 0 else 'kısaldı'} (dış ölçü "
+                      f"{YP._tr(W0)} × {YP._tr(H0)} → {YP._tr(W1)} × {YP._tr(H1)} cm" + (f"; {odalar}" if odalar else "") + ")")
+    return ie, notlar
 
 
 _ADDAKI_OLCU = re.compile(r" \d{2,3}x\d{2,3}(?= |$)")

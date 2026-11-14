@@ -350,11 +350,30 @@ def pano_siniflari(p0, p1, eksen: str, kenar_g: str, d: float) -> tuple[dict, di
     sonra = [tuple(p.rect()) for p in p1.panolar]
     o_sabit = [_otele(r, eksen, sabit) for r in once]
     o_kayan = [_otele(r, eksen, kayan) for r in once]
+    # Eşleme birebir (PR-2): her önceki pano en çok bir sonraki panoyla eşleşir; önce yerinde kalanlar, sonra kayanlar. Tam pano (125,5)
+    # kaymada yeni pano komşusunun kaymış kopyasına benzer; birebir eşlemede yeni pano "degisti" (pembe) olur, sayılar tutar.
+    def _bul(r, adaylar, kullanilan):
+        return next((i for i, k in enumerate(adaylar) if i not in kullanilan and all(abs(a - b) <= YER_TOL for a, b in zip(r, k))), None)
     s1, s0 = {}, {}
-    for p, r in zip(p1.panolar, sonra):
-        s1[id(p)] = "ayni" if _var_mi(r, o_sabit) else "kaydi" if _var_mi(r, o_kayan) else "degisti"
-    for p, rs, rk in zip(p0.panolar, o_sabit, o_kayan):
-        s0[id(p)] = "ayni" if _var_mi(rs, sonra) else "kaydi" if _var_mi(rk, sonra) else "degisti"
+    kullanilan: set[int] = set()
+    eslesme: dict[int, tuple[int, str]] = {}
+    for j, r in enumerate(sonra):
+        i = _bul(r, o_sabit, kullanilan)
+        if i is not None:
+            kullanilan.add(i)
+            eslesme[j] = (i, "ayni")
+    for j, r in enumerate(sonra):
+        if j in eslesme:
+            continue
+        i = _bul(r, o_kayan, kullanilan)
+        if i is not None:
+            kullanilan.add(i)
+            eslesme[j] = (i, "kaydi")
+    onceki_sinif = {i: s for i, s in eslesme.values()}
+    for j, p in enumerate(p1.panolar):
+        s1[id(p)] = eslesme[j][1] if j in eslesme else "degisti"
+    for i, p in enumerate(p0.panolar):
+        s0[id(p)] = onceki_sinif.get(i, "degisti")
     return s1, s0
 
 

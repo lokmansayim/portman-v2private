@@ -52,6 +52,9 @@ VARSAYILAN = {
     # [Reddet] gider; onayla kart açılır ve karşılama şablonu gider. `gunluk_en_cok`: 24 saatte açılan yeni talep tavanı (aşılırsa sabit
     # cevap). Kapalıyken bugünkü sabit cevap (kayitsiz_cevap).
     "bayi_kaydi": {"acik": False, "gunluk_en_cok": 10},
+    # İE-39 PR-2 (D-90): havuz evinin açık planında bayinin "sağa yarım pano uzat" sözü koddan okunur (LLM ve ek çağrı yok); dış duvar
+    # yarım pano (62,75 cm) kayar, "1 pano" 125,5 cm. Bugün sağ ve ön duvar; kural tutmazsa bayiye gerekçe gider. Kapalıyken bugünkü yol.
+    "yarim_pano": {"acik": False},
 }
 ANAHTARLAR = tuple(VARSAYILAN)
 SABLON_ANAHTARLARI = ("sablon_patron_bildirim", "sablon_bayi_dosyalar_hazir", "sablon_muhendis_kontrol", "sablon_muhendis_hatirlatma",
@@ -71,7 +74,8 @@ def oku(veri) -> dict:
         return a
     if isinstance(d, dict):
         for k, v in d.items():
-            if k in ("llm", "plan_uretimi", "llm_once_revizyon", "banka_germe", "gorsel_okuma", "talep_formu", "bayi_kaydi") and isinstance(v, dict):
+            if k in ("llm", "plan_uretimi", "llm_once_revizyon", "banka_germe", "gorsel_okuma", "talep_formu", "bayi_kaydi",
+                     "yarim_pano") and isinstance(v, dict):
                 a[k] = {**a[k], **v}
             else:
                 a[k] = v
