@@ -1,0 +1,767 @@
+{
+ "sema": "portman.yapi_tanimi/0.5-taslak",
+ "kod": "ÇP-23",
+ "ad": "Tek kat çelik, 2+1, verandalı, beşik, dış duvar 140, 82 m² (kör ölçüm projesi)",
+ "aile": "tek_kat_celik",
+ "paket": "proje",
+ "birim": "cm",
+ "kat": "zemin",
+ "kaynak": {
+  "okunmayanlar": "Kör proje: gerçek yükleme listesi, paftanın panel sayfaları ve modeller tanım yazılırken açılmadı. Panel, makas ve çatı paneli adetleri ve bölmeleri tanımda yok: karkas kuralından (`karkas: kural`; İE-16 PR-3a–3c). Yöntem B, paftada 'omega' ya da 'aşık' sözcüğü geçen sayfa olduğu için (sayfa denetimi aracı yalnız A/B yazar; `testler/celik/projeler/kor_sayfa.py`).",
+  "koordinat": "Köken karkasın güneybatı dış köşesi: verandanın korkuluk hattı (x = 0 batı duvarının ve batı korkuluğunun dış yüzü, y = 0 güney korkuluğunun ve merdiven önü kirişinin dış yüzü); +x doğu, +y kuzey (paftada kuzey işareti yok; çizimin üstü kuzey alındı). Veranda güneybatıda (481 × 203 kaplamalı), salonun güneyinde merdiven önü (398 × 120 kaplamalı; merdiven alıcıya ait); ikisi de ana çatının altında.",
+  "cizim": "Projenin montaj paftası (PDF, altı sayfa; mühürde ÇP-23'ün montaj paftası, SHA-256 eb5e0d30…). Kör kural (İE-16 PR-4; plan `Celik_Cizim_Kurallari/PR-4/plan.md`; İE-16 PR-7): yalnız 1. sayfa (müşteri onay paftası) okundu, 14 Kasım 2026; panel sayfaları, modeller ve gerçek liste açılmadı. Ölçüler sayfanın vektör çizgilerinden (ölçek üst dış ölçü zinciri 879 ile; zincirler 245 + 246 + 388, 481 + 398, 384 + 400 + 203, 392 + 475 + 120 ile tutarlı, en büyük sapma 0,2); karkas kaplamalı ölçüden iki yanda 3 cm düşülerek (873 × 981). Pencereler en/yükseklik etiketlerinden ve doğrama işaretlerinden; kapılar kanat çizgileri ve açılış yaylarından; mahaller oda etiketlerinden; çatı teknik özelliklerden ve çatı kesitinden (beşik, 18°, 1041 = 987 + 2 × 27)."
+ },
+ "kat_yuksekligi": 270,
+ "teknik_ozellikler": {
+  "Bina yüksekliği": "2700 mm",
+  "Dış duvarlar": "140 mm",
+  "İç duvarlar": "80 mm",
+  "Panel türü": "galvanizli yapısal çelik",
+  "Çatı şekli": "beşik",
+  "Çatı kaplaması": "sandviç panel",
+  "Çatı kaplama rengi": "bordo",
+  "Dış kapı": "başka bir projedeki (150 m²) dış kapının aynısı",
+  "İç kapılar": "alıcıya ait",
+  "Dış cephe boya": "alıcıya ait",
+  "İç cephe boya": "alıcıya ait",
+  "Pencere rengi": "alıcıya ait",
+  "Tavan": "ters tavan",
+  "Saçak ve alın rengi": "Boardex kaplama",
+  "Pencere detay": "alıcıya ait"
+ },
+ "aciklama_notlari": [
+  "1- Dış cephe panelleri: Boardex + çelik karkas + OSB + alçıpan",
+  "2- İç cephe panelleri: alçıpan + OSB + çelik karkas + OSB + alçıpan",
+  "3- Dere grubu beyaz renk olacak.",
+  "4- Sıhhi tesisat grubu alıcıya ait.",
+  "5- Vitrifiye grubu alıcıya ait.",
+  "6- Boya grubu alıcıya ait.",
+  "7- Merdiven alıcıya ait.",
+  "8- Veranda korkulukları 80'lik çelikten yapılacak, dış ve iç kaplama Boardex'ten yapılacak. İçi mineral yün olacak. Çatı paneli ve tavan paneli olacak."
+ ],
+ "kapsam": {
+  "dis_kapi": true,
+  "ic_kapi": false,
+  "pencere": false,
+  "boya": false,
+  "vitrifiye": false,
+  "sihhi_tesisat": false,
+  "kaynak": "teknik özellikler (dış kapı başka bir projedekinin aynısı: bizden; iç kapılar, dış ve iç cephe boyası, pencere rengi ve pencere detayı alıcıya ait) ve açıklama 4–7 (sıhhi tesisat, vitrifiye, boya ve merdiven alıcıya ait). Elektrik için 1. sayfada not yok: varsayılan (listede)"
+ },
+ "renk": {
+  "cati": "bordo",
+  "kaynak": "teknik özellikler (çatı kaplama rengi bordo). Saçak ve alın rengi yerine 'Boardex kaplama' yazılı: renk yazılmadı. Dere beyaz (açıklama 3): kuralın renk grupları dereyi çatının rengiyle yazar"
+ },
+ "yuz_kaplamalari": {
+  "dis": {
+   "kalinlik": 3.0,
+   "malzeme": [
+    "boardex"
+   ],
+   "not": "kaplamalı dış ölçü karkasın iki yanında 3 cm (sayfada 2,8–2,9 çizili; açık beşteki gibi 3); açıklama 1: Boardex, nem bariyeri yazmıyor"
+  },
+  "ic": {
+   "kalinlik": 2.35,
+   "malzeme": [
+    "osb",
+    "alcipan"
+   ],
+   "not": "OSB 11 mm + alçıpan 12,5 mm (açıklama 1 ve 2)"
+  }
+ },
+ "duvar_siniflari": {
+  "dis": {
+   "ad": "bina dış duvarı",
+   "profil": "140x45x1,2",
+   "yalitim": true,
+   "yuz": {
+    "ic": "ic",
+    "dis": "dis",
+    "veranda": "dis"
+   },
+   "not": "teknik özellikler: dış duvarlar 140 mm (sayfada 14,2 çizili); et kalınlığı paftada yok (1,2: kitabın varsayılanı)"
+  },
+  "ic": {
+   "ad": "iç duvar",
+   "profil": "80x45x1,2",
+   "yalitim": true,
+   "yuz": {
+    "ic": "ic"
+   },
+   "not": "teknik özellikler: iç duvarlar 80 mm (sayfada 7,9–8,2 çizili)"
+  },
+  "korkuluk": {
+   "ad": "veranda korkuluğu",
+   "profil": "80x45x1,2",
+   "yalitim": true,
+   "yuz": {
+    "veranda": "dis",
+    "dis": "dis"
+   },
+   "not": "açıklama 8: 80'lik çelik, iki yüzü Boardex, içi mineral yün (sayfada 7,9–8,2 çizili); et kalınlığı paftada yok (1,2: kitabın varsayılanı)"
+  },
+  "kolon": {
+   "ad": "veranda dikmesi",
+   "profil": "80x45x1,2",
+   "yalitim": false,
+   "yuz": {
+    "veranda": "dis",
+    "dis": "dis"
+   },
+   "not": "kolonun profili paftada yok (karkas kuralı: kolon ve kiriş 80 × 45 × 1,2)"
+  }
+ },
+ "duvarlar": [
+  {
+   "ad": "W01",
+   "sinif": "dis",
+   "kutu": [
+    0,
+    967,
+    873,
+    981
+   ],
+   "yukseklik": 270,
+   "not": "kuzey"
+  },
+  {
+   "ad": "W02",
+   "sinif": "dis",
+   "kutu": [
+    0,
+    200,
+    14,
+    967
+   ],
+   "yukseklik": 270,
+   "not": "batı"
+  },
+  {
+   "ad": "W03",
+   "sinif": "dis",
+   "kutu": [
+    859,
+    120,
+    873,
+    967
+   ],
+   "yukseklik": 270,
+   "not": "doğu"
+  },
+  {
+   "ad": "W04",
+   "sinif": "dis",
+   "kutu": [
+    495,
+    120,
+    859,
+    134
+   ],
+   "yukseklik": 270,
+   "not": "güney (salon; merdiven önüne bakar)"
+  },
+  {
+   "ad": "W05",
+   "sinif": "dis",
+   "kutu": [
+    481,
+    120,
+    495,
+    214
+   ],
+   "yukseklik": 270,
+   "not": "salonun verandaya bakan batı duvarı"
+  },
+  {
+   "ad": "W06",
+   "sinif": "dis",
+   "kutu": [
+    14,
+    200,
+    481,
+    214
+   ],
+   "yukseklik": 270,
+   "not": "güney (mutfak ve koridor; verandaya bakar)"
+  },
+  {
+   "ad": "W07",
+   "sinif": "ic",
+   "kutu": [
+    234,
+    714,
+    242,
+    967
+   ],
+   "yukseklik": 270,
+   "not": "yatak odası 1 ile banyo arası"
+  },
+  {
+   "ad": "W08",
+   "sinif": "ic",
+   "kutu": [
+    242,
+    714,
+    480,
+    722
+   ],
+   "yukseklik": 270,
+   "not": "banyo ile yatak odası 1 ve koridor arası"
+  },
+  {
+   "ad": "W09",
+   "sinif": "ic",
+   "kutu": [
+    350,
+    214,
+    358,
+    714
+   ],
+   "yukseklik": 270,
+   "not": "koridorun batı duvarı"
+  },
+  {
+   "ad": "W10",
+   "sinif": "ic",
+   "kutu": [
+    480,
+    214,
+    488,
+    967
+   ],
+   "yukseklik": 270,
+   "not": "koridorun ve banyonun doğu duvarı"
+  },
+  {
+   "ad": "W11",
+   "sinif": "ic",
+   "kutu": [
+    14,
+    592,
+    350,
+    600
+   ],
+   "yukseklik": 270,
+   "not": "yatak odası 1 ile mutfak arası"
+  },
+  {
+   "ad": "W12",
+   "sinif": "ic",
+   "kutu": [
+    488,
+    592,
+    859,
+    600
+   ],
+   "yukseklik": 270,
+   "not": "yatak odası 2 ile salon arası"
+  },
+  {
+   "ad": "VK1",
+   "sinif": "korkuluk",
+   "kutu": [
+    30,
+    0,
+    481,
+    8
+   ],
+   "yukseklik": 70,
+   "not": "veranda korkuluğu, güney (sayfada 2,8–481 çizili)"
+  },
+  {
+   "ad": "VK2",
+   "sinif": "korkuluk",
+   "kutu": [
+    0,
+    8,
+    8,
+    200
+   ],
+   "yukseklik": 70,
+   "not": "veranda korkuluğu, batı"
+  },
+  {
+   "sinif": "kolon",
+   "yukseklik": 240,
+   "kaplama_yuksekligi": 240,
+   "ad": "KLN1",
+   "kutu": [
+    843,
+    0,
+    873,
+    14
+   ],
+   "not": "merdiven önünün güneydoğu köşe dikmesi (sayfada 30 × 13,9 çizili)"
+  },
+  {
+   "sinif": "kolon",
+   "yukseklik": 240,
+   "kaplama_yuksekligi": 240,
+   "ad": "KLN2",
+   "kutu": [
+    0,
+    0,
+    30,
+    8
+   ],
+   "not": "verandanın güneybatı köşe dikmesi (iki korkuluğun birleştiği açık köşe); 1. sayfada ayrıca çizili değil: varsayım (ÇP-18, ÇP-20'deki gibi)"
+  }
+ ],
+ "mahaller": [
+  {
+   "ad": "Yatak Odası 1",
+   "nokta": [
+    120,
+    800
+   ],
+   "sinif": "ic",
+   "islev": [
+    "yatak_odasi"
+   ],
+   "etiket_m2": 9.39,
+   "not": "L biçimli: banyonun batısında ve güneyinde"
+  },
+  {
+   "ad": "Banyo",
+   "nokta": [
+    360,
+    840
+   ],
+   "sinif": "ic",
+   "islev": [
+    "banyo"
+   ],
+   "islak": true,
+   "etiket_m2": 5.83
+  },
+  {
+   "ad": "Yatak Odası 2",
+   "nokta": [
+    670,
+    780
+   ],
+   "sinif": "ic",
+   "islev": [
+    "yatak_odasi"
+   ],
+   "etiket_m2": 13.61
+  },
+  {
+   "ad": "Koridor",
+   "nokta": [
+    419,
+    450
+   ],
+   "sinif": "ic",
+   "islev": [
+    "hol"
+   ],
+   "etiket_m2": 6.09
+  },
+  {
+   "ad": "Mutfak",
+   "nokta": [
+    180,
+    400
+   ],
+   "sinif": "ic",
+   "islev": [
+    "mutfak"
+   ],
+   "etiket_m2": 12.7
+  },
+  {
+   "ad": "Salon",
+   "nokta": [
+    670,
+    350
+   ],
+   "sinif": "ic",
+   "islev": [
+    "salon"
+   ],
+   "etiket_m2": 16.93
+  },
+  {
+   "ad": "Veranda",
+   "poligon": [
+    [
+     0,
+     0
+    ],
+    [
+     481,
+     0
+    ],
+    [
+     481,
+     200
+    ],
+    [
+     0,
+     200
+    ]
+   ],
+   "sinif": "veranda",
+   "islev": [
+    "veranda"
+   ],
+   "etiket_m2": 9.82,
+   "not": "batısı ve güneyi korkuluklu veranda (481 × 203 kaplamalı; VK1, VK2 korkulukları, KRS1, KRS2 kirişleri, KLN2 dikmesi); doğusu merdivene açık"
+  }
+ ],
+ "acikliklar": [
+  {
+   "ad": "P1",
+   "tur": "pencere",
+   "duvar": "W01",
+   "bas": 262.4,
+   "en": 60,
+   "yuk": 40,
+   "alt": 160,
+   "mahal": "Banyo",
+   "etiket": "60/40"
+  },
+  {
+   "ad": "P2",
+   "tur": "pencere",
+   "duvar": "W02",
+   "bas": 726.1,
+   "en": 120,
+   "yuk": 120,
+   "alt": 80,
+   "mahal": "Yatak Odası 1",
+   "etiket": "120/120"
+  },
+  {
+   "ad": "P3",
+   "tur": "pencere",
+   "duvar": "W03",
+   "bas": 726.1,
+   "en": 120,
+   "yuk": 120,
+   "alt": 80,
+   "mahal": "Yatak Odası 2",
+   "etiket": "120/120"
+  },
+  {
+   "ad": "P4",
+   "tur": "pencere",
+   "duvar": "W03",
+   "bas": 299.7,
+   "en": 120,
+   "yuk": 180,
+   "alt": 20,
+   "mahal": "Salon",
+   "etiket": "120/180"
+  },
+  {
+   "ad": "P5",
+   "tur": "pencere",
+   "duvar": "W06",
+   "bas": 103.0,
+   "en": 120,
+   "yuk": 120,
+   "alt": 80,
+   "mahal": "Mutfak",
+   "etiket": "120/120",
+   "not": "verandaya bakan pencere"
+  },
+  {
+   "ad": "P6",
+   "tur": "pencere",
+   "duvar": "W04",
+   "bas": 616.9,
+   "en": 120,
+   "yuk": 180,
+   "alt": 20,
+   "mahal": "Salon",
+   "etiket": "120/180",
+   "not": "merdiven önüne bakan pencere"
+  },
+  {
+   "ad": "K1",
+   "tur": "dis_kapi",
+   "duvar": "W06",
+   "bas": 375.9,
+   "en": 95,
+   "yuk": 210,
+   "mentese": "son",
+   "acilim": "ust",
+   "mahal": "Koridor",
+   "not": "giriş kapısı (verandadan koridora); kanat 82 çizili (382,3–464,4); boşluk 95 × 210 açık beşteki gibi"
+  },
+  {
+   "ad": "K2",
+   "tur": "dis_kapi",
+   "duvar": "W06",
+   "bas": 244.3,
+   "en": 95,
+   "yuk": 210,
+   "mentese": "son",
+   "acilim": "ust",
+   "mahal": "Mutfak",
+   "not": "mutfaktan verandaya ikinci dış kapı; kanat 82 çizili (250,7–332,8); boşluk 95 × 210 giriş kapısı gibi"
+  },
+  {
+   "ad": "K3",
+   "tur": "ic_kapi",
+   "duvar": "W09",
+   "bas": 605.4,
+   "en": 90,
+   "yuk": 214,
+   "mentese": "bas",
+   "acilim": "sol",
+   "kanat": [
+    80,
+    200
+   ],
+   "mahal": "Yatak Odası 1"
+  },
+  {
+   "ad": "K4",
+   "tur": "ic_kapi",
+   "duvar": "W10",
+   "bas": 605.4,
+   "en": 90,
+   "yuk": 214,
+   "mentese": "bas",
+   "acilim": "sag",
+   "kanat": [
+    80,
+    200
+   ],
+   "mahal": "Yatak Odası 2"
+  },
+  {
+   "ad": "K5",
+   "tur": "ic_kapi",
+   "duvar": "W10",
+   "bas": 493.4,
+   "en": 90,
+   "yuk": 214,
+   "mentese": "son",
+   "acilim": "sag",
+   "kanat": [
+    80,
+    200
+   ],
+   "mahal": "Salon"
+  },
+  {
+   "ad": "K6",
+   "tur": "ic_kapi",
+   "duvar": "W09",
+   "bas": 403.4,
+   "en": 90,
+   "yuk": 214,
+   "mentese": "son",
+   "acilim": "sol",
+   "kanat": [
+    80,
+    200
+   ],
+   "mahal": "Mutfak"
+  },
+  {
+   "ad": "K7",
+   "tur": "ic_kapi",
+   "duvar": "W08",
+   "bas": 377.2,
+   "en": 90,
+   "yuk": 214,
+   "mentese": "son",
+   "acilim": "ust",
+   "kanat": [
+    80,
+    200
+   ],
+   "mahal": "Banyo"
+  }
+ ],
+ "kirisler": [
+  {
+   "ad": "KRS1",
+   "kutu": [
+    0,
+    0,
+    873,
+    14
+   ],
+   "alt": 240,
+   "ust": 270,
+   "acik": [
+    [
+     30,
+     843
+    ]
+   ],
+   "bolge": "veranda",
+   "not": "veranda ve merdiven önü kirişi, güney; uçları KLN2 ve KLN1'in üstünde"
+  },
+  {
+   "ad": "KRS2",
+   "kutu": [
+    0,
+    0,
+    14,
+    214
+   ],
+   "alt": 240,
+   "ust": 270,
+   "acik": [
+    [
+     8,
+     200
+    ]
+   ],
+   "bolge": "veranda",
+   "not": "veranda kirişi, batı; 200–214 arası W02'nin içinde"
+  },
+  {
+   "ad": "KRS3",
+   "kutu": [
+    859,
+    0,
+    873,
+    134
+   ],
+   "alt": 240,
+   "ust": 270,
+   "acik": [
+    [
+     14,
+     120
+    ]
+   ],
+   "bolge": "veranda",
+   "not": "merdiven önünün kirişi, doğu; 120–134 arası W03'ün içinde"
+  }
+ ],
+ "lento": 70,
+ "cati": {
+  "tip": "besik",
+  "tip_adi": "beşik (mahya doğu–batı)",
+  "tip_kaynak": "teknik özellikler: çatı şekli 'Beşik'. 1. sayfadaki çatı kesiti planın yanında, kuzey–güney doğrultusunda: 1041 = 987 + 2 × 27 (kaplamalı yüzden saçak 27), tepe ortada, eğim 18°, eğik boy 548. Mahya doğu–batı, ortada; çatı veranda ve merdiven önü dahil bütün dikdörtgeni örter",
+  "sacak": 30,
+  "topuk": 10,
+  "duvar_ustu": 270,
+  "panel_kalinligi": 8,
+  "duzlemler": [
+   {
+    "ad": "güney",
+    "plan": [
+     [
+      -30.0,
+      -30.0
+     ],
+     [
+      903.0,
+      -30.0
+     ],
+     [
+      903.0,
+      490.5
+     ],
+     [
+      -30.0,
+      490.5
+     ]
+    ],
+    "yukari": [
+     0,
+     1
+    ],
+    "egim": 0.3249,
+    "sacak_kotu": 280.0,
+    "sacak": {
+     "y": -30.0
+    },
+    "ust_pay": 8.412,
+    "not": "güney yüzü (veranda ve merdiven önü dahil)"
+   },
+   {
+    "ad": "kuzey",
+    "plan": [
+     [
+      -30.0,
+      490.5
+     ],
+     [
+      903.0,
+      490.5
+     ],
+     [
+      903.0,
+      1011.0
+     ],
+     [
+      -30.0,
+      1011.0
+     ]
+    ],
+    "yukari": [
+     0,
+     -1
+    ],
+    "egim": 0.3249,
+    "sacak_kotu": 280.0,
+    "sacak": {
+     "y": 1011.0
+    },
+    "ust_pay": 8.412,
+    "not": "kuzey yüzü"
+   }
+  ],
+  "kalkanlar": [
+   {
+    "ad": "batı kalkanı",
+    "eksen": "x",
+    "konum": 0.0,
+    "aralik": [
+     0.0,
+     981.0
+    ],
+    "ic": "dogu",
+    "ust": [
+     "güney",
+     "kuzey"
+    ],
+    "not": "batı alnı; 0–200 arası veranda kirişinin (KRS2) üstünde"
+   },
+   {
+    "ad": "doğu kalkanı",
+    "eksen": "x",
+    "konum": 873.0,
+    "aralik": [
+     0.0,
+     981.0
+    ],
+    "ic": "bati",
+    "ust": [
+     "güney",
+     "kuzey"
+    ],
+    "not": "doğu alnı; 0–120 arası merdiven önü kirişinin (KRS3) üstünde"
+   }
+  ],
+  "egim_kaynak": "çatı kesitinde 18° yazılı → tan 18° = 0,3249; duvar üstü 270 (bina yüksekliği 2700 mm); saçak 30 (kesitte kaplamalı yüzden 27: karkas yüzünden 30), topuk 10 kuralın varsayılanı",
+  "yontem": "omega_asik",
+  "yontem_kaynak": "paftada 'omega' ya da 'aşık' sözcüğü geçen sayfa var (sayfa denetimi aracı; sayfa açılmadı): yöntem B. Açıklama 8'in son cümlesi 'Çatı paneli ve tavan paneli olacak' (yöntem A'nın parçaları); kör kural sözcük kuralıdır, B seçildi ve beyan edildi",
+  "kaplama": "sandvic_panel",
+  "kaplama_kaynak": "teknik özellikler: sandviç panel (bordo)"
+ },
+ "bilinen_sinirlar": [
+  "Kör tanım: yalnız 1. sayfadan. Panel bölmeleri, makaslar ve çatı paneli kuraldan; paftanın panel sayfaları açılmadı.",
+  "Yöntem: sözcük kuralıyla B (omega-aşık). 1. sayfada açıklama 8'in son cümlesi 'Çatı paneli ve tavan paneli olacak' yöntem A'yı anlatıyor olabilir; kör kural değiştirilmedi.",
+  "Veranda korkuluğunun yüksekliği 1. sayfada yok: 70 (bankadaki tek çelik korkuluk, KT-01'deki gibi).",
+  "Verandanın güneybatı köşe dikmesi (KLN2) ve kirişler (KRS1, KRS2, KRS3) 1. sayfada ayrıca çizili değil: açık köşeye dikme, açık kenarlara kiriş (kör kural; ÇP-18, ÇP-20'deki gibi). Merdiven önünün köşe dikmesi (KLN1) çizili. Güney kirişi (KRS1) 813 cm açıklıkta tek parça: ara dikme çizili değil.",
+  "Merdiven önü (salonun güneyi, 398 × 120 kaplamalı) çatının altında; merdiven alıcıya ait (açıklama 7), mahal yazılmadı.",
+  "Mutfaktan verandaya açılan ikinci kapı (K2) dış kapı sayıldı (dış duvarda); teknik özelliklerde tek dış kapı tarifi var.",
+  "Saçak ve alın 'Boardex kaplama' yazılı; yöntem B'de kuralın saçak altı sacdır (girdi kuralı). Dere beyaz (açıklama 3); kuralın renk grubunda dere çatının rengiyle (bordo) yazılır.",
+  "Pencere alt kotları etikette yok: 200 − yükseklik (lento 70; KT-01 ve ÇP-06'daki gibi).",
+  "İç kapı boşlukları 90 × 214, kanat 80 (açık beşteki gibi); 1. sayfada kanat 82 çizili. İç kapılar alıcıya ait (listede yok); boşlukları çerçeve için tanımda.",
+  "Kirişlerin, korkuluğun ve duvar panellerinin et kalınlığı paftada yazmıyor (1,2: kitabın varsayılanı)."
+ ],
+ "karkas": "kural"
+}
