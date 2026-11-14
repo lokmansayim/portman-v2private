@@ -1,0 +1,75 @@
+{
+ "kod": "PA29",
+ "gosterim": "PA-29",
+ "durum": "gecerli",
+ "sablon": "adaylar/PA29.json",
+ "gorsel": "adaylar/PA29.png",
+ "referans_model": "PA-29",
+ "yapi_turu": "prefabrik",
+ "kat": 1,
+ "oda_programi": "1+1",
+ "katalog_m2": 40.0,
+ "kapali_m2": 39.6,
+ "veranda_m2": 1.76,
+ "ozet": {
+  "grid": {
+   "x_pano": 5.5,
+   "y_pano": 5
+  },
+  "dis_olcu_cm": [
+   700.25,
+   647.5
+  ],
+  "brut_m2": 39.61,
+  "pano": 31,
+  "pencere": 4,
+  "kapi": 4,
+  "odalar": {
+   "BANYO": 4.47,
+   "GİRİŞ": 4.52,
+   "SALON & MUTFAK": 16.72,
+   "YATAK ODASI": 10.57,
+   "SUNDURMA": 1.76
+  },
+  "brut_disi_acik_m2": 1.76
+ },
+ "kaynak": {
+  "metin": "D-91 (İE-40): AP-07'nin (PA-27) dış duvarındaki özel ölçülü panolar bir alt standart panoya, kısalt (Lokman 14 Kasım 2026 10:01:43 'aslında kısaltta olmuş ... bence ikisinide havuza al', 10:05:24 'evet 3 de havuza girsin'); salonun 150/190 penceresi için yarım pano duvarın sonunda (son_pano kosu); hakemin standart hâl kipi (Lokman 14 Kasım 2026 10:10:11 kartı 'Kural denetime girsin').",
+  "dosya": "testler/havuz/is_emirleri/AP07_STD40.json",
+  "ayna": null,
+  "karar": "D-91",
+  "standart": true,
+  "kart_kiyasi": {
+   "kart": "AP-07",
+   "kart_sha256": "14ba8581f809360046ccecf29d08f6014279a707a9962f397fa86334c3b0cf7b",
+   "sonuc": "geçti",
+   "olcum": {
+    "dis_olcu_cm": [
+     700.25,
+     647.5
+    ],
+    "acikla_olcu_cm": [
+     700.25,
+     777.5
+    ],
+    "brut_m2": 39.61,
+    "kubbe_m2": 0.0,
+    "yatak_odasi": 1,
+    "pencereler": {
+     "120x120": 1,
+     "150x190": 2,
+     "60x40": 1
+    },
+    "dis_kapi": 1,
+    "ic_kapi": 3,
+    "veranda": 1,
+    "kat": 1,
+    "dis_ozel_pano": 0
+   },
+   "kip": "standart_hal",
+   "kaynak_is_emri": "testler/havuz/is_emirleri/AP07.json",
+   "kaynak_sha256": "4b768ae8a4601f83c91aae3fdaefb50a5b4824b60b51f168ecc378b30d4e3fca"
+  }
+ },
+ "not": ""
+}

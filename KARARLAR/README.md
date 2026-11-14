@@ -115,6 +115,7 @@ Biçim: karar · gerekçe · reddedilen seçenekler · geri alma yolu · kim ve 
 | [D-71](D-71.md) | Canlıya kontrollü geçiş: prefabrik liste isabeti %85'i beklemeden (bugün %57) yeni sürüm `v2026.11.08` kurulur; önce yedekten geri yükleme ve geri dönüş tatbikatı (satır 13), sonra kurulum (satır 119); dört yeni özellik ve 3D bağlantısı kapalı gelir, satır 80, 83, 110, 111 her biri ayrı onayla açılır; liste her teklifte Lokman'ın gözünden geçer; komutları Lokman Mac'inden koşar | 8.11 (Lokman 16:25 kartı "Şimdi, kontrollü geçelim") |
 | [D-72](D-72.md) | Tek fiyat kaynağı CRM stok fiyatları API'si: yeni teklifin her fiyatı CRM'den, sunucu her gün 06:15'te çeker; öteki listeler (EKIM87, HAZ, L45, CTKB, tekil Patron fiyatları) konu dışı, çırpı ipi D-65 aynen; pencere de CRM'den (3 Kasım pencere kararının yerine), eklenene kadar fiyatsız; eşleme `kurallar/fiyat/crm_esleme.json`, araç `araclar/crm_fiyat.py`, `fiyatla`/`teklif` `--crm`, varsayılan defter yok; kapanmış teklif o günkü defterle; mühür M-15 (İE-35) | 9.11 (Lokman 13:10 "bundan sonra tek fiyat kaynağımız bu api olacak ve hergün fiyatları çek", "diğer tüm listeler konu dışı"; 13:15 kartı "Samet CRM'e eklesin") |
 | [D-73](D-73.md) | Montaj rehberinde baş makas Z'si Lokman'ın çizimiyle (üst kanat 4, gövde 7, tırnak 3 cm, 30°); alın sacının 3 cm tırnağı Z'nin tırnağına oturur, saçak altı makas üstünün 3,6 cm altında; alın sacı abkantta tek biçim (250 ve 280 boyda aynı), kenar boyunca saçak altının 6 cm altına iner; köşede derenin ucunu örter, ucu derenin biçiminde kesilir; parçalar değer, iç içe girmez (`cakisma.js`) | 9.11 (Lokman 13:45 çizim, 15:12 "kendim düzelttim", 15:16 kartta B "çakışma olmasın tame değme olsun", 19:57 "alın sacını dereyi kapattığı yeri derenin deseninde kes") |
+| [D-92](D-92.md) | Tek özel pano kuralı: bir duvarda (dış ve iç) iki köşe ya da T arasında açıklıksız panoların toplamından 125,5'ler çıkar, kalan tek özel pano olur; pencereli panolar yerinde; İş Emri anahtarı `yapi.dizilim.tek_ozel_pano` (`geometry._tek_ozel_pano`, PC-39; BK-30), anahtarsız İş Emri aynen; kalan pano montaj köşesinden uzak uçta (dizilim sonu), duvarda zaten tek özel pano varsa yerinde; kısa parça açık; çeyrek pano yok | 14.11 (Lokman 13:12–13:24; kart 14:05:21 "Okuma 2: duvar boyunca"; 14:14:55; kart 14:27:09 "Montaj köşesinden uzak uçta"; kart 14:55:45 "A: Yerinde kalsın") |
 
 ## Numara defteri (14 Ekim 2026, BK-08; CIO planı › Görev 3)
 
@@ -201,7 +202,8 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | D | D-89 | Talep formunda veranda ayrıca sorulmaz: ilk formun verandasız kopyası `talep2.json`, kimliği ayara yazılınca ilk formun yerine sunulur (İE-20 PR-8; Lokman 14.11 07:34:50, 07:44:08 kartı "Çıkar, yeni form kur", 08:17:11 kartı "Evet, yayımla ve aç") | yazıldı (14.11; talep formu sohbeti, `claude/project-thread-l5mh7r`) |
 | D | D-90 | havuz evinde bayinin "yarım pano uzat / kısalt" komutu: dış duvar kayar, değen odalar uzar; veranda ya da çatı açıklığı değişirse durur; ilk dilim sağ ve ön (İE-39; Lokman 14.11 09:29:42, 09:53:57 kartları) | yazıldı (14.11; yarım pano sohbeti, `claude/project-thread-8hhan1`) |
 | D | D-91 | 45 m² havuz evinin iki standart pano hâli (PA-28, PA-29; İE-40) | alındı (14.11; standart pano sohbeti) |
-| D | **D-92** | — | **sıradaki boş** |
+| D | D-92 | tek özel pano kuralı: iki köşe ya da T arasında 125,5'ler, kalan tek özel pano; İş Emri anahtarı `dizilim.tek_ozel_pano` (BK-30, PC-39; Lokman 14.11 13:12–13:24, kart 14:05:21 "Okuma 2: duvar boyunca"; 14:14:55 çeyrek pano yok; 14:27:09 kalan uzak uçta) | yazıldı (14.11; tek pano Motor sohbeti, `claude/project-thread-9gdwir`) |
+| D | **D-93** | — | **sıradaki boş** |
 | İE | İE-01–İE-08 | bu depo (`main`) | yazıldı |
 | İE | İE-09 | model atölyesi: kontrollü model üretimi ve banka hattı (Görev 6e; pano 30; P6001 güncellemesi kapsam dışı) | alındı (16.10; `claude/gorev-6e-model-atolyesi-rnhtcp`; PR-1 banka hattı 29.10, `claude/project-thread-rhjgzv`) |
 | İE | İE-10, İE-11, İE-12 | prefabrik hattı (PR #12, PR #14, `ie-12-prefabrik-bayi-paftasi`) | `main`'e BK-12 ile (PR-1: motor ve bayi paftası; liste ve mühür kıyası sonraki PR'larda) |
@@ -253,7 +255,8 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | BK | BK-23 … BK-27 | iş emri belgelerinde (`docs/is_emirleri/`) ve dallarında; bu tabloya yazılmadı | alındı |
 | BK | BK-28 | bayiye giden tanıtım metinleri ("Nasıl çalışır?" sayfası, selam örneği) bugünkü sisteme göre; prefabrik onayında Patron'a bildirim (pano 196, 197, 199; D-84; `claude/project-thread-iv2z5f`) | alındı (12.11; CIO) |
 | BK | BK-29 | WhatsApp revizyon diyaloğu, 13 Kasım denetimi: geri çevrilen istek planı kapatmaz, iki pencereli odada soru, prefabrik seçimde kod ve numara (pano 200, 201, 208, 210; `claude/project-thread-2ypd6m`) | alındı (13.11; CIO) |
-| BK | **BK-30** | — | **sıradaki boş** |
+| BK | BK-30 | Pano Motor'unda tek özel pano kuralı (D-92, PC-39; `claude/project-thread-9gdwir`) | alındı (14.11; CIO) |
+| BK | **BK-31** | — | **sıradaki boş** |
 
 ## 27 Eylülde Lokman'ın verdiği kararlar
 

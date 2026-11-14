@@ -128,9 +128,11 @@ def set_kaydi(kaynak_mesaj_id: str, siralanmis: list[dict], ts: dict, tur: str =
     """Konuşma durumuna ve secenek_setleri tablosuna yazılan set (şablon yolu ve büyük alanlar hariç). tur: alan | cati_varyanti."""
     return {"id": set_id(kaynak_mesaj_id), "durum": "acik", "kaynak_mesaj_id": kaynak_mesaj_id, "tur": tur,
             "oncelik": ts.get("oncelik"), "agirliklar": dict(AGIRLIKLAR),
-            "adaylar": [{k: a.get(k) for k in ("kod", "sira", "puan", "hesap", "referans_model", "oda_programi", "katalog_m2",
-                                                 "kapali_m2", "veranda_m2", "durum", "gorsel", "motor", "tanim", "gosterim", "sunum", "yapi_turu", "kat")
-                         if k in a} for a in siralanmis[:EN_COK_SUNUM]]}
+            "adaylar": [{**{k: a.get(k) for k in ("kod", "sira", "puan", "hesap", "referans_model", "oda_programi", "katalog_m2",
+                                                    "kapali_m2", "veranda_m2", "durum", "gorsel", "motor", "tanim", "gosterim", "sunum", "yapi_turu", "kat")
+                            if k in a},
+                         **({"acik_alan": acik_alan_adi(a)} if acik_alan_adi(a) != "veranda" else {})}     # set kaydında `ozet` yok: ad buradan okunur
+                        for a in siralanmis[:EN_COK_SUNUM]]}
 
 
 def gosterim(a: dict) -> str:
@@ -144,12 +146,33 @@ def kisa_ad(a: dict) -> str:
     return f"{g} · {m2:g} m²"[:24] if isinstance(m2, (int, float)) else (f"{g} · {m2} m²"[:24] if m2 is not None else g[:24])
 
 
+# Lokman, 14 Kasım 2026 13:08:54 UTC kartı "Kendi adıyla yazılsın" (D-87): açık alan planda sundurma ya da giriş adını taşıyorsa
+# seçenek satırı ve mesajı "veranda" yerine o adı yazar (PA-27 ve KT-11 sundurma, KT-09 giriş). Öteki evlerde metin aynı kalır.
+ACIK_ALAN_ADLARI = ("sundurma", "giriş")
+
+
+def _kucuk(s) -> str:
+    return str(s).replace("İ", "i").replace("I", "ı").lower().strip()
+
+
+def acik_alan_adi(a: dict) -> str:
+    """Açık alanın bayiye yazılan adı: kayıttaki `acik_alan` (set kaydı), yoksa planın odaları içinde `veranda_m2`'ye eşit tek alanın adı
+    sundurma ya da giriş ise o; başka her durumda "veranda" (toplam, adı başka ya da odalar yok)."""
+    if a.get("acik_alan"):
+        return str(a["acik_alan"])
+    v = _f(a.get("veranda_m2"))
+    if not v:
+        return "veranda"
+    adlar = [_kucuk(ad) for ad, m2 in ((a.get("ozet") or {}).get("odalar") or {}).items() if _f(m2) == v]
+    return next((ad for ad in adlar if ad in ACIK_ALAN_ADLARI), "veranda")
+
+
 def aciklama(a: dict) -> str:
-    """Liste satırı açıklaması (≤72): oda programı, kapalı alan, veranda, puan."""
+    """Liste satırı açıklaması (≤72): oda programı, kapalı alan, veranda (sundurma, giriş), puan."""
     p = [a.get("oda_programi") or ""]
     if a.get("kapali_m2") is not None:
         p.append(f"kapalı {a['kapali_m2']} m²")
-    p.append(f"veranda {a['veranda_m2']} m²" if (_f(a.get("veranda_m2")) or 0) > 0 else "verandasız")
+    p.append(f"{acik_alan_adi(a)} {a['veranda_m2']} m²" if (_f(a.get("veranda_m2")) or 0) > 0 else "verandasız")
     p.append(f"puan {a.get('puan')}")
     return " · ".join(x for x in p if x)[:72]
 
@@ -180,7 +203,7 @@ def mesaj_metni(siralanmis: list[dict], ts: dict, gerekli: int = GEREKEN_ADAY) -
         m2 = a.get("katalog_m2"); m2s = f"{m2:g}" if isinstance(m2, float) else f"{m2}"      # 88.0 → "88"; prefabrik tamsayı/metin aynen
         satirlar.append(f"{a['sira']}. {gosterim(a)} · {m2s} m² katalog"
                         + (f", kapalı {a['kapali_m2']}" if a.get("kapali_m2") is not None else "")
-                        + (f", veranda {a['veranda_m2']}" if (_f(a.get("veranda_m2")) or 0) > 0 else "")
+                        + (f", {acik_alan_adi(a)} {a['veranda_m2']}" if (_f(a.get("veranda_m2")) or 0) > 0 else "")
                         + f" · puan {a['puan']} ({a['hesap']})")
     bas = f"{ts.get('alan_m2'):g} m² civarı {ts.get('oda_programi')}" if _f(ts.get("alan_m2")) is not None else (ts.get("oda_programi") or "talebiniz")
     onc = f" Öncelik: {ONCELIKLER.get(ts.get('oncelik'), 'belirtilmedi')}." if ts.get("oncelik") in ONCELIKLER else ""

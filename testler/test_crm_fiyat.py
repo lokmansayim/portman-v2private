@@ -52,18 +52,19 @@ def _kayitlar(E):
 
 
 def sahte_anlik(E: dict) -> dict:
-    """Eşlemedeki her kod için bir satır (icerir'li kodda her renk ayrı satır); fiyat kodun sırasından, bazıları kuruşlu."""
+    """Eşlemedeki her kod için bir satır (icerir'li kodda her renk, crm_olcu'lu kodda her ölçü ayrı satır); fiyat kodun sırasından,
+    bazıları kuruşlu."""
     kodlar: dict[str, set] = {}
     for _, g, _ in _kayitlar(E):
         if g.get("kod"):
             for k in g["kod"] if isinstance(g["kod"], list) else [g["kod"]]:
-                kodlar.setdefault(k, set()).add(g.get("icerir"))
+                kodlar.setdefault(k, set()).add((g.get("icerir"), g.get("crm_olcu")))
     data, i = [], 0
     for k in sorted(kodlar):
-        renkler = sorted(r for r in kodlar[k] if r) or [None]
-        for r in renkler:
+        suzgec = sorted((t for t in kodlar[k] if t != (None, None)), key=lambda t: (t[0] or "", t[1] or "")) or [(None, None)]
+        for r, o in suzgec:
             i += 1
-            data.append({"id": i, "urunkodu": k, "urunadi": f"Ürün {k}" + (f" ({r})" if r else ""), "olcu": "X", "birim": "Adet",
+            data.append({"id": i, "urunkodu": k, "urunadi": f"Ürün {k}" + (f" ({r})" if r else ""), "olcu": o or "X", "birim": "Adet",
                          "fiyat": 100 + 7 * i + (0.35 if i % 3 == 0 else 0), "kategori": None})
     return {"success": True, "count": len(data), "currency": "TRY", "generated_at": "2026-11-09T14:27:29+03:00", "data": data}
 
@@ -83,8 +84,9 @@ def D(A, E):
     return C.defter_uret(C.denetle(A), E)
 
 
-def _fiyat(A, kod, icerir=None):
-    return Decimal(str(next(x["fiyat"] for x in A["data"] if x["urunkodu"] == kod and (not icerir or icerir in x["urunadi"]))))
+def _fiyat(A, kod, icerir=None, olcu=None):
+    return Decimal(str(next(x["fiyat"] for x in A["data"] if x["urunkodu"] == kod and (not icerir or icerir in x["urunadi"])
+                            and (not olcu or x["olcu"] == olcu))))
 
 
 def _kurus(x, adim="0.01"):
@@ -140,18 +142,21 @@ def test_esleme_son_defterin_butun_kalemlerini_kapsar(E):
     """Eşlemenin anahtarları ve birimleri son elle defterin (r13) kalemleri, aynı sırayla; bant, boy ve makas kuralı aynı kalemlerde.
     D-72'den sonra yeni kalem (Motor'un listesinde olup defterde olmayan anahtar) yalnız eşlemeye girer: kapanmış defter değişmez. Yeni
     anahtarlar defterin kalemlerinden sonra gelir (PR-5, TK-06'nın 15 anahtarı; `test_pr5_tk06_anahtarlari`; r06, metal kiremit vidası;
-    `test_r06_mahya_bandi_ve_metal_kiremit_vidasi`; r07, 280 ve 300 cm yükseklik; `test_r07_280_ve_300_yukseklik`). Yeni bant da
-    defterin bantlarından sonra gelir (r07)."""
+    `test_r06_mahya_bandi_ve_metal_kiremit_vidasi`; r07, 280 ve 300 cm yükseklik; `test_r07_280_ve_300_yukseklik`; r08, fugalı dış
+    cephe; `test_r08_fugali_duz_desen`). Yeni bant da defterin bantlarından sonra gelir (r07, r08)."""
     S = _oku(SON_DEFTER)
     for hat in ("prefabrik", "celik"):
         H, R = E["hatlar"][hat], S["hatlar"][hat]
         assert list(H["kalemler"])[:len(R["kalemler"])] == list(R["kalemler"]) and H["anahtar"] == R["anahtar"] and H["atla"] == R["atla"]
         assert {k: H["kalemler"][k]["birim"] for k in R["kalemler"]} == {k: g["birim"] for k, g in R["kalemler"].items()}
         assert set(H["kalemler"]) - set(R["kalemler"]) == \
-            (set(PR5_ANAHTARLAR) | set(R06_ANAHTARLAR) | set(R07_ANAHTARLAR) if hat == "prefabrik" else set())
+            (set(PR5_ANAHTARLAR) | set(R06_ANAHTARLAR) | set(R07_ANAHTARLAR) | set(R08_ANAHTARLAR) if hat == "prefabrik" else set())
+        if hat == "prefabrik":                                              # yeni anahtarlar sürüm sırasıyla, sona
+            assert list(H["kalemler"])[-len(R08_ANAHTARLAR):] == list(R08_ANAHTARLAR)
         assert [(b["kalem"], b["kalinlik_mm"], b["yukseklik_mm"], [(a["en_mm"], a["alt_haric"]) for a in b["araliklar"]]) for b in H["bantlar"]] == \
                [(b["kalem"], b["kalinlik_mm"], b["yukseklik_mm"], [(a["en_mm"], a.get("alt_haric", False)) for a in b["araliklar"]]) for b in R["bantlar"]] \
-               + ([(k, kal, h, [(a[0], a[1]) for a in ar]) for h in (2800, 3000) for k, kal, ar in R07_BANT_ARALIK] if hat == "prefabrik" else [])
+               + ([(k, kal, h, [(a[0], a[1]) for a in ar]) for h in (2800, 3000) for k, kal, ar in R07_BANT_ARALIK]
+                  + [(R08_BANT, 100, h, R08_BANT_ARALIK) for h in (2500, 2800, 3000)] if hat == "prefabrik" else [])
     P, RP = E["hatlar"]["prefabrik"], S["hatlar"]["prefabrik"]
     assert [(b.get("kalem"), b.get("kalem_baslar"), b.get("kapatma_m")) for b in P["boy_onerileri"]] == \
            [(b.get("kalem"), b.get("kalem_baslar"), b.get("kapatma_m")) for b in RP["boy_onerileri"]] + [(None, "Metal kiremit (100 cm kapatır) · ", None)]
@@ -472,6 +477,118 @@ def test_r07_280_ve_300_yukseklik(E, A):
             assert all(x["anahtar"] in R07_ANAHTARLAR and x["durum"] in ("fiyat yok", "öneri, onay bekliyor") for x in yeni), (ev, ic, h, yeni)
             assert any(f"× {h}" in s["olcu"] and s["durum"].startswith("onaylı") for s in R[h]["satirlar"] if s["olcu"]), (ev, h)
 
+# ── r08: fugalı dış cephe, düz desen (Lokman 14 Kasım 2026 08:16:59 UTC kartı) ─────────────────────────────────────────────────────
+
+R08_ANAHTARLAR = {
+    "100'lük yapıştırma dolu vasistaslı pano (60/40) (FUGALI) | 100 × 1250 × 2500": (None, "CRM'de yok"),
+    "100'lük yapıştırma dolu vasistaslı pano (50/50) (FUGALI) | 100 × 1250 × 2500": (None, "CRM'de yok"),
+    "100'lük yapıştırma dolu vasistaslı pano (60/40) (FUGALI) | 100 × 1250 × 2800": (None, "CRM'de yok"),
+    "100'lük yapıştırma dolu vasistaslı pano (50/50) (FUGALI) | 100 × 1250 × 2800": (None, "CRM'de yok"),
+    "100'lük yapıştırma dolu vasistaslı pano (60/40) (FUGALI) | 100 × 1250 × 3000": (None, "CRM'de yok"),
+    "100'lük yapıştırma dolu vasistaslı pano (50/50) (FUGALI) | 100 × 1250 × 3000": (None, "CRM'de yok"),
+    "Karkaslı özel pencere panosu (150/180) (FUGALI) | 100 × 2500 × 2500": (None, "CRM'de yok"),
+    "Karkaslı özel pencere panosu (160/180) (FUGALI) | 100 × 2500 × 2500": (None, "CRM'de yok"),
+    "Karkaslı özel pencere panosu (170/180) (FUGALI) | 100 × 2125 × 2500": (None, "CRM'de yok"),
+    "Karkaslı özel pencere panosu (150/180) (FUGALI) | 100 × 2500 × 2800": (None, "CRM'de yok"),
+    "Karkaslı özel pencere panosu (160/180) (FUGALI) | 100 × 2500 × 2800": (None, "CRM'de yok"),
+    "Karkaslı özel pencere panosu (170/180) (FUGALI) | 100 × 2125 × 2800": (None, "CRM'de yok"),
+    "Karkaslı özel pencere panosu (150/180) (FUGALI) | 100 × 2500 × 3000": (None, "CRM'de yok"),
+    "Karkaslı özel pencere panosu (160/180) (FUGALI) | 100 × 2500 × 3000": (None, "CRM'de yok"),
+    "Karkaslı özel pencere panosu (170/180) (FUGALI) | 100 × 2125 × 3000": (None, "CRM'de yok"),
+    "Karkaslı çelik kapı panosu (FUGALI) | 100 × 1150 × 2500": (None, "CRM'de yok"),
+    "Karkaslı çelik kapı panosu (FUGALI) | 100 × 1200 × 2500": (None, "CRM'de yok"),
+    "Karkaslı çelik kapı panosu (FUGALI) | 100 × 1250 × 2500": (None, "CRM'de yok"),
+    "Karkaslı çelik kapı panosu (FUGALI) | 100 × 1150 × 2800": (None, "CRM'de yok"),
+    "Karkaslı çelik kapı panosu (FUGALI) | 100 × 1200 × 2800": (None, "CRM'de yok"),
+    "Karkaslı çelik kapı panosu (FUGALI) | 100 × 1250 × 2800": (None, "CRM'de yok"),
+    "Karkaslı çelik kapı panosu (FUGALI) | 100 × 1150 × 3000": (None, "CRM'de yok"),
+    "Karkaslı çelik kapı panosu (FUGALI) | 100 × 1200 × 3000": (None, "CRM'de yok"),
+    "Karkaslı çelik kapı panosu (FUGALI) | 100 × 1250 × 3000": (None, "CRM'de yok"),
+    "Pencere üst panel (FUGALI) | 100 × 1250 × 500": ("YP19", "kural"),
+    "Pencere üst panel (FUGALI) | 100 × 1250 × 800": ("YP19", "kural"),
+    "Pencere üst panel (FUGALI) | 100 × 1250 × 1000": ("YP19", "kural"),
+    "Pencere alt panel (120/100) (FUGALI) | 100 × 1250 × 1000": ("YP19", "kural"),
+    "Pencere alt panel (120/120) (FUGALI) | 100 × 1250 × 800": ("YP19", "kural"),
+    "Pencere alt panel (120/160) (FUGALI) | 100 × 1250 × 400": ("YP19", "kural"),
+    "Pencere alt panel (120/180) (FUGALI) | 100 × 1250 × 200": ("YP19", "kural"),
+    "Pencere alt panel (120/70) (FUGALI) | 100 × 1250 × 1300": ("YP19", "kural"),
+    "H'lar için lata (10 mm betopan, oymalı) | 100 × 2500": (None, "CRM'de yok"),
+    "Köşe latası | 150 × 2500": ("KG2", "birebir"),
+    "Köşe latası | 130 × 2500": ("KG2", "birebir"),
+    "Pencere latası | 100 × 2500": ("KG3", "birebir"),
+    "Pencere latası | 100 × 2800": ("KG3", "kural"),
+}
+R08_BANT, R08_BANT_ARALIK = "100'lük yapıştırma dolu pano (FUGALI)", [([627.5, 1250], True), ([340, 627.5], False), ([225, 225], False)]
+R08_BANT_KOD = {2500: ["YP19", "YP22", "YP19"], 2800: ["YP20", "YP23", "YP20"], 3000: ["YP21", "YP24", "YP21"]}
+R08_YAPISTIRMA = ("YP19", "YP20", "YP21", "YP22", "YP23", "YP24")
+
+
+def test_r08_fugali_duz_desen(E, A):
+    """İş Emri'nin `Açıklama: Fugalı`'sı 100'lük dış duvar panolarını "(FUGALI)" adıyla yazar, lata satırları girer; eşlemede bunların
+    hiçbiri yoktu ("defterde yok"). CRM'de fugalı pano iki desende (düz YP19–YP24, ahşap YP25–YP30); Lokman'ın kartı (14 Kasım 08:16:59,
+    "Düz desen"): düz desen. r08 fiyat yazmaz: tam / yarım pano bandı düz desenin h:2500 / 2800 / 3000 panosu (Patron 27 Ekim 22:08),
+    çeyrek tamın 1/4'ü öneri; fugalı pencere üst / alt paneli düz kaplamalı panelin kuralıyla (D-75) fugalı tam panodan; köşe latası
+    `KG2` iki satırda, satır ölçüsüyle (`crm_olcu`); pencere latası 2500 `KG3` birebir, 2800 boyla orantılı (pencere panelleri ve 2800'lük
+    lata Lokman'ın 08:28:03 kartıyla onaylı, "İkisi de onaylı");
+    CRM'de olmayan (vasistaslı pano, karkaslı özel pencere panosu, fugalı dış çelik kapı panosu, H latası) fiyatsız. Lata KDV'si
+    `Betopan` (okuma; Lokman'ın sözü değil). Havuz evinde fugalının yeni satırı "defterde yok" kalmaz."""
+    P = E["hatlar"]["prefabrik"]
+    K = P["kalemler"]
+    for k, (kod, tur) in R08_ANAHTARLAR.items():
+        assert (_kod(K[k]), K[k]["esleme"]) == (kod, tur), k
+    for h, kodlar in R08_BANT_KOD.items():
+        (b,) = [b for b in P["bantlar"] if (b["kalem"], b["yukseklik_mm"]) == (R08_BANT, h)]
+        assert [a["kod"] for a in b["araliklar"]] == kodlar and [a["esleme"] for a in b["araliklar"]] == ["kural", "kural", "yakın"]
+        assert all("08:16:59" in a["not"] and "Düz desen" in a["not"] for a in b["araliklar"][:2])
+        assert b["araliklar"][2]["carpan"] == 0.25
+    for k, g in K.items():
+        if k.startswith(("Pencere üst panel (FUGALI)", "Pencere alt panel (")) and "(FUGALI)" in k:
+            duz = K[k.replace(" (FUGALI)", "")] if k.replace(" (FUGALI)", "") in K else None
+            assert (g["kod"], g["hesap"], g["pay"], g["esleme"]) == ("YP19", "oran", 1, "kural"), k
+            assert "08:28:03" in g["not"] and "İkisi de onaylı" in g["not"], k
+            if duz:                                                     # düz kaplamalı panelin oranı, tam pano YP1 yerine YP19
+                assert (duz["kod"], duz["pay"], duz["payda"]) == ("YP1", 1, g["payda"]), k
+    assert K["Köşe latası | 150 × 2500"]["crm_olcu"] == "150*2500" and K["Köşe latası | 130 × 2500"]["crm_olcu"] == "130*2500"
+    assert {E["kdv"]["kodlar"][k] for k in ("KG2", "KG3")} == {"Betopan"} and any(y.startswith("KG2, KG3") for y in E["kdv"]["okuma"]["yerler"])
+    D = C.defter_uret(C.denetle(kategorili(A)), E)
+    PD = D["hatlar"]["prefabrik"]
+    b = next(b for b in PD["bantlar"] if (b["kalem"], b["yukseklik_mm"]) == (R08_BANT, 2800))
+    assert [(a["fiyat"], a["onay"], a["kdv"]) for a in b["araliklar"]] == [
+        (_kurus(_fiyat(A, "YP20")), True, 0.2), (_kurus(_fiyat(A, "YP23")), True, 0.2), (_kurus(_fiyat(A, "YP20") / 4), False, 0.2)]
+    for en in (130, 150):                                               # aynı kod iki satırda: satır ölçüsüyle ayrı fiyat
+        g = PD["kalemler"][f"Köşe latası | {en} × 2500"]
+        assert (g["fiyat"], g["onay"], g["kdv"], g["kdv_grubu"]) == (_kurus(_fiyat(A, "KG2", olcu=f"{en}*2500")), True, 0.2, "Betopan")
+    assert _fiyat(A, "KG2", olcu="130*2500") != _fiyat(A, "KG2", olcu="150*2500")
+    g = PD["kalemler"]["Pencere latası | 100 × 2800"]
+    assert (g["fiyat"], g["onay"]) == (_kurus(_fiyat(A, "KG3") * 28 / 25), True) and "08:28:03" in E["hatlar"]["prefabrik"]["kalemler"]["Pencere latası | 100 × 2800"]["not"]
+    g = PD["kalemler"]["Pencere üst panel (FUGALI) | 100 × 1250 × 500"]
+    assert (g["fiyat"], g["onay"], g["kdv"]) == (_kurus(_fiyat(A, "YP19") / 5), True, 0.2)
+    g = PD["kalemler"]["Pencere alt panel (120/120) (FUGALI) | 100 × 1250 × 800"]
+    assert (g["fiyat"], g["onay"]) == (_kurus(_fiyat(A, "YP19") / 3), True)
+    for k in ("Karkaslı çelik kapı panosu (FUGALI) | 100 × 1250 × 2500", "H'lar için lata (10 mm betopan, oymalı) | 100 × 2500"):
+        assert PD["kalemler"][k]["fiyat"] is None and PD["kalemler"][k]["durum"] == "kaynakta yok", k
+    B = copy.deepcopy(A)                                                # süzgeçsiz: iki satır, kod belirsiz → fiyatsız
+    X = copy.deepcopy(E)
+    X["hatlar"]["prefabrik"]["kalemler"]["Köşe latası | 130 × 2500"].pop("crm_olcu")
+    assert C.defter_uret(C.denetle(B), X)["hatlar"]["prefabrik"]["kalemler"]["Köşe latası | 130 × 2500"]["durum"] == "CRM'de kod yok"
+    X["hatlar"]["prefabrik"]["kalemler"]["Köşe latası | 150 × 2500"]["crm_olcu"] = " "
+    assert any("crm_olcu" in x for x in C.esleme_denetle(X))
+    from motor import prefabrik_liste as PL
+    KU = PL.kurallari_oku()
+    for ev in ("PA01", "PA06C", "PA08"):
+        ie0 = _oku(HAVUZ / f"{ev}.json")
+        for h in (250, 280, 300):
+            ie = copy.deepcopy(ie0)
+            ie["yapi"]["duvar_yuksekligi_cm"] = h
+            R0 = F.fiyatla(PL.is_emrinden(copy.deepcopy(ie), KU), D, "prefabrik")
+            ie.setdefault("ozellikler", {})["Açıklama"] = "Fugalı"
+            R = F.fiyatla(PL.is_emrinden(ie, KU), D, "prefabrik")
+            yok0 = {x["anahtar"] for x in R0["ozet"]["fiyatsiz"]}
+            yeni = [x for x in R["ozet"]["fiyatsiz"] if x["anahtar"] not in yok0]
+            assert yeni and all(x["anahtar"] in R08_ANAHTARLAR and x["durum"] == "fiyat yok" for x in yeni), (ev, h, yeni)
+            fug = [s for s in R["satirlar"] if s["kalem"] == R08_BANT]
+            assert fug and all(s["durum"].startswith("onaylı") and s["tutar"] for s in fug), (ev, h)
+
 # ── D-76: KDV ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 
 KDV_LOKMAN = {**{g: 0.2 for g in ("Metal aksam", "Betopan", "EPS", "Kiremit desen sac", "Boardex", "Alçıpan", "OSB", "Knauf", "Pencereler",
@@ -508,6 +625,7 @@ def test_d76_kdv_gruplari_lokmanin_listesi(E):
     assert kart == {**{k: "Yapıştırma pano" for k in ("YP1", "YP2", "YP4", "YP5", "YP7", "YP10")},
                     **{k: "Kapı panoları" for k in ("KP1", "KP10", "KP11")},
                     **{k: "Yapıştırma pano" for k in R07_YAPISTIRMA}, **{k: "Kapı panoları" for k in R07_KAPI},   # r07: aynı ürünün h:2800 / 3000'i
+                    **{k: "Yapıştırma pano" for k in R08_YAPISTIRMA},                                         # r08: fugalı düz desen
                     "CG6": "Tek kat panel", "DG1": "Tavan H'ı",
                     "DG2": "PVC omega kapak", "DG3": "PVC betopan H'ı", "DG11": "Acil müdahale kapağı",
                     **{f"DG{i}": "Baca" for i in range(15, 21)}}

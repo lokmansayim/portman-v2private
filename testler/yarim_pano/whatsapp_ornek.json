@@ -1,0 +1,81 @@
+{
+ "aciklama": "İE-39 PR-2: 85 m² 3+1 havuz evinde bayinin WhatsApp yazışması (ayar yarim_pano.acik). Plan numarası PM-… diye yazılır (saate bağlı). Üreten: testler/test_yarim_pano_okuma.py --dondur.",
+ "onay": {
+  "kim": "Lokman",
+  "zaman_utc": "2026-11-14T15:14:58Z",
+  "soz": "karar kartı \"Onaylayın: 85 m2 evde sağa yarım pano çizimi ve bayi mesajları doğru mu?\" → \"Doğru, PR açılsın\" (seçenek metni: \"Çizim (1202,25 cm) ve ekteki 6 bayi mesajı onaylı örnek olur. PR açılır, birleştirme sizde.\")",
+  "gosterilen": "bayinin 6 mesajı ve sistemin cevapları (PF Havuz_Basit_Komut/IE-39_tek_pano_kurali/85m2_26_5_silinir/whatsapp_yazisma_ornegi.md), önce/sonra pano dizilimi, ön onay PDF'i, DXF, bayi plan görseli (1202,25 cm) ve 1 pano önce/sonra (1265 cm); 14 Kasım 2026 15:12 UTC"
+ },
+ "konusma": [
+  {
+   "bayi": "PA12",
+   "eylem": "is_emri",
+   "revizyon": 1,
+   "mesaj": "PA-12 seçildi. Ön onay planınız hazır; plan görseli ve PDF ektedir.",
+   "dis_olcu_cm": [
+    1166,
+    726
+   ]
+  },
+  {
+   "bayi": "Sağa yarım pano uzatın",
+   "eylem": "is_emri",
+   "revizyon": 2,
+   "mesaj": "PA-12 r02. Değişiklik: sağ duvar yarım pano uzadı (uçtaki 26,5 cm özel pano kaldırıldı; dış ölçü 1166 × 726 → 1202,25 × 726 cm; YATAK ODASI 2 11,8 → 13,4 m²; YATAK ODASI 3 13,5 → 14,5 m²). Ön onay planınız hazır; plan görseli ve PDF ektedir.",
+   "dis_olcu_cm": [
+    1202.25,
+    726
+   ]
+  },
+  {
+   "bayi": "Sola da yarım pano uzatın",
+   "eylem": "yonlendir",
+   "revizyon": 2,
+   "mesaj": "Sol duvarı yarım pano uzatma isteği bu evde otomatik yapılamıyor: bugün yalnız sağ ve ön duvar uzatılıp kısaltılabiliyor. Bu konuyu Lokman Bey'e iletiyorum; en kısa sürede dönüş yapılacak. Planınız (PM-… r02) değişmedi. Onaylayabilir ya da başka bir değişiklik yazabilirsiniz.",
+   "dis_olcu_cm": [
+    1202.25,
+    726
+   ]
+  },
+  {
+   "bayi": "Öne yarım pano uzatın",
+   "eylem": "yonlendir",
+   "revizyon": 2,
+   "mesaj": "Ön duvarı yarım pano uzatma isteği bu evde otomatik yapılamıyor: veranda bu duvara değiyor; veranda uzamaz. Bu konuyu Lokman Bey'e iletiyorum; en kısa sürede dönüş yapılacak. Planınız (PM-… r02) değişmedi. Onaylayabilir ya da başka bir değişiklik yazabilirsiniz.",
+   "dis_olcu_cm": [
+    1202.25,
+    726
+   ]
+  },
+  {
+   "bayi": "yarım pano daha uzat",
+   "eylem": "cevapla",
+   "revizyon": 2,
+   "mesaj": "\"yarım pano daha uzat\" isteğini uygulamadım: hangi duvarın kayacağı yazılı değil. Örnek: \"sağa yarım pano uzat\" ya da \"öne 1 pano kısalt\". Planınız (PM-… r02) değişmedi. Onaylayabilir ya da başka bir değişiklik yazabilirsiniz.",
+   "dis_olcu_cm": [
+    1202.25,
+    726
+   ]
+  },
+  {
+   "bayi": "Sağa yarım pano kısaltın",
+   "eylem": "is_emri",
+   "revizyon": 3,
+   "mesaj": "PA-12 r03. Değişiklik: sağ duvar ilk yerine döndü. Ön onay planınız hazır; plan görseli ve PDF ektedir.",
+   "dis_olcu_cm": [
+    1166,
+    726
+   ]
+  },
+  {
+   "bayi": "Sağa 1 pano uzatın",
+   "eylem": "is_emri",
+   "revizyon": 4,
+   "mesaj": "PA-12 r04. Değişiklik: sağ duvar toplam 1 pano uzadı (uçtaki 26,5 cm özel pano kaldırıldı; dış ölçü 1166 × 726 → 1265 × 726 cm; YATAK ODASI 2 11,8 → 16,2 m²; YATAK ODASI 3 13,5 → 16,1 m²). Ön onay planınız hazır; plan görseli ve PDF ektedir.",
+   "dis_olcu_cm": [
+    1265.0,
+    726
+   ]
+  }
+ ]
+}

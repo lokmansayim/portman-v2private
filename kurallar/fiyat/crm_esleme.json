@@ -1,6 +1,6 @@
 {
  "sema": 1,
- "surum": "2026-11-13-r07",
+ "surum": "2026-11-14-r08",
  "karar": "D-72",
  "muhur": "M-15",
  "aciklama": "Fiyat defteri kaleminin CRM stok fiyatları API'sindeki karşılığı ve fiyatın nasıl hesaplandığı (İE-35). Fiyat yazmaz: fiyat her gün CRM'den gelir, `araclar/crm_fiyat.py` bu dosyayla defter üretir. Anahtarlar ve birimler fiyat defterinin (defter_2026-11 r13) kalemleri; Motor'un listesindeki anahtar. D-72'den sonra defter kapandı: Motor'un yeni anahtarı yalnız buraya, hattın kalemlerinin sonuna girer (r05, TK-06); yeni bant aralığı da bantların sonuna (r07, 280 ve 300 cm yükseklik). Eşleme değişikliği (yeni kalem, Lokman'ın birim cevabı, Samet'in CRM'e eklediği ürün) bu dosyaya PR'la girer; `kaynak` bölümü mühürlü (M-15).",
@@ -195,7 +195,15 @@
    "YP12": "Yapıştırma pano",
    "KP2": "Kapı panoları",
    "KP3": "Kapı panoları",
-   "KP12": "Kapı panoları"
+   "KP12": "Kapı panoları",
+   "YP19": "Yapıştırma pano",
+   "YP20": "Yapıştırma pano",
+   "YP21": "Yapıştırma pano",
+   "YP22": "Yapıştırma pano",
+   "YP23": "Yapıştırma pano",
+   "YP24": "Yapıştırma pano",
+   "KG2": "Betopan",
+   "KG3": "Betopan"
   },
   "listede_adi_yok": {
    "aciklama": "Lokman'ın listesinde adıyla geçmeyen, grubuna konan yerler. Çelik fiyat sohbeti bunları 10 Kasım 16:54:38 ve 17:01'de Lokman'a yazdı (DIAMOND 82 listesinin mor hücreleri; temiz su borusu %20). Lokman 18:05:03: \"hepsini kural olarak kayda geç\" (D-76). Kuraldır.",
@@ -213,7 +221,8 @@
     "HM46, HM47 (strafor), HM48 (alçıpan destek straforu) → EPS",
     "CG10–CG13 (metal kiremit) → Kiremit desen sac",
     "PK2 (Amerikan panel kapı), Melamin kapı → İç kapı",
-    "HM49 (nem bariyeri) → Membran (Lokman 10 Kasım 04:58, D-74: \"OSB+ Nem Bariyeri/Membar+Kiremit Desen Sac\")"
+    "HM49 (nem bariyeri) → Membran (Lokman 10 Kasım 04:58, D-74: \"OSB+ Nem Bariyeri/Membar+Kiremit Desen Sac\")",
+    "KG2, KG3 (köşe ve pencere latası 10 mm; Motor'un listesinde lata \"10 mm betopan\"; CRM kategorisi Kaplama Grubu) → Betopan (r08)"
    ]
   }
  },
@@ -1801,6 +1810,260 @@
      "esleme": "birebir",
      "birim": "adet",
      "not": "CRM adı: antrasit metal iniş borusu L 3000; çelikteki \"Dere iniş borusu | L 3000\" kaydının aynısı (r07, iniş borusu özelliği metal)"
+    },
+    "100'lük yapıştırma dolu vasistaslı pano (60/40) (FUGALI) | 100 × 1250 × 2500": {
+     "kod": null,
+     "esleme": "CRM'de yok",
+     "birim": "adet",
+     "not": "CRM'de vasistaslı pano yok, fugalı da yok (r08)"
+    },
+    "100'lük yapıştırma dolu vasistaslı pano (50/50) (FUGALI) | 100 × 1250 × 2500": {
+     "kod": null,
+     "esleme": "CRM'de yok",
+     "birim": "adet",
+     "not": "CRM'de vasistaslı pano yok, fugalı da yok (r08)"
+    },
+    "100'lük yapıştırma dolu vasistaslı pano (60/40) (FUGALI) | 100 × 1250 × 2800": {
+     "kod": null,
+     "esleme": "CRM'de yok",
+     "birim": "adet",
+     "not": "CRM'de vasistaslı pano yok, fugalı da yok (r08)"
+    },
+    "100'lük yapıştırma dolu vasistaslı pano (50/50) (FUGALI) | 100 × 1250 × 2800": {
+     "kod": null,
+     "esleme": "CRM'de yok",
+     "birim": "adet",
+     "not": "CRM'de vasistaslı pano yok, fugalı da yok (r08)"
+    },
+    "100'lük yapıştırma dolu vasistaslı pano (60/40) (FUGALI) | 100 × 1250 × 3000": {
+     "kod": null,
+     "esleme": "CRM'de yok",
+     "birim": "adet",
+     "not": "CRM'de vasistaslı pano yok, fugalı da yok (r08)"
+    },
+    "100'lük yapıştırma dolu vasistaslı pano (50/50) (FUGALI) | 100 × 1250 × 3000": {
+     "kod": null,
+     "esleme": "CRM'de yok",
+     "birim": "adet",
+     "not": "CRM'de vasistaslı pano yok, fugalı da yok (r08)"
+    },
+    "Karkaslı özel pencere panosu (150/180) (FUGALI) | 100 × 2500 × 2500": {
+     "kod": null,
+     "esleme": "CRM'de yok",
+     "birim": "adet",
+     "not": "CRM'de karkaslı özel pencere panosu yalnız 250/180 (KP13, düz kaplama); fugalı yok (r08; CRM'e eklenmeli)"
+    },
+    "Karkaslı özel pencere panosu (160/180) (FUGALI) | 100 × 2500 × 2500": {
+     "kod": null,
+     "esleme": "CRM'de yok",
+     "birim": "adet",
+     "not": "CRM'de karkaslı özel pencere panosu yalnız 250/180 (KP13, düz kaplama); fugalı yok (r08; CRM'e eklenmeli)"
+    },
+    "Karkaslı özel pencere panosu (170/180) (FUGALI) | 100 × 2125 × 2500": {
+     "kod": null,
+     "esleme": "CRM'de yok",
+     "birim": "adet",
+     "not": "CRM'de karkaslı özel pencere panosu yalnız 250/180 (KP13, düz kaplama); fugalı yok (r08; CRM'e eklenmeli)"
+    },
+    "Karkaslı özel pencere panosu (150/180) (FUGALI) | 100 × 2500 × 2800": {
+     "kod": null,
+     "esleme": "CRM'de yok",
+     "birim": "adet",
+     "not": "CRM'de karkaslı özel pencere panosu yalnız 250/180 (KP13, düz kaplama); fugalı yok (r08; CRM'e eklenmeli)"
+    },
+    "Karkaslı özel pencere panosu (160/180) (FUGALI) | 100 × 2500 × 2800": {
+     "kod": null,
+     "esleme": "CRM'de yok",
+     "birim": "adet",
+     "not": "CRM'de karkaslı özel pencere panosu yalnız 250/180 (KP13, düz kaplama); fugalı yok (r08; CRM'e eklenmeli)"
+    },
+    "Karkaslı özel pencere panosu (170/180) (FUGALI) | 100 × 2125 × 2800": {
+     "kod": null,
+     "esleme": "CRM'de yok",
+     "birim": "adet",
+     "not": "CRM'de karkaslı özel pencere panosu yalnız 250/180 (KP13, düz kaplama); fugalı yok (r08; CRM'e eklenmeli)"
+    },
+    "Karkaslı özel pencere panosu (150/180) (FUGALI) | 100 × 2500 × 3000": {
+     "kod": null,
+     "esleme": "CRM'de yok",
+     "birim": "adet",
+     "not": "CRM'de karkaslı özel pencere panosu yalnız 250/180 (KP13, düz kaplama); fugalı yok (r08; CRM'e eklenmeli)"
+    },
+    "Karkaslı özel pencere panosu (160/180) (FUGALI) | 100 × 2500 × 3000": {
+     "kod": null,
+     "esleme": "CRM'de yok",
+     "birim": "adet",
+     "not": "CRM'de karkaslı özel pencere panosu yalnız 250/180 (KP13, düz kaplama); fugalı yok (r08; CRM'e eklenmeli)"
+    },
+    "Karkaslı özel pencere panosu (170/180) (FUGALI) | 100 × 2125 × 3000": {
+     "kod": null,
+     "esleme": "CRM'de yok",
+     "birim": "adet",
+     "not": "CRM'de karkaslı özel pencere panosu yalnız 250/180 (KP13, düz kaplama); fugalı yok (r08; CRM'e eklenmeli)"
+    },
+    "Karkaslı çelik kapı panosu (FUGALI) | 100 × 1150 × 2500": {
+     "kod": null,
+     "esleme": "CRM'de yok",
+     "birim": "adet",
+     "not": "CRM'de fugalı dış çelik kapı panosu yok; KP8 (100'lük fugalı düz desen kaplamalı pano, özel ölçü) fiyatı 0 (r08; CRM'e eklenmeli)"
+    },
+    "Karkaslı çelik kapı panosu (FUGALI) | 100 × 1200 × 2500": {
+     "kod": null,
+     "esleme": "CRM'de yok",
+     "birim": "adet",
+     "not": "CRM'de fugalı dış çelik kapı panosu yok; KP8 (100'lük fugalı düz desen kaplamalı pano, özel ölçü) fiyatı 0 (r08; CRM'e eklenmeli)"
+    },
+    "Karkaslı çelik kapı panosu (FUGALI) | 100 × 1250 × 2500": {
+     "kod": null,
+     "esleme": "CRM'de yok",
+     "birim": "adet",
+     "not": "CRM'de fugalı dış çelik kapı panosu yok; KP8 (100'lük fugalı düz desen kaplamalı pano, özel ölçü) fiyatı 0 (r08; CRM'e eklenmeli)"
+    },
+    "Karkaslı çelik kapı panosu (FUGALI) | 100 × 1150 × 2800": {
+     "kod": null,
+     "esleme": "CRM'de yok",
+     "birim": "adet",
+     "not": "CRM'de fugalı dış çelik kapı panosu yok; KP8 (100'lük fugalı düz desen kaplamalı pano, özel ölçü) fiyatı 0 (r08; CRM'e eklenmeli)"
+    },
+    "Karkaslı çelik kapı panosu (FUGALI) | 100 × 1200 × 2800": {
+     "kod": null,
+     "esleme": "CRM'de yok",
+     "birim": "adet",
+     "not": "CRM'de fugalı dış çelik kapı panosu yok; KP8 (100'lük fugalı düz desen kaplamalı pano, özel ölçü) fiyatı 0 (r08; CRM'e eklenmeli)"
+    },
+    "Karkaslı çelik kapı panosu (FUGALI) | 100 × 1250 × 2800": {
+     "kod": null,
+     "esleme": "CRM'de yok",
+     "birim": "adet",
+     "not": "CRM'de fugalı dış çelik kapı panosu yok; KP8 (100'lük fugalı düz desen kaplamalı pano, özel ölçü) fiyatı 0 (r08; CRM'e eklenmeli)"
+    },
+    "Karkaslı çelik kapı panosu (FUGALI) | 100 × 1150 × 3000": {
+     "kod": null,
+     "esleme": "CRM'de yok",
+     "birim": "adet",
+     "not": "CRM'de fugalı dış çelik kapı panosu yok; KP8 (100'lük fugalı düz desen kaplamalı pano, özel ölçü) fiyatı 0 (r08; CRM'e eklenmeli)"
+    },
+    "Karkaslı çelik kapı panosu (FUGALI) | 100 × 1200 × 3000": {
+     "kod": null,
+     "esleme": "CRM'de yok",
+     "birim": "adet",
+     "not": "CRM'de fugalı dış çelik kapı panosu yok; KP8 (100'lük fugalı düz desen kaplamalı pano, özel ölçü) fiyatı 0 (r08; CRM'e eklenmeli)"
+    },
+    "Karkaslı çelik kapı panosu (FUGALI) | 100 × 1250 × 3000": {
+     "kod": null,
+     "esleme": "CRM'de yok",
+     "birim": "adet",
+     "not": "CRM'de fugalı dış çelik kapı panosu yok; KP8 (100'lük fugalı düz desen kaplamalı pano, özel ölçü) fiyatı 0 (r08; CRM'e eklenmeli)"
+    },
+    "Pencere üst panel (FUGALI) | 100 × 1250 × 500": {
+     "kod": "YP19",
+     "hesap": "oran",
+     "pay": 1,
+     "payda": 5,
+     "esleme": "kural",
+     "birim": "adet",
+     "not": "Fugalı düz desen tam pano (100 × 1250 × 2500, YP19) fiyatının 1/5'i: Lokman 14 Kasım 2026 08:28:03 UTC kartı (cmsg_01UAFvcnfVuTR1wfFux5fQPPUBALw1K3LRVk1XvVW3W5yq, \"Fugalı evdeki iki öneri fiyat onaylansın mı?\"), seçim \"İkisi de onaylı\". Düz kaplamalı üst panelin kuralı (D-75; 800 / 1000 Lokman 14 Kasım 07:28:15 kartı). CRM'deki fugalı düz desen pencere üst paneli (YP14, özel ölçü) fiyatı 0 (r08)"
+    },
+    "Pencere üst panel (FUGALI) | 100 × 1250 × 800": {
+     "kod": "YP19",
+     "hesap": "oran",
+     "pay": 1,
+     "payda": 3,
+     "esleme": "kural",
+     "birim": "adet",
+     "not": "Fugalı düz desen tam pano (100 × 1250 × 2500, YP19) fiyatının 1/3'ü: Lokman 14 Kasım 2026 08:28:03 UTC kartı (cmsg_01UAFvcnfVuTR1wfFux5fQPPUBALw1K3LRVk1XvVW3W5yq, \"Fugalı evdeki iki öneri fiyat onaylansın mı?\"), seçim \"İkisi de onaylı\". Düz kaplamalı üst panelin kuralı (D-75; 800 / 1000 Lokman 14 Kasım 07:28:15 kartı). CRM'deki fugalı düz desen pencere üst paneli (YP14, özel ölçü) fiyatı 0 (r08)"
+    },
+    "Pencere üst panel (FUGALI) | 100 × 1250 × 1000": {
+     "kod": "YP19",
+     "hesap": "oran",
+     "pay": 1,
+     "payda": 3,
+     "esleme": "kural",
+     "birim": "adet",
+     "not": "Fugalı düz desen tam pano (100 × 1250 × 2500, YP19) fiyatının 1/3'ü: Lokman 14 Kasım 2026 08:28:03 UTC kartı (cmsg_01UAFvcnfVuTR1wfFux5fQPPUBALw1K3LRVk1XvVW3W5yq, \"Fugalı evdeki iki öneri fiyat onaylansın mı?\"), seçim \"İkisi de onaylı\". Düz kaplamalı üst panelin kuralı (D-75; 800 / 1000 Lokman 14 Kasım 07:28:15 kartı). CRM'deki fugalı düz desen pencere üst paneli (YP14, özel ölçü) fiyatı 0 (r08)"
+    },
+    "Pencere alt panel (120/100) (FUGALI) | 100 × 1250 × 1000": {
+     "kod": "YP19",
+     "hesap": "oran",
+     "pay": 1,
+     "payda": 3,
+     "esleme": "kural",
+     "birim": "adet",
+     "not": "Fugalı düz desen tam pano (100 × 1250 × 2500, YP19) fiyatının 1/3'ü: Lokman 14 Kasım 2026 08:28:03 UTC kartı (cmsg_01UAFvcnfVuTR1wfFux5fQPPUBALw1K3LRVk1XvVW3W5yq, \"Fugalı evdeki iki öneri fiyat onaylansın mı?\"), seçim \"İkisi de onaylı\". Düz kaplamalı alt panelin kuralı (D-75). CRM'deki fugalı düz desen pencere alt paneli (YP17, özel ölçü) fiyatı 0 (r08)"
+    },
+    "Pencere alt panel (120/120) (FUGALI) | 100 × 1250 × 800": {
+     "kod": "YP19",
+     "hesap": "oran",
+     "pay": 1,
+     "payda": 3,
+     "esleme": "kural",
+     "birim": "adet",
+     "not": "Fugalı düz desen tam pano (100 × 1250 × 2500, YP19) fiyatının 1/3'ü: Lokman 14 Kasım 2026 08:28:03 UTC kartı (cmsg_01UAFvcnfVuTR1wfFux5fQPPUBALw1K3LRVk1XvVW3W5yq, \"Fugalı evdeki iki öneri fiyat onaylansın mı?\"), seçim \"İkisi de onaylı\". Düz kaplamalı alt panelin kuralı (D-75). CRM'deki fugalı düz desen pencere alt paneli (YP17, özel ölçü) fiyatı 0 (r08)"
+    },
+    "Pencere alt panel (120/160) (FUGALI) | 100 × 1250 × 400": {
+     "kod": "YP19",
+     "hesap": "oran",
+     "pay": 1,
+     "payda": 3,
+     "esleme": "kural",
+     "birim": "adet",
+     "not": "Fugalı düz desen tam pano (100 × 1250 × 2500, YP19) fiyatının 1/3'ü: Lokman 14 Kasım 2026 08:28:03 UTC kartı (cmsg_01UAFvcnfVuTR1wfFux5fQPPUBALw1K3LRVk1XvVW3W5yq, \"Fugalı evdeki iki öneri fiyat onaylansın mı?\"), seçim \"İkisi de onaylı\". Düz kaplamalı alt panelin kuralı (D-75). CRM'deki fugalı düz desen pencere alt paneli (YP17, özel ölçü) fiyatı 0 (r08)"
+    },
+    "Pencere alt panel (120/180) (FUGALI) | 100 × 1250 × 200": {
+     "kod": "YP19",
+     "hesap": "oran",
+     "pay": 1,
+     "payda": 3,
+     "esleme": "kural",
+     "birim": "adet",
+     "not": "Fugalı düz desen tam pano (100 × 1250 × 2500, YP19) fiyatının 1/3'ü: Lokman 14 Kasım 2026 08:28:03 UTC kartı (cmsg_01UAFvcnfVuTR1wfFux5fQPPUBALw1K3LRVk1XvVW3W5yq, \"Fugalı evdeki iki öneri fiyat onaylansın mı?\"), seçim \"İkisi de onaylı\". Düz kaplamalı alt panelin kuralı (D-75). CRM'deki fugalı düz desen pencere alt paneli (YP17, özel ölçü) fiyatı 0 (r08)"
+    },
+    "Pencere alt panel (120/70) (FUGALI) | 100 × 1250 × 1300": {
+     "kod": "YP19",
+     "hesap": "oran",
+     "pay": 1,
+     "payda": 3,
+     "esleme": "kural",
+     "birim": "adet",
+     "not": "Fugalı düz desen tam pano (100 × 1250 × 2500, YP19) fiyatının 1/3'ü: Lokman 14 Kasım 2026 08:28:03 UTC kartı (cmsg_01UAFvcnfVuTR1wfFux5fQPPUBALw1K3LRVk1XvVW3W5yq, \"Fugalı evdeki iki öneri fiyat onaylansın mı?\"), seçim \"İkisi de onaylı\". Düz kaplamalı alt panelin kuralı (D-75). CRM'deki fugalı düz desen pencere alt paneli (YP17, özel ölçü) fiyatı 0 (r08)"
+    },
+    "H'lar için lata (10 mm betopan, oymalı) | 100 × 2500": {
+     "kod": null,
+     "esleme": "CRM'de yok",
+     "birim": "adet",
+     "not": "CRM'de H latası yok; pencere latası (KG3) aynı ölçüde, oymalı değil (r08; CRM'e eklenmeli)"
+    },
+    "Köşe latası | 150 × 2500": {
+     "kod": "KG2",
+     "crm_olcu": "150*2500",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet",
+     "not": "CRM adı: köşe latası 10 mm; KG2 CRM'de iki satırda (130*2500 ve 150*2500), satır ölçüsüyle seçilir (r08)"
+    },
+    "Köşe latası | 130 × 2500": {
+     "kod": "KG2",
+     "crm_olcu": "130*2500",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet",
+     "not": "CRM adı: köşe latası 10 mm; KG2 CRM'de iki satırda (130*2500 ve 150*2500), satır ölçüsüyle seçilir; bu satırın adında 150*2500 yazıyor (r08)"
+    },
+    "Pencere latası | 100 × 2500": {
+     "kod": "KG3",
+     "hesap": "ayni",
+     "esleme": "birebir",
+     "birim": "adet",
+     "not": "CRM adı: pencere latası 10 mm (100*2500) (r08)"
+    },
+    "Pencere latası | 100 × 2800": {
+     "kod": "KG3",
+     "hesap": "oran",
+     "pay": 2800,
+     "payda": 2500,
+     "esleme": "kural",
+     "birim": "adet",
+     "not": "2500'lük pencere latasının (KG3) boyla orantılısı (2800 / 2500): Lokman 14 Kasım 2026 08:28:03 UTC kartı (cmsg_01UAFvcnfVuTR1wfFux5fQPPUBALw1K3LRVk1XvVW3W5yq, \"Fugalı evdeki iki öneri fiyat onaylansın mı?\"), seçim \"İkisi de onaylı\". CRM'de 2800'lük lata yok (r08)"
     }
    },
    "bantlar": [
@@ -2209,6 +2472,129 @@
        "hesap": "ayni",
        "esleme": "kural",
        "not": "en 1070–1250 aynı fiyat; CRM adı: 100'lük dış çelik kapı panosu h:3000 (r07)"
+      }
+     ]
+    },
+    {
+     "kalem": "100'lük yapıştırma dolu pano (FUGALI)",
+     "kalinlik_mm": 100,
+     "yukseklik_mm": 2500,
+     "araliklar": [
+      {
+       "en_mm": [
+        627.5,
+        1250
+       ],
+       "alt_haric": true,
+       "kod": "YP19",
+       "hesap": "ayni",
+       "esleme": "kural",
+       "not": "627,5'ten geniş tam (Patron 27 Ekim 22:08); fugalı düz desen tam pano h:2500 (Lokman 14 Kasım 2026 08:16:59 UTC kartı (cmsg_01UAFvcnfVuTR1wfFux5fQPP5ApU2mgc2DSzeUppokCHbA, \"Fugalı dış cephe panosu hangi desenin fiyatıyla hesaplansın?\"), seçim \"Düz desen\") (r08)"
+      },
+      {
+       "en_mm": [
+        340,
+        627.5
+       ],
+       "alt_haric": false,
+       "kod": "YP22",
+       "hesap": "ayni",
+       "esleme": "kural",
+       "not": "627,5'e kadar yarım (Patron 27 Ekim 22:08); fugalı düz desen yarım pano h:2500 (Lokman 14 Kasım 2026 08:16:59 UTC kartı (cmsg_01UAFvcnfVuTR1wfFux5fQPP5ApU2mgc2DSzeUppokCHbA, \"Fugalı dış cephe panosu hangi desenin fiyatıyla hesaplansın?\"), seçim \"Düz desen\") (r08)"
+      },
+      {
+       "en_mm": [
+        225,
+        225
+       ],
+       "alt_haric": false,
+       "kod": "YP19",
+       "hesap": "carp",
+       "carpan": 0.25,
+       "esleme": "yakın",
+       "not": "öneri: fugalı düz desen tam panonun dörtte biri; CRM'de çeyrek pano yok (r08)"
+      }
+     ]
+    },
+    {
+     "kalem": "100'lük yapıştırma dolu pano (FUGALI)",
+     "kalinlik_mm": 100,
+     "yukseklik_mm": 2800,
+     "araliklar": [
+      {
+       "en_mm": [
+        627.5,
+        1250
+       ],
+       "alt_haric": true,
+       "kod": "YP20",
+       "hesap": "ayni",
+       "esleme": "kural",
+       "not": "627,5'ten geniş tam (Patron 27 Ekim 22:08); fugalı düz desen tam pano h:2800 (Lokman 14 Kasım 2026 08:16:59 UTC kartı (cmsg_01UAFvcnfVuTR1wfFux5fQPP5ApU2mgc2DSzeUppokCHbA, \"Fugalı dış cephe panosu hangi desenin fiyatıyla hesaplansın?\"), seçim \"Düz desen\") (r08)"
+      },
+      {
+       "en_mm": [
+        340,
+        627.5
+       ],
+       "alt_haric": false,
+       "kod": "YP23",
+       "hesap": "ayni",
+       "esleme": "kural",
+       "not": "627,5'e kadar yarım (Patron 27 Ekim 22:08); fugalı düz desen yarım pano h:2800 (Lokman 14 Kasım 2026 08:16:59 UTC kartı (cmsg_01UAFvcnfVuTR1wfFux5fQPP5ApU2mgc2DSzeUppokCHbA, \"Fugalı dış cephe panosu hangi desenin fiyatıyla hesaplansın?\"), seçim \"Düz desen\") (r08)"
+      },
+      {
+       "en_mm": [
+        225,
+        225
+       ],
+       "alt_haric": false,
+       "kod": "YP20",
+       "hesap": "carp",
+       "carpan": 0.25,
+       "esleme": "yakın",
+       "not": "öneri: fugalı düz desen tam panonun dörtte biri; CRM'de çeyrek pano yok (r08)"
+      }
+     ]
+    },
+    {
+     "kalem": "100'lük yapıştırma dolu pano (FUGALI)",
+     "kalinlik_mm": 100,
+     "yukseklik_mm": 3000,
+     "araliklar": [
+      {
+       "en_mm": [
+        627.5,
+        1250
+       ],
+       "alt_haric": true,
+       "kod": "YP21",
+       "hesap": "ayni",
+       "esleme": "kural",
+       "not": "627,5'ten geniş tam (Patron 27 Ekim 22:08); fugalı düz desen tam pano h:3000 (Lokman 14 Kasım 2026 08:16:59 UTC kartı (cmsg_01UAFvcnfVuTR1wfFux5fQPP5ApU2mgc2DSzeUppokCHbA, \"Fugalı dış cephe panosu hangi desenin fiyatıyla hesaplansın?\"), seçim \"Düz desen\") (r08)"
+      },
+      {
+       "en_mm": [
+        340,
+        627.5
+       ],
+       "alt_haric": false,
+       "kod": "YP24",
+       "hesap": "ayni",
+       "esleme": "kural",
+       "not": "627,5'e kadar yarım (Patron 27 Ekim 22:08); fugalı düz desen yarım pano h:3000 (Lokman 14 Kasım 2026 08:16:59 UTC kartı (cmsg_01UAFvcnfVuTR1wfFux5fQPP5ApU2mgc2DSzeUppokCHbA, \"Fugalı dış cephe panosu hangi desenin fiyatıyla hesaplansın?\"), seçim \"Düz desen\") (r08)"
+      },
+      {
+       "en_mm": [
+        225,
+        225
+       ],
+       "alt_haric": false,
+       "kod": "YP21",
+       "hesap": "carp",
+       "carpan": 0.25,
+       "esleme": "yakın",
+       "not": "öneri: fugalı düz desen tam panonun dörtte biri; CRM'de çeyrek pano yok (r08)"
       }
      ]
     }

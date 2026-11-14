@@ -1,5 +1,5 @@
 {
- "aciklama": "İE-38 (D-87) çelik hakeminin hedef değerleri. AICelik'in tek katlı projeleri için proje kartı yok; değerler İE-16'da müşteri onay paftasından okunan tanımın adından (antet m², oda programı, veranda) alınır. Motor'un brüt oturumu antet m²'sinden en çok 0,5 m² sapar; oda programı ve veranda antette yazılı olmalı. `havuzda`: aynı proje havuzda başka kodla var (ÇP-07 = KT-03, ÇP-13 = KT-01, ÇP-14 = KT-04, ÇP-17 = KT-02).",
+ "aciklama": "İE-38 (D-87) çelik hakeminin hedef değerleri. AICelik'in tek katlı projeleri için proje kartı yok; değerler İE-16'da müşteri onay paftasından okunan tanımın adından (antet m², oda programı, veranda) alınır. Motor'un brüt oturumu antet m²'sinden en çok 0,5 m² sapar; oda programı ve veranda antette yazılı olmalı. `havuzda`: aynı proje havuzda başka kodla var (ÇP-07 = KT-03, ÇP-13 = KT-01, ÇP-14 = KT-04, ÇP-17 = KT-02). `plan_m2`: antetteki sayı brüt oturum değilse (net alan, planla çelişen sayı ya da yuvarlanmış sayı) brüt oturum planın ölçtüğü m²'yle kıyaslanır; yalnız Lokman'ın sözüyle (`plan_m2_kaynagi`) ve aynı 0,5 m² sınırıyla. `antet_m2` paftadaki sayı olarak kalır (ÇP-22, ÇP-24, ÇP-25; 14 Kasım 2026 12:33:58 kartı).",
  "kaynak": "testler/celik/projeler/CP*/CP*.json (İE-16 tanımları; AICelik mührü testler/celik/muhur.json, ikinci küme testler/celik/muhur_2.json)",
  "evler": {
   "ÇP-03": {
@@ -116,6 +116,8 @@
    "tanim": "testler/celik/projeler/CP22/CP22.json",
    "tanim_sha256": "c435ace16c52efdd6a054e2f328fbae9d885db03055f4319e9c764f3e3197935",
    "antet_m2": 43.2,
+   "plan_m2": 49.0,
+   "plan_m2_kaynagi": "Lokman, 14 Kasım 2026 12:33:58 UTC, karar kartı (bayi havuzu sohbeti): soru \"Paftadaki m²'si planla tutmayan üç çelik ev, planın m²'siyle havuza girsin mi?\", seçim \"Planın m²'siyle girsin\" (seçeneğin sonucu: \"Üç ev planın ölçtüğü 49, 130 ve 167 m² ile havuza girer. Denetim kuralı değişir; birleştirmeyi siz yaparsınız.\"). Antetteki \"43.2 m²\" odaların net toplamına yakın (oda etiketleri 12,1 + 5,1 + 23,2 + 2 = 42,4); planın dış ölçü zinciri 960 × 600 tutarlı (çelik kör testi sohbeti, 14 Kasım 11:54).",
    "oda_programi": "1+1",
    "veranda": false,
    "kat_adedi": 1,
@@ -136,6 +138,8 @@
    "tanim": "testler/celik/projeler/CP24/CP24.json",
    "tanim_sha256": "feec2d79f179f86051e3f39f9f5a673406bb59acc5c96625d6bc9217cec80e46",
    "antet_m2": 140.0,
+   "plan_m2": 130.0,
+   "plan_m2_kaynagi": "Lokman, 14 Kasım 2026 12:33:58 UTC, karar kartı (bayi havuzu sohbeti): soru \"Paftadaki m²'si planla tutmayan üç çelik ev, planın m²'siyle havuza girsin mi?\", seçim \"Planın m²'siyle girsin\" (seçeneğin sonucu: \"Üç ev planın ölçtüğü 49, 130 ve 167 m² ile havuza girer. Denetim kuralı değişir; birleştirmeyi siz yaparsınız.\"). Onay çerçevesinde \"Toplam Alan 140 m2\"; aynı çerçevedeki oda etiketleri (veranda 25,3 ve sundurma 2 dahil) 130,0; ölçü öğeleri 1250 = 395 + 460 + 395 ve 1100 tutarlı. 140 paftanın kendi planıyla çelişir (çelik kör testi sohbeti, 14 Kasım 11:54).",
    "oda_programi": "3+1",
    "veranda": true,
    "kat_adedi": 1,
@@ -146,6 +150,8 @@
    "tanim": "testler/celik/projeler/CP25/CP25.json",
    "tanim_sha256": "9775fe51f16624b0fbec22e3aa5d7b7efb6155b1693240531781174f4227470e",
    "antet_m2": 166.0,
+   "plan_m2": 167.0,
+   "plan_m2_kaynagi": "Lokman, 14 Kasım 2026 12:33:58 UTC, karar kartı (bayi havuzu sohbeti): soru \"Paftadaki m²'si planla tutmayan üç çelik ev, planın m²'siyle havuza girsin mi?\", seçim \"Planın m²'siyle girsin\" (seçeneğin sonucu: \"Üç ev planın ölçtüğü 49, 130 ve 167 m² ile havuza girer. Denetim kuralı değişir; birleştirmeyi siz yaparsınız.\"). Plan çerçevesinde \"166 M2\"; kaplamalı dış ölçü gövde 1100 × 1460 + antre 230 × 280 = 167,04 m²; 166 yuvarlanmış sayı (çelik kör testi sohbeti, 14 Kasım 11:54).",
    "oda_programi": "3+1",
    "veranda": true,
    "kat_adedi": 1,
