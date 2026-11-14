@@ -28,7 +28,11 @@ from testler.kor.kiyas import kayitli_mi  # noqa: E402
 
 BURADA = Path(__file__).resolve().parent
 KAYNAK = os.environ.get("PORTMAN_CELIK_KAYNAK")
-MUHUR = json.loads(kiyas.MUHUR.read_text(encoding="utf-8"))
+def muhur(kod: str) -> dict:
+    """Projenin mührü (ilk mühür ya da ikinci kör kümenin mührü; İE-16 PR-7)."""
+    return json.loads(kiyas.muhur_yolu(kod).read_text(encoding="utf-8"))
+
+
 SONUCLAR = sorted(BURADA.glob("*/sonuc.json"))
 IDS = [p.parent.name for p in SONUCLAR]
 
@@ -38,15 +42,17 @@ def oku(p: Path) -> dict:
 
 
 def kiyas_listesi(kod: str) -> dict:
-    drive_id = MUHUR["projeler"][kod]["kiyas_listesi"]
-    (r,) = [r for r in MUHUR["dosyalar"] if r["kod"] == kod and r["drive_id"] == drive_id]
+    m = muhur(kod)
+    drive_id = m["projeler"][kod]["kiyas_listesi"]
+    (r,) = [r for r in m["dosyalar"] if r["kod"] == kod and r["drive_id"] == drive_id]
     return r
 
 
 def muhur_commit_denetle(yeni: dict, kayitli: dict) -> None:
     """Kayıttaki mühür commit'i mühürün geçmişinde (o commit'ten sonra mühüre yalnız ekleme yapıldı); sonra iki kayıttan da çıkarılır."""
     c = kayitli["muhur"].pop("muhur_commit")
-    gecmis = subprocess.run(["git", "-C", str(KOK), "rev-list", "HEAD", "--", "testler/celik/muhur.json"], capture_output=True, text=True)
+    yol = kiyas.muhur_yolu(kayitli["kod"]).relative_to(KOK).as_posix()            # projenin mührü (İE-16 PR-7)
+    gecmis = subprocess.run(["git", "-C", str(KOK), "rev-list", "HEAD", "--", yol], capture_output=True, text=True)
     if c not in gecmis.stdout.split():
         sig = subprocess.run(["git", "-C", str(KOK), "rev-parse", "--is-shallow-repository"], capture_output=True, text=True)
         if sig.stdout.strip() == "true":
@@ -68,13 +74,13 @@ def test_sonuc_kaydinin_kendisi(yol):
     kod = s["kod"]
     liste = kayitli_mi(yol.parent / "bizim_liste.json", KOK, 1)
     assert s["bizim_liste"] == {"yol": liste["yol"], "commit": liste["commit"]}, "sonuç listemizin bugünkü commit'ine bağlı değil"
-    kayit = kiyas_listesi(kod)
-    assert s["muhur"]["sha256"] == kiyas.kayit_ozeti(kayit, MUHUR) and s["muhur"]["bayt"] == kayit["bayt"], "mühürdeki kıyas listesi değil"
+    kayit, M = kiyas_listesi(kod), muhur(kod)
+    assert s["muhur"]["sha256"] == kiyas.kayit_ozeti(kayit, M) and s["muhur"]["bayt"] == kayit["bayt"], "mühürdeki kıyas listesi değil"
     assert s["muhur"]["kayit_durumu"] == kayit["durum"]
     if kayit["durum"] != "acik":                 # kör ya da kapalı: açılış kaydı bu dosyanın ve listemizin
-        acilis = MUHUR["acilislar"][kod]
+        acilis = M["acilislar"][kod]
         assert acilis["sha256"] == s["muhur"]["sha256"] and acilis["liste_commit"] == liste["commit"]
-        assert s["muhur"]["durum"] == kiyas.etkin_durum(kayit, MUHUR, kod)
+        assert s["muhur"]["durum"] == kiyas.etkin_durum(kayit, M, kod)
     kapi = s["celik_kg_kapisi"]
     assert kapi["sonuc"] in ("geçti", "geçmedi") and kapi["pay_yuzde"] == 3.0
     assert (kapi["fark_yuzde"] is None) == (kapi["sonuc"] != "geçti"), "fark yalnız kapı geçtiyse yazılır"

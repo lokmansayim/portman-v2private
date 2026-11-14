@@ -141,6 +141,8 @@
    "dis_kapi_adedi": 1,
    "ic_kapi_adedi": 3,
    "veranda_adedi": 0,
+   "sundurma_adedi": 1,
+   "sundurma_kaynagi": "Alan 14 Kasım 2026'da kartın kendisinden eklendi (Proje_Karti/AP-07/kart.json; dosya ve `kart_sha256` aynı). Kartın mahalleri: Sundurma 1,76 m² (net); brüt oturum hesabı \"sundurma 135,5 × 130 hariç\". Sundurma açık mahaldir, veranda sayılmaz; Motor'da taşan veranda (ad SUNDURMA), çatısı ana çatının ikinci cumbası (PC-38). Lokman, 14 Kasım 2026 08:55:19 UTC kartı \"Evet, böyle doğru\" (sundurmanın çizimi; ev bayi havuzuna). D-87.",
    "kart_sha256": "14ba8581f809360046ccecf29d08f6014279a707a9962f397fa86334c3b0cf7b"
   },
   "AP-08": {

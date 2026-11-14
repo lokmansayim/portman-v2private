@@ -206,7 +206,7 @@ def set_kaydi(kural_seti: Path, yaz: bool = True) -> dict:
 
 def sozluk_donar_mi(kod: str) -> bool:
     """Projenin mühürdeki durumu kör ya da kapalıysa listesinin sözlüğü listeyle donar."""
-    m = json.loads(kiyas.MUHUR.read_text(encoding="utf-8"))
+    m = json.loads(kiyas.muhur_yolu(kod).read_text(encoding="utf-8"))      # projenin mührü (İE-16 PR-7: ikinci mühür)
     return (m["projeler"].get(kod) or {}).get("durum") in DONAN_SOZLUK
 
 

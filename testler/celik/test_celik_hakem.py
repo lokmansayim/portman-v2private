@@ -229,6 +229,92 @@ def test_muhur_izi_is_emrinde_de_yazili():
     assert K.MUHUR_IZI in (KOK / "docs" / "is_emirleri" / "IE-16.md").read_text(encoding="utf-8")
 
 
+# ------------------------------------------------------------------------------------------------- ikinci mühür (İE-16 PR-7)
+
+MUHUR_2 = KOK / "testler" / "celik" / "muhur_2.json"
+YENI_KUME = [f"ÇP-{i:02d}" for i in range(22, 27)]
+
+
+def test_ikinci_muhur_kayitlari_ve_durumlari():
+    """İkinci kör küme ("Tek kat çelik 2. part"): beş proje ÇP-22…ÇP-26, hepsi kör; kayıtlarda yalnız izinli alanlar (ad yok); listeler kör,
+    öteki dosyalar kaynak; her projenin kıyas listesi kendi Excel'i; Drive kimlikleri ilk mühürle çakışmaz."""
+    m, ilk = K.muhur_oku(MUHUR_2), K.muhur_oku(MUHUR)
+    assert list(m["projeler"]) == YENI_KUME and all(p["durum"] == "kor" for p in m["projeler"].values())
+    assert not set(m["projeler"]) & set(ilk["projeler"]), "bir kod yalnız bir mühürde olur"
+    assert not {r["drive_id"] for r in m["dosyalar"]} & {r["drive_id"] for r in ilk["dosyalar"]}
+    for r in m["dosyalar"]:
+        assert set(r) == IZINLI_ALAN and r["kod"] in m["projeler"]
+        assert re.fullmatch(r"[A-Za-z0-9_-]{25,60}", r["drive_id"])
+        assert r["sha256"] is None or re.fullmatch(r"[0-9a-f]{64}", r["sha256"])
+        assert r["durum"] == ("kor" if r["tur"] in K.LISTELER else "kaynak")
+    for k, p in m["projeler"].items():
+        assert set(p) == {"m2", "kat", "liste_tarihi", "drive_klasor", "durum", "kiyas_listesi"}
+        (kl,) = [r for r in m["dosyalar"] if r["drive_id"] == p["kiyas_listesi"]]
+        assert kl["kod"] == k and kl["tur"] == K.LISTE and kl["uzanti"] == ".xlsx"
+    assert len({r["drive_id"] for r in m["dosyalar"]}) == len(m["dosyalar"]) == 42
+    assert m["sayilar"]["sha256_dolu"] == sum(1 for r in m["dosyalar"] if r["sha256"]) == 7
+
+
+def test_ikinci_muhurun_dondurulmus_bolumleri_degismez():
+    """İkinci mührün dondurulmuş bölümlerinin izi araçta ve iş emrinde; ilk mührün izi aynen. Depodaki ikinci mühür iz ve yalnız-ekleme
+    geçmişi denetiminden geçer; dondurulmuş bir bölüm değişirse iz tutmaz."""
+    m = K.muhur_oku(MUHUR_2)
+    assert set(m) == {"aciklama", "kaynaklar", "kat_ayrimi", "kiyas_listesi_kurali", "sayilar", "projeler", "dosyalar", *K.EKLENEBILIR}
+    assert K.donmus_iz(m) == K.MUHUR_2_IZI and K.MUHUR_2_IZI != K.MUHUR_IZI
+    assert K.MUHUR_2_IZI in (KOK / "docs" / "is_emirleri" / "IE-16.md").read_text(encoding="utf-8")
+    K.muhur_dogrula(MUHUR_2, KOK)
+    for degistir in (lambda x: x["projeler"]["ÇP-22"].update(durum="acik"), lambda x: x["dosyalar"][0].update(bayt=1),
+                     lambda x: x["projeler"]["ÇP-23"].update(kat="tek")):
+        y = json.loads(json.dumps(m))
+        degistir(y)
+        assert K.donmus_iz(y) != K.MUHUR_2_IZI
+
+
+def test_muhur_yolu_koda_gore():
+    """Hakem projenin mührünü koduyla seçer: ilk küme muhur.json, ikinci küme muhur_2.json; hiçbir mühürde olmayan kod ilk mühre düşer
+    (sonraki adım "kod mühürde yok" diye durur)."""
+    assert K.muhur_yolu("ÇP-06") == MUHUR and K.muhur_yolu("ÇP-20") == MUHUR
+    assert all(K.muhur_yolu(k) == MUHUR_2 for k in YENI_KUME)
+    assert K.muhur_yolu("ÇP-99") == MUHUR
+
+
+def test_iki_muhurde_ayni_kod_durur(depo):
+    """Aynı kod iki mühürde birden varsa araç durur (adım 2); ikinci mühür yoksa davranış PR-7'den önceki gibi."""
+    assert K.muhur_yolu("DN-02", depo["kok"]) == depo["muhur"]
+    ikinci = depo["cel"] / "muhur_2.json"
+    m = _oku(depo["muhur"])
+    m["projeler"] = {"DN-02": m["projeler"]["DN-02"]}
+    m["dosyalar"] = [r for r in m["dosyalar"] if r["kod"] == "DN-02"]
+    ikinci.write_text(json.dumps(m, ensure_ascii=False), encoding="utf-8")
+    with pytest.raises(Durdu) as e:
+        K.muhur_yolu("DN-02", depo["kok"])
+    assert e.value.adim == 2 and "iki mühürde" in str(e.value)
+    assert K.muhur_yolu("DN-01", depo["kok"]) == depo["muhur"]
+    ikinci.write_text("{bozuk", encoding="utf-8")
+    with pytest.raises(Durdu) as e:
+        K.muhur_yolu("DN-01", depo["kok"])
+    assert e.value.adim == 2
+
+
+def test_ikinci_muhurdeki_kor_liste_acilis_kaydi_olmadan_acilmaz(depo):
+    """Kıyas, projenin mührünü koduyla seçer; ikinci mühürdeki kör liste de açılış kaydı olmadan açılmaz (adım 3)."""
+    m = _oku(depo["muhur"])
+    ikinci = {**m, "projeler": {"DN-02": m["projeler"]["DN-02"]}, "dosyalar": [r for r in m["dosyalar"] if r["kod"] == "DN-02"]}
+    m["projeler"].pop("DN-02")
+    m["dosyalar"] = [r for r in m["dosyalar"] if r["kod"] != "DN-02"]
+    depo["muhur"].write_text(json.dumps(m, ensure_ascii=False), encoding="utf-8")
+    (depo["cel"] / "muhur_2.json").write_text(json.dumps(ikinci, ensure_ascii=False), encoding="utf-8")
+    _git(depo["kok"], "add", ".")
+    _git(depo["kok"], "commit", "-q", "-m", "ikinci mühür")
+    assert K.muhur_yolu("DN-02", depo["kok"]) == depo["cel"] / "muhur_2.json"
+    with pytest.raises(Durdu) as e:
+        K.kiyasla(depo["bizim"]("DN02"), depo["kor"], kok=depo["kok"])
+    assert e.value.adim == 3 and "açılış kaydı yok" in str(e.value)
+    with pytest.raises(Durdu) as e:                 # ilk mühürde artık yok: oradan okunmaz
+        K.kiyasla(depo["bizim"]("DN02"), depo["kor"], kok=depo["kok"], muhur_yol=depo["muhur"])
+    assert e.value.adim == 1
+
+
 def test_yalniz_ekleme_kurali():
     a = {"acilislar": {"X": {"karar": "k", "sha256": "1" * 64, "liste_commit": "abcdef1"}}, "ilk_indirmeler": {}, "kat_kayitlari": {}}
     K.yalniz_ekleme([a, {**a, "ilk_indirmeler": {"d": {"sha256": "2" * 64}}}])
@@ -364,12 +450,15 @@ def test_acik_cevap_muhurle_ve_kendi_icinde_tutarli(muhur, kod):
     # genel motorun adları (ayraç içi türe bakılmadan atılır)
     ("Çatı makas panelleri", "makas"), ("Tavan paneli (makas arası)", "tavan_paneli"),
     ("Çatı paneli (makas üstü, sırt 80 mm)", "cati_paneli"), ("Veranda kirişleri (kiriş paneli)", "kolon_kiris"),
+    # İE-16 PR-7 (ikinci kör küme; Lokman 14 Kasım 2026 11:15 kartı): özel panel ve iki yeni ad
+    ("NİŞ PANELLERİ", "ozel_panel"), ("KEMER PANELLERİ", "ozel_panel"), ("GÖMME REZERVUAR PANELLERİ", "ozel_panel"),
+    ("NİŞLİ DUVAR PANELİ", "duvar_paneli"), ("80X0,8 MAKAS ARA PANELLERİ", "makas"), ("80X1,5 KIRIS PANELI", "kolon_kiris"),
 ])
 def test_tur(ad, beklenen):
     assert oku.tur(ad) == beklenen
 
 
-@pytest.mark.parametrize("ad", ["ÇELİK KUTU", "DUVAR MAKAS PANELİ"])
+@pytest.mark.parametrize("ad", ["ÇELİK KUTU", "DUVAR MAKAS PANELİ", "NİŞ DUVAR PANELİ"])
 def test_tur_bilinmiyor_ya_da_belirsizse_durur(ad):
     with pytest.raises(oku.OkumaHatasi):
         oku.tur(ad)
@@ -444,6 +533,70 @@ def test_baska_turde_kg_bossa_durur(tmp_path):
     _liste_xlsx_b(yol, [(a, b, n, None if a == "ÇATI PANELLERİ" else kg) for a, b, n, kg in CELIK])
     with pytest.raises(oku.OkumaHatasi, match="adet ya da kg"):
         oku.oku(yol, ".xlsx")
+
+
+# İE-16 PR-7 (Lokman, 14 Kasım 2026 11:15 UTC kartı "Evet, üçü de ölçülsün"; beyan İE-16 › Değişiklik (PR-7)): boş şablon sayfası
+# sayılmaz, özel panel toplama girer.
+
+def _iki_sayfa(yol: Path, sayfalar) -> None:
+    """Her sayfa `_liste_xlsx` düzeninde; "sablon" adları dolu, adet ve kg boş, TOPLAM 0 / 0 (gerçek ikinci kümedeki gibi)."""
+    import openpyxl
+
+    wb = openpyxl.Workbook()
+    wb.remove(wb.active)
+    for no, celik in enumerate(sayfalar):
+        ws = wb.create_sheet(f"S{no}")
+        for c, v in enumerate(("NO", "ÇELİK PANEL GRUBU", "BOYUT/ÖLÇÜ", "ADET", "KG", "MAKİNE"), 1):
+            ws.cell(11, c, v)
+        satirlar = [(a, b, None, None) for a, b, _, _ in CELIK[3:]] if celik == "sablon" else celik
+        n = 12
+        for i, (a, b, adet, kg) in enumerate(satirlar, 1):
+            for c, v in enumerate((i, a, b, adet, kg), 1):
+                if v is not None:
+                    ws.cell(n, c, v)
+            n += 1
+        ws.cell(n, 1, "TOPLAM"), ws.cell(n, 4, sum(x[2] or 0 for x in satirlar)), ws.cell(n, 5, sum(x[3] or 0 for x in satirlar))
+        for c, v in enumerate(("NO", "METAL AKSAM GRUBU", "BOYUT/ÖLÇÜ", "ADET"), 1):
+            ws.cell(n + 1, c, v)
+        ws.cell(n + 2, 1, 1), ws.cell(n + 2, 2, OTEKI[0][1]), ws.cell(n + 2, 3, OTEKI[0][2]), ws.cell(n + 2, 4, OTEKI[0][3])
+    wb.save(str(yol))
+
+
+@pytest.mark.parametrize("sira", [["sablon", CELIK], [CELIK, "sablon"]], ids=["sablon-once", "sablon-sonra"])
+def test_bos_sablon_sayfasi_sayilmaz(tmp_path, sira):
+    yol = tmp_path / "liste.xlsx"
+    _iki_sayfa(yol, sira)
+    assert oku.excel_celik(yol)["sayfa"] == sira.index(CELIK)
+    c = oku.oku(yol, ".xlsx")["celik"]
+    assert c["toplam"] == {"adet": 21, "kg": 874} and {t: (x["adet"], x["kg"]) for t, x in c["turler"].items()} == _beklenen_celik()
+
+
+@pytest.mark.parametrize("sayfalar,neden", [
+    ([CELIK, CELIK], "2 sayfada çelik panel grubu var"),
+    (["sablon", CELIK, CELIK[:3]], "2 sayfada çelik panel grubu var"),
+    (["sablon", "sablon"], "hepsi boş şablon"),
+])
+def test_sablon_disinda_iki_sayfa_ya_da_hepsi_sablonsa_durur(tmp_path, sayfalar, neden):
+    yol = tmp_path / "liste.xlsx"
+    _iki_sayfa(yol, sayfalar)
+    with pytest.raises(oku.OkumaHatasi, match=neden):
+        oku.oku(yol, ".xlsx")
+
+
+def test_tek_sayfa_sablonsa_eskisi_gibi_durur(tmp_path):
+    """Şablon atlaması yalnız birden çok sayfa varken: tek şablon sayfası okunmaz, adet ve kg boş satırda okuma durur."""
+    yol = tmp_path / "liste.xlsx"
+    _iki_sayfa(yol, ["sablon"])
+    with pytest.raises(oku.OkumaHatasi, match="adet ya da kg"):
+        oku.oku(yol, ".xlsx")
+
+
+def test_ozel_panel_toplama_girer(tmp_path):
+    yol = tmp_path / "liste.xlsx"
+    ek = [("NİŞ PANELLERİ", "80X45X10X1,2", 6, 36), ("KEMER PANELLERİ", "80X45X10X1,2", 1, 91)]
+    _liste_xlsx(yol, celik=[*CELIK, *ek])
+    c = oku.oku(yol, ".xlsx")["celik"]
+    assert c["toplam"] == {"adet": 28, "kg": 1001} and c["turler"]["ozel_panel"] == {"harf": None, "adet": 7, "kg": 127}
 
 
 def test_bilinmeyen_celik_satiri_durur(tmp_path):

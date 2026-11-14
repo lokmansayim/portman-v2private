@@ -140,15 +140,18 @@ def test_esleme_son_defterin_butun_kalemlerini_kapsar(E):
     """Eşlemenin anahtarları ve birimleri son elle defterin (r13) kalemleri, aynı sırayla; bant, boy ve makas kuralı aynı kalemlerde.
     D-72'den sonra yeni kalem (Motor'un listesinde olup defterde olmayan anahtar) yalnız eşlemeye girer: kapanmış defter değişmez. Yeni
     anahtarlar defterin kalemlerinden sonra gelir (PR-5, TK-06'nın 15 anahtarı; `test_pr5_tk06_anahtarlari`; r06, metal kiremit vidası;
-    `test_r06_mahya_bandi_ve_metal_kiremit_vidasi`)."""
+    `test_r06_mahya_bandi_ve_metal_kiremit_vidasi`; r07, 280 ve 300 cm yükseklik; `test_r07_280_ve_300_yukseklik`). Yeni bant da
+    defterin bantlarından sonra gelir (r07)."""
     S = _oku(SON_DEFTER)
     for hat in ("prefabrik", "celik"):
         H, R = E["hatlar"][hat], S["hatlar"][hat]
         assert list(H["kalemler"])[:len(R["kalemler"])] == list(R["kalemler"]) and H["anahtar"] == R["anahtar"] and H["atla"] == R["atla"]
         assert {k: H["kalemler"][k]["birim"] for k in R["kalemler"]} == {k: g["birim"] for k, g in R["kalemler"].items()}
-        assert set(H["kalemler"]) - set(R["kalemler"]) == (set(PR5_ANAHTARLAR) | set(R06_ANAHTARLAR) if hat == "prefabrik" else set())
+        assert set(H["kalemler"]) - set(R["kalemler"]) == \
+            (set(PR5_ANAHTARLAR) | set(R06_ANAHTARLAR) | set(R07_ANAHTARLAR) if hat == "prefabrik" else set())
         assert [(b["kalem"], b["kalinlik_mm"], b["yukseklik_mm"], [(a["en_mm"], a["alt_haric"]) for a in b["araliklar"]]) for b in H["bantlar"]] == \
-               [(b["kalem"], b["kalinlik_mm"], b["yukseklik_mm"], [(a["en_mm"], a.get("alt_haric", False)) for a in b["araliklar"]]) for b in R["bantlar"]]
+               [(b["kalem"], b["kalinlik_mm"], b["yukseklik_mm"], [(a["en_mm"], a.get("alt_haric", False)) for a in b["araliklar"]]) for b in R["bantlar"]] \
+               + ([(k, kal, h, [(a[0], a[1]) for a in ar]) for h in (2800, 3000) for k, kal, ar in R07_BANT_ARALIK] if hat == "prefabrik" else [])
     P, RP = E["hatlar"]["prefabrik"], S["hatlar"]["prefabrik"]
     assert [(b.get("kalem"), b.get("kalem_baslar"), b.get("kapatma_m")) for b in P["boy_onerileri"]] == \
            [(b.get("kalem"), b.get("kalem_baslar"), b.get("kapatma_m")) for b in RP["boy_onerileri"]] + [(None, "Metal kiremit (100 cm kapatır) · ", None)]
@@ -349,6 +352,126 @@ def test_d79_metal_kiremit_m2_fiyati_ve_boy_adimi(E, A):
     assert any("boy_adim_mm" in x for x in C.esleme_denetle(X))
 
 
+# ── r07: 280 ve 300 cm yükseklik (pano 2800 / 3000; koordinatör 13 Kasım 22:46, pano 221 ekstra özellik testi) ───────────────────
+
+R07_ANAHTARLAR = {
+    "6'lık köşe direği 60 × 60 | 60 × 60 × 2800": ("MA5", "birebir"),
+    "H 100 (dış pano eki) | 100 × 100 × 2800": (("MA16", "MA19"), "kural"),
+    "H standart 60 (iç pano eki) | 60 × 60 × 2800": ("MA22", "birebir"),
+    "3'lü H 100 × 100 × 60 (dış duvar T'si) | L 2800": (("MA25", "MA28"), "kural"),
+    "3'lü H 100 × 100 × 100 (dış duvar T'si) | L 2800": (("MA25", "MA28"), "kural"),
+    "3'lü H standart 60 (iç T) | L 2800": ("MA31", "kural"),
+    "Çektirme U'su 100 | 100 × 2740": ("MA40", "birebir"),
+    "Özel kutu profil (kolon) 100 × 100 | L 2800": ("MA12", "kural"),
+    "Pencere üst panel | 100 × 1250 × 800": ("YP1", "kural"),
+    "100'lük yapıştırma dolu vasistaslı pano (60/40) | 100 × 1250 × 2800": (None, "CRM'de yok"),
+    "100'lük yapıştırma dolu vasistaslı pano (50/50) | 100 × 1250 × 2800": (None, "CRM'de yok"),
+    "Karkaslı özel pencere panosu (150/180) | 100 × 2500 × 2800": (None, "CRM'de yok"),
+    "Karkaslı özel pencere panosu (160/180) | 100 × 2500 × 2800": (None, "CRM'de yok"),
+    "Karkaslı özel pencere panosu (170/180) | 100 × 2125 × 2800": (None, "CRM'de yok"),
+    "10'luk köşe direği 100 × 100 | 100 × 100 × 3000": ("MA3", "birebir"),
+    "6'lık köşe direği 60 × 60 | 60 × 60 × 3000": ("MA6", "birebir"),
+    "H 100 (dış pano eki) | 100 × 100 × 3000": (("MA17", "MA20"), "kural"),
+    "H standart 100 (iç pano eki) | 100 × 100 × 3000": (("MA17", "MA20"), "kural"),
+    "H standart 60 (iç pano eki) | 60 × 60 × 3000": ("MA23", "birebir"),
+    "3'lü H 100 × 100 × 60 (dış duvar T'si) | L 3000": (("MA26", "MA29"), "kural"),
+    "3'lü H 100 × 100 × 100 (dış duvar T'si) | L 3000": (("MA26", "MA29"), "kural"),
+    "3'lü H standart 60 (iç T) | L 3000": ("MA32", "kural"),
+    "3'lü H standart 100 (iç T) | L 3000": ("MA32", "kural"),
+    "Çektirme U'su 100 | 100 × 2940": (None, "CRM'de yok"),
+    "Çektirme U'su 100 (iç duvar) | 100 × 2940": (None, "CRM'de yok"),
+    "Çektirme U'su 60 | 60 × 2940": (None, "CRM'de yok"),
+    "Özel kutu profil (kolon) 100 × 100 | L 3000": ("MA12", "kural"),
+    "Pencere üst panel | 100 × 1250 × 1000": ("YP1", "kural"),
+    "100'lük yapıştırma dolu vasistaslı pano (60/40) | 100 × 1250 × 3000": (None, "CRM'de yok"),
+    "100'lük yapıştırma dolu vasistaslı pano (50/50) | 100 × 1250 × 3000": (None, "CRM'de yok"),
+    "Karkaslı özel pencere panosu (150/180) | 100 × 2500 × 3000": (None, "CRM'de yok"),
+    "Karkaslı özel pencere panosu (160/180) | 100 × 2500 × 3000": (None, "CRM'de yok"),
+    "Karkaslı özel pencere panosu (170/180) | 100 × 2125 × 3000": (None, "CRM'de yok"),
+    "Metal iniş borusu | L 3000": ("DR13", "birebir"),                 # iniş borusu özelliği metal (yükseklikten bağımsız)
+}
+R07_BANT_ARALIK = [("100'lük yapıştırma dolu pano", 100, [([627.5, 1250], True), ([340, 627.5], False), ([225, 225], False)]),
+                   ("60'lık yapıştırma dolu pano", 60, [([627.5, 1250], True), ([350, 627.5], False), ([175, 320], False)]),
+                   ("60'lık karkaslı + kasalı pano", 60, [([1070, 1250], False)]),
+                   ("100'lük karkaslı + kasalı pano", 100, [([1070, 1250], False)]),
+                   ("Karkaslı çelik kapı panosu", 100, [([1070, 1250], False)])]
+R07_BANT_KOD = {2800: ["YP2", "YP5", "YP2", "YP8", "YP11", "YP8", "KP2", "KP11", "KP11"],
+                3000: ["YP3", "YP6", "YP3", "YP9", "YP12", "YP9", "KP3", "KP12", "KP12"]}
+R07_YAPISTIRMA, R07_KAPI = ("YP3", "YP6", "YP8", "YP9", "YP11", "YP12"), ("KP2", "KP3", "KP12")
+HAVUZ = KOK / "is_emri" / "adaylar"
+
+
+def _kod(g):
+    return tuple(g["kod"]) if isinstance(g["kod"], list) else g["kod"]
+
+
+def test_r07_280_ve_300_yukseklik(E, A):
+    """280 ve 300 cm yükseklikte (pano 2800 / 3000) havuz evlerinin listesinde eşlemede olmayan satırlar vardı: pano, H, 3'lü H, köşe
+    direği, çektirme U'su, kolon, pencere üst paneli; fiyatsız satır toplama girmediği için 280'in teklifi 250'ninkinden düşük çıkıyordu.
+    r07 CRM'deki h:2800 / h:3000 ürünlerine eşler, fiyat yazmaz: tam/yarım pano bandı (Patron 27 Ekim 22:08), H ve 3'lü H'da kulaklı /
+    dübelli ortalaması (defterin 2500'deki kuralı), D-36 (100'lük iç eleman dıştakinin fiyatı), köşe direği ve standart H birebir, kolon
+    D-75. Pencere üst paneli 800 / 1000: aynı ölçüdeki alt panelin kuralı, tam panonun 1/3'ü (Lokman 14 Kasım 07:28:15 kartı). CRM'de olmayan
+    (vasistaslı pano, karkaslı özel pencere panosu, 2940'lık çektirme U'su) fiyatsız. Listede 280 ve 300'ün yeni satırı "defterde yok"
+    kalmaz."""
+    P = E["hatlar"]["prefabrik"]
+    K = P["kalemler"]
+    for k, (kod, tur) in R07_ANAHTARLAR.items():
+        assert (_kod(K[k]), K[k]["esleme"]) == (kod, tur), k
+    for h in (2800, 3000):
+        assert K[f"Özel kutu profil (kolon) 100 × 100 | L {h}"] == K["Özel kutu profil (kolon) 100 × 100 | L 2500"]
+        bant = [b for b in P["bantlar"] if b["yukseklik_mm"] == h and b["kalem"] in {x[0] for x in R07_BANT_ARALIK}]
+        assert [a["kod"] for b in bant for a in b["araliklar"]] == R07_BANT_KOD[h]
+        assert [a["esleme"] for b in bant for a in b["araliklar"]] == ["kural", "kural", "yakın"] * 2 + ["kural"] * 3
+        for k in (f"H 100 (dış pano eki) | 100 × 100 × {h}", f"3'lü H 100 × 100 × 60 (dış duvar T'si) | L {h}"):
+            k25 = k.replace(str(h), "2500")
+            assert (K[k]["hesap"], K[k]["agirlik"]) == (K[k25]["hesap"], K[k25]["agirlik"]), k
+        assert {a: K[f"3'lü H 100 × 100 × 100 (dış duvar T'si) | L {h}"][a] for a in ("kod", "agirlik")} == \
+               {a: K[f"3'lü H 100 × 100 × 60 (dış duvar T'si) | L {h}"][a] for a in ("kod", "agirlik")}            # D-36
+    assert {a: K["H standart 100 (iç pano eki) | 100 × 100 × 3000"][a] for a in ("kod", "hesap", "agirlik")} == \
+           {a: K["H 100 (dış pano eki) | 100 × 100 × 3000"][a] for a in ("kod", "hesap", "agirlik")}                 # D-36
+    for ust, alt in ((800, "Pencere alt panel (120/120) | 100 × 1250 × 800"), (1000, "Pencere alt panel (120/100) | 100 × 1250 × 1000")):
+        g = K[f"Pencere üst panel | 100 × 1250 × {ust}"]
+        assert {a: g[a] for a in ("kod", "hesap", "pay", "payda")} == {a: K[alt][a] for a in ("kod", "hesap", "pay", "payda")}
+        assert g["esleme"] == "kural" and "07:28:15" in g["not"] and "Tam panonun 1/3'ü" in g["not"]
+    D = C.defter_uret(C.denetle(kategorili(A)), E)
+    PD = D["hatlar"]["prefabrik"]
+    g = PD["kalemler"]["H 100 (dış pano eki) | 100 × 100 × 2800"]
+    assert (g["fiyat"], g["onay"], g["kdv"]) == (_kurus((_fiyat(A, "MA16") * 11 + _fiyat(A, "MA19") * 9) / 20), True, 0.2)
+    g = PD["kalemler"]["6'lık köşe direği 60 × 60 | 60 × 60 × 3000"]
+    assert (g["fiyat"], g["onay"], g["kdv"]) == (_kurus(_fiyat(A, "MA6")), True, 0.2)
+    g = PD["kalemler"]["Pencere üst panel | 100 × 1250 × 800"]
+    assert (g["fiyat"], g["onay"]) == (_kurus(_fiyat(A, "YP1") / 3), True)
+    for k in ("Çektirme U'su 100 | 100 × 2940", "100'lük yapıştırma dolu vasistaslı pano (60/40) | 100 × 1250 × 3000"):
+        assert PD["kalemler"][k]["fiyat"] is None, k
+    b = next(b for b in PD["bantlar"] if (b["kalem"], b["yukseklik_mm"]) == ("100'lük yapıştırma dolu pano", 3000))
+    assert [(a["fiyat"], a["onay"], a["kdv"]) for a in b["araliklar"]] == [
+        (_kurus(_fiyat(A, "YP3")), True, 0.2), (_kurus(_fiyat(A, "YP6")), True, 0.2), (_kurus(_fiyat(A, "YP3") / 4), False, 0.2)]
+    b = next(b for b in PD["bantlar"] if (b["kalem"], b["yukseklik_mm"]) == ("60'lık karkaslı + kasalı pano", 2800))
+    assert [(a["fiyat"], a["onay"], a["kdv"]) for a in b["araliklar"]] == [(_kurus(_fiyat(A, "KP2")), True, 0.2)]
+    assert {a: K["Metal iniş borusu | L 3000"][a] for a in ("kod", "hesap", "esleme")} == \
+           {a: E["hatlar"]["celik"]["kalemler"]["Dere iniş borusu | L 3000"][a] for a in ("kod", "hesap", "esleme")}
+    g = PD["kalemler"]["Metal iniş borusu | L 3000"]
+    assert (g["fiyat"], g["onay"], g["kdv"]) == (_kurus(_fiyat(A, "DR13")), True, 0.2)
+    from motor import prefabrik_liste as PL
+    KU = PL.kurallari_oku()
+    ie = _oku(HAVUZ / "PA01.json")
+    ie.setdefault("ozellikler", {})["Yağmur İniş Borusu"] = "Metal"
+    s = [s for s in F.fiyatla(PL.is_emrinden(ie, KU), D, "prefabrik")["satirlar"] if s["kalem"] == "Metal iniş borusu"]
+    assert len(s) == 1 and s[0]["durum"].startswith("onaylı") and s[0]["tutar"], s
+    for ev, ic in (("PA01", 6), ("PA06C", 6), ("PA01", 10)):              # iç 100'lü evde 100'lük iç eleman
+        ie0 = _oku(HAVUZ / f"{ev}.json")
+        ie0["yapi"].setdefault("duvar_kalinligi_cm", {})["ic"] = ic
+        R = {}
+        for h in (250, 280, 300):
+            ie = copy.deepcopy(ie0)
+            ie["yapi"]["duvar_yuksekligi_cm"] = h
+            R[h] = F.fiyatla(PL.is_emrinden(ie, KU), D, "prefabrik")
+        yok250 = {x["anahtar"] for x in R[250]["ozet"]["fiyatsiz"]}
+        for h in (280, 300):
+            yeni = [x for x in R[h]["ozet"]["fiyatsiz"] if x["anahtar"] not in yok250]
+            assert all(x["anahtar"] in R07_ANAHTARLAR and x["durum"] in ("fiyat yok", "öneri, onay bekliyor") for x in yeni), (ev, ic, h, yeni)
+            assert any(f"× {h}" in s["olcu"] and s["durum"].startswith("onaylı") for s in R[h]["satirlar"] if s["olcu"]), (ev, h)
+
 # ── D-76: KDV ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 
 KDV_LOKMAN = {**{g: 0.2 for g in ("Metal aksam", "Betopan", "EPS", "Kiremit desen sac", "Boardex", "Alçıpan", "OSB", "Knauf", "Pencereler",
@@ -383,7 +506,9 @@ def test_d76_kdv_gruplari_lokmanin_listesi(E):
            {"Trapez", "Sandviç panel", "Çelik paneller", "Çatı izolasyonu", "İç kapı", "Dış (çelik) kapı"}
     kart = {k: g for k, g in K["kodlar"].items() if g in KDV_KART}
     assert kart == {**{k: "Yapıştırma pano" for k in ("YP1", "YP2", "YP4", "YP5", "YP7", "YP10")},
-                    **{k: "Kapı panoları" for k in ("KP1", "KP10", "KP11")}, "CG6": "Tek kat panel", "DG1": "Tavan H'ı",
+                    **{k: "Kapı panoları" for k in ("KP1", "KP10", "KP11")},
+                    **{k: "Yapıştırma pano" for k in R07_YAPISTIRMA}, **{k: "Kapı panoları" for k in R07_KAPI},   # r07: aynı ürünün h:2800 / 3000'i
+                    "CG6": "Tek kat panel", "DG1": "Tavan H'ı",
                     "DG2": "PVC omega kapak", "DG3": "PVC betopan H'ı", "DG11": "Acil müdahale kapağı",
                     **{f"DG{i}": "Baca" for i in range(15, 21)}}
     assert not {"Yapıştırma Panel Grubu", "Karkaslı Kaplamalı Panoları", "Özel Çatı Grubu", "Depo Grubu"} & set(K["kategoriler"])
