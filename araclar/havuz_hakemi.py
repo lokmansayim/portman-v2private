@@ -10,7 +10,7 @@ Kalemler (her biri paftanın 1. sayfasındaki değerle):
 - oda programı: kartın oda sayısı (yoksa kartın yatak odası sayısı + 1) Motor'un yatak odası sayısıyla; paftada oda adı yoksa
   Lokman'ın karar kartıyla verdiği program (`oda_sayisi_lokman`, sözü ve saatiyle; AP-14, 14 Kasım 2026);
 - pencereler: ölçü ölçü aynı adet (kubbenin pencereleri kubbe panolarından);
-- dış kapı, iç kapı ve veranda (açık mahal) sayısı aynı; kat 1.
+- dış kapı, iç kapı ve açık mahal sayısı aynı (kartın verandaları + sundurması; AP-07'nin sundurması, 14 Kasım 2026); kat 1.
 
     python3 araclar/havuz_hakemi.py testler/kor/projeler/AP14/is_emri.json --kart AP-14
 
@@ -101,9 +101,14 @@ def denetle(ie: dict, kart: dict) -> tuple[list[str], dict]:
     if Counter(o["pencereler"]) != kp:
         eksik, fazla = kp - Counter(o["pencereler"]), Counter(o["pencereler"]) - kp
         b.append(f"pencereler: Motor'da eksik {dict(eksik) or '-'}, fazla {dict(fazla) or '-'}")
-    for alan, ka in (("dis_kapi", "dis_kapi_adedi"), ("ic_kapi", "ic_kapi_adedi"), ("veranda", "veranda_adedi")):
+    for alan, ka in (("dis_kapi", "dis_kapi_adedi"), ("ic_kapi", "ic_kapi_adedi")):
         if kart.get(ka) is not None and int(kart[ka]) != o[alan]:
             b.append(f"{alan.replace('_', ' ')}: Motor {o[alan]}, pafta {kart[ka]}")
+    if kart.get("veranda_adedi") is not None:                                     # sundurma da açık mahal (Motor'da taşan veranda)
+        acik = int(kart["veranda_adedi"]) + int(kart.get("sundurma_adedi") or 0)
+        if acik != o["veranda"]:
+            ek = f" + sundurma {kart['sundurma_adedi']}" if kart.get("sundurma_adedi") else ""
+            b.append(f"veranda: Motor {o['veranda']}, pafta {kart['veranda_adedi']}{ek}")
     if int(kart.get("kat_adedi") or 1) != 1 or o["kat"] != 1:
         b.append("kat: havuz yalnız tek kat")
     return b, o

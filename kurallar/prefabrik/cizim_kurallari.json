@@ -967,6 +967,37 @@
     "testler/motor/test_d69.py::test_depodaki_is_emirleri_kurala_uyar",
     "testler/motor/test_d69.py::test_tam_izgara_son_aks_yarim_pano"
    ]
+  },
+  {
+   "kod": "PC-38",
+   "baslik": "Taşan verandanın çatısı ana çatının cumbası olabilir; iki cumba",
+   "kural": "Gövdeden taşan veranda (İş Emri `verandalar`) ana çatının saçak yanındaysa çatısı ana çatının çapraz cumbası gibi çizilir: verandada `cati.tip` \"cumba\" (eğim, saçak ve topuk ana çatınınki; başka alan yazılmaz), ana çatıda `cati.cumbalar`'a `{cephe, veranda: <verandanın adı>}` öğesi. Cumbanın ayak izi verandanın dikdörtgenidir (kolonlar içinde); kendi beşiği ana çatıya iki vadiyle girer, mahyası vadilerin birleştiği yere kadar (tek cumbanın kuralı, `cati_cumba`). Evde gövdenin cumbası da varsa iki cumba ana çatının karşı iki saçak yüzünde olur (`cati_prefabrik.cumba_dikdortgenleri`, `_iki_cumba`); ana çatının uç kalkanları iki kurulumun birleşimidir. Görünüşte verandanın kolonu ve kirişi çizilir, çatısı, saçağı ve topuğu ana çatının çizgilerindedir; cumbanın saçaklı alnı ardını örter (öndeki cumbanın vadisi ve topuğu arkadan görünmez, `cephe_gorunus._cumba_alinlari`). Bu sürümde yalnız tek dizilim var (Lokman'ın gördüğü): gövdenin çıkıntılı cumbası (`cikinti_cm` > 0) + karşı saçak yüzünde taşan verandanın cumbası. Yanlış yazılan cumba açık hatadır (K21): aynı yüzde iki cumba, verandasız ikinci gövde cumbası, iki veranda cumbası, gövde cumbası olmadan veranda cumbası, çıkıntısız gövde cumbasıyla veranda cumbası, cumbası olmayan cumba verandası, ana_makas (geri çekilen ana makas) ile iki cumba. Liste iki cumbayı saymaz (`ListeYazilmaz`); IFC ve montaj rehberi bu çatıyı henüz bilmez. Tek cumbalı ve cumbasız evlerin çizimi değişmez. İlk ev: 45 m² ev (AP-07, arka sundurma; `testler/havuz/is_emirleri/AP07.json`).",
+   "karar": "D-87",
+   "lokman": {
+    "tarih": "2026-11-14",
+    "saat": "08:41",
+    "soz": "cumba çatısı gibi birleştireceksin vadi dere oluşacak böyle eğrelti olmayacak; şunu anlamıyorum çapraz cumba çatısını nasıl çiziyorsan öyle çiz"
+   },
+   "kod_yeri": [
+    "motor/cati_prefabrik.py::cumba_dikdortgenleri",
+    "motor/cati_prefabrik.py::_iki_cumba",
+    "motor/cati_prefabrik.py::_veranda_cumbasi",
+    "motor/geometry.py::_dis_verandalar",
+    "motor/veranda.py::gorunus_parcalari",
+    "motor/cephe_gorunus.py::_cumba_alinlari"
+   ],
+   "test": [
+    "testler/motor/test_iki_cumba.py::test_iki_cumba_duzlemleri",
+    "testler/motor/test_iki_cumba.py::test_vadiler_ve_mahyalar",
+    "testler/motor/test_iki_cumba.py::test_kalkanlar",
+    "testler/motor/test_iki_cumba.py::test_arka_gorunus",
+    "testler/motor/test_iki_cumba.py::test_yan_gorunus_cumba_bandi",
+    "testler/motor/test_iki_cumba.py::test_veranda_kolon_ve_kiris",
+    "testler/motor/test_iki_cumba.py::test_cizim_dogrulamasi",
+    "testler/motor/test_iki_cumba.py::test_liste_yazilmaz",
+    "testler/motor/test_iki_cumba.py::test_yanlis_tanim_hata",
+    "testler/motor/test_iki_cumba.py::test_tek_cumba_eski_yol"
+   ]
   }
  ]
 }

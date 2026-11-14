@@ -1741,7 +1741,7 @@ def _kose_kolonlari(plan: "Plan") -> None:
 
 
 VERANDA_KOLON_CM = 10.0      # veranda dikmesi 10 × 10 (DXF bloğu VERANDA_DIKME_100x100; liste "Özel kutu profil (kolon) 100 × 100")
-VERANDA_CATI_TIPLERI = ("besik", "tek_yon", "teras_paneli")
+VERANDA_CATI_TIPLERI = ("besik", "tek_yon", "teras_paneli", "cumba")   # cumba: ana çatının ikinci cumbası (`cati_prefabrik.cumba_dikdortgenleri`)
 # D-52 (İE-30; Lokman 4 Kasım 2026 20:42: "teras ayrı bir teknikle yapılıyor çatı saçağının 10 cm altında çatı paneli olarak kullandığımız bir
 # 8 cm genişliğinde C den oluşan panel yapıyoruz üzerine yine Trapez sac araya damlalık atıyoruz yani çatı gibi şekilli değil"; 21:14 "Paftadan,
 # ev ev"): verandanın üstü `cati: {tip: teras_paneli, cikma_cm}` → düz panel, üst yüzü ana çatının saçak altı çizgisinin (duvar üstü) 10 cm
@@ -1839,6 +1839,13 @@ def _dis_verandalar(plan: "Plan", is_emri: dict) -> None:
                                    f"{d:g} en çok 60 cm fazla; egim_yuzde duvardan dışarı, 0'dan büyük, en çok "
                                    f"{TERAS_PANELI_EGIM_SINIRI:g}): {c}")
             cati = {"tip": tip, "egim_yuzde": float(eg), "sacak_cm": 0.0, "topuk_cm": float(ana.get("topuk_cm", 10)), "cikma_cm": float(cikma)}
+        elif tip == "cumba":                        # 14 Kasım 2026 (Lokman 08:41–08:42): verandanın çatısı ana çatının cumbası; vadiyle girer
+            if set(c) - {"tip"}:
+                raise IsEmriHatasi(f"Veranda {ad}: cumba çatısında eğim, saçak ve topuk ana çatınındır; yalnız tip yazılır: {c}")
+            if ana.get("tip") != "besik_cumba" or not any(u.get("veranda") == ad for u in ana.get("cumbalar") or []):
+                raise IsEmriHatasi(f"Veranda {ad}: cumba çatısı için ana çatı besik_cumba olur ve `cati.cumbalar`'da veranda: {ad} yazılır")
+            cati = {"tip": tip, "egim_yuzde": float(ana["egim_yuzde"]), "sacak_cm": float(ana.get("sacak_cm", 30)),
+                    "topuk_cm": float(ana.get("topuk_cm", 10))}
         else:
             cati = {"tip": tip, "egim_yuzde": float(c.get("egim_yuzde", ana.get("egim_yuzde", 33))),
                     "sacak_cm": float(c.get("sacak_cm", ana.get("sacak_cm", 30))), "topuk_cm": float(ana.get("topuk_cm", 10))}

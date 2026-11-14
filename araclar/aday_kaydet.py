@@ -105,7 +105,13 @@ def main() -> int:
         if abs(katalog_m2 - brut) >= 1:
             print(f"UYARI: --katalog-m2 {katalog_m2:g}, Motor'un brüt alanı {brut:.2f} m² (D-49)")
         veranda = round(sum(mh.alan_m2 for mh in plan.mahaller.values() if mh.acik), 2)
-        kapali = round(brut - veranda, 1)
+        # Girintili gövdenin brütü gövdenin dış çizgisidir (`bina_brut_cm2`): ondan taşan açık mahal (AP-07'nin sundurması) brütte
+        # yoktur, kapalı alandan da düşülmez. Öteki evlerde fark 0 (kayıtlar aynen).
+        disarida = 0.0
+        if plan.girintili and plan.dis_verandalar:
+            ic = G.govde_cokgeni(plan)
+            disarida = round(sum(mh.poly.area - mh.poly.intersection(ic).area for mh in plan.mahaller.values() if mh.acik) / 1e4, 2)
+        kapali = round(brut - veranda + disarida, 1)
         oda_prog = ie.get("oda_programi") or _oda_programi(ie)
         sablon_dir = KOK / "is_emri" / "adaylar"; sablon_dir.mkdir(parents=True, exist_ok=True)
         (sablon_dir / f"{kod}.json").write_text(json.dumps(ie, ensure_ascii=False, indent=1), encoding="utf-8")
@@ -114,7 +120,7 @@ def main() -> int:
                  "referans_model": ie["yapi"].get("referans_model"), "yapi_turu": "prefabrik", "kat": int(a.kat or 1),
                  "oda_programi": oda_prog, "katalog_m2": katalog_m2, "kapali_m2": kapali, "veranda_m2": veranda,
                  "ozet": {"grid": ie["yapi"]["grid"], "dis_olcu_cm": [W, H], "brut_m2": round(brut, 2), "pano": v.get("panel_count"), "pencere": v.get("windows"), "kapi": v.get("doors"),
-                          "odalar": {k: round(x, 2) for k, x in rooms.items()}},
+                          "odalar": {k: round(x, 2) for k, x in rooms.items()}, **({"brut_disi_acik_m2": disarida} if disarida else {})},
                  "kaynak": {"metin": a.kaynak, "dosya": str(Path(a.is_emri)), "ayna": a.ayna, "karar": a.karar,
                             **({"standart": True} if a.standart else {}), **({"kart_kiyasi": kart_kiyasi} if kart_kiyasi else {})},
                  "not": a.not_}
