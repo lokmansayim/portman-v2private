@@ -1,8 +1,13 @@
 """İE-37 (D-83) · Prefabrik evde çatı seçimi: PA-06 evine üç çatı (PA-06, PA-06-K, PA-06-C). LLM'siz, Postgres'siz.
 
 Lokman 12 Kasım 2026 08:36:09 ("olabilirse başka seçeneklerde sunulsun … salonun üzerine kampanyalı binada olduğu gibi cumba
-koyabilirsin") ve 08:41:09 ("burada 1, 2 ve 5 sunulsun"). Plan seçilince "Çatı seçin" seti gelir (İE-25'in çelik adımı gibi); seçenekler
-ayrı aday kaydıdır, görünmesi K-A10 kabulüne bağlıdır. Kabulsüz yol (harness) ve seçeneği kabul edilmemiş ev bugünkü gibi doğrudan çizilir.
+koyabilirsin") ve 08:41:09 ("burada 1, 2 ve 5 sunulsun"). Seçenekler ayrı aday kaydıdır, görünmesi K-A10 kabulüne bağlıdır. Kabulsüz
+yol (harness) ve seçeneği kabul edilmemiş ev bugünkü gibi doğrudan çizilir.
+
+İE-42 (D-94; Lokman 14 Kasım 2026 20:33:41 kartı "Onaydan sonra, eskizdeki gibi"): çatı plan seçilince değil, plan onaylanınca sorulur.
+r01 evin kendi çatısıyla gelir; "Onayla" → "Planınız onaylandı (r01). Şimdi çatıyı seçin." seti; evin çatısı seçilirse r01 onaylanır, başka
+çatı seçilirse aynı plan o çatıyla r02 → onay. Talepte çatı yazılıysa adım yok. Bu dosyanın İE-37 vakaları bu sıraya göre değişti
+(`_cati_seti` artık r01 → onay → set; setten evin çatısı onaydır, başka çatı r02); gerekçe `docs/is_emirleri/IE-42.md` › Testler.
 """
 from __future__ import annotations
 import copy
@@ -32,14 +37,36 @@ CATI = {   # D-83 tablosu "Çatılar": kararla yazılan iki çatı (eğim, saça
 }
 
 
-def _cati_seti(tmp_path: Path, kabul=PA | CATILAR, m2: float = 85):
-    """85 m² 2+1 → öncelik "fark etmez" → alan seti → PA-06 düğmesi."""
+def _plan(tmp_path: Path, kabul=PA | CATILAR, m2: float = 85):
+    """85 m² 2+1 → öncelik "fark etmez" → alan seti → PA-06 düğmesi → r01 evin kendi çatısıyla (İE-42: çatı sorulmaz)."""
     s = Sohbet(tmp_path, kabul=set(kabul))
     k = s.yaz(f"{m2:g} m2 2+1 prefabrik ev", alan_m2=m2, oda_programi="2+1", yapi_turu="prefabrik")
     if k.eylem == "sor" and "öne çıksın" in (k.mesaj or ""):
         k = s.yaz("fark etmez", niyet="yeni_talep")
     assert k.eylem == "secenek" and s.k.d["secenek_seti"]["tur"] == "alan", k.mesaj
-    return s, s.dugme("s:{set}:PA06")
+    k = s.dugme("s:{set}:PA06")
+    assert k.eylem == "is_emri" and k.revizyon == 1 and k.is_emri["talep"]["kaynak"] == "PA06", k.mesaj
+    return s, k
+
+
+def _onayla(s: Sohbet):
+    return s.dugme(f"o:{s.plan['is_emri_no']}:{s.plan['revizyon']}")
+
+
+def _cati_seti(tmp_path: Path, kabul=PA | CATILAR, m2: float = 85):
+    """r01 (evin çatısı) → Onayla → çatı seti (İE-42, D-94)."""
+    s, _ = _plan(tmp_path, kabul, m2)
+    return s, _onayla(s)
+
+
+def _secildi(s: Sohbet, k, kod: str, rev: int = 2):
+    """Onaydan sonraki setten seçim: evin çatısı (PA06) r01'i onaylar (yeni çizim yok); başka çatı aynı planı o çatıyla rNN çizer."""
+    if kod == "PA06":
+        assert (k.eylem, k.gerekce, s.k.d["asama"]) == ("cevapla", K.PLAN_ONAYI, "onaylandi"), k.mesaj
+        assert (s.plan["revizyon"], s.plan["talep"]["kaynak"]) == (1, "PA06"), k.mesaj
+    else:
+        assert k.eylem == "is_emri" and k.revizyon == rev and k.is_emri["talep"]["kaynak"] == kod, k.mesaj
+        assert s.k.d["asama"] == "onay_bekliyor"
 
 
 # ── kayıt ─────────────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -127,92 +154,124 @@ def test_alan_setinde_her_plan_bir_kez(tmp_path):
 
 
 # ── karar: çatı seti ve seçim ─────────────────────────────────────────────────────────────────────────────────────────
-def test_plan_secilince_cati_seti(tmp_path):
-    s, k = _cati_seti(tmp_path)
+def test_plan_secilince_r01_onaydan_sonra_cati_seti(tmp_path):
+    """İE-42: plan seçilince çatı sorulmaz, r01 evin kendi çatısıyla; "Onayla" çatı setini getirir (eskizin 3. adımı). Set mesajı
+    bugünkü setin listesi ve görseliyle; yalnız ilk cümle yeni. Onay henüz kaydedilmez (kanalın onay kancaları "plan onaylandı" bekler)."""
+    s, r01 = _plan(tmp_path)
+    assert r01.mesaj == "PA-06 seçildi. Ön onay planınız hazır; plan görseli ve PDF ektedir.", r01.mesaj
+    assert r01.is_emri["cati"]["tip"] == "besik" and s.k.d["secenek_seti"]["durum"] == "secildi"
+    k = _onayla(s)
     st = s.k.d["secenek_seti"]
-    assert k.eylem == "secenek" and st["tur"] == "cati_varyanti", k.mesaj
+    assert k.eylem == "secenek" and st["tur"] == "cati_varyanti" and st["durum"] == "acik", k.mesaj
+    assert K.PLAN_ONAYI not in k.gerekce and s.k.d["asama"] == "onay_bekliyor"
     assert [a["kod"] for a in st["adaylar"]] == ["PA06", "PA06K", "PA06C"]
     assert [a["gorsel"] for a in st["adaylar"]] == ["adaylar/PA06_cati.png", "adaylar/PA06K.png", "adaylar/PA06C.png"]
     assert [b["baslik"] for b in k.butonlar] == ["1. PA-06", "2. PA-06-K", "3. PA-06-C"]
-    assert "1. PA-06 · evin çatısı (Beşik, kalkan önde)" in k.mesaj and "3. PA-06-C · çatı C (Beşik + salonda cumba)" in k.mesaj
-    assert 'örn. "PA-06-K olsun"' in k.mesaj and "öne çıksın" not in k.mesaj
+    assert k.mesaj.startswith("Planınız onaylandı (r01). Şimdi çatıyı seçin. Bu eve 3 çatı uygulanır. Plan aynı kalır; yalnız çatı "
+                              "değişir.\n\n1. PA-06 · evin çatısı (Beşik, kalkan önde)\n"), k.mesaj
+    assert "3. PA-06-C · çatı C (Beşik + salonda cumba)" in k.mesaj and 'örn. "PA-06-K olsun"' in k.mesaj and "öne çıksın" not in k.mesaj
     eski = next(e for e in s.k.d["eski_setler"] if e["tur"] == "alan")
     assert (eski["durum"], eski["secilen_kod"]) == ("secildi", "PA06")
 
 
 @pytest.mark.parametrize("kod", ["PA06", "PA06K", "PA06C"])
-def test_dugmeyle_cati_secimi_r01(tmp_path, kod):
+def test_dugmeyle_cati_secimi(tmp_path, kod):
+    """Evin çatısı: r01 aynen onaylanır ("Çatı: … Plan r01 aynen kalır. Onayınız kaydedildi …"). Başka çatı: aynı plan o çatıyla r02
+    ("Çatı: Kırma (PA-06-K). Plan aynı. …"); r02'nin onayı kaydedilir, çatı yeniden sorulmaz."""
     s, _ = _cati_seti(tmp_path)
+    r01 = s.plan
     k = s.dugme(f"s:{{set}}:{kod}")
-    assert k.eylem == "is_emri", k.mesaj
-    ie = k.is_emri
+    _secildi(s, k, kod)
     sab = json.loads((SABLON_DIR / ("adaylar/PA06.json" if kod == "PA06" else f"adaylar/{kod}.json")).read_text(encoding="utf-8"))
-    assert (ie["talep"]["kaynak"], ie["revizyon"], ie["cati"], ie["mahaller"]) == (kod, 1, sab["cati"], sab["mahaller"])
-    assert (s.k.d["secenek_seti"]["durum"], s.k.d["secenek_seti"]["secilen_kod"]) == ("secildi", kod)
+    assert (s.k.d["eski_setler"][-1] if kod == "PA06" else s.k.d["secenek_seti"])["secilen_kod"] == kod
+    if kod == "PA06":
+        assert k.mesaj.startswith(f"Çatı: Beşik, kalkan önde (PA-06). Plan r01 aynen kalır. Onayınız kaydedildi ({r01['is_emri_no']}, "
+                                  "revizyon 1)."), k.mesaj
+        return
+    ie = k.is_emri
+    assert (ie["cati"], ie["mahaller"], ie["acikliklar"], ie["is_emri_no"]) == (sab["cati"], r01["mahaller"], r01["acikliklar"], r01["is_emri_no"])
+    ad = {"PA06K": "Kırma", "PA06C": "Beşik + salonda cumba"}[kod]
+    assert k.mesaj == (f"Çatı: {ad} ({kod[:2]}-{kod[2:4]}-{kod[4:]}). Plan aynı. Ön onay planınız hazır (r02); PDF'teki 4 görünüş "
+                       f"{ad.lower()} çatıyı gösterir."), k.mesaj
+    k = _onayla(s)
+    assert (k.eylem, k.gerekce, s.k.d["asama"], s.plan["revizyon"]) == ("cevapla", K.PLAN_ONAYI, "onaylandi", 2), k.mesaj
 
 
 @pytest.mark.parametrize("metin,kod", [("2", "PA06K"), ("3", "PA06C"), ("1", "PA06")])
-def test_numarayla_cati_secimi(tmp_path, metin, kod):
+@pytest.mark.parametrize("niyet", ["revizyon", "diger"])
+def test_numarayla_cati_secimi(tmp_path, metin, kod, niyet):
     s, _ = _cati_seti(tmp_path)
-    k = s.yaz(metin, niyet="yeni_talep")
-    assert k.eylem == "is_emri" and k.is_emri["talep"]["kaynak"] == kod, k.mesaj
+    _secildi(s, s.yaz(metin, niyet=niyet), kod)
 
 
 def test_yaziyla_cati_kodu(tmp_path):
     """Bayi "PA-06-K olsun" yazar: kod LLM'siz tanınır (`_sozcukler`); LLM'in okuduğu kodla da seçilir."""
     s, _ = _cati_seti(tmp_path)
     assert K._secim_kodlari("PA-06-K olsun", s.kat) == ["PA06K"]
-    k = s.yaz("PA-06-K olsun", katalog_kodu="PA-06-K")
-    assert k.eylem == "is_emri" and k.is_emri["talep"]["kaynak"] == "PA06K", k.mesaj
+    _secildi(s, s.yaz("PA-06-K olsun", katalog_kodu="PA-06-K"), "PA06K")
+    s, _ = _cati_seti(tmp_path / "b")
+    _secildi(s, s.yaz("PA-06-K olsun"), "PA06K")
 
 
-def test_kodla_ev_secilince_cati_seti(tmp_path):
-    """Set açılmadan "PA-06 olsun": yine çatı seti (plan seçildi, çatı yazılmadı)."""
+def test_kodla_ev_secilince_r01_evin_catisiyla(tmp_path):
+    """Set açılmadan "PA-06 olsun": r01 evin çatısıyla (İE-42; önce çatı seti geliyordu). Onaydan önce "PA-06-C olsun" revizyondur: r02."""
     s = Sohbet(tmp_path, kabul=PA | CATILAR)
     k = s.yaz("PA-06 olsun", katalog_kodu="PA-06", yapi_turu="prefabrik")
-    assert k.eylem == "secenek" and s.k.d["secenek_seti"]["tur"] == "cati_varyanti", k.mesaj
+    assert k.eylem == "is_emri" and k.revizyon == 1 and k.is_emri["talep"]["kaynak"] == "PA06", k.mesaj
     k = s.yaz("PA-06-C olsun", katalog_kodu="PA-06-C", yapi_turu="prefabrik")
-    assert k.eylem == "is_emri" and k.is_emri["talep"]["kaynak"] == "PA06C", k.mesaj
+    assert k.eylem == "is_emri" and k.revizyon == 2 and k.is_emri["talep"]["kaynak"] == "PA06C", k.mesaj
+    k = _onayla(s)                                        # çatıyı bayi yazdı: onayda çatı seti gelmez
+    assert (k.eylem, k.gerekce) == ("cevapla", K.PLAN_ONAYI), k.mesaj
 
 
 def test_cati_koduyla_ilk_mesaj_seti_atlar(tmp_path):
-    """Bayi çatıyı ilk mesajda yazdıysa ("PA-06-K olsun") set gelmez, r01 o çatıyla; çatısı tek olan ev (PA-05) bugünkü gibi r01."""
+    """Bayi çatıyı ilk mesajda yazdıysa ("PA-06-K olsun") set gelmez, r01 o çatıyla ve onayda da çatı sorulmaz (D-94: talepte çatı varsa
+    adım yok); çatısı tek olan ev (PA-05) bugünkü gibi r01 ve onay."""
     s = Sohbet(tmp_path, kabul=PA | CATILAR)
     k = s.yaz("PA-06-K olsun", katalog_kodu="PA-06-K", yapi_turu="prefabrik")
     assert k.eylem == "is_emri" and k.is_emri["talep"]["kaynak"] == "PA06K" and k.is_emri["cati"]["tip"] == "kirma", k.mesaj
+    k = _onayla(s)
+    assert (k.eylem, k.gerekce, s.plan["revizyon"]) == ("cevapla", K.PLAN_ONAYI, 1), k.mesaj
+    assert "Çatı:" not in k.mesaj
     s = Sohbet(tmp_path / "b", kabul=PA | CATILAR)
     k = s.yaz("PA-05 olsun", katalog_kodu="PA-05", yapi_turu="prefabrik")
     assert k.eylem == "is_emri" and k.is_emri["talep"]["kaynak"] == "PA05", k.mesaj
+    k = _onayla(s)
+    assert (k.eylem, k.gerekce) == ("cevapla", K.PLAN_ONAYI), k.mesaj
 
 
 def test_revizyonda_cati_seti_yeniden_gelmez(tmp_path):
     """Evin kendi çatısıyla çizilmiş planın revizyonu çatıyı yeniden sormaz; plan aynı çatıyla kalır.
     D-86 (Lokman 13 Kasım 2026 21:36:32 kartı "Değişmedi desin"): yalnız kodu yineleyen yazı ("PA-06 olsun") planı değiştirmez; yeni
     revizyon numarası gitmez (önce aynı plan r02 diye yeniden çiziliyordu). Gerçek bir değişiklik r02 üretir: çatı seti yine gelmez,
-    LLM'in yinelediği kodla da plan evin çatısında (PA06) kalır."""
-    s, _ = _cati_seti(tmp_path)
-    k = s.dugme("s:{set}:PA06")
-    assert k.eylem == "is_emri" and k.revizyon == 1
+    LLM'in yinelediği kodla da plan evin çatısında (PA06) kalır. İE-42: çatı seti r02'nin onayında gelir ("Planınız onaylandı (r02)")."""
+    s, _ = _plan(tmp_path)
     k = s.yaz("PA-06 olsun", katalog_kodu="PA-06", niyet="revizyon")
     assert (k.eylem, k.gerekce) == ("cevapla", K.PLAN_DEGISMEDI), k.mesaj
     assert s.plan["revizyon"] == 1 and s.plan["talep"]["kaynak"] == "PA06"
     assert (s.k.d.get("secenek_seti") or {}).get("durum") != "acik"          # çatı seti yeniden açılmadı
     k = s.yaz("yatak odası 1 penceresi 120x180 olsun", katalog_kodu="PA-06", pencereler=[pen("yatak odası 1", "120x180")])
     assert k.eylem == "is_emri" and k.revizyon == 2 and k.is_emri["talep"]["kaynak"] == "PA06", k.mesaj
+    k = _onayla(s)
+    assert k.eylem == "secenek" and k.mesaj.startswith("Planınız onaylandı (r02). Şimdi çatıyı seçin."), k.mesaj
+    k = s.dugme("s:{set}:PA06K")
+    assert k.eylem == "is_emri" and k.revizyon == 3 and k.is_emri["talep"]["kaynak"] == "PA06K", k.mesaj
+    assert [a["olcu"] for a in k.is_emri["acikliklar"] if a.get("mahal") == "YATAK ODASI 1"] == ["120x180"], k.mesaj
 
 
 def test_revizyonda_cati_degisir(tmp_path):
     """r01 evin çatısıyla; bayi sonra "PA-06-C olsun" yazar (LLM revizyon okur) → aynı plan, cumbalı çatıyla r02. LLM yeni talep
     okursa bugünkü kural geçer (gönderilmiş plandan sonra yeni talep konuşmayı kapatır): cumbalı çatıyla yeni r01, çatı yeniden sorulmaz."""
-    s, _ = _cati_seti(tmp_path)
-    r01 = s.dugme("s:{set}:PA06").is_emri
+    s, r01 = _plan(tmp_path)
+    r01 = r01.is_emri
     k = s.yaz("PA-06-C olsun", katalog_kodu="PA-06-C")
     assert k.eylem == "is_emri" and k.revizyon == 2 and k.is_emri["cati"]["tip"] == "besik_cumba", k.mesaj
     assert k.is_emri["talep"]["kaynak"] == "PA06C" and (k.is_emri["mahaller"], k.is_emri["acikliklar"]) == (r01["mahaller"], r01["acikliklar"])
-    s, _ = _cati_seti(tmp_path / "b")
-    s.dugme("s:{set}:PA06")
+    assert (_onayla(s).gerekce, s.plan["revizyon"]) == (K.PLAN_ONAYI, 2)          # çatıyı bayi seçti: onayda set gelmez
+    s, _ = _plan(tmp_path / "b")
     k = s.yaz("PA-06-C olsun", katalog_kodu="PA-06-C", niyet="yeni_talep")
     assert k.eylem == "is_emri" and k.revizyon == 1 and k.is_emri["talep"]["kaynak"] == "PA06C", k.mesaj
+    assert _onayla(s).gerekce == K.PLAN_ONAYI
 
 
 # ── çatı isteği (geometri hakemi, 12 Kasım 2026, üç tur): LLM `cati_degistir` okursa çatıyı yalnız seçeneğin kodu seçer; çatının adı
@@ -291,13 +350,13 @@ def test_llm_cati_istegi_okunan_cumleyle_kiyaslanir(tmp_path, metin, aciklama, e
 @pytest.mark.parametrize("metin,kod", [("PA-06-K'ya geçelim", "PA06K"), ("PA-06-C'ye geçelim", "PA06C"), ("PA-06-K modeline geçelim", "PA06K")])
 def test_revizyonda_kodla_gecis_llm_okumasiyla(tmp_path, metin, kod):
     """Hakem sekizinci tur: r01 evin çatısıyla; LLM bayinin sözünü `aciklama`ya yazsa da kodla geçiş seçimdir (yönlendirilmez)."""
-    s, _ = _cati_seti(tmp_path)
-    s.dugme("s:{set}:PA06")
+    s, _ = _plan(tmp_path)
     k = s.yaz(metin, katalog_kodu=metin[:7], varyantlar=[var("cati_degistir", metin)])
     assert k.eylem == "is_emri" and k.revizyon == 2 and k.is_emri["talep"]["kaynak"] == kod, k.mesaj
     s, _ = _cati_seti(tmp_path / "b")
-    k = s.yaz("ikinci çatı olsun", varyantlar=[var("cati_degistir", "2. çatı")])
-    assert k.eylem == "is_emri" and k.is_emri["talep"]["kaynak"] == "PA06K", k.mesaj
+    _secildi(s, s.yaz("ikinci çatı olsun", varyantlar=[var("cati_degistir", "2. çatı")]), "PA06K")
+    s, _ = _cati_seti(tmp_path / "c")
+    _secildi(s, s.yaz(metin, katalog_kodu=metin[:7], varyantlar=[var("cati_degistir", metin)]), kod)
 
 
 def test_cumba_kalsin_kodla_celisirse_sorulur(tmp_path):
@@ -306,8 +365,8 @@ def test_cumba_kalsin_kodla_celisirse_sorulur(tmp_path):
     s, _ = _cati_seti(tmp_path)
     k = s.yaz("ikinci çatı olsun, cumba kalsın")
     assert k.eylem == "sor" and "Hangi çatı olsun?" in k.mesaj, k.mesaj
-    s, _ = _cati_seti(tmp_path / "b")
-    s.dugme("s:{set}:PA06C")
+    s = Sohbet(tmp_path / "b", kabul=PA | CATILAR)
+    assert s.yaz("PA-06-C olsun", katalog_kodu="PA-06-C", yapi_turu="prefabrik").eylem == "is_emri"
     k = s.yaz("PA-06-K olsun, cumba kalsın", katalog_kodu="PA-06-K", varyantlar=[var("cati_degistir", "PA-06-K olsun, cumba kalsın")])
     assert k.eylem == "secenek" and s.k.d["secenek_seti"]["tur"] == "cati_varyanti", k.mesaj
 
@@ -329,15 +388,19 @@ def test_cati_istegi_ve_pencere_birlikte(tmp_path):
 
 
 def test_cati_seti_acikken_ve_revizyonda_secenek_disi_istek(tmp_path):
+    """Seçeneklerin dışındaki çatı isteği yönlendirilir. Set açıkken (İE-42) plan onay bekler kalır, set düşer: sonraki "Onayla" çatıyı
+    yeniden sorar (yönlendirilen istek onayı kaydettirmez)."""
     s, _ = _cati_seti(tmp_path)
     k = s.yaz("çatı eğimi %40 olsun", varyantlar=[var("cati_degistir", "çatı eğimi %40")])
     assert k.eylem == "yonlendir" and "otomatik yapılamıyor" in k.mesaj, k.mesaj
-    s, _ = _cati_seti(tmp_path / "b")
-    s.dugme("s:{set}:PA06")
+    assert s.k.d["asama"] == "onay_bekliyor" and (s.k.d.get("secenek_seti") or {}).get("durum") != "acik"
+    k = _onayla(s)
+    assert k.eylem == "secenek" and k.mesaj.startswith("Planınız onaylandı (r01). Şimdi çatıyı seçin."), k.mesaj
+    s, _ = _plan(tmp_path / "b")
     k = s.yaz("çatı eğimi %40 olsun", varyantlar=[var("cati_degistir", "çatı eğimi %40")])
     assert k.eylem == "yonlendir" and "otomatik yapılamıyor" in k.mesaj, k.mesaj
-    s, _ = _cati_seti(tmp_path / "c")                      # hakem altıncı tur: "kalacak" sözlü istek düşmez, r02 çizilmez
-    s.dugme("s:{set}:PA06K")
+    s = Sohbet(tmp_path / "c", kabul=PA | CATILAR)          # hakem altıncı tur: "kalacak" sözlü istek düşmez, r02 çizilmez
+    assert s.yaz("PA-06-K olsun", katalog_kodu="PA-06-K", yapi_turu="prefabrik").eylem == "is_emri"
     m = "PA-06-C olsun, cumba yatak odasının üstünde kalacak"
     k = s.yaz(m, katalog_kodu="PA-06-C", varyantlar=[var("cati_degistir", "cumba yatak odasının üstünde")])
     assert k.eylem == "yonlendir" and k.mesaj.startswith('"cumba yatak odasının üstünde kalacak" isteği otomatik'), k.mesaj
@@ -350,45 +413,67 @@ def test_cati_seti_acikken_cati_adi_sorulur(tmp_path, metin):
     k = s.yaz(metin, varyantlar=[var("cati_degistir", metin)])
     assert k.eylem == "sor" and "Hangi çatı olsun?" in k.mesaj and "3. PA-06-C (Beşik + salonda cumba)" in k.mesaj, k.mesaj
     assert s.k.d["secenek_seti"]["durum"] == "acik"
-    k = s.yaz("2", niyet="diger")
-    assert k.eylem == "is_emri" and k.is_emri["talep"]["kaynak"] == "PA06K", k.mesaj
+    _secildi(s, s.yaz("2", niyet="diger"), "PA06K")
 
 
 @pytest.mark.parametrize("metin,kod", [("çatı K olsun", "PA06K"), ("K olsun", "PA06K"), ("C olsun", "PA06C"), ("PA-06 olsun", "PA06")])
 def test_cati_seti_acikken_etiket_ve_evin_kodu(tmp_path, metin, kod):
-    """Set açıkken mesajın etiketi ("çatı K") ve evin kodu seçimdir (LLM varyant okumasa da)."""
+    """Set açıkken mesajın etiketi ("çatı K") ve evin kodu seçimdir (LLM varyant okumasa da); evin kodu evin çatısıdır: onay."""
     s, _ = _cati_seti(tmp_path)
-    k = s.yaz(metin, katalog_kodu=None)
-    assert k.eylem == "is_emri" and k.is_emri["talep"]["kaynak"] == kod, k.mesaj
+    _secildi(s, s.yaz(metin, katalog_kodu=None), kod)
 
 
 @pytest.mark.parametrize("metin,alan", [
-    ("kırma olsun", {}), ("cumbalı olan", {}), ("tamam", {}), ("kırma çatıyı seçiyorum", {}), ("kırma olsun", {"niyet": "revizyon"}),
+    ("kırma olsun", {}), ("cumbalı olan", {}), ("tamam", {}), ("kırma çatıyı seçiyorum", {}), ("kırma olsun", {"niyet": "diger"}),
+    ("tamam", {"niyet": "onay"}), ("tamam", {"niyet": "diger"}), ("bakalım", {"katalog_kodu": "PA-06", "alan_m2": 85}),
 ])
 def test_cati_seti_acikken_secim_yoksa_evin_catisi_cizilmez(tmp_path, metin, alan):
-    """Hakem dördüncü tur: set açıkken kodsuz ve varyantsız mesaj evin çatısıyla çizilmiyor; "Hangi çatı olsun?" sorulur."""
+    """Hakem dördüncü tur: set açıkken kodsuz ve varyantsız mesaj evin çatısıyla çizilmiyor; "Hangi çatı olsun?" sorulur. İE-42: onay da
+    seçim değildir (plan onaylandı, çatı bekleniyor); LLM'in bağlamdan yinelediği kod ve m² istek sayılmaz, onay kaydedilmez."""
     s, _ = _cati_seti(tmp_path)
     k = s.yaz(metin, **alan)
     assert k.eylem == "sor" and "Hangi çatı olsun?" in k.mesaj and s.k.d["secenek_seti"]["durum"] == "acik", k.mesaj
+    assert K.PLAN_ONAYI not in k.gerekce and s.k.d["asama"] == "onay_bekliyor" and s.k.d.get("cati_adimi")
 
 
-def test_cati_seti_acikken_pencere_istegi_bekler(tmp_path):
-    """Set açıkken yalnız pencere isteği: çatı sorulur, pencere taslakta bekler ve seçilen çatıya uygulanır."""
+def test_cati_seti_acikken_pencere_istegi_plani_degistirir(tmp_path):
+    """İE-42 (D-94: "Çatı seti açıkken plan değişirse set kapanır"): set açıkken yalnız pencere isteği planın değişikliğidir. Set kapanır,
+    pencere evin çatısıyla r02'de uygulanır, r01'in onayı düşer; r02 onaylanınca çatı yeniden sorulur. (İE-37'de çatı sorulup pencere
+    bekliyordu; plan o zaman henüz çizilmemişti.)"""
     s, _ = _cati_seti(tmp_path)
     k = s.yaz("banyo penceresi 120x50 olsun", pencereler=[pen("banyo", "120x50")])
-    assert k.eylem == "sor" and "Hangi çatı olsun?" in k.mesaj, k.mesaj
-    k = s.yaz("2", niyet="diger")
-    assert k.eylem == "is_emri" and k.is_emri["talep"]["kaynak"] == "PA06K", k.mesaj
+    assert k.eylem == "is_emri" and k.revizyon == 2 and k.is_emri["talep"]["kaynak"] == "PA06", k.mesaj
     assert [a["olcu"] for a in k.is_emri["acikliklar"] if a.get("mahal") == "BANYO"] == ["120x50"], k.mesaj
+    assert k.mesaj.endswith("Bu değişiklik r01 onayınızı geçersiz kıldı. r02 için yeniden onay gerekir."), k.mesaj
+    assert s.k.d["asama"] == "onay_bekliyor" and not s.k.d.get("cati_adimi")
+    eski = next(e for e in s.k.d["eski_setler"] if e["tur"] == "cati_varyanti")
+    assert eski["durum"] == "eskidi"
+    k = _onayla(s)                                       # r02'nin onayında çatı yeniden sorulur
+    assert k.eylem == "secenek" and k.mesaj.startswith("Planınız onaylandı (r02). Şimdi çatıyı seçin."), k.mesaj
+    k = s.yaz("2", niyet="diger")
+    _secildi(s, k, "PA06K", rev=3)
+    assert [a["olcu"] for a in k.is_emri["acikliklar"] if a.get("mahal") == "BANYO"] == ["120x50"], k.mesaj
+
+
+def test_cati_seti_acikken_cati_ve_pencere_birlikte(tmp_path):
+    """Set açıkken çatı ve pencere aynı mesajda: çatı seçilir, pencere uygulanır; plan değiştiği için mesaj onayın düştüğünü yazar."""
+    s, _ = _cati_seti(tmp_path)
+    k = s.yaz("2 olsun, banyo penceresi 120x50 olsun", pencereler=[pen("banyo", "120x50")])
+    _secildi(s, k, "PA06K")
+    assert [a["olcu"] for a in k.is_emri["acikliklar"] if a.get("mahal") == "BANYO"] == ["120x50"], k.mesaj
+    assert k.mesaj.startswith("Çatı: Kırma (PA-06-K). ") and k.mesaj.endswith("Bu değişiklik r01 onayınızı geçersiz kıldı. r02 için "
+                                                                                "yeniden onay gerekir."), k.mesaj
+    assert _onayla(s).gerekce == K.PLAN_ONAYI                # çatı seçildi: r02'nin onayında set gelmez
 
 
 @pytest.mark.parametrize("metin", ["PA-06 olsun, çatı aynı kalsın", "PA-06 olsun, zemin kaplaması laminat olsun",
                                    "PA-06 olsun, girişe eğimli rampa yapın"])
 def test_cati_istegi_olmayan_cumle_bugunku_yol(tmp_path, metin):
-    """Hakem beşinci tur: "kalsın" cümlesi ve çatı dışı "kaplama", "eğimli" sözü çatı isteği değildir; plan seçilince çatı seti (bugünkü)."""
+    """Hakem beşinci tur: "kalsın" cümlesi ve çatı dışı "kaplama", "eğimli" sözü çatı isteği değildir; plan evin çatısıyla r01 (İE-42),
+    çatı onaydan sonra sorulur."""
     s = Sohbet(tmp_path, kabul=PA | CATILAR)
     k = s.yaz(metin, katalog_kodu="PA-06", yapi_turu="prefabrik")
-    assert k.eylem == "secenek" and s.k.d["secenek_seti"]["tur"] == "cati_varyanti", k.mesaj
+    assert k.eylem == "is_emri" and k.revizyon == 1 and k.is_emri["talep"]["kaynak"] == "PA06", k.mesaj
 
 
 @pytest.mark.parametrize("metin,pencere", [("banyo penceresi 120x50 olsun, çatı aynı kalsın", True),
@@ -397,8 +482,8 @@ def test_cati_istegi_olmayan_cumle_bugunku_yol(tmp_path, metin):
                                            ("salonun zemin kaplaması laminat olsun", False)])
 def test_cati_secenekli_evde_revizyon_yonlenmez(tmp_path, metin, pencere):
     """r01 PA-06-K; pencere revizyonu ve çatıyı koruyan söz çatı okumasına takılmaz: r02 aynı çatıyla."""
-    s, _ = _cati_seti(tmp_path)
-    s.dugme("s:{set}:PA06K")
+    s = Sohbet(tmp_path, kabul=PA | CATILAR)
+    assert s.yaz("PA-06-K olsun", katalog_kodu="PA-06-K", yapi_turu="prefabrik").eylem == "is_emri"
     k = s.yaz(metin, pencereler=[pen("banyo", "120x50")] if pencere else [])
     assert k.eylem != "yonlendir" or "çatı için" not in k.mesaj, k.mesaj
     if pencere:
@@ -410,14 +495,13 @@ def test_cati_secenekli_evde_revizyon_yonlenmez(tmp_path, metin, pencere):
                                       ("birinci çatı olsun", "PA06"), ("üçüncü olsun", "PA06C"), ("son çatı olsun", "PA06C")])
 def test_cati_seti_acikken_numarali_secim(tmp_path, metin, kod):
     s, _ = _cati_seti(tmp_path)
-    k = s.yaz(metin)
-    assert k.eylem == "is_emri" and k.is_emri["talep"]["kaynak"] == kod, k.mesaj
+    _secildi(s, s.yaz(metin), kod)
 
 
 def test_revizyonda_cati_adi_seti_getirir(tmp_path):
-    """r01 evin çatısıyla; revizyonda "çatı kırma olsun" → çatı seti; seçilen çatıyla r02 (plan aynı)."""
-    s, _ = _cati_seti(tmp_path)
-    r01 = s.dugme("s:{set}:PA06").is_emri
+    """r01 evin çatısıyla; onaydan önce revizyonda "çatı kırma olsun" → çatı seti; seçilen çatıyla r02 (plan aynı)."""
+    s, r01 = _plan(tmp_path)
+    r01 = r01.is_emri
     k = s.yaz("çatı kırma olsun", varyantlar=[var("cati_degistir", "çatı kırma olsun")])
     assert k.eylem == "secenek" and s.k.d["secenek_seti"]["tur"] == "cati_varyanti", k.mesaj
     k = s.dugme("s:{set}:PA06K")
@@ -433,21 +517,31 @@ def test_cati_istegi_secenek_gorunmezse_bugunku_yol(tmp_path):
 
 
 def test_kismi_kabul(tmp_path):
-    """Yalnız kırma kabul edildiyse set iki çatı; hiçbiri kabul edilmediyse plan evin çatısıyla doğrudan (bugünkü yol)."""
+    """Yalnız kırma kabul edildiyse set iki çatı ("Bu eve 2 çatı uygulanır"); hiçbiri kabul edilmediyse onayda çatı sorulmaz, onay kaydedilir
+    (bugünkü yol; öteki 28 ev de böyle)."""
     s, k = _cati_seti(tmp_path, kabul=PA | {"PA06K"})
     assert [a["kod"] for a in s.k.d["secenek_seti"]["adaylar"]] == ["PA06", "PA06K"], k.mesaj
+    assert k.mesaj.startswith("Planınız onaylandı (r01). Şimdi çatıyı seçin. Bu eve 2 çatı uygulanır."), k.mesaj
     s, k = _cati_seti(tmp_path / "b", kabul=PA)
-    assert k.eylem == "is_emri" and k.is_emri["talep"]["kaynak"] == "PA06" and k.is_emri["cati"]["tip"] == "besik", k.mesaj
+    assert (k.eylem, k.gerekce, s.plan["cati"]["tip"]) == ("cevapla", K.PLAN_ONAYI, "besik"), k.mesaj
+    assert k.mesaj.startswith("Onayınız kaydedildi"), k.mesaj
 
 
 def test_cati_seti_acikken_olcu_degisirse_set_eskir(tmp_path):
-    """İE-25 kuralı prefabrikte de: çatı seti açıkken yeni m² sessizce düşmez; set eskir, talep yeniden okunur."""
+    """İE-25 kuralı prefabrikte de: çatı seti açıkken yeni m² sessizce düşmez. İE-42: plan çizilmiş olduğu için yeni talep konuşmayı
+    kapatır (gönderilmiş plandan sonraki bugünkü kural) ve talep yeniden okunur; revizyon okunursa çatı seti düşer, plan onay bekler
+    (BK-29), "Onayla" çatıyı yeniden sorar. Onay iki yolda da kaydedilmez."""
     s, _ = _cati_seti(tmp_path)
-    k = s.yaz("80 m2 olsun", alan_m2=80, niyet="yeni_talep")
-    eski = next(e for e in s.k.d["eski_setler"] if e["tur"] == "cati_varyanti")
-    assert eski["durum"] == "eskidi"
+    k = s.yaz("80 m2 2+1 olsun", alan_m2=80, oda_programi="2+1", niyet="yeni_talep")
+    assert k.eylem == "sor" and "öne çıksın" in k.mesaj and not s.k.d.get("cati_adimi") and K.PLAN_ONAYI not in k.gerekce, k.mesaj
+    k = s.yaz("fark etmez", niyet="yeni_talep")
     assert k.eylem == "secenek" and s.k.d["secenek_seti"]["tur"] == "alan", k.mesaj
     assert [a["kod"] for a in s.k.d["secenek_seti"]["adaylar"]] == ["PA04", "PA05", "PA06"]
+    s, _ = _cati_seti(tmp_path / "b")
+    k = s.yaz("80 m2 olsun", alan_m2=80)
+    assert (s.k.d["asama"], s.k.d["secenek_seti"]["durum"], s.k.d.get("cati_adimi")) == ("onay_bekliyor", "dustu", None), k.mesaj
+    assert K.PLAN_ONAYI not in k.gerekce and "değişmedi" in k.mesaj, k.mesaj
+    assert _onayla(s).mesaj.startswith("Planınız onaylandı (r01). Şimdi çatıyı seçin.")
 
 
 def test_kabul_araci_cati_kodlarini_tanir(capsys):

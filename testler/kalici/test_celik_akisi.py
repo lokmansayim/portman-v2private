@@ -1,8 +1,8 @@
 """İE-08 8a PR-2a · çelik bayi akışı A2–A3 (kalıcı akış, gerçek Postgres, kayıtlı LLM çıkarımı, sahte WhatsApp).
 
-A2: "Ç8801" → tek görselde üç çatı seçeneği (katalog, K, L; öncelik sorusu yok; set türü cati_varyanti); "88 m² 2+1 çelik" → alan seti
-(soru yok; her plan bir kez, Ç8801 seçilince çatı seti: İE-25); "95 m² 3+1 tek kat çelik" → bugünkü davranış (katalog önerisi); dış ölçü → alan yolu (GRID yok);
-kabul kaydı yokken aday sunulmaz (K-A10). A3: seçim düğmesi → r01 genel motordan (zarf yapi.sistem celik, tanım gömülmez, sha; satırlar
+A2: "Ç8801" → r01 katalog çatısıyla; Onayla → tek görselde üç çatı seçeneği (katalog, K, L; öncelik sorusu yok; set türü cati_varyanti;
+İE-42, D-94: çatı plan onayından sonra); "88 m² 2+1 çelik" → alan seti (soru yok; her plan bir kez, Ç8801 seçilince r01, çatı onaydan sonra: İE-25, İE-42); "95 m² 3+1 tek kat çelik" → bugünkü davranış (katalog önerisi); dış ölçü → alan yolu (GRID yok);
+kabul kaydı yokken aday sunulmaz (K-A10). A3: model kodu ya da seçim düğmesi → r01 genel motordan (zarf yapi.sistem celik, tanım gömülmez, sha; satırlar
 etkileşim + belge; PDF adı Portman_<no>_rNN.pdf; CTA yok); gerçek motor: PDF 2 sayfa, 1. sayfada TASLAK, antette bayinin adı ve kart
 numarası (D-09); Patron kartı numara yazdırmaz; LLM bağlamı ve iş sonucu ham numara taşımaz.
 A4 (PR-2b): bayinin sözünden okunan değişiklik aynı projede r02 (pencere ölçüsü, çatı varyantı, dış 140); başlık görseli önce–sonra;
@@ -90,28 +90,48 @@ def test_kabul_kaydi_yokken_celik_aday_sunulmaz(depo, wa, hizli_genel):
     assert r["eylem"] == "yonlendir" and "şablon kodlanmamış" in r["gerekce"]        # bugünkü davranış (K-A10: kabul yok)
 
 
+def onayla(depo, no: str, rev: int = 1) -> tuple[dict, dict]:
+    """İE-42: bayi r0N'in Onayla düğmesine basar (İş Emri numarası saniyeye bağlı: önce 1,1 sn bekler). Dönen: (iş sonucu, gelen mesaj)."""
+    time.sleep(1.1)
+    g = buton(f"o:{no}:{rev}")
+    assert depo.mesaj_kaydet(g)
+    [r] = isle_hepsi(depo)
+    return r, g
+
+
 def test_c8801_uc_cati_seti_oncelik_sorusu_yok(depo, wa, hizli_genel):
+    # İE-42 (D-94; Lokman, kart 14 Kasım 2026 20:33:41 UTC "Onaydan sonra, eskizdeki gibi"): "Ç8801" → r01 evin (katalog) çatısıyla;
+    # üç çatı seti plan onayından sonra gelir (önceden plandan önceydi, İE-25). Öncelik sorusu yine yok.
     kabul(depo)
     g1 = mesaj("Ç8801 olsun", talep(ozet="Ç8801 istiyor", katalog_kodu="Ç8801"), bayi=BAYI_KART)
     assert depo.mesaj_kaydet(g1)
     [r1] = isle_hepsi(depo)
-    assert r1["eylem"] == "secenek" and "3 aday" in r1["gerekce"]
+    assert r1["eylem"] == "is_emri" and "Ç8801" in r1["gerekce"], r1
+    assert sorgu(depo, "SELECT count(*) AS n FROM secenek_setleri")[0]["n"] == 0                         # plandan önce set yok
+    rev = sorgu(depo, "SELECT is_emri_no, is_emri FROM revizyonlar")[0]
+    assert rev["is_emri"]["yapi"]["kod"] == "Ç8801"
+    kalici.gonder(depo, wa)
+    r2, g2 = onayla(depo, rev["is_emri_no"])
+    assert r2["eylem"] == "secenek" and "3 aday" in r2["gerekce"], r2
     st = sorgu(depo, "SELECT id, durum, adaylar FROM secenek_setleri")[0]
     assert st["durum"] == "acik" and [a["kod"] for a in st["adaylar"]] == ["Ç8801", "Ç8801K", "Ç8801L"] and all(a.get("puan") is None for a in st["adaylar"])
     d, _ = depo.konusma_oku(NUMARA_A)
     assert d["secenek_seti"]["tur"] == "cati_varyanti" and d.get("son_soru_alani") == "secenek" and "oncelik_soruldu" not in d["taslak"]
+    assert d["asama"] == "onay_bekliyor" and sorgu(depo, "SELECT durum FROM revizyonlar")[0]["durum"] == "onay_bekliyor"   # onay çatıyla kaydedilir
     satir = set_satiri(depo)
     butonlar = [b["reply"]["id"] for b in satir["interactive"]["action"]["buttons"]]
     assert butonlar == [f"s:{st['id']}:Ç8801", f"s:{st['id']}:Ç8801K", f"s:{st['id']}:Ç8801L"]
     assert [b["reply"]["title"] for b in satir["interactive"]["action"]["buttons"]] == ["1. Ç8801", "2. Ç8801-K", "3. Ç8801-L"]
     assert satir.get("file") and satir["file"].endswith("secenekler.png") and Path(satir["file"]).is_file()      # bileşik görsel: üç aday kartı
-    assert "çatı seçeneği" in satir["body"] and "fark çatıda" in satir["body"]
-    assert sorgu(depo, "SELECT count(*) AS n FROM giden WHERE kind = 'interactive'")[0]["n"] == 1                 # öncelik sorusu sorulmadı
+    assert satir["body"].startswith("Planınız onaylandı (r01). Şimdi çatıyı seçin. Bu eve 3 çatı uygulanır. Plan aynı kalır; yalnız çatı değişir.")
+    assert "katalog çatısı" in satir["body"] and "çatı K" in satir["body"]
+    assert [x["kind"] for x in sorgu(depo, "SELECT kind FROM giden WHERE mesaj_id = %s", g2["id"])] == ["interactive"]   # öncelik sorusu sorulmadı
 
 
 def test_88_m2_2arti1_celik_soru_yok_her_plan_bir_kez_cati_sonra(depo, wa, hizli_genel):
     # İE-25 (Lokman 1 Kasım 2026: çatı plan seçildikten sonra, elimizdeki modellerle): alan setinde her plan bir kez; Ç8801'in K ve L'si
-    # setten çıktı (önceden görselin üç kartı Ç8801, Ç8801-K, Ç8801-L'ydi, 6 aday). Ç8801 seçilince çatı seti, çatı seçilince r01.
+    # setten çıktı (önceden görselin üç kartı Ç8801, Ç8801-K, Ç8801-L'ydi, 6 aday). İE-42 (D-94, 14 Kasım 2026): Ç8801 seçilince r01 katalog
+    # çatısıyla; Onayla çatı setini getirir; başka çatı seçilince aynı plan r02 (önceden çatı seti r01'den önceydi).
     kabul(depo, YEDI)
     assert depo.mesaj_kaydet(mesaj("88 m² 2+1 çelik", talep(ozet="88 m² 2+1 çelik", alan_m2=88, oda_programi="2+1", yapi_turu="celik"), bayi=BAYI_KART))
     [r] = isle_hepsi(depo)
@@ -126,21 +146,28 @@ def test_88_m2_2arti1_celik_soru_yok_her_plan_bir_kez_cati_sonra(depo, wa, hizli
     dis = sorgu(depo, "SELECT dis_id FROM giden WHERE kind = 'interactive' ORDER BY sira")[0]["dis_id"]
     assert depo.mesaj_kaydet(buton(f"s:{st['id']}:Ç8801", context_id=dis))
     [r2] = isle_hepsi(depo)
-    assert r2["eylem"] == "secenek" and "3 aday" in r2["gerekce"]
+    assert r2["eylem"] == "is_emri" and "Ç8801" in r2["gerekce"], r2               # r01 katalog çatısıyla; çatı onaydan sonra
     setler = {x["id"]: x for x in sorgu(depo, "SELECT id, durum, secilen_kod, adaylar FROM secenek_setleri")}
-    assert setler[st["id"]]["durum"] == "secildi" and setler[st["id"]]["secilen_kod"] == "Ç8801"          # "eskidi" değil
-    [cs] = [x for x in setler.values() if x["durum"] == "acik"]
+    assert list(setler) == [st["id"]] and setler[st["id"]]["durum"] == "secildi" and setler[st["id"]]["secilen_kod"] == "Ç8801"
+    rev = sorgu(depo, "SELECT is_emri_no, rev, durum, is_emri FROM revizyonlar")[0]
+    assert (rev["rev"], rev["durum"], rev["is_emri"]["yapi"]["kod"]) == (1, "onay_bekliyor", "Ç8801")
+    kalici.gonder(depo, wa)
+    r3, _ = onayla(depo, rev["is_emri_no"])
+    assert r3["eylem"] == "secenek" and "3 aday" in r3["gerekce"], r3
+    [cs] = [x for x in sorgu(depo, "SELECT id, durum, adaylar FROM secenek_setleri") if x["durum"] == "acik"]
     assert [a["kod"] for a in cs["adaylar"]] == ["Ç8801", "Ç8801K", "Ç8801L"]
     satir = set_satiri(depo)
     assert [b["reply"]["id"] for b in satir["interactive"]["action"]["buttons"]] == [f"s:{cs['id']}:{c}" for c in ("Ç8801", "Ç8801K", "Ç8801L")]
-    assert satir.get("file") and Path(satir["file"]).is_file() and "fark çatıda" in satir["body"]
-    assert not sorgu(depo, "SELECT count(*) AS n FROM revizyonlar")[0]["n"]                                  # çatı seçilmeden plan yok
+    assert satir.get("file") and Path(satir["file"]).is_file() and satir["body"].startswith("Planınız onaylandı (r01). Şimdi çatıyı seçin.")
+    assert sorgu(depo, "SELECT count(*) AS n FROM revizyonlar")[0]["n"] == 1                                 # çatı seçilmeden yeni plan yok
     kalici.gonder(depo, wa)
     dis2 = sorgu(depo, "SELECT dis_id FROM giden WHERE kind = 'interactive' ORDER BY olusturuldu DESC, sira")[0]["dis_id"]
+    time.sleep(1.1)
     assert depo.mesaj_kaydet(buton(f"s:{cs['id']}:Ç8801K", context_id=dis2))
-    [r3] = isle_hepsi(depo)
-    assert r3["eylem"] == "is_emri" and "Ç8801K" in r3["gerekce"]
+    [r4] = isle_hepsi(depo)
+    assert r4["eylem"] == "is_emri" and "Ç8801K" in r4["gerekce"]
     assert sorgu(depo, "SELECT durum, secilen_kod FROM secenek_setleri WHERE id = %s", cs["id"])[0] == {"durum": "secildi", "secilen_kod": "Ç8801K"}
+    assert [(x["rev"], x["durum"]) for x in sorgu(depo, "SELECT rev, durum FROM revizyonlar ORDER BY rev")] == [(1, "yerini_aldi"), (2, "onay_bekliyor")]
 
 
 def test_yapi_turu_soylenmeden_celik_aday_sunulmaz(depo, wa, hizli_genel):
@@ -178,40 +205,58 @@ def test_dis_olcu_celikte_alan_yolu_grid_yok(depo, wa, hizli_genel):
 
 # ───────────────────────── A3 ─────────────────────────
 def test_secim_r01_genel_motor_satirlar_ve_zarf(depo, wa, hizli_genel):
+    # İE-42 (D-94): "Ç8801" r01'i katalog çatısıyla doğrudan çizer (önceden setten Ç8801K seçilince r01 Ç8801K'ydı); çatı seti onaydan sonra,
+    # setten seçilen çatı aynı projede r02. Zarf ve satır denetimleri r01'de aynen, Ç8801K'nın zarfı r02'de.
     kabul(depo)
     assert depo.mesaj_kaydet(mesaj("Ç8801 olsun", talep(ozet="Ç8801 istiyor", katalog_kodu="Ç8801"), bayi=BAYI_KART))
-    isle_hepsi(depo); kalici.gonder(depo, wa)
-    st = sorgu(depo, "SELECT id, dis_id FROM giden WHERE kind = 'interactive'")[0]
-    sid = sorgu(depo, "SELECT id FROM secenek_setleri")[0]["id"]
-    assert depo.mesaj_kaydet(buton(f"s:{sid}:Ç8801K", context_id=st["dis_id"]))
     [r] = isle_hepsi(depo)
-    assert r["eylem"] == "is_emri" and "Ç8801K" in r["gerekce"]
+    assert r["eylem"] == "is_emri" and "Ç8801" in r["gerekce"]
     rev = sorgu(depo, "SELECT is_emri_no, rev, is_emri, durum, pdf_yolu, dxf_sha256, ekler FROM revizyonlar")[0]
     ie = rev["is_emri"]
-    assert rev["rev"] == 1 and rev["durum"] == "onay_bekliyor" and rev["dxf_sha256"] is None and rev["pdf_yolu"].endswith("C8801K_pafta.pdf")
-    assert ie["yapi"]["sistem"] == "celik" and ie["yapi"]["motor"] == "genel" and ie["yapi"]["tanim"] == "modeller/C8801K.json" and ie["yapi"]["degisiklikler"] == []
+    assert rev["rev"] == 1 and rev["durum"] == "onay_bekliyor" and rev["dxf_sha256"] is None and rev["pdf_yolu"].endswith("C8801_pafta.pdf")
+    assert ie["yapi"]["sistem"] == "celik" and ie["yapi"]["motor"] == "genel" and ie["yapi"]["tanim"] == "modeller/C8801.json" and ie["yapi"]["degisiklikler"] == []
     assert "mahaller" not in ie and "duvarlar" not in ie                            # tanım gömülmez
-    assert ie["yapi"]["tanim_sha256"] == hashlib.sha256((KOK / "modeller" / "C8801K.json").read_bytes()).hexdigest()
+    assert ie["yapi"]["tanim_sha256"] == hashlib.sha256((KOK / "modeller" / "C8801.json").read_bytes()).hexdigest()
     assert ie["bilgi"]["bayi_adi"] == "Deneme Bayi A" and ie["bilgi"]["bayi_telefonu"] == NUMARA_A and "kunye" not in ie     # D-09: kart numarası, gönderici kimliği yok
-    assert rev["ekler"]["gorsel"]["filename"] == "C8801K_bayi_gorsel.png" and rev["ekler"]["ifc"]["sema_hatasi"] == 0
+    assert rev["ekler"]["gorsel"]["filename"] == "C8801_bayi_gorsel.png" and rev["ekler"]["ifc"]["sema_hatasi"] == 0
     assert "ucb" not in rev["ekler"] and rev["ekler"]["ucb_hata"]       # İE-21: sahte IFC'den 3D sayfası çıkmaz; akış durmaz (gerçek motorla aşağıda)
     assert rev["ekler"]["yukleme_listesi"]["bayiye_gider"] is False
     satirlar = sorgu(depo, "SELECT kind, satir, revizyon_id FROM giden WHERE mesaj_id = (SELECT kaynak_mesaj_id FROM revizyonlar) ORDER BY sira")
     assert [s["kind"] for s in satirlar] == ["interactive", "document"] and all(s["revizyon_id"] for s in satirlar)
     assert sorted(b["reply"]["id"] for b in satirlar[0]["satir"]["interactive"]["action"]["buttons"]) == sorted([f"o:{rev['is_emri_no']}:1", f"r:{rev['is_emri_no']}:1"])
-    assert satirlar[0]["satir"]["file"].endswith("C8801K_bayi_gorsel.png") and satirlar[1]["satir"]["filename"] == f"Portman_{rev['is_emri_no']}_r01.pdf"
+    assert satirlar[0]["satir"]["file"].endswith("C8801_bayi_gorsel.png") and satirlar[1]["satir"]["filename"] == f"Portman_{rev['is_emri_no']}_r01.pdf"
+    d, _ = depo.konusma_oku(NUMARA_A)
+    assert d["asama"] == "onay_bekliyor" and d["revizyon"] == 0 and d["son_is_emri"]["yapi"]["kod"] == "Ç8801"
+    sonuc = sorgu(depo, "SELECT sonuc FROM isler ORDER BY id DESC")[0]["sonuc"]
+    assert NUMARA_A not in json.dumps(sonuc, ensure_ascii=False) and sonuc["cizim"]["motor"] == "genel" and sonuc["cizim"]["set"] == "kurallar.json"
+    assert NUMARA_A not in W.baglam_ozeti(type("K", (), {"d": d})()) and "Ç8801" in W.baglam_ozeti(type("K", (), {"d": d})())
+    # Onayla → çatı seti; Ç8801K seçilince aynı projede r02 (Ç8801K zarfı)
+    kalici.gonder(depo, wa)
+    r2, _ = onayla(depo, rev["is_emri_no"])
+    assert r2["eylem"] == "secenek", r2
+    kalici.gonder(depo, wa)
+    st = sorgu(depo, "SELECT id, dis_id FROM giden WHERE kind = 'interactive' ORDER BY olusturuldu DESC, sira")[0]
+    sid = sorgu(depo, "SELECT id FROM secenek_setleri")[0]["id"]
+    time.sleep(1.1)
+    assert depo.mesaj_kaydet(buton(f"s:{sid}:Ç8801K", context_id=st["dis_id"]))
+    [r3] = isle_hepsi(depo)
+    assert r3["eylem"] == "is_emri" and "Ç8801K" in r3["gerekce"]
+    rev2 = sorgu(depo, "SELECT is_emri_no, rev, is_emri, durum, pdf_yolu, ekler FROM revizyonlar WHERE rev = 2")[0]
+    ie2 = rev2["is_emri"]
+    assert rev2["durum"] == "onay_bekliyor" and rev2["pdf_yolu"].endswith("C8801K_pafta.pdf")
+    assert ie2["yapi"]["tanim"] == "modeller/C8801K.json" and ie2["yapi"]["kod"] == "Ç8801K"
+    assert ie2["yapi"]["tanim_sha256"] == hashlib.sha256((KOK / "modeller" / "C8801K.json").read_bytes()).hexdigest()
+    assert ie2["bilgi"]["bayi_adi"] == "Deneme Bayi A" and ie2["bilgi"]["bayi_telefonu"] == NUMARA_A
     st_son = sorgu(depo, "SELECT durum, secilen_kod FROM secenek_setleri")[0]
     assert st_son["durum"] == "secildi" and st_son["secilen_kod"] == "Ç8801K"
     d, _ = depo.konusma_oku(NUMARA_A)
-    assert d["asama"] == "onay_bekliyor" and d["revizyon"] == 0 and d["son_is_emri"]["yapi"]["kod"] == "Ç8801K"        # konuşma sıfırlanmadı (taban kod)
-    sonuc = sorgu(depo, "SELECT sonuc FROM isler ORDER BY id DESC")[0]["sonuc"]
-    assert NUMARA_A not in json.dumps(sonuc, ensure_ascii=False) and sonuc["cizim"]["motor"] == "genel" and sonuc["cizim"]["set"] == "kurallar.json"
-    assert NUMARA_A not in W.baglam_ozeti(type("K", (), {"d": d})()) and "Ç8801-K" in W.baglam_ozeti(type("K", (), {"d": d})())
-    # eski set düğmesi artık geçersiz; onay düğmesi çalışır
+    assert d["asama"] == "onay_bekliyor" and d["son_is_emri"]["yapi"]["kod"] == "Ç8801K" and "Ç8801-K" in W.baglam_ozeti(type("K", (), {"d": d})())
+    # eski set düğmesi artık geçersiz
     kalici.gonder(depo, wa)
+    time.sleep(1.1)
     assert depo.mesaj_kaydet(buton(f"s:{sid}:Ç8801L", context_id=st["dis_id"]))
-    [r2] = isle_hepsi(depo)
-    assert r2["eylem"] == "cevapla" and "set zaten seçilmiş" in r2["gerekce"]
+    [r4] = isle_hepsi(depo)
+    assert r4["eylem"] == "cevapla" and "set zaten seçilmiş" in r4["gerekce"]
 
 
 def test_varyant_ve_kt_kodu_dogrudan_r01_kt_adsiz(depo, wa, hizli_genel):
@@ -257,30 +302,43 @@ def test_patron_ve_kart_disi_numara_antete_girmez(depo, wa, hizli_genel):
 
 
 def test_cati_secildikten_sonra_revizyon_seti_yeniden_sormaz(depo, wa, hizli_genel):
-    # kod incelemesi (12.10): katalog çatısı seçilip r01 gittikten sonra aynı kodla gelen revizyon üç çatıyı yeniden sormamalı
+    # kod incelemesi (12.10): katalog çatısı seçilip plan gittikten sonra aynı kodla gelen revizyon üç çatıyı yeniden sormamalı.
+    # İE-42 (D-94): katalog çatısı onaydan sonraki setten seçilir (r01 onaylanır); revizyonun r02'si onaylanınca çatı yeniden sorulmaz.
     kabul(depo)
     assert depo.mesaj_kaydet(mesaj("Ç8801 olsun", talep(ozet="Ç8801 istiyor", katalog_kodu="Ç8801"), bayi=BAYI_KART))
-    isle_hepsi(depo); kalici.gonder(depo, wa)
+    [r0] = isle_hepsi(depo)
+    assert r0["eylem"] == "is_emri"
+    kalici.gonder(depo, wa)
+    no1 = sorgu(depo, "SELECT is_emri_no FROM revizyonlar")[0]["is_emri_no"]
+    r1, _ = onayla(depo, no1)
+    assert r1["eylem"] == "secenek"
+    kalici.gonder(depo, wa)
     sid = sorgu(depo, "SELECT id FROM secenek_setleri")[0]["id"]
-    st = sorgu(depo, "SELECT dis_id FROM giden WHERE kind = 'interactive'")[0]
+    st = sorgu(depo, "SELECT dis_id FROM giden WHERE kind = 'interactive' ORDER BY olusturuldu DESC, sira")[0]
+    time.sleep(1.1)
     assert depo.mesaj_kaydet(buton(f"s:{sid}:Ç8801", context_id=st["dis_id"]))
     [r1] = isle_hepsi(depo)
-    assert r1["eylem"] == "is_emri" and "Ç8801 " in r1["gerekce"] + " "
+    assert r1["eylem"] == "cevapla" and r1["gerekce"] == "plan onaylandı", r1                 # katalog çatısı: r01 onaylandı, yeni çizim yok
+    assert sorgu(depo, "SELECT durum FROM revizyonlar")[0]["durum"] == "onaylandi"
     time.sleep(1.1)
     assert depo.mesaj_kaydet(mesaj("sevk adresi Deneme İlçesi olsun", talep(ozet="sevk adresi", katalog_kodu="Ç8801", niyet="revizyon",
                                                                            musteri={"sevk_adresi": "Deneme İlçesi"}), bayi=BAYI_KART))
     [r2] = isle_hepsi(depo)
     assert r2["eylem"] == "is_emri", r2
-    revs = sorgu(depo, "SELECT rev, durum, is_emri FROM revizyonlar ORDER BY rev")
-    assert [(x["rev"], x["durum"]) for x in revs] == [(1, "yerini_aldi"), (2, "onay_bekliyor")]
+    revs = sorgu(depo, "SELECT rev, durum, is_emri_no, is_emri FROM revizyonlar ORDER BY rev")
+    assert [(x["rev"], x["durum"]) for x in revs] == [(1, "onaylandi"), (2, "onay_bekliyor")]
     assert revs[1]["is_emri"]["yapi"]["kod"] == "Ç8801" and revs[1]["is_emri"]["bilgi"]["sevk_adresi"] == "Deneme İlçesi"
     assert sorgu(depo, "SELECT count(*) AS n FROM secenek_setleri")[0]["n"] == 1                      # yeni set açılmadı
+    kalici.gonder(depo, wa)
+    r3, _ = onayla(depo, revs[1]["is_emri_no"], 2)
+    assert r3["eylem"] == "cevapla" and r3["gerekce"] == "plan onaylandı", r3                 # r02 onayı: çatı yeniden sorulmadı
+    assert sorgu(depo, "SELECT count(*) AS n FROM secenek_setleri")[0]["n"] == 1
     # desteklenmeyen varyant (çatı tarifi, kapı) → yönlendirme, sessizce düşmez (K21)
     time.sleep(1.1)
     assert depo.mesaj_kaydet(mesaj("çatıyı kırma yap", talep(ozet="çatı kırma", katalog_kodu="Ç8801", niyet="revizyon",
                                                              varyantlar=[{"tur": "cati_degistir", "aciklama": "çatıyı kırma yap", "parametreler": {"tip": "kırma"}}]), bayi=BAYI_KART))
-    [r3] = isle_hepsi(depo)
-    assert r3["eylem"] == "yonlendir" and "cati_degistir" in r3["gerekce"]
+    [r4] = isle_hepsi(depo)
+    assert r4["eylem"] == "yonlendir" and "cati_degistir" in r4["gerekce"]
 
 
 @pytest.mark.skipif(not (KOK / "modeller" / "C8801K.json").exists(), reason="model tanımı yok")

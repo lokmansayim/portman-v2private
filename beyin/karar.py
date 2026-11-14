@@ -105,6 +105,7 @@ def karar_ver(talep: Talep, k: Konusma, bayi: dict | None, katalog: Katalog, met
     k.rev0 = int(k.d.get("revizyon") or 0)          # G-2: _bitir, plan üretmeyen turda sayacı buna geri alır
     k.bu_mesaj_mahalleri, k.pencere_hicbiri = set(), False   # BK-29 PR-2: bu mesajın pencere satırlarının odaları; "Hangi pencere?" → hiçbiri
     k.degismedi_notu = ""                           # D-86: aynı değişiklik yeniden istendi ("YATAK ODASI 1 penceresi zaten 100x140")
+    k.cati_secimi, k.cati_metni, k.cati_adi = None, "", ""          # İE-42 (D-94): onaydan sonraki çatı setinde bu mesajın seçimi ve plan metninin başı
     d0 = json.loads(json.dumps(k.d))                # BK-29 (pano 200): geri çevrilen istek açık planı kapatmaz; konuşma buna döner
     karar = _karar_ver(talep, k, bayi, katalog, metin)
     if karar.eylem == "yonlendir" or karar.gerekce == PLAN_DEGISMEDI:
@@ -342,6 +343,12 @@ def _karar_ver(talep: Talep, k: Konusma, bayi: dict | None, katalog: Katalog, me
     # İE-08 8b M5 (D-06): selamda önce kartın hitabı; ad numaraya düşmüşse (kanal gelen_bayisi) numara yazılmaz
     hitap = str(bayi.get("hitap") or "").strip() or ("" if (not ad or str(ad) == str(bayi.get("numara") or "") or str(ad).isdigit()) else str(ad))
 
+    # İE-42 (D-94): plan onaylandı, çatı seti açık. Çatı seçimi okunur (evin çatısı → onay; başka çatı → aynı plan yeni çatıyla);
+    # çatı sözü olmayan istek seti kapatır ve bugünkü yoldan gider.
+    t, cati_karari = _cati_adimi(k, t, metin, katalog)
+    if cati_karari is not None:
+        return cati_karari
+
     # 1) niyete göre
     if t.niyet == "selam":
         return _bitir(k, Karar(eylem="cevapla", gerekce="selam",
@@ -366,15 +373,10 @@ def _karar_ver(talep: Talep, k: Konusma, bayi: dict | None, katalog: Katalog, me
                                 mesaj=f"Anlayamadım. Ön onay planı için model kodu (örn. P6001) ya da ölçü ve oda programı (örn. \"{ORNEK_PREFABRIK}\") yazabilirsiniz."))
     if t.niyet == "onay":
         if k.d["asama"] == "onay_bekliyor" and k.d.get("son_is_emri"):
-            k.d["asama"] = "onaylandi"
-            k.d["son_soru_alani"] = None                       # askıdaki yeni plan sorusu onayla kapanır (soru kaydı açık kalmaz)
-            rev = k.d["son_is_emri"].get("revizyon", k.d["revizyon"] + 1)   # gönderilen planın numarası (r01 = 1)
-            k.d["onaylanan"] = [k.d["son_is_emri"].get("is_emri_no"), int(rev)]   # BK-29: geri çevrilen sonraki istek onayı geri getirir
-            # İE-08 8b (plan kararı 6, Lokman 14.10): çelik plan onaydan sonra mühendisin teknik kontrolüne gider (kanal/muhendis.py)
-            sonraki = ("Plan teknik kontrole gönderildi; sonucu size bildireceğiz." if (k.d["son_is_emri"].get("yapi") or {}).get("sistem") == "celik"
-                       else "Teklif aşamasına geçiliyor.")
-            return _bitir(k, Karar(eylem="cevapla", gerekce="plan onaylandı", revizyon=rev,
-                                    mesaj=f"Onayınız kaydedildi ({k.d['son_is_emri'].get('is_emri_no')}, revizyon {rev}). {sonraki}"))
+            cati = _onay_cati_seti(k, katalog)                 # İE-42 (D-94): çatı seçenekli evde onaydan sonra çatı seti
+            if cati is not None:
+                return cati
+            return _onay_kaydet(k, katalog)
         return _bitir(k, Karar(eylem="cevapla", gerekce="onaylanacak plan yok",
                                 mesaj="Onaylanacak açık bir plan görünmüyor. Yeni plan için model kodu ya da ölçü yazabilirsiniz."))
     if t.niyet == "red":
@@ -397,12 +399,12 @@ def _karar_ver(talep: Talep, k: Konusma, bayi: dict | None, katalog: Katalog, me
     # D-01: mesaj eski bir taslağa eklenecekse ve taslak ESKI_TASLAK_SN'den eskiyse, model koduyla başlayan mesajda tahmin
     # edilmez, sorulur (22.09: 3,5 saat sonra gelen "P6001 …" eski aynalı taslağın revizyonu sayılmıştı).
     if eski_taslak_cevabi is None and t.niyet in ("yeni_talep", "revizyon") and k.d["taslak"] and not kapanmis \
-            and not baska_model and _eski_taslak(k) and _model_koduyla_basliyor(metin, katalog):
+            and not baska_model and not getattr(k, "cati_secimi", None) and _eski_taslak(k) and _model_koduyla_basliyor(metin, katalog):
         return _eski_taslak_sor(k, t, metin)
     k.d.pop("eski_taslak_soru", None)
     if t.niyet == "revizyon" and k.d.get("son_is_emri"):
         k.d["revizyon"] += 1
-        if k.d["revizyon"] > MAX_REVIZYON:
+        if k.d["revizyon"] > MAX_REVIZYON and not getattr(k, "cati_secimi", None):       # İE-42: onaydan sonraki çatı seçimi revizyon hakkına takılmaz
             celik_mi = ((k.d["son_is_emri"].get("yapi") or {}).get("sistem") == "celik")      # İE-08 PR-2b (Lokman, 12.10): mühendis incelemesi
             return _bitir(k, Karar(eylem="yonlendir", gerekce="revizyon sınırı",
                                     mesaj=f"Bu plan için {MAX_REVIZYON} revizyon hakkı doldu" + ("; plan mühendis incelemesine alındı. " if celik_mi else ". ") + YONLENDIRME))
@@ -447,7 +449,8 @@ def _karar_ver(talep: Talep, k: Konusma, bayi: dict | None, katalog: Katalog, me
                 ts0.pop("dis_olcu", None)
             t = t.model_copy(update={"katalog_kodu": None})
             k.not_dus("kural", "çatı seti açıkken talep bilgisi değişti: set eskidi, talep yeniden okundu")
-    t = _yinelenen_kodu_birak(k, t, metin, katalog)
+    if not getattr(k, "cati_secimi", None):           # İE-42: çatı setinden seçilen kod bayinin seçimidir (sıra sözü, etiket, numara)
+        t = _yinelenen_kodu_birak(k, t, metin, katalog)
     t = _pencere_varyantlarina_soz_isle(t, metin)    # G-3/G-4 (29.09): pencere değişikliği tek yoldan, B1 kurallarıyla
     yp_komut = []
     if getattr(k, "yarim_pano", False):              # İE-39 PR-2 (D-90): ayar `yarim_pano.acik`; kapalıyken bugünkü yol
@@ -499,16 +502,18 @@ def _karar_ver(talep: Talep, k: Konusma, bayi: dict | None, katalog: Katalog, me
         kod = aday["kod"] if aday else model["code"]
         cati_istegi = None
         if aday is not None and aday.get("motor") != "genel":
-            cati_istegi = _prefabrik_cati_istegi(k, katalog, aday, ts)  # İE-37 (hakem): çatı sözü ve açık çatı seti bayinin sözünden
+            cati_istegi = getattr(k, "cati_secimi", None)           # İE-42: onaydan sonraki çatı setinden seçim; söz yeniden okunmaz
+            if cati_istegi:
+                ts["varyantlar"] = [v for v in ts.get("varyantlar") or [] if v.get("tur") != "cati_degistir"]
+            else:
+                cati_istegi = _prefabrik_cati_istegi(k, katalog, aday, ts)  # İE-37 (hakem): çatı sözü ve açık çatı seti bayinin sözünden
             if isinstance(cati_istegi, Karar):
                 return cati_istegi
             if cati_istegi:
                 aday, kod = katalog.aday(cati_istegi), cati_istegi
                 ts["katalog_kodu"] = kod
-        if aday is not None and aday.get("varyantlar") and not cati_istegi and _prefabrik_cati_sorulur(k, aday):
-            secenek = _prefabrik_cati_seti(k, katalog, aday, ts)       # İE-37 (D-83): prefabrik evde plan seçildi, çatı sonra
-            if secenek is not None:
-                return secenek
+        # İE-42 (D-94; Lokman 14 Kasım 2026): çatı seçenekli evde çatı yazılmadıysa plan evin kendi çatısıyla çizilir; çatı seti plan
+        # onaylanınca gelir (`_onay_cati_seti`). İE-37'deki "plan seçilince çatı seti" kalktı.
         yol = katalog.sablon_yolu(kod)
         if yol is None:
             return _bitir(k, Karar(eylem="yonlendir", gerekce="şablon kodlanmamış",
@@ -616,6 +621,10 @@ def _celik_dali(k: Konusma, bayi: dict, katalog: Katalog, aday: dict, ts: dict) 
     st = k.d.get("secenek_seti")
     kod = str(aday["kod"]).upper()
     metin = k.d.get("son_metin")
+    if str(getattr(k, "cati_secimi", None) or "").upper() == kod:   # İE-42: onaydan sonraki çatı setinden seçim; söz yeniden okunmaz
+        k.d["taslak"]["katalog_kodu"] = aday["kod"]
+        _seti_kapat(k, aday["kod"])
+        return _celik_is_emri_uret(k, bayi, katalog, aday, ts)
     if aday.get("uretilen"):                                   # İE-14: yeni plan çatı varyantı taşımaz; setten seçim ya da revizyon → plan
         _seti_kapat(k, aday["kod"])
         k.d["uretilen_plan"] = aday                            # r3: setteki iki yeni plandan seçilen; revizyon ondan sürer
@@ -653,10 +662,14 @@ def _celik_dali(k: Konusma, bayi: dict, katalog: Katalog, aday: dict, ts: dict) 
                 cati0 = cati or (None if not istek_metni or CO.cati_olumsuz(istek_metni, mahaller)
                                  or len(CO.cati_secenekleri(istek_metni, mahaller)) > 1 else CO.cati_okumasi(istek_metni, secilen, mahaller))
                 c0 = katalog.aday(cati0) if cati0 and Katalog.taban_kod(cati0) == Katalog.taban_kod(secilen["kod"]) else None
-                if c0 is None:
-                    return _cati_varyant_seti(k, bayi, katalog, secilen, ts)
-                k.not_dus("kural", f"plan ve çatı aynı istekte: {c0['kod']}")
-                secilen = c0
+                if c0 is None and istek_metni and (CO.cati_olumsuz(istek_metni, mahaller)
+                                                   or len(CO.cati_secenekleri(istek_metni, mahaller)) > 1):
+                    return _cati_varyant_seti(k, bayi, katalog, secilen, ts)   # kararsız çatı sözü planla geldi: set plandan önce (bugünkü gibi)
+                if c0 is not None:
+                    k.not_dus("kural", f"plan ve çatı aynı istekte: {c0['kod']}")
+                    _cati_secildi(k, c0["kod"])
+                    secilen = c0
+                # İE-42 (D-94): çatı yazılmadıysa plan katalog çatısıyla; çatı seti plan onaylanınca (`_onay_cati_seti`)
             if secilen is not None:
                 k.d["taslak"]["katalog_kodu"] = secilen["kod"]
                 _seti_kapat(k, secilen["kod"])                 # setten seçim (düğme, kod, çatı sözü ya da numara)
@@ -695,10 +708,14 @@ def _celik_dali(k: Konusma, bayi: dict, katalog: Katalog, aday: dict, ts: dict) 
         if secilen is not None:
             if sozden:
                 k.not_dus("kural", f"bayinin sözünden çatı seçimi: {secilen['kod']}")
+                _cati_secildi(k, secilen["kod"])
             k.d["taslak"]["katalog_kodu"] = secilen["kod"]
             _seti_kapat(k, secilen["kod"])
             return _celik_is_emri_uret(k, bayi, katalog, secilen, ts)
-    if not hedef and kat_aday.get("varyantlar") and (aday.get("varyantlar") or (kararsiz and not ayni)):
+    if cati and hedef == kod:                                  # yazılan çatı planın kendi çatısı ("katalog çatısı olsun"): seçildi
+        _cati_secildi(k, kod)
+    # İE-42 (D-94): çatısız seçimde (taban kod) plan katalog çatısıyla çizilir, çatı seti onaydan sonra; kararsız çatı sözü set getirir
+    if not hedef and kat_aday.get("varyantlar") and kararsiz and not ayni:
         varyantlar = [katalog.aday(v) for v in kat_aday["varyantlar"]]
         uygun = [kat_aday] + [v for v in varyantlar if v is not None]
         if len(uygun) >= 2:
@@ -772,7 +789,8 @@ def _talep_bilgisi_degisti(ts: dict, t: Talep, model: dict | None) -> bool:
 
 
 def _cati_varyant_seti(k: Konusma, bayi: dict, katalog: Katalog, taban: dict, ts: dict) -> Karar:
-    """İE-25 · çatı varyantlı banka modeli alan setinden (ya da yeni plan setinden) seçildi, çatı yazılmadı: modelin çatı seti (katalog
+    """İE-25 · çatı varyantlı banka modeli alan setinden (ya da yeni plan setinden) seçildi, set sunulurken kararsız çatı sözü yazıldı
+    (İE-42'den beri yalnız bu durumda; çatı yazılmadıysa plan katalog çatısıyla, set onaydan sonra): modelin çatı seti (katalog
     çatısı, K, L; İE-08 A2'nin seti, tek görsel). Seçilen set kayıtta "seçildi" kapanır (yeni set onu eskitmez, `depo._set_kaydi`); set
     sunulurken saklanan istek seçilen çatıya işlenir. Varyantı görünmüyorsa (K-A10 kabul kaydı yok) plan katalog çatısıyla çizilir."""
     uygun = [taban] + [v for v in (katalog.aday(x) for x in taban.get("varyantlar") or []) if v is not None]
@@ -791,14 +809,190 @@ def _cati_varyant_seti(k: Konusma, bayi: dict, katalog: Katalog, taban: dict, ts
                        ek_not=CELIK_ISTEK_NOTU if saklandi else "")
 
 
-def _prefabrik_cati_sorulur(k: Konusma, aday: dict) -> bool:
-    """İE-37 (D-83; Lokman, 12 Kasım 2026): çatı seçenekli prefabrik ev seçildi; çatı seti sunulur mu? Çatı setinden seçimde (evin kendi çatısı
-    düğmesi ya da kodu) ve aynı evin çizilmiş planının revizyonunda sunulmaz: plan o çatıyla çizilir."""
-    st = k.d.get("secenek_seti") or {}
-    if st.get("durum") == "acik" and st.get("tur") == "cati_varyanti":
+# ── İE-42 (D-94; Lokman, 14 Kasım 2026 20:33:41 kartı "Onaydan sonra, eskizdeki gibi") · çatı plan onayından sonra ─────────────────────
+# Çatı seçenekli evde (bugün PA-06 ve Ç8801) plan evin kendi çatısıyla çizilir. Bayi planı onaylayınca onay hemen kaydedilmez: "Çatı seçin"
+# seti gelir (`_onay_cati_seti`; görsel, düğmeler ve liste İE-25/İE-37'nin seti, ilk cümle yeni). Set açıkken (`cati_adimi`) evin kendi
+# çatısı seçilirse onay o an kaydedilir (`_onay_kaydet`: prefabrikte Patron'a bildirim, çelikte mühendisin teknik kontrolü); başka çatı
+# seçilirse plan aynı kalır, Motor yeni revizyonu o çatıyla çizer, bayi onu onaylar. Çatı sözü olmayan istek seti kapatır ve bugünkü
+# yoldan gider (plan değişirse "r01 onayınızı geçersiz kıldı"). Talepte ya da plandan önce çatı seçildiyse (`cati_secilen`) set gelmez.
+PLAN_ONAYI = "plan onaylandı"                          # kanal: onay denetimi, mühendis ve Patron kancaları bu gerekçeye bakar
+
+
+def _cati_secildi(k: Konusma, kod: str) -> None:
+    """Bu projede çatı seçildi (kodla, çatı setinden ya da çatı sözüyle): onayda çatı seti yeniden sunulmaz."""
+    k.d["cati_secilen"] = str(kod)
+
+
+def _cati_adi(a: dict | None) -> str:
+    return str((a or {}).get("cati_adi") or ((a or {}).get("sunum") or {}).get("cati_adi") or "")
+
+
+def _plan_cati_secenekleri(katalog: Katalog, ie: dict) -> tuple[dict, list[dict]] | None:
+    """Planın evi çatı seçenekli mi ve plan evin kendi çatısıyla mı çizildi? Öyleyse (taban, [taban + görünür çatı seçenekleri]); görünür
+    seçenek yoksa (K-A10 kabul kaydı yok), plan bir çatı seçeneğiyle çizildiyse ya da yeni çizilen plansa (İE-14) None."""
+    celik_mi = (ie.get("yapi") or {}).get("sistem") == "celik"
+    kod = str(((ie.get("yapi") or {}).get("kod") if celik_mi else (ie.get("talep") or {}).get("kaynak")) or "")
+    plan = katalog.aday(kod) if kod else None
+    if plan is None or plan.get("uretilen"):
+        return None
+    taban = katalog.aday(Katalog.taban_kod(plan["kod"]))
+    if taban is None or not taban.get("varyantlar") or str(taban["kod"]).upper() != str(plan["kod"]).upper():
+        return None
+    uygun = [taban] + [v for v in (katalog.aday(x) for x in taban["varyantlar"]) if v is not None]
+    return (taban, uygun) if len(uygun) >= 2 else None
+
+
+def _onay_cati_seti(k: Konusma, katalog: Katalog) -> Karar | None:
+    """Bayi planı onayladı: plan çatı seçenekli bir evin kendi çatısıyla çizildiyse ve bu projede çatı seçilmediyse çatı seti (onay henüz
+    kaydedilmez; aşama "onay_bekliyor" kalır). Yoksa None: onay bugünkü gibi kaydedilir."""
+    ie = k.d.get("son_is_emri") or {}
+    if k.d.get("cati_secilen"):
+        return None
+    sec = _plan_cati_secenekleri(katalog, ie)
+    if sec is None:
+        return None
+    taban, uygun = sec
+    if taban.get("motor") != "genel":                         # prefabrik: kartın görseli çatının ön ve sol görünüşü (İE-37)
+        uygun = [{**a, "sunum": {**(a.get("sunum") or {}), "cati_adi": a.get("cati_adi")}, "gorsel": a.get("cati_gorsel") or a.get("gorsel")}
+                 for a in uygun]
+    no, rev = ie.get("is_emri_no"), int(ie.get("revizyon") or 1)
+    eski = k.d.get("secenek_seti")
+    if eski and eski.get("durum") == "secildi":
+        k.d.setdefault("eski_setler", []).append(eski)
+        k.d["eski_setler"] = k.d["eski_setler"][-5:]
+    k.d["cati_adimi"] = {"is_emri_no": no, "rev": rev, "kod": taban["kod"]}
+    k.d["son_soru_alani"] = None
+    k.not_dus("kural", f"plan onaylandı ({no} r{rev:02d}), çatı sonra: {taban['kod']} çatı seti (D-94)")
+    bas = (f"Planınız onaylandı (r{rev:02d}). Şimdi çatıyı seçin. Bu eve {len(uygun)} çatı uygulanır. "
+           "Plan aynı kalır; yalnız çatı değişir.")
+    return _secenekler(k, katalog, k.d.get("taslak") or {}, uygun=SC.cati_seti(uygun), tur="cati_varyanti", referans=uygun[0], bas=bas,
+                       gerekce_on="plan onayından sonra çatı seti; ")
+
+
+def _onay_kaydet(k: Konusma, katalog: Katalog, cati: str | None = None) -> Karar:
+    """Onay bekleyen planın onayı kaydedilir (`PLAN_ONAYI`; kanal onayı bayinin gördüğü revizyona bağlar). `cati`: onaydan sonraki çatı
+    setinde evin kendi çatısı seçildi; plan aynen kalır, mesajın başına çatı yazılır."""
+    k.d["asama"] = "onaylandi"
+    k.d["son_soru_alani"] = None                               # askıdaki yeni plan sorusu onayla kapanır (soru kaydı açık kalmaz)
+    rev = k.d["son_is_emri"].get("revizyon", k.d["revizyon"] + 1)   # gönderilen planın numarası (r01 = 1)
+    k.d["onaylanan"] = [k.d["son_is_emri"].get("is_emri_no"), int(rev)]   # BK-29: geri çevrilen sonraki istek onayı geri getirir
+    # İE-08 8b (plan kararı 6, Lokman 14.10): çelik plan onaydan sonra mühendisin teknik kontrolüne gider (kanal/muhendis.py)
+    sonraki = ("Plan teknik kontrole gönderildi; sonucu size bildireceğiz." if (k.d["son_is_emri"].get("yapi") or {}).get("sistem") == "celik"
+               else "Teklif aşamasına geçiliyor.")
+    a = katalog.aday(cati) if cati else None
+    on = f"Çatı: {_cati_adi(a)} ({SC.gosterim(a)}). Plan r{int(rev):02d} aynen kalır. " if a else ""
+    return _bitir(k, Karar(eylem="cevapla", gerekce=PLAN_ONAYI, revizyon=rev,
+                           mesaj=f"{on}Onayınız kaydedildi ({k.d['son_is_emri'].get('is_emri_no')}, revizyon {rev}). {sonraki}"))
+
+
+def _cati_adimini_kapat(k: Konusma, st: dict, neden: str) -> None:
+    """Onaydan sonraki çatı seti seçim yapılmadan kapanır (plan değişikliği, yeni istek): set "eskidi", plan onayı düşer (yeni çizilen
+    revizyonun mesajı "r01 onayınızı geçersiz kıldı" der)."""
+    ca = k.d.pop("cati_adimi", None) or {}
+    st["durum"] = "eskidi"
+    k.d.setdefault("eski_setler", []).append(st)
+    k.d["eski_setler"] = k.d["eski_setler"][-5:]
+    k.d["son_soru_alani"] = None
+    if ca.get("rev"):
+        k.d["cati_onayi_dustu"] = int(ca["rev"])
+    k.not_dus("kural", f"onaydan sonraki çatı seti kapandı: {neden}")
+
+
+def _celik_cati_adimi_okumasi(k: Konusma, katalog: Katalog, taban: dict, metin: str | None, st: dict,
+                              cati_istegi: bool = False) -> str | Karar | None:
+    """Çelik çatı setinde (onaydan sonra) bu mesajın çatı seçimi, bayinin sözünden (`_celik_dali` ilkeleri): yazılı kod (düğme ve numara
+    koda çevrilmiş gelir) ya da çatı cümlesi ("çatı K olsun", "katalog çatısı"); tek ve olumlu ise kod. İki çatı, olumsuz çatı cümlesi ya da
+    seçimsiz çatı sözü (çatı kökü: "kırma olsun"; ya da LLM'in `cati_degistir` okuması) "Hangi çatı olsun?"; çatı sözü yoksa None."""
+    set_kodlari = {str(a.get("kod")).upper() for a in st.get("adaylar") or []}
+    mahaller = _aday_mahalleri(taban)
+    kodlar = {c for c in _secim_kodlari(metin, katalog) if c in set_kodlari}
+    cati = CO.cati_okumasi(metin, taban, mahaller)
+    if cati and str(cati).upper() in set_kodlari:
+        kodlar.add(str(cati).upper())
+    secenekler = CO.cati_secenekleri(metin, mahaller, CO.norm(str(taban.get("kod") or "")) or None)
+    olumsuz = CO.cati_olumsuz(metin, mahaller)
+    if len(kodlar) == 1 and not olumsuz and len(secenekler) <= 1:
+        return next(iter(kodlar))
+    n = CO.norm(metin or "")
+    if kodlar or secenekler or olumsuz or cati_istegi or any(re.search(rf"\b{kok}", n) for kok in _CATI_KOKLERI):
+        k.not_dus("kural", "onaydan sonraki çatı setinde seçim yok ya da kararsız: soru")
+        return _cati_sorusu(k, st)
+    return None
+
+
+def _cati_adiminda_istek_yok(k: Konusma, t: Talep, metin: str | None, taban: dict) -> bool:
+    """Çatı sözü olmayan mesaj bir istek taşımıyor mu ("tamam", "bakalım"; LLM'in bağlamdan yinelediği kod, m², oda programı)? Öyleyse
+    çatı sorulur, set açık kalır. İstek taşıyan mesaj (pencere, ölçü, varyant, özel istek, başka model, iptal, pano komutu) seti kapatır
+    ve bugünkü yoldan gider: değişiklik isteği sessizce düşmez (Lokman, 13 Ekim)."""
+    if t.niyet == "diger":
+        return True
+    if t.niyet != "revizyon" or _iptal_sozu(metin) or CO.hizli_istek(metin) or any(YPO.oku(metin)):
         return False
-    son = ((k.d.get("son_is_emri") or {}).get("talep") or {}).get("kaynak")
-    return not (son and Katalog.taban_kod(son) == Katalog.taban_kod(aday.get("kod")))
+    d = t.model_dump(exclude={"niyet", "guven", "ozet", "belirsizlikler", "musteri", "katalog_kodu", "alan_m2", "oda_programi",
+                              "kat_sayisi", "yapi_turu", "dis_olcu"})
+    if any(v not in (None, [], {}, "") for v in d.values()):
+        return False
+    if t.katalog_kodu and Katalog.taban_kod(t.katalog_kodu) != Katalog.taban_kod(taban.get("kod")):
+        return False
+    return not _talep_bilgisi_degisti(k.d.get("taslak") or {}, t, taban)
+
+
+def _cati_adimi(k: Konusma, t: Talep, metin: str | None, katalog: Katalog) -> tuple[Talep, Karar | None]:
+    """Onaydan sonraki çatı seti açıkken gelen mesaj. Dönen (talep, karar): karar varsa o; yoksa talep bugünkü yoldan işlenir.
+    - selam, soru: bugünkü cevap, set açık kalır. Onay: çatı bekleniyor ("Hangi çatı olsun?"). Ret ("Revize et"): set kapanır.
+    - Çatı seçimi (düğme, numara, sıra sözü, kod, etiket; prefabrikte `_prefabrik_cati_istegi`, çelikte `_celik_cati_adimi_okumasi`):
+      evin kendi çatısı ve başka istek yok → onay kaydedilir, plan aynen; başka çatı (ya da istekle birlikte) → talep o çatının revizyonu
+      olur (`k.cati_secimi`; revizyon hakkına takılmaz, söz yeniden okunmaz), mesajın başı "Çatı: … (kod)."
+    - Çatı sözü olmayan mesaj: istek taşımıyorsa soru (`_cati_adiminda_istek_yok`); taşıyorsa set kapanır, mesaj bugünkü yoldan
+      (planın değişikliği ya da yeni talep; onay düşer, "r01 onayınızı geçersiz kıldı")."""
+    ca = k.d.get("cati_adimi")
+    if not ca:
+        return t, None
+    st = k.d.get("secenek_seti") or {}
+    ie = k.d.get("son_is_emri") or {}
+    taban = katalog.aday(ca.get("kod"))
+    if not (st.get("durum") == "acik" and st.get("tur") == "cati_varyanti" and k.d.get("asama") == "onay_bekliyor" and taban is not None
+            and ie.get("is_emri_no") == ca.get("is_emri_no") and int(ie.get("revizyon") or 1) == ca.get("rev")):
+        k.d.pop("cati_adimi", None)
+        return t, None
+    if t.niyet in ("selam", "soru"):
+        return t, None
+    if t.niyet == "onay":
+        k.not_dus("kural", "çatı seti açıkken onay: plan zaten onaylandı, çatı bekleniyor")
+        return t, _cati_sorusu(k, st)
+    if t.niyet == "red":
+        _cati_adimini_kapat(k, st, "plan değişikliği istendi")
+        return t, None
+    k.d["son_metin"] = (metin or "").strip()
+    if (ie.get("yapi") or {}).get("sistem") == "celik":
+        secim = _celik_cati_adimi_okumasi(k, katalog, taban, metin, st,
+                                          cati_istegi=any(v.tur == "cati_degistir" for v in t.varyantlar))
+    else:
+        secim = _prefabrik_cati_istegi(k, katalog, taban, {"varyantlar": [v.model_dump(mode="json") for v in t.varyantlar]}, bos_ise_yok=True)
+    if isinstance(secim, Karar):
+        return t, secim
+    if not secim:
+        if _cati_adiminda_istek_yok(k, t, metin, taban):
+            k.not_dus("kural", "onaydan sonraki çatı setinde seçim ve istek yok: soru")
+            return t, _cati_sorusu(k, st)
+        _cati_adimini_kapat(k, st, "çatı seçimi yerine başka istek")
+        return t, None
+    secim = str(secim)
+    ek = bool(t.pencereler or [v for v in t.varyantlar if v.tur != "cati_degistir"]) or CO.degisiklik_var(metin)
+    _seti_kapat(k, secim)
+    _cati_secildi(k, secim)
+    k.d.pop("cati_adimi", None)
+    if secim.upper() == str(ca["kod"]).upper() and not ek:
+        k.not_dus("kural", f"onaydan sonraki çatı setinde evin çatısı: {secim}; plan r{int(ca['rev']):02d} onaylandı")
+        return t, _onay_kaydet(k, katalog, cati=secim)
+    a = katalog.aday(secim)
+    k.cati_secimi = secim
+    k.cati_adi = _cati_adi(a) if a else ""
+    k.cati_metni = f"Çatı: {k.cati_adi} ({SC.gosterim(a)})." if a else ""
+    if ek:
+        k.d["cati_onayi_dustu"] = int(ca["rev"])               # çatıyla birlikte plan da değişiyor: onay düşer
+    k.not_dus("kural", f"onaydan sonraki çatı setinden seçim: {secim}" + (" (mesajda başka istek de var)" if ek else ""))
+    return t.model_copy(update={"niyet": "revizyon", "katalog_kodu": secim}), None
 
 
 def _prefabrik_cati_seti(k: Konusma, katalog: Katalog, taban: dict, ts: dict) -> Karar | None:
@@ -887,7 +1081,7 @@ def _cati_sorusu(k: Konusma, st: dict) -> Karar:
     return _soru(k, "secenek", f"Hangi çatı olsun?\n\n{satirlar}\n\nNumarasını ya da kodunu yazın.")
 
 
-def _prefabrik_cati_istegi(k: Konusma, katalog: Katalog, aday: dict, ts: dict) -> str | Karar | None:
+def _prefabrik_cati_istegi(k: Konusma, katalog: Katalog, aday: dict, ts: dict, bos_ise_yok: bool = False) -> str | Karar | None:
     """İE-37 (geometri hakemi, 12 Kasım 2026; sekiz tur): çatı seçenekli prefabrik evde bayinin bu mesajı cümle cümle okunur (K18).
     - Çatıyı yalnız kod seçer: seçeneğin kodu ("PA-06-K olsun"), açık çatı setinde evin kodu ya da etiket harfi ("çatı K olsun"), düğme,
       numara. Tek kod, olumsuz söz yok ve aynı mesajdaki çatı adları o seçeneğin adıysa kod döner; kod ile çelişen ad ("PA-06-K olsun,
@@ -897,7 +1091,8 @@ def _prefabrik_cati_istegi(k: Konusma, katalog: Katalog, aday: dict, ts: dict) -
       çatı isteği (LLM `cati_degistir`, bu mesajda çatı cümlesi yok) bugünkü gibi yönlendirilir; mesaj isteği ve seçilebilecek çatıları yazar
       (13.10 kuralı: istek sessizce düşmez).
     - Çatı seti açıkken seçim yoksa plan evin çatısıyla çizilmez: "Hangi çatı olsun?" (aynı mesajdaki pencere isteği taslakta bekler).
-    Çatı içeriği yoksa ve set açık değilse ya da evin görünür seçeneği yoksa None: bugünkü yol."""
+    Çatı içeriği yoksa ve set açık değilse ya da evin görünür seçeneği yoksa None: bugünkü yol. İE-42: `bos_ise_yok` (onaydan sonraki
+    çatı seti) set açıkken de çatı içeriği olmayan mesajda None döner (mesaj planın değişikliğidir, set kapanır)."""
     taban = katalog.aday(Katalog.taban_kod(aday.get("kod")))
     if taban is None or not taban.get("varyantlar"):
         return None
@@ -969,13 +1164,14 @@ def _prefabrik_cati_istegi(k: Konusma, katalog: Katalog, aday: dict, ts: dict) -
         return _bitir(k, Karar(eylem="yonlendir", gerekce="prefabrik çatı isteği seçeneklerin dışında",
                                 mesaj=f"\"{_kisalt(uygulanamaz[0])}\" isteği otomatik yapılamıyor; bu evde çatı için şunlar seçilebilir: {secenek}. "
                                       + YONLENDIRME))
-    if not (kodlar or ad_sozleri or istekler or cati_cumlesi or set_acik):
-        return None                                            # çatı içeriği yok: bugünkü yol (evin kodu → çatı seti)
+    if not (kodlar or ad_sozleri or istekler or cati_cumlesi or (set_acik and not bos_ise_yok)):
+        return None                                            # çatı içeriği yok: bugünkü yol (plan evin çatısıyla; İE-42)
     ts["varyantlar"] = [v for v in ts.get("varyantlar") or [] if v.get("tur") != "cati_degistir"]
     if len(kodlar) == 1 and not olumsuz:
         secilen = next(iter(kodlar))
         if all(_cati_adi_mi(w, adlar[secilen]) for w in ad_sozleri + kalsin_adlari):
             _seti_kapat(k, secilen)
+            _cati_secildi(k, secilen)
             k.not_dus("kural", f"çatı seçimi kodla: {secilen}")
             return secilen
     k.not_dus("kural", "çatı seçimi yok ya da kararsız: çatı seti")
@@ -1597,8 +1793,14 @@ def _celik_is_emri_uret(k: Konusma, bayi: dict, katalog: Katalog, aday: dict, ts
     if kod_metni and aday.get("uretilen") and ly is not None and ly.get("durum") == "uygulanamadi" and ly.get("kurala_uymayan"):
         gerekce += f"; {KURALA_UYMADI}, plan aynen"            # bilgiyle yeniden çizimde de Patron'a bilgi (plan geometrisi aynen)
     # BK-08 madde 4: çelik planda görsel ve PDF bu metinle birlikte gider (çizim düşerse bu metin gitmez, `worker._cizim_hatasi`)
-    return _bitir(k, Karar(eylem="is_emri", is_emri=ie, revizyon=ie["revizyon"], gerekce=gerekce,
-                            mesaj=f"{on_not}{on_bilgi}{ozet} {uyg}Ön onay planınız hazır; plan görseli ve PDF ektedir.".replace("  ", " ")))
+    mesaj = f"{on_not}{on_bilgi}{ozet} {uyg}Ön onay planınız hazır; plan görseli ve PDF ektedir.".replace("  ", " ")
+    cati_metni = getattr(k, "cati_metni", "")
+    if cati_metni:                                             # İE-42 (D-94): onaydan sonraki çatı setinden seçim
+        if yeni and all(d.get("op") == "cati_varyanti" for d in yeni):
+            mesaj = f"{on_not}{cati_metni} Plan aynı. Ön onay planınız hazır (r{ie['revizyon']:02d})."
+        else:
+            mesaj = f"{on_not}{cati_metni} " + mesaj[len(on_not):]
+    return _bitir(k, Karar(eylem="is_emri", is_emri=ie, revizyon=ie["revizyon"], gerekce=gerekce, mesaj=mesaj))
 
 
 def _yeni_plan_revizyonu(k: Konusma, bayi: dict, aday: dict, ts: dict, son: dict, son_y: dict, ly: dict) -> Karar:
@@ -1802,9 +2004,16 @@ def _is_emri_uret(k: Konusma, bayi: dict, katalog: Katalog, sablon: dict, kaynak
     degisiklik = f"Değişiklik: {', '.join(notlar)}" if notlar else ""
     ie["talep"]["metin"] = " · ".join(x for x in (bas or on_bilgi.strip().rstrip("."), degisiklik) if x)
     ie["talep"]["metin_koddan"] = True
-    return _bitir(k, Karar(eylem="is_emri", is_emri=ie, revizyon=ie["revizyon"], gerekce=f"şablon {kaynak}" + ek,
-                            mesaj=f"{on_not}{on_bilgi}" + "".join(f"{x}. " for x in (bas, degisiklik) if x)
-                                  + "Ön onay planınız hazır; plan görseli ve PDF ektedir."))
+    mesaj = f"{on_not}{on_bilgi}" + "".join(f"{x}. " for x in (bas, degisiklik) if x) + "Ön onay planınız hazır; plan görseli ve PDF ektedir."
+    cati_metni = getattr(k, "cati_metni", "")
+    if cati_metni:                                    # İE-42 (D-94): onaydan sonraki çatı setinden seçim; plan yalnız çatıda değiştiyse "Plan aynı."
+        if son and _cati_disi_ozu(ie) == _cati_disi_ozu(son):
+            cati_adi = SC._kucuk(getattr(k, "cati_adi", "") or "yeni")          # eskiz: "PDF'teki 4 görünüş kırma çatıyı gösterir"
+            mesaj = (f"{on_not}{cati_metni} Plan aynı. Ön onay planınız hazır (r{ie['revizyon']:02d}); "
+                     f"PDF'teki 4 görünüş {cati_adi} çatıyı gösterir.")
+        else:
+            mesaj = f"{on_not}{cati_metni} " + mesaj[len(on_not):]
+    return _bitir(k, Karar(eylem="is_emri", is_emri=ie, revizyon=ie["revizyon"], gerekce=f"şablon {kaynak}" + ek, mesaj=mesaj))
 
 
 # ── İE-39 PR-2 (D-90) · havuz evinde bayinin "sağa yarım pano uzat" komutu ────────────────────────────────────────────────────────
@@ -2217,11 +2426,13 @@ def _seti_kapat(k: Konusma, kod: str) -> None:
     if st and st.get("durum") == "acik":
         st["durum"] = "secildi"; st["secilen_kod"] = kod
         st["set_disi"] = kod not in {a["kod"] for a in st.get("adaylar") or []}
+        if st.get("tur") == "cati_varyanti":
+            _cati_secildi(k, kod)                     # İE-42: çatı seçildi; onayda çatı seti yeniden sunulmaz
         k.not_dus("kural", f"seçenek setinden seçim: {kod}" + (" (set dışı)" if st["set_disi"] else ""))
 
 
 def _secenekler(k: Konusma, katalog: Katalog, ts: dict, uygun: list[dict] | None = None, tur: str = "alan", referans: dict | None = None,
-                ek_not: str = "") -> Karar | None:
+                ek_not: str = "", bas: str | None = None, gerekce_on: str = "") -> Karar | None:
     """İE-04: aday kaydından uyan aday varsa seçenek seti. Önce (bir kez) öncelik sorulur; sonra set sunulur. Hiç aday yoksa None
     (çağıran bugünkü davranışa döner). Set kaydı konuşmadadır; kimlikler s:<set>:<kod>; eski set 'eskidi' olur.
     İE-08: `uygun` verilirse (çatı seti, tur 'cati_varyanti') sıra hazırdır, puanlanmaz; çelikte öncelik sorusu hiç sorulmaz (Lokman, 12.10.2026).
@@ -2246,7 +2457,7 @@ def _secenekler(k: Konusma, katalog: Katalog, ts: dict, uygun: list[dict] | None
         k.d["eski_setler"] = k.d["eski_setler"][-5:]
     k.d["secenek_seti"] = st
     test_var = any(a.get("durum") == "test" for a in st["adaylar"])
-    mesaj = SC.cati_mesaji(sirali, referans or sirali[0]) if tur == "cati_varyanti" else SC.mesaj_metni(sirali, ts)
+    mesaj = SC.cati_mesaji(sirali, referans or sirali[0], bas) if tur == "cati_varyanti" else SC.mesaj_metni(sirali, ts)
     if test_var:
         mesaj = "[TEST VERİSİ — gerçek seçenek değildir] " + mesaj
     if ek_not:
@@ -2257,7 +2468,7 @@ def _secenekler(k: Konusma, katalog: Katalog, ts: dict, uygun: list[dict] | None
     if k.d["soru_sayisi"] > MAX_SORU:
         return _bitir(k, Karar(eylem="yonlendir", gerekce="soru sınırı", mesaj="Talebi netleştiremedim. " + YONLENDIRME))
     return _bitir(k, Karar(eylem="secenek", soru_alani="secenek", mesaj=mesaj, secenek_seti=st, butonlar=butonlar,
-                           gerekce=f"seçenek seti {st['id']}: {len(sirali)} aday" + (" (test verisi)" if test_var else "")))
+                           gerekce=f"{gerekce_on}seçenek seti {st['id']}: {len(sirali)} aday" + (" (test verisi)" if test_var else "")))
 
 
 def _soru(k: Konusma, alan: str, metin: str, butonlar: list[dict] | None = None) -> Karar:
@@ -2689,6 +2900,14 @@ def _plan_ozu(ie: dict) -> str:
     return json.dumps(o, sort_keys=True, ensure_ascii=False)
 
 
+def _cati_disi_ozu(ie: dict) -> str:
+    """İE-42: planın çatısı dışındaki içeriği (çatı ve çatının adını taşıyan referans model hariç): aynıysa yalnız çatı değişmiştir."""
+    o = json.loads(json.dumps(ie))
+    o.pop("cati", None)
+    (o.get("yapi") or {}).pop("referans_model", None)
+    return _plan_ozu(o)
+
+
 ACIK_PLAN_ASAMALARI = ("onay_bekliyor", "revizyon", "topluyor", "onaylandi")
 
 
@@ -2708,6 +2927,10 @@ def _plan_durumu_cevabi(k: Konusma) -> str:
                     "Fiyat ve teslim süresi teklifte yazar.")
         return (f"Onayladığınız plan ({etiket}) için teklifi PortatifEv hazırlıyor. Teklif bu sohbete gönderilir. "
                 "Fiyat ve teslim süresi teklifte yazar.")
+    if k.d.get("asama") == "onay_bekliyor" and k.d.get("cati_adimi"):        # İE-42: plan onaylandı, çatı bekleniyor
+        return (f"Planınız ({etiket}) onaylandı; çatı seçiminizi bekliyor. "
+                + ("Çatı seçilince plan teknik kontrole gider. " if celik else "Teklifi PortatifEv, çatı seçildikten sonra hazırlar. ")
+                + "Fiyat ve teslim süresi teklifte yazar.")
     if k.d.get("asama") == "onay_bekliyor":
         return (f"Planınız ({etiket}) onayınızı bekliyor. Teklifi PortatifEv, planı onayladıktan sonra hazırlar. "
                 "Fiyat ve teslim süresi teklifte yazar.")
@@ -2731,6 +2954,8 @@ def _plani_acik_tut(k: Konusma, d0: dict, karar: Karar) -> None:
     if isinstance(d0.get("plan_taslagi"), dict):
         k.d["taslak"] = json.loads(json.dumps(d0["plan_taslagi"]))   # askıdaki sorunun isteği (ör. odası sorulan pencere) taslakta kalmaz
     onayli = k.d.get("onaylanan") == [no, rev]
+    if k.d.pop("cati_adimi", None):                   # İE-42: onaydan sonraki çatı seti kapanır; plan onay bekler (Onayla seti yeniden getirir)
+        onayli = False
     k.d["asama"] = "onaylandi" if onayli else "onay_bekliyor"
     k.d["bekleyen_onay"] = no
     k.d["son_soru_alani"] = None
@@ -2778,9 +3003,11 @@ def _bitir(k: Konusma, karar: Karar) -> Karar:
         k.d.pop("pencere_secim", None)
     if karar.eylem == "is_emri":
         onayli = k.d.pop("onaylanan", None)            # BK-29 tur 6 (pano 212, C8): onaylı planın üstüne yeni revizyon geldi; onay düşer, bayiye söylenir
+        dusen = k.d.pop("cati_onayi_dustu", None)      # İE-42: "Planınız onaylandı" denmişti, çatı seti açıkken plan değişti
         yeni_rev = int((karar.is_emri or {}).get("revizyon") or 1)
-        if onayli and yeni_rev > 1 and int(onayli[1]) < yeni_rev:
-            karar.mesaj = (f"{karar.mesaj} Bu değişiklik r{int(onayli[1]):02d} onayınızı geçersiz kıldı. "
+        onceki = int(onayli[1]) if onayli else (int(dusen) if dusen else None)
+        if onceki and yeni_rev > 1 and onceki < yeni_rev:
+            karar.mesaj = (f"{karar.mesaj} Bu değişiklik r{onceki:02d} onayınızı geçersiz kıldı. "
                            f"r{yeni_rev:02d} için yeniden onay gerekir.").strip()
         k.d["bekleyen_onay"] = karar.is_emri.get("is_emri_no") if karar.is_emri else None
         k.d["asama"] = "onay_bekliyor"

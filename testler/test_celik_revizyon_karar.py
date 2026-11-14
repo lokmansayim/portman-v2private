@@ -62,6 +62,22 @@ def s(tmp_path) -> Sohbet:
     return Sohbet(tmp_path)
 
 
+def onayla(s: Sohbet):
+    return s.dugme(f"o:{s.plan['is_emri_no']}:{s.plan['revizyon']}")
+
+
+def cati_seti(s: Sohbet):
+    """İE-42 (D-94): "Ç8801" r01'i katalog çatısıyla çizer; "Onayla" çatı setini getirir (önce set plan seçilince, çizimden önce geliyordu)."""
+    k = s.yaz("Ç8801", katalog_kodu="Ç8801", yapi_turu="celik")
+    assert k.eylem == "is_emri" and s.plan["revizyon"] == 1 and s.plan["yapi"]["kod"] == "Ç8801", k.mesaj
+    k = onayla(s)
+    assert k.eylem == "secenek" and s.k.d["secenek_seti"]["tur"] == "cati_varyanti" and s.k.d["asama"] == "onay_bekliyor", k.mesaj
+    return k
+
+
+KARARSIZ = ", çatı K mı L mi bilemedim"            # İE-42: set plandan önce yalnız kararsız çatı sözüyle (İE-25 yolu)
+
+
 def r01_k(s: Sohbet):
     k = s.yaz("Ç8801K", katalog_kodu="Ç8801K", yapi_turu="celik")
     assert k.eylem == "is_emri" and s.plan["revizyon"] == 1
@@ -79,13 +95,21 @@ def test_ilk_planda_okuma_sorusu_cevaplanir(s):
     assert "kısa cevap" not in k.mesaj                                       # CR17: düğme özeti plan mesajına sızmaz
 
 
-def test_set_sunulurken_istek_saklanir_secimde_uygulanir(s):
-    """CR1b: "Ç8801, mutfak penceresi 120x120" → çatı seti (istek saklanır, mesajda söylenir) → K düğmesi → r01 K + mutfak 120/120.
-    Önce düğmeden sonra LLM ipucuyla bütün pencereler soruluyordu ("Yaşam Alanı penceresini hangi ölçüye")."""
-    k = s.yaz("Ç8801, mutfak penceresi 120x120 olsun", katalog_kodu="Ç8801", yapi_turu="celik", pencereler=[pen("mutfak", "120x120")])
+def test_set_sunulurken_istek_saklanir_secimde_uygulanir(s, tmp_path):
+    """CR1b: "Ç8801, <kararsız çatı>, mutfak penceresi 120x120" → çatı seti (istek saklanır, mesajda söylenir) → K düğmesi → r01 K + mutfak
+    120/120. Önce düğmeden sonra LLM ipucuyla bütün pencereler soruluyordu ("Yaşam Alanı penceresini hangi ölçüye"). İE-42: çatı sözü
+    yoksa set gelmez; r01 katalog çatısı ve pencereyle, onaydan sonra K seçilince pencere r02'de kalır."""
+    k = s.yaz("Ç8801" + KARARSIZ + ", mutfak penceresi 120x120 olsun", katalog_kodu="Ç8801", yapi_turu="celik",
+              pencereler=[pen("mutfak", "120x120")])
     assert k.eylem == "secenek" and K.CELIK_ISTEK_NOTU in k.mesaj
     k = s.dugme("s:{set}:Ç8801K")
     assert k.eylem == "is_emri" and s.plan["yapi"]["kod"] == "Ç8801K" and s.degisiklikler(k) == ["pencere_olcu:P5"]
+    t = Sohbet(tmp_path / "ikinci")
+    k = t.yaz("Ç8801, mutfak penceresi 120x120 olsun", katalog_kodu="Ç8801", yapi_turu="celik", pencereler=[pen("mutfak", "120x120")])
+    assert k.eylem == "is_emri" and t.plan["yapi"]["kod"] == "Ç8801" and t.degisiklikler(k) == ["pencere_olcu:P5"], k.mesaj
+    assert onayla(t).eylem == "secenek"
+    k = t.dugme("s:{set}:Ç8801K")
+    assert k.eylem == "is_emri" and k.revizyon == 2 and t.degisiklikler(k) == ["pencere_olcu:P5", "cati_varyanti:Ç8801K"], k.mesaj
 
 
 @pytest.mark.parametrize("cevap, alan, beklenen", [
@@ -95,18 +119,26 @@ def test_set_sunulurken_istek_saklanir_secimde_uygulanir(s):
 ])
 def test_cati_seti_yazili_cevap(s, cevap, alan, beklenen):
     """Çatı seti açıkken yazılı cevap: setin kendi örneği ("çatı K olsun"), harf ve numara. Önce taslakta kalan "Ç8801" katalog çatısını
-    seçiyor, "3" "Anlayamadım" diyordu (PR-2a'dan kalma; kapanış incelemesinde bulundu)."""
-    assert s.yaz("Ç8801", katalog_kodu="Ç8801", yapi_turu="celik").eylem == "secenek"
+    seçiyor, "3" "Anlayamadım" diyordu (PR-2a'dan kalma; kapanış incelemesinde bulundu). İE-42: set onaydan sonra; seçim r02."""
+    cati_seti(s)
     k = s.yaz(cevap, **alan)
-    assert k.eylem == "is_emri" and s.plan["yapi"]["kod"] == beklenen
+    assert k.eylem == "is_emri" and s.plan["yapi"]["kod"] == beklenen and k.revizyon == 2
 
 
-def test_set_acikken_secim_olmayan_istek_set_yeniden_sunulur(s):
-    s.yaz("Ç8801", katalog_kodu="Ç8801", yapi_turu="celik")
+def test_set_acikken_secim_olmayan_istek_set_yeniden_sunulur(s, tmp_path):
+    """Plandan önceki sette (kararsız çatı sözüyle) seçim olmayan istek set yeniden sunulur, istek saklanır. Onaydan sonraki sette (İE-42)
+    istek planın değişikliğidir: set kapanır, r02 katalog çatısı ve pencereyle, r01'in onayı düşer; r02'nin onayı çatıyı yeniden sorar."""
+    s.yaz("Ç8801" + KARARSIZ, katalog_kodu="Ç8801", yapi_turu="celik")
     k = s.yaz("mutfak penceresi 120x120 olsun", pencereler=[pen("mutfak", "120x120")])
     assert k.eylem == "secenek" and "Önce listeden seçin" in k.mesaj and K.CELIK_ISTEK_NOTU in k.mesaj
     k = s.yaz("2", niyet="diger")
     assert k.eylem == "is_emri" and s.plan["yapi"]["kod"] == "Ç8801K" and s.degisiklikler(k) == ["pencere_olcu:P5"]
+    t = Sohbet(tmp_path / "ikinci")
+    cati_seti(t)
+    k = t.yaz("mutfak penceresi 120x120 olsun", pencereler=[pen("mutfak", "120x120")])
+    assert k.eylem == "is_emri" and k.revizyon == 2 and t.plan["yapi"]["kod"] == "Ç8801" and t.degisiklikler(k) == ["pencere_olcu:P5"]
+    assert k.mesaj.endswith("Bu değişiklik r01 onayınızı geçersiz kıldı. r02 için yeniden onay gerekir."), k.mesaj
+    assert onayla(t).mesaj.startswith("Planınız onaylandı (r02). Şimdi çatıyı seçin.")
 
 
 def test_olcu_sorusu_ayni_turde_yinelenir(s):
@@ -165,7 +197,7 @@ def test_okunamayan_istek_yonlendirilir_plan_degismez(s, metin, alan):
 
 def test_katalog_catisina_donus_sonra_pencere(s):
     """CR7: K seçilip katalog çatısına dönülünce sonraki revizyon kapanmış setin eski seçimine (K) geri dönmez."""
-    s.yaz("Ç8801", katalog_kodu="Ç8801", yapi_turu="celik")
+    cati_seti(s)
     assert s.dugme("s:{set}:Ç8801K").eylem == "is_emri"
     k = s.yaz("katalog çatısı olsun", varyantlar=[var("cati_degistir", "katalog çatısı")])
     assert k.eylem == "is_emri" and s.plan["yapi"]["kod"] == "Ç8801"
@@ -271,9 +303,11 @@ def test_ilk_planda_soru_yalniz_gercek_degisiklikte(s, metin, alan, eylem):
 
 
 def test_cati_sorusunda_set_notu_yok_secimde_soru_yok(s):
-    """"çatı nasıl olacak?" değişiklik isteği değildir: set mesajında "isteğinizi işleyeceğim" notu yok, seçim r01 verir."""
+    """"çatı nasıl olacak?" değişiklik isteği değildir: "isteğinizi işleyeceğim" ya da "uygulayamadım" notu yok. İE-42: soru çatı seçimi
+    değildir, r01 katalog çatısıyla; çatı onaydan sonra setle sorulur, seçim r02 verir."""
     k = s.yaz("Ç8801 çelik ev, çatı nasıl olacak?", katalog_kodu="Ç8801", yapi_turu="celik")
-    assert k.eylem == "secenek" and K.CELIK_ISTEK_NOTU not in k.mesaj
+    assert k.eylem == "is_emri" and K.CELIK_ISTEK_NOTU not in k.mesaj and "uygulayamadım" not in k.mesaj, k.mesaj
+    onayla(s)
     k = s.yaz("2", niyet="diger")
     assert k.eylem == "is_emri" and s.plan["yapi"]["kod"] == "Ç8801K"
 
@@ -372,10 +406,15 @@ def test_besinci_tur_olumsuz_cati_secilmez(s, metin, alan, eylem, kod):
 
 
 def test_besinci_tur_set_acikken_olumsuz_kod_secim_degil(s):
-    """Set açıkken "Ç8801K'dan Ç8801L'ye geçmeyelim" L'yi seçmez, set yeniden sunulur."""
-    assert s.yaz("Ç8801", katalog_kodu="Ç8801", yapi_turu="celik").eylem == "secenek"
+    """Set açıkken "Ç8801K'dan Ç8801L'ye geçmeyelim" L'yi seçmez: plandan önceki set yeniden sunulur; onaydan sonraki sette (İE-42)
+    "Hangi çatı olsun?", plan r01 onay bekler."""
+    assert s.yaz("Ç8801" + KARARSIZ, katalog_kodu="Ç8801", yapi_turu="celik").eylem == "secenek"
     k = s.yaz("Ç8801K'dan Ç8801L'ye geçmeyelim", katalog_kodu="Ç8801L")
     assert k.eylem == "secenek" and not s.plan
+    t = Sohbet(s.k.path.parent / "ikinci")
+    cati_seti(t)
+    k = t.yaz("Ç8801K'dan Ç8801L'ye geçmeyelim", katalog_kodu="Ç8801L")
+    assert k.eylem == "sor" and "Hangi çatı olsun?" in k.mesaj and t.plan["revizyon"] == 1 and t.k.d["asama"] == "onay_bekliyor"
 
 
 def test_besinci_tur_dis140_oda_cumlesiyle_dusmez(s):
@@ -383,9 +422,11 @@ def test_besinci_tur_dis140_oda_cumlesiyle_dusmez(s):
     k = s.yaz("Ç8801K olsun, dışlar 140'lık olsun ve oda kapıları beyaz olsun", katalog_kodu="Ç8801K", yapi_turu="celik")
     assert k.eylem == "is_emri" and s.degisiklikler(k) == ["dis_karkas_140:"]
     t = Sohbet(s.k.path.parent / "ikinci")
-    assert t.yaz("Ç8801 çelik, dışlar 140'lık olsun ve çalışma odası geniş olsun", katalog_kodu="Ç8801", yapi_turu="celik").eylem == "secenek"
+    k = t.yaz("Ç8801 çelik, dışlar 140'lık olsun ve çalışma odası geniş olsun", katalog_kodu="Ç8801", yapi_turu="celik")
+    assert k.eylem == "is_emri" and t.degisiklikler(k) == ["dis_karkas_140:"]           # İE-42: r01 katalog çatısıyla
+    onayla(t)
     k = t.yaz("2", niyet="diger")
-    assert k.eylem == "is_emri" and t.plan["yapi"]["kod"] == "Ç8801K" and t.degisiklikler(k) == ["dis_karkas_140:"]
+    assert k.eylem == "is_emri" and t.plan["yapi"]["kod"] == "Ç8801K" and t.degisiklikler(k) == ["dis_karkas_140:", "cati_varyanti:Ç8801K"]
 
 
 @pytest.mark.parametrize("metin, alan, cevap, degisiklik", [
@@ -481,9 +522,13 @@ def test_altinci_tur_cati_secenegi_olmayan_model(s):
 
 
 def test_altinci_tur_set_acikken_olumsuz_bicim(s):
-    assert s.yaz("Ç8801", katalog_kodu="Ç8801", yapi_turu="celik").eylem == "secenek"
+    assert s.yaz("Ç8801" + KARARSIZ, katalog_kodu="Ç8801", yapi_turu="celik").eylem == "secenek"
     k = s.yaz("L çatıyı beğenmedik", katalog_kodu="Ç8801L")
     assert k.eylem == "secenek" and not s.plan
+    t = Sohbet(s.k.path.parent / "ikinci")                   # İE-42: onaydan sonraki sette soru, çatı seçilmez
+    cati_seti(t)
+    k = t.yaz("L çatıyı beğenmedik", katalog_kodu="Ç8801L")
+    assert k.eylem == "sor" and "Hangi çatı olsun?" in k.mesaj and t.plan["revizyon"] == 1
 
 
 @pytest.mark.parametrize("metin, alan, eylem", [
@@ -530,12 +575,19 @@ def test_yedinci_tur_ilk_plan(s, metin, alan, eylem, degisiklik, not_var):
 
 
 def test_dorduncu_tur_set_acikken_kaynak_ve_kararsizlik(s):
-    """Set açıkken iki kod seçim değildir (set yeniden sunulur; önce ilk kod seçiliyordu); "Ç8801K yerine Ç8801L" L'yi seçer."""
-    assert s.yaz("Ç8801", katalog_kodu="Ç8801", yapi_turu="celik").eylem == "secenek"
+    """Set açıkken iki kod seçim değildir (set yeniden sunulur; önce ilk kod seçiliyordu); "Ç8801K yerine Ç8801L" L'yi seçer. İE-42:
+    onaydan sonraki sette de aynı okuma ("Hangi çatı olsun?", sonra r02 L)."""
+    assert s.yaz("Ç8801" + KARARSIZ, katalog_kodu="Ç8801", yapi_turu="celik").eylem == "secenek"
     k = s.yaz("Ç8801K mi Ç8801L mi olsun?", katalog_kodu="Ç8801K")
     assert k.eylem == "secenek" and "Önce listeden seçin" in k.mesaj and not s.plan
     k = s.yaz("Ç8801K yerine Ç8801L olsun", katalog_kodu="Ç8801K")
     assert k.eylem == "is_emri" and s.plan["yapi"]["kod"] == "Ç8801L"
+    t = Sohbet(s.k.path.parent / "ikinci")
+    cati_seti(t)
+    k = t.yaz("Ç8801K mi Ç8801L mi olsun?", katalog_kodu="Ç8801K")
+    assert k.eylem == "sor" and "Hangi çatı olsun?" in k.mesaj and t.plan["revizyon"] == 1
+    k = t.yaz("Ç8801K yerine Ç8801L olsun", katalog_kodu="Ç8801K")
+    assert k.eylem == "is_emri" and t.plan["yapi"]["kod"] == "Ç8801L" and k.revizyon == 2
 
 
 def test_celik_plan_mesaji_ekleri_soyler(s):

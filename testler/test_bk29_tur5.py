@@ -107,9 +107,13 @@ def test_plan_basi(kaynak, rev, ozet, beklenen):
 # ── Tur 4 canlı denetimi (v2026.11.13e): "hiçbiri" ilk planda, yinelenen kod, P6001 ve ölçü cevabının metni ─────────────────────────
 
 def _cati_setinden_r01(tmp_path):
+    """Çatı setinden seçilmiş r01 PA-06-K. İE-42 (D-94): set plandan önce yalnız çatı adıyla ("kırma çatı olsun") gelir; önce yalnız "PA-06"
+    yazmak seti getiriyordu (şimdi r01 evin çatısıyla, set onaydan sonra)."""
     from test_bk29_tur4 import CanliSohbet
+    from test_celik_revizyon_karar import var
     s = CanliSohbet(tmp_path, kabul=KABUL)
-    s.yaz("PA-06", niyet="diger")
+    k = s.yaz("PA-06 olsun, kırma çatı olsun", katalog_kodu="PA-06", yapi_turu="prefabrik", varyantlar=[var("cati_degistir", "kırma çatı olsun")])
+    assert k.eylem == "secenek" and s.k.d["secenek_seti"]["tur"] == "cati_varyanti", k.mesaj
     k = s.yaz("2", niyet="diger")
     assert k.revizyon == 1 and s.plan["talep"]["kaynak"] == "PA06K"
     return s
@@ -138,6 +142,15 @@ def test_yinelenen_kod_secilen_catiyi_degistirmez(tmp_path):
     k = s.dugme("q:pencere_secim:1")
     assert k.eylem == "is_emri" and k.revizyon == 2 and s.plan["talep"]["kaynak"] == "PA06K", k.mesaj
     assert k.mesaj.startswith("PA-06-K r02. Değişiklik: MUTFAK 120x100 sol penceresi 120x120.")
+    from test_bk29_tur4 import CanliSohbet                        # İE-42: onaydan sonraki setten seçilen çatı da korunur
+    t = CanliSohbet(tmp_path / "onaydan_sonra", kabul=KABUL)
+    t.yaz("PA-06", niyet="diger")
+    t.dugme(f"o:{t.plan['is_emri_no']}:1")
+    assert t.yaz("2", niyet="diger").revizyon == 2 and t.plan["talep"]["kaynak"] == "PA06K"
+    t.yaz("mutfak penceresi 120x120 olsun", pencereler=[pen("mutfak", "120x120")], katalog_kodu="PA-06")
+    k = t.dugme("q:pencere_secim:1")
+    assert k.eylem == "is_emri" and k.revizyon == 3 and t.plan["talep"]["kaynak"] == "PA06K", k.mesaj
+    assert k.mesaj.startswith("PA-06-K r03. Değişiklik: MUTFAK 120x100 sol penceresi 120x120."), k.mesaj
 
 
 def test_yazilan_kod_bugunku_gibi(tmp_path):
