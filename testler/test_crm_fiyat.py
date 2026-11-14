@@ -363,7 +363,7 @@ R07_ANAHTARLAR = {
     "3'lü H standart 60 (iç T) | L 2800": ("MA31", "kural"),
     "Çektirme U'su 100 | 100 × 2740": ("MA40", "birebir"),
     "Özel kutu profil (kolon) 100 × 100 | L 2800": ("MA12", "kural"),
-    "Pencere üst panel | 100 × 1250 × 800": ("YP1", "yakın"),
+    "Pencere üst panel | 100 × 1250 × 800": ("YP1", "kural"),
     "100'lük yapıştırma dolu vasistaslı pano (60/40) | 100 × 1250 × 2800": (None, "CRM'de yok"),
     "100'lük yapıştırma dolu vasistaslı pano (50/50) | 100 × 1250 × 2800": (None, "CRM'de yok"),
     "Karkaslı özel pencere panosu (150/180) | 100 × 2500 × 2800": (None, "CRM'de yok"),
@@ -382,7 +382,7 @@ R07_ANAHTARLAR = {
     "Çektirme U'su 100 (iç duvar) | 100 × 2940": (None, "CRM'de yok"),
     "Çektirme U'su 60 | 60 × 2940": (None, "CRM'de yok"),
     "Özel kutu profil (kolon) 100 × 100 | L 3000": ("MA12", "kural"),
-    "Pencere üst panel | 100 × 1250 × 1000": ("YP1", "yakın"),
+    "Pencere üst panel | 100 × 1250 × 1000": ("YP1", "kural"),
     "100'lük yapıştırma dolu vasistaslı pano (60/40) | 100 × 1250 × 3000": (None, "CRM'de yok"),
     "100'lük yapıştırma dolu vasistaslı pano (50/50) | 100 × 1250 × 3000": (None, "CRM'de yok"),
     "Karkaslı özel pencere panosu (150/180) | 100 × 2500 × 3000": (None, "CRM'de yok"),
@@ -410,7 +410,7 @@ def test_r07_280_ve_300_yukseklik(E, A):
     direği, çektirme U'su, kolon, pencere üst paneli; fiyatsız satır toplama girmediği için 280'in teklifi 250'ninkinden düşük çıkıyordu.
     r07 CRM'deki h:2800 / h:3000 ürünlerine eşler, fiyat yazmaz: tam/yarım pano bandı (Patron 27 Ekim 22:08), H ve 3'lü H'da kulaklı /
     dübelli ortalaması (defterin 2500'deki kuralı), D-36 (100'lük iç eleman dıştakinin fiyatı), köşe direği ve standart H birebir, kolon
-    D-75. Pencere üst paneli 800 / 1000 için Lokman'ın sözü yok: aynı ölçüdeki alt panelin kaydı, öneri (onay bekler). CRM'de olmayan
+    D-75. Pencere üst paneli 800 / 1000: aynı ölçüdeki alt panelin kuralı, tam panonun 1/3'ü (Lokman 14 Kasım 07:28:15 kartı). CRM'de olmayan
     (vasistaslı pano, karkaslı özel pencere panosu, 2940'lık çektirme U'su) fiyatsız. Listede 280 ve 300'ün yeni satırı "defterde yok"
     kalmaz."""
     P = E["hatlar"]["prefabrik"]
@@ -432,7 +432,7 @@ def test_r07_280_ve_300_yukseklik(E, A):
     for ust, alt in ((800, "Pencere alt panel (120/120) | 100 × 1250 × 800"), (1000, "Pencere alt panel (120/100) | 100 × 1250 × 1000")):
         g = K[f"Pencere üst panel | 100 × 1250 × {ust}"]
         assert {a: g[a] for a in ("kod", "hesap", "pay", "payda")} == {a: K[alt][a] for a in ("kod", "hesap", "pay", "payda")}
-        assert g["esleme"] == "yakın" and "Lokman'ın sözü yok" in g["not"]
+        assert g["esleme"] == "kural" and "07:28:15" in g["not"] and "Tam panonun 1/3'ü" in g["not"]
     D = C.defter_uret(C.denetle(kategorili(A)), E)
     PD = D["hatlar"]["prefabrik"]
     g = PD["kalemler"]["H 100 (dış pano eki) | 100 × 100 × 2800"]
@@ -440,7 +440,7 @@ def test_r07_280_ve_300_yukseklik(E, A):
     g = PD["kalemler"]["6'lık köşe direği 60 × 60 | 60 × 60 × 3000"]
     assert (g["fiyat"], g["onay"], g["kdv"]) == (_kurus(_fiyat(A, "MA6")), True, 0.2)
     g = PD["kalemler"]["Pencere üst panel | 100 × 1250 × 800"]
-    assert (g["fiyat"], g["onay"]) == (_kurus(_fiyat(A, "YP1") / 3), False)
+    assert (g["fiyat"], g["onay"]) == (_kurus(_fiyat(A, "YP1") / 3), True)
     for k in ("Çektirme U'su 100 | 100 × 2940", "100'lük yapıştırma dolu vasistaslı pano (60/40) | 100 × 1250 × 3000"):
         assert PD["kalemler"][k]["fiyat"] is None, k
     b = next(b for b in PD["bantlar"] if (b["kalem"], b["yukseklik_mm"]) == ("100'lük yapıştırma dolu pano", 3000))

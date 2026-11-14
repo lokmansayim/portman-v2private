@@ -16,14 +16,15 @@ Lokman, 9 Kasım 2026 13:10: "bunu kural olarak al ve mühürle bundan sonra tek
   Defter D-72'den sonra kapandı: Motor'un yeni anahtarı yalnız eşlemeye, hattın kalemlerinin sonuna girer (r05: TK-06'nın 15 kalemi;
   OSB, duvar alçıpanı, kiriş, pencere panelleri, nem bariyeri, alçıpan destek straforu, pencere karkası ve PVC pencereler).
   r07 (13 Kasım): 280 ve 300 cm yükseklik. Pano eni bantları 2800 ve 3000 için (bantların sonunda), H, 3'lü H, köşe direği, çektirme
-  U'su ve kolon CRM'deki aynı ürünün h:2800 / h:3000 koduyla, 2500'deki kuralla. Pencere üst paneli 800 / 1000 öneri (Lokman'ın sözü
-  yok). CRM'de olmayanlar fiyatsız: vasistaslı pano, karkaslı özel pencere panosu, 2940'lık çektirme U'su. Metal iniş borusu
-  L 3000 çelikteki kayıtla aynı (antrasit, `DR13`).
+  U'su ve kolon CRM'deki aynı ürünün h:2800 / h:3000 koduyla, 2500'deki kuralla. Pencere üst paneli 800 / 1000 tam panonun 1/3'ü
+  (Lokman'ın kartı, 14 Kasım 07:28). CRM'de olmayanlar fiyatsız: vasistaslı pano, karkaslı özel pencere panosu, 2940'lık çektirme
+  U'su. Metal iniş borusu L 3000 çelikteki kayıtla aynı (antrasit, `DR13`).
 - **Onay.** Eşleme `birebir` ya da `kural` ise onaylı; `yakın` ve `birim varsayımı` öneri (`--oneri`); `birim sorusu` ve `CRM'de yok`
   fiyatsız. O gün fiyatı 0 ya da boş olan kod, listede olmayan kod ve birden çok satırdaki kod fiyatsız. `bekletme`: Lokman'ın kararıyla şimdilik
   fiyatsız, CRM'de fiyatı olsa da yazılmaz (banyo dolabı, D-75).
 - **Lokman'ın hesap kuralları (D-75, 10 Kasım).** Kutu profilin (kiriş ve kolon) CRM fiyatı 6 metrelik boyun fiyatıdır; parça fiyatı
-  boyla orantılı, tam TL. Pencere üst paneli tam panonun (100 × 1250 × 2500) 1/5'i, alt paneli 1/3'ü.
+  boyla orantılı, tam TL. Pencere üst paneli tam panonun (100 × 1250 × 2500) 1/5'i, alt paneli 1/3'ü. 280 ve 300'ün üst paneli
+  (800, 1000) alt panel gibi 1/3 (Lokman'ın kartı, 14 Kasım 07:28; r07).
   Mahya bandının CRM fiyatı bir rulonun (10 m) fiyatıdır (Lokman'ın kartı, 11 Kasım 11:14; eşleme r06).
   Metal kiremidin CRM fiyatı m² fiyatıdır (D-79, Lokman 11 Kasım 20:24): levha 100 cm kapatır, boyu 5 cm'nin katına yukarı
   tamamlanır (3740 → 3750; kart 20:29), levhanın fiyatı m² fiyatı × boy (m).

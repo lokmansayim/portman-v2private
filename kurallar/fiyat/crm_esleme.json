@@ -1604,9 +1604,9 @@
      "hesap": "oran",
      "pay": 1,
      "payda": 3,
-     "esleme": "yakın",
+     "esleme": "kural",
      "birim": "adet",
-     "not": "öneri: aynı ölçüdeki pencere alt panelinin (100 × 1250 × 800) kaydı, tam panonun 1/3'ü (D-75). 280'lük evde üst kot 200, üst panel 800. D-75 üst paneli 1/5 dedi (500'lük panel); 800'lük üst panel için Lokman'ın sözü yok, onay bekler (r07)"
+     "not": "Tam pano (100 × 1250 × 2500, YP1) fiyatının 1/3'ü: Lokman 14 Kasım 2026 07:28:15 UTC kartı (cmsg_01UAFvcnfVuTR1wfFux5fQPPVRWdgNBZskjEbrpP1Fawc1, \"Pencere üst paneli 800 ve 1000 mm boyda hangi fiyatla hesaplansın?\"), seçim \"Tam panonun 1/3'ü\". Aynı ölçüdeki pencere alt panelinin (100 × 1250 × 800) kuralı (D-75). 280'lük evde üst kot 200, üst panel 800. 500'lük üst panel 1/5 kalır (D-75) (r07)"
     },
     "100'lük yapıştırma dolu vasistaslı pano (60/40) | 100 × 1250 × 2800": {
      "kod": null,
@@ -1761,9 +1761,9 @@
      "hesap": "oran",
      "pay": 1,
      "payda": 3,
-     "esleme": "yakın",
+     "esleme": "kural",
      "birim": "adet",
-     "not": "öneri: aynı ölçüdeki pencere alt panelinin (100 × 1250 × 1000) kaydı, tam panonun 1/3'ü (D-75). 300'lük evde üst kot 200, üst panel 1000. D-75 üst paneli 1/5 dedi (500'lük panel); 1000'lük üst panel için Lokman'ın sözü yok, onay bekler (r07)"
+     "not": "Tam pano (100 × 1250 × 2500, YP1) fiyatının 1/3'ü: Lokman 14 Kasım 2026 07:28:15 UTC kartı (cmsg_01UAFvcnfVuTR1wfFux5fQPPVRWdgNBZskjEbrpP1Fawc1, \"Pencere üst paneli 800 ve 1000 mm boyda hangi fiyatla hesaplansın?\"), seçim \"Tam panonun 1/3'ü\". Aynı ölçüdeki pencere alt panelinin (100 × 1250 × 1000) kuralı (D-75). 300'lük evde üst kot 200, üst panel 1000. 500'lük üst panel 1/5 kalır (D-75) (r07)"
     },
     "100'lük yapıştırma dolu vasistaslı pano (60/40) | 100 × 1250 × 3000": {
      "kod": null,
