@@ -1,0 +1,96 @@
+{
+ "kod": "PA31",
+ "gosterim": "PA-31",
+ "durum": "gecerli",
+ "sablon": "adaylar/PA31.json",
+ "gorsel": "adaylar/PA31.png",
+ "referans_model": "PA-31",
+ "yapi_turu": "prefabrik",
+ "kat": 1,
+ "oda_programi": "2+1",
+ "katalog_m2": 59.0,
+ "kapali_m2": 49.3,
+ "veranda_m2": 9.64,
+ "ozet": {
+  "grid": {
+   "x_pano": 6,
+   "y_pano": 6.0
+  },
+  "dis_olcu_cm": [
+   763.0,
+   773.0
+  ],
+  "brut_m2": 58.98,
+  "pano": 35,
+  "pencere": 5,
+  "kapi": 4,
+  "odalar": {
+   "YATAK ODASI 1": 9.09,
+   "VERANDA": 9.64,
+   "BANYO": 4.43,
+   "SALON+MUTFAK": 20.6,
+   "YATAK ODASI 2": 11.45
+  }
+ },
+ "kaynak": {
+  "metin": "D-92 (İE-40): 60 m² 2+1 evin (PA-14, AP-13) tek özel pano kuralının dizilim sonunda bıraktığı 15 cm kısa parçası silinmiş hâli; ön duvar ve veranda 15 cm (Lokman 14 Kasım 2026 19:39:46 kartı \"Kısa parça silinsin\"; 20:09:12 kartı \"Doğru, yanına eklensin\": \"Bugünkü 60 m2 kalır; 773 cm hâli (59,0 m2, veranda 9,64 m2) yeni numarayla girer.\")",
+  "dosya": "testler/havuz/is_emirleri/PA14_SILME.json",
+  "ayna": null,
+  "karar": "D-92",
+  "standart": true,
+  "kart_kiyasi": {
+   "kart": "AP-13",
+   "kart_sha256": "4d155eeceab5d922d4f177ea45180b3c0761cc7c5a956d8873806bf1625e7750",
+   "sonuc": "geçti",
+   "olcum": {
+    "dis_olcu_cm": [
+     763.0,
+     773.0
+    ],
+    "acikla_olcu_cm": [
+     763.0,
+     773.0
+    ],
+    "brut_m2": 58.98,
+    "kubbe_m2": 0.0,
+    "yatak_odasi": 2,
+    "pencereler": {
+     "120x120": 2,
+     "120x180": 2,
+     "60x40": 1
+    },
+    "dis_kapi": 1,
+    "ic_kapi": 3,
+    "veranda": 1,
+    "kat": 1,
+    "kaynak_dis_olcu_cm": [
+     763.0,
+     788.0
+    ],
+    "silinen_cm": [
+     0.0,
+     15.0
+    ],
+    "silinen": [
+     {
+      "duvar": "dis y 5",
+      "boy": 15.0
+     },
+     {
+      "duvar": "dis y 381.5",
+      "boy": 15.0
+     }
+    ],
+    "yeniden_dizilen": [],
+    "veranda_kisalan": [
+     "VERANDA"
+    ]
+   },
+   "kip": "silme_hali",
+   "kaynak_is_emri": "is_emri/adaylar/PA14.json",
+   "kaynak_sha256": "3ada72c064cbf31591045bd3c0181f3b45f27c556238aea909a4ada1c409dd43",
+   "veranda_sozu": "Lokman, 14 Kasım 2026 20:09:12 UTC kartı \"Doğru, yanına eklensin\" (seçenek metni: \"Bugünkü 60 m2 kalır; 773 cm hâli (59,0 m2, veranda 9,64 m2) yeni numarayla girer.\")"
+  }
+ },
+ "not": ""
+}

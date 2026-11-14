@@ -1,0 +1,99 @@
+{
+ "kod": "PA30",
+ "gosterim": "PA-30",
+ "durum": "gecerli",
+ "sablon": "adaylar/PA30.json",
+ "gorsel": "adaylar/PA30.png",
+ "referans_model": "PA-30",
+ "yapi_turu": "prefabrik",
+ "kat": 1,
+ "oda_programi": "3+1",
+ "katalog_m2": 83.0,
+ "kapali_m2": 69.9,
+ "veranda_m2": 12.8,
+ "ozet": {
+  "grid": {
+   "x_pano": 9.0,
+   "y_pano": 6
+  },
+  "dis_olcu_cm": [
+   1139.5,
+   726.0
+  ],
+  "brut_m2": 82.73,
+  "pano": 51,
+  "pencere": 7,
+  "kapi": 6,
+  "odalar": {
+   "SALON+MUTFAK": 18.5,
+   "YATAK ODASI 1": 9.56,
+   "BANYO": 5.66,
+   "YATAK ODASI 2": 10.67,
+   "HOL": 7.61,
+   "YATAK ODASI 3": 12.84,
+   "VERANDA": 12.8
+  }
+ },
+ "kaynak": {
+  "metin": "D-92 (İE-40): 85 m² 3+1 evin (PA-12, AP-11) tek özel pano kuralının dizilim sonunda bıraktığı 26,5 cm kısa parçası silinmiş hâli (Lokman 14 Kasım 2026 19:39:46 kartı \"Kısa parça silinsin\"; 20:05:33 kartı \"Doğru, yanına eklensin\": \"Bugünkü 85 m2 kalır; 1139,5 cm hâli (82,7 m2) yeni numarayla girer.\")",
+  "dosya": "testler/havuz/is_emirleri/PA12_SILME.json",
+  "ayna": null,
+  "karar": "D-92",
+  "standart": true,
+  "kart_kiyasi": {
+   "kart": "AP-11",
+   "kart_sha256": "5432f4eae3a5fa73a041ef75b6b94401c015b91acabc649135b0d9df3c0c7023",
+   "sonuc": "geçti",
+   "olcum": {
+    "dis_olcu_cm": [
+     1139.5,
+     726.0
+    ],
+    "acikla_olcu_cm": [
+     1139.5,
+     726.0
+    ],
+    "brut_m2": 82.73,
+    "kubbe_m2": 0.0,
+    "yatak_odasi": 3,
+    "pencereler": {
+     "120x180": 5,
+     "180x200": 1,
+     "60x40": 1
+    },
+    "dis_kapi": 1,
+    "ic_kapi": 5,
+    "veranda": 1,
+    "kat": 1,
+    "kaynak_dis_olcu_cm": [
+     1166.0,
+     726.0
+    ],
+    "silinen_cm": [
+     26.5,
+     0.0
+    ],
+    "silinen": [
+     {
+      "duvar": "dis x 5",
+      "boy": 26.5
+     },
+     {
+      "duvar": "ic x 452.25",
+      "boy": 21.5
+     },
+     {
+      "duvar": "dis x 721",
+      "boy": 26.5
+     }
+    ],
+    "yeniden_dizilen": [],
+    "veranda_kisalan": []
+   },
+   "kip": "silme_hali",
+   "kaynak_is_emri": "is_emri/adaylar/PA12.json",
+   "kaynak_sha256": "7e76bc047e0aa08b517ce50f17e9b9318b13fb6e02b537411784c7cb85447dfa"
+  }
+ },
+ "not": ""
+}
