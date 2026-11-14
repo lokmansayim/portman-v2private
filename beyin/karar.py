@@ -141,6 +141,34 @@ def karar_ver(talep: Talep, k: Konusma, bayi: dict | None, katalog: Katalog, met
     return karar
 
 
+_UNVANLAR = {"bey", "hanim", "sayin", "usta", "abi", "abla", "hoca", "hocam"}
+
+
+def _ad_sozcukleri(s) -> list[str]:
+    """Adın sözcükleri: küçük harf, Türkçe harfler sade, unvan ("Bey", "Hanım") sayılmaz."""
+    return [w for w in (varyant._norm(x) for x in re.split(r"[^0-9A-Za-zÇĞİÖŞÜçğıöşü]+", str(s or ""))) if w and w not in _UNVANLAR]
+
+
+def _bayi_adi_musteri_degil(k: Konusma, t: Talep, bayi: dict | None, metin: str | None) -> Talep:
+    """BK-29 tur 7 (canlı bulgu, 14–15 Kasım 2026): LLM bağlamında "bayinin adı/hitabı" yazar (D-06, `worker.bayi_tanimi`); LLM bunu
+    bazen `musteri.ad`'a yazıyor ve bayinin adı İş Emri'nin `talep.musteri_adi`'sına, PDF başlığına ve çelik antetine çıkıyor. Müşteri
+    adı bayinin kendi mesajından okunur (K18; şema: "Mesajda OLMAYAN hiçbir alan doldurulmaz"): LLM'in verdiği ad bayinin kartındaki
+    adın ya da hitabın sözcüklerinden oluşuyorsa ve bu mesajda yazmıyorsa düşer (taslağa girmez; sevk adresi ve öteki alanlar aynen).
+    Bayi kendi adını mesajına yazdıysa (kendi evi) ad kalır. Bayi kaydı ya da ham mesaj yoksa dokunulmaz."""
+    ad = (t.musteri.ad if t.musteri else None) or ""
+    sozcukler = _ad_sozcukleri(ad)
+    if not sozcukler or not bayi or metin is None:
+        return t
+    bayinin = set(_ad_sozcukleri(bayi.get("ad"))) | set(_ad_sozcukleri(bayi.get("hitap")))
+    if not set(sozcukler) <= bayinin:
+        return t
+    mesajdaki = _ad_sozcukleri(metin)
+    if all(any(m.startswith(w) for m in mesajdaki) for w in sozcukler):      # "Lokman'ın evi", "müşteri Lokman": bayi kendi yazdı
+        return t
+    k.not_dus("kural", "müşteri adı bayinin adıyla aynı ve mesajda yok: alınmadı")
+    return t.model_copy(update={"musteri": t.musteri.model_copy(update={"ad": None})})
+
+
 def _karar_ver(talep: Talep, k: Konusma, bayi: dict | None, katalog: Katalog, metin: str | None) -> Karar:
     t = talep
     k.not_dus("gelen", t.ozet, {"niyet": t.niyet, "guven": t.guven})
@@ -481,6 +509,7 @@ def _karar_ver(talep: Talep, k: Konusma, bayi: dict | None, katalog: Katalog, me
             return yp
         if yp is not None:
             t, yp_komut = yp
+    t = _bayi_adi_musteri_degil(k, t, bayi, metin)   # BK-29 tur 7: LLM'in bağlamdan aldığı bayi adı müşteri adı değildir (K18)
     k.birlestir(t.model_dump())
     if yp_komut:
         k.d["taslak"]["yarim_pano"] = list(k.d["taslak"].get("yarim_pano") or []) + yp_komut
