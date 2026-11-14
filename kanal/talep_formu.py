@@ -16,7 +16,13 @@ Sır ve numara tutmaz; ağ yok. Bayinin notu LLM'e gitmez (talepte özel istek o
   - Ölçü (`olcu_hesabi`): kısa kenar 20 + 62,75 × yarım pano, uzun kenar 10 + 62,75 × yarım pano; en yakın yarım panoya. Bayi tek kenar
     ve m² yazarsa öteki kenarı kod m²'den hesaplar ("bunu motorda kendin hesapla müşteriye bırakma"). Talebe hesaplanan alan yazılır;
     bayiye ölçü `olcu_notu` ile söylenir.
-  - Cevabın token'ı `pf:<iz>[:1]`; tür yine `talep`, `form` alanı `prefabrik` (kuyruk satırı ve çözüm yolu aynı)."""
+  - Cevabın token'ı `pf:<iz>[:1]`; tür yine `talep`, `form` alanı `prefabrik` (kuyruk satırı ve çözüm yolu aynı).
+
+İE-20 PR-8 · Verandasız talep formu (`kanal/formlar/talep2.json`; D-89; Lokman, 14 Kasım 2026 07:34 ve 07:44 UTC):
+  - İlk talep formunun (`talep.json`, yayımlı; değişmez) veranda sorusu olmayan kopyasıdır; öteki alanlar aynı. Veranda ayrıca sorulmaz:
+    bir oda gibi sayılır, bayi isterse yazar. Kimliği ayarda varsa (`talep_formu.talep2_flow_id`) ilk formun yerine o sunulur
+    (`kanal/worker.py` › `talep_formu_sunusu`); yoksa davranış bugünküyle aynı. Ekran verisi `talep2_ekran_verisi` (veranda yok).
+  - Cevabın token'ı ilk formunkiyle aynıdır (`tf:<iz>[:1]`); cevapta veranda olmadığı için talebe veranda yazılmaz."""
 from __future__ import annotations
 
 import json
@@ -24,8 +30,8 @@ import re
 from pathlib import Path
 
 FORMLAR = Path(__file__).resolve().parent / "formlar"
-EKRAN = {"talep": "TALEP", "revizyon": "REVIZYON", "prefabrik": "TALEP_P"}
-DUGME = {"talep": "Talep formu", "revizyon": "Revizyon formu", "prefabrik": "Talep formu"}          # flow_cta (≤ 20)
+EKRAN = {"talep": "TALEP", "revizyon": "REVIZYON", "prefabrik": "TALEP_P", "talep2": "TALEP"}
+DUGME = {"talep": "Talep formu", "revizyon": "Revizyon formu", "prefabrik": "Talep formu", "talep2": "Talep formu"}   # flow_cta (≤ 20)
 # tf:<iz>[:1] talep · pf:<iz>[:1] prefabrik talep formu · rv:<İş Emri no>:<rev> revizyon
 TOKEN = re.compile(r"^(tf|pf|rv):([^:\s]{1,80})(?::([0-9]{1,3}))?$")
 FLOW_ID = re.compile(r"^[0-9]{1,40}$")
@@ -385,6 +391,11 @@ def ekran_verisi(bayi: dict | None, taslak: dict | None) -> dict:
     d["bilinen"] = ("Bildiklerim: " + ", ".join(bilinen) + ". " if bilinen else "") + \
         "Bildiğiniz kadarını doldurmanız yeterli; eksik kalanı sohbette sorarım."
     return d
+
+
+def talep2_ekran_verisi(bayi: dict | None, taslak: dict | None) -> dict:
+    """Verandasız talep formunun (`talep2.json`) ekran verisi: `ekran_verisi` ile aynı, veranda yok (formun veri modelinde de yok)."""
+    return {k: v for k, v in ekran_verisi(bayi, taslak).items() if k != "veranda"}
 
 
 def prefabrik_tokeni(iz: str, taslaktan: bool = False) -> str:
