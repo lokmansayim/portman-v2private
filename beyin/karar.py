@@ -344,7 +344,18 @@ def _karar_ver(talep: Talep, k: Konusma, bayi: dict | None, katalog: Katalog, me
     if t.niyet == "selam":
         return _bitir(k, Karar(eylem="cevapla", gerekce="selam",
                                 mesaj=f"Merhaba{(' ' + hitap) if hitap else ''}. Hangi model ya da ölçü için ön onay planı hazırlayalım? Örnek: {ORNEK_METNI}."))
+    if t.niyet in ("diger", "soru", "red") and k.d["asama"] in ("onay_bekliyor", "uretildi", "revizyon") and k.d.get("son_is_emri") \
+            and _iptal_olumsuz_sozu(metin):
+        # BK-29 tur 6 (tur 5 canlı madde 10): "iptal etmeyin" canlıda "diğer" okunuyor, "Anlayamadım" ve [Talep formu] gidiyordu.
+        # Niyet "red" gelince verilen cevabın aynısı (tur 5): talep kapanmaz, değişiklik sorulur. "Neyi değiştirelim?" açıkken
+        # niyet "red" okunan "iptal etmeyin" de talebi kapatmaz (olumsuz söz iptal değildir, K21).
+        k.d["asama"] = "revizyon"
+        return _bitir(k, Karar(eylem="sor", soru_alani="revizyon_ne", gerekce="plan reddedildi",
+                                mesaj="Anladım. " + _neyi_degistirelim(k)))
     if t.niyet == "soru":
+        plan_cevabi = _plan_durumu_cevabi(k)                    # BK-29 tur 6 (pano 212, C7): açık ya da onaylı planı olan bayiye planı söylenir
+        if plan_cevabi:
+            return _bitir(k, Karar(eylem="cevapla", gerekce="genel soru: plan durumu", mesaj=plan_cevabi))
         ek = " Açık bir plan talebiniz devam ediyor; ölçü/model bilgisini yazınca planı hazırlarım." if k.d["asama"] == "topluyor" else ""
         return _bitir(k, Karar(eylem="cevapla", gerekce="genel soru",
                                 mesaj="Fiyat, süre ve teslim bilgisi ön onaylı planın ardından teklifle gelir. Plan için model kodu ya da ölçü/oda programı yazmanız yeterli." + ek))
@@ -495,6 +506,9 @@ def _karar_ver(talep: Talep, k: Konusma, bayi: dict | None, katalog: Katalog, me
         return _is_emri_uret(k, bayi, katalog, json.loads(yol.read_text(encoding="utf-8")), kod, ts)
 
     # 2b) serbest talep — zorunlu: oda programı + (dış ölçü | pano | alan)
+    cok_kat = _cok_katli_prefabrik(k, katalog, ts)             # BK-29 tur 6 (pano 213, A12): iki kat prefabrikte soru sorulmaz, ilk cevapta söylenir
+    if cok_kat is not None:
+        return cok_kat
     if not ts.get("oda_programi"):
         return _soru(k, "oda_programi", "Kaç oda istiyorsunuz? (örn. 2+1, 3+1, tek oda)")
     nx = ny = None
@@ -561,6 +575,28 @@ def _karar_ver(talep: Talep, k: Konusma, bayi: dict | None, katalog: Katalog, me
     # yerleşim üretici henüz yok → dürüst yönlendirme, ölçü teyidiyle
     return _bitir(k, Karar(eylem="yonlendir", gerekce="serbest yerleşim üretici v0.1'de yok",
                             mesaj=f"Anladım: {ts['oda_programi']}, dış ölçü {fmt_m(W)} x {fmt_m(H)} ({nx:g}x{ny:g} pano). Bu ölçüde hazır yerleşim şablonu yok; " + YONLENDIRME))
+
+
+KAT_ADI = {2: "İki", 3: "Üç"}
+
+
+def _cok_katli_prefabrik(k: Konusma, katalog: Katalog, ts: dict) -> Karar | None:
+    """BK-29 tur 6 (pano 213; kabul seti A12): iki katlı prefabrik planı çizilmiyor (şablon ve aday tek kat). Bot eskiden oda ve dış ölçü
+    sorup sonra yönlendiriyordu; dış ölçü verilince tek katlı ızgara şablonuna da düşebiliyordu. Talep ilk cevapta PortatifEv'e iletilir.
+    Katalogda bu kata uyan model varsa (alan ve oda programıyla) bugünkü öneri yolu kalır. Çelik bu kurala girmez (kat süzgeci ve
+    yönlendirme `2b` çelik dalında); yapı tipi yazılmamış talep de girmez."""
+    try:
+        kat = int(ts.get("kat_sayisi") or 1)
+    except (TypeError, ValueError):
+        return None
+    if kat < 2 or ts.get("yapi_turu") != "prefabrik":         # yapı tipi yazılmadıysa bugünkü yol (yapı tipi sorusu: pano 209)
+        return None
+    if ts.get("alan_m2") and ts.get("oda_programi") and \
+            katalog.yakin_modeller(float(ts["alan_m2"]), ts["oda_programi"], ts.get("yapi_turu"), kat=kat):
+        return None
+    ad = KAT_ADI.get(kat, str(kat))
+    return _bitir(k, Karar(eylem="yonlendir", gerekce=f"{kat} katlı prefabrik: plan çizilmiyor",
+                            mesaj=f"{ad} katlı ev planını henüz çizemiyorum. Talebinizi PortatifEv'e iletiyorum; size dönüş yapılacak."))
 
 
 def _celik_dali(k: Konusma, bayi: dict, katalog: Katalog, aday: dict, ts: dict) -> Karar:
@@ -2144,6 +2180,14 @@ def _iptal_sozu(metin: str | None) -> bool:
     """Mesaj yalnız açık iptal sözü mü ("iptal", "iptal edin", "talebi iptal et", "vazgeçtik")? Olumsuz ve soru biçimi değil."""
     q = _sozcuk_norm(metin or "")
     return bool(_IPTAL_SOZU.match(q)) and not _IPTAL_OLUMSUZ.search(q)
+
+
+def _iptal_olumsuz_sozu(metin: str | None) -> bool:
+    """Mesaj yalnız iptal sözünün olumsuz biçimi mi ("iptal etmeyin", "iptal etme", "vazgeçmedim")? Açık planı kapatmaz."""
+    q = _sozcuk_norm(metin or "")
+    return bool(_IPTAL_SOZU.match(q)) and bool(_IPTAL_OLUMSUZ.search(q))
+
+
 _NEYI_DEGISTIRELIM_PREFABRIK = "Neyi değiştirelim? Odayı ve pencere ölçüsünü yazın (örn. \"mutfak penceresi 120x120 olsun\")."
 
 
@@ -2539,6 +2583,28 @@ def _plan_ozu(ie: dict) -> str:
 ACIK_PLAN_ASAMALARI = ("onay_bekliyor", "revizyon", "topluyor", "onaylandi")
 
 
+def _plan_durumu_cevabi(k: Konusma) -> str:
+    """BK-29 tur 6 (pano 212; kabul seti C7): fiyat, süre ya da teklif sorusuna cevap bayinin planını bilir. Onaylı plan: teklifi
+    PortatifEv hazırlıyor (çelikte plan önce teknik kontrolde). Onay bekleyen plan: teklif onaydan sonra. Planı olmayan bayiye
+    bugünkü genel cevap gider (boş dize)."""
+    ie = k.d.get("son_is_emri") or {}
+    no = ie.get("is_emri_no")
+    if not no:
+        return ""
+    etiket = f"{no} r{int(ie.get('revizyon') or 1):02d}"
+    celik = (ie.get("yapi") or {}).get("sistem") == "celik"
+    if k.d.get("asama") == "onaylandi":
+        if celik:
+            return (f"Onayladığınız plan ({etiket}) teknik kontrolde. Kontrol bitince teklifi PortatifEv hazırlar ve bu sohbete gönderir. "
+                    "Fiyat ve teslim süresi teklifte yazar.")
+        return (f"Onayladığınız plan ({etiket}) için teklifi PortatifEv hazırlıyor. Teklif bu sohbete gönderilir. "
+                "Fiyat ve teslim süresi teklifte yazar.")
+    if k.d.get("asama") == "onay_bekliyor":
+        return (f"Planınız ({etiket}) onayınızı bekliyor. Teklifi PortatifEv, planı onayladıktan sonra hazırlar. "
+                "Fiyat ve teslim süresi teklifte yazar.")
+    return ""
+
+
 def _plani_acik_tut(k: Konusma, d0: dict, karar: Karar) -> None:
     """BK-29 (pano 200; 13 Kasım 2026 WhatsApp denetimi): açık bir planın üstüne gelen istek geri çevrilince (yönlendirme) plan ölmez.
     Konuşma bu mesajdan önceki hâline döner (taslak, revizyon sayacı, plan); askıdaki soru, saklanan istek ve açık set kapanır, soru hakkı
@@ -2602,6 +2668,11 @@ def _bitir(k: Konusma, karar: Karar) -> Karar:
     if k.d.get("son_soru_alani") != "pencere_secim":
         k.d.pop("pencere_secim", None)
     if karar.eylem == "is_emri":
+        onayli = k.d.pop("onaylanan", None)            # BK-29 tur 6 (pano 212, C8): onaylı planın üstüne yeni revizyon geldi; onay düşer, bayiye söylenir
+        yeni_rev = int((karar.is_emri or {}).get("revizyon") or 1)
+        if onayli and yeni_rev > 1 and int(onayli[1]) < yeni_rev:
+            karar.mesaj = (f"{karar.mesaj} Bu değişiklik r{int(onayli[1]):02d} onayınızı geçersiz kıldı. "
+                           f"r{yeni_rev:02d} için yeniden onay gerekir.").strip()
         k.d["bekleyen_onay"] = karar.is_emri.get("is_emri_no") if karar.is_emri else None
         k.d["asama"] = "onay_bekliyor"
         k.d["soru_sayisi"] = 0      # BK-29: soru hakkı (MAX_SORU) her planda yenilenir; prefabrikte talebin soruları revizyonda tükeniyordu
