@@ -64,6 +64,7 @@ def isleme_ayari(ayar: dict) -> dict:
             "banka_germe": dict(ayar.get("banka_germe") or {}),                    # İE-23 PR-2a: banka modelinde oda büyüt/küçült (kapalı)
             "gorsel_okuma": dict(ayar.get("gorsel_okuma") or {}),                  # İE-20: çizim okuma (kapalıyken bugünkü cevap)
             "talep_formu": dict(ayar.get("talep_formu") or {}),                    # İE-20 PR-2: talep ve revizyon formu (kapalıyken bugünkü metin)
+            "yarim_pano": dict(ayar.get("yarim_pano") or {}),                      # İE-39 PR-2: "sağa yarım pano uzat" (kapalıyken bugünkü yol)
             "kira_sn": KIRA_SN, "en_cok_deneme": EN_COK_DENEME}
 
 

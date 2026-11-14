@@ -8,8 +8,8 @@
 #      sonraki ilk mesai dakikasında 'zaman_asimi' olur ve Patron'a bir bildirim + pencere kapalıysa ücretli şablon gider; Patron'un fiyat
 #      hatırlatması bekleyen kontrol (bugünkü sürümde de vardır, sayı bilgi için); onay bekleyen revizyon (bayi yeniden yazınca kapanır,
 #      mesaj gitmez);
-#   5. ayarlar: kanal açık mı, dry_run, mesaj katmanı, 3D adresi dolu mu, plan üretimi ve LLM-önce revizyon, yeni sürümün dört yeni
-#      özelliği (banka_germe, gorsel_okuma, talep_formu, bayi_kaydi; ayarda yoksa kapalıdır, kanal/ayarlar.py VARSAYILAN);
+#   5. ayarlar: kanal açık mı, dry_run, mesaj katmanı, 3D adresi dolu mu, plan üretimi ve LLM-önce revizyon, yeni özellikler
+#      (banka_germe, gorsel_okuma, talep_formu, bayi_kaydi, yarim_pano; ayarda yoksa kapalıdır, kanal/ayarlar.py VARSAYILAN);
 #   6. son yedeğin yaşı (nabız dosyası) ve öz-test sonucu (yoksa ajan kurulumdan sonra öz-testi koşar: LLM anahtarı varsa 1 ücretli çağrı).
 # Sunucuda kopyası yok (sürümle gelir); kopyası olmayan geçici betik gibi koşulur (AGENTS.md › Sunucu erişimi). Mac'te, commit'e sabit:
 #   curl -fsSL https://raw.githubusercontent.com/lokmansayim/portman-v2private/<commit>/vps/kurulum_on_bakis.sh \
@@ -98,7 +98,8 @@ print(f"   kanal (enabled): {'açık' if d.get('enabled') is True else 'kapalı'
       f" · mesaj katmanı: {'açık' if d.get('mesaj_katmani') is True else 'kapalı'} · 3D adresi (ucb_taban_url): {'dolu' if d.get('ucb_taban_url') else 'boş'}")
 print(f"   plan üretimi (İE-14): {ac('plan_uretimi')} · LLM-önce revizyon: {ac('llm_once_revizyon')}")
 yeni = [("banka_germe", "oda büyütme, İE-23"), ("gorsel_okuma", "çizim ve PDF okuma, İE-20, satır 83"),
-        ("talep_formu", "talep ve revizyon formu, İE-20, satır 110"), ("bayi_kaydi", "WhatsApp'tan bayi kaydı, İE-22, satır 111")]
+        ("talep_formu", "talep ve revizyon formu, İE-20, satır 110"), ("bayi_kaydi", "WhatsApp'tan bayi kaydı, İE-22, satır 111"),
+        ("yarim_pano", "havuz evinde yarım pano uzat / kısalt, İE-39")]
 print("   yeni özellikler: " + " · ".join(f"{k} ({a}): {ac(k)}" for k, a in yeni))
 acik = [k for k, _ in yeni if ac(k) == "açık"]
 print("   yeni özelliklerin hepsi kapalı" if not acik else f"   DİKKAT: açık yeni özellik: {', '.join(acik)}")
