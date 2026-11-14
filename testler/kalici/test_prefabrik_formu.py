@@ -45,7 +45,7 @@ def test_form_tanimi_iki_ekran_flow_json_sinirlari():
     assert not e1.get("terminal") and e2["terminal"] is True and e2["success"] is True
     for ekran in (e1, e2):
         assert re.fullmatch(r"[A-Z_]+", ekran["id"]) and 0 < len(ekran["title"]) <= 30
-        assert all("__example__" in v and v["type"] == "string" for v in ekran["data"].values())
+        assert all("__example__" in v and v["type"] == "string" for v in ekran.get("data", {}).values())
         cocuklar = ekran["layout"]["children"]
         adlar = [c["name"] for c in cocuklar if "name" in c]
         assert len(adlar) == len(set(adlar))
@@ -60,26 +60,88 @@ def test_form_tanimi_iki_ekran_flow_json_sinirlari():
             if "helper-text" in c:
                 assert len(c["helper-text"]) <= 80
             if c["type"] in PICKER:
+                assert "isteğe bağlı" not in c["label"]            # Meta, 14 Kasım 2026: en az 0 dosyada etikete "(isteğe bağlı)" kendisi ekler
                 assert "init-value" not in c and len(c.get("description", "")) <= 300 and c["max-uploaded-documents"] == 1
                 assert c["max-file-size-kb"] * 1024 <= GO.EN_BUYUK_BAYT
                 for mime in c["allowed-mime-types"]:
                     assert GO.okunabilir_mi(mime, 1000) is None, mime
             for d in re.findall(r"\$\{data\.(\w+)\}", json.dumps(c)):
-                assert d in ekran["data"], d
+                assert d in ekran.get("data", {}), d
             for k, v in c.items():                                # Meta: sınır özellikleri tamsayı (12 Kasım: "max-length": "600" reddedildi)
                 if k.startswith(("max-", "min-")):
                     assert type(v) is int, (k, v)
-    # ekran 1 → ekran 2: ilk ekranın her alanı taşınır; ekran 2 hepsini cevaba yazar
+    # ekran 1 → ekran 2: geçiş yük taşımaz; ekran 2 ilk ekranın alanlarını genel başvuruyla (`${screen.TALEP_P.form.x}`, Flow JSON 4.0+)
+    # cevaba yazar. Meta, 14 Kasım 2026: geçiş yükündeki sayı girişi (`${form.alan}`, `en`, `boy`) ikinci ekranın "string" veri modeline
+    # yazılamaz (INVALID_NAVIGATE_ACTION_PAYLOAD); uzun kenar çoğu zaman boştur, tipli geçişe sokulmaz.
     a1 = [c["name"] for c in e1["layout"]["children"] if "name" in c]
     gecis = e1["layout"]["children"][-1]["on-click-action"]
     assert gecis["name"] == "navigate" and gecis["next"] == {"type": "screen", "name": "OZELLIK_P"}
-    assert gecis["payload"] == {a: "${form.%s}" % a for a in a1} and set(e2["data"]) == set(a1)
+    assert gecis["payload"] == {} and "data" not in e2
     a2 = [c["name"] for c in e2["layout"]["children"] if "name" in c]
     bitis = e2["layout"]["children"][-1]["on-click-action"]
     assert bitis["name"] == "complete"
-    assert bitis["payload"] == {**{a: "${data.%s}" % a for a in a1}, **{a: "${form.%s}" % a for a in a2}}
+    assert bitis["payload"] == {**{a: "${screen.TALEP_P.form.%s}" % a for a in a1}, **{a: "${form.%s}" % a for a in a2}}
     # önizleme verisi ilk ekranın verisiyle aynı alanlar (vps/flow_taslak.py önizlemesi ve canlı sunuş)
     assert set(TF.prefabrik_ekran_verisi(None, None)) == set(e1["data"])
+
+
+def _alan_turu(c: dict) -> str:
+    """Bileşenin form değerinin Flow JSON türü (Meta'nın geçiş yükü denetimindeki gibi)."""
+    if c["type"] == "TextInput" and c.get("input-type") == "number":
+        return "number"
+    return "array" if c["type"] in PICKER or c["type"] == "CheckboxGroup" else "string"
+
+
+@pytest.mark.parametrize("tur", ["talep", "revizyon", "prefabrik"])
+def test_gecis_yuku_sonraki_ekranin_veri_modeliyle_ayni_turde(tur):
+    """Meta'nın 14 Kasım 2026 hatası yerelde yakalanır: `navigate` yükündeki her alan sonraki ekranın veri modelinde aynı türle durur,
+    veri modelinin her alanı yükte vardır; `${screen.X.form.y}` var olan bir ekranın var olan alanını gösterir."""
+    ekranlar = {e["id"]: e for e in TF.tanim(tur)["screens"]}
+    alanlar = {kid: {c["name"]: c for c in e["layout"]["children"] if "name" in c} for kid, e in ekranlar.items()}
+    for kid, e in ekranlar.items():
+        for c in e["layout"]["children"]:
+            eylem = c.get("on-click-action") or {}
+            for ekran, alan in re.findall(r"\$\{screen\.(\w+)\.form\.(\w+)\}", json.dumps(eylem)):
+                assert ekran in ekranlar and alan in alanlar[ekran], (ekran, alan)
+            if eylem.get("name") != "navigate":
+                continue
+            model = ekranlar[eylem["next"]["name"]].get("data", {})
+            assert set(eylem["payload"]) == set(model), (kid, sorted(set(eylem["payload"]) ^ set(model)))
+            for ad, deger in eylem["payload"].items():
+                m = re.fullmatch(r"\$\{form\.(\w+)\}", str(deger))
+                if m:
+                    assert _alan_turu(alanlar[kid][m.group(1)]) == model[ad]["type"], (kid, ad)
+                m = re.fullmatch(r"\$\{data\.(\w+)\}", str(deger))
+                if m:
+                    assert e["data"][m.group(1)]["type"] == model[ad]["type"], (kid, ad)
+
+
+def _hepsi(dugum) -> list[dict]:
+    """Ekrandaki bütün bileşenler; `If` ve `Switch` dallarındakiler dahil."""
+    if isinstance(dugum, list):
+        return [x for d in dugum for x in _hepsi(d)]
+    if not isinstance(dugum, dict):
+        return []
+    return ([dugum] if "type" in dugum else []) + [x for k, v in dugum.items() if k != "data-source" for x in _hepsi(v)]
+
+
+@pytest.mark.parametrize("tur", ["talep", "revizyon", "prefabrik"])
+def test_alan_adi_formun_butununde_tek(tur):
+    """Meta, 14 Kasım 2026 (DUPLICATE_FORM_COMPONENT_NAMES): aynı alan adı `If`'in iki dalında bile iki kez geçemez; ad formun bütün
+    ekranlarında tektir."""
+    adlar = [c["name"] for e in TF.tanim(tur)["screens"] for c in _hepsi(e["layout"]) if "name" in c]
+    assert len(adlar) == len(set(adlar)), sorted(a for a in set(adlar) if adlar.count(a) > 1)
+
+
+def test_cevapta_sayi_da_metin_de_okunur_bos_alan_dusmez():
+    """Sayı girişi cevapta sayı (70, 7.73) ya da metin ("70", "7,73") gelebilir; boş alan hiç gelmeyebilir, "" ya da null gelebilir."""
+    for alan in ({"alan": 70, "en": 7}, {"alan": "70", "en": "7"}, {"alan": 70.0, "en": 7, "boy": ""}, {"alan": "70", "en": "7,0", "boy": None}):
+        t = TF.talep(_cevap(**alan))
+        assert t["pano"] == {"nx": 5.5, "ny": 8.0} and t["alan_m2"] == 72.0 and "dis_olcu" not in t, (alan, t)
+    for alan in ({"en": 7.73, "boy": 10.14}, {"en": "7,73", "boy": "10,14"}, {"en": "7.73", "boy": "10.14", "alan": ""}, {"en": 10.14, "boy": 7.73}):
+        t = TF.talep(_cevap(**alan))
+        assert t["pano"] == {"nx": 6.0, "ny": 8.0}, (alan, t)
+    assert "pano" not in TF.talep(_cevap(alan="", en="", boy="")) and "pano" not in TF.talep(_cevap(alan=None, en=None, boy=None))
 
 
 def test_form_secenekleri_cozumleyiciyle_ayni_ve_standartlar_secili():

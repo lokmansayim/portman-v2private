@@ -30,9 +30,7 @@
            "data-source": [{"id": "butce", "title": "Bütçe"}, {"id": "yasam", "title": "Yaşam alanı"}, {"id": "montaj", "title": "Kısa montaj"},
                            {"id": "yok", "title": "Fark etmez"}]},
           {"type": "Footer", "label": "Devam",
-           "on-click-action": {"name": "navigate", "next": {"type": "screen", "name": "OZELLIK_P"},
-                               "payload": {"kat": "${form.kat}", "oda": "${form.oda}", "alan": "${form.alan}", "en": "${form.en}",
-                                           "boy": "${form.boy}", "oncelik": "${form.oncelik}"}}}
+           "on-click-action": {"name": "navigate", "next": {"type": "screen", "name": "OZELLIK_P"}, "payload": {}}}
         ]
       }
     },
@@ -41,14 +39,6 @@
       "title": "Standart özellikler",
       "terminal": true,
       "success": true,
-      "data": {
-        "kat": {"type": "string", "__example__": "1"},
-        "oda": {"type": "string", "__example__": "2+1"},
-        "alan": {"type": "string", "__example__": "70"},
-        "en": {"type": "string", "__example__": "7"},
-        "boy": {"type": "string", "__example__": ""},
-        "oncelik": {"type": "string", "__example__": "butce"}
-      },
       "layout": {
         "type": "SingleColumnLayout",
         "children": [
@@ -77,13 +67,15 @@
           {"type": "TextInput", "name": "il", "label": "Teslim ili", "input-type": "text", "required": false},
           {"type": "TextInput", "name": "ilce", "label": "Teslim ilçesi", "input-type": "text", "required": false},
           {"type": "TextArea", "name": "not", "label": "Not", "required": false, "max-length": 600, "helper-text": "Varsa özel isteğiniz"},
-          {"type": "DocumentPicker", "name": "dosya", "label": "Çizim ya da plan (isteğe bağlı)",
+          {"type": "DocumentPicker", "name": "dosya", "label": "Çizim ya da plan",
            "description": "El çizimi, plan resmi ya da PDF; tek dosya, en çok 20 MB", "min-uploaded-documents": 0, "max-uploaded-documents": 1,
            "max-file-size-kb": 20480, "allowed-mime-types": ["image/jpeg", "image/png", "image/webp", "application/pdf"]},
           {"type": "Footer", "label": "Gönder",
            "on-click-action": {"name": "complete",
-                               "payload": {"kat": "${data.kat}", "oda": "${data.oda}", "alan": "${data.alan}", "en": "${data.en}",
-                                           "boy": "${data.boy}", "oncelik": "${data.oncelik}", "kaplama": "${form.kaplama}",
+                               "payload": {"kat": "${screen.TALEP_P.form.kat}", "oda": "${screen.TALEP_P.form.oda}",
+                                           "alan": "${screen.TALEP_P.form.alan}", "en": "${screen.TALEP_P.form.en}",
+                                           "boy": "${screen.TALEP_P.form.boy}", "oncelik": "${screen.TALEP_P.form.oncelik}",
+                                           "kaplama": "${form.kaplama}",
                                            "cati_rengi": "${form.cati_rengi}", "yukseklik": "${form.yukseklik}",
                                            "dis_duvar": "${form.dis_duvar}", "ic_duvar": "${form.ic_duvar}", "tavan": "${form.tavan}",
                                            "pencere_rengi": "${form.pencere_rengi}", "ek": "${form.ek}", "musteri": "${form.musteri}",
