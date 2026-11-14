@@ -1,6 +1,6 @@
 {
  "aciklama": "İE-38 (D-87) çelik hakeminin hedef değerleri. AICelik'in tek katlı projeleri için proje kartı yok; değerler İE-16'da müşteri onay paftasından okunan tanımın adından (antet m², oda programı, veranda) alınır. Motor'un brüt oturumu antet m²'sinden en çok 0,5 m² sapar; oda programı ve veranda antette yazılı olmalı. `havuzda`: aynı proje havuzda başka kodla var (ÇP-07 = KT-03, ÇP-13 = KT-01, ÇP-14 = KT-04, ÇP-17 = KT-02).",
- "kaynak": "testler/celik/projeler/CP*/CP*.json (İE-16 tanımları; AICelik mührü testler/celik/muhur.json)",
+ "kaynak": "testler/celik/projeler/CP*/CP*.json (İE-16 tanımları; AICelik mührü testler/celik/muhur.json, ikinci küme testler/celik/muhur_2.json)",
  "evler": {
   "ÇP-03": {
    "tanim": "testler/celik/projeler/CP03/CP03.json",
@@ -111,6 +111,46 @@
    "kat_adedi": 1,
    "havuzda": null,
    "antet": "Tek kat çelik, 3+1, verandalı, beşik + çift cumba, 90,11 m² (kör ölçüm projesi)"
+  },
+  "ÇP-22": {
+   "tanim": "testler/celik/projeler/CP22/CP22.json",
+   "tanim_sha256": "c435ace16c52efdd6a054e2f328fbae9d885db03055f4319e9c764f3e3197935",
+   "antet_m2": 43.2,
+   "oda_programi": "1+1",
+   "veranda": false,
+   "kat_adedi": 1,
+   "havuzda": null,
+   "antet": "Tek kat çelik, 1+1, sundurmalı, parapet çatı, dış duvar 140, 43,2 m² (kör ölçüm projesi)"
+  },
+  "ÇP-23": {
+   "tanim": "testler/celik/projeler/CP23/CP23.json",
+   "tanim_sha256": "5b1101cdcfe513b131a476a0af0ba80f0362d0a2aefcfd26f154a91f2d973f5c",
+   "antet_m2": 82.0,
+   "oda_programi": "2+1",
+   "veranda": true,
+   "kat_adedi": 1,
+   "havuzda": null,
+   "antet": "Tek kat çelik, 2+1, verandalı, beşik, dış duvar 140, 82 m² (kör ölçüm projesi)"
+  },
+  "ÇP-24": {
+   "tanim": "testler/celik/projeler/CP24/CP24.json",
+   "tanim_sha256": "feec2d79f179f86051e3f39f9f5a673406bb59acc5c96625d6bc9217cec80e46",
+   "antet_m2": 140.0,
+   "oda_programi": "3+1",
+   "veranda": true,
+   "kat_adedi": 1,
+   "havuzda": null,
+   "antet": "Tek kat çelik, 3+1, iki verandalı, ikili beşik (beşik olarak), dış duvar 80, 140 m² (kör ölçüm projesi)"
+  },
+  "ÇP-25": {
+   "tanim": "testler/celik/projeler/CP25/CP25.json",
+   "tanim_sha256": "9775fe51f16624b0fbec22e3aa5d7b7efb6155b1693240531781174f4227470e",
+   "antet_m2": 166.0,
+   "oda_programi": "3+1",
+   "veranda": true,
+   "kat_adedi": 1,
+   "havuzda": null,
+   "antet": "Tek kat çelik, 3+1, L verandalı, antreli, ikili beşik (beşik + cumba olarak), dış duvar 140, 166 m² (kör ölçüm projesi)"
   }
  }
 }
