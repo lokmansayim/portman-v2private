@@ -1,6 +1,11 @@
 {
  "aciklama": "İE-39 PR-2: 85 m² 3+1 havuz evinde bayinin WhatsApp yazışması (ayar yarim_pano.acik). Plan numarası PM-… diye yazılır (saate bağlı). Üreten: testler/test_yarim_pano_okuma.py --dondur.",
- "onay": null,
+ "onay": {
+  "kim": "Lokman",
+  "zaman_utc": "2026-11-14T15:14:58Z",
+  "soz": "karar kartı \"Onaylayın: 85 m2 evde sağa yarım pano çizimi ve bayi mesajları doğru mu?\" → \"Doğru, PR açılsın\" (seçenek metni: \"Çizim (1202,25 cm) ve ekteki 6 bayi mesajı onaylı örnek olur. PR açılır, birleştirme sizde.\")",
+  "gosterilen": "bayinin 6 mesajı ve sistemin cevapları (PF Havuz_Basit_Komut/IE-39_tek_pano_kurali/85m2_26_5_silinir/whatsapp_yazisma_ornegi.md), önce/sonra pano dizilimi, ön onay PDF'i, DXF, bayi plan görseli (1202,25 cm) ve 1 pano önce/sonra (1265 cm); 14 Kasım 2026 15:12 UTC"
+ },
  "konusma": [
   {
    "bayi": "PA12",

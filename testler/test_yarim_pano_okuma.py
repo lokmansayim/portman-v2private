@@ -275,6 +275,12 @@ def test_whatsapp_ornegi(tmp_path):
     assert konusma_ornegi(tmp_path) == hedef["konusma"]
 
 
+def test_whatsapp_ornegi_onayli():
+    """Bayiye giden 6 cevap Lokman'ın onayıyla hedef örnek (kart 14 Kasım 2026 15:14:58 UTC "Doğru, PR açılsın"; D-90 Ek 2)."""
+    o = json.loads(ORNEK.read_text(encoding="utf-8"))["onay"]
+    assert o["kim"] == "Lokman" and o["zaman_utc"] == "2026-11-14T15:14:58Z" and "Doğru, PR açılsın" in o["soz"]
+
+
 def _dondur():
     import tempfile
     eski = json.loads(ORNEK.read_text(encoding="utf-8")) if ORNEK.exists() else {}
