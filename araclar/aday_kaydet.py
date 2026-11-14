@@ -12,6 +12,8 @@
     python3 araclar/aday_kaydet.py testler/havuz/is_emirleri/PA12_SILME.json --kod PA-30 … --karar D-92 --kart AP-11 \
                                    --silme-hali is_emri/adaylar/PA12.json --standart --havuz [--veranda-sozu "<Lokman'ın ev kartı, saatiyle>"]
                                    (BK-31: tek özel pano kuralının kısa parçası silinmiş ev; hakemin silme hâli kipi, kaynak evin İş Emri'siyle)
+                                   [--buyume-sozu "<Lokman'ın ev sözü, saatiyle>"] (BK-31 PR-2: kalan özel pano tam ya da yarım panoya
+                                   tamamlanmış, dış duvar dışarı kaymış ev; yalnız Lokman'ın o evdeki sözüyle)
     python3 araclar/aday_kaydet.py --motor genel --tanim modeller/C8801.json [--kod Ç8801] [--durum gecerli] [--referans Ç8801]
                                    [--varyantlar Ç8801K,Ç8801L] [--kat 1] [--musteri-projesi] [--kaynak "…"] [--not "…"] [--perspektifsiz]
 
@@ -64,6 +66,9 @@ def main() -> int:
                          "bıraktığı 30 cm'den kısa parça silinmiş)")
     ap.add_argument("--veranda-sozu", default=None,
                     help="--silme-hali ile: veranda da silinen kadar kısalırsa Lokman'ın o evin kartı, sözü ve saatiyle (BK-31); kayda yazılır")
+    ap.add_argument("--buyume-sozu", default=None,
+                    help="--silme-hali ile: dış duvar kalan özel panoyu tam ya da yarım panoya tamamlamak için dışarı kayarsa Lokman'ın o "
+                         "evdeki sözü ve saati (BK-31 PR-2; tek ev sözü); kayda yazılır")
     ap.add_argument("--havuz", action="store_true",
                     help="İE-38 (D-87): kaydı beyin/veri/havuz/<kod>.json'a yaz (ev başına bir dosya; adaylar.json ve adaylar_prefabrik.json aynen)")
     ap.add_argument("--standart", action="store_true",
@@ -71,8 +76,8 @@ def main() -> int:
     a = ap.parse_args()
     if a.standart_hal and a.silme_hali:
         print("DUR: --standart-hal ve --silme-hali ayrı kalemlerdir; birlikte verilmez"); return 2
-    if a.veranda_sozu and not a.silme_hali:
-        print("DUR: --veranda-sozu yalnız --silme-hali ile"); return 2
+    if (a.veranda_sozu or a.buyume_sozu) and not a.silme_hali:
+        print("DUR: --veranda-sozu ve --buyume-sozu yalnız --silme-hali ile"); return 2
     if a.motor == "genel":
         if a.standart_hal or a.silme_hali:
             print("DUR: --standart-hal ve --silme-hali yalnız prefabrikte (D-91, BK-31); çelikte yok"); return 2
@@ -106,7 +111,7 @@ def main() -> int:
             bulgular, olc = HH.denetle_standart(ie, kart, kaynak_ie)
         elif a.silme_hali:                                                     # BK-31: kısa parça silinmiş ev
             kaynak_ie = json.loads(Path(a.silme_hali).read_text(encoding="utf-8"))
-            bulgular, olc = HH.denetle_silme(ie, kart, kaynak_ie, a.veranda_sozu)
+            bulgular, olc = HH.denetle_silme(ie, kart, kaynak_ie, a.veranda_sozu, a.buyume_sozu)
         else:
             bulgular, olc = HH.denetle(ie, kart)
         if bulgular:
@@ -114,7 +119,8 @@ def main() -> int:
         kart_kiyasi = {"kart": a.kart.strip().upper(), "kart_sha256": kart["kart_sha256"], "sonuc": "geçti", "olcum": olc,
                        **({"kip": "standart_hal" if a.standart_hal else "silme_hali", "kaynak_is_emri": str(Path(kaynak_yolu)),
                            "kaynak_sha256": hashlib.sha256(Path(kaynak_yolu).read_bytes()).hexdigest()} if kaynak_yolu else {}),
-                       **({"veranda_sozu": a.veranda_sozu} if a.veranda_sozu and olc.get("veranda_kisalan") else {})}
+                       **({"veranda_sozu": a.veranda_sozu} if a.veranda_sozu and olc.get("veranda_kisalan") else {}),
+                       **({"buyume_sozu": a.buyume_sozu} if a.buyume_sozu and olc.get("tamamlanan") else {})}
     elif a.standart_hal or a.silme_hali:
         print("DUR: --standart-hal ve --silme-hali yalnız --kart ile (kaynak evin proje kartı)"); return 2
     kod = kod_normalize(a.kod)                                                 # PA-04 → PA04 (kayıt kodu); bayinin gördüğü `gosterim`
