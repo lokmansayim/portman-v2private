@@ -241,7 +241,9 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | İE | İE-38 | aday havuzu: AIPrefabrik ve AICelik'teki tek katlı projeler, proje kartı hakemiyle, ev başına bir kayıt dosyası, görünürlük K-A10 kabulüyle (D-87) | alındı (13.11; `claude/project-thread-8msr8u`) |
 | İE | İE-39 | havuz evinde bayinin "yarım pano uzat / kısalt" komutu: İş Emri dönüştürücü, önce/sonra pano dizilimi, ilk dilim sağ ve ön (D-90) | alındı (14.11; `claude/project-thread-8hhan1`) |
 | İE | İE-40 | havuz evlerinde özel ölçülü dış panoları standarda çekmek (D-91) | alındı (14.11; standart pano sohbeti) |
-| İE | **İE-41** | — | **sıradaki boş** |
+| İE | İE-41 | rehber.portatifev.com sitesi main'deki koddan: paketleyici (`araclar/paket/site/`), yayın betiği `vps/rehber_yayin.sh` main'e, beş rehber (Lokman 14.11 20:37 kartı "Siteyi main'den kur"; D-28) | alındı (14.11; `claude/project-thread-v9ykyo`) |
+| İE | İE-42 | çatı seçimi (başka sohbet; D-94) | alındı (14.11) |
+| İE | **İE-43** | — | **sıradaki boş** |
 | BK | BK-01–BK-08 | bu depo; BK-08 8a sonrası temizlik (`bk-08-8a-temizlik`) | yazıldı |
 | BK | BK-09 | metin ve çizim düzeltmeleri, G1 (`bk-09-metin-cizim`, `bk-09-cizim-g1`) | alındı (14.10) |
 | BK | BK-10 | 8b sonrası küçük işler (DXF `.txt` notu, geç gelen Excel, panelden Excel, plan değişince kontrol kapanır, D-19 24 saat kuralı, düğmeli mesajda satır sonları, `YENI-` kodu ve ilk çelik planda LLM özeti bayiye gitmez, komut freni metni; pano satır 15; çelikte kapı değişikliği kapsam dışı) | alındı (30.10; `claude/project-thread-h64uz2`) |
