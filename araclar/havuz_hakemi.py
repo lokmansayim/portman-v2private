@@ -7,7 +7,8 @@ aşağıdaki kalemlerde aynıysa girer. Hakem yalnız okur ve bulgu yazar; düze
 Kalemler (her biri paftanın 1. sayfasındaki değerle):
 - dış ölçü: gövde (W × H) ya da açık mahallerle birlikte (taşan teras ve veranda) en çok 5 cm fark (pafta okuması ve 125,5 köşe kuralı);
 - brüt oturum: Motor'un brüt alanı (D-49, `prefabrik_liste.bina_brut_cm2`) + kubbelerin dış yüzden çıkıntısı, en çok 0,5 m² fark;
-- oda programı: kartın oda sayısı (yoksa kartın yatak odası sayısı + 1) Motor'un yatak odası sayısıyla;
+- oda programı: kartın oda sayısı (yoksa kartın yatak odası sayısı + 1) Motor'un yatak odası sayısıyla; paftada oda adı yoksa
+  Lokman'ın karar kartıyla verdiği program (`oda_sayisi_lokman`, sözü ve saatiyle; AP-14, 14 Kasım 2026);
 - pencereler: ölçü ölçü aynı adet (kubbenin pencereleri kubbe panolarından);
 - dış kapı, iç kapı ve veranda (açık mahal) sayısı aynı; kat 1.
 
@@ -89,7 +90,7 @@ def denetle(ie: dict, kart: dict) -> tuple[list[str], dict]:
     if kart.get("brut_oturum_m2") is not None and abs(brut - kart["brut_oturum_m2"]) > TOL_BRUT_M2:
         b.append(f"brüt oturum: Motor {brut:.2f} m² (kubbe {o['kubbe_m2']:.2f} dahil), pafta {kart['brut_oturum_m2']:g} m²; "
                  f"fark {brut - kart['brut_oturum_m2']:+.2f} > {TOL_BRUT_M2:g}")
-    oda = str(kart.get("oda_sayisi") or "").strip()
+    oda = str(kart.get("oda_sayisi") or (kart.get("oda_sayisi_lokman") or {}).get("deger") or "").strip()   # paftada yoksa Lokman'ın kartı
     m = re.fullmatch(r"(\d+)\+1", oda)
     beklenen_yatak = int(m.group(1)) if m else (kart.get("yatak_odasi") if not oda else None)
     if beklenen_yatak is None or beklenen_yatak != o["yatak_odasi"]:
