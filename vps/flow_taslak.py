@@ -25,8 +25,9 @@ Sunucuda kopyası varsa:
 Seçenekler: --waba <kimlik> · --kok <dizin> (formların sürümü; varsayılan betiğin deposu, yoksa /opt/portman/guncel) · --kaynak <commit>
 (iki formun JSON'u sunucudaki sürümden değil, depodaki o commit'ten okunur; 40 haneli; sürüm kurulmadan düzeltilmiş formu taslağa
 yüklemek için; diske yazılmaz) · --bak (Meta'da hiçbir şeyi kurmaz ve değiştirmez; yalnız var olanı listeler) · --yayimla (5. adım;
---bak ile olmaz) · --form <talep | revizyon | prefabrik> (yinelenebilir; yalnız o formlar kurulur ve yayımlanır. Verilmezse talep ve
-revizyon: bugünkü davranış. İE-20 PR-6: prefabrik talep formu `--form prefabrik` ile, <kök>/kanal/formlar/prefabrik.json). Çıkış: 0 tamam,
+--bak ile olmaz) · --form <talep | revizyon | prefabrik | talep2> (yinelenebilir; yalnız o formlar kurulur ve yayımlanır. Verilmezse talep ve
+revizyon: bugünkü davranış. İE-20 PR-6: prefabrik talep formu `--form prefabrik` ile, <kök>/kanal/formlar/prefabrik.json. İE-20 PR-8 (D-89):
+verandasız talep formu `--form talep2` ile, talep2.json; kurulu sürüm bu formu tanımıyorsa `--kaynak` ile koşulur). Çıkış: 0 tamam,
 2 Meta doğrulama hatası buldu, 1 durdu. Test için: PM_ETC, PM_GRAPH_BASE, PM_RAW_BASE (ağa çıkılmaz).
 """
 from __future__ import annotations
@@ -49,8 +50,10 @@ ETC = os.environ.get("PM_ETC", "/etc/portman")
 GUNCEL = "/opt/portman/guncel"
 RAW = os.environ.get("PM_RAW_BASE", "https://raw.githubusercontent.com/lokmansayim/portman-v2private").rstrip("/")
 TURLER = ("talep", "revizyon")                     # --form verilmezse; main() seçimle değiştirir
-TUM_TURLER = ("talep", "revizyon", "prefabrik")
-AD = {"talep": "Portman Talep Formu", "revizyon": "Portman Revizyon Formu", "prefabrik": "Portman Prefabrik Talep Formu"}
+TUM_TURLER = ("talep", "revizyon", "prefabrik", "talep2")
+AD = {"talep": "Portman Talep Formu", "revizyon": "Portman Revizyon Formu", "prefabrik": "Portman Prefabrik Talep Formu",
+      "talep2": "Portman Talep Formu 2"}
+EKRAN = {"talep2": "TALEP"}                        # kurulu sürümün form modülü bu türü tanımıyorsa (yeni form sürümden önce taslağa kurulur)
 KATEGORI = ["OTHER"]
 KIMLIK = re.compile(r"^[0-9]{5,30}$")
 BELIRTEC: str = ""
@@ -157,13 +160,19 @@ def kaynaktan(commit: str, tur: str) -> dict:
     return t
 
 
+def ekran_adi(tf, tur: str) -> str:
+    return (getattr(tf, "EKRAN", None) or {}).get(tur) or EKRAN[tur]
+
+
 def onizleme_verisi(tf, tur: str, tanim: dict) -> dict:
     """Etkileşimli önizlemenin ekran verisi: talep → kartı ve taslağı olmayan yeni bayiye sunulan veri; revizyon → formun örnek değeri."""
     if tur == "talep":
         return tf.ekran_verisi(None, None)
     if tur == "prefabrik":
         return tf.prefabrik_ekran_verisi(None, None)
-    ekran = next(s for s in tanim["screens"] if s["id"] == tf.EKRAN[tur])
+    if tur == "talep2":                            # ilk formun verisi, veranda yok (`talep_formu.talep2_ekran_verisi` ile aynı)
+        return {k: v for k, v in tf.ekran_verisi(None, None).items() if k != "veranda"}
+    ekran = next(s for s in tanim["screens"] if s["id"] == ekran_adi(tf, tur))
     return {k: v.get("__example__", "") for k, v in (ekran.get("data") or {}).items()}
 
 
@@ -401,7 +410,7 @@ def main(argv: list[str]) -> int:
         if on.startswith("https://"):
             bitis = (g.get("preview") or {}).get("expires_at") or "?"
             print(f"   önizleme (telefonda açın; giriş istemez; son gün {str(bitis)[:10]}):")
-            print(f"   {etkilesimli(on, tf.EKRAN[tur], onizleme_verisi(tf, tur, tanimlar[tur]))}")
+            print(f"   {etkilesimli(on, ekran_adi(tf, tur), onizleme_verisi(tf, tur, tanimlar[tur]))}")
             print(f"   düz önizleme: {on}")
         else:
             print("   önizleme bağlantısı gelmedi")
