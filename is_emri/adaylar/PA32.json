@@ -293,7 +293,8 @@
   "Kapılar panoda ortada (dizilim.kapi_yeri: ortada; paftada kapının söveleri pano ucundan 19–27 cm), menteşe kapı mantığıyla (dizilim.kapi: mantik). Ortak duvarın bir ucundaki kavşaktan tam panoyla başlayan kapılar duvar_ucu ile (paftadaki yer). Kapı genişlikleri paftada yazılı değil: dış kapı 90, iç kapı 82 (Motor'un ölçüsü).",
   "Paftayla bilinen küçük farklar: mutfağın veranda penceresi paftada 251'lik tek pencereli panoda, Motor'da 125,5'lik pencereli pano ve iki yanında 61,75 + 63,75 (pencerenin yeri aynı); iki iç L köşede köşe parçası 3 cm. Kapılar paftadaki yerlerine en çok 4,2 cm (paftada kapı panonun tam ortasında değil).",
   "Çatı: ana beşiğin mahyası x boyunca (makaslar derinliği geçer), ön-sol odanın üstünde çapraz cumba 0–386,5 (paftanın cumba kesiti 446,5 = 386,5 + 2 × 30 saçak); eğim %32,88 (18,2°): paftanın kesitlerinde yazı 18°, ölçüler 18,2° (ana kesit 978,5 = 918,5 + 2 × 30; mahya 170,86 = 10 topuk + 489,25 × 0,3288; cumba 83,4 = 10 + 223,25 × 0,3288); topuk 10, saçak 30.",
-  "İE-29 kör ölçümü: geometri ve çatı İE-17 PR-1'in İş Emri'sinin aynısı (testler/cizim/evler/AP16.json; pafta çizim için görüldü, muhur.json notu); kopyaya yalnız paftanın özellik tablosu ve açıklaması eklendi."
+  "İE-29 kör ölçümü: geometri ve çatı İE-17 PR-1'in İş Emri'sinin aynısı (testler/cizim/evler/AP16.json; pafta çizim için görüldü, muhur.json notu); kopyaya yalnız paftanın özellik tablosu ve açıklaması eklendi.",
+  "D-92 (Lokman, 14 Kasım 2026 UTC; kart 19:39:46 \"Kısa parça silinsin\"; ev kartı 20:14:50 \"Doğru, yanına eklensin\"): bu İş Emri 70 m²'nin (PA-15) kısa parçası silinmiş hâlidir (PA-32); ön duvar ve veranda 20 cm içeri, dış ölçü 763 × 918,5 → 763 × 898,5 cm. Yukarıdaki maddelerdeki ölçüler kaynak evin paftasındandır."
  ],
  "eksikler": []
 }
