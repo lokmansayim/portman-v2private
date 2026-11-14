@@ -85,9 +85,9 @@ def test_temiz_sunucu_kurulabilir_ve_yeni_ozellikler_kapali(tmp_path):
     assert "kararı bekleyen mühendis kontrolü: 0 (24 saati geçmiş: 0)" in out and "NOT:" not in out
     assert "kanal (enabled): açık · dry_run: hayır · mesaj katmanı: açık · 3D adresi (ucb_taban_url): boş" in out
     assert "plan üretimi (İE-14): kapalı · LLM-önce revizyon: kapalı" in out
-    for k in ("banka_germe", "gorsel_okuma", "talep_formu", "bayi_kaydi"):
+    for k in ("banka_germe", "gorsel_okuma", "talep_formu", "bayi_kaydi", "yarim_pano"):
         assert f"{k} (" in out
-    assert out.count("ayarda yok → kapalı") == 4 and "yeni özelliklerin hepsi kapalı" in out
+    assert out.count("ayarda yok → kapalı") == 5 and "yeni özelliklerin hepsi kapalı" in out     # İE-39 PR-2: yarim_pano eklendi
     assert "son yedek: 13 saat önce" in out
     assert "öz-test sonucu var (sürüm v2026.10.15, done): kurulumda öz-test yeniden koşmaz, LLM çağrısı yok" in out
     assert out.rstrip().endswith("== sonuç: KURULABİLİR (hiçbir şey değişmedi)")

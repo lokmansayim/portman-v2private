@@ -3,8 +3,8 @@
 Kural D-90 (Lokman, 14 Kasım 2026 09:29:42 UTC, kart "Doğru, işe başlansın"): dış duvar yarım pano kayar, o duvara değen odalar uzar;
 veranda ya da çatı açıklığı değişen evde komut durur. İlk dilim (kart 09:53:57 UTC): sağ ve ön duvar.
 
-Hedef örnek `testler/yarim_pano/PA12_sag_arti1.json` (85 m² 3+1, sağa 1 yarım pano): Lokman 14 Kasım 2026 10:11:06 UTC kartı
-"Doğru, örnek olsun" (`onay` alanı; D-28). Yalnız Lokman'ın onayıyla ve gerekçeli kararla yeniden dondurulur (D-02). Ev × duvar × komut tablosu `testler/yarim_pano/beklenen_tablo.json`. İkisi bilinçli yazılır:
+Hedef örnek `testler/yarim_pano/PA12_sag_arti1.json` (85 m² 3+1, sağa 1 yarım pano; uçtaki 26,5 cm özel pano silinir, 1202,25 cm):
+Lokman 14 Kasım 2026 14:57:40 UTC kartı "1202,25 cm, 26,5 silinir" (`onay` alanı; önceki 10:11:06 kartı `onay.onceki`; D-90 Ek 2, D-28). Yalnız Lokman'ın onayıyla ve gerekçeli kararla yeniden dondurulur (D-02). Ev × duvar × komut tablosu `testler/yarim_pano/beklenen_tablo.json`. İkisi bilinçli yazılır:
 `python testler/test_yarim_pano.py --dondur` (gerekçe iş emrine).
 """
 from __future__ import annotations
@@ -140,7 +140,7 @@ def test_sundurma_uzamaz(ad):
 def test_cati_acikligi_degisirse_durur():
     with pytest.raises(Y.KomutDurdu) as e:
         Y.uygula(_ie("PA24"), "on", 1)
-    assert e.value.kod == "cati" and "1000 → 1062,75" in e.value.neden
+    assert e.value.kod == "cati" and "1000 → 1014" in e.value.neden          # önde 48,75 cm özel parça silinir, sonra 62,75
 
 
 def test_girdi_degismez():
@@ -151,25 +151,86 @@ def test_girdi_degismez():
 
 
 def test_uzat_sonra_kisalt_eski_plan():
-    """Sağa 1 yarım pano uzat, sonra 1 yarım pano kısalt: İş Emri'nin geometrisi eskisinin aynısı (revizyon ve kayıt satırı dışında)."""
+    """Sağa 1 yarım pano uzat, sonra 1 yarım pano kısalt (zincirle): duvar ilk yerinin 26,5 cm içinde, 62,75 ızgarasında durur; ilk
+    komut uçtaki özel parçayı sildi (Lokman, kart 14 Kasım 2026 14:57:40 UTC). Geometri, ilk planın duvarını 26,5 cm içeri almakla aynı.
+    WhatsApp'ta komutlar şablondan toplanır: uzat + kısalt = ilk plan (testler/test_yarim_pano_okuma.py)."""
     ie0 = _ie("PA12")
     ie1 = Y.uygula(ie0, "sag", 1)["is_emri"]
     ie2 = Y.uygula(ie1, "sag", -1)["is_emri"]
-    disla = ("revizyon", "varsayimlar")
-    assert {k: v for k, v in ie2.items() if k not in disla} == {k: v for k, v in ie0.items() if k not in disla}
+    assert Y.ozel_artik(ie0, "sag") == 26.5 and Y.ozel_artik(ie1, "sag") == 0.0
+    beklenen, _ = Y.kaydir(ie0, "sag", -26.5)
+    assert ie2["yapi"]["dis_olcu_cm"]["x"] == 1139.5
+    assert [m["konum_cm"] for m in ie2["mahaller"]] == [m["konum_cm"] for m in beklenen["mahaller"]]
+
+
+def _uc(plan, c: float, n: int = 3) -> list:
+    """x yönündeki duvarın (ekseni c) sağ uçtaki n panosunun boyu."""
+    ps = sorted((p for p in plan.panolar if p.duvar.yon == "x" and abs(p.duvar.c - c) < 0.01), key=lambda p: p.a0)
+    return [round(p.boy, 2) for p in ps[-n:]]
+
+
+def _parcali_uc(plan, eksen: str, kenar_g: str) -> list:
+    """Kayan duvar ucunda "62,75 + kalan" deseni: duvarın son iki panosu açıklıksız, ilki 62,75, ikincisi kesilmiş parça ve toplamı
+    125,5'ten büyük. Lokman'ın kuralında (14 Kasım 2026 13:24 UTC) bu iki pano 125,5 + kalan olmalı."""
+    duvarlar = {}
+    for p in plan.panolar:
+        if p.duvar.yon == eksen:
+            duvarlar.setdefault(round(p.duvar.c, 2), []).append(p)
+    out = []
+    for c, ps in duvarlar.items():
+        ps.sort(key=lambda p: p.a0)
+        if len(ps) < 2:
+            continue
+        a, b = (ps[-2], ps[-1]) if kenar_g == "max" else (ps[1], ps[0])
+        if a.aciklar or b.aciklar or abs(a.boy - Y.YARIM) > 0.01:
+            continue
+        if b.boy not in (Y.MOD, Y.YARIM) and a.boy + b.boy > Y.MOD + 0.01:
+            out.append((c, a.boy, b.boy))
+    return out
+
+
+@pytest.mark.parametrize("kod,cephe,adim", [("PA12", "sag", a) for a in (1, -1, 2, -2)] + [("PA24", "sag", a) for a in (1, -1, 2)]
+                         + [("PA23", "on", a) for a in (1, -1, 2)])
+def test_tek_pano_kurali(kod, cephe, adim):
+    """Komut çıktısında kayan duvar ucunda 62,75 + kalan yok (Lokman, 14 Kasım 2026 13:12–13:24 UTC)."""
+    s = Y.uygula(_ie(kod), cephe, adim)
+    assert _parcali_uc(s["sonra"], s["eksen"], s["kenar"]) == []
+
+
+def test_tek_pano_pa12():
+    """85 m² ev (Lokman, kart 14 Kasım 2026 14:57:40 UTC "1202,25 cm, 26,5 silinir"; seçenek metni "Sağ uç 125,5 + 62,75 olur … 1 pano
+    uzatınca 1265 cm"). Uçtaki 26,5 silinir; yarım panoda sağ uç 125,5 + 125,5 + 62,75 (iç duvar 57,75), son_aks'ın 125,5 + 62,75 +
+    125,5'i değil (13:21 "durduk yere … 62,75 pano bölmeyiz"); 1 panoda hepsi tam pano."""
+    ie = _ie("PA12")
+    s = Y.uygula(ie, "sag", 1)
+    assert _uc(s["once"], 5) == [125.5, 62.75, 89.25] and _uc(s["once"], 273.75) == [125.5, 62.75, 84.25]
+    assert s["dis_olcu"]["sonra"] == [1202.25, 726.0] and s["silinen"] == 26.5 and s["d"] == 36.25
+    assert _uc(s["sonra"], 5) == _uc(s["sonra"], 721) == [125.5, 125.5, 62.75] and _uc(s["sonra"], 273.75) == [125.5, 125.5, 57.75]
+    assert s["is_emri"]["yapi"]["dizilim"]["son_pano"] == "kosu"
+    s = Y.uygula(ie, "sag", 2)
+    assert s["dis_olcu"]["sonra"] == [1265.0, 726.0] and s["d"] == 99.0
+    assert _uc(s["sonra"], 5) == _uc(s["sonra"], 721) == [125.5, 125.5, 125.5] and _uc(s["sonra"], 273.75) == [125.5, 125.5, 120.5]
+    assert s["is_emri"]["yapi"]["dizilim"]["son_pano"] == "son_aks"            # dizilim aynı: İş Emri'nin anahtarı değişmez
+
+
+@pytest.mark.parametrize("kod,cephe,artik", [("PA12", "sag", 26.5), ("PA24", "sag", 0.0), ("PA23", "on", -0.25), ("PA24", "on", 48.75)])
+def test_ozel_artik(kod, cephe, artik):
+    """Kayan duvar ucunda 62,75 ızgarasından artan parça; 0,5 cm'den yakın eksik ızgarada sayılır (PA-23 önde 690 = 11 × 62,75 − 0,25)."""
+    assert Y.ozel_artik(_ie(kod), cephe) == artik
 
 
 # ---------------------------------------------------------------- 85 m² ev, sağa 1 yarım pano
 
 def test_pa12_sag_arti1_ozet():
     s = Y.uygula(_ie("PA12"), "sag", 1)
-    assert s["dis_olcu"] == {"once": [1166.0, 726.0], "sonra": [1228.75, 726.0]}
-    assert [(u["ad"], u["once_m2"], u["sonra_m2"]) for u in s["uzayan"]] == [("YATAK ODASI 2", 11.84, 14.59), ("YATAK ODASI 3", 13.53, 15.17)]
-    assert s["sayilar"] == {"once": 54, "sonra": 54, "ayni": 42, "kaydi": 9, "degisti": 3}
+    assert s["dis_olcu"] == {"once": [1166.0, 726.0], "sonra": [1202.25, 726.0]}
+    assert [(u["ad"], u["once_m2"], u["sonra_m2"]) for u in s["uzayan"]] == [("YATAK ODASI 2", 11.84, 13.43), ("YATAK ODASI 3", 13.53, 14.48)]
+    assert s["sayilar"] == {"once": 54, "sonra": 54, "ayni": 42, "kaydi": 6, "degisti": 6}
     alan0 = {m.ad: round(m.alan_m2, 2) for m in s["once"].mahaller.values()}
     alan1 = {m.ad: round(m.alan_m2, 2) for m in s["sonra"].mahaller.values()}
     assert {k for k in alan1 if alan1[k] != alan0[k]} == {"YATAK ODASI 2", "YATAK ODASI 3"}
-    assert s["is_emri"]["revizyon"] == 2 and s["is_emri"]["varsayimlar"][-1].startswith("Bayi komutu (İE-39): sağ dış duvar 1 yarım pano")
+    assert s["is_emri"]["revizyon"] == 2 and s["is_emri"]["varsayimlar"][-1].startswith(
+        "Bayi komutu (İE-39): sağ dış duvar 1 yarım pano uzadı (uçtaki 26,5 cm özel pano silindi; duvar 36,25 cm kaydı)")
 
 
 def test_pa12_sag_arti1_beklenen_ornek():
@@ -181,7 +242,8 @@ def test_pa12_sag_arti1_beklenen_ornek():
 
 def test_pa12_hedef_onayli():
     h = json.loads(PA12_HEDEF.read_text(encoding="utf-8"))
-    assert h["onay"]["kim"] == "Lokman" and "Doğru, örnek olsun" in h["onay"]["soz"]
+    assert h["onay"]["kim"] == "Lokman" and "1202,25 cm, 26,5 silinir" in h["onay"]["soz"]      # D-90 ek 2, kart 14:57:40 UTC
+    assert "Doğru, örnek olsun" in h["onay"]["onceki"]["soz"]                                        # 1228,75'lik ilk örnek (10:11:06)
 
 
 def test_pa12_sag_arti1_cizim(tmp_path):
@@ -196,9 +258,10 @@ def test_pa12_sag_arti1_cizim(tmp_path):
 def test_kisaltmada_kalkan_panolar_once_planinda():
     """Kısaltmada silinen panolar önceki planda 'degisti' (görselde pembe; çalışma kuralı 12, hakem bulgusu 3)."""
     s = Y.uygula(_ie("PA12"), "sag", -1)
-    assert s["sayilar"] == {"once": 54, "sonra": 51, "ayni": 42, "kaydi": 9}
+    assert s["dis_olcu"]["sonra"] == [1076.75, 726.0]                           # 26,5 silinir, sonra 62,75 kısalır
+    assert s["sayilar"] == {"once": 54, "sonra": 51, "ayni": 44, "kaydi": 6, "degisti": 1}
     from collections import Counter
-    assert Counter(s["siniflar_once"].values()) == {"ayni": 42, "kaydi": 9, "degisti": 3}
+    assert Counter(s["siniflar_once"].values()) == {"ayni": 44, "kaydi": 6, "degisti": 4}
 
 
 def test_dogrulama_gecmezse_dosya_yazilmaz(tmp_path, monkeypatch):
@@ -212,16 +275,17 @@ def test_dogrulama_gecmezse_dosya_yazilmaz(tmp_path, monkeypatch):
 
 
 def test_on_duvar_kisalt_pa23():
-    """Ön kısalt: Motor 62,5 cm kısaltır (D-30); kıyas önce kaydırır, sonra eşler, kapılar yerinde (hakem bulgusu 2)."""
+    """Ön kısalt: koşu ızgaraya 0,25 cm eksik (ızgarada sayılır), duvar 62,5 cm kayar; kıyas önce kaydırır, sonra eşler, kapılar yerinde
+    (hakem bulgusu 2). Motor'un tamamlaması (D-30) artık gerekmez: not yok."""
     s = Y.uygula(_ie("PA23"), "on", -1)
-    assert s["d_motor"] == -62.5 and s["notlar"]
+    assert s["d"] == s["d_motor"] == -62.5 and s["notlar"] == []
     assert s["sayilar"] == {"once": 40, "sonra": 38, "ayni": 32, "kaydi": 6}
 
 
 def test_on_duvar_pa23():
     """Ön duvar (gerçek çerçevede ön y = 0): yerinde kalan panolar 'aynı', ön duvar 'kaydı'; Motor son panoyu tamamlar (D-30)."""
     s = Y.uygula(_ie("PA23"), "on", 1)
-    assert s["d_motor"] == 63.0 and s["notlar"]
+    assert s["d"] == s["d_motor"] == 63.0 and s["notlar"] == []
     assert s["sayilar"] == {"once": 40, "sonra": 40, "ayni": 32, "kaydi": 6, "degisti": 2}
     assert [u["ad"] for u in s["uzayan"]] == ["SALON & MUTFAK"]
 
@@ -232,7 +296,8 @@ if __name__ == "__main__" and "--dondur" in sys.argv:
                                  "'temiz' ya da durma kodu (beyin/yarim_pano.KomutDurdu.kod).", "tablo": tablo_uret()},
                                 ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
     eski = json.loads(PA12_HEDEF.read_text(encoding="utf-8")) if PA12_HEDEF.is_file() else {}
-    PA12_HEDEF.write_text(json.dumps({"aciklama": "İE-39: 85 m² 3+1 (PA-12, is_emri/adaylar/PA12.json) sağ dış duvar 1 yarım pano uzat.",
+    PA12_HEDEF.write_text(json.dumps({"aciklama": "İE-39: 85 m² 3+1 (PA-12, is_emri/adaylar/PA12.json) sağ dış duvar 1 yarım pano uzat; "
+                                                     "uçtaki 26,5 cm özel pano silinir (D-90 ek 2).",
                                       "onay": eski.get("onay"), "girdi": "is_emri/adaylar/PA12.json", "komut": {"cephe": "sag", "adim": 1},
                                       **pa12_uret()}, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
     print("yazıldı:", TABLO.relative_to(KOK), PA12_HEDEF.relative_to(KOK))
