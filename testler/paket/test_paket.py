@@ -288,19 +288,22 @@ def test_sacak_omegasi_z_ve_veranda_asigi_kart_modelinden(paketler):
 
 
 def test_baslikta_brut_ve_net(paketler):
-    """Rehberin başlığındaki alan ön onay antedindeki yazının kendisi (`dxf_out.alan_yazisi`): brüt verandalar dahil (D-49), net kapalı
-    odaların toplamı (Lokman, 14 Kasım 2026 20:43 UTC: "TK-01 ve TK-02 verandalar dahil bürüt m² leri yazılmamış sadece başlıkları düzelt")."""
+    """D-95 (Lokman, 14 Kasım 2026 21:01 UTC: "biz verandayıda net alana alır sayarız", "biz çatı ile kapattığımız her yeri bürütten
+    sayarız"): rehberin başlığında brüt çatının örttüğü oturum (yükleme listesinin `bina_m2`'si, D-49), net bütün mahaller (veranda, niş,
+    balkon dahil). Ön onay antedi (M-02) kapalı odaların netini yazmaya devam eder; sahnedeki etiket (rozet) değişmedi."""
     from motor import dxf_out, geometry as G
+    from motor.prefabrik_liste import bina_brut_cm2
     kok, _, _ = paketler
-    beklenen = {"TK-01": "90,21 m² brüt · 72,71 m² net", "AP-19": "60,00 m² brüt · 48,85 m² net"}   # kayıttaki İş Emri'leri: TK-01 r06, PK-01
-    for kod, yazi in beklenen.items():
+    beklenen = {"TK-01": ("90,21 m² brüt · 84,54 m² net", "72,71"), "AP-19": ("60,00 m² brüt · 55,53 m² net", "48,85")}   # TK-01 r06, PK-01
+    for kod, (yazi, kapali) in beklenen.items():
         ie = json.loads((KOK / _model(kod)["is_emri"]).read_text(encoding="utf-8"))
-        assert dxf_out.alan_yazisi(G.kur(ie)) == yazi, kod
+        plan = G.kur(ie)
+        assert yazi.startswith(f"{bina_brut_cm2(plan) / 1e4:.2f}".replace(".", ",")) and dxf_out.alan_yazisi(plan).endswith(f"{kapali} m² net")
         G.lento_ayarla({})                                   # lento modül durumudur (BK-23): öteki testlere sızmaz
         yol = kok / "prefabrik" / kod / f"{kod}_montaj_rehberi.html"
         d = _rehber_verisi(yol)
         assert d["kabuk"]["chip"] == yazi and f'<span class="chip">{yazi}</span>' in yol.read_text(encoding="utf-8"), kod
-        assert d["rozet"].endswith(yazi.split(" · ")[1].replace(" net", "")), kod     # sahnedeki etiket değişmedi: net m²
+        assert d["rozet"].endswith(f"{kapali} m²"), kod
 
 
 @pytest.mark.skipif(iz.hazir() is not None, reason=f"rehber izi: {iz.hazir()}")

@@ -208,10 +208,19 @@ def ifc_parcalar(ifc_yolu: Path, desen: str) -> dict[str, dict]:
 PI = 3.141592654     # dönüş açısı veride dokuz ondalıkla: 15 haneli π numara maskesine (`beyin/numara.py`) takılır; fark 4e-10 rad
 
 
+def baslik_alani(plan) -> str:
+    """Rehberin başlığındaki alan (D-95; Lokman, 14 Kasım 2026 21:01 UTC: "biz verandayıda net alana alır sayarız", "biz çatı ile
+    kapattığımız her yeri bürütten sayarız"). Brüt: çatının örttüğü oturum, yükleme listesinin `bina_m2`'si (tek kaynak
+    `prefabrik_liste.bina_brut_cm2`, D-49). Net: bütün mahallerin net alanı, veranda, giriş nişi ve balkon dahil. Ön onay antedindeki
+    net (`dxf_out.alan_yazisi`, kapalı odalar; M-02 mühürlü) bu kararla değişmedi."""
+    from motor import prefabrik_liste as LU
+    f2 = lambda v: f"{v:.2f}".replace(".", ",")
+    return f"{f2(LU.bina_brut_cm2(plan) / 1e4)} m² brüt · {f2(sum(m.alan_m2 for m in plan.mahaller.values()))} m² net"
+
+
 def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
     """Rehberin verisi. `kart`: kart modeli klasörü (`<kart_kodu>_model.ifc`, `<kart_kodu>_kart_sayim.json`); `L`: liste satırları;
     `kod`: rehberde görünen kod (TK-01, AP-19)."""
-    from motor import dxf_out
     from motor import geometry as G
     from motor import ifc_uret
     from motor import prefabrik_liste as LU
@@ -1619,8 +1628,7 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
                 "z": "CK-04", "tomega": "OM-01", "asik": "AS-01", "ckapama": "CK-05", "mahya": "CK-07" if TR_ else "CK-06", "alin": "CK-03", "dere": "DR-01",
                 "inis": "DR-02", **({"kaplama": "KP-01"} if SP else {})}
     kabuk = {
-        # başlıktaki alan: ön onay antedindeki yazının kendisi (D-49 brüt, verandalar dahil · net; Lokman 14 Kasım 2026 20:43 UTC)
-        "proje": f"{kod} prefabrik", "kisa": kod, "chip": dxf_out.alan_yazisi(plan),
+        "proje": f"{kod} prefabrik", "kisa": kod, "chip": baslik_alani(plan),
         "spec": [f"{fmtc(W)} × {fmtc(DY)} cm", "tek kat prefabrik", f"duvar {fmtc(H)} cm", f"beşik %{fmt(TAN * 100)} · {fmt(EGIM_D, 1)}°", kaplama_txt,
                  (f"{len(VR)} veranda" if VR else "gömme veranda" if GVK and not GVK["nis"] and GVK["ad"] == "veranda" else
                   f"{'köşede' if GVK['iki_yan'] else 'gövdede'} {GVK['ad']}" if GVK and not GVK["nis"] else "verandasız") +
