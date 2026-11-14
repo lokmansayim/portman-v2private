@@ -47,6 +47,13 @@ EVLER = {
     "PA26": ("AP-08", "testler/havuz/is_emirleri/AP08.json", "2+1", 71.0),        # Lokman'ın 08:16 düzeltmesi, 08:29 kartı
     "PA27": ("AP-07", "testler/havuz/is_emirleri/AP07.json", "1+1", 45.0),        # sundurma ikinci cumba (PC-38), 08:55 kartı
 }
+# D-91 › Havuza giren standart hâller (dış duvardaki özel panolar standart panoya; hakemin standart hâl kipi): ayrıntı test_havuz_standart_pano.py
+D91 = (KOK / "KARARLAR" / "D-91.md").read_text(encoding="utf-8")
+STANDART_HAL = {
+    "PA28": ("AP-07", "testler/havuz/is_emirleri/AP07_STD45.json", "1+1", 46.0),  # en yakın standart, 45,70 m² (Lokman 09:58:53 kartı)
+    "PA29": ("AP-07", "testler/havuz/is_emirleri/AP07_STD40.json", "1+1", 40.0),  # kısalt, 39,61 m² (Lokman 10:01:43)
+}
+HAVUZ_EVLERI = {**EVLER, **STANDART_HAL}
 PREFABRIK = {a["kod"]: a for a in havuz_kayitlari(yapi="prefabrik")}
 
 # D-87 › Havuza giren çelik projeler (PR-2): kod → (proje, tanımın kaynağı, oda programı, brüt m²; genel motorun `bina_m2`'si)
@@ -65,7 +72,7 @@ KALANLAR_CELIK = {"ÇP-22": "brüt oturum", "ÇP-24": "brüt oturum", "ÇP-25": 
 CELIK_KAYIT = {a["kod"]: a for a in havuz_kayitlari(yapi="celik")}
 ESKI_CELIK = {"Ç8801", "Ç8801K", "Ç8801L", "Ç8201", "KT01", "KT02", "KT03", "KT04"}
 D80 = {f"PA0{i}" for i in range(1, 9)}
-TUM_PA = D80 | {"PA06K", "PA06C"} | set(EVLER)
+TUM_PA = D80 | {"PA06K", "PA06C"} | set(HAVUZ_EVLERI)
 
 # D-87 › Havuza girmeyen projeler: hakemden geçmeyenler ve bulgunun başı
 KALANLAR = {
@@ -93,20 +100,21 @@ def _standart(ie: dict) -> dict:
 
 
 def test_havuz_kaydi_bicimi():
-    assert set(PREFABRIK) == set(EVLER)
-    assert sorted(f.stem for f in HAVUZ_DIR.glob("*.json")) == sorted([*EVLER, *CELIK])  # ev başına bir dosya, ad = kod
+    assert set(PREFABRIK) == set(HAVUZ_EVLERI)
+    assert sorted(f.stem for f in HAVUZ_DIR.glob("*.json")) == sorted([*HAVUZ_EVLERI, *CELIK])  # ev başına bir dosya, ad = kod
     eski = {str(a["kod"]).upper() for a in json.loads(ADAYLAR_PREFABRIK_JSON.read_text(encoding="utf-8"))}
-    assert not eski & set(EVLER) and eski == D80                                      # D-80 kaydı aynen
+    assert not eski & set(HAVUZ_EVLERI) and eski == D80                                      # D-80 kaydı aynen
     for kod, a in PREFABRIK.items():
-        proje, kaynak, oda, m2 = EVLER[kod]
+        proje, kaynak, oda, m2 = HAVUZ_EVLERI[kod]
+        karar, karar_metni = ("D-87", D87) if kod in EVLER else ("D-91", D91)
         g = kod[:2] + "-" + kod[2:]
         assert a["gosterim"] == g == a["referans_model"]
         assert (a["durum"], a["yapi_turu"], a["kat"], a["oda_programi"], a["katalog_m2"]) == ("gecerli", "prefabrik", 1, oda, m2), kod
-        assert a["kaynak"]["dosya"] == kaynak and a["kaynak"]["karar"] == "D-87" and a["kaynak"]["standart"] is True
+        assert a["kaynak"]["dosya"] == kaynak and a["kaynak"]["karar"] == karar and a["kaynak"]["standart"] is True
         kk = a["kaynak"]["kart_kiyasi"]
         assert (kk["kart"], kk["sonuc"]) == (proje, "geçti")
         assert kk["kart_sha256"] == HH.kartlar()[proje]["kart_sha256"]
-        assert f"| {g} | {proje} | `{kaynak}` |" in D87, kod                         # karar dosyası evi yazar
+        assert f"| {g} | {proje} | `{kaynak}` |" in karar_metni, kod                 # karar dosyası evi yazar
         disarida = a["ozet"].get("brut_disi_acik_m2", 0)                                 # girintili gövdeden taşan sundurma (PA-27)
         assert abs(a["kapali_m2"] - (a["ozet"]["brut_m2"] - a["veranda_m2"] + disarida)) <= 0.06, kod   # aday_kaydet ham brütle yuvarlar
         assert ((a["veranda_m2"] or 0) > 0) == (kk["olcum"]["veranda"] > 0), kod      # veranda bir oda gibi: kartta ne varsa (D-87 › Veranda)
@@ -123,10 +131,11 @@ def test_hakem_gecer(kod):
     assert olc == a["kaynak"]["kart_kiyasi"]["olcum"], kod
 
 
-@pytest.mark.parametrize("kod", sorted(EVLER))
+@pytest.mark.parametrize("kod", sorted(HAVUZ_EVLERI))
 def test_sablon_kaynagin_standart_hali(kod):
-    """Şablon gerçek projenin İş Emri'sidir: yalnız kimlik, talep, referans kodu ve müşterinin seçimleri (D-74 standart) değişir."""
-    kaynak = _standart(json.loads((KOK / EVLER[kod][1]).read_text(encoding="utf-8")))
+    """Şablon gerçek projenin İş Emri'sidir: yalnız kimlik, talep, referans kodu ve müşterinin seçimleri (D-74 standart) değişir.
+    D-91'in standart hâllerinde kaynak, standart hâlin İş Emri'si (`testler/havuz/is_emirleri/AP07_STD*.json`)."""
+    kaynak = _standart(json.loads((KOK / HAVUZ_EVLERI[kod][1]).read_text(encoding="utf-8")))
     sab = json.loads((SABLON_DIR / PREFABRIK[kod]["sablon"]).read_text(encoding="utf-8"))
     assert "ozellikler" not in sab and "alici_ait" not in sab
     for d in (kaynak, sab):
@@ -220,7 +229,7 @@ def test_ap07_sundurma():
     a = PREFABRIK["PA27"]
     assert (a["ozet"]["brut_m2"], a["kapali_m2"], a["veranda_m2"], a["ozet"]["brut_disi_acik_m2"]) == (45.0, 45.0, 1.76, 1.76)
     assert a["ozet"]["odalar"]["SUNDURMA"] == 1.76 and [v["cati"]["tip"] for v in ie["verandalar"]] == ["cumba"]
-    assert not [k for k, b in PREFABRIK.items() if k != "PA27" and "brut_disi_acik_m2" in b["ozet"]]  # öteki kayıtlar aynen
+    assert not [k for k, b in PREFABRIK.items() if k not in {"PA27", *STANDART_HAL} and "brut_disi_acik_m2" in b["ozet"]]  # öteki kayıtlar aynen
 
 
 def test_hakem_kalemleri():
@@ -245,7 +254,7 @@ def test_kartlarda_ad_yok():
 def test_kabulsuz_yolda_havuz_gorunmez():
     """Harness `Katalog()`'u kabul kümesiz kurar: havuz evi görünmez, 22 vaka değişmez; görünmek K-A10 kaydına bağlı."""
     for kat in (Katalog(), Katalog(test_adaylari=True), Katalog(kabul_edilmis={"Ç8801"}), Katalog(kabul_edilmis=D80)):
-        assert not {a["kod"] for a in kat.gorunur_adaylar()} & set(EVLER)
+        assert not {a["kod"] for a in kat.gorunur_adaylar()} & set(HAVUZ_EVLERI)
         assert kat.aday("PA-13") is None
     assert Katalog(kabul_edilmis={"PA13"}).aday("pa 13")["kod"] == "PA13"
     assert Katalog(havuz_dir=None, kabul_edilmis=set(EVLER)).aday("PA-13") is None
@@ -254,7 +263,8 @@ def test_kabulsuz_yolda_havuz_gorunmez():
 # Bütün havuz kabul edilince seçenek seti: düğme ve görsel en çok 3, liste en çok 10 satır, satır başlığı ≤ 24, açıklama ≤ 72
 SETLER = {
     (50, "2+1"): ["PA23"],                                                            # tek aday: öncelik sorulmaz
-    (45, "1+1"): ["PA27"],
+    (40, "1+1"): ["PA29"],                                                            # D-91 kısalt (39,61 m²)
+    (45, "1+1"): ["PA27", "PA28"],                                                    # eski hâl ve en yakın standart (D-91)
     (60, "2+1"): ["PA01", "PA14", "PA18", "PA25", "PA02", "PA09", "PA20"],
     (65, "2+1"): ["PA02", "PA09", "PA20", "PA25", "PA01", "PA03", "PA14", "PA15", "PA18", "PA26"],
     (71, "2+1"): ["PA26", "PA03", "PA15", "PA24", "PA02", "PA04", "PA09", "PA20"],
@@ -304,8 +314,8 @@ def test_kabul_betigi_havuzu_tanir():
     """K-A10 kabul kaydı (`vps/ie08_adaylar.sh` → `aday_kabul.py`): PA kodlarıyla prefabrik koşusu havuz evlerini de tanır."""
     arac = [sys.executable, str(KOK / "araclar/aday_kabul.py"), "--tarih", "2026-11-14", "--kuru",
             "--adaylar", str(ADAYLAR_PREFABRIK_JSON)]
-    r = subprocess.run(arac + ["--kodlar", ",".join(f"PA-{k[2:]}" for k in sorted(EVLER))], capture_output=True, text=True, cwd=KOK)
-    assert r.returncode == 0 and f"KURU: {len(EVLER)} kayıt yazılacak" in r.stdout, r.stdout + r.stderr
+    r = subprocess.run(arac + ["--kodlar", ",".join(f"PA-{k[2:]}" for k in sorted(HAVUZ_EVLERI))], capture_output=True, text=True, cwd=KOK)
+    assert r.returncode == 0 and f"KURU: {len(HAVUZ_EVLERI)} kayıt yazılacak" in r.stdout, r.stdout + r.stderr
     r = subprocess.run(arac[:-2] + ["--adaylar", str(KOK / "beyin/veri/adaylar.json"), "--kodlar", "PA-13"], capture_output=True,
                        text=True, cwd=KOK)
     assert r.returncode == 2 and "olmayan kod: PA13" in r.stdout, r.stdout             # prefabrik çelik koşusuna karışmaz
