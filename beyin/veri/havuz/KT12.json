@@ -1,0 +1,70 @@
+{
+ "kod": "KT12",
+ "gosterim": "KT-12",
+ "durum": "gecerli",
+ "motor": "genel",
+ "tanim": "modeller/havuz/KT12.json",
+ "tanim_sha256": "281dc079b5e7045bd2f87891446255c788531260f1cf97068ad511e67999e796",
+ "gorsel": "adaylar/KT12.png",
+ "referans_model": "KT12",
+ "yapi_turu": "celik",
+ "kat": 1,
+ "oda_programi": "3+1",
+ "katalog_m2": 130.0,
+ "kapali_m2": 112.62,
+ "veranda_m2": 17.82,
+ "varyantlar": [],
+ "musteri_projesi": true,
+ "sunum": {
+  "cati_adi": "Ikili beşik çatı (beşik olarak",
+  "ad": ""
+ },
+ "ozet": {
+  "dis_olcu_cm": [
+   1250.0,
+   1150.0
+  ],
+  "oturum_m2": 130.44,
+  "odalar": {
+   "Yatak Odası 1": 12.25,
+   "Yatak Odası 2": 12.54,
+   "Kiler": 4.58,
+   "Salon ve Hol": 35.84,
+   "Genel Banyo": 4.27,
+   "Ebeveyn Banyosu": 3.71,
+   "Yatak Odası 3": 12.93,
+   "Mutfak": 15.49,
+   "Veranda (batı)": 7.96,
+   "Veranda (doğu)": 7.96,
+   "Sundurma": 1.9
+  },
+  "pencere": 11,
+  "kapi": 7,
+  "cati": "besik",
+  "liste_satir": 100,
+  "kural_seti": "kurallar.json",
+  "perspektif": "TAMAM"
+ },
+ "kaynak": {
+  "metin": "ÇP-24 tanımı (İE-16 ikinci kör kümesi; müşteri onay paftası), kod ve ad dışında aynı. Aday: D-87 (Lokman 13 Kasım 2026 21:41); yalnız plan olarak, Lokman 14 Kasım 2026 11:33:07 UTC kartı 'Yalnız plan olarak girsin'; brüt planın m²'siyle, Lokman 14 Kasım 2026 12:33:58 UTC kartı 'Planın m²'siyle girsin'.",
+  "dosya": "modeller/havuz/KT12.json",
+  "dogrulama": "çizim seti (İE-08, 12 Ekim 2026)",
+  "karar": "D-87",
+  "kart_kiyasi": {
+   "kart": "ÇP-24",
+   "tanim": "testler/celik/projeler/CP24/CP24.json",
+   "tanim_sha256": "feec2d79f179f86051e3f39f9f5a673406bb59acc5c96625d6bc9217cec80e46",
+   "sonuc": "geçti",
+   "olcum": {
+    "gecti": true,
+    "hatalar": [],
+    "bayi_gorseli": true,
+    "oturum_m2": 130.44,
+    "veranda_m2": 17.82,
+    "oda_programi": "3+1",
+    "kat": 1
+   }
+  }
+ },
+ "not": ""
+}

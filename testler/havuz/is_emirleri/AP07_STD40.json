@@ -1,0 +1,250 @@
+{
+ "is_emri_no": "HAVUZ-AP07-STD40",
+ "revizyon": 1,
+ "talep": {
+  "bayi": {
+   "kod": "AP07",
+   "ad": "Bayi AP-07"
+  },
+  "musteri_adi": "AP-07",
+  "metin": "D-91 (İE-40): AP-07'nin (D-87, PA-27) dış duvarındaki özel ölçülü panolar standart panoya (125,5 / 62,75) çekildi (14 Kasım 2026): sağ duvar 745 → 695,25, girinti duvarı 295 → 256, salonun ön duvarı 535 → 512, yatak odasının ön duvarı 680 → 637,5 (arka-sol çerçevesi, cm). Lokman 14 Kasım 2026 09:46 UTC 'dış panolarda özel ölçü varsa o iki aks arasındaki panoları standart ölçümüze çek', 10:05 'evet 3 de havuza girsin'; karar kartı 10:10:11 'Kural denetime girsin' (D-91). Bu hâl: 10:01 'aslında kısaltta olmuş ... bence ikisinide havuza al'."
+ },
+ "yapi": {
+  "sistem": "prefabrik",
+  "kat_sayisi": 1,
+  "duvar_yuksekligi_cm": 250,
+  "duvar_kalinligi_cm": {
+   "dis": 10,
+   "ic": 6
+  },
+  "olcu_kaynagi": "dis_olcu",
+  "dis_olcu_cm": {
+   "x": 700.25,
+   "y": 647.5
+  },
+  "referans_model": "AP-07",
+  "grid": {
+   "x_pano": 5.5,
+   "y_pano": 5
+  },
+  "kisa_kenar": "y",
+  "giris_cephesi": "on",
+  "dis_dusey_duvar": "cevre_aks_disinda",
+  "dizilim": {
+   "baslangic": "arka-sol",
+   "hiza": "izgara",
+   "dis_duvar_t_bolme": false,
+   "pencere": "oda_ortasi",
+   "kapi": "mantik",
+   "kose": "oda",
+   "son_pano": "kosu",
+   "kapi_yeri": "ortada",
+   "dis_pano_dayanagi": [
+    {
+     "x": 193.25,
+     "aralik_cm": [
+      130.5,
+      381.5
+     ],
+     "cephe": "arka"
+    }
+   ]
+  }
+ },
+ "mahaller": [
+  {
+   "ad": "BANYO",
+   "tur": "banyo",
+   "konum_cm": [
+    [
+     5,
+     10,
+     193.25,
+     261
+    ]
+   ]
+  },
+  {
+   "ad": "GİRİŞ",
+   "tur": "antre_hol",
+   "konum_cm": [
+    [
+     193.25,
+     10,
+     381.5,
+     261
+    ]
+   ]
+  },
+  {
+   "ad": "SALON & MUTFAK",
+   "tur": "salon",
+   "konum_cm": [
+    [
+     381.5,
+     10,
+     695.25,
+     261
+    ],
+    [
+     318.75,
+     261,
+     695.25,
+     512.0
+    ]
+   ]
+  },
+  {
+   "ad": "YATAK ODASI",
+   "tur": "yatak_odasi",
+   "konum_cm": [
+    [
+     5,
+     261,
+     318.75,
+     512.0
+    ],
+    [
+     5,
+     512.0,
+     256.0,
+     637.5
+    ]
+   ]
+  }
+ ],
+ "girintiler": [
+  [
+   256.0,
+   512.0,
+   695.25,
+   637.5
+  ]
+ ],
+ "acik_sinirlar": [],
+ "acikliklar": [
+  {
+   "tur": "pencere",
+   "olcu": "60x40",
+   "mahal": "BANYO",
+   "duvar": "arka",
+   "pano": 0
+  },
+  {
+   "tur": "pencere",
+   "olcu": "120x120",
+   "mahal": "SALON & MUTFAK",
+   "duvar": "sag",
+   "pano": 2
+  },
+  {
+   "tur": "pencere",
+   "olcu": "150x190",
+   "mahal": "SALON & MUTFAK",
+   "duvar": "on"
+  },
+  {
+   "tur": "pencere",
+   "olcu": "150x190",
+   "mahal": "YATAK ODASI",
+   "duvar": "on"
+  },
+  {
+   "tur": "dis_kapi",
+   "olcu": 90,
+   "arasi": [
+    "__DIS__",
+    "GİRİŞ"
+   ],
+   "duvar": "arka"
+  },
+  {
+   "tur": "ic_kapi",
+   "olcu": 82,
+   "arasi": [
+    "GİRİŞ",
+    "BANYO"
+   ],
+   "pano": 1
+  },
+  {
+   "tur": "ic_kapi",
+   "olcu": 82,
+   "arasi": [
+    "GİRİŞ",
+    "SALON & MUTFAK"
+   ],
+   "pano": 1
+  },
+  {
+   "tur": "ic_kapi",
+   "olcu": 82,
+   "arasi": [
+    "GİRİŞ",
+    "YATAK ODASI"
+   ]
+  }
+ ],
+ "dikmeler": [],
+ "cati": {
+  "tip": "besik_cumba",
+  "egim_yuzde": 32.9,
+  "sacak_cm": 30,
+  "topuk_cm": 10,
+  "makas_yonu": "kisa_kenar",
+  "makas_ekseni": "y",
+  "cumbalar": [
+   {
+    "cephe": "on",
+    "bas_cm": 0,
+    "bit_cm": 261.0,
+    "cikinti_cm": 130.5
+   },
+   {
+    "cephe": "arka",
+    "veranda": "SUNDURMA"
+   }
+  ]
+ },
+ "ozellikler": {
+  "Panel Türü": "Pres Panel",
+  "Çatı Şekli": "Beşik + Cumba",
+  "Dış Kapı": "Çelik Standart",
+  "İç Kapılar": "Standart Amerikan",
+  "Tavan": "Ters"
+ },
+ "cikti": {
+  "pdf": true,
+  "dxf": true,
+  "pafta": "A2",
+  "icerik": [
+   "aksli_plan",
+   "alanli_kopya",
+   "montaj_kopyasi",
+   "on_gorunus",
+   "cati_profili",
+   "ozellik_tablosu"
+  ]
+ },
+ "varsayimlar": [
+  "Kaynak AP-07'nin İş Emri'si (testler/havuz/is_emirleri/AP07.json): odalar, açıklıklar, sundurma ve çatı tipi aynı; yalnız dört dış duvar hattı en yakın yarım pano hattına kaydı (sağ duvar 745 → 695,25, girinti duvarı 295 → 256, salonun ön duvarı 535 → 512, yatak odasının ön duvarı 680 → 637,5).",
+  "Izgara 5,5 × 5 pano; dış ölçü 700,25 × 647,5 cm, brüt 39,61 m². Ek aks yok: bütün dış duvarlar yarım pano hattında.",
+  "Yatak odasının öne çıkıntısının çatısı ana çatının çapraz cumbası; cumba 261 × 130,5 cm (çıkıntıyla birlikte değişti).",
+  "Sundurma arkada taşan veranda, ikinci cumba (PC-38); yeri ve ölçüsü kaynakla aynı (arka duvar yerinde).",
+  "Çelik kapı arka duvarda sundurmanın altında, 193,25–318,75; iki yanında birer 62,75 pano (dis_pano_dayanagi x 193,25, aralık 130,5–381,5), kaynakla aynı. Lokman 14 Kasım 2026 10:12:22 UTC düzeltmesi, 10:34:26 kartı 'Evet, doğru' (D-87).",
+  "Salonun 150/190 penceresi için yarım pano duvarın sonunda (`dizilim.son_pano: kosu`); Lokman 10:01 bu yerleşimi beğendi."
+ ],
+ "eksikler": [],
+ "verandalar": [
+  {
+   "ad": "SUNDURMA",
+   "cephe": "arka",
+   "bas_cm": 188.25,
+   "bit_cm": 323.75,
+   "derinlik_cm": 130,
+   "cati": {
+    "tip": "cumba"
+   }
+  }
+ ]
+}

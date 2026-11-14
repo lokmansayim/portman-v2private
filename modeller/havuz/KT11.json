@@ -1,0 +1,705 @@
+{
+ "sema": "portman.yapi_tanimi/0.5-taslak",
+ "kod": "KT-11",
+ "ad": "Tek kat çelik, 1+1, sundurmalı, parapet çatı, dış duvar 140, 49 m² (ÇP-22; aday havuzu, D-87; planın m²'si, paftada 43,2 net)",
+ "aile": "tek_kat_celik",
+ "paket": "proje",
+ "birim": "cm",
+ "kat": "zemin",
+ "kaynak": {
+  "okunmayanlar": "Kör proje: gerçek yükleme listesi, paftanın panel sayfaları ve modeller tanım yazılırken açılmadı. Panel, makas ve çatı paneli adetleri ve bölmeleri tanımda yok: karkas kuralından (`karkas: kural`; İE-16 PR-3a–3c). Yöntem B, paftada 'omega' ya da 'aşık' sözcüğü geçen sayfa olduğu için (sayfa denetimi aracı yalnız A/B yazar; `testler/celik/projeler/kor_sayfa.py`).",
+  "koordinat": "Köken karkasın güneybatı dış köşesi (x = 0 batı duvarının dış yüzü, y = 0 yaşam alanının güney duvarının dış yüzü); +x doğu, +y kuzey (paftada kuzey işareti yok; çizimin üstü kuzey alındı). Yatak odası, banyo ve hol batıda, güney yüzleri 60 cm kuzeyde; yaşam alanı doğuda; sundurma ikisinin arasındaki iç köşede (140 × 140 kaplamalı), güneye 80 cm taşar.",
+  "cizim": "Projenin montaj paftası (PDF, on bir sayfa; mühürde ÇP-22'nin montaj paftası, SHA-256 d2aea818…). Kör kural (İE-16 PR-4; plan `Celik_Cizim_Kurallari/PR-4/plan.md`; İE-16 PR-7): yalnız 1. sayfa (müşteri onay paftası) okundu, 14 Kasım 2026; panel sayfaları, modeller ve gerçek liste açılmadı. Ölçüler sayfanın vektör çizgilerinden (ölçek alt dış ölçü zinciri 960 ile; zincirler 490 + 140 + 330, 410 + 60 + 80, 600 ve kuzeydeki eğik 324, düz 161, eğik 482 ile tutarlı, en büyük sapma 0,5); karkas kaplamalı ölçüden iki yanda 3 cm düşülerek (954 × 594). Pencereler en/yükseklik etiketlerinden ve doğrama işaretlerinden; kapılar kanat çizgileri ve açılış yaylarından; mahaller oda etiketlerinden; çatı yalnız teknik özelliklerden (sayfada görünüş yok)."
+ },
+ "kat_yuksekligi": 270,
+ "teknik_ozellikler": {
+  "Bina yüksekliği": "2700 mm",
+  "Dış duvarlar": "140 × 45 × 0,8",
+  "İç duvarlar": "80 × 45 × 0,8",
+  "Panel türü": "galvanizli yapısal çelik",
+  "Çatı şekli": "parapet çatı",
+  "Çatı kaplaması": "OSB + membran + shingle",
+  "Çatı kaplama rengi": "antrasit gri",
+  "Dış kapı": "çelik standart (başka bir projedeki 150 m²'nin aynısı)",
+  "İç kapılar": "alıcıya ait",
+  "Dış cephe boya": "alıcıya ait",
+  "İç cephe boya": "alıcıya ait",
+  "Pencere rengi": "alıcıya ait",
+  "Tavan": "ters tavan",
+  "Saçak ve alın rengi": "antrasit gri",
+  "Pencere detay": "alıcıya ait"
+ },
+ "aciklama_notlari": [
+  "1- Dış cephe panelleri: Boardex + çelik karkas + OSB + alçıpan",
+  "2- İç cephe panelleri: alçıpan + OSB + çelik karkas + OSB + alçıpan",
+  "3- Tesisat grubu alıcıya ait.",
+  "4- Vitrifiye grubu alıcıya ait."
+ ],
+ "kapsam": {
+  "dis_kapi": true,
+  "ic_kapi": false,
+  "pencere": false,
+  "dis_cephe_boyasi": false,
+  "ic_cephe_boyasi": false,
+  "vitrifiye": false,
+  "sihhi_tesisat": false,
+  "kaynak": "teknik özellikler (dış kapı çelik standart: bizden; iç kapılar, dış ve iç cephe boyası, pencere rengi ve pencere detayı alıcıya ait) ve açıklama 3–4 (tesisat grubu ve vitrifiye alıcıya ait: tesisat sıhhi tesisat sayıldı). Elektrik için 1. sayfada not yok: varsayılan (listede)"
+ },
+ "renk": {
+  "cati": "antrasit gri",
+  "sacak_alin": "antrasit gri",
+  "kaynak": "teknik özellikler (çatı kaplama rengi; saçak ve alın rengi)"
+ },
+ "yuz_kaplamalari": {
+  "dis": {
+   "kalinlik": 3.0,
+   "malzeme": [
+    "boardex"
+   ],
+   "not": "kaplamalı dış ölçü karkasın iki yanında 3 cm (sayfada 3,0 çizili); açıklama 1: Boardex, nem bariyeri yazmıyor"
+  },
+  "ic": {
+   "kalinlik": 2.35,
+   "malzeme": [
+    "osb",
+    "alcipan"
+   ],
+   "not": "OSB 11 mm + alçıpan 12,5 mm (açıklama 1 ve 2)"
+  }
+ },
+ "duvar_siniflari": {
+  "dis": {
+   "ad": "bina dış duvarı",
+   "profil": "140x45x0,8",
+   "yalitim": true,
+   "yuz": {
+    "ic": "ic",
+    "dis": "dis",
+    "veranda": "dis"
+   },
+   "not": "teknik özellikler: dış duvarlar 140X45X08 (sayfada 14 çizili)"
+  },
+  "ic": {
+   "ad": "iç duvar",
+   "profil": "80x45x0,8",
+   "yalitim": true,
+   "yuz": {
+    "ic": "ic"
+   },
+   "not": "teknik özellikler: iç duvarlar 80X45X08 (sayfada 7,8–7,9 çizili)"
+  },
+  "kolon": {
+   "ad": "sundurma dikmesi",
+   "profil": "80x45x1,2",
+   "yalitim": false,
+   "yuz": {
+    "veranda": "dis",
+    "dis": "dis"
+   },
+   "not": "kolonun profili paftada yok (karkas kuralı: kolon ve kiriş 80 × 45 × 1,2)"
+  }
+ },
+ "duvarlar": [
+  {
+   "ad": "W01",
+   "sinif": "dis",
+   "kutu": [
+    0,
+    60.1,
+    14,
+    486.0
+   ],
+   "yukseklik": 270,
+   "not": "batı"
+  },
+  {
+   "ad": "W02",
+   "sinif": "dis",
+   "kutu": [
+    14,
+    472.0,
+    311.0,
+    486.0
+   ],
+   "yukseklik": 270,
+   "not": "kuzeybatı: sayfada eğik (324; dış yüzü 464,4'ten 507,6'ya); dik açılı yazıldı, eğik çizginin ortalamasında"
+  },
+  {
+   "ad": "W03",
+   "sinif": "dis",
+   "kutu": [
+    311.0,
+    472.0,
+    325.0,
+    507.6
+   ],
+   "yukseklik": 270,
+   "not": "kuzeybatı ile düz kuzey duvarı arasındaki basamak: yapay (eğik duvarın dik açılı yazılmasından; sayfada yok)"
+  },
+  {
+   "ad": "W04",
+   "sinif": "dis",
+   "kutu": [
+    325.0,
+    493.6,
+    481.9,
+    507.6
+   ],
+   "yukseklik": 270,
+   "not": "kuzey, düz (161; banyonun 60/40 penceresi)"
+  },
+  {
+   "ad": "W05",
+   "sinif": "dis",
+   "kutu": [
+    481.9,
+    493.6,
+    495.9,
+    561.6
+   ],
+   "yukseklik": 270,
+   "not": "kuzey basamağı: sayfada 22 (507,6–529,6), eğik duvarın ortalamasına uzatıldı"
+  },
+  {
+   "ad": "W06",
+   "sinif": "dis",
+   "kutu": [
+    495.9,
+    547.6,
+    954.0,
+    561.6
+   ],
+   "yukseklik": 270,
+   "not": "kuzeydoğu: sayfada eğik (482; dış yüzü 529,6'dan 593,5'e); dik açılı yazıldı, eğik çizginin ortalamasında"
+  },
+  {
+   "ad": "W07",
+   "sinif": "dis",
+   "kutu": [
+    940.0,
+    0,
+    954.0,
+    547.6
+   ],
+   "yukseklik": 270,
+   "not": "doğu"
+  },
+  {
+   "ad": "W08",
+   "sinif": "dis",
+   "kutu": [
+    644.0,
+    0,
+    940.0,
+    14
+   ],
+   "yukseklik": 270,
+   "not": "güney (yaşam alanı)"
+  },
+  {
+   "ad": "W09",
+   "sinif": "dis",
+   "kutu": [
+    630.1,
+    0,
+    644.0,
+    74.1
+   ],
+   "yukseklik": 270,
+   "not": "yaşam alanının sundurmaya bakan batı yüzü (60 cm girinti)"
+  },
+  {
+   "ad": "W10",
+   "sinif": "dis",
+   "kutu": [
+    14,
+    60.1,
+    630.1,
+    74.1
+   ],
+   "yukseklik": 270,
+   "not": "güney (yatak odası ve hol; giriş kapısı)"
+  },
+  {
+   "ad": "W11",
+   "sinif": "ic",
+   "kutu": [
+    311.0,
+    74.1,
+    319.0,
+    472.0
+   ],
+   "yukseklik": 270,
+   "not": "yatak odası ile banyo ve hol arası"
+  },
+  {
+   "ad": "W12",
+   "sinif": "ic",
+   "kutu": [
+    319.0,
+    180.6,
+    492.8,
+    188.5
+   ],
+   "yukseklik": 270,
+   "not": "banyo ile hol arası"
+  },
+  {
+   "ad": "W13",
+   "sinif": "ic",
+   "kutu": [
+    485.0,
+    188.5,
+    492.8,
+    493.6
+   ],
+   "yukseklik": 270,
+   "not": "banyo ile yaşam alanı arası"
+  },
+  {
+   "sinif": "kolon",
+   "yukseklik": 210,
+   "kaplama_yuksekligi": 210,
+   "ad": "KLN1",
+   "kutu": [
+    487.0,
+    -82.9,
+    517.0,
+    -74.9
+   ],
+   "not": "sundurmanın güneybatı köşe dikmesi; 1. sayfada ayrıca çizili değil: varsayım (açık köşe; ÇP-17'nin sundurması gibi)"
+  },
+  {
+   "sinif": "kolon",
+   "yukseklik": 210,
+   "kaplama_yuksekligi": 210,
+   "ad": "KLN2",
+   "kutu": [
+    600.1,
+    -82.9,
+    630.1,
+    -74.9
+   ],
+   "not": "sundurmanın güneydoğu köşe dikmesi; 1. sayfada ayrıca çizili değil: varsayım (açık köşe; ÇP-17'nin sundurması gibi)"
+  }
+ ],
+ "mahaller": [
+  {
+   "ad": "Yatak Odası",
+   "nokta": [
+    150,
+    280
+   ],
+   "sinif": "ic",
+   "islev": [
+    "yatak_odasi"
+   ],
+   "etiket_m2": 12.1
+  },
+  {
+   "ad": "Banyo",
+   "nokta": [
+    400,
+    350
+   ],
+   "sinif": "ic",
+   "islev": [
+    "banyo"
+   ],
+   "islak": true,
+   "etiket_m2": 5.1
+  },
+  {
+   "ad": "Yaşam Alanı ve Hol",
+   "nokta": [
+    720,
+    300
+   ],
+   "sinif": "ic",
+   "islev": [
+    "salon",
+    "mutfak",
+    "hol"
+   ],
+   "etiket_m2": 25.2,
+   "not": "etiketler 23,2 (yaşam alanı; mutfak tezgâhı banyonun doğu duvarında çizili) + 2 (hol): hol ile yaşam alanı arasında duvar yok (KRS1)"
+  },
+  {
+   "ad": "Sundurma",
+   "poligon": [
+    [
+     487.0,
+     -82.9
+    ],
+    [
+     630.1,
+     -82.9
+    ],
+    [
+     630.1,
+     60.1
+    ],
+    [
+     487.0,
+     60.1
+    ]
+   ],
+   "sinif": "veranda",
+   "islev": [
+    "veranda"
+   ],
+   "etiket_m2": 2.0,
+   "not": "giriş kapısının önündeki sundurma (140 × 140 kaplamalı; batısı ve güneyi açık, doğusu 60 cm yaşam alanına dayalı, 80 cm açık); korkuluk yazılı değil"
+  }
+ ],
+ "acikliklar": [
+  {
+   "ad": "P1",
+   "tur": "pencere",
+   "duvar": "W04",
+   "bas": 327.0,
+   "en": 60,
+   "yuk": 40,
+   "alt": 160,
+   "mahal": "Banyo",
+   "etiket": "60/40"
+  },
+  {
+   "ad": "P2",
+   "tur": "pencere",
+   "duvar": "W01",
+   "bas": 125.3,
+   "en": 60,
+   "yuk": 130,
+   "alt": 70,
+   "mahal": "Yatak Odası",
+   "etiket": "60/130"
+  },
+  {
+   "ad": "P3",
+   "tur": "pencere",
+   "duvar": "W10",
+   "bas": 90.6,
+   "en": 120,
+   "yuk": 180,
+   "alt": 20,
+   "mahal": "Yatak Odası",
+   "etiket": "120/180"
+  },
+  {
+   "ad": "P4",
+   "tur": "pencere",
+   "duvar": "W08",
+   "bas": 732.0,
+   "en": 120,
+   "yuk": 180,
+   "alt": 20,
+   "mahal": "Yaşam Alanı ve Hol",
+   "etiket": "120/180"
+  },
+  {
+   "ad": "K1",
+   "tur": "dis_kapi",
+   "duvar": "W10",
+   "bas": 512.8,
+   "en": 95,
+   "yuk": 210,
+   "mentese": "bas",
+   "acilim": "ust",
+   "mahal": "Yaşam Alanı ve Hol",
+   "not": "giriş kapısı (sundurmadan yaşam alanına); kanat 100 çizili (510,3–610,3); boşluk 95 × 210 açık beşteki gibi, çizili kanadın ortasında"
+  },
+  {
+   "ad": "K2",
+   "tur": "ic_kapi",
+   "duvar": "W11",
+   "bas": 76.2,
+   "en": 90,
+   "yuk": 214,
+   "mentese": "bas",
+   "acilim": "sol",
+   "kanat": [
+    80,
+    200
+   ],
+   "mahal": "Yatak Odası"
+  },
+  {
+   "ad": "K3",
+   "tur": "ic_kapi",
+   "duvar": "W12",
+   "bas": 324.0,
+   "en": 90,
+   "yuk": 214,
+   "mentese": "bas",
+   "acilim": "ust",
+   "kanat": [
+    80,
+    200
+   ],
+   "mahal": "Banyo"
+  }
+ ],
+ "kirisler": [
+  {
+   "ad": "KRS1",
+   "kutu": [
+    485.0,
+    60.1,
+    492.8,
+    188.5
+   ],
+   "alt": 240,
+   "ust": 270,
+   "acik": [
+    [
+     74.1,
+     180.6
+    ]
+   ],
+   "bolge": "Yaşam Alanı ve Hol",
+   "not": "holün yaşam alanına açılan kapısız açıklığının kirişi (106,5); banyonun doğu duvarının hattında; uçları W10'un ve W12'nin içinde"
+  },
+  {
+   "ad": "KRS2",
+   "kutu": [
+    487.0,
+    -82.9,
+    630.1,
+    -74.9
+   ],
+   "alt": 210,
+   "ust": 240,
+   "acik": [
+    [
+     517.0,
+     600.1
+    ]
+   ],
+   "bolge": "Sundurma",
+   "not": "sundurma kirişi, güney (KLN1–KLN2); kotu sayfada yok (ÇP-17'nin sundurması gibi, beyan)"
+  },
+  {
+   "ad": "KRS3",
+   "kutu": [
+    487.0,
+    -74.9,
+    495.0,
+    74.1
+   ],
+   "alt": 210,
+   "ust": 240,
+   "acik": [
+    [
+     -74.9,
+     60.1
+    ]
+   ],
+   "bolge": "Sundurma",
+   "not": "sundurma kirişi, batı (KLN1'den W10'a; 60,1–74,1 arası W10'un içinde); kotu sayfada yok (beyan)"
+  },
+  {
+   "ad": "KRS4",
+   "kutu": [
+    622.1,
+    -74.9,
+    630.1,
+    0
+   ],
+   "alt": 210,
+   "ust": 240,
+   "acik": [
+    [
+     -74.9,
+     0
+    ]
+   ],
+   "bolge": "Sundurma",
+   "not": "sundurma kirişi, doğu (KLN2'den W09'a); kotu sayfada yok (beyan)"
+  }
+ ],
+ "lento": 70,
+ "cati": {
+  "tip": "besik",
+  "tip_adi": "parapet çatı (alçak beşik olarak; parapet kurulmadı)",
+  "tip_kaynak": "teknik özellikler: çatı şekli 'Parapet Çatı', kaplama OSB + membran + shingle. Sayfada görünüş ve çatı kesiti yok; kuralda parapet çatı yok (makas kuralı tek düzlemli çatıda aile bulamıyor, liste kuralı çatı tipini beşik, kırma ve cumbalılar arasında arıyor). Kural dışı durum (kör kural: kurulur ve beyan edilir): ana çatı duvarların içinde saçaksız alçak beşik, eğim %10 (çatı üreticisinin en küçük eğimi, `kurallar/cizim/cati_uretici.json › egim_yuzde_aralik`), mahya doğu–batı, yaşam alanının derinliğinin ortasında (y = 280,8); parapet duvarı kurulmadı. Sundurma kendi tek eğimli alçak çatısıyla güney duvarına dayanır (ÇP-17'nin sundurması gibi)",
+  "sacak": 0,
+  "topuk": 10,
+  "duvar_ustu": 270,
+  "panel_kalinligi": 8,
+  "duzlemler": [
+   {
+    "ad": "güney",
+    "plan": [
+     [
+      0,
+      60.1
+     ],
+     [
+      630.1,
+      60.1
+     ],
+     [
+      630.1,
+      0
+     ],
+     [
+      954.0,
+      0
+     ],
+     [
+      954.0,
+      280.8
+     ],
+     [
+      0,
+      280.8
+     ]
+    ],
+    "yukari": [
+     0,
+     1
+    ],
+    "egim": 0.1,
+    "sacak_kotu": 280.0,
+    "sacak": {
+     "y": 0.0
+    },
+    "ust_pay": 8.04,
+    "not": "alçak beşiğin güney yüzü (saçaksız; y = 0'da 280, batıdaki güney duvarında 286)"
+   },
+   {
+    "ad": "kuzey",
+    "plan": [
+     [
+      0,
+      280.8
+     ],
+     [
+      954.0,
+      280.8
+     ],
+     [
+      954.0,
+      561.6
+     ],
+     [
+      481.9,
+      561.6
+     ],
+     [
+      481.9,
+      507.6
+     ],
+     [
+      311.0,
+      507.6
+     ],
+     [
+      311.0,
+      486.0
+     ],
+     [
+      0,
+      486.0
+     ]
+    ],
+    "yukari": [
+     0,
+     -1
+    ],
+    "egim": 0.1,
+    "sacak_kotu": 280.0,
+    "sacak": {
+     "y": 561.6
+    },
+    "ust_pay": 8.04,
+    "not": "alçak beşiğin kuzey yüzü (saçaksız; kuzeydoğu duvarında 280, düz kuzey duvarında 285, kuzeybatı duvarında 288)"
+   },
+   {
+    "ad": "sundurma",
+    "plan": [
+     [
+      487.0,
+      -82.9
+     ],
+     [
+      630.1,
+      -82.9
+     ],
+     [
+      630.1,
+      60.1
+     ],
+     [
+      487.0,
+      60.1
+     ]
+    ],
+    "yukari": [
+     0,
+     1
+    ],
+    "egim": 0.1,
+    "sacak_kotu": 240.0,
+    "sacak": {
+     "y": -82.9
+    },
+    "ust_pay": 8.04,
+    "ust_yapi": "cati_paneli",
+    "panel_kalinligi": 8.0,
+    "not": "sundurmanın tek eğimli alçak çatısı, güney duvarına (W10) dayanır; çatı paneli (açık alanın ayrı alçak çatısı, ÇP-07 ve ÇP-17'nin sundurması gibi); kotu sayfada yok: kiriş üstü 240 (beyan)"
+   }
+  ],
+  "kalkanlar": [
+   {
+    "ad": "batı kalkanı",
+    "eksen": "x",
+    "konum": 0.0,
+    "aralik": [
+     60.1,
+     486.0
+    ],
+    "ic": "dogu",
+    "ust": [
+     "güney",
+     "kuzey"
+    ],
+    "not": "alçak beşiğin batı alnı"
+   },
+   {
+    "ad": "doğu kalkanı",
+    "eksen": "x",
+    "konum": 954.0,
+    "aralik": [
+     0.0,
+     561.6
+    ],
+    "ic": "bati",
+    "ust": [
+     "güney",
+     "kuzey"
+    ],
+    "not": "alçak beşiğin doğu alnı"
+   }
+  ],
+  "egim_kaynak": "eğim 1. sayfada yazmıyor ve kuralda parapet çatı yok: %10 (çatı üreticisinin en küçük eğimi; beyan); duvar üstü 270 (bina yüksekliği 2700 mm); saçak yok (parapet), topuk 10 kuralın varsayılanı",
+  "yontem": "omega_asik",
+  "yontem_kaynak": "paftada 'omega' ya da 'aşık' sözcüğü geçen sayfa var (sayfa denetimi aracı; sayfa açılmadı): yöntem B",
+  "kaplama": "tek_kat_panel",
+  "kaplama_kaynak": "teknik özellikler: OSB + membran + shingle (antrasit gri). Genel model bu kaplamayı hesaplamıyor (yalnız sandviç panel ve tek kat panel): kitabın çelik standardı tek kat panel sayıldı (`baz_paket_cati_kaplamasi`; kural dışı durum, beyan)"
+ },
+ "bilinen_sinirlar": [
+  "Kör tanım: yalnız 1. sayfadan. Panel bölmeleri, makaslar ve çatı paneli kuraldan; paftanın panel sayfaları açılmadı.",
+  "Eğik duvarlar kuralda yok: motor duvarı dik açılı kutuyla yazar. Kuzeydeki iki eğik duvar (324 ve 482) eğik çizgilerinin ortalamasında yatay yazıldı (alan korunur); boyları izdüşüm (297 ve 458 iç yüz), eğik boydan %1 kısa. Batıda yapay bir basamak (W03, 21,6) eklendi, kuzey basamağı (W05) 22'den 54'e uzadı; batı duvarı 21,6 uzun, doğu duvarı 32 kısa.",
+  "Parapet çatı kuralda yok ve sayfada görünüş yok: duvarların içinde saçaksız alçak beşik (%10, mahya doğu–batı; beyan); kuzeydeki iki basamağın (W03, W05) alnı yazılmadı. Parapet duvarı kurulmadı: parapetin çeliği ve kaplaması listemizde yok.",
+  "Çatı kaplaması OSB + membran + shingle genel modelde hesaplanmıyor: kitabın çelik standardı tek kat panel sayıldı; OSB, membran ve shingle satırları listemizde yok, yerine tek kat panel satırları var.",
+  "Sundurmanın dikmeleri (KLN1, KLN2), kirişleri (KRS2–KRS4) ve alçak çatısı 1. sayfada ayrıca çizili değil: açık köşelere dikme, açık kenarlara kiriş, ÇP-17'nin sundurması gibi (kiriş 210–240, çatı paneli).",
+  "Holün yaşam alanına açılan kapısız açıklığının kirişi (KRS1, 106,5) 1. sayfada çizili değil: banyonun doğu duvarının hattındaki kapısız açıklığa yazıldı (kör kural).",
+  "Pencere alt kotları etikette yok: 200 − yükseklik (lento 70; KT-01 ve ÇP-06'daki gibi).",
+  "İç kapı boşlukları 90 × 214, kanat 80 (açık beşteki gibi); 1. sayfada kanat 80 çizili. İç kapılar alıcıya ait (listede yok); boşlukları çerçeve için tanımda. Giriş kapısı 100 çizili; boşluk 95 × 210.",
+  "'Tesisat grubu alıcıya ait' sıhhi tesisat sayıldı; elektrik listede kaldı.",
+  "Dış ve iç duvarın et kalınlığı teknik özelliklerde 0,8 (140X45X08, 80X45X08); kolon ve kirişin et kalınlığı paftada yok (1,2: kitabın varsayılanı)."
+ ],
+ "karkas": "kural"
+}
