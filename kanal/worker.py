@@ -10,7 +10,7 @@ Bu dosya WhatsApp'a bağlanmaz ve HİÇBİR ŞEY GÖNDERMEZ; dışarı yalnız L
 çıktıları checks/ altına yazar. Hosting dosya modu (state.json, cron, pip kurulumu) İE-06 ile kaldırıldı.
 """
 from __future__ import annotations
-import hashlib, json, os, sys, time, traceback, warnings
+import hashlib, json, os, re, sys, time, traceback, warnings
 from pathlib import Path
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
@@ -298,6 +298,8 @@ def isle(gelen: dict, settings: dict, k=None, cikarim: dict | None = None, proje
     kim = f"{(bayi or {}).get('ad') or gelen.get('name') or ''} ({maske(sender)})"
     reply_id = str(gelen.get("reply_id") or "")
     import sablonlar as S0
+    if nasil_calisir_mesaji(gelen):
+        reply_id = S0.BILGI_NASIL                 # BK-29 tur 6 (pano 206, D3): yazıyla "Nasıl çalışır?" düğmeyle aynı (LLM'siz; fiyat cevabı gidiyordu)
     if gelen.get("type") in GELEN_YAZILI and reply_id.startswith("dosya:") and S0.is_emri_no_gecerli(reply_id[len("dosya:"):]):
         # İE-07 P5: bayi "dosyalarınız hazır" şablonunun hızlı yanıt düğmesine bastı → Meta tarafında 24 saat penceresi açıldı.
         # LLM çağrılmaz, konuşma durumu değişmez; bayiye onaylı sabit cevap, Patron'a bildirim (metin + şablon, ekleme A).
@@ -1402,6 +1404,24 @@ def maske_numaralar(metin: str) -> str:
 NASIL_CALISIR = KOD / "belgeler" / "nasil_calisir.html"      # İE-08 8b M4: bayi rehberi §1–3 tek sayfa (Görev 9 metni)
 _NASIL_CSS = ("body{font-family:sans-serif;font-size:9.5pt} h1{font-size:16pt} h2{font-size:11.5pt;margin-top:8pt} "
               "table{border-collapse:collapse} td,th{border:0.5pt solid #999;padding:2pt;font-size:8.5pt}")
+
+
+_NASIL_SOZU = re.compile(r"^(portman |bu |sistem |bu sistem |burasi |siz )?nasil (calisir|calisiyor|calisiyorsunuz|kullanilir|kullanirim|kullanacagim)$")
+
+
+def nasil_calisir_sozu(metin: str | None) -> bool:
+    """BK-29 tur 6 (pano 206; kabul seti D3): mesaj yalnız "Nasıl çalışır?" sorusu mu (K18: bayinin kendi sözü). Başka söz taşıyan
+    cümle ("bu pencere nasıl çalışır", "nasıl çalışır, fiyat ne") bugünkü yoldan gider."""
+    s = str(metin or "").translate(str.maketrans("ıİçÇğĞöÖşŞüÜâî", "iiccggoossuuai")).lower()
+    s = " ".join(re.sub(r"[^a-z0-9 ]", " ", s).split())
+    return bool(_NASIL_SOZU.match(s))
+
+
+def nasil_calisir_mesaji(gelen: dict) -> bool:
+    """Kayıtlı bayinin düğmesiz yazı mesajı yalnız "Nasıl çalışır?" mı. Kalıcı akış bu mesajda LLM'i çağırmaz (`kalici.bir_is`);
+    `isle` düğmenin yolundan cevaplar. Kayıtsız gönderen ve mühendis bu yola girmez."""
+    return (not gelen.get("reply_id") and gelen.get("type") == "text" and bool(gelen.get("bayi"))
+            and (gelen.get("role") or "bayi") != "muhendis" and nasil_calisir_sozu(gelen.get("text")))
 
 
 def nasil_calisir_pdf() -> tuple[Path, str]:
