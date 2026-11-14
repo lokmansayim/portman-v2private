@@ -1311,9 +1311,9 @@ def dis140_onerilir(yapi: dict | None) -> bool:
         t = celik.tanim_oku(y)
         for d in onceki:
             t = varyant.tanim_uygula(t, d)
-    except (varyant.VaryantHatasi, OSError, ValueError, TypeError):
+        return _dis140_uygulanir(t, onceki)
+    except Exception:                                          # kayıttaki tanım okunamadı ya da uygulanamadı: örnek gösterilmez, iş düşmez
         return False
-    return _dis140_uygulanir(t, onceki)
 
 
 def _celik_ornekleri(katalog: Katalog, aday: dict, t: dict, onceki: list[dict]) -> str:
