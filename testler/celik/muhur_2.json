@@ -199,6 +199,18 @@
    "tarih": "2026-11-14",
    "dayanak": "Lokman 14 Kasım 2026 09:06 UTC kartta \"Çift kat say, testten çıkar\" seçeneğini seçti (soru: bu evde içeride 18 basamaklı merdiven var; tek kat mı sayalım?). kor_sayfa (yalnız kat ve merdiven sözcükleri): 5 pafta sayfasında kat ya da merdiven sözcüğü yok; kor_dwg: DWG'nin onay çerçeveleri boş şablon, çerçeve dışındaki mimari planda \"MERDİVENHOLÜ\" ve 18 basamaklı iç merdiven (Lokman 08:58 sözüyle montaj paftasından okundu); montaj paftasında döşeme yerleşim planı sayfası var (bu kaydın paftası). Çift kat: kapalı (D-26), kör testte ölçülmez",
    "pafta_sha256": "f5d5ba447d616d9e79c08f13603bd8a4758f3021e91b4b8a0961aa43300d6686"
+  },
+  "ÇP-24": {
+   "kat": "tek",
+   "tarih": "2026-11-14",
+   "dayanak": "kor_sayfa (yalnız kat ve merdiven sözcükleri): 7 pafta sayfasının hiçbirinde kat ya da merdiven sözcüğü yok; kor_dwg: DWG'nin 29 çerçevesinde ve çerçeve dışında kat ya da merdiven sözcüğü yok. Onay sayfasına (DWG'nin 2. çerçevesi; 13. çerçeve aynısı) bakıldı: tek kat planı, bina yüksekliği 2700 mm; kuzeyde sundurmaya iki basamaklı dış giriş; iç merdiven ve üst kat planı yok",
+   "pafta_sha256": "ea3809c032053b15cb68aaf3f80c02c9c95b28a4b91e09b850e273f4a3afa205"
+  },
+  "ÇP-25": {
+   "kat": "tek",
+   "tarih": "2026-11-14",
+   "dayanak": "kor_sayfa (yalnız kat ve merdiven sözcükleri): 6 pafta sayfasında kat ya da merdiven sözcüğü yok; kor_dwg: çerçevelerde yok, çerçeve dışında yalnız \"MERDİVEN\" (beton planının notu: araziye göre merdiven sayısı ayarlanacak). Lokman 14 Kasım 2026 08:58 UTC sözüyle montaj paftasından okundu: DWG'deki plan sayfası (bina yüksekliği 2800 mm, tek kat planı) ve beton planı: merdivenler girişlerdeki 30 cm basamaklı dış merdivenler; iç merdiven ve üst kat planı yok",
+   "pafta_sha256": "daaeb23d7f2c1d224a2ea35981357988f29497b02d673df050294ee7b715e632"
   }
  },
  "dosyalar": [
