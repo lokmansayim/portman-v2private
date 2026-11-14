@@ -59,12 +59,37 @@ def _form_izi(k: Konusma, t: Talep) -> None:
     `form = "prefabrik"` (formdaki seçimler İş Emri'ne işlenir, `form_ozellik`), öncelik taslağa yazılır (sohbette sorulmaz; plan başka
     bir mesajda çıksa da), ölçü "formdan" diye işaretlenir (pano + m² birlikte: hazır planlar m²'ye göre). Sonraki bir mesajda bayi
     ölçüyü sohbette yazarsa ölçü izi kalkar; plan henüz çıkmadıysa formun hesapladığı öteki değer de düşer: bayinin son sözü bugünkü
-    yoldan okunur (pano ya da dış ölçü yazdıysa m², m² yazdıysa pano)."""
+    yoldan okunur (pano ya da dış ölçü yazdıysa m², m² yazdıysa pano).
+    İE-20 PR-9 (D-93): çelik talep formunun mesajında (`k.celik_formu`) `form = "celik"`; öncelik taslağa yazılır (çelikte öncelik
+    sohbette sorulmaz; formda seçilen bütçe ya da yaşam alanı seti sıralar), dış duvar 140 mm karkas seçimi `form_dis140` olarak durur
+    (`_celik_is_emri_uret` ilk planda çizime işler). Çelikte ölçü yuvarlanmaz: ölçü izi yok."""
     ts = k.d["taslak"]
+    cf = getattr(k, "celik_formu", None)
+    k.celik_formu = None                          # yalnız bu mesaj için
+    if cf is not None:
+        ts["form"] = "celik"
+        ts.pop("olcu_formdan", None)
+        if cf.get("oncelik"):
+            ts["oncelik"] = cf["oncelik"]
+        if cf.get("dis140"):
+            ts["form_dis140"] = True
+        else:
+            ts.pop("form_dis140", None)
+        # Form yeniden geldiyse (aynı taslak) formun yazdığı satırlarda son form geçerli: bu cevapta olmayan satırın eski değeri kalkar
+        # (`Konusma.birlestir` özellikleri üst üste ekler; standarda dönen seçim eski standart dışı değeri plana taşımasın).
+        bo, bu = ts.get("bina_ozellikleri"), t.bina_ozellikleri or {}
+        if isinstance(bo, dict):
+            for a in cf.get("anahtarlar") or ():
+                if a in bo and not bu.get(a):
+                    del bo[a]
+            if not bo:
+                ts.pop("bina_ozellikleri", None)
+        return
     form = getattr(k, "prefabrik_formu", None)
     k.prefabrik_formu = None                      # yalnız bu mesaj için (aynı konuşma nesnesi sonraki mesajda da kullanılırsa kalmasın)
     if form is not None:
         ts["form"] = "prefabrik"
+        ts.pop("form_dis140", None)
         ts["olcu_formdan"] = True
         if form.get("oncelik"):
             ts["oncelik"] = form["oncelik"]
@@ -2174,6 +2199,11 @@ def _celik_is_emri_uret(k: Konusma, bayi: dict, katalog: Katalog, aday: dict, ts
     if isinstance(sonuc, Karar):
         return sonuc
     yeni, okunan = sonuc
+    # İE-20 PR-9 (D-93): çelik talep formunun dış duvar seçimi ilk planda. Karar burada, işlem öteki değişikliklerden sonra (aşağıda).
+    form_ilk = not ayni_proje and ts.get("form") == "celik"
+    form_140 = form_ilk and bool(ts.get("form_dis140")) and not _zaten_140(t, onceki) \
+        and not any(d.get("op") == "dis_karkas_140" for d in yeni)
+    form_notu = "Bu planın dış duvarı 140 mm karkastır. " if form_ilk and not ts.get("form_dis140") and _zaten_140(t, []) else ""
     tekil: dict[str, dict] = {}
     for d in yeni:                                             # aynı pencereye iki değişiklik (saklanan istek + seçim mesajı): sonuncusu geçerli
         tekil[f"{d.get('op')}:{d.get('aciklik') or ''}:{d.get('mahal') or ''}:{d.get('yon') or ''}"] = d   # İE-23: oda işlemi odası ve yönüyle
@@ -2207,6 +2237,21 @@ def _celik_is_emri_uret(k: Konusma, bayi: dict, katalog: Katalog, aday: dict, ts
         k.not_dus("kural", f"değişiklik uygulanamadı: {e}")
         return _bitir(k, Karar(eylem="yonlendir", gerekce=f"çelik değişikliği uygulanamadı: {e}",
                                 mesaj=f"Bu değişiklik otomatik uygulanamadı ({e}). " + YONLENDIRME))
+    if form_140:
+        # Formda dış duvar 140 mm karkas seçildi: sohbette yazılan "dışlar 140" ile aynı işlem, bayinin öteki değişikliklerinden sonra
+        # (onların üstüne) denenir. Bu modele uygulanamıyorsa plan öteki değişikliklerle ve modelin kendi dış duvarıyla çizilir, seçim
+        # özel isteğe yazılır ve bayiye söylenir (sessiz düşmez; form seçimi yüzünden plan yönlendirilmez). Taslak yalnız burada, plan
+        # kesinleşince değişir (yukarıdaki erken dönüşlerde dokunulmaz).
+        d140 = {"op": "dis_karkas_140", "aciklama": "dış duvarlar 140'lık karkas (16,5 cm)"}
+        try:
+            t = varyant.tanim_uygula(t, d140)
+            yeni = yeni + [d140]
+        except varyant.VaryantHatasi as e:
+            k.not_dus("kural", f"çelik formu: dış 140 bu modele uygulanamadı: {e}")
+            ts["ozel_istekler"] = list(ts.get("ozel_istekler") or []) + ["Dış duvar: 140 mm karkas (formdan; çizime işlenemedi)"]
+            ts.pop("form_dis140", None)
+            form_notu = ("Dış duvar 140 mm karkası bu plana otomatik işleyemedim. Planı modelin kendi dış duvarıyla çizdim. "
+                         "İsteğinizi talebe yazdım. ")
     ts.pop("pencereler", None); ts["varyantlar"] = []          # tüketildi: sonraki revizyon bunları yeniden okumaz (değişiklikler zarfta birikir)
     ie = celik.zarf(aday, bayi, k.gonderen, ts, son, onceki + yeni, kaynak=f"aday {aday['kod']}")
     ie["yapi"]["bu_revizyon"] = [{**d} for d in yeni]
@@ -2242,7 +2287,7 @@ def _celik_is_emri_uret(k: Konusma, bayi: dict, katalog: Katalog, aday: dict, ts
     if kod_metni and aday.get("uretilen") and ly is not None and ly.get("durum") == "uygulanamadi" and ly.get("kurala_uymayan"):
         gerekce += f"; {KURALA_UYMADI}, plan aynen"            # bilgiyle yeniden çizimde de Patron'a bilgi (plan geometrisi aynen)
     # BK-08 madde 4: çelik planda görsel ve PDF bu metinle birlikte gider (çizim düşerse bu metin gitmez, `worker._cizim_hatasi`)
-    mesaj = f"{on_not}{on_bilgi}{ozet} {uyg}Ön onay planınız hazır; plan görseli ve PDF ektedir.".replace("  ", " ")
+    mesaj = f"{on_not}{on_bilgi}{ozet} {uyg}{form_notu}Ön onay planınız hazır; plan görseli ve PDF ektedir.".replace("  ", " ")
     cati_metni = getattr(k, "cati_metni", "")
     if cati_metni:                                             # İE-42 (D-94): onaydan sonraki çatı setinden seçim
         if yeni and all(d.get("op") == "cati_varyanti" for d in yeni):

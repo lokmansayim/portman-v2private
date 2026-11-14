@@ -287,6 +287,26 @@ def test_sacak_omegasi_z_ve_veranda_asigi_kart_modelinden(paketler):
     assert d["asik"]["yuzler"]["V2L"]["sira"] == d["asik"]["yuzler"]["V2R"]["sira"] == [4.58, 49.01, 109.01, 164.43]
 
 
+def test_baslikta_brut_ve_net(paketler):
+    """D-95 (Lokman, 14 Kasım 2026 21:01 UTC: "biz verandayıda net alana alır sayarız", "biz çatı ile kapattığımız her yeri bürütten
+    sayarız"): rehberin başlığında brüt çatının örttüğü oturum (yükleme listesinin `bina_m2`'si, D-49), net bütün mahaller (veranda, niş,
+    balkon dahil). Sahnenin genel bakış etiketi (rozet) brütü yazar (21:07:29 "her zaman brüt m² ile hesaplarız"). Ön onay antedi (M-02)
+    kapalı odaların netini yazmaya devam eder."""
+    from motor import dxf_out, geometry as G
+    from motor.prefabrik_liste import bina_brut_cm2
+    kok, _, _ = paketler
+    beklenen = {"TK-01": ("90,21 m² brüt · 84,54 m² net", "72,71"), "AP-19": ("60,00 m² brüt · 55,53 m² net", "48,85")}   # TK-01 r06, PK-01
+    for kod, (yazi, kapali) in beklenen.items():
+        ie = json.loads((KOK / _model(kod)["is_emri"]).read_text(encoding="utf-8"))
+        plan = G.kur(ie)
+        assert yazi.startswith(f"{bina_brut_cm2(plan) / 1e4:.2f}".replace(".", ",")) and dxf_out.alan_yazisi(plan).endswith(f"{kapali} m² net")
+        G.lento_ayarla({})                                   # lento modül durumudur (BK-23): öteki testlere sızmaz
+        yol = kok / "prefabrik" / kod / f"{kod}_montaj_rehberi.html"
+        d = _rehber_verisi(yol)
+        assert d["kabuk"]["chip"] == yazi and f'<span class="chip">{yazi}</span>' in yol.read_text(encoding="utf-8"), kod
+        assert d["rozet"].endswith(" · " + yazi.split(" · ")[0]), kod
+
+
 @pytest.mark.skipif(iz.hazir() is not None, reason=f"rehber izi: {iz.hazir()}")
 @pytest.mark.parametrize("kod", ["TK-01", "AP-19"])
 def test_rehber_izi(paketler, tmp_path, kod):
