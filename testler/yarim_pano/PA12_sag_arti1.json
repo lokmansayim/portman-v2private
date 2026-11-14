@@ -1,6 +1,11 @@
 {
  "aciklama": "İE-39: 85 m² 3+1 (PA-12, is_emri/adaylar/PA12.json) sağ dış duvar 1 yarım pano uzat.",
- "onay": null,
+ "onay": {
+  "kim": "Lokman",
+  "zaman_utc": "2026-11-14T10:11:06Z",
+  "soz": "karar kartı \"Onaylayın: 85 m2 evin sağa yarım pano uzamış hâli doğru mu?\" → \"Doğru, örnek olsun\" (seçenek metni: \"Bu çizim komutun beklenen örneği olur. Kod PR'a girer, birleştirme sizde.\")",
+  "gosterilen": "önce/sonra pano dizilimi, ön onay PDF'i, DXF, bayi plan görseli (PF Havuz_Basit_Komut/IE-39_85m2_sag_yarim_pano/, 14 Kasım 10:05 UTC)"
+ },
  "girdi": "is_emri/adaylar/PA12.json",
  "komut": {
   "cephe": "sag",

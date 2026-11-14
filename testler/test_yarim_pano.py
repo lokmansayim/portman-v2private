@@ -3,8 +3,8 @@
 Kural D-90 (Lokman, 14 Kasım 2026 09:29:42 UTC, kart "Doğru, işe başlansın"): dış duvar yarım pano kayar, o duvara değen odalar uzar;
 veranda ya da çatı açıklığı değişen evde komut durur. İlk dilim (kart 09:53:57 UTC): sağ ve ön duvar.
 
-Beklenen örnek `testler/yarim_pano/PA12_sag_arti1.json` (85 m² 3+1, sağa 1 yarım pano): `onay` alanı Lokman'ın sözüyle dolar (D-28,
-D-02); dolmadan "hedef" diye anılmaz. Ev × duvar × komut tablosu `testler/yarim_pano/beklenen_tablo.json`. İkisi bilinçli yazılır:
+Hedef örnek `testler/yarim_pano/PA12_sag_arti1.json` (85 m² 3+1, sağa 1 yarım pano): Lokman 14 Kasım 2026 10:11:06 UTC kartı
+"Doğru, örnek olsun" (`onay` alanı; D-28). Yalnız Lokman'ın onayıyla ve gerekçeli kararla yeniden dondurulur (D-02). Ev × duvar × komut tablosu `testler/yarim_pano/beklenen_tablo.json`. İkisi bilinçli yazılır:
 `python testler/test_yarim_pano.py --dondur` (gerekçe iş emrine).
 """
 from __future__ import annotations
@@ -147,6 +147,11 @@ def test_pa12_sag_arti1_beklenen_ornek():
     u = pa12_uret()
     assert u["is_emri"] == h["is_emri"]
     assert json.loads(json.dumps(u["ozet"], ensure_ascii=False)) == h["ozet"]
+
+
+def test_pa12_hedef_onayli():
+    h = json.loads(PA12_HEDEF.read_text(encoding="utf-8"))
+    assert h["onay"]["kim"] == "Lokman" and "Doğru, örnek olsun" in h["onay"]["soz"]
 
 
 def test_pa12_sag_arti1_cizim(tmp_path):
