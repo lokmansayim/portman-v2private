@@ -205,7 +205,7 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | D | D-90 | havuz evinde bayinin "yarım pano uzat / kısalt" komutu: dış duvar kayar, değen odalar uzar; veranda ya da çatı açıklığı değişirse durur; ilk dilim sağ ve ön (İE-39; Lokman 14.11 09:29:42, 09:53:57 kartları) | yazıldı (14.11; yarım pano sohbeti, `claude/project-thread-8hhan1`) |
 | D | D-91 | 45 m² havuz evinin iki standart pano hâli (PA-28, PA-29; İE-40) | alındı (14.11; standart pano sohbeti) |
 | D | D-92 | tek özel pano kuralı: iki köşe ya da T arasında 125,5'ler, kalan tek özel pano; İş Emri anahtarı `dizilim.tek_ozel_pano` (BK-30, PC-39; Lokman 14.11 13:12–13:24, kart 14:05:21 "Okuma 2: duvar boyunca"; 14:14:55 çeyrek pano yok; 14:27:09 kalan uzak uçta) | yazıldı (14.11; tek pano Motor sohbeti, `claude/project-thread-9gdwir`) |
-| D | D-93 | çelik talep formu: çatı şekli ve veranda yok, çeliğin standartları seçili, dış duvar 140 mm çizime, ölçü yuvarlanmaz (İE-20 PR-9; Lokman 14.11 20:40:05 kartı "Evet, bu listeyle kur") | yazıldı (14.11; talep formu sohbeti, `claude/project-thread-l5mh7r`) |
+| D | D-93 | çelik talep formu: çatı şekli ve veranda yok, çeliğin standartları seçili, dış duvar 140 mm çizime, ölçü yuvarlanmaz (İE-20 PR-9; Lokman 14.11 20:40:05 kartı "Evet, bu listeyle kur") | canlıda (15.11, v2026.11.15a; PR #208; talep formu sohbeti) |
 | D | D-94 | çatı adımı (başka sohbet; CIO 14.11 21:07) | alındı (14.11) |
 | D | D-95 | brüt ve net m²'nin tanımı; montaj rehberinin başlığı (Lokman 14.11 21:01) | yazıldı (14.11; rehber sohbeti, `claude/project-thread-v9ykyo`) |
 | D | **D-96** | — | **sıradaki boş** |

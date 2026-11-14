@@ -105,6 +105,7 @@ C_OZELLIK_ADI = {"kaplama": "çatı kaplaması", "cati_rengi": "çatı rengi", "
 # beyaz VARSAYIMDIR (prefabrik standardından alındı; Lokman alan listesi kartıyla kabul etti, 14 Kasım 2026 20:40 UTC; D-93).
 C_STANDART = {"kaplama": "tek_kat", "cati_rengi": "antrasit", "dis_duvar": "80", "ic_duvar": "alcipan", "pencere_rengi": "beyaz"}
 FORM_SECIMLERI = {"prefabrik": (OZELLIKLER, EK), "celik": (C_OZELLIKLER, C_EK)}     # form → ikinci ekranın (seçimleri, ek istekleri)
+C_ISLENEMEZSE = "İşleyemezsem plan mesajında yazarım."                              # dış 140 her plana işlenemez; ön not kesin söz vermez
 C_HER_ZAMAN = ("cati_rengi",)                                                       # standart da olsa talebe yazılan seçim (pafta tablosunun satırı)
 MODUL_CM = 125.5                                                                    # pano modülü; yarım pano 62,75 cm
 KOSE_KISA_CM, KOSE_UZUN_CM = 20.0, 10.0                                             # kısa kenarda 20, uzun kenarda 10 cm köşe payı
@@ -339,7 +340,9 @@ def celik_dis140(oz: dict) -> bool:
 def celik_notu(oz: dict, cizim: bool = True) -> str:
     """Çelik formun cevabından sonra bayiye gidecek ön not: m²'den hesaplanan kenar, standart dışı seçimler ve bunlardan hangisinin
     çizime işlendiği (yalnız dış duvar 140 mm karkas), kısa montaj önceliğinin çelikte sıralama ölçüsü olmadığı. Söylenecek şey yoksa
-    boş. `cizim` False ise (talep yönlendirildi, çizim yok) çizim cümlesi yazılmaz. Sade Teknik Türkçe (D-70): bir cümle bir iş."""
+    boş. `cizim` False ise (talep yönlendirildi ya da plan bu mesajda çıktı) çizim cümlesi yazılmaz. Not yazılırken plan henüz
+    seçilmemiştir ve dış 140 her plana işlenemez (KT-01, KT-02): not kesin söz vermez, sonucu plan mesajı söyler (İE-20 PR-10,
+    15 Kasım 2026 canlı denemesi C6). Sade Teknik Türkçe (D-70): bir cümle bir iş."""
     if oz.get("form") != "celik":
         return ""
     a, o, p = oz.get("alanlar") or {}, celik_olcusu(oz), []
@@ -347,11 +350,12 @@ def celik_notu(oz: dict, cizim: bool = True) -> str:
         p.append(f"{'Uzun' if o['hesaplanan'] == 'uzun' else 'Kısa'} kenarı m²'den hesapladım: {_olcu(o['en_m'])} × {_olcu(o['boy_m'])} m.")
     sd = celik_standart_disi(oz)
     if sd and cizim and celik_dis140(oz) and len(sd) == 1:
-        p.append("Dış duvar 140 mm karkas seçtiniz; çizime işlenir.")
+        p.append("Dış duvar 140 mm karkas seçtiniz. Çizime işlerim. " + C_ISLENEMEZSE)
     elif sd:
         p.append("Standart dışı seçimlerinizi aldım: " + ", ".join(sd) + ".")
         if cizim:
-            p.append("Çizime yalnız dış duvar 140 mm karkas işlenir." if celik_dis140(oz) else "Bu seçimler çizimi değiştirmez.")
+            p.append("Çizime yalnız dış duvar 140 mm karkası işlerim. " + C_ISLENEMEZSE if celik_dis140(oz)
+                     else "Bu seçimler çizimi değiştirmez.")
     if a.get("oncelik") == "montaj":
         p.append("Çelik planlarda kısa montaj sıralaması yok.")
     return " ".join(p)
