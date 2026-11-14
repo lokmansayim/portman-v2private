@@ -63,15 +63,21 @@ from testler.celik import oku, pafta  # noqa: E402
 from testler.kor.kiyas import Durdu, kayitli_mi, maske, sha256  # noqa: E402
 
 MUHUR = KOK / "testler" / "celik" / "muhur.json"
+# İE-16 PR-7 (hakem değişikliği, beyanlı): ikinci kör kümenin mührü ("Tek kat çelik 2. part", ÇP-22…ÇP-26). İlk mühür aynen kalır; bir kod
+# yalnız bir mühürde olur ve hakem proje koduna göre mührü seçer (`muhur_yolu`).
+MUHUR_2 = KOK / "testler" / "celik" / "muhur_2.json"
+MUHUR_ADLARI = ("muhur.json", "muhur_2.json")
 DURUMLAR = ("acik", "kor", "kapali", "kaynak")
 LISTE = "yükleme listesi"
 LISTELER = (LISTE, "sundurma listesi", "çatı kaplama listesi")
 PAFTA = "montaj paftası"
-DOSYA_TURLERI = (*LISTELER, PAFTA, "montaj paftası (DWG)", "pafta sayfası", "detay", "model (SketchUp)")
+DOSYA_TURLERI = (*LISTELER, PAFTA, "montaj paftası (DWG)", "pafta sayfası", "detay", "model (SketchUp)",
+                 "model (IFC)", "üretim dosyası")       # son ikisi ikinci mühürde (İE-16 PR-7); ikisi de kaynak, açılmaz
 KG_PAYI = 0.03                       # çelik kg kapısı (pano 91)
 EKLENEBILIR = ("acilislar", "ilk_indirmeler", "kat_kayitlari")   # mühürde yalnız ekleme yapılan bölümler
 # Mühürün dondurulmuş bölümlerinin izi (`donmus_iz`); değişirse hakem değişikliğidir.
 MUHUR_IZI = "311e56af37811219e2419cf884f74ade0f6f696537b4a7f94a28d5de3182704c"
+MUHUR_2_IZI = "dba89d0c5c49dcbaa04f3a358aa1a0f905cbe15e989f4e4874846b727bb50891"       # ikinci mührün dondurulmuş bölümlerinin izi (İE-16 PR-7)
 ACILIS_ALANLARI = {"karar", "tarih", "sha256", "liste_commit"}
 YENIDEN = "acik"                     # açılan listenin yeniden ölçüm klasörü (`projeler/<CPnn>/acik/`; İE-16 PR-6a)
 KAT_ALANLARI = {"kat", "tarih", "dayanak", "pafta_sha256"}
@@ -122,11 +128,29 @@ def muhur_dogrula(muhur_yol: Path, kok: Path) -> tuple[dict, dict]:
     kayit = kayitli_mi(muhur_yol, kok, 2)
     head_ile_ayni(muhur_yol, kok, 2)
     muhur = muhur_oku(muhur_yol)
-    if muhur_yol.resolve() == MUHUR.resolve() and donmus_iz(muhur) != MUHUR_IZI:
+    beklenen_iz = {MUHUR.resolve(): MUHUR_IZI, MUHUR_2.resolve(): MUHUR_2_IZI}.get(muhur_yol.resolve())
+    if beklenen_iz and donmus_iz(muhur) != beklenen_iz:
         raise Durdu(2, "mühürün dondurulmuş bölümleri değişmiş (iz tutmuyor): hakem değişikliği, beyanla ve Patron'un onayıyla gelir; "
                        "araç durdu")
     gecmis_denetle(kok, muhur_yol.resolve().relative_to(kok.resolve()).as_posix())
     return kayit, muhur
+
+
+def muhur_yolu(kod: str, kok: Path = KOK) -> Path:
+    """Projenin mührü (İE-16 PR-7): kodu `projeler`'inde taşıyan mühür dosyası. Kod iki mühürde birden varsa araç durur; hiçbirinde yoksa
+    ilk mühür döner (sonraki adım "kod mühürde yok" diye durur; PR-7'den önceki davranış). Seçimden sonra seçilen mühür `muhur_dogrula`
+    ile baştan denetlenir (commit'li, değişmemiş, iz ve yalnız-ekleme geçmişi)."""
+    yollar = [Path(kok) / "testler" / "celik" / ad for ad in MUHUR_ADLARI]
+    bulunan = []
+    for y in yollar:
+        try:
+            if y.is_file() and kod in (json.loads(y.read_text(encoding="utf-8")).get("projeler") or {}):
+                bulunan.append(y)
+        except ValueError:
+            raise Durdu(2, f"{y.name} okunamadı (JSON değil); araç durdu") from None
+    if len(bulunan) > 1:
+        raise Durdu(2, f"{kod} iki mühürde birden var ({', '.join(y.name for y in bulunan)}): bir kod yalnız bir mühürde olur; araç durdu")
+    return bulunan[0] if bulunan else yollar[0]
 
 
 def head_ile_ayni(yol: Path, kok: Path, adim: int) -> None:
@@ -469,7 +493,7 @@ def cevap(kod: str, liste: Path, pafta_yol: Path | None = None, *, kok: Path = K
           sayfa: int | None = None) -> dict:
     """Açık listenin hakem cevabı: listedeki çelik panel türleri, adet ve kg; paftanın etiket sayıları; ikisinin sağlaması."""
     kok = Path(kok)
-    muhur_yol = Path(muhur_yol) if muhur_yol else kok / "testler" / "celik" / "muhur.json"
+    muhur_yol = Path(muhur_yol) if muhur_yol else muhur_yolu(kod, kok)
     muhur_kaydi, muhur = muhur_dogrula(muhur_yol, kok)
     kayit = muhur_denetle(liste, muhur, kod)
     acilis = acilabilir_mi(kayit, muhur, kod, None)
@@ -485,7 +509,6 @@ def cevap(kod: str, liste: Path, pafta_yol: Path | None = None, *, kok: Path = K
 def kiyasla(bizim_yol: Path, liste: Path, pafta_yol: Path | None = None, *, kok: Path = KOK, muhur_yol: Path | None = None,
             sayfa: int | None = None) -> dict:
     kok, bizim_yol = Path(kok), Path(bizim_yol)
-    muhur_yol = Path(muhur_yol) if muhur_yol else kok / "testler" / "celik" / "muhur.json"
     # 1. bizim yanımız
     bag_yok(bizim_yol, kok, 1)
     liste_kaydi = kayitli_mi(bizim_yol, kok, 1)
@@ -501,7 +524,8 @@ def kiyasla(bizim_yol: Path, liste: Path, pafta_yol: Path | None = None, *, kok:
         bc = bizim_celik(bizim["satirlar"])          # türler gerçek liste açılmadan denetlenir
     except oku.OkumaHatasi as e:
         raise Durdu(1, f"kendi listemiz: {e}") from None
-    # 2. mühür
+    # 2. mühür (projenin mührü koduna göre; İE-16 PR-7)
+    muhur_yol = Path(muhur_yol) if muhur_yol else muhur_yolu(str(kod), kok)
     muhur_kaydi, muhur = muhur_dogrula(muhur_yol, kok)
     if kod not in muhur["projeler"]:
         raise Durdu(1, f"kendi listemizin kodu ({kod}) mühürde yok")
@@ -738,12 +762,13 @@ def main(argv: list[str] | None = None) -> int:
             if hedef:
                 sonuc_yaz(sonuc_kaydi(r), hedef)
         else:
-            _, m = muhur_dogrula(MUHUR, KOK)               # commit'li, iz ve geçmiş tutuyor; yazılan kayıt sonra ayrı commit'le girer
+            yol = muhur_yolu(a.kod)                         # projenin mührü (İE-16 PR-7)
+            _, m = muhur_dogrula(yol, KOK)                  # commit'li, iz ve geçmiş tutuyor; yazılan kayıt sonra ayrı commit'le girer
             kayit = ilk_indirme(a.kod, a.dosya, a.drive_degisme, m)
             print(json.dumps(kayit, ensure_ascii=False))
             if a.yaz:
                 m.setdefault("ilk_indirmeler", {}).update(kayit)
-                MUHUR.write_text(json.dumps(m, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+                yol.write_text(json.dumps(m, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
     except Durdu as e:
         print(f"DURDU · {e}", file=sys.stderr)
         return 2
