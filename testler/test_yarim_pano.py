@@ -52,12 +52,29 @@ def pa12_uret() -> dict:
 
 # ---------------------------------------------------------------- tablo: hangi evde ne olur
 
+TABLO_EVLER = sorted(json.loads(TABLO.read_text(encoding="utf-8"))["tablo"])
+
+
 def test_tablo_evleri_aynı():
-    t = json.loads(TABLO.read_text(encoding="utf-8"))["tablo"]
-    assert sorted(t) == EVLER, "is_emri/adaylar'a yeni ev girdi ya da çıktı: tabloyu bilinçli yeniden yazın"
+    """Tablodaki her ev havuzda durur (ev çıkarsa tablo bilinçli yeniden yazılır). Havuza sonradan giren ev (başka sohbetin işi, ör. PA-27
+    14 Kasım) tabloyu kırmaz: tabloya bu işin bir sonraki dondurmasında girer (`--dondur`); o güne kadar `test_yeni_ev_komutu_kirmaz`."""
+    assert set(TABLO_EVLER) <= set(EVLER), "tablodaki bir ev is_emri/adaylar'dan çıktı: tabloyu bilinçli yeniden yazın"
 
 
-@pytest.mark.parametrize("kod", EVLER)
+@pytest.mark.parametrize("kod", sorted(set(EVLER) - set(TABLO_EVLER)) or ["-"])
+def test_yeni_ev_komutu_kirmaz(kod):
+    """Tabloda olmayan yeni havuz evinde komut ya temiz çalışır ya da gerekçeyle durur; başka hata vermez."""
+    if kod == "-":
+        pytest.skip("tabloda olmayan ev yok")
+    for c, a in KOMUTLAR:
+        assert _sonuc(kod, c, a) in ("temiz",) + DURMA_KODLARI
+
+
+DURMA_KODLARI = ("adim", "cephe", "dilim", "muhur", "sistem", "motor", "konum", "oda", "veranda", "karkasli", "girinti", "kubbe", "cumba",
+                 "aciklik", "cati", "olcu", "dizilim")
+
+
+@pytest.mark.parametrize("kod", TABLO_EVLER)
 def test_tablo(kod):
     t = json.loads(TABLO.read_text(encoding="utf-8"))["tablo"]
     assert {f"{c}{a:+d}": _sonuc(kod, c, a) for c, a in KOMUTLAR} == t[kod]
