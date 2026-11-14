@@ -7,7 +7,7 @@
    "ad": "Bayi AP-07"
   },
   "musteri_adi": "AP-07",
-  "metin": "D-87 (İE-38): AP-07 (45 m², 1+1, L gövde: yatak odası öne 150 çıkıntılı, arkada sundurma) montaj paftasından okundu (14 Kasım 2026). Konumlar cm, aks; x sol dış yüzden; dizilim arka-sol olduğundan mahallerin y'si arka dış yüzden (Motor'un kuralı), açıklıkların ve verandanın cepheleri gerçek çerçevede. Sundurmanın çatısı ana çatının ikinci cumbası: Lokman 14 Kasım 2026 08:41 UTC 'cumba çatısı gibi birleştireceksin vadi dere oluşacak böyle eğrelti olmayacak', 08:41:58 'çapraz cumba çatısını nasıl çiziyorsan öyle çiz'."
+  "metin": "D-87 (İE-38): AP-07 (45 m², 1+1, L gövde: yatak odası öne 150 çıkıntılı, arkada sundurma) montaj paftasından okundu (14 Kasım 2026). Konumlar cm, aks; x sol dış yüzden; dizilim arka-sol olduğundan mahallerin y'si arka dış yüzden (Motor'un kuralı), açıklıkların ve verandanın cepheleri gerçek çerçevede. Sundurmanın çatısı ana çatının ikinci cumbası: Lokman 14 Kasım 2026 08:41 UTC 'cumba çatısı gibi birleştireceksin vadi dere oluşacak böyle eğrelti olmayacak', 08:41:58 'çapraz cumba çatısını nasıl çiziyorsan öyle çiz'. Çelik kapının panosu sundurmanın altında, iki yanında birer 62,75 pano (paftadaki gibi): Lokman 14 Kasım 2026 10:12:22 UTC 'sundurmanın konumu doğru ama çelik kapının konumu hatalı çelik kapı sundurmanın olduğu pano ile yer değiştirmeli'; 10:34:26 kartı 'Evet, doğru'."
  },
  "yapi": {
   "sistem": "prefabrik",
@@ -38,7 +38,17 @@
    "kapi": "mantik",
    "kose": "oda",
    "son_pano": "son_aks",
-   "kapi_yeri": "ortada"
+   "kapi_yeri": "ortada",
+   "dis_pano_dayanagi": [
+    {
+     "x": 193.25,
+     "aralik_cm": [
+      130.5,
+      381.5
+     ],
+     "cephe": "arka"
+    }
+   ]
   },
   "ek_akslar_cm": {
    "x": [
@@ -229,7 +239,8 @@
   "L gövde: yatak odası 300 × 150 öne çıkıntılı (girinti x 295–745, y 535–680 arkadan); çatısı ana çatının çapraz cumbası (çıkıntı 150), ana çatı beşik %32,9.",
   "Sundurma arkada taşan veranda, girişin önünde 188,25–323,75 × 130 (paftada 135,5 × 130); çatısı ana çatının ikinci cumbası (veranda cati.tip cumba, cumbalar[1] veranda SUNDURMA): eğim, saçak ve topuk ana çatınınki. Paftadaki sundurma üçgeni 195,5 × 42,14 (yaklaşık %43); Lokman 08:41 'çapraz cumba çatısını nasıl çiziyorsan öyle çiz' (Motor'un cumbası ana çatının eğimiyle).",
   "Girinti hizasında iki 18 cm pano: yatak odası–salon duvarı ve sağ dış duvar (540 cm'lik cephe pano adımına oturmuyor).",
-  "150x190 pencereler paftadaki ölçüsüyle; ölçü pencere veri tabanına eklendi (kaynak AP-07 paftası, D-87)."
+  "150x190 pencereler paftadaki ölçüsüyle; ölçü pencere veri tabanına eklendi (kaynak AP-07 paftası, D-87).",
+  "Çelik kapı arka duvarda sundurmanın altında, 193,25–318,75; iki yanında birer 62,75 pano (dis_pano_dayanagi x 193,25, aralık 130,5–381,5), paftadaki gibi. Lokman 14 Kasım 2026 10:12:22 UTC düzeltmesi, 10:34:26 kartı 'Evet, doğru'."
  ],
  "eksikler": [],
  "verandalar": [

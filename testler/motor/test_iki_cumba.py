@@ -61,6 +61,18 @@ def test_vadiler_ve_mahyalar(ap07):
     assert max(z["cumba 2 doğu"]) == pytest.approx(260.0 + 97.75 * 0.329, abs=0.05)
 
 
+def test_kapi_sundurmanin_altinda(ap07):
+    """Çelik kapının panosu sundurmanın altında, ortada; iki yanında birer 62,75 pano (Lokman, 14 Kasım 2026 10:12:22 UTC
+    "çelik kapı sundurmanın olduğu pano ile yer değiştirmeli"; 10:34:26 kartı "Evet, doğru"; `dis_pano_dayanagi` x 193,25)."""
+    ie, plan, t = ap07
+    arka = sorted((round(p.a0, 2), round(p.a1, 2), p.acilim.tur if p.acilim else None)
+                  for d in plan.duvarlar if d.yon == "x" and d.c > 600 for p in d.panolar)
+    assert arka == [(5.0, 130.5, "pencere"), (130.5, 193.25, None), (193.25, 318.75, "dis_kapi"), (318.75, 381.5, None),
+                    (381.5, 507.0, None), (507.0, 632.5, None), (632.5, 745.0, None)]
+    x0, _, x1, _ = plan.dis_verandalar[0]["rect"]
+    assert (x0 + x1) / 2 == pytest.approx((193.25 + 318.75) / 2)
+
+
 def test_kalkanlar(ap07):
     """Ana çatının uç kalkanları iki kurulumun birleşimi; sundurmanın alnı verandanın dış kenarında, kolonların arasında."""
     ie, plan, t = ap07
