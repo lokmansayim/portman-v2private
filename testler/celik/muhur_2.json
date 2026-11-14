@@ -59,7 +59,14 @@
   }
  },
  "acilislar": {},
- "ilk_indirmeler": {},
+ "ilk_indirmeler": {
+  "1DbuGZnjgKGE1Qr4_4vt8vxapbK5FQ59n": {
+   "sha256": "d368b6ab00aabbedc61167f3127d764c1d6e64b5ee848150572d9565fbf049e0",
+   "bayt": 2911382,
+   "drive_degisme": "2026-09-30T09:39:40Z",
+   "tarih": "2026-11-14"
+  }
+ },
  "kat_kayitlari": {
   "ÇP-23": {
    "kat": "tek",
