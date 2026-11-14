@@ -444,3 +444,62 @@ def test_form_talep2_verandasiz_formu_kurar_eski_surumde_kaynakla(etc, tmp_path)
         assert "talep2 formu yayımlandı · kimlik 91003" in r.stdout
     finally:
         g.kapat()
+
+
+def _celiksiz_surum(tmp_path: Path) -> Path:
+    """Kurulu sürüm gibi bir kök: form modülü `celik`i tanımaz, `celik.json` yoktur (çelik formu sürümden önce taslağa kurulur)."""
+    kok = tmp_path / "celiksiz"
+    (kok / "kanal" / "formlar").mkdir(parents=True)
+    kaynak = (KOK / "kanal" / "talep_formu.py").read_text(encoding="utf-8")
+    for ad in (', "celik": "TALEP_C"', "def celik_ekran_verisi"):
+        assert ad in kaynak, ad
+    kaynak = kaynak.replace(', "celik": "TALEP_C"', "").replace("def celik_ekran_verisi", "def _yok")
+    (kok / "kanal" / "talep_formu.py").write_text(kaynak, encoding="utf-8")
+    for tur in ("talep", "revizyon", "prefabrik", "talep2"):
+        (kok / "kanal" / "formlar" / f"{tur}.json").write_text((KOK / "kanal" / "formlar" / f"{tur}.json").read_text(encoding="utf-8"), encoding="utf-8")
+    return kok
+
+
+def test_form_celik_formunu_kurar_eski_surumde_kaynakla(etc, tmp_path):
+    """İE-20 PR-9 (D-93): `--form celik` yalnız çelik talep formunu kurar; yayımlı formlara dokunmaz. Kurulu sürüm bu formu tanımıyorsa
+    betik stdin'den, form `--kaynak` ile depodan gelir (sürüm kurulmadan önizleme). Yayım yalnız `--yayimla` ile."""
+    g = SahteGraph()
+    try:
+        assert kos(etc, g, "--yayimla").returncode == 0                      # bugünkü hâl: talep ve revizyon yayımlı (91001, 91002)
+        g.istekler.clear()
+        g.depo = {"celik": TF.tanim("celik")}
+        env = {"PM_ETC": str(etc), "PM_GRAPH_BASE": g.url, "PM_RAW_BASE": g.url.removesuffix("/v23.0") + "/raw", "PATH": "/usr/bin:/bin"}
+        eski = _celiksiz_surum(tmp_path)
+        r = subprocess.run([sys.executable, "-", "--kok", str(eski), "--form", "celik", "--kaynak", COMMIT], input=BETIK.read_text(), env=env,
+                           capture_output=True, text=True, timeout=60)
+        cikti = r.stdout + r.stderr
+        assert r.returncode == 0, cikti
+        [olustur] = _yazma_istekleri(g)
+        govde = json.loads(olustur["govde"])
+        assert olustur["yol"] == f"{WABA}/flows" and govde["name"] == "Portman Çelik Talep Formu" and govde["publish"] is False
+        assert json.loads(govde["flow_json"]) == TF.tanim("celik")
+        assert "celik_flow_id 91003" in cikti and "talep_flow_id" not in cikti and "== sonuç: tamam" in cikti
+        link = next(s.strip() for s in r.stdout.splitlines() if "interactive=true" in s and "91003" in s)
+        yuk = json.loads(dict(urllib.parse.parse_qsl(urllib.parse.urlsplit(link).query))["flow_action_payload"])
+        assert yuk == {"screen": "TALEP_C", "data": TF.celik_ekran_verisi(None, None)}
+        assert set(yuk["data"]) == set(TF.tanim("celik")["screens"][0]["data"])
+        assert {k: f["status"] for k, f in g.formlar.items()} == {"91001": "PUBLISHED", "91002": "PUBLISHED", "91003": "DRAFT"}
+        # kurulu sürüm formu tanıyınca (bu depo) --kaynak'sız da aynı veriyle
+        g.istekler.clear()
+        r = kos(etc, g, "--form", "celik")
+        assert r.returncode == 0, r.stdout + r.stderr
+        assert [i["yol"] for i in _yazma_istekleri(g)] == ["91003/assets"]
+        link = next(s.strip() for s in r.stdout.splitlines() if "interactive=true" in s and "91003" in s)
+        assert json.loads(dict(urllib.parse.parse_qsl(urllib.parse.urlsplit(link).query))["flow_action_payload"]) == yuk
+        # seçim verilmezse bugünkü davranış: çelik forma bakılmaz
+        g.istekler.clear()
+        r = kos(etc, g)
+        assert r.returncode == 0 and not _yazma_istekleri(g) and "Çelik Talep Formu" not in r.stdout and "91003" not in r.stdout
+        # yayım yalnız --yayimla ile; öteki formlar yayımlı kalır
+        g.istekler.clear()
+        r = kos(etc, g, "--form", "celik", "--yayimla")
+        assert r.returncode == 0, r.stdout + r.stderr
+        assert [i["yol"] for i in _yazma_istekleri(g)] == ["91003/assets", "91003/publish"]
+        assert "celik formu yayımlandı · kimlik 91003" in r.stdout
+    finally:
+        g.kapat()

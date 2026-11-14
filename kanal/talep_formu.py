@@ -22,7 +22,17 @@ Sır ve numara tutmaz; ağ yok. Bayinin notu LLM'e gitmez (talepte özel istek o
   - İlk talep formunun (`talep.json`, yayımlı; değişmez) veranda sorusu olmayan kopyasıdır; öteki alanlar aynı. Veranda ayrıca sorulmaz:
     bir oda gibi sayılır, bayi isterse yazar. Kimliği ayarda varsa (`talep_formu.talep2_flow_id`) ilk formun yerine o sunulur
     (`kanal/worker.py` › `talep_formu_sunusu`); yoksa davranış bugünküyle aynı. Ekran verisi `talep2_ekran_verisi` (veranda yok).
-  - Cevabın token'ı ilk formunkiyle aynıdır (`tf:<iz>[:1]`); cevapta veranda olmadığı için talebe veranda yazılmaz."""
+  - Cevabın token'ı ilk formunkiyle aynıdır (`tf:<iz>[:1]`); cevapta veranda olmadığı için talebe veranda yazılmaz.
+
+İE-20 PR-9 · Çelik talep formu (`kanal/formlar/celik.json`, iki ekran; D-93; Lokman, 13 Kasım 2026 21:26 ve 14 Kasım 2026 20:19 UTC;
+alan listesi kartı 14 Kasım 2026 20:40 UTC "Evet, bu listeyle kur"):
+  - Yapı tipi, çatı şekli ve veranda sorulmaz (form yalnız çelik; çatı plan onayından sonra görselle seçilir). İkinci ekranda çeliğin
+    standartları seçili gelir (`C_STANDART`). Çatı rengi her zaman, öteki seçimler standarttan ayrıldıysa talebe `bina_ozellikleri`
+    olarak yazılır (`beyin/celik.zarf`: renk pafta tablosuna, ötekiler özel isteğe). Dış duvar 140 mm karkas çizime işlenir
+    (`dis140`; `beyin/karar._celik_is_emri_uret`, işlem `dis_karkas_140`).
+  - Ölçü pano katına yuvarlanmaz (çelik serbest aks; varsayım, D-93): bayinin ölçüsü kalır. Tek kenar ve m² yazılıysa öteki kenarı kod
+    m²'den hesaplar (`celik_olcusu`). Kimliği ayarda varsa (`talep_formu.celik_flow_id`) çelikte ilk formun yerine o sunulur.
+  - Cevabın token'ı `cf:<iz>[:1]`; tür yine `talep`, `form` alanı `celik`."""
 from __future__ import annotations
 
 import json
@@ -30,10 +40,12 @@ import re
 from pathlib import Path
 
 FORMLAR = Path(__file__).resolve().parent / "formlar"
-EKRAN = {"talep": "TALEP", "revizyon": "REVIZYON", "prefabrik": "TALEP_P", "talep2": "TALEP"}
-DUGME = {"talep": "Talep formu", "revizyon": "Revizyon formu", "prefabrik": "Talep formu", "talep2": "Talep formu"}   # flow_cta (≤ 20)
-# tf:<iz>[:1] talep · pf:<iz>[:1] prefabrik talep formu · rv:<İş Emri no>:<rev> revizyon
-TOKEN = re.compile(r"^(tf|pf|rv):([^:\s]{1,80})(?::([0-9]{1,3}))?$")
+EKRAN = {"talep": "TALEP", "revizyon": "REVIZYON", "prefabrik": "TALEP_P", "talep2": "TALEP", "celik": "TALEP_C"}
+DUGME = {"talep": "Talep formu", "revizyon": "Revizyon formu", "prefabrik": "Talep formu", "talep2": "Talep formu",
+         "celik": "Talep formu"}                 # flow_cta (≤ 20)
+# tf:<iz>[:1] talep · pf:<iz>[:1] prefabrik talep formu · cf:<iz>[:1] çelik talep formu · rv:<İş Emri no>:<rev> revizyon
+TOKEN = re.compile(r"^(tf|pf|cf|rv):([^:\s]{1,80})(?::([0-9]{1,3}))?$")
+TOKEN_FORMU = {"pf": "prefabrik", "cf": "celik"}  # token öneki → cevabın `form` alanı (ilk form ve verandasız form: alan yok)
 FLOW_ID = re.compile(r"^[0-9]{1,40}$")
 MEDYA_ID = re.compile(r"^[0-9]{1,40}$")
 CEVAP_EN_COK = 64 * 1024                       # response_json (dize) üst sınırı
@@ -73,6 +85,27 @@ OZELLIK_ADI = {"kaplama": "çatı kaplaması", "cati_rengi": "çatı rengi", "yu
 STANDART = {"kaplama": "trapez", "cati_rengi": "antrasit", "yukseklik": "250", "dis_duvar": "100", "ic_duvar": "60", "tavan": "asma",
             "pencere_rengi": "beyaz"}
 EK_OZELLIK = "Ek İstekler"                                                            # `bina_ozellikleri` anahtarı (EK yazıları, "; " ile)
+# ── Çelik talep formu (İE-20 PR-9, D-93). Kimlikler `celik.json`'un `data-source` kimlikleri. Seçenekler: çatı kaplaması kural kitabının
+# altı kaplaması (`kurallar/liste/kurallar.json` › cati_kaplamasi); dış duvar `kurallar/model/duvar_tipleri.json` (DIS-80 baz, DIS-140
+# seçenek); iç duvar, pencere rengi ve ek istek bayi tekliflerinin taramasından (19 çelik proje). ──
+C_KAPLAMA = {"tek_kat": "tek kat panel", "sandvic": "sandviç panel", "kiremit": "kiremit desen sac + OSB", "trapez": "trapez sac",
+             "osb_trapez": "trapez sac + OSB", "shingle": "shingle + OSB"}
+C_DIS_DUVAR = {"80": "80 mm karkas", "140": "140 mm karkas"}
+C_IC_DUVAR = {"alcipan": "alçıpan + 80 mm karkas", "osb": "OSB'li iç duvar"}
+C_EK = {"cift_yalitim": "çatıda çift kat yalıtım"}
+# alan → (izinli değerler, talepteki `bina_ozellikleri` anahtarı; None: talebe yazılmaz, çizime işlenir). Sıra bayiye okunan sıradır.
+# Anahtarlar çelik pafta tablosunun satır adlarıdır (`beyin/celik.OZELLIK_ALANLARI`): "Çatı Kaplama Rengi" tabloya yazılır; "Çatı
+# Kaplaması" ve "İç Duvarlar" çizimden hesaplanan satırlardır, bayinin seçimi özel isteğe gider; "Pencere Rengi" tabloda yoktur, o da.
+C_OZELLIKLER = {"kaplama": (C_KAPLAMA, "Çatı Kaplaması"), "cati_rengi": (CATI_RENGI, "Çatı Kaplama Rengi"), "dis_duvar": (C_DIS_DUVAR, None),
+                "ic_duvar": (C_IC_DUVAR, "İç Duvarlar"), "pencere_rengi": (PENCERE_RENGI, "Pencere Rengi")}
+C_OZELLIK_ADI = {"kaplama": "çatı kaplaması", "cati_rengi": "çatı rengi", "dis_duvar": "dış duvar", "ic_duvar": "iç duvar",
+                 "pencere_rengi": "pencere rengi"}
+# Formda seçili gelen çelik standartları: çatı kaplaması tek kat panel (Lokman, 4 Ekim 2026 01:42; kitabın `baz_paket_cati_kaplamasi`),
+# dış duvar 80 mm karkas ve iç duvar alçıpan + 80 mm karkas (kitabın DIS-80 ve IC-80 tipleri). Çatı rengi antrasit gri ve pencere rengi
+# beyaz VARSAYIMDIR (prefabrik standardından alındı; Lokman alan listesi kartıyla kabul etti, 14 Kasım 2026 20:40 UTC; D-93).
+C_STANDART = {"kaplama": "tek_kat", "cati_rengi": "antrasit", "dis_duvar": "80", "ic_duvar": "alcipan", "pencere_rengi": "beyaz"}
+FORM_SECIMLERI = {"prefabrik": (OZELLIKLER, EK), "celik": (C_OZELLIKLER, C_EK)}     # form → ikinci ekranın (seçimleri, ek istekleri)
+C_HER_ZAMAN = ("cati_rengi",)                                                       # standart da olsa talebe yazılan seçim (pafta tablosunun satırı)
 MODUL_CM = 125.5                                                                    # pano modülü; yarım pano 62,75 cm
 KOSE_KISA_CM, KOSE_UZUN_CM = 20.0, 10.0                                             # kısa kenarda 20, uzun kenarda 10 cm köşe payı
 KENAR_EN_COK_M = 40.0                                                               # bundan büyük kenar santimetre sayılır (700 → 7 m)
@@ -125,10 +158,11 @@ def cevap_ozeti(rj) -> dict:
     rj = rj if isinstance(rj, dict) else {}
     token = _dize(rj.get("flow_token"), 120)
     m = TOKEN.match(token)
-    tur = {"tf": "talep", "pf": "talep", "rv": "revizyon"}.get(m.group(1)) if m else "bilinmiyor"
+    tur = {"tf": "talep", "pf": "talep", "cf": "talep", "rv": "revizyon"}.get(m.group(1)) if m else "bilinmiyor"
     a: dict = {}
-    if tur == "talep" and m.group(1) == "pf":
-        return {"tur": tur, "form": "prefabrik", "token": token, "alanlar": _prefabrik_alanlari(rj), "dosyalar": _dosyalar(rj.get("dosya"))}
+    if tur == "talep" and m.group(1) in TOKEN_FORMU:
+        form = TOKEN_FORMU[m.group(1)]
+        return {"tur": tur, "form": form, "token": token, "alanlar": _form_alanlari(rj, form), "dosyalar": _dosyalar(rj.get("dosya"))}
     if tur == "talep":
         for ad, izinli in (("yapi", YAPI), ("kat", KAT), ("oda", ODA), ("cati", CATI), ("veranda", VERANDA)):
             v = _dize(rj.get(ad), 20)
@@ -147,10 +181,12 @@ def cevap_ozeti(rj) -> dict:
     return {"tur": tur, "token": token, "alanlar": a, "dosyalar": _dosyalar(rj.get("dosya"))}
 
 
-def _prefabrik_alanlari(rj: dict) -> dict:
-    """Prefabrik talep formunun cevabı → tanınan alanlar. İzinli olmayan değer atılır; boş seçim standart sayılmaz (alan yazılmaz)."""
+def _form_alanlari(rj: dict, form: str) -> dict:
+    """İki ekranlı talep formunun (prefabrik, çelik) cevabı → tanınan alanlar. İzinli olmayan değer atılır; boş seçim standart sayılmaz
+    (alan yazılmaz). İkinci ekranın seçimleri forma göre (`FORM_SECIMLERI`)."""
+    ozellikler, ekler = FORM_SECIMLERI[form]
     a: dict = {}
-    for ad, izinli in (("kat", KAT), ("oda", ODA), ("oncelik", ONCELIK), *((ad, v[0]) for ad, v in OZELLIKLER.items())):
+    for ad, izinli in (("kat", KAT), ("oda", ODA), ("oncelik", ONCELIK), *((ad, v[0]) for ad, v in ozellikler.items())):
         v = _dize(rj.get(ad), 20)
         if v in izinli:
             a[ad] = v
@@ -158,8 +194,8 @@ def _prefabrik_alanlari(rj: dict) -> dict:
         if sayi(rj.get(ad)) is not None:
             a[ad] = sayi(rj.get(ad))
     ek = rj.get("ek") if isinstance(rj.get("ek"), list) else []
-    if [x for x in EK if x in {str(y) for y in ek}]:
-        a["ek"] = [x for x in EK if x in {str(y) for y in ek}]
+    if [x for x in ekler if x in {str(y) for y in ek}]:
+        a["ek"] = [x for x in ekler if x in {str(y) for y in ek}]
     for ad, n in (("musteri", 80), ("il", 40), ("ilce", 40)):
         if _dize(rj.get(ad), n):
             a[ad] = _dize(rj.get(ad), n)
@@ -250,11 +286,96 @@ def olcu_notu(oz: dict, olcu: bool = True) -> str:
 
 
 def set_basligi(oz: dict) -> str:
-    """Seçenek görselinin başlığı (≤ 60): "Prefabrik, tek kat, 2+1, 72 m²"."""
+    """Seçenek görselinin başlığı (≤ 60): "Prefabrik, tek kat, 2+1, 72 m²"; çelik formda "Çelik, tek kat, 2+1, 88 m²"."""
     a = oz.get("alanlar") or {}
+    if oz.get("form") == "celik":
+        m2 = celik_alani(oz)
+        return ", ".join(x for x in ("Çelik", KAT.get(a.get("kat")), a.get("oda"), f"{_olcu(m2)} m²" if m2 else None) if x)[:60]
     o = prefabrik_olcusu(oz)
     m2 = f"{round(o['alan_m2']):d} m²" if o else (f"{_olcu(a['alan'])} m²" if a.get("alan") else None)
     return ", ".join(x for x in ("Prefabrik", KAT.get(a.get("kat")), a.get("oda"), m2) if x)[:60]
+
+
+# ── Çelik talep formu (İE-20 PR-9, D-93) ──
+def celik_olcusu(oz: dict) -> dict | None:
+    """Çelik formdaki ölçü → {en_m, boy_m, hesaplanan: "uzun" | "kisa" | None}. Pano katına yuvarlanmaz (çelik serbest aks; D-93,
+    varsayım 1): bayinin yazdığı kenar aynen kalır. İki kenar yazılıysa ikisi; tek kenar ve m² yazılıysa öteki kenar m² ÷ kenar
+    (santimetreye yuvarlanır). Yalnız m² ya da yalnız tek kenar varsa None (ölçü uydurulmaz)."""
+    if oz.get("form") != "celik":
+        return None
+    a = oz.get("alanlar") or {}
+    kenarlar = sorted(x for x in (_kenar(a.get("en")), _kenar(a.get("boy"))) if x is not None)
+    alan = sayi(a.get("alan"))
+    if len(kenarlar) == 2:
+        return {"en_m": kenarlar[0], "boy_m": kenarlar[1], "hesaplanan": None}
+    if len(kenarlar) == 1 and alan is not None:
+        oteki = round(alan / kenarlar[0], 2)
+        if not 1 <= oteki <= KENAR_EN_COK_M:
+            return None
+        return {"en_m": min(kenarlar[0], oteki), "boy_m": max(kenarlar[0], oteki), "hesaplanan": "uzun" if oteki >= kenarlar[0] else "kisa"}
+    return None
+
+
+def celik_alani(oz: dict) -> float | None:
+    """Çelik formun alanı (m²): iki kenar yazılıysa kenarların çarpımı (bir ondalık), yoksa bayinin yazdığı m²."""
+    o = celik_olcusu(oz)
+    if o and o["hesaplanan"] is None:
+        return round(o["en_m"] * o["boy_m"], 1)
+    return sayi((oz.get("alanlar") or {}).get("alan"))
+
+
+def celik_standart_disi(oz: dict) -> list[str]:
+    """Bayinin çelik standardından ayırdığı seçimler, bayiye okunacak yazılarıyla ("dış duvar 140 mm karkas", ek istekler)."""
+    a = oz.get("alanlar") or {}
+    out = [f"{C_OZELLIK_ADI[ad]} {izinli[a[ad]]}" for ad, (izinli, _) in C_OZELLIKLER.items() if a.get(ad) and a[ad] != C_STANDART[ad]]
+    return out + [C_EK[x] for x in a.get("ek") or []]
+
+
+def celik_dis140(oz: dict) -> bool:
+    """Çelik formda dış duvar 140 mm karkas seçildi mi (çizime işlenir: `beyin/karar._celik_is_emri_uret`, işlem `dis_karkas_140`)."""
+    return oz.get("form") == "celik" and (oz.get("alanlar") or {}).get("dis_duvar") == "140"
+
+
+def celik_notu(oz: dict, cizim: bool = True) -> str:
+    """Çelik formun cevabından sonra bayiye gidecek ön not: m²'den hesaplanan kenar, standart dışı seçimler ve bunlardan hangisinin
+    çizime işlendiği (yalnız dış duvar 140 mm karkas), kısa montaj önceliğinin çelikte sıralama ölçüsü olmadığı. Söylenecek şey yoksa
+    boş. `cizim` False ise (talep yönlendirildi, çizim yok) çizim cümlesi yazılmaz. Sade Teknik Türkçe (D-70): bir cümle bir iş."""
+    if oz.get("form") != "celik":
+        return ""
+    a, o, p = oz.get("alanlar") or {}, celik_olcusu(oz), []
+    if o and o["hesaplanan"]:
+        p.append(f"{'Uzun' if o['hesaplanan'] == 'uzun' else 'Kısa'} kenarı m²'den hesapladım: {_olcu(o['en_m'])} × {_olcu(o['boy_m'])} m.")
+    sd = celik_standart_disi(oz)
+    if sd and cizim and celik_dis140(oz) and len(sd) == 1:
+        p.append("Dış duvar 140 mm karkas seçtiniz; çizime işlenir.")
+    elif sd:
+        p.append("Standart dışı seçimlerinizi aldım: " + ", ".join(sd) + ".")
+        if cizim:
+            p.append("Çizime yalnız dış duvar 140 mm karkas işlenir." if celik_dis140(oz) else "Bu seçimler çizimi değiştirmez.")
+    if a.get("oncelik") == "montaj":
+        p.append("Çelik planlarda kısa montaj sıralaması yok.")
+    return " ".join(p)
+
+
+def celik_anahtarlari() -> tuple[str, ...]:
+    """Çelik formun talebe yazdığı `bina_ozellikleri` anahtarları. Form yeniden gelince bu anahtarların eski değeri taslakta kalmaz
+    (`beyin/karar._form_izi`): seçim standarda döndüyse eski standart dışı değer plana taşınmaz."""
+    return tuple(anahtar for _, anahtar in C_OZELLIKLER.values() if anahtar) + (EK_OZELLIK,)
+
+
+def celik_cizim_notu(oz: dict) -> str:
+    """Formla gelen dosya plan olarak okunduysa (çizim esas) çelik formun standart dışı seçimleri plana işlenmez; bayiye söylenir
+    (sessiz düşmez). Standart dışı seçim yoksa boş."""
+    sd = celik_standart_disi(oz) if oz.get("form") == "celik" else []
+    return ("Formdaki standart dışı seçimlerinizi plana işlemedim: " + ", ".join(sd) + ". "
+            "Planı gördükten sonra değişiklik olarak yazabilirsiniz.") if sd else ""
+
+
+def celik_onceligi(oz: dict) -> str | None:
+    """Çelik formda seçilen sıralama önceliği: butce | yasam; kısa montaj ve "fark etmez" → yok (çelik adaylarda pano sayısı yoktur,
+    kısa montajın ölçüsü yok; bayiye `celik_notu` söyler). Form çelik değilse ya da seçim yoksa None."""
+    v = (oz.get("alanlar") or {}).get("oncelik") if oz.get("form") == "celik" else None
+    return None if v is None else (v if v in ("butce", "yasam") else "yok")
 
 
 def _olcu(x: float) -> str:
@@ -268,6 +389,11 @@ def ozet(oz: dict) -> str:
         o = prefabrik_olcusu(oz)
         p = ["prefabrik", KAT.get(a.get("kat")), a.get("oda"), f"istenen dış ölçü {olcu_yazisi(o)}" if o else None,
              f"yaklaşık {_olcu(a['alan'])} m²" if a.get("alan") and not o else None, *standart_disi(oz)]
+        return "Talep formu: " + ", ".join(x for x in p if x)
+    if oz.get("form") == "celik":
+        o, m2 = celik_olcusu(oz), celik_alani(oz)
+        p = ["çelik", KAT.get(a.get("kat")), a.get("oda"), f"{_olcu(o['en_m'])} × {_olcu(o['boy_m'])} m" if o else None,
+             f"yaklaşık {_olcu(m2)} m²" if m2 else None, *celik_standart_disi(oz)]
         return "Talep formu: " + ", ".join(x for x in p if x)
     p = [YAPI[a["yapi"]] if a.get("yapi") else None, KAT.get(a.get("kat")) if a.get("kat") else None, a.get("oda")]
     if a.get("en") and a.get("boy"):
@@ -299,6 +425,8 @@ def talep(oz: dict) -> dict:
     t: dict = {"niyet": "yeni_talep", "guven": "yuksek", "ozet": ozet(oz)}
     if oz.get("form") == "prefabrik":
         return _prefabrik_talebi(oz, {**t, "ozet": set_basligi(oz)})   # kısa özet: plan metni ve PDF başlığı; ayrıntı ön notta ve panelde
+    if oz.get("form") == "celik":
+        return _celik_talebi(oz, {**t, "ozet": set_basligi(oz)})
     if a.get("yapi"):
         t["yapi_turu"] = a["yapi"]
     if a.get("kat"):
@@ -339,6 +467,37 @@ def _prefabrik_talebi(oz: dict, t: dict) -> dict:
     bo = {anahtar: izinli[a[ad]] for ad, (izinli, anahtar) in OZELLIKLER.items() if a.get(ad)}
     if a.get("ek"):
         bo[EK_OZELLIK] = "; ".join(EK[x] for x in a["ek"])
+    if bo:
+        t["bina_ozellikleri"] = bo
+    yer = ", ".join(x for x in (a.get("ilce"), a.get("il")) if x)
+    if a.get("musteri") or yer:
+        t["musteri"] = {**({"ad": numara.maskele(a["musteri"])} if a.get("musteri") else {}),
+                        **({"sevk_adresi": numara.maskele(yer)} if yer else {})}
+    if a.get("not"):
+        t["ozel_istekler"] = [numara.maskele(a["not"])]
+    return t
+
+
+def _celik_talebi(oz: dict, t: dict) -> dict:
+    """Çelik talep formu → Talep. Ölçü yuvarlanmaz: iki kenar (yazılan ya da m²'den hesaplanan) `dis_olcu`, alan `alan_m2` (iki kenar
+    yazılıysa çarpımları, yoksa bayinin m²'si). Çatı rengi her zaman, öteki seçimler standarttan ayrıldıysa `bina_ozellikleri`'ne yazılır;
+    dış duvar 140 mm karkas talebe yazılmaz, çizime işlenir (`celik_dis140`). Müşteri adı ve teslim yeri `musteri`."""
+    from beyin import numara
+    a = oz.get("alanlar") or {}
+    t["yapi_turu"] = "celik"
+    if a.get("kat"):
+        t["kat_sayisi"] = int(a["kat"])
+    if a.get("oda"):
+        t["oda_programi"] = a["oda"]
+    o, m2 = celik_olcusu(oz), celik_alani(oz)
+    if o:
+        t["dis_olcu"] = {"en_m": o["en_m"], "boy_m": o["boy_m"]}
+    if m2:
+        t["alan_m2"] = float(m2)
+    bo = {anahtar: izinli[a[ad]] for ad, (izinli, anahtar) in C_OZELLIKLER.items()
+          if anahtar and a.get(ad) and (ad in C_HER_ZAMAN or a[ad] != C_STANDART[ad])}
+    if a.get("ek"):
+        bo[EK_OZELLIK] = "; ".join(C_EK[x] for x in a["ek"])
     if bo:
         t["bina_ozellikleri"] = bo
     yer = ", ".join(x for x in (a.get("ilce"), a.get("il")) if x)
@@ -421,6 +580,16 @@ def prefabrik_ekran_verisi(bayi: dict | None, taslak: dict | None) -> dict:
     d["bilinen"] = ("Bildiklerim: " + ", ".join(bilinen) + ". " if bilinen else "") + \
         "Bildiğiniz kadarını doldurmanız yeterli; eksik kalanı sohbette sorarım."
     return d
+
+
+def celik_tokeni(iz: str, taslaktan: bool = False) -> str:
+    return f"cf:{iz}:1" if taslaktan else f"cf:{iz}"
+
+
+def celik_ekran_verisi(bayi: dict | None, taslak: dict | None) -> dict:
+    """TALEP_C ekranının verisi: prefabrik formun ilk ekranıyla aynı alanlar (kat, oda, alan, kısa ve uzun kenar; açık taslaktaki bilgi >
+    kartın kat varsayılanı > tek kat). Çeliğin standartları formun kendisinde seçilidir (`C_STANDART`)."""
+    return prefabrik_ekran_verisi(bayi, taslak)
 
 
 def etkilesim(tur: str, govde: str, flow_id: str, token: str, veri: dict, taslak_kipi: bool) -> dict:
