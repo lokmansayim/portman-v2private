@@ -6,6 +6,9 @@
     python3 araclar/aday_kaydet.py <is_emri.json> --kod PA-04 --durum gecerli --karar D-80 --katalog-m2 80 [--referans PA-04] [--kaynak "…"]
     python3 araclar/aday_kaydet.py testler/kor/projeler/AP02/is_emri.json --kod PA-09 --gosterim PA-09 --referans PA-09 --durum gecerli \
                                    --karar D-87 --kart AP-02 --standart --havuz --kaynak "…"   (İE-38: proje kartı hakemi, standart, havuz dosyası)
+    python3 araclar/aday_kaydet.py testler/havuz/is_emirleri/AP07_STD45.json --kod PA-28 … --karar D-91 --kart AP-07 \
+                                   --standart-hal testler/havuz/is_emirleri/AP07.json --standart --havuz
+                                   (D-91: dış duvardaki özel panoları standarda çekilmiş ev; hakemin standart hâl kipi, kaynak evin İş Emri'siyle)
     python3 araclar/aday_kaydet.py --motor genel --tanim modeller/C8801.json [--kod Ç8801] [--durum gecerli] [--referans Ç8801]
                                    [--varyantlar Ç8801K,Ç8801L] [--kat 1] [--musteri-projesi] [--kaynak "…"] [--not "…"] [--perspektifsiz]
 
@@ -50,12 +53,17 @@ def main() -> int:
     ap.add_argument("--karar", default=None, help="prefabrik 'gecerli' için Lokman'ın kararı (KARARLAR/<D-NN>.md; İE-36)")
     ap.add_argument("--gosterim", default=None, help="prefabrik: bayinin gördüğü kod (varsayılan --kod; ör. PA-04)")
     ap.add_argument("--kart", default=None, help="proje kartı hakemi (İE-38, D-87; prefabrik AP-14, çelik ÇP-18): kıyas geçmezse kayıt yazılmaz")
+    ap.add_argument("--standart-hal", metavar="KAYNAK", default=None,
+                    help="--kart ile: hakemin standart hâl kipi; KAYNAK kaynak evin İş Emri'si (D-91: dış duvardaki özel panolar standarda "
+                         "çekilmiş; ölçü kaynaktan en çok 62,75 cm)")
     ap.add_argument("--havuz", action="store_true",
                     help="İE-38 (D-87): kaydı beyin/veri/havuz/<kod>.json'a yaz (ev başına bir dosya; adaylar.json ve adaylar_prefabrik.json aynen)")
     ap.add_argument("--standart", action="store_true",
                     help="prefabrik: müşterinin seçimleri (`ozellikler`, `alici_ait`) şablona girmez; standart geçerli (D-74; İE-38)")
     a = ap.parse_args()
     if a.motor == "genel":
+        if a.standart_hal:
+            print("DUR: --standart-hal yalnız prefabrikte (D-91); çelikte yok"); return 2
         return genel(a)
     if not a.is_emri or not a.kod:
         print("DUR: prefabrik aday için <is_emri.json> ve --kod gerekir"); return 2
@@ -80,10 +88,18 @@ def main() -> int:
         kart = HH.kartlar().get(a.kart.strip().upper())
         if kart is None:
             print(f"DUR: {a.kart} için proje kartı yok (testler/havuz/proje_kartlari.json)"); return 2
-        bulgular, olc = HH.denetle(ie, kart)
+        if a.standart_hal:
+            kaynak_ie = json.loads(Path(a.standart_hal).read_text(encoding="utf-8"))
+            bulgular, olc = HH.denetle_standart(ie, kart, kaynak_ie)
+        else:
+            bulgular, olc = HH.denetle(ie, kart)
         if bulgular:
             print(f"DUR: proje kartı hakemi geçmedi ({a.kart}):\n- " + "\n- ".join(bulgular)); return 1
-        kart_kiyasi = {"kart": a.kart.strip().upper(), "kart_sha256": kart["kart_sha256"], "sonuc": "geçti", "olcum": olc}
+        kart_kiyasi = {"kart": a.kart.strip().upper(), "kart_sha256": kart["kart_sha256"], "sonuc": "geçti", "olcum": olc,
+                       **({"kip": "standart_hal", "kaynak_is_emri": str(Path(a.standart_hal)),
+                           "kaynak_sha256": hashlib.sha256(Path(a.standart_hal).read_bytes()).hexdigest()} if a.standart_hal else {})}
+    elif a.standart_hal:
+        print("DUR: --standart-hal yalnız --kart ile (kaynak evin proje kartı)"); return 2
     kod = kod_normalize(a.kod)                                                 # PA-04 → PA04 (kayıt kodu); bayinin gördüğü `gosterim`
     gosterim = (a.gosterim or a.kod).strip().upper()
     ie["is_emri_no"] = f"PM-ADAY-{kod}"; ie["revizyon"] = 1

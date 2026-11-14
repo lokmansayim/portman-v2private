@@ -229,3 +229,28 @@ def test_hazir_olcu_dogrudan_plan(depo, wa, tmp_path, hizli_motor):
     [onay] = [y for y in bayiye(depo) if y["kind"] == "interactive"]
     govde = onay["satir"]["body"]
     assert "pano yüksekliği 280 cm" in govde and "Ölçüyü pano katına yuvarladım" not in govde      # ölçü planın kendi metninde
+
+
+def test_celik_dugmesi_verandasiz_formu_acar(depo, wa, tmp_path):
+    """İE-20 PR-8 (D-89; Lokman, 14 Kasım 2026): verandasız formun kimliği ayarda varsa [Çelik] düğmesinden sonra o form açılır; veranda
+    ayrıca sorulmaz, talebe yazılmaz. Kimlik yokken bugünkü form (yukarıdaki test)."""
+    s = pf_ayar(tmp_path)
+    s = {**s, "talep_formu": {**s["talep_formu"], "talep2_flow_id": "4444444444"}}
+    ids, dis = yapi_dugmeleri(depo, wa, s)
+    assert depo.mesaj_kaydet(buton(ids[1], dis))
+    [r] = isle_hepsi(depo, s)
+    assert son_sonuc(depo)["form_sunuldu"] == "talep2", r
+    satir, dis_form = form_satiri(depo, wa)
+    assert satir["body"] == "Çelik için talep formunu doldurun. İsterseniz talebinizi yazın."
+    p = parametreler(satir)
+    assert p["flow_id"] == "4444444444" and p["flow_token"].startswith("tf:") and p["flow_action_payload"]["screen"] == "TALEP"
+    veri = p["flow_action_payload"]["data"]
+    assert veri["yapi"] == "celik" and "veranda" not in veri and set(veri) == set(TF.tanim("talep2")["screens"][0]["data"])
+    # bayi formu gönderir: cevapta veranda yok; talep LLM'siz çözülür, veranda belirtilmemiş kalır
+    form_cevabi(depo, tmp_path, p["flow_token"], {"yapi": "celik", "kat": "1", "oda": "2+1", "alan": 80, "cati": "besik"}, dis_form)
+    [r] = isle_hepsi(depo, s)
+    j = tek(depo, "SELECT cikarim, sonuc FROM isler ORDER BY id DESC LIMIT 1")
+    assert j["cikarim"]["form"]["durum"] == "talep" and j["sonuc"]["llm"]["backend"] == "form", r
+    t = j["cikarim"]["form"]["talep"]
+    assert "veranda" not in t and t["yapi_turu"] == "celik" and t["oda_programi"] == "2+1" and t["alan_m2"] == 80
+    assert not any("veranda" in (x.get("govde") or "").lower() for x in bayiye(depo))
