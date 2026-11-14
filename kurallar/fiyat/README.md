@@ -19,8 +19,14 @@ Lokman, 9 Kasım 2026 13:10: "bunu kural olarak al ve mühürle bundan sonra tek
   U'su ve kolon CRM'deki aynı ürünün h:2800 / h:3000 koduyla, 2500'deki kuralla. Pencere üst paneli 800 / 1000 tam panonun 1/3'ü
   (Lokman'ın kartı, 14 Kasım 07:28). CRM'de olmayanlar fiyatsız: vasistaslı pano, karkaslı özel pencere panosu, 2940'lık çektirme
   U'su. Metal iniş borusu L 3000 çelikteki kayıtla aynı (antrasit, `DR13`).
+  r08 (14 Kasım): fugalı dış cephe düz desenle (Lokman'ın kartı, 14 Kasım 08:16:59). "(FUGALI)" pano bandı 2500, 2800, 3000 (tam
+  `YP19`–`YP21`, yarım `YP22`–`YP24`); fugalı pencere panelleri düz panelin oranıyla fugalı tam panodan; köşe latası `KG2` satır
+  ölçüsüyle (`crm_olcu`: CRM'de aynı kod iki satırda), pencere latası `KG3`, 2800 boyla orantılı (pencere panelleri ve 2800'lük lata
+  Lokman'ın kartı, 14 Kasım 08:28:03, "İkisi de onaylı"). CRM'de olmayanlar
+  fiyatsız: fugalı vasistaslı pano, karkaslı özel pencere panosu, dış çelik kapı panosu, H latası. Lataların KDV'si "Betopan" (okuma).
 - **Onay.** Eşleme `birebir` ya da `kural` ise onaylı; `yakın` ve `birim varsayımı` öneri (`--oneri`); `birim sorusu` ve `CRM'de yok`
-  fiyatsız. O gün fiyatı 0 ya da boş olan kod, listede olmayan kod ve birden çok satırdaki kod fiyatsız. `bekletme`: Lokman'ın kararıyla şimdilik
+  fiyatsız. O gün fiyatı 0 ya da boş olan kod, listede olmayan kod ve birden çok satırdaki kod fiyatsız; kayıt aynı kodun satırını
+  adıyla (`icerir`) ya da ölçüsüyle (`crm_olcu`) seçebilir. `bekletme`: Lokman'ın kararıyla şimdilik
   fiyatsız, CRM'de fiyatı olsa da yazılmaz (banyo dolabı, D-75).
 - **Lokman'ın hesap kuralları (D-75, 10 Kasım).** Kutu profilin (kiriş ve kolon) CRM fiyatı 6 metrelik boyun fiyatıdır; parça fiyatı
   boyla orantılı, tam TL. Pencere üst paneli tam panonun (100 × 1250 × 2500) 1/5'i, alt paneli 1/3'ü. 280 ve 300'ün üst paneli
