@@ -263,7 +263,7 @@ def test_ikinci_muhurun_dondurulmus_bolumleri_degismez():
     assert K.donmus_iz(m) == K.MUHUR_2_IZI and K.MUHUR_2_IZI != K.MUHUR_IZI
     assert K.MUHUR_2_IZI in (KOK / "docs" / "is_emirleri" / "IE-16.md").read_text(encoding="utf-8")
     K.muhur_dogrula(MUHUR_2, KOK)
-    for degistir in (lambda x: x["projeler"]["ÇP-22"].update(durum="acik"), lambda x: x["dosyalar"][0].update(sha256=None),
+    for degistir in (lambda x: x["projeler"]["ÇP-22"].update(durum="acik"), lambda x: x["dosyalar"][0].update(bayt=1),
                      lambda x: x["projeler"]["ÇP-23"].update(kat="tek")):
         y = json.loads(json.dumps(m))
         degistir(y)
