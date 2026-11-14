@@ -63,11 +63,16 @@ SILME_HAL = {
     "PA34": ("AP-27", "testler/havuz/is_emirleri/PA24_BUYUME.json", "2+1", 78.0),   # 77 m² büyüyen hâl (20:35:43 sözü, 20:38:43)
 }
 HAVUZ_EVLERI = {**EVLER, **STANDART_HAL, **SILME_HAL}
+# D-92 › Havuz evlerine uygulama: tek özel pano anahtarı yazılan evlerin kaynağı kör İş Emri'nin anahtarlı kopyası (kör dosya aynen;
+# ayrıntı test_havuz_tek_pano.py). Kayıt yeniden yazıldı, karar D-92; D-87'nin tablosu evin havuza girdiği kaynağı yazmaya devam eder.
 D92 = (KOK / "KARARLAR" / "D-92.md").read_text(encoding="utf-8")
+TEK_PANO = {"PA10": "testler/havuz/is_emirleri/AP04_D92.json"}                    # D-92 (95 m² kartı 20:32:51)
 
 
 def _kayit_kaynagi(kod: str) -> tuple[str, str, str]:
-    """(kaynak İş Emri, karar, karar metni) kayıttaki gibi: D-92 silinmiş hâlleri, D-91 standart hâlleri, öteki D-87 evleri."""
+    """(kaynak İş Emri, karar, karar metni) kayıttaki gibi: D-92 evleri ve silinmiş hâlleri, D-91 standart hâlleri, öteki D-87 evleri."""
+    if kod in TEK_PANO:
+        return TEK_PANO[kod], "D-92", D92
     if kod in SILME_HAL:
         return SILME_HAL[kod][1], "D-92", D92
     return HAVUZ_EVLERI[kod][1], *(("D-87", D87) if kod in EVLER else ("D-91", D91))
@@ -126,8 +131,10 @@ def test_havuz_kaydi_bicimi():
     eski = {str(a["kod"]).upper() for a in json.loads(ADAYLAR_PREFABRIK_JSON.read_text(encoding="utf-8"))}
     assert not eski & set(HAVUZ_EVLERI) and eski == D80                                      # D-80 kaydı aynen
     for kod, a in PREFABRIK.items():
-        proje, kaynak, oda, m2 = HAVUZ_EVLERI[kod]
-        _, karar, karar_metni = _kayit_kaynagi(kod)
+        proje, _, oda, m2 = HAVUZ_EVLERI[kod]
+        kaynak, karar, karar_metni = _kayit_kaynagi(kod)
+        if kod in TEK_PANO:
+            assert f"| {kod[:2]}-{kod[2:]} | {proje} | `{EVLER[kod][1]}` |" in D87, kod     # havuza girdiği kaynak D-87'de aynen
         g = kod[:2] + "-" + kod[2:]
         assert a["gosterim"] == g == a["referans_model"]
         assert (a["durum"], a["yapi_turu"], a["kat"], a["oda_programi"], a["katalog_m2"]) == ("gecerli", "prefabrik", 1, oda, m2), kod
@@ -156,7 +163,7 @@ def test_hakem_gecer(kod):
 def test_sablon_kaynagin_standart_hali(kod):
     """Şablon gerçek projenin İş Emri'sidir: yalnız kimlik, talep, referans kodu ve müşterinin seçimleri (D-74 standart) değişir.
     D-91'in standart hâllerinde kaynak, standart hâlin İş Emri'si (`testler/havuz/is_emirleri/AP07_STD*.json`)."""
-    kaynak = _standart(json.loads((KOK / HAVUZ_EVLERI[kod][1]).read_text(encoding="utf-8")))
+    kaynak = _standart(json.loads((KOK / _kayit_kaynagi(kod)[0]).read_text(encoding="utf-8")))
     sab = json.loads((SABLON_DIR / PREFABRIK[kod]["sablon"]).read_text(encoding="utf-8"))
     assert "ozellikler" not in sab and "alici_ait" not in sab
     for d in (kaynak, sab):
