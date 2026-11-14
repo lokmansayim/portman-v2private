@@ -175,3 +175,98 @@ def test_prefabrik_cati_secenegi_kabulsuz_bugunku_onay(depo, wa, hizli_motor):
     rev = _son_rev(depo)
     r, _ = _bas(depo, f"o:{rev['is_emri_no']}:1")
     assert r["gerekce"] == PLAN_ONAYI and not _cati_setleri(depo), r
+
+
+# ───────────────────────── onay denetimi (hakem tur 1, bulgu 1) ─────────────────────────
+def _r02_pencereyle(depo, wa, gonder: bool) -> tuple[str, dict]:
+    """PA-06 r01 (evin çatısı) gönderilir; pencere isteği r02'yi çizer (çatı yine evin çatısı). Dönen: (r01 mesajının dış kimliği, r02)."""
+    _pf_kabul(depo)
+    assert depo.mesaj_kaydet(mesaj("PA-06 olsun", talep(ozet="PA-06", katalog_kodu="PA-06", yapi_turu="prefabrik"), bayi=BAYI_KART))
+    [r] = isle_hepsi(depo)
+    assert r["eylem"] == "is_emri", r
+    kalici.gonder(depo, wa)
+    r01_dis = sorgu(depo, "SELECT dis_id FROM giden WHERE kind = 'interactive' ORDER BY olusturuldu, sira")[0]["dis_id"]
+    time.sleep(1.1)
+    assert depo.mesaj_kaydet(mesaj("yatak odası 1 penceresi 120x180 olsun", talep(
+        "revizyon", "pencere", pencereler=[{"mahal": "yatak odası 1", "islem": "degistir", "olcu": "120x180"}]), bayi=BAYI_KART))
+    [r] = isle_hepsi(depo)
+    assert r["eylem"] == "is_emri", r
+    if gonder:
+        kalici.gonder(depo, wa)
+    rev = _son_rev(depo)
+    assert (rev["rev"], rev["durum"]) == (2, "onay_bekliyor")
+    time.sleep(1.1)
+    return r01_dis, rev
+
+
+def _onay_reddedildi(depo, g: dict, r: dict, rev: dict, metin: str) -> None:
+    """Onay revizyona bağlanmadı: çatı seti açılmadı, onay ve çatı adımı yazılmadı, bayiye neden yazıldı."""
+    assert r["gerekce"].startswith("onay bağlanmadı"), r
+    assert not _cati_setleri(depo), "onay bağlanmadan çatı seti açıldı"
+    assert tek(depo, "SELECT durum FROM revizyonlar WHERE id = %s", rev["id"])["durum"] == "onay_bekliyor"
+    d, _ = depo.konusma_oku(NUMARA_A)
+    assert d["asama"] == "onay_bekliyor" and not d.get("cati_adimi") and not d.get("onaylanan")
+    govde = [s["govde"] for s in sorgu(depo, "SELECT govde FROM giden WHERE mesaj_id = %s ORDER BY sira", g["id"])]
+    assert govde and metin in govde[0] and "Planınız onaylandı" not in " ".join(govde), govde
+
+
+def test_alintilanan_eski_revizyonun_onayi_cati_setini_acmaz(depo, wa, hizli_motor):
+    """Bayi r01'in mesajını alıntılayıp "onaylıyorum" yazar, güncel plan r02: "Planınız onaylandı (r02)" ve çatı seti gitmez (onay denetimi
+    çatı setinde de koşar); bayi güncel planı yeniden onaylayınca set gelir."""
+    r01_dis, rev = _r02_pencereyle(depo, wa, gonder=True)
+    g = mesaj("onaylıyorum", talep("onay", "onay"), bayi=BAYI_KART, context_id=r01_dis)
+    assert depo.mesaj_kaydet(g)
+    [r] = isle_hepsi(depo)
+    _onay_reddedildi(depo, g, r, rev, "r01 planına ait; güncel plan")
+    kalici.gonder(depo, wa)
+    r, _ = _bas(depo, f"o:{rev['is_emri_no']}:2")
+    assert r["eylem"] == "secenek" and set_satiri(depo)["body"].startswith("Planınız onaylandı (r02). Şimdi çatıyı seçin."), r
+
+
+def test_plan_ulasmadan_yazilan_onay_cati_setini_acmaz(depo, wa, hizli_motor):
+    """r02 bayiye gönderilmeden yazılan "onaylıyorum" çatı setini açmaz; sonra evin çatısı seçilip r02'nin onayı kaydedilemez."""
+    _, rev = _r02_pencereyle(depo, wa, gonder=False)
+    g = mesaj("onaylıyorum", talep("onay", "onay"), bayi=BAYI_KART)
+    assert depo.mesaj_kaydet(g)
+    [r] = isle_hepsi(depo)
+    _onay_reddedildi(depo, g, r, rev, "size ulaşmadan yazılmış")
+
+
+# ───────────────────────── hakem tur 2 ─────────────────────────
+def _yaz(depo, metin: str, t: dict) -> tuple[dict, dict]:
+    time.sleep(1.1)
+    g = mesaj(metin, t, bayi=BAYI_KART)
+    assert depo.mesaj_kaydet(g)
+    [r] = isle_hepsi(depo)
+    return r, g
+
+
+def test_prefabrik_evin_catisi_ve_uygulanmayan_istek_onay_kaydetmez(depo, wa, hizli_motor):
+    """Y1: evin çatısı + yükseklik (Motor plana işlemez): onay kaydedilmez, Patron'a bildirim gitmez, set açık kalır; bayiye isteğin
+    uygulanmadığı ve çatı seçiminin kaydedilmediği yazılır. Sonra düğmeyle evin çatısı r01'i onaylar."""
+    _pf_kabul(depo)
+    rev, st = _r01_ve_cati_seti(depo, wa, "PA-06 olsun", talep(ozet="PA-06", katalog_kodu="PA-06", yapi_turu="prefabrik"))
+    r, g = _yaz(depo, "1 olsun, yükseklik 260 olsun", talep("revizyon", "çatı 1, yükseklik 260", yukseklik_cm=260))
+    assert r["gerekce"] != PLAN_ONAYI, r
+    assert tek(depo, "SELECT durum FROM revizyonlar WHERE id = %s", rev["id"])["durum"] == "onay_bekliyor"
+    assert tek(depo, "SELECT durum FROM secenek_setleri WHERE id = %s", st["id"])["durum"] == "acik"
+    assert not sorgu(depo, "SELECT 1 FROM giden WHERE alici = 'PATRON'")
+    assert satirlar(depo, g["id"])[0]["body"].endswith("değişmedi; isteğinizi plana uygulayamadım. Çatı seçiminizi (PA-06) kaydetmedim; "
+                                                       "çatıyı yeniden seçin.")
+    kalici.gonder(depo, wa)
+    r, _ = _bas(depo, f"s:{st['id']}:PA06")
+    assert r["gerekce"] == PLAN_ONAYI, r
+    assert tek(depo, "SELECT durum FROM revizyonlar WHERE id = %s", rev["id"])["durum"] == "onaylandi"
+
+
+def test_prefabrik_cati_ve_m2_degisikligi_yeni_talep(depo, wa, hizli_motor):
+    """O1: çatı + yeni m² aynı mesajda: talep değişikliği önce gelir; onay kaydedilmez, set kapanır, bayiye çatı seçiminin kaydedilmediği
+    yazılır."""
+    _pf_kabul(depo)
+    rev, st = _r01_ve_cati_seti(depo, wa, "PA-06 olsun", talep(ozet="PA-06", katalog_kodu="PA-06", yapi_turu="prefabrik"))
+    r, g = _yaz(depo, "2 olsun, 100 m2 olsun", talep("revizyon", "çatı 2, 100 m2", alan_m2=100))
+    assert r["gerekce"] != PLAN_ONAYI and r["eylem"] != "is_emri", r
+    assert tek(depo, "SELECT durum FROM revizyonlar WHERE id = %s", rev["id"])["durum"] != "onaylandi"
+    assert tek(depo, "SELECT durum FROM secenek_setleri WHERE id = %s", st["id"])["durum"] != "acik"
+    assert not sorgu(depo, "SELECT 1 FROM giden WHERE alici = 'PATRON'")
+    assert satirlar(depo, g["id"])[0]["body"].startswith("Çatı seçiminizi (PA-06-K) kaydetmedim. Talebiniz değişti; önce plan seçilir.")

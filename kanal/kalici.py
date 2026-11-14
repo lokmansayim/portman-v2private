@@ -261,7 +261,17 @@ def bir_is(depo: Depo, settings: dict, sahip: str | None = None) -> dict | None:
                            ek_kaydet=ek_kaydet, ara_gonder=ara_gonder)
             # Onay denetimi kuralın sonucuna bakar: hangi yoldan olursa olsun (ör. süresi dolan D-01 sorusundan sonra) bir onay
             # kaydedildiyse, onay bayinin gördüğü revizyona bağlanabiliyor mu diye sınanır; bağlanamıyorsa onay yazılmaz.
-            if (cikti.get("sonuc") or {}).get("gerekce") == "plan onaylandı":
+            gerekce = (cikti.get("sonuc") or {}).get("gerekce") or ""
+            if gerekce.startswith("plan onayından sonra çatı seti"):
+                # İE-42 (D-94; hakem tur 1, bulgu 1): onaydan sonraki çatı seti de bir onaydır ("Planınız onaylandı (r01)"); onay bayinin
+                # gördüğü revizyona bağlanamıyorsa (alıntı başka revizyon, plan ulaşmadan yazılmış) set açılmaz, onay yazılmaz.
+                # Kanca yok: mühendis ve Patron, çatı seçilip onay kaydedilince (`plan onaylandı`) çağrılır.
+                denetim = onay_denetimi(depo, gelen, d)
+                if not denetim["kabul"]:
+                    k = BellekKonusma(gelen["sender"], d)
+                    cikti = _red_ciktisi(gelen, k, cikarim["talep"], denetim)
+                cikti["sonuc"]["onay"] = {a: denetim.get(a) for a in ("kabul", "is_emri_no", "rev", "pdf_wamid", "alinti_id", "sinir", "neden")}
+            elif gerekce == "plan onaylandı":
                 denetim = onay_denetimi(depo, gelen, d)
                 if not denetim["kabul"]:
                     k = BellekKonusma(gelen["sender"], d)

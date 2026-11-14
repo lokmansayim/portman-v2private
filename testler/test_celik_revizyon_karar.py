@@ -303,11 +303,10 @@ def test_ilk_planda_soru_yalniz_gercek_degisiklikte(s, metin, alan, eylem):
 
 
 def test_cati_sorusunda_set_notu_yok_secimde_soru_yok(s):
-    """"çatı nasıl olacak?" değişiklik isteği değildir: "isteğinizi işleyeceğim" ya da "uygulayamadım" notu yok. İE-42: soru çatı seçimi
-    değildir, r01 katalog çatısıyla; çatı onaydan sonra setle sorulur, seçim r02 verir."""
+    """"çatı nasıl olacak?" değişiklik isteği değildir: set mesajında "isteğinizi işleyeceğim" notu yok, seçim r01 verir. İE-42 (hakem tur
+    1, bulgu 4): seçimsiz çatı sözü planla gelince set plandan önce gelir (D-94: "ad ya da kararsız söz planla gelirse eski gibi set önce")."""
     k = s.yaz("Ç8801 çelik ev, çatı nasıl olacak?", katalog_kodu="Ç8801", yapi_turu="celik")
-    assert k.eylem == "is_emri" and K.CELIK_ISTEK_NOTU not in k.mesaj and "uygulayamadım" not in k.mesaj, k.mesaj
-    onayla(s)
+    assert k.eylem == "secenek" and K.CELIK_ISTEK_NOTU not in k.mesaj
     k = s.yaz("2", niyet="diger")
     assert k.eylem == "is_emri" and s.plan["yapi"]["kod"] == "Ç8801K"
 
@@ -598,3 +597,151 @@ def test_celik_plan_mesaji_ekleri_soyler(s):
     k = s.yaz("mutfak penceresi 120x120 olsun", pencereler=[pen("mutfak", "120x120")])
     assert k.eylem == "is_emri" and k.revizyon == 2
     assert "plan görseli ve PDF ektedir" in k.mesaj and "göndereceğim" not in k.mesaj
+
+
+# ── İE-42 · geometri hakemi tur 1 (14 Kasım 2026 gece): onaydan sonraki çatı seti ve plandan önceki set ─────────────────────────
+@pytest.mark.parametrize("metin, alan", [
+    ("Ç8801 olsun, kırma çatı olsun", {"varyantlar": [var("cati_degistir", "kırma çatı olsun")]}),
+    ("Ç8801 olsun, kırma çatı olsun", {}),
+    ("Ç8801 olsun, çatısı farklı olsun", {"varyantlar": [var("cati_degistir", "çatısı farklı olsun")]}),
+    ("Ç8801 olsun, çatı seçeneklerini görelim", {}),
+])
+def test_hakem1_secimsiz_cati_sozu_set_once(s, metin, alan):
+    """Bulgu 4: plan seçilirken seçimsiz çatı sözü (çatının adı, "farklı", "seçenekleri görelim") set getirir (D-94: ad ya da kararsız söz
+    planla gelirse set önce); plan katalog çatısıyla çizilip istek düşmez."""
+    k = s.yaz(metin, katalog_kodu="Ç8801", yapi_turu="celik", **alan)
+    assert k.eylem == "secenek" and s.k.d["secenek_seti"]["tur"] == "cati_varyanti" and not s.plan, k.mesaj
+    k = s.yaz("2", niyet="diger")
+    assert k.eylem == "is_emri" and s.plan["yapi"]["kod"] == "Ç8801K" and k.revizyon == 1
+    assert onayla(s).gerekce == K.PLAN_ONAYI                                  # çatı seçildi: onayda yeniden sorulmaz
+
+
+def test_hakem1_alan_setinde_saklanan_cati_sozu_set_getirir(s):
+    """Bulgu 4: "88 m² 2+1 tek kat çelik, kırma çatı olsun" → alan seti (istek saklanır) → Ç8801 düğmesi → çatı seti (r01 çizilmez)."""
+    k = s.yaz("88 m² 2+1 tek kat çelik, kırma çatı olsun", alan_m2=88, oda_programi="2+1", yapi_turu="celik", kat_sayisi=1,
+              varyantlar=[var("cati_degistir", "kırma çatı olsun")])
+    assert k.eylem == "secenek" and s.k.d["secenek_seti"]["tur"] == "alan", k.mesaj
+    k = s.dugme("s:{set}:Ç8801")
+    assert k.eylem == "secenek" and s.k.d["secenek_seti"]["tur"] == "cati_varyanti" and not s.plan, k.mesaj
+
+
+def test_hakem1_cati_rengi_bilgi_set_getirmez(s):
+    """Renk ve malzeme sözü çatı seçimi istemez (bilgi): r01 katalog çatısıyla, set onaydan sonra."""
+    k = s.yaz("Ç8801 olsun, çatı rengi antrasit olsun", katalog_kodu="Ç8801", yapi_turu="celik")
+    assert k.eylem == "is_emri" and s.plan["yapi"]["kod"] == "Ç8801", k.mesaj
+    assert onayla(s).eylem == "secenek"
+
+
+@pytest.mark.parametrize("metin, alan", [
+    ("tamam", {"niyet": "yeni_talep"}),
+    ("bakalım", {"niyet": "yeni_talep", "katalog_kodu": "Ç8801", "yapi_turu": "celik"}),
+])
+def test_hakem1_celik_iceriksiz_mesaj_cati_sorar(s, metin, alan):
+    """Bulgu 5: onaydan sonraki sette içeriksiz "yeni talep" okuması konuşmayı sıfırlamaz: "Hangi çatı olsun?"."""
+    cati_seti(s)
+    k = s.yaz(metin, **alan)
+    assert k.eylem == "sor" and k.mesaj.startswith("Hangi çatı olsun?") and s.k.d.get("cati_adimi") and s.plan["revizyon"] == 1, k.mesaj
+
+
+def test_hakem1_celik_katalog_catisi_ve_bilgi(s):
+    """Bulgu 2: katalog çatısı + sevk adresi: onay o an kaydedilmez; plan antet bilgisiyle r02, çatı seçilmiş."""
+    cati_seti(s)
+    k = s.yaz("Ç8801 olsun, sevk adresi Deneme İlçesi olsun", katalog_kodu="Ç8801", musteri={"sevk_adresi": "Deneme İlçesi"})
+    assert k.eylem == "is_emri" and k.revizyon == 2 and s.plan["yapi"]["kod"] == "Ç8801" and K.PLAN_ONAYI not in k.gerekce, k.mesaj
+    assert (s.plan.get("bilgi") or {}).get("sevk_adresi") == "Deneme İlçesi" and k.mesaj.startswith("Çatı: Beşik + cumba (Ç8801).")
+    assert onayla(s).gerekce == K.PLAN_ONAYI
+
+
+def test_hakem1_celik_yalniz_musteri_bilgisi(s):
+    """Bulgu 3: set açıkken yalnız müşteri adı: soru değil, plan bilgiyle r02."""
+    cati_seti(s)
+    k = s.yaz("müşteri Ayşe Deneme", musteri={"ad": "Ayşe Deneme"})
+    assert k.eylem == "is_emri" and k.revizyon == 2 and not k.mesaj.startswith("Hangi çatı"), k.mesaj
+
+
+def test_hakem1_celik_onay_sozunde_cati(s):
+    """Bulgu 8: "çatı K olsun, onaylıyorum" (LLM "onay") çatıyı seçer: r02 K."""
+    cati_seti(s)
+    k = s.yaz("çatı K olsun, onaylıyorum", niyet="onay")
+    assert k.eylem == "is_emri" and k.revizyon == 2 and s.plan["yapi"]["kod"] == "Ç8801K", k.mesaj
+
+
+def test_hakem1_celik_yalniz_cati_degisince_onay_dusme_notu_yok(s):
+    """Bulgu 7: K + antet bilgisi (plan geometrisi yalnız çatıda değişir): "Plan aynı", "onayınızı geçersiz kıldı" yazılmaz; bilgi r02'de."""
+    cati_seti(s)
+    k = s.yaz("çatı K olsun, sevk adresi Deneme İlçesi", musteri={"sevk_adresi": "Deneme İlçesi"})
+    assert k.eylem == "is_emri" and k.revizyon == 2 and s.plan["yapi"]["kod"] == "Ç8801K", k.mesaj
+    assert "Plan aynı" in k.mesaj and "geçersiz kıldı" not in k.mesaj and (s.plan.get("bilgi") or {}).get("sevk_adresi") == "Deneme İlçesi"
+
+
+def test_hakem1_celik_cati_ve_okunamayan_istek_secimi_dusurmez(s):
+    """Bulgu 6: K + okunamayan istek ("dışlar 140 olmasın": olumsuz, soru): çatı "seçildi" sayılıp düşmez; plan değişmez, set açık kalır,
+    bayiye çatı seçiminin kaydedilmediği yazılır; sonraki "Onayla" çatıyı yine sorar."""
+    cati_seti(s)
+    st = s.k.d["secenek_seti"]
+    k = s.yaz("çatı K olsun, dışlar 140 olmasın")
+    assert k.eylem == "cevapla" and k.mesaj.endswith("Çatı seçiminizi (Ç8801-K) kaydetmedim; çatıyı yeniden seçin."), k.mesaj
+    assert s.k.d.get("cati_adimi") and not s.k.d.get("cati_secilen") and s.k.d["secenek_seti"]["durum"] == "acik"
+    assert [b["id"] for b in k.butonlar] == [f"s:{st['id']}:{c}" for c in ("Ç8801", "Ç8801K", "Ç8801L")] and s.plan["revizyon"] == 1
+    k = s.dugme("s:{set}:Ç8801K")
+    assert k.eylem == "is_emri" and k.revizyon == 2 and s.plan["yapi"]["kod"] == "Ç8801K", k.mesaj
+
+
+# ── İE-42 · geometri hakemi tur 2 (14 Kasım 2026 gece) ─────────────────────────────────────────────────────────────────
+@pytest.mark.parametrize("metin", ["Ç8801K'nın fiyatı ne kadar?", "K çatı daha mı pahalı?"])
+def test_hakem2_celik_soru_cumlesindeki_kod_secim_degil(s, metin):
+    """O2: soru cümlesindeki kod ya da etiket çatı seçimi değildir: plan çizilmez, set açık kalır."""
+    cati_seti(s)
+    k = s.yaz(metin, niyet="soru")
+    assert k.eylem != "is_emri" and s.plan["revizyon"] == 1 and not s.k.d.get("cati_secilen") and s.k.d.get("cati_adimi"), k.mesaj
+
+
+def test_hakem2_celik_eskiyen_cati_secimi_onayda_sorulur(s):
+    """O3: çatı seçimi okuma sorusuyla bekledi, bayi soruyu cevaplamadan başka istek yazdı (r02 katalog çatısıyla): r02'nin onayında
+    çatı seti yeniden gelir (eskiyen seçim çatı adımını atlatmaz)."""
+    cati_seti(s)
+    k = s.yaz("çatı L olsun, salondaki pencere 120x120 olsun", pencereler=[pen("salon", "120x120")])
+    assert k.eylem == "sor", k.mesaj
+    k = s.yaz("mutfak penceresi 120x120 olsun", pencereler=[pen("mutfak", "120x120")])
+    assert k.eylem == "is_emri" and k.revizyon == 2 and s.plan["yapi"]["kod"] == "Ç8801", k.mesaj
+    k = onayla(s)
+    assert k.eylem == "secenek" and k.gerekce.startswith("plan onayından sonra çatı seti") and s.k.d.get("cati_adimi"), k.mesaj
+
+
+@pytest.mark.parametrize("metin, alan", [("100 m2 olsun", {"alan_m2": 100}), ("3+1 olsun", {"oda_programi": "3+1"})])
+def test_hakem2_celik_talep_degisince_yapi_turu_kalir(tmp_path, metin, alan):
+    """O6: yalnız kodla seçilen çelik evde (taslakta yapı türü yok) talep değişikliği yeni talepte çelik kalır (prefabrik öneri gelmez)."""
+    s = Sohbet(tmp_path)
+    k = s.yaz("Ç8801", katalog_kodu="Ç8801")
+    assert k.eylem == "is_emri", k.mesaj
+    assert onayla(s).eylem == "secenek"
+    k = s.yaz(metin, niyet="revizyon", **alan)
+    assert s.k.d["taslak"].get("yapi_turu") == "celik" and "prefabrik" not in k.mesaj, k.mesaj
+    assert not s.k.d.get("cati_adimi") and K.PLAN_ONAYI not in k.gerekce
+
+
+@pytest.mark.parametrize("metin, kod", [("2 olsun, mutfak penceresi 120x120 olsun", "Ç8801K"),
+                                        ("ikinci çatı olsun, mutfak penceresi 120x120 olsun", "Ç8801K")])
+def test_hakem2_celik_numara_baska_cumleyle(s, metin, kod):
+    """O7: çelikte numara ya da sıra sözü başka cümleyle birlikte de setin numarasıdır: r02 o çatıyla ve pencereyle."""
+    cati_seti(s)
+    k = s.yaz(metin, pencereler=[pen("mutfak", "120x120")])
+    assert k.eylem == "is_emri" and k.revizyon == 2 and s.plan["yapi"]["kod"] == kod, k.mesaj
+    assert k.mesaj.startswith("Çatı: Beşik + cumba, doğu ucu kırma (Ç8801-K).") and "120/120" in k.mesaj, k.mesaj
+
+
+def test_hakem2_celik_numara_ve_okunamayan_istek(s):
+    """O7 + Y1: "1 olsun, dış kapı çelik olsun": çatı seçimi okunur, istek otomatik yapılamaz; plan değişmez, set açık kalır ve bayiye
+    çatı seçiminin kaydedilmediği yazılır (onay kaydedilmez)."""
+    cati_seti(s)
+    k = s.yaz("1 olsun, dış kapı çelik olsun", dis_kapi="çelik", varyantlar=[var("kapi_degistir", "dış kapı çelik olsun")])
+    assert K.PLAN_ONAYI not in k.gerekce and k.mesaj.endswith("Çatı seçiminizi (Ç8801) kaydetmedim; çatıyı yeniden seçin."), k.mesaj
+    assert s.k.d.get("cati_adimi") and s.k.d["secenek_seti"]["durum"] == "acik" and s.plan["revizyon"] == 1
+
+
+@pytest.mark.parametrize("metin", ["L olsun onaylıyorum", "üçüncü çatı olsun, onaylıyorum"])
+def test_hakem2_celik_virgulsuz_onay_ve_sira_sozu(s, metin):
+    """D4: onay sözü virgülsüz ("L olsun onaylıyorum") ya da sıra sözüyle gelince de seçim okunur: r02 L."""
+    cati_seti(s)
+    k = s.yaz(metin, niyet="onay")
+    assert k.eylem == "is_emri" and k.revizyon == 2 and s.plan["yapi"]["kod"] == "Ç8801L", k.mesaj
