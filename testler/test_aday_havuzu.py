@@ -57,7 +57,7 @@ HAVUZ_EVLERI = {**EVLER, **STANDART_HAL}
 # D-92 › Havuz evlerine uygulama: tek özel pano anahtarı yazılan evlerin kaynağı kör İş Emri'nin anahtarlı kopyası (kör dosya aynen;
 # ayrıntı test_havuz_tek_pano.py). Kayıt yeniden yazıldı, karar D-92; D-87'nin tablosu evin havuza girdiği kaynağı yazmaya devam eder.
 D92 = (KOK / "KARARLAR" / "D-92.md").read_text(encoding="utf-8")
-TEK_PANO = {"PA10": "testler/havuz/is_emirleri/AP04_D92.json", "PA24": "testler/havuz/is_emirleri/AP27_D92.json"}
+TEK_PANO = {"PA10": "testler/havuz/is_emirleri/AP04_D92.json"}                    # D-92 (95 m² kartı 20:32:51)
 
 
 def _kayit_kaynagi(kod: str) -> tuple[str, str, str]:

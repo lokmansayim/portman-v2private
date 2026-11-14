@@ -36,7 +36,7 @@ def _anahtarli(ie: dict, deger="dizilim_sonu") -> dict:
 
 
 def _anahtarsiz(ie: dict) -> dict:
-    """Anahtarı yazılmış havuz şablonunun (D-92 › Havuz evlerine uygulama: PA-10, PA-24) anahtarsız hâli; öteki şablonlar aynen."""
+    """Anahtarı yazılmış havuz şablonunun (D-92 › Havuz evlerine uygulama: PA-10) anahtarsız hâli; öteki şablonlar aynen."""
     ie = copy.deepcopy(ie)
     ie["yapi"].get("dizilim", {}).pop("tek_ozel_pano", None)
     return ie
