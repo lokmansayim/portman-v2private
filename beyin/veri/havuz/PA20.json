@@ -1,0 +1,73 @@
+{
+ "kod": "PA20",
+ "gosterim": "PA-20",
+ "durum": "gecerli",
+ "sablon": "adaylar/PA20.json",
+ "gorsel": "adaylar/PA20.png",
+ "referans_model": "PA-20",
+ "yapi_turu": "prefabrik",
+ "kat": 1,
+ "oda_programi": "2+1",
+ "katalog_m2": 64.0,
+ "kapali_m2": 58.2,
+ "veranda_m2": 5.58,
+ "ozet": {
+  "grid": {
+   "x_pano": 6,
+   "y_pano": 6.5
+  },
+  "dis_olcu_cm": [
+   763.0,
+   835.75
+  ],
+  "brut_m2": 63.77,
+  "pano": 41,
+  "pencere": 6,
+  "kapi": 4,
+  "odalar": {
+   "YATAK ODASI 1": 9.5,
+   "BANYO": 4.42,
+   "HOL": 1.46,
+   "YATAK ODASI 2": 9.12,
+   "YAŞAMA ALANI": 30.68,
+   "VERANDA": 5.58
+  }
+ },
+ "kaynak": {
+  "metin": "AP-24 montaj paftasından İş Emri (İE-33 kör ölçümü, kubbeli). Aday: D-87 (Lokman 13 Kasım 2026 21:41).",
+  "dosya": "testler/kor/projeler/AP24/is_emri.json",
+  "ayna": null,
+  "karar": "D-87",
+  "standart": true,
+  "kart_kiyasi": {
+   "kart": "AP-24",
+   "kart_sha256": "ed0732165f3b84bbbc5972d0d959b621268349a14cf403e547f6ad916262683c",
+   "sonuc": "geçti",
+   "olcum": {
+    "dis_olcu_cm": [
+     763.0,
+     835.75
+    ],
+    "acikla_olcu_cm": [
+     763.0,
+     835.75
+    ],
+    "brut_m2": 63.77,
+    "kubbe_m2": 1.13,
+    "yatak_odasi": 2,
+    "pencereler": {
+     "105x170": 1,
+     "120x120": 3,
+     "120x180": 2,
+     "59x170": 2,
+     "60x40": 1
+    },
+    "dis_kapi": 1,
+    "ic_kapi": 3,
+    "veranda": 1,
+    "kat": 1
+   }
+  }
+ },
+ "not": ""
+}

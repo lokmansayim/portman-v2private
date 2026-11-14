@@ -15,9 +15,23 @@ ADAYLAR_JSON = Path(__file__).resolve().parent / "veri" / "adaylar.json"      # 
 ADAYLAR_TEST_JSON = Path(__file__).resolve().parent / "veri" / "adaylar_test.json"   # yalnız test_adaylari=True iken yüklenir
 ADAYLAR_PREFABRIK_JSON = Path(__file__).resolve().parent / "veri" / "adaylar_prefabrik.json"   # İE-36 (D-80): prefabrik adaylar (PA-01…); yeni dosya, adaylar.json aynen
 CATI_VARYANT_DIR = Path(__file__).resolve().parent / "veri" / "cati_varyantlari"   # İE-37 (D-83): prefabrik evin çatı seçenekleri, ev başına bir dosya
+HAVUZ_DIR = Path(__file__).resolve().parent / "veri" / "havuz"   # İE-38 (D-87): AIPrefabrik ve AICelik'ten aday havuzu, ev başına bir dosya
 SABLON_DIR = ROOT / "is_emri"
 ADAY_SABLON_DIR = SABLON_DIR / "adaylar"
 SABLONLAR = {"P6001": "P6001_2plus1_6x6.json"}          # kodlanmış katalog modelleri (büyüyecek)
+
+
+def havuz_kayitlari(havuz_dir: Path | None = HAVUZ_DIR, yapi: str | None = None) -> list[dict]:
+    """İE-38 (D-87): aday havuzunun kayıtları (`veri/havuz/<kod>.json`, her dosyada bir aday kaydı; dosya adı sırasıyla). `yapi`
+    verilirse yalnız o yapı türü ("celik" ya da "prefabrik"). Kayıt `araclar/aday_kaydet.py --havuz` ile, proje kartı hakeminden sonra."""
+    if havuz_dir is None or not Path(havuz_dir).is_dir():
+        return []
+    out = []
+    for f in sorted(Path(havuz_dir).glob("*.json")):
+        a = json.loads(f.read_text(encoding="utf-8"))
+        if isinstance(a, dict) and a.get("kod") and (yapi is None or a.get("yapi_turu", "prefabrik") == yapi):
+            out.append(a)
+    return out
 
 
 def _m2(s) -> float | None:
@@ -41,11 +55,13 @@ class Katalog:
     model olarak hiç sunulmaz.
     İE-37 (D-83): prefabrik evin çatı seçenekleri `veri/cati_varyantlari/<taban>.json`'dan (ev başına bir dosya; kayıt `araclar/
     cati_varyanti_kaydet.py`). Varyant ayrı aday kaydıdır (kod PA06K, gösterim PA-06-K; `taban` evin kodu); evin kaydına (dosyası değişmez)
-    bellekte `varyantlar`, `cati_adi` ve `cati_gorsel` eklenir. Görünürlük öteki prefabrik adaylar gibi: yalnız kabul kümesinde (K-A10)."""
+    bellekte `varyantlar`, `cati_adi` ve `cati_gorsel` eklenir. Görünürlük öteki prefabrik adaylar gibi: yalnız kabul kümesinde (K-A10).
+    İE-38 (D-87): aday havuzu `veri/havuz/<kod>.json`'dan (prefabrik ve çelik; adaylar.json ve adaylar_prefabrik.json'un ardından, çakışan
+    kod alınmaz). Havuz kaydı, çelik de olsa, yalnız kabul kümesinde açıkça varsa görünür: harness ve kabulsüz yol aynen."""
 
     def __init__(self, path: Path = KATALOG_JSON, adaylar_path: Path = ADAYLAR_JSON, test_adaylari: bool = False,
                  kabul_edilmis: set | None = None, banka: bool = True, prefabrik_path: Path | None = ADAYLAR_PREFABRIK_JSON,
-                 cati_varyant_dir: Path | None = CATI_VARYANT_DIR):
+                 cati_varyant_dir: Path | None = CATI_VARYANT_DIR, havuz_dir: Path | None = HAVUZ_DIR):
         self.modeller = {m["code"].upper(): m for m in json.loads(path.read_text(encoding="utf-8"))}
         self.test_adaylari = bool(test_adaylari)
         self.kabul_edilmis = set(kabul_edilmis) if kabul_edilmis is not None else None
@@ -57,6 +73,11 @@ class Katalog:
             for a in json.loads(Path(prefabrik_path).read_text(encoding="utf-8")):
                 if isinstance(a, dict) and a.get("kod"):
                     self.adaylar.setdefault(str(a["kod"]).upper(), a)
+        self.havuz_kodlari: set[str] = set()                         # İE-38 (D-87): havuz kaydı yalnız kabul kümesiyle görünür
+        for a in havuz_kayitlari(havuz_dir):
+            k = str(a["kod"]).upper()
+            if k not in self.adaylar:
+                self.adaylar[k] = a; self.havuz_kodlari.add(k)
         if cati_varyant_dir is not None and Path(cati_varyant_dir).is_dir():
             for f in sorted(Path(cati_varyant_dir).glob("*.json")):
                 self._cati_varyantlari(json.loads(f.read_text(encoding="utf-8")))
@@ -89,7 +110,7 @@ class Katalog:
             return self.test_adaylari
         if d == "gecerli":
             if self.kabul_edilmis is None:                 # İE-36 (D-80): kabulsüz yolda yalnız çelik (İE-08); prefabrik aday K-A10 kaydıyla
-                return a.get("yapi_turu", "prefabrik") == "celik"
+                return a.get("yapi_turu", "prefabrik") == "celik" and str(a["kod"]).upper() not in self.havuz_kodlari   # İE-38: havuz K-A10'la
             return str(a["kod"]).upper() in self.kabul_edilmis
         return False
 
