@@ -116,6 +116,23 @@ def test_gecis_yuku_sonraki_ekranin_veri_modeliyle_ayni_turde(tur):
                     assert e["data"][m.group(1)]["type"] == model[ad]["type"], (kid, ad)
 
 
+def _hepsi(dugum) -> list[dict]:
+    """Ekrandaki bütün bileşenler; `If` ve `Switch` dallarındakiler dahil."""
+    if isinstance(dugum, list):
+        return [x for d in dugum for x in _hepsi(d)]
+    if not isinstance(dugum, dict):
+        return []
+    return ([dugum] if "type" in dugum else []) + [x for k, v in dugum.items() if k != "data-source" for x in _hepsi(v)]
+
+
+@pytest.mark.parametrize("tur", ["talep", "revizyon", "prefabrik"])
+def test_alan_adi_formun_butununde_tek(tur):
+    """Meta, 14 Kasım 2026 (DUPLICATE_FORM_COMPONENT_NAMES): aynı alan adı `If`'in iki dalında bile iki kez geçemez; ad formun bütün
+    ekranlarında tektir."""
+    adlar = [c["name"] for e in TF.tanim(tur)["screens"] for c in _hepsi(e["layout"]) if "name" in c]
+    assert len(adlar) == len(set(adlar)), sorted(a for a in set(adlar) if adlar.count(a) > 1)
+
+
 def test_cevapta_sayi_da_metin_de_okunur_bos_alan_dusmez():
     """Sayı girişi cevapta sayı (70, 7.73) ya da metin ("70", "7,73") gelebilir; boş alan hiç gelmeyebilir, "" ya da null gelebilir."""
     for alan in ({"alan": 70, "en": 7}, {"alan": "70", "en": "7"}, {"alan": 70.0, "en": 7, "boy": ""}, {"alan": "70", "en": "7,0", "boy": None}):
