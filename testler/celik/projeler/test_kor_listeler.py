@@ -6,7 +6,8 @@
 - Açıldıktan sonra liste yeniden üretilmez: ölçüm o günün kuralının ölçümüdür. Listemiz ve tanımı, Patron'un açılış kaydındaki commit'teki
   (`acilislar › liste_commit`) baytlarla aynı kalır.
 - Donan sözlük de açık beşin sözlüğüyle aynı kurallardan geçer (adet taşımaz, ölçüye sabit sayı yazmaz, iki kalem bir satırı tutmaz).
-- Kör tanım paftadan okunmuş makas yeri ve panel bölmesi taşımaz (karkas kuralından; kör kural yalnız 1. sayfa).
+- Kör tanım paftadan okunmuş makas yeri ve panel bölmesi taşımaz (karkas kuralından; kör kural yalnız 1. sayfa; paftanın PDF'i yoksa DWG'nin
+  onay çerçevesi, o boş şablonsa plan çerçevesi, İE-16 PR-7).
 """
 from __future__ import annotations
 
@@ -99,4 +100,8 @@ def test_kor_tanim_paftanin_cevabini_tasimaz(yol):
     t = oku(KOK / oku(yol)["tanim"]["yol"])
     assert t["karkas"] == "kural" and "celik_modeli" not in t and "makaslar" not in t["cati"]
     assert not any(k in w for w in t["duvarlar"] for k in ("paneller", "bolme", "eklemler"))
-    assert "1. sayfa" in t["kaynak"]["cizim"]
+    c = t["kaynak"]["cizim"]
+    if "(DWG," in c:        # İE-16 PR-7: paftanın PDF'i yok; DWG'nin onay çerçevesi (Lokman 14 Kasım 2026 08:17), boşsa plan çerçevesi (08:58)
+        assert re.search(r"\d+\. çerçeve", c) and ("onay paftası çerçevesi okundu" in c or "08:58" in c)
+    else:
+        assert "1. sayfa" in c
