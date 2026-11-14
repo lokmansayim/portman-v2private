@@ -47,6 +47,8 @@ VARSAYILAN = {
     # İE-20 PR-6 (D-88): `prefabrik_flow_id` (varsayılanda yok; `vps/flow_taslak.py --form prefabrik` ile kurulan prefabrik talep formunun
     # kimliği) yazılınca yapı tipi bilinmeyen bayiye önce [Prefabrik] [Çelik] sorulur; prefabrik → o form, çelik → `talep_flow_id`.
     # Anahtar yokken davranış bugünküyle aynıdır.
+    # İE-20 PR-8 (D-89): `talep2_flow_id` (varsayılanda yok; `vps/flow_taslak.py --form talep2` ile kurulan verandasız talep formunun kimliği)
+    # yazılınca `talep_flow_id`'nin formu yerine o sunulur (veranda ayrıca sorulmaz). Anahtar yokken davranış bugünküyle aynıdır.
     "talep_formu": {"acik": False, "talep_flow_id": None, "revizyon_flow_id": None, "taslak": True},
     # İE-22: WhatsApp'tan bayi kaydı (kanal/kayit.py; LLM yok). Açıkken kartı hiç olmayan numaraya ad ve firma sorulur, Patron'a [Onayla]
     # [Reddet] gider; onayla kart açılır ve karşılama şablonu gider. `gunluk_en_cok`: 24 saatte açılan yeni talep tavanı (aşılırsa sabit

@@ -390,3 +390,57 @@ def test_form_prefabrik_yalniz_o_formu_kurar_ve_yayimlar(etc):
         assert r.returncode == 0 and not _yazma_istekleri(g) and "Prefabrik Talep Formu" not in r.stdout and "91003" not in r.stdout
     finally:
         g.kapat()
+
+
+def _eski_surum(tmp_path: Path) -> Path:
+    """Kurulu sürüm gibi bir kök: form modülü `talep2`yi tanımaz, `talep2.json` yoktur (yeni form sürümden önce taslağa kurulur)."""
+    kok = tmp_path / "eski"
+    (kok / "kanal" / "formlar").mkdir(parents=True)
+    kaynak = (KOK / "kanal" / "talep_formu.py").read_text(encoding="utf-8")
+    for ad in ('"talep2": "TALEP"', '"talep2": "Talep formu"', "def talep2_ekran_verisi"):
+        assert ad in kaynak, ad
+    kaynak = kaynak.replace(', "talep2": "TALEP"', "").replace(', "talep2": "Talep formu"', "").replace("def talep2_ekran_verisi", "def _yok")
+    (kok / "kanal" / "talep_formu.py").write_text(kaynak, encoding="utf-8")
+    for tur in ("talep", "revizyon", "prefabrik"):
+        (kok / "kanal" / "formlar" / f"{tur}.json").write_text((KOK / "kanal" / "formlar" / f"{tur}.json").read_text(encoding="utf-8"), encoding="utf-8")
+    return kok
+
+
+def test_form_talep2_verandasiz_formu_kurar_eski_surumde_kaynakla(etc, tmp_path):
+    """İE-20 PR-8 (D-89): `--form talep2` yalnız verandasız talep formunu kurar; yayımlı formlara dokunmaz. Kurulu sürüm bu formu
+    tanımıyorsa betik stdin'den, form `--kaynak` ile depodan gelir (sürüm kurulmadan önizleme)."""
+    g = SahteGraph()
+    try:
+        assert kos(etc, g, "--yayimla").returncode == 0                      # bugünkü hâl: talep ve revizyon yayımlı (91001, 91002)
+        g.istekler.clear()
+        g.depo = {"talep2": TF.tanim("talep2")}
+        env = {"PM_ETC": str(etc), "PM_GRAPH_BASE": g.url, "PM_RAW_BASE": g.url.removesuffix("/v23.0") + "/raw", "PATH": "/usr/bin:/bin"}
+        eski = _eski_surum(tmp_path)
+        r = subprocess.run([sys.executable, "-", "--kok", str(eski), "--form", "talep2", "--kaynak", COMMIT], input=BETIK.read_text(), env=env,
+                           capture_output=True, text=True, timeout=60)
+        cikti = r.stdout + r.stderr
+        assert r.returncode == 0, cikti
+        [olustur] = _yazma_istekleri(g)
+        govde = json.loads(olustur["govde"])
+        assert olustur["yol"] == f"{WABA}/flows" and govde["name"] == "Portman Talep Formu 2" and govde["publish"] is False
+        assert json.loads(govde["flow_json"]) == TF.tanim("talep2") and "veranda" not in govde["flow_json"]
+        assert "talep2_flow_id 91003" in cikti and "talep_flow_id" not in cikti and "== sonuç: tamam" in cikti
+        link = next(s.strip() for s in r.stdout.splitlines() if "interactive=true" in s and "91003" in s)
+        yuk = json.loads(dict(urllib.parse.parse_qsl(urllib.parse.urlsplit(link).query))["flow_action_payload"])
+        assert yuk == {"screen": "TALEP", "data": TF.talep2_ekran_verisi(None, None)} and "veranda" not in yuk["data"]
+        assert {k: f["status"] for k, f in g.formlar.items()} == {"91001": "PUBLISHED", "91002": "PUBLISHED", "91003": "DRAFT"}
+        # kurulu sürüm formu tanıyınca (bu depo) --kaynak'sız da aynı veriyle
+        g.istekler.clear()
+        r = kos(etc, g, "--form", "talep2")
+        assert r.returncode == 0, r.stdout + r.stderr
+        assert [i["yol"] for i in _yazma_istekleri(g)] == ["91003/assets"]
+        link = next(s.strip() for s in r.stdout.splitlines() if "interactive=true" in s and "91003" in s)
+        assert json.loads(dict(urllib.parse.parse_qsl(urllib.parse.urlsplit(link).query))["flow_action_payload"]) == yuk
+        # yayım yalnız --yayimla ile; öteki formlar yayımlı kalır
+        g.istekler.clear()
+        r = kos(etc, g, "--form", "talep2", "--yayimla")
+        assert r.returncode == 0, r.stdout + r.stderr
+        assert [i["yol"] for i in _yazma_istekleri(g)] == ["91003/assets", "91003/publish"]
+        assert "talep2 formu yayımlandı · kimlik 91003" in r.stdout
+    finally:
+        g.kapat()
