@@ -58,7 +58,14 @@
    "kiyas_listesi": "1sLOomgrv-Mp-8h263W9jj5iC1epeiPTt"
   }
  },
- "acilislar": {},
+ "acilislar": {
+  "ÇP-22": {
+   "karar": "Lokman, 14 Kasım 2026 09:53 UTC açılış kartı (\"Dört evin gerçek çelik listeleri açılsın ve iş birleştirmeye hazırlansın mı?\"): \"Dördü açılsın, birleşsin\" (ÇP-22, 23, 24, 25)",
+   "tarih": "2026-11-14",
+   "sha256": "cf0850aee6ef76429c5b2268d4eb62da5e6029f62f7b48c74c322bcee26769ff",
+   "liste_commit": "8c08a7f6585bdb2cba1ab98939473a792c7eba81"
+  }
+ },
  "ilk_indirmeler": {
   "1DbuGZnjgKGE1Qr4_4vt8vxapbK5FQ59n": {
    "sha256": "d368b6ab00aabbedc61167f3127d764c1d6e64b5ee848150572d9565fbf049e0",
