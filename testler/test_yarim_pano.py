@@ -3,8 +3,8 @@
 Kural D-90 (Lokman, 14 Kasım 2026 09:29:42 UTC, kart "Doğru, işe başlansın"): dış duvar yarım pano kayar, o duvara değen odalar uzar;
 veranda ya da çatı açıklığı değişen evde komut durur. İlk dilim (kart 09:53:57 UTC): sağ ve ön duvar.
 
-Hedef örnek `testler/yarim_pano/PA12_sag_arti1.json` (85 m² 3+1, sağa 1 yarım pano): Lokman 14 Kasım 2026 10:11:06 UTC kartı
-"Doğru, örnek olsun" (`onay` alanı; D-28). Yalnız Lokman'ın onayıyla ve gerekçeli kararla yeniden dondurulur (D-02). Ev × duvar × komut tablosu `testler/yarim_pano/beklenen_tablo.json`. İkisi bilinçli yazılır:
+Hedef örnek `testler/yarim_pano/PA12_sag_arti1.json` (85 m² 3+1, sağa 1 yarım pano; uçtaki 26,5 cm özel pano silinir, 1202,25 cm):
+Lokman 14 Kasım 2026 14:57:40 UTC kartı "1202,25 cm, 26,5 silinir" (`onay` alanı; önceki 10:11:06 kartı `onay.onceki`; D-90 Ek 2, D-28). Yalnız Lokman'ın onayıyla ve gerekçeli kararla yeniden dondurulur (D-02). Ev × duvar × komut tablosu `testler/yarim_pano/beklenen_tablo.json`. İkisi bilinçli yazılır:
 `python testler/test_yarim_pano.py --dondur` (gerekçe iş emrine).
 """
 from __future__ import annotations
