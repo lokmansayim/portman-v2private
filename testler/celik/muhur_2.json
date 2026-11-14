@@ -60,7 +60,14 @@
  },
  "acilislar": {},
  "ilk_indirmeler": {},
- "kat_kayitlari": {},
+ "kat_kayitlari": {
+  "ÇP-23": {
+   "kat": "tek",
+   "tarih": "2026-11-14",
+   "dayanak": "kor_sayfa (yalnız kat ve merdiven sözcükleri): yalnız 1. sayfa \"MERDİVEN\"; hiçbir sayfada \"1. KAT\" ya da başka kat sözcüğü yok. 1. sayfaya bakıldı: merdiven gövdenin dışında, salonun güneyinde verandaya çıkan 11 basamaklı dış merdiven; açıklama 7 \"Merdiven alıcıya ait\"; bina yüksekliği 2700 mm; sayfada tek kat planı var, üst kat planı yok",
+   "pafta_sha256": "eb5e0d30c5d62cf70eceb325233bc5ba66ea7e97d180a1a71cd556e1f43037a2"
+  }
+ },
  "dosyalar": [
   {
    "kod": "ÇP-22",
