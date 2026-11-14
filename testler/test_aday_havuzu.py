@@ -44,6 +44,7 @@ EVLER = {
     "PA23": ("AP-05", "testler/kor/projeler/AP05/is_emri.json", "2+1", 49.0),     # verandasız (D-87 › Veranda, 14 Kasım)
     "PA24": ("AP-27", "testler/kor/projeler/AP27/is_emri.json", "2+1", 77.0),     # verandasız
     "PA25": ("AP-14", "testler/kor/projeler/AP14/is_emri.json", "2+1", 61.0),     # oda programı Lokman'ın kartından (14 Kasım 07:50)
+    "PA26": ("AP-08", "testler/havuz/is_emirleri/AP08.json", "2+1", 71.0),        # Lokman'ın 08:16 düzeltmesi, 08:29 kartı
 }
 PREFABRIK = {a["kod"]: a for a in havuz_kayitlari(yapi="prefabrik")}
 
@@ -70,6 +71,9 @@ VERANDA_SOZU = "veranda ayrıca var mı yok mu belirtilmez verandayı da bir oda
 VERANDASIZ = {"PA23", "PA24", "KT09"}
 # AP-14: paftada oda adı yok; oda programı Lokman'ın karar kartından (14 Kasım 2026 07:50:30 UTC, "Evet, 2+1 olarak girsin")
 AP14_SOZU = '"Evet, 2+1 olarak girsin"'
+# AP-08: Lokman 14 Kasım 2026 08:16:22 UTC düzeltmesi (hol panoları, sırt sırta kapılar, ortada pencere), 08:29:26 kartı
+AP08_SOZU = "wc banyo kapısı ile yatak odası kapısı sırt sırta gelecek"
+AP08_KART = '"Evet, bu çizimle girsin"'
 
 
 def _standart(ie: dict) -> dict:
@@ -171,6 +175,27 @@ def test_oda_programi_lokmanin_kartindan():
     assert "| AP-14 | Hakem kaldı" not in D87 and "| AP-10 | Aynı ev havuzda" in D87
 
 
+def test_ap08_lokmanin_duzeltmesi():
+    """AP-08 (Lokman, 14 Kasım 2026 08:16 UTC): hol ile yatak odası/WC arasındaki duvarda giriş kapısından sonra 74,75 + 62,75 + 62,75,
+    WC ve yatak odası kapısı WC–yatak bölmesinin iki yanında sırt sırta, yatak odası penceresi odanın ortasında; 785 cm son panosu 74,75."""
+    from motor import geometry as G
+    assert AP08_SOZU in D87 and AP08_KART in D87 and "| PA-26 | AP-08 |" in D87 and "| AP-08 | İş Emri yok" not in D87
+    plan = G.kur(json.loads((SABLON_DIR / PREFABRIK["PA26"]["sablon"]).read_text(encoding="utf-8")))
+    hol = next(d for d in plan.duvarlar if d.yon == "y" and d.tur == "ic" and abs(d.c - 512) < 1e-6)
+    bolme = next(d for d in plan.duvarlar if d.yon == "x" and d.tur == "ic" and d.p0 > 512 - 1e-6 and abs(d.c - 455.75) < 1e-6)
+    boylar = [round(p.boy, 2) for p in hol.panolar]
+    assert boylar == [74.75, 62.75, 62.75, 125.5, 125.5, 62.75, 40.75], boylar        # önden (giriş) arkaya
+    kapilar = [p for p in hol.panolar if p.acilim is not None and p.acilim.tur == "ic_kapi"]
+    assert [round(p.a1, 2) for p in kapilar][:1] == [bolme.c] and round(kapilar[1].a0, 2) == bolme.c   # bölmenin iki yanında
+    assert {p.acilim.arasi[1] if p.acilim.arasi[0] == "HOL" else p.acilim.arasi[0] for p in kapilar} == {"WC & BANYO", "YATAK ODASI"}
+    on = next(d for d in plan.duvarlar if d.yon == "x" and d.tur == "dis" and abs(d.c - 125) < 1e-6)
+    yatak = [p for p in on.panolar if p.a0 >= 512 - 1e-6]
+    assert [round(p.boy, 2) for p in yatak] == [71.25, 125.5, 66.25] and yatak[1].acilim.tur == "pencere"
+    assert abs((yatak[1].a0 + yatak[1].a1) / 2 - (517 + 775) / 2) < 1e-6                 # odanın iç yüzleri arasında ortada
+    arka = next(d for d in plan.duvarlar if d.yon == "x" and d.tur == "dis" and abs(d.c - 895) < 1e-6)
+    assert round(arka.panolar[-1].boy, 2) == 74.75 and round(arka.panolar[-2].boy, 2) == 62.75
+
+
 def test_hakem_kalemleri():
     """Hakem kalem kalem bulur: ölçü 5 cm'yi, brüt 0,5 m²'yi aşınca; pencere ölçüsü, kapı, veranda ve kat farkında."""
     kart = dict(HH.kartlar()["AP-04"])
@@ -203,8 +228,9 @@ def test_kabulsuz_yolda_havuz_gorunmez():
 SETLER = {
     (50, "2+1"): ["PA23"],                                                            # tek aday: öncelik sorulmaz
     (60, "2+1"): ["PA01", "PA14", "PA18", "PA25", "PA02", "PA09", "PA20"],
-    (65, "2+1"): ["PA02", "PA09", "PA20", "PA25", "PA01", "PA03", "PA14", "PA15", "PA18"],
-    (77, "2+1"): ["PA24", "PA04", "PA16", "PA05", "PA03", "PA15", "PA19"],
+    (65, "2+1"): ["PA02", "PA09", "PA20", "PA25", "PA01", "PA03", "PA14", "PA15", "PA18", "PA26"],
+    (71, "2+1"): ["PA26", "PA03", "PA15", "PA24", "PA02", "PA04", "PA09", "PA20"],
+    (77, "2+1"): ["PA24", "PA04", "PA16", "PA05", "PA26", "PA03", "PA15", "PA19"],
     (80, "2+1"): ["PA16", "PA04", "PA05", "PA24", "PA19", "PA06"],
     (80, "3+1"): ["PA21", "PA12"],
     (90, "3+1"): ["PA07", "PA11", "PA17", "PA10", "PA12"],
