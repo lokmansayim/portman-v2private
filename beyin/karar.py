@@ -59,12 +59,28 @@ def _form_izi(k: Konusma, t: Talep) -> None:
     `form = "prefabrik"` (formdaki seçimler İş Emri'ne işlenir, `form_ozellik`), öncelik taslağa yazılır (sohbette sorulmaz; plan başka
     bir mesajda çıksa da), ölçü "formdan" diye işaretlenir (pano + m² birlikte: hazır planlar m²'ye göre). Sonraki bir mesajda bayi
     ölçüyü sohbette yazarsa ölçü izi kalkar; plan henüz çıkmadıysa formun hesapladığı öteki değer de düşer: bayinin son sözü bugünkü
-    yoldan okunur (pano ya da dış ölçü yazdıysa m², m² yazdıysa pano)."""
+    yoldan okunur (pano ya da dış ölçü yazdıysa m², m² yazdıysa pano).
+    İE-20 PR-9 (D-93): çelik talep formunun mesajında (`k.celik_formu`) `form = "celik"`; öncelik taslağa yazılır (çelikte öncelik
+    sohbette sorulmaz; formda seçilen bütçe ya da yaşam alanı seti sıralar), dış duvar 140 mm karkas seçimi `form_dis140` olarak durur
+    (`_celik_is_emri_uret` ilk planda çizime işler). Çelikte ölçü yuvarlanmaz: ölçü izi yok."""
     ts = k.d["taslak"]
+    cf = getattr(k, "celik_formu", None)
+    k.celik_formu = None                          # yalnız bu mesaj için
+    if cf is not None:
+        ts["form"] = "celik"
+        ts.pop("olcu_formdan", None)
+        if cf.get("oncelik"):
+            ts["oncelik"] = cf["oncelik"]
+        if cf.get("dis140"):
+            ts["form_dis140"] = True
+        else:
+            ts.pop("form_dis140", None)
+        return
     form = getattr(k, "prefabrik_formu", None)
     k.prefabrik_formu = None                      # yalnız bu mesaj için (aynı konuşma nesnesi sonraki mesajda da kullanılırsa kalmasın)
     if form is not None:
         ts["form"] = "prefabrik"
+        ts.pop("form_dis140", None)
         ts["olcu_formdan"] = True
         if form.get("oncelik"):
             ts["oncelik"] = form["oncelik"]
@@ -1529,6 +1545,21 @@ def _celik_is_emri_uret(k: Konusma, bayi: dict, katalog: Katalog, aday: dict, ts
     if isinstance(sonuc, Karar):
         return sonuc
     yeni, okunan = sonuc
+    form_notu = ""
+    if not ayni_proje and ts.get("form") == "celik" and ts.get("form_dis140") and not _zaten_140(t, onceki) \
+            and not any(d.get("op") == "dis_karkas_140" for d in yeni):
+        # İE-20 PR-9 (D-93): çelik talep formunda dış duvar 140 mm karkas seçildi. İlk planda çizime işlenir (sohbette yazılan "dışlar
+        # 140" ile aynı işlem). Bu modele uygulanamıyorsa plan standart duvarla çizilir, seçim özel isteğe yazılır ve bayiye söylenir
+        # (sessiz düşmez; form seçimi yüzünden plan yönlendirilmez).
+        d140 = {"op": "dis_karkas_140", "aciklama": "dış duvarlar 140'lık karkas (16,5 cm)"}
+        try:
+            varyant.tanim_uygula(t, d140)
+            yeni = yeni + [d140]
+        except varyant.VaryantHatasi as e:
+            k.not_dus("kural", f"çelik formu: dış 140 bu modele uygulanamadı: {e}")
+            ts["ozel_istekler"] = list(ts.get("ozel_istekler") or []) + ["Dış duvar: 140 mm karkas (formdan; çizime işlenemedi)"]
+            ts.pop("form_dis140", None)
+            form_notu = "Dış duvar 140 mm karkas bu plana otomatik işlenemedi. Plan modelin kendi dış duvarıyla çizildi; isteğiniz talebe yazıldı. "
     tekil: dict[str, dict] = {}
     for d in yeni:                                             # aynı pencereye iki değişiklik (saklanan istek + seçim mesajı): sonuncusu geçerli
         tekil[f"{d.get('op')}:{d.get('aciklik') or ''}:{d.get('mahal') or ''}:{d.get('yon') or ''}"] = d   # İE-23: oda işlemi odası ve yönüyle
@@ -1598,7 +1629,7 @@ def _celik_is_emri_uret(k: Konusma, bayi: dict, katalog: Katalog, aday: dict, ts
         gerekce += f"; {KURALA_UYMADI}, plan aynen"            # bilgiyle yeniden çizimde de Patron'a bilgi (plan geometrisi aynen)
     # BK-08 madde 4: çelik planda görsel ve PDF bu metinle birlikte gider (çizim düşerse bu metin gitmez, `worker._cizim_hatasi`)
     return _bitir(k, Karar(eylem="is_emri", is_emri=ie, revizyon=ie["revizyon"], gerekce=gerekce,
-                            mesaj=f"{on_not}{on_bilgi}{ozet} {uyg}Ön onay planınız hazır; plan görseli ve PDF ektedir.".replace("  ", " ")))
+                            mesaj=f"{on_not}{on_bilgi}{ozet} {uyg}{form_notu}Ön onay planınız hazır; plan görseli ve PDF ektedir.".replace("  ", " ")))
 
 
 def _yeni_plan_revizyonu(k: Konusma, bayi: dict, aday: dict, ts: dict, son: dict, son_y: dict, ly: dict) -> Karar:
