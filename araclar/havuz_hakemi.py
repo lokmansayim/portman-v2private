@@ -7,7 +7,8 @@ aşağıdaki kalemlerde aynıysa girer. Hakem yalnız okur ve bulgu yazar; düze
 Kalemler (her biri paftanın 1. sayfasındaki değerle):
 - dış ölçü: gövde (W × H) ya da açık mahallerle birlikte (taşan teras ve veranda) en çok 5 cm fark (pafta okuması ve 125,5 köşe kuralı);
 - brüt oturum: Motor'un brüt alanı (D-49, `prefabrik_liste.bina_brut_cm2`) + kubbelerin dış yüzden çıkıntısı, en çok 0,5 m² fark;
-- oda programı: kartın oda sayısı (yoksa kartın yatak odası sayısı + 1) Motor'un yatak odası sayısıyla;
+- oda programı: kartın oda sayısı (yoksa kartın yatak odası sayısı + 1) Motor'un yatak odası sayısıyla; paftada oda adı yoksa
+  Lokman'ın karar kartıyla verdiği program (`oda_sayisi_lokman`, sözü ve saatiyle; AP-14, 14 Kasım 2026);
 - pencereler: ölçü ölçü aynı adet (kubbenin pencereleri kubbe panolarından);
 - dış kapı, iç kapı ve veranda (açık mahal) sayısı aynı; kat 1.
 
@@ -15,7 +16,8 @@ Kalemler (her biri paftanın 1. sayfasındaki değerle):
 
 Çelik (AICelik): proje kartı yok. Hedef değerler İE-16'da müşteri onay paftasından okunan tanımın adından (`testler/havuz/
 celik_kartlari.json`: antet m², oda programı, veranda): genel motor çizer ve doğrular, brüt oturum antet m²'sinden en çok 0,5 m² sapar,
-oda programı antette yazılı ve aynı, veranda var, tek kat; aynı proje havuzda başka kodla varsa (ÇP-14 = KT-04) girmez.
+oda programı antette yazılı ve aynı, antet verandalıysa Motor'da da veranda var, tek kat; aynı proje havuzda başka kodla varsa
+(ÇP-14 = KT-04) girmez. Veranda bir oda gibi sayılır; verandasız proje de girer (Lokman, 14 Kasım 2026 07:34 UTC; D-87 › Veranda).
 
     python3 araclar/havuz_hakemi.py testler/celik/projeler/CP18/CP18.json --kart ÇP-18
 """
@@ -88,7 +90,7 @@ def denetle(ie: dict, kart: dict) -> tuple[list[str], dict]:
     if kart.get("brut_oturum_m2") is not None and abs(brut - kart["brut_oturum_m2"]) > TOL_BRUT_M2:
         b.append(f"brüt oturum: Motor {brut:.2f} m² (kubbe {o['kubbe_m2']:.2f} dahil), pafta {kart['brut_oturum_m2']:g} m²; "
                  f"fark {brut - kart['brut_oturum_m2']:+.2f} > {TOL_BRUT_M2:g}")
-    oda = str(kart.get("oda_sayisi") or "").strip()
+    oda = str(kart.get("oda_sayisi") or (kart.get("oda_sayisi_lokman") or {}).get("deger") or "").strip()   # paftada yoksa Lokman'ın kartı
     m = re.fullmatch(r"(\d+)\+1", oda)
     beklenen_yatak = int(m.group(1)) if m else (kart.get("yatak_odasi") if not oda else None)
     if beklenen_yatak is None or beklenen_yatak != o["yatak_odasi"]:
@@ -143,10 +145,8 @@ def celik_denetle(tanim_yolu: Path, kart: dict) -> tuple[list[str], dict]:
         b.append(f"oda programı: antette yok (Motor {o['oda_programi']}); doğrulanamadı")
     elif kart["oda_programi"] != o["oda_programi"]:
         b.append(f"oda programı: Motor {o['oda_programi']}, antet {kart['oda_programi']}")
-    if not kart.get("veranda"):
-        b.append("veranda: antette veranda yok (verandasız teklif olmaz; Lokman, 27 Ekim 2026)")
-    elif o["veranda_m2"] <= 0:
-        b.append("veranda: Motor'da veranda yok")
+    if kart.get("veranda") and o["veranda_m2"] <= 0:                           # veranda bir oda gibi: antette varsa Motor'da da olmalı;
+        b.append("veranda: antet verandalı, Motor'da veranda yok")               # verandasız proje de girer (Lokman, 14 Kasım 2026; D-87)
     if int(kart.get("kat_adedi") or 1) != 1 or o["kat"] != 1:
         b.append("kat: havuz yalnız tek kat")
     return b, o
