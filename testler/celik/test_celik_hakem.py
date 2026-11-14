@@ -450,12 +450,15 @@ def test_acik_cevap_muhurle_ve_kendi_icinde_tutarli(muhur, kod):
     # genel motorun adları (ayraç içi türe bakılmadan atılır)
     ("Çatı makas panelleri", "makas"), ("Tavan paneli (makas arası)", "tavan_paneli"),
     ("Çatı paneli (makas üstü, sırt 80 mm)", "cati_paneli"), ("Veranda kirişleri (kiriş paneli)", "kolon_kiris"),
+    # İE-16 PR-7 (ikinci kör küme; Lokman 14 Kasım 2026 11:15 kartı): özel panel ve iki yeni ad
+    ("NİŞ PANELLERİ", "ozel_panel"), ("KEMER PANELLERİ", "ozel_panel"), ("GÖMME REZERVUAR PANELLERİ", "ozel_panel"),
+    ("NİŞLİ DUVAR PANELİ", "duvar_paneli"), ("80X0,8 MAKAS ARA PANELLERİ", "makas"), ("80X1,5 KIRIS PANELI", "kolon_kiris"),
 ])
 def test_tur(ad, beklenen):
     assert oku.tur(ad) == beklenen
 
 
-@pytest.mark.parametrize("ad", ["ÇELİK KUTU", "DUVAR MAKAS PANELİ"])
+@pytest.mark.parametrize("ad", ["ÇELİK KUTU", "DUVAR MAKAS PANELİ", "NİŞ DUVAR PANELİ"])
 def test_tur_bilinmiyor_ya_da_belirsizse_durur(ad):
     with pytest.raises(oku.OkumaHatasi):
         oku.tur(ad)
@@ -530,6 +533,70 @@ def test_baska_turde_kg_bossa_durur(tmp_path):
     _liste_xlsx_b(yol, [(a, b, n, None if a == "ÇATI PANELLERİ" else kg) for a, b, n, kg in CELIK])
     with pytest.raises(oku.OkumaHatasi, match="adet ya da kg"):
         oku.oku(yol, ".xlsx")
+
+
+# İE-16 PR-7 (Lokman, 14 Kasım 2026 11:15 UTC kartı "Evet, üçü de ölçülsün"; beyan İE-16 › Değişiklik (PR-7)): boş şablon sayfası
+# sayılmaz, özel panel toplama girer.
+
+def _iki_sayfa(yol: Path, sayfalar) -> None:
+    """Her sayfa `_liste_xlsx` düzeninde; "sablon" adları dolu, adet ve kg boş, TOPLAM 0 / 0 (gerçek ikinci kümedeki gibi)."""
+    import openpyxl
+
+    wb = openpyxl.Workbook()
+    wb.remove(wb.active)
+    for no, celik in enumerate(sayfalar):
+        ws = wb.create_sheet(f"S{no}")
+        for c, v in enumerate(("NO", "ÇELİK PANEL GRUBU", "BOYUT/ÖLÇÜ", "ADET", "KG", "MAKİNE"), 1):
+            ws.cell(11, c, v)
+        satirlar = [(a, b, None, None) for a, b, _, _ in CELIK[3:]] if celik == "sablon" else celik
+        n = 12
+        for i, (a, b, adet, kg) in enumerate(satirlar, 1):
+            for c, v in enumerate((i, a, b, adet, kg), 1):
+                if v is not None:
+                    ws.cell(n, c, v)
+            n += 1
+        ws.cell(n, 1, "TOPLAM"), ws.cell(n, 4, sum(x[2] or 0 for x in satirlar)), ws.cell(n, 5, sum(x[3] or 0 for x in satirlar))
+        for c, v in enumerate(("NO", "METAL AKSAM GRUBU", "BOYUT/ÖLÇÜ", "ADET"), 1):
+            ws.cell(n + 1, c, v)
+        ws.cell(n + 2, 1, 1), ws.cell(n + 2, 2, OTEKI[0][1]), ws.cell(n + 2, 3, OTEKI[0][2]), ws.cell(n + 2, 4, OTEKI[0][3])
+    wb.save(str(yol))
+
+
+@pytest.mark.parametrize("sira", [["sablon", CELIK], [CELIK, "sablon"]], ids=["sablon-once", "sablon-sonra"])
+def test_bos_sablon_sayfasi_sayilmaz(tmp_path, sira):
+    yol = tmp_path / "liste.xlsx"
+    _iki_sayfa(yol, sira)
+    assert oku.excel_celik(yol)["sayfa"] == sira.index(CELIK)
+    c = oku.oku(yol, ".xlsx")["celik"]
+    assert c["toplam"] == {"adet": 21, "kg": 874} and {t: (x["adet"], x["kg"]) for t, x in c["turler"].items()} == _beklenen_celik()
+
+
+@pytest.mark.parametrize("sayfalar,neden", [
+    ([CELIK, CELIK], "2 sayfada çelik panel grubu var"),
+    (["sablon", CELIK, CELIK[:3]], "2 sayfada çelik panel grubu var"),
+    (["sablon", "sablon"], "hepsi boş şablon"),
+])
+def test_sablon_disinda_iki_sayfa_ya_da_hepsi_sablonsa_durur(tmp_path, sayfalar, neden):
+    yol = tmp_path / "liste.xlsx"
+    _iki_sayfa(yol, sayfalar)
+    with pytest.raises(oku.OkumaHatasi, match=neden):
+        oku.oku(yol, ".xlsx")
+
+
+def test_tek_sayfa_sablonsa_eskisi_gibi_durur(tmp_path):
+    """Şablon atlaması yalnız birden çok sayfa varken: tek şablon sayfası okunmaz, adet ve kg boş satırda okuma durur."""
+    yol = tmp_path / "liste.xlsx"
+    _iki_sayfa(yol, ["sablon"])
+    with pytest.raises(oku.OkumaHatasi, match="adet ya da kg"):
+        oku.oku(yol, ".xlsx")
+
+
+def test_ozel_panel_toplama_girer(tmp_path):
+    yol = tmp_path / "liste.xlsx"
+    ek = [("NİŞ PANELLERİ", "80X45X10X1,2", 6, 36), ("KEMER PANELLERİ", "80X45X10X1,2", 1, 91)]
+    _liste_xlsx(yol, celik=[*CELIK, *ek])
+    c = oku.oku(yol, ".xlsx")["celik"]
+    assert c["toplam"] == {"adet": 28, "kg": 1001} and c["turler"]["ozel_panel"] == {"harf": None, "adet": 7, "kg": 127}
 
 
 def test_bilinmeyen_celik_satiri_durur(tmp_path):

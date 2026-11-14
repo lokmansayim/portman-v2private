@@ -1,0 +1,47 @@
+{
+ "aciklama": "Çelik hakeminin sonucu (İE-16). Yalnız tutanlar: çelik kg kapısının sonucu (farkı yalnız geçtiyse), adedi tutan çelik türleri ve adedi tutan öteki satırlar (anahtar ve bizim adedimiz). Tutmayan satırların gerçek değeri depoya girmez; sayilar kıyasın özetidir.",
+ "kod": "ÇP-22",
+ "tarih": "2026-11-14",
+ "kiyas_commit": "103f8678fc3913b37afbc5b89e720dabfd8e1a43",
+ "bizim_liste": {
+  "yol": "testler/celik/projeler/CP22/bizim_liste.json",
+  "commit": "8c08a7f6585bdb2cba1ab98939473a792c7eba81"
+ },
+ "muhur": {
+  "sha256": "cf0850aee6ef76429c5b2268d4eb62da5e6029f62f7b48c74c322bcee26769ff",
+  "bayt": 186335,
+  "durum": "kor",
+  "kayit_durumu": "kor",
+  "liste_sayfasi": 0,
+  "muhur_commit": "30878e4b95ba086a179f1d388a123e81169dbc92"
+ },
+ "celik_kg_kapisi": {
+  "sonuc": "geçmedi",
+  "pay_yuzde": 3.0,
+  "kapi_disi": [],
+  "kapi_disi_bizim_kg": null,
+  "fark_yuzde": null
+ },
+ "celik_turleri_tutan": [
+  {
+   "tur": "kolon_kiris",
+   "adet": 6
+  }
+ ],
+ "sayilar": {
+  "aynı": 7,
+  "farklı": 10,
+  "adet okunamadı": 0,
+  "bizde yok": 51,
+  "bizde fazla": 53
+ },
+ "tutanlar": [
+  {"grup": "ELEKTRIK", "ad": "UYDU KABLO", "olcu": [], "adet": 25},
+  {"grup": "ELEKTRIK", "ad": "BESLEME KABLOSU SIGORTA KUTULARI ARASI", "olcu": [], "adet": 5},
+  {"grup": "ELEKTRIK", "ad": "BESLEME KABLO BORUSU", "olcu": [], "adet": 5},
+  {"grup": "ELEKTRIK", "ad": "ZIL", "olcu": [], "adet": 1},
+  {"grup": "ELEKTRIK", "ad": "SIGORTA KUTUSU", "olcu": [12.0], "adet": 1},
+  {"grup": "ELEKTRIK", "ad": "IZOLE BANT", "olcu": [], "adet": 3},
+  {"grup": "VIDA", "ad": "CIRPI IPI", "olcu": [], "adet": 1}
+ ]
+}
