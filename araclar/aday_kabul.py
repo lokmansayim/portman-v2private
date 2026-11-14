@@ -66,6 +66,11 @@ def main(argv: list[str] | None = None) -> int:
         from beyin import banka
         kodlar_var = {str(x["kod"]).upper() for x in adaylar}
         adaylar = adaylar + [x for x in banka.kayitlar() if str(x["kod"]).upper() not in kodlar_var]
+    for ad, yapi in (("adaylar.json", "celik"), ("adaylar_prefabrik.json", "prefabrik")):   # İE-38 (D-87): aday havuzu (`beyin/veri/havuz/`)
+        if Path(a.adaylar).resolve() == (KOK / "beyin" / "veri" / ad).resolve():            # yapı türüyle aynı koşuya; Katalog'la aynı kaynak
+            from beyin.katalog import havuz_kayitlari
+            kodlar_var = {str(x["kod"]).upper() for x in adaylar}
+            adaylar = adaylar + [x for x in havuz_kayitlari(yapi=yapi) if str(x["kod"]).upper() not in kodlar_var]
     if Path(a.adaylar).resolve() == (KOK / "beyin" / "veri" / "adaylar_prefabrik.json").resolve():   # İE-37 (D-83): evlerin çatı seçenekleri
         from beyin.katalog import CATI_VARYANT_DIR                                     # (her kod ayrı kabul; Katalog'la aynı kaynak)
         kodlar_var = {str(x["kod"]).upper() for x in adaylar}
@@ -77,7 +82,7 @@ def main(argv: list[str] | None = None) -> int:
         print("DUR: model bankasının çatı varyantı bayiye ayrı model olarak sunulmaz, kabul kaydı yazılmaz:", ", ".join(varyant)); return 2
     kayitlar, yok = kabul_kayitlari(adaylar, kodlar, a.kim.strip(), a.tarih, a.not_.strip(), a.paket.strip())
     if yok:
-        print("DUR: aday kaydında, çatı seçeneklerinde ve model bankasında olmayan kod:", ", ".join(yok)); return 2
+        print("DUR: aday kaydında, aday havuzunda, çatı seçeneklerinde ve model bankasında olmayan kod:", ", ".join(yok)); return 2
     if not kayitlar:
         print("DUR: kod verilmedi"); return 2
     kim_izi = a.kim.strip()[0] + "…"                 # ad çıktıya girmez (K09; kişisel veri)

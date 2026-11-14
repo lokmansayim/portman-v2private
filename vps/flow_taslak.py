@@ -25,8 +25,9 @@ Sunucuda kopyası varsa:
 Seçenekler: --waba <kimlik> · --kok <dizin> (formların sürümü; varsayılan betiğin deposu, yoksa /opt/portman/guncel) · --kaynak <commit>
 (iki formun JSON'u sunucudaki sürümden değil, depodaki o commit'ten okunur; 40 haneli; sürüm kurulmadan düzeltilmiş formu taslağa
 yüklemek için; diske yazılmaz) · --bak (Meta'da hiçbir şeyi kurmaz ve değiştirmez; yalnız var olanı listeler) · --yayimla (5. adım;
---bak ile olmaz). Çıkış: 0 tamam, 2 Meta
-doğrulama hatası buldu, 1 durdu. Test için: PM_ETC, PM_GRAPH_BASE, PM_RAW_BASE (ağa çıkılmaz).
+--bak ile olmaz) · --form <talep | revizyon | prefabrik> (yinelenebilir; yalnız o formlar kurulur ve yayımlanır. Verilmezse talep ve
+revizyon: bugünkü davranış. İE-20 PR-6: prefabrik talep formu `--form prefabrik` ile, <kök>/kanal/formlar/prefabrik.json). Çıkış: 0 tamam,
+2 Meta doğrulama hatası buldu, 1 durdu. Test için: PM_ETC, PM_GRAPH_BASE, PM_RAW_BASE (ağa çıkılmaz).
 """
 from __future__ import annotations
 
@@ -47,8 +48,9 @@ from pathlib import Path
 ETC = os.environ.get("PM_ETC", "/etc/portman")
 GUNCEL = "/opt/portman/guncel"
 RAW = os.environ.get("PM_RAW_BASE", "https://raw.githubusercontent.com/lokmansayim/portman-v2private").rstrip("/")
-TURLER = ("talep", "revizyon")
-AD = {"talep": "Portman Talep Formu", "revizyon": "Portman Revizyon Formu"}
+TURLER = ("talep", "revizyon")                     # --form verilmezse; main() seçimle değiştirir
+TUM_TURLER = ("talep", "revizyon", "prefabrik")
+AD = {"talep": "Portman Talep Formu", "revizyon": "Portman Revizyon Formu", "prefabrik": "Portman Prefabrik Talep Formu"}
 KATEGORI = ["OTHER"]
 KIMLIK = re.compile(r"^[0-9]{5,30}$")
 BELIRTEC: str = ""
@@ -159,6 +161,8 @@ def onizleme_verisi(tf, tur: str, tanim: dict) -> dict:
     """Etkileşimli önizlemenin ekran verisi: talep → kartı ve taslağı olmayan yeni bayiye sunulan veri; revizyon → formun örnek değeri."""
     if tur == "talep":
         return tf.ekran_verisi(None, None)
+    if tur == "prefabrik":
+        return tf.prefabrik_ekran_verisi(None, None)
     ekran = next(s for s in tanim["screens"] if s["id"] == tf.EKRAN[tur])
     return {k: v.get("__example__", "") for k, v in (ekran.get("data") or {}).items()}
 
@@ -295,7 +299,8 @@ def yayimla(hazir: dict[str, dict]) -> tuple[int, list[str]]:
     neden += [f"{t} formunda Meta doğrulama hatası {len(h['hata'])}" for t, h in hazir.items() if h["hata"]]
     neden += [f"{t} formunun durumu {h['durum']}" for t, h in hazir.items() if h["durum"] not in ("DRAFT", "PUBLISHED")]
     if neden:
-        print("   YAYIMLANMADI (iki form da hazır olmalı): " + "; ".join(neden))
+        print(f"   YAYIMLANMADI ({'iki form da' if TURLER == ('talep', 'revizyon') else 'seçilen formların hepsi'} hazır olmalı): "
+              + "; ".join(neden))
         return 1, []
     yayimlanan, sonuc = [], 0
     for tur in TURLER:
@@ -323,14 +328,16 @@ def yayimla(hazir: dict[str, dict]) -> tuple[int, list[str]]:
 
 
 def main(argv: list[str]) -> int:
-    global BELIRTEC, PNID
+    global BELIRTEC, PNID, TURLER
     p = argparse.ArgumentParser(prog="flow_taslak.py", description="Talep ve revizyon formunu Meta'da taslak kurar; --yayimla ile yayımlar.")
     p.add_argument("--waba")
     p.add_argument("--kok")
     p.add_argument("--kaynak")
     p.add_argument("--bak", action="store_true")
     p.add_argument("--yayimla", action="store_true")
+    p.add_argument("--form", action="append", choices=TUM_TURLER)
     a = p.parse_args(argv)
+    TURLER = tuple(dict.fromkeys(a.form)) if a.form else ("talep", "revizyon")
     print(f"== PORTMAN · WhatsApp formları Meta'da {'taslak ve yayım' if a.yayimla else 'taslak'} "
           f"({time.strftime('%Y-%m-%d %H:%M', time.gmtime())} UTC){' · yalnız bakış (--bak)' if a.bak else ''}")
     if a.yayimla and a.bak:

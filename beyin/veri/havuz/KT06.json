@@ -1,0 +1,65 @@
+{
+ "kod": "KT06",
+ "gosterim": "KT-06",
+ "durum": "gecerli",
+ "motor": "genel",
+ "tanim": "modeller/havuz/KT06.json",
+ "tanim_sha256": "73febb0ae0f97f81493f00e6f3ec331c65ac7ff659e98e217b3e153e2883eca2",
+ "gorsel": "adaylar/KT06.png",
+ "referans_model": "KT06",
+ "yapi_turu": "celik",
+ "kat": 1,
+ "oda_programi": "2+1",
+ "katalog_m2": 90.0,
+ "kapali_m2": 77.16,
+ "veranda_m2": 12.39,
+ "varyantlar": [],
+ "musteri_projesi": true,
+ "sunum": {
+  "cati_adi": "Beşik (mahya kuzey–güney)",
+  "ad": ""
+ },
+ "ozet": {
+  "dis_olcu_cm": [
+   934.0,
+   961.0
+  ],
+  "oturum_m2": 89.55,
+  "odalar": {
+   "Yatak Odası 1": 11.96,
+   "Banyo": 4.38,
+   "Hol": 2.0,
+   "Yatak Odası 2": 13.22,
+   "Yaşama Alanı": 36.06,
+   "Veranda": 12.39
+  },
+  "pencere": 7,
+  "kapi": 5,
+  "cati": "besik",
+  "liste_satir": 74,
+  "kural_seti": "kurallar.json",
+  "perspektif": "TAMAM"
+ },
+ "kaynak": {
+  "metin": "ÇP-18 tanımı (İE-16; müşteri onay paftası), kod ve ad dışında aynı. Aday: D-87 (Lokman 13 Kasım 2026 21:41).",
+  "dosya": "modeller/havuz/KT06.json",
+  "dogrulama": "çizim seti (İE-08, 12 Ekim 2026)",
+  "karar": "D-87",
+  "kart_kiyasi": {
+   "kart": "ÇP-18",
+   "tanim": "testler/celik/projeler/CP18/CP18.json",
+   "tanim_sha256": "3bd726c9b5b0c2e61099eb7fc2b69faf8b44f8ccab7852be24cf6e5d414a4a59",
+   "sonuc": "geçti",
+   "olcum": {
+    "gecti": true,
+    "hatalar": [],
+    "bayi_gorseli": true,
+    "oturum_m2": 89.55,
+    "veranda_m2": 12.39,
+    "oda_programi": "2+1",
+    "kat": 1
+   }
+  }
+ },
+ "not": ""
+}
