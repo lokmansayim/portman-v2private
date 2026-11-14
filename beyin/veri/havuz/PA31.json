@@ -71,6 +71,10 @@
      0.0,
      15.0
     ],
+    "buyuyen_cm": [
+     0.0,
+     0.0
+    ],
     "silinen": [
      {
       "duvar": "dis y 5",
@@ -81,6 +85,7 @@
       "boy": 15.0
      }
     ],
+    "tamamlanan": [],
     "yeniden_dizilen": [],
     "veranda_kisalan": [
      "VERANDA"

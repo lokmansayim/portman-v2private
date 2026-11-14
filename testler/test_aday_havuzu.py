@@ -59,6 +59,8 @@ SILME_HAL = {
     "PA30": ("AP-11", "testler/havuz/is_emirleri/PA12_SILME.json", "3+1", 83.0),  # 85 m² sağ duvar 26,5 cm (20:05:33 kartı)
     "PA31": ("AP-13", "testler/havuz/is_emirleri/PA14_SILME.json", "2+1", 59.0),  # 60 m² ön duvar ve veranda 15 cm (20:09:12)
     "PA32": ("AP-16", "testler/havuz/is_emirleri/PA15_SILME.json", "2+1", 69.0),  # 70 m² ön duvar ve veranda 20 cm (20:14:50)
+    "PA33": ("AP-01", "testler/havuz/is_emirleri/PA08_BUYUME.json", "3+1", 142.0),  # 140 m² büyüyen hâl (20:22:14 sözü, 20:25:45)
+    "PA34": ("AP-27", "testler/havuz/is_emirleri/PA24_BUYUME.json", "2+1", 78.0),   # 77 m² büyüyen hâl (20:35:43 sözü, 20:38:43)
 }
 HAVUZ_EVLERI = {**EVLER, **STANDART_HAL, **SILME_HAL}
 D92 = (KOK / "KARARLAR" / "D-92.md").read_text(encoding="utf-8")
@@ -100,7 +102,7 @@ KALANLAR = {
 }
 # D-87 › Veranda (Lokman, 14 Kasım 2026 07:34 UTC): veranda bir oda gibi sayılır; verandasız ev de havuza girer
 VERANDA_SOZU = "veranda ayrıca var mı yok mu belirtilmez verandayı da bir oda gibi kabul et"
-VERANDASIZ = {"PA23", "PA24", "KT09", "KT11"}                                   # KT-11 (ÇP-22): antette sundurma, veranda yok
+VERANDASIZ = {"PA23", "PA24", "PA34", "KT09", "KT11"}                           # KT-11 (ÇP-22): antette sundurma, veranda yok; PA-34 77 m² hâli
 # AP-14: paftada oda adı yok; oda programı Lokman'ın karar kartından (14 Kasım 2026 07:50:30 UTC, "Evet, 2+1 olarak girsin")
 AP14_SOZU = '"Evet, 2+1 olarak girsin"'
 # AP-08: Lokman 14 Kasım 2026 08:16:22 UTC düzeltmesi (hol panoları, sırt sırta kapılar, ortada pencere), 08:29:26 kartı
@@ -286,12 +288,13 @@ SETLER = {
     (45, "1+1"): ["PA27", "PA28"],                                                    # eski hâl ve en yakın standart (D-91)
     (60, "2+1"): ["PA01", "PA14", "PA18", "PA25", "PA31", "PA02", "PA09", "PA20"],  # PA-31: 60 m²'nin silinmiş hâli (59 m², D-92)
     (65, "2+1"): ["PA02", "PA09", "PA20", "PA25", "PA32", "PA01", "PA03", "PA14", "PA15", "PA18"],  # PA-32 (69 m²) girdi, liste 10
-    (71, "2+1"): ["PA26", "PA03", "PA15", "PA32", "PA24", "PA02", "PA04", "PA09", "PA20"],
-    (77, "2+1"): ["PA24", "PA04", "PA16", "PA05", "PA26", "PA03", "PA15", "PA19"],
-    (80, "2+1"): ["PA16", "PA04", "PA05", "PA24", "PA19", "PA06"],
+    (71, "2+1"): ["PA26", "PA03", "PA15", "PA32", "PA24", "PA02", "PA04", "PA09", "PA20", "PA34"],  # PA-34 (78 m²) sonda
+    (77, "2+1"): ["PA24", "PA04", "PA34", "PA16", "PA05", "PA26", "PA03", "PA15", "PA19"],  # PA-34: 77 m²'nin büyüyen hâli (D-92)
+    (80, "2+1"): ["PA16", "PA04", "PA05", "PA34", "PA24", "PA19", "PA06"],
     (80, "3+1"): ["PA21", "PA30", "PA12"],                                            # PA-30: 85 m²'nin silinmiş hâli (83 m², D-92)
     (90, "3+1"): ["PA07", "PA11", "PA17", "PA10", "PA12", "PA30"],
     (100, "2+1"): ["PA22"],
+    (140, "3+1"): ["PA08", "PA33"],                                                   # PA-33: 140 m²'nin büyüyen hâli (142 m², D-92)
     (140, "4+1"): ["PA13"],
 }
 

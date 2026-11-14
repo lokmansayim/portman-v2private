@@ -73,12 +73,17 @@
      0.0,
      20.0
     ],
+    "buyuyen_cm": [
+     0.0,
+     0.0
+    ],
     "silinen": [
      {
       "duvar": "dis y 5",
       "boy": 20.0
      }
     ],
+    "tamamlanan": [],
     "yeniden_dizilen": [
      {
       "duvar": "dis y 381.5",
