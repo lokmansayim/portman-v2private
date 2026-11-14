@@ -75,6 +75,15 @@ def _form_izi(k: Konusma, t: Talep) -> None:
             ts["form_dis140"] = True
         else:
             ts.pop("form_dis140", None)
+        # Form yeniden geldiyse (aynı taslak) formun yazdığı satırlarda son form geçerli: bu cevapta olmayan satırın eski değeri kalkar
+        # (`Konusma.birlestir` özellikleri üst üste ekler; standarda dönen seçim eski standart dışı değeri plana taşımasın).
+        bo, bu = ts.get("bina_ozellikleri"), t.bina_ozellikleri or {}
+        if isinstance(bo, dict):
+            for a in cf.get("anahtarlar") or ():
+                if a in bo and not bu.get(a):
+                    del bo[a]
+            if not bo:
+                ts.pop("bina_ozellikleri", None)
         return
     form = getattr(k, "prefabrik_formu", None)
     k.prefabrik_formu = None                      # yalnız bu mesaj için (aynı konuşma nesnesi sonraki mesajda da kullanılırsa kalmasın)
@@ -1545,21 +1554,11 @@ def _celik_is_emri_uret(k: Konusma, bayi: dict, katalog: Katalog, aday: dict, ts
     if isinstance(sonuc, Karar):
         return sonuc
     yeni, okunan = sonuc
-    form_notu = ""
-    if not ayni_proje and ts.get("form") == "celik" and ts.get("form_dis140") and not _zaten_140(t, onceki) \
-            and not any(d.get("op") == "dis_karkas_140" for d in yeni):
-        # İE-20 PR-9 (D-93): çelik talep formunda dış duvar 140 mm karkas seçildi. İlk planda çizime işlenir (sohbette yazılan "dışlar
-        # 140" ile aynı işlem). Bu modele uygulanamıyorsa plan standart duvarla çizilir, seçim özel isteğe yazılır ve bayiye söylenir
-        # (sessiz düşmez; form seçimi yüzünden plan yönlendirilmez).
-        d140 = {"op": "dis_karkas_140", "aciklama": "dış duvarlar 140'lık karkas (16,5 cm)"}
-        try:
-            varyant.tanim_uygula(t, d140)
-            yeni = yeni + [d140]
-        except varyant.VaryantHatasi as e:
-            k.not_dus("kural", f"çelik formu: dış 140 bu modele uygulanamadı: {e}")
-            ts["ozel_istekler"] = list(ts.get("ozel_istekler") or []) + ["Dış duvar: 140 mm karkas (formdan; çizime işlenemedi)"]
-            ts.pop("form_dis140", None)
-            form_notu = "Dış duvar 140 mm karkas bu plana otomatik işlenemedi. Plan modelin kendi dış duvarıyla çizildi; isteğiniz talebe yazıldı. "
+    # İE-20 PR-9 (D-93): çelik talep formunun dış duvar seçimi ilk planda. Karar burada, işlem öteki değişikliklerden sonra (aşağıda).
+    form_ilk = not ayni_proje and ts.get("form") == "celik"
+    form_140 = form_ilk and bool(ts.get("form_dis140")) and not _zaten_140(t, onceki) \
+        and not any(d.get("op") == "dis_karkas_140" for d in yeni)
+    form_notu = "Bu planın dış duvarı 140 mm karkastır. " if form_ilk and not ts.get("form_dis140") and _zaten_140(t, []) else ""
     tekil: dict[str, dict] = {}
     for d in yeni:                                             # aynı pencereye iki değişiklik (saklanan istek + seçim mesajı): sonuncusu geçerli
         tekil[f"{d.get('op')}:{d.get('aciklik') or ''}:{d.get('mahal') or ''}:{d.get('yon') or ''}"] = d   # İE-23: oda işlemi odası ve yönüyle
@@ -1593,6 +1592,21 @@ def _celik_is_emri_uret(k: Konusma, bayi: dict, katalog: Katalog, aday: dict, ts
         k.not_dus("kural", f"değişiklik uygulanamadı: {e}")
         return _bitir(k, Karar(eylem="yonlendir", gerekce=f"çelik değişikliği uygulanamadı: {e}",
                                 mesaj=f"Bu değişiklik otomatik uygulanamadı ({e}). " + YONLENDIRME))
+    if form_140:
+        # Formda dış duvar 140 mm karkas seçildi: sohbette yazılan "dışlar 140" ile aynı işlem, bayinin öteki değişikliklerinden sonra
+        # (onların üstüne) denenir. Bu modele uygulanamıyorsa plan öteki değişikliklerle ve modelin kendi dış duvarıyla çizilir, seçim
+        # özel isteğe yazılır ve bayiye söylenir (sessiz düşmez; form seçimi yüzünden plan yönlendirilmez). Taslak yalnız burada, plan
+        # kesinleşince değişir (yukarıdaki erken dönüşlerde dokunulmaz).
+        d140 = {"op": "dis_karkas_140", "aciklama": "dış duvarlar 140'lık karkas (16,5 cm)"}
+        try:
+            t = varyant.tanim_uygula(t, d140)
+            yeni = yeni + [d140]
+        except varyant.VaryantHatasi as e:
+            k.not_dus("kural", f"çelik formu: dış 140 bu modele uygulanamadı: {e}")
+            ts["ozel_istekler"] = list(ts.get("ozel_istekler") or []) + ["Dış duvar: 140 mm karkas (formdan; çizime işlenemedi)"]
+            ts.pop("form_dis140", None)
+            form_notu = ("Dış duvar 140 mm karkası bu plana otomatik işleyemedim. Planı modelin kendi dış duvarıyla çizdim. "
+                         "İsteğinizi talebe yazdım. ")
     ts.pop("pencereler", None); ts["varyantlar"] = []          # tüketildi: sonraki revizyon bunları yeniden okumaz (değişiklikler zarfta birikir)
     ie = celik.zarf(aday, bayi, k.gonderen, ts, son, onceki + yeni, kaynak=f"aday {aday['kod']}")
     ie["yapi"]["bu_revizyon"] = [{**d} for d in yeni]

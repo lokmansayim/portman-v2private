@@ -171,8 +171,8 @@ def onizleme_verisi(tf, tur: str, tanim: dict) -> dict:
         return tf.ekran_verisi(None, None)
     if tur == "prefabrik":
         return tf.prefabrik_ekran_verisi(None, None)
-    if tur == "celik":                             # ilk ekranın alanları prefabrik formunkiyle aynı (`talep_formu.celik_ekran_verisi`)
-        return tf.prefabrik_ekran_verisi(None, None)
+    if tur == "celik":                             # kurulu sürüm çelik formu tanımıyorsa prefabrik formun verisi (ilk ekranın alanları aynı)
+        return getattr(tf, "celik_ekran_verisi", tf.prefabrik_ekran_verisi)(None, None)
     if tur == "talep2":                            # ilk formun verisi, veranda yok (`talep_formu.talep2_ekran_verisi` ile aynı)
         return {k: v for k, v in tf.ekran_verisi(None, None).items() if k != "veranda"}
     ekran = next(s for s in tanim["screens"] if s["id"] == ekran_adi(tf, tur))

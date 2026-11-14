@@ -104,6 +104,7 @@ C_OZELLIK_ADI = {"kaplama": "çatı kaplaması", "cati_rengi": "çatı rengi", "
 # dış duvar 80 mm karkas ve iç duvar alçıpan + 80 mm karkas (kitabın DIS-80 ve IC-80 tipleri). Çatı rengi antrasit gri ve pencere rengi
 # beyaz VARSAYIMDIR (prefabrik standardından alındı; Lokman alan listesi kartıyla kabul etti, 14 Kasım 2026 20:40 UTC; D-93).
 C_STANDART = {"kaplama": "tek_kat", "cati_rengi": "antrasit", "dis_duvar": "80", "ic_duvar": "alcipan", "pencere_rengi": "beyaz"}
+FORM_SECIMLERI = {"prefabrik": (OZELLIKLER, EK), "celik": (C_OZELLIKLER, C_EK)}     # form → ikinci ekranın (seçimleri, ek istekleri)
 C_HER_ZAMAN = ("cati_rengi",)                                                       # standart da olsa talebe yazılan seçim (pafta tablosunun satırı)
 MODUL_CM = 125.5                                                                    # pano modülü; yarım pano 62,75 cm
 KOSE_KISA_CM, KOSE_UZUN_CM = 20.0, 10.0                                             # kısa kenarda 20, uzun kenarda 10 cm köşe payı
@@ -161,8 +162,7 @@ def cevap_ozeti(rj) -> dict:
     a: dict = {}
     if tur == "talep" and m.group(1) in TOKEN_FORMU:
         form = TOKEN_FORMU[m.group(1)]
-        alanlar = _prefabrik_alanlari(rj, C_OZELLIKLER, C_EK) if form == "celik" else _prefabrik_alanlari(rj)
-        return {"tur": tur, "form": form, "token": token, "alanlar": alanlar, "dosyalar": _dosyalar(rj.get("dosya"))}
+        return {"tur": tur, "form": form, "token": token, "alanlar": _form_alanlari(rj, form), "dosyalar": _dosyalar(rj.get("dosya"))}
     if tur == "talep":
         for ad, izinli in (("yapi", YAPI), ("kat", KAT), ("oda", ODA), ("cati", CATI), ("veranda", VERANDA)):
             v = _dize(rj.get(ad), 20)
@@ -181,11 +181,10 @@ def cevap_ozeti(rj) -> dict:
     return {"tur": tur, "token": token, "alanlar": a, "dosyalar": _dosyalar(rj.get("dosya"))}
 
 
-def _prefabrik_alanlari(rj: dict, ozellikler: dict | None = None, ekler: dict | None = None) -> dict:
-    """Prefabrik (ve aynı kalıptaki çelik) talep formunun cevabı → tanınan alanlar. İzinli olmayan değer atılır; boş seçim standart
-    sayılmaz (alan yazılmaz). `ozellikler` ve `ekler` formun ikinci ekranının seçimleridir (varsayılan prefabrik formunkiler)."""
-    ozellikler = OZELLIKLER if ozellikler is None else ozellikler
-    ekler = EK if ekler is None else ekler
+def _form_alanlari(rj: dict, form: str) -> dict:
+    """İki ekranlı talep formunun (prefabrik, çelik) cevabı → tanınan alanlar. İzinli olmayan değer atılır; boş seçim standart sayılmaz
+    (alan yazılmaz). İkinci ekranın seçimleri forma göre (`FORM_SECIMLERI`)."""
+    ozellikler, ekler = FORM_SECIMLERI[form]
     a: dict = {}
     for ad, izinli in (("kat", KAT), ("oda", ODA), ("oncelik", ONCELIK), *((ad, v[0]) for ad, v in ozellikler.items())):
         v = _dize(rj.get(ad), 20)
@@ -356,6 +355,20 @@ def celik_notu(oz: dict, cizim: bool = True) -> str:
     if a.get("oncelik") == "montaj":
         p.append("Çelik planlarda kısa montaj sıralaması yok.")
     return " ".join(p)
+
+
+def celik_anahtarlari() -> tuple[str, ...]:
+    """Çelik formun talebe yazdığı `bina_ozellikleri` anahtarları. Form yeniden gelince bu anahtarların eski değeri taslakta kalmaz
+    (`beyin/karar._form_izi`): seçim standarda döndüyse eski standart dışı değer plana taşınmaz."""
+    return tuple(anahtar for _, anahtar in C_OZELLIKLER.values() if anahtar) + (EK_OZELLIK,)
+
+
+def celik_cizim_notu(oz: dict) -> str:
+    """Formla gelen dosya plan olarak okunduysa (çizim esas) çelik formun standart dışı seçimleri plana işlenmez; bayiye söylenir
+    (sessiz düşmez). Standart dışı seçim yoksa boş."""
+    sd = celik_standart_disi(oz) if oz.get("form") == "celik" else []
+    return ("Formdaki standart dışı seçimlerinizi plana işlemedim: " + ", ".join(sd) + ". "
+            "Planı gördükten sonra değişiklik olarak yazabilirsiniz.") if sd else ""
 
 
 def celik_onceligi(oz: dict) -> str | None:

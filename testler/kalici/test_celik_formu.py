@@ -205,6 +205,11 @@ def test_ozet_baslik_ve_bayiye_not():
     assert TF.celik_notu(_cevap(alan=88)) == "" and TF.celik_notu(_cevap(en=8, boy=11)) == ""       # söylenecek şey yoksa not yok
     assert TF.celik_notu({"form": "prefabrik", "alanlar": {"dis_duvar": "140"}}) == ""
     assert TF.olcu_notu(_cevap(en=8, boy=11)) == ""                                               # prefabrik notu çelik forma yazılmaz
+    # formla gelen dosya plan olarak okunduysa (çizim esas) seçimler plana işlenmez; bayiye söylenir
+    assert TF.celik_cizim_notu(_cevap(alan=88, kaplama="kiremit", dis_duvar="140")) == (
+        "Formdaki standart dışı seçimlerinizi plana işlemedim: çatı kaplaması kiremit desen sac + OSB, dış duvar 140 mm karkas. "
+        "Planı gördükten sonra değişiklik olarak yazabilirsiniz.")
+    assert TF.celik_cizim_notu(_cevap(alan=88)) == "" and TF.celik_cizim_notu({"form": "prefabrik", "alanlar": {"dis_duvar": "140"}}) == ""
     for cumle in re.split(r"(?<=\.) ", TF.celik_notu(_cevap(en=8, alan=88, kaplama="kiremit", dis_duvar="140", oncelik="montaj"))):
         assert len(cumle.split()) <= 20, cumle                                                    # D-70: açıklama cümlesi en çok 20 kelime
 
@@ -243,6 +248,21 @@ def test_form_izi_taslakta(tmp_path):
     k.celik_formu = {"oncelik": "yok", "dis140": False}
     KR._form_izi(k, Talep.model_validate(TF.talep(_cevap(alan=88))))
     assert "form_dis140" not in ts and ts["oncelik"] == "yok"
+    # form yeniden gelince formun yazdığı satırlarda son form geçerli: standarda dönen seçimin eski değeri taslakta kalmaz;
+    # formun yazmadığı satır (bayinin sohbette yazdığı) ve bu formda yine seçilen satır kalır
+    assert set(TF.celik_anahtarlari()) == {"Çatı Kaplaması", "Çatı Kaplama Rengi", "İç Duvarlar", "Pencere Rengi", "Ek İstekler"}
+    ilk = Talep.model_validate(TF.talep(_cevap(alan=88, kaplama="kiremit", pencere_rengi="antrasit", cati_rengi="kirmizi", ek=["cift_yalitim"])))
+    k.birlestir(ilk.model_dump())
+    ts["bina_ozellikleri"]["Zemin"] = "laminat"
+    k.celik_formu = {"oncelik": "yok", "dis140": False, "anahtarlar": TF.celik_anahtarlari()}
+    KR._form_izi(k, ilk)
+    assert ts["bina_ozellikleri"] == {"Çatı Kaplaması": "kiremit desen sac + OSB", "Çatı Kaplama Rengi": "kırmızı (RAL 3009)",
+                                      "Pencere Rengi": "antrasit gri", "Ek İstekler": "çatıda çift kat yalıtım", "Zemin": "laminat"}
+    ikinci = Talep.model_validate(TF.talep(_cevap(alan=88, pencere_rengi="antrasit")))
+    k.birlestir(ikinci.model_dump())
+    k.celik_formu = {"oncelik": "yok", "dis140": False, "anahtarlar": TF.celik_anahtarlari()}
+    KR._form_izi(k, ikinci)
+    assert ts["bina_ozellikleri"] == {"Çatı Kaplama Rengi": "antrasit gri", "Pencere Rengi": "antrasit gri", "Zemin": "laminat"}
     ts["form_dis140"] = True
     k.prefabrik_formu = {"oncelik": "butce"}
     KR._form_izi(k, Talep.model_validate({"niyet": "yeni_talep", "guven": "yuksek", "ozet": "x"}))
@@ -272,6 +292,11 @@ def test_formdaki_dis_140_ilk_planda_cizime_islenir(tmp_path):
     for kod, taslak in (("Ç8801", {"form": "celik"}), ("Ç8801", {"form_dis140": True}), ("Ç8801", {}), ("KT03", {"form": "celik", "form_dis140": True})):
         k, kr = _plan(tmp_path, kod, taslak)
         assert kr.eylem == "is_emri" and kr.is_emri["yapi"]["degisiklikler"] == [] and "Uygulanan" not in kr.mesaj, (kod, taslak)
+        assert "140 mm karkastır" not in kr.mesaj, (kod, taslak)
+    # formda 80 mm (standart) kaldı ama seçilen model zaten 140'lık (KT-03): bayiye söylenir; form çelik değilse bugünkü metin
+    k, kr = _plan(tmp_path, "KT03", {"form": "celik"})
+    assert kr.eylem == "is_emri" and kr.is_emri["yapi"]["degisiklikler"] == [] and "Bu planın dış duvarı 140 mm karkastır. Ön onay" in kr.mesaj
+    assert "140 mm karkastır" not in _plan(tmp_path, "KT03", {})[1].mesaj
 
 
 def test_formdaki_dis_140_uygulanamayan_modelde_plan_dusmez(tmp_path):
@@ -285,7 +310,8 @@ def test_formdaki_dis_140_uygulanamayan_modelde_plan_dusmez(tmp_path):
         pass
     k, kr = _plan(tmp_path, "KT01", {"form": "celik", "form_dis140": True})
     assert kr.eylem == "is_emri" and kr.is_emri["yapi"]["degisiklikler"] == []
-    assert "Dış duvar 140 mm karkas bu plana otomatik işlenemedi." in kr.mesaj and "isteğiniz talebe yazıldı" in kr.mesaj
+    assert ("Dış duvar 140 mm karkası bu plana otomatik işleyemedim. Planı modelin kendi dış duvarıyla çizdim. İsteğinizi talebe yazdım. "
+            "Ön onay planınız hazır") in kr.mesaj
     assert "Dış duvar: 140 mm karkas (formdan; çizime işlenemedi)" in kr.is_emri["bilgi"]["ozel_istekler"]
     assert "form_dis140" not in k.d["taslak"]
 
@@ -327,9 +353,11 @@ def test_hangi_form_sunulur():
     assert W.talep_formu_sunusu(GELEN, None, celik_ts, hepsi)[0] == "celik"
     assert W.talep_formu_sunusu(GELEN, None, {"yapi_turu": "prefabrik"}, hepsi)[0] == "prefabrik"
     assert W.talep_formu_sunusu(GELEN, None, None, hepsi)[0] == "yapi_sor"
-    # prefabrik formun kimliği yokken (yapı tipi düğmeleri yok) çelik formu sunulmaz: ilk formun yolu
+    # prefabrik formun kimliği yokken de (yapı tipi düğmeleri yok) yapı tipi çelik olan bayiye çelik formu sunulur; ötekiler ilk formun yolu
     yalniz = {**AYAR_V1, "talep_formu": {**AYAR_V1["talep_formu"], "celik_flow_id": "5555555555"}}
-    assert W.talep_formu_sunusu(GELEN, None, celik_ts, yalniz)[0] == "talep"
+    assert W.talep_formu_sunusu(GELEN, None, celik_ts, yalniz)[0] == "celik"
+    assert W.talep_formu_sunusu(GELEN, None, {"yapi_turu": "prefabrik"}, yalniz)[0] == "talep"
+    assert W.talep_formu_sunusu(GELEN, None, None, yalniz)[0] == "talep"
     # bozuk kimlik sunulmaz
     bozuk = {**AYAR_PF, "talep_formu": {**AYAR_PF["talep_formu"], "celik_flow_id": "12a"}}
     assert W.talep_formu_sunusu(GELEN, None, celik_ts, bozuk)[0] == "talep"
