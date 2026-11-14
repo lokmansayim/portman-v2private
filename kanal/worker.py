@@ -355,6 +355,9 @@ def isle(gelen: dict, settings: dict, k=None, cikarim: dict | None = None, proje
             return _form_cevabi(gelen, k, fc, sonuc, satirlar, ekle, patrona, kim)
         if fc is not None and medya:
             fc, medya, form_on, cikarim = _form_okumasi(fc, cikarim, gelen, patrona, kim)
+            if medya and form.get("form") == "celik":     # İE-20 PR-9: çizim esas; çelik formun standart dışı seçimleri plana işlenmez, söylenir
+                import talep_formu as TF
+                form_on = " ".join(x for x in (form_on.strip(), TF.celik_cizim_notu(form)) if x)
         if fc is None:                                # revizyon formunun açıklaması okunur; dosyası Patron'a (işaretli plan otomatik okunmaz)
             if form.get("dosyalar"):
                 patrona(f"Portman: {kim} revizyon formuna dosya ekledi; panelden bakabilirsiniz.")
@@ -363,6 +366,10 @@ def isle(gelen: dict, settings: dict, k=None, cikarim: dict | None = None, proje
             if form.get("form") == "prefabrik":       # İE-20 PR-6: öncelik formda seçildi (sohbette sorulmaz); ölçü ve seçimler ön notta
                 import talep_formu as TF
                 k.prefabrik_formu = {"oncelik": TF.oncelik(form)}     # `karar._form_izi` taslağa yazar
+            if form.get("form") == "celik":           # İE-20 PR-9 (D-93): öncelik ve dış duvar 140 mm karkas formda seçildi
+                import talep_formu as TF
+                k.celik_formu = {"oncelik": TF.celik_onceligi(form), "dis140": TF.celik_dis140(form),
+                                 "anahtarlar": TF.celik_anahtarlari()}                # `karar._form_izi` taslağa yazar
             if form.get("dosyalar") and not form_on:
                 patrona(f"Portman: {kim} talep formuna dosya ekledi (çizim okuması kapalı); panelden bakabilirsiniz.")
             k.d.pop("cizim_okuma", None)              # formla gelen talep açık çizim okumasının yerine geçer
@@ -510,6 +517,10 @@ def isle(gelen: dict, settings: dict, k=None, cikarim: dict | None = None, proje
     if fc is not None and not medya and not form_on and (form or {}).get("form") == "prefabrik":
         import talep_formu as TF                  # İE-20 PR-6: ölçü ve standart dışı seçimler ön notta (yönlendirme ve plan metni ölçüyü kendisi söyler)
         form_on = TF.olcu_notu(form, olcu=karar.eylem not in ("yonlendir", "is_emri"))
+    if fc is not None and not medya and (form or {}).get("form") == "celik":
+        import talep_formu as TF                  # İE-20 PR-9: m²'den hesaplanan kenar ve standart dışı seçimler ön notta. Plan bu mesajda
+        # çıktıysa (`is_emri`) dış 140'ın çizime işlenip işlenmediğini plan metni söyler (`karar._celik_is_emri_uret`); ön not söz vermez.
+        form_on = " ".join(x for x in (form_on.strip(), TF.celik_notu(form, cizim=karar.eylem not in ("yonlendir", "is_emri"))) if x)
     if form_on and not medya and len(form_on.strip() + " " + karar.mesaj) > WA_GOVDE:
         ekle(form_on.strip()); form_on = ""       # İE-20 PR-6: ön not gövdeye sığmıyorsa ayrı satır (seçenek mesajı kesilmez)
     metin = ("" if medya or not form_on else form_on.strip() + " ") + karar.mesaj   # çizim yolunda ön not ayrı satır (teyit gövdesi sınırlı)
@@ -730,8 +741,8 @@ def secenek_satirlari(gelen: dict, karar, katalog, metin: str, proje_koku: Path 
         celik = any(a.get("motor") == "genel" for a in adaylar)      # İE-08: çelik kartı (plan + çatı planı + perspektif) daha geniş panelde okunur
         # İE-25: çatı setinin başlığı kodun metni (plan seçildi, çatı seçilecek); öteki setlerde bayinin mesajı (bugünkü gibi)
         baslik = "Çatı seçin: plan aynı, fark çatıda" if st.get("tur") == "cati_varyanti" else f"{gelen.get('text') or ''}"[:60]
-        if st.get("tur") != "cati_varyanti" and (gelen.get("form") or {}).get("form") == "prefabrik":
-            import talep_formu as TF              # İE-20 PR-6: formun özeti 60 karakterde kesiliyordu; başlık kısa özet
+        if st.get("tur") != "cati_varyanti" and (gelen.get("form") or {}).get("form") in ("prefabrik", "celik"):
+            import talep_formu as TF              # İE-20 PR-6: formun özeti 60 karakterde kesiliyordu; başlık kısa özet (PR-9: çelik form da)
             baslik = TF.set_basligi(gelen["form"])
         cati_karti = st.get("tur") == "cati_varyanti" and not celik      # İE-37: prefabrik çatı setinde kart çatının adını söyler
         yol = BG.bilesik_gorsel([{**a, "gorsel_yolu": (KT_KOK() / a["gorsel"]) if a.get("gorsel") else None, **({"cati_karti": True} if cati_karti else {})}
@@ -756,12 +767,14 @@ FORM_NOTU = "Formdaki notunuz plana özel istek olarak yazıldı; planı değiş
 FORM_NOTU_CIZIM = "Çiziminizi esas aldım; formdaki notunuz plana otomatik işlenmez, planı gördükten sonra değişiklik olarak yazabilirsiniz."
 NASIL_TALEP = "Talebinizi bu sohbete yazabilirsiniz; örnek: \"Tek kat çelik, 2+1, 88 m² civarı, beşik çatı.\""
 # İE-20 PR-6 (Lokman, 13 Kasım 2026 21:32 UTC kartı "Önce iki düğmeyle sor"): yapı tipi bilinmiyorsa form yerine iki düğme; prefabrik →
-# prefabrik talep formu, çelik → bugünkü talep formu (çelik formu kurulana kadar). Düğme `y:<iz>:prefabrik|celik` (kanal/etkilesim.py).
+# prefabrik talep formu, çelik → bugünkü talep formu (çelik formu kurulana kadar; İE-20 PR-9: çelik formunun kimliği ayarda varsa çelik
+# talep formu). Düğme `y:<iz>:prefabrik|celik` (kanal/etkilesim.py).
 YAPI_SORUSU = "Formla iletmek için yapı tipini seçin."
 YAPI_DUGMELERI = (("prefabrik", "Prefabrik"), ("celik", "Çelik"))
 YAPI_FORM_METNI = {"prefabrik": "Prefabrik talep formunu doldurun. İsterseniz talebinizi yazın.",
                    "talep": "Çelik için talep formunu doldurun. İsterseniz talebinizi yazın.",    # düğmeden sonra sunulan forma göre
-                   "talep2": "Çelik için talep formunu doldurun. İsterseniz talebinizi yazın."}
+                   "talep2": "Çelik için talep formunu doldurun. İsterseniz talebinizi yazın.",
+                   "celik": "Çelik talep formunu doldurun. İsterseniz talebinizi yazın."}
 YAPI_DAVET_SORULARI = ("oda_programi", "dis_olcu")      # katalog önerisi taşıyan soru ("model_veya_olcu") kendi metniyle gider
 
 
@@ -791,7 +804,9 @@ def talep_formu_sunusu(gelen: dict, bayi: dict | None, taslak: dict | None, sett
     (`talep_formu.prefabrik_flow_id`) bugünkü talep formu. Varsa yapı tipine göre (açık taslak > bayi kartının varsayılanı): prefabrik →
     prefabrik talep formu; çelik → bugünkü talep formu; bilinmiyorsa `yapi_sor` (iki düğme; token yerine mesajın izi).
     İE-20 PR-8 (D-89): verandasız formun kimliği ayarda varsa (`talep_formu.talep2_flow_id`) bugünkü talep formunun yerine o sunulur
-    (veranda ayrıca sorulmaz); yoksa bugünkü form, davranış aynı."""
+    (veranda ayrıca sorulmaz); yoksa bugünkü form, davranış aynı.
+    İE-20 PR-9 (D-93): çelik formunun kimliği ayarda varsa (`talep_formu.celik_flow_id`) yapı tipi çelikken çelik talep formu sunulur
+    (prefabrik formun kimliği olmasa da); yoksa bugünkü yol (verandasız ya da ilk form), davranış aynı."""
     import talep_formu as TF
     iz = satir_id(gelen["id"], 0)[4:16]
     if form_kimligi(settings, "talep2"):
@@ -799,9 +814,11 @@ def talep_formu_sunusu(gelen: dict, bayi: dict | None, taslak: dict | None, sett
     else:
         v1 = ("talep", TF.talep_tokeni(iz, taslaktan=taslak is not None), TF.ekran_verisi(bayi, taslak), None, None) \
             if form_kimligi(settings, "talep") else None
+    yapi = (taslak or {}).get("yapi_turu") or TF.kart_varsayilanlari(bayi).get("yapi")
+    if yapi == "celik" and form_kimligi(settings, "celik"):
+        return "celik", TF.celik_tokeni(iz, taslaktan=taslak is not None), TF.celik_ekran_verisi(bayi, taslak), None, None
     if not form_kimligi(settings, "prefabrik"):
         return v1
-    yapi = (taslak or {}).get("yapi_turu") or TF.kart_varsayilanlari(bayi).get("yapi")
     if yapi == "prefabrik":
         return "prefabrik", TF.prefabrik_tokeni(iz, taslaktan=taslak is not None), TF.prefabrik_ekran_verisi(bayi, taslak), None, None
     if yapi == "celik":
