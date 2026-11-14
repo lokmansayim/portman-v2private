@@ -106,7 +106,8 @@ def main(argv: list[str] | None = None) -> int:
     a = ap.parse_args(argv)
     if a.kod:
         try:
-            kiyas.muhur_denetle(a.pafta, json.loads(kiyas.MUHUR.read_text(encoding="utf-8")), a.kod, turler=(kiyas.PAFTA,))
+            kiyas.muhur_denetle(a.pafta, json.loads(kiyas.muhur_yolu(a.kod).read_text(encoding="utf-8")), a.kod,
+                                turler=(kiyas.PAFTA,))
         except kiyas.Durdu as e:
             raise SystemExit(f"mühür: {e}") from None
     sonuc = denetle(a.pafta)

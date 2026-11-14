@@ -27,7 +27,11 @@ from testler.celik.projeler.test_listeler import kural_kopyalari, sozluk_kuralla
 
 BURADA = Path(__file__).resolve().parent
 ACIK_BES = ["CP03", "CP06", "CP07", "CP13", "CP14"]
-MUHUR = json.loads(kiyas.MUHUR.read_text(encoding="utf-8"))
+def muhur(kod: str) -> dict:
+    """Projenin mührü (ilk mühür ya da ikinci kör kümenin mührü; İE-16 PR-7)."""
+    return json.loads(kiyas.muhur_yolu(kod).read_text(encoding="utf-8"))
+
+
 HEPSI = sorted(BURADA.glob("*/bizim_liste.json"))
 KOR = [p for p in HEPSI if p.parent.name not in ACIK_BES]
 
@@ -45,7 +49,7 @@ def test_her_liste_acik_bes_ya_da_kor():
     for p in KOR:
         kod = oku(p)["kod"]
         assert kiyas.kod_klasoru(kod) == p.parent.name and liste_yap.sozluk_donar_mi(kod), p
-        assert MUHUR["projeler"][kod]["durum"] in liste_yap.DONAN_SOZLUK
+        assert muhur(kod)["projeler"][kod]["durum"] in liste_yap.DONAN_SOZLUK
 
 
 def _kopya(kayit: dict) -> Path:
@@ -74,7 +78,7 @@ def test_kor_liste_donar(yol, tmp_path):
     assert oku(sozluk)["surum"] == b["sozluk"]["surum"]
     kk = b.get("karkas_kurali")
     assert kk_kopya is not None, "kör tanım karkası kuraldan"
-    acilis = (MUHUR.get("acilislar") or {}).get(b["kod"])
+    acilis = (muhur(b["kod"]).get("acilislar") or {}).get(b["kod"])
     if acilis:                       # açıldı: yeniden üretilmez; açılış kaydındaki commit'in baytları
         c = acilis["liste_commit"]
         assert re.fullmatch(r"[0-9a-f]{40}", c), c

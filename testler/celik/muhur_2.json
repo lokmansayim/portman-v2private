@@ -1,0 +1,486 @@
+{
+ "aciklama": "Çelik hattının ikinci mührü (İE-16 PR-7): Drive AICelik › \"Tek Kat celik 2. part\" klasörünün 5 projesi, ÇP-22…ÇP-26 (alt klasör adlarının düz sıralaması; ilk mührün ÇP-01…ÇP-21'inden sonra). İlk mühür (`muhur.json`) aynen kalır; bir kod yalnız bir mühürde olur, hakem proje koduna göre mührü seçer (`kiyas.muhur_yolu`). Şema, durumlar, liste türleri, açılış ve kat kaydının kuralları ilk mührünkiyle aynı (`muhur.json › aciklama`). İki yeni kaynak türü: `model (IFC)` ve `üretim dosyası` (açılmaz). SHA-256: 14 Kasım 2026'da indirilen 7 dosyada (iki montaj paftası PDF'i, beş Excel yükleme listesi) dolu, liste içerikleri açılmadan; öteki kayıtlarda null, ilk indirmede `ilk_indirmeler`'e yazılır. Mühür birleştikten sonra yalnız `ilk_indirmeler`, `acilislar` ve `kat_kayitlari`'na ekleme yapılır; öteki bölümler dondurulmuştur (izi araçta `MUHUR_2_IZI`, testte ve İE-16'da), değişiklikleri hakem değişikliğidir. Dosya adı, klasör adı ve kişi ya da bayi adı yazılmaz.",
+ "kaynaklar": [
+  "Drive AICelik › \"Tek Kat celik 2. part\" (mühendisin 10 ve 12 Kasım 2026 yüklemesi), 14 Kasım 2026 07:58–08:00 UTC envanteri: 5 klasör, 42 dosya",
+  "Lokman, 14 Kasım 2026 07:55 UTC: \"çelik kör test için benden 5 tane daha yapı istemiştin … 'Tek kat celik 2. part' diye klasör var oradan yapabilirsin\""
+ ],
+ "kat_ayrimi": "İlk mührün kuralı (`muhur.json › kat_ayrimi`): kat yalnız paftadan, listeye bakılmadan. ÇP-22: montaj paftası PDF'inde kat ya da merdiven sözcüğü yok → tek. ÇP-23: paftanın 1. sayfasında \"MERDİVEN\" geçiyor → belirsiz; kat kaydıyla açılır. ÇP-24, ÇP-25, ÇP-26: montaj paftası PDF'i yok (yalnız DWG ve pafta sayfaları) → belirsiz.",
+ "kiyas_listesi_kurali": "İlk mührün kuralı (`muhur.json › kiyas_listesi_kurali`): Excel yükleme listelerinin Drive saati en yeni olanı; Excel yoksa PDF'lerin en yenisi.",
+ "sayilar": {
+  "projeler": {
+   "kor": 5
+  },
+  "dosyalar": {
+   "kaynak": 35,
+   "kor": 7
+  },
+  "sha256_dolu": 7
+ },
+ "projeler": {
+  "ÇP-22": {
+   "m2": 43.2,
+   "kat": "tek",
+   "liste_tarihi": "2026-11-02",
+   "drive_klasor": "1FU3uFIETAsoAqpmJpygqdV2zP-wjWZy5",
+   "durum": "kor",
+   "kiyas_listesi": "1iTPLGwdsdyjAGNULSrPxK-ftvBjlsTwi"
+  },
+  "ÇP-23": {
+   "m2": 82,
+   "kat": "belirsiz",
+   "liste_tarihi": "2026-11-09",
+   "drive_klasor": "1aXknClnz1Afn3-ssma7xsIJEBT-Nsj6C",
+   "durum": "kor",
+   "kiyas_listesi": "1O0RjGfrAui_GWDcBNYvmq-7F4PlnPNwj"
+  },
+  "ÇP-24": {
+   "m2": 140,
+   "kat": "belirsiz",
+   "liste_tarihi": "2026-10-15",
+   "drive_klasor": "1nfCr5gdxM0Yp6EGEZ4lNVQE6AOwF5NU7",
+   "durum": "kor",
+   "kiyas_listesi": "1UGdgEaZ4qrjNntxkDQ-Lx4MfXGGMFgS_"
+  },
+  "ÇP-25": {
+   "m2": 166,
+   "kat": "belirsiz",
+   "liste_tarihi": "2026-10-02",
+   "drive_klasor": "17q3B6oZtWMtCIahi6hyi_0urnDVbmgen",
+   "durum": "kor",
+   "kiyas_listesi": "19vuHZqUP2t6zU1bJKA_UXpndREZaazux"
+  },
+  "ÇP-26": {
+   "m2": null,
+   "kat": "belirsiz",
+   "liste_tarihi": "2026-09-30",
+   "drive_klasor": "1XOQAuYuiqLx-ylHjmwPNKQ_LHelLQpdp",
+   "durum": "kor",
+   "kiyas_listesi": "1sLOomgrv-Mp-8h263W9jj5iC1epeiPTt"
+  }
+ },
+ "acilislar": {},
+ "ilk_indirmeler": {},
+ "kat_kayitlari": {},
+ "dosyalar": [
+  {
+   "kod": "ÇP-22",
+   "tur": "detay",
+   "uzanti": ".pdf",
+   "bayt": 382780,
+   "drive_id": "1IJDaZHyzre8C-zBISa42rIT1GNIQLXOp",
+   "drive_degisme": "2026-11-02T05:55:48.275Z",
+   "sha256": null,
+   "durum": "kaynak"
+  },
+  {
+   "kod": "ÇP-22",
+   "tur": "detay",
+   "uzanti": ".pdf",
+   "bayt": 90174,
+   "drive_id": "1tD4C-VDQqCxwSe6Xp4W1ArDY4wrFKiqH",
+   "drive_degisme": "2026-11-02T09:31:05.398Z",
+   "sha256": null,
+   "durum": "kaynak"
+  },
+  {
+   "kod": "ÇP-22",
+   "tur": "model (IFC)",
+   "uzanti": ".ifc",
+   "bayt": 13561621,
+   "drive_id": "1fAOPhFoMt1SBVvtYAvF_TXCK0sN-yY9J",
+   "drive_degisme": "2026-11-12T08:17:03.188Z",
+   "sha256": null,
+   "durum": "kaynak"
+  },
+  {
+   "kod": "ÇP-22",
+   "tur": "model (SketchUp)",
+   "uzanti": ".skp",
+   "bayt": 17199702,
+   "drive_id": "13jFqwj_anRdtlQ2IXoYzDIgbKCPQaQH5",
+   "drive_degisme": "2026-11-02T09:33:52.802Z",
+   "sha256": null,
+   "durum": "kaynak"
+  },
+  {
+   "kod": "ÇP-22",
+   "tur": "montaj paftası",
+   "uzanti": ".pdf",
+   "bayt": 4672495,
+   "drive_id": "1Nycq2ke8QZUcNnTSyq_UdEtHDU2IUoaH",
+   "drive_degisme": "2026-11-02T09:34:13.538Z",
+   "sha256": "d2aea818dbdba1da93ad07fb65e50d93691c02edd75dc0c3c25468b65261e9b3",
+   "durum": "kaynak"
+  },
+  {
+   "kod": "ÇP-22",
+   "tur": "montaj paftası (DWG)",
+   "uzanti": ".dwg",
+   "bayt": 15056473,
+   "drive_id": "1wE_t3H-1p7RBNZWE-PUHwg3KKxV-P6qK",
+   "drive_degisme": "2026-11-02T09:33:44Z",
+   "sha256": null,
+   "durum": "kaynak"
+  },
+  {
+   "kod": "ÇP-22",
+   "tur": "yükleme listesi",
+   "uzanti": ".xlsx",
+   "bayt": 186335,
+   "drive_id": "1iTPLGwdsdyjAGNULSrPxK-ftvBjlsTwi",
+   "drive_degisme": "2026-11-02T09:24:16.495Z",
+   "sha256": "cf0850aee6ef76429c5b2268d4eb62da5e6029f62f7b48c74c322bcee26769ff",
+   "durum": "kor"
+  },
+  {
+   "kod": "ÇP-22",
+   "tur": "yükleme listesi",
+   "uzanti": ".pdf",
+   "bayt": 213335,
+   "drive_id": "1EFwzsSoktVEccvPJLyi9V9IScZoHqxEm",
+   "drive_degisme": "2026-11-02T09:24:25.643Z",
+   "sha256": null,
+   "durum": "kor"
+  },
+  {
+   "kod": "ÇP-22",
+   "tur": "üretim dosyası",
+   "uzanti": ".zip",
+   "bayt": 63168,
+   "drive_id": "1AoW_Wh2929ML4ojKb4yHe4E-Y45xR-q4",
+   "drive_degisme": "2026-10-31T17:45:38.446Z",
+   "sha256": null,
+   "durum": "kaynak"
+  },
+  {
+   "kod": "ÇP-23",
+   "tur": "detay",
+   "uzanti": ".pdf",
+   "bayt": 86476,
+   "drive_id": "1Fnb4n-tfvLYA3joyQLGlGsjTCv3OpF3l",
+   "drive_degisme": "2026-11-05T10:00:42.767Z",
+   "sha256": null,
+   "durum": "kaynak"
+  },
+  {
+   "kod": "ÇP-23",
+   "tur": "detay",
+   "uzanti": ".pdf",
+   "bayt": 89152,
+   "drive_id": "1Jka9RkeDCmBMeRZhvC5WWoiW0WAlSFVr",
+   "drive_degisme": "2026-11-05T11:27:26.687Z",
+   "sha256": null,
+   "durum": "kaynak"
+  },
+  {
+   "kod": "ÇP-23",
+   "tur": "detay",
+   "uzanti": ".pdf",
+   "bayt": 91261,
+   "drive_id": "1nv7B9OlAPqPK5G07X-X2xjx7AUZEsQ2t",
+   "drive_degisme": "2026-11-07T06:17:57.483Z",
+   "sha256": null,
+   "durum": "kaynak"
+  },
+  {
+   "kod": "ÇP-23",
+   "tur": "detay",
+   "uzanti": ".pdf",
+   "bayt": 82688,
+   "drive_id": "1Can3vpmmxN5zOEwLresjRIX5iN3MmD-1",
+   "drive_degisme": "2026-11-09T08:12:34Z",
+   "sha256": null,
+   "durum": "kaynak"
+  },
+  {
+   "kod": "ÇP-23",
+   "tur": "montaj paftası",
+   "uzanti": ".pdf",
+   "bayt": 2861567,
+   "drive_id": "18MX1sFsJcbh418Jqaf_MmYmRSzL1WKpE",
+   "drive_degisme": "2026-11-09T07:54:37.746Z",
+   "sha256": "eb5e0d30c5d62cf70eceb325233bc5ba66ea7e97d180a1a71cd556e1f43037a2",
+   "durum": "kaynak"
+  },
+  {
+   "kod": "ÇP-23",
+   "tur": "montaj paftası (DWG)",
+   "uzanti": ".dwg",
+   "bayt": 1627418,
+   "drive_id": "1mwggWLR6qOIJyQtL2TlJpQiCptSR98u_",
+   "drive_degisme": "2026-11-09T08:20:08Z",
+   "sha256": null,
+   "durum": "kaynak"
+  },
+  {
+   "kod": "ÇP-23",
+   "tur": "yükleme listesi",
+   "uzanti": ".pdf",
+   "bayt": 136588,
+   "drive_id": "1eKovJXQafCYrg8oO1zfwxBt5qklE4GcH",
+   "drive_degisme": "2026-11-09T08:19:46.970Z",
+   "sha256": null,
+   "durum": "kor"
+  },
+  {
+   "kod": "ÇP-23",
+   "tur": "yükleme listesi",
+   "uzanti": ".xlsx",
+   "bayt": 67636,
+   "drive_id": "1O0RjGfrAui_GWDcBNYvmq-7F4PlnPNwj",
+   "drive_degisme": "2026-11-09T08:56:01.535Z",
+   "sha256": "31d06909d5543d38eaa80016aa6e23efd3f43d8a189d76e319581d05e3734941",
+   "durum": "kor"
+  },
+  {
+   "kod": "ÇP-24",
+   "tur": "montaj paftası (DWG)",
+   "uzanti": ".dwg",
+   "bayt": 5366002,
+   "drive_id": "1v-s7yPGn4t6Edwci-II0zdw7gDw32Dt2",
+   "drive_degisme": "2026-10-15T13:36:57Z",
+   "sha256": null,
+   "durum": "kaynak"
+  },
+  {
+   "kod": "ÇP-24",
+   "tur": "pafta sayfası",
+   "uzanti": ".pdf",
+   "bayt": 1558264,
+   "drive_id": "1lRSTvb_Coa23aIU4hO9RFuUybHi9WPbD",
+   "drive_degisme": "2026-10-15T13:30:58Z",
+   "sha256": null,
+   "durum": "kaynak"
+  },
+  {
+   "kod": "ÇP-24",
+   "tur": "pafta sayfası",
+   "uzanti": ".pdf",
+   "bayt": 882232,
+   "drive_id": "1JDbNhYUtBtWBeyMI3t5EES2sg8p2B5I7",
+   "drive_degisme": "2026-10-15T13:31:16Z",
+   "sha256": null,
+   "durum": "kaynak"
+  },
+  {
+   "kod": "ÇP-24",
+   "tur": "pafta sayfası",
+   "uzanti": ".pdf",
+   "bayt": 567323,
+   "drive_id": "1lhVR4XtQkIlkqcXzXADdpPq0BUgrH6dK",
+   "drive_degisme": "2026-10-15T13:31:35Z",
+   "sha256": null,
+   "durum": "kaynak"
+  },
+  {
+   "kod": "ÇP-24",
+   "tur": "pafta sayfası",
+   "uzanti": ".pdf",
+   "bayt": 324896,
+   "drive_id": "1hEQELYVBQoYtWW9mfZbGILTN6b8VIwiO",
+   "drive_degisme": "2026-10-15T13:31:52Z",
+   "sha256": null,
+   "durum": "kaynak"
+  },
+  {
+   "kod": "ÇP-24",
+   "tur": "pafta sayfası",
+   "uzanti": ".pdf",
+   "bayt": 397004,
+   "drive_id": "1GPWgX5S-tp4wJp5OSY7YdbGd5GINrNcd",
+   "drive_degisme": "2026-10-15T13:32:11Z",
+   "sha256": null,
+   "durum": "kaynak"
+  },
+  {
+   "kod": "ÇP-24",
+   "tur": "pafta sayfası",
+   "uzanti": ".pdf",
+   "bayt": 318756,
+   "drive_id": "1E2-5ftmCTl8HqUlh9XyCzoAlQSe7KtUE",
+   "drive_degisme": "2026-10-15T13:32:36Z",
+   "sha256": null,
+   "durum": "kaynak"
+  },
+  {
+   "kod": "ÇP-24",
+   "tur": "pafta sayfası",
+   "uzanti": ".pdf",
+   "bayt": 611014,
+   "drive_id": "1Tszzb3wfKGZry4SpzuhRZMkL7Nq7NVbf",
+   "drive_degisme": "2026-10-15T13:32:50Z",
+   "sha256": null,
+   "durum": "kaynak"
+  },
+  {
+   "kod": "ÇP-24",
+   "tur": "yükleme listesi",
+   "uzanti": ".xlsx",
+   "bayt": 59207,
+   "drive_id": "1UGdgEaZ4qrjNntxkDQ-Lx4MfXGGMFgS_",
+   "drive_degisme": "2026-10-15T11:15:02Z",
+   "sha256": "e2c0028f43feaf819a477950cc86c31cce567ac1d05e54df2faccb1b5bd2fd56",
+   "durum": "kor"
+  },
+  {
+   "kod": "ÇP-25",
+   "tur": "detay",
+   "uzanti": ".pdf",
+   "bayt": 88617,
+   "drive_id": "1aJ3Qkj-1dEJB7P9XJJ3T4RV_hXAKiKZ5",
+   "drive_degisme": "2026-10-02T09:07:39Z",
+   "sha256": null,
+   "durum": "kaynak"
+  },
+  {
+   "kod": "ÇP-25",
+   "tur": "montaj paftası (DWG)",
+   "uzanti": ".dwg",
+   "bayt": 4142448,
+   "drive_id": "1yLUXs66Pra1MFWFKpt0dVFqk8Ppccd3l",
+   "drive_degisme": "2026-10-02T11:49:13Z",
+   "sha256": null,
+   "durum": "kaynak"
+  },
+  {
+   "kod": "ÇP-25",
+   "tur": "pafta sayfası",
+   "uzanti": ".pdf",
+   "bayt": 607388,
+   "drive_id": "12l9Ucc_-YoNCBoRbBAoiHMhuxaG7BlT6",
+   "drive_degisme": "2026-10-02T11:46:45Z",
+   "sha256": null,
+   "durum": "kaynak"
+  },
+  {
+   "kod": "ÇP-25",
+   "tur": "pafta sayfası",
+   "uzanti": ".pdf",
+   "bayt": 524651,
+   "drive_id": "1_7SLX3S0vC7mOWxuL4duQfp1_OJIhF77",
+   "drive_degisme": "2026-10-02T11:47:06Z",
+   "sha256": null,
+   "durum": "kaynak"
+  },
+  {
+   "kod": "ÇP-25",
+   "tur": "pafta sayfası",
+   "uzanti": ".pdf",
+   "bayt": 421382,
+   "drive_id": "1UAbWE8jJaTlfg71n74Mv1wWVTpqOyY_y",
+   "drive_degisme": "2026-10-02T11:47:37Z",
+   "sha256": null,
+   "durum": "kaynak"
+  },
+  {
+   "kod": "ÇP-25",
+   "tur": "pafta sayfası",
+   "uzanti": ".pdf",
+   "bayt": 154175,
+   "drive_id": "11Gl0omC7V6byHwN31imsQ-4RQyMU0zMk",
+   "drive_degisme": "2026-10-02T11:47:59Z",
+   "sha256": null,
+   "durum": "kaynak"
+  },
+  {
+   "kod": "ÇP-25",
+   "tur": "pafta sayfası",
+   "uzanti": ".pdf",
+   "bayt": 343147,
+   "drive_id": "1cVQdBnschRoHGYYmVL7cxJ1Zfga4AqYL",
+   "drive_degisme": "2026-10-02T11:48:23Z",
+   "sha256": null,
+   "durum": "kaynak"
+  },
+  {
+   "kod": "ÇP-25",
+   "tur": "pafta sayfası",
+   "uzanti": ".pdf",
+   "bayt": 359149,
+   "drive_id": "1U_Q5fg5ng1S6zIPs7aoQL_87OQNwMm4n",
+   "drive_degisme": "2026-10-02T11:49:08Z",
+   "sha256": null,
+   "durum": "kaynak"
+  },
+  {
+   "kod": "ÇP-25",
+   "tur": "yükleme listesi",
+   "uzanti": ".xlsx",
+   "bayt": 80858,
+   "drive_id": "19vuHZqUP2t6zU1bJKA_UXpndREZaazux",
+   "drive_degisme": "2026-10-02T08:59:09Z",
+   "sha256": "ef5da75e03a6c332ff4dc8d42b0e6f486d3ff5180f688a4fa504f583b4c35cd7",
+   "durum": "kor"
+  },
+  {
+   "kod": "ÇP-26",
+   "tur": "montaj paftası (DWG)",
+   "uzanti": ".dwg",
+   "bayt": 2911382,
+   "drive_id": "1DbuGZnjgKGE1Qr4_4vt8vxapbK5FQ59n",
+   "drive_degisme": "2026-09-30T09:39:40Z",
+   "sha256": null,
+   "durum": "kaynak"
+  },
+  {
+   "kod": "ÇP-26",
+   "tur": "pafta sayfası",
+   "uzanti": ".pdf",
+   "bayt": 1146644,
+   "drive_id": "1MbpLfcF-9YvEy-nGuVZWB1zJVm2HnJ5B",
+   "drive_degisme": "2026-09-30T09:37:52Z",
+   "sha256": null,
+   "durum": "kaynak"
+  },
+  {
+   "kod": "ÇP-26",
+   "tur": "pafta sayfası",
+   "uzanti": ".pdf",
+   "bayt": 318124,
+   "drive_id": "1Sa3HiF-_abglPb-qIsvF9eICzvRm8Jum",
+   "drive_degisme": "2026-09-30T09:38:09Z",
+   "sha256": null,
+   "durum": "kaynak"
+  },
+  {
+   "kod": "ÇP-26",
+   "tur": "pafta sayfası",
+   "uzanti": ".pdf",
+   "bayt": 427677,
+   "drive_id": "1O83u7BW7k9XcXBGA9byNONyxsamE72yy",
+   "drive_degisme": "2026-09-30T09:38:31Z",
+   "sha256": null,
+   "durum": "kaynak"
+  },
+  {
+   "kod": "ÇP-26",
+   "tur": "pafta sayfası",
+   "uzanti": ".pdf",
+   "bayt": 169006,
+   "drive_id": "180Xn1cCzCVA_LNM2TfqVQI4WooTIpBUo",
+   "drive_degisme": "2026-09-30T09:38:48Z",
+   "sha256": null,
+   "durum": "kaynak"
+  },
+  {
+   "kod": "ÇP-26",
+   "tur": "pafta sayfası",
+   "uzanti": ".pdf",
+   "bayt": 322897,
+   "drive_id": "1RYtUByWsrDpnh9amDtZOB6a5OcV9feCm",
+   "drive_degisme": "2026-09-30T09:39:01Z",
+   "sha256": null,
+   "durum": "kaynak"
+  },
+  {
+   "kod": "ÇP-26",
+   "tur": "yükleme listesi",
+   "uzanti": ".xlsx",
+   "bayt": 61679,
+   "drive_id": "1sLOomgrv-Mp-8h263W9jj5iC1epeiPTt",
+   "drive_degisme": "2026-09-30T09:39:50Z",
+   "sha256": "fa0de1caa95bd0f973a986ef1c6f1514003dc91f332e702f4c505f8d538ae17e",
+   "durum": "kor"
+  }
+ ]
+}

@@ -229,6 +229,92 @@ def test_muhur_izi_is_emrinde_de_yazili():
     assert K.MUHUR_IZI in (KOK / "docs" / "is_emirleri" / "IE-16.md").read_text(encoding="utf-8")
 
 
+# ------------------------------------------------------------------------------------------------- ikinci mühür (İE-16 PR-7)
+
+MUHUR_2 = KOK / "testler" / "celik" / "muhur_2.json"
+YENI_KUME = [f"ÇP-{i:02d}" for i in range(22, 27)]
+
+
+def test_ikinci_muhur_kayitlari_ve_durumlari():
+    """İkinci kör küme ("Tek kat çelik 2. part"): beş proje ÇP-22…ÇP-26, hepsi kör; kayıtlarda yalnız izinli alanlar (ad yok); listeler kör,
+    öteki dosyalar kaynak; her projenin kıyas listesi kendi Excel'i; Drive kimlikleri ilk mühürle çakışmaz."""
+    m, ilk = K.muhur_oku(MUHUR_2), K.muhur_oku(MUHUR)
+    assert list(m["projeler"]) == YENI_KUME and all(p["durum"] == "kor" for p in m["projeler"].values())
+    assert not set(m["projeler"]) & set(ilk["projeler"]), "bir kod yalnız bir mühürde olur"
+    assert not {r["drive_id"] for r in m["dosyalar"]} & {r["drive_id"] for r in ilk["dosyalar"]}
+    for r in m["dosyalar"]:
+        assert set(r) == IZINLI_ALAN and r["kod"] in m["projeler"]
+        assert re.fullmatch(r"[A-Za-z0-9_-]{25,60}", r["drive_id"])
+        assert r["sha256"] is None or re.fullmatch(r"[0-9a-f]{64}", r["sha256"])
+        assert r["durum"] == ("kor" if r["tur"] in K.LISTELER else "kaynak")
+    for k, p in m["projeler"].items():
+        assert set(p) == {"m2", "kat", "liste_tarihi", "drive_klasor", "durum", "kiyas_listesi"}
+        (kl,) = [r for r in m["dosyalar"] if r["drive_id"] == p["kiyas_listesi"]]
+        assert kl["kod"] == k and kl["tur"] == K.LISTE and kl["uzanti"] == ".xlsx"
+    assert len({r["drive_id"] for r in m["dosyalar"]}) == len(m["dosyalar"]) == 42
+    assert m["sayilar"]["sha256_dolu"] == sum(1 for r in m["dosyalar"] if r["sha256"]) == 7
+
+
+def test_ikinci_muhurun_dondurulmus_bolumleri_degismez():
+    """İkinci mührün dondurulmuş bölümlerinin izi araçta ve iş emrinde; ilk mührün izi aynen. Depodaki ikinci mühür iz ve yalnız-ekleme
+    geçmişi denetiminden geçer; dondurulmuş bir bölüm değişirse iz tutmaz."""
+    m = K.muhur_oku(MUHUR_2)
+    assert set(m) == {"aciklama", "kaynaklar", "kat_ayrimi", "kiyas_listesi_kurali", "sayilar", "projeler", "dosyalar", *K.EKLENEBILIR}
+    assert K.donmus_iz(m) == K.MUHUR_2_IZI and K.MUHUR_2_IZI != K.MUHUR_IZI
+    assert K.MUHUR_2_IZI in (KOK / "docs" / "is_emirleri" / "IE-16.md").read_text(encoding="utf-8")
+    K.muhur_dogrula(MUHUR_2, KOK)
+    for degistir in (lambda x: x["projeler"]["ÇP-22"].update(durum="acik"), lambda x: x["dosyalar"][0].update(sha256=None),
+                     lambda x: x["projeler"]["ÇP-23"].update(kat="tek")):
+        y = json.loads(json.dumps(m))
+        degistir(y)
+        assert K.donmus_iz(y) != K.MUHUR_2_IZI
+
+
+def test_muhur_yolu_koda_gore():
+    """Hakem projenin mührünü koduyla seçer: ilk küme muhur.json, ikinci küme muhur_2.json; hiçbir mühürde olmayan kod ilk mühre düşer
+    (sonraki adım "kod mühürde yok" diye durur)."""
+    assert K.muhur_yolu("ÇP-06") == MUHUR and K.muhur_yolu("ÇP-20") == MUHUR
+    assert all(K.muhur_yolu(k) == MUHUR_2 for k in YENI_KUME)
+    assert K.muhur_yolu("ÇP-99") == MUHUR
+
+
+def test_iki_muhurde_ayni_kod_durur(depo):
+    """Aynı kod iki mühürde birden varsa araç durur (adım 2); ikinci mühür yoksa davranış PR-7'den önceki gibi."""
+    assert K.muhur_yolu("DN-02", depo["kok"]) == depo["muhur"]
+    ikinci = depo["cel"] / "muhur_2.json"
+    m = _oku(depo["muhur"])
+    m["projeler"] = {"DN-02": m["projeler"]["DN-02"]}
+    m["dosyalar"] = [r for r in m["dosyalar"] if r["kod"] == "DN-02"]
+    ikinci.write_text(json.dumps(m, ensure_ascii=False), encoding="utf-8")
+    with pytest.raises(Durdu) as e:
+        K.muhur_yolu("DN-02", depo["kok"])
+    assert e.value.adim == 2 and "iki mühürde" in str(e.value)
+    assert K.muhur_yolu("DN-01", depo["kok"]) == depo["muhur"]
+    ikinci.write_text("{bozuk", encoding="utf-8")
+    with pytest.raises(Durdu) as e:
+        K.muhur_yolu("DN-01", depo["kok"])
+    assert e.value.adim == 2
+
+
+def test_ikinci_muhurdeki_kor_liste_acilis_kaydi_olmadan_acilmaz(depo):
+    """Kıyas, projenin mührünü koduyla seçer; ikinci mühürdeki kör liste de açılış kaydı olmadan açılmaz (adım 3)."""
+    m = _oku(depo["muhur"])
+    ikinci = {**m, "projeler": {"DN-02": m["projeler"]["DN-02"]}, "dosyalar": [r for r in m["dosyalar"] if r["kod"] == "DN-02"]}
+    m["projeler"].pop("DN-02")
+    m["dosyalar"] = [r for r in m["dosyalar"] if r["kod"] != "DN-02"]
+    depo["muhur"].write_text(json.dumps(m, ensure_ascii=False), encoding="utf-8")
+    (depo["cel"] / "muhur_2.json").write_text(json.dumps(ikinci, ensure_ascii=False), encoding="utf-8")
+    _git(depo["kok"], "add", ".")
+    _git(depo["kok"], "commit", "-q", "-m", "ikinci mühür")
+    assert K.muhur_yolu("DN-02", depo["kok"]) == depo["cel"] / "muhur_2.json"
+    with pytest.raises(Durdu) as e:
+        K.kiyasla(depo["bizim"]("DN02"), depo["kor"], kok=depo["kok"])
+    assert e.value.adim == 3 and "açılış kaydı yok" in str(e.value)
+    with pytest.raises(Durdu) as e:                 # ilk mühürde artık yok: oradan okunmaz
+        K.kiyasla(depo["bizim"]("DN02"), depo["kor"], kok=depo["kok"], muhur_yol=depo["muhur"])
+    assert e.value.adim == 1
+
+
 def test_yalniz_ekleme_kurali():
     a = {"acilislar": {"X": {"karar": "k", "sha256": "1" * 64, "liste_commit": "abcdef1"}}, "ilk_indirmeler": {}, "kat_kayitlari": {}}
     K.yalniz_ekleme([a, {**a, "ilk_indirmeler": {"d": {"sha256": "2" * 64}}}])
