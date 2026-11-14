@@ -14,7 +14,8 @@ Lokman, 9 Kasım 2026 13:10: "bunu kural olarak al ve mühürle bundan sonra tek
   ortalama, toplam; sonuç kuruşa yarım yukarı (kutu profil tam TL'ye, D-36).
 - **Onay:** eşleme `birebir` ya da `kural` ise onaylı; `yakın` ve `birim varsayımı` öneridir (`fiyatla.py --oneri`); `birim sorusu`
   ve `CRM'de yok` fiyatsızdır. Kodun o günkü fiyatı 0 ya da boşsa, kod listede yoksa ya da birden çok satırdaysa kalem fiyatsızdır
-  (fiyat uydurulmaz). Çırpı ipi Lokman'ın kararıyla 0 TL (D-65). `bekletme`: Lokman'ın kararıyla şimdilik fiyatsız, CRM'de fiyatı
+  (fiyat uydurulmaz). Aynı kod birden çok satırdaysa kayıt satırı adıyla (`icerir`, adın içinde geçen) ya da ölçüsüyle (`crm_olcu`,
+  CRM satırının `olcu`'su; boşluk ve büyük-küçük harf sayılmaz) seçer: r08, köşe latası `KG2` iki ölçüde aynı kodla. Çırpı ipi Lokman'ın kararıyla 0 TL (D-65). `bekletme`: Lokman'ın kararıyla şimdilik fiyatsız, CRM'de fiyatı
   olsa da yazılmaz (banyo dolabı, D-75); Samet'e giden eksik listesine girmez.
 - **KDV (D-76):** eşlemenin `kdv` bölümü varsa defterin her kaydı KDV oranını ve grubunu taşır (`kdv`, `kdv_grubu`). Grup sırayla:
   kalemin `kdv_grubu`'su, kodun `kdv.kodlar` kaydı, CRM satırının kategorisi (`kdv.kategoriler`). Grubu bulunmayan ya da kodları iki
@@ -108,12 +109,23 @@ def _boy(anahtar: str) -> Decimal:
     return Decimal(m.group(1).replace(",", "."))
 
 
-def satir_bul(dizin: dict, kod: str, icerir: str | None = None) -> tuple[dict | None, str | None]:
-    """(satır, None) ya da (None, durum). Kod listede yoksa ya da `icerir` süzgecinden sonra birden çok satırdaysa "CRM'de kod yok";
-    fiyatı 0 ya da boşsa "CRM'de fiyat 0"."""
-    adaylar = dizin.get(kod) or []
+def _olcu_yaz(x: str | None) -> str:
+    return re.sub(r"\s+", "", x or "").lower()
+
+
+def _suz(satirlar: list[dict], icerir: str | None = None, crm_olcu: str | None = None) -> list[dict]:
+    """Kodun satırları, kaydın süzgeçleriyle: `icerir` adın içinde, `crm_olcu` satırın ölçüsü (boşluksuz, küçük harf)."""
     if icerir:
-        adaylar = [x for x in adaylar if icerir.lower() in (x.get("urunadi") or "").lower()]
+        satirlar = [x for x in satirlar if icerir.lower() in (x.get("urunadi") or "").lower()]
+    if crm_olcu:
+        satirlar = [x for x in satirlar if _olcu_yaz(x.get("olcu")) == _olcu_yaz(crm_olcu)]
+    return satirlar
+
+
+def satir_bul(dizin: dict, kod: str, icerir: str | None = None, crm_olcu: str | None = None) -> tuple[dict | None, str | None]:
+    """(satır, None) ya da (None, durum). Kod listede yoksa ya da `icerir` / `crm_olcu` süzgecinden sonra birden çok satırdaysa
+    "CRM'de kod yok"; fiyatı 0 ya da boşsa "CRM'de fiyat 0"."""
+    adaylar = _suz(dizin.get(kod) or [], icerir, crm_olcu)
     if len(adaylar) != 1:
         return None, "CRM'de kod yok"
     if not adaylar[0].get("fiyat"):
@@ -126,7 +138,7 @@ def hesapla(g: dict, dizin: dict, anahtar: str = "") -> dict:
     kodlar = g["kod"] if isinstance(g["kod"], list) else [g["kod"]]
     satirlar, sorun = [], None
     for k in kodlar:
-        s, d = satir_bul(dizin, k, g.get("icerir"))
+        s, d = satir_bul(dizin, k, g.get("icerir"), g.get("crm_olcu"))
         sorun = sorun or d
         if s:
             satirlar.append(s)
@@ -169,7 +181,7 @@ def kdv_bul(K: dict | None, g: dict, dizin: dict) -> tuple[float | None, str | N
             if k in K["kodlar"]:
                 bulunan.add(K["kodlar"][k])
                 continue
-            satirlar = [x for x in dizin.get(k) or [] if not g.get("icerir") or g["icerir"].lower() in (x.get("urunadi") or "").lower()]
+            satirlar = _suz(dizin.get(k) or [], g.get("icerir"), g.get("crm_olcu"))
             kat = {x.get("kategori") for x in satirlar}
             bulunan.add(K["kategoriler"].get(kat.pop()) if len(kat) == 1 else None)
         if None in bulunan or len({K["gruplar"][b] for b in bulunan}) != 1:
@@ -231,6 +243,9 @@ def esleme_denetle(E: dict) -> list[str]:
                 sorun.append(f"{yer}: {e}")
         if "esas_boy_mm" in g and (h != "boy_m" or not isinstance(g["esas_boy_mm"], (int, float)) or g["esas_boy_mm"] <= 0):
             sorun.append(f"{yer}: esas_boy_mm yalnız boy hesabında ve sıfırdan büyük olur")
+        for a in ("icerir", "crm_olcu"):
+            if a in g and (not isinstance(g[a], str) or not g[a].strip()):
+                sorun.append(f"{yer}: {a} boş olmayan yazı olur")
 
     for hat, H in E["hatlar"].items():
         for k, g in H["kalemler"].items():
