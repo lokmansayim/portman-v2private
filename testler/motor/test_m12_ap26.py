@@ -31,7 +31,9 @@ ONAY = ("AP-26 ön onay çizimi (İE-30, D-52; mühür M-12). Lokman, 4 Kasım 2
         "kartı \"Paftadan, ev ev\"; 5 Kasım 2026 00:36: \"teraslara biraz eğim vereceksin\"; 10:17 (\"%10 eğimle ve paftadaki gibi 120 "
         "derinlikle devam edeyim mi?\" sorusuna): \"evet onaylıyorum mühürle bu çizim şeklini\". 10:48 kartı (\"Teras yan kirişini listeden "
         "ve yan görünüşten kaldırayım mı?\"): \"Kaldır, gerçek liste gibi\" (D-56; M-12 bununla açıldı, iz yalnız yan kirişin kalkmasıyla "
-        "yeniden donduruldu).")
+        "yeniden donduruldu). 14 Kasım 2026 21:01 antetteki net verandayla, bütün mahaller (D-95, \"biz verandayıda net alana alır "
+        "sayarız\"; M-12 Lokman'ın 21:07:29 sözüyle açıldı: \"ben izin veriyorum varsa mühür bunu gir ve mühürle\"): iz yalnız antet m² "
+        "yazısıyla yeniden donduruldu.")
 GORUNUS_KATMANLARI = ("ON_GORUNUS", "ON_DERZ", "ON_CATI", "ON_TOPUK")
 
 

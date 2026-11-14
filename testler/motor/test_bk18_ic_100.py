@@ -31,13 +31,19 @@ HEDEFLER = {   # girdi, beklenen iz, onay dayanağı
              "edeceğiz\"; 13:13–13:21 madde 14–15 notları (r12); 13:48 \"sen onayla PR birleştir\" (D-31). 30 Ekim 2026 14:45 görünüş ölçüsü mor, "
              "yazısı siyah (D-34, PC-25; TK-03 notu, bütün prefabrik çizimlerde): iz yalnız ölçü rengiyle yeniden donduruldu."
              " 4 Kasım 2026 14:24 antetteki brüt m² verandayla, çatının örttüğü oturum (D-49 madde 2, \"çatı kapattığı için\"; M-02 "
-             "Lokman'ın 19:55 kartıyla açıldı): iz yalnız antet m² yazısıyla yeniden donduruldu."),
+             "Lokman'ın 19:55 kartıyla açıldı): iz yalnız antet m² yazısıyla yeniden donduruldu."
+             " 14 Kasım 2026 21:01 antetteki net verandayla, bütün mahaller (D-95, \"biz verandayıda net alana alır sayarız\"; "
+             "M-02 Lokman'ın 21:07:29 sözüyle açıldı: \"ben izin veriyorum varsa mühür bunu gir ve mühürle\"): iz yalnız antet m² "
+             "yazısıyla yeniden donduruldu."),
     "TK01_r07": (VERI / "TK01_r07.json", VERI / "TK01_r07_beklenen.json",
                  "TK-01 r07 (aynı proje, iç 60, standart) ön onay çizimi. Lokman 29 Ekim 2026: 13:41 \"ikiside çizim motorunda kurallar halinde "
                  "olsun\", 13:47 kat planı \"60'lık versiyonunda onaylıyorum\", 13:48 görünüşler \"sen onayla\" (D-31 madde 16). 30 Ekim 2026 "
                  "14:45 görünüş ölçüsü mor, yazısı siyah (D-34, PC-25): iz yalnız ölçü rengiyle yeniden donduruldu."
                  " 4 Kasım 2026 14:24 antetteki brüt m² verandayla, çatının örttüğü oturum (D-49 madde 2, \"çatı kapattığı için\"; M-02 "
-                 "Lokman'ın 19:55 kartıyla açıldı): iz yalnız antet m² yazısıyla yeniden donduruldu."),
+                 "Lokman'ın 19:55 kartıyla açıldı): iz yalnız antet m² yazısıyla yeniden donduruldu."
+             " 14 Kasım 2026 21:01 antetteki net verandayla, bütün mahaller (D-95, \"biz verandayıda net alana alır sayarız\"; "
+             "M-02 Lokman'ın 21:07:29 sözüyle açıldı: \"ben izin veriyorum varsa mühür bunu gir ve mühürle\"): iz yalnız antet m² "
+             "yazısıyla yeniden donduruldu."),
 }
 
 
