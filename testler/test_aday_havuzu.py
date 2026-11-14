@@ -452,14 +452,15 @@ def test_koddan_secim_celik_havuz(tmp_path):
 # Lokman, 14 Kasım 2026 13:08:54 UTC kartı "Kendi adıyla yazılsın": açık alan planda sundurma ya da giriş ise seçenek satırı ve mesajı
 # "veranda" yerine o adı yazar. Ad, planın odaları içinde `veranda_m2`'ye eşit tek alandan okunur; toplamda (KT-12) "veranda" kalır.
 ACIK_ALAN_KART = '"Kendi adıyla yazılsın"'
-ACIK_ALAN = {"PA27": "sundurma", "KT11": "sundurma", "KT09": "giriş"}
+ACIK_ALAN = {"PA27": "sundurma", "KT11": "sundurma", "KT09": "giriş",
+             "PA28": "sundurma", "PA29": "sundurma"}                              # PA-28, PA-29: aynı evin standart hâlleri (D-91)
 
 
 def test_acik_alan_kendi_adiyla():
     assert ACIK_ALAN_KART in D87 and "13:08:54" in D87
     kat = Katalog(kabul_edilmis=set(TUM_PA) | ESKI_CELIK | set(CELIK))
     adaylar = kat.gorunur_adaylar()
-    assert {a["kod"] for a in adaylar} >= set(ACIK_ALAN) | {"KT12", "PA13", "PA26"}
+    assert {a["kod"] for a in adaylar} >= {"PA27", "KT11", "KT09", "KT12", "PA13", "PA26"}
     for a in adaylar:
         ad = S.acik_alan_adi(a)
         assert ad == ACIK_ALAN.get(a["kod"], "veranda"), a["kod"]
