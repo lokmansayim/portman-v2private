@@ -447,3 +447,42 @@ def test_koddan_secim_celik_havuz(tmp_path):
     assert k.eylem == "is_emri", k.mesaj
     y = k.is_emri["yapi"]
     assert (y["kod"], y["tanim"], y["sistem"]) == ("KT06", "modeller/havuz/KT06.json", "celik") and C.tanim_dogrula(y)
+
+
+# Lokman, 14 Kasım 2026 13:08:54 UTC kartı "Kendi adıyla yazılsın": açık alan planda sundurma ya da giriş ise seçenek satırı ve mesajı
+# "veranda" yerine o adı yazar. Ad, planın odaları içinde `veranda_m2`'ye eşit tek alandan okunur; toplamda (KT-12) "veranda" kalır.
+ACIK_ALAN_KART = '"Kendi adıyla yazılsın"'
+ACIK_ALAN = {"PA27": "sundurma", "KT11": "sundurma", "KT09": "giriş"}
+
+
+def test_acik_alan_kendi_adiyla():
+    assert ACIK_ALAN_KART in D87 and "13:08:54" in D87
+    kat = Katalog(kabul_edilmis=set(TUM_PA) | ESKI_CELIK | set(CELIK))
+    adaylar = kat.gorunur_adaylar()
+    assert {a["kod"] for a in adaylar} >= set(ACIK_ALAN) | {"KT12", "PA13", "PA26"}
+    for a in adaylar:
+        ad = S.acik_alan_adi(a)
+        assert ad == ACIK_ALAN.get(a["kod"], "veranda"), a["kod"]
+        satir = S.aciklama({**a, "puan": 100})
+        if (S._f(a.get("veranda_m2")) or 0) > 0:
+            assert f"· {ad} {a['veranda_m2']} m² ·" in satir, (a["kod"], satir)
+        else:
+            assert "verandasız" in satir and "sundurma" not in satir and "giriş" not in satir, (a["kod"], satir)
+
+
+def test_acik_alan_set_kaydinda(tmp_path):
+    """Liste satırı set kaydından yazılır (`ozet` yok): ad `acik_alan` ile taşınır; öteki evlerin set kaydı aynı kalır."""
+    s, k = _set(tmp_path, 45, "1+1")
+    a = s.k.d["secenek_seti"]["adaylar"][0]
+    assert a["kod"] == "PA27" and a["acik_alan"] == "sundurma"
+    assert ", sundurma 1.76 ·" in k.mesaj and "veranda" not in k.mesaj, k.mesaj
+    assert "· sundurma 1.76 m² ·" in S.aciklama(a)
+    s, k = _set(tmp_path / "71", 71, "2+1")
+    assert all("acik_alan" not in a for a in s.k.d["secenek_seti"]["adaylar"])
+    assert "veranda" in k.mesaj and "sundurma" not in k.mesaj
+    for m2, oda, kod, ad in ((49, "1+1", "KT11", "sundurma"), (80, "2+1", "KT09", "giriş")):
+        s = Sohbet(tmp_path / f"c{m2}", kabul=ESKI_CELIK | set(CELIK))
+        k = s.yaz(f"{m2} m2 {oda} çelik ev", alan_m2=m2, oda_programi=oda, yapi_turu="celik")
+        st = s.k.d["secenek_seti"]["adaylar"]
+        assert {x["kod"]: x.get("acik_alan") for x in st if "acik_alan" in x} == {kod: ad}, st
+        assert f", {ad} " in k.mesaj, k.mesaj
