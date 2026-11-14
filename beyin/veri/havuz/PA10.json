@@ -21,7 +21,7 @@
    835.75
   ],
   "brut_m2": 95.23,
-  "pano": 50,
+  "pano": 48,
   "pencere": 7,
   "kapi": 5,
   "odalar": {
@@ -35,10 +35,10 @@
   }
  },
  "kaynak": {
-  "metin": "AP-04 montaj paftasından İş Emri (İE-33 kör ölçümü). Aday: D-87 (Lokman 13 Kasım 2026 21:41).",
-  "dosya": "testler/kor/projeler/AP04/is_emri.json",
+  "metin": "AP-04 montaj paftasından İş Emri (İE-33 kör ölçümü). Aday: D-87 (Lokman 13 Kasım 2026 21:41). Tek özel pano kuralı: D-92 (Lokman 14 Kasım 2026 14:05:21 kartı \"Okuma 2: duvar boyunca\").",
+  "dosya": "testler/havuz/is_emirleri/AP04_D92.json",
   "ayna": null,
-  "karar": "D-87",
+  "karar": "D-92",
   "standart": true,
   "kart_kiyasi": {
    "kart": "AP-04",

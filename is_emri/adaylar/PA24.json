@@ -7,7 +7,7 @@
    "ad": "Aday kaydı"
   },
   "musteri_adi": "ADAY PA24",
-  "metin": "AP-27 montaj paftasından İş Emri (D-87 › Veranda, 14 Kasım düzeltmesi). Aday: D-87 (Lokman 13 Kasım 2026 21:41; 14 Kasım 07:34)."
+  "metin": "AP-27 montaj paftasından İş Emri (D-87 › Veranda, 14 Kasım düzeltmesi). Aday: D-87 (Lokman 13 Kasım 2026 21:41; 14 Kasım 07:34). Tek özel pano kuralı: D-92 (Lokman 14 Kasım 2026 14:05:21 kartı \"Okuma 2: duvar boyunca\")."
  },
  "yapi": {
   "sistem": "prefabrik",
@@ -30,6 +30,7 @@
   "giris_cephesi": "on",
   "dis_dusey_duvar": "cevre_aks_disinda",
   "dizilim": {
+   "tek_ozel_pano": "dizilim_sonu",
    "baslangic": "arka-sol",
    "hiza": "kosu",
    "dis_duvar_t_bolme": true,
