@@ -290,7 +290,8 @@ def test_sacak_omegasi_z_ve_veranda_asigi_kart_modelinden(paketler):
 def test_baslikta_brut_ve_net(paketler):
     """D-95 (Lokman, 14 Kasım 2026 21:01 UTC: "biz verandayıda net alana alır sayarız", "biz çatı ile kapattığımız her yeri bürütten
     sayarız"): rehberin başlığında brüt çatının örttüğü oturum (yükleme listesinin `bina_m2`'si, D-49), net bütün mahaller (veranda, niş,
-    balkon dahil). Ön onay antedi (M-02) kapalı odaların netini yazmaya devam eder; sahnedeki etiket (rozet) değişmedi."""
+    balkon dahil). Sahnenin genel bakış etiketi (rozet) brütü yazar (21:07:29 "her zaman brüt m² ile hesaplarız"). Ön onay antedi (M-02)
+    kapalı odaların netini yazmaya devam eder."""
     from motor import dxf_out, geometry as G
     from motor.prefabrik_liste import bina_brut_cm2
     kok, _, _ = paketler
@@ -303,7 +304,7 @@ def test_baslikta_brut_ve_net(paketler):
         yol = kok / "prefabrik" / kod / f"{kod}_montaj_rehberi.html"
         d = _rehber_verisi(yol)
         assert d["kabuk"]["chip"] == yazi and f'<span class="chip">{yazi}</span>' in yol.read_text(encoding="utf-8"), kod
-        assert d["rozet"].endswith(f"{kapali} m²"), kod
+        assert d["rozet"].endswith(" · " + yazi.split(" · ")[0]), kod
 
 
 @pytest.mark.skipif(iz.hazir() is not None, reason=f"rehber izi: {iz.hazir()}")

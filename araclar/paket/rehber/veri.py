@@ -212,7 +212,8 @@ def baslik_alani(plan) -> str:
     """Rehberin başlığındaki alan (D-95; Lokman, 14 Kasım 2026 21:01 UTC: "biz verandayıda net alana alır sayarız", "biz çatı ile
     kapattığımız her yeri bürütten sayarız"). Brüt: çatının örttüğü oturum, yükleme listesinin `bina_m2`'si (tek kaynak
     `prefabrik_liste.bina_brut_cm2`, D-49). Net: bütün mahallerin net alanı, veranda, giriş nişi ve balkon dahil. Ön onay antedindeki
-    net (`dxf_out.alan_yazisi`, kapalı odalar; M-02 mühürlü) bu kararla değişmedi."""
+    net (`dxf_out.alan_yazisi`, kapalı odalar; M-02 mühürlü) bu kararla değişmedi. Sahnenin genel bakış etiketi (rozet) brütü yazar
+    ("her zaman brüt m² ile hesaplarız", 21:07:29)."""
     from motor import prefabrik_liste as LU
     f2 = lambda v: f"{v:.2f}".replace(".", ",")
     return f"{f2(LU.bina_brut_cm2(plan) / 1e4)} m² brüt · {f2(sum(m.alan_m2 for m in plan.mahaller.values()))} m² net"
@@ -1660,7 +1661,7 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
         "izo": izo, "tavan": tavan, "verandalar": verandalar, "rooms": rooms, "panels": panels, "posts": posts, "ceku": ceku, "hs": hs, "alt": alt, "alt_m": alt_m,
         "omega_duvar": omega_duvar, "makas": makas, "omega": omega, "dere": {"hatlar": dere_hat, "inisler": inisler}, "doors": doors, "cards": cards,
         "pencere": pencere, "metin": metin, "adimlar": adim, "kart_bag": kart_bag, "genel": genel, "cati_adim": list(range(S["makas"], S["alin"] + 1)),
-        "rozet": f"{fmtc(W)} × {fmtc(DY)} · {fmt(m2, 2)} m²", "kabuk": kabuk,
+        "rozet": f"{fmtc(W)} × {fmtc(DY)} · {baslik_alani(plan).split(' · ')[0]}", "kabuk": kabuk,   # D-95: brüt
     }
 
 
