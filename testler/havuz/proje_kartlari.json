@@ -277,6 +277,10 @@
    "brut_oturum_m2": 61.46,
    "oda_sayisi": null,
    "yatak_odasi": 0,
+   "oda_sayisi_lokman": {
+    "deger": "2+1",
+    "kaynak": "Lokman, karar kartı 14 Kasım 2026 07:50:30 UTC: \"Evet, 2+1 olarak girsin\" (soru: \"AP-14 2+1 olarak bayi havuzuna girsin mi?\"; soruda projenin adı yazılıydı, burada kodu). Paftada oda adı yok; Motor'un planı paftayla görselle kıyaslandı (iki yatak odası, banyo, hol, salon + mutfak, veranda). D-87."
+   },
    "kat_adedi": 1,
    "cati_sekli": "Beşik",
    "acikliklar": {
