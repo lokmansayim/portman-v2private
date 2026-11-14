@@ -35,6 +35,8 @@ Brüt oturum kıyaslanmaz (ölçüyle değişir; kayıt Motor'un brütünü yaza
 celik_kartlari.json`: antet m², oda programı, veranda): genel motor çizer ve doğrular, brüt oturum antet m²'sinden en çok 0,5 m² sapar,
 oda programı antette yazılı ve aynı, antet verandalıysa Motor'da da veranda var, tek kat; aynı proje havuzda başka kodla varsa
 (ÇP-14 = KT-04) girmez. Veranda bir oda gibi sayılır; verandasız proje de girer (Lokman, 14 Kasım 2026 07:34 UTC; D-87 › Veranda).
+Antetteki sayı brüt oturum değilse kart `plan_m2` taşır ve brüt planın ölçtüğü m²'yle kıyaslanır; yalnız Lokman'ın sözüyle
+(`plan_m2_kaynagi`; 14 Kasım 2026 12:33:58 UTC kartı "Planın m²'siyle girsin": ÇP-22, ÇP-24, ÇP-25).
 
     python3 araclar/havuz_hakemi.py testler/celik/projeler/CP18/CP18.json --kart ÇP-18
 """
@@ -279,8 +281,13 @@ def celik_denetle(tanim_yolu: Path, kart: dict) -> tuple[list[str], dict]:
         b.append(f"havuzda: aynı proje {kart['havuzda']} koduyla havuzda")
     if not o["gecti"] or not o["bayi_gorseli"]:
         b.append(f"motor: genel motor doğrulaması geçmedi ya da bayi görseli yok ({o['hatalar']})")
-    if kart.get("antet_m2") is None or abs(o["oturum_m2"] - kart["antet_m2"]) > TOL_BRUT_M2:
-        b.append(f"brüt oturum: Motor {o['oturum_m2']:.2f} m², antet {kart.get('antet_m2')} m²; en çok {TOL_BRUT_M2:g}")
+    # Antetteki sayı brüt oturum değilse (net, planla çelişen, yuvarlanmış) kart `plan_m2` taşır: planın ölçtüğü m², yalnız Lokman'ın
+    # sözüyle (`plan_m2_kaynagi`; 14 Kasım 2026 12:33:58 kartı "Planın m²'siyle girsin", D-87). Sınır aynı; `antet_m2` paftadaki sayı kalır.
+    ad, hedef = ("plan", kart["plan_m2"]) if kart.get("plan_m2") is not None else ("antet", kart.get("antet_m2"))
+    if ad == "plan" and not kart.get("plan_m2_kaynagi"):
+        b.append("brüt oturum: plan m²'sinin kaynağı (Lokman'ın sözü) kartta yok")
+    elif hedef is None or abs(o["oturum_m2"] - hedef) > TOL_BRUT_M2:
+        b.append(f"brüt oturum: Motor {o['oturum_m2']:.2f} m², {ad} {hedef} m²; en çok {TOL_BRUT_M2:g}")
     if not kart.get("oda_programi"):
         b.append(f"oda programı: antette yok (Motor {o['oda_programi']}); doğrulanamadı")
     elif kart["oda_programi"] != o["oda_programi"]:
@@ -307,7 +314,8 @@ def main(argv: list[str] | None = None) -> int:
             print(f"DUR: {kod} için çelik hedef değeri yok ({CELIK_KARTLARI.relative_to(KOK)})"); return 2
         bulgular, o = celik_denetle(Path(a.is_emri), kart)
         print(json.dumps(o, ensure_ascii=False))
-        print("GEÇTİ: antetle aynı" if not bulgular else "KALDI:\n- " + "\n- ".join(bulgular))
+        gecti = "GEÇTİ: antetle aynı" + (" (brüt planın m²'siyle, Lokman'ın sözü)" if kart.get("plan_m2") is not None else "")
+        print(gecti if not bulgular else "KALDI:\n- " + "\n- ".join(bulgular))
         return 0 if not bulgular else 1
     kart = kartlar().get(a.kart.upper())
     if kart is None:
