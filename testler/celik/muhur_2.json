@@ -193,6 +193,12 @@
    "tarih": "2026-11-14",
    "dayanak": "kor_sayfa (yalnız kat ve merdiven sözcükleri): yalnız 1. sayfa \"MERDİVEN\"; hiçbir sayfada \"1. KAT\" ya da başka kat sözcüğü yok. 1. sayfaya bakıldı: merdiven gövdenin dışında, salonun güneyinde verandaya çıkan 11 basamaklı dış merdiven; açıklama 7 \"Merdiven alıcıya ait\"; bina yüksekliği 2700 mm; sayfada tek kat planı var, üst kat planı yok",
    "pafta_sha256": "eb5e0d30c5d62cf70eceb325233bc5ba66ea7e97d180a1a71cd556e1f43037a2"
+  },
+  "ÇP-26": {
+   "kat": "çift",
+   "tarih": "2026-11-14",
+   "dayanak": "Lokman 14 Kasım 2026 09:06 UTC kartta \"Çift kat say, testten çıkar\" seçeneğini seçti (soru: bu evde içeride 18 basamaklı merdiven var; tek kat mı sayalım?). kor_sayfa (yalnız kat ve merdiven sözcükleri): 5 pafta sayfasında kat ya da merdiven sözcüğü yok; kor_dwg: DWG'nin onay çerçeveleri boş şablon, çerçeve dışındaki mimari planda \"MERDİVENHOLÜ\" ve 18 basamaklı iç merdiven (Lokman 08:58 sözüyle montaj paftasından okundu); montaj paftasında döşeme yerleşim planı sayfası var (bu kaydın paftası). Çift kat: kapalı (D-26), kör testte ölçülmez",
+   "pafta_sha256": "f5d5ba447d616d9e79c08f13603bd8a4758f3021e91b4b8a0961aa43300d6686"
   }
  },
  "dosyalar": [
