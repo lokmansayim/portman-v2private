@@ -1,0 +1,173 @@
+{
+ "aciklama": "İE-39: is_emri/adaylar/PA*.json × sağ ve ön × 1 yarım pano uzat (+1) ve kısalt (-1); 'temiz' ya da durma kodu (beyin/yarim_pano.KomutDurdu.kod).",
+ "tablo": {
+  "PA01": {
+   "sag+1": "muhur",
+   "sag-1": "muhur",
+   "on+1": "muhur",
+   "on-1": "muhur"
+  },
+  "PA02": {
+   "sag+1": "muhur",
+   "sag-1": "muhur",
+   "on+1": "muhur",
+   "on-1": "muhur"
+  },
+  "PA03": {
+   "sag+1": "muhur",
+   "sag-1": "muhur",
+   "on+1": "muhur",
+   "on-1": "muhur"
+  },
+  "PA04": {
+   "sag+1": "veranda",
+   "sag-1": "veranda",
+   "on+1": "girinti",
+   "on-1": "girinti"
+  },
+  "PA05": {
+   "sag+1": "muhur",
+   "sag-1": "muhur",
+   "on+1": "muhur",
+   "on-1": "muhur"
+  },
+  "PA06": {
+   "sag+1": "cati",
+   "sag-1": "cati",
+   "on+1": "veranda",
+   "on-1": "veranda"
+  },
+  "PA06C": {
+   "sag+1": "cumba",
+   "sag-1": "cumba",
+   "on+1": "veranda",
+   "on-1": "veranda"
+  },
+  "PA06K": {
+   "sag+1": "cati",
+   "sag-1": "cati",
+   "on+1": "veranda",
+   "on-1": "veranda"
+  },
+  "PA07": {
+   "sag+1": "cati",
+   "sag-1": "cati",
+   "on+1": "veranda",
+   "on-1": "veranda"
+  },
+  "PA08": {
+   "sag+1": "veranda",
+   "sag-1": "veranda",
+   "on+1": "veranda",
+   "on-1": "veranda"
+  },
+  "PA09": {
+   "sag+1": "veranda",
+   "sag-1": "veranda",
+   "on+1": "cati",
+   "on-1": "motor"
+  },
+  "PA10": {
+   "sag+1": "veranda",
+   "sag-1": "veranda",
+   "on+1": "veranda",
+   "on-1": "veranda"
+  },
+  "PA11": {
+   "sag+1": "veranda",
+   "sag-1": "veranda",
+   "on+1": "veranda",
+   "on-1": "veranda"
+  },
+  "PA12": {
+   "sag+1": "temiz",
+   "sag-1": "temiz",
+   "on+1": "veranda",
+   "on-1": "veranda"
+  },
+  "PA13": {
+   "sag+1": "veranda",
+   "sag-1": "veranda",
+   "on+1": "veranda",
+   "on-1": "veranda"
+  },
+  "PA14": {
+   "sag+1": "veranda",
+   "sag-1": "veranda",
+   "on+1": "veranda",
+   "on-1": "veranda"
+  },
+  "PA15": {
+   "sag+1": "veranda",
+   "sag-1": "veranda",
+   "on+1": "veranda",
+   "on-1": "veranda"
+  },
+  "PA16": {
+   "sag+1": "cati",
+   "sag-1": "cati",
+   "on+1": "veranda",
+   "on-1": "veranda"
+  },
+  "PA17": {
+   "sag+1": "veranda",
+   "sag-1": "veranda",
+   "on+1": "karkasli",
+   "on-1": "karkasli"
+  },
+  "PA18": {
+   "sag+1": "veranda",
+   "sag-1": "veranda",
+   "on+1": "veranda",
+   "on-1": "veranda"
+  },
+  "PA19": {
+   "sag+1": "veranda",
+   "sag-1": "veranda",
+   "on+1": "veranda",
+   "on-1": "veranda"
+  },
+  "PA20": {
+   "sag+1": "veranda",
+   "sag-1": "veranda",
+   "on+1": "cati",
+   "on-1": "motor"
+  },
+  "PA21": {
+   "sag+1": "veranda",
+   "sag-1": "veranda",
+   "on+1": "veranda",
+   "on-1": "veranda"
+  },
+  "PA22": {
+   "sag+1": "muhur",
+   "sag-1": "muhur",
+   "on+1": "muhur",
+   "on-1": "muhur"
+  },
+  "PA23": {
+   "sag+1": "cati",
+   "sag-1": "aciklik",
+   "on+1": "temiz",
+   "on-1": "aciklik"
+  },
+  "PA24": {
+   "sag+1": "temiz",
+   "sag-1": "temiz",
+   "on+1": "cati",
+   "on-1": "cati"
+  },
+  "PA25": {
+   "sag+1": "veranda",
+   "sag-1": "veranda",
+   "on+1": "veranda",
+   "on-1": "veranda"
+  },
+  "PA26": {
+   "sag+1": "veranda",
+   "sag-1": "veranda",
+   "on+1": "veranda",
+   "on-1": "veranda"
+  }
+ }
+}
