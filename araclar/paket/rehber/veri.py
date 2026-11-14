@@ -211,6 +211,7 @@ PI = 3.141592654     # dönüş açısı veride dokuz ondalıkla: 15 haneli π n
 def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
     """Rehberin verisi. `kart`: kart modeli klasörü (`<kart_kodu>_model.ifc`, `<kart_kodu>_kart_sayim.json`); `L`: liste satırları;
     `kod`: rehberde görünen kod (TK-01, AP-19)."""
+    from motor import dxf_out
     from motor import geometry as G
     from motor import ifc_uret
     from motor import prefabrik_liste as LU
@@ -1618,7 +1619,8 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
                 "z": "CK-04", "tomega": "OM-01", "asik": "AS-01", "ckapama": "CK-05", "mahya": "CK-07" if TR_ else "CK-06", "alin": "CK-03", "dere": "DR-01",
                 "inis": "DR-02", **({"kaplama": "KP-01"} if SP else {})}
     kabuk = {
-        "proje": f"{kod} prefabrik", "kisa": kod, "chip": f"{fmt(m2, 2)} m² · motordan",
+        # başlıktaki alan: ön onay antedindeki yazının kendisi (D-49 brüt, verandalar dahil · net; Lokman 14 Kasım 2026 20:43 UTC)
+        "proje": f"{kod} prefabrik", "kisa": kod, "chip": dxf_out.alan_yazisi(plan),
         "spec": [f"{fmtc(W)} × {fmtc(DY)} cm", "tek kat prefabrik", f"duvar {fmtc(H)} cm", f"beşik %{fmt(TAN * 100)} · {fmt(EGIM_D, 1)}°", kaplama_txt,
                  (f"{len(VR)} veranda" if VR else "gömme veranda" if GVK and not GVK["nis"] and GVK["ad"] == "veranda" else
                   f"{'köşede' if GVK['iki_yan'] else 'gövdede'} {GVK['ad']}" if GVK and not GVK["nis"] else "verandasız") +

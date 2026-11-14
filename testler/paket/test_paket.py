@@ -287,6 +287,22 @@ def test_sacak_omegasi_z_ve_veranda_asigi_kart_modelinden(paketler):
     assert d["asik"]["yuzler"]["V2L"]["sira"] == d["asik"]["yuzler"]["V2R"]["sira"] == [4.58, 49.01, 109.01, 164.43]
 
 
+def test_baslikta_brut_ve_net(paketler):
+    """Rehberin başlığındaki alan ön onay antedindeki yazının kendisi (`dxf_out.alan_yazisi`): brüt verandalar dahil (D-49), net kapalı
+    odaların toplamı (Lokman, 14 Kasım 2026 20:43 UTC: "TK-01 ve TK-02 verandalar dahil bürüt m² leri yazılmamış sadece başlıkları düzelt")."""
+    from motor import dxf_out, geometry as G
+    kok, _, _ = paketler
+    beklenen = {"TK-01": "90,21 m² brüt · 72,71 m² net", "AP-19": "60,00 m² brüt · 48,85 m² net"}   # kayıttaki İş Emri'leri: TK-01 r06, PK-01
+    for kod, yazi in beklenen.items():
+        ie = json.loads((KOK / _model(kod)["is_emri"]).read_text(encoding="utf-8"))
+        assert dxf_out.alan_yazisi(G.kur(ie)) == yazi, kod
+        G.lento_ayarla({})                                   # lento modül durumudur (BK-23): öteki testlere sızmaz
+        yol = kok / "prefabrik" / kod / f"{kod}_montaj_rehberi.html"
+        d = _rehber_verisi(yol)
+        assert d["kabuk"]["chip"] == yazi and f'<span class="chip">{yazi}</span>' in yol.read_text(encoding="utf-8"), kod
+        assert d["rozet"].endswith(yazi.split(" · ")[1].replace(" net", "")), kod     # sahnedeki etiket değişmedi: net m²
+
+
 @pytest.mark.skipif(iz.hazir() is not None, reason=f"rehber izi: {iz.hazir()}")
 @pytest.mark.parametrize("kod", ["TK-01", "AP-19"])
 def test_rehber_izi(paketler, tmp_path, kod):
