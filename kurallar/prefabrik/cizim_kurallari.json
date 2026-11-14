@@ -998,6 +998,35 @@
     "testler/motor/test_iki_cumba.py::test_yanlis_tanim_hata",
     "testler/motor/test_iki_cumba.py::test_tek_cumba_eski_yol"
    ]
+  },
+  {
+   "kod": "PC-39",
+   "baslik": "Tek özel pano: iki köşe ya da T arasında 125,5'ler, kalan tek özel pano",
+   "kural": "İş Emri'nde `yapi.dizilim.tek_ozel_pano: \"dizilim_sonu\"` yazılıysa Motor her duvarda (dış ve iç) iki köşe ya da T arasındaki açıklıksız panoları yeniden dizer: toplamdan 125,5'ler çıkar, kalan tek özel pano olur (`geometry._tek_ozel_pano`, `_kur`'un sonunda, 125,5 denetiminden önce). Aralığı T eki, pencereli ya da kapılı pano ve karkaslı pano keser (`geometry.tek_pano_araliklari`); bu panolar yerinde kalır. Aralıkta en az iki tam olmayan pano (boy < 119,9; köşe ve T payıyla kısalmış 120,5 ve 122,5 tamdır) yoksa aralığa dokunulmaz; özel durum yokken 62,75 bölünmez. Boy aks üstünden ölçülür, köşe ve T payı gerçek uçta kalır. Kalan özel pano montaj köşesinden uzak uçtadır (Lokman, kart 14 Kasım 2026 14:27:09): sağ uç, ön-solda düşey duvarda arka uç, arka-solda düşey duvarda ön uç. Dış ölçü, odalar ve açıklıklar değişmez; çeyrek pano (31,375) kullanılmaz (Lokman 14:14:55). Kısa kalan parça silinmez; 20 cm'den kısa panoya Motor'un var olan \"çok kısa pano\" uyarısı düşer (kalsın mı silinsin mi sorusu açık). Kalan köşe ya da T payından kısaysa (pano boyu ≤ 0 olurdu) ya da yeni ek çektirme U'lu T'ye denk gelirse açık hata (K21, D-49). Paftadan gelen dayanak ekleri (`dis_pano_dayanagi`, `son_aks`) aralığın içindeyse yeniden dizilir. Duvarda zaten tek özel pano varsa yerinde kalır (Lokman, kart 14:55:45 \"A: Yerinde kalsın\"). Değişen aralıklar `Plan.tek_ozel_pano`'da; önce/sonra resmi `python -m araclar.tek_ozel_pano_kiyas`. Anahtarsız İş Emri'nin planı değişmez. Algoritma Lokman'ın kart seçimini yaptığı eskizle birebirdir (havuz şablonları, `testler/motor/veri/D92_tek_ozel_pano_beklenen.json`).",
+   "karar": "D-92",
+   "lokman": {
+    "tarih": "2026-11-14",
+    "saat": "13:24",
+    "soz": "89,25 veya 70 cm veya ne olursa olsun 125,5 daha büyük bir ölçü varsa 125,5 ölçüsünü çıkar kalanı özel pano olarak ekle"
+   },
+   "kod_yeri": [
+    "motor/geometry.py::_tek_ozel_pano",
+    "motor/geometry.py::tek_pano_araliklari",
+    "motor/geometry.py::_kur"
+   ],
+   "test": [
+    "testler/motor/test_d92_tek_ozel_pano.py::test_anahtarsiz_is_emri_aynen",
+    "testler/motor/test_d92_tek_ozel_pano.py::test_degismeyen_evde_anahtar_bir_sey_degistirmez",
+    "testler/motor/test_d92_tek_ozel_pano.py::test_motor_eskiz_tablosuyla_ayni",
+    "testler/motor/test_d92_tek_ozel_pano.py::test_aciklikli_panolar_dis_olcu_ve_odalar_yerinde",
+    "testler/motor/test_d92_tek_ozel_pano.py::test_her_aralikta_en_cok_bir_ozel_pano",
+    "testler/motor/test_d92_tek_ozel_pano.py::test_kalan_dizilim_sonunda",
+    "testler/motor/test_d92_tek_ozel_pano.py::test_lokmanin_ornegi_85m2",
+    "testler/motor/test_d92_tek_ozel_pano.py::test_kisa_parca_kalir_ve_uyarilir",
+    "testler/motor/test_d92_tek_ozel_pano.py::test_kalan_kose_payindan_kisa_hata",
+    "testler/motor/test_d92_tek_ozel_pano.py::test_bilinmeyen_deger_hata",
+    "testler/motor/test_d92_tek_ozel_pano.py::test_cektirme_u_ile_cakisma_hata"
+   ]
   }
  ]
 }
