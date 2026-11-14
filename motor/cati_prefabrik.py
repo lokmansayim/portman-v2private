@@ -135,8 +135,9 @@ def cumba_dikdortgenleri(c: dict, kutu: tuple, plan: G.Plan | None = None) -> tu
     önde gövdenin cumbası, arkada sundurmanın cumbası): ana çatının iki karşı saçak yüzünde; her biri tek cumbanın kuralıyla kurulur, ana çatı
     iki çıkıntının arasında. Taşan verandanın cumbası `veranda` ile (`_veranda_cumbasi`). Ana makasın geri çekilmesi (`ana_makas`) iki cumbada yok."""
     cs = c.get("cumbalar") or []
-    if len(cs) != 2:
-        if any(isinstance(u, dict) and "veranda" in u for u in cs):
+    veranda_var = any(isinstance(u, dict) and "veranda" in u for u in cs)
+    if len(cs) != 2 or not veranda_var:                                         # verandasız: eski yol (iki gövde cumbası orada hata)
+        if veranda_var:
             raise PrefabrikCatiHatasi("verandanın cumbası yalnız gövdenin çıkıntılı cumbasıyla birlikte, ikinci cumba olarak yazılır (PC-38)")
         ana, cumba = _cumba(c, kutu, plan)
         return ana, [cumba]
@@ -146,7 +147,7 @@ def cumba_dikdortgenleri(c: dict, kutu: tuple, plan: G.Plan | None = None) -> tu
         raise PrefabrikCatiHatasi(f"iki cumba ana çatının karşı iki saçak yüzünde olur ({cs[0].get('cephe')}, {cs[1].get('cephe')} yazılmış)")
     if sum("veranda" in u for u in cs) != 1:
         raise PrefabrikCatiHatasi("iki cumbanın biri gövdenin çıkıntılı cumbası, öteki taşan verandanın cumbası (`veranda`) olur (PC-38); "
-                                  "iki gövde cumbası ya da iki veranda cumbası bu sürümde yok")
+                                  "iki veranda cumbası bu sürümde yok")
     if not all(float(u.get("cikinti_cm") or 0) > 0 for u in cs if "veranda" not in u):
         raise PrefabrikCatiHatasi("veranda cumbasının karşısındaki gövde cumbası çıkıntılı olur (`cikinti_cm` > 0; PC-38, 45 m² ev); "
                                   "çıkıntısız gövde cumbasıyla iki cumba bu sürümde yok")
@@ -303,7 +304,7 @@ def cati(plan: G.Plan, ie: dict) -> dict:
             from .genel import cati_ortak as CO
             u["duzlemler"] = _kirma_farkli(kutu, mahya, round(float(c["egim_yuzde"]) / 100, 5), dict(c["kirma_egimleri"]),
                                            CO.baglam(k, round(float(c["egim_yuzde"]) / 100, 5), H0), k)
-    elif len(c.get("cumbalar") or []) == 2:          # 14 Kasım 2026: iki cumba (gövdenin cumbası + taşan verandanın cumbası)
+    elif len(c.get("cumbalar") or []) == 2 and any(isinstance(u, dict) and "veranda" in u for u in c["cumbalar"]):   # PC-38: gövde + veranda cumbası
         ana, rs = cumba_dikdortgenleri(c, kutu, plan)
         from shapely.geometry import box
         from shapely.ops import unary_union
