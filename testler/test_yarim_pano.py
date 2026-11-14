@@ -64,10 +64,11 @@ def test_tablo(kod):
 
 
 def test_tablo_temiz_evler():
-    """Bugün temiz çizilen: 85 m² (PA-12) ve 77 m² (PA-24) sağ uzat ve kısalt, 49 m² (PA-23) ön uzat (Lokman'a rapor, 14 Kasım 09:53)."""
+    """Bugün temiz çizilen: 85 m² (PA-12) ve 77 m² (PA-24) sağ uzat ve kısalt, 49 m² (PA-23) ön uzat ve kısalt (Lokman'a rapor,
+    14 Kasım 09:53; 49 m² ön kısalt hakem bulgusundan sonra: kıyas önce kaydırır, sonra toleransla eşler)."""
     t = json.loads(TABLO.read_text(encoding="utf-8"))["tablo"]
     temiz = sorted((k, kom) for k, v in t.items() for kom, s in v.items() if s == "temiz")
-    assert temiz == [("PA12", "sag+1"), ("PA12", "sag-1"), ("PA23", "on+1"), ("PA24", "sag+1"), ("PA24", "sag-1")]
+    assert temiz == [("PA12", "sag+1"), ("PA12", "sag-1"), ("PA23", "on+1"), ("PA23", "on-1"), ("PA24", "sag+1"), ("PA24", "sag-1")]
 
 
 # ---------------------------------------------------------------- kurallar
@@ -105,6 +106,18 @@ def test_veranda_duvara_degerse_durur():
     with pytest.raises(Y.KomutDurdu) as e:
         Y.uygula(_ie("PA12"), "on", 1)
     assert e.value.kod == "veranda" and "VERANDA" in e.value.neden
+
+
+@pytest.mark.parametrize("ad", ["SUNDURMA", "ÖN ALAN"])
+def test_sundurma_uzamaz(ad):
+    """Motor'un açık mahali (veranda, balkon, sundurma, teras) kayan duvara değerse komut durur; adı ne olursa olsun (hakem bulgusu 1)."""
+    ie = json.loads((KOK / "is_emri" / "adaylar" / "PA14.json").read_text(encoding="utf-8").replace('"VERANDA"', json.dumps(ad, ensure_ascii=False)))
+    for m in ie["mahaller"]:
+        if m.get("tur") == "veranda":
+            m["tur"] = "sundurma"
+    with pytest.raises(Y.KomutDurdu) as e:
+        Y.uygula(ie, "sag", 1)
+    assert e.value.kod == "veranda" and ad in e.value.neden
 
 
 def test_cati_acikligi_degisirse_durur():
@@ -161,6 +174,31 @@ def test_pa12_sag_arti1_cizim(tmp_path):
         assert (tmp_path / ad).is_file(), ad
     v = json.loads((tmp_path / "cizim" / "validation.json").read_text(encoding="utf-8"))
     assert v["passed"] is True
+
+
+def test_kisaltmada_kalkan_panolar_once_planinda():
+    """Kısaltmada silinen panolar önceki planda 'degisti' (görselde pembe; çalışma kuralı 12, hakem bulgusu 3)."""
+    s = Y.uygula(_ie("PA12"), "sag", -1)
+    assert s["sayilar"] == {"once": 54, "sonra": 51, "ayni": 42, "kaydi": 9}
+    from collections import Counter
+    assert Counter(s["siniflar_once"].values()) == {"ayni": 42, "kaydi": 9, "degisti": 3}
+
+
+def test_dogrulama_gecmezse_dosya_yazilmaz(tmp_path, monkeypatch):
+    """K23: çizim doğrulaması geçmezse hedef klasöre hiçbir dosya yazılmaz (hakem bulgusu 4)."""
+    from motor import dxf_out
+    monkeypatch.setattr(dxf_out, "uret", lambda ie, d, ad_govde=None: {"validation_passed": False})
+    with pytest.raises(Y.KomutDurdu) as e:
+        Y.uret(_ie("PA12"), "sag", 1, tmp_path / "cikti")
+    assert e.value.kod == "cizim"
+    assert not any((tmp_path / "cikti").rglob("*"))
+
+
+def test_on_duvar_kisalt_pa23():
+    """Ön kısalt: Motor 62,5 cm kısaltır (D-30); kıyas önce kaydırır, sonra eşler, kapılar yerinde (hakem bulgusu 2)."""
+    s = Y.uygula(_ie("PA23"), "on", -1)
+    assert s["d_motor"] == -62.5 and s["notlar"]
+    assert s["sayilar"] == {"once": 40, "sonra": 38, "ayni": 32, "kaydi": 6}
 
 
 def test_on_duvar_pa23():

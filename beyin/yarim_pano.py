@@ -17,7 +17,7 @@ Kullanım: python -m beyin.yarim_pano <İş Emri.json> --cephe sag --adim 1 <ç�
 """
 from __future__ import annotations
 
-import argparse, copy, io, json, math, re, sys, contextlib
+import argparse, copy, io, json, math, re, shutil, sys, tempfile, contextlib
 from collections import Counter
 from pathlib import Path
 
@@ -33,7 +33,9 @@ DILIM = ("sag", "on")                     # İE-39 ilk dilim (Lokman, kart 14 Ka
 CEPHE_ADI = {"sag": "sağ", "sol": "sol", "on": "ön", "arka": "arka"}
 # Lokman'ın mühürlediği planlar (AGENTS.md › Mühürlü konular): bu evlerde komut yalnız Lokman'ın sözüyle açılır.
 MUHURLU_EVLER = {"PA-01": "M-07", "PA-02": "M-07", "PA-03": "M-07", "PA-05": "M-07", "PA-22": "M-12"}
-ACIK_MAHAL = ("veranda", "balkon", "teras")
+ACIK_MAHAL = tuple(sorted(G.ACIK_MAHAL_TURLERI))   # Motor'un açık mahal türleri (veranda, balkon, sundurma, teras)
+ACIK_AD = ("VERANDA", "BALKON", "SUNDURMA", "TERAS")
+YER_TOL = 0.05                            # yer kıyasında tolerans (cm): kaydırma yuvarlamadan önce yapılır
 OLCU_TOLERANSI = 0.5                      # Motor'un dış ölçüyü tam panoya tamamlaması (D-30) en çok bu kadar sapabilir (cm)
 
 
@@ -120,7 +122,7 @@ def kaydir(ie0: dict, cephe: str, d: float) -> tuple[dict, dict]:
                 raise KomutDurdu("oda", f"{m['ad']} {_tr(r2[i1] - r2[i0])} cm'ye iner")
             yeni.append(r2)
         if any(abs((b[i1] - b[i0]) - (a[i1] - a[i0])) > TOL for a, b in zip(m["konum_cm"], yeni)):
-            acik = m.get("tur") in ACIK_MAHAL or any(k in m["ad"].upper() for k in ("VERANDA", "BALKON", "TERAS"))
+            acik = m.get("tur") in ACIK_MAHAL or any(k in m["ad"].upper() for k in ACIK_AD)
             if acik:
                 raise KomutDurdu("veranda", f"{m['ad']} kayan duvara değiyor; veranda uzamaz")
             bilgi["uzayan"].append({"ad": m["ad"], "tur": m.get("tur")})
@@ -282,28 +284,40 @@ def _aciklik_adi(ac: dict) -> str:
     return f"{ac['tur']} {ac['olcu']} {yer}"
 
 
-def aciklik_yerleri(plan) -> Counter:
-    """Plan'daki kapı ve pencerelerin yerleri (kubbe dışı): (tür, ölçü, duvar yönü, duvar ekseni, açıklık ortası)."""
-    out = Counter()
+def aciklik_yerleri(plan) -> list:
+    """Plan'daki kapı ve pencerelerin yerleri (kubbe dışı): (tür, ölçü, menteşe, duvar yönü, duvar ekseni, açıklık ortası); yuvarlanmaz."""
+    out = []
     for p in plan.panolar:
         for ac in p.aciklar:
             if ac.tur == "kubbe":
                 continue
             b0, b1 = p.bosluk(ac)
-            out[(ac.tur, str(ac.olcu), p.duvar.yon, round(p.duvar.c, 1), round((b0 + b1) / 2, 1))] += 1
+            out.append((ac.tur, str(ac.olcu), ac.mentese, p.duvar.yon, float(p.duvar.c), (b0 + b1) / 2))
     return out
 
 
+def _esle(bek: list, var: list) -> tuple[list, list]:
+    """İki yer listesini eşler: ilk dört alan aynı, iki sayı `YER_TOL` içinde. Dönüş: (eşlenmeyen beklenen, eşlenmeyen var)."""
+    kalan = list(var)
+    eksik = []
+    for k in bek:
+        for i, v in enumerate(kalan):
+            if k[:4] == v[:4] and abs(k[4] - v[4]) <= YER_TOL and abs(k[5] - v[5]) <= YER_TOL:
+                del kalan[i]
+                break
+        else:
+            eksik.append(k)
+    return eksik, kalan
+
+
 def aciklik_farki(p0, p1, eksen: str, kenar_g: str, d: float, t: float) -> list:
-    """Kayan duvarın bandı dışındaki her açıklık yerinde mi (bandındakiler d kadar kaymış mı)? Yerinde olmayanlar."""
+    """Kayan duvarın bandı dışındaki her açıklık yerinde mi (bandındakiler d kadar kaymış mı), menteşesi aynı mı? Yerinde olmayanlar."""
     L = p0.W if eksen == "x" else p0.H
     kg = kaydirici(L, kenar_g, t, d)
-    bek = Counter()
-    for (tur, olcu, yon, c, m), n in aciklik_yerleri(p0).items():
-        k = (tur, olcu, yon, c, round(kg(m), 1)) if yon == eksen else (tur, olcu, yon, round(kg(c), 1), m)
-        bek[k] += n
-    var = aciklik_yerleri(p1)
-    return sorted(set(f"{k[0]} {k[1]}" for k in (bek - var)) | set(f"{k[0]} {k[1]}" for k in (var - bek)))
+    bek = [(tur, olcu, me, yon, c, kg(m)) if yon == eksen else (tur, olcu, me, yon, kg(c), m)
+           for tur, olcu, me, yon, c, m in aciklik_yerleri(p0)]
+    eksik, fazla = _esle(bek, aciklik_yerleri(p1))
+    return sorted({f"{k[0]} {k[1]}" for k in eksik + fazla})
 
 
 # ---------------------------------------------------------------- çatı ve panolar
@@ -316,33 +330,32 @@ def cati_acikliklari(plan, ie: dict) -> list:
     return [round(b1 - b0, 2) for _a0, _a1, b0, b1 in sr]
 
 
-def _anahtar(p) -> tuple:
-    x0, y0, x1, y1 = p.rect()
-    return (round(x0, 1), round(y0, 1), round(x1, 1), round(y1, 1))
-
-
-def _otele(k: tuple, eksen: str, v: float) -> tuple:
+def _otele(r: tuple, eksen: str, v: float) -> tuple:
     if eksen == "x":
-        return (round(k[0] + v, 1), k[1], round(k[2] + v, 1), k[3])
-    return (k[0], round(k[1] + v, 1), k[2], round(k[3] + v, 1))
+        return (r[0] + v, r[1], r[2] + v, r[3])
+    return (r[0], r[1] + v, r[2], r[3] + v)
 
 
-def pano_siniflari(p0, p1, eksen: str, kenar_g: str, d: float) -> dict:
-    """Sonraki planın her panosu: 'ayni' (yeri ve boyu aynı), 'kaydi' (duvarla birlikte d kadar kaydı), 'degisti' (boyu ya da yeri
-    değişti, yeni). Plan gerçek çerçevededir: önde (gerçek çerçevede en küçük kenar) yerinde kalan panoların koordinatı d kadar artar."""
+def _var_mi(r: tuple, kume: list) -> bool:
+    return any(all(abs(a - b) <= YER_TOL for a, b in zip(r, k)) for k in kume)
+
+
+def pano_siniflari(p0, p1, eksen: str, kenar_g: str, d: float) -> tuple[dict, dict]:
+    """Panolar: 'ayni' (yeri ve boyu aynı), 'kaydi' (duvarla birlikte d kadar kaydı), 'degisti' (boyu ya da yeri değişti; sonrakinde
+    yeni, öncekinde kalkan). Dönüş: (sonraki planın sınıfları, önceki planın sınıfları), pano id → sınıf. Plan gerçek çerçevededir: önde
+    (gerçek çerçevede en küçük kenar) yerinde kalan panoların koordinatı d kadar artar. Kaydırma yuvarlamadan önce, kıyas `YER_TOL` ile."""
     sabit = d if kenar_g == "min" else 0.0
     kayan = 0.0 if kenar_g == "min" else d
-    once = {_anahtar(p) for p in p0.panolar}
-    out = {}
-    for p in p1.panolar:
-        k = _anahtar(p)
-        if _otele(k, eksen, -sabit) in once:
-            out[id(p)] = "ayni"
-        elif _otele(k, eksen, -kayan) in once:
-            out[id(p)] = "kaydi"
-        else:
-            out[id(p)] = "degisti"
-    return out
+    once = [tuple(p.rect()) for p in p0.panolar]
+    sonra = [tuple(p.rect()) for p in p1.panolar]
+    o_sabit = [_otele(r, eksen, sabit) for r in once]
+    o_kayan = [_otele(r, eksen, kayan) for r in once]
+    s1, s0 = {}, {}
+    for p, r in zip(p1.panolar, sonra):
+        s1[id(p)] = "ayni" if _var_mi(r, o_sabit) else "kaydi" if _var_mi(r, o_kayan) else "degisti"
+    for p, rs, rk in zip(p0.panolar, o_sabit, o_kayan):
+        s0[id(p)] = "ayni" if _var_mi(rs, sonra) else "kaydi" if _var_mi(rk, sonra) else "degisti"
+    return s1, s0
 
 
 def bant_disi_degisen(p1, siniflar: dict, eksen: str, kenar_g: str, d: float, t: float) -> list:
@@ -409,12 +422,15 @@ def uygula(ie0: dict, cephe: str, adim: int) -> dict:
     fark = aciklik_farki(p0, p1, eksen, kenar_g, d_motor, t)
     if fark:
         raise KomutDurdu("aciklik", "kapı ya da pencere yerinde kalmıyor: " + ", ".join(fark))
-    siniflar = pano_siniflari(p0, p1, eksen, kenar_g, d_motor)
+    siniflar, siniflar_once = pano_siniflari(p0, p1, eksen, kenar_g, d_motor)
     uzak = bant_disi_degisen(p1, siniflar, eksen, kenar_g, d_motor, t)
     if uzak:
         raise KomutDurdu("dizilim", f"kayan duvardan uzakta {len(uzak)} pano değişir; öteki duvarlar yerinde kalmıyor")
     alan0 = {m.ad: round(m.alan_m2, 2) for m in p0.mahaller.values()}
     alan1 = {m.ad: round(m.alan_m2, 2) for m in p1.mahaller.values()}
+    acik_degisen = [m.ad for m in p1.mahaller.values() if m.acik and alan1.get(m.ad) != alan0.get(m.ad)]
+    if acik_degisen:                                 # Motor'un açık mahali (veranda, balkon, sundurma, teras) uzamaz (D-90)
+        raise KomutDurdu("veranda", f"{', '.join(acik_degisen)} kayan duvara değiyor; veranda uzamaz")
     yon = "uzadı" if adim > 0 else "kısaldı"
     ie1["revizyon"] = int(ie0.get("revizyon") or 1) + 1
     ie1["varsayimlar"] = list(ie0.get("varsayimlar") or []) + [
@@ -424,14 +440,14 @@ def uygula(ie0: dict, cephe: str, adim: int) -> dict:
     return {"is_emri": ie1, "once": p0, "sonra": p1, "cephe": cephe, "adim": adim, "d": d, "d_motor": d_motor,
             "eksen": eksen, "kenar": kenar_g,
             "uzayan": [{"ad": u["ad"], "once_m2": alan0.get(u["ad"]), "sonra_m2": alan1.get(u["ad"])} for u in bilgi["uzayan"]],
-            "kayan_ek_akslar": bilgi["kayan_ek_akslar"], "siniflar": siniflar,
+            "kayan_ek_akslar": bilgi["kayan_ek_akslar"], "siniflar": siniflar, "siniflar_once": siniflar_once,
             "sayilar": {"once": len(p0.panolar), "sonra": len(p1.panolar), **Counter(siniflar.values())},
             "dis_olcu": {"once": [p0.W, p0.H], "sonra": [p1.W, p1.H]}, "notlar": notlar}
 
 
 def ozet(s: dict) -> dict:
     """`uygula` sonucunun JSON'a yazılabilir özeti (Plan nesneleri olmadan)."""
-    return {k: v for k, v in s.items() if k not in ("is_emri", "once", "sonra", "siniflar")}
+    return {k: v for k, v in s.items() if k not in ("is_emri", "once", "sonra", "siniflar", "siniflar_once")}
 
 
 def uret(ie0: dict, cephe: str, adim: int, hedef: Path, govde: str | None = None) -> dict:
@@ -443,15 +459,17 @@ def uret(ie0: dict, cephe: str, adim: int, hedef: Path, govde: str | None = None
     s = uygula(ie0, cephe, adim)
     ie1 = s["is_emri"]
     govde = govde or f"{(ie0['yapi'].get('referans_model') or 'EV').replace('-', '')}_{cephe}_{'arti' if adim > 0 else 'eksi'}{abs(adim)}"
+    with tempfile.TemporaryDirectory() as td:            # K23: doğrulama geçmeden hedefe hiçbir dosya yazılmaz
+        with contextlib.redirect_stdout(io.StringIO()):
+            m = dxf_out.uret(ie1, Path(td) / "cizim", ad_govde=govde)
+        if not m.get("validation_passed"):
+            raise KomutDurdu("cizim", "yeni planın çizim doğrulaması geçmedi")
+        shutil.copytree(Path(td) / "cizim", hedef / "cizim", dirs_exist_ok=True)
     (hedef / f"{govde}_is_emri.json").write_text(json.dumps(ie1, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
     yon = "uzat" if adim > 0 else "kısalt"
     baslik = f"Sonra · {CEPHE_ADI[cephe]} duvar {abs(adim)} yarım pano {yon}"
     dizilim_kiyas.once_sonra(s["once"], s["sonra"], s["siniflar"], hedef / f"{govde}_once_sonra.png", baslik,
-                             kayma=s["d_motor"], eksen=s["eksen"], kenar=s["kenar"])
-    with contextlib.redirect_stdout(io.StringIO()):
-        m = dxf_out.uret(ie1, hedef / "cizim", ad_govde=govde)
-    if not m.get("validation_passed"):
-        raise KomutDurdu("cizim", "yeni planın çizim doğrulaması geçmedi")
+                             kayma=s["d_motor"], eksen=s["eksen"], kenar=s["kenar"], siniflar_once=s["siniflar_once"])
     from motor import bayi_gorseli as BG
     v = json.loads((hedef / "cizim" / "validation.json").read_text(encoding="utf-8"))
     with contextlib.redirect_stdout(io.StringIO()):

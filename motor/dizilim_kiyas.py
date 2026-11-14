@@ -66,14 +66,17 @@ def ciz(ax, plan, sinif: dict | None, baslik: str) -> None:
     ax.set_title(baslik, fontsize=13, loc="left", fontweight="bold")
 
 
-def once_sonra(p0, p1, siniflar: dict, yol: Path, baslik_sonra: str, kayma: float, eksen: str, kenar: str) -> Path:
-    """Önce ve sonra yan yana (x yönündeki değişimde) ya da alt alta değil, yine yan yana; sonra planında panolar sınıf rengiyle.
-    `siniflar`: sonraki planın panosu (id) → 'ayni' | 'kaydi' | 'degisti'. `kayma` cm, `eksen` x | y, `kenar` gerçek çerçevede min | max."""
+def once_sonra(p0, p1, siniflar: dict, yol: Path, baslik_sonra: str, kayma: float, eksen: str, kenar: str,
+               siniflar_once: dict | None = None) -> Path:
+    """Önce ve sonra yan yana; iki planda da panolar sınıf rengiyle. `siniflar`: sonraki planın panosu (id) → 'ayni' | 'kaydi' |
+    'degisti' (yeni ya da boyu değişen); `siniflar_once`: önceki planın panosu → aynı sınıflar ('degisti' kalkan ya da boyu değişen).
+    `kayma` cm, `eksen` x | y, `kenar` gerçek çerçevede min | max."""
     yol = Path(yol)
     sayi = Counter(siniflar.values())
+    sayi0 = Counter((siniflar_once or {}).values())
     Wm, Hm = max(p0.W, p1.W), max(p0.H, p1.H)
     fig, axs = plt.subplots(1, 2, figsize=(20, 9.5 * (Hm + 230) / (Wm + 260) + 1.6), dpi=120)
-    ciz(axs[0], p0, None, f"Önce · {tr(p0.W)} × {tr(p0.H)} cm · {len(p0.panolar)} pano")
+    ciz(axs[0], p0, siniflar_once, f"Önce · {tr(p0.W)} × {tr(p0.H)} cm · {len(p0.panolar)} pano")
     ciz(axs[1], p1, siniflar, f"{baslik_sonra} · {tr(p1.W)} × {tr(p1.H)} cm · {len(p1.panolar)} pano")
     for ax in axs:
         ax.set_xlim(-170, Wm + 90)
@@ -81,8 +84,8 @@ def once_sonra(p0, p1, siniflar: dict, yol: Path, baslik_sonra: str, kayma: floa
     yon = {("x", "max"): "sağa", ("x", "min"): "sola", ("y", "min"): "öne", ("y", "max"): "arkaya"}[(eksen, kenar)]
     yon = yon if kayma > 0 else {"sağa": "sola", "sola": "sağa", "öne": "arkaya", "arkaya": "öne"}[yon]
     fig.text(0.5, 0.035, f"Gri: aynı pano, yeri ve boyu değişmedi ({sayi['ayni']}).   Mavi: aynı pano, duvarla birlikte {tr(abs(kayma))} cm "
-             f"{yon} kaydı ({sayi['kaydi']}).   Pembe: boyu değişen ya da yeni pano ({sayi['degisti']}).", ha="center", fontsize=11.5,
-             color="#333333")
+             f"{yon} kaydı ({sayi['kaydi']}).   Pembe: sonra planında yeni ya da boyu değişen pano ({sayi['degisti']}), "
+             f"önce planında kalkan ya da boyu değişen pano ({sayi0['degisti']}).", ha="center", fontsize=11.5, color="#333333")
     fig.text(0.5, 0.012, "Kırmızı çerçeve pencere, yeşil çerçeve kapı. Sayı: 125,5 cm dışındaki pano boyu.", ha="center", fontsize=11.5,
              color="#333333")
     plt.tight_layout(rect=(0, 0.06, 1, 1))
