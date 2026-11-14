@@ -43,6 +43,7 @@ EVLER = {
     "PA22": ("AP-26", "testler/kor/projeler/AP26/is_emri.json", "2+1", 102.0),
     "PA23": ("AP-05", "testler/kor/projeler/AP05/is_emri.json", "2+1", 49.0),     # verandasız (D-87 › Veranda, 14 Kasım)
     "PA24": ("AP-27", "testler/kor/projeler/AP27/is_emri.json", "2+1", 77.0),     # verandasız
+    "PA25": ("AP-14", "testler/kor/projeler/AP14/is_emri.json", "2+1", 61.0),     # oda programı Lokman'ın kartından (14 Kasım 07:50)
 }
 PREFABRIK = {a["kod"]: a for a in havuz_kayitlari(yapi="prefabrik")}
 
@@ -61,13 +62,14 @@ TUM_PA = D80 | {"PA06K", "PA06C"} | set(EVLER)
 
 # D-87 › Havuza girmeyen projeler: hakemden geçmeyenler ve bulgunun başı
 KALANLAR = {
-    "AP-14": ("testler/kor/projeler/AP14/is_emri.json", ["oda programı"]),
     "AP-23": ("testler/kor/projeler/AP23/is_emri.json", ["oda programı"]),
     "AP-28": ("testler/kor/projeler/AP28/is_emri.json", ["dış ölçü", "brüt oturum"]),
 }
 # D-87 › Veranda (Lokman, 14 Kasım 2026 07:34 UTC): veranda bir oda gibi sayılır; verandasız ev de havuza girer
 VERANDA_SOZU = "veranda ayrıca var mı yok mu belirtilmez verandayı da bir oda gibi kabul et"
 VERANDASIZ = {"PA23", "PA24", "KT09"}
+# AP-14: paftada oda adı yok; oda programı Lokman'ın karar kartından (14 Kasım 2026 07:50:30 UTC, "Evet, 2+1 olarak girsin")
+AP14_SOZU = '"Evet, 2+1 olarak girsin"'
 
 
 def _standart(ie: dict) -> dict:
@@ -154,6 +156,21 @@ def test_verandasiz_ev_havuzda():
         assert satir not in D87
 
 
+def test_oda_programi_lokmanin_kartindan():
+    """AP-14'ün paftasında oda adı yok: hakem oda programını yalnız Lokman'ın kartla verdiği değerden okur, değer sözüyle ve saatiyle durur."""
+    kart = HH.kartlar()["AP-14"]
+    ie = json.loads((KOK / EVLER["PA25"][1]).read_text(encoding="utf-8"))
+    assert kart["oda_sayisi"] is None and kart["yatak_odasi"] == 0
+    assert kart["oda_sayisi_lokman"]["deger"] == "2+1" and AP14_SOZU in kart["oda_sayisi_lokman"]["kaynak"]
+    assert "07:50:30" in kart["oda_sayisi_lokman"]["kaynak"] and AP14_SOZU in D87 and "| PA-25 | AP-14 |" in D87
+    assert HH.denetle(ie, kart)[0] == []
+    sozsuz = {a: v for a, v in kart.items() if a != "oda_sayisi_lokman"}
+    assert [b.split(":")[0] for b in HH.denetle(ie, sozsuz)[0]] == ["oda programı"]                 # söz olmadan kalır
+    assert [b.split(":")[0] for b in HH.denetle(ie, {**kart, "oda_sayisi_lokman": {"deger": "3+1"}})[0]] == ["oda programı"]
+    assert sum("oda_sayisi_lokman" in k for k in HH.kartlar().values()) == 1                           # yalnız AP-14
+    assert "| AP-14 | Hakem kaldı" not in D87 and "| AP-10 | Aynı ev havuzda" in D87
+
+
 def test_hakem_kalemleri():
     """Hakem kalem kalem bulur: ölçü 5 cm'yi, brüt 0,5 m²'yi aşınca; pencere ölçüsü, kapı, veranda ve kat farkında."""
     kart = dict(HH.kartlar()["AP-04"])
@@ -185,8 +202,8 @@ def test_kabulsuz_yolda_havuz_gorunmez():
 # Bütün havuz kabul edilince seçenek seti: düğme ve görsel en çok 3, liste en çok 10 satır, satır başlığı ≤ 24, açıklama ≤ 72
 SETLER = {
     (50, "2+1"): ["PA23"],                                                            # tek aday: öncelik sorulmaz
-    (60, "2+1"): ["PA01", "PA14", "PA18", "PA02", "PA09", "PA20"],
-    (65, "2+1"): ["PA02", "PA09", "PA20", "PA01", "PA03", "PA14", "PA15", "PA18"],
+    (60, "2+1"): ["PA01", "PA14", "PA18", "PA25", "PA02", "PA09", "PA20"],
+    (65, "2+1"): ["PA02", "PA09", "PA20", "PA25", "PA01", "PA03", "PA14", "PA15", "PA18"],
     (77, "2+1"): ["PA24", "PA04", "PA16", "PA05", "PA03", "PA15", "PA19"],
     (80, "2+1"): ["PA16", "PA04", "PA05", "PA24", "PA19", "PA06"],
     (80, "3+1"): ["PA21", "PA12"],
