@@ -31,7 +31,7 @@ def bilesenler(tur: str) -> tuple[dict, list[dict]]:
     return ekran, ekran["layout"]["children"]
 
 
-@pytest.mark.parametrize("tur", ["talep", "revizyon"])
+@pytest.mark.parametrize("tur", ["talep", "revizyon", "talep2"])
 def test_form_tanimi_flow_json_sinirlari(tur):
     t = TF.tanim(tur)
     assert t["version"] == "7.3" and "data_api_version" not in t and "routing_model" not in t      # uç noktasız
@@ -212,3 +212,67 @@ def test_form_mesaji_govdesi_ve_sunus_kurali():
     # aynı planın formu güncel sayılır (sunuş ve çözüm aynı revizyonu okur)
     g = {"form": {"tur": "revizyon", "token": fs[1], "alanlar": {"neyi": ["pencere"]}, "dosyalar": []}}
     assert W.form_cikarimi(g, k.d)["durum"] == "bos"
+
+
+# İE-20 PR-8 (D-89) · verandasız talep formu (`talep2.json`; Lokman, 14 Kasım 2026 07:34 ve 07:44 UTC)
+
+FORM2 = {**FORM, "talep_formu": {**FORM["talep_formu"], "talep2_flow_id": "4444444444"}}
+
+
+def test_talep2_ilk_formun_verandasiz_kopyasi():
+    """Yeni form ilk formla aynı alanları sorar; yalnız veranda sorusu yok. Dosya başlığına "(isteğe bağlı)" yazılmaz (Meta kendisi ekler)."""
+    assert "veranda" not in (TF.FORMLAR / "talep2.json").read_text(encoding="utf-8").lower()
+    e1, c1 = bilesenler("talep")
+    e2, c2 = bilesenler("talep2")
+    assert {k: v for k, v in e1.items() if k not in ("data", "layout")} == {k: v for k, v in e2.items() if k not in ("data", "layout")}
+    assert e2["data"] == {k: v for k, v in e1["data"].items() if k != "veranda"}
+    beklenen = json.loads(json.dumps([c for c in c1 if c.get("name") != "veranda"]))
+    [dosya] = [c for c in beklenen if c["type"] == "DocumentPicker"]
+    dosya["label"] = "Çizim ya da plan"
+    [footer] = [c for c in beklenen if c["type"] == "Footer"]
+    del footer["on-click-action"]["payload"]["veranda"]
+    assert c2 == beklenen
+    assert "isteğe bağlı" not in json.dumps(c2, ensure_ascii=False)
+
+
+def test_talep2_ekran_verisi_veranda_tasimaz():
+    [ekran] = TF.tanim("talep2")["screens"]
+    kart = {"varsayilanlar": {"yapi_turu": "celik", "veranda": "kose"}}
+    taslak = {"yapi_turu": "celik", "oda_programi": "3+1", "dis_olcu": {"en_m": 7.5, "boy_m": 9.0}, "veranda": {"konum": "yan"}}
+    for bayi, ts in ((None, None), (kart, None), (kart, taslak)):
+        d = TF.talep2_ekran_verisi(bayi, ts)
+        assert set(d) == set(ekran["data"]) and "veranda" not in d and all(isinstance(v, str) for v in d.values())
+        assert d == {k: v for k, v in TF.ekran_verisi(bayi, ts).items() if k != "veranda"}       # öteki alanlar ilk formdakiyle aynı
+
+
+def test_talep2_kimligi_varsa_ilk_formun_yerine_sunulur():
+    gelen = {"id": "wamid.G2", "sender": "900000000101"}
+    celik = {"yapi_turu": "celik"}
+    # kimlik yokken bugünkü davranış: ilk form, veranda seçili
+    tur, token, veri, *_ = W.talep_formu_sunusu(gelen, None, celik, FORM)
+    assert tur == "talep" and veri["veranda"] == "on"
+    # kimlik varken: verandasız form, aynı token biçimi, veranda verisi yok
+    tur, token, veri, *_ = W.talep_formu_sunusu(gelen, None, celik, FORM2)
+    assert tur == "talep2" and token.startswith("tf:") and "veranda" not in veri and veri["yapi"] == "celik"
+    satir = W.giden_form(gelen, "Kaç oda istiyorsunuz?", 0, tur, FORM2, token, veri)
+    p = M.mesaj_yuku(satir, "900000000101")["interactive"]["action"]["parameters"]
+    assert p["flow_id"] == "4444444444" and p["flow_cta"] == "Talep formu" and p["flow_action_payload"]["screen"] == "TALEP"
+    assert set(p["flow_action_payload"]["data"]) == set(TF.tanim("talep2")["screens"][0]["data"])
+    # prefabrik formu da açıkken: prefabrik → prefabrik formu, çelik → verandasız form, bilinmiyorsa iki düğme
+    hepsi = {**FORM2, "talep_formu": {**FORM2["talep_formu"], "prefabrik_flow_id": "3333333333"}}
+    assert W.talep_formu_sunusu(gelen, None, {"yapi_turu": "prefabrik"}, hepsi)[0] == "prefabrik"
+    assert W.talep_formu_sunusu(gelen, None, celik, hepsi)[0] == "talep2"
+    assert W.talep_formu_sunusu(gelen, None, None, hepsi)[0] == "yapi_sor"
+    assert W.YAPI_FORM_METNI["talep2"] == W.YAPI_FORM_METNI["talep"]
+    # geçersiz kimlik sayılmaz: ilk form
+    bozuk = {**FORM, "talep_formu": {**FORM["talep_formu"], "talep2_flow_id": "12a"}}
+    assert W.talep_formu_sunusu(gelen, None, celik, bozuk)[0] == "talep"
+
+
+def test_talep2_cevabi_talebe_veranda_yazmaz():
+    oz = TF.cevap_ozeti(_cevap(flow_token="tf:abc", yapi="celik", kat="1", oda="2+1", alan=60, cati="besik"))
+    assert oz["tur"] == "talep" and "veranda" not in oz["alanlar"]
+    t = TF.talep(oz)
+    assert "veranda" not in t and t["yapi_turu"] == "celik" and t["oda_programi"] == "2+1"
+    assert Talep.model_validate(t).veranda is None                                              # veranda belirtilmedi
+    assert "veranda" not in TF.metin(oz).lower()

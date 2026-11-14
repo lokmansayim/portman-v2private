@@ -92,7 +92,7 @@ def _alan_turu(c: dict) -> str:
     return "array" if c["type"] in PICKER or c["type"] == "CheckboxGroup" else "string"
 
 
-@pytest.mark.parametrize("tur", ["talep", "revizyon", "prefabrik"])
+@pytest.mark.parametrize("tur", ["talep", "revizyon", "prefabrik", "talep2"])
 def test_gecis_yuku_sonraki_ekranin_veri_modeliyle_ayni_turde(tur):
     """Meta'nın 14 Kasım 2026 hatası yerelde yakalanır: `navigate` yükündeki her alan sonraki ekranın veri modelinde aynı türle durur,
     veri modelinin her alanı yükte vardır; `${screen.X.form.y}` var olan bir ekranın var olan alanını gösterir."""
@@ -125,7 +125,7 @@ def _hepsi(dugum) -> list[dict]:
     return ([dugum] if "type" in dugum else []) + [x for k, v in dugum.items() if k != "data-source" for x in _hepsi(v)]
 
 
-@pytest.mark.parametrize("tur", ["talep", "revizyon", "prefabrik"])
+@pytest.mark.parametrize("tur", ["talep", "revizyon", "prefabrik", "talep2"])
 def test_alan_adi_formun_butununde_tek(tur):
     """Meta, 14 Kasım 2026 (DUPLICATE_FORM_COMPONENT_NAMES): aynı alan adı `If`'in iki dalında bile iki kez geçemez; ad formun bütün
     ekranlarında tektir."""
