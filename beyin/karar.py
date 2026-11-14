@@ -1893,8 +1893,9 @@ def _yarim_pano_uygula(k: Konusma, ie: dict, ts: dict):
         odalar = "; ".join(f"{u['ad']} {_m2(u['once_m2'])} → {_m2(u['sonra_m2'])} m²" for u in s["uzayan"])
         birikti = sum(1 for x in ts.get("yarim_pano") or [] if x["cephe"] == c["cephe"]) > 1     # notlar evin ilk hâline göre
         notlar.append(f"{YP.CEPHE_ADI[c['cephe']]} duvar {'toplam ' if birikti else ''}{_yp_miktar(c['adim'])} "
-                      f"{'uzadı' if c['adim'] > 0 else 'kısaldı'} (dış ölçü "
-                      f"{YP._tr(W0)} × {YP._tr(H0)} → {YP._tr(W1)} × {YP._tr(H1)} cm" + (f"; {odalar}" if odalar else "") + ")")
+                      f"{'uzadı' if c['adim'] > 0 else 'kısaldı'} ("
+                      + (f"uçtaki {YP._tr(s['silinen'])} cm özel pano kaldırıldı; " if s.get("silinen") else "")    # kart 14:57:40
+                      + f"dış ölçü {YP._tr(W0)} × {YP._tr(H0)} → {YP._tr(W1)} × {YP._tr(H1)} cm" + (f"; {odalar}" if odalar else "") + ")")
     return ie, notlar
 
 

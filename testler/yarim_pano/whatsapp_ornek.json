@@ -16,9 +16,9 @@
    "bayi": "Sağa yarım pano uzatın",
    "eylem": "is_emri",
    "revizyon": 2,
-   "mesaj": "PA-12 r02. Değişiklik: sağ duvar yarım pano uzadı (dış ölçü 1166 × 726 → 1228,75 × 726 cm; YATAK ODASI 2 11,8 → 14,6 m²; YATAK ODASI 3 13,5 → 15,2 m²). Ön onay planınız hazır; plan görseli ve PDF ektedir.",
+   "mesaj": "PA-12 r02. Değişiklik: sağ duvar yarım pano uzadı (uçtaki 26,5 cm özel pano kaldırıldı; dış ölçü 1166 × 726 → 1202,25 × 726 cm; YATAK ODASI 2 11,8 → 13,4 m²; YATAK ODASI 3 13,5 → 14,5 m²). Ön onay planınız hazır; plan görseli ve PDF ektedir.",
    "dis_olcu_cm": [
-    1228.75,
+    1202.25,
     726
    ]
   },
@@ -28,7 +28,7 @@
    "revizyon": 2,
    "mesaj": "Sol duvarı yarım pano uzatma isteği bu evde otomatik yapılamıyor: bugün yalnız sağ ve ön duvar uzatılıp kısaltılabiliyor. Bu konuyu Lokman Bey'e iletiyorum; en kısa sürede dönüş yapılacak. Planınız (PM-… r02) değişmedi. Onaylayabilir ya da başka bir değişiklik yazabilirsiniz.",
    "dis_olcu_cm": [
-    1228.75,
+    1202.25,
     726
    ]
   },
@@ -38,7 +38,7 @@
    "revizyon": 2,
    "mesaj": "Ön duvarı yarım pano uzatma isteği bu evde otomatik yapılamıyor: veranda bu duvara değiyor; veranda uzamaz. Bu konuyu Lokman Bey'e iletiyorum; en kısa sürede dönüş yapılacak. Planınız (PM-… r02) değişmedi. Onaylayabilir ya da başka bir değişiklik yazabilirsiniz.",
    "dis_olcu_cm": [
-    1228.75,
+    1202.25,
     726
    ]
   },
@@ -48,7 +48,7 @@
    "revizyon": 2,
    "mesaj": "\"yarım pano daha uzat\" isteğini uygulamadım: hangi duvarın kayacağı yazılı değil. Örnek: \"sağa yarım pano uzat\" ya da \"öne 1 pano kısalt\". Planınız (PM-… r02) değişmedi. Onaylayabilir ya da başka bir değişiklik yazabilirsiniz.",
    "dis_olcu_cm": [
-    1228.75,
+    1202.25,
     726
    ]
   },
@@ -66,9 +66,9 @@
    "bayi": "Sağa 1 pano uzatın",
    "eylem": "is_emri",
    "revizyon": 4,
-   "mesaj": "PA-12 r04. Değişiklik: sağ duvar toplam 1 pano uzadı (dış ölçü 1166 × 726 → 1291,5 × 726 cm; YATAK ODASI 2 11,8 → 17,4 m²; YATAK ODASI 3 13,5 → 16,8 m²). Ön onay planınız hazır; plan görseli ve PDF ektedir.",
+   "mesaj": "PA-12 r04. Değişiklik: sağ duvar toplam 1 pano uzadı (uçtaki 26,5 cm özel pano kaldırıldı; dış ölçü 1166 × 726 → 1265 × 726 cm; YATAK ODASI 2 11,8 → 16,2 m²; YATAK ODASI 3 13,5 → 16,1 m²). Ön onay planınız hazır; plan görseli ve PDF ektedir.",
    "dis_olcu_cm": [
-    1291.5,
+    1265.0,
     726
    ]
   }

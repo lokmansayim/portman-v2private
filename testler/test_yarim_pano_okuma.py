@@ -118,14 +118,14 @@ def test_ayar_kapali_bugunku_yol(s):
 
 def test_hedef_ornekle_ayni_plan(s):
     """85 m² 3+1 ev, sağ duvar 1 yarım pano: WhatsApp'tan gelen komutun İş Emri'nin geometrisi Lokman'ın onayladığı hedef örnekle aynı
-    (testler/yarim_pano/PA12_sag_arti1.json; kart 14 Kasım 10:11:06 UTC "Doğru, örnek olsun")."""
+    (testler/yarim_pano/PA12_sag_arti1.json; kart 14 Kasım 14:57:40 UTC "1202,25 cm, 26,5 silinir")."""
     _r01(s, "PA12")
     k = s.yaz("Sağa yarım pano uzatın", varyantlar=[_yonlendirme("Sağa yarım pano uzatın")])
     assert k.eylem == "is_emri" and s.plan["revizyon"] == 2, k.mesaj
-    assert k.mesaj == ("PA-12 r02. Değişiklik: sağ duvar yarım pano uzadı (dış ölçü 1166 × 726 → 1228,75 × 726 cm; YATAK ODASI 2 11,8 → "
-                       f"14,6 m²; YATAK ODASI 3 13,5 → 15,2 m²). {HAZIR}")
+    assert k.mesaj == ("PA-12 r02. Değişiklik: sağ duvar yarım pano uzadı (uçtaki 26,5 cm özel pano kaldırıldı; dış ölçü 1166 × 726 → "
+                       f"1202,25 × 726 cm; YATAK ODASI 2 11,8 → 13,4 m²; YATAK ODASI 3 13,5 → 14,5 m²). {HAZIR}")
     hedef = json.loads((KOK / "testler" / "yarim_pano" / "PA12_sag_arti1.json").read_text(encoding="utf-8"))
-    assert hedef["onay"]["zaman_utc"] == "2026-11-14T10:11:06Z"
+    assert hedef["onay"]["zaman_utc"] == "2026-11-14T14:57:40Z"
     assert _geometri(k.is_emri)[1:] == _geometri(hedef["is_emri"])[1:]
     assert k.is_emri["yapi"]["dis_olcu_cm"] == hedef["is_emri"]["yapi"]["dis_olcu_cm"]
 
@@ -135,7 +135,7 @@ def test_llm_kopyasi_ikinci_kez_girmez(s):
     _r01(s, "PA12")
     soz = "Sağa yarım pano uzat"
     k = s.yaz(soz, varyantlar=[_yonlendirme(soz), {"tur": "diger", "aciklama": "yapıyı sağa doğru yarım pano uzat"}], ozel_istekler=[soz])
-    assert k.eylem == "is_emri" and k.is_emri["yapi"]["dis_olcu_cm"]["x"] == pytest.approx(1228.75), k.mesaj
+    assert k.eylem == "is_emri" and k.is_emri["yapi"]["dis_olcu_cm"]["x"] == pytest.approx(1202.25), k.mesaj
     assert soz not in k.is_emri["ozel_istekler"]
     assert not [v for v in s.k.d["taslak"].get("varyantlar") or [] if "pano" in v.get("aciklama", "")]
 
@@ -145,7 +145,8 @@ def test_tam_pano(s):
     _r01(s, "PA12")
     k = s.yaz("Sağa 1 pano uzat")
     assert k.eylem == "is_emri", k.mesaj
-    assert k.mesaj.startswith("PA-12 r02. Değişiklik: sağ duvar 1 pano uzadı (dış ölçü 1166 × 726 → 1291,5 × 726 cm;")
+    assert k.mesaj.startswith("PA-12 r02. Değişiklik: sağ duvar 1 pano uzadı (uçtaki 26,5 cm özel pano kaldırıldı; dış ölçü 1166 × 726 → "
+                              "1265 × 726 cm;")
     beklenen = YP.uygula(_sablon("PA12"), "sag", 2)["is_emri"]
     assert _geometri(k.is_emri)[1:] == _geometri(beklenen)[1:]
     assert k.is_emri["yapi"]["dis_olcu_cm"] == beklenen["yapi"]["dis_olcu_cm"]
@@ -155,7 +156,7 @@ def test_komutlar_birikir_ve_geri_alinir(s):
     _r01(s, "PA12")
     s.yaz("sağa yarım pano uzat")
     k = s.yaz("sağa yarım pano daha uzat")
-    assert k.eylem == "is_emri" and s.plan["revizyon"] == 3 and k.is_emri["yapi"]["dis_olcu_cm"]["x"] == pytest.approx(1291.5), k.mesaj
+    assert k.eylem == "is_emri" and s.plan["revizyon"] == 3 and k.is_emri["yapi"]["dis_olcu_cm"]["x"] == pytest.approx(1265), k.mesaj
     s.yaz("sağa yarım pano kısalt")
     k = s.yaz("sağa yarım pano kısalt")
     assert k.eylem == "is_emri" and s.plan["revizyon"] == 5, k.mesaj
@@ -176,7 +177,8 @@ def test_ilk_planda_komut(s):
     s.k.yarim_pano = True
     k = s.yaz("PA12 sağa yarım pano uzat", katalog_kodu="PA12", varyantlar=[{"tur": "diger", "aciklama": "sağa yarım pano uzat"}])
     assert k.eylem == "is_emri" and s.plan["revizyon"] == 1, k.mesaj
-    assert k.mesaj.startswith("PA-12 seçildi. Değişiklik: sağ duvar yarım pano uzadı (dış ölçü 1166 × 726 → 1228,75 × 726 cm;")
+    assert k.mesaj.startswith("PA-12 seçildi. Değişiklik: sağ duvar yarım pano uzadı (uçtaki 26,5 cm özel pano kaldırıldı; dış ölçü "
+                              "1166 × 726 → 1202,25 × 726 cm;")
 
 
 def test_pencereyle_birlikte(s):
@@ -192,7 +194,7 @@ def test_pencereyle_birlikte(s):
 @pytest.mark.parametrize("kod,soz,neden", [
     ("PA12", "öne yarım pano uzat", "veranda bu duvara değiyor; veranda uzamaz"),
     ("PA12", "sola yarım pano uzat", "bugün yalnız sağ ve ön duvar uzatılıp kısaltılabiliyor"),
-    ("PA23", "sağa yarım pano kısalt", "kapı ya da pencere yerinde kalmıyor"),
+    ("PA23", "sağa yarım pano uzat", "çatının açıklığı değişiyor"),
     ("PA01", "sağa yarım pano uzat", "bu evin planı sabit, değiştirilemiyor"),
 ])
 def test_kural_tutmazsa_gerekce_plan_acik(s, kod, soz, neden):
