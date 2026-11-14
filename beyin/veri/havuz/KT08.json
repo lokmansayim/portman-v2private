@@ -1,0 +1,65 @@
+{
+ "kod": "KT08",
+ "gosterim": "KT-08",
+ "durum": "gecerli",
+ "motor": "genel",
+ "tanim": "modeller/havuz/KT08.json",
+ "tanim_sha256": "193187bacc02e8bd7c309917dba25f7a1bd48029bd68318a73f28458e5901c07",
+ "gorsel": "adaylar/KT08.png",
+ "referans_model": "KT08",
+ "yapi_turu": "celik",
+ "kat": 1,
+ "oda_programi": "3+1",
+ "katalog_m2": 90.0,
+ "kapali_m2": 73.28,
+ "veranda_m2": 16.6,
+ "varyantlar": [],
+ "musteri_projesi": true,
+ "sunum": {
+  "cati_adi": "Beşik + çift cumba (mahya doğu–batı)",
+  "ad": ""
+ },
+ "ozet": {
+  "dis_olcu_cm": [
+   1139.5,
+   790.8
+  ],
+  "oturum_m2": 89.88,
+  "odalar": {
+   "Yatak Odası 1": 11.0,
+   "Banyo": 3.97,
+   "Yatak Odası 2": 10.18,
+   "Yatak Odası 3": 7.66,
+   "Salon - Mutfak": 33.07,
+   "Veranda": 16.6
+  },
+  "pencere": 7,
+  "kapi": 5,
+  "cati": "besik_cumba",
+  "liste_satir": 90,
+  "kural_seti": "kurallar.json",
+  "perspektif": "TAMAM"
+ },
+ "kaynak": {
+  "metin": "ÇP-20 tanımı (İE-16; müşteri onay paftası), kod ve ad dışında aynı. Aday: D-87 (Lokman 13 Kasım 2026 21:41).",
+  "dosya": "modeller/havuz/KT08.json",
+  "dogrulama": "çizim seti (İE-08, 12 Ekim 2026)",
+  "karar": "D-87",
+  "kart_kiyasi": {
+   "kart": "ÇP-20",
+   "tanim": "testler/celik/projeler/CP20/CP20.json",
+   "tanim_sha256": "a90d960b0ef7b8eb2a24fa623a7cf47baa20b12b7d68aae2edf47d1b36144859",
+   "sonuc": "geçti",
+   "olcum": {
+    "gecti": true,
+    "hatalar": [],
+    "bayi_gorseli": true,
+    "oturum_m2": 89.88,
+    "veranda_m2": 16.6,
+    "oda_programi": "3+1",
+    "kat": 1
+   }
+  }
+ },
+ "not": ""
+}

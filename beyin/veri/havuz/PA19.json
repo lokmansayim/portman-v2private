@@ -1,0 +1,73 @@
+{
+ "kod": "PA19",
+ "gosterim": "PA-19",
+ "durum": "gecerli",
+ "sablon": "adaylar/PA19.json",
+ "gorsel": "adaylar/PA19.png",
+ "referans_model": "PA-19",
+ "yapi_turu": "prefabrik",
+ "kat": 1,
+ "oda_programi": "2+1",
+ "katalog_m2": 84.0,
+ "kapali_m2": 75.0,
+ "veranda_m2": 9.2,
+ "ozet": {
+  "grid": {
+   "x_pano": 7,
+   "y_pano": 7.5
+  },
+  "dis_olcu_cm": [
+   888.0,
+   948.25
+  ],
+  "brut_m2": 84.2,
+  "pano": 50,
+  "pencere": 7,
+  "kapi": 6,
+  "odalar": {
+   "YATAK ODASI 1": 13.76,
+   "WC": 4.43,
+   "YATAK ODASI 2": 11.81,
+   "HOL": 5.9,
+   "YAŞAM ALANI": 20.65,
+   "MUTFAK": 13.38,
+   "VERANDA": 9.2
+  }
+ },
+ "kaynak": {
+  "metin": "AP-21 montaj paftasından İş Emri (İE-33 kör ölçümü). Aday: D-87 (Lokman 13 Kasım 2026 21:41).",
+  "dosya": "testler/kor/projeler/AP21/is_emri.json",
+  "ayna": null,
+  "karar": "D-87",
+  "standart": true,
+  "kart_kiyasi": {
+   "kart": "AP-21",
+   "kart_sha256": "19659150fc65eb696721c901c3e31c438eff3da4675627550e1511bd92a56dd8",
+   "sonuc": "geçti",
+   "olcum": {
+    "dis_olcu_cm": [
+     888.0,
+     948.25
+    ],
+    "acikla_olcu_cm": [
+     888.0,
+     948.25
+    ],
+    "brut_m2": 84.2,
+    "kubbe_m2": 0.0,
+    "yatak_odasi": 2,
+    "pencereler": {
+     "100x60": 1,
+     "120x120": 3,
+     "120x180": 2,
+     "60x40": 1
+    },
+    "dis_kapi": 1,
+    "ic_kapi": 5,
+    "veranda": 1,
+    "kat": 1
+   }
+  }
+ },
+ "not": ""
+}

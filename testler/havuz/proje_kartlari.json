@@ -1,0 +1,565 @@
+{
+ "aciklama": "Proje kartı kıyasının hedef değerleri (İE-38, D-87): AIPrefabrik'teki her tek katlı projenin montaj paftasının 1. sayfasından okunan yapı alanları. Kaynak: proje kartı veri seti (Proje_Karti/AP-xx/kart.json, `araclar/proje_karti.py`; her kart bir hakemce kaynakla karşılaştırıldı, 13 projede 23 alan hakem değeriyle düzeltildi; Lokman 9 Kasım 2026 09:18 \"tamam düzeltmeleri yap\", PR #145). Yalnız sayılar ve kodlar; proje adı ve kişi adı yazılmaz. `kart_sha256` kartın dosya özetidir. Pencere ölçüsü paftadaki gibi en/boy cm.",
+ "kaynak": "Proje_Karti (proje dosyaları), PR #145",
+ "evler": {
+  "AP-01": {
+   "dis_olcu_cm": [
+    1400,
+    1000
+   ],
+   "brut_oturum_m2": 140.0,
+   "oda_sayisi": "3+1",
+   "yatak_odasi": 3,
+   "kat_adedi": 1,
+   "cati_sekli": "Dörtomuz",
+   "acikliklar": {
+    "120/120": 3,
+    "60/40": 3,
+    "120/180": 2
+   },
+   "dis_kapi_adedi": 1,
+   "ic_kapi_adedi": 9,
+   "veranda_adedi": 1,
+   "kart_sha256": "c9417f52ed3bb047c3f246272e4b94848353ed94de4a7c91983218414f710c86"
+  },
+  "AP-02": {
+   "dis_olcu_cm": [
+    763,
+    835.75
+   ],
+   "brut_oturum_m2": 64.89,
+   "oda_sayisi": "2+1",
+   "yatak_odasi": 1,
+   "kat_adedi": 1,
+   "cati_sekli": "Beşik + Kubbe",
+   "acikliklar": {
+    "120/120": 3,
+    "120/180": 2,
+    "60/40": 1,
+    "105/170": 1,
+    "59/170": 2
+   },
+   "dis_kapi_adedi": 1,
+   "ic_kapi_adedi": 4,
+   "veranda_adedi": 1,
+   "kart_sha256": "5bb9b3db43582001755b1225771b7423c72782d7030f0dec0f75e48d13f596e7"
+  },
+  "AP-03": {
+   "dis_olcu_cm": [
+    763,
+    835.75
+   ],
+   "brut_oturum_m2": 63.77,
+   "oda_sayisi": "2+1",
+   "yatak_odasi": 1,
+   "kat_adedi": 1,
+   "cati_sekli": "Beşik + Kubbe",
+   "acikliklar": {
+    "120/120": 5,
+    "60/40": 1
+   },
+   "dis_kapi_adedi": 1,
+   "ic_kapi_adedi": 4,
+   "veranda_adedi": 1,
+   "kart_sha256": "12b8dfe288c2b6d2c2404f828f79340f071bea5a7c1d527c6ed30ef8aacd2f01"
+  },
+  "AP-04": {
+   "dis_olcu_cm": [
+    1139.5,
+    835.75
+   ],
+   "brut_oturum_m2": 95.23,
+   "oda_sayisi": "3+1",
+   "yatak_odasi": 3,
+   "kat_adedi": 1,
+   "cati_sekli": "Beşik",
+   "acikliklar": {
+    "120/120": 5,
+    "120/180": 1,
+    "60/40": 1
+   },
+   "dis_kapi_adedi": 1,
+   "ic_kapi_adedi": 4,
+   "veranda_adedi": 1,
+   "kart_sha256": "7b8cdc8cdca6c748da28b0a8dca882e13cf7dce2ecb3bb52d7d7270d17619e65"
+  },
+  "AP-05": {
+   "dis_olcu_cm": [
+    700,
+    700
+   ],
+   "brut_oturum_m2": 49.0,
+   "oda_sayisi": "2+1",
+   "yatak_odasi": 1,
+   "kat_adedi": 1,
+   "cati_sekli": "Beşik",
+   "acikliklar": {
+    "100/100": 5,
+    "50/50": 1,
+    "200/200": 1
+   },
+   "dis_kapi_adedi": 1,
+   "ic_kapi_adedi": 3,
+   "veranda_adedi": 0,
+   "kart_sha256": "57242b1598ffc089491153bbbda12a566b93a139395a0d6b07b8a2a88dd0f997"
+  },
+  "AP-06": {
+   "dis_olcu_cm": [
+    888.5,
+    1024
+   ],
+   "brut_oturum_m2": 90.98,
+   "oda_sayisi": "3+1",
+   "yatak_odasi": 3,
+   "kat_adedi": 1,
+   "cati_sekli": "Beşik + Cumba",
+   "acikliklar": {
+    "120/120": 5,
+    "120/180": 1,
+    "60/40": 1
+   },
+   "dis_kapi_adedi": 2,
+   "ic_kapi_adedi": 4,
+   "veranda_adedi": 1,
+   "kart_sha256": "44b97a7a5dafd06205c54955481ee57a9191a1b3b9c2a8ef1cd28609c1cbf906"
+  },
+  "AP-07": {
+   "dis_olcu_cm": [
+    750,
+    690
+   ],
+   "brut_oturum_m2": 45.0,
+   "oda_sayisi": "1+1",
+   "yatak_odasi": 1,
+   "kat_adedi": 1,
+   "cati_sekli": "Beşik + Cumba",
+   "acikliklar": {
+    "60/40": 1,
+    "120/120": 1,
+    "150/190": 2
+   },
+   "dis_kapi_adedi": 1,
+   "ic_kapi_adedi": 3,
+   "veranda_adedi": 0,
+   "kart_sha256": "14ba8581f809360046ccecf29d08f6014279a707a9962f397fa86334c3b0cf7b"
+  },
+  "AP-08": {
+   "dis_olcu_cm": [
+    785,
+    900
+   ],
+   "brut_oturum_m2": 70.65,
+   "oda_sayisi": "2+1",
+   "yatak_odasi": 1,
+   "kat_adedi": 1,
+   "cati_sekli": "Beşik + Cumba",
+   "acikliklar": {
+    "120/120": 4,
+    "100/120": 1,
+    "60/40": 1
+   },
+   "dis_kapi_adedi": 1,
+   "ic_kapi_adedi": 5,
+   "veranda_adedi": 1,
+   "kart_sha256": "1d35e05aa6f2c3e546f9af8e1da03e09d30a306c67f5d5dd7f0ff066df949292"
+  },
+  "AP-09": {
+   "dis_olcu_cm": [
+    740,
+    944
+   ],
+   "brut_oturum_m2": 69.86,
+   "oda_sayisi": "2+1",
+   "yatak_odasi": 0,
+   "kat_adedi": 1,
+   "cati_sekli": "Beşik + Cumba",
+   "acikliklar": {
+    "60/40": 1,
+    "120/120": 3,
+    "120/70": 1,
+    "150/180": 1,
+    "170/180": 1
+   },
+   "dis_kapi_adedi": 1,
+   "ic_kapi_adedi": 3,
+   "veranda_adedi": 1,
+   "kart_sha256": "2356e37ec2c313ef4b232b4ff609b914ecff440e41c57e8a2bbc8345cd7e5edd"
+  },
+  "AP-10": {
+   "dis_olcu_cm": [
+    888.5,
+    898.5
+   ],
+   "brut_oturum_m2": 81.0,
+   "oda_sayisi": null,
+   "yatak_odasi": 0,
+   "kat_adedi": 1,
+   "cati_sekli": "Beşik",
+   "acikliklar": {
+    "60/40": 2,
+    "120/120": 3,
+    "120/100": 1,
+    "180/200": 1,
+    "105/170": 1,
+    "59/170": 2
+   },
+   "dis_kapi_adedi": 1,
+   "ic_kapi_adedi": 4,
+   "veranda_adedi": 1,
+   "kart_sha256": "9930b1dbbd41190e4dd6e76f579561709ef3f2d4fd4357064541a29c9859765d"
+  },
+  "AP-11": {
+   "dis_olcu_cm": [
+    1166,
+    726
+   ],
+   "brut_oturum_m2": 84.65,
+   "oda_sayisi": "3+1",
+   "yatak_odasi": 3,
+   "kat_adedi": 1,
+   "cati_sekli": "Beşik",
+   "acikliklar": {
+    "120/180": 5,
+    "180/200": 1,
+    "60/40": 1
+   },
+   "dis_kapi_adedi": 1,
+   "ic_kapi_adedi": 5,
+   "veranda_adedi": 1,
+   "kart_sha256": "5432f4eae3a5fa73a041ef75b6b94401c015b91acabc649135b0d9df3c0c7023"
+  },
+  "AP-12": {
+   "dis_olcu_cm": [
+    888.5,
+    1638.25
+   ],
+   "brut_oturum_m2": 143.0,
+   "oda_sayisi": "4+1",
+   "yatak_odasi": 4,
+   "kat_adedi": 1,
+   "cati_sekli": "Beşik + Çift Cumba",
+   "acikliklar": {
+    "120/120": 7,
+    "120/100": 1,
+    "60/40": 3,
+    "160/180": 2
+   },
+   "dis_kapi_adedi": 2,
+   "ic_kapi_adedi": 10,
+   "veranda_adedi": 2,
+   "kart_sha256": "77f0728a2f1602235407f22c6a264428f79c1e6f3777cb19d023247d805a1208"
+  },
+  "AP-13": {
+   "dis_olcu_cm": [
+    763,
+    788
+   ],
+   "brut_oturum_m2": 60.12,
+   "oda_sayisi": "2+1",
+   "yatak_odasi": 2,
+   "kat_adedi": 1,
+   "cati_sekli": "Beşik + Cumba",
+   "acikliklar": {
+    "120/120": 2,
+    "120/180": 2,
+    "60/40": 1
+   },
+   "dis_kapi_adedi": 1,
+   "ic_kapi_adedi": 3,
+   "veranda_adedi": 1,
+   "kart_sha256": "4d155eeceab5d922d4f177ea45180b3c0761cc7c5a956d8873806bf1625e7750"
+  },
+  "AP-14": {
+   "dis_olcu_cm": [
+    748.67,
+    821
+   ],
+   "brut_oturum_m2": 61.46,
+   "oda_sayisi": null,
+   "yatak_odasi": 0,
+   "kat_adedi": 1,
+   "cati_sekli": "Beşik",
+   "acikliklar": {
+    "120/120": 3,
+    "120/180": 2,
+    "180/200": 1,
+    "60/40": 1
+   },
+   "dis_kapi_adedi": 1,
+   "ic_kapi_adedi": 4,
+   "veranda_adedi": 1,
+   "kart_sha256": "ad8f88201848cc2c66dba30f69044ea34cbae0661ce8db217a035851f2ed38f2"
+  },
+  "AP-15": {
+   "dis_olcu_cm": [
+    763,
+    800.75
+   ],
+   "brut_oturum_m2": 60.05,
+   "oda_sayisi": "2+1",
+   "yatak_odasi": 2,
+   "kat_adedi": 1,
+   "cati_sekli": "Beşik + Cumba",
+   "acikliklar": {
+    "120/120": 2,
+    "60/40": 1,
+    "160/180": 1,
+    "120/180": 1
+   },
+   "dis_kapi_adedi": 1,
+   "ic_kapi_adedi": 3,
+   "veranda_adedi": 1,
+   "kart_sha256": "ffccf93321d954c3b139fcf99d8f2697f02f847472a051197bd9eaf7bc7fd702"
+  },
+  "AP-16": {
+   "dis_olcu_cm": [
+    763,
+    918.5
+   ],
+   "brut_oturum_m2": 70.08,
+   "oda_sayisi": "2+1",
+   "yatak_odasi": 2,
+   "kat_adedi": 1,
+   "cati_sekli": "Beşik + Cumba",
+   "acikliklar": {
+    "120/120": 3,
+    "120/180": 2,
+    "60/40": 2
+   },
+   "dis_kapi_adedi": 1,
+   "ic_kapi_adedi": 5,
+   "veranda_adedi": 1,
+   "kart_sha256": "4c51bde7ad084a4f42015b2640d7364a9f92d0488a4eac2b34dad6fe84f12857"
+  },
+  "AP-17": {
+   "dis_olcu_cm": [
+    888.5,
+    898.5
+   ],
+   "brut_oturum_m2": 80.9,
+   "oda_sayisi": "2+1",
+   "yatak_odasi": 2,
+   "kat_adedi": 1,
+   "cati_sekli": "Beşik + Kubbe (cumba)",
+   "acikliklar": {
+    "120/120": 3,
+    "60/40": 2,
+    "120/100": 1,
+    "180/200": 1,
+    "59/170": 2,
+    "105/170": 1
+   },
+   "dis_kapi_adedi": 1,
+   "ic_kapi_adedi": 4,
+   "veranda_adedi": 1,
+   "kart_sha256": "6ac0dc507c313793a2f31304ec800dc98fe4e4824bf028fd8df46aff2d6df426"
+  },
+  "AP-18": {
+   "dis_olcu_cm": [
+    888.5,
+    1149.5
+   ],
+   "brut_oturum_m2": 91.09,
+   "oda_sayisi": "3+1",
+   "yatak_odasi": 3,
+   "kat_adedi": 1,
+   "cati_sekli": "Beşik + Cumba",
+   "acikliklar": {
+    "120/180": 6,
+    "60/40": 1,
+    "180/180": 1
+   },
+   "dis_kapi_adedi": 1,
+   "ic_kapi_adedi": 4,
+   "veranda_adedi": 1,
+   "kart_sha256": "ee4af2491ed0493ce6675b4018e5cde62afb665c469232e214b544f360428b48"
+  },
+  "AP-19": {
+   "dis_olcu_cm": [
+    600.0,
+    1000.0
+   ],
+   "brut_oturum_m2": 60.0,
+   "oda_sayisi": "2+1",
+   "yatak_odasi": 2,
+   "kat_adedi": 1,
+   "cati_sekli": "Beşik",
+   "acikliklar": {
+    "60/40": 1,
+    "120/180": 2,
+    "120/120": 3
+   },
+   "dis_kapi_adedi": 1,
+   "ic_kapi_adedi": 5,
+   "veranda_adedi": 1,
+   "kart_sha256": "cfd5a08a1d171872f80411351535a111c099563fd28042974bd6837af5401682"
+  },
+  "AP-21": {
+   "dis_olcu_cm": [
+    888,
+    948.25
+   ],
+   "brut_oturum_m2": 84.2,
+   "oda_sayisi": "2+1",
+   "yatak_odasi": 2,
+   "kat_adedi": 1,
+   "cati_sekli": "Beşik",
+   "acikliklar": {
+    "120/120": 3,
+    "120/180": 2,
+    "60/40": 1,
+    "100/60 (sürgülü)": 1
+   },
+   "dis_kapi_adedi": 1,
+   "ic_kapi_adedi": 5,
+   "veranda_adedi": 1,
+   "kart_sha256": "19659150fc65eb696721c901c3e31c438eff3da4675627550e1511bd92a56dd8"
+  },
+  "AP-22": {
+   "dis_olcu_cm": [
+    1014,
+    835.8
+   ],
+   "brut_oturum_m2": 82.0,
+   "oda_sayisi": "2+1",
+   "yatak_odasi": 1,
+   "kat_adedi": 1,
+   "cati_sekli": "Beşik + Cumba",
+   "acikliklar": {
+    "120/100": 3,
+    "120/180": 2,
+    "50/50": 1
+   },
+   "dis_kapi_adedi": 1,
+   "ic_kapi_adedi": 5,
+   "veranda_adedi": 1,
+   "kart_sha256": "f71ef8911aaaf99bc0330490c4aeeb34b52d059fe3cc105d71576363918a1aa1"
+  },
+  "AP-23": {
+   "dis_olcu_cm": [
+    1516,
+    835.75
+   ],
+   "brut_oturum_m2": 128.96,
+   "oda_sayisi": "2+1 (her birim)",
+   "yatak_odasi": 1,
+   "kat_adedi": 1,
+   "cati_sekli": "Beşik + Kubbe (cumba)",
+   "acikliklar": {
+    "120/120": 6,
+    "120/180": 4,
+    "60/40": 2,
+    "105/170 (kubbe)": 2,
+    "59/170": 4
+   },
+   "dis_kapi_adedi": 2,
+   "ic_kapi_adedi": 8,
+   "veranda_adedi": 2,
+   "kart_sha256": "6b306437e9dd187c2fc0e9cb99374972bfeca05947fa3807ced8359f274c2a60"
+  },
+  "AP-24": {
+   "dis_olcu_cm": [
+    763,
+    835.75
+   ],
+   "brut_oturum_m2": 64.9,
+   "oda_sayisi": "2+1",
+   "yatak_odasi": 2,
+   "kat_adedi": 1,
+   "cati_sekli": "Beşik + Kubbe (cumba)",
+   "acikliklar": {
+    "120/120": 3,
+    "120/180": 2,
+    "60/40": 1,
+    "105/170 (kubbe)": 1,
+    "59/170": 2
+   },
+   "dis_kapi_adedi": 1,
+   "ic_kapi_adedi": 3,
+   "veranda_adedi": 1,
+   "kart_sha256": "ed0732165f3b84bbbc5972d0d959b621268349a14cf403e547f6ad916262683c"
+  },
+  "AP-25": {
+   "dis_olcu_cm": [
+    800,
+    1029
+   ],
+   "brut_oturum_m2": 80.06,
+   "oda_sayisi": "3+1",
+   "yatak_odasi": 3,
+   "kat_adedi": 1,
+   "cati_sekli": "Beşik + Cumba",
+   "acikliklar": {
+    "120/120": 4,
+    "120/180": 2,
+    "60/40": 2
+   },
+   "dis_kapi_adedi": 1,
+   "ic_kapi_adedi": 7,
+   "veranda_adedi": 1,
+   "kart_sha256": "51fd8887c8ea07b64b0156aceef30df7518cc1ed7b8f9eb68f05ca18776e0593"
+  },
+  "AP-26": {
+   "dis_olcu_cm": [
+    689.58,
+    1559.02
+   ],
+   "brut_oturum_m2": 101.85,
+   "oda_sayisi": "2+1",
+   "yatak_odasi": 2,
+   "kat_adedi": 1,
+   "cati_sekli": "Beşik",
+   "acikliklar": {
+    "120/120": 3,
+    "200/210 (Sürgülü)": 1,
+    "280/210 (Sürgülü)": 1,
+    "50/50": 1
+   },
+   "dis_kapi_adedi": 2,
+   "ic_kapi_adedi": 6,
+   "veranda_adedi": 2,
+   "kart_sha256": "527fede9ba76ad5fc519783fa8758a264d8e1cc7516ff3dc35710753178fecea"
+  },
+  "AP-27": {
+   "dis_olcu_cm": [
+    773,
+    1000
+   ],
+   "brut_oturum_m2": 77.3,
+   "oda_sayisi": "2+1",
+   "yatak_odasi": 1,
+   "kat_adedi": 1,
+   "cati_sekli": "Kırma Çatı",
+   "acikliklar": {
+    "180/210": 3,
+    "140/150": 1
+   },
+   "dis_kapi_adedi": 1,
+   "ic_kapi_adedi": 5,
+   "veranda_adedi": 0,
+   "kart_sha256": "bf336f6c647b04ab1226ae8c6fdfb67f93c744f88724172e0d7d75ebf19424bd"
+  },
+  "AP-28": {
+   "dis_olcu_cm": [
+    1259.94,
+    763
+   ],
+   "brut_oturum_m2": 88.96,
+   "oda_sayisi": "3+1",
+   "yatak_odasi": 2,
+   "kat_adedi": 1,
+   "cati_sekli": "Beşik + Cumba",
+   "acikliklar": {
+    "120/180": 3,
+    "160/180": 1,
+    "160/180 Sürgülü": 1,
+    "80/100": 1,
+    "60/40": 2
+   },
+   "dis_kapi_adedi": 1,
+   "ic_kapi_adedi": 6,
+   "veranda_adedi": 1,
+   "kart_sha256": "344d4aa13b582785944cfc33b2d12b5bedc6d2a25914ef9f5e4c702ff035bceb"
+  }
+ }
+}

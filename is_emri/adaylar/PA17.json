@@ -1,0 +1,330 @@
+{
+ "is_emri_no": "PM-ADAY-PA17",
+ "revizyon": 1,
+ "talep": {
+  "bayi": {
+   "kod": "ADAY",
+   "ad": "Aday kaydı"
+  },
+  "musteri_adi": "ADAY PA17",
+  "metin": "AP-18 montaj paftasından İş Emri (İE-33 kör ölçümü). Aday: D-87 (Lokman 13 Kasım 2026 21:41)."
+ },
+ "yapi": {
+  "sistem": "prefabrik",
+  "kat_sayisi": 1,
+  "duvar_yuksekligi_cm": 250,
+  "duvar_kalinligi_cm": {
+   "dis": 10,
+   "ic": 6
+  },
+  "olcu_kaynagi": "dis_olcu",
+  "dis_olcu_cm": {
+   "x": 888.5,
+   "y": 1149.5
+  },
+  "referans_model": "PA-17",
+  "grid": {
+   "x_pano": 7,
+   "y_pano": 9
+  },
+  "kisa_kenar": "y",
+  "giris_cephesi": "on",
+  "dis_dusey_duvar": "cevre_aks_disinda",
+  "dizilim": {
+   "baslangic": "arka-sol",
+   "hiza": "tam_izgara",
+   "dis_duvar_t_bolme": false,
+   "pencere": "pano",
+   "kapi": "mantik",
+   "kose": "oda",
+   "son_pano": "kosu",
+   "kapi_yeri": "ortada",
+   "karkasli_panolar": [
+    {
+     "yon": "x",
+     "eksen_cm": 1144.5,
+     "aralik_cm": [
+      5,
+      381.5
+     ]
+    },
+    {
+     "yon": "y",
+     "eksen_cm": 381.5,
+     "aralik_cm": [
+      888.5,
+      1139.5
+     ]
+    }
+   ]
+  },
+  "ek_akslar_cm": {
+   "x": [],
+   "y": [
+    768,
+    924.5
+   ]
+  }
+ },
+ "mahaller": [
+  {
+   "ad": "YATAK ODASI 1",
+   "tur": "yatak_odasi",
+   "konum_cm": [
+    [
+     5,
+     10,
+     381.5,
+     386.5
+    ]
+   ]
+  },
+  {
+   "ad": "BANYO",
+   "tur": "banyo",
+   "konum_cm": [
+    [
+     381.5,
+     10,
+     569.75,
+     261
+    ]
+   ]
+  },
+  {
+   "ad": "YATAK ODASI 2",
+   "tur": "yatak_odasi",
+   "konum_cm": [
+    [
+     569.75,
+     10,
+     883.5,
+     261
+    ],
+    [
+     507,
+     261,
+     883.5,
+     386.5
+    ]
+   ]
+  },
+  {
+   "ad": "HOL",
+   "tur": "antre_hol",
+   "konum_cm": [
+    [
+     381.5,
+     261,
+     507,
+     386.5
+    ]
+   ]
+  },
+  {
+   "ad": "YATAK ODASI 3",
+   "tur": "yatak_odasi",
+   "konum_cm": [
+    [
+     507,
+     386.5,
+     883.5,
+     768
+    ]
+   ]
+  },
+  {
+   "ad": "SALON+MUTFAK",
+   "tur": "salon",
+   "konum_cm": [
+    [
+     5,
+     386.5,
+     507,
+     768
+    ],
+    [
+     5,
+     768,
+     381.5,
+     1139.5
+    ]
+   ]
+  },
+  {
+   "ad": "VERANDA",
+   "tur": "veranda",
+   "konum_cm": [
+    [
+     381.5,
+     768,
+     883.5,
+     924.5
+    ]
+   ]
+  }
+ ],
+ "acik_sinirlar": [
+  [
+   "HOL",
+   "SALON+MUTFAK"
+  ]
+ ],
+ "acikliklar": [
+  {
+   "tur": "dis_kapi",
+   "olcu": 90,
+   "arasi": [
+    "VERANDA",
+    "SALON+MUTFAK"
+   ],
+   "pano": 0
+  },
+  {
+   "tur": "ic_kapi",
+   "olcu": 82,
+   "arasi": [
+    "HOL",
+    "BANYO"
+   ],
+   "pano": 0
+  },
+  {
+   "tur": "ic_kapi",
+   "olcu": 82,
+   "arasi": [
+    "HOL",
+    "YATAK ODASI 1"
+   ],
+   "pano": 0
+  },
+  {
+   "tur": "ic_kapi",
+   "olcu": 82,
+   "arasi": [
+    "HOL",
+    "YATAK ODASI 2"
+   ],
+   "pano": 0
+  },
+  {
+   "tur": "ic_kapi",
+   "olcu": 82,
+   "arasi": [
+    "SALON+MUTFAK",
+    "YATAK ODASI 3"
+   ],
+   "pano": 0
+  },
+  {
+   "tur": "pencere",
+   "olcu": "180x180",
+   "mahal": "SALON+MUTFAK",
+   "duvar": "sag",
+   "acilis": "surgulu",
+   "pano": 1
+  },
+  {
+   "tur": "pencere",
+   "olcu": "120x180",
+   "mahal": "SALON+MUTFAK",
+   "duvar": "on",
+   "pano": 0
+  },
+  {
+   "tur": "pencere",
+   "olcu": "120x180",
+   "mahal": "SALON+MUTFAK",
+   "duvar": "on",
+   "pano": 2
+  },
+  {
+   "tur": "pencere",
+   "olcu": "120x180",
+   "mahal": "SALON+MUTFAK",
+   "duvar": "sol",
+   "pano": 1
+  },
+  {
+   "tur": "pencere",
+   "olcu": "120x180",
+   "mahal": "YATAK ODASI 1",
+   "duvar": "sol",
+   "pano": 1
+  },
+  {
+   "tur": "pencere",
+   "olcu": "120x180",
+   "mahal": "YATAK ODASI 2",
+   "duvar": "sag",
+   "pano": 1
+  },
+  {
+   "tur": "pencere",
+   "olcu": "120x180",
+   "mahal": "YATAK ODASI 3",
+   "duvar": "sag",
+   "pano": 1
+  },
+  {
+   "tur": "pencere",
+   "olcu": "60x40",
+   "mahal": "BANYO",
+   "duvar": "arka",
+   "pano": 0
+  }
+ ],
+ "dikmeler": [
+  [
+   878.5,
+   220
+  ]
+ ],
+ "cati": {
+  "tip": "besik_cumba",
+  "egim_yuzde": 32.88,
+  "sacak_cm": 30,
+  "topuk_cm": 10,
+  "makas_yonu": "uzun_kenar",
+  "makas_ekseni": "y",
+  "cumbalar": [
+   {
+    "cephe": "on",
+    "bas_cm": 0,
+    "bit_cm": 386.5,
+    "cikinti_cm": 220
+   }
+  ]
+ },
+ "cikti": {
+  "pdf": true,
+  "dxf": true,
+  "pafta": "A2",
+  "icerik": [
+   "aksli_plan",
+   "alanli_kopya",
+   "montaj_kopyasi",
+   "on_gorunus",
+   "cati_profili",
+   "ozellik_tablosu"
+  ]
+ },
+ "varsayimlar": [
+  "Köşe ve ızgara (İE-17 kuralı; paftada aynı): ana makas y'yi geçer (makas planı MK01–MK08, kesit 989,5 = 929,5 + 2 × 30), kısa kenar y. Ön ve arka duvar köşeden geçer, x ızgarası duvar ekseninden (5 + 125,5k; paftanın arka duvarı 130,5, 256, 381,5, 507, 632,5, 758); yan duvarlar araya girer, y ızgarası arka iç yüzden (10 + 125,5k).",
+  "Gövde: arka bölüm 888,5 × 929,5; solda salon 386,5 × 220 öne çıkar (paftanın ölçüleri 1149,5 = 929,5 + 220). Motor'da dış ölçü 888,5 × 1149,5, sağ önde 507 × 220 girinti; salonun girintiye bakan sağ duvarı aksa ortalı (381,5; dış yüzü 386,5).",
+  "Veranda sağ önde, gövdenin içinde (502 × 156,5; paftada), ön ve sağ açık; ön kenarı paftadaki kirişin hattı (dış yüzü 929,5; ek aks 924,5); arka duvarı dış duvar (ek aks 768). Sağ ön köşede 10 × 10 dikme (paftanın A ve B detayı).",
+  "Hol 125,5 × 125,5, salonla arası açık (paftada duvar yok; acik_sinirlar); banyo ve iki yatak odası holden, üçüncü yatak odası salondan açılır. Oda adları paftada yazılı değil: yatak odası, banyo, hol ve salon (mutfak salonda sayıldı) paftanın ölçülerinden ve kapılarından.",
+  "Pencereler ve kapılar paftadaki yerine en yakın Motor panosunda (pano dizini; paftanın pencere yazıları). Salonun girintiye bakan 180/180'i paftada sürgülü yazılı. Kapı genişlikleri paftada yazılı değil: dış kapı 90, iç kapı 82 (Motor'un ölçüsü).",
+  "Çatı: beşik + çapraz cumba (paftanın çatı şekli). Ana beşik makas y'yi geçer, mahya x boyunca; salonun öne çıkan bölümünün üstünde çapraz cumba 0–386,5, ön cepheden 220 çıkıntılı (paftanın cumba kesiti 446,5 = 386,5 + 2 × 30; makas planında MK09–MK12). Eğim %32,88 (18,2°; paftanın kesitinde eğik 520,97 / yarım açıklık 494,75), saçak 30 (paftanın özellik tablosu), topuk 10. Kaplama OSB + nem bariyeri + tek kat panel (paftanın özellik tablosu ve OSB planı, 42 adet). Özellikler paftanın özellik tablosundan ve açıklamasından; boya ve iniş borusu satırları tabloda boş.",
+  "Karkaslı kaplama duvar panoları paftadan (İE-28, D-46): cumbanın ön duvarı tek parça 376,5 (iki 120/180), 180/180 sürgülünün duvarı 251. Paftanın bu evdeki renkleri pano pano okunmadı (İE-27 PR-3 okuması ve gerçek liste: pencere karkaslı pano 376,5 ve 251); pencereler Motor'un yerinde."
+ ],
+ "eksikler": [],
+ "girintiler": [
+  [
+   381.5,
+   924.5,
+   883.5,
+   1139.5
+  ]
+ ]
+}
