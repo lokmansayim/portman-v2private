@@ -261,7 +261,8 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | BK | BK-28 | bayiye giden tanıtım metinleri ("Nasıl çalışır?" sayfası, selam örneği) bugünkü sisteme göre; prefabrik onayında Patron'a bildirim (pano 196, 197, 199; D-84; `claude/project-thread-iv2z5f`) | alındı (12.11; CIO) |
 | BK | BK-29 | WhatsApp revizyon diyaloğu, 13 Kasım denetimi: geri çevrilen istek planı kapatmaz, iki pencereli odada soru, prefabrik seçimde kod ve numara (pano 200, 201, 208, 210; `claude/project-thread-2ypd6m`) | alındı (13.11; CIO) |
 | BK | BK-30 | Pano Motor'unda tek özel pano kuralı (D-92, PC-39; `claude/project-thread-9gdwir`) | alındı (14.11; CIO) |
-| BK | **BK-31** | — | **sıradaki boş** |
+| BK | BK-31 | Havuz hakeminde silme hâli kalemi: tek özel pano kuralının kısa parçası silinmiş ev (D-92 › Havuza uygulama; Lokman 14.11 kart 19:39:46 "Kısa parça silinsin", ev kartları 20:05:33, 20:09:12, 20:14:50 "Doğru, yanına eklensin"; `claude/project-thread-9gdwir`) | alındı (14.11; CIO) |
+| BK | **BK-32** | — | **sıradaki boş** |
 
 ## 27 Eylülde Lokman'ın verdiği kararlar
 
