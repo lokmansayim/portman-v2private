@@ -25,19 +25,6 @@ from beyin.sema import Talep
 SINIR = {"TextInput": 20, "TextArea": 20, "Dropdown": 20, "RadioButtonsGroup": 30, "CheckboxGroup": 30, "DocumentPicker": 80, "PhotoPicker": 80,
          "Footer": 35}
 SECIMLI = ("RadioButtonsGroup", "Dropdown", "CheckboxGroup")
-
-
-def _bilesenler(ekran: dict) -> list[dict]:
-    """Ekranın bileşenleri; `If` dallarındakiler dahil (koşulun kendisi sayılmaz)."""
-    cikti = []
-    for c in ekran["layout"]["children"]:
-        cikti += (c["then"] + c.get("else", [])) if c["type"] == "If" else [c]
-    return cikti
-
-
-def _adlar(ekran: dict) -> list[str]:
-    """Form alanlarının adları, sırasıyla; `If`'in iki dalındaki aynı alan bir kez."""
-    return list(dict.fromkeys(c["name"] for c in _bilesenler(ekran) if "name" in c))
 PICKER = ("DocumentPicker", "PhotoPicker")
 AYAR_V1 = {"mesaj_katmani": True, "talep_formu": {"acik": True, "talep_flow_id": "1111111111", "revizyon_flow_id": "2222222222", "taslak": True}}
 AYAR_PF = {**AYAR_V1, "talep_formu": {**AYAR_V1["talep_formu"], "prefabrik_flow_id": "3333333333"}}
@@ -59,17 +46,11 @@ def test_form_tanimi_iki_ekran_flow_json_sinirlari():
     for ekran in (e1, e2):
         assert re.fullmatch(r"[A-Z_]+", ekran["id"]) and 0 < len(ekran["title"]) <= 30
         assert all("__example__" in v and v["type"] == "string" for v in ekran.get("data", {}).values())
-        ust = ekran["layout"]["children"]
-        for c in ust:                                             # koşullu alan: iki dalda aynı ad, tek bileşen; dalların dışında yinelenmez
-            if c["type"] == "If":
-                assert "${data." in c["condition"] and len(c["then"]) == len(c["else"]) == 1
-                assert c["then"][0]["name"] == c["else"][0]["name"] and c["then"][0]["type"] == c["else"][0]["type"]
-        adlar = [c["name"] for c in ust if "name" in c] + [c["then"][0]["name"] for c in ust if c["type"] == "If"]
+        cocuklar = ekran["layout"]["children"]
+        adlar = [c["name"] for c in cocuklar if "name" in c]
         assert len(adlar) == len(set(adlar))
-        cocuklar = _bilesenler(ekran)
-        assert ust[-1]["type"] == "Footer"
         assert sum(c["type"] in PICKER for c in cocuklar) <= 1                                   # ekranda en çok bir dosya seçici
-        assert [c["type"] for c in cocuklar].count("Footer") == 1
+        assert [c["type"] for c in cocuklar].count("Footer") == 1 and cocuklar[-1]["type"] == "Footer"
         for c in cocuklar:
             if c["type"] in SINIR:
                 assert 0 < len(c["label"]) <= SINIR[c["type"]], c
@@ -92,11 +73,11 @@ def test_form_tanimi_iki_ekran_flow_json_sinirlari():
     # ekran 1 → ekran 2: geçiş yük taşımaz; ekran 2 ilk ekranın alanlarını genel başvuruyla (`${screen.TALEP_P.form.x}`, Flow JSON 4.0+)
     # cevaba yazar. Meta, 14 Kasım 2026: geçiş yükündeki sayı girişi (`${form.alan}`, `en`, `boy`) ikinci ekranın "string" veri modeline
     # yazılamaz (INVALID_NAVIGATE_ACTION_PAYLOAD); uzun kenar çoğu zaman boştur, tipli geçişe sokulmaz.
-    a1 = _adlar(e1)
+    a1 = [c["name"] for c in e1["layout"]["children"] if "name" in c]
     gecis = e1["layout"]["children"][-1]["on-click-action"]
     assert gecis["name"] == "navigate" and gecis["next"] == {"type": "screen", "name": "OZELLIK_P"}
     assert gecis["payload"] == {} and "data" not in e2
-    a2 = _adlar(e2)
+    a2 = [c["name"] for c in e2["layout"]["children"] if "name" in c]
     bitis = e2["layout"]["children"][-1]["on-click-action"]
     assert bitis["name"] == "complete"
     assert bitis["payload"] == {**{a: "${screen.TALEP_P.form.%s}" % a for a in a1}, **{a: "${form.%s}" % a for a in a2}}
@@ -116,9 +97,9 @@ def test_gecis_yuku_sonraki_ekranin_veri_modeliyle_ayni_turde(tur):
     """Meta'nın 14 Kasım 2026 hatası yerelde yakalanır: `navigate` yükündeki her alan sonraki ekranın veri modelinde aynı türle durur,
     veri modelinin her alanı yükte vardır; `${screen.X.form.y}` var olan bir ekranın var olan alanını gösterir."""
     ekranlar = {e["id"]: e for e in TF.tanim(tur)["screens"]}
-    alanlar = {kid: {c["name"]: c for c in _bilesenler(e) if "name" in c} for kid, e in ekranlar.items()}
+    alanlar = {kid: {c["name"]: c for c in e["layout"]["children"] if "name" in c} for kid, e in ekranlar.items()}
     for kid, e in ekranlar.items():
-        for c in _bilesenler(e):
+        for c in e["layout"]["children"]:
             eylem = c.get("on-click-action") or {}
             for ekran, alan in re.findall(r"\$\{screen\.(\w+)\.form\.(\w+)\}", json.dumps(eylem)):
                 assert ekran in ekranlar and alan in alanlar[ekran], (ekran, alan)
@@ -148,17 +129,11 @@ def test_cevapta_sayi_da_metin_de_okunur_bos_alan_dusmez():
 
 def test_form_secenekleri_cozumleyiciyle_ayni_ve_standartlar_secili():
     e1, e2 = TF.tanim("prefabrik")["screens"]
-    c1 = {c["name"]: c for c in _bilesenler(e1) if "name" in c}
-    c2 = {c["name"]: c for c in _bilesenler(e2) if "name" in c}
+    c1 = {c["name"]: c for c in e1["layout"]["children"] if "name" in c}
+    c2 = {c["name"]: c for c in e2["layout"]["children"] if "name" in c}
     ids = lambda c: [x["id"] for x in c["data-source"]]                      # noqa: E731
     assert ids(c1["kat"]) == list(TF.KAT) and ids(c1["oda"]) == list(TF.ODA) and ids(c1["oncelik"]) == list(TF.ONCELIK)
     assert c1["oncelik"]["required"] is True and c1["oda"]["required"] is True
-    # Oda programı koşullu: bilinen oda seçili gelir; bilinmiyorsa başlangıç değeri hiç verilmez (Meta önizlemesi, 14 Kasım 2026: zorunlu
-    # açılır listeye boş başlangıç değeri verilince form açılır açılmaz "Oda programı girin" uyarısı çıkıyordu)
-    [kosul] = [c for c in e1["layout"]["children"] if c["type"] == "If"]
-    assert kosul["condition"] == "${data.oda} != ''"
-    assert kosul["then"][0]["init-value"] == "${data.oda}" and "init-value" not in kosul["else"][0]
-    assert {k: v for k, v in kosul["then"][0].items() if k != "init-value"} == kosul["else"][0]
     assert not c1["alan"].get("required") and not c1["en"].get("required") and not c1["boy"].get("required")
     for alan, (izinli, _anahtar) in TF.OZELLIKLER.items():
         assert ids(c2[alan]) == list(izinli), alan

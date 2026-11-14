@@ -18,15 +18,9 @@
           {"type": "TextBody", "text": "${data.bilinen}"},
           {"type": "RadioButtonsGroup", "name": "kat", "label": "Kat", "required": true, "init-value": "${data.kat}",
            "data-source": [{"id": "1", "title": "Tek kat"}, {"id": "2", "title": "İki kat"}]},
-          {"type": "If", "condition": "${data.oda} != ''",
-           "then": [
-             {"type": "Dropdown", "name": "oda", "label": "Oda programı", "required": true, "init-value": "${data.oda}",
-              "data-source": [{"id": "1+0", "title": "Tek oda (1+0)"}, {"id": "1+1", "title": "1+1"}, {"id": "2+1", "title": "2+1"},
-                              {"id": "3+1", "title": "3+1"}, {"id": "4+1", "title": "4+1"}, {"id": "5+1", "title": "5+1"}]}],
-           "else": [
-             {"type": "Dropdown", "name": "oda", "label": "Oda programı", "required": true,
-              "data-source": [{"id": "1+0", "title": "Tek oda (1+0)"}, {"id": "1+1", "title": "1+1"}, {"id": "2+1", "title": "2+1"},
-                              {"id": "3+1", "title": "3+1"}, {"id": "4+1", "title": "4+1"}, {"id": "5+1", "title": "5+1"}]}]},
+          {"type": "Dropdown", "name": "oda", "label": "Oda programı", "required": true, "init-value": "${data.oda}",
+           "data-source": [{"id": "1+0", "title": "Tek oda (1+0)"}, {"id": "1+1", "title": "1+1"}, {"id": "2+1", "title": "2+1"},
+                           {"id": "3+1", "title": "3+1"}, {"id": "4+1", "title": "4+1"}, {"id": "5+1", "title": "5+1"}]},
           {"type": "TextInput", "name": "alan", "label": "Yaklaşık alan (m²)", "input-type": "number", "required": false,
            "init-value": "${data.alan}", "helper-text": "İki kenarı da yazarsanız boş bırakabilirsiniz"},
           {"type": "TextInput", "name": "en", "label": "Kısa kenar (m)", "input-type": "number", "required": false, "init-value": "${data.en}"},
