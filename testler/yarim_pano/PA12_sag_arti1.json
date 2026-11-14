@@ -1,10 +1,16 @@
 {
- "aciklama": "İE-39: 85 m² 3+1 (PA-12, is_emri/adaylar/PA12.json) sağ dış duvar 1 yarım pano uzat.",
+ "aciklama": "İE-39: 85 m² 3+1 (PA-12, is_emri/adaylar/PA12.json) sağ dış duvar 1 yarım pano uzat; uçtaki 26,5 cm özel pano silinir (D-90 ek 2).",
  "onay": {
   "kim": "Lokman",
-  "zaman_utc": "2026-11-14T10:11:06Z",
-  "soz": "karar kartı \"Onaylayın: 85 m2 evin sağa yarım pano uzamış hâli doğru mu?\" → \"Doğru, örnek olsun\" (seçenek metni: \"Bu çizim komutun beklenen örneği olur. Kod PR'a girer, birleştirme sizde.\")",
-  "gosterilen": "önce/sonra pano dizilimi, ön onay PDF'i, DXF, bayi plan görseli (PF Havuz_Basit_Komut/IE-39_85m2_sag_yarim_pano/, 14 Kasım 10:05 UTC)"
+  "zaman_utc": "2026-11-14T14:57:40Z",
+  "soz": "karar kartı \"Seçin: 85 m2 evde 'sağa yarım pano uzat' sonrası dış ölçü kaç olsun?\" → \"1202,25 cm, 26,5 silinir\" (seçenek metni: \"Sağ uç 125,5 + 62,75 olur. Onayladığınız örnek bu kararla yenilenir. 1 pano uzatınca 1265 cm.\"); dayanak 13:24 UTC sözü \"bayi 62,75 eklerse kalan 26,5 panoyu sil\"",
+  "gosterilen": "beş planlı pano dizilimi eskizi (PF Havuz_Basit_Komut/IE-39_tek_pano_kurali/85m2_tek_pano_kurali_eskiz2.png, 14 Kasım 13:27 UTC; Okuma 1: 1202,25 cm, sağ uç 125,5 + 125,5 + 62,75)",
+  "onceki": {
+   "kim": "Lokman",
+   "zaman_utc": "2026-11-14T10:11:06Z",
+   "soz": "karar kartı \"Onaylayın: 85 m2 evin sağa yarım pano uzamış hâli doğru mu?\" → \"Doğru, örnek olsun\" (seçenek metni: \"Bu çizim komutun beklenen örneği olur. Kod PR'a girer, birleştirme sizde.\")",
+   "gosterilen": "önce/sonra pano dizilimi, ön onay PDF'i, DXF, bayi plan görseli (PF Havuz_Basit_Komut/IE-39_85m2_sag_yarim_pano/, 14 Kasım 10:05 UTC)"
+  }
  },
  "girdi": "is_emri/adaylar/PA12.json",
  "komut": {
@@ -14,20 +20,21 @@
  "ozet": {
   "cephe": "sag",
   "adim": 1,
-  "d": 62.75,
-  "d_motor": 62.75,
+  "d": 36.25,
+  "d_motor": 36.25,
+  "silinen": 26.5,
   "eksen": "x",
   "kenar": "max",
   "uzayan": [
    {
     "ad": "YATAK ODASI 2",
     "once_m2": 11.84,
-    "sonra_m2": 14.59
+    "sonra_m2": 13.43
    },
    {
     "ad": "YATAK ODASI 3",
     "once_m2": 13.53,
-    "sonra_m2": 15.17
+    "sonra_m2": 14.48
    }
   ],
   "kayan_ek_akslar": [],
@@ -35,8 +42,8 @@
    "once": 54,
    "sonra": 54,
    "ayni": 42,
-   "degisti": 3,
-   "kaydi": 9
+   "degisti": 6,
+   "kaydi": 6
   },
   "dis_olcu": {
    "once": [
@@ -44,7 +51,7 @@
     726.0
    ],
    "sonra": [
-    1228.75,
+    1202.25,
     726.0
    ]
   },
@@ -71,12 +78,12 @@
    },
    "olcu_kaynagi": "dis_olcu",
    "dis_olcu_cm": {
-    "x": 1228.75,
+    "x": 1202.25,
     "y": 726
    },
    "referans_model": "PA-12",
    "grid": {
-    "x_pano": 10.0,
+    "x_pano": 9.5,
     "y_pano": 6
    },
    "kisa_kenar": "y",
@@ -89,7 +96,7 @@
     "pencere": "oda_ortasi",
     "kapi": "mantik",
     "kose": "oda",
-    "son_pano": "son_aks",
+    "son_pano": "kosu",
     "kapi_yeri": "ortada",
     "dis_pano_dayanagi": [
      {
@@ -172,7 +179,7 @@
      [
       883.5,
       10,
-      1223.75,
+      1197.25,
       452.25
      ]
     ]
@@ -202,7 +209,7 @@
      [
       632.5,
       452.25,
-      1223.75,
+      1197.25,
       716
      ]
     ]
@@ -360,7 +367,7 @@
    "Kapılar paftadaki duvarda ve panoda; koridordan yatak odası 1, banyo ve yatak odası 2'ye açılan kapılar paftadaki gibi duvarın kavşak ucunda (duvar_ucu); verandaya bakan yatak odası 3 duvarının panoları ön dış yüzün aksından (dis_pano_dayanagi, pencere 125,5'lik panoda); genişlikler paftada yazılı değil: dış kapı 90, iç kapı 82 (Motor'un ölçüsü). Oda adları ve alanları paftanın elektrik planından (salon + mutfak 18,49, yatak odaları 9,56 / 11,75 / 13,68, banyo 5,66, hol 7,53 m²).",
    "Çatı: beşik, makas y'yi geçer; paftada eğim ve saçak yazılı değil: eğim 18,2° (%32,88, prefabrik evlerin eğimi), saçak 30 (paftanın çatı alanı 101 m² ve 3 × 410'luk aşık sırası 1226 = 1166 + 2 × 30 ile), topuk 10. Kaplama paftanın kaplama sayfasından: OSB + nem bariyeri + trapez.",
    "Karkaslı kaplama duvar panoları paftadan (İE-28, D-46): 180/200 odaya ortalı 62,75 + 251 + 62,75 (`dizilim.genis_pencere: oda_ortasi`), 251'lik pano karkaslı; yatak odası 3'ün verandaya bakan duvarı tek parça 194 (120/180). Paftanın bu evdeki renkleri pano pano okunmadı (İE-27 PR-3 okuması ve gerçek liste: karkaslı kaplamalı pano 251 ve 194); pencereler Motor'un yerinde.",
-   "Bayi komutu (İE-39): sağ dış duvar 1 yarım pano (62,75 cm) uzadı; dış ölçü 1166 × 726 → 1228,75 × 726 cm; değişen odalar: YATAK ODASI 2, YATAK ODASI 3."
+   "Bayi komutu (İE-39): sağ dış duvar 1 yarım pano uzadı (uçtaki 26,5 cm özel pano silindi; duvar 36,25 cm kaydı); dış ölçü 1166 × 726 → 1202,25 × 726 cm; değişen odalar: YATAK ODASI 2, YATAK ODASI 3."
   ],
   "eksikler": []
  }

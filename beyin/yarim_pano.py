@@ -350,11 +350,30 @@ def pano_siniflari(p0, p1, eksen: str, kenar_g: str, d: float) -> tuple[dict, di
     sonra = [tuple(p.rect()) for p in p1.panolar]
     o_sabit = [_otele(r, eksen, sabit) for r in once]
     o_kayan = [_otele(r, eksen, kayan) for r in once]
+    # Eşleme birebir (PR-2): her önceki pano en çok bir sonraki panoyla eşleşir; önce yerinde kalanlar, sonra kayanlar. Tam pano (125,5)
+    # kaymada yeni pano komşusunun kaymış kopyasına benzer; birebir eşlemede yeni pano "degisti" (pembe) olur, sayılar tutar.
+    def _bul(r, adaylar, kullanilan):
+        return next((i for i, k in enumerate(adaylar) if i not in kullanilan and all(abs(a - b) <= YER_TOL for a, b in zip(r, k))), None)
     s1, s0 = {}, {}
-    for p, r in zip(p1.panolar, sonra):
-        s1[id(p)] = "ayni" if _var_mi(r, o_sabit) else "kaydi" if _var_mi(r, o_kayan) else "degisti"
-    for p, rs, rk in zip(p0.panolar, o_sabit, o_kayan):
-        s0[id(p)] = "ayni" if _var_mi(rs, sonra) else "kaydi" if _var_mi(rk, sonra) else "degisti"
+    kullanilan: set[int] = set()
+    eslesme: dict[int, tuple[int, str]] = {}
+    for j, r in enumerate(sonra):
+        i = _bul(r, o_sabit, kullanilan)
+        if i is not None:
+            kullanilan.add(i)
+            eslesme[j] = (i, "ayni")
+    for j, r in enumerate(sonra):
+        if j in eslesme:
+            continue
+        i = _bul(r, o_kayan, kullanilan)
+        if i is not None:
+            kullanilan.add(i)
+            eslesme[j] = (i, "kaydi")
+    onceki_sinif = {i: s for i, s in eslesme.values()}
+    for j, p in enumerate(p1.panolar):
+        s1[id(p)] = eslesme[j][1] if j in eslesme else "degisti"
+    for i, p in enumerate(p0.panolar):
+        s0[id(p)] = onceki_sinif.get(i, "degisti")
     return s1, s0
 
 
@@ -374,10 +393,49 @@ def bant_disi_degisen(p1, siniflar: dict, eksen: str, kenar_g: str, d: float, t:
     return out
 
 
+def ozel_artik(ie: dict, cephe: str) -> float:
+    """Kayan duvarın ucunda 62,75 ızgarasından artan özel parça (cm). Lokman, 14 Kasım 2026 kart 14:57:40 UTC ("Seçin: 85 m² evde
+    'sağa yarım pano uzat' sonrası dış ölçü kaç olsun?" → "1202,25 cm, 26,5 silinir"; 13:24 sözü "bayi 62,75 eklerse kalan 26,5 panoyu
+    sil"): komut önce bu parçayı siler, duvar 62,75 ızgarasına oturur, sonra adım eklenir. Koşu = dış ölçü − 2 × ilk aks; ızgaraya
+    `OLCU_TOLERANSI`'ndan yakın eksik ızgarada sayılır (dönüş eksi: Motor'un D-30 tamamlaması gibi). Motor dizilimi kayan kenarın
+    öbür ucundan başlıyorsa (önde `on-sol`) artık kayan duvarda değildir: 0."""
+    eksen, kenar_m, _kenar_g = yan(cephe, ie)
+    if kenar_m != "max":
+        return 0.0
+    kosu = float(ie["yapi"]["dis_olcu_cm"][eksen]) - 2 * _ilk_aks(ie, eksen)
+    k = math.floor((kosu + OLCU_TOLERANSI) / YARIM)
+    return round(kosu - k * YARIM, 4)
+
+
+def dizilim_izi(plan) -> list:
+    """Planın pano dizilimi: (duvar yönü, duvar ekseni, a0, a1), sıralı; iki planın dizilimi aynı mı kıyası için."""
+    return sorted((p.duvar.yon, round(p.duvar.c, 2), round(p.a0, 2), round(p.a1, 2)) for p in plan.panolar)
+
+
+def tek_pano(ie0: dict, ie1: dict, p0, p1, kaymalar: list, cephe: str, d: float):
+    """Lokman, 14 Kasım 2026 13:12–13:24 UTC: duvarda 125,5'ler çıkar, kalan tek parça son (özel) panodur; özel durum yokken 62,75
+    bölünmez ("62,75 ile 89,25 tek pano haline gelir … 125,5 + 26,5 olur"; aynı akstaki iç duvar da). Komutun çıktısında İş Emri'nin
+    `dizilim.son_pano: son_aks`ı (kesilmiş son panonun önünde yarım pano) `kosu` olur. Dizilim değişmiyorsa İş Emri aynen kalır
+    (onaylı örnek bayt bayt). Dönüş: (İş Emri, Plan, kaymalar)."""
+    if ((ie1["yapi"].get("dizilim") or {}).get("son_pano")) != "son_aks":
+        return ie1, p1, kaymalar
+    ie_k = copy.deepcopy(ie1)
+    ie_k["yapi"]["dizilim"]["son_pano"] = "kosu"
+    try:
+        ie_k, kay_k = dizinleri_esle(ie0, ie_k, p0, cephe, d)
+        p_k = _sessiz_kur(ie_k)
+    except Exception as e:
+        raise KomutDurdu("motor", f"tek pano dizilimi kurulamadı: {str(e)[:120]}")
+    if dizilim_izi(p_k) == dizilim_izi(p1):
+        return ie1, p1, kaymalar
+    return ie_k, p_k, kay_k
+
+
 # ---------------------------------------------------------------- komut
 
 def uygula(ie0: dict, cephe: str, adim: int) -> dict:
-    """Bayinin komutu: `cephe` dış duvarı `adim` yarım pano (62,75 cm) kayar; adim > 0 uzat, adim < 0 kısalt.
+    """Bayinin komutu: `cephe` dış duvarı `adim` yarım pano (62,75 cm) kayar; adim > 0 uzat, adim < 0 kısalt. Önce duvarın ucundaki
+    özel parça silinir (`ozel_artik`; 85 m² evde 26,5 cm): sağa 1 yarım pano 1166 → 1202,25 cm.
     Dönüş: {is_emri, once, sonra, d, d_motor, uzayan, alanlar, siniflar, sayilar, notlar}. Kural tutmazsa KomutDurdu (K21)."""
     if not isinstance(adim, int) or adim == 0:
         raise KomutDurdu("adim", "yarım pano sayısı sıfırdan farklı bir tam sayı olmalı")
@@ -390,7 +448,8 @@ def uygula(ie0: dict, cephe: str, adim: int) -> dict:
         raise KomutDurdu("muhur", f"{ev} planı Lokman'ın onayıyla mühürlü ({MUHURLU_EVLER[ev]})")
     if ie0["yapi"].get("sistem") != "prefabrik":
         raise KomutDurdu("sistem", "komut yalnız prefabrik evde")
-    d = round(adim * YARIM, 4)
+    silinen = ozel_artik(ie0, cephe)
+    d = round(adim * YARIM - silinen, 4)              # kayan duvarın ucundaki özel parça silinir, sonra adım (Lokman, kart 14:57:40)
     eksen, _kenar_m, kenar_g = yan(cephe, ie0)
     t = _t_dis(ie0)
     try:
@@ -401,6 +460,7 @@ def uygula(ie0: dict, cephe: str, adim: int) -> dict:
     try:
         ie1, kaymalar = dizinleri_esle(ie0, ie1, p0, cephe, d)
         p1 = _sessiz_kur(ie1)
+        ie1, p1, kaymalar = tek_pano(ie0, ie1, p0, p1, kaymalar, cephe, d)
     except KomutDurdu:
         raise
     except Exception as e:
@@ -434,10 +494,12 @@ def uygula(ie0: dict, cephe: str, adim: int) -> dict:
     yon = "uzadı" if adim > 0 else "kısaldı"
     ie1["revizyon"] = int(ie0.get("revizyon") or 1) + 1
     ie1["varsayimlar"] = list(ie0.get("varsayimlar") or []) + [
-        f"Bayi komutu (İE-39): {CEPHE_ADI[cephe]} dış duvar {abs(adim)} yarım pano ({_tr(abs(d))} cm) {yon}; "
+        f"Bayi komutu (İE-39): {CEPHE_ADI[cephe]} dış duvar {abs(adim)} yarım pano {yon}"
+        + (f" (uçtaki {_tr(silinen)} cm özel pano silindi; duvar {_tr(abs(d))} cm kaydı)" if silinen > TOL else f" ({_tr(abs(d))} cm)") + "; "
         f"dış ölçü {_tr(p0.W)} × {_tr(p0.H)} → {_tr(p1.W)} × {_tr(p1.H)} cm; "
         f"değişen odalar: {', '.join(u['ad'] for u in bilgi['uzayan']) or 'yok'}."]
     return {"is_emri": ie1, "once": p0, "sonra": p1, "cephe": cephe, "adim": adim, "d": d, "d_motor": d_motor,
+            "silinen": silinen if silinen > TOL else 0.0,
             "eksen": eksen, "kenar": kenar_g,
             "uzayan": [{"ad": u["ad"], "once_m2": alan0.get(u["ad"]), "sonra_m2": alan1.get(u["ad"])} for u in bilgi["uzayan"]],
             "kayan_ek_akslar": bilgi["kayan_ek_akslar"], "siniflar": siniflar, "siniflar_once": siniflar_once,

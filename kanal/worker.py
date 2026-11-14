@@ -423,6 +423,7 @@ def isle(gelen: dict, settings: dict, k=None, cikarim: dict | None = None, proje
     pu_kayit = None
     pu_ayar = settings.get("plan_uretimi") or {}
     k.plan_uretimi = bool(pu_ayar.get("acik"))       # İE-14 (D-18): kapalıysa uyan-yok dalı bugünkü davranış
+    k.yarim_pano = bool((settings.get("yarim_pano") or {}).get("acik"))   # İE-39 PR-2 (D-90): kapalıysa bugünkü yol
     k.llm_golge = None
     son0 = k.d.get("son_is_emri") or {}
     son_y0 = son0.get("yapi") or {}                               # gölge kıyası karar öncesi açık plana karşı

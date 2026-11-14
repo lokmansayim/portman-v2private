@@ -147,7 +147,7 @@
   },
   "PA23": {
    "sag+1": "cati",
-   "sag-1": "aciklik",
+   "sag-1": "motor",
    "on+1": "temiz",
    "on-1": "temiz"
   },
@@ -170,6 +170,18 @@
    "on-1": "veranda"
   },
   "PA27": {
+   "sag+1": "girinti",
+   "sag-1": "girinti",
+   "on+1": "girinti",
+   "on-1": "girinti"
+  },
+  "PA28": {
+   "sag+1": "girinti",
+   "sag-1": "girinti",
+   "on+1": "girinti",
+   "on-1": "girinti"
+  },
+  "PA29": {
    "sag+1": "girinti",
    "sag-1": "girinti",
    "on+1": "girinti",
