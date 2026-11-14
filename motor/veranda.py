@@ -52,6 +52,8 @@ def cati(v: dict, ie: dict) -> dict:
     """Veranda çatısı: plan düzlemleri (genel motorun `duzlemler` biçimi: plan, yukarı yönü, eğim, saçak kotu), mahya ve kotlar (cm)."""
     if v["cati"]["tip"] == "teras_paneli":
         return teras_paneli(v, ie)
+    if v["cati"]["tip"] == "cumba":                 # 14 Kasım 2026: çatısı ana çatının cumbası (`cati_prefabrik`); ayrı veranda çatısı yok
+        raise G.IsEmriHatasi(f"Veranda {v['ad']}: çatısı ana çatının cumbası; ayrı veranda çatısı kurulmaz (bu çıktı iki cumbayı bilmiyor)")
     x0, y0, x1, y1 = v["rect"]
     c = v["cati"]; s = c["sacak_cm"]; eg = c["egim_yuzde"] / 100.0
     zs = duvar_ustu(ie) + c["topuk_cm"]
@@ -123,8 +125,8 @@ def uyarilar(plan: G.Plan, ie: dict) -> list[str]:
     zs_ana = duvar_ustu(ie) + float(ana.get("topuk_cm", 10))
     mahya_y = ana_mahya_yonu(ie) == "y"
     for v in plan.dis_verandalar:
-        if v["cati"]["tip"] == "teras_paneli":                          # D-52: düz panel ana çatının saçağının altında; birleşim yok
-            continue
+        if v["cati"]["tip"] in ("teras_paneli", "cumba"):              # D-52: düz panel ana çatının saçağının altında; birleşim yok.
+            continue                                                   # cumba: ana çatının parçası, vadiyle girer (cati_prefabrik)
         kalkan_yuzu = (v["cephe"] in ("on", "arka")) == mahya_y      # ana çatının kalkanına dayanıyor (TK-01)
         if not kalkan_yuzu and cati(v, ie)["mahya_kotu"] > zs_ana + 1e-6:
             out.append(f"Veranda {v['ad']}: çatısı ana çatının saçak yanına dayanıyor, " +
@@ -175,6 +177,8 @@ def gorunus_parcalari(plan: G.Plan, ie: dict, taraf: str) -> list[dict]:
         for (x0, y0, x1, y1) in v["kirisler"]:
             u0, u1, dd = kutu_u(x0, y0, x1, y1)
             out.append({"tur": "kiris", "u": [(u0, H0 - KIRIS_CM), (u1, H0 - KIRIS_CM), (u1, H0), (u0, H0)], "derinlik": dd, "veranda": v["ad"]})
+        if v["cati"]["tip"] == "cumba":                                  # çatısı, saçağı ve topuğu ana çatının çizgilerinde (`cephe_gorunus`)
+            continue
         C = cati(v, ie)
         X0, Y0, X1, Y1 = C["kutu"]
         u0, u1, dd = kutu_u(X0, Y0, X1, Y1)

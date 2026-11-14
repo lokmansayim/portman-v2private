@@ -40,6 +40,8 @@ ALANLAR = {"tip", "egim_yuzde", "sacak_cm", "topuk_cm", "makas_ekseni", "makas_y
 TIP_ALANI = {"besik_cumba": {"cumbalar"}, "kirma": {"kirma_egimleri", "kalkan_ucu"}}
 KALKAN_UCLARI = {"x": ("sol", "sag"), "y": ("on", "arka")}       # İE-29: tek uçlu kırmada kalkanlı uç (mahya yönüne göre)
 CUMBA_ALANLARI = {"cephe", "bas_cm", "bit_cm", "cikinti_cm", "egim_yuzde", "ana_makas"}
+VERANDA_CUMBA_ALANLARI = {"cephe", "veranda"}   # ikinci cumba: taşan verandanın çatısı (Lokman, 14 Kasım 2026 08:41)
+KARSI = {"on": "arka", "arka": "on", "sol": "sag", "sag": "sol"}
 ANA_MAKAS = ("cumba_makasindan",)   # İE-15 K6, D-53 madde 7: ana makaslar cumbanın baş makasının arkasından 10 cm topukla
 
 
@@ -106,6 +108,91 @@ def _cumba(c: dict, kutu: tuple, plan: G.Plan | None = None) -> tuple[list[float
     if cephe == "sol":
         return [x0 + cik, y0, x1, y1], [x0, y0 + a, x0 + cik, y0 + b]
     return [x0, y0, x1 - cik, y1], [x1 - cik, y0 + a, x1, y0 + b]
+
+
+def _veranda_cumbasi(u: dict, plan: G.Plan | None) -> list[float]:
+    """Taşan verandanın üstündeki cumba (`cumbalar[]` öğesinde `veranda`: verandanın adı; verandanın `cati.tip`'i "cumba"): cumbanın ayak izi
+    verandanın dikdörtgeni (kolonlar içinde); eğim, saçak ve topuk ana çatınınki. Lokman, 14 Kasım 2026 08:41–08:42 (45 m² ev, arka sundurma):
+    "cumba çatısı gibi birleştireceksin vadi dere oluşacak böyle eğrelti olmayacak", "çapraz cumba çatısını nasıl çiziyorsan öyle çiz"."""
+    fazla = sorted(set(u) - VERANDA_CUMBA_ALANLARI)
+    if fazla:
+        raise PrefabrikCatiHatasi(f"verandanın cumbasında yalnız cephe ve veranda yazılır ({', '.join(fazla)} yazılmış; yeri ve eğimi verandadan "
+                                  "ve ana çatıdan)")
+    if plan is None:
+        raise PrefabrikCatiHatasi("verandanın cumbası: verandanın yeri için plan gerekir")
+    v = next((v for v in plan.dis_verandalar if v["ad"] == u["veranda"]), None)
+    if v is None:
+        raise PrefabrikCatiHatasi(f"cumbanın verandası yok: {u['veranda']} (İş Emri `verandalar`'ında taşan veranda olmalı)")
+    if v["cephe"] != u.get("cephe"):
+        raise PrefabrikCatiHatasi(f"cumba {u.get('cephe')} cephesinde, verandası {v['ad']} {v['cephe']} cephesinde")
+    if v["cati"]["tip"] != "cumba":
+        raise PrefabrikCatiHatasi(f"veranda {v['ad']}: çatısı cumba değil ({v['cati']['tip']}); cumbanın verandasında `cati.tip` cumba yazılır")
+    return [float(t) for t in v["rect"]]
+
+
+def cumba_dikdortgenleri(c: dict, kutu: tuple, plan: G.Plan | None = None) -> tuple[list[float], list[list[float]]]:
+    """`cumbalar` → (ana çatının dikdörtgeni, [cumba dikdörtgeni, …]). Tek cumba `_cumba` (eski yol, aynen). İki cumba (14 Kasım 2026, 45 m² ev:
+    önde gövdenin cumbası, arkada sundurmanın cumbası): ana çatının iki karşı saçak yüzünde; her biri tek cumbanın kuralıyla kurulur, ana çatı
+    iki çıkıntının arasında. Taşan verandanın cumbası `veranda` ile (`_veranda_cumbasi`). Ana makasın geri çekilmesi (`ana_makas`) iki cumbada yok."""
+    cs = c.get("cumbalar") or []
+    if len(cs) != 2:
+        if any(isinstance(u, dict) and "veranda" in u for u in cs):
+            raise PrefabrikCatiHatasi("verandanın cumbası yalnız gövdenin çıkıntılı cumbasıyla birlikte, ikinci cumba olarak yazılır (PC-38)")
+        ana, cumba = _cumba(c, kutu, plan)
+        return ana, [cumba]
+    if any("ana_makas" in u for u in cs):
+        raise PrefabrikCatiHatasi("iki cumbada ana_makas (ana makasların cumba makasından geri çekilmesi) bu sürümde yok")
+    if KARSI.get(cs[0].get("cephe")) != cs[1].get("cephe"):
+        raise PrefabrikCatiHatasi(f"iki cumba ana çatının karşı iki saçak yüzünde olur ({cs[0].get('cephe')}, {cs[1].get('cephe')} yazılmış)")
+    if sum("veranda" in u for u in cs) != 1:
+        raise PrefabrikCatiHatasi("iki cumbanın biri gövdenin çıkıntılı cumbası, öteki taşan verandanın cumbası (`veranda`) olur (PC-38); "
+                                  "iki gövde cumbası ya da iki veranda cumbası bu sürümde yok")
+    if not all(float(u.get("cikinti_cm") or 0) > 0 for u in cs if "veranda" not in u):
+        raise PrefabrikCatiHatasi("veranda cumbasının karşısındaki gövde cumbası çıkıntılı olur (`cikinti_cm` > 0; PC-38, 45 m² ev); "
+                                  "çıkıntısız gövde cumbasıyla iki cumba bu sürümde yok")
+    ana, rs = list(kutu), []
+    for u in cs:
+        if "veranda" in u:
+            rs.append(_veranda_cumbasi(u, plan))
+            continue
+        a_, r = _cumba({**c, "cumbalar": [u]}, kutu, plan)
+        ana = [max(ana[0], a_[0]), max(ana[1], a_[1]), min(ana[2], a_[2]), min(ana[3], a_[3])]
+        rs.append(r)
+    for u, r in zip(cs, rs):
+        bitisik = {"on": r[3] == ana[1], "arka": r[1] == ana[3], "sol": r[2] == ana[0], "sag": r[0] == ana[2]}[u["cephe"]]
+        if not bitisik:
+            raise PrefabrikCatiHatasi(f"{u['cephe']} cumbası ana çatının kenarına bitişik değil ({r} ↔ ana çatı {ana})")
+    return ana, rs
+
+
+def _iki_cumba(ana: list, rs: list, mahya: str, c: dict, H0: float, k: dict) -> dict:
+    """İki cumbalı çatı: her cumba tek cumbanın üreticisiyle (`cati_uretici.uret`, "cumba") aynı ana çatıya kurulur; çatı, birincinin girdiği
+    ana yüz ve onun cumbası + ikincinin girdiği karşı yüz ve onun cumbası. Ana çatının uç kalkanları iki kurulumun aralıklarının birleşimi
+    (cumba bir uçla aynı hizadaysa kalkan onun yanını da örter). İkinci cumbanın yüzleri "cumba 2 …" adını alır."""
+    from .genel import cati_uretici as CU
+    us = []
+    for r in rs:
+        try:
+            us.append(CU.uret([ana, r], "cumba", mahya=mahya, egim_yuzde=float(c["egim_yuzde"]), duvar_ustu=H0, kural=k))
+        except CU.CatiHatasi as e:
+            raise PrefabrikCatiHatasi(str(e))
+    u1, u2 = us
+    ana_ad = {d["ad"] for d in u1["duzlemler"] if d["ad"].startswith("ana ")}
+    giris1 = next(d["ad"] for d in u1["duzlemler"] if d["ad"].startswith("ana ") and len(d["plan"]) > 4)
+    giris2 = next(d["ad"] for d in u2["duzlemler"] if d["ad"].startswith("ana ") and len(d["plan"]) > 4)
+    if giris1 == giris2 or giris2 not in ana_ad:
+        raise PrefabrikCatiHatasi("iki cumba ana çatının aynı yüzüne giriyor; karşı iki yüzde olmalı")
+    yeni = lambda ad: ad.replace("cumba ", "cumba 2 ", 1) if ad.startswith("cumba ") else ad
+    duz = [d for d in u1["duzlemler"] if d["ad"] != giris2]
+    duz += [dict(d, ad=yeni(d["ad"])) for d in u2["duzlemler"] if d["ad"] == giris2 or not d["ad"].startswith("ana ")]
+    kal, uc2 = [], {kk["ad"]: kk for kk in u2["kalkanlar"]}
+    for kk in u1["kalkanlar"]:
+        o = uc2.pop(kk["ad"], None) if not kk["ad"].startswith("cumba") else None
+        if o is not None:
+            kk = dict(kk, aralik=[min(kk["aralik"][0], o["aralik"][0]), max(kk["aralik"][1], o["aralik"][1])])
+        kal.append(kk)
+    kal += [dict(kk, ad=kk["ad"].replace("cumbanın", "cumba 2'nin", 1), ust=[yeni(a) for a in kk["ust"]]) for kk in uc2.values()]
+    return dict(u1, duzlemler=duz, kalkanlar=kal)
 
 
 def _kirma_farkli(kutu: tuple, mahya: str, e: float, uc: dict, b: dict, k: dict) -> list[dict]:
@@ -216,6 +303,16 @@ def cati(plan: G.Plan, ie: dict) -> dict:
             from .genel import cati_ortak as CO
             u["duzlemler"] = _kirma_farkli(kutu, mahya, round(float(c["egim_yuzde"]) / 100, 5), dict(c["kirma_egimleri"]),
                                            CO.baglam(k, round(float(c["egim_yuzde"]) / 100, 5), H0), k)
+    elif len(c.get("cumbalar") or []) == 2:          # 14 Kasım 2026: iki cumba (gövdenin cumbası + taşan verandanın cumbası)
+        ana, rs = cumba_dikdortgenleri(c, kutu, plan)
+        from shapely.geometry import box
+        from shapely.ops import unary_union
+        from .cati_serit import cati_izi
+        fark = cati_izi(plan).symmetric_difference(unary_union([box(*ana)] + [box(*r) for r in rs])).area
+        if fark > 1.0:
+            raise PrefabrikCatiHatasi(f"iki cumba: gövdenin ve verandanın dış çizgisi ana çatı ile cumbaların birleşimi değil ({fark:.0f} cm² fark)")
+        ayak = [ana, *rs]
+        u = _iki_cumba(ana, rs, mahya, c, H0, k)
     else:
         ana, cumba = _cumba(c, kutu, plan)
         if (ana != list(kutu) and ana_geri_cm(c, plan) is None) or plan.girintili:                   # çıkıntılı cumba: gövde = ana çatı + cumba (girinti cumbanın yanında)

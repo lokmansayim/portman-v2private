@@ -182,7 +182,7 @@ def cati_cizgileri(plan: G.Plan, ie: dict, taraf: str) -> dict:
         tanim = sunum.cati_tanimi(plan, ie)
         ck = cati_genel.cati_kur(tanim)
         mc = tanim.get("mahal_catilari") or []
-    elif plan.dis_verandalar:
+    elif any(v["cati"]["tip"] != "cumba" for v in plan.dis_verandalar):   # cumbalı veranda ana çatının parçası (14 Kasım 2026)
         raise CP.PrefabrikCatiHatasi("beşik dışı ana çatıyla taşan veranda görünüşte çizilmez (iki çatının birleşimi; İE-17 PR-2)")
     else:
         ck = cati_genel.cati_kur(CP.cati(plan, ie))
@@ -205,6 +205,8 @@ def cati_cizgileri(plan: G.Plan, ie: dict, taraf: str) -> dict:
         k2 = [(u(x, y), z) for x, y, z in kose]
         if len(k2) >= 3 and Polygon(k2).area > 1:
             perde.append((sum(d(x, y) for x, y, _z in kose) / len(kose), k2))
+    if any(dz["ad"].startswith("cumba 2 ") for dz in ck["duzlemler"]):  # iki cumba (14 Kasım 2026): ana çatının iki yüzü de oyuk; cumbanın
+        perde += _cumba_alinlari(ck, u, d, float((ie.get("yapi") or {}).get("duvar_yuksekligi_cm", 250)))   # saçaklı alnı ardını örter
     cizgi = []
 
     def ekle(geo):
@@ -248,6 +250,30 @@ def cati_cizgileri(plan: G.Plan, ie: dict, taraf: str) -> dict:
            "topuklar": _topuklar(ck, u, d, ortu, (u0, u1), float((ie.get("cati") or {}).get("topuk_cm", 10)))}
     if plan.kubbeler:                                                    # İE-29: anahtar yalnız kubbeli planda (öteki görünüşler aynen)
         out["kubbe"] = _kubbe_gorunusu(plan, ie, taraf, u, d, ck)
+    return out
+
+
+def _cumba_alinlari(ck: dict, u, d, H0: float) -> list:
+    """İki cumbalı çatıda (`cati_prefabrik._iki_cumba`) her cumbanın alnı, saçak uçlarıyla: dış uçtaki iki saçak köşesi ve mahyanın ucu, altta
+    duvar üstüne kadar (topuk bandı). Ana çatının iki yüzü de cumbaya oyulduğu için öteki cumbanın vadisi ve topuğu bu alnın ardında kalır
+    (`perde` biçimi: (derinlik, [(u, z)])). Alına bakmayan görünüşte izdüşüm bir çizgidir, örtü eklenmez."""
+    from shapely.geometry import Polygon
+    out = []
+    for on_ek in ("cumba 2 ", "cumba "):
+        yuzler = [dz for dz in ck["duzlemler"] if dz["ad"].startswith(on_ek) and (on_ek == "cumba 2 " or not dz["ad"].startswith("cumba 2 "))]
+        if not yuzler:
+            continue
+        noktalar = {tuple(round(float(v), 4) for v in p) for dz in yuzler for p in dz["ucboyut"]}
+        eksen = 1 if abs(yuzler[0]["yukari"][0]) > abs(yuzler[0]["yukari"][1]) else 0    # cumbanın mahyası y boyunca (yüzler x'e eğimli)
+        uclar = [min(p[eksen] for p in noktalar), max(p[eksen] for p in noktalar)]
+        dis = next((v for v in uclar if len({p for p in noktalar if abs(p[eksen] - v) < 1e-3}) >= 3), None)
+        if dis is None:
+            continue
+        alin = sorted((p for p in noktalar if abs(p[eksen] - dis) < 1e-3), key=lambda p: p[1 - eksen])
+        k2 = [(u(x, y), z) for x, y, z in alin]
+        k2 = k2 + [(k2[-1][0], H0), (k2[0][0], H0)]
+        if Polygon(k2).area > 1:
+            out.append((sum(d(x, y) for x, y, _z in alin) / len(alin), k2))
     return out
 
 

@@ -1,0 +1,240 @@
+{
+ "is_emri_no": "PM-ADAY-PA27",
+ "revizyon": 1,
+ "talep": {
+  "bayi": {
+   "kod": "ADAY",
+   "ad": "Aday kaydı"
+  },
+  "musteri_adi": "ADAY PA27",
+  "metin": "AP-07 montaj paftasından İş Emri (14 Kasım 2026); sundurmanın çatısı ana çatının ikinci cumbası (PC-38), Lokman 08:41 'çapraz cumba çatısını nasıl çiziyorsan öyle çiz', kartı 08:55 'Evet, böyle doğru'. Aday: D-87 (Lokman 13 Kasım 2026 21:41)."
+ },
+ "yapi": {
+  "sistem": "prefabrik",
+  "kat_sayisi": 1,
+  "duvar_yuksekligi_cm": 250,
+  "duvar_kalinligi_cm": {
+   "dis": 10,
+   "ic": 6
+  },
+  "olcu_kaynagi": "dis_olcu",
+  "dis_olcu_cm": {
+   "x": 750,
+   "y": 690
+  },
+  "referans_model": "PA-27",
+  "grid": {
+   "x_pano": 6,
+   "y_pano": 5.5
+  },
+  "kisa_kenar": "y",
+  "giris_cephesi": "on",
+  "dis_dusey_duvar": "cevre_aks_disinda",
+  "dizilim": {
+   "baslangic": "arka-sol",
+   "hiza": "izgara",
+   "dis_duvar_t_bolme": false,
+   "pencere": "oda_ortasi",
+   "kapi": "mantik",
+   "kose": "oda",
+   "son_pano": "son_aks",
+   "kapi_yeri": "ortada"
+  },
+  "ek_akslar_cm": {
+   "x": [
+    295
+   ],
+   "y": [
+    535
+   ]
+  }
+ },
+ "mahaller": [
+  {
+   "ad": "BANYO",
+   "tur": "banyo",
+   "konum_cm": [
+    [
+     5,
+     10,
+     193.25,
+     261
+    ]
+   ]
+  },
+  {
+   "ad": "GİRİŞ",
+   "tur": "antre_hol",
+   "konum_cm": [
+    [
+     193.25,
+     10,
+     381.5,
+     261
+    ]
+   ]
+  },
+  {
+   "ad": "SALON & MUTFAK",
+   "tur": "salon",
+   "konum_cm": [
+    [
+     381.5,
+     10,
+     745,
+     261
+    ],
+    [
+     318.75,
+     261,
+     745,
+     535
+    ]
+   ]
+  },
+  {
+   "ad": "YATAK ODASI",
+   "tur": "yatak_odasi",
+   "konum_cm": [
+    [
+     5,
+     261,
+     318.75,
+     535
+    ],
+    [
+     5,
+     535,
+     295,
+     680
+    ]
+   ]
+  }
+ ],
+ "girintiler": [
+  [
+   295,
+   535,
+   745,
+   680
+  ]
+ ],
+ "acik_sinirlar": [],
+ "acikliklar": [
+  {
+   "tur": "pencere",
+   "olcu": "60x40",
+   "mahal": "BANYO",
+   "duvar": "arka",
+   "pano": 0
+  },
+  {
+   "tur": "pencere",
+   "olcu": "120x120",
+   "mahal": "SALON & MUTFAK",
+   "duvar": "sag",
+   "pano": 2
+  },
+  {
+   "tur": "pencere",
+   "olcu": "150x190",
+   "mahal": "SALON & MUTFAK",
+   "duvar": "on"
+  },
+  {
+   "tur": "pencere",
+   "olcu": "150x190",
+   "mahal": "YATAK ODASI",
+   "duvar": "on"
+  },
+  {
+   "tur": "dis_kapi",
+   "olcu": 90,
+   "arasi": [
+    "__DIS__",
+    "GİRİŞ"
+   ],
+   "duvar": "arka"
+  },
+  {
+   "tur": "ic_kapi",
+   "olcu": 82,
+   "arasi": [
+    "GİRİŞ",
+    "BANYO"
+   ],
+   "pano": 1
+  },
+  {
+   "tur": "ic_kapi",
+   "olcu": 82,
+   "arasi": [
+    "GİRİŞ",
+    "SALON & MUTFAK"
+   ],
+   "pano": 1
+  },
+  {
+   "tur": "ic_kapi",
+   "olcu": 82,
+   "arasi": [
+    "GİRİŞ",
+    "YATAK ODASI"
+   ]
+  }
+ ],
+ "dikmeler": [],
+ "cati": {
+  "tip": "besik_cumba",
+  "egim_yuzde": 32.9,
+  "sacak_cm": 30,
+  "topuk_cm": 10,
+  "makas_yonu": "kisa_kenar",
+  "makas_ekseni": "y",
+  "cumbalar": [
+   {
+    "cephe": "on",
+    "bas_cm": 0,
+    "bit_cm": 300,
+    "cikinti_cm": 150
+   },
+   {
+    "cephe": "arka",
+    "veranda": "SUNDURMA"
+   }
+  ]
+ },
+ "cikti": {
+  "pdf": true,
+  "dxf": true,
+  "pafta": "A2",
+  "icerik": [
+   "aksli_plan",
+   "alanli_kopya",
+   "montaj_kopyasi",
+   "on_gorunus",
+   "cati_profili",
+   "ozellik_tablosu"
+  ]
+ },
+ "varsayimlar": [
+  "Izgara 6 × 5,5 pano; kısa kenar y (makaslar y'yi geçer, mahya x boyunca). Dış ölçü 750 × 690. Ek akslar x 295 (yatak odası çıkıntısının yanı), y 535 (girinti), Motor çerçevesinde arkadan.",
+  "L gövde: yatak odası 300 × 150 öne çıkıntılı (girinti x 295–745, y 535–680 arkadan); çatısı ana çatının çapraz cumbası (çıkıntı 150), ana çatı beşik %32,9.",
+  "Sundurma arkada taşan veranda, girişin önünde 188,25–323,75 × 130 (paftada 135,5 × 130); çatısı ana çatının ikinci cumbası (veranda cati.tip cumba, cumbalar[1] veranda SUNDURMA): eğim, saçak ve topuk ana çatınınki. Paftadaki sundurma üçgeni 195,5 × 42,14 (yaklaşık %43); Lokman 08:41 'çapraz cumba çatısını nasıl çiziyorsan öyle çiz' (Motor'un cumbası ana çatının eğimiyle).",
+  "Girinti hizasında iki 18 cm pano: yatak odası–salon duvarı ve sağ dış duvar (540 cm'lik cephe pano adımına oturmuyor).",
+  "150x190 pencereler paftadaki ölçüsüyle; ölçü pencere veri tabanına eklendi (kaynak AP-07 paftası, D-87)."
+ ],
+ "eksikler": [],
+ "verandalar": [
+  {
+   "ad": "SUNDURMA",
+   "cephe": "arka",
+   "bas_cm": 188.25,
+   "bit_cm": 323.75,
+   "derinlik_cm": 130,
+   "cati": {
+    "tip": "cumba"
+   }
+  }
+ ]
+}

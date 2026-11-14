@@ -45,6 +45,7 @@ EVLER = {
     "PA24": ("AP-27", "testler/kor/projeler/AP27/is_emri.json", "2+1", 77.0),     # verandasız
     "PA25": ("AP-14", "testler/kor/projeler/AP14/is_emri.json", "2+1", 61.0),     # oda programı Lokman'ın kartından (14 Kasım 07:50)
     "PA26": ("AP-08", "testler/havuz/is_emirleri/AP08.json", "2+1", 71.0),        # Lokman'ın 08:16 düzeltmesi, 08:29 kartı
+    "PA27": ("AP-07", "testler/havuz/is_emirleri/AP07.json", "1+1", 45.0),        # sundurma ikinci cumba (PC-38), 08:55 kartı
 }
 PREFABRIK = {a["kod"]: a for a in havuz_kayitlari(yapi="prefabrik")}
 
@@ -74,6 +75,9 @@ AP14_SOZU = '"Evet, 2+1 olarak girsin"'
 # AP-08: Lokman 14 Kasım 2026 08:16:22 UTC düzeltmesi (hol panoları, sırt sırta kapılar, ortada pencere), 08:29:26 kartı
 AP08_SOZU = "wc banyo kapısı ile yatak odası kapısı sırt sırta gelecek"
 AP08_KART = '"Evet, bu çizimle girsin"'
+# AP-07: Lokman 14 Kasım 2026 08:41:58 UTC ("çapraz cumba çatısını nasıl çiziyorsan öyle çiz"), 08:55:19 kartı; sundurma kartta veranda değil
+AP07_SOZU = "çapraz cumba çatısını nasıl çiziyorsan öyle çiz"
+AP07_KART = '"Evet, böyle doğru"'
 
 
 def _standart(ie: dict) -> dict:
@@ -98,7 +102,8 @@ def test_havuz_kaydi_bicimi():
         assert (kk["kart"], kk["sonuc"]) == (proje, "geçti")
         assert kk["kart_sha256"] == HH.kartlar()[proje]["kart_sha256"]
         assert f"| {g} | {proje} | `{kaynak}` |" in D87, kod                         # karar dosyası evi yazar
-        assert abs(a["kapali_m2"] - (a["ozet"]["brut_m2"] - a["veranda_m2"])) <= 0.06, kod      # aday_kaydet ham brütle yuvarlar
+        disarida = a["ozet"].get("brut_disi_acik_m2", 0)                                 # girintili gövdeden taşan sundurma (PA-27)
+        assert abs(a["kapali_m2"] - (a["ozet"]["brut_m2"] - a["veranda_m2"] + disarida)) <= 0.06, kod   # aday_kaydet ham brütle yuvarlar
         assert ((a["veranda_m2"] or 0) > 0) == (kk["olcum"]["veranda"] > 0), kod      # veranda bir oda gibi: kartta ne varsa (D-87 › Veranda)
         assert (SABLON_DIR / a["gorsel"]).stat().st_size > 10_000
 
@@ -196,6 +201,23 @@ def test_ap08_lokmanin_duzeltmesi():
     assert round(arka.panolar[-1].boy, 2) == 74.75 and round(arka.panolar[-2].boy, 2) == 62.75
 
 
+def test_ap07_sundurma():
+    """AP-07 (Lokman, 14 Kasım 2026 08:41–08:55 UTC): sundurma taşan veranda, çatısı ana çatının ikinci cumbası (PC-38). Proje kartında
+    sundurma veranda sayılmaz (`veranda_adedi` 0, `sundurma_adedi` 1); hakem açık mahali ikisinin toplamıyla kıyaslar. Brüt gövdenin
+    dış çizgisi (45 m², pafta "sundurma hariç"); kapalı alan sundurmayı düşmez."""
+    assert AP07_SOZU in D87 and AP07_KART in D87 and "| PA-27 | AP-07 |" in D87 and "| AP-07 | İş Emri yok" not in D87
+    kart = HH.kartlar()["AP-07"]
+    ie = json.loads((KOK / EVLER["PA27"][1]).read_text(encoding="utf-8"))
+    assert (kart["veranda_adedi"], kart["sundurma_adedi"]) == (0, 1) and "08:55:19" in kart["sundurma_kaynagi"]
+    assert HH.denetle(ie, kart)[0] == []
+    assert [b.split(":")[0] for b in HH.denetle(ie, {a: v for a, v in kart.items() if a != "sundurma_adedi"})[0]] == ["veranda"]
+    assert sum("sundurma_adedi" in k for k in HH.kartlar().values()) == 1                              # yalnız AP-07
+    a = PREFABRIK["PA27"]
+    assert (a["ozet"]["brut_m2"], a["kapali_m2"], a["veranda_m2"], a["ozet"]["brut_disi_acik_m2"]) == (45.0, 45.0, 1.76, 1.76)
+    assert a["ozet"]["odalar"]["SUNDURMA"] == 1.76 and [v["cati"]["tip"] for v in ie["verandalar"]] == ["cumba"]
+    assert not [k for k, b in PREFABRIK.items() if k != "PA27" and "brut_disi_acik_m2" in b["ozet"]]  # öteki kayıtlar aynen
+
+
 def test_hakem_kalemleri():
     """Hakem kalem kalem bulur: ölçü 5 cm'yi, brüt 0,5 m²'yi aşınca; pencere ölçüsü, kapı, veranda ve kat farkında."""
     kart = dict(HH.kartlar()["AP-04"])
@@ -227,6 +249,7 @@ def test_kabulsuz_yolda_havuz_gorunmez():
 # Bütün havuz kabul edilince seçenek seti: düğme ve görsel en çok 3, liste en çok 10 satır, satır başlığı ≤ 24, açıklama ≤ 72
 SETLER = {
     (50, "2+1"): ["PA23"],                                                            # tek aday: öncelik sorulmaz
+    (45, "1+1"): ["PA27"],
     (60, "2+1"): ["PA01", "PA14", "PA18", "PA25", "PA02", "PA09", "PA20"],
     (65, "2+1"): ["PA02", "PA09", "PA20", "PA25", "PA01", "PA03", "PA14", "PA15", "PA18", "PA26"],
     (71, "2+1"): ["PA26", "PA03", "PA15", "PA24", "PA02", "PA04", "PA09", "PA20"],
