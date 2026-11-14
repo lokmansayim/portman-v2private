@@ -67,7 +67,7 @@
           {"type": "TextInput", "name": "il", "label": "Teslim ili", "input-type": "text", "required": false},
           {"type": "TextInput", "name": "ilce", "label": "Teslim ilçesi", "input-type": "text", "required": false},
           {"type": "TextArea", "name": "not", "label": "Not", "required": false, "max-length": 600, "helper-text": "Varsa özel isteğiniz"},
-          {"type": "DocumentPicker", "name": "dosya", "label": "Çizim ya da plan (isteğe bağlı)",
+          {"type": "DocumentPicker", "name": "dosya", "label": "Çizim ya da plan",
            "description": "El çizimi, plan resmi ya da PDF; tek dosya, en çok 20 MB", "min-uploaded-documents": 0, "max-uploaded-documents": 1,
            "max-file-size-kb": 20480, "allowed-mime-types": ["image/jpeg", "image/png", "image/webp", "application/pdf"]},
           {"type": "Footer", "label": "Gönder",

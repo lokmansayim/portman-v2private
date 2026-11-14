@@ -60,6 +60,7 @@ def test_form_tanimi_iki_ekran_flow_json_sinirlari():
             if "helper-text" in c:
                 assert len(c["helper-text"]) <= 80
             if c["type"] in PICKER:
+                assert "isteğe bağlı" not in c["label"]            # Meta, 14 Kasım 2026: en az 0 dosyada etikete "(isteğe bağlı)" kendisi ekler
                 assert "init-value" not in c and len(c.get("description", "")) <= 300 and c["max-uploaded-documents"] == 1
                 assert c["max-file-size-kb"] * 1024 <= GO.EN_BUYUK_BAYT
                 for mime in c["allowed-mime-types"]:
