@@ -1,0 +1,72 @@
+{
+ "kod": "PA10",
+ "gosterim": "PA-10",
+ "durum": "gecerli",
+ "sablon": "adaylar/PA10.json",
+ "gorsel": "adaylar/PA10.png",
+ "referans_model": "PA-10",
+ "yapi_turu": "prefabrik",
+ "kat": 1,
+ "oda_programi": "3+1",
+ "katalog_m2": 95.0,
+ "kapali_m2": 76.1,
+ "veranda_m2": 19.15,
+ "ozet": {
+  "grid": {
+   "x_pano": 9,
+   "y_pano": 6.5
+  },
+  "dis_olcu_cm": [
+   1139.5,
+   835.75
+  ],
+  "brut_m2": 95.23,
+  "pano": 50,
+  "pencere": 7,
+  "kapi": 5,
+  "odalar": {
+   "YATAK ODASI 1": 11.45,
+   "WC": 4.43,
+   "HOL": 1.5,
+   "YATAK ODASI 2": 12.2,
+   "YATAK ODASI 3": 9.08,
+   "SALON": 32.4,
+   "VERANDA": 19.15
+  }
+ },
+ "kaynak": {
+  "metin": "AP-04 montaj paftasından İş Emri (İE-33 kör ölçümü). Aday: D-87 (Lokman 13 Kasım 2026 21:41).",
+  "dosya": "testler/kor/projeler/AP04/is_emri.json",
+  "ayna": null,
+  "karar": "D-87",
+  "standart": true,
+  "kart_kiyasi": {
+   "kart": "AP-04",
+   "kart_sha256": "7b8cdc8cdca6c748da28b0a8dca882e13cf7dce2ecb3bb52d7d7270d17619e65",
+   "sonuc": "geçti",
+   "olcum": {
+    "dis_olcu_cm": [
+     1139.5,
+     835.75
+    ],
+    "acikla_olcu_cm": [
+     1139.5,
+     835.75
+    ],
+    "brut_m2": 95.23,
+    "kubbe_m2": 0.0,
+    "yatak_odasi": 3,
+    "pencereler": {
+     "120x120": 5,
+     "120x180": 1,
+     "60x40": 1
+    },
+    "dis_kapi": 1,
+    "ic_kapi": 4,
+    "veranda": 1,
+    "kat": 1
+   }
+  }
+ },
+ "not": ""
+}

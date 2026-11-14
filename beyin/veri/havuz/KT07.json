@@ -1,0 +1,64 @@
+{
+ "kod": "KT07",
+ "gosterim": "KT-07",
+ "durum": "gecerli",
+ "motor": "genel",
+ "tanim": "modeller/havuz/KT07.json",
+ "tanim_sha256": "34f2e5e9bd9522b1ec512217df05201dda2d31536c380a65fb2a7ba0de8b9b48",
+ "gorsel": "adaylar/KT07.png",
+ "referans_model": "KT07",
+ "yapi_turu": "celik",
+ "kat": 1,
+ "oda_programi": "2+1",
+ "katalog_m2": 90.0,
+ "kapali_m2": 74.08,
+ "veranda_m2": 15.74,
+ "varyantlar": [],
+ "musteri_projesi": true,
+ "sunum": {
+  "cati_adi": "Kırma (mahya kuzey–güney)",
+  "ad": ""
+ },
+ "ozet": {
+  "dis_olcu_cm": [
+   750.6,
+   1200.6
+  ],
+  "oturum_m2": 89.82,
+  "odalar": {
+   "Yatak Odası 1": 17.03,
+   "Yatak Odası 2": 11.66,
+   "Banyo": 4.19,
+   "Yaşama Mekânı": 34.11,
+   "Veranda": 15.74
+  },
+  "pencere": 7,
+  "kapi": 4,
+  "cati": "kirma",
+  "liste_satir": 85,
+  "kural_seti": "kurallar.json",
+  "perspektif": "TAMAM"
+ },
+ "kaynak": {
+  "metin": "ÇP-19 tanımı (İE-16; müşteri onay paftası), kod ve ad dışında aynı. Aday: D-87 (Lokman 13 Kasım 2026 21:41).",
+  "dosya": "modeller/havuz/KT07.json",
+  "dogrulama": "çizim seti (İE-08, 12 Ekim 2026)",
+  "karar": "D-87",
+  "kart_kiyasi": {
+   "kart": "ÇP-19",
+   "tanim": "testler/celik/projeler/CP19/CP19.json",
+   "tanim_sha256": "e51a93a694285497169d70da8eee9a4041de8cfd8cd098666d30b352d88a9f25",
+   "sonuc": "geçti",
+   "olcum": {
+    "gecti": true,
+    "hatalar": [],
+    "bayi_gorseli": true,
+    "oturum_m2": 89.82,
+    "veranda_m2": 15.74,
+    "oda_programi": "2+1",
+    "kat": 1
+   }
+  }
+ },
+ "not": ""
+}

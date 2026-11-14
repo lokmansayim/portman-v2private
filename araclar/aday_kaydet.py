@@ -4,11 +4,14 @@
     python3 araclar/aday_kaydet.py <is_emri.json> --kod TEST01 --durum test --katalog-m2 94 [--referans P9401] [--kaynak "…"] [--not "…"]
                                    [--ayna x|y] [--test-dosyasi]
     python3 araclar/aday_kaydet.py <is_emri.json> --kod PA-04 --durum gecerli --karar D-80 --katalog-m2 80 [--referans PA-04] [--kaynak "…"]
+    python3 araclar/aday_kaydet.py testler/kor/projeler/AP02/is_emri.json --kod PA-09 --gosterim PA-09 --referans PA-09 --durum gecerli \
+                                   --karar D-87 --kart AP-02 --standart --havuz --kaynak "…"   (İE-38: proje kartı hakemi, standart, havuz dosyası)
     python3 araclar/aday_kaydet.py --motor genel --tanim modeller/C8801.json [--kod Ç8801] [--durum gecerli] [--referans Ç8801]
                                    [--varyantlar Ç8801K,Ç8801L] [--kat 1] [--musteri-projesi] [--kaynak "…"] [--not "…"] [--perspektifsiz]
 
 Yazdıkları (prefabrik): is_emri/adaylar/<kod>.json (şablon; is_emri_no PM-ADAY-<kod>, revizyon 1), is_emri/adaylar/<kod>.png (bayi görseli),
-beyin/veri/adaylar_prefabrik.json (İE-36; ya da --test-dosyasi ile adaylar_test.json) içinde <kod> satırı (varsa yenilenir).
+beyin/veri/adaylar_prefabrik.json (İE-36; ya da --test-dosyasi ile adaylar_test.json) içinde <kod> satırı (varsa yenilenir); `--havuz` ile
+beyin/veri/havuz/<kod>.json (İE-38, D-87: ev başına bir dosya).
 Özet Motor doğrulamasından gelir (oda alanları, pano, pencere, kapı, dış ölçü); kapalı alan = dış kutu − veranda (kutu içi).
 Prefabrikte 'gecerli' yalnız Lokman'ın kararıyla verilir (`--karar D-NN`, dosyası KARARLAR/'da; İE-36, D-80: sekiz ev). Bayiye sunulma
 yine K-A10 kabul kaydına bağlıdır: Katalog 'gecerli' prefabrik adayı yalnız kabul kümesinde açıkça varsa gösterir (IE-04-aday-teslimi.md).
@@ -46,6 +49,11 @@ def main() -> int:
     ap.add_argument("--test-dosyasi", action="store_true", help="kaydı beyin/veri/adaylar_test.json'a yaz (yalnız yerel testlerde yüklenir)")
     ap.add_argument("--karar", default=None, help="prefabrik 'gecerli' için Lokman'ın kararı (KARARLAR/<D-NN>.md; İE-36)")
     ap.add_argument("--gosterim", default=None, help="prefabrik: bayinin gördüğü kod (varsayılan --kod; ör. PA-04)")
+    ap.add_argument("--kart", default=None, help="proje kartı hakemi (İE-38, D-87; prefabrik AP-14, çelik ÇP-18): kıyas geçmezse kayıt yazılmaz")
+    ap.add_argument("--havuz", action="store_true",
+                    help="İE-38 (D-87): kaydı beyin/veri/havuz/<kod>.json'a yaz (ev başına bir dosya; adaylar.json ve adaylar_prefabrik.json aynen)")
+    ap.add_argument("--standart", action="store_true",
+                    help="prefabrik: müşterinin seçimleri (`ozellikler`, `alici_ait`) şablona girmez; standart geçerli (D-74; İE-38)")
     a = ap.parse_args()
     if a.motor == "genel":
         return genel(a)
@@ -61,8 +69,21 @@ def main() -> int:
     from motor import dxf_out, bayi_gorseli as BG, geometry as G, prefabrik_liste as PL
     from beyin import varyant
     ie = json.loads(Path(a.is_emri).read_text(encoding="utf-8"))
+    if a.standart:                                                             # İE-38: gerçek projenin müşteri seçimleri havuz evine girmez;
+        for anahtar in ("ozellikler", "alici_ait"):                            # liste ve teklif standartla (D-74 trapez sac) sayar
+            ie.pop(anahtar, None)
     if a.ayna:
         ie = varyant.ayna(ie, a.ayna)
+    kart_kiyasi = None
+    if a.kart:                                                                 # İE-38 (D-87): hakem önce; geçmeyen ev havuza girmez
+        from araclar import havuz_hakemi as HH
+        kart = HH.kartlar().get(a.kart.strip().upper())
+        if kart is None:
+            print(f"DUR: {a.kart} için proje kartı yok (testler/havuz/proje_kartlari.json)"); return 2
+        bulgular, olc = HH.denetle(ie, kart)
+        if bulgular:
+            print(f"DUR: proje kartı hakemi geçmedi ({a.kart}):\n- " + "\n- ".join(bulgular)); return 1
+        kart_kiyasi = {"kart": a.kart.strip().upper(), "kart_sha256": kart["kart_sha256"], "sonuc": "geçti", "olcum": olc}
     kod = kod_normalize(a.kod)                                                 # PA-04 → PA04 (kayıt kodu); bayinin gördüğü `gosterim`
     gosterim = (a.gosterim or a.kod).strip().upper()
     ie["is_emri_no"] = f"PM-ADAY-{kod}"; ie["revizyon"] = 1
@@ -94,8 +115,10 @@ def main() -> int:
                  "oda_programi": oda_prog, "katalog_m2": katalog_m2, "kapali_m2": kapali, "veranda_m2": veranda,
                  "ozet": {"grid": ie["yapi"]["grid"], "dis_olcu_cm": [W, H], "brut_m2": round(brut, 2), "pano": v.get("panel_count"), "pencere": v.get("windows"), "kapi": v.get("doors"),
                           "odalar": {k: round(x, 2) for k, x in rooms.items()}},
-                 "kaynak": {"metin": a.kaynak, "dosya": str(Path(a.is_emri)), "ayna": a.ayna, "karar": a.karar}, "not": a.not_}
-    _yaz(kayit, a.test_dosyasi, dosya="adaylar_prefabrik.json")
+                 "kaynak": {"metin": a.kaynak, "dosya": str(Path(a.is_emri)), "ayna": a.ayna, "karar": a.karar,
+                            **({"standart": True} if a.standart else {}), **({"kart_kiyasi": kart_kiyasi} if kart_kiyasi else {})},
+                 "not": a.not_}
+    _yaz(kayit, a.test_dosyasi, dosya="adaylar_prefabrik.json", havuz=a.havuz)
     return 0
 
 
@@ -114,6 +137,24 @@ def genel(a) -> int:
         print("DUR: tanım depo kökünün altında olmalı (modeller/<kod>.json):", tanim_yolu); return 2
     t = json.loads(tanim_yolu.read_text(encoding="utf-8"))
     kod = kod_normalize(a.kod or t["kod"])
+    if a.karar:                                                                # İE-38: karar dosyası bu adayın kodunu yazmalı (prefabrikteki gibi)
+        karar_yolu = KOK / "KARARLAR" / f"{a.karar.strip()}.md"
+        if not (karar_yolu.exists() and str(t["kod"]).upper() in karar_yolu.read_text(encoding="utf-8").upper()):
+            print(f"DUR: {a.karar} {t['kod']} kodunu yazmıyor (KARARLAR/)"); return 2
+    kart_kiyasi = None
+    if a.kart:                                                                 # İE-38 (D-87): çelik hakemi önce; geçmeyen proje havuza girmez
+        from araclar import havuz_hakemi as HH
+        kk = "ÇP-" + "".join(ch for ch in a.kart if ch.isdigit())[-2:].zfill(2)
+        kart = HH.celik_kartlari().get(kk)
+        if kart is None:
+            print(f"DUR: {kk} için çelik hedef değeri yok (testler/havuz/celik_kartlari.json)"); return 2
+        kaynak_t = json.loads((KOK / kart["tanim"]).read_text(encoding="utf-8"))
+        if {k: v for k, v in t.items() if k not in ("kod", "ad")} != {k: v for k, v in kaynak_t.items() if k not in ("kod", "ad")}:
+            print(f"DUR: tanım {kart['tanim']} ile aynı değil (yalnız kod ve ad farklı olabilir)"); return 1
+        bulgular, olc = HH.celik_denetle(tanim_yolu, kart)
+        if bulgular:
+            print(f"DUR: çelik hakemi geçmedi ({kk}):\n- " + "\n- ".join(bulgular)); return 1
+        kart_kiyasi = {"kart": kk, "tanim": kart["tanim"], "tanim_sha256": kart["tanim_sha256"], "sonuc": "geçti", "olcum": olc}
     with tempfile.TemporaryDirectory() as tmp:
         m = U.uret(tanim_yolu, Path(tmp), is_emri_no=None, revizyon=None, set_yolu=None, yontem="panel", perspektif=not a.perspektifsiz, bayi=True,
                    kaynak=f"Yapı Tanımı 0.5 ({tanim_yolu.name})")          # revizyon None: aday kartında "TASLAK", r01 yok (Lokman 12.10)
@@ -155,14 +196,25 @@ def genel(a) -> int:
                           "pencere": sum(1 for x in acl if x["tur"] == "pencere"), "kapi": sum(1 for x in acl if x["tur"] in ("dis_kapi", "ic_kapi")),
                           "cati": t.get("cati", {}).get("tip"), "liste_satir": v.get("liste_satir"), "kural_seti": Path(v.get("set", "")).name,
                           "perspektif": v.get("perspektif", {}).get("durum")},
-                 "kaynak": {"metin": a.kaynak, "dosya": gorece, "dogrulama": "çizim seti (İE-08, 12 Ekim 2026)", "karar": "D-08 madde 4; D-10"},
+                 "kaynak": {"metin": a.kaynak, "dosya": gorece, "dogrulama": "çizim seti (İE-08, 12 Ekim 2026)", "karar": a.karar or "D-08 madde 4; D-10",
+                            **({"kart_kiyasi": kart_kiyasi} if kart_kiyasi else {})},
                  "not": a.not_}
-    _yaz(kayit, a.test_dosyasi)
+    _yaz(kayit, a.test_dosyasi, havuz=a.havuz)
     return 0
 
 
-def _yaz(kayit: dict, test_dosyasi: bool, dosya: str = "adaylar.json") -> None:
+def _yaz(kayit: dict, test_dosyasi: bool, dosya: str = "adaylar.json", havuz: bool = False) -> None:
     kod = kayit["kod"]
+    if havuz and not test_dosyasi:                                             # İE-38 (D-87): ev başına bir dosya; var olan aday kayıtları değişmez
+        veri = KOK / "beyin" / "veri"
+        for ad in ("adaylar.json", "adaylar_prefabrik.json"):
+            if any(str(x.get("kod")).upper() == kod for x in json.loads((veri / ad).read_text(encoding="utf-8"))):
+                raise SystemExit(f"DUR: {kod} {ad}'da var; havuz aynı kodu yazmaz")
+        yol = veri / "havuz" / f"{kod.replace('Ç', 'C')}.json"
+        yol.parent.mkdir(parents=True, exist_ok=True)
+        yol.write_text(json.dumps(kayit, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+        print(json.dumps({k: kayit.get(k) for k in ("kod", "durum", "oda_programi", "katalog_m2", "kapali_m2", "veranda_m2", "motor")}, ensure_ascii=False), "→", f"havuz/{yol.name}")
+        return
     yol = KOK / "beyin" / "veri" / ("adaylar_test.json" if test_dosyasi else dosya)
     liste = json.loads(yol.read_text(encoding="utf-8")) if yol.exists() else []
     liste = [x for x in liste if str(x.get("kod")).upper() != kod] + [kayit]

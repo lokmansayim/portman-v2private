@@ -1,0 +1,65 @@
+{
+ "kod": "KT05",
+ "gosterim": "KT-05",
+ "durum": "gecerli",
+ "motor": "genel",
+ "tanim": "modeller/havuz/KT05.json",
+ "tanim_sha256": "4677b57d34e264c45eac557310b1b7defaae94c21079eef328d0583f74f7521c",
+ "gorsel": "adaylar/KT05.png",
+ "referans_model": "KT05",
+ "yapi_turu": "celik",
+ "kat": 1,
+ "oda_programi": "2+1",
+ "katalog_m2": 90.0,
+ "kapali_m2": 80.82,
+ "veranda_m2": 9.01,
+ "varyantlar": [],
+ "musteri_projesi": true,
+ "sunum": {
+  "cati_adi": "Beşik + cumba",
+  "ad": ""
+ },
+ "ozet": {
+  "dis_olcu_cm": [
+   900.0,
+   1000.0
+  ],
+  "oturum_m2": 89.83,
+  "odalar": {
+   "Yatak Odası 1": 13.18,
+   "Yatak Odası 2": 14.81,
+   "Hol": 6.17,
+   "Banyo": 6.68,
+   "Salon - Mutfak": 32.03,
+   "Veranda": 9.01
+  },
+  "pencere": 7,
+  "kapi": 5,
+  "cati": "besik_cumba",
+  "liste_satir": 94,
+  "kural_seti": "kurallar.json",
+  "perspektif": "TAMAM"
+ },
+ "kaynak": {
+  "metin": "ÇP-06 tanımı (İE-16; müşteri onay paftası), kod ve ad dışında aynı. Aday: D-87 (Lokman 13 Kasım 2026 21:41).",
+  "dosya": "modeller/havuz/KT05.json",
+  "dogrulama": "çizim seti (İE-08, 12 Ekim 2026)",
+  "karar": "D-87",
+  "kart_kiyasi": {
+   "kart": "ÇP-06",
+   "tanim": "testler/celik/projeler/CP06/CP06.json",
+   "tanim_sha256": "f3697162624d161d6946d1be0247a4a4d07a240414af38ade05a524aa5b88b7c",
+   "sonuc": "geçti",
+   "olcum": {
+    "gecti": true,
+    "hatalar": [],
+    "bayi_gorseli": true,
+    "oturum_m2": 89.83,
+    "veranda_m2": 9.01,
+    "oda_programi": "2+1",
+    "kat": 1
+   }
+  }
+ },
+ "not": ""
+}

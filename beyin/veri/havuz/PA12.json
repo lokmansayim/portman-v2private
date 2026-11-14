@@ -1,0 +1,72 @@
+{
+ "kod": "PA12",
+ "gosterim": "PA-12",
+ "durum": "gecerli",
+ "sablon": "adaylar/PA12.json",
+ "gorsel": "adaylar/PA12.png",
+ "referans_model": "PA-12",
+ "yapi_turu": "prefabrik",
+ "kat": 1,
+ "oda_programi": "3+1",
+ "katalog_m2": 85.0,
+ "kapali_m2": 71.9,
+ "veranda_m2": 12.8,
+ "ozet": {
+  "grid": {
+   "x_pano": 9.5,
+   "y_pano": 6
+  },
+  "dis_olcu_cm": [
+   1166.0,
+   726.0
+  ],
+  "brut_m2": 84.65,
+  "pano": 54,
+  "pencere": 7,
+  "kapi": 6,
+  "odalar": {
+   "SALON+MUTFAK": 18.5,
+   "YATAK ODASI 1": 9.56,
+   "BANYO": 5.66,
+   "YATAK ODASI 2": 11.84,
+   "HOL": 7.61,
+   "YATAK ODASI 3": 13.53,
+   "VERANDA": 12.8
+  }
+ },
+ "kaynak": {
+  "metin": "AP-11 montaj paftasından İş Emri (İE-33 kör ölçümü). Aday: D-87 (Lokman 13 Kasım 2026 21:41).",
+  "dosya": "testler/kor/projeler/AP11/is_emri.json",
+  "ayna": null,
+  "karar": "D-87",
+  "standart": true,
+  "kart_kiyasi": {
+   "kart": "AP-11",
+   "kart_sha256": "5432f4eae3a5fa73a041ef75b6b94401c015b91acabc649135b0d9df3c0c7023",
+   "sonuc": "geçti",
+   "olcum": {
+    "dis_olcu_cm": [
+     1166.0,
+     726.0
+    ],
+    "acikla_olcu_cm": [
+     1166.0,
+     726.0
+    ],
+    "brut_m2": 84.65,
+    "kubbe_m2": 0.0,
+    "yatak_odasi": 3,
+    "pencereler": {
+     "120x180": 5,
+     "180x200": 1,
+     "60x40": 1
+    },
+    "dis_kapi": 1,
+    "ic_kapi": 5,
+    "veranda": 1,
+    "kat": 1
+   }
+  }
+ },
+ "not": ""
+}

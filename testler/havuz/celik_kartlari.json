@@ -1,0 +1,116 @@
+{
+ "aciklama": "İE-38 (D-87) çelik hakeminin hedef değerleri. AICelik'in tek katlı projeleri için proje kartı yok; değerler İE-16'da müşteri onay paftasından okunan tanımın adından (antet m², oda programı, veranda) alınır. Motor'un brüt oturumu antet m²'sinden en çok 0,5 m² sapar; oda programı ve veranda antette yazılı olmalı. `havuzda`: aynı proje havuzda başka kodla var (ÇP-07 = KT-03, ÇP-13 = KT-01, ÇP-14 = KT-04, ÇP-17 = KT-02).",
+ "kaynak": "testler/celik/projeler/CP*/CP*.json (İE-16 tanımları; AICelik mührü testler/celik/muhur.json)",
+ "evler": {
+  "ÇP-03": {
+   "tanim": "testler/celik/projeler/CP03/CP03.json",
+   "tanim_sha256": "e21d2254581d2d809764ba5adf796411625164e611802c17c65ac278eb9ff6a6",
+   "antet_m2": 68.34,
+   "oda_programi": null,
+   "veranda": true,
+   "kat_adedi": 1,
+   "havuzda": null,
+   "antet": "Tek kat çelik, açık plan, verandalı, dörtomuz, 68,34 m² (açık ölçüm projesi)"
+  },
+  "ÇP-04": {
+   "tanim": "testler/celik/projeler/CP04/CP04.json",
+   "tanim_sha256": "d3e441e1a40af6eb9c0f0578da0b8f65611aa901919fbfba345f52465e884888",
+   "antet_m2": 55.89,
+   "oda_programi": null,
+   "veranda": true,
+   "kat_adedi": 1,
+   "havuzda": null,
+   "antet": "Tek kat çelik, müşteri karşılama alanlı, verandalı, dış duvar 140, beşik + cumba, 55,89 m² (kör ölçüm projesi)"
+  },
+  "ÇP-06": {
+   "tanim": "testler/celik/projeler/CP06/CP06.json",
+   "tanim_sha256": "f3697162624d161d6946d1be0247a4a4d07a240414af38ade05a524aa5b88b7c",
+   "antet_m2": 90.0,
+   "oda_programi": "2+1",
+   "veranda": true,
+   "kat_adedi": 1,
+   "havuzda": null,
+   "antet": "Tek kat çelik, 2+1, verandalı, beşik + cumba, 90 m² (çelik hattının hedef örneği)"
+  },
+  "ÇP-07": {
+   "tanim": "testler/celik/projeler/CP07/CP07.json",
+   "tanim_sha256": "0b7cd8da05dbd1031b8f2e29133d36de31f7a75beca0ed907d2624fd9a37f94c",
+   "antet_m2": 80.0,
+   "oda_programi": "2+1",
+   "veranda": true,
+   "kat_adedi": 1,
+   "havuzda": "KT-03",
+   "antet": "Tek kat çelik, 2+1, verandalı ve sundurmalı, kırma çatı, 80 m² (KT-03 ile aynı proje)"
+  },
+  "ÇP-08": {
+   "tanim": "testler/celik/projeler/CP08/CP08.json",
+   "tanim_sha256": "3c2795e670ebd663f3bcaa1f382a070f6cc701f228addfc644f789edfcfb11ce",
+   "antet_m2": 81.0,
+   "oda_programi": "2+1",
+   "veranda": false,
+   "kat_adedi": 1,
+   "havuzda": null,
+   "antet": "Tek kat çelik, 2+1, beşik + önde iki cumba, 81 m² (kör ölçüm projesi; önceden görülmüş: 2 Ekim'deki 81 m² model)"
+  },
+  "ÇP-13": {
+   "tanim": "testler/celik/projeler/CP13/CP13.json",
+   "tanim_sha256": "7049bca4dbef9f72fd5ee0c3650d1793a509c785d2677c413f6592d934d6ae92",
+   "antet_m2": 98.65,
+   "oda_programi": "2+1",
+   "veranda": false,
+   "kat_adedi": 1,
+   "havuzda": "KT-01",
+   "antet": "Tek kat çelik, 2+1, müştemilatlı, 98,65 m² (KT-01 ile aynı proje)"
+  },
+  "ÇP-14": {
+   "tanim": "testler/celik/projeler/CP14/CP14.json",
+   "tanim_sha256": "73a637b240c9f42423818cfa25469f967d997b8d136de68e782aa63637da6919",
+   "antet_m2": 120.0,
+   "oda_programi": "4+1",
+   "veranda": true,
+   "kat_adedi": 1,
+   "havuzda": "KT-04",
+   "antet": "Tek kat çelik, 4+1, verandalı, beşik + iki cumba, 120 m² (açık ölçüm projesi)"
+  },
+  "ÇP-17": {
+   "tanim": "testler/celik/projeler/CP17/CP17.json",
+   "tanim_sha256": "f13473645c26a2b7996a7daecd755c7dc54a9a9d17cc0ac24d00744fd1588c99",
+   "antet_m2": 90.0,
+   "oda_programi": "2+1",
+   "veranda": true,
+   "kat_adedi": 1,
+   "havuzda": "KT-02",
+   "antet": "Tek kat çelik, 2+1, önü verandalı, batıda sundurma, dört omuz, 90 m² (kör ölçüm projesi; önceden görülmüş: KT-02)"
+  },
+  "ÇP-18": {
+   "tanim": "testler/celik/projeler/CP18/CP18.json",
+   "tanim_sha256": "3bd726c9b5b0c2e61099eb7fc2b69faf8b44f8ccab7852be24cf6e5d414a4a59",
+   "antet_m2": 90.0,
+   "oda_programi": "2+1",
+   "veranda": true,
+   "kat_adedi": 1,
+   "havuzda": null,
+   "antet": "Tek kat çelik, 2+1, verandalı, dış duvar 140, 90 m² (kör ölçüm projesi)"
+  },
+  "ÇP-19": {
+   "tanim": "testler/celik/projeler/CP19/CP19.json",
+   "tanim_sha256": "e51a93a694285497169d70da8eee9a4041de8cfd8cd098666d30b352d88a9f25",
+   "antet_m2": 90.0,
+   "oda_programi": "2+1",
+   "veranda": true,
+   "kat_adedi": 1,
+   "havuzda": null,
+   "antet": "Tek kat çelik, 2+1, önü verandalı, dört omuz, 90 m² (kör ölçüm projesi)"
+  },
+  "ÇP-20": {
+   "tanim": "testler/celik/projeler/CP20/CP20.json",
+   "tanim_sha256": "a90d960b0ef7b8eb2a24fa623a7cf47baa20b12b7d68aae2edf47d1b36144859",
+   "antet_m2": 90.11,
+   "oda_programi": "3+1",
+   "veranda": true,
+   "kat_adedi": 1,
+   "havuzda": null,
+   "antet": "Tek kat çelik, 3+1, verandalı, beşik + çift cumba, 90,11 m² (kör ölçüm projesi)"
+  }
+ }
+}

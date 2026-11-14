@@ -1,0 +1,72 @@
+{
+ "kod": "PA17",
+ "gosterim": "PA-17",
+ "durum": "gecerli",
+ "sablon": "adaylar/PA17.json",
+ "gorsel": "adaylar/PA17.png",
+ "referans_model": "PA-17",
+ "yapi_turu": "prefabrik",
+ "kat": 1,
+ "oda_programi": "3+1",
+ "katalog_m2": 91.0,
+ "kapali_m2": 83.2,
+ "veranda_m2": 7.61,
+ "ozet": {
+  "grid": {
+   "x_pano": 7,
+   "y_pano": 9
+  },
+  "dis_olcu_cm": [
+   888.5,
+   1149.5
+  ],
+  "brut_m2": 90.84,
+  "pano": 46,
+  "pencere": 8,
+  "kapi": 5,
+  "odalar": {
+   "YATAK ODASI 1": 13.76,
+   "BANYO": 4.52,
+   "YATAK ODASI 2": 12.17,
+   "HOL": 1.5,
+   "YATAK ODASI 3": 13.76,
+   "SALON+MUTFAK": 32.25,
+   "VERANDA": 7.61
+  }
+ },
+ "kaynak": {
+  "metin": "AP-18 montaj paftasından İş Emri (İE-33 kör ölçümü). Aday: D-87 (Lokman 13 Kasım 2026 21:41).",
+  "dosya": "testler/kor/projeler/AP18/is_emri.json",
+  "ayna": null,
+  "karar": "D-87",
+  "standart": true,
+  "kart_kiyasi": {
+   "kart": "AP-18",
+   "kart_sha256": "ee4af2491ed0493ce6675b4018e5cde62afb665c469232e214b544f360428b48",
+   "sonuc": "geçti",
+   "olcum": {
+    "dis_olcu_cm": [
+     888.5,
+     1149.5
+    ],
+    "acikla_olcu_cm": [
+     888.5,
+     1149.5
+    ],
+    "brut_m2": 90.84,
+    "kubbe_m2": 0.0,
+    "yatak_odasi": 3,
+    "pencereler": {
+     "120x180": 6,
+     "180x180": 1,
+     "60x40": 1
+    },
+    "dis_kapi": 1,
+    "ic_kapi": 4,
+    "veranda": 1,
+    "kat": 1
+   }
+  }
+ },
+ "not": ""
+}
