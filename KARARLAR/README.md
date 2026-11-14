@@ -198,7 +198,10 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | D | D-86 | Aynı değişiklik yeniden istenince yeni revizyon gitmez: "Planınız (… rNN) değişmedi; YATAK ODASI 1 penceresi zaten 100x140."; revizyon hakkı harcanmaz; altın set D03 ve D04 bu kararla değişti (pano 217, BK-29 tur 5; Lokman 13.11 21:36:32 kartı) | yazıldı (13.11; WhatsApp revizyon sohbeti, `claude/project-thread-2ypd6m`) |
 | D | D-87 | AIPrefabrik ve AICelik'teki tek katlı projeler bayiye giden aday havuzuna; havuza giriş proje kartı hakemiyle (İE-38; Lokman 13.11 21:41:13 "tüm izinleri veriyorum") | yazıldı (13.11; havuz sohbeti, `claude/project-thread-8msr8u`) |
 | D | D-88 | Prefabrik talep formu: standart özellikler seçili, ölçü kodda hesaplanır (kısa kenar + m² → uzun kenar, yarım pano katı), formdan önce [Prefabrik] [Çelik] düğmeleri (İE-20 PR-6; Lokman 13.11 21:26:26, 21:32:39 kartı, 21:37:11) | yazıldı (13.11; talep formu sohbeti, `claude/project-thread-l5mh7r`) |
-| D | **D-89** | — | **sıradaki boş** |
+| D | D-89 | verandasız talep formu (İE-20 PR-8; Lokman 14.11 07:44) | alındı (14.11; talep formu sohbeti, `claude/project-thread-l5mh7r`) |
+| D | D-90 | havuz evinde bayinin "yarım pano uzat / kısalt" komutu: dış duvar kayar, değen odalar uzar; veranda ya da çatı açıklığı değişirse durur; ilk dilim sağ ve ön (İE-39; Lokman 14.11 09:29:42, 09:53:57 kartları) | yazıldı (14.11; yarım pano sohbeti, `claude/project-thread-8hhan1`) |
+| D | D-91 | 45 m² havuz evinin iki standart pano hâli (PA-28, PA-29; İE-40) | alındı (14.11; standart pano sohbeti) |
+| D | **D-92** | — | **sıradaki boş** |
 | İE | İE-01–İE-08 | bu depo (`main`) | yazıldı |
 | İE | İE-09 | model atölyesi: kontrollü model üretimi ve banka hattı (Görev 6e; pano 30; P6001 güncellemesi kapsam dışı) | alındı (16.10; `claude/gorev-6e-model-atolyesi-rnhtcp`; PR-1 banka hattı 29.10, `claude/project-thread-rhjgzv`) |
 | İE | İE-10, İE-11, İE-12 | prefabrik hattı (PR #12, PR #14, `ie-12-prefabrik-bayi-paftasi`) | `main`'e BK-12 ile (PR-1: motor ve bayi paftası; liste ve mühür kıyası sonraki PR'larda) |
@@ -229,7 +232,9 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | İE | İE-36 | bayiye üç seçenek: sekiz prefabrik ev aday kaydında, görünürlük K-A10 kabulüyle (pano 115 madde 2; D-80) | alındı (11.11; `claude/project-thread-0yp292`) |
 | İE | İE-37 | prefabrik evde plan seçilince çatı seçimi (pano 41 prefabrik kolu; D-83): seçenekler ayrı kayıtta, görünürlük K-A10 kabulüyle | alındı (12.11; `claude/project-thread-91gav7`) |
 | İE | İE-38 | aday havuzu: AIPrefabrik ve AICelik'teki tek katlı projeler, proje kartı hakemiyle, ev başına bir kayıt dosyası, görünürlük K-A10 kabulüyle (D-87) | alındı (13.11; `claude/project-thread-8msr8u`) |
-| İE | **İE-39** | — | **sıradaki boş** |
+| İE | İE-39 | havuz evinde bayinin "yarım pano uzat / kısalt" komutu: İş Emri dönüştürücü, önce/sonra pano dizilimi, ilk dilim sağ ve ön (D-90) | alındı (14.11; `claude/project-thread-8hhan1`) |
+| İE | İE-40 | havuz evlerinde özel ölçülü dış panoları standarda çekmek (D-91) | alındı (14.11; standart pano sohbeti) |
+| İE | **İE-41** | — | **sıradaki boş** |
 | BK | BK-01–BK-08 | bu depo; BK-08 8a sonrası temizlik (`bk-08-8a-temizlik`) | yazıldı |
 | BK | BK-09 | metin ve çizim düzeltmeleri, G1 (`bk-09-metin-cizim`, `bk-09-cizim-g1`) | alındı (14.10) |
 | BK | BK-10 | 8b sonrası küçük işler (DXF `.txt` notu, geç gelen Excel, panelden Excel, plan değişince kontrol kapanır, D-19 24 saat kuralı, düğmeli mesajda satır sonları, `YENI-` kodu ve ilk çelik planda LLM özeti bayiye gitmez, komut freni metni; pano satır 15; çelikte kapı değişikliği kapsam dışı) | alındı (30.10; `claude/project-thread-h64uz2`) |

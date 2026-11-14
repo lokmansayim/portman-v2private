@@ -82,7 +82,8 @@ ACILIS_ALANLARI = {"karar", "tarih", "sha256", "liste_commit"}
 YENIDEN = "acik"                     # açılan listenin yeniden ölçüm klasörü (`projeler/<CPnn>/acik/`; İE-16 PR-6a)
 KAT_ALANLARI = {"kat", "tarih", "dayanak", "pafta_sha256"}
 TUR_ADLARI = {"duvar_paneli": "Duvar paneli", "kolon_kiris": "Kolon-kiriş paneli", "makas": "Makas", "cati_paneli": "Çatı paneli",
-              "tavan_paneli": "Tavan paneli", "baca_paneli": "Baca paneli", "c_profil": "Boy C profil"}
+              "tavan_paneli": "Tavan paneli", "baca_paneli": "Baca paneli", "c_profil": "Boy C profil",
+              "ozel_panel": "Özel panel (niş, kemer, gömme rezervuar)"}
 
 
 def _git(kok: Path, *args) -> subprocess.CompletedProcess:

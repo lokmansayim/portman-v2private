@@ -1,0 +1,367 @@
+{
+ "aciklama": "İE-39: 85 m² 3+1 (PA-12, is_emri/adaylar/PA12.json) sağ dış duvar 1 yarım pano uzat.",
+ "onay": {
+  "kim": "Lokman",
+  "zaman_utc": "2026-11-14T10:11:06Z",
+  "soz": "karar kartı \"Onaylayın: 85 m2 evin sağa yarım pano uzamış hâli doğru mu?\" → \"Doğru, örnek olsun\" (seçenek metni: \"Bu çizim komutun beklenen örneği olur. Kod PR'a girer, birleştirme sizde.\")",
+  "gosterilen": "önce/sonra pano dizilimi, ön onay PDF'i, DXF, bayi plan görseli (PF Havuz_Basit_Komut/IE-39_85m2_sag_yarim_pano/, 14 Kasım 10:05 UTC)"
+ },
+ "girdi": "is_emri/adaylar/PA12.json",
+ "komut": {
+  "cephe": "sag",
+  "adim": 1
+ },
+ "ozet": {
+  "cephe": "sag",
+  "adim": 1,
+  "d": 62.75,
+  "d_motor": 62.75,
+  "eksen": "x",
+  "kenar": "max",
+  "uzayan": [
+   {
+    "ad": "YATAK ODASI 2",
+    "once_m2": 11.84,
+    "sonra_m2": 14.59
+   },
+   {
+    "ad": "YATAK ODASI 3",
+    "once_m2": 13.53,
+    "sonra_m2": 15.17
+   }
+  ],
+  "kayan_ek_akslar": [],
+  "sayilar": {
+   "once": 54,
+   "sonra": 54,
+   "ayni": 42,
+   "degisti": 3,
+   "kaydi": 9
+  },
+  "dis_olcu": {
+   "once": [
+    1166.0,
+    726.0
+   ],
+   "sonra": [
+    1228.75,
+    726.0
+   ]
+  },
+  "notlar": []
+ },
+ "is_emri": {
+  "is_emri_no": "PM-ADAY-PA12",
+  "revizyon": 2,
+  "talep": {
+   "bayi": {
+    "kod": "ADAY",
+    "ad": "Aday kaydı"
+   },
+   "musteri_adi": "ADAY PA12",
+   "metin": "AP-11 montaj paftasından İş Emri (İE-33 kör ölçümü). Aday: D-87 (Lokman 13 Kasım 2026 21:41)."
+  },
+  "yapi": {
+   "sistem": "prefabrik",
+   "kat_sayisi": 1,
+   "duvar_yuksekligi_cm": 250,
+   "duvar_kalinligi_cm": {
+    "dis": 10,
+    "ic": 6
+   },
+   "olcu_kaynagi": "dis_olcu",
+   "dis_olcu_cm": {
+    "x": 1228.75,
+    "y": 726
+   },
+   "referans_model": "PA-12",
+   "grid": {
+    "x_pano": 10.0,
+    "y_pano": 6
+   },
+   "kisa_kenar": "y",
+   "giris_cephesi": "on",
+   "dis_dusey_duvar": "cevre_aks_disinda",
+   "dizilim": {
+    "baslangic": "arka-sol",
+    "hiza": "tam_izgara",
+    "dis_duvar_t_bolme": false,
+    "pencere": "oda_ortasi",
+    "kapi": "mantik",
+    "kose": "oda",
+    "son_pano": "son_aks",
+    "kapi_yeri": "ortada",
+    "dis_pano_dayanagi": [
+     {
+      "y": 716,
+      "aralik_cm": [
+       512,
+       716
+      ]
+     }
+    ],
+    "genis_pencere": "oda_ortasi",
+    "karkasli_panolar": [
+     {
+      "yon": "x",
+      "eksen_cm": 517,
+      "aralik_cm": [
+       67.75,
+       318.75
+      ]
+     },
+     {
+      "yon": "y",
+      "eksen_cm": 632.5,
+      "aralik_cm": [
+       522,
+       716
+      ]
+     }
+    ]
+   },
+   "ek_akslar_cm": {
+    "x": [],
+    "y": [
+     517,
+     452.25
+    ]
+   }
+  },
+  "mahaller": [
+   {
+    "ad": "SALON+MUTFAK",
+    "tur": "salon",
+    "konum_cm": [
+     [
+      5.0,
+      10,
+      381.5,
+      517
+     ]
+    ]
+   },
+   {
+    "ad": "YATAK ODASI 1",
+    "tur": "yatak_odasi",
+    "konum_cm": [
+     [
+      381.5,
+      10,
+      695.25,
+      323.75
+     ]
+    ]
+   },
+   {
+    "ad": "BANYO",
+    "tur": "banyo",
+    "konum_cm": [
+     [
+      695.25,
+      10,
+      883.5,
+      323.75
+     ]
+    ]
+   },
+   {
+    "ad": "YATAK ODASI 2",
+    "tur": "yatak_odasi",
+    "konum_cm": [
+     [
+      883.5,
+      10,
+      1223.75,
+      452.25
+     ]
+    ]
+   },
+   {
+    "ad": "HOL",
+    "tur": "antre_hol",
+    "konum_cm": [
+     [
+      381.5,
+      323.75,
+      883.5,
+      452.25
+     ],
+     [
+      381.5,
+      452.25,
+      632.5,
+      517
+     ]
+    ]
+   },
+   {
+    "ad": "YATAK ODASI 3",
+    "tur": "yatak_odasi",
+    "konum_cm": [
+     [
+      632.5,
+      452.25,
+      1223.75,
+      716
+     ]
+    ]
+   },
+   {
+    "ad": "VERANDA",
+    "tur": "veranda",
+    "konum_cm": [
+     [
+      5.0,
+      517,
+      632.5,
+      716
+     ]
+    ]
+   }
+  ],
+  "acik_sinirlar": [],
+  "acikliklar": [
+   {
+    "tur": "dis_kapi",
+    "olcu": 90,
+    "arasi": [
+     "VERANDA",
+     "HOL"
+    ],
+    "pano": 1
+   },
+   {
+    "tur": "pencere",
+    "olcu": "180x200",
+    "mahal": "SALON+MUTFAK",
+    "duvar": "on",
+    "acilis": "surgulu",
+    "pano": 0
+   },
+   {
+    "tur": "pencere",
+    "olcu": "120x180",
+    "mahal": "SALON+MUTFAK",
+    "duvar": "sol"
+   },
+   {
+    "tur": "pencere",
+    "olcu": "120x180",
+    "mahal": "YATAK ODASI 1",
+    "duvar": "arka",
+    "pano": 1
+   },
+   {
+    "tur": "pencere",
+    "olcu": "60x40",
+    "mahal": "BANYO",
+    "duvar": "arka",
+    "pano": 0
+   },
+   {
+    "tur": "pencere",
+    "olcu": "120x180",
+    "mahal": "YATAK ODASI 2",
+    "duvar": "sag",
+    "pano": 1
+   },
+   {
+    "tur": "pencere",
+    "olcu": "120x180",
+    "mahal": "YATAK ODASI 3",
+    "duvar": "sol",
+    "pano": 0
+   },
+   {
+    "tur": "pencere",
+    "olcu": "120x180",
+    "mahal": "YATAK ODASI 3",
+    "duvar": "on",
+    "pano": 2
+   },
+   {
+    "tur": "ic_kapi",
+    "olcu": 82,
+    "arasi": [
+     "HOL",
+     "SALON+MUTFAK"
+    ],
+    "pano": 0
+   },
+   {
+    "tur": "ic_kapi",
+    "olcu": 82,
+    "arasi": [
+     "HOL",
+     "YATAK ODASI 1"
+    ],
+    "duvar_ucu": "sag"
+   },
+   {
+    "tur": "ic_kapi",
+    "olcu": 82,
+    "arasi": [
+     "HOL",
+     "BANYO"
+    ],
+    "duvar_ucu": "sol"
+   },
+   {
+    "tur": "ic_kapi",
+    "olcu": 82,
+    "arasi": [
+     "HOL",
+     "YATAK ODASI 2"
+    ],
+    "duvar_ucu": "arka"
+   },
+   {
+    "tur": "ic_kapi",
+    "olcu": 82,
+    "arasi": [
+     "HOL",
+     "YATAK ODASI 3"
+    ],
+    "pano": 0
+   }
+  ],
+  "dikmeler": [
+   [
+    0.0,
+    0
+   ]
+  ],
+  "cati": {
+   "tip": "besik",
+   "egim_yuzde": 32.88,
+   "sacak_cm": 30,
+   "topuk_cm": 10,
+   "makas_yonu": "kisa_kenar",
+   "makas_ekseni": "y"
+  },
+  "cikti": {
+   "pdf": true,
+   "dxf": true,
+   "pafta": "A2",
+   "icerik": [
+    "aksli_plan",
+    "alanli_kopya",
+    "montaj_kopyasi",
+    "on_gorunus",
+    "cati_profili",
+    "ozellik_tablosu"
+   ]
+  },
+  "varsayimlar": [
+   "Köşe ve ızgara (İE-17 kuralı; paftada aynı): makas y'yi geçer (makas planı M1–M11 boyuna dizili), kısa kenar y. Ön ve arka duvar köşeden geçer, x ızgarası duvar ekseninden (5 + 125,5k; 381,5, 883,5 ve 1009 paftada ek); yan duvarlar araya girer, y ızgarası arka iç yüzden. Son pano x yönünde paftadaki gibi ızgaranın sondan bir önceki aksından (dizilim.son_pano: son_aks; sağ uçta ön ve arka dış duvarda 62,75 + 89,25, aynı uca giden iç duvarda 62,75 + 84,25 (sağ duvarın iç yüzüne kadar); İE-27 PR-3, D-45 madde 1, 3 Kasım 2026; önce kosu: 125,5 + 26,5).",
+   "Veranda sol önde, gömme (627,5 × 204), ön ve sol açık; sol ön köşede 10 × 10 dikme (paftada D tipi kutu profil, önde E tipi kiriş). Verandanın arka duvarı (Motor çerçevesinde y 517) ve yatak odası 2'nin ön duvarı (y 452,25) ek aks.",
+   "Pencereler: salonun sol penceresi odanın ortasında (dizilim.pencere: oda_ortasi; paftada 62,75 + 125,5 + 62,75); ötekiler paftadaki yerine en yakın Motor panosunda (pano dizini). 180/200 sürgülü paftadaki ölçüsüyle (İE-27 madde 11, kısaltma yok; 3 Kasım 2026'ya kadar Motor'un 180 sınırıyla 180x180 yazılıydı): döşemeden, paftada odaya ortalı 251'lik pano ve iki yanında 62,75 (Motor'da ızgaradaki iki pano; Motor'un geniş pencere kuralı odaya ortalamaz, paftayla kalan fark). Verandaya bakan yatak odası 3 duvarı paftada tek parça 194'lük karkaslı pano (120/180 ortada); Motor'da 125,5'lik pencereli pano + 68,5 (kalan fark). Sağ duvarın önü paftada 78,5 + 125,5; Motor'da dayanak aynı aralıkta iki duvara düştüğü için 125,5 + 78,5 (kalan fark). 120/180 çift açılır: Motor'da açılış yazılmaz (yalnız sürgülü), ölçü aynı.",
+   "Kapılar paftadaki duvarda ve panoda; koridordan yatak odası 1, banyo ve yatak odası 2'ye açılan kapılar paftadaki gibi duvarın kavşak ucunda (duvar_ucu); verandaya bakan yatak odası 3 duvarının panoları ön dış yüzün aksından (dis_pano_dayanagi, pencere 125,5'lik panoda); genişlikler paftada yazılı değil: dış kapı 90, iç kapı 82 (Motor'un ölçüsü). Oda adları ve alanları paftanın elektrik planından (salon + mutfak 18,49, yatak odaları 9,56 / 11,75 / 13,68, banyo 5,66, hol 7,53 m²).",
+   "Çatı: beşik, makas y'yi geçer; paftada eğim ve saçak yazılı değil: eğim 18,2° (%32,88, prefabrik evlerin eğimi), saçak 30 (paftanın çatı alanı 101 m² ve 3 × 410'luk aşık sırası 1226 = 1166 + 2 × 30 ile), topuk 10. Kaplama paftanın kaplama sayfasından: OSB + nem bariyeri + trapez.",
+   "Karkaslı kaplama duvar panoları paftadan (İE-28, D-46): 180/200 odaya ortalı 62,75 + 251 + 62,75 (`dizilim.genis_pencere: oda_ortasi`), 251'lik pano karkaslı; yatak odası 3'ün verandaya bakan duvarı tek parça 194 (120/180). Paftanın bu evdeki renkleri pano pano okunmadı (İE-27 PR-3 okuması ve gerçek liste: karkaslı kaplamalı pano 251 ve 194); pencereler Motor'un yerinde.",
+   "Bayi komutu (İE-39): sağ dış duvar 1 yarım pano (62,75 cm) uzadı; dış ölçü 1166 × 726 → 1228,75 × 726 cm; değişen odalar: YATAK ODASI 2, YATAK ODASI 3."
+  ],
+  "eksikler": []
+ }
+}
