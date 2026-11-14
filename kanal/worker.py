@@ -759,7 +759,8 @@ NASIL_TALEP = "Talebinizi bu sohbete yazabilirsiniz; örnek: \"Tek kat çelik, 2
 YAPI_SORUSU = "Formla iletmek için yapı tipini seçin."
 YAPI_DUGMELERI = (("prefabrik", "Prefabrik"), ("celik", "Çelik"))
 YAPI_FORM_METNI = {"prefabrik": "Prefabrik talep formunu doldurun. İsterseniz talebinizi yazın.",
-                   "talep": "Çelik için talep formunu doldurun. İsterseniz talebinizi yazın."}    # düğmeden sonra sunulan forma göre
+                   "talep": "Çelik için talep formunu doldurun. İsterseniz talebinizi yazın.",    # düğmeden sonra sunulan forma göre
+                   "talep2": "Çelik için talep formunu doldurun. İsterseniz talebinizi yazın."}
 YAPI_DAVET_SORULARI = ("oda_programi", "dis_olcu")      # katalog önerisi taşıyan soru ("model_veya_olcu") kendi metniyle gider
 
 
@@ -787,11 +788,16 @@ def giden_form(gelen: dict, metin: str, sira: int, tur: str, settings: dict, tok
 def talep_formu_sunusu(gelen: dict, bayi: dict | None, taslak: dict | None, settings: dict) -> tuple | None:
     """Hangi talep formu sunulur: (tur, token, veri, None, None). İE-20 PR-6: prefabrik formun kimliği ayarda yoksa
     (`talep_formu.prefabrik_flow_id`) bugünkü talep formu. Varsa yapı tipine göre (açık taslak > bayi kartının varsayılanı): prefabrik →
-    prefabrik talep formu; çelik → bugünkü talep formu; bilinmiyorsa `yapi_sor` (iki düğme; token yerine mesajın izi)."""
+    prefabrik talep formu; çelik → bugünkü talep formu; bilinmiyorsa `yapi_sor` (iki düğme; token yerine mesajın izi).
+    İE-20 PR-8 (D-89): verandasız formun kimliği ayarda varsa (`talep_formu.talep2_flow_id`) bugünkü talep formunun yerine o sunulur
+    (veranda ayrıca sorulmaz); yoksa bugünkü form, davranış aynı."""
     import talep_formu as TF
     iz = satir_id(gelen["id"], 0)[4:16]
-    v1 = ("talep", TF.talep_tokeni(iz, taslaktan=taslak is not None), TF.ekran_verisi(bayi, taslak), None, None) \
-        if form_kimligi(settings, "talep") else None
+    if form_kimligi(settings, "talep2"):
+        v1 = ("talep2", TF.talep_tokeni(iz, taslaktan=taslak is not None), TF.talep2_ekran_verisi(bayi, taslak), None, None)
+    else:
+        v1 = ("talep", TF.talep_tokeni(iz, taslaktan=taslak is not None), TF.ekran_verisi(bayi, taslak), None, None) \
+            if form_kimligi(settings, "talep") else None
     if not form_kimligi(settings, "prefabrik"):
         return v1
     yapi = (taslak or {}).get("yapi_turu") or TF.kart_varsayilanlari(bayi).get("yapi")
