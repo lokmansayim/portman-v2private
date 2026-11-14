@@ -1,0 +1,72 @@
+{
+ "kod": "PA25",
+ "gosterim": "PA-25",
+ "durum": "gecerli",
+ "sablon": "adaylar/PA25.json",
+ "gorsel": "adaylar/PA25.png",
+ "referans_model": "PA-25",
+ "yapi_turu": "prefabrik",
+ "kat": 1,
+ "oda_programi": "2+1",
+ "katalog_m2": 61.0,
+ "kapali_m2": 53.1,
+ "veranda_m2": 8.36,
+ "ozet": {
+  "grid": {
+   "x_pano": 6,
+   "y_pano": 6.5
+  },
+  "dis_olcu_cm": [
+   748.67,
+   821.0
+  ],
+  "brut_m2": 61.47,
+  "pano": 41,
+  "pencere": 7,
+  "kapi": 5,
+  "odalar": {
+   "YATAK ODASI 1": 9.08,
+   "BANYO": 4.54,
+   "YATAK ODASI 2": 9.68,
+   "HOL": 3.32,
+   "SALON+MUTFAK": 22.35,
+   "VERANDA": 8.36
+  }
+ },
+ "kaynak": {
+  "metin": "AP-14 montaj paftasından İş Emri (İE-26 kör ölçümü); oda programı 2+1 Lokman'ın karar kartından (14 Kasım 2026 07:50). Aday: D-87 (Lokman 13 Kasım 2026 21:41).",
+  "dosya": "testler/kor/projeler/AP14/is_emri.json",
+  "ayna": null,
+  "karar": "D-87",
+  "standart": true,
+  "kart_kiyasi": {
+   "kart": "AP-14",
+   "kart_sha256": "ad8f88201848cc2c66dba30f69044ea34cbae0661ce8db217a035851f2ed38f2",
+   "sonuc": "geçti",
+   "olcum": {
+    "dis_olcu_cm": [
+     748.67,
+     821.0
+    ],
+    "acikla_olcu_cm": [
+     748.67,
+     821.0
+    ],
+    "brut_m2": 61.47,
+    "kubbe_m2": 0.0,
+    "yatak_odasi": 2,
+    "pencereler": {
+     "120x120": 3,
+     "120x180": 2,
+     "180x200": 1,
+     "60x40": 1
+    },
+    "dis_kapi": 1,
+    "ic_kapi": 4,
+    "veranda": 1,
+    "kat": 1
+   }
+  }
+ },
+ "not": ""
+}

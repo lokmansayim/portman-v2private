@@ -1,0 +1,264 @@
+{
+ "is_emri_no": "PM-ADAY-PA24",
+ "revizyon": 1,
+ "talep": {
+  "bayi": {
+   "kod": "ADAY",
+   "ad": "Aday kaydı"
+  },
+  "musteri_adi": "ADAY PA24",
+  "metin": "AP-27 montaj paftasından İş Emri (D-87 › Veranda, 14 Kasım düzeltmesi). Aday: D-87 (Lokman 13 Kasım 2026 21:41; 14 Kasım 07:34)."
+ },
+ "yapi": {
+  "sistem": "prefabrik",
+  "kat_sayisi": 1,
+  "duvar_yuksekligi_cm": 250,
+  "duvar_kalinligi_cm": {
+   "dis": 10,
+   "ic": 6
+  },
+  "olcu_kaynagi": "dis_olcu",
+  "dis_olcu_cm": {
+   "x": 773,
+   "y": 1000
+  },
+  "referans_model": "PA-24",
+  "grid": {
+   "x_pano": 6,
+   "y_pano": 8
+  },
+  "giris_cephesi": "on",
+  "dis_dusey_duvar": "cevre_aks_disinda",
+  "dizilim": {
+   "baslangic": "arka-sol",
+   "hiza": "kosu",
+   "dis_duvar_t_bolme": true,
+   "pencere": "oda_ortasi",
+   "kapi": "mantik",
+   "kose": "oda",
+   "son_pano": "kosu",
+   "kapi_yeri": "ortada",
+   "dis_pano_dayanagi": [
+    {
+     "y": 632.5,
+     "aralik_cm": [
+      569.75,
+      995
+     ],
+     "ic_duvarlar": true
+    },
+    {
+     "y": 500,
+     "aralik_cm": [
+      381.5,
+      569.75
+     ],
+     "ic_duvarlar": true
+    }
+   ]
+  },
+  "ek_akslar_cm": {
+   "x": [],
+   "y": [
+    500
+   ]
+  }
+ },
+ "mahaller": [
+  {
+   "ad": "ÇOCUK ODASI",
+   "tur": "yatak_odasi",
+   "konum_cm": [
+    [
+     10,
+     5,
+     449.25,
+     381.5
+    ]
+   ]
+  },
+  {
+   "ad": "YATAK ODASI",
+   "tur": "yatak_odasi",
+   "konum_cm": [
+    [
+     449.25,
+     5,
+     763,
+     444.25
+    ]
+   ]
+  },
+  {
+   "ad": "BANYO",
+   "tur": "banyo",
+   "konum_cm": [
+    [
+     10,
+     381.5,
+     323.75,
+     569.75
+    ]
+   ]
+  },
+  {
+   "ad": "HOL",
+   "tur": "antre_hol",
+   "konum_cm": [
+    [
+     323.75,
+     381.5,
+     449.25,
+     569.75
+    ],
+    [
+     449.25,
+     444.25,
+     763,
+     569.75
+    ]
+   ]
+  },
+  {
+   "ad": "SALON",
+   "tur": "salon",
+   "konum_cm": [
+    [
+     10,
+     569.75,
+     449.25,
+     995
+    ]
+   ]
+  },
+  {
+   "ad": "MUTFAK",
+   "tur": "mutfak",
+   "konum_cm": [
+    [
+     449.25,
+     569.75,
+     763,
+     995
+    ]
+   ]
+  }
+ ],
+ "acik_sinirlar": [],
+ "acikliklar": [
+  {
+   "tur": "dis_kapi",
+   "olcu": 90,
+   "arasi": [
+    "__DIS__",
+    "HOL"
+   ],
+   "duvar": "sag",
+   "duvar_ucu": "arka"
+  },
+  {
+   "tur": "ic_kapi",
+   "olcu": 82,
+   "arasi": [
+    "HOL",
+    "SALON"
+   ],
+   "duvar_ucu": "sol"
+  },
+  {
+   "tur": "ic_kapi",
+   "olcu": 82,
+   "arasi": [
+    "HOL",
+    "MUTFAK"
+   ],
+   "duvar_ucu": "sol"
+  },
+  {
+   "tur": "ic_kapi",
+   "olcu": 82,
+   "arasi": [
+    "HOL",
+    "YATAK ODASI"
+   ],
+   "duvar_ucu": "sol"
+  },
+  {
+   "tur": "ic_kapi",
+   "olcu": 82,
+   "arasi": [
+    "HOL",
+    "ÇOCUK ODASI"
+   ],
+   "duvar_ucu": "sol"
+  },
+  {
+   "tur": "ic_kapi",
+   "olcu": 82,
+   "arasi": [
+    "HOL",
+    "BANYO"
+   ],
+   "pano": 0
+  },
+  {
+   "tur": "pencere",
+   "olcu": "180x210",
+   "mahal": "SALON",
+   "duvar": "on",
+   "pano": 1
+  },
+  {
+   "tur": "pencere",
+   "olcu": "180x210",
+   "mahal": "MUTFAK",
+   "duvar": "on",
+   "pano": 0
+  },
+  {
+   "tur": "pencere",
+   "olcu": "180x210",
+   "mahal": "ÇOCUK ODASI",
+   "duvar": "arka",
+   "pano": 1
+  },
+  {
+   "tur": "pencere",
+   "olcu": "140x150",
+   "mahal": "YATAK ODASI",
+   "duvar": "arka",
+   "pano": 0
+  }
+ ],
+ "dikmeler": [],
+ "cati": {
+  "tip": "kirma",
+  "egim_yuzde": 32.88,
+  "sacak_cm": 30,
+  "topuk_cm": 10,
+  "makas_yonu": "uzun_kenar",
+  "makas_ekseni": "y",
+  "kalkan_ucu": "sol"
+ },
+ "cikti": {
+  "pdf": true,
+  "dxf": true,
+  "pafta": "A2",
+  "icerik": [
+   "aksli_plan",
+   "alanli_kopya",
+   "montaj_kopyasi",
+   "on_gorunus",
+   "cati_profili",
+   "ozellik_tablosu"
+  ]
+ },
+ "varsayimlar": [
+  "Köşe ve ızgara (montaj paftası): ön ve arka duvarın panoları iç yüzden (10 + 125,5k; altı tam pano), yan duvarlar köşeden geçer, y ızgarası arka duvarın ekseninden (5 + 125,5k); kesilmiş son pano önde (111,5). Pano dizilimi paftadan: x boyunca duvarlar her T kavşağında bölünür ve parçanın başından 125,5 (hiza: kosu, dis_duvar_t_bolme; pencereli 251'likler paftadaki yerinde), y boyunca duvarlar önde (salon ve mutfak bölümü) arka ızgaradan (dis_pano_dayanagi 632,5) ve banyo bölümünde evin ortasından (500, kalkanın tepesi; paftada 118,5 + 69,75) bölünür. Kısa kenar x (köşe 10 cm x'te); makas y'yi geçer (mahya x boyunca), Motor bunu uyarıyla çizer. İç duvarlar 60'lık (özellik tablosu).",
+  "Pano dizilimi arkadan (dizilim.baslangic: arka-sol): mahallerin y'si arka dış yüzden; açıklıkların cepheleri gerçek çerçevede. Arkada çocuk odası ve yatak odası, ortada banyo ve L hol, önde salon ve mutfak; verandasız.",
+  "Hol L: banyonun önündeki giriş (323,75–449,25) ile yatak odasının önündeki koridor arası duvarsız (paftada 449,25 ekseninde 441–573 arası boş). Oda alanları paftanın planından (çocuk 16,07, yatak 13,4, banyo 5,66, hol 5,96, salon 18,2, mutfak 12,96 m²).",
+  "Dış kapı sağ duvarda, holün koridorunda (paftada kanat 691–773). Kapılar ve pencereler paftadaki yerine en yakın Motor panosunda (kanat izi ve pencere yazıları); kapı genişlikleri paftada yazılı değil: dış kapı 90, iç kapı 82 (Motor'un ölçüsü). Pencereler 180/210 (üç) ve 140/150 (yatak odası) paftadaki yazıyla; ikisi de 251'lik pencereli panoda.",
+  "Çatı: tek uçlu kırma (İE-29). Mahya x boyunca, sol uçta kalkan, sağ uçta kırma; eşit eğim %32,88 (18,2°; paftanın yan kesiti 1060 = 1000 + 2 × 30, tepe 184,26 = 10 topuk + 530 × 0,3288), saçak 30, topuk 10. Kaynak: makas ve panel yerleşim planı (kırma çizgileri 45°, tepe sağ duvardan ~500) ve çatı kaplaması planı (üç yüzün eğik boyu 562,91, kırma yüzünün tabanı 1060). Paftanın ön kesiti (373,7 düz, 151,15) bir makasın kesiti, mahya değil. Kaplama trapez (özellik tablosu)."
+ ],
+ "eksikler": []
+}
