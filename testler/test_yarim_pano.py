@@ -151,12 +151,58 @@ def test_girdi_degismez():
 
 
 def test_uzat_sonra_kisalt_eski_plan():
-    """Sağa 1 yarım pano uzat, sonra 1 yarım pano kısalt: İş Emri'nin geometrisi eskisinin aynısı (revizyon ve kayıt satırı dışında)."""
+    """Sağa 1 yarım pano uzat, sonra 1 yarım pano kısalt: İş Emri'nin geometrisi eskisinin aynısı (revizyon ve kayıt satırı dışında).
+    Tek fark son panonun dizilimi: Lokman'ın kuralıyla (14 Kasım 2026 13:24 UTC) 1166'da sağ uç 62,75 + 89,25 değil 125,5 + 26,5."""
     ie0 = _ie("PA12")
     ie1 = Y.uygula(ie0, "sag", 1)["is_emri"]
     ie2 = Y.uygula(ie1, "sag", -1)["is_emri"]
+    assert ie0["yapi"]["dizilim"]["son_pano"] == "son_aks" and ie2["yapi"]["dizilim"]["son_pano"] == "kosu"
+    ie2["yapi"]["dizilim"]["son_pano"] = "son_aks"
     disla = ("revizyon", "varsayimlar")
     assert {k: v for k, v in ie2.items() if k not in disla} == {k: v for k, v in ie0.items() if k not in disla}
+
+
+def _uc(plan, c: float, n: int = 3) -> list:
+    """x yönündeki duvarın (ekseni c) sağ uçtaki n panosunun boyu."""
+    ps = sorted((p for p in plan.panolar if p.duvar.yon == "x" and abs(p.duvar.c - c) < 0.01), key=lambda p: p.a0)
+    return [round(p.boy, 2) for p in ps[-n:]]
+
+
+def _parcali_uc(plan, eksen: str, kenar_g: str) -> list:
+    """Kayan duvar ucunda "62,75 + kalan" deseni: duvarın son iki panosu açıklıksız, ilki 62,75, ikincisi kesilmiş parça ve toplamı
+    125,5'ten büyük. Lokman'ın kuralında (14 Kasım 2026 13:24 UTC) bu iki pano 125,5 + kalan olmalı."""
+    duvarlar = {}
+    for p in plan.panolar:
+        if p.duvar.yon == eksen:
+            duvarlar.setdefault(round(p.duvar.c, 2), []).append(p)
+    out = []
+    for c, ps in duvarlar.items():
+        ps.sort(key=lambda p: p.a0)
+        if len(ps) < 2:
+            continue
+        a, b = (ps[-2], ps[-1]) if kenar_g == "max" else (ps[1], ps[0])
+        if a.aciklar or b.aciklar or abs(a.boy - Y.YARIM) > 0.01:
+            continue
+        if b.boy not in (Y.MOD, Y.YARIM) and a.boy + b.boy > Y.MOD + 0.01:
+            out.append((c, a.boy, b.boy))
+    return out
+
+
+@pytest.mark.parametrize("kod,cephe,adim", [("PA12", "sag", a) for a in (1, -1, 2, -2)] + [("PA24", "sag", a) for a in (1, -1, 2)]
+                         + [("PA23", "on", a) for a in (1, -1, 2)])
+def test_tek_pano_kurali(kod, cephe, adim):
+    """Komut çıktısında kayan duvar ucunda 62,75 + kalan yok (Lokman, 14 Kasım 2026 13:12–13:24 UTC)."""
+    s = Y.uygula(_ie(kod), cephe, adim)
+    assert _parcali_uc(s["sonra"], s["eksen"], s["kenar"]) == []
+
+
+def test_tek_pano_pa12_bir_pano():
+    """85 m² ev sağa 1 pano: sağ uç 125,5 + 125,5 + 26,5, aynı akstaki iç duvar 125,5 + 125,5 + 21,5 (Lokman'ın 13:12 sözü)."""
+    s = Y.uygula(_ie("PA12"), "sag", 2)
+    assert _uc(s["once"], 5) == [125.5, 62.75, 89.25] and _uc(s["once"], 273.75) == [125.5, 62.75, 84.25]
+    assert _uc(s["sonra"], 5) == _uc(s["sonra"], 721) == [125.5, 125.5, 26.5]
+    assert _uc(s["sonra"], 273.75) == [125.5, 125.5, 21.5]
+    assert s["is_emri"]["yapi"]["dizilim"]["son_pano"] == "kosu"
 
 
 # ---------------------------------------------------------------- 85 m² ev, sağa 1 yarım pano

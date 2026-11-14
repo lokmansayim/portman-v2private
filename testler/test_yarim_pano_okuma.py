@@ -192,7 +192,7 @@ def test_pencereyle_birlikte(s):
 @pytest.mark.parametrize("kod,soz,neden", [
     ("PA12", "öne yarım pano uzat", "veranda bu duvara değiyor; veranda uzamaz"),
     ("PA12", "sola yarım pano uzat", "bugün yalnız sağ ve ön duvar uzatılıp kısaltılabiliyor"),
-    ("PA12", "sağa 1 pano kısalt", "kapı ya da pencere yerinde kalmıyor"),
+    ("PA23", "sağa yarım pano kısalt", "kapı ya da pencere yerinde kalmıyor"),
     ("PA01", "sağa yarım pano uzat", "bu evin planı sabit, değiştirilemiyor"),
 ])
 def test_kural_tutmazsa_gerekce_plan_acik(s, kod, soz, neden):

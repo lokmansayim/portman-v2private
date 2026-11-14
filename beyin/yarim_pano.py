@@ -393,6 +393,30 @@ def bant_disi_degisen(p1, siniflar: dict, eksen: str, kenar_g: str, d: float, t:
     return out
 
 
+def dizilim_izi(plan) -> list:
+    """Planın pano dizilimi: (duvar yönü, duvar ekseni, a0, a1), sıralı; iki planın dizilimi aynı mı kıyası için."""
+    return sorted((p.duvar.yon, round(p.duvar.c, 2), round(p.a0, 2), round(p.a1, 2)) for p in plan.panolar)
+
+
+def tek_pano(ie0: dict, ie1: dict, p0, p1, kaymalar: list, cephe: str, d: float):
+    """Lokman, 14 Kasım 2026 13:12–13:24 UTC: duvarda 125,5'ler çıkar, kalan tek parça son (özel) panodur; özel durum yokken 62,75
+    bölünmez ("62,75 ile 89,25 tek pano haline gelir … 125,5 + 26,5 olur"; aynı akstaki iç duvar da). Komutun çıktısında İş Emri'nin
+    `dizilim.son_pano: son_aks`ı (kesilmiş son panonun önünde yarım pano) `kosu` olur. Dizilim değişmiyorsa İş Emri aynen kalır
+    (onaylı örnek bayt bayt). Dönüş: (İş Emri, Plan, kaymalar)."""
+    if ((ie1["yapi"].get("dizilim") or {}).get("son_pano")) != "son_aks":
+        return ie1, p1, kaymalar
+    ie_k = copy.deepcopy(ie1)
+    ie_k["yapi"]["dizilim"]["son_pano"] = "kosu"
+    try:
+        ie_k, kay_k = dizinleri_esle(ie0, ie_k, p0, cephe, d)
+        p_k = _sessiz_kur(ie_k)
+    except Exception as e:
+        raise KomutDurdu("motor", f"tek pano dizilimi kurulamadı: {str(e)[:120]}")
+    if dizilim_izi(p_k) == dizilim_izi(p1):
+        return ie1, p1, kaymalar
+    return ie_k, p_k, kay_k
+
+
 # ---------------------------------------------------------------- komut
 
 def uygula(ie0: dict, cephe: str, adim: int) -> dict:
@@ -420,6 +444,7 @@ def uygula(ie0: dict, cephe: str, adim: int) -> dict:
     try:
         ie1, kaymalar = dizinleri_esle(ie0, ie1, p0, cephe, d)
         p1 = _sessiz_kur(ie1)
+        ie1, p1, kaymalar = tek_pano(ie0, ie1, p0, p1, kaymalar, cephe, d)
     except KomutDurdu:
         raise
     except Exception as e:
