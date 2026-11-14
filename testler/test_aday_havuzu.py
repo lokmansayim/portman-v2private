@@ -57,11 +57,15 @@ CELIK = {
     "KT08": ("ÇP-20", "testler/celik/projeler/CP20/CP20.json", "3+1", 90.0),
     "KT09": ("ÇP-08", "testler/celik/projeler/CP08/CP08.json", "2+1", 81.0),      # antette veranda yok (D-87 › Veranda, 14 Kasım)
     "KT10": ("ÇP-23", "testler/celik/projeler/CP23/CP23.json", "2+1", 82.0),      # ikinci kör küme, yalnız plan olarak (aşağıda)
+    "KT11": ("ÇP-22", "testler/celik/projeler/CP22/CP22.json", "1+1", 49.0),      # ikinci kör küme, planın m²'siyle (aşağıda)
+    "KT12": ("ÇP-24", "testler/celik/projeler/CP24/CP24.json", "3+1", 130.0),
+    "KT13": ("ÇP-25", "testler/celik/projeler/CP25/CP25.json", "3+1", 167.0),
 }
 # İkinci kör küme (İE-16 PR-7): Lokman'ın 14 Kasım 2026 11:33:07 UTC kartı, çelik kör testi sohbeti; plan hakemden geçerse girer
 CELIK2_KART = '"Yalnız plan olarak girsin"'
-# Hakemden geçmeyen ikinci küme projeleri ve bulgunun başı (D-87 › Havuza girmeyen çelik projeler)
-KALANLAR_CELIK = {"ÇP-22": "brüt oturum", "ÇP-24": "brüt oturum", "ÇP-25": "brüt oturum"}
+# Antetteki sayı brüt oturum değil (net, planla çelişen, yuvarlanmış): Lokman'ın 14 Kasım 2026 12:33:58 UTC kartıyla brüt planın m²'siyle
+PLAN_M2_KART = '"Planın m²\'siyle girsin"'
+PLAN_M2 = {"ÇP-22": (49.0, 43.2), "ÇP-24": (130.0, 140.0), "ÇP-25": (167.0, 166.0)}          # (plan_m2, antet_m2)
 CELIK_KAYIT = {a["kod"]: a for a in havuz_kayitlari(yapi="celik")}
 ESKI_CELIK = {"Ç8801", "Ç8801K", "Ç8801L", "Ç8201", "KT01", "KT02", "KT03", "KT04"}
 D80 = {f"PA0{i}" for i in range(1, 9)}
@@ -74,7 +78,7 @@ KALANLAR = {
 }
 # D-87 › Veranda (Lokman, 14 Kasım 2026 07:34 UTC): veranda bir oda gibi sayılır; verandasız ev de havuza girer
 VERANDA_SOZU = "veranda ayrıca var mı yok mu belirtilmez verandayı da bir oda gibi kabul et"
-VERANDASIZ = {"PA23", "PA24", "KT09"}
+VERANDASIZ = {"PA23", "PA24", "KT09", "KT11"}                                   # KT-11 (ÇP-22): antette sundurma, veranda yok
 # AP-14: paftada oda adı yok; oda programı Lokman'ın karar kartından (14 Kasım 2026 07:50:30 UTC, "Evet, 2+1 olarak girsin")
 AP14_SOZU = '"Evet, 2+1 olarak girsin"'
 # AP-08: Lokman 14 Kasım 2026 08:16:22 UTC düzeltmesi (hol panoları, sırt sırta kapılar, ortada pencere), 08:29:26 kartı
@@ -364,26 +368,34 @@ def test_celik_hakem_gecer(kod):
 
 def test_celik_disarida_kalanlar():
     """Antette oda programı yok (ÇP-03, ÇP-04), aynı proje havuzda (ÇP-07, 13, 14, 17): hakem girdisi bunu söyler. Verandasız ÇP-08 girer.
-    İkinci kümede brüt oturumu antetten farklı üç proje (ÇP-22, 24, 25) girmez; ÇP-26 çift kat, kartı yok."""
+    İkinci kümede antetteki sayısı brüt olmayan üç proje (ÇP-22, 24, 25) planın m²'siyle girer; ÇP-26 çift kat, kartı yok."""
     kart = HH.celik_kartlari()
     assert {k for k, v in kart.items() if not v["oda_programi"]} == {"ÇP-03", "ÇP-04"}
     assert {k for k, v in kart.items() if not v["veranda"]} == {"ÇP-08", "ÇP-13", "ÇP-22"}
     assert {k: v["havuzda"] for k, v in kart.items() if v["havuzda"]} == {"ÇP-07": "KT-03", "ÇP-13": "KT-01", "ÇP-14": "KT-04", "ÇP-17": "KT-02"}
     gecen = {CELIK[k][0] for k in CELIK}
-    assert gecen == {k for k, v in kart.items() if v["oda_programi"] and not v["havuzda"]} - set(KALANLAR_CELIK)
+    assert gecen == {k for k, v in kart.items() if v["oda_programi"] and not v["havuzda"]}
     assert "ÇP-26" not in kart and CELIK2_KART in D87 and "| ÇP-26 | Çift kat" in D87
-    for satir in ("| ÇP-07, ÇP-13, ÇP-14, ÇP-17 |", "| ÇP-03 | Hakem kaldı", "| ÇP-04 | Hakem kaldı", "| ÇP-22 | Hakem kaldı: brüt oturum",
-                  "| ÇP-24 | Hakem kaldı: brüt oturum", "| ÇP-25 | Hakem kaldı: brüt oturum"):
+    for satir in ("| ÇP-07, ÇP-13, ÇP-14, ÇP-17 |", "| ÇP-03 | Hakem kaldı", "| ÇP-04 | Hakem kaldı"):
         assert satir in D87
+    assert not [p for p in PLAN_M2 if f"| {p} | Hakem kaldı" in D87]
 
 
-@pytest.mark.parametrize("proje", sorted(KALANLAR_CELIK))
-def test_celik_ikinci_kume_kalanlar(proje):
-    """Hakem yeniden koşar: genel motor çizer ve doğrular, oda programı tutar; brüt oturum antetten 0,5 m²'den çok sapar (zorla girmez)."""
+@pytest.mark.parametrize("proje", sorted(PLAN_M2))
+def test_celik_plan_m2(proje):
+    """Lokman 14 Kasım 2026 12:33:58 kartı: brüt oturum planın m²'siyle (`plan_m2`), sınır aynı 0,5 m²; `antet_m2` paftadaki sayı kalır.
+    Söz kartta yoksa ya da `plan_m2` yoksa hakem yine "brüt oturum" der (kural yalnız bu üç projede, Lokman'ın sözüyle)."""
     k = HH.celik_kartlari()[proje]
+    assert (k["plan_m2"], k["antet_m2"]) == PLAN_M2[proje]
+    assert "12:33:58" in k["plan_m2_kaynagi"] and PLAN_M2_KART in k["plan_m2_kaynagi"] and PLAN_M2_KART in D87
     bulgular, olc = HH.celik_denetle(KOK / k["tanim"], k)
-    assert [b.split(":")[0] for b in bulgular] == [KALANLAR_CELIK[proje]], bulgular
-    assert olc["gecti"] and olc["oda_programi"] == k["oda_programi"]
+    assert bulgular == [] and olc["gecti"] and olc["oda_programi"] == k["oda_programi"]
+    assert abs(olc["oturum_m2"] - k["plan_m2"]) <= HH.TOL_BRUT_M2 < abs(olc["oturum_m2"] - k["antet_m2"])
+    antetle = {a: v for a, v in k.items() if a not in ("plan_m2", "plan_m2_kaynagi")}
+    assert [b.split(":")[0] for b in HH.celik_denetle(KOK / k["tanim"], antetle)[0]] == ["brüt oturum"]
+    sozsuz = {a: v for a, v in k.items() if a != "plan_m2_kaynagi"}
+    assert [b for b in HH.celik_denetle(KOK / k["tanim"], sozsuz)[0] if "kaynağı" in b]
+    assert sorted(p for p, v in HH.celik_kartlari().items() if "plan_m2" in v) == sorted(PLAN_M2)
 
 
 def test_celik_kabulsuz_gorunmez():
@@ -399,6 +411,9 @@ SETLER_CELIK = {
     (90, "2+1"): ["KT05", "KT06", "KT07", "KT02", "Ç8801", "KT03", "KT10", "Ç8201", "KT01", "KT09"],
     (88, "2+1"): ["Ç8801", "KT05", "KT06", "KT07", "KT02", "KT03", "KT10", "Ç8201", "KT09"],
     (90, "3+1"): ["KT08"],
+    (49, "1+1"): ["KT11"],                                                            # planın m²'siyle (12:33:58 kartı); tek aday
+    (130, "3+1"): ["KT12"],
+    (167, "3+1"): ["KT13"],
 }
 
 
@@ -415,9 +430,9 @@ def test_tum_havuzla_celik_seti(tmp_path, m2, oda):
 def test_kabul_betigi_celik_havuzu_tanir():
     """Çelik kodlarıyla koşu (`adaylar.json`) havuzun çelik kayıtlarını tanır; prefabrik koşusu tanımaz."""
     arac = [sys.executable, str(KOK / "araclar/aday_kabul.py"), "--tarih", "2026-11-14", "--kuru"]
-    r = subprocess.run(arac + ["--adaylar", str(KOK / "beyin/veri/adaylar.json"), "--kodlar", "KT-05,KT-06,KT-07,KT-08,KT-09,KT-10"],
+    r = subprocess.run(arac + ["--adaylar", str(KOK / "beyin/veri/adaylar.json"), "--kodlar", "KT-05,KT-06,KT-07,KT-08,KT-09,KT-10,KT-11,KT-12,KT-13"],
                        capture_output=True, text=True, cwd=KOK)
-    assert r.returncode == 0 and "KURU: 6 kayıt yazılacak" in r.stdout, r.stdout + r.stderr
+    assert r.returncode == 0 and "KURU: 9 kayıt yazılacak" in r.stdout, r.stdout + r.stderr
     r = subprocess.run(arac + ["--adaylar", str(ADAYLAR_PREFABRIK_JSON), "--kodlar", "KT-05"], capture_output=True, text=True, cwd=KOK)
     assert r.returncode == 2 and "olmayan kod: KT05" in r.stdout, r.stdout
 
