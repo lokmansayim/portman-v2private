@@ -259,6 +259,18 @@ def test_shingle_satirlari():
     assert not c.get("ters_mahya_m")            # bu evde vadi yok; vadili çatıda ters mahya ve bandı bugünkü kuralla
 
 
+def test_shingle_girdisinde_dizilim_satiri_varsa_durur():
+    """D-100 madde 4: shingle levha değildir; girdide kaplama dizilimi satırı varsa liste sessizce sayılmaz, durur (hakem bulgusu 3)."""
+    from motor.genel import yukleme
+    cikti, _ = uretim("osb_shingle", "KT11")
+    g = json.loads((cikti / "KT11_girdi.json").read_text(encoding="utf-8"))
+    assert g["cati"]["dizilim"]["satirlar"] == []
+    yukleme.hesapla(copy.deepcopy(g), kural.oku())                                   # boş satırlı dizilim: liste çıkar
+    g["cati"]["dizilim"]["satirlar"] = [{"boy_m": 3.0, "adet": 2}]
+    with pytest.raises(SystemExit, match="shingle levha değildir"):
+        yukleme.hesapla(g, kural.oku())
+
+
 def test_shingle_cizimler_ayni_yalniz_pafta_satiri_degisir():
     """Shingle'da da çizimler tek kat paneldekiyle bayt bayt aynı; liste yalnız kaplamaya bağlı satırlarda farklı; paftada yeni yazı çakışması yok."""
     s_cikti, s_rapor = uretim("osb_shingle", "KT11")
