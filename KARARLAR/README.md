@@ -282,7 +282,9 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | BK | BK-32 | Pano Motor'unda yazılan köşeye üçlü H (D-96, PC-40; `claude/project-thread-9gdwir`) | alındı (14.11; CIO 20:58:58) |
 | BK | BK-33 | Çelikte dört çatı kaplaması (Motor işi; çelik dört çatı kaplaması sohbeti) | alındı (15.11; CIO, Lokman kartı 05:03:47) |
 | BK | BK-34 | Havuz hakeminde kesim hattı, üçlü H ve açıklık kayması kalemleri: 71 m² 2+1'in üçlü H'lı hâli (Lokman 14.11 20:46:54 sözü, kart 20:57:28 "Doğru, yanına eklensin"; `claude/project-thread-9gdwir`) | alındı (15.11; CIO 05:59) |
-| BK | **BK-35** | — | **sıradaki boş** |
+| BK | BK-35 | Havuz hakeminde veranda duvarı aksa ve tam + yarım pano kalemleri: 60 m² 2+1'in 647,5 × 951,25 cm hâli (Lokman 15.11 06:07:17 ve 07:17:23 sözleri, kartlar 07:15:45 ve 07:24:23 "Doğru, yanına eklensin"; `claude/project-thread-9gdwir`) | alındı (15.11; CIO 07:16) |
+| BK | BK-36 | Pano Motor'unda yazılan üçlü H yalnız iç duvar dış duvarla aynı kalınlıktaysa; 60'lıkta köşe direği (Lokman 15.11 07:32:42; `claude/project-thread-9gdwir`, BK-35'ten sonra) | alındı (15.11; CIO 07:32) |
+| BK | **BK-37** | — | **sıradaki boş** |
 
 ## 27 Eylülde Lokman'ın verdiği kararlar
 
