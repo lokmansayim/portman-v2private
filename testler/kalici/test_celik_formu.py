@@ -491,9 +491,10 @@ def test_form_izi_kaplamayi_tasir(tmp_path):
     k.celik_formu = {"oncelik": "yok", "dis140": False, "kaplama": "sandvic_panel", "anahtarlar": TF.celik_anahtarlari()}
     KR._form_izi(k, Talep.model_validate(TF.talep(_cevap(alan=88, kaplama="sandvic"))))
     assert k.d["taslak"]["form"] == "celik" and k.d["taslak"]["form_kaplama"] == "sandvic_panel"
+    assert k.d["taslak"]["form_kaplama_yazi"] == "sandviç panel"                                  # formun özellik satırına yazdığı değer
     k.celik_formu = {"oncelik": "yok", "dis140": False, "kaplama": None, "anahtarlar": TF.celik_anahtarlari()}
     KR._form_izi(k, Talep.model_validate(TF.talep(_cevap(alan=88))))
-    assert "form_kaplama" not in k.d["taslak"]
+    assert "form_kaplama" not in k.d["taslak"] and "form_kaplama_yazi" not in k.d["taslak"]
     k.d["taslak"]["form_kaplama"] = "sandvic_panel"
     k.prefabrik_formu = {"oncelik": None}
     KR._form_izi(k, Talep.model_validate({"niyet": "yeni_talep", "guven": "yuksek", "ozet": ""}))
@@ -528,11 +529,37 @@ def test_formdaki_cati_kaplamasi_ilk_planda_tanima_yazilir(tmp_path):
         k, kr = _plan(tmp_path, kod, taslak)
         assert kr.eylem == "is_emri" and kr.is_emri["yapi"]["degisiklikler"] == [] and "kaplama" not in kr.mesaj, (kod, taslak)
     # motorun hesaplamadığı kaplama taslağa `form_kaplama` diye girse bile (olmaması gerekir) plan düşmez, bayiye söylenir
-    k, kr = _plan(tmp_path, "Ç8801", {"form": "celik", "form_kaplama": "osb_shingle", "bina_ozellikleri": {"Çatı Kaplaması": "shingle + OSB"}})
+    k, kr = _plan(tmp_path, "Ç8801", {"form": "celik", "form_kaplama": "osb_shingle", "form_kaplama_yazi": "shingle + OSB",
+                                      "bina_ozellikleri": {"Çatı Kaplaması": "shingle + OSB"}})
     assert kr.eylem == "is_emri" and kr.is_emri["yapi"]["degisiklikler"] == []
     assert kr.is_emri["bilgi"]["ozel_istekler"] == ["Çatı kaplaması: osb+membran+shingle (formdan; çizime işlenemedi)"]
     assert ("Çatı kaplaması osb+membran+shingle seçiminizi bu plana otomatik işleyemedim. Planı modelin kendi çatı kaplamasıyla çizdim. "
             "İsteğinizi talebe yazdım. Ön onay") in kr.mesaj
+
+
+def test_sohbette_yazilan_baska_kaplama_dusmez(tmp_path):
+    """Geometri hakemi (PR-11): formda sandviç panel seçiliyken bayi sohbette başka bir kaplama yazarsa (LLM aynı özellik satırına yazar,
+    `Konusma.birlestir` formun değerini ezer) o satır silinmez. Son söz bayinin cümlesidir: form seçimi çizime işlenmez, yazdığı kaplama
+    bugünkü gibi özel isteğe gider (pafta tablosu modelin kendi kaplaması; tabloyla çelişen ikinci satır yok). Formun kendi değeri
+    ("sandviç panel", "Sandviç Panel", "sandviç") yeniden yazıldıysa seçim işlenir."""
+    ortak = {"form": "celik", "form_kaplama": "sandvic_panel", "form_kaplama_yazi": "sandviç panel"}
+    # aynı satıra başka değer: Ç8801 (tek kat panel) ve KT-02 (kendi kaplaması sandviç panel)
+    for kod in ("Ç8801", "KT02"):
+        k, kr = _plan(tmp_path, kod, {**ortak, "bina_ozellikleri": {"Çatı Kaplaması": "kiremit"}})
+        assert kr.eylem == "is_emri" and kr.is_emri["yapi"]["degisiklikler"] == [], kod
+        assert kr.is_emri["bilgi"]["ozel_istekler"] == ["Çatı Kaplaması: kiremit"] and "Uygulanan" not in kr.mesaj, kod
+        assert "form_kaplama" not in k.d["taslak"] and "form_kaplama_yazi" not in k.d["taslak"]
+    # LLM satır adını başka yazdı: formun satırı ve bayinin satırı yan yana; formunki kalkar, bayininki özel isteğe
+    k, kr = _plan(tmp_path, "Ç8801", {**ortak, "bina_ozellikleri": {"Çatı Kaplaması": "sandviç panel", "Çatı kaplaması": "kiremit desen sac"}})
+    assert kr.is_emri["yapi"]["degisiklikler"] == [] and kr.is_emri["bilgi"]["ozel_istekler"] == ["Çatı kaplaması: kiremit desen sac"]
+    # formun seçimi başka yazımla yinelendi: seçim işlenir, özel istekte kaplama yok
+    for deger, anahtar in (("Sandviç Panel", "Çatı Kaplaması"), ("sandviç", "çatı kaplaması"), ("SANDVİÇ PANEL", "Çatı Kaplaması")):
+        k, kr = _plan(tmp_path, "Ç8801", {**ortak, "bina_ozellikleri": {anahtar: deger}})
+        assert [d["op"] for d in kr.is_emri["yapi"]["degisiklikler"]] == ["cati_kaplamasi"], deger
+        assert kr.is_emri["bilgi"]["ozel_istekler"] == [], deger
+    # `form_kaplama_yazi` taşınmamış eski taslak (sürüm kurulumundan önce gelen form): kitabın adıyla kıyas yeter
+    k, kr = _plan(tmp_path, "Ç8801", {"form": "celik", "form_kaplama": "sandvic_panel", "bina_ozellikleri": {"Çatı Kaplaması": "sandviç panel"}})
+    assert [d["op"] for d in kr.is_emri["yapi"]["degisiklikler"]] == ["cati_kaplamasi"] and kr.is_emri["bilgi"]["ozel_istekler"] == []
 
 
 def test_cati_kaplamasi_revizyonda_kalir(tmp_path):
@@ -547,4 +574,12 @@ def test_cati_kaplamasi_revizyonda_kalir(tmp_path):
     assert [d["op"] for d in kr2.is_emri["yapi"]["degisiklikler"]] == ["cati_kaplamasi", "cati_varyanti"]
     t = W._cizim_tanimi(kr2.is_emri["yapi"]["tanim"], kr2.is_emri["yapi"]["degisiklikler"])
     assert varyant.kaplama_oku(t) == "sandvic_panel"
+    # çatı değişmeyen sonraki revizyon (r03): kaplama yine zarfta ve çizim tanımında
+    k.d["son_metin"] = "mutfak penceresi 120x120 olsun"
+    k.d["taslak"]["varyantlar"] = []
+    k.d["taslak"]["pencereler"] = [{"mahal": "mutfak", "en": 120, "yukseklik": 120}]
+    kr3 = KR._celik_is_emri_uret(k, {"kod": "TEST", "ad": "Test Bayi"}, Katalog(), _celik_adayi("Ç8801K"), k.d["taslak"])
+    assert kr3.eylem == "is_emri" and kr3.is_emri["revizyon"] == 3, kr3
+    assert [d["op"] for d in kr3.is_emri["yapi"]["degisiklikler"]] == ["cati_kaplamasi", "pencere_olcu"]   # çatı artık planın kendisi
+    assert varyant.kaplama_oku(W._cizim_tanimi(kr3.is_emri["yapi"]["tanim"], kr3.is_emri["yapi"]["degisiklikler"])) == "sandvic_panel"
 
