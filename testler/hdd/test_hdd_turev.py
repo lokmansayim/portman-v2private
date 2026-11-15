@@ -147,3 +147,43 @@ def test_manifest_en_iyi_durum_ve_yeniden(tmp_path):
                                                       ("HD-002", "1", "dwg"): "hata"}
     assert len(turev.oku_manifest(str(tmp_path))) == 3
     assert turev.oku_manifest(str(tmp_path), ("hata", "kismi")) == {("HD-001", "1", "dwg")}
+
+
+def test_plan_adaylari_obekleme_ve_imza():
+    import planlar
+
+    def ev(x0, y0, n=6, m=8):
+        L = []
+        for i in range(n):
+            L += [{"blok": "100 LIK DOLU PANO 125 LİK", "x": x0 + i * 125.5, "y": y0},
+                  {"blok": "100 LIK DOLU PANO 125 LİK", "x": x0 + i * 125.5, "y": y0 + m * 125.5}]
+        for j in range(m):
+            L += [{"blok": "100'LÜK 125'LİK (120x100) PENCERELİ PANO", "x": x0, "y": y0 + j * 125.5},
+                  {"blok": "60'LIK 125'LİK KAPILI PANO(80'LİK)", "x": x0 + n * 125.5, "y": y0 + j * 125.5}]
+        return L
+    kagit = [{"blok": "X PANO", "x": 99999 + i, "y": 0, "kagit": True} for i in range(20)]
+    A = planlar.adaylar(ev(0, 0) + ev(5000, 0) + ev(0, 5000, 4, 5) + kagit, 400, 12)
+    assert [a["pano"] for a in A] == [28, 28, 18]                    # kağıt alanı sayılmaz
+    assert A[0]["imza"] == A[1]["imza"] != A[2]["imza"]               # kopya aynı imza
+    assert A[0]["kutu_cm"] == [753.0, 1004.0]
+    assert A[0]["turler"] == {"100_dolu": 12, "100_pencere": 8, "60_kapi": 8}
+    assert planlar.adaylar(ev(0, 0), 100, 12) == []                   # 125,5 aralık 100 cm eşikte bağlanmaz
+
+
+def test_ozet_proje_sayilari(tmp_path):
+    import ozet
+
+    hedef = tmp_path / "_portman_analiz" / "turev"
+    (hedef / "excel" / "HD-002").mkdir(parents=True)
+    liste = {"sayfalar": [{"hucreler": [["A1", "Yükleme listesi"], ["B2", 4]]}]}
+    (hedef / "excel" / "HD-002" / "1.json.gz").write_bytes(gzip.compress(json.dumps(liste).encode()))
+    satirlar = [{"kod": "HD-001", "sira": 1, "tur": "dwg", "durum": "hata"},
+                {"kod": "HD-001", "sira": 1, "tur": "dwg", "durum": "tamam", "pano_eklemesi": 40},
+                {"kod": "HD-002", "sira": 1, "tur": "excel", "durum": "tamam",
+                 "ciktilar": {"json_gz": {"yol": "excel/HD-002/1.json.gz"}}},
+                {"kod": "HD-002", "sira": 2, "tur": "gorsel", "durum": "tamam", "konum_var": True}]
+    (hedef / "manifest_p0.jsonl").write_text("".join(json.dumps(s) + "\n" for s in satirlar), encoding="utf-8")
+    o = ozet.ozet(str(tmp_path))
+    assert o["projeler"]["HD-001"] == {"dwg_tamam": 1, "dwg_panolu": 1, "pano_eklemesi": 40}
+    assert o["projeler"]["HD-002"]["excel_liste"] == 1 and o["projeler"]["HD-002"]["gorsel_konumlu"] == 1
+    assert o["toplam"]["proje_dwg_panolu"] == 1 and o["toplam"]["proje_excel_liste"] == 1
