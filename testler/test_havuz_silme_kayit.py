@@ -6,6 +6,7 @@ hakemin silme hâli kipinden (BK-31, `havuz_hakemi.denetle_silme`): oda, açıkl
 veranda Lokman'ın ev kartıyla kısalır.
 Büyümüş hâller (BK-31 PR-2 büyüme kalemi, yalnız Lokman'ın ev sözüyle): 140 m² 20:22:14 sözü ve 20:25:45 kartı (PA-33), 77 m² 20:35:43
 sözü ve 20:38:43 kartı (PA-34); bugünkü 140 m² (PA-08) ve 77 m² (PA-24) aynen.
+Kesim hattı, üçlü H ve kayan pencere (BK-34, D-96): 71 m² 20:46:54 sözü ve 20:57:28 kartı (PA-35); bugünkü 71 m² (PA-26) aynen.
 """
 from __future__ import annotations
 import hashlib
@@ -35,9 +36,14 @@ HALLER = {
              "20:25:45", "Bugünkü 140 m2 kalır; 1390,5 × 1024 cm hâli (142,4 m2, veranda 24,0 m2)"),
     "PA34": ("PA24", "AP-27", "testler/havuz/is_emirleri/PA24_BUYUME.json", ((773.0, 1000.0), (773.0, 1014.0)), 78.38, 0,
              "20:38:43", "Bugünkü 77 m2 kalır; 773 × 1014 cm hâli (78,4 m2)"),
+    "PA35": ("PA26", "AP-08", "testler/havuz/is_emirleri/PA26_UCLU_H.json", ((785.0, 900.0), (773.0, 888.5)), 68.68, 4.79,
+             "20:57:28", "Bugünkü 71 m2 kalır; 773 × 888,5 cm üçlü H'lı hâl (kapı panosu 120,5)"),
 }
 # büyüyen hâl → (Lokman'ın ev sözünün saati, sözden parça, tamamlanan duvar sayısı)
-BUYUYEN = {"PA33": ("20:22:14", "101,5'u 125,5 a tamamlayabilirsin", 1), "PA34": ("20:35:43", "48,75'leride 62,75'e tamamla", 2)}
+BUYUYEN = {"PA33": ("20:22:14", "101,5'u 125,5 a tamamlayabilirsin", 1), "PA34": ("20:35:43", "48,75'leride 62,75'e tamamla", 2),
+           "PA35": ("20:46:54", "120,5 panoyuda kendi ölçüsüne getirir misin", 1)}
+# kesim hattı, üçlü H ve açıklık kayması (BK-34): yalnız 71 m² üçlü H'lı hâlde, Lokman'ın o evdeki sözüyle
+KESIMLI = {"PA35": ("on:17:770", [{"nokta_cm": [386.5, 758.0], "kaynakta_cm": [386.5, 775.0]}], ["pencere 120x120"])}
 KAYIT = {a["kod"]: a for a in havuz_kayitlari(yapi="prefabrik")}
 # kaynak evler: havuz kaydı (D-87) ya da ilk sekiz aday (D-80; 140 m² PA-08)
 KAYNAK = {**{a["kod"]: a for a in json.loads(ADAYLAR_PREFABRIK_JSON.read_text(encoding="utf-8"))}, **KAYIT}
@@ -51,6 +57,13 @@ def _sablon(kod: str) -> dict:
     return _ie(SABLON_DIR / KAYIT[kod]["sablon"])
 
 
+def _sozler(kk: dict) -> dict:
+    """Kayıttaki sözler `denetle_silme`'nin seçenekleri olarak (kesim hattının yazısı ölçümden)."""
+    kesim = (kk["olcum"].get("kesim_hatti") or {}).get("yazi")
+    return {"veranda_sozu": kk.get("veranda_sozu"), "buyume_sozu": kk.get("buyume_sozu"), "kesim_hatti": kesim,
+            "kesim_sozu": kk.get("kesim_sozu"), "uclu_h_sozu": kk.get("uclu_h_sozu"), "aciklik_sozu": kk.get("aciklik_sozu")}
+
+
 @pytest.mark.parametrize("kod", sorted(HALLER))
 def test_kayit_silme_kipinden(kod):
     """Kayıt silme hâli kipinden geçti; hakem şablonla yeniden koşunca ölçüm aynı; kaynak ev değişirse kayıt yeniden yazılır."""
@@ -62,8 +75,7 @@ def test_kayit_silme_kipinden(kod):
     assert (kk["kart"], kk["sonuc"], kk["kip"], kk["kaynak_is_emri"]) == (kart, "geçti", "silme_hali", kaynak_ie)
     assert kk["kart_sha256"] == HH.kartlar()[kart]["kart_sha256"]
     assert kk["kaynak_sha256"] == hashlib.sha256((KOK / kaynak_ie).read_bytes()).hexdigest()
-    bulgular, olc = HH.denetle_silme(_sablon(kod), HH.kartlar()[kart], _ie(KOK / kaynak_ie), kk.get("veranda_sozu"),
-                                     kk.get("buyume_sozu"))
+    bulgular, olc = HH.denetle_silme(_sablon(kod), HH.kartlar()[kart], _ie(KOK / kaynak_ie), **_sozler(kk))
     assert bulgular == [] and olc == kk["olcum"], (kod, bulgular)
     assert tuple(olc["kaynak_dis_olcu_cm"]) == once and tuple(olc["dis_olcu_cm"]) == sonra
     assert (a["ozet"]["brut_m2"], a["veranda_m2"]) == (brut, veranda) and a["katalog_m2"] == round(brut)
@@ -82,8 +94,8 @@ def test_veranda_kartla_degisir(kod):
         return
     saat, secenek = HALLER[kod][6:]
     assert saat in soz and '"Doğru, yanına eklensin"' in soz and secenek in soz and kk["olcum"]["veranda_kisalan"] == ["VERANDA"]
-    bulgular, _ = HH.denetle_silme(_sablon(kod), HH.kartlar()[kart], _ie(KOK / f"is_emri/adaylar/{kaynak}.json"), None,
-                                   kk.get("buyume_sozu"))
+    bulgular, _ = HH.denetle_silme(_sablon(kod), HH.kartlar()[kart], _ie(KOK / f"is_emri/adaylar/{kaynak}.json"),
+                                   **{**_sozler(kk), "veranda_sozu": None})
     assert bulgular, kod
 
 
@@ -100,7 +112,7 @@ def test_buyume_yalniz_ev_soziyle(kod):
     saat, parca, n = BUYUYEN[kod]
     assert saat in soz and parca in soz and len(kk["olcum"]["tamamlanan"]) == n
     bulgular, _ = HH.denetle_silme(_sablon(kod), HH.kartlar()[kart], _ie(KOK / f"is_emri/adaylar/{kaynak}.json"),
-                                   kk.get("veranda_sozu"))
+                                   **{**_sozler(kk), "buyume_sozu": None})
     assert bulgular, kod
 
 
@@ -141,3 +153,27 @@ def test_silinmis_hal_anahtarli_kaynak_ev_anahtarsiz():
     anahtarli = {f.stem for f in (SABLON_DIR / "adaylar").glob("*.json")
                  if ((_ie(f).get("yapi") or {}).get("dizilim") or {}).get("tek_ozel_pano")}
     assert set(HALLER) <= anahtarli and not {h[0] for h in HALLER.values()} & anahtarli
+
+
+@pytest.mark.parametrize("kod", sorted(HALLER))
+def test_kesim_hatti_yalniz_ev_soziyle(kod):
+    """Kesim hattı, üçlü H ve kayan pencere (BK-34) yalnız 71 m² üçlü H'lı hâlde, Lokman'ın 20:46:54 sözü ve 20:57:28 kartıyla; öteki
+    hâllerde yok. Sözlerden biri düşerse hakem kalır."""
+    kaynak, kart, *_ = HALLER[kod]
+    kk = KAYIT[kod]["kaynak"]["kart_kiyasi"]
+    olc = kk["olcum"]
+    if kod not in KESIMLI:
+        assert not ({"kesim_sozu", "uclu_h_sozu", "aciklik_sozu"} & set(kk)) and not (
+            {"kesim_hatti", "uclu_h", "kayan_aciklik"} & set(olc)), kod
+        return
+    yazi, uclu_h, kayan = KESIMLI[kod]
+    assert olc["kesim_hatti"]["yazi"] == yazi and olc["uclu_h"] == uclu_h
+    assert [a["aciklik"] for a in olc["kayan_aciklik"]] == kayan
+    assert "20:57:28" in kk["kesim_sozu"] and "20:57:28" in kk["aciklik_sozu"] and "üçlü H olacak" in kk["uclu_h_sozu"]
+    assert _sablon(kod)["yapi"]["birlesimler"] == [{"nokta_cm": [386.5, 758.0], "t": "uclu_h"}]
+    for dusen in ("kesim_sozu", "uclu_h_sozu", "aciklik_sozu"):
+        sozler = {**_sozler(kk), dusen: None}
+        if dusen == "kesim_sozu":
+            sozler["kesim_hatti"] = None
+        bulgular, _ = HH.denetle_silme(_sablon(kod), HH.kartlar()[kart], _ie(KOK / f"is_emri/adaylar/{kaynak}.json"), **sozler)
+        assert bulgular, (kod, dusen)
