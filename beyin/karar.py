@@ -71,9 +71,12 @@ def _form_izi(k: Konusma, t: Talep, metin: str = "") -> None:
     if cf is None and ts.get("form_kaplama_once") and ts.get("form_kaplama"):
         # Formdan önce yazılmış kaplama sözü formdan sonra yeniden yazıldı: artık son sözdür. Yalnız bayinin bu mesajındaki cümle bir
         # çatı malzemesi anıyorsa (K18: LLM'in bağlamdan yinelediği satır bayinin sözü değildir).
+        # LLM cümleyi yeniden yazmasa da (söz taslakta zaten durur) bayinin metni aynı malzemeyi anıyorsa işaret kalkar (hakem, 4. tur).
         bu = {f"{a}: {v}" for a, v in (t.bina_ozellikleri or {}).items()} | set(t.ozel_istekler or [])
-        if bu & set(ts["form_kaplama_once"]) and _kaplama_kiyasi(metin, ts["form_kaplama"], baglam=_kaplama_istegi_mi(metin)) == "baska":
-            ts["form_kaplama_once"] = [x for x in ts["form_kaplama_once"] if x not in bu]
+        anilan = _kap_oteki_malzemeler(metin, ts["form_kaplama"], baglam=_kaplama_istegi_mi(metin))
+        if anilan:
+            ts["form_kaplama_once"] = [x for x in ts["form_kaplama_once"]
+                                       if not (x in bu or anilan & _kap_oteki_malzemeler(x, ts["form_kaplama"]))]
             if not ts["form_kaplama_once"]:
                 ts.pop("form_kaplama_once")
     if cf is not None:
@@ -1671,6 +1674,7 @@ _KAP_KESIN = ("ondulin", "eternit")                            # kitapta olmayan
 _KAP_BAGLAMLI = ("sac", "galvaniz", "aluminyum", "bakir", "cinko")   # yalnız çatı / kaplama sözüyle birlikte çatı kaplamasıdır
 _KAP_RENK = ("kirmizi", "reng", "renk", "tonu")                # "kiremit kırmızısı", "kiremit rengi": renk adı, kaplama değil
 _KAP_BASKA_YER = ("cephe", "duvar", "zemin", "tavan", "kapi", "doseme")
+_KAP_CATI_PARCASI = ("oluk", "olug", "pencere", "sacak", "sacag", "baca")   # "çatı oluğu galvaniz": çatının parçası, örtüsü değil
 
 
 def _kap_sozcukleri(metin) -> list[str]:
@@ -1684,6 +1688,28 @@ def _kaplama_istegi_mi(metin) -> bool:
                                                      and not any(w.startswith(_KAP_BASKA_YER) for w in ws))
 
 
+def _kap_oteki_malzemeler(deger, kap: str, baglam: bool = True) -> set[str]:
+    """Metinde anılan, `kap` dışındaki çatı malzemelerinin kökleri ("kiremit", "galvaniz", "tekkat"). "kiremit kırmızısı" renk adıdır.
+    `baglam` False ise yalnız çatıya özgü malzemeler sayılır ("sac" cephe de olabilir). Çatının bir parçasına yazılan metal ("çatı oluğu
+    galvaniz", "alüminyum çatı penceresi") çatı örtüsü değildir."""
+    ws = _kap_sozcukleri(deger)
+    ws = [w for i, w in enumerate(ws) if not (w.startswith("kiremit") and i + 1 < len(ws) and ws[i + 1].startswith(_KAP_RENK))]
+    kendi_kok = _KAP_KOK.get(kap, ())
+    oteki_kok = tuple({x for a, ks in _KAP_KOK.items() if a != kap for x in ks} - set(kendi_kok)) + _KAP_KESIN
+    bulunan = {kok for w in ws for kok in oteki_kok if w.startswith(kok)}
+    bitisik = "".join(ws)
+    if kap != "tek_kat_panel" and (any(x in bitisik for x in ("tekkatpanel", "tekkatlipanel", "tekkatsac")) or bitisik == "tekkat"):
+        bulunan.add("tekkat")
+    if baglam:
+        parca = lambda n: 0 <= n < len(ws) and ws[n].startswith(_KAP_CATI_PARCASI)
+        for i, w in enumerate(ws):
+            sonraki = parca(i + 1) or (i + 1 < len(ws) and ws[i + 1].startswith("cati") and parca(i + 2))
+            if w.startswith(_KAP_CATI_PARCASI) or parca(i - 1) or (sonraki and not (i and ws[i - 1].startswith("cati"))):
+                continue                                       # "oluğu galvaniz", "alüminyum çatı penceresi"; "çatı galvaniz, pencere …" değil
+            bulunan |= {kok for kok in _KAP_BAGLAMLI if w.startswith(kok)}
+    return bulunan
+
+
 def _kaplama_kiyasi(deger, kap: str, adlar=(), satir: bool = False, baglam: bool = True) -> str:
     """Bayinin yazdığı değer, çizime işlenen kaplamaya (`kap`, kural kitabının anahtarı) göre nedir:
     "ayni"  yalnız o kaplamanın adı (formun yazdığı değer, kitaptaki ad ya da adın ilk sözcüğü): tablo gösterir, ayrıca yazılmaz;
@@ -1695,17 +1721,12 @@ def _kaplama_kiyasi(deger, kap: str, adlar=(), satir: bool = False, baglam: bool
     if d in {varyant._norm(x) for ad in (*adlar, varyant.kaplama_adi(kap)) if ad for x in (str(ad), str(ad).split()[0])}:
         return "ayni"
     ws = _kap_sozcukleri(deger)
-    ws = [w for i, w in enumerate(ws) if not (w.startswith("kiremit") and i + 1 < len(ws) and ws[i + 1].startswith(_KAP_RENK))]
     kendi_kok = _KAP_KOK.get(kap, ())
-    oteki_kok = tuple({x for a, ks in _KAP_KOK.items() if a != kap for x in ks} - set(kendi_kok)) + _KAP_KESIN
     kendi = any(w.startswith(kendi_kok) for w in ws) if kendi_kok else False
-    bitisik = "".join(ws)
-    tek_kat = any(x in bitisik for x in ("tekkatpanel", "tekkatlipanel", "tekkatsac")) or bitisik == "tekkat"
     if kap == "tek_kat_panel":
-        kendi, tek_kat = kendi or tek_kat, False
-    oteki = any(w.startswith(oteki_kok) for w in ws) or tek_kat \
-        or (baglam and any(w.startswith(_KAP_BAGLAMLI) and not w.startswith("sacak") for w in ws))
-    return "baska" if oteki or (satir and not kendi) else "ek"
+        bitisik = "".join(ws)
+        kendi = kendi or any(x in bitisik for x in ("tekkatpanel", "tekkatlipanel", "tekkatsac")) or bitisik == "tekkat"
+    return "baska" if _kap_oteki_malzemeler(deger, kap, baglam) or (satir and not kendi) else "ek"
 
 
 def _kaplama_satiri_mi(anahtar) -> bool:
@@ -1715,7 +1736,8 @@ def _kaplama_satiri_mi(anahtar) -> bool:
     if ad:
         return ad == _KAPLAMA_SATIRI
     ws = _kap_sozcukleri(anahtar)
-    return (any(w.startswith("cati") for w in ws) or bool(ws) and ws[0].startswith("kaplama")) and not any(w.startswith(("renk", "reng")) for w in ws)
+    return (any(w.startswith("cati") for w in ws) or bool(ws) and ws[0].startswith("kaplama")) \
+        and not any(w.startswith(("renk", "reng") + _KAP_CATI_PARCASI) for w in ws)
 
 
 def _kaplama_sozleri(ts: dict, kap: str, hepsi: bool = False) -> tuple[list[str], list[str]]:
@@ -1730,6 +1752,9 @@ def _kaplama_sozleri(ts: dict, kap: str, hepsi: bool = False) -> tuple[list[str]
         tablo = celik.satir_adi(a)
         if tablo and tablo != _KAPLAMA_SATIRI:
             continue
+        aw = _kap_sozcukleri(a)
+        if not tablo and any(w.startswith(_KAP_BASKA_YER) for w in aw) and not any(w.startswith("cati") for w in aw):
+            continue                                           # "Dış Cephe Kaplaması: trapez sac": çatı değil (hakem, 4. tur)
         s = _kaplama_kiyasi(v, kap, adlar, satir=tablo == _KAPLAMA_SATIRI, baglam=_kaplama_satiri_mi(a))
         if s == "ayni" and tablo == _KAPLAMA_SATIRI:
             ayni.append(a)
