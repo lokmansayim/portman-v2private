@@ -1141,3 +1141,26 @@ def test_hakem17_celik_sayi_araligi_onayi_bozmaz(s, metin):
     cati_seti(s)
     k = s.yaz(metin)
     assert k.gerekce == K.PLAN_ONAYI and k.revizyon == 1, k.mesaj
+
+
+# ── İE-42 · geometri hakemi on sekizinci tur (15 Kasım 2026 sabah) ─────────────────────────────────────────────────────────────────────
+@pytest.mark.parametrize("metin", ["K olsun, birinci daha mı iyi?", "Ç8801 olsun, ikinci daha mı iyi?",
+                                   "Ç8801 olsun, gönderdiklerinizden hangisi daha iyi?", "Ç8801 olsun, karar müşteride tabii",
+                                   "K olsun, ötekini önerir misiniz?", "Ç8801 olsun, son karar yarın verilecek",
+                                   "Ç8801 olsun, eğime göre sonra bakarız", "Ç8801 olsun, karar müşterinin eşinde",
+                                   "Ç8801 olsun, zemine göre değişebilir", "Ç8801 olsun, tavsiyenize göre değiştiririz"])
+def test_hakem18_celik_sira_sahip_ve_erteleme_sorulur(s, metin):
+    """Tur 18 çelikte: sıra sözü, setten seçen ayrılma, dolgulu ya da tamlamalı sahip, karardan sonra zaman ve "göre" ertelemesi onayı
+    mühendis kontrolüne gönderiyor ya da setten çatı kaydediyordu."""
+    cati_seti(s)
+    k = s.yaz(metin)
+    assert k.eylem == "sor" and k.mesaj.startswith("Hangi çatı olsun?"), k.mesaj
+    assert s.plan["revizyon"] == 1 and s.k.d["secenek_seti"]["durum"] == "acik" and not s.k.d.get("onaylanan"), k.mesaj
+
+
+@pytest.mark.parametrize("metin", ["K olsun, kararımızı veriyoruz", "K olsun, kararımızı verebildik"])
+def test_hakem18_celik_olumlu_karar_secimi_bozmaz(s, metin):
+    """Tur 18 (Orta 3) çelikte: olumlu karar sözü K'yı seçer: r02."""
+    cati_seti(s)
+    k = s.yaz(metin)
+    assert k.eylem == "is_emri" and s.plan["revizyon"] == 2 and s.k.d.get("cati_secilen") == "Ç8801K", k.mesaj
