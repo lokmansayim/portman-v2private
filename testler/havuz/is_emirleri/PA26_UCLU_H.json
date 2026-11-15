@@ -7,7 +7,7 @@
    "ad": "Aday kaydı"
   },
   "musteri_adi": "ADAY PA26",
-  "metin": "AP-08 montaj paftasından İş Emri (14 Kasım 2026); Lokman'ın 08:16 düzeltmesiyle (hol panoları, sırt sırta kapılar, ortada pencere), kartı 08:29 'Evet, bu çizimle girsin'. Aday: D-87 (Lokman 13 Kasım 2026 21:41). Tek özel pano kuralı: D-92 (Lokman 14 Kasım 2026 14:05:21 kartı \"Okuma 2: duvar boyunca\"; 19:39:46 kartı \"Kısa parça silinsin\"). Üçlü H: D-96 (20:46:54 sözü; 20:57:28 kartı \"Doğru, yanına eklensin\")."
+  "metin": "AP-08 montaj paftasından İş Emri (14 Kasım 2026); Lokman'ın 08:16 düzeltmesiyle (hol panoları, sırt sırta kapılar, ortada pencere), kartı 08:29 'Evet, bu çizimle girsin'. Aday: D-87 (Lokman 13 Kasım 2026 21:41). Tek özel pano kuralı: D-92 (Lokman 14 Kasım 2026 14:05:21 kartı \"Okuma 2: duvar boyunca\"; 19:39:46 kartı \"Kısa parça silinsin\"). Üçlü H: D-96 (20:46:54 sözü; 20:57:28 kartı \"Doğru, yanına eklensin\"). Sağ dış duvar paftadaki gibi (önden 40,75 + 147,5 karkaslı pano + 62,75; mutfak–WC duvarı pano ekinde, 3'lü H): Lokman 15 Kasım 2026 08:53:28 UTC sözü \"bu doğru neden çektirme U'sunun koyulacağı ölçü net değil o yüzden panoyu bölmüş ama şunu söylemeliyim mühendis burada da iç bölmelerde hata yapmış istersen 71 m² de son güncellemeyi yap depoya al ve bırak çünkü bu projede hata çok fazla\"; kartı 09:42:35 \"Evet, paftadaki gibi\"."
  },
  "yapi": {
   "sistem": "prefabrik",
@@ -56,9 +56,30 @@
      ],
      "ic_duvarlar": true,
      "duvar_cm": 512.0
+    },
+    {
+     "y": 215.25,
+     "aralik_cm": [
+      5,
+      256
+     ],
+     "cephe": "sag"
     }
    ],
-   "tek_ozel_pano": "dizilim_sonu"
+   "tek_ozel_pano": "dizilim_sonu",
+   "karkasli_panolar": [
+    {
+     "yon": "y",
+     "eksen_cm": 768,
+     "aralik_cm": [
+      67.75,
+      215.25
+     ],
+     "aciklik_ortasi_cm": [
+      138.4
+     ]
+    }
+   ]
   },
   "ek_akslar_cm": {
    "x": [],
@@ -306,7 +327,8 @@
   "Dayanak 2 (y 444,25, 256–632,5, yalnız x 512'deki hol–yatak/WC duvarı): giriş kapısından sonra 74,75 + 62,75 + 62,75, WC ve yatak odası kapıları WC–yatak bölmesinin iki yanında sırt sırta (Lokman 08:16; paftada KAPI-01 ve KAPI-02).",
   "Yatak odasının veranda duvarındaki penceresi 637,5 ekinde ortalı: kapı 120,5, sonra 62,75 + pencere + 62,75 (dizilim.pencere: oda_ortasi; D-29 eke ortalama; Lokman 15 Kasım 07:43:27 kart '3: 62,75 + pencere + 62,75'; asıl evde 71,25 ve 66,25 idi). Öteki pencereler paftadaki panoda (pano dizini).",
   "Veranda sağ önde, gömme, 388,5 × 120; çatısı tek eğim %5 (mahal_catilari), ana çatı beşik %32,9.",
-  "D-92 ve D-96 (Lokman, 14 Kasım 2026 UTC; kart 19:39:46 \"Kısa parça silinsin\"; söz 20:46:54 \"... orada köşe direği olmayacak üçlü H olacak ...\"; ev kartı 20:57:28 \"Doğru, yanına eklensin\"): bu İş Emri 71 m²'nin (PA-26) tek özel pano dizilimli, kısa parçaları silinmiş, veranda köşesinde üçlü H'lı hâlidir (PA-35). Sağ dış duvar 12 cm içeri; veranda arka duvarı (kapı duvarı) 775 → 758 (17 cm, kesim hattı 770); salonun ön duvarındaki 120 cm'lik pano (sözde \"120,5 pano\") 125,5 cm'ye tamamlanır, ön cephe 5,5 cm öne; dış ölçü 785 × 900 → 773 × 888,5 cm. Yukarıdaki maddelerdeki ölçüler kaynak evin paftasındandır."
+  "D-92 ve D-96 (Lokman, 14 Kasım 2026 UTC; kart 19:39:46 \"Kısa parça silinsin\"; söz 20:46:54 \"... orada köşe direği olmayacak üçlü H olacak ...\"; ev kartı 20:57:28 \"Doğru, yanına eklensin\"): bu İş Emri 71 m²'nin (PA-26) tek özel pano dizilimli, kısa parçaları silinmiş, veranda köşesinde üçlü H'lı hâlidir (PA-35). Sağ dış duvar 12 cm içeri; veranda arka duvarı (kapı duvarı) 775 → 758 (17 cm, kesim hattı 770); salonun ön duvarındaki 120 cm'lik pano (sözde \"120,5 pano\") 125,5 cm'ye tamamlanır, ön cephe 5,5 cm öne; dış ölçü 785 × 900 → 773 × 888,5 cm. Yukarıdaki maddelerdeki ölçüler kaynak evin paftasındandır.",
+  "Sağ dış duvar paftadaki gibi (Lokman 15 Kasım 2026 08:53:28 notu; kart 09:42:35 'Evet, paftadaki gibi'): önden 40,75 + 147,5 karkaslı pano (100/120 mutfak penceresi) + 62,75; mutfak–WC duvarı pano ekinde, birleşimde 3'lü H. Dayanak 3 (y 215,25, 5–256, cephe sağ) ve karkaslı pano (y 67,75–215,25; pencere ortası 138,4, paftanın montaj planından ölçüldü: pencere iç duvardan 26,9 cm sonra başlar). Gerçek listede aynı pano \"betopan kaplı çelik karkas duvar 100x1470x2500\"."
  ],
  "eksikler": []
 }

@@ -21,7 +21,7 @@
    888.5
   ],
   "brut_m2": 68.68,
-  "pano": 47,
+  "pano": 48,
   "pencere": 6,
   "kapi": 6,
   "odalar": {
@@ -35,7 +35,7 @@
   }
  },
  "kaynak": {
-  "metin": "D-92 ve D-96 (İE-40): 71 m² 2+1 evin (PA-26, AP-08) tek özel pano kuralının bıraktığı kısa parçaları silinmiş (sağ 12 cm, veranda arka duvarının hattında 17 cm), salonun ön duvarındaki 120 cm'lik panosu (sözde \"120,5 pano\") 125,5 cm'ye tamamlanmış (ön 5,5 cm öne) ve veranda köşesinde köşe direği yerine üçlü H'lı hâli (Lokman 14 Kasım 2026 19:39:46 kartı \"Kısa parça silinsin\"; 20:46:54 sözü \"... orada köşe direği olmayacak üçlü H olacak yanlış çizmiş mühendis ...\"; 20:57:28 kartı \"Doğru, yanına eklensin\": \"Bugünkü 71 m2 kalır; 773 × 888,5 cm üçlü H'lı hâl (kapı panosu 120,5) Motor eklemesinden sonra ayrı ev olarak girer.\")",
+  "metin": "D-92 ve D-96 (İE-40): 71 m² 2+1 evin (PA-26, AP-08) tek özel pano kuralının bıraktığı kısa parçaları silinmiş (sağ 12 cm, veranda arka duvarının hattında 17 cm), salonun ön duvarındaki 120 cm'lik panosu (sözde \"120,5 pano\") 125,5 cm'ye tamamlanmış (ön 5,5 cm öne) ve veranda köşesinde köşe direği yerine üçlü H'lı hâli (Lokman 14 Kasım 2026 19:39:46 kartı \"Kısa parça silinsin\"; 20:46:54 sözü \"... orada köşe direği olmayacak üçlü H olacak yanlış çizmiş mühendis ...\"; 20:57:28 kartı \"Doğru, yanına eklensin\": \"Bugünkü 71 m2 kalır; 773 × 888,5 cm üçlü H'lı hâl (kapı panosu 120,5) Motor eklemesinden sonra ayrı ev olarak girer.\") Sağ dış duvar paftadaki gibi (40,75 + 147,5 karkaslı pano + 62,75; 3'lü H): Lokman 15 Kasım 2026 08:53:28 UTC sözü \"bu doğru neden çektirme U'sunun koyulacağı ölçü net değil o yüzden panoyu bölmüş ama şunu söylemeliyim mühendis burada da iç bölmelerde hata yapmış istersen 71 m² de son güncellemeyi yap depoya al ve bırak çünkü bu projede hata çok fazla\"; kartı 09:42:35 \"Evet, paftadaki gibi\" (asıl proje paftadır, D-103; kayıt aynı numarayla yenilendi, D-87 › Ek).",
   "dosya": "testler/havuz/is_emirleri/PA26_UCLU_H.json",
   "ayna": null,
   "karar": "D-92",
@@ -184,7 +184,7 @@
    },
    "kip": "silme_hali",
    "kaynak_is_emri": "is_emri/adaylar/PA26.json",
-   "kaynak_sha256": "0b8db40e7aaef3693e5f478836a61a1579f9014b97821e9f8f52a923b9f05521",
+   "kaynak_sha256": "2ae7b17259a4e456d26bca967c69662325c4148b0165e67859e1aa0f7b108333",
    "veranda_sozu": "Lokman, 14 Kasım 2026 20:57:28 UTC kartı \"Doğru, yanına eklensin\": \"Bugünkü 71 m2 kalır; 773 × 888,5 cm üçlü H'lı hâl (kapı panosu 120,5) Motor eklemesinden sonra ayrı ev olarak girer.\" (eskiz 05c: sağ 12 cm içeri, ön 17 cm içeri, ön 5,5 cm dışarı)",
    "buyume_sozu": "Lokman 14 Kasım 2026 20:46:54 UTC: \"salon ön tarafta ki 120,5 panoyuda kendi ölçüsüne getirir misin birde başka bir düzeltilmesi gereken yer 120,5 aksındaki 115,5 pano ana giriş kapısını dik kesen pano orada köşe direği olmayacak üçlü H olacak yanlış çizmiş mühendis yani 120,5 panoyu 125,5 yaparsan 115,5 pano 120,5 olur ama oradaki köşe direğini alırsan 115,5 panoda 125,5 olur\"; kart 20:57:28 \"Doğru, yanına eklensin\"",
    "kesim_sozu": "Lokman, 14 Kasım 2026 20:57:28 UTC kartı \"Doğru, yanına eklensin\": \"Bugünkü 71 m2 kalır; 773 × 888,5 cm üçlü H'lı hâl (kapı panosu 120,5) Motor eklemesinden sonra ayrı ev olarak girer.\" (eskiz 05c: sağ 12 cm içeri, ön 17 cm içeri, ön 5,5 cm dışarı)",

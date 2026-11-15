@@ -45,7 +45,8 @@ EVLER = {
     "PA24": ("AP-27", "testler/kor/projeler/AP27/is_emri.json", "2+1", 77.0),     # verandasız
     "PA25": ("AP-14", "testler/kor/projeler/AP14/is_emri.json", "2+1", 61.0),     # oda programı Lokman'ın kartından (14 Kasım 07:50)
     "PA26": ("AP-08", "testler/havuz/is_emirleri/AP08.json", "2+1", 71.0),        # Lokman'ın 08:16 düzeltmesi, 08:29 kartı
-    "PA27": ("AP-07", "testler/havuz/is_emirleri/AP07.json", "1+1", 45.0),        # sundurma ikinci cumba (PC-38), 08:55 kartı
+    "PA27": ("AP-07", "testler/havuz/is_emirleri/AP07_PAFTA.json", "1+1", 45.0),  # sundurma ikinci cumba (PC-38), 08:55 kartı; salonun ön
+                                                                                   # dış duvarı paftadaki gibi (15 Kasım 2026 09:42:35 kartı)
 }
 # D-91 › Havuza giren standart hâller (dış duvardaki özel panolar standart panoya; hakemin standart hâl kipi): ayrıntı test_havuz_standart_pano.py
 D91 = (KOK / "KARARLAR" / "D-91.md").read_text(encoding="utf-8")

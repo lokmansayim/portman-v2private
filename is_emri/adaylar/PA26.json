@@ -7,7 +7,7 @@
    "ad": "Aday kaydı"
   },
   "musteri_adi": "ADAY PA26",
-  "metin": "AP-08 montaj paftasından İş Emri (14 Kasım 2026); Lokman'ın 08:16 düzeltmesiyle (hol panoları, sırt sırta kapılar, ortada pencere), kartı 08:29 'Evet, bu çizimle girsin'. Aday: D-87 (Lokman 13 Kasım 2026 21:41)."
+  "metin": "AP-08 montaj paftasından İş Emri (14 Kasım 2026); Lokman'ın 08:16 düzeltmesiyle (hol panoları, sırt sırta kapılar, ortada pencere), kartı 08:29 'Evet, bu çizimle girsin'. Aday: D-87 (Lokman 13 Kasım 2026 21:41). Sağ dış duvar paftadaki gibi (40,75 + 147,5 karkaslı pano + 62,75; 3'lü H): Lokman 15 Kasım 2026 08:53:28 UTC sözü \"bu doğru neden çektirme U'sunun koyulacağı ölçü net değil o yüzden panoyu bölmüş ama şunu söylemeliyim mühendis burada da iç bölmelerde hata yapmış istersen 71 m² de son güncellemeyi yap depoya al ve bırak çünkü bu projede hata çok fazla\"; kartı 09:42:35 \"Evet, paftadaki gibi\" (asıl proje paftadır, D-103; kayıt aynı numarayla yenilendi, D-87 › Ek)."
  },
  "yapi": {
   "sistem": "prefabrik",
@@ -56,6 +56,27 @@
      ],
      "ic_duvarlar": true,
      "duvar_cm": 512
+    },
+    {
+     "y": 215.25,
+     "aralik_cm": [
+      5,
+      256
+     ],
+     "cephe": "sag"
+    }
+   ],
+   "karkasli_panolar": [
+    {
+     "yon": "y",
+     "eksen_cm": 780,
+     "aralik_cm": [
+      67.75,
+      215.25
+     ],
+     "aciklik_ortasi_cm": [
+      138.4
+     ]
     }
    ]
   },
@@ -295,7 +316,8 @@
   "Dayanak 1 (y 695,25, 632,5–775, iç duvarlar dahil): giriş tarafında dış ve iç duvarlarda 74,75 + 62,75, paftadaki gibi.",
   "Dayanak 2 (y 444,25, 256–632,5, yalnız x 512'deki hol–yatak/WC duvarı): giriş kapısından sonra 74,75 + 62,75 + 62,75, WC ve yatak odası kapıları WC–yatak bölmesinin iki yanında sırt sırta (Lokman 08:16; paftada KAPI-01 ve KAPI-02).",
   "Yatak odasının ön penceresi odanın ortasında (dizilim.pencere: oda_ortasi; yanları 71,25 ve 66,25; Lokman 08:16 'yatak odası penceresini ortala'). Öteki pencereler paftadaki panoda (pano dizini).",
-  "Veranda sağ önde, gömme, 388,5 × 120; çatısı tek eğim %5 (mahal_catilari), ana çatı beşik %32,9."
+  "Veranda sağ önde, gömme, 388,5 × 120; çatısı tek eğim %5 (mahal_catilari), ana çatı beşik %32,9.",
+  "Sağ dış duvar paftadaki gibi (Lokman 15 Kasım 2026 08:53:28 notu; kart 09:42:35 'Evet, paftadaki gibi'): önden 40,75 + 147,5 karkaslı pano (100/120 mutfak penceresi) + 62,75; mutfak–WC duvarı pano ekinde, birleşimde 3'lü H. Dayanak 3 (y 215,25, 5–256, cephe sağ) ve karkaslı pano (y 67,75–215,25; pencere ortası 138,4, paftanın montaj planından ölçüldü: pencere iç duvardan 26,9 cm sonra başlar). Gerçek listede aynı pano \"betopan kaplı çelik karkas duvar 100x1470x2500\"."
  ],
  "eksikler": []
 }
