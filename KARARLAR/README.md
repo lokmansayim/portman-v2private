@@ -297,7 +297,7 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | BK | BK-39 | Pano Motor'unda tavan kirişi (D-107, PC-43; Motor bakım sohbeti, tavan kirişi) | alındı (15.11) |
 | BK | BK-40 | (başka sohbet: köşe verandası ve taşan verandada ara kolon) | alındı (15.11) |
 | BK | BK-41 | (başka sohbet: iç duvarın dış duvar ucunda kalan parça; D-108, PC-44) | alındı (15.11) |
-| BK | BK-42 | Bayi plan görselinde dış ölçü DXF ve PDF'teki gibi iki ondalık (951,25 cm "951,2" yazılıyordu); 12 kayıtlı seçenek resmi yeniden çizildi (Lokman 15.11 21:50 kartı "Evet, iş açılsın"; `claude/project-thread-r8278d`) | alındı (15.11; 21:58) |
+| BK | BK-42 | Bayi plan görselinde dış ölçü DXF ve PDF'teki gibi iki ondalık (951,25 cm "951,2" yazılıyordu); 13 kayıtlı seçenek resmi yeniden çizildi (Lokman 15.11 21:50 kartı "Evet, iş açılsın", 22:29 kartı "Evet, 12 resim de düzelsin"; `claude/project-thread-r8278d`) | alındı (15.11; 21:58) |
 | BK | **BK-43** | — | **sıradaki boş** |
 
 ## 27 Eylülde Lokman'ın verdiği kararlar
