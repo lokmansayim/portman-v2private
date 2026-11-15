@@ -13,6 +13,7 @@ import pytest
 KOK = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(KOK))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+from beyin import karar as K  # noqa: E402
 from test_celik_revizyon_karar import Sohbet  # noqa: E402
 from test_bk29_revizyon_reddi import KABUL  # noqa: E402
 
@@ -50,12 +51,15 @@ def test_a6_prefabrik_sette_yazili_numara(s, metin, kod, niyet):
 
 
 def test_a6_cati_seti_acan_evde_numara(s):
-    """Setin 1. evi (PA-06) çatı seçenekli: "1" önce çatı setini getirir (düğmeyle seçimdeki gibi), sonra "1" evin çatısıyla plan."""
+    """Setin 1. evi (PA-06) çatı seçenekli: "1" evin çatısıyla r01 (düğmeyle seçimdeki gibi). İE-42 (D-94): çatı seti onaydan sonra gelir;
+    orada "1" evin çatısıdır, r01'i onaylar (önce "1" çatı setini, ikinci "1" planı getiriyordu)."""
     _set(s)
     k = s.yaz("1", niyet="diger")
+    assert k.eylem == "is_emri" and s.plan["talep"]["kaynak"] == "PA06" and s.plan["revizyon"] == 1, k.mesaj
+    k = s.dugme(f"o:{s.plan['is_emri_no']}:1")
     assert k.eylem == "secenek" and s.k.d["secenek_seti"]["tur"] == "cati_varyanti"
     k = s.yaz("1", niyet="diger")
-    assert k.eylem == "is_emri" and s.plan["talep"]["kaynak"] == "PA06"
+    assert (k.eylem, k.gerekce, s.plan["revizyon"]) == ("cevapla", K.PLAN_ONAYI, 1), k.mesaj
 
 
 @pytest.mark.parametrize("metin", ["2+1 olsun", "PA-04 olmasın", "PA-04 ile PA-05 farkı ne?", "5"])
@@ -68,11 +72,13 @@ def test_sette_secim_olmayan_mesaj(s, metin):
 
 @pytest.mark.parametrize("niyet", ["diger", "yeni_talep"])
 def test_a7_bos_sohbette_yalniz_kod(s, niyet):
-    """A7: boş sohbette "PA-04" planı getirir; "PA-06" önce çatı setini (evin çatısı, kırma, mahya önde)."""
+    """A7: boş sohbette "PA-04" planı getirir; "PA-06" de evin çatısıyla r01 (İE-42: çatı seti onaydan sonra; önce set geliyordu)."""
     k = s.yaz("PA-04", niyet=niyet)
     assert k.eylem == "is_emri" and s.plan["talep"]["kaynak"] == "PA04", k.mesaj
     s2 = Sohbet(s.k.path.parent / "b", kabul=KABUL)
     k = s2.yaz("PA-06", niyet=niyet)
+    assert k.eylem == "is_emri" and s2.plan["talep"]["kaynak"] == "PA06" and s2.plan["revizyon"] == 1, k.mesaj
+    k = s2.dugme(f"o:{s2.plan['is_emri_no']}:1")
     assert k.eylem == "secenek" and s2.k.d["secenek_seti"]["tur"] == "cati_varyanti"
 
 
