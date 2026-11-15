@@ -883,10 +883,12 @@ def form_cikarimi(gelen: dict, d: dict | None, giden_bul=None) -> dict | None:
     if oz.get("dosyalar"):
         return {"durum": "dosya", "no": no, "rev": rev,
                 "mesaj": "Dosyanızı Lokman Bey'e ilettim. Değişikliği kısaca yazarsanız (örn. \"mutfak penceresi 120x120\") planı hemen güncellerim."}
-    celik = ((d.get("son_is_emri") or {}).get("yapi") or {}).get("sistem") == "celik"     # BK-29 (pano 210): yalnız yapılabilen örnek
+    yapi = (d.get("son_is_emri") or {}).get("yapi") or {}                                   # BK-29 (pano 210): yalnız yapılabilen örnek
+    from beyin import karar as KR
+    dis140 = yapi.get("sistem") == "celik" and KR.dis140_onerilir(yapi)                    # İE-20 PR-10: zaten 140'lık ya da karkas modelli planda yok
     return {"durum": "bos", "no": no, "rev": rev,
             "mesaj": "Neyi nasıl değiştirelim? Kısaca yazmanız yeterli; örneğin \"mutfak penceresi 120x120\""
-                     + (" ya da \"dışlar 140'lık olsun\"." if celik else ".")}
+                     + (" ya da \"dışlar 140'lık olsun\"." if dis140 else ".")}
 
 
 def form_dosyasi_okunur(cikarim: dict | None, settings: dict) -> bool:

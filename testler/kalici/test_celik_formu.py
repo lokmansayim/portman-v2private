@@ -194,11 +194,13 @@ def test_ozet_baslik_ve_bayiye_not():
     oz = _cevap(en=8, alan=88, dis_duvar="140")
     assert TF.metin(oz) == "Talep formu: çelik, tek kat, 2+1, 8 × 11 m, yaklaşık 88 m², dış duvar 140 mm karkas."
     assert TF.set_basligi(oz) == "Çelik, tek kat, 2+1, 88 m²"
-    assert TF.celik_notu(oz) == "Uzun kenarı m²'den hesapladım: 8 × 11 m. Dış duvar 140 mm karkas seçtiniz; çizime işlenir."
+    assert TF.celik_notu(oz) == ("Uzun kenarı m²'den hesapladım: 8 × 11 m. Dış duvar 140 mm karkas seçtiniz. Çizime işlerim. "
+                                 "İşleyemezsem plan mesajında yazarım.")       # PR-10: plan seçilmeden kesin söz verilmez (canlı C6)
     assert TF.celik_notu(oz, cizim=False) == "Uzun kenarı m²'den hesapladım: 8 × 11 m. Standart dışı seçimlerinizi aldım: dış duvar 140 mm karkas."
     oz = _cevap(alan=88, kaplama="kiremit", dis_duvar="140", ek=["cift_yalitim"])
     assert TF.celik_notu(oz) == ("Standart dışı seçimlerinizi aldım: çatı kaplaması kiremit desen sac + OSB, dış duvar 140 mm karkas, "
-                                 "çatıda çift kat yalıtım. Çizime yalnız dış duvar 140 mm karkas işlenir.")
+                                 "çatıda çift kat yalıtım. Çizime yalnız dış duvar 140 mm karkası işlerim. "
+                                 "İşleyemezsem plan mesajında yazarım.")
     oz = _cevap(alan=88, pencere_rengi="antrasit", oncelik="montaj")
     assert TF.celik_notu(oz) == ("Standart dışı seçimlerinizi aldım: pencere rengi antrasit gri. Bu seçimler çizimi değiştirmez. "
                                  "Çelik planlarda kısa montaj sıralaması yok.")
@@ -286,6 +288,8 @@ def test_formdaki_dis_140_ilk_planda_cizime_islenir(tmp_path):
     assert kr.eylem == "is_emri" and [d["op"] for d in kr.is_emri["yapi"]["degisiklikler"]] == ["dis_karkas_140"]
     assert [d["op"] for d in kr.is_emri["yapi"]["bu_revizyon"]] == ["dis_karkas_140"]
     assert "Uygulanan: dış duvarlar 140'lık karkas (16,5 cm)." in kr.mesaj and "işlenemedi" not in kr.mesaj
+    # PR-10 (canlı C5): PDF başlığının metninde model adı ve m² düşmez; "Uygulanan" ondan sonra gelir
+    assert kr.is_emri["talep"]["metin"] == "Ç8801 (Beşik + cumba) · 88 m², 2+1. Uygulanan: dış duvarlar 140'lık karkas (16,5 cm)."
     t = celik.tanim_oku(_celik_adayi("Ç8801"))
     assert KR._zaten_140(varyant.tanim_uygula(t, kr.is_emri["yapi"]["degisiklikler"][0]), []) and not KR._zaten_140(t, [])
     # seçim yoksa, form çelik değilse ya da model zaten 140'lıksa işlem eklenmez (bugünkü plan aynen)
@@ -362,3 +366,81 @@ def test_hangi_form_sunulur():
     bozuk = {**AYAR_PF, "talep_formu": {**AYAR_PF["talep_formu"], "celik_flow_id": "12a"}}
     assert W.talep_formu_sunusu(GELEN, None, celik_ts, bozuk)[0] == "talep"
     assert W.YAPI_FORM_METNI["celik"] == "Çelik talep formunu doldurun. İsterseniz talebinizi yazın."
+
+
+# ─── İE-20 PR-10 · 15 Kasım 2026 canlı denemesinin gözlemleri (v2026.11.15a; PF `WhatsApp_Denetim_celik-formu_v2026.11.15a.md`) ───
+def test_yaziyla_secimde_secim_cumlesi_ozel_istege_girmez(tmp_path):
+    """Gözlem 1: "KT-02 olsun" yazınca LLM cümleyi özel istek diye de yazıyordu; paftanın özel isteklerinde "KT-02 olsun" çıkıyordu.
+    Hedef: yalnız model kodu ve seçim sözcüğü taşıyan özel istek taslağa yazılmaz; düğmeyle seçimle aynı pafta."""
+    from beyin.katalog import Katalog
+    kat = Katalog()
+    k = _konusma(tmp_path)
+    t = Talep.model_validate({"niyet": "yeni_talep", "guven": "yuksek", "ozet": "x",
+                              "ozel_istekler": ["KT-02 olsun", "KT-03 olsun.", "Ç8801 istiyorum", "KT-02 olsun, zemin laminat", "zemin laminat olsun"]})
+    assert KR._secim_kopyasini_birak(k, t, kat).ozel_istekler == ["KT-02 olsun, zemin laminat", "zemin laminat olsun"]
+    temiz = Talep.model_validate({"niyet": "yeni_talep", "guven": "yuksek", "ozet": "x", "ozel_istekler": ["zemin laminat olsun"]})
+    assert KR._secim_kopyasini_birak(k, temiz, kat) is temiz
+    # karar katmanında: çelik formdan sonra yazıyla seçim (LLM'in canlıdaki çıkarımı gibi) → paftanın özel isteklerinde seçim cümlesi yok
+    k = _konusma(tmp_path, {"yapi_turu": "celik", "oda_programi": "2+1", "alan_m2": 88.0, "form": "celik"})
+    t = Talep.model_validate({"niyet": "yeni_talep", "guven": "yuksek", "ozet": "KT-02 seçildi", "katalog_kodu": "KT02",
+                              "ozel_istekler": ["KT-02 olsun"]})
+    kr = KR.karar_ver(t, k, {"kod": "TEST", "ad": "Test Bayi"}, kat, metin="KT-02 olsun")
+    assert kr.eylem == "is_emri" and kr.is_emri["yapi"]["kod"] == "KT02", kr
+    assert kr.is_emri["bilgi"]["ozel_istekler"] == [] and "ozel_istekler" not in {a for a, v in k.d["taslak"].items() if v}
+    assert kr.mesaj == "KT-02 · 92 m², 2+1. Ön onay planınız hazır; plan görseli ve PDF ektedir."
+    assert kr.is_emri["talep"]["metin"] == "KT-02 · 92 m², 2+1"                                    # PDF başlığının metni
+
+
+def test_neyi_degistirelim_yalniz_bu_planda_yapilabilen_ornekler(tmp_path):
+    """Gözlem 4: KT-03'te [Revize et] cevabı "çatı K ya da çatı L" ve "dışlar 140'lık olsun" öneriyordu; KT-03'ün çatı seçeneği yok,
+    dış duvarı zaten 140 mm. Hedef: çatı örneği yalnız çatı seçeneği olan modelde, dış 140 örneği yalnız uygulanabilen planda."""
+    from beyin.katalog import Katalog
+    kat = Katalog()
+    yalin = "Neyi değiştirelim? Odayı ve pencere ölçüsünü yazın (örn. \"mutfak penceresi 120x120\")"
+    hedef = {"Ç8801": KR._NEYI_DEGISTIRELIM, "Ç8801K": KR._NEYI_DEGISTIRELIM, "Ç8801L": KR._NEYI_DEGISTIRELIM,
+             "Ç8201": yalin + "; dış duvar için \"dışlar 140'lık olsun\" yazabilirsiniz.",
+             "KT01": yalin + ".", "KT02": yalin + ".", "KT03": yalin + "."}
+    assert KR._NEYI_DEGISTIRELIM == yalin + "; çatı için \"çatı K\" ya da \"çatı L\", dış duvar için \"dışlar 140'lık olsun\" yazabilirsiniz."
+    for kod, metin in hedef.items():
+        a = _celik_adayi(kod)
+        assert KR._celik_ornekleri(kat, a, celik.tanim_oku(a), []) == metin, kod
+    # dış 140 uygulanmış planda örnek yinelenmez (Ç8801K + form 140); çatı örneği kalır
+    k, kr = _plan(tmp_path, "Ç8801K", {"form": "celik", "form_dis140": True})
+    assert KR._neyi_degistirelim(k, kat) == yalin + "; çatı için \"çatı K\" ya da \"çatı L\" yazabilirsiniz."
+    assert KR.dis140_onerilir(kr.is_emri["yapi"]) is False
+    # [Revize et] cevabı KT-03 planında (niyet red; plan onay bekliyor)
+    k, kr = _plan(tmp_path, "KT03", {"form": "celik"})
+    assert KR.dis140_onerilir(kr.is_emri["yapi"]) is False and KR._neyi_degistirelim(k, kat) == yalin + "."
+    k.d["asama"] = "onay_bekliyor"
+    red = KR.karar_ver(Talep.model_validate({"niyet": "red", "guven": "yuksek", "ozet": "revize"}), k, {"kod": "TEST", "ad": "Test Bayi"}, kat,
+                       metin="Revize et")
+    assert red.eylem == "sor" and red.mesaj == "Anladım. " + yalin + ".", red
+    # boş revizyon formunun cevabı (`worker.form_cikarimi`): KT-03 ve KT-02'de dış 140 örneği yok, Ç8201'de var
+    for kod, var in (("KT03", False), ("KT02", False), ("Ç8201", True), ("Ç8801", True)):
+        k, kr = _plan(tmp_path, kod, {"form": "celik"})
+        assert KR.dis140_onerilir(kr.is_emri["yapi"]) is var, kod
+        k.d["asama"] = "onay_bekliyor"
+        token = f"rv:{kr.is_emri['is_emri_no']}:{kr.is_emri['revizyon']}"
+        fc = W.form_cikarimi({"form": {"tur": "revizyon", "token": token, "alanlar": {"neyi": ["pencere"]}, "dosyalar": []}}, k.d)
+        assert fc["durum"] == "bos", (kod, fc)
+        assert fc["mesaj"] == ("Neyi nasıl değiştirelim? Kısaca yazmanız yeterli; örneğin \"mutfak penceresi 120x120\""
+                               + (" ya da \"dışlar 140'lık olsun\"." if var else ".")), kod
+    assert KR.dis140_onerilir(None) is False and KR.dis140_onerilir({"sistem": "celik", "tanim": "modeller/yok.json"}) is False
+
+
+def test_on_not_plan_secilmeden_kesin_soz_vermez():
+    """Gözlem 5 (C6): ön not "çizime işlenir" diyordu, KT-02 seçilince plan "işleyemedim" dedi. Hedef: ön not kesin söz vermez, sonucu
+    plan mesajı söyler. Cümleler D-70'e göre: etken, en çok 20 kelime."""
+    tek = TF.celik_notu(_cevap(alan=88, dis_duvar="140"))
+    assert tek == "Dış duvar 140 mm karkas seçtiniz. Çizime işlerim. İşleyemezsem plan mesajında yazarım."
+    cok = TF.celik_notu(_cevap(alan=88, dis_duvar="140", pencere_rengi="antrasit"))
+    assert cok == ("Standart dışı seçimlerinizi aldım: dış duvar 140 mm karkas, pencere rengi antrasit gri. "
+                   "Çizime yalnız dış duvar 140 mm karkası işlerim. İşleyemezsem plan mesajında yazarım.")
+    for not_ in (tek, cok):
+        assert "işlenir" not in not_
+        for cumle in re.split(r"(?<=\.) ", not_):
+            assert len(cumle.split()) <= 20, cumle
+    # dış 140 yoksa söz de yok; plan aynı mesajda çıktıysa (cizim=False) çizim cümlesi yazılmaz
+    assert TF.celik_notu(_cevap(alan=88, pencere_rengi="antrasit")) == ("Standart dışı seçimlerinizi aldım: pencere rengi antrasit gri. "
+                                                                         "Bu seçimler çizimi değiştirmez.")
+    assert TF.celik_notu(_cevap(alan=88, dis_duvar="140"), cizim=False) == "Standart dışı seçimlerinizi aldım: dış duvar 140 mm karkas."
