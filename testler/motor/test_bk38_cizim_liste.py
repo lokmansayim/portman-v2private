@@ -171,7 +171,9 @@ def test_dogrulama_ortadaki_h_yi_yakalar(tmp_path, monkeypatch):
     assert m is not None
 
 
-@pytest.mark.parametrize("kod, cy", [("PA11", {"t_orta": 2, "dis_kose": 1, "serbest": 1}), ("PA26", {"t_orta": 2, "dis_kose": 1, "serbest": 0})])
+# 71 m² 2+1 (PA26) kaydı 15 Kasım'da paftaya döndü (standart pano sohbeti; Lokman kartı 09:42:35 "Evet, paftadaki gibi"): mutfak–WC
+# duvarı sağ dış duvarda pano ekinde, t_orta 2 → 1. Dış köşedeki U (bu kalem) aynı.
+@pytest.mark.parametrize("kod, cy", [("PA11", {"t_orta": 2, "dis_kose": 1, "serbest": 1}), ("PA26", {"t_orta": 1, "dis_kose": 1, "serbest": 0})])
 def test_100luk_dis_kosede_cektirme_u(kod, cy):
     """Madde 2: 100'lük iç duvarın dış köşeye geldiği yerde listede 1 çektirme U'su (91 m² 3+1, 71 m² 2+1); çizim değişmez."""
     ie = _ie(KOK / "is_emri" / "adaylar" / f"{kod}.json")
