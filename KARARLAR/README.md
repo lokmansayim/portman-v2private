@@ -118,6 +118,7 @@ Biçim: karar · gerekçe · reddedilen seçenekler · geri alma yolu · kim ve 
 | [D-92](D-92.md) | Tek özel pano kuralı: bir duvarda (dış ve iç) iki köşe ya da T arasında açıklıksız panoların toplamından 125,5'ler çıkar, kalan tek özel pano olur; pencereli panolar yerinde; İş Emri anahtarı `yapi.dizilim.tek_ozel_pano` (`geometry._tek_ozel_pano`, PC-39; BK-30), anahtarsız İş Emri aynen; kalan pano montaj köşesinden uzak uçta (dizilim sonu), duvarda zaten tek özel pano varsa yerinde; kısa parça açık; çeyrek pano yok | 14.11 (Lokman 13:12–13:24; kart 14:05:21 "Okuma 2: duvar boyunca"; 14:14:55; kart 14:27:09 "Montaj köşesinden uzak uçta"; kart 14:55:45 "A: Yerinde kalsın") |
 | [D-93](D-93.md) | Çelik talep formu (`kanal/formlar/celik.json`): çatı şekli ve veranda sorulmaz; çeliğin standartları seçili (tek kat panel, antrasit gri, dış 80 mm karkas, iç alçıpan + 80 mm karkas, beyaz pencere); dış duvar 140 mm karkas ilk planda çizime işlenir, öteki seçimler özel isteğe; ölçü pano katına yuvarlanmaz; dört varsayım kartla kabul edildi; kimliği ayara yazılınca çelikte sunulur (İE-20 PR-9) | 14.11 (Lokman 13.11 21:26:26; 14.11 20:19:54; kart 20:40:05 "Evet, bu listeyle kur") |
 | [D-95](D-95.md) | Brüt ve net m²: brüt çatının örttüğü her yer (bugünkü D-49 brütü), net bütün mahaller, veranda, giriş nişi ve balkon dahil; ön onay antedi (`dxf_out.alan_yazisi`) ve montaj rehberinin başlığı bu tanımla; M-02 ve M-12 açılıp kapandı, tanım M-18 ile mühürlü | 14.11 (Lokman 20:43:23, 21:01:02, 21:01:25, 21:07:29 "ben izin veriyorum varsa mühür bunu gir ve mühürle") |
+| [D-97](D-97.md) | Çelik formda seçilen çatı kaplaması ilk planda Yapı Tanımı'nın `cati.kaplama`'sına yazılır (`varyant.cati_kaplamasi`): pafta tablosu ve yükleme listesi o kaplamayla çıkar, özel isteğe ayrıca yazılmaz; bugün sandviç panel (16 çelik plan); genel motorun hesaplamadığı dört kaplama özel istekte kalır (ayrı Motor bakım işi); plan ve görünüş çizimi değişmez (İE-20 PR-11) | 15.11 (Lokman kart 04:44:37 "Plana ve listeye işlensin") |
 
 ## Numara defteri (14 Ekim 2026, BK-08; CIO planı › Görev 3)
 
@@ -208,7 +209,9 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | D | D-93 | çelik talep formu: çatı şekli ve veranda yok, çeliğin standartları seçili, dış duvar 140 mm çizime, ölçü yuvarlanmaz (İE-20 PR-9; Lokman 14.11 20:40:05 kartı "Evet, bu listeyle kur") | canlıda (15.11, v2026.11.15a; PR #208; talep formu sohbeti) |
 | D | D-94 | çatı adımı (başka sohbet; CIO 14.11 21:07) | alındı (14.11) |
 | D | D-95 | brüt ve net m²'nin tanımı; montaj rehberinin başlığı (Lokman 14.11 21:01) | yazıldı (14.11; rehber sohbeti, `claude/project-thread-v9ykyo`) |
-| D | **D-96** | — | **sıradaki boş** |
+| D | D-96 | üçlü H Motor eklemesi (başka sohbet; BK-32, PC-40; tek pano Motor sohbeti) | alındı (14.11) |
+| D | D-97 | çelik formda seçilen çatı kaplaması plana, pafta tablosuna ve yükleme listesine (İE-20 PR-11; Lokman 15.11 04:44:37 kartı "Plana ve listeye işlensin") | yazıldı (15.11; talep formu sohbeti, `claude/project-thread-l5mh7r`) |
+| D | **D-98** | — | **sıradaki boş** |
 | İE | İE-01–İE-08 | bu depo (`main`) | yazıldı |
 | İE | İE-09 | model atölyesi: kontrollü model üretimi ve banka hattı (Görev 6e; pano 30; P6001 güncellemesi kapsam dışı) | alındı (16.10; `claude/gorev-6e-model-atolyesi-rnhtcp`; PR-1 banka hattı 29.10, `claude/project-thread-rhjgzv`) |
 | İE | İE-10, İE-11, İE-12 | prefabrik hattı (PR #12, PR #14, `ie-12-prefabrik-bayi-paftasi`) | `main`'e BK-12 ile (PR-1: motor ve bayi paftası; liste ve mühür kıyası sonraki PR'larda) |

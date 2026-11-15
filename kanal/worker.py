@@ -369,6 +369,7 @@ def isle(gelen: dict, settings: dict, k=None, cikarim: dict | None = None, proje
             if form.get("form") == "celik":           # İE-20 PR-9 (D-93): öncelik ve dış duvar 140 mm karkas formda seçildi
                 import talep_formu as TF
                 k.celik_formu = {"oncelik": TF.celik_onceligi(form), "dis140": TF.celik_dis140(form),
+                                 "kaplama": TF.celik_kaplamasi(form),                  # İE-20 PR-11 (D-97): çizime işlenen çatı kaplaması
                                  "anahtarlar": TF.celik_anahtarlari()}                # `karar._form_izi` taslağa yazar
             if form.get("dosyalar") and not form_on:
                 patrona(f"Portman: {kim} talep formuna dosya ekledi (çizim okuması kapalı); panelden bakabilirsiniz.")
