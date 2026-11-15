@@ -306,7 +306,7 @@
  "senaryolar": [
   {
    "id": "A",
-   "ad": "Ç8801: çatı seti, seçim, pencere, iki adaylı okuma sorusu, çatı L, onay, yeni talep (prova kartı)",
+   "ad": "Ç8801: r01 katalog çatısıyla, onaydan sonra çatı seti ve seçim (İE-42), pencere, iki adaylı okuma sorusu, çatı L, onay, yeni talep (prova kartı)",
    "adimlar": [
     {
      "id": "A01",
@@ -318,15 +318,18 @@
       "katalog_kodu": "Ç8801"
      },
      "karar": {
-      "eylem": "secenek",
-      "secenek": [
-       "Ç8801",
-       "Ç8801K",
-       "Ç8801L"
-      ]
+      "eylem": "is_emri",
+      "plan_kodu": "Ç8801",
+      "revizyon": 1
      },
      "anlam": "Ç8801 istiyor; çatısı söylenmedi",
-     "not": "Katalog modelinin çatı varyantları varsa çatı seti (katalog, K, L) tek görselde."
+     "not": "İE-42 (D-94; Lokman, kart 14 Kasım 2026 20:33:41 UTC \"Onaydan sonra, eskizdeki gibi\"): r01 evin (katalog) çatısıyla; çatı seti (katalog, K, L) plan onayından sonra, tek görselde. Önceden (İE-08 A2) çatı seti plandan önceydi."
+    },
+    {
+     "id": "A01h",
+     "hazirlik": true,
+     "dugme": "o:{is_emri}:{rev}",
+     "anlam": "Onayla (r01): çatı seti gelir, onay çatıyla kaydedilir (İE-42)"
     },
     {
      "id": "A02",
@@ -336,9 +339,9 @@
      "karar": {
       "eylem": "is_emri",
       "plan_kodu": "Ç8801K",
-      "revizyon": 1
+      "revizyon": 2
      },
-     "anlam": "seçim düğmesi: Ç8801-K"
+     "anlam": "onaydan sonraki çatı setinden Ç8801-K: aynı plan r02 (İE-42)"
     },
     {
      "id": "A03",
@@ -357,7 +360,7 @@
      "karar": {
       "eylem": "is_emri",
       "plan_kodu": "Ç8801K",
-      "revizyon": 2,
+      "revizyon": 3,
       "degisiklikler": [
        "pencere_olcu:P5"
       ]
@@ -397,7 +400,7 @@
      "karar": {
       "eylem": "is_emri",
       "plan_kodu": "Ç8801K",
-      "revizyon": 3,
+      "revizyon": 4,
       "degisiklikler": [
        "pencere_olcu:P5",
        "pencere_olcu:P3"
@@ -432,7 +435,7 @@
      "karar": {
       "eylem": "is_emri",
       "plan_kodu": "Ç8801L",
-      "revizyon": 4,
+      "revizyon": 5,
       "degisiklikler": [
        "pencere_olcu:P5",
        "pencere_olcu:P3",
@@ -450,7 +453,7 @@
       "eylem": "cevapla",
       "gerekce": "plan onaylandı"
      },
-     "anlam": "Onayla düğmesi (r04)"
+     "anlam": "Onayla düğmesi (r05)"
     },
     {
      "id": "A08",
