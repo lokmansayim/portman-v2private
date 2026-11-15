@@ -1,9 +1,11 @@
-"""İE-25 · çatı seçiminin hedef örneği (D-28 madde 2–3): `testler/cati_secimi/ornek.py`'nin bugünkü çıktısı ↔ Lokman'ın onayladığı
-`hedef.json` (1 Kasım 2026; dayanak dosyanın `onay` alanında).
+"""İE-25, İE-42 · çatı seçiminin hedef örneği (D-28 madde 2–3): `testler/cati_secimi/ornek.py`'nin bugünkü çıktısı ↔ Lokman'ın
+onayladığı `hedef.json` (dayanak dosyanın `onay` alanında).
 
-Örnek: "88 m² 2+1 tek kat çelik" → alan seti (her plan bir kez) → Ç8801 seçilir → "Çatı seçin" (katalog, K, L) → seçilen çatıyla r01.
-Kıyaslanan: iki setin bayiye giden mesajı, düğmeleri ve bileşik görselinin içerik izi (PNG baytı), alan setinin "seçildi" kapanışı, üç
-çatının r01 kararı (kod, revizyon, tanım dosyası ve sha, mesaj). r01 çizimi (`--r01`) kıyasa girmez; genel motorun izleri ayrıca dondurulu.
+Örnek: "88 m² 2+1 tek kat çelik" → alan seti (her plan bir kez) → Ç8801 seçilir → r01 katalog çatısıyla → Onayla → "Planınız onaylandı
+(r01). Şimdi çatıyı seçin." (katalog, K, L) → katalog çatısı r01'i onaylar; başka çatı aynı planı o çatıyla r02 çizer → Onayla (D-94; önce
+İE-25'te set plan seçilince, çizimden önce geliyordu). Kıyaslanan: iki setin bayiye giden mesajı, düğmeleri ve bileşik görselinin içerik
+izi (PNG baytı), alan setinin "seçildi" kapanışı, r01 (kod, revizyon, tanım dosyası ve sha, mesaj), üç çatı seçiminin sonucu ve r02'nin
+onayı. Çizim (`--ciz`) kıyasa girmez; genel motorun izleri ayrıca dondurulu.
 Fark bilerek yapıldıysa `hedef.json` yalnız Lokman'ın onayıyla ve gerekçeli kararla yeniden donar (D-02); testi geçirmek için hedef
 değiştirilmez. LLM, WhatsApp ve Postgres yok.
 """

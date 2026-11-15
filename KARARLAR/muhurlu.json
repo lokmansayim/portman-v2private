@@ -549,12 +549,14 @@
   {
    "kod": "M-08",
    "konu": "Çatı seçenek adımı",
-   "kural": "Talepte çatı yoksa önce sorulmaz; plan seçilince \"Çatı seçin\" görseli gelir, elimizdeki modellerin kendi çatılarıyla (Ç8801 üç çatı). Hedef örnek çatı seti görseli (testler/cati_secimi/hedef.json).",
+   "kural": "Talepte çatı yoksa plan seçilince çatı sorulmaz: r01 evin kendi çatısıyla çizilir. Bayi planı onaylayınca \"Çatı seçin\" görseli gelir (onay o an kaydedilmez), elimizdeki modellerin kendi çatılarıyla (PA-06 ve Ç8801 üç çatı); evin çatısı r01'i onaylar, başka çatı aynı planı r02 çizer (D-94). Hedef örnek bu akış (testler/cati_secimi/hedef.json).",
    "kararlar": [
-    "İE-25"
+    "İE-25",
+    "D-94"
    ],
    "pr": [
-    105
+    105,
+    218
    ],
    "lokman": [
     {
@@ -569,24 +571,42 @@
      "tarih": "2026-11-01 12:18",
      "soz": "onaylıyorum",
      "mesaj": "cmsg_01UAFvcnfVuTR1wfFux5fQPPV6DaRxoejgtwBbbusVqjrR"
+    },
+    {
+     "tarih": "2026-11-14 20:33",
+     "soz": "Onaydan sonra, eskizdeki gibi",
+     "mesaj": "cmsg_01UAFvcnfVuTR1wfFux5fQPP1hzFTwFZ63SwgUWmf14cpm"
+    },
+    {
+     "tarih": "2026-11-15 07:18",
+     "soz": "onaylıyorum",
+     "mesaj": "cmsg_01UAFvcnfVuTR1wfFux5fQPPMBGuqdQKk8WBvgMHxcNwyC"
     }
    ],
    "kilitler": [
     {
      "yer": "testler/cati_secimi/hedef.json",
-     "iz": "071b8aec757df32e"
+     "iz": "84d04045a9db8b52"
     },
     {
      "yer": "testler/cati_secimi/test_cati_seti_hedef.py",
-     "iz": "9603e6c37ba91a7c"
+     "iz": "d832bc991f4a97c7"
     },
     {
      "yer": "testler/test_cati_secimi.py",
-     "iz": "90718963d758cbd3"
+     "iz": "ba169a38d405c9ea"
     }
    ],
    "durum": "mühürlü",
-   "gecmis": []
+   "gecmis": [
+    {
+     "tarih": "2026-11-14 20:33",
+     "soz": "Onaydan sonra, eskizdeki gibi",
+     "mesaj": "cmsg_01UAFvcnfVuTR1wfFux5fQPP1hzFTwFZ63SwgUWmf14cpm",
+     "kapanis": "2026-11-15T07:20Z",
+     "karar": "D-94"
+    }
+   ]
   },
   {
    "kod": "M-09",

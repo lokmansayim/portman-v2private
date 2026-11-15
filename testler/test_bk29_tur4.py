@@ -18,7 +18,7 @@ KOK = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(KOK))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from beyin import karar as K  # noqa: E402
-from test_celik_revizyon_karar import Sohbet, pen  # noqa: E402
+from test_celik_revizyon_karar import Sohbet, pen, var  # noqa: E402
 from test_bk29_revizyon_reddi import KABUL  # noqa: E402
 from test_bk29_pencere_sorulari import _plan, _pencereler, _pv  # noqa: E402
 
@@ -212,8 +212,7 @@ def test_hicbiri_yeni_revizyon_uretmez(tmp_path, ek):
     """Tur 3 gözlem 2: LLM pencere isteğini serbest istek ya da pafta alanı olarak da yazınca "hiçbiri" aynı planı r02 olarak çiziyordu
     ("Tamam, o pencereyi değiştirmedim. … 120x120 olmasını istiyorsunuz. Ön onay planını hazırlıyorum"). Plan aynı numarayla kalır."""
     s = CanliSohbet(tmp_path, kabul=KABUL)
-    s.yaz("PA-06", niyet="diger")
-    assert s.yaz("2", niyet="diger").revizyon == 1
+    assert s.yaz("PA-06-K", niyet="diger").revizyon == 1            # İE-42: önce "PA-06" çatı setini, "2" PA-06-K r01'i getiriyordu
     k = s.yaz("mutfak penceresi 120x120 olsun", pencereler=[pen("mutfak", "120x120")], ozet="Mutfak penceresinin 120x120 olmasını istiyorsunuz.", **ek)
     assert k.soru_alani == "pencere_secim"
     k = s.yaz("hiçbiri", niyet="revizyon", ozet="Pencere seçimi için sunulan seçeneklerin hiçbirini istemiyorsunuz.")
@@ -232,12 +231,21 @@ def test_yalniz_kod_ozeti_koddan(s):
     assert k.is_emri["talep"]["metin"] == "PA-04 seçildi" and k.is_emri["talep"]["metin_koddan"] is True
 
 
-def test_cati_setine_yazili_numara_pdf_basligi_koddan(s):
-    """Tur 3: çatı setine yazılı "2" doğru planı getiriyordu, PDF başlığı LLM'in "… "2" diye cevap verdiniz; teyit …" özetiydi."""
-    s.yaz("PA-06", niyet="diger")
-    k = s.yaz("2", niyet="diger", ozet='Önceki seçenek sorusuna "2" diye cevap verdiniz; hangi seçeneği kastettiğinizi teyit edebilir misiniz?')
+def test_cati_setine_yazili_numara_pdf_basligi_koddan(s, tmp_path):
+    """Tur 3: çatı setine yazılı "2" doğru planı getiriyordu, PDF başlığı LLM'in "… "2" diye cevap verdiniz; teyit …" özetiydi. İE-42: set
+    plandan önce yalnız çatı adı ya da kararsız sözle ("kırma çatı olsun"); onaydan sonraki sette "2" r02, metin ve başlık yine koddan."""
+    ozet = 'Önceki seçenek sorusuna "2" diye cevap verdiniz; hangi seçeneği kastettiğinizi teyit edebilir misiniz?'
+    k = s.yaz("PA-06 olsun, kırma çatı olsun", katalog_kodu="PA-06", yapi_turu="prefabrik", varyantlar=[var("cati_degistir", "kırma çatı olsun")])
+    assert k.eylem == "secenek" and s.k.d["secenek_seti"]["tur"] == "cati_varyanti", k.mesaj
+    k = s.yaz("2", niyet="diger", ozet=ozet)
     assert k.eylem == "is_emri" and k.mesaj == "PA-06-K seçildi. Ön onay planınız hazır; plan görseli ve PDF ektedir."
     assert k.is_emri["talep"]["metin"] == "PA-06-K seçildi" and k.is_emri["talep"]["metin_koddan"] is True
+    t = Sohbet(tmp_path / "onaydan_sonra", kabul=KABUL)
+    t.yaz("PA-06", niyet="diger")
+    t.dugme(f"o:{t.plan['is_emri_no']}:1")
+    k = t.yaz("2", niyet="diger", ozet=ozet)
+    assert k.eylem == "is_emri" and k.mesaj.startswith("Çatı: Kırma (PA-06-K). Plan aynı. Ön onay planınız hazır (r02);"), k.mesaj
+    assert k.is_emri["talep"]["metin"] == "PA-06-K r02" and k.is_emri["talep"]["metin_koddan"] is True
 
 
 def test_dugmeyle_secimde_metin_ayni(s):
