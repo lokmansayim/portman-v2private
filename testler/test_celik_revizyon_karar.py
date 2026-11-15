@@ -1086,3 +1086,21 @@ def test_hakem14_celik_acik_secim_soruya_donmez(s, metin, kod):
     cati_seti(s)
     k = s.yaz(metin)
     assert k.eylem == "is_emri" and k.revizyon == 2 and s.plan["yapi"]["kod"] == kod, k.mesaj
+
+
+# ── İE-42 · geometri hakemi on beşinci tur (15 Kasım 2026 sabah) ─────────────────────────────────────────────────────────────────────
+@pytest.mark.parametrize("metin", ["1 olsun. K mı daha iyi?", "1 olsun. K'nın şekli mi daha iyi?", "Ç8801 olsun. L mi daha iyi?"])
+def test_hakem15_celik_karsilastirma_sorusu_sorulur(s, metin):
+    """Y-1 çelikte: on dördüncü tur kodunda çatıları kıyaslayan soru onay kaydediyordu (plan teknik kontrole gidiyordu)."""
+    cati_seti(s)
+    k = s.yaz(metin)
+    assert k.eylem == "sor" and k.mesaj.startswith("Hangi çatı olsun?"), k.mesaj
+    assert s.plan["revizyon"] == 1 and s.k.d["secenek_seti"]["durum"] == "acik" and not s.k.d.get("onaylanan"), k.mesaj
+
+
+@pytest.mark.parametrize("metin", ["Ç8801 olsun, onaylıyoruz başka söyleyeceğimiz yok", "1 olsun, onaylıyoruz başka diyeceğimiz yok"])
+def test_hakem15_celik_olumlu_onay_soruya_donmez(s, metin):
+    """O-4 çelikte: araya söz giren "başka söyleyeceğimiz yok" onayı olumsuzlamaz."""
+    cati_seti(s)
+    k = s.yaz(metin)
+    assert k.gerekce == K.PLAN_ONAYI and k.revizyon == 1, k.mesaj
