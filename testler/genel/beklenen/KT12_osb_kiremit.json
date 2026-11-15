@@ -1,0 +1,70 @@
+{
+ "aciklama": "BK-33 · D-98 hedef örneği: 140 m² çelik ev (KT-12, modeller/havuz/KT12.json) tanımın cati.kaplama'sı osb_kiremit yapılarak, güncel kural kitabıyla (kurallar/liste/kurallar.json). Kıyaslanan: Örnek Şablon paftasının 'Çatı Kaplaması' yazısı ve yükleme listesinin kaplamaya bağlı satırları; listeden çıkan panel satırları boş. Test: testler/genel/test_celik_cati_kaplamasi.py::test_hedef_ornekle_ayni.",
+ "tanim": "modeller/havuz/KT12.json",
+ "degisiklik": {
+  "cati.kaplama": "osb_kiremit"
+ },
+ "uretim": "python -m motor.genel.uret <tanım (cati.kaplama: osb_kiremit)> <çıktı>",
+ "onay": {
+  "karar": "D-98",
+  "tarih": "2026-11-15T05:57:23Z",
+  "soz": "Evet, hedef örnek olsun",
+  "kart": "Seçin: kiremit desen sac listesi ve pafta satırı bu hâliyle hedef örnek olsun mu?",
+  "secenegin_metni": "140 m² evin bu listesi ve pafta satırı hedef örnek olarak dondurulur. Test ve PR hazırlanır; birleştirme sizde.",
+  "gorsel": "PF Celik_Cati_Kaplamasi/02_kiremit_desen_sac_motor_listesi.png, 02_140m2_kiremit_pafta.pdf"
+ },
+ "ozet": {
+  "pafta_cati_kaplamasi": "OSB + Nem Bariyeri + Kiremit Desen Sac",
+  "satirlar": [
+   {
+    "kalem": "Çatı OSB",
+    "liste_adi": "Çatı OSB",
+    "boyut": "11 × 1220 × 2440",
+    "adet": 61
+   },
+   {
+    "kalem": "Nem bariyeri",
+    "liste_adi": "Nem bariyeri",
+    "boyut": "m²",
+    "adet": 151
+   },
+   {
+    "kalem": "Kiremit desen sac",
+    "liste_adi": "Antrasit gri kiremit desen sac",
+    "boyut": "L 5760 · 100 cm kapatır",
+    "adet": 28
+   },
+   {
+    "kalem": "Kiremit desen sac",
+    "liste_adi": "Antrasit gri kiremit desen sac",
+    "boyut": "L 1260 · 100 cm kapatır",
+    "adet": 2
+   },
+   {
+    "kalem": "Metal kiremit mahyası",
+    "liste_adi": "Antrasit gri metal kiremit mahyası",
+    "boyut": "L 2800",
+    "adet": 6
+   },
+   {
+    "kalem": "OSB mahyası",
+    "liste_adi": "OSB mahyası",
+    "boyut": "L 2800",
+    "adet": 6
+   },
+   {
+    "kalem": "Mahya bandı",
+    "liste_adi": "Mahya bandı",
+    "boyut": "rulo / 10 m",
+    "adet": 2
+   },
+   {
+    "kalem": "Trapez vida (5,5 × 60)",
+    "liste_adi": "Trapez vida (5,5 × 60)",
+    "boyut": "adet",
+    "adet": 1250
+   }
+  ],
+  "cikan": []
+ }
+}
