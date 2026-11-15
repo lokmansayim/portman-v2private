@@ -119,6 +119,7 @@ Biçim: karar · gerekçe · reddedilen seçenekler · geri alma yolu · kim ve 
 | [D-93](D-93.md) | Çelik talep formu (`kanal/formlar/celik.json`): çatı şekli ve veranda sorulmaz; çeliğin standartları seçili (tek kat panel, antrasit gri, dış 80 mm karkas, iç alçıpan + 80 mm karkas, beyaz pencere); dış duvar 140 mm karkas ilk planda çizime işlenir, öteki seçimler özel isteğe; ölçü pano katına yuvarlanmaz; dört varsayım kartla kabul edildi; kimliği ayara yazılınca çelikte sunulur (İE-20 PR-9) | 14.11 (Lokman 13.11 21:26:26; 14.11 20:19:54; kart 20:40:05 "Evet, bu listeyle kur") |
 | [D-94](D-94.md) | Çatı plan onayından sonra görselle sorulur (prefabrik ve çelik): çatı seçeneği olan evde (PA-06, Ç8801) plan seçilince r01 evin kendi çatısıyla; bayi onaylayınca "Çatı seçin" seti (bugünkü görsel ve düğmeler); evin çatısı seçilirse r01 onaylanır, başka çatı seçilirse plan aynı r02; çelikte teknik kontrol çatıdan sonra; talepte çatı varsa adım atlanır; M-08 açıldı (İE-42) | 14.11 (Lokman 20:19:54; kart 20:33:41 "Onaydan sonra, eskizdeki gibi") |
 | [D-95](D-95.md) | Brüt ve net m²: brüt çatının örttüğü her yer (bugünkü D-49 brütü), net bütün mahaller, veranda, giriş nişi ve balkon dahil; ön onay antedi (`dxf_out.alan_yazisi`) ve montaj rehberinin başlığı bu tanımla; M-02 ve M-12 açılıp kapandı, tanım M-18 ile mühürlü | 14.11 (Lokman 20:43:23, 21:01:02, 21:01:25, 21:07:29 "ben izin veriyorum varsa mühür bunu gir ve mühürle") |
+| [D-96](D-96.md) | Yazılan köşede köşe direği yerine üçlü H: İş Emri anahtarı `yapi.birlesimler` › `t: "uclu_h"`, Motor D-29'un niş T'sini yalnız o noktada kurar (`geometry._birlesimleri_oku`, PC-40; BK-32); 71 m² 2+1'in veranda köşesi (kapı panosu 125,5 → 120,5, veranda yan duvarı 120,5 → 125,5); genel kural değil, her evde mi sorusu açık | 14.11 (Lokman 20:46:54; kart 20:57:28 "Doğru, yanına eklensin") |
 
 ## Numara defteri (14 Ekim 2026, BK-08; CIO planı › Görev 3)
 
@@ -209,7 +210,8 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | D | D-93 | çelik talep formu: çatı şekli ve veranda yok, çeliğin standartları seçili, dış duvar 140 mm çizime, ölçü yuvarlanmaz (İE-20 PR-9; Lokman 14.11 20:40:05 kartı "Evet, bu listeyle kur") | canlıda (15.11, v2026.11.15a; PR #208; talep formu sohbeti) |
 | D | D-94 | Çatı plan onayından sonra görselle sorulur: PA-06 ve Ç8801'de r01 evin kendi çatısıyla, onayda "Çatı seçin" seti, başka çatı seçilirse r02; M-08 açıldı (İE-42; Lokman 14.11 20:19:54, 20:33:41 kartı "Onaydan sonra, eskizdeki gibi") | yazıldı (14.11; çatı seçimi sohbeti, `claude/project-thread-91gav7`) |
 | D | D-95 | brüt ve net m²'nin tanımı; montaj rehberinin başlığı (Lokman 14.11 21:01) | yazıldı (14.11; rehber sohbeti, `claude/project-thread-v9ykyo`) |
-| D | **D-96** | — | **sıradaki boş** |
+| D | D-96 | yazılan köşede köşe direği yerine üçlü H; İş Emri anahtarı `birlesimler` › `t: "uclu_h"` (BK-32, PC-40; Lokman 14.11 20:46:54, kart 20:57:28 "Doğru, yanına eklensin") | yazıldı (14.11; tek pano Motor sohbeti, `claude/project-thread-9gdwir`; CIO 20:58 D-95 verdi, rehber sohbetinin D-95'i önce birleşti, D-96 oldu) |
+| D | **D-97** | — | **sıradaki boş** |
 | İE | İE-01–İE-08 | bu depo (`main`) | yazıldı |
 | İE | İE-09 | model atölyesi: kontrollü model üretimi ve banka hattı (Görev 6e; pano 30; P6001 güncellemesi kapsam dışı) | alındı (16.10; `claude/gorev-6e-model-atolyesi-rnhtcp`; PR-1 banka hattı 29.10, `claude/project-thread-rhjgzv`) |
 | İE | İE-10, İE-11, İE-12 | prefabrik hattı (PR #12, PR #14, `ie-12-prefabrik-bayi-paftasi`) | `main`'e BK-12 ile (PR-1: motor ve bayi paftası; liste ve mühür kıyası sonraki PR'larda) |
@@ -265,7 +267,10 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | BK | BK-29 | WhatsApp revizyon diyaloğu, 13 Kasım denetimi: geri çevrilen istek planı kapatmaz, iki pencereli odada soru, prefabrik seçimde kod ve numara (pano 200, 201, 208, 210; `claude/project-thread-2ypd6m`) | alındı (13.11; CIO) |
 | BK | BK-30 | Pano Motor'unda tek özel pano kuralı (D-92, PC-39; `claude/project-thread-9gdwir`) | alındı (14.11; CIO) |
 | BK | BK-31 | Havuz hakeminde silme hâli kalemi: tek özel pano kuralının kısa parçası silinmiş ev (D-92 › Havuza uygulama; Lokman 14.11 kart 19:39:46 "Kısa parça silinsin", ev kartları 20:05:33, 20:09:12, 20:14:50 "Doğru, yanına eklensin"; `claude/project-thread-9gdwir`) | alındı (14.11; CIO) |
-| BK | **BK-32** | — | **sıradaki boş** |
+| BK | BK-32 | Pano Motor'unda yazılan köşeye üçlü H (D-96, PC-40; `claude/project-thread-9gdwir`) | alındı (14.11; CIO 20:58:58) |
+| BK | BK-33 | Çelikte dört çatı kaplaması (Motor işi; çelik dört çatı kaplaması sohbeti) | alındı (15.11; CIO, Lokman kartı 05:03:47) |
+| BK | BK-34 | Havuz hakeminde kesim hattı, üçlü H ve açıklık kayması kalemleri: 71 m² 2+1'in üçlü H'lı hâli (Lokman 14.11 20:46:54 sözü, kart 20:57:28 "Doğru, yanına eklensin"; `claude/project-thread-9gdwir`) | alındı (15.11; CIO 05:59) |
+| BK | **BK-35** | — | **sıradaki boş** |
 
 ## 27 Eylülde Lokman'ın verdiği kararlar
 
