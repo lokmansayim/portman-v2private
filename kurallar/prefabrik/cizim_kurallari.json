@@ -1058,7 +1058,7 @@
   {
    "kod": "PC-43",
    "baslik": "Makas yönünde 7 m'yi aşan açıklıkta tavan kirişi (saha montaj planında)",
-   "kural": "Prefabrikte makasın geçtiği yerde makas yönündeki açıklık 7 m'yi aşarsa odaya bir tavan kirişi (kutu profil 100 × 100) konur (`motor/tavan_kirisi.bul`; kural `kurallar/yerlesim/prefabrik.json › tavan_kirisi`). Kiriş makasa dik gider, iki ucu duvara oturur; en kısa çizgi seçilir, iki çizgi eşitse iki ucu da köşede olan. Açıklığın makasların dizildiği yöndeki genişliği makas aralığından (125,5) darsa oraya makas gelmez, kiriş de konmaz; çıkıntılı cumbanın altı kapsam dışı. Kiriş yalnız DXF'in saha montaj planında çizilir: 10 cm genişlikte kırmızı taralı dikdörtgen, yüzden yüze, ve \"TAVAN KİRİŞİ 10×10\" yazısı kirişin yanında, plandaki yazılara ve özel pano ölçülerine binmeyen ilk yerde (katman TAVAN_KIRISI, yalnız kirişli evde açılır). Akslı plan, net alan planı ve bayiye giden A4 ön onay sayfası değişmez; çizime ölçü eklenmez. Listede bir satır: Kutu profil (kiriş) 100 × 100, L yüzden yüze + 2 × 10, uçta kolon yok. İki oda arasındaki duvarsız sınırın kirişi açıklığı keser. Yer bulunamazsa, iki eşit yer kalırsa (1 cm payla), açıklık birden çok mahalden geçerse ya da odaya bir kiriş yetmezse kiriş konmaz; liste adetsiz \"Kural yok\" satırıyla sorar, çizime uyarı yazılmaz (K21). Kirişsiz evin çizimi ve listesi aynen.",
+   "kural": "Prefabrikte makasın geçtiği yerde makas yönündeki açıklık 7 m'yi aşarsa odaya bir tavan kirişi (kutu profil 100 × 100) konur (`motor/tavan_kirisi.bul`; kural `kurallar/yerlesim/prefabrik.json › tavan_kirisi`). Kiriş makasa dik gider, iki ucu duvara oturur; en kısa çizgi seçilir, iki çizgi eşitse iki ucu da köşede olan. Açıklığın makasların dizildiği yöndeki genişliği makas aralığından (125,5) darsa oraya makas gelmez, kiriş de konmaz (genişlik 2,5 cm'lik adımla ölçülür; aralığa 2,5 cm'den yakınsa sorulur); çıkıntılı cumbanın altı kapsam dışı. Kiriş yalnız DXF'in saha montaj planında çizilir: 10 cm genişlikte kırmızı taralı dikdörtgen, yüzden yüze, ve \"TAVAN KİRİŞİ 10×10\" yazısı kirişin yanında, plandaki yazılara ve özel pano ölçülerine binmeyen ilk yerde (katman TAVAN_KIRISI, yalnız kirişli evde açılır). Akslı plan, net alan planı ve bayiye giden A4 ön onay sayfası değişmez; çizime ölçü eklenmez. Listede bir satır: Kutu profil (kiriş) 100 × 100, L yüzden yüze + 2 × 10, uçta kolon yok. İki oda arasındaki duvarsız sınırın kirişi açıklığı keser. Yer bulunamazsa, iki eşit yer kalırsa (1 cm payla), açıklık birden çok mahalden geçerse ya da odaya bir kiriş yetmezse kiriş konmaz; liste adetsiz \"Kural yok\" satırıyla sorar, çizime uyarı yazılmaz (K21). Kirişsiz evin çizimi ve listesi aynen.",
    "karar": "D-107",
    "lokman": {
     "tarih": "2026-11-15",
@@ -1088,7 +1088,8 @@
     "testler/motor/test_d107_tavan_kirisi.py::test_sorulan_evin_cizimi_aynen",
     "testler/motor/test_d107_tavan_kirisi.py::test_duvarsiz_sinir_acikligi_keser",
     "testler/motor/test_d107_tavan_kirisi.py::test_odaya_bir_kiris_yetmezse_sorulur",
-    "testler/motor/test_d107_tavan_kirisi.py::test_esitlik_payi_ve_ayni_kiris"
+    "testler/motor/test_d107_tavan_kirisi.py::test_esitlik_payi_ve_ayni_kiris",
+    "testler/motor/test_d107_tavan_kirisi.py::test_makas_araligina_yakin_bant_sorulur"
    ],
    "sabitler": [
     {

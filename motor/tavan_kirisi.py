@@ -12,7 +12,8 @@ kurulmuyor). Yöntem:
    (`cati_prefabrik.cumba_dikdortgenleri`): cumbanın makası öteki yöne gider (93 m² cumba; Lokman 10:22:20 "gerek yok").
 2. Makas yönünde her 2,5 cm'de bir çizgi. Duvar, köşe direği ve dikme çizgiyi keser; iki oda arasındaki duvarsız sınırın kirişi de keser
    (listede var; Lokman, kart 22 Ekim). Parçası 7 m'yi aşan çizgiler, aynı odada ardışık ve birbirine binen parçalarla bir bant olur
-   (uçları kayabilir). Parça tek bir kapalı odada değilse (duvarsız geçilen birden çok mahal) kiriş konmaz, sorulur.
+   (uçları kayabilir). Parça tek bir kapalı odada değilse (duvarsız geçilen birden çok mahal) kiriş konmaz, sorulur. Bandın genişliği
+   2,5 cm'lik adımla ölçülür: makas aralığına 2,5 cm'den yakınsa (123 … 128) makasın gelip gelmediği sorulur (geometri hakemi, 2. tur).
 3. Aday: makasa dik (kiriş yönündeki) bir duvarın ucu bandın bütün çizgilerinin içinde; duvarın ekseni boyunca boşluk bandın bütün
    makaslarını kesip karşı duvara (sınır kirişine ya da dikmeye değil) varır ve aynı odada kalır. En kısa aday seçilir (1 cm'den az fark
    eşit sayılır, varsayım); eşitse iki ucu köşede olan; ekseni 10 cm'den yakın ve aynı uçlu iki aday tek kiriştir (kalın duvarın ekseni:
@@ -167,8 +168,12 @@ def bul(plan: G.Plan, ie: dict) -> dict:
         a0 = max(s_[1] for s_ in bn["satirlar"])              # bandın bütün çizgilerinin ortak aralığı
         a1 = min(s_[2] for s_ in bn["satirlar"])
         ac = round(max(s_[2] - s_[1] for s_ in bn["satirlar"]), 2)
-        if hi - lo < K["makas"]:
+        if hi - lo < K["makas"] - ADIM:
             disari(bn, ac, f"bant {_fmt(hi - lo)} cm, makas aralığı {_fmt(K['makas'])} cm'den dar: makas gelmez")
+            continue
+        if hi - lo < K["makas"] + ADIM:                       # bant tarama adımıyla ölçülür (± 2,5): makas aralığına yakınsa sorulur
+            disari(bn, ac, f"bant {_fmt(hi - lo)} cm, makas aralığına ({_fmt(K['makas'])} cm) {_fmt(ADIM)} cm'den yakın",
+                   f"bant {_fmt(hi - lo)} cm, makas aralığına yakın; makas gelir mi, sorulur")
             continue
         if c.get("tip", "besik") not in K["cati_tipleri"]:      # kural bu çatı tipi için yazılmadı: kiriş konmaz, sorulur
             disari(bn, ac, f"çatı tipi {c.get('tip')!r} kuralda yok", "çatı tipi kuralda yok, sorulur")

@@ -254,3 +254,13 @@ def test_esitlik_payi_ve_ayni_kiris():
     for y, adaylar in SORULAN.items():
         s = _bul(_oku(y))
         assert s["kirisler"] == [] and [d["adaylar_cm"] for d in s["disinda"]] == [adaylar]
+
+
+def test_makas_araligina_yakin_bant_sorulur(monkeypatch):
+    """Bandın genişliği 2,5 cm'lik tarama adımıyla ölçülür; makas aralığına 2,5 cm'den yakın bant (bugün depoda yok: 117,5 ve 55)
+    sessizce "makas gelmez" sayılmaz, sorulur (K21; geometri hakemi, 2. tur). Sınama: aralık 118 sayılınca 102 m²'nin 117,5'lik antresi."""
+    asil = TK.kural
+    monkeypatch.setattr(TK, "kural", lambda: {**asil(), "makas": 118.0})
+    s = _bul(_oku(BEKLENEN["kirissiz"]["PA22"]["is_emri"]))
+    assert s["kirisler"] == [] and len(s["uyarilar"]) == 1 and "makas gelir mi" in s["uyarilar"][0]
+    assert [d["neden"] for d in s["disinda"]] == ["bant 117,5 cm, makas aralığına (118 cm) 2,5 cm'den yakın"]
