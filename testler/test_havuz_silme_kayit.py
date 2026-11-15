@@ -135,9 +135,9 @@ def test_karar_dosyasi():
         assert f"| PA-{kod[2:]} | {kart} | `{silme}` |" in D92, kod
 
 
-def test_anahtar_yalniz_silinmis_hallerde():
-    """D-92 anahtarı havuz şablonlarında yalnız kısa parçası silinmiş ya da büyümüş hâllerde; kaynak evler ve öteki şablonlar anahtarsız. 95 m²'nin
-    anahtarı (PA-10, kart 20:32:51) korunan dosyaya dokunduğu için ayrı PR'da girer; girince bu küme bilinçli olarak genişler."""
+def test_silinmis_hal_anahtarli_kaynak_ev_anahtarsiz():
+    """Silinmiş hâlin şablonu D-92 anahtarlı; kaynak ev (bugünkü hâl) anahtarsız. Anahtarlı şablonların tam kümesi
+    `test_havuz_tek_pano.py::test_anahtar_yalniz_95m2_evde`'de."""
     anahtarli = {f.stem for f in (SABLON_DIR / "adaylar").glob("*.json")
                  if ((_ie(f).get("yapi") or {}).get("dizilim") or {}).get("tek_ozel_pano")}
-    assert anahtarli == set(HALLER)
+    assert set(HALLER) <= anahtarli and not {h[0] for h in HALLER.values()} & anahtarli

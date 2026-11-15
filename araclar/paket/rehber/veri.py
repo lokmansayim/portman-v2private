@@ -210,13 +210,11 @@ PI = 3.141592654     # dönüş açısı veride dokuz ondalıkla: 15 haneli π n
 
 def baslik_alani(plan) -> str:
     """Rehberin başlığındaki alan (D-95; Lokman, 14 Kasım 2026 21:01 UTC: "biz verandayıda net alana alır sayarız", "biz çatı ile
-    kapattığımız her yeri bürütten sayarız"). Brüt: çatının örttüğü oturum, yükleme listesinin `bina_m2`'si (tek kaynak
-    `prefabrik_liste.bina_brut_cm2`, D-49). Net: bütün mahallerin net alanı, veranda, giriş nişi ve balkon dahil. Ön onay antedindeki
-    net (`dxf_out.alan_yazisi`, kapalı odalar; M-02 mühürlü) bu kararla değişmedi. Sahnenin genel bakış etiketi (rozet) brütü yazar
-    ("her zaman brüt m² ile hesaplarız", 21:07:29)."""
-    from motor import prefabrik_liste as LU
-    f2 = lambda v: f"{v:.2f}".replace(".", ",")
-    return f"{f2(LU.bina_brut_cm2(plan) / 1e4)} m² brüt · {f2(sum(m.alan_m2 for m in plan.mahaller.values()))} m² net"
+    kapattığımız her yeri bürütten sayarız"): ön onay antedinin yazısı (`dxf_out.alan_yazisi`, tek kaynak, D-28 madde 1). Brüt çatının
+    örttüğü oturum (yükleme listesinin `bina_m2`'si, D-49); net bütün mahaller, veranda, giriş nişi ve balkon dahil. Sahnenin genel bakış
+    etiketi (rozet) brütü yazar ("her zaman brüt m² ile hesaplarız", 21:07:29)."""
+    from motor import dxf_out
+    return dxf_out.alan_yazisi(plan)
 
 
 def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:

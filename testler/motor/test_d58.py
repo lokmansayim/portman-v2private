@@ -39,7 +39,7 @@ def _duvarlar(plan) -> dict:
 
 def test_veranda_ice_alinir():
     """Ön kiriş ön dış yüzden 37,5 içeride, köşe kolonu ve salon duvarının dibinde kolon; duvarlar ve panolar r06 ile aynı; brüt verandayla
-    77,95 (veranda 7,82 m²); listede iki 250'lik kolon, sağ kiriş 155,75 − 10."""
+    77,95 (veranda 7,82 m²), net veranda dahil 73,04 (D-95); listede iki 250'lik kolon, sağ kiriş 155,75 − 10."""
     r6, r7 = _oku("TK04_r06.json"), _oku("TK04_r07.json")
     a, b = G.kur(copy.deepcopy(r6)), G.kur(copy.deepcopy(r7))
     assert _duvarlar(a) == _duvarlar(b)
@@ -47,7 +47,7 @@ def test_veranda_ice_alinir():
     assert sorted(b.dikmeler) == [(386.5, 37.5, 396.5, 47.5), (878.5, 37.5, 888.5, 47.5)] and b.kose_kolonlari == [(878.5, 37.5, 888.5, 47.5)]
     on = sorted(k[:4] for k in b.acik_kenarlar if abs(k[1] - k[3]) < 1e-9)
     assert on[0][0] == 381.5 and on[-1][2] == 883.5 and {k[1] for k in on} == {37.5}
-    assert dxf_out.alan_yazisi(b) == "77,95 m² brüt · 65,22 m² net"
+    assert dxf_out.alan_yazisi(b) == "77,95 m² brüt · 73,04 m² net"
     L = PL.is_emrinden(copy.deepcopy(r7))
     kolon = [s for s in L["satirlar"] if s["kalem"].startswith("Özel kutu profil (kolon)")]
     assert [(s["olcu"], s["adet"]) for s in kolon] == [("L 2500", 2)]
