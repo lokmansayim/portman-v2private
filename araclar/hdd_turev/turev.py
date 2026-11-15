@@ -22,6 +22,7 @@ import io
 import json
 import math
 import os
+import signal
 import subprocess
 import sys
 import time
@@ -606,6 +607,18 @@ def isle_yedek(anahtar: str, kayit: dict, gecici: str, hedef: str, arac: dict, n
 
 
 GECICI_EKLER = (".dxf", ".katman.json", ".oge.json", ".bitti")
+ISLEME_SINIR = 90  # sn: bir dosyanın ezdxf işlemesi bundan uzunsa akışla özetlenir (kismi)
+
+
+class SureAsimi(BaseException):
+    """SIGALRM; BaseException: ezdxf'in genel `except Exception` blokları yutmasın."""
+
+
+def _alarm(_isaret, _cerceve):
+    raise SureAsimi()
+
+
+signal.signal(signal.SIGALRM, _alarm)
 
 
 def dwg(kok: str, buyuk_mb: float, sure: float, gecici: str, node_sure: float, parca: str = "0/1",
@@ -697,12 +710,23 @@ def dwg(kok: str, buyuk_mb: float, sure: float, gecici: str, node_sure: float, p
                     break
                 k = kayitlar[a]
                 ns_ = json.load(open(os.path.join(gecici, a + ".bitti")))
+                # bir dosyada takılan ezdxf koşuyu kilitlemesin (15 Kasım: bir parça 3 saat aynı dosyada kaldı)
+                kalan_sn = int(sure - 15 - (time.time() - bas))
+                sinir = min(ISLEME_SINIR, kalan_sn)
                 try:
+                    signal.alarm(max(1, sinir))
                     if ns_.get("durum") == "dxfsiz":
                         satir = isle_yedek(a, k, gecici, hedef, arac, ns_, f"DXF yazılamadı (kod {ns_.get('dxf_kod')}): {ns_.get('dxf_hata') or ''}")
                     else:
                         satir = (isle_buyuk if ns_.get("hafif") else isle_dwg)(a, k, gecici, hedef, arac, ns_)
+                    signal.alarm(0)
+                except SureAsimi:
+                    signal.alarm(0)
+                    if sinir < ISLEME_SINIR:
+                        break                      # koşunun süresi bitti; dosya sonraki koşuda yeniden işlenir
+                    satir = isle_yedek(a, k, gecici, hedef, arac, ns_, f"isleme {ISLEME_SINIR} sn'de bitmedi")
                 except Exception as h:
+                    signal.alarm(0)
                     try:
                         satir = isle_yedek(a, k, gecici, hedef, arac, ns_, f"isleme: {str(h)[:200]}")
                     except Exception as h2:
