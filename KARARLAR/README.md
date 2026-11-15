@@ -217,7 +217,10 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | D | D-99 | disk arşivi: ham dosyalar Drive'da, depoya adsız dizin ve SHA-256 mührü (Lokman 15.11 05:37:53 kartı "Drive'da, depoya dizin ve kart") | yazıldı (15.11; disk arşivi sohbeti, `claude/project-thread-wc6dw0`) |
 | D | D-100 | çelikte OSB + membran + shingle (başka sohbet; BK-33) | alındı (15.11) |
 | D | D-101 | prefabrik planda revizyon talebin numarasını taşır (BK-29 PR-10; Lokman 15.11 07:26:12 kartı "Sabit kalsın") | yazıldı (15.11; WhatsApp revizyon sohbeti, `claude/project-thread-2ypd6m`) |
-| D | **D-102** | — | **sıradaki boş** |
+| D | D-102 | çelik talep formunda trapez sac sunulmaz (başka sohbet; İE-20 PR-12) | alındı (15.11) |
+| D | D-103 | standart pano (başka sohbet; İE-40) | alındı (15.11) |
+| D | D-104 | tek pano Motor (başka sohbet; BK-36) | alındı (15.11) |
+| D | **D-105** | — | **sıradaki boş** |
 | İE | İE-01–İE-08 | bu depo (`main`) | yazıldı |
 | İE | İE-09 | model atölyesi: kontrollü model üretimi ve banka hattı (Görev 6e; pano 30; P6001 güncellemesi kapsam dışı) | alındı (16.10; `claude/gorev-6e-model-atolyesi-rnhtcp`; PR-1 banka hattı 29.10, `claude/project-thread-rhjgzv`) |
 | İE | İE-10, İE-11, İE-12 | prefabrik hattı (PR #12, PR #14, `ie-12-prefabrik-bayi-paftasi`) | `main`'e BK-12 ile (PR-1: motor ve bayi paftası; liste ve mühür kıyası sonraki PR'larda) |
