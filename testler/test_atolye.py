@@ -485,3 +485,13 @@ def test_hakemli_kabul_pim_ve_kontrol(hakemli, tmp_path, capsys):
     kontrol = json.loads((banka / "KT99" / "kontrol.json").read_text(encoding="utf-8"))
     assert kontrol["kural_seti"] == k["pim"]["kural_seti"]["yol"] and kontrol["karkas_kurali"] == k["pim"]["karkas"]["yol"]
     assert B.denetle(banka) == [] and kos(banka, "kontrol", "KT99") == 0
+
+
+def test_karar_var_uc_haneli(tmp_path):
+    # D-100 ve sonrası da dondurmaya dayanak olur (kalıp dogrula.py'deki gibi); dosya adı tam eşleşir, önek saymaz
+    for ad in ("D-02", "D-100", "K21", "Z-03"):
+        (tmp_path / f"{ad}.md").write_text("x", encoding="utf-8")
+    assert all(A.karar_var(k, tmp_path) for k in ("D-02", "D-100", "K21", "Z-03"))
+    assert not A.karar_var("D-10", tmp_path)        # D-100.md var, D-10.md yok
+    assert not A.karar_var("D-1000", tmp_path) and not A.karar_var("", tmp_path) and not A.karar_var("D-00", tmp_path)
+    assert A.karar_var("D-02") and A.karar_var("D-99") and not A.karar_var("D-00")
