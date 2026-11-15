@@ -753,9 +753,13 @@ def test_hakem2_tamam_ve_kartin_m2_si(tmp_path):
     ("mutfak penceresi 120x180 olsun", {"pencereler": [pen("mutfak", "120x180")]}),
 ])
 @pytest.mark.parametrize("niyet", ["diger", "yeni_talep"])
-def test_hakem2_diger_ve_yeni_talep_okunan_istek(tmp_path, metin, alan, niyet):
+def test_hakem2_diger_ve_yeni_talep_okunan_istek(tmp_path, monkeypatch, metin, alan, niyet):
     """O5: "diğer" ya da "yeni talep" okunan istek ve bilgi planın değişikliğidir: set sessizce kapanmaz, konuşma sıfırlanmaz; plan
-    değişikliği bugünkü yoldan (r02 ya da pencere sorusu), r01'in onayı düşer."""
+    değişikliği bugünkü yoldan (r02 ya da pencere sorusu), r01'in onayı düşer.
+    Saat sabit: prefabrik planın numarası her revizyonda saniyeden üretilir (`_is_emri_uret`, ilk sürümden beri); r01 ile r02 ayrı
+    saniyeye düşünce numara değişiyor ve test yükte ara sıra kırmızı oluyordu (15 Kasım 2026)."""
+    t0 = K.time.time()
+    monkeypatch.setattr(K.time, "time", lambda: t0)
     s, _ = _cati_seti(tmp_path)
     no = s.plan["is_emri_no"]
     k = s.yaz(metin, niyet=niyet, **alan)
@@ -2609,6 +2613,43 @@ def test_hakem24_acik_secim_soruya_donmez(tmp_path, metin):
 def test_hakem24_acik_onay_soruya_donmez(tmp_path, metin):
     """Tur 24: kapanış sözü ("şimdilik eyvallah / tşk / selamlar", önceden soruluyordu) ve müşterinin geçmiş onayı ("müşteri seçti",
     "müşterinin de isteği bu") evin çatısının onayını bozmaz: r01 onaylanır."""
+    s, _ = _cati_seti(tmp_path)
+    k = s.yaz(metin, niyet="diger")
+    assert k.gerekce == K.PLAN_ONAYI and k.revizyon == 1, k.mesaj
+
+
+@pytest.mark.parametrize("metin", [
+    "1 olsun, olur mu abi?", "1 olsun, olur mu hocam?", "1 olsun, tamam mı ustam?", "1 olsun, tamam mı kardeşim?",
+    "1 olsun, uygun mu efendim?", "1 olsun, olur mu ya?", "1 olsun, olur mu peki?", "1 olsun, peki olur mu?",
+    "1 olsun, uygundur değil mi?", "1 olsun, müşteriye uygun mu?", "1 olsun, müşteri için iyi mi?", "1 olsun, bu çatı bize uygun mu?",
+    "1 olsun, bizim için iyi mi?", "1 olsun, sizin için de olur mu?", "1 olsun, size de uyar mı?", "2 olsun, olur mu abi?",
+    "2 olsun, tamam mı hocam?", "2 olsun, bize uygun mu?", "1 olsun, sorun olur mu?", "1 olsun, olur mu yav?", "1 olsun, makul mü?",
+    "1 olsun, uygun düşer mi?", "2 olsun, fikrimiz değişebilir", "2 olsun, müşterinin fikri değişebilir"])
+def test_hakem24_hitapli_secim_sorusu_sorulur(tmp_path, metin):
+    """Tur 24 sonrası (kendi yoklamamızla): seçim sorusundaki hitap ve dolgu ("olur mu abi?", "tamam mı hocam?", "peki olur mu?"),
+    kişiye uygunluk ("bize uygun mu?", "müşteri için iyi mi?"), "sorun olur mu?", "makul mü?" seçim sorusudur; "fikrimiz değişebilir"
+    kararsızlıktır. Onay ya da onaylanabilir r02 kaydediliyordu (bir
+    kısmı kayıtsız cevap alıyordu): seçim sorulur."""
+    s, _ = _cati_seti(tmp_path)
+    _soruldu(s, s.yaz(metin, niyet="diger"))
+
+
+@pytest.mark.parametrize("metin", [
+    "2 olsun, kasım uygun mu?", "2 olsun, montaj için cumartesi uygun mu?", "2 olsun, saat 10 uygun mu?", "2 olsun, taksit olur mu?",
+    "2 olsun, kredi kartı olur mu?", "2 olsun, KDV dahil mi?", "2 olsun, yarın uygun mu?", "2 olsun, bize de fatura olur mu?",
+    "2 olsun, bunu ne zaman gönderirsiniz?", "2 olsun, gerisi müşteriye kalsın"])
+def test_hakem24_surec_uygunlugu_soruya_donmez(tmp_path, metin):
+    """Tur 24 sonrası (sınır): başka şeyin uygunluğu ("kasım uygun mu?", "taksit olur mu?") seçim sorusu değildir; kalan işi
+    müşteriye bırakan söz ("gerisi müşteriye kalsın") çatıyı ertelemez: r02."""
+    s, _ = _cati_seti(tmp_path)
+    k = s.yaz(metin, niyet="diger")
+    assert k.eylem == "is_emri" and k.revizyon == 2 and k.is_emri["talep"]["kaynak"] == "PA06K", k.mesaj
+
+
+@pytest.mark.parametrize("metin", ["1 olsun, tamam abi", "1 olsun abi", "1 olsun hocam, teşekkürler", "1 olsun, uygundur",
+                                   "1 olsun, fiyatı uygun mu?"])
+def test_hakem24_hitapli_onay_soruya_donmez(tmp_path, metin):
+    """Tur 24 sonrası (sınır): soru olmayan hitaplı söz ve fiyat sorusu evin çatısının onayını bozmaz: r01 onaylanır."""
     s, _ = _cati_seti(tmp_path)
     k = s.yaz(metin, niyet="diger")
     assert k.gerekce == K.PLAN_ONAYI and k.revizyon == 1, k.mesaj

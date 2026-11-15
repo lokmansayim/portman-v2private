@@ -1272,3 +1272,13 @@ def test_hakem24_celik_acik_secim_soruya_donmez(s, metin):
     cati_seti(s)
     k = s.yaz(metin)
     assert k.eylem == "is_emri" and k.revizyon == 2 and s.plan["yapi"]["kod"] == "Ç8801K", k.mesaj
+
+
+@pytest.mark.parametrize("metin", ["Ç8801 olsun, olur mu abi?", "K olsun, tamam mı hocam?", "Ç8801 olsun, sorun olur mu?",
+                                   "K olsun, makul mü?"])
+def test_hakem24_celik_hitapli_secim_sorusu_sorulur(s, metin):
+    """Tur 24 sonrası çelikte: hitaplı seçim sorusu onayı mühendis kontrolüne gönderiyor ya da r02 çiziyordu: seçim sorulur."""
+    cati_seti(s)
+    k = s.yaz(metin)
+    assert k.eylem == "sor" and k.mesaj.startswith("Hangi çatı olsun?"), k.mesaj
+    assert s.plan["revizyon"] == 1 and s.k.d["secenek_seti"]["durum"] == "acik" and not s.k.d.get("onaylanan"), k.mesaj

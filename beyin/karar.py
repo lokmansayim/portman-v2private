@@ -2107,7 +2107,8 @@ def _musteri_ertelemesi(ham: list[str]) -> bool:
             continue
         tamlayan = bool(re.fullmatch(r"\w+n[iu]n", x))         # "müşterinin": ad tamlaması ya da "-mAsI lazım"ın öznesi
         s1, s2 = (ham[i + 1:i + 3] + ["", ""])[:2]
-        if not konulu and ((re.fullmatch(r"\w+(?:y[ae])", x) and s1.startswith(("kal", "birak")))
+        gerisi = any(a.startswith(("geri", "kalan", "diger", "oteki", "detay", "ayrinti")) for a in ham[:i])   # "gerisi müşteriye kalsın"
+        if not konulu and not gerisi and ((re.fullmatch(r"\w+(?:y[ae])", x) and s1.startswith(("kal", "birak")))
                            or (tamlayan and s1.startswith(_KISI_KARARI) and (not s2 or s2.startswith(("kal", "birak", "bagli"))))):
             return True                                        # tur 24 (Y3): "müşteriye kalsın", "müşterinin tercihine kalsın", "çatı
                                                                # müşterinin kararı"
@@ -2188,7 +2189,8 @@ def _simdilik_secimde(ham: list[str], i: int) -> bool:
 _DEGISEN_DOLGU = {"ama", "fakat", "ancak", "ve", "sonra", "sonradan", "belki", "yine", "de", "da", "ileride", "yarin", "haftaya", "tabi",
                   "tabii", "her", "zaman", "hala", "bile", "gerekirse", "istenirse", "olarak", "verildi",
                   "verdik", "alindi", "aldik", "kesin", "simdilik", "mi", "mu", "miyiz", "muyuz", "misiniz", "musunuz"}
-_DEGISEN_OZNE = ("karar", "cati", "secim", "tercih", "bu", "o", "su", "hepsi", "sey")
+_DEGISEN_OZNE = ("karar", "cati", "secim", "tercih", "bu", "o", "su", "hepsi", "sey", "fikir", "fikr", "dusunce", "niyet",
+                 "gorusu", "gorusum", "kanaat", "istek", "istegi")   # "fikrimiz değişebilir"
 
 
 def _degisenin_oznesi(ham: list[str], k: int) -> bool:
@@ -2749,11 +2751,17 @@ _SECIM_SORUSU_SOZU = {
     "diyorsunuz", "evin", "kendi", "kendisi", "secim", "secimi", "secimimiz", "sonra", "sonradan", "ileride", "degistirsek",
     "degistirebilir", "degisebilir", "degistirebiliriz", "gecici", "olarak", "karar", "kararimiz", "kararimizi", "karari", "karardan",
     "musteri", "musterimiz", "esi", "esim", "der", "diyecek", "begenir", "begenecek", "razi", "kabul", "eder", "edecek", "onaylar",
-    "onaylayacak", "ister", "sever", "yapiyoruz", "secimimizi", "yine", "hala", "boylece", "boylesi", "hangisi"}
+    "onaylayacak", "ister", "sever", "yapiyoruz", "secimimizi", "yine", "hala", "boylece", "boylesi", "hangisi",
+    # tur 24 sonrası: hitap ve dolgu ("olur mu abi?", "tamam mı hocam?", "peki olur mu?"), kişiye uygunluk ("bize uygun mu?", "müşteri
+    # için iyi mi?") ve ekli yüklem ("uygundur değil mi?")
+    "abi", "abim", "abicim", "abla", "ablacim", "hocam", "hocacim", "ustam", "ustacim", "ustamcim", "kardesim", "kardes", "efendim",
+    "bey", "beyim", "beyefendi", "hanim", "hanimefendi", "reis", "sef", "dostum", "patron", "patronum", "ya", "yahu", "peki", "hani",
+    "yani", "bize", "bizim", "size", "sizin", "icin", "musteriye", "musterinin", "musterimize", "musterimizin", "uyar", "uygundur",
+    "tamamdir", "dogrudur", "yeterlidir", "mantiklidir", "guzeldir", "yav", "sorun", "problem", "olmaz", "makul", "duser"}
 _SECIM_SORUSU_CAPA = ("olsun", "kalsin", "kalsa", "olsa", "secelim", "secsek", "secsem", "alalim", "alsak", "kalalim", "yapalim",
                       "yapsak", "iyi", "tamam", "uygun", "olur", "olabilir", "emin", "dogru", "yeterli", "guzel", "mantikli", "begen",
                       "razi", "kabul", "onaylar", "dersiniz", "dersin", "diyorsunuz", "der", "diyecek", "degistir", "degisebilir",
-                      "bu", "bunu", "boyle", "oyle")
+                      "bu", "bunu", "boyle", "oyle", "uyar", "olmaz", "makul", "duser")
 _OLCUT_SOZU = ("acisindan", "bakimindan", "yonunden", "olarak", "icin")
 
 
