@@ -187,3 +187,29 @@ def test_ozet_proje_sayilari(tmp_path):
     assert o["projeler"]["HD-001"] == {"dwg_tamam": 1, "dwg_panolu": 1, "pano_eklemesi": 40}
     assert o["projeler"]["HD-002"]["excel_liste"] == 1 and o["projeler"]["HD-002"]["gorsel_konumlu"] == 1
     assert o["toplam"]["proje_dwg_panolu"] == 1 and o["toplam"]["proje_excel_liste"] == 1
+
+
+def test_arsivdeki_dxf_ozeti_kopyasiz(tmp_path):
+    # arşivde zaten DXF olan dosya: özet JSON'a yazılır, DXF'in kopyası yazılmaz, manifestte ad yok
+    kok = _arsiv(tmp_path)
+    klasor = kok / PROJE
+    d = ezdxf.new("R2010")
+    d.blocks.new("100 LIK DOLU PANO 125 LİK").add_line((0, 0), (125.5, 0))
+    m = d.modelspace()
+    for i in range(4):
+        m.add_blockref("100 LIK DOLU PANO 125 LİK", (i * 125.5, 0))
+    m.add_text("Zeynep Çağlar", height=10).set_placement((0, -50))
+    d.saveas(klasor / "Zeynep plan.dxf")
+    sha = hashlib.sha256((klasor / "Zeynep plan.dxf").read_bytes()).hexdigest()
+    with open(kok / "_portman_analiz" / "kod_esleme.csv", "a", encoding="utf-8-sig", newline="") as f:
+        csv.writer(f, delimiter=";").writerow(["HD-001", 5, PROJE, "Zeynep plan.dxf", sha])
+    assert turev_belge.main(["dxf", str(kok)]) == 0
+    satir, = _manifest(kok, "dxf")
+    assert satir["durum"] == "tamam" and satir["pano_eklemesi"] == 4 and satir["dwg_surum"] == "AC1024"
+    assert set(satir["ciktilar"]) == {"json_gz"}
+    hedef = kok / "_portman_analiz" / "turev"
+    oz = json.loads(gzip.decompress((hedef / satir["ciktilar"]["json_gz"]["yol"]).read_bytes()))
+    assert [e["x"] for e in oz["eklemeler"]] == [0.0, 125.5, 251.0, 376.5]
+    assert not list(hedef.rglob("*.dxf*"))
+    metin = (hedef / "manifest_dxf.jsonl").read_text(encoding="utf-8")
+    assert "Zeynep" not in metin and "Çağlar" not in metin

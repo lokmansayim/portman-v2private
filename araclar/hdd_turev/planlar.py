@@ -97,7 +97,7 @@ def calistir(kok: str, esik: float, en_az: int) -> dict:
     hedef = os.path.join(kok, "_portman_analiz", "turev")
     dosyalar, imzalar, projeler, ornekler = [], collections.Counter(), collections.defaultdict(set), {}
     for (kod, sira, tur), d in sorted(ozet.en_iyi_satirlar(hedef).items()):
-        if tur != "dwg" or not d.get("pano_eklemesi"):
+        if tur not in ("dwg", "dxf") or not d.get("pano_eklemesi"):
             continue
         oz = ozet._json(hedef, d)
         if not oz:

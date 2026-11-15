@@ -443,7 +443,7 @@ def _oge_bitir(oge: dict, eklemeler: list, yazilar: list) -> None:
         yazilar.append({"t": metin, **ortak, "h": oge.get("h")})
 
 
-def dxf_akis(kaynak: str, yol: str) -> dict:
+def dxf_akis(kaynak: str, yol: str | None) -> dict:
     """Büyük DXF'i satır satır bir kez okur: gzip'e yazar ve özetini çıkarır (bellek sabit, ezdxf yok).
 
     Özet: başlık ($ACADVER, $INSUNITS, $EXTMIN/$EXTMAX), ENTITIES bölümünde öğe türleri, INSERT'ler (blok, konum, açı,
@@ -456,12 +456,15 @@ def dxf_akis(kaynak: str, yol: str) -> dict:
     bolum = kayit = degisken = katman = None
     bolum_bekle = False
     tampon, kod = [], None
-    with open(kaynak, "rb") as g, gzip.GzipFile(yol, "wb", compresslevel=6, mtime=0) as f:
+    # yol None: yalnız özet (arşivde zaten DXF olan dosyalar; kopyası yazılmaz)
+    with open(kaynak, "rb") as g, (gzip.GzipFile(yol, "wb", compresslevel=6, mtime=0) if yol else
+                                   contextlib.nullcontext()) as f:
         for i, satir in enumerate(g):
-            tampon.append(satir)
-            if len(tampon) >= 65536:
-                f.write(b"".join(tampon))
-                tampon.clear()
+            if f is not None:
+                tampon.append(satir)
+                if len(tampon) >= 65536:
+                    f.write(b"".join(tampon))
+                    tampon.clear()
             if i % 2 == 0:
                 kod = satir.strip()
                 continue
@@ -505,7 +508,8 @@ def dxf_akis(kaynak: str, yol: str) -> dict:
             elif katman is not None and kod == b"420":
                 with contextlib.suppress(ValueError):
                     katmanlar[katman]["gercek_renk"] = int(v) & 0xFFFFFF
-        f.write(b"".join(tampon))
+        if f is not None:
+            f.write(b"".join(tampon))
     if oge is not None:
         _oge_bitir(oge, eklemeler, yazilar)
     kapsam = None
@@ -659,41 +663,43 @@ def dwg(kok: str, buyuk_mb: float, sure: float, gecici: str, node_sure: float, p
     while time.time() - bas < sure - 45:
         hazir = [a for a in hazirlar() if a not in islenen]
         if not hazir:
-            sira = [a for a in bekleyen if deneme.get(a, 0) < 2 and a not in islenen and a not in hatali]
-            if not sira:
-                break
+            # iki denemede çevrilemeyenler önce yazılır; yalnız onlar kaldıysa da manifeste girer
             for a in bekleyen:
                 if deneme.get(a, 0) >= 2 and a not in islenen:
                     hatali[a] = "iki denemede çevrilemedi (zaman aşımı ya da çökme)"
-            liste = os.path.join(gecici, "liste.jsonl")
-            with open(liste, "w", encoding="utf-8") as f:
-                for a in (sira[:1] if kayitlar[sira[0]]["hafif"] else sira[:300]):
-                    f.write(json.dumps({"anahtar": a, "girdi": kayitlar[a]["girdi"], "hafif": kayitlar[a]["hafif"]},
-                                       ensure_ascii=False) + "\n")
-            ns = max(15.0, min(node_sure, sure - 45 - (time.time() - bas)))
-            # büyük modelde tek dosyanın çevrimi sürenin kalanını kullanabilir; işlenmesi sonraki koşuya kalabilir
-            zaman = max(ns + 60, sure - (time.time() - bas)) if kayitlar[sira[0]]["hafif"] else ns + 60
-            cikis, kod = "", 0
-            try:
-                r = subprocess.run(["node", os.path.join(BURASI, "dwg_toplu.mjs"), liste, gecici, str(ns)],
-                                   capture_output=True, text=True, timeout=zaman)
-                cikis, kod = r.stdout, r.returncode
-            except subprocess.TimeoutExpired as h:
-                cikis = h.stdout.decode() if isinstance(h.stdout, bytes) else (h.stdout or "")
-                kod = -9
-            sonuclar = {}
-            for s_ in cikis.splitlines():
-                with contextlib.suppress(ValueError, KeyError):
-                    d = json.loads(s_)
-                    sonuclar[d["anahtar"]] = d
-            for a, d in sonuclar.items():
-                if d.get("durum") == "hata":
-                    hatali[a] = d.get("hata") or "hata"
-            if kod != 0:
-                yarim = next((a for a in sira[:300] if a not in sonuclar), None)
-                if yarim:
-                    deneme[yarim] = deneme.get(yarim, 0) + 1
-            json.dump(deneme, open(deneme_yolu, "w"))
+            sira = [a for a in bekleyen if deneme.get(a, 0) < 2 and a not in islenen and a not in hatali]
+            if not sira and not hatali:
+                break
+            if sira:
+                liste = os.path.join(gecici, "liste.jsonl")
+                with open(liste, "w", encoding="utf-8") as f:
+                    for a in (sira[:1] if kayitlar[sira[0]]["hafif"] else sira[:300]):
+                        f.write(json.dumps({"anahtar": a, "girdi": kayitlar[a]["girdi"], "hafif": kayitlar[a]["hafif"]},
+                                           ensure_ascii=False) + "\n")
+                ns = max(15.0, min(node_sure, sure - 45 - (time.time() - bas)))
+                # büyük modelde tek dosyanın çevrimi sürenin kalanını kullanabilir; işlenmesi sonraki koşuya kalabilir
+                zaman = max(ns + 60, sure - (time.time() - bas)) if kayitlar[sira[0]]["hafif"] else ns + 60
+                cikis, kod = "", 0
+                try:
+                    r = subprocess.run(["node", os.path.join(BURASI, "dwg_toplu.mjs"), liste, gecici, str(ns)],
+                                       capture_output=True, text=True, timeout=zaman)
+                    cikis, kod = r.stdout, r.returncode
+                except subprocess.TimeoutExpired as h:
+                    cikis = h.stdout.decode() if isinstance(h.stdout, bytes) else (h.stdout or "")
+                    kod = -9
+                sonuclar = {}
+                for s_ in cikis.splitlines():
+                    with contextlib.suppress(ValueError, KeyError):
+                        d = json.loads(s_)
+                        sonuclar[d["anahtar"]] = d
+                for a, d in sonuclar.items():
+                    if d.get("durum") == "hata":
+                        hatali[a] = d.get("hata") or "hata"
+                if kod != 0:
+                    yarim = next((a for a in sira[:300] if a not in sonuclar), None)
+                    if yarim:
+                        deneme[yarim] = deneme.get(yarim, 0) + 1
+                json.dump(deneme, open(deneme_yolu, "w"))
             hazir = [a for a in hazirlar() if a not in islenen]
             if not hazir and not hatali:
                 break

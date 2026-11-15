@@ -3,6 +3,7 @@
   python3 turev_belge.py pdf    <kök> [--sure 150] [--parca k/n] [--sayfa-onizleme 10]
   python3 turev_belge.py excel  <kök> [--sure 150] [--parca k/n]
   python3 turev_belge.py gorsel <kök> [--sure 150] [--parca k/n]
+  python3 turev_belge.py dxf    <kök> [--sure 150] [--parca k/n]
 
 Mac'te koşar; ham dosyaya yazmaz. Çıktı `<kök>/_portman_analiz/turev/<tür>/<kod>/<sıra>.*`, manifest
 `turev/manifest_<tür>[_p<k>].jsonl` (DWG'nin manifestiyle aynı biçim). Kişisel veri (Excel'deki TC kimlik no, telefon,
@@ -20,7 +21,7 @@ import sys
 import time
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from turev import oku_esleme, oku_manifest, r2, sha256_dosya  # noqa: E402
+from turev import dxf_akis, oku_esleme, oku_manifest, r2, sha256_dosya  # noqa: E402
 
 SINIR_SEGMENT = 100000
 SINIR_BLOK = 5000
@@ -164,10 +165,18 @@ def isle_gorsel(girdi: str, klasor: str, sira: str, hedef: str, _sayfa_onizleme:
     return oz, {"jpg": {"yol": os.path.relpath(yol, hedef), "sha256": sha256_dosya(yol), "bayt": os.path.getsize(yol)}}
 
 
+# --- Arşivde hazır DXF -------------------------------------------------------------------------------------------
+
+def isle_dxf(girdi: str, klasor: str, sira: str, hedef: str, _sayfa_onizleme: int) -> dict:
+    """Arşivde zaten DXF olan dosya: kopyası yazılmaz, özet akışla (başlık, öğe türleri, eklemeler, yazılar, katmanlar)."""
+    return dxf_akis(girdi, None), {}
+
+
 TURLER = {
     "pdf": (("pdf",), isle_pdf),
     "excel": (("xlsx", "xls"), isle_excel),
     "gorsel": (("jpg", "jpeg", "png", "bmp", "webp"), isle_gorsel),
+    "dxf": (("dxf",), isle_dxf),
 }
 
 
@@ -231,6 +240,9 @@ def calistir(tur: str, kok: str, sure: float, parca: str, sayfa_onizleme: int) -
                     satir.update(konum_var="konum" in oz, cekim_tarihi=oz.get("cekim_tarihi"))
                 elif tur == "excel":
                     satir.update(sayfa=oz["sayfa_sayisi"])
+                elif tur == "dxf":
+                    satir.update(dxf_oge=sum(oz["oge_sayilari"].values()), dwg_surum=oz["dxf"]["surum"],
+                                 pano_eklemesi=sum(b["adet"] for b in oz["bloklar"] if "PANO" in b["ad"].upper()))
             except Exception as h:
                 satir.update(durum="hata", hata=str(h)[:200])
             satir["sure"] = round(time.time() - t0, 1)

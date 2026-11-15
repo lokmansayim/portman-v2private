@@ -70,7 +70,7 @@ def ozet(kok: str) -> dict:
         p[f"{tur}_{d.get('durum')}"] += 1
         if d.get("durum") == "hata":
             continue
-        if tur == "dwg":
+        if tur in ("dwg", "dxf"):
             if d.get("pano_eklemesi"):
                 p["dwg_panolu"] += 1
                 p["pano_eklemesi"] += d["pano_eklemesi"]
