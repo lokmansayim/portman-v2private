@@ -950,12 +950,6 @@
   "PA-19": [
    {"tur": "pafta_duz_kayit_uclu", "xy": [882.1, 564.8], "yazi": "[882,1; 564,8] paftada düz H, kayıtta 3'lü H", "durum": "kabul", "kart": "84 m² 2+1: Lokman'a ev kartı 15 Kasım 2026 ~08:29 UTC (mühendis hatası mı, kayıt hatası mı; önerilen mühendis hatası); eskiz PF Hakem_Kose_Profili/2026-11-15", "soz": "Lokman 15 Kasım 2026 08:54:31 UTC, 84 m² eskizinde kaydın 3'lü H'ına not: \"bunlar kesin doğrula 125,5 cm lik pano gibi net tartışmasız doğrular\"", "sonuc": "kayıt doğru: iki yerde 3'lü H; paftanın düz H'ı mühendis hatası"},
    {"tur": "pafta_duz_kayit_uclu", "xy": [3.9, 567.7], "yazi": "[3,9; 567,7] paftada düz H, kayıtta 3'lü H", "durum": "kabul", "kart": "84 m² 2+1: Lokman'a ev kartı 15 Kasım 2026 ~08:29 UTC (mühendis hatası mı, kayıt hatası mı; önerilen mühendis hatası); eskiz PF Hakem_Kose_Profili/2026-11-15", "soz": "Lokman 15 Kasım 2026 08:54:31 UTC, 84 m² eskizinde kaydın 3'lü H'ına not: \"bunlar kesin doğrula 125,5 cm lik pano gibi net tartışmasız doğrular\"", "sonuc": "kayıt doğru: iki yerde 3'lü H; paftanın düz H'ı mühendis hatası"}
-  ],
-  "PA-26": [
-   {"tur": "pafta_uclu_kayit_degil", "xy": [782.0, 688.2], "yazi": "[782; 688,2] paftada 3'lü H, kayıtta çektirme U'su", "durum": "kayit_hatasi", "kart": "71 m² 2+1: Lokman'a ev kartı 15 Kasım 2026 ~08:29 UTC (mühendis hatası mı, kayıt hatası mı; önerilen kayıt hatası); eskiz PF Hakem_Kose_Profili/2026-11-15", "soz": "Lokman 15 Kasım 2026 08:53:28 UTC, 71 m² eskizinde paftanın 3'lü H'ına not: \"bu doğru neden çektirme U'sunun koyulacağı ölçü net değil o yüzden panoyu bölmüş ama şunu söylemeliyim mühendis burada da iç bölmelerde hata yapmış istersen 71 m² de son güncellemeyi yap depoya al ve bırak çünkü bu projede hata çok fazla\"", "sonuc": "pafta doğru: T panonun ortasında değil (125,5'lik panoda 40,75), mühendis panoyu bölüp 3'lü H koymuş; kaydın düzeltilmesi standart pano sohbetinde (CIO, 15 Kasım 2026 08:53 UTC)"}
-  ],
-  "PA-27": [
-   {"tur": "pafta_uclu_kayit_degil", "xy": [320.0, 153.5], "yazi": "[320; 153,5] paftada 3'lü H, kayıtta çektirme U'su", "durum": "kayit_hatasi", "kart": "45 m² 1+1: Lokman'a ev kartı 15 Kasım 2026 ~08:29 UTC (mühendis hatası mı, kayıt hatası mı; önerilen kayıt hatası); eskiz PF Hakem_Kose_Profili/2026-11-15", "soz": "Lokman 15 Kasım 2026 08:53:55 UTC, 45 m² eskizinde paftanın 3'lü H'ına not: \"71 m² deki durumun aynısı yeri net değil\"", "sonuc": "pafta doğru: T panonun ortasında değil (86,5'lik panoda 23,75); kaydın düzeltilmesi ayrı iş (CIO'ya iletildi)"}
   ]
  }
 }

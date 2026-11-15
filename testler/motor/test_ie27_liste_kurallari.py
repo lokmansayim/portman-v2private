@@ -118,11 +118,12 @@ def test_cektirme_yerleri_ornek(modeller):
     assert modeller["PK02"]["cektirme_yerleri"] == {"t_orta": 0, "dis_kose": 0, "serbest": 0}
 
 
-@pytest.mark.parametrize("ad", ["TK02", "TK01_r07"])
+@pytest.mark.parametrize("ad", ["TK02"])
 def test_giris_nisi_t_degil(ad):
     """Geometri hakemi (İE-27): giriş nişinde yan duvar içeride iç duvar olarak sürer ve ucuna `T→<kapı duvarı>` yazılır, ama kapı duvarı
-    orada biter. O birleşim uç uca ektir, 3'lü H'ı `uc_uca_ekler`'den sayılır; "panonun ortasına T" sayılıp çektirme U'su almaz. TK-02 ve
-    TK-01 r07'de bütün T'ler pano ekinde: çektirme U'su (iç) 0."""
+    orada biter. O birleşim uç uca ektir, 3'lü H'ı `uc_uca_ekler`'den sayılır; "panonun ortasına T" sayılıp çektirme U'su almaz. TK-02'de
+    bütün T'ler pano ekinde: çektirme U'su (iç) 0. TK-01 r07 (iç 60) D-104'ten beri bu testte değil: nişte üçlü H yok, köşe direği var
+    (`test_giris_nisi_60_kose`)."""
     from motor import geometry as G
     ie = json.loads((KOK / "testler" / "motor" / "veri" / f"{ad}.json").read_text(encoding="utf-8"))
     plan = G.kur(ie)
@@ -131,6 +132,18 @@ def test_giris_nisi_t_degil(ad):
     assert N["cektirme_yerleri"] == {"t_orta": 0, "dis_kose": 0, "serbest": 0}
     ic = [x for x in _liste(N) if x["kalem"].startswith("Çektirme U'su") and x["dayanak"] == "Kural (Lokman 3.11)"]
     assert len(ic) == 1 and ic[0]["adet"] == 0
+
+
+def test_giris_nisi_60_kose():
+    """D-104 (Lokman, 15 Kasım 2026 07:32:42, 07:47:55; kart 07:55:12): TK-01 r07'de (iç 60) nişin iki ucunda üçlü H yok, 100'lük köşe direği
+    var; hol duvarı (60'lık) köşeye çektirme U'suyla bağlanır: madde 13'ün "100'lük köşelerde 60'lığa geçiş"i (dış köşe 2)."""
+    from motor import geometry as G
+    ie = json.loads((KOK / "testler" / "motor" / "veri" / "TK01_r07.json").read_text(encoding="utf-8"))
+    assert G.uc_uca_ekler(G.kur(json.loads(json.dumps(ie)))) == []
+    N = PL.model_motor(ie)
+    assert N["cektirme_yerleri"] == {"t_orta": 0, "dis_kose": 2, "serbest": 0}
+    ic = [x for x in _liste(N) if x["kalem"].startswith("Çektirme U'su") and x["dayanak"] == "Kural (Lokman 3.11)"]
+    assert len(ic) == 1 and ic[0]["adet"] == 2
 
 
 @pytest.mark.parametrize("kod", ["AP11", "AP15", "AP21"])

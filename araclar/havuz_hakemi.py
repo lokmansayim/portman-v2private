@@ -60,7 +60,7 @@ genelleme varsayımdır). 71 m² 2+1: Lokman 14 Kasım 2026 20:46:54 sözü, kar
 - açıklık kayması (`--aciklik-sozu`): Motor'un yeniden dizdiği duvarda (kısa parçasız kısalan ya da uzayan) kapı ya da pencere duvar boyunca
   kayabilir (oda ortasındaki pencere odanın ortasında kalır): hattı ve boyu aynı, duvarın içinde, kayma duvarın değişiminden çok değil.
 
-    python3 araclar/havuz_hakemi.py testler/motor/veri/D96_71m2_uclu_h.json --kart AP-08 --silme-hali is_emri/adaylar/PA26.json \
+    python3 araclar/havuz_hakemi.py testler/havuz/is_emirleri/PA26_UCLU_H.json --kart AP-08 --silme-hali is_emri/adaylar/PA26.json \
         --kesim-hatti on:17:770 --kesim-sozu "<kart>" --buyume-sozu "<söz>" --veranda-sozu "<kart>" --uclu-h-sozu "<söz>" --aciklik-sozu "<kart>"
 
 Veranda duvarı aksa ve tam + yarım pano (BK-35; silme hâlinin içinde, her biri yalnız Lokman'ın o evdeki sözüyle; tek ev sözleri,
