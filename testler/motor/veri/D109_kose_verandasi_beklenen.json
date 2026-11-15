@@ -1,0 +1,542 @@
+{
+ "aciklama": "D-109 hedef örneği (BK-40, PC-45): köşe boşluğundan taşan veranda (52 m², 55 m²) ve taşan verandada ara kolon (52 m², 67 m²). Girdiler disk arşivinin montaj paftalarından elle girildi (oda sınırları ve ölçüler paftadan; veranda eskiz r04). Önce: anahtarsız Motor (52 ve 55 m² açık hata, 67 m² iki kolon tek ön kiriş). Sonra: `nis` ve `ara_kolon` ile. Lokman, 15 Kasım 2026 (UTC): 22:10:48 \"kolon ver kiriş kavramları bir birine karıştı kiriş olacak ama kolon olmayacak\"; 22:16:38 (67 m²) \"aynen böyle olacak doğrusu bu\"; 22:16:59 (55 m²) \"bu yeşil niş mi kiriş mi neyse olmayacak\"; 22:17:51 (52 m²) \"bu olmayacak plana iyice bak bak 242,5 tek kiriş 100*100 profil olacak yani altında 1 tane daha kolon olmayacak\"; kart 22:30:06 \"Doğru, böyle yap\" (soru: \"Köşe verandası eskizi bu hâliyle doğru mu?\"; eskiz PF Kose_Verandasi_Motor/2026-11-15_eskiz_r04/). Ön onay çizimleri (PF Kose_Verandasi_Motor/2026-11-15_on_onay/) Lokman'ın bakışını bekliyor; değerler o bakışla değişirse bu dosya onun sözüyle yeniden yazılır (D-02).",
+ "evler": {
+  "52m2": {
+   "girdi": "testler/motor/veri/BK40_52m2.json",
+   "once": {
+    "hata": "Veranda VERANDA 2: on cephesinde 378.5–1014 cm gövdenin dış yüzüne tam oturmuyor"
+   },
+   "sonra": {
+    "veranda": {
+     "ad": "VERANDA",
+     "rect": [
+      378.5,
+      -117.0,
+      1014.0,
+      0.0
+     ],
+     "en": 635.5,
+     "derinlik": 117.0,
+     "kolonlar": [
+      [
+       378.5,
+       -117.0,
+       388.5,
+       -107.0
+      ],
+      [
+       691.25,
+       -117.0,
+       701.25,
+       -107.0
+      ],
+      [
+       1004.0,
+       -117.0,
+       1014.0,
+       -107.0
+      ]
+     ],
+     "kenarlar": [
+      [
+       378.5,
+       -117.0,
+       1014.0,
+       -117.0
+      ],
+      [
+       378.5,
+       -117.0,
+       378.5,
+       0.0
+      ],
+      [
+       1014.0,
+       -117.0,
+       1014.0,
+       125.5
+      ]
+     ],
+     "kirisler": [
+      [
+       378.5,
+       -117.0,
+       1014.0,
+       -107.0
+      ],
+      [
+       378.5,
+       -117.0,
+       388.5,
+       0.0
+      ],
+      [
+       1004.0,
+       -117.0,
+       1014.0,
+       125.5
+      ]
+     ],
+     "dis_parcalar": [
+      [
+       [
+        378.5,
+        -117.0,
+        696.25,
+        -117.0
+       ],
+       [
+        378.5,
+        -117.0,
+        696.25,
+        -107.0
+       ]
+      ],
+      [
+       [
+        696.25,
+        -117.0,
+        1014.0,
+        -117.0
+       ],
+       [
+        696.25,
+        -117.0,
+        1014.0,
+        -107.0
+       ]
+      ]
+     ],
+     "nis": {
+      "ad": "VERANDA",
+      "yan": 1,
+      "kutu": [
+       386.5,
+       0.0,
+       1014.0,
+       125.5
+      ]
+     }
+    },
+    "veranda_m2": 15.31,
+    "dikme_sayisi": 3,
+    "kose_kolonu": 0,
+    "acik_kenarlar": [
+     [
+      378.5,
+      -117.0,
+      378.5,
+      0.0
+     ],
+     [
+      378.5,
+      -117.0,
+      1014.0,
+      -117.0
+     ],
+     [
+      1014.0,
+      -117.0,
+      1014.0,
+      125.5
+     ]
+    ],
+    "liste": {
+     "kolon": [
+      [
+       "L 2500",
+       3
+      ]
+     ],
+     "kirisler": [
+      "L 1070",
+      "L 2325",
+      "L 3177,5",
+      "L 3177,5"
+     ],
+     "ic_kalan_dis_duvar_m": 7.53,
+     "brut_m2": 73.092
+    }
+   }
+  },
+  "55m2": {
+   "girdi": "testler/motor/veri/BK40_55m2.json",
+   "once": {
+    "hata": "Veranda VERANDA 2: on cephesinde 0–449.25 cm gövdenin dış yüzüne tam oturmuyor"
+   },
+   "sonra": {
+    "veranda": {
+     "ad": "VERANDA",
+     "rect": [
+      0.0,
+      -125.0,
+      449.25,
+      0.0
+     ],
+     "en": 449.25,
+     "derinlik": 125.0,
+     "kolonlar": [
+      [
+       0.0,
+       -125.0,
+       10.0,
+       -115.0
+      ],
+      [
+       439.25,
+       -125.0,
+       449.25,
+       -115.0
+      ]
+     ],
+     "kenarlar": [
+      [
+       0.0,
+       -125.0,
+       449.25,
+       -125.0
+      ],
+      [
+       0.0,
+       -125.0,
+       0.0,
+       125.5
+      ],
+      [
+       449.25,
+       -125.0,
+       449.25,
+       0.0
+      ]
+     ],
+     "kirisler": [
+      [
+       0.0,
+       -125.0,
+       449.25,
+       -115.0
+      ],
+      [
+       0.0,
+       -125.0,
+       10.0,
+       125.5
+      ],
+      [
+       439.25,
+       -125.0,
+       449.25,
+       0.0
+      ]
+     ],
+     "dis_parcalar": [],
+     "nis": {
+      "ad": "VERANDA",
+      "yan": 0,
+      "kutu": [
+       0.0,
+       0.0,
+       439.25,
+       125.5
+      ]
+     }
+    },
+    "veranda_m2": 11.13,
+    "dikme_sayisi": 2,
+    "kose_kolonu": 0,
+    "acik_kenarlar": [
+     [
+      0.0,
+      -125.0,
+      0.0,
+      125.5
+     ],
+     [
+      0.0,
+      -125.0,
+      449.25,
+      -125.0
+     ],
+     [
+      449.25,
+      -125.0,
+      449.25,
+      0.0
+     ]
+    ],
+    "liste": {
+     "kolon": [
+      [
+       "L 2500",
+       2
+      ]
+     ],
+     "kirisler": [
+      "L 1150",
+      "L 1255",
+      "L 2405",
+      "L 2510",
+      "L 4492,5"
+     ],
+     "ic_kalan_dis_duvar_m": 5.65,
+     "brut_m2": 59.808
+    }
+   }
+  },
+  "67m2": {
+   "girdi": "testler/motor/veri/BK40_67m2.json",
+   "once": {
+    "veranda": {
+     "ad": "VERANDA",
+     "rect": [
+      0.0,
+      -240.0,
+      710.25,
+      0.0
+     ],
+     "en": 710.25,
+     "derinlik": 240.0,
+     "kolonlar": [
+      [
+       0.0,
+       -240.0,
+       10.0,
+       -230.0
+      ],
+      [
+       700.25,
+       -240.0,
+       710.25,
+       -230.0
+      ]
+     ],
+     "kenarlar": [
+      [
+       0.0,
+       -240.0,
+       710.25,
+       -240.0
+      ],
+      [
+       0.0,
+       -240.0,
+       0.0,
+       0.0
+      ],
+      [
+       710.25,
+       -240.0,
+       710.25,
+       0.0
+      ]
+     ],
+     "kirisler": [
+      [
+       0.0,
+       -240.0,
+       710.25,
+       -230.0
+      ],
+      [
+       0.0,
+       -240.0,
+       10.0,
+       0.0
+      ],
+      [
+       700.25,
+       -240.0,
+       710.25,
+       0.0
+      ]
+     ],
+     "dis_parcalar": [],
+     "nis": null
+    },
+    "veranda_m2": 17.05,
+    "dikme_sayisi": 2,
+    "kose_kolonu": 0,
+    "acik_kenarlar": [
+     [
+      0.0,
+      -240.0,
+      0.0,
+      0.0
+     ],
+     [
+      0.0,
+      -240.0,
+      710.25,
+      -240.0
+     ],
+     [
+      710.25,
+      -240.0,
+      710.25,
+      0.0
+     ]
+    ],
+    "liste": {
+     "kolon": [
+      [
+       "L 2500",
+       2
+      ]
+     ],
+     "kirisler": [
+      "L 1255",
+      "L 2300",
+      "L 2300",
+      "L 7102,5"
+     ],
+     "ic_kalan_dis_duvar_m": 0.0,
+     "brut_m2": 66.781
+    }
+   },
+   "sonra": {
+    "veranda": {
+     "ad": "VERANDA",
+     "rect": [
+      0.0,
+      -240.0,
+      710.25,
+      0.0
+     ],
+     "en": 710.25,
+     "derinlik": 240.0,
+     "kolonlar": [
+      [
+       0.0,
+       -240.0,
+       10.0,
+       -230.0
+      ],
+      [
+       350.12,
+       -240.0,
+       360.12,
+       -230.0
+      ],
+      [
+       700.25,
+       -240.0,
+       710.25,
+       -230.0
+      ]
+     ],
+     "kenarlar": [
+      [
+       0.0,
+       -240.0,
+       710.25,
+       -240.0
+      ],
+      [
+       0.0,
+       -240.0,
+       0.0,
+       0.0
+      ],
+      [
+       710.25,
+       -240.0,
+       710.25,
+       0.0
+      ]
+     ],
+     "kirisler": [
+      [
+       0.0,
+       -240.0,
+       710.25,
+       -230.0
+      ],
+      [
+       0.0,
+       -240.0,
+       10.0,
+       0.0
+      ],
+      [
+       700.25,
+       -240.0,
+       710.25,
+       0.0
+      ]
+     ],
+     "dis_parcalar": [
+      [
+       [
+        0.0,
+        -240.0,
+        355.12,
+        -240.0
+       ],
+       [
+        0.0,
+        -240.0,
+        355.12,
+        -230.0
+       ]
+      ],
+      [
+       [
+        355.12,
+        -240.0,
+        710.25,
+        -240.0
+       ],
+       [
+        355.12,
+        -240.0,
+        710.25,
+        -230.0
+       ]
+      ]
+     ],
+     "nis": null
+    },
+    "veranda_m2": 17.05,
+    "dikme_sayisi": 3,
+    "kose_kolonu": 0,
+    "acik_kenarlar": [
+     [
+      0.0,
+      -240.0,
+      0.0,
+      0.0
+     ],
+     [
+      0.0,
+      -240.0,
+      710.25,
+      -240.0
+     ],
+     [
+      710.25,
+      -240.0,
+      710.25,
+      0.0
+     ]
+    ],
+    "liste": {
+     "kolon": [
+      [
+       "L 2500",
+       3
+      ]
+     ],
+     "kirisler": [
+      "L 1255",
+      "L 2300",
+      "L 2300",
+      "L 3551,2",
+      "L 3551,2"
+     ],
+     "ic_kalan_dis_duvar_m": 0.0,
+     "brut_m2": 66.781
+    }
+   }
+  }
+ }
+}

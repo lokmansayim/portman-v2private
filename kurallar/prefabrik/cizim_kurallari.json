@@ -1081,6 +1081,40 @@
     "testler/motor/test_d104_uclu_h_kalinlik.py::test_ic_100_nis_t_kalir",
     "testler/motor/test_d104_uclu_h_kalinlik.py::test_nis_olcusu_oda_yaninda"
    ]
+  },
+  {
+   "kod": "PC-45",
+   "baslik": "Köşe boşluğundan taşan veranda tek mahal, yan kiriş tek parça; taşan verandada ara kolon",
+   "kural": "Taşan verandanın iç kenarı gövdenin köşe boşluğunun (önü ve yanı açık, ızgaradaki açık mahal) ağzına oturuyorsa İş Emri `verandalar[].nis` boşluğun adını yazar: boşluk ve taşan şerit tek mahal olur; boşluğun yanındaki kiriş gövdenin köşesinden ön kolona tek parça (52 m² 242,5, 55 m² 250,5; 100 × 100), altında kolon yok; boşluğun ağzında kiriş ve köşesinde kolon yok (D-38'in köşe kolonu kalkar). `ara_kolon: n` dış kenara eşit aralıkla n kolon koyar, dış kiriş n + 1 eşit parça (67 m²: 355,1 + 355,1). Ön onay çiziminde verandanın eni, boşluk yanında yan kirişin boyu, öteki yanda taşma; boşluğun kendi ölçüsü yok; aks numaralarının yanına düşen ölçü verandanın içinde. Görünüşte yan kirişin gövdenin ardında kalan kısmı çizilmez. Anahtarsız İş Emri aynen (BK-14). Ara kolon eşiği açık soru: Motor yalnız yazılan `ara_kolon`'u kurar.",
+   "karar": "D-109",
+   "lokman": {
+    "tarih": "2026-11-15",
+    "saat": "22:30",
+    "soz": "kart \"Doğru, böyle yap\" (soru: \"Köşe verandası eskizi bu hâliyle doğru mu?\", eskiz r04); 22:17:51 \"bu olmayacak  plana iyice bak bak 242,5 tek kiriş 100*100 profil olacak yani altında 1 tane daha kolon olmayacak\"; 22:16:59 \"bu yeşil niş mi kiriş mi neyse olmayacak\"; 22:16:38 (67 m²) \"aynen böyle olacak doğrusu bu\"; 22:10:48 \"kolon ver kiriş kavramları bir birine karıştı kiriş olacak ama kolon olmayacak\""
+   },
+   "kod_yeri": [
+    "motor/geometry.py::_kose_boslugu",
+    "motor/geometry.py::_dis_verandalar",
+    "motor/prefabrik_liste.py::model_motor",
+    "motor/prefabrik_liste.py::liste",
+    "motor/dxf_out.py::Cizici._kose_verandasi_olculeri",
+    "motor/veranda.py::gorunus_parcalari",
+    "motor/cephe_gorunus.py::_golge",
+    "motor/ifc_uret.py::hazirla"
+   ],
+   "test": [
+    "testler/motor/test_d109_kose_verandasi.py::test_hedef_ornek",
+    "testler/motor/test_d109_kose_verandasi.py::test_52m2_yan_kiris_tek_parca_altinda_kolon_yok",
+    "testler/motor/test_d109_kose_verandasi.py::test_55m2_iki_kolon_sol_yan_kiris",
+    "testler/motor/test_d109_kose_verandasi.py::test_67m2_ortada_kolon_on_kiris_iki_parca",
+    "testler/motor/test_d109_kose_verandasi.py::test_anahtarsiz_eski_yol",
+    "testler/motor/test_d109_kose_verandasi.py::test_hatalar",
+    "testler/motor/test_d109_kose_verandasi.py::test_nis_kosesinde_is_emri_dikmesi_hata",
+    "testler/motor/test_d109_kose_verandasi.py::test_yalniz_onu_acik_giris_nisine_nis_yazilmaz",
+    "testler/motor/test_d109_kose_verandasi.py::test_gorunuste_govdenin_ardindaki_kiris_yok",
+    "testler/motor/test_d109_kose_verandasi.py::test_cizim_olculeri",
+    "testler/motor/test_d109_kose_verandasi.py::test_ifc_girdisi_birlesik_mahal"
+   ]
   }
  ]
 }

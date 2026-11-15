@@ -1872,6 +1872,61 @@ TERAS_PANELI_KALINLIK_CM = 8.0
 TERAS_PANELI_EGIM_SINIRI = 20.0      # % (açık hata üstünde; eğimsiz teras paneli yok)
 
 
+def _kose_boslugu(plan: "Plan", nm: "Mahal", ad: str, cephe: str, ic: tuple, bas: float, bit: float, sinir) -> dict:
+    """D-109 (BK-40; Lokman 15 Kasım 2026 22:10:48 "kiriş olacak ama kolon olmayacak", 22:16:59, 22:17:51 "242,5 tek kiriş 100*100 profil
+    olacak yani altında 1 tane daha kolon olmayacak"; eskiz r04 kartı 22:30:06): verandanın `nis`'i gövdedeki köşe boşluğudur (52 m² ve 55 m²
+    paftası). Denetim: boşluk dikdörtgen, ağzı verandanın iç kenarında, yalnız bir yanı açık ve o yan verandanın bir yanıyla aynı hatta;
+    iç kenarın gövdeye oturmayan kısmı boşluğun ağzı, öteki iç köşe gövdede, yanın uzak ucu gövdenin köşesinde. Döner: `yan` (0 bas, 1 bit),
+    `uzak` (yan kirişin gövde köşesindeki ucu), `kutu` (boşluğun kendisi), silinecek açık kenarlar ve köşe kolonu. Nişin köşesine İş Emri
+    dikme yazmışsa açık hata (K21; orada kolon yok)."""
+    from shapely.geometry import LineString, Point
+    yatay = cephe in ("on", "arka")
+    uv = (lambda x, y: (x, y)) if yatay else (lambda x, y: (y, x))      # (cephe boyunca, cepheye dik); kendi tersi
+    c = ic[0][1] if yatay else ic[0][0]
+    ice = 1.0 if cephe in ("on", "sol") else -1.0
+    nx0, ny0, nx1, ny1 = nm.poly.bounds
+    if abs(nm.poly.area - (nx1 - nx0) * (ny1 - ny0)) > 1.0:
+        raise IsEmriHatasi(f"Veranda {ad}: nişi ({nm.ad}) dikdörtgen değil")
+    (u0, w0), (u1, w1) = uv(nx0, ny0), uv(nx1, ny1)
+    yakin, uzak = (w0, w1) if ice > 0 else (w1, w0)
+    if abs(yakin - c) > 0.5 or u0 < bas - 0.5 or u1 > bit + 0.5:
+        raise IsEmriHatasi(f"Veranda {ad}: nişin ({nm.ad}) ağzı verandanın iç kenarında değil")
+    tampon = nm.poly.buffer(1.0)
+    kenarlar = [e for e in plan.acik_kenarlar if tampon.contains(Point((e[0] + e[2]) / 2, (e[1] + e[3]) / 2))]
+    yanlar = set()
+    for e in kenarlar:
+        (ua, wa), (ub, wb) = uv(e[0], e[1]), uv(e[2], e[3])
+        if abs(wa - c) < KOSE_HIZA_CM and abs(wb - c) < KOSE_HIZA_CM:
+            continue                                    # nişin ağzı: verandanın iç kenarında
+        s = next((i for i, u in enumerate((bas, bit)) if abs(ua - u) < KOSE_HIZA_CM and abs(ub - u) < KOSE_HIZA_CM), None)
+        if s is None:
+            raise IsEmriHatasi(f"Veranda {ad}: nişin ({nm.ad}) açık kenarı ({e[0]:g}, {e[1]:g})–({e[2]:g}, {e[3]:g}) verandanın iç kenarında "
+                               f"ya da yanında değil")
+        yanlar.add(s)
+    if len(yanlar) != 1:
+        raise IsEmriHatasi(f"Veranda {ad}: nişin ({nm.ad}) yalnız bir yanı açık olur (köşe boşluğu); yalnız önü açık nişe nis yazılmaz")
+    s = yanlar.pop()
+    yan_u = (bas, bit)[s]
+    if abs((u0, u1)[s] - yan_u) > 0.5:
+        raise IsEmriHatasi(f"Veranda {ad}: nişin ({nm.ad}) açık yanı verandanın yanıyla aynı hatta değil")
+    agiz = LineString([uv(u0, c), uv(u1, c)])
+    bosluk = LineString(ic).difference(sinir.buffer(1e-6))
+    if bosluk.difference(agiz.buffer(1e-6)).length > 1e-6 or sinir.distance(Point(ic[1 - s])) > 1e-6:
+        raise IsEmriHatasi(f"Veranda {ad}: iç kenar gövdenin dış yüzüne ve nişin ({nm.ad}) ağzına tam oturmuyor")
+    uzak_nokta = uv(yan_u, uzak)
+    if sinir.distance(Point(uzak_nokta)) > 0.5:
+        raise IsEmriHatasi(f"Veranda {ad}: yan kiriş gövdenin köşesinde bitmiyor ({uzak_nokta[0]:g}, {uzak_nokta[1]:g})")
+    kose = Point(uv(yan_u, c))
+    kolon_sil = []
+    for r in plan.dikmeler:
+        if box(*r).distance(kose) < KOSE_KOLONU_YAKIN_CM:
+            if r not in plan.kose_kolonlari:
+                raise IsEmriHatasi(f"Veranda {ad}: nişin köşesinde İş Emri dikmesi var; köşe boşluğundan taşan verandada orada kolon yok "
+                                   f"(yan kiriş tek parça, D-109)")
+            kolon_sil.append(r)
+    return {"yan": s, "uzak": uzak_nokta, "kutu": (nx0, ny0, nx1, ny1), "kenar_sil": kenarlar, "kolon_sil": kolon_sil}
+
+
 def _dis_verandalar(plan: "Plan", is_emri: dict) -> None:
     """BK-14: gövdeden taşan veranda (İş Emri `verandalar`, TK-01). Gövde ve pano ızgarası değişmez; veranda gövdenin dış yüzüne dışarıdan
     eklenir: açık mahal (net alan dikdörtgenin kendisi), üç açık kenar (dış kenar ve iki yan; çizimde veranda profili, listede kiriş) ve iki dış
@@ -1879,7 +1934,12 @@ def _dis_verandalar(plan: "Plan", is_emri: dict) -> None:
     `bas_cm`–`bit_cm` cephe boyunca dış yüzden (on / arka: x, sol / sag: y), `derinlik_cm` dış yüzden dışarı. Çatı `cati` {tip besik | tek_yon,
     egim_yuzde, sacak_cm}: beşiğin mahyası cepheye dik, kalkanı dış kenarda; tek eğim duvardan dışarı iner. `cati` yazılmamışsa beşik ve ana
     çatının eğimi alınır, uyarı düşer (K21). Gövde cephesine tam oturmayan (gövdedeki açık mahalin, ör. giriş nişinin, ağzı cephe sayılır),
-    gövdeye ya da başka mahale binen veranda açık hata."""
+    gövdeye ya da başka mahale binen veranda açık hata.
+
+    D-109 (BK-40, PC-45; Lokman, eskiz r04 kartı 15 Kasım 2026 22:30:06 "Doğru, böyle yap"): `nis` gövdedeki köşe boşluğunun (önü ve yanı açık
+    açık mahal) adıysa veranda o boşluktan öne taşar ve boşlukla tek mahal olur (`_kose_boslugu`): nişin ağzında kiriş yok, nişin köşesinde
+    kolon yok (D-38'in köşe kolonu kalkar), boşluğun yanındaki kiriş gövdenin köşesinden ön kolona tek parça. `ara_kolon` n → dış kenarda eşit
+    aralıkla n kolon daha, dış kiriş n + 1 eşit parça (`dis_parcalar`). İkisi de yazılmazsa veranda eski yoldan."""
     liste = is_emri.get("verandalar") or []
     if not liste:
         return
@@ -1900,9 +1960,22 @@ def _dis_verandalar(plan: "Plan", is_emri: dict) -> None:
     ana = is_emri.get("cati") or {}
     k = VERANDA_KOLON_CM
     for v in liste:
-        ad, cephe = v.get("ad"), v.get("cephe")
-        if not ad or ad in plan.mahaller:
+        nis_ad = v.get("nis")                           # D-109: köşe boşluğundan taşan veranda (boşlukla tek mahal)
+        ad, cephe = v.get("ad", nis_ad), v.get("cephe")
+        nm = None
+        if nis_ad is not None:
+            nm = plan.mahaller.get(nis_ad) if isinstance(nis_ad, str) else None
+            if nm is None or not nm.acik or not nm.cells or any(x["ad"] == nis_ad for x in plan.dis_verandalar):
+                raise IsEmriHatasi(f"Veranda {ad}: nis gövdedeki (ızgaradaki) bir açık mahalin adı olur: {nis_ad!r}")
+            if ad != nis_ad:
+                raise IsEmriHatasi(f"Veranda {ad}: köşe boşluğuyla tek mahal olur; ad yazılmaz ya da nişin adı yazılır ({nis_ad})")
+            if v.get("tur", nm.tur) != nm.tur:
+                raise IsEmriHatasi(f"Veranda {ad}: türü nişinkiyle aynı olur ({nm.tur})")
+        elif not ad or ad in plan.mahaller:
             raise IsEmriHatasi(f"Veranda adı boş ya da başka mahalle aynı: {ad}")
+        ara = v.get("ara_kolon", 0)                     # D-109: dış kenarda eşit aralıkla ara kolon (67 m² 2+1: 1)
+        if isinstance(ara, bool) or not isinstance(ara, int) or ara < 0:
+            raise IsEmriHatasi(f"Veranda {ad}: ara_kolon 0 ya da pozitif tam sayı olur: {ara!r}")
         if cephe not in ("on", "arka", "sol", "sag"):
             raise IsEmriHatasi(f"Veranda cephesi bilinmiyor: {cephe} (on | arka | sol | sag)")
         tur = v.get("tur", "veranda")
@@ -1915,6 +1988,9 @@ def _dis_verandalar(plan: "Plan", is_emri: dict) -> None:
             raise IsEmriHatasi(f"Verandada bas_cm, bit_cm ve derinlik_cm sayı olmalı: {v}") from None
         if bit - bas < 2 * k + 20 - 1e-9 or d < k + 20 - 1e-9:
             raise IsEmriHatasi(f"Veranda {ad}: {bit - bas:g} × {d:g} cm çok dar (en az {2 * k + 20:g} × {k + 20:g})")
+        if ara and (bit - bas) / (ara + 1) < 2 * k + 20 - 1e-9:
+            raise IsEmriHatasi(f"Veranda {ad}: {ara} ara kolonla dış kirişin parçası {(bit - bas) / (ara + 1):g} cm, çok kısa "
+                               f"(en az {2 * k + 20:g})")
         if cephe == "on":
             rect, ic, dis = (bas, fy0 - d, bit, fy0), ((bas, fy0), (bit, fy0)), ((bas, fy0 - d), (bit, fy0 - d))
             kolonlar = [(bas, fy0 - d), (bit - k, fy0 - d)]
@@ -1930,7 +2006,10 @@ def _dis_verandalar(plan: "Plan", is_emri: dict) -> None:
         kutu = box(*rect)
         cizgi = LineString(ic)
         bosluk = cizgi.difference(sinir.buffer(1e-6))
-        if bosluk.length > 1e-6:
+        nis = None
+        if nm is not None:
+            nis = _kose_boslugu(plan, nm, ad, cephe, ic, bas, bit, sinir)
+        elif bosluk.length > 1e-6:
             # nişin ağzı dış yüz sayılır, yalnız şöyleyse: verandanın iki iç köşesi duvarda, nişin bütün açık kenarı verandanın iç kenarında
             # (yanı da açık ızgara verandası niş değildir) ve boşluğun tamamı nişlerin ağzı
             agiz = [n for n in nisler if n.intersection(bosluk.buffer(1e-6)).length > 1e-6]
@@ -1949,6 +2028,8 @@ def _dis_verandalar(plan: "Plan", is_emri: dict) -> None:
         tip = c.get("tip", "besik")
         if tip not in VERANDA_CATI_TIPLERI:
             raise IsEmriHatasi(f"Veranda {ad}: çatı tipi bilinmiyor: {tip} ({' | '.join(VERANDA_CATI_TIPLERI)})")
+        if tip == "teras_paneli" and nis is not None:
+            raise IsEmriHatasi(f"Veranda {ad}: teras panelinde yan kiriş yok; köşe boşluğundan taşan verandada (nis) yazılmaz")
         if tip == "teras_paneli":                   # D-52: panel; saçağı, topuğu yok (K21: yazılırsa yok sayılmaz); D-52 ek: eğimi İş Emri'nden
             cikma, eg = c.get("cikma_cm"), c.get("egim_yuzde")
             sayi = lambda q: isinstance(q, (int, float)) and not isinstance(q, bool)
@@ -1976,13 +2057,35 @@ def _dis_verandalar(plan: "Plan", is_emri: dict) -> None:
         kirisler = [kutu.intersection(LineString([e[:2], e[2:]]).buffer(k, cap_style=2)).bounds for e in kenarlar]   # açık kenarda, içeride 10'luk
         if tip == "teras_paneli":                   # D-56 (Lokman, 5 Kasım 2026 10:48, "Kaldır, gerçek liste gibi"): yan kiriş yok, yalnız dış
             kirisler = kirisler[:1]                 # kiriş; panel duvara ve dış kirişe oturur (AP-26 gerçek listesi: iki dış kiriş, dört kolon)
-        mh = Mahal(ad=ad, tur=tur, rects=[], acik=True, poly=kutu, alan_m2=kutu.area / 10000.0)
-        plan.mahaller[ad] = mh
-        dikmeler = [(x, y, x + k, y + k) for x, y in kolonlar]
+        if nis is not None:                         # D-109: boşluğun yanındaki kiriş gövdenin köşesinden ön kolona tek parça (Lokman 22:17:51)
+            s_ = nis["yan"]
+            uzun = LineString([dis[s_], nis["uzak"]])
+            kenarlar[1 + s_] = uzun.bounds
+            birlesik = unary_union([nm.poly, kutu])
+            kirisler[1 + s_] = birlesik.intersection(uzun.buffer(k, cap_style=2)).bounds
+            plan.acik_kenarlar = [e for e in plan.acik_kenarlar if e not in nis["kenar_sil"]]   # nişin ağzında ve yanında ayrı kiriş yok
+            for r_ in nis["kolon_sil"]:             # nişin köşesinde kolon yok (Lokman 22:10:48)
+                plan.dikmeler.remove(r_); plan.kose_kolonlari.remove(r_)
+            nm.poly, nm.alan_m2 = birlesik, birlesik.area / 10000.0
+        else:
+            mh = Mahal(ad=ad, tur=tur, rects=[], acik=True, poly=kutu, alan_m2=kutu.area / 10000.0)
+            plan.mahaller[ad] = mh
+        ara_kolonlar = [(u, kolonlar[0][1]) if cephe in ("on", "arka") else (kolonlar[0][0], u)
+                        for u in (bas + (bit - bas) * i / (ara + 1) - k / 2 for i in range(1, ara + 1))]
+        dikmeler = [(x, y, x + k, y + k) for x, y in kolonlar + ara_kolonlar]
         plan.dikmeler.extend(dikmeler)
         plan.acik_kenarlar.extend(kenarlar)
-        plan.dis_verandalar.append({"ad": ad, "cephe": cephe, "rect": rect, "en": bit - bas, "derinlik": d, "kolonlar": dikmeler,
-                                    "kenarlar": kenarlar, "kirisler": kirisler, "cati": cati})
+        kayit = {"ad": ad, "cephe": cephe, "rect": rect, "en": bit - bas, "derinlik": d, "kolonlar": dikmeler,
+                 "kenarlar": kenarlar, "kirisler": kirisler, "cati": cati}
+        if ara:                                     # D-109: dış kiriş ara kolonlarda bölünür, n + 1 eşit parça (67 m²: 355,1 + 355,1)
+            kesik = [bas + (bit - bas) * i / (ara + 1) for i in range(ara + 2)]
+            (e0, e1, e2, e3), (q0, q1, q2, q3) = kenarlar[0], kirisler[0]
+            kayit["ara_kolon"] = ara
+            kayit["dis_parcalar"] = [((a, e1, b, e3), (max(a, q0), q1, min(b, q2), q3)) if cephe in ("on", "arka") else
+                                     ((e0, a, e2, b), (q0, max(a, q1), q2, min(b, q3))) for a, b in zip(kesik, kesik[1:])]
+        if nis is not None:
+            kayit["nis"] = {"ad": nis_ad, "yan": nis["yan"], "kutu": nis["kutu"]}
+        plan.dis_verandalar.append(kayit)
     from . import veranda as VR                                 # burada: veranda bu modülü içe aktarır
     plan.uyarilar.extend(VR.uyarilar(plan, is_emri))
 

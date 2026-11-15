@@ -165,6 +165,8 @@ def hazirla(ie: dict) -> dict:
         **({"pano_ekleri": pano_ekleri} if pano_ekleri else {}), **girinti,
         **({"dis_verandalar": [{"ad": v["ad"], "cephe": v["cephe"], "rect": [_r(t) for t in v["rect"]], "cati": VR.cati(v, ie),
                                 "net_m2": _r(plan.mahaller[v["ad"]].alan_m2, 4),
+                                **({"poligon": [[_r(x), _r(y)] for x, y in list(plan.mahaller[v["ad"]].poly.simplify(0.0).exterior.coords)[:-1]]}
+                                   if v.get("nis") else {}),       # D-109: köşe boşluğuyla tek mahal
                                 "etiket_m2": etiket.get("".join(v["ad"].split()))}
                                for v in plan.dis_verandalar]} if plan.dis_verandalar else {}),     # BK-14: dikme ve kiriş baglantilar'da
         "kanit": {"motor_uyarilari": plan.uyarilar}, "uyari": [],
@@ -788,7 +790,8 @@ class IfcUretici:
             X0, Y0, X1, Y1 = C["kutu"]; zs, zm, eg, s = C["sacak_kotu"], C["mahya_kotu"], C["egim"], C["sacak"]
             sp = self._urun("IfcSpace", f"M-VERANDA-{i}", predefined="EXTERNAL", kapsa=False, LongName=v["ad"])
             api("aggregate.assign_object", self.f, relating_object=self.kat, products=[sp])
-            self._yerlestir(sp); self._temsil(sp, self._prizma_xy([(x0, y0), (x1, y0), (x1, y1), (x0, y1)], 0, H0), "mahal")
+            taban = [tuple(q) for q in v.get("poligon") or [(x0, y0), (x1, y0), (x1, y1), (x0, y1)]]   # D-109: köşe boşluğuyla tek mahal
+            self._yerlestir(sp); self._temsil(sp, self._prizma_xy(taban, 0, H0), "mahal")
             self._qto(sp, "Qto_SpaceBaseQuantities", {"NetFloorArea": v["net_m2"]})
             self._pset(sp, "PortatifEv_Mahal", {"CizimNetAlan_m2": v["net_m2"], "BayiEtiketAlan_m2": v["etiket_m2"] or 0.0,
                                                 "BinaDisinaTasma_cm": round(y1 - y0 if v["cephe"] in ("on", "arka") else x1 - x0, 1)})

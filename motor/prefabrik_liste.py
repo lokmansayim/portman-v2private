@@ -302,6 +302,9 @@ def model_motor(ie: dict) -> dict:
     dis_ad = {v["ad"] for v in plan.dis_verandalar}
     ic_kalan_m = sum(g_.exterior.intersection(m.poly).length for g_ in getattr(fp, "geoms", [fp]) for m in acik
                      if m.poly is not None and m.ad not in dis_ad) / 100
+    # D-109: köşe boşluğundan taşan verandada boşluğa bakan duvarlar yine ana çatının altında (boşluk gövdede); yalnız boşluğun kutusu sayılır
+    ic_kalan_m += sum(g_.exterior.intersection(box(*v["nis"]["kutu"])).length for g_ in getattr(fp, "geoms", [fp])
+                      for v in plan.dis_verandalar if v.get("nis")) / 100
     # duvarsız sınır (İş Emri `acik_sinirlar`, ör. salon–mutfak): üstüne kiriş gelir (Lokman, kart 22 Ekim "Evet, gelir"; E5, TS-01). Sınır
     # çizgileri ızgara gözü başına; aynı hattaki bitişik parçalar tek kiriş, boyu aks arası. Motor iki açık mahalin (ör. iki veranda) arasına da
     # çizgi koyar; o sınır iki oda arası değil, kiriş sayılmaz (geometri hakemi 3. tur)
@@ -358,10 +361,17 @@ def model_motor(ie: dict) -> dict:
                         for (b0_, b1_, k0_, k1_) in [((ky0, ky1, kx0, kx1) if e == "x" else (kx0, kx1, ky0, ky1))]
                         if b0_ - 1.0 <= yanlar[e] <= b1_ + 1.0 for u, var in ((0, abs(k0_ - a0_) < 1.0), (1, abs(k1_ - a1_) < 1.0)) if var}
             kenar_kolon.append(len(uc_kolon))
-    dis_kenar_sira = []                                        # taşan verandanın dış kenarının `veranda_kenarlari_cm`'deki sırası
+    dis_kenar_sira, dis_parca_sira = [], []                   # taşan verandanın dış kenarının `veranda_kenarlari_cm`'deki sırası
     for v in plan.dis_verandalar:                              # BK-14: dış kenar ve iki yan (TK-01 geçici yolu, PK-03/PK-06 paftası gibi)
-        dis_kenar_sira.append(len(kirisler))                   # `kenarlar`: dış, yan 1, yan 2
-        kirisler += [max(x1 - x0, y1 - y0) for (x0, y0, x1, y1), _k in zip(v["kenarlar"], v["kirisler"])]   # D-56: teras panelinde yalnız dış
+        boylar = [max(x1 - x0, y1 - y0) for (x0, y0, x1, y1), _k in zip(v["kenarlar"], v["kirisler"])]   # D-56: teras panelinde yalnız dış
+        parca = [max(x1 - x0, y1 - y0) for (x0, y0, x1, y1), _k in v.get("dis_parcalar") or []]
+        if parca:                                              # D-109: ara kolonlu dış kiriş n + 1 parça (67 m²: 355,1 + 355,1)
+            dis_parca_sira += range(len(kirisler), len(kirisler) + len(parca))
+            dis_kenar_sira += range(len(kirisler), len(kirisler) + len(parca))
+            boylar = parca + boylar[1:]
+        else:
+            dis_kenar_sira.append(len(kirisler))               # `kenarlar`: dış, yan 1, yan 2
+        kirisler += boylar
     t_dis = 2 * next(d.h for d in plan.duvarlar if d.tur == "dis")
     brut = bina_brut_cm2(plan)                                 # D-49: antet de bunu okur; BK-14 taşan veranda, İE-24 girintili gövde orada
     if plan.dis_verandalar:                                    # BK-14: ana çatı gövdeyi örter; brüt gövde + veranda, dış kutunun boş köşeleri sayılmaz
@@ -395,6 +405,7 @@ def model_motor(ie: dict) -> dict:
             "dikmeler": len(plan.dikmeler), **({"kose_kolonlari": len(plan.kose_kolonlari)} if plan.kose_kolonlari else {}),
             **_teras_kolon_boylari(plan, ie),
             "veranda_kenarlari_cm": kirisler, **({"veranda_dis_kenar_sira": dis_kenar_sira} if dis_kenar_sira else {}),
+            **({"veranda_dis_parca_sira": dis_parca_sira} if dis_parca_sira else {}),
             **({"veranda_kenar_uc_kolonlari": kenar_kolon} if any(n_ > 1 for n_ in kenar_kolon) else {}),
             **({"nis_agizlari_cm": nis_agizlari} if nis_agizlari else {}),
             "kapali": [oda(m) for m in kapali], "acik": [{**oda(m), "tur": "veranda"} for m in acik],
@@ -1250,10 +1261,16 @@ def liste(N: dict, kurallar: dict | None = None, pafta: dict | None = None) -> d
         kirisler = [(L_, "paftadan okunan kiriş boyu", "PK-01'de tuttu") for L_ in kirisler]
     else:                                                       # Motor kipi açık kenarları verir; kiriş = açık kenar − 10
         dis_sira = set(N.get("veranda_dis_kenar_sira") or [])
+        parca_sira = set(N.get("veranda_dis_parca_sira") or [])
         uc_k = N.get("veranda_kenar_uc_kolonlari") or []
         kirisler = []
         for i, x in enumerate(N.get("veranda_kenarlari_cm", [])):
-            if i in dis_sira:                                   # taşan verandanın iki kolon arasındaki dış kirişi (Lokman, kart 28 Ekim)
+            if i in parca_sira:                                 # D-109: ara kolonlu dış kirişin parçası, ara kolonun ortasında birleşir
+                e = r("tasan_veranda_dis_kirisi_eksik_cm")
+                kirisler.append((x - e, "taşan verandanın dış kirişi, ara kolonda eşit parçalara bölünür; köşe kolonunun dış yüzünden ara "
+                                 "kolonun ortasına" + (f" − {mm(e)}" if e else ""),
+                                 "Lokman, 15 Kasım 2026 22:16:38 (67 m²) \"aynen böyle olacak doğrusu bu\"; eskiz kartı 22:30:06 (D-109)"))
+            elif i in dis_sira:                                 # taşan verandanın iki kolon arasındaki dış kirişi (Lokman, kart 28 Ekim)
                 e = r("tasan_veranda_dis_kirisi_eksik_cm")
                 kirisler.append((x - e, "taşan verandanın dış kenarı, kolonun dış yüzünden dış yüzüne" + (f" − {mm(e)}" if e else ""),
                                  "Lokman, kart 28 Ekim: dış yüzden dış yüze"))

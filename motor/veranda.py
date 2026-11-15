@@ -174,7 +174,14 @@ def gorunus_parcalari(plan: G.Plan, ie: dict, taraf: str) -> list[dict]:
         for (x0, y0, x1, y1) in v["kolonlar"]:
             u0, u1, dd = kutu_u(x0, y0, x1, y1)
             out.append({"tur": "kolon", "u": [(u0, 0.0), (u1, 0.0), (u1, H0 - KIRIS_CM), (u0, H0 - KIRIS_CM)], "derinlik": dd, "veranda": v["ad"]})
-        for (x0, y0, x1, y1) in v["kirisler"]:
+        kirisler = v["kirisler"]
+        if v.get("nis"):                                                 # D-109: köşe boşluğu boyunca uzanan yan kirişin kapalı gövdenin
+            from shapely.geometry import box                             # ardında kalan kısmı görünmez (yalnız bu verandada; öteki aynen)
+            from .cephe_gorunus import kapali_golge
+            golge = kapali_golge(plan, taraf)
+            kirisler = [g.bounds for r in kirisler for g in getattr(box(*r).difference(golge), "geoms", [box(*r).difference(golge)])
+                        if not g.is_empty and g.area >= 1]
+        for (x0, y0, x1, y1) in kirisler:
             u0, u1, dd = kutu_u(x0, y0, x1, y1)
             out.append({"tur": "kiris", "u": [(u0, H0 - KIRIS_CM), (u1, H0 - KIRIS_CM), (u1, H0), (u0, H0)], "derinlik": dd, "veranda": v["ad"]})
         if v["cati"]["tip"] == "cumba":                                  # çatısı, saçağı ve topuğu ana çatının çizgilerinde (`cephe_gorunus`)
