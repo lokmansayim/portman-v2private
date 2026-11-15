@@ -369,6 +369,7 @@ def isle(gelen: dict, settings: dict, k=None, cikarim: dict | None = None, proje
             if form.get("form") == "celik":           # İE-20 PR-9 (D-93): öncelik ve dış duvar 140 mm karkas formda seçildi
                 import talep_formu as TF
                 k.celik_formu = {"oncelik": TF.celik_onceligi(form), "dis140": TF.celik_dis140(form),
+                                 "kaplama": TF.celik_kaplamasi(form),                  # İE-20 PR-11 (D-97): çizime işlenen çatı kaplaması
                                  "anahtarlar": TF.celik_anahtarlari()}                # `karar._form_izi` taslağa yazar
             if form.get("dosyalar") and not form_on:
                 patrona(f"Portman: {kim} talep formuna dosya ekledi (çizim okuması kapalı); panelden bakabilirsiniz.")
@@ -774,7 +775,8 @@ YAPI_DUGMELERI = (("prefabrik", "Prefabrik"), ("celik", "Çelik"))
 YAPI_FORM_METNI = {"prefabrik": "Prefabrik talep formunu doldurun. İsterseniz talebinizi yazın.",
                    "talep": "Çelik için talep formunu doldurun. İsterseniz talebinizi yazın.",    # düğmeden sonra sunulan forma göre
                    "talep2": "Çelik için talep formunu doldurun. İsterseniz talebinizi yazın.",
-                   "celik": "Çelik talep formunu doldurun. İsterseniz talebinizi yazın."}
+                   "celik": "Çelik talep formunu doldurun. İsterseniz talebinizi yazın.",
+                   "celik2": "Çelik talep formunu doldurun. İsterseniz talebinizi yazın."}
 YAPI_DAVET_SORULARI = ("oda_programi", "dis_olcu")      # katalog önerisi taşıyan soru ("model_veya_olcu") kendi metniyle gider
 
 
@@ -806,7 +808,9 @@ def talep_formu_sunusu(gelen: dict, bayi: dict | None, taslak: dict | None, sett
     İE-20 PR-8 (D-89): verandasız formun kimliği ayarda varsa (`talep_formu.talep2_flow_id`) bugünkü talep formunun yerine o sunulur
     (veranda ayrıca sorulmaz); yoksa bugünkü form, davranış aynı.
     İE-20 PR-9 (D-93): çelik formunun kimliği ayarda varsa (`talep_formu.celik_flow_id`) yapı tipi çelikken çelik talep formu sunulur
-    (prefabrik formun kimliği olmasa da); yoksa bugünkü yol (verandasız ya da ilk form), davranış aynı."""
+    (prefabrik formun kimliği olmasa da); yoksa bugünkü yol (verandasız ya da ilk form), davranış aynı.
+    İE-20 PR-12 (D-102): çelik formun ikinci sürümünün kimliği ayarda varsa (`talep_formu.celik2_flow_id`) çelik formun yerine o sunulur
+    (trapez saclı seçenek yok); yoksa davranış aynı."""
     import talep_formu as TF
     iz = satir_id(gelen["id"], 0)[4:16]
     if form_kimligi(settings, "talep2"):
@@ -815,8 +819,9 @@ def talep_formu_sunusu(gelen: dict, bayi: dict | None, taslak: dict | None, sett
         v1 = ("talep", TF.talep_tokeni(iz, taslaktan=taslak is not None), TF.ekran_verisi(bayi, taslak), None, None) \
             if form_kimligi(settings, "talep") else None
     yapi = (taslak or {}).get("yapi_turu") or TF.kart_varsayilanlari(bayi).get("yapi")
-    if yapi == "celik" and form_kimligi(settings, "celik"):
-        return "celik", TF.celik_tokeni(iz, taslaktan=taslak is not None), TF.celik_ekran_verisi(bayi, taslak), None, None
+    cf = next((f for f in ("celik2", "celik") if form_kimligi(settings, f)), None)
+    if yapi == "celik" and cf:
+        return cf, TF.celik_tokeni(iz, taslaktan=taslak is not None), TF.celik_ekran_verisi(bayi, taslak), None, None
     if not form_kimligi(settings, "prefabrik"):
         return v1
     if yapi == "prefabrik":
