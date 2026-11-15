@@ -125,6 +125,7 @@ Biçim: karar · gerekçe · reddedilen seçenekler · geri alma yolu · kim ve 
 | [D-99](D-99.md) | Disk arşivi (Elements diskinin Mac kopyası, 628 proje, 8.163 dosya): ham dosyalar Mac'te ve Drive'da, depoya adsız dizin ve SHA-256 mührü (`testler/hdd/`, `araclar/hdd_dizin.py`); adlı eşleme yalnız Mac ve Drive'da (Lokman 15.11 05:37:53 kartı "Drive'da, depoya dizin ve kart"; İE-43) |
 | [D-100](D-100.md) | Çelik planda (genel motor) OSB + membran + shingle: çatı OSB yüzey × 1,20 ÷ 2,98, membran ve shingle yüzey ÷ 8 (shingle çatı renginde), dizilim yok, mahyada yalnız OSB mahyası, damlalık yok; pafta satırı "OSB+Membran+Shingle"; hedef örnek 43 m² çelik ev (KT-11; BK-33) | 15.11 (Lokman 05:23:08 "Shingle sadece Memran ile kullanılır"; kart 07:14:40 "Evet, damlalıksız"; kart 07:26:24 "Evet, hedef örnek olsun") |
 | [D-102](D-102.md) | Çelik talep formunda trapez sac ve trapez sac + OSB sunulmaz (4 seçenek), shingle satırı "OSB + membran + shingle"; yayımlı form değişmez, yeni form `celik2.json` ve `talep_formu.celik2_flow_id` ayarıyla açılır; taslak, yayım ve ayar Lokman'ın ayrı sözüyle (İE-20 PR-12) | 15.11 (Lokman 05:23:08, 05:23:34; kart 05:28:14 "Yalnız trapez sac kalksın"; 07:54:18 "çelikte Trapez sacı komple kaldır", 07:54:29 "yani Trapez sac + OSB de olmasın") |
+| [D-106](D-106.md) | Çelikte bayi formdan sonra mesajla çatı kaplaması yazarsa kaplama çizime işlenmez; söz talebe (özel istek) yazılır ve plan mesajında üç cümle söylenir ("Mesajınızda çatı kaplaması yazdınız. Planı modelin kendi çatı kaplamasıyla çizdim. Yazdığınız kaplamayı talebe yazdım."); ilk planda ve revizyonda; istek geri çevrilmez (İE-20 PR-13) | 15.11 (Lokman, kart 10:06:51 "Evet, talebe yazılsın"; kart 10:08:33 "Üç cümle") |
 
 ## Numara defteri (14 Ekim 2026, BK-08; CIO planı › Görev 3)
 
@@ -222,7 +223,11 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | D | D-100 | çelikte OSB + membran + shingle (BK-33; Lokman 15.11 07:14:40 kartı "Evet, damlalıksız") | yazıldı (15.11; çelik dört çatı kaplaması sohbeti, `claude/project-thread-awk9nj`) |
 | D | D-101 | prefabrikte talep numarası revizyonda sabit kalır (başka sohbet; BK-29 tur 10) | alındı (15.11) |
 | D | D-102 | çelik talep formunda trapez saclı seçenek sunulmaz; shingle satırı OSB + membran + shingle (İE-20 PR-12; Lokman 15.11 05:28:14 kartı, 07:54:18 ve 07:54:29 sözleri) | yazıldı (15.11; talep formu sohbeti, `claude/project-thread-l5mh7r`) |
-| D | **D-103** | — | **sıradaki boş** |
+| D | D-103 | asıl proje kalır, değişiklik yeni proje (başka sohbet; standart pano) | alındı (15.11) |
+| D | D-104 | üçlü H yalnız aynı kalınlıkta (başka sohbet; BK-36, PC-41) | alındı (15.11) |
+| D | D-105 | montaj çizimi ile listenin eşitliği (başka sohbet; BK-38, PC-42) | alındı (15.11) |
+| D | D-106 | çelikte formdan sonra mesajla yazılan çatı kaplaması talebe yazılır, bayiye üç cümle (İE-20 PR-13; Lokman 15.11 10:06:51 ve 10:08:33 kartları) | yazıldı (15.11; talep formu sohbeti, `claude/project-thread-l5mh7r`) |
+| D | **D-107** | — | **sıradaki boş** |
 | İE | İE-01–İE-08 | bu depo (`main`) | yazıldı |
 | İE | İE-09 | model atölyesi: kontrollü model üretimi ve banka hattı (Görev 6e; pano 30; P6001 güncellemesi kapsam dışı) | alındı (16.10; `claude/gorev-6e-model-atolyesi-rnhtcp`; PR-1 banka hattı 29.10, `claude/project-thread-rhjgzv`) |
 | İE | İE-10, İE-11, İE-12 | prefabrik hattı (PR #12, PR #14, `ie-12-prefabrik-bayi-paftasi`) | `main`'e BK-12 ile (PR-1: motor ve bayi paftası; liste ve mühür kıyası sonraki PR'larda) |
