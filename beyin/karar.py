@@ -54,7 +54,7 @@ def bayileri_yukle() -> dict:
     return json.loads(BAYI_JSON.read_text(encoding="utf-8")) if BAYI_JSON.exists() else {}
 
 
-def _form_izi(k: Konusma, t: Talep) -> None:
+def _form_izi(k: Konusma, t: Talep, metin: str = "") -> None:
     """İE-20 PR-6: prefabrik talep formundan gelen talebin izi taslakta. Form mesajında (`k.prefabrik_formu`; `kanal/worker` yazar):
     `form = "prefabrik"` (formdaki seçimler İş Emri'ne işlenir, `form_ozellik`), öncelik taslağa yazılır (sohbette sorulmaz; plan başka
     bir mesajda çıksa da), ölçü "formdan" diye işaretlenir (pano + m² birlikte: hazır planlar m²'ye göre). Sonraki bir mesajda bayi
@@ -68,6 +68,14 @@ def _form_izi(k: Konusma, t: Talep) -> None:
     ts = k.d["taslak"]
     cf = getattr(k, "celik_formu", None)
     k.celik_formu = None                          # yalnız bu mesaj için
+    if cf is None and ts.get("form_kaplama_once") and ts.get("form_kaplama"):
+        # Formdan önce yazılmış kaplama sözü formdan sonra yeniden yazıldı: artık son sözdür. Yalnız bayinin bu mesajındaki cümle bir
+        # çatı malzemesi anıyorsa (K18: LLM'in bağlamdan yinelediği satır bayinin sözü değildir).
+        bu = {f"{a}: {v}" for a, v in (t.bina_ozellikleri or {}).items()} | set(t.ozel_istekler or [])
+        if bu & set(ts["form_kaplama_once"]) and _kaplama_kiyasi(metin, ts["form_kaplama"], baglam=_kaplama_istegi_mi(metin)) == "baska":
+            ts["form_kaplama_once"] = [x for x in ts["form_kaplama_once"] if x not in bu]
+            if not ts["form_kaplama_once"]:
+                ts.pop("form_kaplama_once")
     if cf is not None:
         ts["form"] = "celik"
         ts.pop("olcu_formdan", None)
@@ -80,16 +88,11 @@ def _form_izi(k: Konusma, t: Talep) -> None:
         if cf.get("kaplama"):                     # İE-20 PR-11 (D-97): çizime işlenen çatı kaplaması (kural kitabının anahtarı)
             ts["form_kaplama"] = cf["kaplama"]
             ts["form_kaplama_yazi"] = (t.bina_ozellikleri or {}).get(_KAPLAMA_SATIRI)   # formun özellik satırına yazdığı değer
-            # Formdan önce sohbette yazılmış başka kaplama (taslaktan doldurulan formda taslak durur): son söz formdur. Başka adla
-            # yazılmış özellik satırı kalkar (formun kendi satırını `birlestir` zaten ezdi); serbest istek silinmez, "formdan önce"
-            # diye işaretlenir (ilk planda form seçimini durdurmaz).
-            adlar, bu, eski = (ts["form_kaplama_yazi"],), t.bina_ozellikleri or {}, ts.get("bina_ozellikleri")
-            for a in [a for a in (eski if isinstance(eski, dict) else {}) if a not in bu and _kaplama_satiri_mi(a)
-                      and _kaplama_kiyasi(eski[a], cf["kaplama"], adlar) == "baska"]:
-                k.not_dus("kural", f"çelik formu: formdan önce yazılan kaplama ({a}: {eski[a]}) formdaki seçimle değişti")
-                del eski[a]
-            once = [x for x in (ts.get("ozel_istekler") or []) if isinstance(x, str) and x not in (t.ozel_istekler or [])
-                    and _kaplama_istegi_mi(x) and _kaplama_kiyasi(x, cf["kaplama"], adlar) == "baska"]
+            # Formdan önce sohbette yazılmış başka kaplama (taslaktan doldurulan formda taslak durur): son söz formdur. O sözler silinmez
+            # (içinde başka bilgi olabilir: "kiremit, çift kat yalıtım"), "formdan önce" diye işaretlenir: ilk planda form seçimini
+            # durdurmaz, özel istekte kalır. Formun bu cevapta yazdığı satırlar ve notu aynı mesajdır: işaretlenmez.
+            bu = {f"{a}: {v}" for a, v in (t.bina_ozellikleri or {}).items()} | set(t.ozel_istekler or [])
+            once = [x for x in _kaplama_sozleri(ts, cf["kaplama"], hepsi=True)[1] if x not in bu]
             ts["form_kaplama_once"] = once
             if not once:
                 ts.pop("form_kaplama_once")
@@ -546,7 +549,7 @@ def _karar_ver(talep: Talep, k: Konusma, bayi: dict | None, katalog: Katalog, me
     k.birlestir(t.model_dump())
     if yp_komut:
         k.d["taslak"]["yarim_pano"] = list(k.d["taslak"].get("yarim_pano") or []) + yp_komut
-    _form_izi(k, t)                               # İE-20 PR-6: prefabrik talep formunun önceliği ve ölçü izi taslakta
+    _form_izi(k, t, metin or "")                  # İE-20 PR-6: prefabrik talep formunun önceliği ve ölçü izi taslakta
     k.d["asama"] = "topluyor"
     k.d["son_metin"] = (metin or "").strip()      # sıfırlama(lar)dan SONRA: kurallar bayinin bu mesajdaki sözünü okur
     # İE-08 A4 (kapanış incelemesi 13.10): çelik okuması yalnız BU mesajın LLM ipuçlarına bakar; taslakta biriken eski pencere/varyant
@@ -1660,26 +1663,49 @@ def _pencereleri_coz(k: Konusma, aday: dict, t: dict, onceki: list[dict], ops: l
 _KAPLAMA_SATIRI = "Çatı Kaplaması"                            # çelik pafta tablosunun satırı; formun `bina_ozellikleri` anahtarı
 
 
-# Bayinin sözünde bir çatı kaplamasını ele veren parçalar (`varyant._norm` yazımıyla: küçük harf, Türkçe harfsiz, bitişik). Desen geniş:
-# kalınlık, ek ya da sıra fark etmez ("sandviç panel 5 cm", "sandviç paneli", "sandwich panel").
-_KAPLAMA_SOZU = {"tek_kat_panel": ("tekkatpanel", "tekkatlipanel", "tekkatsac"), "sandvic_panel": ("sandvic", "sandwic", "sandvij"),
-                 "osb_kiremit": ("kiremit",), "trapez_sac": ("trapez",), "osb_trapez": ("trapez",),
-                 "osb_shingle": ("shingle", "shingil", "singil", "singl")}
-_KAPLAMA_DEGIL = ("kiremitkirmizi", "kiremitreng", "kiremitrenk")   # renk adı: "kiremit kırmızısı" kaplama değildir
+# ── İE-20 PR-11 (D-97; geometri hakemi, üç tur) · bayinin yazdığı çatı kaplaması, çizime işlenen form seçimine göre ──
+# Desen geniş, istisna dar: sözcük kökleriyle (Türkçe harfsiz, küçük harf) bakılır; kalınlık, ek ve sıra fark etmez.
+_KAP_KOK = {"sandvic_panel": ("sandvic", "sandwic", "sandvij"), "osb_kiremit": ("kiremit", "marsilya"), "trapez_sac": ("trapez",),
+            "osb_trapez": ("trapez",), "osb_shingle": ("shingle", "shingil", "shingl", "singil", "singl")}
+_KAP_KESIN = ("ondulin", "eternit")                            # kitapta olmayan ama yalnız çatı örtüsü olan malzemeler
+_KAP_BAGLAMLI = ("sac", "galvaniz", "aluminyum", "bakir", "cinko")   # yalnız çatı / kaplama sözüyle birlikte çatı kaplamasıdır
+_KAP_RENK = ("kirmizi", "reng", "renk", "tonu")                # "kiremit kırmızısı", "kiremit rengi": renk adı, kaplama değil
+_KAP_BASKA_YER = ("cephe", "duvar", "zemin", "tavan", "kapi", "doseme")
 
 
-def _kaplama_kiyasi(deger, kap: str, adlar=()) -> str:
-    """Bayinin yazdığı değer, çizime işlenen kaplamaya (`kap`, kural kitabının anahtarı) göre nedir (İE-20 PR-11, geometri hakemi):
-    "ayni"  yalnız o kaplamanın adı (formun yazdığı değer, kitaptaki ad ya da adın ilk sözcüğü): satır tabloda görünür, ayrıca yazılmaz;
-    "baska" başka bir kaplamayı anıyor ("kiremit", "sandviç yerine shingle"): bayinin son sözü form seçimiyle çelişir;
-    "ek"    başka kaplama anmıyor ("sandviç panel 5 cm", "çift kat yalıtım"): seçim işlenir, satır özel istekte kalır (bilgi düşmez)."""
+def _kap_sozcukleri(metin) -> list[str]:
+    return [w for w in re.split(r"[^a-z0-9]+", str(metin).replace("İ", "i").replace("I", "ı").lower().translate(celik._TR)) if w]
+
+
+def _kaplama_istegi_mi(metin) -> bool:
+    """Serbest metin çatı kaplamasından mı söz ediyor ("çatı kiremit olsun", "kaplama shingle")? Cephe, duvar, zemin ve tavan kaplaması değil."""
+    ws = _kap_sozcukleri(metin)
+    return any(w.startswith("cati") for w in ws) or (any(w.startswith("kaplama") for w in ws)
+                                                     and not any(w.startswith(_KAP_BASKA_YER) for w in ws))
+
+
+def _kaplama_kiyasi(deger, kap: str, adlar=(), satir: bool = False, baglam: bool = True) -> str:
+    """Bayinin yazdığı değer, çizime işlenen kaplamaya (`kap`, kural kitabının anahtarı) göre nedir:
+    "ayni"  yalnız o kaplamanın adı (formun yazdığı değer, kitaptaki ad ya da adın ilk sözcüğü): tablo gösterir, ayrıca yazılmaz;
+    "baska" başka bir çatı malzemesini anıyor ("kiremit", "galvaniz sac", "sandviç yerine shingle"), ya da tablonun "Çatı Kaplaması"
+            satırına (`satir`) seçilen kaplamayı anmayan bir değer yazılmış ("onduline"): bayinin son sözü form seçimiyle çelişir;
+    "ek"    başka malzeme anmıyor ("sandviç panel 5 cm", "çift kat yalıtım"): seçim işlenir, söz özel istekte kalır (bilgi düşmez).
+    `baglam` False ise (çatıdan söz etmeyen satır ya da istek) yalnız çatıya özgü malzemeler sayılır ("sac" cephe de olabilir)."""
     d = varyant._norm(str(deger))
     if d in {varyant._norm(x) for ad in (*adlar, varyant.kaplama_adi(kap)) if ad for x in (str(ad), str(ad).split()[0])}:
         return "ayni"
-    for x in _KAPLAMA_DEGIL:
-        d = d.replace(x, "")
-    oteki = {x for a, ss in _KAPLAMA_SOZU.items() if a != kap for x in ss} - set(_KAPLAMA_SOZU.get(kap, ()))
-    return "baska" if any(x in d for x in oteki) or (d == "tekkat" and kap != "tek_kat_panel") else "ek"
+    ws = _kap_sozcukleri(deger)
+    ws = [w for i, w in enumerate(ws) if not (w.startswith("kiremit") and i + 1 < len(ws) and ws[i + 1].startswith(_KAP_RENK))]
+    kendi_kok = _KAP_KOK.get(kap, ())
+    oteki_kok = tuple({x for a, ks in _KAP_KOK.items() if a != kap for x in ks} - set(kendi_kok)) + _KAP_KESIN
+    kendi = any(w.startswith(kendi_kok) for w in ws) if kendi_kok else False
+    bitisik = "".join(ws)
+    tek_kat = any(x in bitisik for x in ("tekkatpanel", "tekkatlipanel", "tekkatsac")) or bitisik == "tekkat"
+    if kap == "tek_kat_panel":
+        kendi, tek_kat = kendi or tek_kat, False
+    oteki = any(w.startswith(oteki_kok) for w in ws) or tek_kat \
+        or (baglam and any(w.startswith(_KAP_BAGLAMLI) and not w.startswith("sacak") for w in ws))
+    return "baska" if oteki or (satir and not kendi) else "ek"
 
 
 def _kaplama_satiri_mi(anahtar) -> bool:
@@ -1688,28 +1714,39 @@ def _kaplama_satiri_mi(anahtar) -> bool:
     ad = celik.satir_adi(anahtar)
     if ad:
         return ad == _KAPLAMA_SATIRI
-    n = varyant._norm(str(anahtar))
-    return ("cati" in n or n.startswith("kaplama")) and "renk" not in n and "reng" not in n
+    ws = _kap_sozcukleri(anahtar)
+    return (any(w.startswith("cati") for w in ws) or bool(ws) and ws[0].startswith("kaplama")) and not any(w.startswith(("renk", "reng")) for w in ws)
 
 
-def _kaplama_istegi_mi(metin) -> bool:
-    """Serbest özel istek çatı kaplamasından mı söz ediyor ("çatı kiremit olsun")? Cephe, duvar, zemin ve tavan kaplaması değil."""
-    n = varyant._norm(str(metin))
-    return "cati" in n or ("kaplama" in n and not any(x in n for x in ("cephe", "duvar", "zemin", "tavan")))
-
-
-def _kaplama_sozleri(ts: dict, kap: str) -> tuple[list[str], str | None]:
+def _kaplama_sozleri(ts: dict, kap: str, hepsi: bool = False) -> tuple[list[str], list[str]]:
     """Taslakta çizime işlenen kaplamayla (`kap`) ilgili sözler: (tabloda zaten görünen "ayni" satırların adları, bayinin yazdığı başka
-    kaplama ya da None). Formdan önce yazılmış serbest istek (`form_kaplama_once`) sayılmaz: son söz formdur."""
+    kaplamalar). Özellik satırı "ad: değer" biçiminde, serbest istek kendi metniyle döner. Tablonun öteki satırlarına (dış duvar, renk)
+    bakılmaz. Formdan önce yazılmış söz (`form_kaplama_once`) `hepsi` False iken sayılmaz: son söz formdur."""
     bo = ts.get("bina_ozellikleri") if isinstance(ts.get("bina_ozellikleri"), dict) else {}
-    adlar = (ts.get("form_kaplama_yazi"),)
-    dolu = [a for a in bo if bo[a] not in (None, "")]
-    ayni = [a for a in dolu if celik.satir_adi(a) == _KAPLAMA_SATIRI and _kaplama_kiyasi(bo[a], kap, adlar) == "ayni"]
-    baska = [str(bo[a]) for a in dolu if _kaplama_satiri_mi(a) and _kaplama_kiyasi(bo[a], kap, adlar) == "baska"]
-    once = set(ts.get("form_kaplama_once") or [])
-    baska += [x for x in (ts.get("ozel_istekler") or []) if isinstance(x, str) and x not in once and _kaplama_istegi_mi(x)
-              and _kaplama_kiyasi(x, kap, adlar) == "baska"]
-    return ayni, (baska[-1] if baska else None)
+    adlar, ayni, baska = (ts.get("form_kaplama_yazi"),), [], []
+    for a, v in bo.items():
+        if v in (None, ""):
+            continue
+        tablo = celik.satir_adi(a)
+        if tablo and tablo != _KAPLAMA_SATIRI:
+            continue
+        s = _kaplama_kiyasi(v, kap, adlar, satir=tablo == _KAPLAMA_SATIRI, baglam=_kaplama_satiri_mi(a))
+        if s == "ayni" and tablo == _KAPLAMA_SATIRI:
+            ayni.append(a)
+        elif s == "baska":
+            baska.append(f"{a}: {v}")
+    for x in ts.get("ozel_istekler") or []:
+        if not isinstance(x, str):
+            continue
+        ws, cati = _kap_sozcukleri(x), _kaplama_istegi_mi(x)
+        if not cati and any(w.startswith(_KAP_BASKA_YER) for w in ws):
+            continue                                           # "dış cephe trapez sac": çatı değil
+        if _kaplama_kiyasi(x, kap, adlar, baglam=cati) == "baska":
+            baska.append(x)
+    if not hepsi:
+        once = set(ts.get("form_kaplama_once") or [])
+        baska = [x for x in baska if x not in once]
+    return ayni, baska
 
 
 def _celik_is_emri_uret(k: Konusma, bayi: dict, katalog: Katalog, aday: dict, ts: dict) -> Karar:
@@ -1842,7 +1879,8 @@ def _celik_is_emri_uret(k: Konusma, bayi: dict, katalog: Katalog, aday: dict, ts
         # gösterdiği için özel istekte ayrıca yazılmaz. Uygulanamazsa plan modelin kendi kaplamasıyla çizilir, seçim özel isteğe yazılır
         # ve bayiye söylenir (dış 140'taki kural: sessiz düşmez, form seçimi yüzünden plan yönlendirilmez).
         ad = varyant.kaplama_adi(form_kap)
-        ayni, yazilan = _kaplama_sozleri(ts, form_kap)
+        ayni, baska = _kaplama_sozleri(ts, form_kap)
+        yazilan = baska[-1] if baska else None
         for a in ayni:                                         # formun kendi satırı: tablo gösterir (ya da bayinin sonraki sözü yerini aldı)
             ts["bina_ozellikleri"].pop(a)
         if "bina_ozellikleri" in ts and not ts["bina_ozellikleri"]:

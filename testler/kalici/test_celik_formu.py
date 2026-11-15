@@ -543,27 +543,45 @@ _KAP_ORTAK = {"form": "celik", "form_kaplama": "sandvic_panel", "form_kaplama_ya
 
 
 def test_kaplama_kiyasi_genis_desen():
-    """Geometri hakemi (PR-11, ikinci tur): kıyas dar eşleşmeyle değil geniş desenle. "ayni" yalnız kaplamanın adı; "baska" başka bir
-    kaplamayı anan her yazım; "ek" başka kaplama anmayan her şey (kalınlık, ek, yabancı yazım: seçim işlenir, satır kalır)."""
-    kiyas = lambda d: KR._kaplama_kiyasi(d, "sandvic_panel", ("sandviç panel",))                           # noqa: E731
+    """Geometri hakemi (PR-11, ikinci ve üçüncü tur): kıyas dar eşleşmeyle değil geniş desenle, sözcük kökleriyle. "ayni" yalnız
+    kaplamanın adı; "baska" başka bir çatı malzemesini anan her yazım ve tablonun "Çatı Kaplaması" satırına yazılmış, seçilen kaplamayı
+    anmayan her değer; "ek" başka malzeme anmayan her şey (kalınlık, ek, yabancı yazım: seçim işlenir, söz özel istekte kalır)."""
+    kiyas = lambda d, **kw: KR._kaplama_kiyasi(d, "sandvic_panel", ("sandviç panel",), **kw)               # noqa: E731
     for d in ("sandviç panel", "Sandviç Panel", "SANDVİÇ PANEL", "sandviç", "Sandviç"):
-        assert kiyas(d) == "ayni", d
+        assert kiyas(d) == kiyas(d, satir=True) == "ayni", d
     for d in ("sandviç panel 5 cm", "sandviç paneli", "sandviç panel olsun", "5 cm sandviç panel", "sandviç panel (kırmızı)",
-              "sandviç çatı paneli", "sandwich panel", "4 cm poliüretan sandviç panel", "çift kat yalıtım", "panel", "kiremit kırmızısı",
-              "kiremit rengi sandviç panel", ""):
-        assert kiyas(d) == "ek", d
+              "sandviç çatı paneli", "sandwich panel", "4 cm poliüretan sandviç panel", "kiremit rengi sandviç panel",
+              "kiremit kırmızısı sandviç"):
+        assert kiyas(d) == kiyas(d, satir=True) == "ek", d
+    for d in ("çift kat yalıtım", "panel", "kiremit kırmızısı", "saçak 50 cm", "çatı penceresi", "çatı eğimi %40", "çatı arası", ""):
+        assert kiyas(d) == "ek", d                                                 # çatı sözü ama malzeme yok
     for d in ("kiremit", "kiremit desen sac", "kiremit desen sac + OSB", "shingle", "OSB + membran + shingle", "şıngıl", "trapez sac",
-              "trapez", "tek kat panel", "tek kat", "tek katlı panel", "sandviç değil kiremit", "sandviç yerine tek kat panel"):
-        assert kiyas(d) == "baska", d
+              "trapez", "tek kat panel", "tek kat", "tek katlı panel", "sandviç değil kiremit", "sandviç yerine tek kat panel",
+              "galvaniz sac", "boyalı sac", "çatı sac olsun", "onduline", "eternit", "marsilya kiremidi", "alüminyum"):
+        assert kiyas(d) == kiyas(d, satir=True) == "baska", d
+    for d in ("5 cm", "antrasit", "çift kat yalıtım", "membranlı"):                # tablonun kaplama satırına yazılmış, sandviç anmıyor
+        assert kiyas(d, satir=True) == "baska" and kiyas(d) == "ek", d
+    for d in ("sac", "galvaniz sac", "alüminyum"):                                 # çatıdan söz etmeyen yerde cephe de olabilir
+        assert kiyas(d, baglam=False) == "ek", d
+    for d in ("kiremit", "shingle olsun", "trapez sac", "onduline"):               # çatıya özgü malzeme: bağlamsız da sayılır
+        assert kiyas(d, baglam=False) == "baska", d
     assert KR._kaplama_kiyasi("sandviç panel", "tek_kat_panel") == "baska" and KR._kaplama_kiyasi("tek kat panel", "tek_kat_panel") == "ayni"
     for a in ("Çatı Kaplaması", "Çatı kaplaması", "cati kaplamasi", "Kaplama", "Çatı kaplama", "Çatı Malzemesi", "Çatı", "Çatı örtüsü"):
         assert KR._kaplama_satiri_mi(a), a
-    for a in ("Çatı Kaplama Rengi", "Çatı rengi", "Çatı Şekli", "Çatı Eğimi", "Dış Duvarlar", "Pencere Rengi", "Ek İstekler", "Zemin"):
+    for a in ("Çatı Kaplama Rengi", "Çatı rengi", "Çatı Şekli", "Çatı Eğimi", "Dış Duvarlar", "Pencere Rengi", "Ek İstekler", "Zemin",
+              "Malzeme", "Dış cephe kaplaması"):
         assert not KR._kaplama_satiri_mi(a), a
     for x in ("çatı kiremit olsun", "Çatıya OSB + nem bariyeri", "kaplama shingle olsun"):
         assert KR._kaplama_istegi_mi(x), x
-    for x in ("dış cephe kaplaması trapez sac", "zemin kaplaması laminat", "mutfak tezgahı granit"):
+    for x in ("dış cephe kaplaması trapez sac", "zemin kaplaması laminat", "mutfak tezgahı granit", "saçak 50 cm olsun"):
         assert not KR._kaplama_istegi_mi(x), x
+    # taslaktan okuma: tablonun öteki satırları ve çatı olmayan yerler sayılmaz; "çatı"sız serbest istekte çatıya özgü malzeme sayılır
+    ts = {"form_kaplama_yazi": "sandviç panel",
+          "bina_ozellikleri": {"Çatı Kaplaması": "sandviç panel", "Dış Duvarlar": "trapez sac", "Çatı Kaplama Rengi": "kiremit kırmızısı",
+                               "Malzeme": "kiremit", "Cephe": "galvaniz sac", "Çatı": "çift kat yalıtım"},
+          "ozel_istekler": ["kiremit olsun", "dış cephe trapez sac", "zemin laminat", "çatı sac olsun", "sac kapı", "shingle olsun"]}
+    assert KR._kaplama_sozleri(ts, "sandvic_panel") == (["Çatı Kaplaması"], ["Malzeme: kiremit", "kiremit olsun", "çatı sac olsun",
+                                                                           "shingle olsun"])
 
 
 def test_sohbette_yazilan_baska_kaplama_dusmez(tmp_path):
@@ -579,7 +597,14 @@ def test_sohbette_yazilan_baska_kaplama_dusmez(tmp_path):
             ("Ç8801", {"bina_ozellikleri": {"Çatı Kaplaması": "sandviç panel", "Kaplama": "kiremit"}}, ["Kaplama: kiremit"]),
             ("Ç8801", {"bina_ozellikleri": {"Çatı Kaplaması": "sandviç panel", "Çatı Malzemesi": "shingle"}}, ["Çatı Malzemesi: shingle"]),
             ("Ç8801", {"bina_ozellikleri": {"Çatı Kaplaması": "sandviç panel"}, "ozel_istekler": ["çatı kiremit olsun"]},
-             ["çatı kiremit olsun"])):
+             ["çatı kiremit olsun"]),
+            # üçüncü tur: desende olmayan malzeme, "çatı"sız serbest istek, başka adlı satır
+            ("Ç8801", {"bina_ozellikleri": {"Çatı Kaplaması": "galvaniz sac"}}, ["Çatı Kaplaması: galvaniz sac"]),
+            ("Ç8801", {"bina_ozellikleri": {"Çatı Kaplaması": "onduline"}}, ["Çatı Kaplaması: onduline"]),
+            ("Ç8801", {"bina_ozellikleri": {"Çatı Kaplaması": "sandviç panel", "Malzeme": "kiremit"}}, ["Malzeme: kiremit"]),
+            ("Ç8801", {"bina_ozellikleri": {"Çatı Kaplaması": "sandviç panel"}, "ozel_istekler": ["kiremit olsun"]}, ["kiremit olsun"]),
+            ("Ç8801", {"bina_ozellikleri": {"Çatı Kaplaması": "sandviç panel"}, "ozel_istekler": ["trapez sac olsun"]}, ["trapez sac olsun"]),
+            ("Ç8801", {"bina_ozellikleri": {"Çatı Kaplaması": "sandviç panel"}, "ozel_istekler": ["çatı sac olsun"]}, ["çatı sac olsun"])):
         k, kr = _plan(tmp_path, kod, {**_KAP_ORTAK, **ek})
         assert kr.eylem == "is_emri" and kr.is_emri["yapi"]["degisiklikler"] == [], (kod, ek)
         assert kr.is_emri["bilgi"]["ozel_istekler"] == beklenen and "Uygulanan" not in kr.mesaj, (kod, ek)
@@ -601,29 +626,48 @@ def test_sohbette_yazilan_baska_kaplama_dusmez(tmp_path):
 
 
 def test_formdan_once_yazilan_kaplama_son_soz_degildir(tmp_path):
-    """Geometri hakemi (ikinci tur, sıra): bayi önce sohbette kiremit yazdı, sonra (taslaktan doldurulan) formda sandviç panel seçti. Son
-    söz formdur: başka adla yazılmış eski özellik satırı kalkar, eski serbest istek "formdan önce" diye işaretlenir ve form seçimini
-    durdurmaz (özel istekte kalır: serbest metin silinmez)."""
+    """Geometri hakemi (ikinci ve üçüncü tur, sıra): bayi önce sohbette kiremit yazdı, sonra (taslaktan doldurulan) formda sandviç panel
+    seçti. Son söz formdur: eski sözler "formdan önce" diye işaretlenir ve form seçimini durdurmaz. Hiçbiri silinmez (karma satırdaki
+    yalıtım bilgisi düşmez); özel istekte kalır. Bayi aynı sözü formdan sonra yeniden yazarsa işaret kalkar: o artık son sözdür."""
+    def form_gelir(k, **ek):
+        t = Talep.model_validate({**TF.talep(_cevap(alan=88, kaplama="sandvic")), **ek})
+        k.birlestir(t.model_dump())
+        k.celik_formu = {"oncelik": "yok", "dis140": False, "kaplama": "sandvic_panel", "anahtarlar": TF.celik_anahtarlari()}
+        KR._form_izi(k, t, "")
+        return k.d["taslak"]
+
     k = _konusma(tmp_path)
-    k.d["taslak"].update({"bina_ozellikleri": {"Çatı kaplaması": "kiremit", "Kaplama": "shingle", "Çatı": "çift kat yalıtım"},
+    k.d["taslak"].update({"bina_ozellikleri": {"Çatı kaplaması": "kiremit", "Çatı Malzemesi": "kiremit + 10 cm taşyünü",
+                                               "Çatı": "çift kat yalıtım"},
                           "ozel_istekler": ["çatı kiremit olsun", "zemin laminat"]})
-    t = Talep.model_validate(TF.talep(_cevap(alan=88, kaplama="sandvic")))
-    k.birlestir(t.model_dump())
-    k.celik_formu = {"oncelik": "yok", "dis140": False, "kaplama": "sandvic_panel", "anahtarlar": TF.celik_anahtarlari()}
-    KR._form_izi(k, t)
-    ts = k.d["taslak"]
-    assert "Çatı kaplaması" not in ts["bina_ozellikleri"] and "Kaplama" not in ts["bina_ozellikleri"]
-    assert ts["bina_ozellikleri"]["Çatı Kaplaması"] == "sandviç panel" and ts["bina_ozellikleri"]["Çatı"] == "çift kat yalıtım"
-    assert ts["form_kaplama_once"] == ["çatı kiremit olsun"] and ts["ozel_istekler"] == ["çatı kiremit olsun", "zemin laminat"]
-    k2, kr = _plan(tmp_path, "Ç8801", {kk: v for kk, v in ts.items() if kk.startswith("form") or kk in ("bina_ozellikleri", "ozel_istekler")})
+    ts = form_gelir(k)
+    assert ts["bina_ozellikleri"]["Çatı Kaplaması"] == "sandviç panel"
+    assert ts["bina_ozellikleri"]["Çatı Malzemesi"] == "kiremit + 10 cm taşyünü" and ts["bina_ozellikleri"]["Çatı"] == "çift kat yalıtım"
+    assert ts["form_kaplama_once"] == ["Çatı kaplaması: kiremit", "Çatı Malzemesi: kiremit + 10 cm taşyünü", "çatı kiremit olsun"]
+    assert ts["ozel_istekler"] == ["çatı kiremit olsun", "zemin laminat"]
+    taslak = {kk: v for kk, v in ts.items() if kk.startswith("form") or kk in ("bina_ozellikleri", "ozel_istekler")}
+    k2, kr = _plan(tmp_path, "Ç8801", json.loads(json.dumps(taslak)))
     assert [d["op"] for d in kr.is_emri["yapi"]["degisiklikler"]] == ["cati_kaplamasi"] and "başka bir kaplama" not in kr.mesaj
+    assert "Çatı Malzemesi: kiremit + 10 cm taşyünü" in kr.is_emri["bilgi"]["ozel_istekler"]              # bilgi düşmedi
+    # formdan sonra bayi aynı cümleyi yeniden yazar: işaret kalkar, form seçimi işlenmez, bayiye söylenir
+    t2 = Talep.model_validate({"niyet": "yeni_talep", "guven": "yuksek", "ozet": "", "ozel_istekler": ["çatı kiremit olsun"]})
+    k.birlestir(t2.model_dump())
+    KR._form_izi(k, t2, "çatı kiremit olsun")
+    assert k.d["taslak"]["form_kaplama_once"] == ["Çatı kaplaması: kiremit", "Çatı Malzemesi: kiremit + 10 cm taşyünü"]
+    taslak = {kk: v for kk, v in k.d["taslak"].items() if kk.startswith("form") or kk in ("bina_ozellikleri", "ozel_istekler")}
+    k3, kr = _plan(tmp_path, "Ç8801", json.loads(json.dumps(taslak)))
+    assert kr.is_emri["yapi"]["degisiklikler"] == [] and _BASKA_NOTU in kr.mesaj
+    # LLM satırı bağlamdan yineledi ama bayinin mesajı kaplama anmıyor (K18): işaret durur
+    k = _konusma(tmp_path)
+    k.d["taslak"].update({"ozel_istekler": ["çatı kiremit olsun"]})
+    form_gelir(k)
+    t3 = Talep.model_validate({"niyet": "yeni_talep", "guven": "yuksek", "ozet": "", "ozel_istekler": ["çatı kiremit olsun"]})
+    k.birlestir(t3.model_dump())
+    KR._form_izi(k, t3, "Ç8801 olsun")
+    assert k.d["taslak"]["form_kaplama_once"] == ["çatı kiremit olsun"]
     # formun kendi notunda yazılan kaplama aynı mesajdadır: "formdan önce" sayılmaz
     k = _konusma(tmp_path)
-    t = Talep.model_validate({**TF.talep(_cevap(alan=88, kaplama="sandvic")), "ozel_istekler": ["çatı shingle olsun"]})
-    k.birlestir(t.model_dump())
-    k.celik_formu = {"oncelik": "yok", "dis140": False, "kaplama": "sandvic_panel", "anahtarlar": TF.celik_anahtarlari()}
-    KR._form_izi(k, t)
-    assert "form_kaplama_once" not in k.d["taslak"]
+    assert "form_kaplama_once" not in form_gelir(k, ozel_istekler=["çatı shingle olsun"])
 
 
 def test_revizyonda_yazilan_baska_kaplama_islemi_cikarir(tmp_path):
@@ -631,7 +675,7 @@ def test_revizyonda_yazilan_baska_kaplama_islemi_cikarir(tmp_path):
     kaplama işlemi çıkar (plan modelin kendi kaplamasına döner: liste bayinin son sözüne karşın sandviç saymaz), yazdığı kaplama özel
     isteğe gider, bayiye söylenir. Aynı kaplamanın ek bilgisi ("poliüretan sandviç panel") işlemi çıkarmaz."""
     from beyin.katalog import Katalog
-    for deger, kalir in (("kiremit", False), ("poliüretan sandviç panel", True)):
+    for deger, kalir in (("kiremit", False), ("galvaniz sac", False), ("onduline", False), ("poliüretan sandviç panel", True)):
         k, kr = _plan(tmp_path, "Ç8801", {**_KAP_ORTAK, "bina_ozellikleri": {"Çatı Kaplaması": "sandviç panel"}})
         assert [d["op"] for d in kr.is_emri["yapi"]["degisiklikler"]] == ["cati_kaplamasi"]
         k.d["son_metin"] = f"çatı kaplaması {deger} olsun"
