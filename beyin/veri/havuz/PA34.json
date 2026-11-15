@@ -1,0 +1,117 @@
+{
+ "kod": "PA34",
+ "gosterim": "PA-34",
+ "durum": "gecerli",
+ "sablon": "adaylar/PA34.json",
+ "gorsel": "adaylar/PA34.png",
+ "referans_model": "PA-34",
+ "yapi_turu": "prefabrik",
+ "kat": 1,
+ "oda_programi": "2+1",
+ "katalog_m2": 78.0,
+ "kapali_m2": 78.4,
+ "veranda_m2": 0,
+ "ozet": {
+  "grid": {
+   "x_pano": 6,
+   "y_pano": 8.0
+  },
+  "dis_olcu_cm": [
+   773.0,
+   1014.0
+  ],
+  "brut_m2": 78.38,
+  "pano": 52,
+  "pencere": 4,
+  "kapi": 6,
+  "odalar": {
+   "ÇOCUK ODASI": 16.08,
+   "YATAK ODASI": 13.4,
+   "BANYO": 5.66,
+   "HOL": 5.96,
+   "SALON": 18.81,
+   "MUTFAK": 13.4
+  }
+ },
+ "kaynak": {
+  "metin": "D-92 (İE-40): 77 m² 2+1 evin (PA-24, AP-27) tek özel pano kuralıyla ön cephesi 14 cm büyümüş hâli; sol ve sağ dış duvarda 48,75 cm pano 62,75 cm olur (Lokman 14 Kasım 2026 20:35:43 sözü \"salon ve mutfaktaki 1000cm çizgisindeki 48,75'leride 62,75'e tamamla\"; 20:38:43 kartı \"Doğru, yanına eklensin\": \"Bugünkü 77 m2 kalır; 773 × 1014 cm hâli (78,4 m2) yeni numarayla girer.\")",
+  "dosya": "testler/havuz/is_emirleri/PA24_BUYUME.json",
+  "ayna": null,
+  "karar": "D-92",
+  "standart": true,
+  "kart_kiyasi": {
+   "kart": "AP-27",
+   "kart_sha256": "bf336f6c647b04ab1226ae8c6fdfb67f93c744f88724172e0d7d75ebf19424bd",
+   "sonuc": "geçti",
+   "olcum": {
+    "dis_olcu_cm": [
+     773.0,
+     1014.0
+    ],
+    "acikla_olcu_cm": [
+     773.0,
+     1014.0
+    ],
+    "brut_m2": 78.38,
+    "kubbe_m2": 0.0,
+    "yatak_odasi": 2,
+    "pencereler": {
+     "140x150": 1,
+     "180x210": 3
+    },
+    "dis_kapi": 1,
+    "ic_kapi": 5,
+    "veranda": 0,
+    "kat": 1,
+    "kaynak_dis_olcu_cm": [
+     773.0,
+     1000.0
+    ],
+    "silinen_cm": [
+     0.0,
+     0.0
+    ],
+    "buyuyen_cm": [
+     0.0,
+     14.0
+    ],
+    "silinen": [],
+    "tamamlanan": [
+     {
+      "duvar": "dis y 5",
+      "once": 48.75,
+      "sonra": 62.75
+     },
+     {
+      "duvar": "dis y 768",
+      "once": 48.75,
+      "sonra": 62.75
+     }
+    ],
+    "yeniden_dizilen": [
+     {
+      "duvar": "ic y 449.25",
+      "once": [
+       122.5,
+       125.5,
+       125.5,
+       43.75
+      ],
+      "sonra": [
+       59.75,
+       125.5,
+       125.5,
+       120.5
+      ]
+     }
+    ],
+    "veranda_kisalan": []
+   },
+   "kip": "silme_hali",
+   "kaynak_is_emri": "is_emri/adaylar/PA24.json",
+   "kaynak_sha256": "29a9597cc45ae532775f21c52d3e51e48e887d75cf7d75411893136b4a30cdb9",
+   "buyume_sozu": "Lokman 14 Kasım 2026 20:35:43 UTC: \"salon ve mutfaktaki 1000cm çizgisindeki 48,75'leride 62,75'e tamamla\"; kart 20:38:43 \"Doğru, yanına eklensin\""
+  }
+ },
+ "not": ""
+}

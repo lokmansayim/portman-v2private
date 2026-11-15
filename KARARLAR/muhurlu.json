@@ -108,7 +108,8 @@
     "D-30",
     "D-31",
     "D-34",
-    "D-49"
+    "D-49",
+    "D-95"
    ],
    "pr": [
     79,
@@ -147,7 +148,7 @@
     },
     {
      "yer": "testler/motor/veri/TK02_beklenen.json#onay",
-     "iz": "edd258641d29dee9"
+     "iz": "bb4f4c18bb630c83"
     },
     {
      "yer": "testler/motor/veri/TK02_beklenen.json#iz.dogrulama",
@@ -163,15 +164,15 @@
     },
     {
      "yer": "testler/motor/veri/TK02_beklenen.json#iz.pdf_izi",
-     "iz": "2d8e9689ea744e1d"
+     "iz": "0aabd8c0d6433a8b"
     },
     {
      "yer": "testler/motor/veri/TK02_beklenen.json#iz.dxf_izi",
-     "iz": "c24b77c9dd2f003f"
+     "iz": "bdd00c509f8fb402"
     },
     {
      "yer": "testler/motor/veri/TK01_r07_beklenen.json#onay",
-     "iz": "c43e3b4d0c42b533"
+     "iz": "41e84bcf7de4c120"
     },
     {
      "yer": "testler/motor/veri/TK01_r07_beklenen.json#iz.dogrulama",
@@ -187,11 +188,11 @@
     },
     {
      "yer": "testler/motor/veri/TK01_r07_beklenen.json#iz.pdf_izi",
-     "iz": "7f20e69aeba6aeca"
+     "iz": "7e5fef4a8ae4fbec"
     },
     {
      "yer": "testler/motor/veri/TK01_r07_beklenen.json#iz.dxf_izi",
-     "iz": "07f294b4f9c84490"
+     "iz": "8c6981813b25530a"
     },
     {
      "yer": "testler/motor/veri/TK02.json",
@@ -211,7 +212,7 @@
     },
     {
      "yer": "testler/motor/test_d31_gorunus.py",
-     "iz": "89a9ac4517912394"
+     "iz": "ab1710eb577a462d"
     },
     {
      "yer": "testler/motor/test_d34_cizim.py",
@@ -226,6 +227,13 @@
      "mesaj": "cmsg_01UAFvcnfVuTR1wfFux5fQPPWqz9RSSRrAcCNN2N9aTKWT",
      "kapanis": "2026-11-04T20:13Z",
      "karar": "D-49"
+    },
+    {
+     "tarih": "2026-11-14 21:07",
+     "soz": "biz her zaman brüt m² ile hesaplarız ben izin veriyorum varsa mühür bunu gir ve mühürle",
+     "mesaj": "cmsg_01UAFvcnfVuTR1wfFux5fQPP7SruV1LNoB3e4rWdcYGX59",
+     "kapanis": "2026-11-14T22:41Z",
+     "karar": "D-95"
     }
    ]
   },
@@ -731,7 +739,8 @@
    "kural": "AP-26'nın ön onay çizimi 5 Kasım 2026'da onaylanan hâliyle (İE-30, D-52, PC-34): İş Emri montaj paftasından (testler/kor/projeler/AP26/is_emri.json: yapı, mahaller, açıklıklar, çatı, verandalar). Pencere bölmeleri paftanın pencere detayından: 120/120 iki kanat (menteşe dış yanlarda, kollar ortada buluşur), 280/210 sabit + sürgülü + sürgülü + sabit, 200/210 iki bölmeli sürgülü, 50/50 vasistas. Arka terastan yatak odası 1'e komple cam PVC kapı (kapi_turu pvc_cam). Ön ve arka teras 120 derin; üstleri teras paneli: 8 cm C panel, üst yüzü duvarda duvar üstünün (saçak altı) 10 cm altında, dışarı %10 iner, duvardan 140; dış kiriş panelin altında, kolon 210; yan kiriş yok (D-56, gerçek liste gibi); makas, aşık, topuk, kalkan ve saçak yok. Çizimin izi testler/motor/veri/AP26_beklenen.json (A4 PDF, DXF, doğrulama, pano BOM, görünüşler). Yükleme listesi mühürde değil (liste aşaması çizim onayından sonra).",
    "kararlar": [
     "D-52",
-    "D-56"
+    "D-56",
+    "D-95"
    ],
    "pr": [
     116
@@ -790,7 +799,7 @@
     },
     {
      "yer": "testler/motor/veri/AP26_beklenen.json#onay",
-     "iz": "a80a281365ccd138"
+     "iz": "361a24e1dd8b440e"
     },
     {
      "yer": "testler/motor/veri/AP26_beklenen.json#iz.dogrulama",
@@ -806,15 +815,15 @@
     },
     {
      "yer": "testler/motor/veri/AP26_beklenen.json#iz.pdf_izi",
-     "iz": "8465c3fec8a4fea6"
+     "iz": "813abc8e0d4d3ea7"
     },
     {
      "yer": "testler/motor/veri/AP26_beklenen.json#iz.dxf_izi",
-     "iz": "48f12a35fb190791"
+     "iz": "38c37a7f052eb598"
     },
     {
      "yer": "testler/motor/test_m12_ap26.py",
-     "iz": "dbbbf468df2c9194"
+     "iz": "91429f065c088f8e"
     },
     {
      "yer": "testler/motor/test_ie30_pencere_teras.py::test_ap26_is_emri_paftadan",
@@ -853,6 +862,13 @@
      "mesaj": "cmsg_01UAFvcnfVuTR1wfFux5fQPP9p1AfAoGqEoAGgQnau5HMh",
      "kapanis": "2026-11-05T10:56Z",
      "karar": "D-56"
+    },
+    {
+     "tarih": "2026-11-14 21:07",
+     "soz": "biz her zaman brüt m² ile hesaplarız ben izin veriyorum varsa mühür bunu gir ve mühürle",
+     "mesaj": "cmsg_01UAFvcnfVuTR1wfFux5fQPP7SruV1LNoB3e4rWdcYGX59",
+     "kapanis": "2026-11-14T22:41Z",
+     "karar": "D-95"
     }
    ]
   },
@@ -1167,6 +1183,54 @@
     {
      "yer": "testler/paket/test_rehber_cakisma.py",
      "iz": "733a0bafb224d0cb"
+    }
+   ],
+   "durum": "mühürlü",
+   "gecmis": []
+  },
+  {
+   "kod": "M-18",
+   "konu": "Brüt ve net m²'nin tanımı",
+   "kural": "Brüt m²: çatının örttüğü her yer; dış duvarların dış yüzleri, niş, gövdedeki ve taşan veranda, dikmeler dahil (yükleme listesinin bina_m2'si, tek kaynak motor/prefabrik_liste.bina_brut_cm2; D-49 madde 2). Net m²: bütün mahallerin net alanı; veranda, giriş nişi ve balkon dahil. Ön onay antedi (motor/dxf_out.alan_yazisi) \"<brüt> m² brüt · <net> m² net\" yazar; montaj rehberinin başlığı aynı yazıyı okur (araclar/paket/rehber/veri.baslik_alani), sahnenin genel bakış etiketi brütü yazar. Hesap her zaman brüt m² ile yapılır.",
+   "kararlar": [
+    "D-95"
+   ],
+   "pr": [
+    210
+   ],
+   "lokman": [
+    {
+     "tarih": "2026-11-14 21:01",
+     "soz": "net ve bürütte hata var biz verandayıda net alana alır sayarız bu kadar fark çıkmaz prefabrikte",
+     "mesaj": "cmsg_01UAFvcnfVuTR1wfFux5fQPPGThRt6K4GfYTL68vszsCBi"
+    },
+    {
+     "tarih": "2026-11-14 21:01",
+     "soz": "biz çatı ile kapattığımız her yeri bürütten sayarız",
+     "mesaj": "cmsg_01UAFvcnfVuTR1wfFux5fQPPKuM1BYDsZbMrkwpH55WsT5"
+    },
+    {
+     "tarih": "2026-11-14 21:07",
+     "soz": "biz her zaman brüt m² ile hesaplarız ben izin veriyorum varsa mühür bunu gir ve mühürle",
+     "mesaj": "cmsg_01UAFvcnfVuTR1wfFux5fQPP7SruV1LNoB3e4rWdcYGX59"
+    }
+   ],
+   "kilitler": [
+    {
+     "yer": "motor/dxf_out.py::alan_yazisi",
+     "iz": "5a943e49680083ae"
+    },
+    {
+     "yer": "motor/prefabrik_liste.py::bina_brut_cm2",
+     "iz": "5bd5bfc73580472a"
+    },
+    {
+     "yer": "araclar/paket/rehber/veri.py::baslik_alani",
+     "iz": "41a72bc84c266f41"
+    },
+    {
+     "yer": "testler/motor/test_d95_alan.py",
+     "iz": "422025962d31d1f8"
     }
    ],
    "durum": "mühürlü",

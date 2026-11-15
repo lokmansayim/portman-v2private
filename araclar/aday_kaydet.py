@@ -136,7 +136,7 @@ def main() -> int:
         rooms = v.get("rooms_m2") or {}
         W, H = v.get("outer_cm") or [0, 0]
         # İE-36: brüt m² ön onay antedindeki ve listedeki `bina_m2`'nin tek kaynağından (D-49, K-A1; D-28 madde 1): veranda dahil, taşan
-        # veranda da. Veranda = Motor'un açık mahalleri (`alan_yazisi`'nın net alanının dışında kalanlar: veranda, giriş nişi, balkon;
+        # veranda da. Veranda = Motor'un açık mahalleri (veranda, giriş nişi, balkon; D-95'ten beri antedin netine de girerler;
         # geometri hakemi: adla ikinci bir sınıflama yok); kapalı = brüt − veranda.
         plan = G.kur(json.loads(json.dumps(ie)))
         brut = PL.bina_brut_cm2(plan) / 1e4

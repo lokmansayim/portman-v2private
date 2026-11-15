@@ -53,7 +53,29 @@ STANDART_HAL = {
     "PA28": ("AP-07", "testler/havuz/is_emirleri/AP07_STD45.json", "1+1", 46.0),  # en yakın standart, 45,70 m² (Lokman 09:58:53 kartı)
     "PA29": ("AP-07", "testler/havuz/is_emirleri/AP07_STD40.json", "1+1", 40.0),  # kısalt, 39,61 m² (Lokman 10:01:43)
 }
-HAVUZ_EVLERI = {**EVLER, **STANDART_HAL}
+# D-92 › Kısa parça silinmiş hâller (BK-31 hakeminin silme hâli kipi; Lokman'ın ev kartları "Doğru, yanına eklensin"): kaynak evin yanına
+# yeni numarayla; ayrıntı test_havuz_silme_kayit.py
+SILME_HAL = {
+    "PA30": ("AP-11", "testler/havuz/is_emirleri/PA12_SILME.json", "3+1", 83.0),  # 85 m² sağ duvar 26,5 cm (20:05:33 kartı)
+    "PA31": ("AP-13", "testler/havuz/is_emirleri/PA14_SILME.json", "2+1", 59.0),  # 60 m² ön duvar ve veranda 15 cm (20:09:12)
+    "PA32": ("AP-16", "testler/havuz/is_emirleri/PA15_SILME.json", "2+1", 69.0),  # 70 m² ön duvar ve veranda 20 cm (20:14:50)
+    "PA33": ("AP-01", "testler/havuz/is_emirleri/PA08_BUYUME.json", "3+1", 142.0),  # 140 m² büyüyen hâl (20:22:14 sözü, 20:25:45)
+    "PA34": ("AP-27", "testler/havuz/is_emirleri/PA24_BUYUME.json", "2+1", 78.0),   # 77 m² büyüyen hâl (20:35:43 sözü, 20:38:43)
+}
+HAVUZ_EVLERI = {**EVLER, **STANDART_HAL, **SILME_HAL}
+# D-92 › Havuz evlerine uygulama: tek özel pano anahtarı yazılan evlerin kaynağı kör İş Emri'nin anahtarlı kopyası (kör dosya aynen;
+# ayrıntı test_havuz_tek_pano.py). Kayıt yeniden yazıldı, karar D-92; D-87'nin tablosu evin havuza girdiği kaynağı yazmaya devam eder.
+D92 = (KOK / "KARARLAR" / "D-92.md").read_text(encoding="utf-8")
+TEK_PANO = {"PA10": "testler/havuz/is_emirleri/AP04_D92.json"}                    # D-92 (95 m² kartı 20:32:51)
+
+
+def _kayit_kaynagi(kod: str) -> tuple[str, str, str]:
+    """(kaynak İş Emri, karar, karar metni) kayıttaki gibi: D-92 evleri ve silinmiş hâlleri, D-91 standart hâlleri, öteki D-87 evleri."""
+    if kod in TEK_PANO:
+        return TEK_PANO[kod], "D-92", D92
+    if kod in SILME_HAL:
+        return SILME_HAL[kod][1], "D-92", D92
+    return HAVUZ_EVLERI[kod][1], *(("D-87", D87) if kod in EVLER else ("D-91", D91))
 PREFABRIK = {a["kod"]: a for a in havuz_kayitlari(yapi="prefabrik")}
 
 # D-87 › Havuza giren çelik projeler (PR-2): kod → (proje, tanımın kaynağı, oda programı, brüt m²; genel motorun `bina_m2`'si)
@@ -85,7 +107,7 @@ KALANLAR = {
 }
 # D-87 › Veranda (Lokman, 14 Kasım 2026 07:34 UTC): veranda bir oda gibi sayılır; verandasız ev de havuza girer
 VERANDA_SOZU = "veranda ayrıca var mı yok mu belirtilmez verandayı da bir oda gibi kabul et"
-VERANDASIZ = {"PA23", "PA24", "KT09", "KT11"}                                   # KT-11 (ÇP-22): antette sundurma, veranda yok
+VERANDASIZ = {"PA23", "PA24", "PA34", "KT09", "KT11"}                           # KT-11 (ÇP-22): antette sundurma, veranda yok; PA-34 77 m² hâli
 # AP-14: paftada oda adı yok; oda programı Lokman'ın karar kartından (14 Kasım 2026 07:50:30 UTC, "Evet, 2+1 olarak girsin")
 AP14_SOZU = '"Evet, 2+1 olarak girsin"'
 # AP-08: Lokman 14 Kasım 2026 08:16:22 UTC düzeltmesi (hol panoları, sırt sırta kapılar, ortada pencere), 08:29:26 kartı
@@ -109,8 +131,10 @@ def test_havuz_kaydi_bicimi():
     eski = {str(a["kod"]).upper() for a in json.loads(ADAYLAR_PREFABRIK_JSON.read_text(encoding="utf-8"))}
     assert not eski & set(HAVUZ_EVLERI) and eski == D80                                      # D-80 kaydı aynen
     for kod, a in PREFABRIK.items():
-        proje, kaynak, oda, m2 = HAVUZ_EVLERI[kod]
-        karar, karar_metni = ("D-87", D87) if kod in EVLER else ("D-91", D91)
+        proje, _, oda, m2 = HAVUZ_EVLERI[kod]
+        kaynak, karar, karar_metni = _kayit_kaynagi(kod)
+        if kod in TEK_PANO:
+            assert f"| {kod[:2]}-{kod[2:]} | {proje} | `{EVLER[kod][1]}` |" in D87, kod     # havuza girdiği kaynak D-87'de aynen
         g = kod[:2] + "-" + kod[2:]
         assert a["gosterim"] == g == a["referans_model"]
         assert (a["durum"], a["yapi_turu"], a["kat"], a["oda_programi"], a["katalog_m2"]) == ("gecerli", "prefabrik", 1, oda, m2), kod
@@ -139,7 +163,7 @@ def test_hakem_gecer(kod):
 def test_sablon_kaynagin_standart_hali(kod):
     """Şablon gerçek projenin İş Emri'sidir: yalnız kimlik, talep, referans kodu ve müşterinin seçimleri (D-74 standart) değişir.
     D-91'in standart hâllerinde kaynak, standart hâlin İş Emri'si (`testler/havuz/is_emirleri/AP07_STD*.json`)."""
-    kaynak = _standart(json.loads((KOK / HAVUZ_EVLERI[kod][1]).read_text(encoding="utf-8")))
+    kaynak = _standart(json.loads((KOK / _kayit_kaynagi(kod)[0]).read_text(encoding="utf-8")))
     sab = json.loads((SABLON_DIR / PREFABRIK[kod]["sablon"]).read_text(encoding="utf-8"))
     assert "ozellikler" not in sab and "alici_ait" not in sab
     for d in (kaynak, sab):
@@ -269,14 +293,15 @@ SETLER = {
     (50, "2+1"): ["PA23"],                                                            # tek aday: öncelik sorulmaz
     (40, "1+1"): ["PA29"],                                                            # D-91 kısalt (39,61 m²)
     (45, "1+1"): ["PA27", "PA28"],                                                    # eski hâl ve en yakın standart (D-91)
-    (60, "2+1"): ["PA01", "PA14", "PA18", "PA25", "PA02", "PA09", "PA20"],
-    (65, "2+1"): ["PA02", "PA09", "PA20", "PA25", "PA01", "PA03", "PA14", "PA15", "PA18", "PA26"],
-    (71, "2+1"): ["PA26", "PA03", "PA15", "PA24", "PA02", "PA04", "PA09", "PA20"],
-    (77, "2+1"): ["PA24", "PA04", "PA16", "PA05", "PA26", "PA03", "PA15", "PA19"],
-    (80, "2+1"): ["PA16", "PA04", "PA05", "PA24", "PA19", "PA06"],
-    (80, "3+1"): ["PA21", "PA12"],
-    (90, "3+1"): ["PA07", "PA11", "PA17", "PA10", "PA12"],
+    (60, "2+1"): ["PA01", "PA14", "PA18", "PA25", "PA31", "PA02", "PA09", "PA20"],  # PA-31: 60 m²'nin silinmiş hâli (59 m², D-92)
+    (65, "2+1"): ["PA02", "PA09", "PA20", "PA25", "PA32", "PA01", "PA03", "PA14", "PA15", "PA18"],  # PA-32 (69 m²) girdi, liste 10
+    (71, "2+1"): ["PA26", "PA03", "PA15", "PA32", "PA24", "PA02", "PA04", "PA09", "PA20", "PA34"],  # PA-34 (78 m²) sonda
+    (77, "2+1"): ["PA24", "PA04", "PA34", "PA16", "PA05", "PA26", "PA03", "PA15", "PA19"],  # PA-34: 77 m²'nin büyüyen hâli (D-92)
+    (80, "2+1"): ["PA16", "PA04", "PA05", "PA34", "PA24", "PA19", "PA06"],
+    (80, "3+1"): ["PA21", "PA30", "PA12"],                                            # PA-30: 85 m²'nin silinmiş hâli (83 m², D-92)
+    (90, "3+1"): ["PA07", "PA11", "PA17", "PA10", "PA12", "PA30"],
     (100, "2+1"): ["PA22"],
+    (140, "3+1"): ["PA08", "PA33"],                                                   # PA-33: 140 m²'nin büyüyen hâli (142 m², D-92)
     (140, "4+1"): ["PA13"],
 }
 
