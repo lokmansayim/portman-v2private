@@ -8,6 +8,7 @@ Koşum: PORTMAN_TEST_PG="host=127.0.0.1 port=55432 user=postgres" python -m pyte
 """
 from __future__ import annotations
 
+import pytest
 from conftest import NUMARA_A, mesaj, sorgu, talep, tek
 
 import talep_formu as TF
@@ -67,11 +68,12 @@ def test_celik_formu_dis_140_plana_islenir(depo, wa, tmp_path, hizli_genel):  # 
     assert any("bütçe önceliği" in (a.get("hesap") or "") for a in st["adaylar"])                         # formdaki öncelik seti sıraladı
     d, _ = depo.konusma_oku(NUMARA_A)
     assert d["taslak"]["form"] == "celik" and d["taslak"]["form_dis140"] is True and d["taslak"]["oncelik"] == "butce"
+    assert d["taslak"]["form_kaplama"] == "sandvic_panel"                                                 # PR-11 (D-97): kitabın anahtarı
     assert "olcu_formdan" not in d["taslak"] and "pano" not in {k for k, v in d["taslak"].items() if v}
     govde = dugmeli(depo)["satir"]["body"]
     assert govde.startswith("Uzun kenarı m²'den hesapladım: 8 × 11 m. Standart dışı seçimlerinizi aldım: çatı kaplaması sandviç panel, "
                             "dış duvar 140 mm karkas, pencere rengi antrasit gri, çatıda çift kat yalıtım. "
-                            "Çizime yalnız dış duvar 140 mm karkası işlerim. İşleyemezsem plan mesajında yazarım.")
+                            "Çizime yalnız dış duvar 140 mm karkası ve çatı kaplamasını işlerim. İşleyemezsem plan mesajında yazarım.")
     assert "pano katına" not in govde                                                                     # çelikte ölçü yuvarlanmaz
     # plan seçilir → çatı seti (İE-25) → çatı seçilir → r01
     r = sec(depo, wa, s, "Ç8801")
@@ -81,17 +83,68 @@ def test_celik_formu_dis_140_plana_islenir(depo, wa, tmp_path, hizli_genel):  # 
     assert r["eylem"] == "is_emri" and "dis_karkas_140" in r["gerekce"], r
     ie = tek(depo, "SELECT is_emri FROM revizyonlar ORDER BY id DESC LIMIT 1")["is_emri"]
     assert ie["revizyon"] == 1 and ie["yapi"]["kod"] == "Ç8801K"
-    assert [x["op"] for x in ie["yapi"]["degisiklikler"]] == ["dis_karkas_140"]                           # formdaki seçim çizime işlendi
+    # formdaki iki seçim çizime işlendi; PR-11 (D-97; Lokman, kart 15 Kasım 2026 04:44:37 UTC): çatı kaplaması tanıma yazılır
+    assert [(x["op"], x.get("kaplama")) for x in ie["yapi"]["degisiklikler"]] == [("dis_karkas_140", None), ("cati_kaplamasi", "sandvic_panel")]
     assert ie["bilgi"]["ozellikler"] == {"Çatı Kaplama Rengi": "antrasit gri"}                             # renk pafta tablosunda
-    assert sorted(ie["bilgi"]["ozel_istekler"]) == ["Ek İstekler: çatıda çift kat yalıtım", "Pencere Rengi: antrasit gri",
-                                                    "Çatı Kaplaması: sandviç panel"]            # sıra taslağın (jsonb) anahtar sırası
+    # kaplama pafta tablosunda ve listede: özel istekte ayrıca yazılmaz (aynı paftada iki kaplama okunmaz)
+    assert sorted(ie["bilgi"]["ozel_istekler"]) == ["Ek İstekler: çatıda çift kat yalıtım", "Pencere Rengi: antrasit gri"]
     assert ie["bilgi"]["musteri_adi"] == "Ali Veli" and ie["bilgi"]["sevk_adresi"] == "Nilüfer, Bursa"
     [onay] = [y for y in bayiye(depo) if y["kind"] == "interactive"]
-    assert "Uygulanan: dış duvarlar 140'lık karkas (16,5 cm)." in onay["satir"]["body"]
+    assert "Uygulanan: dış duvarlar 140'lık karkas (16,5 cm); çatı kaplaması sandviç panel." in onay["satir"]["body"]
     # PR-10 (15 Kasım 2026 canlı C5): PDF başlığında model adı ve m² düşmez
     belge = sorgu(depo, "SELECT govde FROM giden WHERE kind = 'document' ORDER BY olusturuldu DESC, sira DESC")[0]["govde"]
     assert belge.endswith(" r01 · ÖN ONAYA SUNULAN TASLAK · Ç8801-K (Beşik + cumba, doğu ucu kırma) · 88 m², 2+1. "
-                          "Uygulanan: dış duvarlar 140'lık karkas (16,5 cm)."), belge
+                          "Uygulanan: dış duvarlar 140'lık karkas (16,5 cm); çatı kaplaması sandviç panel."), belge
+
+
+@pytest.mark.parametrize("kod, secim, beklenen", [("Ç8801", "sandvic", [("cati_kaplamasi", "sandvic_panel")]), ("KT02", "sandvic", []),
+                                                  ("Ç8801", "kiremit", [("cati_kaplamasi", "osb_kiremit")]),
+                                                  ("KT02", "kiremit", [("cati_kaplamasi", "osb_kiremit")])])
+def test_celik_formu_cati_kaplamasi_plana_islenir(depo, wa, tmp_path, hizli_genel, kod, secim, beklenen):  # noqa: F811
+    """PR-11 (D-97; Lokman, kart 15 Kasım 2026 04:44:37 UTC "Plana ve listeye işlensin"). Formda yalnız çatı kaplaması sandviç panel:
+    ön not söyler; seçilen planda (Ç8801, kendi kaplaması tek kat panel) işlem tanıma yazılır, özel istekte kaplama yok. Aynı formla
+    kendi paftası sandviç panel olan plan (KT-02) seçilirse işlem eklenmez (tablo zaten sandviç panel), özel istek yine boş.
+    Kiremit desen sac + OSB (BK-33, D-98; Motor 15 Kasım 2026'dan beri hesaplar) aynı yoldan: iki planda da işlem tanıma yazılır."""
+    ad = TF.C_KAPLAMA[secim]
+    kabul(depo, YEDI)
+    s = cf_ayar(tmp_path)
+    satir, dis = celik_formu(depo, wa, s)
+    form_cevabi(depo, tmp_path, parametreler(satir)["flow_token"], {**STD, "alan": 88, "oncelik": "yok", "kaplama": secim}, dis)
+    [r] = isle_hepsi(depo, s)
+    assert r["eylem"] == "secenek", r
+    govde = dugmeli(depo)["satir"]["body"]
+    assert govde.startswith(f"Çatı kaplaması {ad} seçtiniz. Çizime işlerim. İşleyemezsem plan mesajında yazarım. "), govde
+    r = sec(depo, wa, s, kod)
+    if kod == "Ç8801":                                                                                    # çatı seti (İE-25): evin kendi çatısı
+        assert r["eylem"] == "secenek", r
+        r = sec(depo, wa, s, kod)
+    assert r["eylem"] == "is_emri", r
+    ie = tek(depo, "SELECT is_emri FROM revizyonlar ORDER BY id DESC LIMIT 1")["is_emri"]
+    assert ie["yapi"]["kod"] == kod and [(x["op"], x.get("kaplama")) for x in ie["yapi"]["degisiklikler"]] == beklenen
+    assert ie["bilgi"]["ozel_istekler"] == [] and ie["bilgi"]["ozellikler"] == {"Çatı Kaplama Rengi": "antrasit gri"}
+    [onay] = [y for y in bayiye(depo) if y["kind"] == "interactive"]
+    assert (f"Uygulanan: çatı kaplaması {ad}." in onay["satir"]["body"]) is bool(beklenen), onay["satir"]["body"]
+    assert "işleyemedim" not in onay["satir"]["body"]
+
+
+def test_celik_formu_hesaplanmayan_kaplama_ozel_istekte_kalir(depo, wa, tmp_path, hizli_genel):  # noqa: F811
+    """PR-11: genel motorun hesaplamadığı kaplamalar (burada yayımlı formun trapez sac + OSB cevabı) bugünkü gibi özel isteğe yazılır; plan modelin kendi
+    kaplamasıyla çizilir, ön not "çizimi değiştirmez" der (Motor bu kaplamaları öğrenene kadar; BK-33). Örnek 15 Kasım 2026'da kiremit
+    desen sac + OSB'den trapez sac + OSB'ye alındı: Motor kiremit desen sacı o gün öğrendi (D-98), o seçim artık plana işlenir."""
+    kabul(depo, YEDI)
+    s = cf_ayar(tmp_path)
+    satir, dis = celik_formu(depo, wa, s)
+    form_cevabi(depo, tmp_path, parametreler(satir)["flow_token"], {**STD, "alan": 88, "oncelik": "yok", "kaplama": "osb_trapez"}, dis)
+    [r] = isle_hepsi(depo, s)
+    govde = dugmeli(depo)["satir"]["body"]
+    assert govde.startswith("Standart dışı seçimlerinizi aldım: çatı kaplaması trapez sac + OSB. Bu seçimler çizimi değiştirmez. "), govde
+    d, _ = depo.konusma_oku(NUMARA_A)
+    assert "form_kaplama" not in d["taslak"]
+    assert sec(depo, wa, s, "Ç8801")["eylem"] == "secenek"                                               # çatı seti (İE-25)
+    r = sec(depo, wa, s, "Ç8801")
+    assert r["eylem"] == "is_emri", r
+    ie = tek(depo, "SELECT is_emri FROM revizyonlar ORDER BY id DESC LIMIT 1")["is_emri"]
+    assert ie["yapi"]["degisiklikler"] == [] and ie["bilgi"]["ozel_istekler"] == ["Çatı Kaplaması: trapez sac + OSB"]
 
 
 def test_celik_formu_standart_secimle_bugunku_plan(depo, wa, tmp_path, hizli_genel):  # noqa: F811
@@ -139,6 +192,32 @@ def test_celik_formu_yaziyla_secim_islenemeyen_140(depo, wa, tmp_path, hizli_gen
     belge = sorgu(depo, "SELECT govde FROM giden WHERE kind = 'document' ORDER BY olusturuldu DESC, sira DESC")[0]["govde"]
     assert belge.endswith(" r01 · ÖN ONAYA SUNULAN TASLAK · KT-02 · 92 m², 2+1"), belge
     assert not [y for y in sorgu(depo, "SELECT alici FROM giden") if y["alici"] == "PATRON"]               # Patron'a yönlendirme yok
+
+
+def test_celik2_kimligi_varsa_yeni_form_sunulur_cevabi_ayni_yoldan(depo, wa, tmp_path, hizli_genel):  # noqa: F811
+    """İE-20 PR-12 (D-102): `celik2_flow_id` ayarda varsa [Çelik] düğmesi yeni formu açar (trapez saclı seçenek yok). Cevabı çelik formun
+    yolundan işlenir: shingle seçimi "OSB + membran + shingle" diye okunur, özel istekte kalır."""
+    kabul(depo, YEDI)
+    s = cf_ayar(tmp_path)
+    s = {**s, "talep_formu": {**s["talep_formu"], "celik2_flow_id": "6666666666"}}
+    ids, dis = yapi_dugmeleri(depo, wa, s)
+    assert depo.mesaj_kaydet(buton(ids[1], dis))
+    [r] = isle_hepsi(depo, s)
+    assert son_sonuc(depo)["form_sunuldu"] == "celik2", r
+    satir, dis_form = form_satiri(depo, wa)
+    assert satir["body"] == "Çelik talep formunu doldurun. İsterseniz talebinizi yazın."
+    p = parametreler(satir)
+    assert p["flow_id"] == "6666666666" and p["flow_token"].startswith("cf:") and p["flow_action_payload"]["screen"] == "TALEP_C"
+    form_cevabi(depo, tmp_path, p["flow_token"], {**STD, "alan": 88, "oncelik": "yok", "kaplama": "shingle"}, dis_form)
+    [r] = isle_hepsi(depo, s)
+    j = tek(depo, "SELECT cikarim, sonuc FROM isler ORDER BY id DESC LIMIT 1")
+    assert j["cikarim"]["form"]["durum"] == "talep" and j["sonuc"]["llm"]["backend"] == "form", r        # LLM'siz
+    assert j["cikarim"]["form"]["talep"]["bina_ozellikleri"]["Çatı Kaplaması"] == "OSB + membran + shingle"
+    assert r["eylem"] == "secenek", r
+    assert "Standart dışı seçimlerinizi aldım: çatı kaplaması OSB + membran + shingle. Bu seçimler çizimi değiştirmez." \
+        in dugmeli(depo)["satir"]["body"]
+    d, _ = depo.konusma_oku(NUMARA_A)
+    assert d["taslak"]["form"] == "celik" and "form_kaplama" not in d["taslak"]
 
 
 def test_celik_formu_kimligi_yokken_bugunku_form(depo, wa, tmp_path):

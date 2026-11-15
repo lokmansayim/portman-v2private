@@ -25,10 +25,11 @@ Sunucuda kopyası varsa:
 Seçenekler: --waba <kimlik> · --kok <dizin> (formların sürümü; varsayılan betiğin deposu, yoksa /opt/portman/guncel) · --kaynak <commit>
 (iki formun JSON'u sunucudaki sürümden değil, depodaki o commit'ten okunur; 40 haneli; sürüm kurulmadan düzeltilmiş formu taslağa
 yüklemek için; diske yazılmaz) · --bak (Meta'da hiçbir şeyi kurmaz ve değiştirmez; yalnız var olanı listeler) · --yayimla (5. adım;
---bak ile olmaz) · --form <talep | revizyon | prefabrik | talep2 | celik> (yinelenebilir; yalnız o formlar kurulur ve yayımlanır. Verilmezse talep ve
+--bak ile olmaz) · --form <talep | revizyon | prefabrik | talep2 | celik | celik2> (yinelenebilir; yalnız o formlar kurulur ve yayımlanır. Verilmezse talep ve
 revizyon: bugünkü davranış. İE-20 PR-6: prefabrik talep formu `--form prefabrik` ile, <kök>/kanal/formlar/prefabrik.json. İE-20 PR-8 (D-89):
 verandasız talep formu `--form talep2` ile, talep2.json; kurulu sürüm bu formu tanımıyorsa `--kaynak` ile koşulur. İE-20 PR-9 (D-93):
-çelik talep formu `--form celik` ile, celik.json; kurulu sürüm tanımıyorsa yine `--kaynak` ile). Çıkış: 0 tamam,
+çelik talep formu `--form celik` ile, celik.json; kurulu sürüm tanımıyorsa yine `--kaynak` ile. İE-20 PR-12 (D-102): çelik formun ikinci
+sürümü `--form celik2` ile, celik2.json; yayımlı çelik forma dokunmaz). Çıkış: 0 tamam,
 2 Meta doğrulama hatası buldu, 1 durdu. Test için: PM_ETC, PM_GRAPH_BASE, PM_RAW_BASE (ağa çıkılmaz).
 """
 from __future__ import annotations
@@ -51,10 +52,10 @@ ETC = os.environ.get("PM_ETC", "/etc/portman")
 GUNCEL = "/opt/portman/guncel"
 RAW = os.environ.get("PM_RAW_BASE", "https://raw.githubusercontent.com/lokmansayim/portman-v2private").rstrip("/")
 TURLER = ("talep", "revizyon")                     # --form verilmezse; main() seçimle değiştirir
-TUM_TURLER = ("talep", "revizyon", "prefabrik", "talep2", "celik")
+TUM_TURLER = ("talep", "revizyon", "prefabrik", "talep2", "celik", "celik2")
 AD = {"talep": "Portman Talep Formu", "revizyon": "Portman Revizyon Formu", "prefabrik": "Portman Prefabrik Talep Formu",
-      "talep2": "Portman Talep Formu 2", "celik": "Portman Çelik Talep Formu"}
-EKRAN = {"talep2": "TALEP", "celik": "TALEP_C"}                        # kurulu sürümün form modülü bu türü tanımıyorsa (yeni form sürümden önce taslağa kurulur)
+      "talep2": "Portman Talep Formu 2", "celik": "Portman Çelik Talep Formu", "celik2": "Portman Çelik Talep Formu 2"}
+EKRAN = {"talep2": "TALEP", "celik": "TALEP_C", "celik2": "TALEP_C"}                        # kurulu sürümün form modülü bu türü tanımıyorsa (yeni form sürümden önce taslağa kurulur)
 KATEGORI = ["OTHER"]
 KIMLIK = re.compile(r"^[0-9]{5,30}$")
 BELIRTEC: str = ""
@@ -171,7 +172,7 @@ def onizleme_verisi(tf, tur: str, tanim: dict) -> dict:
         return tf.ekran_verisi(None, None)
     if tur == "prefabrik":
         return tf.prefabrik_ekran_verisi(None, None)
-    if tur == "celik":                             # kurulu sürüm çelik formu tanımıyorsa prefabrik formun verisi (ilk ekranın alanları aynı)
+    if tur in ("celik", "celik2"):                 # kurulu sürüm çelik formu tanımıyorsa prefabrik formun verisi (ilk ekranın alanları aynı)
         return getattr(tf, "celik_ekran_verisi", tf.prefabrik_ekran_verisi)(None, None)
     if tur == "talep2":                            # ilk formun verisi, veranda yok (`talep_formu.talep2_ekran_verisi` ile aynı)
         return {k: v for k, v in tf.ekran_verisi(None, None).items() if k != "veranda"}
