@@ -975,6 +975,8 @@ class Cizici:
         boy = (r[3] - r[1]) if d.yon == "y" else (r[2] - r[0])
         yari_en = self.yazi_eni(f"{boy:.2f}".rstrip("0").rstrip(".").replace(".", ","), 14) / 2 + 2
         ic = (1 if d.c < W / 2 else -1) if d.yon == "y" else (1 if d.c < H / 2 else -1)
+        if self._dar_acik_mahal_yani(d, r, ic):
+            ic = -ic
 
         def kutu(u):
             if d.yon == "y":
@@ -992,6 +994,23 @@ class Cizici:
         else:
             yd = r[3] + u if ic > 0 else r[1] - u; yk = r[1] if ic > 0 else r[3]
             self.dim((r[0] + ox, yk + oy), (r[2] + ox, yk + oy), (0, yd + oy), 0, layer)
+
+    def _dar_acik_mahal_yani(self, d, r, ic: int) -> bool:
+        """D-104: özel pano ölçüsünün yanı dar açık mahalse (tek pano şeridi, ör. giriş nişi) ve duvarın öteki yanı kapalı mahalse ölçü
+        kapalı mahalin yanına geçer. 60'lık iç duvarlı 90 m² 3+1'de nişin iki yan duvarı 120,5 oldu; iki ölçü nişin içinde kalınca nişin
+        adına ve m²'sine yer kalmıyordu (açık mahalin kendi ölçüsü de dar mahalde plan dışına alınır). Pano dizilimi eskizinde de bu
+        ölçüler odanın yanındaydı. Öteki durumlarda ölçünün yanı aynen."""
+        orta = ((r[1] + r[3]) / 2) if d.yon == "y" else ((r[0] + r[2]) / 2)
+
+        def mahal(yan: int):
+            u = d.c + yan * (d.h + 1.0)
+            nokta = Point(u, orta) if d.yon == "y" else Point(orta, u)
+            return next((m for m in self.plan.mahaller.values() if m.poly is not None and m.poly.contains(nokta)), None)
+        a, k = mahal(ic), mahal(-ic)
+        if a is None or k is None or not a.acik or k.acik:
+            return False
+        x0, y0, x1, y1 = a.poly.bounds
+        return ((x1 - x0) if d.yon == "y" else (y1 - y0)) < 2 * G.MOD - 1e-6
 
     def _dis_parca_olculeri(self, ox: float, oy: float, dolu: list | None = None) -> None:
         """D-34 (Lokman, 30 Ekim 2026 14:45: "mor ile çizdiğim yerleri de ölçeklendir rengi de mor olsun"): girintili gövdede (İE-24) kapalı
