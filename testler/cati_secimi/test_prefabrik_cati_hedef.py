@@ -1,10 +1,12 @@
 """İE-37 (D-83) · prefabrik evde çatı seçiminin hedef örneği (D-28 madde 2–3): `testler/cati_secimi/ornek_prefabrik.py`'nin bugünkü
 çıktısı ↔ Lokman'ın onayladığı `prefabrik_hedef.json` (12 Kasım 2026; dayanak dosyanın `onay` alanında).
 
-Örnek: "85 m² 2+1 prefabrik" → alan seti (PA-06, PA-05, PA-04; her plan bir kez) → PA-06 seçilir → "Çatı seçin" (evin çatısı, PA-06-K,
-PA-06-C) → seçilen çatıyla r01. Kıyaslanan: iki setin bayiye giden mesajı, düğmeleri ve bileşik görselinin içerik izi (PNG baytı), alan
-setinin "seçildi" kapanışı, üç çatının r01 kararı (kaynak, revizyon, referans kod, çatı, şablon ve sha, mesaj). r01 çizimi (`--r01`) kıyasa
-girmez (yavaş); çatı görselleri `testler/test_prefabrik_cati_seti.py`'de yeniden üretilip kıyaslanır. Fark bilerek yapıldıysa
+Örnek: "85 m² 2+1 prefabrik" → alan seti (PA-06, PA-05, PA-04; her plan bir kez) → PA-06 seçilir → r01 evin kendi çatısıyla → Onayla →
+"Planınız onaylandı (r01). Şimdi çatıyı seçin." (evin çatısı, PA-06-K, PA-06-C) → evin çatısı r01'i onaylar; başka çatı aynı planı o
+çatıyla r02 çizer → Onayla (İE-42, D-94; önce İE-37'de set plan seçilince, çizimden önce geliyordu). Kıyaslanan: iki setin bayiye giden
+mesajı, düğmeleri ve bileşik görselinin içerik izi (PNG baytı), alan setinin "seçildi" kapanışı, r01 (kaynak, revizyon, referans kod, çatı,
+şablon ve sha, mesaj), üç çatı seçiminin sonucu ve r02'nin onayı. Çizim (`--ciz`) kıyasa girmez (yavaş); çatı görselleri
+`testler/test_prefabrik_cati_seti.py`'de yeniden üretilip kıyaslanır. Fark bilerek yapıldıysa
 `prefabrik_hedef.json` yalnız Lokman'ın onayıyla ve gerekçeli kararla yeniden donar (D-02); testi geçirmek için hedef değiştirilmez.
 LLM, WhatsApp ve Postgres yok.
 """

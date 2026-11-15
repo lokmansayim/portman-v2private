@@ -177,9 +177,10 @@ def aciklama(a: dict) -> str:
     return " · ".join(x for x in p if x)[:72]
 
 
-def cati_mesaji(siralanmis: list[dict], referans: dict) -> str:
+def cati_mesaji(siralanmis: list[dict], referans: dict, bas: str | None = None) -> str:
     """Çatı seçenek mesajı (tek görselde üç çatı; plan aynı): 'Ç8801 için üç çatı seçeneği: 1 katalog çatısı, 2 K, 3 L…'.
-    İE-37: prefabrik evde ilk satır "evin çatısı"; örnek yazı varyantın kodu ("PA-06-K olsun"): prefabrikte "çatı K olsun" okunmaz."""
+    İE-37: prefabrik evde ilk satır "evin çatısı"; örnek yazı varyantın kodu ("PA-06-K olsun"): prefabrikte "çatı K olsun" okunmaz.
+    İE-42 (D-94): plan onayından sonra sunulan sette ilk cümle `bas` ("Planınız onaylandı (r01). Şimdi çatıyı seçin. …"); liste aynı."""
     g = gosterim(referans); m2 = referans.get("katalog_m2"); oda = referans.get("oda_programi") or ""
     prefabrik = referans.get("motor") != "genel" and referans.get("yapi_turu", "prefabrik") != "celik"
     satirlar = []
@@ -189,8 +190,9 @@ def cati_mesaji(siralanmis: list[dict], referans: dict) -> str:
             else f"çatı {gosterim(a)[-1]}"
         satirlar.append(f"{a['sira']}. {gosterim(a)} · {etiket}" + (f" ({ca})" if ca else ""))
     ornek = next((gosterim(a) for a in siralanmis if str(a["kod"]).upper() != str(referans["kod"]).upper()), g) if prefabrik else ""
-    govde = (f"{g} için {len(siralanmis)} çatı seçeneği. Plan {'üçünde' if len(siralanmis) == 3 else 'hepsinde'} aynı"
-             + (f" ({m2:g} m², {oda})" if isinstance(m2, (int, float)) else "") + "; fark çatıda.\n\n" + "\n".join(satirlar)
+    ilk = bas or (f"{g} için {len(siralanmis)} çatı seçeneği. Plan {'üçünde' if len(siralanmis) == 3 else 'hepsinde'} aynı"
+                  + (f" ({m2:g} m², {oda})" if isinstance(m2, (int, float)) else "") + "; fark çatıda.")
+    govde = (ilk + "\n\n" + "\n".join(satirlar)
              + (f"\n\nBirini seçin ya da yazın (örn. \"{ornek} olsun\")." if prefabrik else "\n\nBirini seçin ya da yazın (örn. \"çatı K olsun\")."))
     return govde[:1024]
 

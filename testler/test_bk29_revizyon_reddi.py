@@ -80,10 +80,10 @@ def test_c3_ret_sonrasi_revizyon_ayni_planda(s):
 
 
 def test_c4_celik_r03_ret_sonrasi_cati(s):
-    """C4: çelik Ç8801 r03'te "veranda arkada olsun" geri çevrilir; "çatı K olsun" r04 olur."""
+    """C4: çelik Ç8801 r03'te "veranda arkada olsun" geri çevrilir; "çatı K olsun" r04 olur. İE-42 (D-94): "Ç8801 olsun" r01'i katalog
+    çatısıyla çizer (önce çatı seti geliyordu, "çatı K olsun" r01'di); çatı revizyonda değişir."""
     s.yaz("Tek kat çelik, 2+1, 88 m²", yapi_turu="celik", kat_sayisi=1, oda_programi="2+1", alan_m2=88)
-    s.yaz("Ç8801 olsun", katalog_kodu="Ç8801")
-    assert s.yaz("çatı K olsun").eylem == "is_emri"
+    assert s.yaz("Ç8801 olsun", katalog_kodu="Ç8801").revizyon == 1
     assert s.yaz("çatı L olsun").revizyon == 2
     assert s.yaz("dışlar 140'lık olsun").revizyon == 3
     k = s.yaz("veranda arkada olsun", varyantlar=[VERANDA])

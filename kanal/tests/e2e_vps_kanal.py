@@ -361,7 +361,8 @@ try:
     kod, body, _ = istek(app_pn, "GET", f"/panel/konusma/{PATRON}", cerez=cerez)
     ok(b"template" in body and "pencere kapalı (24 saat)".encode() in body and "şablon gereksiz".encode() in body, "Patron konuşma sayfası: şablon satırı ve hata etiketleri")
 
-    print("9) İE-08 çelik (A2–A3): kabul kaydı → 'Ç8801' → üç çatı seçeneği tek görselde → düğme → r01 genel motordan (perspektifli bayi görseli + pafta PDF)")
+    print("9) İE-08 çelik (A2–A3) + İE-42 (D-94): kabul kaydı → 'Ç8801' → r01 katalog çatısıyla genel motordan (perspektifli bayi görseli + "
+          "pafta PDF) → Onayla → üç çatı seçeneği tek görselde (onay henüz kaydedilmez) → düğme K → aynı plan r02")
     AY.yaz(VERI, "mesaj_katmani", True)
     with depo.baglan() as c, c.transaction():
         c.execute("UPDATE mesajlar SET wa_zamani = now() WHERE gonderen = %s", (BAYI,))        # bayinin penceresi açık
@@ -370,38 +371,24 @@ try:
     time.sleep(1.2)
     kod, c = webhook(yuk([metin(BAYI, "Ç8801 olsun", mid="wamid.E2EC1")]))
     hazir_ekle("wamid.E2EC1", {"niyet": "yeni_talep", "guven": "yuksek", "ozet": "Ç8801 istiyor", "katalog_kodu": "Ç8801"})
-    ok(c.get("mesaj") == {"sahiplenildi": 1} and ajan() == 0, "ajan: 'Ç8801' işlendi")
-    i9 = q("SELECT sonuc FROM isler WHERE mesaj_id = 'wamid.E2EC1'")[0]["sonuc"]
-    s9 = q("SELECT id, durum, adaylar FROM secenek_setleri ORDER BY olusturuldu DESC LIMIT 1")[0]
-    ok(i9["eylem"] == "secenek" and [a["kod"] for a in s9["adaylar"]] == ["Ç8801", "Ç8801K", "Ç8801L"] and s9["durum"] == "acik",
-       f"çatı seçenek seti: katalog, K, L ({i9.get('gerekce')})")
-    k9 = q("SELECT kind, satir FROM giden WHERE mesaj_id = 'wamid.E2EC1' ORDER BY sira")
-    ok([x["kind"] for x in k9] == ["interactive"] and [b["reply"]["title"] for b in k9[0]["satir"]["interactive"]["action"]["buttons"]] == ["1. Ç8801", "2. Ç8801-K", "3. Ç8801-L"]
-       and Path(k9[0]["satir"]["file"]).is_file(), "tek etkileşim satırı: bileşik görsel + 3 düğme; öncelik sorusu yok")
-    say = gonder()
-    g9 = sahte.gidenler()[-1]
-    ok(say.get("kabul_edildi") == 1 and g9["type"] == "interactive" and "image" in g9["interactive"]["header"] and len(g9["interactive"]["action"]["buttons"]) == 3,
-       "Meta: görsel başlıklı 3 düğmeli seçenek mesajı")
-    set_wamid = q("SELECT dis_id FROM giden WHERE mesaj_id = 'wamid.E2EC1'")[0]["dis_id"]
-    time.sleep(1.2)
-    kod, c = webhook(yuk([buton(BAYI, f"s:{s9['id']}:Ç8801K", "2. Ç8801-K", set_wamid, mid="wamid.E2EC2")]))
-    ok(c.get("mesaj") == {"sahiplenildi": 1} and ajan() == 0, "ajan: çatı K düğmesi işlendi (gerçek genel motor)")
-    i9b = q("SELECT sonuc, cikarim FROM isler WHERE mesaj_id = 'wamid.E2EC2'")[0]
+    ok(c.get("mesaj") == {"sahiplenildi": 1} and ajan() == 0, "ajan: 'Ç8801' işlendi (gerçek genel motor)")
+    i9 = q("SELECT sonuc, cikarim FROM isler WHERE mesaj_id = 'wamid.E2EC1'")[0]
     r9 = q("SELECT is_emri_no, rev, is_emri, durum, pdf_yolu, ekler FROM revizyonlar WHERE gonderen = %s ORDER BY id DESC LIMIT 1", BAYI)[0]
-    ok(i9b["sonuc"]["eylem"] == "is_emri" and i9b["cikarim"]["meta"]["backend"] == "etkilesim" and i9b["sonuc"]["cizim"]["motor"] == "genel"
-       and i9b["sonuc"]["cizim"]["passed"] is True, f"iş: is_emri, genel motor geçti (perspektif {i9b['sonuc']['cizim'].get('perspektif')}, {i9b['sonuc']['cizim'].get('sure_s')} s)")
-    ok(r9["rev"] == 1 and r9["durum"] == "onay_bekliyor" and r9["is_emri"]["yapi"]["sistem"] == "celik" and r9["is_emri"]["yapi"]["tanim"] == "modeller/C8801K.json"
+    ok(i9["sonuc"]["eylem"] == "is_emri" and i9["sonuc"]["cizim"]["motor"] == "genel" and i9["sonuc"]["cizim"]["passed"] is True
+       and not q("SELECT 1 FROM secenek_setleri WHERE gonderen = %s AND durum = 'acik'", BAYI),
+       f"iş: is_emri, genel motor geçti, plandan önce çatı seti yok (perspektif {i9['sonuc']['cizim'].get('perspektif')}, {i9['sonuc']['cizim'].get('sure_s')} s)")
+    ok(r9["rev"] == 1 and r9["durum"] == "onay_bekliyor" and r9["is_emri"]["yapi"]["sistem"] == "celik" and r9["is_emri"]["yapi"]["tanim"] == "modeller/C8801.json"
        and "mahaller" not in r9["is_emri"] and r9["is_emri"]["bilgi"]["bayi_telefonu"] == BAYI and "kunye" not in r9["is_emri"],
-       "revizyon r01: zarf yapi.sistem celik, tanım gömülü değil, antet numarası bayi kartından (D-09)")
-    ok(Path(r9["pdf_yolu"]).is_file() and Path(r9["pdf_yolu"]).name == "C8801K_pafta.pdf" and str(VERI / "projects") in r9["pdf_yolu"]
-       and r9["ekler"]["gorsel"]["filename"] == "C8801K_bayi_gorsel.png" and r9["ekler"]["ifc"]["sema_hatasi"] == 0
+       "revizyon r01 (katalog çatısı): zarf yapi.sistem celik, tanım gömülü değil, antet numarası bayi kartından (D-09)")
+    ok(Path(r9["pdf_yolu"]).is_file() and Path(r9["pdf_yolu"]).name == "C8801_pafta.pdf" and str(VERI / "projects") in r9["pdf_yolu"]
+       and r9["ekler"]["gorsel"]["filename"] == "C8801_bayi_gorsel.png" and r9["ekler"]["ifc"]["sema_hatasi"] == 0
        and (VERI / "yayin" / "3d" / r9["ekler"]["ucb"]["anahtar"] / "index.html").read_bytes() == Path(r9["ekler"]["ucb"]["dosya"]).read_bytes(),
        "pafta PDF ve bayi görseli data/projects altında; IFC şema 0; 3D sayfası genel motorun IFC'sinden, yayımlandı (İE-21)")
     import fitz
     with fitz.open(r9["pdf_yolu"]) as d9:
         s9w = [w[4] for w in d9[0].get_text("words")]
         ok(len(d9) == 2 and "TASLAK" in s9w and BAYI in s9w and "Deneme" in s9w, "PDF 2 sayfa; 1. sayfada TASLAK, antette bayinin adı ve kart numarası")
-    k9b = q("SELECT kind, satir FROM giden WHERE mesaj_id = 'wamid.E2EC2' ORDER BY sira")
+    k9b = q("SELECT kind, satir, dis_id FROM giden WHERE mesaj_id = 'wamid.E2EC1' ORDER BY sira")
     ok([x["kind"] for x in k9b][:3] == ["interactive", "document", "interactive"] and k9b[1]["satir"]["filename"] == f"Portman_{r9['is_emri_no']}_r01.pdf"
        and sorted(b["reply"]["id"] for b in k9b[0]["satir"]["interactive"]["action"]["buttons"]) == sorted([f"o:{r9['is_emri_no']}:1", f"r:{r9['is_emri_no']}:1"])
        and k9b[2]["satir"]["interactive"]["action"]["parameters"]["url"] == r9["ekler"]["ucb"]["url"],
@@ -409,10 +396,48 @@ try:
     say = gonder()
     t9 = sahte.tipler()[-(say.get("kabul_edildi") or 0) * 2:]
     ok(say.get("kabul_edildi") >= 2 and "interactive/button" in t9 and "document" in t9, f"Meta: bayi görseli + düğmeler ve PDF gitti ({t9})")
-    ok(BAYI not in json.dumps(i9b["sonuc"]) and q("SELECT durum, secilen_kod FROM secenek_setleri WHERE id = %s", s9["id"])[0]["secilen_kod"] == "Ç8801K",
+    ok(BAYI not in json.dumps(i9["sonuc"]), "iş sonucunda ham numara yok")
+    r01_wamid = q("SELECT dis_id FROM giden WHERE mesaj_id = 'wamid.E2EC1' AND kind = 'interactive' ORDER BY sira LIMIT 1")[0]["dis_id"]
+    time.sleep(1.2)
+    kod, c = webhook(yuk([buton(BAYI, f"o:{r9['is_emri_no']}:1", "Onayla", r01_wamid, mid="wamid.E2EC1O")]))
+    ok(c.get("mesaj") == {"sahiplenildi": 1} and ajan() == 0, "ajan: r01'in Onayla düğmesi işlendi (LLM'siz)")
+    i9o = q("SELECT sonuc FROM isler WHERE mesaj_id = 'wamid.E2EC1O'")[0]["sonuc"]
+    s9 = q("SELECT id, durum, adaylar FROM secenek_setleri ORDER BY olusturuldu DESC LIMIT 1")[0]
+    ok(i9o["eylem"] == "secenek" and [a["kod"] for a in s9["adaylar"]] == ["Ç8801", "Ç8801K", "Ç8801L"] and s9["durum"] == "acik"
+       and q("SELECT durum FROM revizyonlar WHERE is_emri_no = %s AND rev = 1", r9["is_emri_no"])[0]["durum"] == "onay_bekliyor"
+       and not q("SELECT 1 FROM muhendis_kontrolleri"),
+       f"onaydan sonra çatı seti: katalog, K, L; onay çatıyla kaydedilecek, mühendis kontrolü açılmadı ({i9o.get('gerekce')})")
+    k9 = q("SELECT kind, satir FROM giden WHERE mesaj_id = 'wamid.E2EC1O' ORDER BY sira")
+    ok([x["kind"] for x in k9] == ["interactive"] and [b["reply"]["title"] for b in k9[0]["satir"]["interactive"]["action"]["buttons"]] == ["1. Ç8801", "2. Ç8801-K", "3. Ç8801-L"]
+       and Path(k9[0]["satir"]["file"]).is_file()
+       and k9[0]["satir"]["body"].startswith("Planınız onaylandı (r01). Şimdi çatıyı seçin. Bu eve 3 çatı uygulanır. Plan aynı kalır; yalnız çatı değişir."),
+       "tek etkileşim satırı: \"Planınız onaylandı (r01). Şimdi çatıyı seçin.\" + bileşik görsel + 3 düğme; öncelik sorusu yok")
+    say = gonder()
+    g9 = sahte.gidenler()[-1]
+    ok(say.get("kabul_edildi") == 1 and g9["type"] == "interactive" and "image" in g9["interactive"]["header"] and len(g9["interactive"]["action"]["buttons"]) == 3,
+       "Meta: görsel başlıklı 3 düğmeli çatı mesajı")
+    set_wamid = q("SELECT dis_id FROM giden WHERE mesaj_id = 'wamid.E2EC1O'")[0]["dis_id"]
+    time.sleep(1.2)
+    kod, c = webhook(yuk([buton(BAYI, f"s:{s9['id']}:Ç8801K", "2. Ç8801-K", set_wamid, mid="wamid.E2EC2")]))
+    ok(c.get("mesaj") == {"sahiplenildi": 1} and ajan() == 0, "ajan: çatı K düğmesi işlendi (gerçek genel motor)")
+    i9b = q("SELECT sonuc, cikarim FROM isler WHERE mesaj_id = 'wamid.E2EC2'")[0]
+    rv9 = q("SELECT proje_id, is_emri_no, rev, is_emri, durum, pdf_yolu, ekler FROM revizyonlar WHERE gonderen = %s ORDER BY id DESC LIMIT 2", BAYI)
+    ok(i9b["sonuc"]["eylem"] == "is_emri" and i9b["cikarim"]["meta"]["backend"] == "etkilesim" and i9b["sonuc"]["cizim"]["motor"] == "genel"
+       and i9b["sonuc"]["cizim"]["passed"] is True, f"iş: is_emri, genel motor geçti (perspektif {i9b['sonuc']['cizim'].get('perspektif')}, {i9b['sonuc']['cizim'].get('sure_s')} s)")
+    ok(rv9[0]["rev"] == 2 and rv9[0]["durum"] == "onay_bekliyor" and rv9[1]["durum"] == "yerini_aldi" and rv9[0]["proje_id"] == rv9[1]["proje_id"]
+       and rv9[0]["is_emri"]["yapi"]["tanim"] == "modeller/C8801K.json" and Path(rv9[0]["pdf_yolu"]).name == "C8801K_pafta.pdf",
+       "r02 aynı projede, Ç8801-K tanımı ve paftası (plan aynı, çatı K)")
+    k9c = q("SELECT kind, satir FROM giden WHERE mesaj_id = 'wamid.E2EC2' ORDER BY sira")
+    ok([x["kind"] for x in k9c][:2] == ["interactive", "document"] and k9c[1]["satir"]["filename"] == f"Portman_{rv9[0]['is_emri_no']}_r02.pdf"
+       and k9c[0]["satir"]["body"].startswith("Çatı: ") and "Plan aynı. Ön onay planınız hazır (r02)." in k9c[0]["satir"]["body"]
+       and not q("SELECT 1 FROM muhendis_kontrolleri"),
+       "satırlar: \"Çatı: … Plan aynı. Ön onay planınız hazır (r02).\" + Onayla/Revize et + PDF r02; mühendis kontrolü yok (onay r02'de)")
+    say = gonder()
+    ok(say.get("kabul_edildi", 0) >= 2, "Meta: r02 görseli + düğmeler ve PDF gitti")
+    ok(BAYI not in json.dumps(i9b["sonuc"]) and q("SELECT durum, secilen_kod FROM secenek_setleri WHERE id = %s", s9["id"])[0] == {"durum": "secildi", "secilen_kod": "Ç8801K"},
        "iş sonucunda ham numara yok; set seçildi olarak kapandı")
 
-    print("10) İE-08 A4: serbest metin revizyon → r02 aynı projede (önce–sonra görseli) → belirsiz cümle → görselli '1 / 2 / Hiçbiri' → düğme 2 → r03")
+    print("10) İE-08 A4: serbest metin revizyon → r03 aynı projede (önce–sonra görseli) → belirsiz cümle → görselli '1 / 2 / Hiçbiri' → düğme 2 → r04")
     time.sleep(1.2)
     kod, c = webhook(yuk([metin(BAYI, "mutfak penceresi 120x120 olsun", mid="wamid.E2ER1")]))
     hazir_ekle("wamid.E2ER1", {"niyet": "revizyon", "guven": "yuksek", "ozet": "mutfak penceresi 120x120",
@@ -421,9 +446,9 @@ try:
     i10 = q("SELECT sonuc FROM isler WHERE mesaj_id = 'wamid.E2ER1'")[0]["sonuc"]
     rv = q("SELECT proje_id, rev, durum, is_emri, ekler, is_emri_no FROM revizyonlar WHERE gonderen = %s ORDER BY id DESC LIMIT 2", BAYI)
     y10 = rv[0]["is_emri"]["yapi"]
-    ok(i10["eylem"] == "is_emri" and rv[0]["rev"] == 2 and rv[0]["proje_id"] == rv[1]["proje_id"] and rv[1]["durum"] == "yerini_aldi"
+    ok(i10["eylem"] == "is_emri" and rv[0]["rev"] == 3 and rv[0]["proje_id"] == rv[1]["proje_id"] and rv[1]["durum"] == "yerini_aldi"
        and [(d["op"], d["aciklik"], d["en"], d["yuk"]) for d in y10["degisiklikler"]] == [("pencere_olcu", "P5", 120, 120)],
-       f"r02 aynı projede; değişiklik zarfta ({i10.get('gerekce')})")
+       f"r03 aynı projede; değişiklik zarfta ({i10.get('gerekce')})")
     g10 = rv[0]["ekler"].get("gorsel") or {}
     t10 = json.loads((Path(g10.get("file", "/yok")).parent / "tanim.json").read_text(encoding="utf-8")) if g10.get("file") else {}
     ok(g10.get("kaynak") == "once_sonra" and Path(g10["file"]).is_file() and Path(g10["file"]).stat().st_size <= 5 * 1024 * 1024
@@ -431,7 +456,7 @@ try:
        f"başlık görseli önce–sonra (perspektif {i10['cizim'].get('perspektif')}); çizilen tanımda P5 120/120")
     k10 = q("SELECT kind, satir FROM giden WHERE mesaj_id = 'wamid.E2ER1' ORDER BY sira")
     ok([x["kind"] for x in k10][:2] == ["interactive", "document"] and k10[0]["satir"]["file"].endswith("_once_sonra.png")
-       and k10[1]["satir"]["filename"] == f"Portman_{rv[0]['is_emri_no']}_r02.pdf", "satırlar: önce–sonra görselli Onayla/Revize et + PDF r02")
+       and k10[1]["satir"]["filename"] == f"Portman_{rv[0]['is_emri_no']}_r03.pdf", "satırlar: önce–sonra görselli Onayla/Revize et + PDF r03")
     say = gonder()
     t10 = sahte.tipler()[-(say.get("kabul_edildi") or 0) * 2:]                    # her dosyalı satır önce medya yükler
     ok(say.get("kabul_edildi", 0) >= 2 and "interactive/button" in t10 and "document" in t10, f"Meta: önce–sonra görseli + düğmeler ve PDF gitti ({t10})")
@@ -451,54 +476,54 @@ try:
     ok(c.get("mesaj") == {"sahiplenildi": 1} and ajan() == 0, "ajan: '2' düğmesi işlendi (LLM'siz)")
     i12 = q("SELECT sonuc, cikarim FROM isler WHERE mesaj_id = 'wamid.E2ER3'")[0]
     r12 = q("SELECT rev, is_emri FROM revizyonlar WHERE gonderen = %s ORDER BY id DESC LIMIT 1", BAYI)[0]
-    ok(i12["sonuc"]["eylem"] == "is_emri" and i12["cikarim"]["meta"]["backend"] == "etkilesim" and r12["rev"] == 3
+    ok(i12["sonuc"]["eylem"] == "is_emri" and i12["cikarim"]["meta"]["backend"] == "etkilesim" and r12["rev"] == 4
        and [(d["aciklik"], d["en"], d["yuk"]) for d in r12["is_emri"]["yapi"]["degisiklikler"]] == [("P5", 120, 120), ("P4", 120, 180)],
-       "r03: seçilen okuma (P4 120/180) önceki değişikliğin üstüne birikti")
+       "r04: seçilen okuma (P4 120/180) önceki değişikliğin üstüne birikti")
     d12, _ = depo.konusma_oku(BAYI)
-    ok(d12["revizyon"] == 2 and BAYI not in json.dumps(i12["sonuc"]) and q("SELECT durum FROM sorular WHERE gonderen = %s ORDER BY id DESC LIMIT 1", BAYI)[0]["durum"] == "cevaplandi",
-       "sayaç 2 (r03), soru cevaplandı, iş sonucunda ham numara yok")
+    ok(d12["revizyon"] == 3 and BAYI not in json.dumps(i12["sonuc"]) and q("SELECT durum FROM sorular WHERE gonderen = %s ORDER BY id DESC LIMIT 1", BAYI)[0]["durum"] == "cevaplandi",
+       "sayaç 3 (r04), soru cevaplandı, iş sonucunda ham numara yok")
 
-    print("11) İE-08 8b: bayi r03'ü onaylar → mühendise şablon → Gönder → görsel, PDF, Excel, DXF → Patron'a gönder → Patron şablonu; panel tablosu")
+    print("11) İE-08 8b: bayi r04'ü onaylar (çatı r02'de seçildi: yeniden sorulmaz) → mühendise şablon → Gönder → görsel, PDF, Excel, DXF → Patron'a gönder → Patron şablonu; panel tablosu")
     MUH = "900000000303"                                                                         # gerçek olmayan deneme numarası
     depo.bayi_yaz(MUH, ad="Deneme Mühendis", rol="muhendis")
     AY.yaz(VERI, "mode", "kayitli")
     for a11, d11 in (("sablon_muhendis_kontrol", "portman_muhendis_kontrol_v1"), ("sablon_muhendis_hatirlatma", "portman_hatirlatma_v1")):
         AY.yaz(VERI, a11, d11)
-    gonder()                                                                                       # r03 bayiye gider (onay ona bağlanır)
+    gonder()                                                                                       # r04 bayiye gider (onay ona bağlanır)
     no11 = q("SELECT is_emri_no FROM revizyonlar WHERE gonderen = %s ORDER BY id DESC LIMIT 1", BAYI)[0]["is_emri_no"]
     # planın düğmeli satırı ilk etkileşimli satırdır; "3D'yi aç" (İE-21) da etkileşimli, sırasız sorguda hangisi geleceği belli değil
-    r03_wamid = q("SELECT dis_id FROM giden WHERE mesaj_id = 'wamid.E2ER3' AND kind = 'interactive' ORDER BY sira LIMIT 1")[0]["dis_id"]
+    r04_wamid = q("SELECT dis_id FROM giden WHERE mesaj_id = 'wamid.E2ER3' AND kind = 'interactive' ORDER BY sira LIMIT 1")[0]["dis_id"]
     time.sleep(1.2)
-    kod, c = webhook(yuk([buton(BAYI, f"o:{no11}:3", "Onayla", r03_wamid, mid="wamid.E2EM1")]))
+    kod, c = webhook(yuk([buton(BAYI, f"o:{no11}:4", "Onayla", r04_wamid, mid="wamid.E2EM1")]))
     ok(c.get("mesaj") == {"sahiplenildi": 1} and ajan() == 0, "ajan: bayinin Onayla düğmesi işlendi")
     k11 = q("SELECT durum, muhendis, bayi, onay_mesaj_id FROM muhendis_kontrolleri")
-    rv11 = q("SELECT durum, ekler FROM revizyonlar WHERE is_emri_no = %s AND rev = 3", no11)[0]
+    rv11 = q("SELECT durum, ekler FROM revizyonlar WHERE is_emri_no = %s AND rev = 4", no11)[0]
     ok(len(k11) == 1 and k11[0]["durum"] == "bekliyor" and k11[0]["muhendis"] == MUH and k11[0]["onay_mesaj_id"] == "wamid.E2EM1" and rv11["durum"] == "onaylandi",
        "kontrol kaydı açıldı (mühendiste), revizyon onaylandı")
-    ok(Path(rv11["ekler"]["excel"]["dosya"]).is_file() and rv11["ekler"]["excel"]["dosya"].endswith("_r03_yukleme_listesi.xlsx") and Path(rv11["ekler"]["dxf"]["dosya"]).is_file(),
-       "r03'ün Excel'i sunucuda (gerçek genel motorun listesinden; D-17) ve DXF'i klasörde")
+    ok(Path(rv11["ekler"]["excel"]["dosya"]).is_file() and rv11["ekler"]["excel"]["dosya"].endswith("_r04_yukleme_listesi.xlsx") and Path(rv11["ekler"]["dxf"]["dosya"]).is_file(),
+       "r04'ün Excel'i sunucuda (gerçek genel motorun listesinden; D-17) ve DXF'i klasörde")
     b11 = q("SELECT alici, kind, govde FROM giden WHERE mesaj_id = 'wamid.E2EM1' ORDER BY sira")
     ok(b11[0]["alici"] == BAYI and b11[0]["govde"].endswith("Plan teknik kontrole gönderildi; sonucu size bildireceğiz.")
        and [(x["alici"], x["kind"]) for x in b11[1:]] == [("MUHENDIS", "template")], "bayiye 'teknik kontrole gönderildi'; mühendise şablon satırı")
     say = gonder()
     m11 = [y for y in sahte.gidenler() if y["to"] == MUH]
     ok(say.get("kabul_edildi") == 2 and len(m11) == 1 and m11[0]["template"]["name"] == "portman_muhendis_kontrol_v1"
-       and m11[0]["template"]["components"][0]["parameters"] == [{"type": "text", "text": no11}, {"type": "text", "text": "r03"}],
-       "Meta: mühendis kartına şablon (iş no, r03) ve Gönder düğmesi")
+       and m11[0]["template"]["components"][0]["parameters"] == [{"type": "text", "text": no11}, {"type": "text", "text": "r04"}],
+       "Meta: mühendis kartına şablon (iş no, r04) ve Gönder düğmesi")
     sab_wamid = q("SELECT dis_id FROM giden WHERE mesaj_id = 'wamid.E2EM1' AND alici = 'MUHENDIS'")[0]["dis_id"]
     time.sleep(1.2)
-    kod, c = webhook(yuk([buton(MUH, f"muh:gonder:{no11}:3", "Gönder", sab_wamid, mid="wamid.E2EM2")]))
+    kod, c = webhook(yuk([buton(MUH, f"muh:gonder:{no11}:4", "Gönder", sab_wamid, mid="wamid.E2EM2")]))
     ok(c.get("mesaj") == {"sahiplenildi": 1} and ajan() == 0 and q("SELECT cikarim FROM isler WHERE mesaj_id = 'wamid.E2EM2'")[0]["cikarim"] is None,
        "ajan: mühendisin Gönder düğmesi (LLM'siz)")
     say = gonder()
     m11b = [y for y in sahte.gidenler() if y["to"] == MUH][1:]
     belge11 = [y["document"]["filename"] for y in m11b if y["type"] == "document"]
     ok(say.get("kabul_edildi") == 5 and [y["type"] for y in m11b] == ["image", "document", "document", "document", "interactive"]
-       and belge11 == [f"Portman_{no11}_r03.pdf", f"Portman_{no11}_r03_yukleme_listesi.xlsx", f"Portman_{no11}_r03.dxf"],
+       and belge11 == [f"Portman_{no11}_r04.pdf", f"Portman_{no11}_r04_yukleme_listesi.xlsx", f"Portman_{no11}_r04.dxf"],
        f"Meta: mühendise görsel, TASLAK pafta, Excel, DXF ve iki düğme ({belge11})")
     dug_wamid = q("SELECT dis_id FROM giden WHERE mesaj_id = 'wamid.E2EM2' AND kind = 'interactive' ORDER BY sira LIMIT 1")[0]["dis_id"]
     time.sleep(1.2)
-    kod, c = webhook(yuk([buton(MUH, f"muh:patron:{no11}:3", "Patron'a gönder", dug_wamid, mid="wamid.E2EM3")]))
+    kod, c = webhook(yuk([buton(MUH, f"muh:patron:{no11}:4", "Patron'a gönder", dug_wamid, mid="wamid.E2EM3")]))
     ok(c.get("mesaj") == {"sahiplenildi": 1} and ajan() == 0, "ajan: mühendisin 'Patron'a gönder' düğmesi")
     say = gonder()
     p11 = q("SELECT kind, durum, hata FROM giden WHERE mesaj_id = 'wamid.E2EM3' AND alici = 'PATRON' ORDER BY sira")
