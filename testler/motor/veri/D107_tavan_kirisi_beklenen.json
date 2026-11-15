@@ -1,6 +1,6 @@
 {
  "sema": "portman.tavan_kirisi_beklenen/1",
- "aciklama": "D-107 (BK-39, PC-43) hedef örneği: Motor'un tavan kirişi kuralının (`motor/tavan_kirisi.bul`) bulduğu kirişler ve liste satırları. Kirişlerin yeri mühendisin paftalarındaki özel profil planından okundu (köşe profili sohbeti, 15 Kasım 2026); Lokman 10:22:20'de yerleri doğru buldu (\"koyulması gerekenleri ... doğru bulmuşsun\"), 10:22:40'ta kuralı kartla onayladı, 10:48:34'te listeyi ve saha montaj planını 70 m²'nin eskiziyle onayladı (\"Eskizdeki gibi\"; liste L 3257,5). 65 ve 81 m²'nin liste boyu aynı kuralla hesaplandı, eskizde ayrıca gösterilmedi. Ölçüler cm, Motor çerçevesi (x sol dış yüzden, y Motor'un dizilimiyle); `yon` kirişin koştuğu eksen. Kirişsiz evler: bandı makas aralığından dar açıklık ve çıkıntılı cumba. Taramadaki öteki evlerde (havuzun 34 evi, TK-01…TK-06, PK-01, P6001, Yan Verandalı) kiriş yok; bunu test tarar.",
+ "aciklama": "D-107 (BK-39, PC-43) hedef örneği: Motor'un tavan kirişi kuralının (`motor/tavan_kirisi.bul`) bulduğu kirişler ve liste satırları. Kirişlerin yeri mühendisin paftalarındaki özel profil planından okundu (köşe profili sohbeti, 15 Kasım 2026); Lokman 10:22:20'de yerleri doğru buldu (\"koyulması gerekenleri ... doğru bulmuşsun\"), 10:22:40'ta kuralı kartla onayladı, 10:48:34'te listeyi ve saha montaj planını 70 m²'nin eskiziyle onayladı (\"Eskizdeki gibi\"; liste L 3257,5). 65 ve 81 m²'nin liste boyu aynı kuralla hesaplandı, eskizde ayrıca gösterilmedi. Ölçüler cm, Motor çerçevesi (x sol dış yüzden, y Motor'un dizilimiyle); `yon` kirişin koştuğu eksen. Kirişsiz evler: bandı makas aralığından dar açıklık, çıkıntılı cumba ve açıklığı duvarsız sınırın kirişiyle kesilen salon. Taramadaki öteki evlerde (havuzun 34 evi, TK-01…TK-06, PK-01, P6001, Yan Verandalı) kiriş yok; bunu test tarar.",
  "onay": {
   "karar": "D-107",
   "lokman": [
@@ -155,13 +155,8 @@
   },
   "ALTIN_2plus1_6x8": {
    "is_emri": "is_emri/ALTIN_2plus1_6x8.json",
-   "disinda": [
-    {
-     "oda": "SALON",
-     "aciklik_cm": 753.0,
-     "neden": "bant 117,5 cm, makas aralığı 125,5 cm'den dar: makas gelmez"
-    }
-   ]
+   "disinda": [],
+   "not": "6×8 referans evi: salon ile mutfak arasındaki duvarsız sınırın kirişi (listede var; Lokman, kart 22 Ekim) makas yönündeki açıklığı keser; 7 m'yi aşan açıklık yok (geometri hakemi, 15 Kasım)"
   },
   "PA17": {
    "is_emri": "is_emri/adaylar/PA17.json",

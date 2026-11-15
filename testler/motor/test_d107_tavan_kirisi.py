@@ -31,6 +31,18 @@ TEK_ODA = {"is_emri_no": "D107-SENTETIK", "revizyon": 1,
            "mahaller": [{"ad": "SALON", "tur": "salon", "konum_pano": [[0, 0, 6, 7]]}],
            "acikliklar": [{"tur": "pencere", "olcu": "120x120", "mahal": "SALON", "duvar": "on"}],
            "cati": {"tip": "besik", "egim_yuzde": 33, "sacak_cm": 30, "topuk_cm": 10}}
+# Aynı oda ikiye bölünmüş, aradaki sınır duvarsız: sınırın kirişi (listede var) makas yönündeki açıklığı keser, 7 m'yi aşan açıklık kalmaz
+SINIRLI = {**TEK_ODA, "mahaller": [{"ad": "SALON", "tur": "salon", "konum_pano": [[0, 0, 3, 7]]},
+                                   {"ad": "MUTFAK", "tur": "mutfak", "konum_pano": [[3, 0, 6, 7]]}],
+           "acik_sinirlar": [{"arasi": ["SALON", "MUTFAK"], "serit": "SALON"}]}
+# 15 m'lik salon, önünde iki oda: kiriş iki odanın arasındaki duvarın ucuna oturur ama iki yanında 753 cm kalır (odaya bir kiriş yetmez)
+UZUN = {**TEK_ODA, "yapi": {**TEK_ODA["yapi"], "grid": {"x_pano": 12, "y_pano": 4}},
+        "mahaller": [{"ad": "ODA 1", "tur": "yatak_odasi", "konum_pano": [[0, 0, 6, 1]]},
+                     {"ad": "ODA 2", "tur": "yatak_odasi", "konum_pano": [[6, 0, 12, 1]]},
+                     {"ad": "SALON", "tur": "salon", "konum_pano": [[0, 1, 12, 4]]}],
+        "acikliklar": [{"tur": "pencere", "olcu": "120x120", "mahal": "SALON", "duvar": "arka"}]}
+# Motor'un sorduğu evler (K21; Lokman'ın sözü değil): katalogdaki 3+1'in (P9401) iki aday kopyası, iki ucu köşede iki eşit yer
+SORULAN = {"is_emri/adaylar/TEST01.json": [323.75, 386.5], "is_emri/adaylar/TEST03.json": [637.5, 700.25]}
 
 
 def _oku(yol: str | Path) -> dict:
@@ -45,8 +57,12 @@ def _bul(ie: dict) -> dict:
 
 
 def _prefabrik_girdiler() -> list[Path]:
-    yollar = sorted((KOK / "is_emri" / "adaylar").glob("PA*.json")) + sorted((KOK / "is_emri").glob("*.json"))
+    """Depodaki bütün prefabrik İş Emri'leri: havuz ve aday evleri, referans girdiler, hedef örnekler, çizim kıyası ve kör ölçüm evleri,
+    harness'in İş Emri'leri. Katalog planları (P1051 …) çıkarıcıdan gelir; onların çizimi `dogrula.py`'nin DXF izlerinde aynen kalmalı."""
+    yollar = sorted((KOK / "is_emri" / "adaylar").glob("*.json")) + sorted((KOK / "is_emri").glob("*.json"))
     yollar += sorted((KOK / "testler" / "motor" / "veri").glob("TK0*.json")) + [KOK / "testler" / "motor" / "veri" / "PK01.json"]
+    yollar += sorted((KOK / "testler" / "cizim" / "evler").glob("*.json")) + sorted((KOK / "testler" / "kor" / "projeler").glob("*/is_emri.json"))
+    yollar += sorted((KOK / "beyin" / "testler").glob("is_emri_*.json"))
     out = []
     for y in yollar:
         ie = json.loads(y.read_text(encoding="utf-8"))
@@ -87,24 +103,37 @@ def test_muhurlu_70m2_ayni_kiris():
 
 @pytest.mark.parametrize("kod", sorted(BEKLENEN["kirissiz"]))
 def test_kirissiz_evler(kod):
-    """102 m²'nin antresi ve 6×8 referans evinin salonu: bant 117,5 < 125,5, makas gelmez (Lokman 10:20:13). 93 m²: çıkıntılı cumba
-    kapsam dışı, ana çatıda açıklık 7 m'nin altında (Lokman 10:19:45, 10:22:20)."""
+    """102 m²'nin antresi: bant 117,5 < 125,5, makas gelmez (Lokman 10:20:13). 93 m²: çıkıntılı cumba kapsam dışı, ana çatıda açıklık
+    7 m'nin altında (Lokman 10:19:45, 10:22:20). 6×8 referans evinin salonu: salon–mutfak sınırının kirişi açıklığı keser."""
     b = BEKLENEN["kirissiz"][kod]
     s = _bul(_oku(b["is_emri"]))
     assert s["kirisler"] == [] and s["uyarilar"] == [] and s["disinda"] == b["disinda"]
 
 
-def test_tarama_yalniz_uc_ev():
-    """Havuzun bütün prefabrik evleri ve referans girdiler (6×8, Yan Verandalı, P6001, TK-01…TK-06, PK-01): kiriş yalnız hedef örnekteki
-    üç evde, uyarı hiçbir evde yok."""
-    kirisli, uyarili = set(), set()
-    for y in _prefabrik_girdiler():
-        s = _bul(json.loads(y.read_text(encoding="utf-8")))
+def test_tarama_butun_is_emirleri():
+    """Depodaki bütün prefabrik İş Emri'leri (havuz, adaylar, 6×8, Yan Verandalı, P6001, TK-01…TK-06, PK-01, çizim kıyası, kör ölçüm,
+    harness): kiriş yalnız hedef örnekteki üç evde ve onların kopyalarında (70 m² = AP-09, 65 m² = AP-24, 81 m² = AP-17), aynı kirişle.
+    Uyarı yalnız iki eşit yerin kaldığı iki aday kopyasında (P9401'in 3+1'i; kiriş konmaz, sorulur)."""
+    kopya = {"testler/cizim/evler/AP09.json": "PA03", "testler/kor/projeler/AP09/is_emri.json": "PA03",
+             "testler/kor/projeler/AP24/is_emri.json": "PA20", "testler/kor/projeler/AP17/is_emri.json": "PA16"}
+    kirisli, uyarili = {}, {}
+    girdiler = _prefabrik_girdiler()
+    assert len(girdiler) > 60
+    for y in girdiler:
+        ad = str(y.relative_to(KOK))
+        ie = json.loads(y.read_text(encoding="utf-8"))
+        try:
+            s = _bul(ie)
+        except G.IsEmriHatasi:                                    # kurulamayan eski deneme girdisi: çizim de yok
+            continue
         if s["kirisler"]:
-            kirisli.add(y.stem)
+            kirisli[ad] = s["kirisler"]
         if s["uyarilar"]:
-            uyarili.add(y.stem)
-    assert kirisli == set(BEKLENEN["kirisli"]) and uyarili == set()
+            uyarili[ad] = [d.get("adaylar_cm") for d in s["disinda"] if d["neden"] == "iki eşit yer"]
+    beklenen = {b["is_emri"]: [b["kiris"]] for b in BEKLENEN["kirisli"].values()}
+    beklenen.update({y: [BEKLENEN["kirisli"][k]["kiris"]] for y, k in kopya.items()})
+    assert kirisli == beklenen
+    assert uyarili == {y: [a] for y, a in SORULAN.items()}
 
 
 def test_liste_satiri():
@@ -132,7 +161,7 @@ def test_kirissiz_evin_modeli_aynen():
 
 
 def test_kose_yoksa_sorulur():
-    """K21: kirişin oturacağı köşe yoksa kiriş yazılmaz; listede adetsiz "Kural yok" satırı ve çizimde uyarı (yer Lokman'a sorulur)."""
+    """K21: kirişin oturacağı köşe yoksa kiriş yazılmaz; listede adetsiz "Kural yok" satırı (yer Lokman'a sorulur)."""
     s = _bul(TEK_ODA)
     assert s["kirisler"] == [] and len(s["uyarilar"]) == 1 and "köşe bulunamadı" in s["uyarilar"][0]
     satir = [x for x in PL.is_emrinden(copy.deepcopy(TEK_ODA))["satirlar"] if x["kalem"] == KALEM]
@@ -189,7 +218,39 @@ def test_kirissiz_evde_katman_yok():
     assert "TAVAN_KIRISI" not in c.doc.layers and not [e for e in c.msp if e.dxf.layer == "TAVAN_KIRISI"]
 
 
-def test_kose_yoksa_cizimde_uyari():
-    plan, c, _gap = _cizim(TEK_ODA)
-    assert "TAVAN_KIRISI" not in c.doc.layers
-    assert any(u.startswith("Tavan kirişi: SALON açıklığı 753 cm") for u in plan.uyarilar)
+@pytest.mark.parametrize("ie", [TEK_ODA, "is_emri/adaylar/TEST01.json"], ids=["kose_yok", "iki_esit_yer"])
+def test_sorulan_evin_cizimi_aynen(ie):
+    """K21'de kiriş çizilmez ve uyarı antete yazılmaz: çizim kirişsiz evinki gibi (katalog planlarının dondurulmuş DXF'i aynen; geometri
+    hakemi, 15 Kasım). Soruyu listenin "Kural yok" satırı sorar."""
+    ie = _oku(ie) if isinstance(ie, str) else ie
+    plan, c, _gap = _cizim(ie)
+    assert c.tavan["uyarilar"] and not c.tavan["kirisler"]
+    assert "TAVAN_KIRISI" not in c.doc.layers and not any("avan kiri" in u for u in plan.uyarilar)
+    satir = [x for x in PL.is_emrinden(copy.deepcopy(ie))["satirlar"] if x["kalem"] == KALEM and x["dayanak"] == "Kural yok"]
+    assert len(satir) == len(c.tavan["uyarilar"]) == 1 and satir[0]["adet"] is None
+
+
+def test_duvarsiz_sinir_acikligi_keser():
+    """İki oda arasındaki duvarsız sınırın kirişi (listede var; Lokman, kart 22 Ekim) makas yönündeki açıklığı keser: tek odada 753 cm
+    olan açıklık sınırla ikiye bölünür, kiriş ve soru yok. Makasa paralel sınır açıklığı kesmez (65 m²'nin kirişi aynı)."""
+    assert _bul(TEK_ODA)["uyarilar"]
+    assert _bul(SINIRLI) == {"kirisler": [], "disinda": [], "uyarilar": []}
+    assert _oku(BEKLENEN["kirisli"]["PA20"]["is_emri"]).get("acik_sinirlar")
+
+
+def test_odaya_bir_kiris_yetmezse_sorulur():
+    """Lokman'ın kuralı odaya bir kiriş koyar. Kirişten sonra 7 m'yi aşan parça kalırsa (15 m'lik salon: iki yanda 753 cm) kiriş konmaz,
+    sorulur (K21)."""
+    s = _bul(UZUN)
+    assert s["kirisler"] == []
+    assert [d["neden"] for d in s["disinda"] if d["oda"] == "SALON"] == ["kirişten sonra 753 cm'lik parça kalıyor"]
+    assert len(s["uyarilar"]) == 1 and "sorulur" in s["uyarilar"][0]
+
+
+def test_esitlik_payi_ve_ayni_kiris():
+    """İki aday 1 cm'den az farklıysa eşittir (varsayım, `ESIT_PAYI`); ekseni 10 cm'den yakın aynı uçlu iki aday tek kiriştir (65 m²'de
+    386,5 ile 389,5: kalın duvarın ekseni). Eşit kalan iki yer sorulur."""
+    assert TK.ESIT_PAYI == 1.0 and TK.AYNI_KIRIS == 10.0
+    for y, adaylar in SORULAN.items():
+        s = _bul(_oku(y))
+        assert s["kirisler"] == [] and [d["adaylar_cm"] for d in s["disinda"]] == [adaylar]

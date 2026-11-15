@@ -159,6 +159,8 @@ def _dosemeden_pencereler(plan) -> list:
 class Cizici:
     def __init__(self, plan: G.Plan, katalog: Katalog):
         self.plan, self.kat = plan, katalog
+        from . import tavan_kirisi as TK                    # D-107: plan kurulur kurulmaz (cumbanın dikdörtgeni son ızgaradan)
+        self.tavan = TK.bul(plan, plan.is_emri)
         katalog.t_dis_cm, katalog.t_ic_cm = G.T_DIS, G.T_IC
         katalog.yukseklik_cm = float(plan.is_emri["yapi"].get("duvar_yuksekligi_cm", 250))   # 250 / 280 / 300 (D-14; kur() başkasını reddeder)
         self.h_blok_adi_dis = None
@@ -932,10 +934,10 @@ class Cizici:
         kirişin yanında (y yönündekinde solda ya da sağda dik, x yönündekinde altta ya da üstte). Yazı, bu planda önce konmuş yazılara ve özel
         pano ölçülerine (`dolu`) binmeyen ilk yere konur: önce ortada sol/alt, sonra sağ/üst, sonra kirişin üçte birinde; hepsi doluysa
         ortada sol/alt. Katman TAVAN_KIRISI yalnız kirişli evde açılır (kirişsiz evin DXF'i aynen). Kiriş yeri bulunamazsa ya da iki eşit
-        yer kalırsa çizilmez; uyarısı antetin uyarılarına (K21)."""
+        yer kalırsa çizilmez; soruyu listenin "Kural yok" satırı sorar (K21). Uyarı antete yazılmaz: kirişsiz evin DXF'i, katalog planları
+        dahil, aynen kalır (geometri hakemi, 15 Kasım)."""
         from . import tavan_kirisi as TK
-        bulunan = TK.bul(self.plan, self.plan.is_emri)
-        self.plan.uyarilar += [u for u in bulunan["uyarilar"] if u not in self.plan.uyarilar]
+        bulunan = self.tavan
         if not bulunan["kirisler"]:
             return
         e = TK.kural()["kesit"] / 2
