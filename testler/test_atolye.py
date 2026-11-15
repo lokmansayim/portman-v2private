@@ -223,7 +223,7 @@ def test_dondur_ve_tam_kontrol(atolye):
     # yeniden dondurma gerekçe ve var olan bir kararla (D-02); tam izler (sabit zaman, perspektifsiz, pim 0.19) iki koşuda aynı
     banka = atolye["banka"]
     assert kos(banka, "dondur", "Ç8801Z", "--gerekce", "", "--karar", "D-02") == 2
-    assert kos(banka, "dondur", "Ç8801Z", "--gerekce", "deneme", "--karar", "D-99") == 2
+    assert kos(banka, "dondur", "Ç8801Z", "--gerekce", "deneme", "--karar", "D-00") == 2
     assert kos(banka, "dondur", "Ç8801Z", "--gerekce", "deneme", "--karar", "D-02") == 0
     k = json.loads((banka / "C8801Z" / "kontrol.json").read_text(encoding="utf-8"))
     assert k["kural_seti"] == "kurallar/liste/setler/0.19.json" and k["dondurma"]["karar"] == "D-02"
