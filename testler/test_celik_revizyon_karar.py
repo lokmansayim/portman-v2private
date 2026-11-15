@@ -848,11 +848,12 @@ def test_hakem6_celik_istek_cumlesinde_cati_numarasi_sorulur(s):
 
 
 def test_hakem6_celik_oda_sira_sayisi_cati_degil(s):
-    """Y2 çelikte: "2. yatak odası penceresi …" çatı notu almaz; pencere sorusu ikinci yatak odasının pencerelerini sorar."""
+    """Y2 çelikte: "2. yatak odası penceresi …" çatı seçimi değildir. Tur 7 (Y1, Y2): "N." numaralı listenin maddesi de olabilir; tek
+    başına "N." ve ardından istek: çatı sorulur (set açık, seçim kaydedilmez), öteki isteğin uygulanmadığı yazılır."""
     cati_seti(s)
     k = s.yaz("2. yatak odası penceresi 120x120 olsun", pencereler=[pen("yatak odası 2", "120x120")])
-    assert "çatı" not in k.mesaj.lower() and not s.k.d.get("cati_secilen"), k.mesaj
-    assert "Yatak Odası 1" not in k.mesaj and "Yatak Odası 2" in k.mesaj, k.mesaj
+    assert k.eylem == "sor" and k.mesaj.startswith("Hangi çatı olsun?") and "öteki isteği uygulamadım" in k.mesaj, k.mesaj
+    assert not s.k.d.get("cati_secilen") and s.plan["revizyon"] == 1 and s.k.d["secenek_seti"]["durum"] == "acik", k.mesaj
 
 
 @pytest.mark.parametrize("metin", ["2 olsun eline sağlık", "2 olsn"])
@@ -878,3 +879,36 @@ def test_hakem6_celik_cati_basliginda_olcu_farki(s):
     m = s.plan["talep"]["metin"]
     assert m.startswith("Ç8801-K (Beşik + cumba, doğu ucu kırma) · 88 m², 2+1. Uygulanan: Banyo arkaya 30 cm büyütüldü.") and m.endswith(
         "Ölçüler değiştiği için plan taslaktır; mühendis kontrolünde kesinleşir."), m
+
+
+# ── İE-42 · geometri hakemi yedinci tur (15 Kasım 2026 gece) ──────────────────────────────────────────────────────────────────────────
+
+@pytest.mark.parametrize("metin", ["K olsun eline sağlık mutfak penceresi 120x120 olsun", "K olsun, eline sağlık mutfak penceresi 120x120 olsun",
+                                   "mutfak penceresi 120x120 olsun 2 olsun", "mutfak penceresi 120x120 olsun çatı da 2 olsun",
+                                   "mutfak penceresi 120x120 olsun ikinci çatı olsun"])
+def test_hakem7_celik_secim_ve_istek(s, metin):
+    """D3: teşekkürle başlayan istek Lokman'a yönlendirilmez; Y4: istekten sonra virgülsüz gelen seçim okunur. Çatı K, pencere aynı r02'de."""
+    cati_seti(s)
+    k = s.yaz(metin, **_MUTFAK)
+    assert k.eylem == "is_emri" and s.plan["revizyon"] == 2 and s.plan["yapi"]["kod"] == "Ç8801K", k.mesaj
+    assert [d["op"] for d in s.plan["yapi"]["degisiklikler"]] == ["pencere_olcu", "cati_varyanti"], s.plan["yapi"]["degisiklikler"]
+
+
+@pytest.mark.parametrize("metin", ["1. yatak odası 1 penceresi 120x120 olsun\n2. mutfak penceresi 120x120 olsun",
+                                   "2. Yatak odası 1 penceresi 120x120 olsun", "2 olsun banyo", "3 olsun yatak odası",
+                                   "1 olsun, daha ucuz olsun", "1 olsun, ikisi de olsun", "Plan aynı kalsın"])
+def test_hakem7_celik_kararsiz_soz_sorulur(s, metin):
+    """Y1, Y2 (numaralı liste), Y3 (devrik sayı), O1 (ucuz, ikisi), O2 (plan aynı kalsın) çelikte: "Hangi çatı olsun?", onay ve seçim
+    kaydedilmez. Önce bayiye "Çatı seçiminizi (Ç8801-K) kaydetmedim" gidiyordu ya da r01 onaylanıyordu."""
+    cati_seti(s)
+    k = s.yaz(metin, **_MUTFAK)
+    assert k.eylem == "sor" and k.mesaj.startswith("Hangi çatı olsun?"), k.mesaj
+    assert s.plan["revizyon"] == 1 and s.k.d["secenek_seti"]["durum"] == "acik" and not s.k.d.get("onaylanan"), k.mesaj
+    assert "Ç8801-K" not in k.mesaj.split("\n\n")[-1], k.mesaj
+
+
+def test_hakem7_celik_sira_sozu_secimdir(s):
+    """D1 çelikte: "2. sıradaki olsun" seçimdir."""
+    cati_seti(s)
+    k = s.yaz("2. sıradaki olsun")
+    assert k.eylem == "is_emri" and s.plan["revizyon"] == 2 and s.plan["yapi"]["kod"] == "Ç8801K", k.mesaj
