@@ -1054,6 +1054,45 @@
     "testler/motor/test_d96_uclu_h.py::test_yanlis_nokta_hata",
     "testler/motor/test_d96_uclu_h.py::test_ayni_nokta_iki_kez_hata"
    ]
+  },
+  {
+   "kod": "PC-43",
+   "baslik": "Makas yönünde 7 m'yi aşan açıklıkta tavan kirişi (saha montaj planında)",
+   "kural": "Prefabrikte makasın geçtiği yerde makas yönündeki açıklık 7 m'yi aşarsa odaya bir tavan kirişi (kutu profil 100 × 100) konur (`motor/tavan_kirisi.bul`; kural `kurallar/yerlesim/prefabrik.json › tavan_kirisi`). Kiriş makasa dik gider, iki ucu duvara oturur; en kısa çizgi seçilir, iki çizgi eşitse iki ucu da köşede olan. Açıklığın makasların dizildiği yöndeki genişliği makas aralığından (125,5) darsa oraya makas gelmez, kiriş de konmaz; çıkıntılı cumbanın altı kapsam dışı. Kiriş yalnız DXF'in saha montaj planında çizilir: 10 cm genişlikte kırmızı taralı dikdörtgen, yüzden yüze, ve \"TAVAN KİRİŞİ 10×10\" yazısı kirişin yanında, plandaki yazılara ve özel pano ölçülerine binmeyen ilk yerde (katman TAVAN_KIRISI, yalnız kirişli evde açılır). Akslı plan, net alan planı ve bayiye giden A4 ön onay sayfası değişmez; çizime ölçü eklenmez. Listede bir satır: Kutu profil (kiriş) 100 × 100, L yüzden yüze + 2 × 10, uçta kolon yok. Yer bulunamazsa ya da iki eşit yer kalırsa kiriş konmaz; liste adetsiz satırla, çizim antetteki uyarıyla sorar (K21). Kirişsiz evin çizimi ve listesi aynen.",
+   "karar": "D-107",
+   "lokman": {
+    "tarih": "2026-11-15",
+    "saat": "09:47",
+    "soz": "eşik 7 metre olsun"
+   },
+   "kod_yeri": [
+    "motor/tavan_kirisi.py::bul",
+    "motor/tavan_kirisi.py::kural",
+    "motor/dxf_out.py::Cizici._tavan_kirisleri",
+    "motor/dxf_out.py::Cizici.TAVAN_KIRISI_YAZISI",
+    "motor/prefabrik_liste.py::model_motor",
+    "motor/prefabrik_liste.py::liste"
+   ],
+   "test": [
+    "testler/motor/test_d107_tavan_kirisi.py::test_kural_degerleri",
+    "testler/motor/test_d107_tavan_kirisi.py::test_paftadaki_kirisler",
+    "testler/motor/test_d107_tavan_kirisi.py::test_muhurlu_70m2_ayni_kiris",
+    "testler/motor/test_d107_tavan_kirisi.py::test_kirissiz_evler",
+    "testler/motor/test_d107_tavan_kirisi.py::test_tarama_yalniz_uc_ev",
+    "testler/motor/test_d107_tavan_kirisi.py::test_liste_satiri",
+    "testler/motor/test_d107_tavan_kirisi.py::test_kirissiz_evin_modeli_aynen",
+    "testler/motor/test_d107_tavan_kirisi.py::test_kose_yoksa_sorulur",
+    "testler/motor/test_d107_tavan_kirisi.py::test_saha_montaj_planinda_kiris",
+    "testler/motor/test_d107_tavan_kirisi.py::test_81m2_yazisi_olcuye_binmez",
+    "testler/motor/test_d107_tavan_kirisi.py::test_kirissiz_evde_katman_yok",
+    "testler/motor/test_d107_tavan_kirisi.py::test_kose_yoksa_cizimde_uyari"
+   ],
+   "sabitler": [
+    {
+     "yer": "motor/dxf_out.py::Cizici.TAVAN_KIRISI_YAZISI",
+     "deger": "TAVAN KİRİŞİ 10×10"
+    }
+   ]
   }
  ]
 }
