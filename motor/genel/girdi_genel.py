@@ -409,8 +409,13 @@ def metraj(y: dict, c: dict, kur: dict) -> dict:
             from shapely.geometry import box as _box
             m["cati"]["silte_dusulen_m2"] = sum(geo.intersection(_box(bx0, by0, bx1, by1)).area for geo in m["catisiz_veranda"].values()) / 1e4
     kaplama = ct.get("kaplama", kur["baz_paket_cati_kaplamasi"]["deger"])
-    if kaplama not in ("sandvic_panel", "tek_kat_panel"):
-        raise SystemExit(f"Genel model şimdilik yalnız sandviç panel ve tek kat panel kaplamasını hesaplar (tanımda: {KAPLAMA_ADI.get(kaplama, kaplama)}). "
+    # OSB'li kaplamalar (D-98, BK-33): kural kitabının `genel_osbli_kaplama` anahtarında yazılı olanlar. Anahtar yoksa (eski kural setleri) eski davranış.
+    # Kodu yazılmamış bir kaplamayı kitaba eklemek planı geçirmez (liste sessizce eksik çıkmasın): küme `yukleme.GENEL_OSBLI_KODDA`.
+    from .yukleme import GENEL_OSBLI_KODDA
+    osbli = [x for x in ((kur.get("genel_osbli_kaplama") or {}).get("deger") or {}) if x in GENEL_OSBLI_KODDA]
+    if kaplama not in ("sandvic_panel", "tek_kat_panel") and kaplama not in osbli:
+        adlar = ["sandviç panel", "tek kat panel"] + [KAPLAMA_ADI.get(x, x) for x in osbli]
+        raise SystemExit(f"Genel model şimdilik yalnız {', '.join(adlar[:-1])} ve {adlar[-1]} kaplamasını hesaplar (tanımda: {KAPLAMA_ADI.get(kaplama, kaplama)}). "
                          "Öteki kaplamalar yalnız dikdörtgen kırma çatılı 0.4 hattında hesaplanır.")
     m["dizilim"] = _dizilim(c, kur, kaplama)
     # tavan omegası dizilimi (yöntem B): tavan gözlerinde makaslara dik hatlar
@@ -493,7 +498,8 @@ def bilgi_satirlari(y: dict, c: dict, m: dict, kur: dict) -> tuple[list[str], li
         f"Yöntem: {'B · tavan omegası ve aşık' if cati_yontemi(ct, kur) == 'omega_asik' else 'A · çatı ve tavan paneli'} · kaplama: {KAPLAMA_ADI.get(ct.get('kaplama', kur['baz_paket_cati_kaplamasi']['deger']), '—') + ('' if 'kaplama' in ct else ' (baz paket)')} · saçak {ct.get('sacak', 30)} cm · topuk {ct.get('topuk', 10)} cm",
         f"Çatı yüzeyi {tr(mc['yuzey_m2'])} m² (plan {tr(mc['plan_m2'])} m²) · mahya kotu {tr(max(k[2] for d in c['duzlemler'] for k in d['ucboyut']), 0)} cm (makas üstü)",
         f"Saçak {tr(mc['sacak_m'], 2)} m · mahya {tr(mc['mahya_m'], 2)} m · kırma {tr(mc['kirma_m'], 2)} m · vadi {tr(mc['vadi_m'], 2)} m · alın (kalkan kenarı) {tr(mc['alin_m'], 2)} m · duvar dibi {tr(mc['duvar_dibi_m'], 2)} m",
-        "Kaplama dizilimi: " + " · ".join(f"L {round(b * 10)}: {n}" for b, n in dz["boy_adet"].items()) + f" = {dz['adet']} panel ({sade(dz['kapatma_cm'])} cm kapatır)",
+        "Kaplama dizilimi: " + " · ".join(f"L {round(b * 10)}: {n}" for b, n in dz["boy_adet"].items()) + f" = {dz['adet']} {'panel' if ct.get('kaplama', kur['baz_paket_cati_kaplamasi']['deger']) in ('sandvic_panel', 'tek_kat_panel') else 'levha'}"
+        f" ({sade(dz['kapatma_cm'])} cm kapatır)",
         "Kalkanlar: " + " · ".join(f"{k['ad']} {tr(k['alan_m2'], 2)} m²" for k in m["kalkanlar"]) if m["kalkanlar"] else "Kalkan yok",
         f"Dere inişi {len(mc['inis_noktalari'])} adet (dere hatlarının uçları; "
         + (f"boyu {sade(kur['inis']['deger']['orta_inis_esigi_m'])} m'yi geçen dere hattının ortası" if kur["inis"]["deger"].get("olcu") == "dere" else
