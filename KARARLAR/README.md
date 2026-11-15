@@ -267,7 +267,9 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | BK | BK-30 | Pano Motor'unda tek özel pano kuralı (D-92, PC-39; `claude/project-thread-9gdwir`) | alındı (14.11; CIO) |
 | BK | BK-31 | Havuz hakeminde silme hâli kalemi: tek özel pano kuralının kısa parçası silinmiş ev (D-92 › Havuza uygulama; Lokman 14.11 kart 19:39:46 "Kısa parça silinsin", ev kartları 20:05:33, 20:09:12, 20:14:50 "Doğru, yanına eklensin"; `claude/project-thread-9gdwir`) | alındı (14.11; CIO) |
 | BK | BK-32 | Pano Motor'unda yazılan köşeye üçlü H (D-96, PC-40; `claude/project-thread-9gdwir`) | alındı (14.11; CIO 20:58:58) |
-| BK | **BK-33** | — | **sıradaki boş** |
+| BK | BK-33 | Çelikte dört çatı kaplaması (Motor işi; çelik dört çatı kaplaması sohbeti) | alındı (15.11; CIO, Lokman kartı 05:03:47) |
+| BK | BK-34 | Havuz hakeminde kesim hattı, üçlü H ve açıklık kayması kalemleri: 71 m² 2+1'in üçlü H'lı hâli (Lokman 14.11 20:46:54 sözü, kart 20:57:28 "Doğru, yanına eklensin"; `claude/project-thread-9gdwir`) | alındı (15.11; CIO 05:59) |
+| BK | **BK-35** | — | **sıradaki boş** |
 
 ## 27 Eylülde Lokman'ın verdiği kararlar
 
