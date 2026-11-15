@@ -349,7 +349,7 @@ def celik_dis140(oz: dict) -> bool:
 
 def celik_kaplamasi(oz: dict) -> str | None:
     """Çelik formda standart dışı seçilen ve çizime işlenen çatı kaplaması (kural kitabının anahtarı; sandviç panel ve, BK-33'ten beri,
-    kiremit desen sac + OSB). Standart seçim (tek kat panel) ve genel motorun hesaplamadığı kaplamalar None: plan modelin kendi kaplamasıyla çizilir, standart
+    kiremit desen sac + OSB (D-98) ve OSB + membran + shingle (D-100)). Standart seçim (tek kat panel) ve genel motorun hesaplamadığı kaplamalar None: plan modelin kendi kaplamasıyla çizilir, standart
     dışı seçim özel isteğe yazılır (İE-20 PR-11, D-97; `beyin/karar._celik_is_emri_uret`, işlem `cati_kaplamasi`)."""
     from beyin import varyant
     v = (oz.get("alanlar") or {}).get("kaplama") if oz.get("form") == "celik" else None
