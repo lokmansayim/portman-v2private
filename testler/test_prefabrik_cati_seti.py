@@ -3019,7 +3019,7 @@ def test_hakem27_acik_secim_soruya_donmez(tmp_path, metin):
 
 
 @pytest.mark.parametrize("metin", [
-    "1 olsun, ne zaman?", "1 olsun, kaç gün?", "1 olsun, hemen mi?", "1 olsun, ne kadar?", "1 olsun, ne zaman olur?",
+    "1 olsun, ne zaman?", "1 olsun, kaç gün?", "1 olsun, ne kadar?", "1 olsun, ne zaman olur?",
     "1 olsun, kaç günde olur?", "1 olsun, kaç günde?", "1 olsun, ne zaman gönderirsiniz?", "1 olsun, teklifi gönderir misiniz?",
     "1 olsun, teklifi ne zaman gönderirsiniz?", "1 olsun, pdf gönderir misiniz?", "1 olsun, görseli gönderir misiniz?",
     "1 olsun, gönderir misiniz?", "1 olsun, teklifi de gönderirsiniz değil mi?", "1 olsun, sonra ne olacak?",
@@ -3038,7 +3038,8 @@ def test_hakem27_acik_secim_soruya_donmez(tmp_path, metin):
 def test_hakem27_acik_onay_soruya_donmez(tmp_path, metin):
     """Tur 27 (bu turun gerilemesi): O1 yapısal seçim sorusu kuralı çatı dışı süreç sorusunu ("ne zaman?", "kaç gün?", "teklifi gönderir
     misiniz?", "model numarası ne?") ve selamı ("iyi misiniz?") seçim sorusu sayıyordu. Sınır: alınmış onay ("onayı lazım verildi") ve
-    bildirilmiş seçim ("müşteriye bıraktık, beğendi"). Evin çatısının onayıdır: r01 onaylanır."""
+    bildirilmiş seçim ("müşteriye bıraktık, beğendi"). Evin çatısının onayıdır: r01 onaylanır. Tur 28 (Y1): "1 olsun, hemen mi?"
+    yalnız zaman sözüyle seçimin sorusudur; `test_hakem28_karar_sorusu_ve_kararsizlik_sorulur`'a taşındı."""
     s, _ = _cati_seti(tmp_path)
     k = s.yaz(metin, niyet="diger")
     assert k.gerekce == K.PLAN_ONAYI and k.revizyon == 1, k.mesaj
@@ -3060,6 +3061,101 @@ def test_hakem27_kayitsiz_cevap_secim_kaydetmez(tmp_path, metin):
 def test_hakem27_set_dusurmeden_sorulur_sonraki_secim_kaydedilir(tmp_path, ilk):
     """Tur 27 (Y3): bu girişler seti düşürüyordu; ardından gelen "2 olsun" sessizce düşüyordu ("Planınız değişmedi"). Set açık kalır,
     seçim sorulur; sonraki "2 olsun" r02'yi çizer."""
+    s, _ = _cati_seti(tmp_path)
+    _soruldu(s, s.yaz(ilk, niyet="diger"))
+    k = s.yaz("2 olsun")
+    assert k.eylem == "is_emri" and k.revizyon == 2 and k.is_emri["talep"]["kaynak"] == "PA06K", k.mesaj
+    assert s.k.d.get("cati_secilen") == "PA06K"
+
+
+# ── İE-42 · geometri hakemi yirmi sekizinci tur (15–16 Kasım 2026 gece) ────────────────────────────────────────────────────────────────────────
+@pytest.mark.parametrize("metin", [
+    "1 olsun, hemen onaylayalım mı?", "1 olsun, şimdi onaylayalım mı?", "1 olsun, onaylayalım mı hemen?", "1 olsun, hemen mi onaylayalım?",
+    "1 olsun, onay verelim mi şimdi?", "1 olsun, onayı hemen verelim mi?", "1 olsun, şimdi mi onaylıyoruz?",
+    "1 olsun, hemen mi onaylansın?", "1 olsun, teklif için onaylayalım mı?", "1 olsun, onaylayıp gönderelim mi?",
+    "1 olsun, 2 gün düşünelim mi?", "1 olsun, 2-3 gün düşünelim mi?", "1 olsun, kaç gün düşünelim?",
+    "1 olsun, onayı 2 gün sonra verelim mi?", "1 olsun, bu mu gelsin?", "1 olsun, bu mu gönderilsin?",
+    "1 olsun, bu çatıyla mı gönderelim?", "1 olsun, teklifi bu çatıyla mı alalım?", "1 olsun, bu mu kalsın şimdi?",
+    "1 olsun, şimdi mi seçelim?", "1 olsun, hemen mi olsun?", "1 olsun, ne olsun?", "1 olsun, kaç numara olsun?", "1 olsun, 1 numara mı?",
+    "1 olsun, model bu mu?", "1 olsun, şimdi tamam mı?", "1 olsun, hemen olur mu?", "1 olsun, şimdi mi?", "1 olsun, hemen mi?",
+    "1 olsun, gelsin mi?", "1 olsun, ne yapalım?", "1 olsun, ne yapacağız?", "Evin kendi çatısı olsun, hemen onaylayalım mı?",
+    "Evin kendi çatısı olsun, kaç gün düşünelim?", "2 olsun, 2 gün düşünelim mi?", "2 olsun, teklif gelince mi onaylayalım?",
+    "2 olsun, onayı hafta sonu verelim mi?", "Hocam iyi misiniz bu çatı olur mu, 1 olsun", "Hocam iyi misiniz bu mu kalsın, 1 olsun",
+    "Merhaba iyi misiniz bu olur mu? 1 olsun", "1 olsun, hocam iyi misiniz bu olur mu?", "1 olsun, iyi misiniz tamam mı?",
+    "1 olsun, hocam iyi misiniz onaylayalım mı?", "1 olsun, bu mu kalsın iyi misiniz?", "Abi iyimisin bu çatı olur mu, 1 olsun",
+    "Hocam nasılsınız bu çatı olur mu, 1 olsun", "1 olsun, nakliye için daha mı uygun?", "1 olsun, nakliye için uygun mu?",
+    "1 olsun, teslim için daha mı iyi?", "1 olsun, nakliye için daha mı ucuz?", "1 olsun, nakliye için daha mı kolay?",
+    "2 olsun, montaj için ikisi de olur mu?", "2 olsun, montaj için daha mı pahalı?", "2 olsun, montaj için daha ucuz mu?",
+    "2 olsun, montaj için en iyisi mi?", "2 olsun, montaj için mantıklı mı?", "2 olsun, montaj için olur mu?",
+    "2 olsun, teslim için iyi mi?", "2 olsun, müşteri arsada bakacak", "2 olsun, müşteri sahada bir bakacak",
+    "2 olsun, eşi de arsada bakacak", "2 olsun, müşteri montajda bakacak", "2 olsun, müşteri arazide inceleyecek",
+    "2 olsun, müşteri arsaya bakacak sonra haber verecek", "2 olsun, müşteri temele bakacak, çatıya da bakacak",
+    "1 olsun, müşteriye bıraktık, razı olacak", "1 olsun, müşteriye bıraktık, razı değil", "1 olsun müşteriye soracam",
+    "2 olsun müşteriye soracam", "2 olsun müşteri bakcak", "1 olsun yarın dönücem", "2 olsun herhalde", "2 olsun galiba",
+    "1 olsun fark etmez", "1 olsun, size bırakıyorum", "2 olsun belki 3", "Merhaba hocam 1 olsun ama müşteri bakacak", "1 olsun mu",
+    "Merhaba hocam 1 olsun mu", "1 olsun olur mu", "2 olsun da müşteri bir baksın", "1 olsun diye düşündük"])
+def test_hakem28_karar_sorusu_ve_kararsizlik_sorulur(tmp_path, metin):
+    """Tur 28: Y1 onayın, seçimin ya da ertelemenin sorusu süreç sorusu sayılıyordu ("1 olsun, hemen onaylayalım mı?", "2 gün düşünelim
+    mi?", "model bu mu?", "şimdi mi?"); Y2 selam aynı cümledeki seçim sorusunu siliyordu ("Hocam iyi misiniz bu çatı olur mu, 1 olsun");
+    Y3, O2 "<konu> için" + kıyas ya da değerlendirme ("nakliye için daha mı ucuz?", "montaj için ikisi de olur mu?"); O3 bulunma ekli yer
+    ve sonradan haber ("müşteri arsada bakacak", "arsaya bakacak sonra haber verecek"); Y5 "razı olacak", "razı değil". Kendi
+    yoklamamızla: virgülsüz ve konuşma dili ("1 olsun müşteriye soracam", "2 olsun müşteri bakcak"), tahmin ("2 olsun herhalde"),
+    seçimi bize bırakma ("1 olsun fark etmez") ve öteki çatı ("2 olsun belki 3"). Onay, onaylanabilir r02 ya da kayıtsız cevap
+    veriliyordu: seçim sorulur."""
+    s, _ = _cati_seti(tmp_path)
+    _soruldu(s, s.yaz(metin, niyet="diger"))
+
+
+@pytest.mark.parametrize("metin", [
+    "2 olsun, yatak odası 2 penceresini değiştirebilir misiniz?", "2 olsun, yatak odası 1 penceresini değiştirebilir misiniz?",
+    "2 olsun, son olarak salon kapısını değiştirebilir misiniz?", "2 olsun, kapıyı 2 kanatlı olarak yapabilir misiniz?",
+    "2 olsun, kapıyı ikinci odaya geçirebilir misiniz?", "2 olsun, ilk odayı salona çevirebilir misiniz?",
+    "2 olsun, verandayı 2 metre olarak yapabilir misiniz?", "2 olsun, ödemeyi 3 taksit olarak yapabilir miyiz?",
+    "2 olsun, teslim tarihini 1 hafta değiştirebilir miyiz?", "2 olsun, faturayı 2 kişi adına ayrı olarak yapabilir misiniz?",
+    "2 olsun, kapıları 2 tane olarak yapabilir misiniz?", "2 olsun, kapora yatırırsak teslim tarihini 2 gün sonra değiştirebilir miyiz?",
+    "2 olsun, pencereler geçici olarak aynı kalsın", "2 olsun, kapılar geçici olarak standart kalsın",
+    "2 olsun, mutfak geçici olarak standart olsun", "2 olsun, iç kapılar geçici olarak eski haliyle kalsın",
+    "2 olsun, salon geçici olarak şu anki haliyle kalsın", "2 olsun, kapı geçici olarak ilk haliyle kalsın",
+    "2 olsun, banyo geçici olarak var olan haliyle kalsın", "2 olsun, usta ücreti müşteriye kalsın",
+    "2 olsun, usta parası müşteriye kalsın", "2 olsun, usta masrafı müşteriye kalsın", "2 olsun, usta yemeği müşteriye kalsın",
+    "2 olsun, usta konaklaması müşteriye kalsın", "2 olsun, değişiklik ücreti olabilir mi?", "2 olsun teklifi gönderin",
+    "2 olsun müşteri beğendi", "Merhaba hocam 2 olsun", "Selam 2 olsun", "hocam 2 numaralı olsun müşteri onu beğendi",
+    "2 olsun abi ne zaman gönderirsiniz", "Günaydın hocam 2 olsun teklif bekliyoruz", "2 olsun müşteri kabul etti",
+    "Merhaba abi nasılsınız 2 olsun", "Hocam iyi misiniz 2 olsun"])
+def test_hakem28_acik_secim_soruya_donmez(tmp_path, metin):
+    """Tur 28 (bu turun gerilemeleri): O1 rica kuralı oda numarasını, birimli sayıyı ve sıra sıfatını çatı numarası sayıyordu ("yatak
+    odası 2 penceresini değiştirebilir misiniz?", "ödemeyi 3 taksit olarak yapabilir miyiz?"); O4 konulu geçici söz ("pencereler geçici
+    olarak aynı kalsın"); O5 "usta ücreti müşteriye kalsın" (işin adı); O6 "değişiklik ücreti olabilir mi?". Kendi yoklamamızla:
+    virgülsüz seçim ve selam ("2 olsun teklifi gönderin", "Merhaba hocam 2 olsun", "Hocam iyi misiniz 2 olsun"). Açık seçimdir: r02."""
+    s, _ = _cati_seti(tmp_path)
+    k = s.yaz(metin, niyet="diger")
+    assert k.eylem == "is_emri" and k.revizyon == 2 and k.is_emri["talep"]["kaynak"] == "PA06K", k.mesaj
+    assert s.k.d.get("cati_secilen") == "PA06K"
+
+
+@pytest.mark.parametrize("metin", [
+    "1 olsun teklifi gönderin", "1 olsun müşteri onayladı", "1 olsun onaylıyoruz teklif bekliyoruz",
+    "1 olsun, onaylıyoruz, teklif bekliyoruz", "ilki kalsın teklif gönderin", "Merhaba hocam 1 olsun teklifi gönderir misiniz",
+    "Merhaba hocam 1 olsun", "Selam abi 1 olsun", "Günaydın 1 olsun", "1 olsun müşteri kabul etti", "1 olsun müşteri onay verdi",
+    "1 olsun teklifi mail atın", "Merhaba hocam 1 olsun teşekkürler", "1 olsun saygılar", "1 olsun görüşürüz", "Kolay gelsin 1 olsun",
+    "1 olsun hocam teklif ne zaman", "1 olsun teklifi gönderir misiniz", "1 olsun selamlar iyi akşamlar"])
+def test_hakem28_virgulsuz_onay_soruya_donmez(tmp_path, metin):
+    """Tur 28 (hakemin önceden var Orta'sı, olasılığı yüksek): virgülsüz yazımda seçim ve çatı dışı söz ("1 olsun teklifi gönderin",
+    "Merhaba hocam 1 olsun", "1 olsun müşteri kabul etti", "1 olsun onaylıyoruz teklif bekliyoruz") "Hangi çatı olsun?" alıyordu.
+    Virgüllü yazım gibi okunur: evin çatısının onayıdır, r01 onaylanır."""
+    s, _ = _cati_seti(tmp_path)
+    k = s.yaz(metin, niyet="diger")
+    assert k.gerekce == K.PLAN_ONAYI and k.revizyon == 1, k.mesaj
+
+
+@pytest.mark.parametrize("ilk", [
+    "2'yi yapabilir misiniz?", "2'yi alabilir miyiz?", "Kırma yapabilir misiniz?", "Kırmayı yapabilir misiniz?",
+    "2 numarayı yapabilir misiniz?", "2'yi kullanabilir miyiz?", "Kırma alabilir miyiz?", "Abi 2'yi yapabilir misiniz?",
+    "Hocam kırmayı yapabilir misiniz?"])
+def test_hakem28_rica_seti_dusurmez_sonraki_secim_kaydedilir(tmp_path, ilk):
+    """Tur 28 (Y4, önceden var): "yap / al / kullan" ricasıyla yalın çatı isteği ("2'yi yapabilir misiniz?", "Kırma alabilir miyiz?")
+    seti düşürüyordu; ardından gelen "2 olsun" sessizce düşüyordu ("Planınız değişmedi"). Set açık kalır, seçim sorulur; sonraki "2
+    olsun" r02'yi çizer."""
     s, _ = _cati_seti(tmp_path)
     _soruldu(s, s.yaz(ilk, niyet="diger"))
     k = s.yaz("2 olsun")

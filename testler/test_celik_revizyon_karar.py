@@ -1377,3 +1377,38 @@ def test_hakem27_celik_acik_onay_soruya_donmez(s, metin):
     cati_seti(s)
     k = s.yaz(metin)
     assert k.gerekce == K.PLAN_ONAYI and k.revizyon == 1, k.mesaj
+
+
+# ── İE-42 · geometri hakemi yirmi sekizinci tur (çelik) ────────────────────────────────────────────────────────────────────────────────────────
+@pytest.mark.parametrize("metin", [
+    "Ç8801 olsun, hemen onaylayalım mı?", "Ç8801 olsun, şimdi onaylayalım mı?", "Ç8801 olsun, hemen tamam mı?",
+    "Ç8801 olsun, 2 gün düşünelim mi?", "Ç8801 olsun, ne yapalım?", "Hocam iyi misiniz bu çatı olur mu, Ç8801 olsun",
+    "Ç8801 olsun, bu mu kalsın iyi misiniz?", "Ç8801 olsun, nakliye için daha mı uygun?", "K olsun, montaj için ikisi de olur mu?",
+    "K olsun, 2 gün düşünelim mi?", "Ç8801 olsun, müşteriye bıraktık, razı değil", "K olsun müşteri bakcak"])
+def test_hakem28_celik_karar_sorusu_ve_kararsizlik_sorulur(s, metin):
+    """Tur 28 (Y1, Y2, Y3, O2, Y5) çelikte: onayın ve ertelemenin sorusu, selamlı seçim sorusu, konulu kıyas, "razı değil", konuşma
+    dili ("K olsun müşteri bakcak"): seçim sorulur."""
+    cati_seti(s)
+    k = s.yaz(metin)
+    assert k.eylem == "sor" and k.mesaj.startswith("Hangi çatı olsun?"), k.mesaj
+    assert s.plan["revizyon"] == 1 and s.k.d["secenek_seti"]["durum"] == "acik" and not s.k.d.get("onaylanan"), k.mesaj
+
+
+@pytest.mark.parametrize("metin", [
+    "K olsun, yatak odası 2 penceresini değiştirebilir misiniz?", "K olsun, son olarak salon kapısını değiştirebilir misiniz?",
+    "K olsun, ödemeyi 3 taksit olarak yapabilir miyiz?", "K olsun, usta ücreti müşteriye kalsın",
+    "K olsun, değişiklik ücreti olabilir mi?", "Merhaba hocam K olsun teklifi gönderir misiniz", "K olsun teklifi gönderin"])
+def test_hakem28_celik_acik_secim_soruya_donmez(s, metin):
+    """Tur 28 (O1, O5, O6 ve virgülsüz yazım) çelikte: açık seçim soruya dönmez: r02 K."""
+    cati_seti(s)
+    k = s.yaz(metin)
+    assert k.eylem == "is_emri" and k.revizyon == 2 and s.plan["yapi"]["kod"] == "Ç8801K", k.mesaj
+
+
+@pytest.mark.parametrize("metin", [
+    "Ç8801 olsun teklifi gönderin", "Merhaba hocam Ç8801 olsun", "Ç8801 olsun müşteri onayladı"])
+def test_hakem28_celik_virgulsuz_onay_soruya_donmez(s, metin):
+    """Tur 28 çelikte: virgülsüz seçim ve selam evin çatısının onayını bozmaz."""
+    cati_seti(s)
+    k = s.yaz(metin)
+    assert k.gerekce == K.PLAN_ONAYI and k.revizyon == 1, k.mesaj
