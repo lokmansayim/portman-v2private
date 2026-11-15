@@ -1013,7 +1013,9 @@ def _cati_adimini_kapat(k: Konusma, st: dict, neden: str) -> None:
 _SECIM_NEZAKET = {"abi", "abim", "abla", "hocam", "hoca", "kardes", "kardesim", "usta", "ustam", "reis", "efendim", "hanimefendi", "bey",
                   "beyefendi", "hanim", "saol", "sagol", "sagolun", "sagolasin", "tesekkurler", "tesekkur", "tsk", "tskler", "eyv", "eyw",
                   "eyvallah", "yeter", "yeterli", "tmm", "tm", "ok", "okey", "peki", "simdilik", "artik", "hadi", "haydi", "alalim", "aliyoruz",
-                  "uygun", "uygundur", "iyi", "guzel"}
+                  "uygun", "uygundur", "iyi", "guzel",
+                  # hakem tur 5 (D1): devam ve alma sözü ("K ile devam edelim", "2'yi alın", "K'da kalalım", "kendi çatısıyla devam")
+                  "devam", "edelim", "ediyoruz", "edin", "alin", "alinsin", "kalalim", "kaliyoruz", "gelsin", "isleme"}
 
 
 def _nezaket(w: str) -> bool:
@@ -1023,11 +1025,15 @@ def _nezaket(w: str) -> bool:
 
 def _kendi_catisi_cumlesi(sozler: list[str]) -> bool:
     """Onaydan sonraki çatı setinde evin kendi çatısını söyleyen cümle ("evin kendi çatısı olsun", "aynı çatı kalsın", "olduğu gibi kalsın",
-    "mevcut çatı iyi"): planın r01'deki çatısı (hakem tur 4, D-D). Başka sözcük (çatı adı, pencere, istek) varsa değil."""
+    "mevcut çatı iyi"): planın r01'deki çatısı (hakem tur 4, D-D). Başka sözcük (çatı adı, pencere, istek) varsa değil. Hakem tur 5 (Y1):
+    "başka", "farklı" sözü ("mevcut çatıdan farklı olsun") ve olumsuz söz ("evin kendi çatısı olmasın") evin çatısı değildir."""
+    if any(w in _BASKA_SOZU or CO._OLUMSUZ_FIIL_T.fullmatch(w) for w in sozler):
+        return False
     return bool(sozler) and any(w in ("kendi", "mevcut", "ayni", "eski", "oldugu") for w in sozler) and all(
         w in _CATI_BAGLAM or _nezaket(w) or w.startswith("cati") or CO._KALSIN_T.fullmatch(w) or w in ("ayni", "evin", "ev")
         for w in sozler)
-_SIRA_EKI = ("i", "yi", "ni", "ini", "u", "yu", "nu", "unu", "in", "nin", "nun")
+_SIRA_EKI = ("i", "yi", "ni", "ini", "u", "yu", "nu", "unu", "in", "nin", "nun", "yle", "yla", "le", "la", "de", "da", "te", "ta", "den",
+             "dan", "ye", "ya")                                # hakem tur 5: "ikinciyle devam", "birincide kalalım"
 
 
 def _sira_kok(w: str, sira: dict) -> str | None:
@@ -1047,9 +1053,17 @@ def _celik_cati_adimi_okumasi(k: Konusma, katalog: Katalog, taban: dict, metin: 
     set_kodlari = {str(a.get("kod")).upper() for a in st.get("adaylar") or []}
     son_sira = str(max([int(a.get("sira") or 0) for a in st.get("adaylar") or []] or [0]))
     sira = {**_SIRA_SOZU, "son": son_sira, "sonuncu": son_sira}
+    harfler, _ = _set_etiketleri(taban, st)
     numaralar, kalan = set(), []
     for ham in _cumleler(metin):
         sozler = CO.norm(ham).split()
+        etiket = [w for w in sozler if w in harfler]
+        # hakem tur 5 (D1): devam ve alma sözlü etiket cümlesi ("K ile devam edelim", "K'yı alın", "K'da kalalım"); şekil sözü ("L tipi")
+        # ve başka/farklı sözü olan cümle değil (çelik okuması bakar)
+        if len(etiket) == 1 and not any(w in _BASKA_SOZU or w in ("tip", "tipi", "seklinde", "sekli") for w in sozler) and all(
+                w in harfler or w in _CATI_BAGLAM or w.startswith("cati") or w in _SECIM_NEZAKET or w in _CATI_EKLERI for w in sozler):
+            numaralar.add(harfler[etiket[0]])
+            continue
         sayi = [w for w in sozler if w.isdigit()] + [sira[_sira_kok(w, sira)] for w in sozler if _sira_kok(w, sira)]
         if sozler and len(sayi) == 1 and all(w.isdigit() or _sira_kok(w, sira) or w in _CATI_BAGLAM or w.startswith("cati") or w in _NUMARA
                                              or _nezaket(w) for w in sozler):
@@ -1094,8 +1108,13 @@ _SORU_SOZU = {"ne", "neden", "niye", "nedir", "nasil", "nasildir", "kac", "kaca"
 _NE_UNLEM = {"guzel", "hos", "iyi", "harika", "guzelmis", "hosmus", "iyiymis"}       # "ne güzel olmuş" soru değil
 _ONAY_SOZU = re.compile(r"\b(?:onay\w*|tamam\w*|evet)\b", re.IGNORECASE)
 # hakem tur 4: iki sözcüklü nezaket kalıbı ("sağ olun", "kolay gelsin", "iyi günler") seçim ve istek değildir; "sağ" tek başına yöndür
-_NEZAKET_SOZU = re.compile(r"\bsa[gğ]\s*ol(?:un|as[ıi]n|sun)?\b|\bkolay\s*gelsin\b|\biyi\s*(?:g[üu]nler|ak[şs]amlar|[çc]al[ıi][şs]malar)\b"
-                           r"|\bhay[ıi]rl[ıi]\s*i[şs]ler\b|\bbu\s*[şs]ekilde\b|\bba[şs]ka\s*iste[gğ]\w*\s*yok\w*\b", re.IGNORECASE)
+# hakem tur 5: "sağ olsun" teşekkür değildir ("kalkan sağ olsun" yön sözüdür, Y2); "başka değişiklik yok", "başka bir isteğimiz yok", "başka
+# değişiklik istemiyoruz" istek değildir (O2)
+_NEZAKET_SOZU = re.compile(r"\bsa[gğ]\s*ol(?:un|as[ıi]n)?\b|\bkolay\s*gelsin\b|\biyi\s*(?:g[üu]nler|ak[şs]amlar|[çc]al[ıi][şs]malar)\b"
+                           r"|\bhay[ıi]rl[ıi]\s*i[şs]ler\b|\bbu\s*[şs]ekilde\b"
+                           r"|\b(?:ba[şs]ka|ekstra|ilave)\s+(?:[^\s,.;:!?]+\s+){0,2}?(?:yok\w*|istemiyor\w*|istemeyiz|gerek\s*yok\w*)(?=$|[\s,.;:!?])"
+                           r"|\bba[şs]ka\s+(?:bir\s+)?(?:[şs]ey|iste[gğ]\w*|de[gğ]i[şs]iklik\w*)\s+(?:yok\w*|istemiyor\w*)(?=$|[\s,.;:!?])",
+                           re.IGNORECASE)
 
 
 def _soru_cumlesi(ham: str) -> bool:
@@ -1138,7 +1157,7 @@ _SECIM_DOLGU = {"evet", "ok", "okey", "peki", "anladim", "anlasildi", "tabi", "t
                 "kardes", "kardesim", "usta", "ustam", "reis", "abla", "abi", "abim", "hocam", "hoca", "efendim", "hanimefendi", "tmm", "tm",
                 "tsk", "tskler", "eyv",
                 "eyw", "eyvallah", "allah", "razi", "insallah", "hepsi", "en", "iyisi", "guzeli", "uygun", "pdf", "gorsel", "gorseli",
-                "cizim", "cizimi", "sonra"}
+                "cizim", "cizimi", "sonra", "ayrica", "halini", "haline", "halinde", "halde"}
 _SECIM_KOKU = ("cati", "onay", "tamam", "tesekkur", "sagol", "besik", "kirma", "kalkan", "cumba", "katalog", "numara", "sira", "model",
                "sec", "tercih", "plan", "ilk", "birinci", "ikinci", "ucuncu", "sonuncu", "musteri", "gonder", "teklif")
 # soru cümlesinde fiyat, teslim ve süre sorusu planın isteği değildir ("1 olsun, fiyatı ne olur?"): cevabın sonuna "Fiyat, süre ve teslim
@@ -1154,9 +1173,11 @@ def _soru_konusu(w: str) -> bool:
 
 
 # başka bir şey isteyen söz ("bir de başka model gönderin"): çatı sözü olmayan cümlede seçim değil, istektir (hakem tur 4, O-C)
-_BASKA_SOZU = {"baska", "farkli", "diger", "yeni", "ayrica", "ekstra"}
+_BASKA_SOZU = {"baska", "farkli", "diger", "yeni", "ekstra"}          # "ayrıca" bağlaçtır ("ayrıca teşekkürler"; hakem tur 5, O2)
 # evin kendi kat ve yapı sözü ("tek katlı prefabrik, 1 olsun") talebin bilgisidir; öteki kat ve yapı sözü istektir (hakem tur 4, B2)
-_TEK_KAT_SOZU = re.compile(r"\b(?:tek|1)\s*kat(?:l[ıi])?\b", re.IGNORECASE)
+_TEK_KAT_SOZU = re.compile(r"\b(?:tek|1)\s*kat(?:l[ıi])?\b(?!\s*(?:daha|ekle|ilave|[çc][ıi]k))", re.IGNORECASE)   # "1 kat daha" değil
+_KAT_EKLE_SOZU = re.compile(r"\b(?:1|bir)\s*kat\s*(?:daha|ekle\w*|ilave\w*|[çc][ıi]k\w*)|\b(?:[üu]st\s*kat|kat\s*ilave\w*|kat\s*ekle\w*)",
+                            re.IGNORECASE)                     # hakem tur 5: "üstüne 1 kat daha", "kat ilavesi" kat sayısını artırır
 _COK_KAT_SOZU = re.compile(r"\b(?:([2-4])|(iki|üç|uc|çift|cift))\s*katl[ıi]\b|\bdubleks\b|\btripleks\b", re.IGNORECASE)
 _KAT_DISI = re.compile(r"yal[ıi]t|izol|\bcam|boya|\bsac|kaplama|al[çc][ıi]pan|osb|panel|membran|kar[ıi]?ton|kontrplak", re.IGNORECASE)
 _YAPI_SOZU = {"celik": re.compile(r"\b[çc]elik\b", re.IGNORECASE), "prefabrik": re.compile(r"\bprefabrik\b", re.IGNORECASE)}
@@ -1164,11 +1185,37 @@ _TALEP_OLUMSUZ = re.compile(r"olmas[ıi]n|olmayacak|olmamal[ıi]|istem(?:iyor|ey
 _YAPI_DISI = re.compile(r"\b(?:kap[ıi]|pencere|do[gğ]rama|kolon|kiri[sş]|profil|[çc]atı|[çc]ati)", re.IGNORECASE)
 
 
-def _secim_sozcugu(w: str, adlar: set[str]) -> bool:
+def _set_etiketleri(taban: dict, st: dict) -> tuple[dict[str, str], dict[str, str]]:
+    """Açık çatı setinin etiket harfleri ("k" → PA06K, "l" → Ç8801L) ve numaraları ("2" → PA06K)."""
+    tk = str((taban or {}).get("kod") or "").upper()
+    kodlar = [str(a.get("kod") or "").upper() for a in st.get("adaylar") or []]
+    harfler = {c[len(tk):].lower(): c for c in kodlar if tk and c != tk and c.startswith(tk) and len(c) == len(tk) + 1}
+    numaralar = {str(a.get("sira")): str(a.get("kod") or "").upper() for a in st.get("adaylar") or [] if a.get("sira") is not None}
+    return harfler, numaralar
+
+
+def _secim_sozcugu(w: str, adlar: set[str], harfler: set[str] | None = None, n: int = 9) -> bool:
+    """Çatı setinde seçim ya da dolgu sözcüğü. Tek rakam yalnız setin numarasıdır ("85 değil 95 olsun" istektir, hakem tur 4; "5 numaralı
+    modele geçelim" üç çatılı sette istektir, hakem tur 5); tek harf yalnız setin etiketi ya da ektir (`harfler`; "L tipi olsun" PA-06'da
+    istektir)."""
+    if len(w) == 1 and not w.isdigit():
+        return harfler is None or w in harfler or w in _CATI_EKLERI
     return (w in _CATI_BAGLAM or w in _NUMARA or w in _SIRA_SOZU or w in ("son", "sonuncu") or w in _KALSIN_BAGLAM or w in _SELAM
             or w in _KOD_DOLGU or w in _CATI_EKLERI or w in _SORU_SOZU or w in _SECIM_DOLGU or w in adlar
-            or len(w) == 1 or (w.isdigit() and int(w) <= 9) or w.startswith(_SECIM_KOKU))   # tek rakam: set numarası, oda numarası
-                                                                                         # ("85 değil 95 olsun" istektir; hakem tur 4)
+            or (w.isdigit() and 1 <= int(w) <= n) or w.startswith(_SECIM_KOKU))
+
+
+def _talep_sozu_cikar(h: str, kendi_yapi: str) -> str:
+    """Çatı setindeki cümleden talebin bilgisi çıkar (küçük harfle): evin m²'si, oda programı ve dış ölçüsü (değiştiyse
+    `_cati_adiminda_talep_degisti` okur, aynıysa "85 m2 2+1 olsun" istek değildir; oda, veranda ya da arsa m²'si içerik kalır), "tek
+    katlı", evin kendi yapı türü ve nezaket kalıbı. Soru cümlesindeki m², oda ve ölçü sorudur ("100 m2 olur mu?"): içerik kalır."""
+    def ev_olcusu(m: re.Match) -> str:                         # evin dış ölçüsü (3–30 m); pencere ölçüsü ("120x120") içeriktir
+        a, b = (float(x.replace(",", ".")) for x in m.groups())
+        return " " if 3 <= a <= 30 and 3 <= b <= 30 else m.group(0)
+    q = h.lower()
+    h2 = q if _soru_cumlesi(h) else _OLCU_SOZU.sub(ev_olcusu, _ODA_SOZU.sub(" ", _M2_SOZU.sub(
+        lambda m: " " if _ev_m2_mi(q, m) else m.group(0), q)))
+    return _NEZAKET_SOZU.sub(" ", _YAPI_SOZU[kendi_yapi].sub(" ", _TEK_KAT_SOZU.sub(" ", h2)))
 
 
 def _cati_icerik_cumleleri(metin: str | None, katalog: Katalog, taban: dict, st: dict, fiyat_sorulari: list | None = None) -> list[str]:
@@ -1182,24 +1229,16 @@ def _cati_icerik_cumleleri(metin: str | None, katalog: Katalog, taban: dict, st:
     sözü olmayan cümlede istektir; yalnız fiyat, süre ve teslim soran soru cümlesi `fiyat_sorulari`'na yazılır (cevabı teklif verir)."""
     tk = Katalog.taban_kod(taban.get("kod"))
     kendi_yapi = "celik" if str(tk or "").upper().startswith(("Ç", "C")) else "prefabrik"
+    harfler, numaralar = _set_etiketleri(taban, st)
     adlar: set[str] = set()                                    # setteki çatıların adları ("kalkan önde"); oda adı ("salonda cumba") yalnız
     oda_adlari: set[str] = set()                               # çatı sözüyle aynı cümlede ("salonda pencere" istektir)
     for x in st.get("adaylar") or []:
         a = katalog.aday(x.get("kod"))
         for w in CO.norm(_cati_adi(a) if a else "").split():
             (oda_adlari if _alan_disi(w) or _alan_disi(_cati_govdesi(w)) else adlar).add(w)
-    def ev_olcusu(m: re.Match) -> str:                         # evin dış ölçüsü (3–30 m); pencere ölçüsü ("120x120") içeriktir
-        a, b = (float(x.replace(",", ".")) for x in m.groups())
-        return " " if 3 <= a <= 30 and 3 <= b <= 30 else m.group(0)
     out = []
     for h in _cumleler(metin):
-        # evin m²'si, oda programı ve dış ölçüsü talebin bilgisidir: değiştiyse `_cati_adiminda_talep_degisti` okur, aynıysa ("85 m2 2+1
-        # olsun") istek değildir. Oda, veranda ya da arsa m²'si ("salon 25 m2", "veranda 12 m2") içerik kalır.
-        q = h.lower()
-        # soru cümlesindeki m², oda ve ölçü sorudur ("100 m2 olur mu?"): talep değişikliği sayılmaz, içerik kalır (cevapsız düşmez)
-        h2 = q if _soru_cumlesi(h) else _OLCU_SOZU.sub(ev_olcusu, _ODA_SOZU.sub(" ", _M2_SOZU.sub(
-            lambda m: " " if _ev_m2_mi(q, m) else m.group(0), q)))
-        h2 = _NEZAKET_SOZU.sub(" ", _YAPI_SOZU[kendi_yapi].sub(" ", _TEK_KAT_SOZU.sub(" ", h2)))
+        h2 = _talep_sozu_cikar(h, kendi_yapi)
         sozler = CO.norm(h2).split()
         cati_sozu = any(w.startswith(("cati", "cumba", "kirma", "besik", "kalkan")) for w in sozler)
         izinli = adlar | (oda_adlari if cati_sozu else set())
@@ -1212,7 +1251,7 @@ def _cati_icerik_cumleleri(metin: str | None, katalog: Katalog, taban: dict, st:
                 if soru and (_soru_konusu(w) or w in _SORU_DOLGU):
                     konu = konu or _soru_konusu(w)
                     continue
-                if (w in _BASKA_SOZU and not cati_sozu) or not _secim_sozcugu(w, izinli):
+                if (w in _BASKA_SOZU and not cati_sozu) or not _secim_sozcugu(w, izinli, set(harfler), len(numaralar) or 9):
                     icerik = True
                     break
             if icerik:
@@ -1224,6 +1263,90 @@ def _cati_icerik_cumleleri(metin: str | None, katalog: Katalog, taban: dict, st:
     return out
 
 
+# İE-42 (hakem tur 5, Y1, Y3): çatı adı kökleri ve evin kendi çatısını anan söz
+_CATI_AD_KOKU = ("kirma", "besik", "cumba", "kalkan")
+_KENDI_SOZU = {"kendi", "mevcut", "eski", "oldugu", "ayni"}
+
+
+def _set_cati_adlari(katalog: Katalog, st: dict) -> dict[str, set[str]]:
+    """Açık çatı setinde her seçeneğin adının sözcükleri (kart adı ve şablonun çatı tipi; "Beşik + salonda cumba" → besik, salon, cumba)."""
+    out: dict[str, set[str]] = {}
+    for x in st.get("adaylar") or []:
+        kod = str(x.get("kod") or "").upper()
+        a = katalog.aday(x.get("kod"))
+        tip = ""
+        try:
+            yol = katalog.sablon_yolu(a["kod"]) if a is not None else None
+            tip = str(((json.loads(yol.read_text(encoding="utf-8")) if yol else {}).get("cati") or {}).get("tip") or "")
+        except (OSError, ValueError, KeyError, TypeError, AttributeError):
+            tip = ""
+        ad = _cati_adi(a) or str((x.get("sunum") or {}).get("cati_adi") or x.get("cati_adi") or "")
+        out[kod] = set(CO.norm(tip.replace("_", " ") + " " + ad).split())
+    return out
+
+
+def _cati_atiflari(metin: str | None, katalog: Katalog, taban: dict, st: dict) -> tuple[bool, set[str], list[set[str]]]:
+    """İE-42 (hakem tur 5, Y1, Y3): onaydan sonraki çatı setinde bu mesajın çatıya atıfları, bayinin sözünden. Seçim okuması (`oku`) yalnız
+    tanıdığı cümleyi okur; öteki cümledeki çatı sözü ("1 olsun, kırmayı alın", "1 olsun, K ile devam edelim", "teklifte 2 de olsun",
+    "mevcut çatıdan farklı olsun") seçimle çelişebilir. Bu işlev her cümleye bakar (soru cümlesi hariç):
+    - istek olmayan cümlede kod, etiket harfi, numara, sıra sözü (yalnız seçim sözcükleriyle kurulmuş cümlede) ve evin kendi çatısı sözü
+      seçimin hedefidir; başka/farklı ya da olumsuz sözle birlikte çatı sözü, setin dışındaki numara ya da kod kararsızlıktır;
+    - her cümlede çatı adı kökü ("kırma", "beşik", "cumba", "kalkan"; ekli de) adında o kök geçen seçenekleri gösterir.
+    Dönen (kararsız, hedefler, ad kümeleri): seçim hedeflerin tek elemanı olmalı ve her ad kümesinde bulunmalı."""
+    harfler, numaralar = _set_etiketleri(taban, st)
+    tk = str(taban.get("kod") or "").upper()
+    son_sira = str(max([int(a.get("sira") or 0) for a in st.get("adaylar") or []] or [0]))
+    sira = {**_SIRA_SOZU, "son": son_sira, "sonuncu": son_sira}
+    set_kodlari = set(numaralar.values()) | {tk}
+    adlar_kod = _set_cati_adlari(katalog, st)
+    kendi_yapi = "celik" if tk.startswith(("Ç", "C")) else "prefabrik"
+    kararsiz, hedefler, ad_kumeleri = False, set(), []
+    for h in _cumleler(metin):
+        if _soru_cumlesi(h):
+            continue
+        istek = bool(_cati_icerik_cumleleri(h, katalog, taban, st))
+        temiz = _ONAY_SOZU.sub(" ", _talep_sozu_cikar(h, kendi_yapi))     # evin m²'si, oda programı, ölçüsü sayı değildir
+        sozler, kodlar = [], []
+        for _, soz, kod in _sozcukler(temiz, katalog):
+            if kod:
+                kodlar.append(str(Katalog.kod_normalize(kod) or kod).upper())
+            else:
+                sozler += CO.norm(soz).split()
+        secilen = set(_secim_kodlari(temiz, katalog))          # değişimin kaynağı seçim değildir ("Ç8801K yerine Ç8801L", "K'dan L'ye")
+        kodlar = [c for c in kodlar if c in secilen]
+        kaynak = {i for i, w in enumerate(sozler) if (i + 1 < len(sozler) and sozler[i + 1] in ("dan", "den", "tan", "ten", "yerine"))
+                  or (w.startswith(_CATI_AD_KOKU) and w.endswith(("dan", "den")))}
+        sozler = [w for i, w in enumerate(sozler) if i not in kaynak]
+        adli = [w for w in sozler if w.startswith(_CATI_AD_KOKU)]
+        for w in adli:
+            kok = next(x for x in _CATI_AD_KOKU if w.startswith(x))
+            kume = {c for c, g in adlar_kod.items() if any(n.startswith(kok) for n in g)}
+            if not istek or 0 < len(kume) < len(adlar_kod):    # istek cümlesinde yalnız seçenekleri ayıran ad ("kırma çatıya pencere")
+                ad_kumeleri.append(kume)
+        if istek:
+            continue                                           # istek cümlesinde sayı ve harf isteğindir ("yatak odası 1 penceresi")
+        hedef = {c for c in kodlar if c in set_kodlari}
+        kararsiz = kararsiz or any(c not in set_kodlari and Katalog.taban_kod(c) == Katalog.taban_kod(tk) for c in kodlar)
+        hedef |= {harfler[w] for w in sozler if w in harfler}
+        for w in sozler:
+            if w.isdigit():
+                if w in numaralar:
+                    hedef.add(numaralar[w])
+                else:
+                    kararsiz = True
+        if all(w.isdigit() or _sira_kok(w, sira) or w in harfler or w in _CATI_BAGLAM or w in _NUMARA or w.startswith("cati")
+               or _nezaket(w) for w in sozler):
+            hedef |= {numaralar.get(sira[r], "") for w in sozler if (r := _sira_kok(w, sira))} - {""}
+        if any(w in _KENDI_SOZU for w in sozler) and (any(w.startswith("cati") for w in sozler) or _kendi_catisi_cumlesi(sozler)
+                                                      or any(w in _KENDI_SOZU for w in sozler if w in ("kendi", "mevcut", "oldugu"))):
+            hedef.add(tk)
+        cati_sozu = bool(hedef or adli or any(w.startswith("cati") or w in _KENDI_SOZU for w in sozler))
+        if cati_sozu and any(w in _BASKA_SOZU or CO._OLUMSUZ_FIIL_T.fullmatch(w) for w in sozler):
+            kararsiz = True                                    # "mevcut çatıdan farklı olsun", "evin kendi çatısı olmasın"
+        hedefler |= hedef
+    return kararsiz, hedefler, ad_kumeleri
+
+
 _M2_SOZU = re.compile(r"(?<![\d.,x×])(\d{2,3}(?:[.,]\d+)?)\s*(?:m2|m²|mt2|metre\s*kare|metrekare)", re.IGNORECASE)
 _ODA_SOZU = re.compile(r"(?<![\d.,])(\d)\s*\+\s*(\d)(?![\d.,])")
 _OLCU_SOZU = re.compile(r"(?<![\d.,])(\d{1,2}(?:[.,]\d+)?)\s*(?:m\s*|metre\s*)?[x×*]\s*(\d{1,2}(?:[.,]\d+)?)(?![\d.,])", re.IGNORECASE)
@@ -1232,7 +1355,9 @@ _KENAR_SOZU = re.compile(r"(?<![\d.,x×])(\d{1,2}(?:[.,]\d+)?)\s*(?:m|mt|metre)(
 _ALAN_DISI_KOK = ("salon", "oturma", "yatak", "mutfa", "banyo", "wc", "tuvalet", "antre", "hol", "koridor", "veranda", "teras", "balkon",
                   "arsa", "bahce", "parsel", "depo", "kiler", "giyinme", "cati", "ofis", "dukkan", "garaj", "odasi", "odanin", "odaya",
                   "odalar", "pencere", "kapi", "vasistas", "cam", "sundurma", "giris", "kamelya", "pergole", "otopark", "havuz",
-                  "bodrum", "camasir", "cocuk", "misafir", "ebeveyn", "calisma", "kisim", "bolum")
+                  "bodrum", "camasir", "cocuk", "misafir", "ebeveyn", "calisma", "kisim", "bolum",
+                  # hakem tur 5 (O3): evin yanındaki başka yapı ("4x5 sera", "yanına 3x4 kulübe")
+                  "sera", "kulube", "cardak", "gazebo", "kumes", "ahir", "barinak", "konteyner", "yanina", "yaninda")
 
 
 def _alan_disi(w: str) -> bool:
@@ -1245,8 +1370,15 @@ def _ev_m2_mi(q: str, m: re.Match) -> bool:
     "verandalı 85 m2" evin alanıdır (hakem tur 4, B1)."""
     sahip = lambda w: bool(re.search(r"l[iu]$", w))
     once = CO.norm(q[:m.start()]).split()[-5:]
-    sonra = [w for w in CO.norm(q[m.end():]).split() if w not in ("lik", "luk", "li", "lu")][:1]
-    return not (any(_alan_disi(w) and not sahip(w) for w in once) or (sonra and _alan_disi(sonra[0]) and not sahip(sonra[0])))
+    sonra = []                                                 # hakem tur 5 (O3): ardındaki üç sözcük ("15 m2 kadar veranda", "15
+    for w in CO.norm(q[m.end():]).split():                     # metrekarelik bir veranda", "12 m2 kapalı teras"); yüklemde durur
+        if w in _YAPI_DUR:                                     # ("85 m2 olsun, veranda kalsın" evin alanıdır)
+            break
+        if w not in ("lik", "luk", "li", "lu"):
+            sonra.append(w)
+        if len(sonra) == 3:
+            break
+    return not (any(_alan_disi(w) and not sahip(w) for w in once) or any(_alan_disi(w) and not sahip(w) for w in sonra))
 
 
 def _ev_m2_sozleri(metin: str | None) -> list[float]:
@@ -1329,11 +1461,18 @@ def _cati_adiminda_talep_degisti(k: Konusma, t: Talep, metin: str | None, taban:
             yeni["dis_olcu"] = olcu
     kat_ref = {int(v) for v in (ts.get("kat_sayisi"), model.get("kat")) if isinstance(v, (int, float)) or str(v or "").isdigit()} or {1}
     kat_soz = None                                             # hakem tur 4, B2: "2 katlı", "iki katlı", "dubleks" (LLM kat yazmasa da)
-    for h in _cumleler(q):                                     # malzeme katı ("çift kat yalıtım") değil
-        mk = None if _KAT_DISI.search(h) or _TALEP_OLUMSUZ.search(h) else _COK_KAT_SOZU.search(h)
+    for h in _cumleler(q):                                     # malzeme katı ("çift kat yalıtım") değil; olumsuzlanan kat sözü ("2 katlı
+        if _KAT_DISI.search(h):                                # olmasın") değil, "tek katlı olmasın 2 katlı olsun" 2 kattır (hakem tur 5)
+            continue
+        mk = next((m for m in _COK_KAT_SOZU.finditer(h) if not _sonra_olumsuz(h[m.end():])), None)
         if mk:
             kat_soz = int(mk.group(1)) if mk.group(1) else {"iki": 2, "çift": 2, "cift": 2, "üç": 3, "uc": 3}.get((mk.group(2) or "").lower(), 2)
             break
+    if not kat_soz:
+        for h in _cumleler(q):
+            if _KAT_EKLE_SOZU.search(h) and not _KAT_DISI.search(h) and not _TALEP_OLUMSUZ.search(h):
+                kat_soz = max(kat_ref) + 1
+                break
     if t.kat_sayisi and re.search(r"\b(?:kat|katli|dubleks|tripleks)\b", n) and int(t.kat_sayisi) not in kat_ref:
         yeni["kat_sayisi"] = int(t.kat_sayisi)
     elif kat_soz and kat_soz not in kat_ref:
@@ -1341,16 +1480,38 @@ def _cati_adiminda_talep_degisti(k: Konusma, t: Talep, metin: str | None, taban:
     yapi_ref = {str(v) for v in (ts.get("yapi_turu"), model.get("yapi_turu")) if v} or \
         {"celik" if ((k.d.get("son_is_emri") or {}).get("yapi") or {}).get("sistem") == "celik" else "prefabrik"}
     for h in _cumleler(metin):                                 # yapı sözü bayinin cümlesinde (kapı, pencere, kolon, çatı sözü değil)
-        if _YAPI_DISI.search(h) or (_TALEP_OLUMSUZ.search(h) and not re.search(r"de[gğ]il\s+\S", h)):
-            continue                                           # "çelik olmasın" istek değil; "prefabrik değil çelik olsun" istektir
-        sozdeki = [y for y, r in _YAPI_SOZU.items() if r.search(h)]
-        sonra = re.search(r"de[gğ]il\s+(.*)", h, re.IGNORECASE)
-        if len(sozdeki) == 2 and sonra:                        # "prefabrik değil çelik olsun": "değil"den sonraki
-            sozdeki = [y for y, r in _YAPI_SOZU.items() if r.search(sonra.group(1))]
-        if len(sozdeki) == 1 and sozdeki[0] not in yapi_ref:
+        if _YAPI_DISI.search(h):
+            continue
+        sozdeki = _olumlu_yapi_sozleri(h)                      # "çelik olmasın" istek değil; "prefabrik değil çelik olsun",
+        if len(sozdeki) == 1 and sozdeki[0] not in yapi_ref:   # "prefabrik istemiyoruz çelik olsun" istektir (hakem tur 5, O1)
             yeni["yapi_turu"] = t.yapi_turu if t.yapi_turu == sozdeki[0] else sozdeki[0]
             break
     return yeni
+
+
+_YAPI_DUR = {"olsun", "olacak", "olmali", "istiyoruz", "istiyorum", "isteriz", "yapin", "yapalim", "yapilsin", "ama", "fakat", "ve"}
+
+
+def _sonra_olumsuz(kalan: str) -> bool:
+    """Sözün ardındaki üç sözcükte, olumlu yükleme ya da başka yapı sözüne gelmeden olumsuz söz var mı ("… olmasın", "… istemiyoruz")."""
+    for z in CO.norm(kalan).split()[:3]:
+        if z.startswith(("celik", "prefabrik")) or z in _YAPI_DUR or re.fullmatch(r"\d|tek|iki|uc|cift", z):
+            return False
+        if CO._OLUMSUZ_FIIL_T.fullmatch(z):
+            return True
+    return False
+
+
+def _olumlu_yapi_sozleri(h: str) -> list[str]:
+    """Cümlede olumsuzlanmamış yapı türü sözleri (hakem tur 5, O1): yapı sözünden sonraki üç sözcükte, başka yapı sözüne ya da olumlu
+    yükleme ("olsun") gelmeden olumsuz söz ("olmasın", "istemiyoruz", "değil") varsa o söz olumsuzdur."""
+    w = CO.norm(h).split()
+    out = []
+    for i, x in enumerate(w):
+        y = "celik" if x.startswith("celik") else "prefabrik" if x.startswith("prefabrik") else None
+        if y is not None and not _sonra_olumsuz(" ".join(w[i + 1:])) and y not in out:
+            out.append(y)
+    return out
 
 
 def _yeni_musteri(k: Konusma, t: Talep, metin: str | None) -> bool:
@@ -1364,8 +1525,9 @@ def _yeni_musteri(k: Konusma, t: Talep, metin: str | None) -> bool:
         return False
     sozler = CO.norm(metin).split()
     if any(w in ("adi", "ismi", "isim", "adini", "ismini") for w in sozler) and any(
-            w.startswith(("yanlis", "duzelt", "hatali")) for w in sozler):
-        return False                                           # "müşteri adı yanlış, Fatma Deneme olacak": adın düzeltmesi (hakem tur 4)
+            w.startswith(("yanlis", "duzelt", "hatali", "degis")) for w in sozler):
+        return False                                           # "müşteri adı yanlış, Fatma Deneme olacak": adın düzeltmesi (hakem tur 4);
+                                                               # "müşterinin adını Zeynep Deneme olarak değiştirin" (tur 5)
     # ekli ad da adın kendisidir ("Mehmet Yılmazın evi", "Mehmet beye"; hakem tur 4, B6)
     return all(any(s == w or (len(w) >= 3 and s.startswith(w) and len(s) - len(w) <= 3) for s in sozler) for w in yeni if len(w) >= 2)
 
@@ -1522,21 +1684,36 @@ def _cati_adimi(k: Konusma, t: Talep, metin: str | None, katalog: Katalog) -> tu
                       + (" (başka müşteri)" if yeni_musteri else ""))
             return _cati_adimi_yeni_talep(k, t, taban, degisen, yeni_musteri), None
 
+    kararsiz, hedefler, ad_kumeleri = (False, set(), []) if (yeni_soz or baska or yeni_musteri) else \
+        _cati_atiflari(metin, katalog, taban, st)              # yeni talep, başka ev ya da müşteri: çatı sözü okunmaz
+    yedek, notlar = json.loads(json.dumps(k.d)), len(getattr(k, "yeni_notlar", None) or [])
+
+    def geri_al():                                             # okumanın izi kalmaz
+        k.d = yedek
+        if isinstance(getattr(k, "yeni_notlar", None), list):
+            del k.yeni_notlar[notlar:]
+        k.d["son_metin"] = son_metin0
+
+    secim = oku()
+    acik = isinstance(secim, str) and bool(secim)
+    if acik:
+        # hakem tur 5 (Y1, Y3): mesajın öteki çatı sözü seçimle çelişiyor ("1 olsun, kırmayı alın", "1 olsun, K ile devam edelim",
+        # "1 olsun, mevcut çatıdan farklı olsun"): seçim yok, "Hangi çatı olsun?"
+        celiski = kararsiz or bool(hedefler - {secim.upper()}) or any(secim.upper() not in a for a in ad_kumeleri)
+    else:                                                      # okunamayan çatı sözü ("teklifte 2 de olsun") sessizce düşmez
+        celiski = not isinstance(secim, Karar) and t.niyet != "soru" and (kararsiz or bool(hedefler) or bool(ad_kumeleri))
+    if celiski:
+        geri_al()
+        k.not_dus("kural", "onaydan sonraki çatı setinde çatı sözü seçimle çelişiyor ya da okunamadı: soru")
+        return t, _cati_sorusu(k, st)
     if onay_soru:
-        yedek, notlar = json.loads(json.dumps(k.d)), len(getattr(k, "yeni_notlar", None) or [])
-        secim = oku()
-        if not (isinstance(secim, str) and secim):            # açık çatı seçimi yok: okumanın izi kalmaz
-            k.d = yedek
-            if isinstance(getattr(k, "yeni_notlar", None), list):
-                del k.yeni_notlar[notlar:]
-            k.d["son_metin"] = son_metin0
+        if not acik:                                           # açık çatı seçimi yok: okumanın izi kalmaz
+            geri_al()
             if t.niyet == "onay":
                 k.not_dus("kural", "çatı seti açıkken onay: plan zaten onaylandı, çatı bekleniyor")
                 return t, _cati_sorusu(k, st)
             return t, None
         k.not_dus("kural", f"çatı seti açıkken {'onay' if t.niyet == 'onay' else 'soru'} sözüyle çatı seçimi: {secim}")
-    else:
-        secim = oku()
     if isinstance(secim, Karar):
         return t, secim
     if not secim:
@@ -1713,7 +1890,10 @@ def _prefabrik_cati_istegi(k: Konusma, katalog: Katalog, aday: dict, ts: dict, b
         yazili |= kod_sozu
         olumsuz = olumsuz or any(CO._OLUMSUZ_FIIL_T.fullmatch(w) for w in kalan)
         etiket = [w for w in kalan if w in harfler]
-        if etiket and all(w in harfler or w in _CATI_BAGLAM or w.startswith("cati") for w in kalan):
+        baska_yok = not (bos_ise_yok and any(w in _BASKA_SOZU for w in kalan))   # İE-42 (hakem tur 5): "farklı K olsun" seçim değil
+        # İE-42 (hakem tur 5, D1): onaydan sonraki sette devam ve alma sözü de etiket cümlesidir ("K ile devam edelim", "K'yı alın")
+        if etiket and baska_yok and all(w in harfler or w in _CATI_BAGLAM or w.startswith("cati")
+                                        or (bos_ise_yok and (w in _SECIM_NEZAKET or w in _CATI_EKLERI)) for w in kalan):
             kodlar |= {harfler[w] for w in etiket}             # "çatı K olsun", "K olsun": set mesajının etiketi
             okunan |= set(kalan)
             continue
@@ -1721,8 +1901,8 @@ def _prefabrik_cati_istegi(k: Konusma, katalog: Katalog, aday: dict, ts: dict, b
         # İE-42 (hakem tur 4, D-D): onaydan sonraki sette (`bos_ise_yok`) ekli sıra sözü ve hitap, teşekkür sözü de numara cümlesidir
         sira_kok = (lambda w: _sira_kok(w, sira)) if bos_ise_yok else (lambda w: w if w in sira else None)
         sayi = [w for w in kalan if w.isdigit()] + [sira[sira_kok(w)] for w in kalan if sira_kok(w)]
-        if set_acik and len(sayi) == 1 and all(w.isdigit() or sira_kok(w) or w in _CATI_BAGLAM or w.startswith("cati") or w in _NUMARA
-                                               or (bos_ise_yok and _nezaket(w)) for w in kalan):
+        if set_acik and baska_yok and len(sayi) == 1 and all(w.isdigit() or sira_kok(w) or w in _CATI_BAGLAM or w.startswith("cati")
+                                                             or w in _NUMARA or (bos_ise_yok and _nezaket(w)) for w in kalan):
             kodlar |= {a["kod"] for a in st.get("adaylar") or [] if str(a.get("sira")) == sayi[0]}   # "2 numaralı", "ikinci çatı olsun"
             okunan |= set(kalan) | set(sayi)
             continue
@@ -2781,21 +2961,47 @@ def _sozdeki_notlar(notlar: list[str], cumleler: list[str]) -> list[str]:
     return [n for n in notlar if _notun_olcusu(n) in olculer]
 
 
+# D-86 notunu açıklayan cümlenin dolgusu (hakem tur 5, Y4): "bir", "daha", "hepsi", oda ve alan sözü dolgu değildir
+_ZATEN_DOLGU = {"olsun", "olacak", "olmali", "olarak", "kalsin", "yapin", "yapiniz", "yapalim", "yapilsin", "istiyoruz", "istiyorum",
+                "isteriz", "isterim", "lutfen", "de", "da", "ve", "ile", "icin", "tamam", "evet", "bu", "su", "boyle", "ayni", "aynen",
+                "cm", "santim", "olcusu", "olculeri", "ebadi", "zaten"}
+
+
+def _ortak_kok(w: str, n: str) -> bool:
+    """Bayinin sözcüğü notun sözcüğüyle aynı kökten mi ("mutfağın" ~ MUTFAK, "odası" ~ ODASI, "sol" = sol, "1" = 1)."""
+    if w == n:
+        return True
+    if w.isdigit() or n.isdigit() or len(w) < 3 or len(n) < 3:
+        return False
+    i = next((j for j, (a, b) in enumerate(zip(w, n)) if a != b), min(len(w), len(n)))
+    return i >= 4 or (i >= 3 and w.startswith("oda") and n.startswith("oda"))
+
+
 def _zaten_kapsar(cumleler: list[str], notlar: list[str]) -> bool:
-    """İE-42 (hakem tur 4, Y-A): bu mesajın her istek cümlesi bir D-86 notuyla tümüyle açıklanıyor mu? Cümleden notun ölçüsü, pencere sözü,
-    oda adı, oda numarası ve seçim sözü çıkınca hiçbir şey kalmamalı ("yatak odası 1 penceresi 120x120 olsun" evet; "… 120x120 ve
-    yükseklik 260 olsun", "iç kapılar ahşap olsun" hayır). Pencere notu olmayan D-86 notu sözle denetlenemez: kapsamaz."""
+    """İE-42 (hakem tur 4, Y-A; tur 5, Y4): bu mesajın her istek cümlesi bir D-86 notuyla tümüyle açıklanıyor mu? Cümlede notun ölçüsü
+    olmalı; ölçü, pencere sözü ve dolgu (`_ZATEN_DOLGU`, hitap) çıkınca kalan her sözcük ölçüsü cümlede geçen notun odasının sözcüğüdür
+    ("yatak odası 1 penceresi 120x120 olsun" evet; "… ve veranda olsun", "… ve bir oda daha olsun", "yatak odası 1 ve salon penceresi
+    120x120", "mutfak penceresi 120x120" (not YATAK ODASI 1), "… 120x120 ve yükseklik 260 olsun", "iç kapılar ahşap olsun" hayır). Çoğul
+    oda sözü ("yatak odaları") en az iki not ister; "hepsi", "bütün" kapsamaz. Pencere notu olmayan D-86 notu sözle denetlenemez."""
     olculer = {_notun_olcusu(n) for n in notlar} - {None}
     if not cumleler or not olculer:
         return not cumleler
     for h in cumleler:
-        kalan = _PENCERE_OLCUSU.sub(lambda m: " " if _cm_olcu(*m.groups()) in olculer else m.group(0), h.lower())
-        if kalan == h.lower():
+        sozdeki = {_cm_olcu(a, b) for a, b in _PENCERE_OLCUSU.findall(h)} & olculer
+        if not sozdeki:
             return False                                       # cümlede notun ölçüsü yok
+        kalan = _PENCERE_OLCUSU.sub(lambda m: " " if _cm_olcu(*m.groups()) in olculer else m.group(0), h.lower())
+        eslesen = [n for n in notlar if _notun_olcusu(n) in sozdeki]
+        oda = set()
+        for n in eslesen:
+            oda |= set(CO.norm(_ADDAKI_OLCU.sub("", re.sub(r" penceresi \d{2,3}x\d{2,3}$", "", n))).split())
         for w in CO.norm(kalan).split():
-            if not (w.startswith(_PENCERE_KOKU) or w == "cm" or _secim_sozcugu(w, set())
-                    or (_alan_disi(w) and not w.startswith(("cati", "kapi", "arsa", "bahce", "parsel")))):
+            if w.startswith(_PENCERE_KOKU) or w in _ZATEN_DOLGU or w in _SECIM_NEZAKET or w in _CATI_EKLERI:
+                continue
+            if not any(_ortak_kok(w, x) for x in oda):
                 return False
+            if re.search(r"l[ae]r(?:i|in|ini|a|e|da|de|dan|den)?$", w) and len(eslesen) < 2:
+                return False                                   # çoğul oda sözü tek notla kapsanmaz
     return True
 
 

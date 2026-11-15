@@ -786,3 +786,37 @@ def test_hakem4_celik_onay_ve_nezaket_sozu_secimdir(s, metin):
     cati_seti(s)
     k = s.yaz(metin)
     assert k.gerekce == K.PLAN_ONAYI and s.k.d.get("onaylanan"), k.mesaj
+
+
+# ── İE-42 · geometri hakemi tur 5 (15 Kasım 2026 gecesi) ──────────────────────────────────────────────────────────────────────────
+@pytest.mark.parametrize("metin", ["mevcut çatıdan farklı olsun", "1 olsun, mevcut çatıdan farklı olsun", "1 olsun, kırmayı alın",
+                                   "1 olsun, kırmada kalalım", "1 olsun, teklifte K de olsun", "1 olsun, kırma gelsin", "1 olsun, L gelsin",
+                                   "1 olsun, K de gelsin", "1 olsun, cumba sağ olsun", "1 olsun, kalkan sağ olsun", "1 olsun, L tipi olsun",
+                                   "1 olsun, başka çatıya da bakalım"])
+def test_hakem5_celik_cati_sozu_secimle_celisir(s, metin):
+    """Y1–Y3: çelikte "farklı çatı", seçimle çelişen çatı adı ya da etiketi, "sağ olsun" yön sözü onay kaydettirmez, mühendise gitmez."""
+    cati_seti(s)
+    k = s.yaz(metin)
+    assert K.PLAN_ONAYI not in k.gerekce and not s.k.d.get("onaylanan") and s.plan["revizyon"] == 1, k.mesaj
+
+
+@pytest.mark.parametrize("metin", ["1 olsun, çelik olmasın prefabrik olsun", "çelik istemiyoruz prefabrik olsun"])
+def test_hakem5_celik_yapi_olumsuzu(s, metin):
+    """O1: "çelik olmasın prefabrik olsun" prefabriğe geçiştir: talep değişti."""
+    cati_seti(s)
+    k = s.yaz(metin)
+    assert k.mesaj.startswith("Talebiniz değişti; bu değişiklik r01 onayınızı geçersiz kıldı."), k.mesaj
+    assert s.k.d["taslak"]["yapi_turu"] == "prefabrik"
+
+
+@pytest.mark.parametrize("metin, kod", [("K ile devam edelim", "Ç8801K"), ("K'yı alın", "Ç8801K"), ("2 yi alın", "Ç8801K"),
+                                        ("L olsun teşekkürler", "Ç8801L"), ("kendi çatısıyla devam edelim", "Ç8801"),
+                                        ("1 olsun, başka değişiklik yok", "Ç8801"), ("1 olsun, son halini onaylıyoruz", "Ç8801")])
+def test_hakem5_celik_devam_sozu_secimdir(s, metin, kod):
+    """D1, O2: devam ve alma sözlü etiket, numara ve "kendi çatısı" seçimdir; "başka değişiklik yok" istek değildir."""
+    cati_seti(s)
+    k = s.yaz(metin)
+    if kod == "Ç8801":
+        assert k.gerekce == K.PLAN_ONAYI and s.k.d.get("onaylanan"), k.mesaj
+    else:
+        assert k.eylem == "is_emri" and s.plan["revizyon"] == 2 and s.plan["yapi"]["kod"] == kod, k.mesaj
