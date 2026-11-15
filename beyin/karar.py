@@ -141,6 +141,34 @@ def karar_ver(talep: Talep, k: Konusma, bayi: dict | None, katalog: Katalog, met
     return karar
 
 
+_UNVANLAR = {"bey", "hanim", "sayin", "usta", "abi", "abla", "hoca", "hocam"}
+
+
+def _ad_sozcukleri(s) -> list[str]:
+    """Adın sözcükleri: küçük harf, Türkçe harfler sade, unvan ("Bey", "Hanım") sayılmaz."""
+    return [w for w in (varyant._norm(x) for x in re.split(r"[^0-9A-Za-zÇĞİÖŞÜçğıöşü]+", str(s or ""))) if w and w not in _UNVANLAR]
+
+
+def _bayi_adi_musteri_degil(k: Konusma, t: Talep, bayi: dict | None, metin: str | None) -> Talep:
+    """BK-29 tur 7 (canlı bulgu, 14–15 Kasım 2026): LLM bağlamında "bayinin adı/hitabı" yazar (D-06, `worker.bayi_tanimi`); LLM bunu
+    bazen `musteri.ad`'a yazıyor ve bayinin adı İş Emri'nin `talep.musteri_adi`'sına, PDF başlığına ve çelik antetine çıkıyor. Müşteri
+    adı bayinin kendi mesajından okunur (K18; şema: "Mesajda OLMAYAN hiçbir alan doldurulmaz"): LLM'in verdiği ad bayinin kartındaki
+    adın ya da hitabın sözcüklerinden oluşuyorsa ve bu mesajda yazmıyorsa düşer (taslağa girmez; sevk adresi ve öteki alanlar aynen).
+    Bayi kendi adını mesajına yazdıysa (kendi evi) ad kalır. Bayi kaydı ya da ham mesaj yoksa dokunulmaz."""
+    ad = (t.musteri.ad if t.musteri else None) or ""
+    sozcukler = _ad_sozcukleri(ad)
+    if not sozcukler or not bayi or metin is None:
+        return t
+    bayinin = set(_ad_sozcukleri(bayi.get("ad"))) | set(_ad_sozcukleri(bayi.get("hitap")))
+    if not set(sozcukler) <= bayinin:
+        return t
+    mesajdaki = _ad_sozcukleri(metin)
+    if all(any(m.startswith(w) for m in mesajdaki) for w in sozcukler):      # "Lokman'ın evi", "müşteri Lokman": bayi kendi yazdı
+        return t
+    k.not_dus("kural", "müşteri adı bayinin adıyla aynı ve mesajda yok: alınmadı")
+    return t.model_copy(update={"musteri": t.musteri.model_copy(update={"ad": None})})
+
+
 def _karar_ver(talep: Talep, k: Konusma, bayi: dict | None, katalog: Katalog, metin: str | None) -> Karar:
     t = talep
     k.not_dus("gelen", t.ozet, {"niyet": t.niyet, "guven": t.guven})
@@ -275,8 +303,7 @@ def _karar_ver(talep: Talep, k: Konusma, bayi: dict | None, katalog: Katalog, me
                                        mesaj="Değişikliği netleştiremedim. " + YONLENDIRME))
             ek = (" Bu mesajdaki öteki değişiklikleri de uygulamadım; hepsini birlikte yazabilirsiniz."
                   if ob.get("hazir") or ob.get("kalan") or _bekleyen_cati(k, ob) else "")
-            return _soru(k, "okuma_metin", "Neyi değiştirelim? Odayı ve pencere ölçüsünü yazın (örn. \"mutfak penceresi 120x120\"); "
-                                           "çatı için \"çatı K\" ya da \"çatı L\", dış duvar için \"dışlar 140'lık olsun\" yazabilirsiniz." + ek)
+            return _soru(k, "okuma_metin", _celik_neyi(k, katalog) + ek)
         elif "olcu" in cevap:
             en, yuk = cevap["olcu"]
             adaylar = list(ob.get("adaylar") or [])
@@ -378,7 +405,7 @@ def _karar_ver(talep: Talep, k: Konusma, bayi: dict | None, katalog: Katalog, me
         # niyet "red" okunan "iptal etmeyin" de talebi kapatmaz (olumsuz söz iptal değildir, K21).
         k.d["asama"] = "revizyon"
         return _bitir(k, Karar(eylem="sor", soru_alani="revizyon_ne", gerekce="plan reddedildi",
-                                mesaj="Anladım. " + _neyi_degistirelim(k)))
+                                mesaj="Anladım. " + _neyi_degistirelim(k, katalog)))
     if t.niyet == "soru":
         plan_cevabi = _plan_durumu_cevabi(k)                    # BK-29 tur 6 (pano 212, C7): açık ya da onaylı planı olan bayiye planı söylenir
         if plan_cevabi:
@@ -406,7 +433,7 @@ def _karar_ver(talep: Talep, k: Konusma, bayi: dict | None, katalog: Katalog, me
         if k.d["asama"] in ("onay_bekliyor", "uretildi") and not _iptal_sozu(metin):
             k.d["asama"] = "revizyon"
             return _bitir(k, Karar(eylem="sor", soru_alani="revizyon_ne", gerekce="plan reddedildi",
-                                    mesaj="Anladım. " + _neyi_degistirelim(k)))
+                                    mesaj="Anladım. " + _neyi_degistirelim(k, katalog)))
         k.sifirla()
         return _bitir(k, Karar(eylem="cevapla", gerekce="iptal", mesaj="Talep kapatıldı. Yeni bir plan istediğinizde yazmanız yeterli."))
 
@@ -473,6 +500,7 @@ def _karar_ver(talep: Talep, k: Konusma, bayi: dict | None, katalog: Katalog, me
             t = t.model_copy(update={"katalog_kodu": None})
             k.not_dus("kural", "çatı seti açıkken talep bilgisi değişti: set eskidi, talep yeniden okundu")
     t = _yinelenen_kodu_birak(k, t, metin, katalog)
+    t = _secim_kopyasini_birak(k, t, katalog)
     t = _pencere_varyantlarina_soz_isle(t, metin)    # G-3/G-4 (29.09): pencere değişikliği tek yoldan, B1 kurallarıyla
     yp_komut = []
     if getattr(k, "yarim_pano", False):              # İE-39 PR-2 (D-90): ayar `yarim_pano.acik`; kapalıyken bugünkü yol
@@ -481,6 +509,7 @@ def _karar_ver(talep: Talep, k: Konusma, bayi: dict | None, katalog: Katalog, me
             return yp
         if yp is not None:
             t, yp_komut = yp
+    t = _bayi_adi_musteri_degil(k, t, bayi, metin)   # BK-29 tur 7: LLM'in bağlamdan aldığı bayi adı müşteri adı değildir (K18)
     k.birlestir(t.model_dump())
     if yp_komut:
         k.d["taslak"]["yarim_pano"] = list(k.d["taslak"].get("yarim_pano") or []) + yp_komut
@@ -744,6 +773,18 @@ def _secim_kodlari(metin: str | None, katalog: Katalog) -> list[str]:
         return []
     kaynak = {str(Katalog.kod_normalize(c) or "").upper() for c in CO.cati_kaynak_kodlari(metin)}
     return [c for c in (str(Katalog.kod_normalize(x) or "").upper() for x in _model_kodlari_ve_kalan(metin, katalog)[0]) if c not in kaynak]
+
+
+def _secim_kopyasini_birak(k: Konusma, t: Talep, katalog: Katalog) -> Talep:
+    """İE-20 PR-10 (15 Kasım 2026 canlı denemesi, çelik formu C6 ve C7): bayi planı yazıyla seçince ("KT-02 olsun") LLM seçim cümlesini
+    özel istek diye de yazıyordu; cümle paftanın özel isteklerine giriyordu (düğmeyle seçimde özel istek boş). Yalnız bir model kodu ve
+    seçim sözcüğü taşıyan özel istek (`_yalniz_kod`) istek değildir: taslağa yazılmaz. Başka söz taşıyan istek ("KT-02 olsun, zemin
+    laminat") aynen kalır."""
+    ozel = [s for s in t.ozel_istekler if _yalniz_kod(s, katalog) is None]
+    if len(ozel) == len(t.ozel_istekler):
+        return t
+    k.not_dus("kural", f"seçim cümlesi özel istek sayılmadı ({len(t.ozel_istekler) - len(ozel)} satır)")
+    return t.model_copy(update={"ozel_istekler": ozel})
 
 
 def _yinelenen_kodu_birak(k: Konusma, t: Talep, metin: str | None, katalog: Katalog) -> Talep:
@@ -1276,6 +1317,64 @@ _NEYI_DEGISTIRELIM = ("Neyi değiştirelim? Odayı ve pencere ölçüsünü yaz�
                       "\"çatı L\", dış duvar için \"dışlar 140'lık olsun\" yazabilirsiniz.")
 
 
+_NEYI_DEGISTIRELIM_YALIN = "Neyi değiştirelim? Odayı ve pencere ölçüsünü yazın (örn. \"mutfak penceresi 120x120\")"
+
+
+def _dis140_uygulanir(t: dict, onceki: list[dict]) -> bool:
+    """Dış 140 bu plana otomatik uygulanabilir mi: zaten 140 değil ve `dis_karkas_140` işlemi tanıma uygulanıyor (karkas modeli yok)."""
+    if _zaten_140(t, onceki):
+        return False
+    try:
+        varyant.tanim_uygula(t, {"op": "dis_karkas_140"})
+        return True
+    except varyant.VaryantHatasi:
+        return False
+
+
+def dis140_onerilir(yapi: dict | None) -> bool:
+    """Çelik İş Emri'nin `yapi`sından: "dışlar 140'lık olsun" bu planda örnek gösterilir mi (`kanal/worker.form_cikarimi`, boş revizyon
+    formu). Tanım okunamıyorsa False (yapılabildiği bilinmeyen örnek gösterilmez)."""
+    y = yapi or {}
+    onceki = [d for d in (y.get("degisiklikler") or []) if d.get("op") != "cati_varyanti"]
+    try:
+        t = celik.tanim_oku(y)
+        for d in onceki:
+            t = varyant.tanim_uygula(t, d)
+        return _dis140_uygulanir(t, onceki)
+    except Exception:                                          # kayıttaki tanım okunamadı ya da uygulanamadı: örnek gösterilmez, iş düşmez
+        return False
+
+
+def _celik_ornekleri(katalog: Katalog, aday: dict, t: dict, onceki: list[dict]) -> str:
+    """Çelik planda "Neyi değiştirelim?" metni: yalnız bu planda otomatik yapılabilen örnekler (BK-29 pano 210 ilkesi; İE-20 PR-10,
+    15 Kasım 2026 canlı denemesi: KT-03'te çatı seçeneği yok ve dış duvar zaten 140'lık, metin ikisini de öneriyordu). Çatı örneği
+    yalnız çatı seçeneği olan modelde; dış 140 örneği yalnız bu plana uygulanabiliyorsa (zaten 140 değil, karkas modeli yok). İkisi de
+    varsa metin `_NEYI_DEGISTIRELIM` ile aynıdır."""
+    ek = []
+    if _cati_kodlari(katalog, aday):
+        ek.append("çatı için \"çatı K\" ya da \"çatı L\"")
+    if _dis140_uygulanir(t, onceki):
+        ek.append("dış duvar için \"dışlar 140'lık olsun\"")
+    return _NEYI_DEGISTIRELIM_YALIN + ("; " + ", ".join(ek) + " yazabilirsiniz." if ek else ".")
+
+
+def _celik_neyi(k: Konusma, katalog: Katalog) -> str:
+    """`_celik_ornekleri`, konuşmadaki çelik plandan (son İş Emri; yoksa taslaktaki kod). Plan bulunamazsa genel metin."""
+    y = (k.d.get("son_is_emri") or {}).get("yapi") or {}
+    kod = y.get("kod") or (k.d.get("taslak") or {}).get("katalog_kodu")
+    aday = _aday_bul(k, katalog, kod) if kod else None
+    if aday is None or aday.get("motor") != "genel" or not celik.tanim_dogrula(aday):
+        return _NEYI_DEGISTIRELIM
+    onceki = [d for d in (y.get("degisiklikler") or []) if d.get("op") != "cati_varyanti"]
+    try:
+        t = celik.tanim_oku(aday)
+        for d in onceki:
+            t = varyant.tanim_uygula(t, d)
+    except varyant.VaryantHatasi:
+        return _NEYI_DEGISTIRELIM
+    return _celik_ornekleri(katalog, aday, t, onceki)
+
+
 _NEYI_DEGISTIRELIM_YENI = ("Planda neyi değiştirelim? Örneğin \"salonu 50 cm büyüt\", \"mutfağa 120x120 pencere ekle\", \"çatı kırma olsun\" ya da "
                            "\"dış duvarlar 140 olsun\" yazabilirsiniz; planı onaylıyorsanız Onayla'ya basın.")
 
@@ -1402,7 +1501,7 @@ def _celik_degisiklikler(k: Konusma, katalog: Katalog, aday: dict, t: dict, once
                   or (p["tur"] == "belirsiz" and p.get("neden") == "dis" and (not p["olumsuz"] or p.get("d140")))
                   for p in r["parcalar"])
     if sor:
-        return _soru(k, "okuma_metin", "Anlayamadım. " + _NEYI_DEGISTIRELIM)
+        return _soru(k, "okuma_metin", "Anlayamadım. " + _celik_ornekleri(katalog, aday, t, onceki))
     if llm.get("pencere") and not r["pencereler"]:
         return _soru(k, "okuma_metin", "Hangi odanın penceresini hangi ölçüye değiştirelim? (örn. \"mutfak penceresi 120x120\")")
     # 5) değişiklikler
@@ -1571,7 +1670,7 @@ def _celik_is_emri_uret(k: Konusma, bayi: dict, katalog: Katalog, aday: dict, ts
             if kr.eylem == "sor":
                 k.d["asama"] = "onay_bekliyor"                 # plan değişmedi, bayide: mesajın dediği gibi Onayla çalışır (dördüncü tur)
             return kr
-        return _soru(k, "okuma_metin", _NEYI_DEGISTIRELIM)   # aynı plan yeniden çizilip revizyon hakkı harcanmaz
+        return _soru(k, "okuma_metin", _celik_ornekleri(katalog, aday, t, onceki))   # aynı plan yeniden çizilip revizyon hakkı harcanmaz
     from . import tanim_germe as TG
     try:
         for d in yeni:
@@ -1630,6 +1729,8 @@ def _celik_is_emri_uret(k: Konusma, bayi: dict, katalog: Katalog, aday: dict, ts
     if yeni:                                                   # BK-09 M1: kod değişiklik uyguladıysa LLM özeti yazılmaz (K18); özetin
         ozet = ""                                              # "teyit etmemiz gerekiyor" sorusu "Uygulanan"la çelişiyordu (14.10 canlı)
         ie["talep"]["metin"] = uyg.strip()                     # PDF açıklaması da kodun okuması (`worker`, `ozet_baslik`)
+        if form_ilk:                                           # İE-20 PR-10 (canlı C5): çelik formdan gelen ilk planda PDF başlığından
+            ie["talep"]["metin"] = (on_bilgi + uyg).strip()    # model adı ve m² düşmez ("Ç8801-K (…) · 88 m², 2+1. Uygulanan: …")
     elif kod_metni:                                            # bilgi + uygulanamayan/zaten olan istek: LLM özeti isteği taşır ("çatı L tipi
         ozet = kod_metni                                       # olsun"), plan değişmedi (geometri hakemi ikinci tur, K18): mesaj ve PDF
         ie["talep"]["metin"] = kod_metni                       # başlığı kodun metni
@@ -2345,13 +2446,13 @@ def _iptal_olumsuz_sozu(metin: str | None) -> bool:
 _NEYI_DEGISTIRELIM_PREFABRIK = "Neyi değiştirelim? Odayı ve pencere ölçüsünü yazın (örn. \"mutfak penceresi 120x120 olsun\")."
 
 
-def _neyi_degistirelim(k: Konusma) -> str:
+def _neyi_degistirelim(k: Konusma, katalog: Katalog) -> str:
     """"Revize et" cevabı: yalnız otomatik yapılabilen değişiklikler örnek gösterilir (pano 210; kapı, veranda, oda yerleşimi yok)."""
     ie = k.d.get("son_is_emri") or {}
     if str((k.d.get("taslak") or {}).get("katalog_kodu") or "").startswith(YENI_ONEK):
         return _NEYI_DEGISTIRELIM_YENI
     if (ie.get("yapi") or {}).get("sistem") == "celik":
-        return _NEYI_DEGISTIRELIM
+        return _celik_neyi(k, katalog)                # İE-20 PR-10: yalnız bu planda yapılabilen örnekler
     return _NEYI_DEGISTIRELIM_PREFABRIK
 
 
