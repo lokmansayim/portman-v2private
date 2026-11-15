@@ -87,7 +87,10 @@ def _once_71(ie: dict) -> dict:
 
 
 def _an(q) -> tuple:
-    return (q.duvar.id, round(q.a0, 3), round(q.a1, 3))
+    """Pano kimliği: duvar, yer, karkas ve açıklık (tür, ölçü, kayma). Öteki panolarda bunların hiçbiri değişmez."""
+    ac = q.acilim
+    acilim = None if ac is None else (ac.tur, ac.olcu, round(ac.kayma or 0, 3))
+    return (q.duvar.id, round(q.a0, 3), round(q.a1, 3), bool(q.karkasli), acilim)
 
 
 def _satirlar(ie: dict) -> dict:
@@ -165,6 +168,20 @@ def test_45m2_salonun_on_dis_duvari():
     assert ozet(q for k, q in k1.items() if k not in k0) == [("x", "dis", 155.0, 295.0, 23.75), ("x", "dis", 155.0, 318.75, 62.75)]
     with pytest.raises(PL.ListeYazilmaz):
         _satirlar(_sablon("PA27"))
+
+
+def test_45m2_standart_halleri_bu_durumda_degil():
+    """Okuma (D-87 › Ek): PA-28'de salonun ön dış duvarı T'nin yerinden başlar; PA-29'da T ilk 125,5'lik panonun tam ortasındadır
+    (Lokman 08:51:58, 140 m²: tam panonun ortasına çektirme U'su). İkisinin kaydı değişmez."""
+    def duvar(kod):
+        p = G.kur(copy.deepcopy(_sablon(kod)))
+        t = next(d.c for d in p.duvarlar if d.yon == "y" and d.tur != "dis" and abs(d.c - 318.75) < 1e-6)
+        w = next(d for d in p.duvarlar if d.yon == "x" and d.tur == "dis" and d.a0 <= t <= d.a1 and d.c < p.H / 2)
+        return t, w.a0, [(round(q.a0, 2), round(q.boy, 2)) for q in sorted((q for q in p.panolar if q.duvar is w), key=lambda q: q.a0)][0]
+    assert duvar("PA28") == (318.75, 318.75, (318.75, 251.0))
+    assert duvar("PA29") == (318.75, 256.0, (256.0, 125.5)) and 256.0 + 125.5 / 2 == 318.75
+    d87 = " ".join(D87.split())
+    assert "PA-28'de 23,75 cm'lik parça silinmiş" in d87 and "PA-29'da T, duvarın ilk 125,5'lik panosunun tam ortasındadır" in d87
 
 
 @pytest.mark.parametrize("kod,proje,kaynak,karar,pano", [

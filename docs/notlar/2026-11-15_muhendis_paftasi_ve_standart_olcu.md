@@ -25,7 +25,7 @@ Lokman'ın isteğiyle kayda alındı ("bu konuyu kayıtlara al"). Bu not bir dur
   bölmelerde hata yapmış".
 - 08:53:55 (45 m² 1+1, salonun ön dış duvarı): "71 m² deki durumun aynısı yeri net değil".
 
-## Çalışmaya etkisi
+## Çalışmaya etkisi (okuma, Lokman'ın sözü değil)
 
 - Montaj paftası gerçek uygulamanın kaydıdır, doğruluk kanıtı değildir. Paftayla kayıt arasındaki farkta "pafta doğru" diye
   varsayılmaz; fark eskizle Lokman'a gösterilir (çalışma kuralı 14, 15).
