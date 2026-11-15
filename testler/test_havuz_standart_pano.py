@@ -21,7 +21,8 @@ from araclar import havuz_hakemi as HH  # noqa: E402
 from beyin.katalog import SABLON_DIR, havuz_kayitlari  # noqa: E402
 
 D91 = (KOK / "KARARLAR" / "D-91.md").read_text(encoding="utf-8")
-KAYNAK = "testler/havuz/is_emirleri/AP07.json"                                    # PA-27 (D-87)
+KAYNAK = "testler/havuz/is_emirleri/AP07.json"                                    # PA-28/29'un kaynağı (D-87'deki ilk PA-27 hâli;
+# PA-27 15 Kasım 2026'dan beri AP07_PAFTA.json'dan, salonun ön dış duvarı paftadaki gibi; D-87 › Ek)
 # kod → (kaynak İş Emri, dış ölçü cm, brüt m², dört hat: sağ duvar, girinti duvarı, salonun ön duvarı, yatak odasının ön duvarı)
 HALLER = {
     "PA28": ("testler/havuz/is_emirleri/AP07_STD45.json", (763.0, 710.25), 45.70, (758.0, 318.75, 512.0, 700.25)),   # en yakın

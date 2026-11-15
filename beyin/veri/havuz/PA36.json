@@ -1,0 +1,234 @@
+{
+ "kod": "PA36",
+ "gosterim": "PA-36",
+ "durum": "gecerli",
+ "sablon": "adaylar/PA36.json",
+ "gorsel": "adaylar/PA36.png",
+ "referans_model": "PA-36",
+ "yapi_turu": "prefabrik",
+ "kat": 1,
+ "oda_programi": "2+1",
+ "katalog_m2": 62.0,
+ "kapali_m2": 54.4,
+ "veranda_m2": 7.18,
+ "ozet": {
+  "grid": {
+   "x_pano": 5,
+   "y_pano": 7.5
+  },
+  "dis_olcu_cm": [
+   647.5,
+   951.25
+  ],
+  "brut_m2": 61.59,
+  "pano": 47,
+  "pencere": 6,
+  "kapi": 6,
+  "odalar": {
+   "YATAK ODASI 1": 7.58,
+   "BANYO": 4.43,
+   "YATAK ODASI 2": 9.14,
+   "HOL": 5.9,
+   "MUTFAK": 13.77,
+   "SALON": 9.14,
+   "VERANDA": 7.18
+  }
+ },
+ "kaynak": {
+  "metin": "D-92 ve D-103 (İE-40, hakem kalemi BK-35): 60 m² 2+1 evin (PA-18, AP-19) veranda duvarı aksa oturmuş, mutfak çıkıntısı ve sol duvar tam ve yarım panoya dönmüş, sağdaki 78 cm'lik panolar 125,5 cm'ye tamamlanmış, salonun penceresi ortada 125,5 cm'lik panoda hâli; 647,5 × 951,25 cm (Lokman 15 Kasım 2026 06:07:17 UTC: \"yani sonuç değişmiyor yine 2 tane özel pano çıkıyor özel pano çıkmaması için en doğrusu 125,5 ve 62,75 çıkması öncesinde dikkat edersen mühendis aksı korumuş şöyle yapabilirsin dışdaki 37 cm mi ve içteki 32'şer santimleri kaldır veranda duvarını aksa oturt sonra mutfak çıkıntısını tam ve yarım pano olarak güncelle ara ölçü çıkmamış olur\"; kart 07:15:45 \"60 m2 evin veranda duvarı aksta eskizi doğru mu?\" → \"Doğru, yanına eklensin\"; Lokman 15 Kasım 2026 07:17:23 UTC: \"buna ek olarak bir doğrulama daha yapmanı istiyorum dış pano 78 cm olan panoyuda tam pano yap selondaki pencereyi ortala ortaya 125,5 tam pano pencere koy yanlara kalanı eşit dağıt\"; kart 07:24:23 \"60 m2 evin 647,5 × 951,25 cm eskizi doğru mu?\" → \"Doğru, yanına eklensin\" (\"Bugünkü 60 m² kalır; 647,5 × 951,25 cm hâli (61,6 m²) yeni numarayla girer. 57 m² ara hâli girmez.\")). Bugünkü 60 m² (PA-18) aynen (D-103).",
+  "dosya": "testler/havuz/is_emirleri/PA18_GENIS.json",
+  "ayna": null,
+  "karar": "D-92",
+  "standart": true,
+  "kart_kiyasi": {
+   "kart": "AP-19",
+   "kart_sha256": "cfd5a08a1d171872f80411351535a111c099563fd28042974bd6837af5401682",
+   "sonuc": "geçti",
+   "olcum": {
+    "dis_olcu_cm": [
+     647.5,
+     951.25
+    ],
+    "acikla_olcu_cm": [
+     647.5,
+     951.25
+    ],
+    "brut_m2": 61.59,
+    "kubbe_m2": 0.0,
+    "yatak_odasi": 2,
+    "pencereler": {
+     "120x120": 3,
+     "120x180": 2,
+     "60x40": 1
+    },
+    "dis_kapi": 1,
+    "ic_kapi": 5,
+    "veranda": 1,
+    "kat": 1,
+    "kaynak_dis_olcu_cm": [
+     600.0,
+     1000.0
+    ],
+    "silinen_cm": [
+     0.0,
+     48.75
+    ],
+    "buyuyen_cm": [
+     47.5,
+     0.0
+    ],
+    "silinen": [
+     {
+      "duvar": "ic y 261",
+      "boy": 32.0
+     },
+     {
+      "duvar": "ic y 386.5",
+      "boy": 32.0
+     },
+     {
+      "duvar": "dis y 595",
+      "boy": 37.0
+     }
+    ],
+    "tamamlanan": [
+     {
+      "duvar": "dis x 5",
+      "once": 78.0,
+      "sonra": 125.5
+     },
+     {
+      "duvar": "ic x 381.5",
+      "once": 78.0,
+      "sonra": 125.5
+     }
+    ],
+    "yeniden_dizilen": [
+     {
+      "duvar": "dis x 795",
+      "once": [
+       125.5,
+       40.5,
+       125.5,
+       37.5
+      ],
+      "sonra": [
+       125.5,
+       62.75,
+       125.5,
+       62.75
+      ]
+     },
+     {
+      "duvar": "dis y 5",
+      "once": [
+       125.5,
+       125.5,
+       125.5,
+       125.5,
+       125.5,
+       125.5,
+       125.5,
+       111.5
+      ],
+      "sonra": [
+       125.5,
+       125.5,
+       125.5,
+       125.5,
+       125.5,
+       125.5,
+       125.5,
+       62.75
+      ]
+     },
+     {
+      "duvar": "dis y 261",
+      "once": [
+       120.5,
+       74.5
+      ],
+      "sonra": [
+       120.5,
+       62.75
+      ]
+     }
+    ],
+    "veranda_kisalan": [
+     "VERANDA"
+    ],
+    "kesim_hatti": {
+     "yazi": "on:37:795",
+     "eksen": "y",
+     "hat_cm": 795.0,
+     "cm": 37.0
+    },
+    "aksa_oturan": {
+     "eksen": "y",
+     "ek_aks_cm": 795.0,
+     "aks_cm": 758.0
+    },
+    "tam_yarim": [
+     {
+      "duvar": "dis y 5",
+      "once": [
+       125.5,
+       125.5,
+       125.5,
+       125.5,
+       125.5,
+       125.5,
+       125.5,
+       111.5
+      ],
+      "sonra": [
+       125.5,
+       125.5,
+       125.5,
+       125.5,
+       125.5,
+       125.5,
+       125.5,
+       62.75
+      ]
+     },
+     {
+      "duvar": "dis y 261",
+      "once": [
+       120.5,
+       74.5
+      ],
+      "sonra": [
+       120.5,
+       62.75
+      ]
+     }
+    ],
+    "kayan_aciklik": [
+     {
+      "aciklik": "pencere 120x180",
+      "duvar": "dis x 758",
+      "once_cm": [
+       427.0,
+       552.5
+      ],
+      "sonra_cm": [
+       449.25,
+       574.75
+      ]
+     }
+    ]
+   },
+   "kip": "silme_hali",
+   "kaynak_is_emri": "is_emri/adaylar/PA18.json",
+   "kaynak_sha256": "a80f12d90f72e204b0222df165f9bd96cd4696b84371f2887b4cccddfe14f039",
+   "veranda_sozu": "kart 07:24:23 \"60 m2 evin 647,5 × 951,25 cm eskizi doğru mu?\" → \"Doğru, yanına eklensin\" (\"Bugünkü 60 m² kalır; 647,5 × 951,25 cm hâli (61,6 m²) yeni numarayla girer. 57 m² ara hâli girmez.\")",
+   "buyume_sozu": "Lokman 15 Kasım 2026 07:17:23 UTC: \"buna ek olarak bir doğrulama daha yapmanı istiyorum dış pano 78 cm olan panoyuda tam pano yap selondaki pencereyi ortala ortaya 125,5 tam pano pencere koy yanlara kalanı eşit dağıt\"; kart 07:24:23 \"60 m2 evin 647,5 × 951,25 cm eskizi doğru mu?\" → \"Doğru, yanına eklensin\" (\"Bugünkü 60 m² kalır; 647,5 × 951,25 cm hâli (61,6 m²) yeni numarayla girer. 57 m² ara hâli girmez.\")",
+   "kesim_sozu": "Lokman 15 Kasım 2026 06:07:17 UTC: \"yani sonuç değişmiyor yine 2 tane özel pano çıkıyor özel pano çıkmaması için en doğrusu 125,5 ve 62,75 çıkması öncesinde dikkat edersen mühendis aksı korumuş şöyle yapabilirsin dışdaki 37 cm mi ve içteki 32'şer santimleri kaldır veranda duvarını aksa oturt sonra mutfak çıkıntısını tam ve yarım pano olarak güncelle ara ölçü çıkmamış olur\"; kart 07:15:45 \"60 m2 evin veranda duvarı aksta eskizi doğru mu?\" → \"Doğru, yanına eklensin\"",
+   "aciklik_sozu": "Lokman 15 Kasım 2026 07:17:23 UTC: \"buna ek olarak bir doğrulama daha yapmanı istiyorum dış pano 78 cm olan panoyuda tam pano yap selondaki pencereyi ortala ortaya 125,5 tam pano pencere koy yanlara kalanı eşit dağıt\"; kart 07:24:23 \"60 m2 evin 647,5 × 951,25 cm eskizi doğru mu?\" → \"Doğru, yanına eklensin\" (\"Bugünkü 60 m² kalır; 647,5 × 951,25 cm hâli (61,6 m²) yeni numarayla girer. 57 m² ara hâli girmez.\")",
+   "aks_sozu": "Lokman 15 Kasım 2026 06:07:17 UTC: \"yani sonuç değişmiyor yine 2 tane özel pano çıkıyor özel pano çıkmaması için en doğrusu 125,5 ve 62,75 çıkması öncesinde dikkat edersen mühendis aksı korumuş şöyle yapabilirsin dışdaki 37 cm mi ve içteki 32'şer santimleri kaldır veranda duvarını aksa oturt sonra mutfak çıkıntısını tam ve yarım pano olarak güncelle ara ölçü çıkmamış olur\"",
+   "tam_yarim_sozu": "Lokman 15 Kasım 2026 06:07:17 UTC: \"yani sonuç değişmiyor yine 2 tane özel pano çıkıyor özel pano çıkmaması için en doğrusu 125,5 ve 62,75 çıkması öncesinde dikkat edersen mühendis aksı korumuş şöyle yapabilirsin dışdaki 37 cm mi ve içteki 32'şer santimleri kaldır veranda duvarını aksa oturt sonra mutfak çıkıntısını tam ve yarım pano olarak güncelle ara ölçü çıkmamış olur\""
+  }
+ },
+ "not": ""
+}
