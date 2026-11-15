@@ -2302,3 +2302,104 @@ def test_hakem21_istek_haberi_secimi_bozmaz(tmp_path, metin):
     k = s.yaz(metin, niyet="diger", **_Y2)
     assert k.eylem == "is_emri" and k.revizyon == 2 and k.is_emri["talep"]["kaynak"] == "PA06K", k.mesaj
 
+
+
+# ── İE-42 · geometri hakemi yirmi ikinci tur (15 Kasım 2026 öğle) ──────────────────────────────────────────────────────────────────────
+@pytest.mark.parametrize("metin", [
+    "1 olsun, ikinci seçilen bir çatı olur mu?", "1 olsun, başka nasıl bir çatı olabilir?", "1 olsun, ikinci olan çatı nasıl?",
+    "2 olsun, başka seçilecek bir çatı var mı?", "2 olsun, başka nasıl bir seçenek var?",
+    "1 olsun ama, çatı ne olacak bilmiyoruz", "1 olsun ama, çatı olsun mu bilmiyoruz", "1 olsun ama, çatı kalsın mı bilmiyoruz",
+    "1 olsun ama, evin kendi çatısı kalsın mı emin değiliz", "1 olsun ama, çatı seçtik mi emin değilim", "1 olsun ama, çatı sonra olacak",
+    "1 olsun ama, çatıyı sonra seçelim", "1 olsun fakat, çatı ne olacak bilmiyoruz",
+    "Evin kendi çatısı olsun ama, çatı ne olacak bilmiyoruz", "2 olsun ama, kırma olsun mu bilemedik",
+    "2 olsun ama, çatı ne olacak henüz belli değil", "2 olsun ama, salon için müşteri ne der bilmiyorum",
+    "2 olsun ama, mutfak yeri değişebilir", "2 olsun ama, verandayı sonra konuşuruz", "2 olsun ama, veranda olsun mu bilemedik",
+    "1 olsun, çatı ne olacak bilmiyoruz", "1 olsun, ne olacak bilmiyoruz", "1 olsun, uygun mu bilemedik", "1 olsun, çatı sonra olacak",
+    "1 olsun, çatıyı sonra seçelim", "1 olsun. Ama çatı ne olacak bilmiyoruz", "2 olsun, müşteri ne der bilmiyoruz",
+    "2 olsun, müşteri beğenir mi bilmiyoruz", "2 olsun, bu mu olur emin değilim", "1 olsun, şimdilik iyi",
+    "1 olsun, şimdilik iyi görünüyor"])
+def test_hakem22_cekince_ve_dolayli_soru_sorulur(tmp_path, metin):
+    """Tur 22: Y1 (gerileme) sıfat-fiil ya da "nasıl" + "bir" + setin adı ("başka nasıl bir çatı") setin seçeneğidir; Y2 (tur 20'den beri)
+    bağlacın ardındaki parça çatıyı ansa da soru, kararsızlık, erteleme ya da olasılık taşıyorsa ("çatı ne olacak bilmiyoruz", "çatıyı
+    sonra seçelim", "mutfak yeri değişebilir") bağlacın kararsızlığını kaldırmaz; Y3 (önceden var) dolaylı soru ("ne olacak bilmiyoruz",
+    "uygun mu bilemedik") ve çatıyı anan erteleme ("çatı sonra olacak") kararsızlıktır; Y4 (önceden var) "şimdilik iyi" seçimi geçici
+    kılar. r01 onayı ya da r02 kaydediliyordu: seçim sorulur."""
+    s, _ = _cati_seti(tmp_path)
+    _soruldu(s, s.yaz(metin, niyet="diger"))
+
+
+@pytest.mark.parametrize("metin", [
+    "1 olsun ama, isteğimiz değişebilir, yatak odası 2 penceresi 120x180 olsun",
+    "1 olsun ama, bir isteğimiz olabilir, yatak odası 2 penceresi 120x180 olsun",
+    "1 olsun ama, ricamız şu, belki yatak odası 2 penceresi 120x180 olur"])
+def test_hakem22_istek_cekincesi_sorulur(tmp_path, metin):
+    """Tur 22 (Y2, tur 21'den beri): isteği haber veren parça ya da istek çekince taşıyorsa ("isteğimiz değişebilir", "belki") bağlacın
+    kararsızlığı kalır: seçim sorulur (r02 istekle çiziliyordu)."""
+    s, _ = _cati_seti(tmp_path)
+    _soruldu(s, s.yaz(metin, niyet="diger", **_Y2))
+
+
+@pytest.mark.parametrize("metin", [
+    "2 olsun, fiyata göre değişiklik isteriz", "2 olsun, fiyata göre başka bir şey isteriz", "2 olsun, bütçeye göre çatıyı isteriz",
+    "2 olsun, müşterinin cevabına göre değişiklik isteriz", "2 olsun, bütçeye göre değişiklik isteyeceğiz",
+    "2 olsun, duruma göre başka çatı isteriz", "2 olsun, fiyata göre rengi ve seçeneği sonra seçeriz",
+    "2 olsun, fiyata göre rengi ve çatıyı isteriz",
+    "2 olsun, sözleşmeyi imzalarsak çatıyı değiştirebilir miyiz?", "2 olsun, kapora yatırırsak çatı değişebilir mi?",
+    "2 olsun, imzalarsak sonra vazgeçebilir miyiz?", "2 olsun, kapora verirsek plan değişebilir mi?",
+    "2 olsun, ödemeyi yaparsak çatı kesinleşir mi?",
+    "2 olsun, fiyat açısından başka seçenek var mı?", "2 olsun, kalite açısından başka seçenek var mı?",
+    "2 olsun, fiyat için hangi seçenekler var?",
+    "2 olsun, müşteri kapora günü bakacak", "2 olsun, müşteri imzadan önce bir daha bakacak", "2 olsun, müşteri yarın gelip bakacak",
+    "2 olsun, müşteri fiyatlara bakacak", "2 olsun, müşteri kaporadan sonra düşünecek",
+    "2 olsun, müşteri önümüzdeki hafta sonuna kadar planı bir daha inceleyecek", "2 olsun, eşi de gelip görsün",
+    "2 olsun, müşteri montaj öncesi bir daha görsün",
+    "2 olsun, karar yarın belli", "2 olsun, karar yarın netleşiyor", "2 olsun, karar yarın netleşmiş olur", "2 olsun, geçici seçim"])
+def test_hakem22_kosul_erteleme_ve_olcut_sorulur(tmp_path, metin):
+    """Tur 22: O1 (gerileme) göre bağında "isteriz" yalnız ölçülü, planın yerini anan ya da evin sabit özelliğine dayanan istekte isteğin
+    fiilidir ("fiyata göre değişiklik isteriz" erteler); O2 (gerileme) bizim işimizin koşulu çatıyı ya da planı değiştirme, vazgeçme
+    ve kesinleşme sorusunda süreç sorusu değildir; O3 (gerileme) fiyat ve kalite ölçüttür; O4 (gerileme) müşteri fiilinin nesne kuralı
+    yalnız sorma ve konuşmada, "gelip" yalnız "de gelip görecek"te; önceden var: "netleşiyor", yüklemsiz "belli" ve "-miş olur"
+    verilmiş karar değildir, "geçici seçim" seçimi geçici kılar. Onaylanabilir r02 çiziliyordu: seçim sorulur."""
+    s, _ = _cati_seti(tmp_path)
+    _soruldu(s, s.yaz(metin, niyet="diger"))
+
+
+@pytest.mark.parametrize("metin", [
+    "2 olsun, şimdilik sorumuz yok", "2 olsun, şimdilik bir değişiklik yok", "2 olsun, şimdilik ilave istek yok",
+    "2 olsun, şimdilik arsada elektrik yok", "2 olsun, müşteri şimdilik yurt dışında", "2 olsun, ev geçici olarak kullanılacak",
+    "2 olsun, şantiyede geçici olarak kalınacak", "2 olsun, başka yapılması gereken bir şey var mı?",
+    "2 olsun, başka alınması gereken bir şey var mı?", "2 olsun, başka yapılacak işlem var mı?",
+    "2 olsun, başka yapılması gerekenler neler?", "2 olsun, hangisi daha uygun, kasımda mı aralıkta mı teslim?",
+    "2 olsun, hangisi daha hızlı, fabrikada mı sahada mı montaj?",
+    "2 olsun, kararımızı verdik teslim tarihini siz söyleyeceksiniz", "2 olsun, kararı verdik ödeme günü belirlenecek",
+    "2 olsun, başka uygun gün var mı?"])
+def test_hakem22_acik_secim_soruya_donmez(tmp_path, metin):
+    """Tur 22: O5 (gerileme) "şimdilik" kapanışta, "yok" ve olumsuz istekte ve başka öznenin durumunda, "geçici olarak" seçim dışı
+    işte seçimi geçici kılmaz; O6 (tur 20'den beri) ad-fiil + "gereken" ve "işlem" sıra sözünü sıfat yapar; O7 (gerileme) bulunma
+    ekli iki seçenekten sonra konu adı ayrık sorudur; O8 (gerileme) geçmiş karar fiili karar penceresini bitirir; önceden var: "başka
+    uygun gün". r02."""
+    s, _ = _cati_seti(tmp_path)
+    k = s.yaz(metin, niyet="diger")
+    assert k.eylem == "is_emri" and k.revizyon == 2 and k.is_emri["talep"]["kaynak"] == "PA06K", k.mesaj
+    assert s.k.d.get("cati_secilen") == "PA06K"
+
+
+@pytest.mark.parametrize("metin", ["1 olsun, şimdilik ekstra bir isteğimiz yok", "1 olsun, şimdilik değişiklik istemiyoruz",
+                                   "1 olsun, şimdilik sağ olun", "1 olsun, şimdilik saygılar", "1 olsun, şimdilik hepsi bu",
+                                   "1 olsun, şimdilik görüşmek üzere"])
+def test_hakem22_acik_onay_soruya_donmez(tmp_path, metin):
+    """Tur 22 (O5, gerileme): kapanıştaki "şimdilik" evin çatısının onayını bozmaz: r01 onaylanır."""
+    s, _ = _cati_seti(tmp_path)
+    k = s.yaz(metin, niyet="diger")
+    assert k.gerekce == K.PLAN_ONAYI and k.revizyon == 1, k.mesaj
+
+
+@pytest.mark.parametrize("metin, al", [
+    ("2 olsun. Ancak, kapıdan girince soldaki yatak odası 2 penceresi 120x180 olsun", _Y2),
+    ("2 olsun, kar yüküne göre güçlendirme isteriz", {}), ("2 olsun ama, salona bakan yatak odası 2 penceresi 120x180 olsun", _Y2)])
+def test_hakem22_ara_gerileme_secimi_bozmaz(tmp_path, metin, al):
+    """Tur 22 ara gerilemeleri: bağlacın ardındaki istekte betim zamanı ("kapıdan girince soldaki …") ve "bakan" çekince değildir; "kar
+    yüküne göre … isteriz" evin sabit özelliğine dayanan istektir: r02."""
+    s, _ = _cati_seti(tmp_path)
+    k = s.yaz(metin, niyet="diger", **al)
+    assert k.eylem == "is_emri" and k.revizyon == 2 and k.is_emri["talep"]["kaynak"] == "PA06K", k.mesaj

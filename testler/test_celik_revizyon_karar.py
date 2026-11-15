@@ -1203,3 +1203,25 @@ def test_hakem21_celik_simdilik_ve_baglac_sorulur(s, metin):
     assert k.eylem == "sor" and k.mesaj.startswith("Hangi çatı olsun?"), k.mesaj
     assert s.plan["revizyon"] == 1 and s.k.d["secenek_seti"]["durum"] == "acik" and not s.k.d.get("onaylanan"), k.mesaj
 
+
+
+# ── İE-42 · geometri hakemi yirmi ikinci tur (15 Kasım 2026 öğle) ──────────────────────────────────────────────────────────────────────
+@pytest.mark.parametrize("metin", ["Ç8801 olsun ama, çatı ne olacak bilmiyoruz", "Ç8801 olsun, başka nasıl bir çatı olabilir?",
+                                   "Ç8801 olsun, ikinci seçilen bir çatı olur mu?", "Ç8801 olsun, şimdilik iyi",
+                                   "K olsun ama, çatı kalsın mı bilmiyoruz", "K olsun, müşteri ne der bilmiyoruz",
+                                   "K olsun, kapora yatırırsak çatıyı değiştirebilir miyiz?",
+                                   "K olsun, fiyat açısından başka seçenek var mı?"])
+def test_hakem22_celik_cekince_ve_soru_sorulur(s, metin):
+    """Tur 22 (Y1–Y4, O2, O3) çelikte: onayı mühendis kontrolüne gönderiyor ya da onaylanabilir r02 çiziyordu."""
+    cati_seti(s)
+    k = s.yaz(metin)
+    assert k.eylem == "sor" and k.mesaj.startswith("Hangi çatı olsun?"), k.mesaj
+    assert s.plan["revizyon"] == 1 and s.k.d["secenek_seti"]["durum"] == "acik" and not s.k.d.get("onaylanan"), k.mesaj
+
+
+@pytest.mark.parametrize("metin", ["Ç8801 olsun, şimdilik değişiklik istemiyoruz", "1 olsun, şimdilik sağ olun"])
+def test_hakem22_celik_kapanis_onayi_bozmaz(s, metin):
+    """Tur 22 (O5) çelikte: kapanıştaki "şimdilik" onayı bozmaz."""
+    cati_seti(s)
+    k = s.yaz(metin)
+    assert k.gerekce == K.PLAN_ONAYI and k.revizyon == 1, k.mesaj
