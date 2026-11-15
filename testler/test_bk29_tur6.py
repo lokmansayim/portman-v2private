@@ -158,9 +158,7 @@ def test_revizyon_sorusu_acikken_iptal_etmeyin_talebi_kapatmaz(s):
     assert (k.eylem, k.soru_alani) == ("sor", "revizyon_ne") and s.plan["is_emri_no"] == no
     k = s.yaz("yatak odası 1 penceresi 120x180 olsun", pencereler=[pen("yatak odası 1", "120x180")])
     assert k.eylem == "is_emri" and k.revizyon == 2                       # plan yaşıyor: değişiklik r02 olur
-    # BK-29 tur 8: burada "r02'nin numarası r01'inkiyle aynı" denetimi vardı. Prefabrikte numara her planda saatten kurulur
-    # (`karar.py`: `seq = int(time.time()) % 100000`); denetim yalnız r01 ve r02 aynı saniyede üretilince geçiyordu (tam koşuda 1 kez
-    # kırmızı, 15 Kasım 2026). Numaranın revizyonda sabit kalması Lokman'ın açık kararıdır (kabul seti D5, pano 207); testle sabitlenmez.
+    assert s.plan["is_emri_no"] == no
 
 
 def test_revizyon_sorusu_acikken_iptal_yine_kapatir(s):

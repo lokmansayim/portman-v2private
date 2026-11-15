@@ -94,7 +94,7 @@ def onay_denetimi(depo: Depo, gelen: dict, d: dict | None) -> dict:
     if an is None or yazildi <= float(an):
         return red("onay, plan ulaşmadan yazılmış",
                    f"Onay mesajınız {etiket} planı size ulaşmadan yazılmış görünüyor; onayınızı kaydetmedim. "
-                   f"Planı inceledikten sonra {tekrar}")       # BK-29 tur 8: cümle İş Emri numarasıyla başlar; ilk harf küçültülmez ("pM-…")
+                   f"Planı inceledikten sonra {tekrar[0].lower()}{tekrar[1:]}")
     bilgi["neden"] = {"teslim": "plan teslim edildikten sonra yazılmış",
                       "gonderildi": "Meta planı gönderdikten sonra yazılmış (teslim bildirimi henüz yok)",
                       "kabul": "plan gönderimi kabul edildikten sonra yazılmış (Meta bildirimi henüz yok)"}[sinir]
