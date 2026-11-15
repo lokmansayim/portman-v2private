@@ -1809,3 +1809,70 @@ def test_hakem13_acik_secim_soruya_donmez(tmp_path, metin, kod):
     k = s.yaz(metin, niyet="diger")
     assert k.eylem == "is_emri" and k.revizyon == 2 and k.is_emri["talep"]["kaynak"] == kod, k.mesaj
     assert s.k.d.get("cati_secilen") == kod
+
+
+# ── İE-42 · geometri hakemi on dördüncü tur (15 Kasım 2026 sabah) ────────────────────────────────────────────────────────────────────
+@pytest.mark.parametrize("metin, al", [
+    ("1 olsun, emin değiliz", {}), ("2 olsun, kararsızız", {}), ("1 olsun, bilemedik", {}), ("2 olsun, karar veremedik", {}),
+    ("1 olsun, bilmiyoruz", {}), ("Evin kendi çatısı olsun, onaydan emin değiliz", {}), ("1 olsun, emin olamadık", {}),
+    ("1 olsun, karar vermedik", {}), ("Bilemedim, 1 olsun", {}), ("2 olsun, çatıda değişiklik istemiyoruz", {}),
+    ("Çatıda değişiklik istemiyoruz, 2 olsun", {}), ("2 olsun, çatıda değişiklik yok", {}), ("Çatıda değişiklik istemiyoruz", {}),
+    ("Çatıda değişiklik gerekmiyor", {}), ("2 olsun, tapu alındığında yatak odası 2 penceresi 120x180 olsun", _Y2),
+    ("2 olsun, havale yapıldığında yatak odası 2 penceresi 120x180 olsun", _Y2),
+    ("2 olsun, teklif kabul edildiğinde yatak odası 2 penceresi 120x180 olsun", _Y2),
+    ("2 olsun, sipariş verildiğinde yatak odası 2 penceresi 120x180 olsun", _Y2),
+    ("2 olsun, anlaşma sağlandığında yatak odası 2 penceresi 120x180 olsun", _Y2),
+    ("2 olsun, havale gelince yatak odası 2 penceresi 120x180 olsun", _Y2),
+    ("2 olsun, stok varsa yatak odası 2 penceresi 120x180 olursa iyi olur", _Y2), ("2 olsun, müşteri onaylarsa iyi olur", {}),
+    ("1 olsun, 2'nin rengi ne olacak?", {}), ("1 olsun, 2'ninki mi olsa?", {}), ("1 olsun, onaylamaya hazır değiliz", {}),
+    ("1 olsun, onay isteğimize cevap vermediler", {}), ("1 olsun, onay sorunu çözülmedi", {}),
+    ("2 olsun, yatak odası penceresi usta gelince 120x180 olsun", _Y2), ("2 olsun, kapora parası yatınca gönderin", {})])
+def test_hakem14_kararsizlik_catida_degisiklik_ve_bagli_zaman_sorulur(tmp_path, metin, al):
+    """Yüksek-1, Orta-4, Orta-5, Düşük: seçimle gelen kararsızlık sözü ("emin değiliz", "karar veremedik", "kararsızız"), çatıya bağlı
+    "değişiklik istemiyoruz" (evin kendi çatısıdır: başka çatıyla çelişir; tek başına sorulur), istekteki işimiz dışındaki zaman ("tapu
+    alındığında …", "havale gelince …"), sorudaki başka çatının özelliği ve olumsuz onay ("onaylamaya hazır değiliz") sorulur. On üçüncü
+    tur kodunda bir kısmı r02 çiziyor, "Çatıda değişiklik istemiyoruz" seti döngüye sokuyordu."""
+    s, _ = _cati_seti(tmp_path)
+    _soruldu(s, s.yaz(metin, niyet="diger", **al))
+    _soruldu(s, _onayla(s))                                    # Onayla da seçim değildir: soru yinelenir, onay kaydedilmez
+
+
+@pytest.mark.parametrize("metin, kod, al", [
+    ("2 olsun, yatak odası 2 penceresi 120x180 yapabilirseniz sevinirim", "PA06K", _Y2),
+    ("2 olsun, yatak odası 2 penceresi 120x180 olursa iyi olur", "PA06K", _Y2),
+    ("2 olsun, yatak odası 2 penceresi 120x180 ederseniz iyi olur", "PA06K", _Y2),
+    ("1 olsun, yatak odası 2 penceresi 120x180 yapabilirseniz sevinirim", "PA06", _Y2),
+    ("2 olsun, kapıdan girince soldaki yatak odası 2 penceresi 120x180 olsun", "PA06K", _Y2),
+    ("2 olsun, salondan geçince sağdaki yatak odası 2 penceresi 120x180 olsun", "PA06K", _Y2),
+    ("2 olsun, salona girdikten sonra sağdaki yatak odası 2 penceresi 120x180 olsun", "PA06K", _Y2),
+    ("2 olsun, yatak odasına gelince penceresi 120x180 olsun", "PA06K", _Y2),
+    ("Çatıya gelince 2, pencereye gelince 120x180 olsun", "PA06K", _Y2),
+    ("2 olsun, 2'nin rengi ne olacak?", "PA06K", {}), ("2 olsun, 2'nin eğimi ne olacak?", "PA06K", {}),
+    ("2 olsun. 2'nin kaplaması ne olacak?", "PA06K", {}), ("2 olsun, 2'nin de fiyatı ne olacak?", "PA06K", {}),
+    ("2 olsun, 2'nin toplam fiyatı ne olacak?", "PA06K", {}), ("Planda değişiklik istemiyoruz, çatı 2 olsun", "PA06K", {}),
+    ("2 olsun, mümkünse salona paravan koyun", "PA06K", {}),
+    ("2 olsun, yatak odası 1'e gelince penceresi 120x120 olsun", "PA06K", dict(pencereler=[pen("yatak odası 1", "120x120")]))])
+def test_hakem14_acik_secim_soruya_donmez(tmp_path, metin, kod, al):
+    """Orta-1, Orta-2, Orta-3, Düşük: istekteki nezaket koşulu ("… yapabilirseniz sevinirim"), planın bir yerine giden hareket ("kapıdan
+    girince soldaki …"), seçilen çatının özelliğini soran ilgi eki ("2'nin rengi ne olacak?") ve "paravan" açık seçimi soruya çevirmez
+    (on üçüncü tur kodunda soruluyordu)."""
+    s, _ = _cati_seti(tmp_path)
+    k = s.yaz(metin, niyet="diger", **al)
+    assert k.eylem == "is_emri" and k.revizyon == 2 and k.is_emri["talep"]["kaynak"] == kod, k.mesaj
+    assert s.k.d.get("cati_secilen") == kod
+
+
+def test_hakem14_nezaketli_istek_secimsiz_r02(tmp_path):
+    """Orta-1: çatı seçimi olmadan gelen nezaketli istek ("… yapabilirseniz sevinirim") soru değildir: r02 evin kendi çatısıyla çizilir."""
+    s, _ = _cati_seti(tmp_path)
+    k = s.yaz("yatak odası 2 penceresi 120x180 yapabilirseniz sevinirim", niyet="diger", **_Y2)
+    assert k.eylem == "is_emri" and k.revizyon == 2 and k.is_emri["talep"]["kaynak"] == "PA06", k.mesaj
+
+
+@pytest.mark.parametrize("metin", ["1 olsun, 2+1'in fiyatı ne olacak?", "1 olsun, onaylıyoruz sorun yok",
+                                   "1 olsun, onaylıyoruz başka değişiklik istemiyoruz"])
+def test_hakem14_acik_onay_soruya_donmez(tmp_path, metin):
+    """Orta-3: oda programı ("2+1'in fiyatı") çatı numarası değildir; olumsuz fiilden hemen önceki sorun sözü onayı olumsuzlamaz."""
+    s, _ = _cati_seti(tmp_path)
+    k = s.yaz(metin, niyet="diger")
+    assert k.gerekce == K.PLAN_ONAYI and k.revizyon == 1, k.mesaj

@@ -1061,3 +1061,28 @@ def test_hakem13_celik_olumlu_onay_soruya_donmez(s, metin):
     cati_seti(s)
     k = s.yaz(metin)
     assert k.gerekce == K.PLAN_ONAYI and k.revizyon == 1, k.mesaj
+
+
+# ── İE-42 · geometri hakemi on dördüncü tur (15 Kasım 2026 sabah) ────────────────────────────────────────────────────────────────────
+@pytest.mark.parametrize("metin", ["1 olsun, bilemedik", "1 olsun, karar veremedik", "Ç8801 olsun, karar veremedik", "1 olsun, emin değiliz",
+                                   "1 olsun. Emin değiliz.", "Ç8801 olsun, emin değiliz", "1 olsun, onay için emin değiliz",
+                                   "Evin kendi çatısı olsun, emin değilim", "Evin kendi çatısı olsun, onaydan emin değiliz",
+                                   "1 olsun, bilmiyoruz", "K olsun, emin değiliz", "K olsun, bilemedik", "K olsun, karar veremedik",
+                                   "K olsun, onay için emin değiliz", "K olsun, çatıda değişiklik istemiyoruz", "Çatıda değişiklik istemiyoruz",
+                                   "1 olsun, onaylamaya hazır değiliz", "1 olsun, onay isteğimize cevap vermediler",
+                                   "K olsun, onay sorunu çözülmedi"])
+def test_hakem14_celik_kararsizlik_ve_olumsuz_onay_sorulur(s, metin):
+    """Yüksek-1, Orta-4, Düşük çelikte: on üçüncü tur kodunda "1 olsun, bilemedik", "emin değiliz", "karar veremedik" onay kaydediyordu
+    (plan teknik kontrole gidiyordu); "K olsun, emin değiliz" ve "K olsun, çatıda değişiklik istemiyoruz" r02 K çiziyordu."""
+    cati_seti(s)
+    k = s.yaz(metin)
+    assert k.eylem == "sor" and k.mesaj.startswith("Hangi çatı olsun?"), k.mesaj
+    assert s.plan["revizyon"] == 1 and s.k.d["secenek_seti"]["durum"] == "acik" and not s.k.d.get("onaylanan"), k.mesaj
+
+
+@pytest.mark.parametrize("metin, kod", [("K olsun, K'nın eğimi kaç olacak?", "Ç8801K"), ("L olsun, L'nin rengi ne olacak?", "Ç8801L")])
+def test_hakem14_celik_acik_secim_soruya_donmez(s, metin, kod):
+    """Orta-3 çelikte: seçilen çatının özelliğini soran ilgi eki açık seçimi soruya çevirmez."""
+    cati_seti(s)
+    k = s.yaz(metin)
+    assert k.eylem == "is_emri" and k.revizyon == 2 and s.plan["yapi"]["kod"] == kod, k.mesaj
