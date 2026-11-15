@@ -72,6 +72,7 @@ def test_veri_temiz_sahne_ayni(sayfalar, kl):
     assert b["kod"] == b["kabuk"]["proje"] == r["ad"] and b["kabuk"]["chip"] == a["kabuk"]["chip"]
     assert f"<h1>{r['ad']} · Montaj Rehberi</h1>" in html and f'<p class="note">{temizle.not_metni(r)}</p>' in html
     assert "googleapis" not in html and "jsdelivr" not in html and "data:image/jpeg" not in html
+    assert "prefabrik prefabrik" not in html                                  # 62 m² açıklaması (CIO, 14.11 23:09)
     assert (pafta is not None) == r["pafta"]
     if pafta:
         im = Image.open(io.BytesIO(pafta)).convert("L")

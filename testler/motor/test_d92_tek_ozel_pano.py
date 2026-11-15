@@ -35,6 +35,13 @@ def _anahtarli(ie: dict, deger="dizilim_sonu") -> dict:
     return ie
 
 
+def _anahtarsiz(ie: dict) -> dict:
+    """Anahtarı yazılmış havuz şablonunun (D-92 › Havuz evlerine uygulama: PA-10) anahtarsız hâli; öteki şablonlar aynen."""
+    ie = copy.deepcopy(ie)
+    ie["yapi"].get("dizilim", {}).pop("tek_ozel_pano", None)
+    return ie
+
+
 def _panolar(plan) -> list:
     return sorted((q.duvar.id, round(q.a0, 4), round(q.a1, 4)) for q in plan.panolar)
 
@@ -55,7 +62,7 @@ def test_tablo_bicimi():
 @pytest.mark.parametrize("kod", DEGISMEYEN + DEGISEN)
 def test_anahtarsiz_is_emri_aynen(kod):
     """Anahtar yoksa işlev koşmaz: plan bugünkü gibi, değişiklik listesi boş."""
-    p = G.kur(_ie(kod))
+    p = G.kur(_anahtarsiz(_ie(kod)))
     assert p.tek_ozel_pano == []
 
 
@@ -78,7 +85,7 @@ def test_motor_eskiz_tablosuyla_ayni(kod):
 @pytest.mark.parametrize("kod", DEGISEN)
 def test_aciklikli_panolar_dis_olcu_ve_odalar_yerinde(kod):
     """Pencereli panolar yerinde kalır (kartın sözü); kapı, karkaslı pano, dış ölçü, oda alanları ve pano toplam boyu aynı."""
-    ie = _ie(kod)
+    ie = _anahtarsiz(_ie(kod))
     p0, p1 = G.kur(ie), G.kur(_anahtarli(ie))
     assert _aciklikli(p0) == _aciklikli(p1)
     assert (p0.W, p0.H) == (p1.W, p1.H)
@@ -143,7 +150,7 @@ def test_kalan_kose_payindan_kisa_hata(kod, cephe, cm):
     """Geometri hakemi bulgusu (14 Kasım): aks üstünde kalan köşe ya da T payından kısaysa son pano eksi boyda olurdu (PA16 sağ +1 cm: iç
     duvar 122,5 + 125,5 + 125,5 + (−4)). Motor bunu sessizce çizmez ya da listeye geçirmez: açık hata (K21). Kısa parçanın kuralı Lokman'da."""
     from beyin import yarim_pano as Y
-    ie1, _ = Y.kaydir(_ie(kod), cephe, cm)
+    ie1, _ = Y.kaydir(_anahtarsiz(_ie(kod)), cephe, cm)
     G.kur(ie1)                                                   # anahtarsız: kurulur
     with pytest.raises(G.IsEmriHatasi, match="köşe ya da T payından kısa"):
         G.kur(_anahtarli(ie1))

@@ -290,16 +290,16 @@ def test_sacak_omegasi_z_ve_veranda_asigi_kart_modelinden(paketler):
 def test_baslikta_brut_ve_net(paketler):
     """D-95 (Lokman, 14 Kasım 2026 21:01 UTC: "biz verandayıda net alana alır sayarız", "biz çatı ile kapattığımız her yeri bürütten
     sayarız"): rehberin başlığında brüt çatının örttüğü oturum (yükleme listesinin `bina_m2`'si, D-49), net bütün mahaller (veranda, niş,
-    balkon dahil). Sahnenin genel bakış etiketi (rozet) brütü yazar (21:07:29 "her zaman brüt m² ile hesaplarız"). Ön onay antedi (M-02)
-    kapalı odaların netini yazmaya devam eder."""
+    balkon dahil). Sahnenin genel bakış etiketi (rozet) brütü yazar (21:07:29 "her zaman brüt m² ile hesaplarız"). Başlık ön onay antedinin
+    yazısıdır (`dxf_out.alan_yazisi`, tek kaynak)."""
     from motor import dxf_out, geometry as G
     from motor.prefabrik_liste import bina_brut_cm2
     kok, _, _ = paketler
-    beklenen = {"TK-01": ("90,21 m² brüt · 84,54 m² net", "72,71"), "AP-19": ("60,00 m² brüt · 55,53 m² net", "48,85")}   # TK-01 r06, PK-01
-    for kod, (yazi, kapali) in beklenen.items():
+    beklenen = {"TK-01": "90,21 m² brüt · 84,54 m² net", "AP-19": "60,00 m² brüt · 55,53 m² net"}   # TK-01 r06, PK-01
+    for kod, yazi in beklenen.items():
         ie = json.loads((KOK / _model(kod)["is_emri"]).read_text(encoding="utf-8"))
         plan = G.kur(ie)
-        assert yazi.startswith(f"{bina_brut_cm2(plan) / 1e4:.2f}".replace(".", ",")) and dxf_out.alan_yazisi(plan).endswith(f"{kapali} m² net")
+        assert yazi.startswith(f"{bina_brut_cm2(plan) / 1e4:.2f}".replace(".", ",")) and dxf_out.alan_yazisi(plan) == yazi
         G.lento_ayarla({})                                   # lento modül durumudur (BK-23): öteki testlere sızmaz
         yol = kok / "prefabrik" / kod / f"{kod}_montaj_rehberi.html"
         d = _rehber_verisi(yol)
@@ -422,7 +422,7 @@ def test_is_emri_ile_paket(paketler, tmp_path):
     assert kagit.sub('"src":""', html).replace("TK-98", "TK-01").replace("TK98", "TK01") == kagit.sub('"src":""', ka)
     yazi = _yazilar(b)
     # antette kime ait ve m² (D-31 madde 14, Lokman 29 Ekim 2026 13:13; önceden "PORTMAN | Bayi TK-98 / TK-98 | İş Emri"); brüt verandayla (D-49; TK-01 r06, listedeki bina_m2 90,211)
-    assert "PORTMAN | Bayi TK-98 / TK-98 | 90,21 m² brüt · 72,71 m² net | İş Emri" in yazi["TK-98_cizim.dxf"] and "'TK-98 " in yazi["TK-98_model.ifc"]
+    assert "PORTMAN | Bayi TK-98 / TK-98 | 90,21 m² brüt · 84,54 m² net | İş Emri" in yazi["TK-98_cizim.dxf"] and "'TK-98 " in yazi["TK-98_model.ifc"]
     for ad, t in yazi.items():
         t = re.sub(r"`[0-9a-f]{64}`", "", t)
         assert not any(x in t for x in ("Sahteadi", "Sahtebayi", "XBAYIX9", no[-9:], no[-9:].replace(" ", ""))), ad
