@@ -189,7 +189,9 @@ def test_dugmeyle_cati_secimi(tmp_path, kod):
                                   "revizyon 1)."), k.mesaj
         return
     ie = k.is_emri
-    assert (ie["cati"], ie["mahaller"], ie["acikliklar"], ie["is_emri_no"]) == (sab["cati"], r01["mahaller"], r01["acikliklar"], r01["is_emri_no"])
+    assert (ie["cati"], ie["mahaller"], ie["acikliklar"]) == (sab["cati"], r01["mahaller"], r01["acikliklar"])
+    # hakem tur 19 (düşük): İş Emri numarası her revizyonda saatten üretilir; r01 ile r02 ayrı saniyeye düşünce sıra kısmı farklıdır
+    assert ie["is_emri_no"].rsplit("-", 1)[0] == r01["is_emri_no"].rsplit("-", 1)[0]
     ad = {"PA06K": "Kırma", "PA06C": "Beşik + salonda cumba"}[kod]
     assert k.mesaj == (f"Çatı: {ad} ({kod[:2]}-{kod[2:4]}-{kod[4:]}). Plan aynı. Ön onay planınız hazır (r02); PDF'teki 4 görünüş "
                        f"{ad.lower()} çatıyı gösterir."), k.mesaj
@@ -2133,6 +2135,62 @@ def test_hakem18_acik_secim_soruya_donmez(tmp_path, metin, al):
                                    "1 olsun, sonra görüşürüz"])
 def test_hakem18_olumlu_karar_onayi_bozmaz(tmp_path, metin):
     """Tur 18 (Orta 3): kararın verildiğini söyleyen söz ve vedalaşma istek ya da erteleme değildir; evin çatısı r01'i onaylar."""
+    s, _ = _cati_seti(tmp_path)
+    k = s.yaz(metin, niyet="diger")
+    assert k.gerekce == K.PLAN_ONAYI and k.revizyon == 1, k.mesaj
+
+
+# ── İE-42 · geometri hakemi on dokuzuncu tur (15 Kasım 2026 sabah) ─────────────────────────────────────────────────────────────────────
+@pytest.mark.parametrize("metin, al", [
+    ("1 olsun, fiyat olarak hangisi daha uygun?", {}), ("Tamam 1 olsun. Fiyat olarak hangisi daha uygun?", {}),
+    ("1 olsun, fiyat olarak hangisi ucuz?", {}), ("1 olsun, modellerden hangisi daha iyi?", {}),
+    ("1 olsun, bu modellerin hangisi daha uygun?", {}), ("1 olsun, usta hangisi daha iyi?", {}), ("1 olsun, hangi tip daha iyi?", {}),
+    ("2 olsun, salona hangisi daha çok yakışır?", {}), ("2 olsun, kapıdan girince hangisi daha iyi?", {}),
+    ("2 olsun, montaj için hangisi daha kolay?", {}), ("1 olsun, hangisi daha iyi, ucuz mu pahalı mı?", {}),
+    ("1 olsun, hangisi daha iyi, ortadaki mi sondaki mi?", {}), ("2 olsun, hangisi daha güzel, soldaki mi sağdaki mi?", {}),
+    ("2 olsun, sizce hangisi daha uygun, bu mu o mu?", {}), ("1 olsun, hangisi daha iyi, düz mü eğimli mi?", {}),
+    ("1 olsun bir bakalım", {}), ("PA-06 olsun bir bakalım", {}), ("Evin kendi çatısı olsun bir bakalım", {}), ("2 olsun bir bakalım", {}),
+    ("1 olsun, müşteriye soralım mı?", {}), ("1 olsun, sonra bir düşünelim mi?", {}), ("2 olsun, müşteriye bir sorayım", {}),
+    ("1 olsun, bir düşüneyim", {}), ("2 olsun, kararı müşteri ve eşi birlikte verecek", {}), ("2 olsun, karar değişebilir", {}),
+    ("2 olsun, kararımızı verdik ama", {}), (_EVE_.format("abim"), _Y2), ("1 olsun, fiyat hangisi daha uygun?", {}),
+    ("2 olsun, tavsiyenize göre değiştiririz", {})])
+def test_hakem19_olcutlu_kiyas_ayrik_ve_erteleme_sorulur(tmp_path, metin, al):
+    """Tur 19: Y1 (gerileme) ölçütle kıyas ("fiyat olarak hangisi", "modellerden hangisi", "montaj için hangisi", "hangi tip daha iyi?")
+    onay kaydediyordu; çatı dışı konu yalnız zamirin hemen önündeki ekli addır. Y2 (gerileme): ayrık soruda konum, gösterme ve kıyas sözü
+    ("soldaki mi sağdaki mi", "bu mu o mu", "ucuz mu pahalı mı") setin seçeneğidir. Y3 (önceden var): seçimle aynı cümlede ve soru
+    biçiminde erteleme ("1 olsun bir bakalım", "müşteriye soralım mı?", "bir sorayım"). O6: uzak fiil, "değişebilir", sondaki "ama".
+    "abim eve gelince" öznedir. Ara gerileme: yalın ölçüt ("fiyat hangisi daha uygun?") ve göreli bizim fiilimiz ("tavsiyenize göre
+    değiştiririz"). Seçim sorulur."""
+    s, _ = _cati_seti(tmp_path)
+    _soruldu(s, s.yaz(metin, niyet="diger", **al))
+
+
+@pytest.mark.parametrize("metin, al", [
+    ("2 olsun, yarın imzalayalım", {}), ("2 olsun, haftaya başlayalım", {}), ("2 olsun, sonra gönderelim", {}),
+    ("2 olsun, yarın görüşürüz", {}), ("2 olsun. İyi akşamlar, yarın görüşürüz", {}), ("2 olsun, pazartesi görüşürüz", {}),
+    ("2 olsun, manzaraya göre yatak odası 2 penceresi 120x180 yapalım", _Y2),
+    ("2 olsun, manzaraya göre yatak odası 2 penceresi 120x180 rica ederiz", _Y2), ("2 olsun, bütçeye göre karar kıldık", {}),
+    ("2 olsun, fiyata göre anlaştık", {}), ("2 olsun, çatıya göre oluk rengini sonra seçeriz", {}),
+    ("2 olsun. Başka da bir şey gerekiyor mu?", {}), ("2 olsun, son plan bu mu?", {}), ("2 olsun, ilk defa mı böyle ev yapıyorsunuz?", {}),
+    (_KAPI_.format("kardeşim"), _Y2), (_KAPI_.format("efendim"), _Y2), (_KAPI_.format("yan"), _Y2), (_KAPI_.format("ikinci"), _Y2),
+    ("2 olsun, karar sonra değişmez", {}), ("2 olsun, karar ayın 5'inde verildi", {}), ("2 olsun. Kapı hangisi olacak?", {}),
+    ("2 olsun. Montaj ve nakliye hangisi önce?", {})])
+def test_hakem19_acik_secim_soruya_donmez(tmp_path, metin, al):
+    """Tur 19 (O1–O5, gerileme): işin kendi istek kipi ("yarın imzalayalım", "sonra gönderelim"), zamanlı veda ("yarın görüşürüz"),
+    göreli istekte isteğin kendi fiili ("120x180 yapalım", "rica ederiz"), geçmiş seçim ("karar kıldık", "anlaştık"), konulu erteleme
+    ("oluk rengini sonra seçeriz"), çatı dışı sıra ve sıfat sözü ("başka da bir şey", "son plan", "ilk defa"), yer önünde hitap ve kapının
+    türü, karardan sonra kesinlik ("sonra değişmez", "ayın 5'inde verildi"), yalın konu adının sorusu ("Kapı hangisi olacak?") açık seçimi
+    soruya çevirmez: r02."""
+    s, _ = _cati_seti(tmp_path)
+    k = s.yaz(metin, niyet="diger", **al)
+    assert k.eylem == "is_emri" and k.revizyon == 2 and k.is_emri["talep"]["kaynak"] == "PA06K", k.mesaj
+    assert s.k.d.get("cati_secilen") == "PA06K"
+
+
+@pytest.mark.parametrize("metin", ["1 olsun, sonra gönderelim", "1 olsun, yarın görüşürüz", "1 olsun, son plan bu mu?",
+                                   "1 olsun, ikinciye kadar teslim olur mu?"])
+def test_hakem19_acik_onay_soruya_donmez(tmp_path, metin):
+    """Tur 19 (O1, O3): işin istek kipi, zamanlı veda ve çatı dışı sıra sözü onayı bozmaz; evin çatısı r01'i onaylar."""
     s, _ = _cati_seti(tmp_path)
     k = s.yaz(metin, niyet="diger")
     assert k.gerekce == K.PLAN_ONAYI and k.revizyon == 1, k.mesaj
