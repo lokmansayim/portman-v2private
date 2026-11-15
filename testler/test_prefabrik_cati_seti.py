@@ -2403,3 +2403,85 @@ def test_hakem22_ara_gerileme_secimi_bozmaz(tmp_path, metin, al):
     s, _ = _cati_seti(tmp_path)
     k = s.yaz(metin, niyet="diger", **al)
     assert k.eylem == "is_emri" and k.revizyon == 2 and k.is_emri["talep"]["kaynak"] == "PA06K", k.mesaj
+
+
+# ── İE-42 · geometri hakemi yirmi üçüncü tur (15 Kasım 2026 öğleden sonra) ─────────────────────────────────────────────────────────────
+@pytest.mark.parametrize("metin", [
+    "1 olsun, müşteri şimdilik razı", "1 olsun, ama şimdilik müşteri razı", "Evin kendi çatısı kalsın, müşteri şimdilik razı",
+    "PA-06 olsun, müşteri şimdilik razı", "2 olsun, müşteri şimdilik kabul etti", "2 olsun, müşteri şimdilik ikna",
+    "3 olsun, müşteri şimdilik kabul etti", "2 olsun, şimdilik görüşümüz bu", "2 olsun, şimdilik sağlam görünüyor",
+    "1 olsun, müşteri onaylasın", "1 olsun, bir de müşteri onaylasın", "1 olsun ama, çatı olsun da müşteri onaylasın",
+    "1 olsun, çatıyı müşteri seçecek", "1 olsun, çatıyı müşteri seçsin", "1 olsun, müşteri seçecek",
+    "Evin kendi çatısı olsun, çatıyı müşteri seçecek", "1 olsun, çatı müşteriye kalsın", "1 olsun, çatı seçimi müşteriye kalsın",
+    "1 olsun, çatı seçimi müşterinin", "1 olsun ama, çatı müşteriye kalsın", "1 olsun, karar için müşterinin onayı lazım",
+    "2 olsun, çatı seçimini müşteri yapacak", "2 olsun, çatı müşteriyle netleşecek", "2 olsun, çatı belli olacak",
+    "2 olsun, çatı kesinleşecek", "2 olsun, karar için müşterinin bir daha bakması lazım", "2 olsun, karar için eşinin de görmesi lazım"])
+def test_hakem23_musteri_onayi_ve_secimi_sorulur(tmp_path, metin):
+    """Tur 23: Y1 (gerileme) müşterinin geçici rızası ("müşteri şimdilik razı / kabul etti") ve önekle kapanış sanılan söz ("şimdilik
+    görüşümüz bu", "sağlam görünüyor") seçimi geçici kılar; Y2 (önceden var) müşterinin onayını ya da seçimini bekleyen söz ("müşteri
+    onaylasın", "çatıyı müşteri seçecek", "çatı müşteriye kalsın", "çatı seçimi müşterinin", "müşterinin onayı lazım", "çatı
+    kesinleşecek") kararı erteler. r01 onayı ya da r02 kaydediliyordu: seçim sorulur."""
+    s, _ = _cati_seti(tmp_path)
+    _soruldu(s, s.yaz(metin, niyet="diger"))
+
+
+@pytest.mark.parametrize("metin", [
+    "1 olsun, kalsın mı?", "1 olsun, bu mu olsun?", "1 olsun, bu olsun mu?", "1 olsun, evin kendi çatısı mı kalsın?",
+    "1 olsun, çatı böyle mi kalsın?", "1 olsun, şimdilik kalsın mı?", "2 olsun, böyle mi olsun?", "1 olsun, emin miyiz?",
+    "2 olsun, kararımız doğru mu?", "2 olsun, müşteri ne der acaba?", "2 olsun, sizce müşteri beğenir mi?",
+    "2 olsun, sonra değiştirsek olur mu?", "2 olsun, geçici olarak mı seçsek?", "2 olsun, çatı olur mu ki?",
+    "2 olsun, karar verildi ama değişebilir", "2 olsun, kararı verdik ama müşteri yarın değiştirebilir",
+    "1 olsun, karar verildi ama değişebilir", "2 olsun, değişebilir", "2 olsun, belki değişir", "2 olsun, geçicisi de olur",
+    "1 olsun ama, çatı olacak inşallah"])
+def test_hakem23_secim_sorusu_ve_degisiklik_sorulur(tmp_path, metin):
+    """Tur 23: Y3 (önceden var) sayısız seçim sorusu ("kalsın mı?", "bu mu olsun?", "emin miyiz?", "müşteri ne der acaba?") seçimin
+    kendisini sorar; O9 (gerileme) geçmiş karar fiilinden sonra gelen "değişebilir" ve konusuz olasılık ("2 olsun, belki değişir")
+    kararsızlıktır; "geçicisi de olur" (ara gerileme) seçimi geçici kılar; bağlaçtan sonraki "inşallah" (önceden var) çekincedir. r01 onayı ya da onaylanabilir r02 kaydediliyordu: seçim
+    sorulur."""
+    s, _ = _cati_seti(tmp_path)
+    _soruldu(s, s.yaz(metin, niyet="diger"))
+
+
+@pytest.mark.parametrize("metin, al", [
+    ("2 olsun, teslim ne zaman olur bilmiyoruz", {}), ("2 olsun, montaj kaç gün sürer bilemiyoruz", {}),
+    ("2 olsun, nakliye ücreti ne kadar bilmiyoruz", {}), ("2 olsun, montaj ekibi kaç kişi gelir bilmiyorum", {}),
+    ("2 olsun, fiyat kesin değil mi?", {}), ("2 olsun, teslim tarihi belli değil mi?", {}),
+    ("2 olsun, karar sonrası teslim ne kadar sürer?", {}), ("2 olsun, karardan sonra kaporayı ne zaman yatıralım?", {}),
+    ("2 olsun, karar sonrası ne yapmamız gerekiyor?", {}), ("2 olsun, karar aşamasında başka ne lazım?", {}),
+    ("2 olsun, kararı onayla mı bildireceğiz?", {}),
+    ("2 olsun ama, salondan sonra mutfak gelsin", {}), ("2 olsun ama, banyo yatak odasından sonra olsun", {}),
+    ("2 olsun ama, girişten sonraki ilk oda salon olsun", {}), ("2 olsun ama, salonun penceresi kapının sonrasında olsun", {}),
+    ("2 olsun ama, banyoya zorunlu olarak pencere eklensin", {}), ("2 olsun ama, mutfak penceresi zor açılıyor, 120x120 olsun", {}),
+    ("2 olsun ama, bunu belki söylemiştik: yatak odası 2 penceresi 120x180 olsun", _Y2),
+    ("2 olsun, kapora yatırırsak çatı malzemesi ne zaman gelir?", {}), ("2 olsun, kapora yatırırsak hangi ödeme seçenekleri var?", {}),
+    ("2 olsun, kapora yatırırsak montaj tarihini seçebilir miyiz?", {}),
+    ("2 olsun, kaporayı yatırırsak kesin planı ne zaman gönderirsiniz?", {}),
+    ("2 olsun, ödemeyi yaparsak teslim tarihi değişir mi?", {}), ("2 olsun, kaporayı yatırırsak bize ne zaman dönersiniz?", {}),
+    ("2 olsun, kapora yatırırsak sipariş kesinleşir mi?", {}),
+    ("2 olsun, müşterinin arsasına ustamız yarın bakacak", {}), ("2 olsun, müşteri için usta yarın zemine bakacak", {}),
+    ("2 olsun, müşteri kaporayı yatırdı ekip yarın arsaya bakacak", {}), ("2 olsun, müşteri memnun ve ustalar yarın gelip bakacak", {}),
+    ("2 olsun, kar yüküne göre ek kolon isteriz", {}), ("2 olsun, soğuğa göre yalıtım isteriz", {}),
+    ("2 olsun, nem oranına göre havalandırma isteriz", {}), ("2 olsun, kara göre güçlendirme isteriz", {}),
+    ("2 olsun, geçici elektrik lazım", {}), ("2 olsun, geçici depo da isteriz", {}),
+    ("2 olsun, çatıyı sonra değiştirmeyiz", {}), ("2 olsun, çatı sonradan değişmeyecek", {}),
+    ("2 olsun, başka nasıl bir marka boya var?", {}), ("2 olsun, başka nasıl bir opsiyon var ödemede?", {}),
+    ("2 olsun, müşteri de onayladı", {}), ("2 olsun, rengi müşteri seçecek", {}), ("2 olsun, emin misiniz teslim kasımda mı?", {}),
+    ("2 olsun, şimdilik sağlıcakla kalın", {})])
+def test_hakem23_acik_secim_soruya_donmez(tmp_path, metin, al):
+    """Tur 23 (bu turun gerilemeleri): O1 konusu belli bilgi ve süreç sorusu ("teslim ne zaman olur bilmiyoruz", "fiyat kesin değil
+    mi?", "karar sonrası …", "karar aşamasında …"); O2 planın sırasını anlatan istek ("salondan sonra", "zorunlu", haberdeki "belki");
+    O3 iş koşullu soruda çatının konusu ya da konulu değişiklik; O4 başka öznenin fiili; O5 somut ek istek ve sabit gerekçe; O6 "geçici"
+    + ad; O7 olumsuz fiil; O8 genel set adından sonra konu; ara gerileme "şimdilik sağlıcakla kalın" kapanıştır. Açık seçimdir: r02."""
+    s, _ = _cati_seti(tmp_path)
+    k = s.yaz(metin, niyet="diger", **al)
+    assert k.eylem == "is_emri" and k.revizyon == 2 and k.is_emri["talep"]["kaynak"] == "PA06K", k.mesaj
+    assert s.k.d.get("cati_secilen") == "PA06K"
+
+
+@pytest.mark.parametrize("metin", ["1 olsun, teslim ne zaman olur bilmiyoruz", "Evin kendi çatısı olsun, teslim ne zaman olur bilmiyoruz",
+                                   "1 olsun, şimdilik sağ olun"])
+def test_hakem23_acik_onay_soruya_donmez(tmp_path, metin):
+    """Tur 23 (O1, gerileme): konusu belli bilgi sorusu ve kapanış evin çatısının onayını bozmaz: r01 onaylanır."""
+    s, _ = _cati_seti(tmp_path)
+    k = s.yaz(metin, niyet="diger")
+    assert k.gerekce == K.PLAN_ONAYI and k.revizyon == 1, k.mesaj
