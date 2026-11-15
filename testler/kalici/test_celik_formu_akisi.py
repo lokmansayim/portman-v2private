@@ -296,6 +296,21 @@ def test_revizyonda_kaplama_cumlesi_pencere_istegiyle_birlikte(depo, wa, tmp_pat
     assert "Sandviç panel seçiminizi plandan çıkardım." in govde and "→ 120/120" in govde, govde
 
 
+def test_formdaki_kaplama_onaydan_sonraki_cati_seciminde_kalir(depo, wa, tmp_path, hizli_genel):  # noqa: F811
+    """D-97 ile D-94 birlikte (4. tur deneme adımı D9): formda sandviç panel; r01 sandviç panelle çizildi. Bayi planı onaylar, çatı seti
+    gelir, başka çatı (L) seçer. r02 çatı L ile gelir; kaplama işlemi zarfta kalır."""
+    s = _sandvic_formu(depo, wa, tmp_path)
+    assert sec(depo, wa, s, "Ç8801")["eylem"] == "is_emri"
+    ie, govde = _son_plan(depo)
+    assert "Uygulanan: çatı kaplaması sandviç panel." in govde
+    assert onayla(depo, wa, s)["eylem"] == "secenek"                                                       # Onayla → çatı seti (D-94)
+    r = sec(depo, wa, s, "Ç8801L")
+    assert r["eylem"] == "is_emri", r
+    ie, _ = _son_plan(depo)
+    assert ie["revizyon"] == 2 and ie["yapi"]["kod"] == "Ç8801L"
+    assert [(x["op"], x.get("kaplama")) for x in ie["yapi"]["degisiklikler"]] == [("cati_kaplamasi", "sandvic_panel"), ("cati_varyanti", None)]
+
+
 # İE-20 PR-13 (D-106; Lokman, kart 15 Kasım 2026 10:06:51 UTC "Evet, talebe yazılsın"; cümle kartı 10:08:33 UTC "Üç cümle"). Formda çatı
 # kaplaması standart kaldı; bayi formdan sonra mesajla bir çatı kaplaması yazdı. Kaplama çizime işlenmez; söz talebe (özel istek) yazılır
 # ve bayiye üç cümle söylenir. İlk planda da revizyonda da; LLM okuması ne olursa olsun (K18). Önceki beklenti (PR-11 eki,
