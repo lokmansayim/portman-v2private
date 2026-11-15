@@ -80,8 +80,21 @@ def _form_izi(k: Konusma, t: Talep) -> None:
         if cf.get("kaplama"):                     # İE-20 PR-11 (D-97): çizime işlenen çatı kaplaması (kural kitabının anahtarı)
             ts["form_kaplama"] = cf["kaplama"]
             ts["form_kaplama_yazi"] = (t.bina_ozellikleri or {}).get(_KAPLAMA_SATIRI)   # formun özellik satırına yazdığı değer
+            # Formdan önce sohbette yazılmış başka kaplama (taslaktan doldurulan formda taslak durur): son söz formdur. Başka adla
+            # yazılmış özellik satırı kalkar (formun kendi satırını `birlestir` zaten ezdi); serbest istek silinmez, "formdan önce"
+            # diye işaretlenir (ilk planda form seçimini durdurmaz).
+            adlar, bu, eski = (ts["form_kaplama_yazi"],), t.bina_ozellikleri or {}, ts.get("bina_ozellikleri")
+            for a in [a for a in (eski if isinstance(eski, dict) else {}) if a not in bu and _kaplama_satiri_mi(a)
+                      and _kaplama_kiyasi(eski[a], cf["kaplama"], adlar) == "baska"]:
+                k.not_dus("kural", f"çelik formu: formdan önce yazılan kaplama ({a}: {eski[a]}) formdaki seçimle değişti")
+                del eski[a]
+            once = [x for x in (ts.get("ozel_istekler") or []) if isinstance(x, str) and x not in (t.ozel_istekler or [])
+                    and _kaplama_istegi_mi(x) and _kaplama_kiyasi(x, cf["kaplama"], adlar) == "baska"]
+            ts["form_kaplama_once"] = once
+            if not once:
+                ts.pop("form_kaplama_once")
         else:
-            ts.pop("form_kaplama", None); ts.pop("form_kaplama_yazi", None)
+            ts.pop("form_kaplama", None); ts.pop("form_kaplama_yazi", None); ts.pop("form_kaplama_once", None)
         # Form yeniden geldiyse (aynı taslak) formun yazdığı satırlarda son form geçerli: bu cevapta olmayan satırın eski değeri kalkar
         # (`Konusma.birlestir` özellikleri üst üste ekler; standarda dönen seçim eski standart dışı değeri plana taşımasın).
         bo, bu = ts.get("bina_ozellikleri"), t.bina_ozellikleri or {}
@@ -97,7 +110,7 @@ def _form_izi(k: Konusma, t: Talep) -> None:
     if form is not None:
         ts["form"] = "prefabrik"
         ts.pop("form_dis140", None)
-        ts.pop("form_kaplama", None); ts.pop("form_kaplama_yazi", None)
+        ts.pop("form_kaplama", None); ts.pop("form_kaplama_yazi", None); ts.pop("form_kaplama_once", None)
         ts["olcu_formdan"] = True
         if form.get("oncelik"):
             ts["oncelik"] = form["oncelik"]
@@ -1647,12 +1660,56 @@ def _pencereleri_coz(k: Konusma, aday: dict, t: dict, onceki: list[dict], ops: l
 _KAPLAMA_SATIRI = "Çatı Kaplaması"                            # çelik pafta tablosunun satırı; formun `bina_ozellikleri` anahtarı
 
 
-def _ayni_kaplama(deger, adlar) -> bool:
-    """Özellik satırındaki değer formda seçilen kaplama mı: formun yazdığı değer, kural kitabındaki ad ya da adın ilk sözcüğü ("sandviç
-    panel", "Sandviç Panel", "sandviç")? Başka bir değer bayinin sohbette yazdığı kaplamadır (İE-20 PR-11, geometri hakemi: form satırı
-    değerine bakılmadan silinmez)."""
+# Bayinin sözünde bir çatı kaplamasını ele veren parçalar (`varyant._norm` yazımıyla: küçük harf, Türkçe harfsiz, bitişik). Desen geniş:
+# kalınlık, ek ya da sıra fark etmez ("sandviç panel 5 cm", "sandviç paneli", "sandwich panel").
+_KAPLAMA_SOZU = {"tek_kat_panel": ("tekkatpanel", "tekkatlipanel", "tekkatsac"), "sandvic_panel": ("sandvic", "sandwic", "sandvij"),
+                 "osb_kiremit": ("kiremit",), "trapez_sac": ("trapez",), "osb_trapez": ("trapez",),
+                 "osb_shingle": ("shingle", "shingil", "singil", "singl")}
+_KAPLAMA_DEGIL = ("kiremitkirmizi", "kiremitreng", "kiremitrenk")   # renk adı: "kiremit kırmızısı" kaplama değildir
+
+
+def _kaplama_kiyasi(deger, kap: str, adlar=()) -> str:
+    """Bayinin yazdığı değer, çizime işlenen kaplamaya (`kap`, kural kitabının anahtarı) göre nedir (İE-20 PR-11, geometri hakemi):
+    "ayni"  yalnız o kaplamanın adı (formun yazdığı değer, kitaptaki ad ya da adın ilk sözcüğü): satır tabloda görünür, ayrıca yazılmaz;
+    "baska" başka bir kaplamayı anıyor ("kiremit", "sandviç yerine shingle"): bayinin son sözü form seçimiyle çelişir;
+    "ek"    başka kaplama anmıyor ("sandviç panel 5 cm", "çift kat yalıtım"): seçim işlenir, satır özel istekte kalır (bilgi düşmez)."""
     d = varyant._norm(str(deger))
-    return bool(d) and d in {varyant._norm(x) for ad in adlar if ad for x in (str(ad), str(ad).split()[0])}
+    if d in {varyant._norm(x) for ad in (*adlar, varyant.kaplama_adi(kap)) if ad for x in (str(ad), str(ad).split()[0])}:
+        return "ayni"
+    for x in _KAPLAMA_DEGIL:
+        d = d.replace(x, "")
+    oteki = {x for a, ss in _KAPLAMA_SOZU.items() if a != kap for x in ss} - set(_KAPLAMA_SOZU.get(kap, ()))
+    return "baska" if any(x in d for x in oteki) or (d == "tekkat" and kap != "tek_kat_panel") else "ek"
+
+
+def _kaplama_satiri_mi(anahtar) -> bool:
+    """Özellik satırının adı çatı kaplamasını mı anlatıyor? Tablonun "Çatı Kaplaması" satırı ve LLM'in başka yazdığı adlar ("Kaplama",
+    "Çatı kaplama", "Çatı Malzemesi", "Çatı"); tablonun öteki satırları (renk, çatı şekli, eğim) değil."""
+    ad = celik.satir_adi(anahtar)
+    if ad:
+        return ad == _KAPLAMA_SATIRI
+    n = varyant._norm(str(anahtar))
+    return ("cati" in n or n.startswith("kaplama")) and "renk" not in n and "reng" not in n
+
+
+def _kaplama_istegi_mi(metin) -> bool:
+    """Serbest özel istek çatı kaplamasından mı söz ediyor ("çatı kiremit olsun")? Cephe, duvar, zemin ve tavan kaplaması değil."""
+    n = varyant._norm(str(metin))
+    return "cati" in n or ("kaplama" in n and not any(x in n for x in ("cephe", "duvar", "zemin", "tavan")))
+
+
+def _kaplama_sozleri(ts: dict, kap: str) -> tuple[list[str], str | None]:
+    """Taslakta çizime işlenen kaplamayla (`kap`) ilgili sözler: (tabloda zaten görünen "ayni" satırların adları, bayinin yazdığı başka
+    kaplama ya da None). Formdan önce yazılmış serbest istek (`form_kaplama_once`) sayılmaz: son söz formdur."""
+    bo = ts.get("bina_ozellikleri") if isinstance(ts.get("bina_ozellikleri"), dict) else {}
+    adlar = (ts.get("form_kaplama_yazi"),)
+    dolu = [a for a in bo if bo[a] not in (None, "")]
+    ayni = [a for a in dolu if celik.satir_adi(a) == _KAPLAMA_SATIRI and _kaplama_kiyasi(bo[a], kap, adlar) == "ayni"]
+    baska = [str(bo[a]) for a in dolu if _kaplama_satiri_mi(a) and _kaplama_kiyasi(bo[a], kap, adlar) == "baska"]
+    once = set(ts.get("form_kaplama_once") or [])
+    baska += [x for x in (ts.get("ozel_istekler") or []) if isinstance(x, str) and x not in once and _kaplama_istegi_mi(x)
+              and _kaplama_kiyasi(x, kap, adlar) == "baska"]
+    return ayni, (baska[-1] if baska else None)
 
 
 def _celik_is_emri_uret(k: Konusma, bayi: dict, katalog: Katalog, aday: dict, ts: dict) -> Karar:
@@ -1668,6 +1725,16 @@ def _celik_is_emri_uret(k: Konusma, bayi: dict, katalog: Katalog, aday: dict, ts
     son_y = son.get("yapi") or {}
     ayni_proje = son_y.get("sistem") == "celik" and Katalog.taban_kod(son_y.get("kod")) == Katalog.taban_kod(aday["kod"])
     onceki = [d for d in (son_y.get("degisiklikler") or []) if d.get("op") != "cati_varyanti"] if ayni_proje else []
+    # İE-20 PR-11 (D-97, geometri hakemi): formdan çizilmiş kaplama zarfta dururken bayi revizyonda başka bir kaplama yazarsa işlem
+    # zarftan çıkar (plan modelin kendi kaplamasına döner), yazdığı kaplama özel isteğe gider, bayiye söylenir. Liste bayinin son sözüne
+    # karşın eski seçimi saymaz. Taslak değişmez: erken dönüşlerde bir şey kaybolmaz.
+    kap_notu = ""
+    kap_op = next((d for d in onceki if d.get("op") == "cati_kaplamasi"), None)
+    if kap_op is not None and _kaplama_sozleri(ts, kap_op.get("kaplama"))[1]:
+        k.not_dus("kural", f"çelik revizyonu: çatı kaplaması {kap_op.get('kaplama')} zarftan çıktı, bayi başka kaplama yazdı")
+        onceki = [d for d in onceki if d is not kap_op]
+        kap_notu = (f"Mesajınızda başka bir çatı kaplaması yazdınız. {varyant.kaplama_adi(kap_op.get('kaplama')).capitalize()} seçiminizi "
+                    "plandan çıkardım. Planı modelin kendi çatı kaplamasıyla çizdim. Yazdığınız kaplamayı talebe yazdım. ")
     t = celik.tanim_oku(aday)
     try:
         for d in onceki:
@@ -1716,6 +1783,7 @@ def _celik_is_emri_uret(k: Konusma, bayi: dict, katalog: Katalog, aday: dict, ts
     form_140 = form_ilk and bool(ts.get("form_dis140")) and not _zaten_140(t, onceki) \
         and not any(d.get("op") == "dis_karkas_140" for d in yeni)
     form_notu = "Bu planın dış duvarı 140 mm karkastır. " if form_ilk and not ts.get("form_dis140") and _zaten_140(t, []) else ""
+    form_notu += kap_notu
     # İE-20 PR-11 (D-97; Lokman, kart 15 Kasım 2026 04:44:37 UTC "Plana ve listeye işlensin"): formda seçilen çatı kaplaması ilk planda
     # tanıma yazılır. Model zaten o kaplamadaysa işlem yok. VARSAYIM (Lokman'ın sözü değil): formda kaplama standart kaldıysa plan modelin
     # kendi kaplamasıyla çizilir (KT-01 … KT-10 kendi paftasında sandviç panel; bugünkü davranış, değişmedi).
@@ -1727,7 +1795,7 @@ def _celik_is_emri_uret(k: Konusma, bayi: dict, katalog: Katalog, aday: dict, ts
     yeni = list(tekil.values())
     if ayni_proje and str(son_y.get("kod")).upper() != str(aday["kod"]).upper():          # çatı varyantı değişti: zarf tanım dosyasını değiştirir
         yeni.append({"op": "cati_varyanti", "kod": aday["kod"], "aciklama": f"çatı {aday.get('gosterim') or aday['kod']}"}); okunan.add("cati")
-    if ayni_proje and not yeni and not bilgi:
+    if ayni_proje and not yeni and not bilgi and not kap_notu:
         if "dis140" in okunan and _zaten_140(t, onceki):      # KT-03 gibi hazır 140'lık modelde aynı öneriyle geri sorulmaz (ikinci tur)
             kr = _soru(k, "okuma_metin", "Bu planda dış duvarlar zaten 140'lık karkas. " + _BASKA_DEGISIKLIK)
             if kr.eylem == "sor":
@@ -1774,19 +1842,19 @@ def _celik_is_emri_uret(k: Konusma, bayi: dict, katalog: Katalog, aday: dict, ts
         # gösterdiği için özel istekte ayrıca yazılmaz. Uygulanamazsa plan modelin kendi kaplamasıyla çizilir, seçim özel isteğe yazılır
         # ve bayiye söylenir (dış 140'taki kural: sessiz düşmez, form seçimi yüzünden plan yönlendirilmez).
         ad = varyant.kaplama_adi(form_kap)
-        bo = ts.get("bina_ozellikleri") if isinstance(ts.get("bina_ozellikleri"), dict) else {}
-        satirlar = [a for a in bo if celik.satir_adi(a) == _KAPLAMA_SATIRI and bo[a] not in (None, "")]
-        baska = [a for a in satirlar if not _ayni_kaplama(bo[a], (ad, ts.get("form_kaplama_yazi")))]
-        for a in satirlar:                                     # formun kendi satırı: tablo gösterir (ya da bayinin sonraki sözü yerini aldı)
-            if a not in baska:
-                bo.pop(a)
-        if "bina_ozellikleri" in ts and not bo:
+        ayni, yazilan = _kaplama_sozleri(ts, form_kap)
+        for a in ayni:                                         # formun kendi satırı: tablo gösterir (ya da bayinin sonraki sözü yerini aldı)
+            ts["bina_ozellikleri"].pop(a)
+        if "bina_ozellikleri" in ts and not ts["bina_ozellikleri"]:
             ts.pop("bina_ozellikleri")
-        if baska:
-            # Bayi formdan sonra sohbette başka bir kaplama yazdı (K18: son söz bayinin kendi cümlesi). Form seçimi çizime işlenmez; yazdığı
-            # satır bugünkü gibi özel isteğe gider (sohbetteki kaplama isteği D-97'nin dışında: sessiz düşmez, tabloyla çelişmez).
-            k.not_dus("kural", f"çelik formu: çatı kaplaması {ad} yerine bayinin yazdığı kaplama özel isteğe ({bo[baska[-1]]})")
-            ts.pop("form_kaplama", None); ts.pop("form_kaplama_yazi", None)
+        if yazilan:
+            # Bayi formdan sonra başka bir kaplama yazdı (özellik satırı ya da serbest istek; K18: son söz bayinin kendi cümlesi). Form
+            # seçimi çizime işlenmez; yazdığı kaplama bugünkü gibi özel isteğe gider ve bayiye söylenir (ön not "işleyemezsem plan
+            # mesajında yazarım" demişti; sessiz düşmez, tabloyla çelişmez). Sohbetteki kaplama isteğini çizmek D-97'nin dışında.
+            k.not_dus("kural", f"çelik formu: çatı kaplaması {ad} işlenmedi, bayi başka kaplama yazdı ({yazilan})")
+            ts.pop("form_kaplama", None); ts.pop("form_kaplama_yazi", None); ts.pop("form_kaplama_once", None)
+            form_notu += (f"Formda çatı kaplaması {ad} seçtiniz. Mesajınızda başka bir kaplama yazdınız. Planı modelin kendi çatı "
+                          "kaplamasıyla çizdim. Yazdığınız kaplamayı talebe yazdım. ")
             form_kap = None
     if form_kap:
         if form_kap != kendi_kap:
@@ -1797,7 +1865,7 @@ def _celik_is_emri_uret(k: Konusma, bayi: dict, katalog: Katalog, aday: dict, ts
             except varyant.VaryantHatasi as e:
                 k.not_dus("kural", f"çelik formu: çatı kaplaması bu modele uygulanamadı: {e}")
                 ts["ozel_istekler"] = list(ts.get("ozel_istekler") or []) + [f"Çatı kaplaması: {ad} (formdan; çizime işlenemedi)"]
-                ts.pop("form_kaplama", None); ts.pop("form_kaplama_yazi", None)
+                ts.pop("form_kaplama", None); ts.pop("form_kaplama_yazi", None); ts.pop("form_kaplama_once", None)
                 form_notu += (f"Çatı kaplaması {ad} seçiminizi bu plana otomatik işleyemedim. Planı modelin kendi çatı kaplamasıyla çizdim. "
                               "İsteğinizi talebe yazdım. ")
     ts.pop("pencereler", None); ts["varyantlar"] = []          # tüketildi: sonraki revizyon bunları yeniden okumaz (değişiklikler zarfta birikir)
