@@ -2243,3 +2243,62 @@ def test_hakem20_acik_onay_soruya_donmez(tmp_path, metin):
     s, _ = _cati_seti(tmp_path)
     k = s.yaz(metin, niyet="diger")
     assert k.gerekce == K.PLAN_ONAYI and k.revizyon == 1, k.mesaj
+
+
+# ── İE-42 · geometri hakemi yirmi birinci tur (15 Kasım 2026 öğle) ─────────────────────────────────────────────────────────────────────
+@pytest.mark.parametrize("metin", [
+    "1 olsun ama, şimdilik", "1 olsun ama, bu şimdilik", "Evin kendi çatısı olsun ama, şimdilik", "PA-06 olsun ama, şimdilik",
+    "Şimdilik 1 olsun", "1 olsun şimdilik", "1 olsun, şimdilik böyle", "Şimdilik evin kendi çatısı kalsın", "Şimdilik 2 olsun",
+    "2 olsun, şimdilik", "2 olsun ama, geçici olarak", "1 olsun, ikinci için fiyat ne olur?",
+    "2 olsun ama, sonra değişebilir", "2 olsun ama, ya beğenmezsek?", "2 olsun ama, müşteri ne der bilmem",
+    "2 olsun ama, hâlâ aklımız karışık", "2 olsun ama, aklımız 3'te",
+    "2 olsun, fiyata göre rengi ve çatıyı sonra seçeriz", "2 olsun, fiyata göre renk ve çatı sonra belli olur",
+    "2 olsun, bütçeye göre kaplamayı ve modeli sonra konuşuruz", "2 olsun, hangisi daha dayanıklı, karda mı rüzgarda mı?",
+    "2 olsun, hangisi daha iyi, birincide mi ikincide mi?", "2 olsun, kararı müşteri kapora günü verecek",
+    "2 olsun, son kararı müşteri imza sırasında verecek", "2 olsun, kararı müşteri teslimattan önce verecek",
+    "2 olsun, karar yarın netleşecek", "2 olsun, karar o zaman belli olur", "2 olsun, müşterinin eşi de görsün",
+    "1 olsun, müşteri bir bakar"])
+def test_hakem21_simdilik_baglac_ve_erteleme_sorulur(tmp_path, metin):
+    """Tur 21: Y1 (gerileme) bağlaçtan sonraki "şimdilik" r01 onayını kaydediyordu; Y2 (önceden var) "şimdilik" ve "geçici olarak" seçimi
+    geçici kılar; Y3 (önceden var) "ikinci için" setin seçeneğini anar. O1: sondaki bağlaç, ardındaki parça çatı seçimi ya da plan isteği
+    değilse kararsızlıktır. O2: göre bağında ertelemenin nesnesinde çatı ya da setin seçeneğini anan söz varsa erteleme çatınındır. O3:
+    ayrık soruda bulunma ekli söz (planın yeri ve çatı dışı konu dışında) setin seçeneği ya da ölçütüdür. O4: karar penceresi zaman
+    sözündeki iş adında bitmez. Önceden var: "netleşecek", "belli olur" verilmiş karar değildir; "eşi de görsün", "müşteri bir bakar"
+    kararı erteler. Seçim sorulur."""
+    s, _ = _cati_seti(tmp_path)
+    _soruldu(s, s.yaz(metin, niyet="diger"))
+
+
+@pytest.mark.parametrize("metin", [
+    "2 olsun, ilk önce kaporayı mı yatıralım?", "2 olsun, ilk başta ölçü mü alınacak?", "2 olsun, ilk hafta gelebilir misiniz?",
+    "2 olsun, ilk ay mı başlar?", "2 olsun, ilk iş kapora mı?", "2 olsun, ilk yapılacak iş ne, kapora mı?",
+    "2 olsun, ilk sorum montaj dahil mi?", "2 olsun, ikinci el malzeme mi kullanıyorsunuz?",
+    "2 olsun, başka yapılacak bir şey var mı?", "2 olsun, başka alınacak bir şey var mı?",
+    "2 olsun, başka olması gereken bir şey var mı?", "2 olsun, başka nasıl ödeme seçenekleri var?",
+    "2 olsun, ödeme açısından hangi seçenekler var?", "2 olsun, montaj bakımından hangi seçenekler var?",
+    "2 olsun, montaj için hangi seçenekler var?", "2 olsun, nakliye için başka seçenek var mı?",
+    "2 olsun, kapora yatırırsak ne zaman teslim olur?", "2 olsun, ödemeyi taksitle yaparsak faiz olur mu?",
+    "2 olsun, sözleşmeyi imzalarsak ne zaman başlarsınız?", "2 olsun, manzaraya göre geniş cam isteriz",
+    "2 olsun, iklime göre kalın yalıtım isteriz", "2 olsun, müşteri teslim tarihini soracak", "2 olsun, müşteri fiyatı soracak",
+    "2 olsun, montajı ustamız yapacak, müşteri de gelip görecek", "2 olsun, kararı o zaman vermiştik",
+    "2 olsun, kararı o zaman almıştık", "Peki ama, 2 olsun"])
+def test_hakem21_acik_secim_soruya_donmez(tmp_path, metin):
+    """Tur 21 (O5–O11, gerileme): çatı dışı sıra sözü ("ilk önce", "ilk hafta", "ilk iş", "ikinci el"), sıfat-fiil + belirsiz ad ("başka
+    yapılacak bir şey"), konunun varlık sorusu ("ödeme açısından hangi seçenekler var?", "montaj için başka seçenek var mı?"), bizim
+    işimizin koşulu ("kapora yatırırsak"), adla "isteriz" ("geniş cam isteriz"), nesneli müşteri fiili ("müşteri fiyatı soracak") ve
+    geçmiş karar ("o zaman vermiştik") açık seçimi soruya çevirmez: r02."""
+    s, _ = _cati_seti(tmp_path)
+    k = s.yaz(metin, niyet="diger")
+    assert k.eylem == "is_emri" and k.revizyon == 2 and k.is_emri["talep"]["kaynak"] == "PA06K", k.mesaj
+    assert s.k.d.get("cati_secilen") == "PA06K"
+
+
+@pytest.mark.parametrize("metin", ["2 olsun ama, bir isteğimiz var: yatak odası 2 penceresi 120x180 olsun",
+                                   "2 olsun ama, ricamız şu: yatak odası 2 penceresi 120x180 olsun"])
+def test_hakem21_istek_haberi_secimi_bozmaz(tmp_path, metin):
+    """Tur 21 ara gerileme: bağlacın ardındaki parça isteği haber veriyorsa ("bir isteğimiz var:") bir sonraki parça da okunur; plan
+    isteği seçimi bozmaz: r02 çatı ve istekle."""
+    s, _ = _cati_seti(tmp_path)
+    k = s.yaz(metin, niyet="diger", **_Y2)
+    assert k.eylem == "is_emri" and k.revizyon == 2 and k.is_emri["talep"]["kaynak"] == "PA06K", k.mesaj
+
