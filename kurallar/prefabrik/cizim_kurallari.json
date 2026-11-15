@@ -1054,6 +1054,28 @@
     "testler/motor/test_d96_uclu_h.py::test_yanlis_nokta_hata",
     "testler/motor/test_d96_uclu_h.py::test_ayni_nokta_iki_kez_hata"
    ]
+  },
+  {
+   "kod": "PC-42",
+   "baslik": "Panonun ortasındaki T'de 3'lü H çizilmez (çizim listeyle aynı parçayı gösterir)",
+   "kural": "İç duvar bir duvara T ile geliyor ve geçen duvarın panosu orada bölünmemişse (pano eki yok; ek toleransı yükleme listesininki: geçen duvarın yarı kalınlığı + 3,5 cm) parça çektirme U'sudur; Motor orada 3'lü H çizmez (ana plan, net alan kopyası, saha montaj planı, A4 ön onay sayfası). 3'lü H yalnız geçen duvarın pano ekinde ya da iki duvarın uç uca birleştiği yerde (niş T'si, D-29, D-96) çizilir. Süzme `_kur`'un sonunda, D-92'nin yeniden dizdiği panolardan sonradır. Motor'un doğrulaması (K23) DXF'teki her 3'lü H'ın iki yanını geçen duvarın tek panosu örtüyorsa hata verir; teslim PDF'i yazılmaz. Pano dizilimi, ölçüler ve yükleme listesi değişmez (liste İE-27'den beri orada çektirme U'su sayar). 125,5'lik panonun tam ortasındaki 13 yer ve 122,5'lik panodaki 2 yer (9 evde 15 yer) kartın \"15 yerin hepsinde\" seçimiyle; dış duvarda panonun tam ortasında olmayan T'ler kapsam dışı.",
+   "karar": "D-105",
+   "lokman": {
+    "tarih": "2026-11-15",
+    "saat": "08:51",
+    "soz": "evet böyle bir uygulama var duvar tam ise yani 125,5 cm ise ve böleceğimiz pano tam ortaya geliyorsa 3'lü H kullanmak yerine tam ortaya çektirme U'su koyuyoruz maliyet ve hız açısından"
+   },
+   "kod_yeri": [
+    "motor/geometry.py::ortadaki_h",
+    "motor/geometry.py::_kur",
+    "motor/validate.py::dogrula"
+   ],
+   "test": [
+    "testler/motor/test_bk38_cizim_liste.py::test_degisen_yerler",
+    "testler/motor/test_bk38_cizim_liste.py::test_cizimde_panonun_ortasinda_h_yok_ve_liste_ayni",
+    "testler/motor/test_bk38_cizim_liste.py::test_ortadaki_h_tanimi",
+    "testler/motor/test_bk38_cizim_liste.py::test_dogrulama_ortadaki_h_yi_yakalar"
+   ]
   }
  ]
 }

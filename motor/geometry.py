@@ -1624,8 +1624,27 @@ def _kur(is_emri: dict) -> Plan:
                 x_, y_ = (d.c, t.c) if t.yon == "x" else (t.c, d.c)
                 raise IsEmriHatasi(f"dizilim.tek_ozel_pano: yeni pano eki {x_:g}, {y_:g} cm'deki çektirme U'lu T'ye denk geliyor (orada "
                                    f"3'lü H olur); yapi.birlesimler'deki t: cektirme_u ile bu duvarda kural birlikte uygulanamaz")
+    plan.h_baglantilar = [hb for hb in plan.h_baglantilar if not ortadaki_h(plan, hb)]   # BK-38: çizim listeyle aynı parçayı gösterir
     genis_pano_denetimi(plan)                                 # D-69: bütün dizilim yollarından sonra, planın son hâlinde
     return plan
+
+
+def ortadaki_h(plan: "Plan", hb: "HBaglanti"):
+    """BK-38: 3'lü H geçen duvarın pano ekinde olur (iki panoyu ve T ile gelen duvarı birleştirir). T geçen duvarın panosunun ortasına geliyorsa
+    (`dizilim.hiza: tam_izgara`: ek her tam aksta, iç duvar T'de bölünmez; İE-17) orada ek yoktur, parça 60'lık çektirme U'sudur (İE-27, D-45;
+    Lokman, 3 Kasım 2026 09:52). Yükleme listesi bunu böyle sayıyordu (`prefabrik_liste.model_motor` › `t_orta`), çizim ise 3'lü H basıyordu.
+    Panonun ortasındaki H'ın geçen duvarını döndürür, değilse None. Ek toleransı listeninki (geçen duvarın yarı kalınlığı + 3,5 cm). Duvarın
+    ucundaki H (D-29 niş T'si, D-96: iki duvar uç uca) ve geçen duvarı bulunmayan H dokunulmaz. Yalnız okur."""
+    kol_x = hb.rot % 180 == 0                                 # kol x yönünde: geçen duvar düşey (yon y)
+    hat, konum = (hb.x, hb.y) if kol_x else (hb.y, hb.x)
+    for t in plan.duvarlar:
+        if t.yon != ("y" if kol_x else "x") or abs(t.c - hat) > t.h + 1e-6:
+            continue
+        if not (t.p0 + t.h + 1e-6 < konum < t.p1 - t.h - 1e-6):
+            continue
+        if not any(abs(p.a1 - konum) <= t.h + 3.5 for p in t.panolar[:-1]):
+            return t
+    return None
 
 
 def tek_pano_araliklari(plan: "Plan", d: "Duvar") -> list:
