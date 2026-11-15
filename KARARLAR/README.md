@@ -122,6 +122,7 @@ Biçim: karar · gerekçe · reddedilen seçenekler · geri alma yolu · kim ve 
 | [D-97](D-97.md) | Çelik formda seçilen çatı kaplaması ilk planda Yapı Tanımı'nın `cati.kaplama`'sına yazılır (`varyant.cati_kaplamasi`): pafta tablosu ve yükleme listesi o kaplamayla çıkar, özel isteğe ayrıca yazılmaz; bugün sandviç panel ve kiremit desen sac + OSB (D-98'den beri; 16 çelik plan); genel motorun hesaplamadığı kaplamalar özel istekte kalır (ayrı Motor bakım işi); plan ve görünüş çizimi değişmez (İE-20 PR-11) | 15.11 (Lokman kart 04:44:37 "Plana ve listeye işlensin") |
 | [D-99](D-99.md) | Disk arşivi (Elements diskinin Mac kopyası, 628 proje, 8.163 dosya): ham dosyalar Mac'te ve Drive'da, depoya adsız dizin ve SHA-256 mührü (`testler/hdd/`, `araclar/hdd_dizin.py`); adlı eşleme yalnız Mac ve Drive'da (Lokman 15.11 05:37:53 kartı "Drive'da, depoya dizin ve kart"; İE-43) |
 | [D-102](D-102.md) | Çelik talep formunda trapez sac ve trapez sac + OSB sunulmaz (4 seçenek), shingle satırı "OSB + membran + shingle"; yayımlı form değişmez, yeni form `celik2.json` ve `talep_formu.celik2_flow_id` ayarıyla açılır; taslak, yayım ve ayar Lokman'ın ayrı sözüyle (İE-20 PR-12) | 15.11 (Lokman 05:23:08, 05:23:34; kart 05:28:14 "Yalnız trapez sac kalksın"; 07:54:18 "çelikte Trapez sacı komple kaldır", 07:54:29 "yani Trapez sac + OSB de olmasın") |
+| [D-105](D-105.md) | Montaj çizimi ile yükleme listesi aynı parçayı gösterir: iç duvarın T ile geldiği yerde geçen duvarın panosu bölünmemişse parça çektirme U'sudur, çizim orada 3'lü H çizmez (`geometry.ortadaki_h`, PC-42; Motor doğrulamasına hakem kalemi; 9 evde 15 yer, mühürlü 102 m² 2+1 dahil, M-12 kartla açılıp kapandı); 100'lük iç duvarın dış köşeye geldiği yerde listede 1 çektirme U'su (`prefabrik_liste.model_motor`; 91 m² 3+1, 71 m² 2+1); BK-38 | 15.11 (Lokman 08:51:58; kartlar 09:14:09 "Evet, 15 yerin hepsinde", 09:14:41 "Evet, 1 adet 100'lük") |
 
 ## Numara defteri (14 Ekim 2026, BK-08; CIO planı › Görev 3)
 
@@ -219,8 +220,10 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | D | D-100 | çelikte OSB + membran + shingle kuralı (başka sohbet; BK-33) | alındı (15.11) |
 | D | D-101 | prefabrikte talep numarası revizyonda sabit kalır (başka sohbet; BK-29 tur 10) | alındı (15.11) |
 | D | D-102 | çelik talep formunda trapez saclı seçenek sunulmaz; shingle satırı OSB + membran + shingle (İE-20 PR-12; Lokman 15.11 05:28:14 kartı, 07:54:18 ve 07:54:29 sözleri) | yazıldı (15.11; talep formu sohbeti, `claude/project-thread-l5mh7r`) |
-| D | **D-103** | — | **sıradaki boş** |
-| D | **D-100** | — | **sıradaki boş** |
+| D | D-103 | uygulanmış asıl proje havuzda aynen kalır, her değişiklik yeni proje (başka sohbet; standart pano sohbeti) | alındı (15.11) |
+| D | D-104 | üçlü H yalnız iç duvar dış duvarla aynı kalınlıktaysa (başka sohbet; BK-36, PC-41; tek pano Motor sohbeti) | alındı (15.11) |
+| D | D-105 | montaj çizimi panonun ortasındaki T'de 3'lü H çizmez, liste orada çektirme U'su sayar; 100'lük dış köşede çektirme U'su (BK-38, PC-42; Lokman 15.11 08:51:58 sözü, kartlar 09:14:09 "Evet, 15 yerin hepsinde", 09:14:41 "Evet, 1 adet 100'lük") | yazıldı (15.11; montaj çizimi ile liste sohbeti, `claude/project-thread-3o0qzh`) |
+| D | **D-106** | — | **sıradaki boş** |
 | İE | İE-01–İE-08 | bu depo (`main`) | yazıldı |
 | İE | İE-09 | model atölyesi: kontrollü model üretimi ve banka hattı (Görev 6e; pano 30; P6001 güncellemesi kapsam dışı) | alındı (16.10; `claude/gorev-6e-model-atolyesi-rnhtcp`; PR-1 banka hattı 29.10, `claude/project-thread-rhjgzv`) |
 | İE | İE-10, İE-11, İE-12 | prefabrik hattı (PR #12, PR #14, `ie-12-prefabrik-bayi-paftasi`) | `main`'e BK-12 ile (PR-1: motor ve bayi paftası; liste ve mühür kıyası sonraki PR'larda) |
@@ -280,7 +283,11 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | BK | BK-32 | Pano Motor'unda yazılan köşeye üçlü H (D-96, PC-40; `claude/project-thread-9gdwir`) | alındı (14.11; CIO 20:58:58) |
 | BK | BK-33 | Çelikte dört çatı kaplaması (Motor işi; çelik dört çatı kaplaması sohbeti) | alındı (15.11; CIO, Lokman kartı 05:03:47) |
 | BK | BK-34 | Havuz hakeminde kesim hattı, üçlü H ve açıklık kayması kalemleri: 71 m² 2+1'in üçlü H'lı hâli (Lokman 14.11 20:46:54 sözü, kart 20:57:28 "Doğru, yanına eklensin"; `claude/project-thread-9gdwir`) | alındı (15.11; CIO 05:59) |
-| BK | **BK-35** | — | **sıradaki boş** |
+| BK | BK-35 | Havuz hakeminde veranda duvarı aksa kalemi: 60 m² 2+1 (başka sohbet; tek pano Motor sohbeti) | alındı (15.11) |
+| BK | BK-36 | Üçlü H yalnız aynı kalınlıkta (D-104, PC-41; tek pano Motor sohbeti) | alındı (15.11) |
+| BK | BK-37 | Havuz hakeminde birleşim profili kalemi (köşe profili sohbeti, `claude/project-thread-are9gn`) | alındı (15.11) |
+| BK | BK-38 | Montaj çizimi ile yükleme listesi aynı parçayı gösterir: panonun ortasındaki T'de 3'lü H çizilmez, Motor doğrulamasına hakem kalemi, 100'lük dış köşede çektirme U'su (D-105, PC-42; `claude/project-thread-3o0qzh`) | alındı (15.11; CIO 08:29:56) |
+| BK | **BK-39** | — | **sıradaki boş** |
 
 ## 27 Eylülde Lokman'ın verdiği kararlar
 

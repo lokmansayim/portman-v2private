@@ -85,8 +85,22 @@ def _t_orta_yerleri(plan) -> list[tuple[float, float]]:
     return out
 
 
+# Kapsam dışı (D-105): listenin çektirme U'su saydığı ama T'nin panonun ortasında olmadığı yerler; çizimdeki H kalır (Lokman'ın sözünde yok).
+# TK-03 (87 m²): kapılı panoda uca 11,85; 125,5'lik panoda 73,95 / 51,55; 62,75'lik panoda uca 11,85.
+BILINEN = {"testler/motor/veri/TK03.json": [(548.5, 349.45), (831.95, 349.45), (1009.0, 349.45)]}
+
+
 def _hs(plan) -> list[tuple[float, float]]:
     return sorted((round(h.x, 2), round(h.y, 2)) for h in plan.h_baglantilar)
+
+
+def _suzulmemis(ie: dict, monkeypatch):
+    """BK-38'den önceki Motor'un planı (süzme kapalı)."""
+    monkeypatch.setattr(G, "ortadaki_h", lambda plan, hb: None)
+    try:
+        return G.kur(copy.deepcopy(ie))
+    finally:
+        monkeypatch.undo()
 
 
 @pytest.mark.parametrize("kod", sorted(DEGISEN))
@@ -94,34 +108,47 @@ def test_degisen_yerler(kod, monkeypatch):
     """Dokuz evde 15 yer: panonun ortasındaki H kalkar, öteki H'lar yerinde (BK-38'den önceki Motor'la kıyas)."""
     ie = _ie(KOK / "is_emri" / "adaylar" / f"{kod}.json")
     sonra = _hs(G.kur(copy.deepcopy(ie)))
-    monkeypatch.setattr(G, "ortadaki_h", lambda plan, hb: None)   # BK-38'den önceki Motor
-    once = _hs(G.kur(copy.deepcopy(ie)))
-    monkeypatch.undo()
+    once = _hs(_suzulmemis(ie, monkeypatch))
     kalkan = [h for h in once if h not in sonra]
     assert sorted(kalkan) == sorted(DEGISEN[kod]) and all(h in once for h in sonra), (kod, once, sonra)
 
 
-def test_cizimde_panonun_ortasinda_h_yok_ve_liste_ayni():
-    """Depodaki her İş Emri'nde: çizimdeki her H geçen duvarın pano ekinde ya da duvar ucunda (niş T'si); listenin çektirme U'su saydığı
-    hiçbir yerde H yok."""
-    n = 0
-    for yol, _ie_, plan in _planlar():
+def test_cizim_listeyle_ayni(monkeypatch):
+    """Depodaki her İş Emri'nde (BK-38'den önceki Motor'la kıyas): kalkan her H listenin çektirme U'su saydığı yerde ve panonun ortasında;
+    listenin çektirme U'su saydığı yerde H kalmaz, yalnız `BILINEN` (kapsam dışı) yerlerde kalır. `_t_orta_yerleri` listenin kendi sayısıyla
+    (`model_motor` › `cektirme_yerleri.t_orta`) aynı."""
+    n = kalkan_top = 0
+    for yol, ie, plan in _planlar():
         n += 1
-        assert not [hb for hb in plan.h_baglantilar if G.ortadaki_h(plan, hb)], yol
-        for x, y in _t_orta_yerleri(plan):
-            assert not any(abs(h.x - x) <= 8.5 and abs(h.y - y) <= 8.5 for h in plan.h_baglantilar), (yol, x, y)
-    assert n >= 60
+        ad = yol.relative_to(KOK).as_posix()
+        yerler = _t_orta_yerleri(plan)
+        try:
+            assert len(yerler) == PL.model_motor(copy.deepcopy(ie))["cektirme_yerleri"]["t_orta"], ad
+        except PL.ListeYazilmaz:
+            pass
+        yakin = lambda h, xy: abs(h[0] - xy[0]) <= 8.5 and abs(h[1] - xy[1]) <= 8.5   # noqa: E731
+        once, sonra = _hs(_suzulmemis(ie, monkeypatch)), _hs(plan)
+        kalkan = [h for h in once if h not in sonra]
+        assert all(h in once for h in sonra), ad
+        assert all(any(yakin(h, xy) for xy in yerler) for h in kalkan), (ad, kalkan)
+        kalan = sorted(h for h in sonra for xy in yerler if yakin(h, xy))
+        assert kalan == sorted(BILINEN.get(ad, [])), (ad, kalan)
+        kalkan_top += len(kalkan)
+    assert n >= 60 and kalkan_top >= 15
 
 
-def test_ortadaki_h_tanimi():
-    """`ortadaki_h` panonun ortasındaki H'ın geçen duvarını verir; pano ekindeki ve niş T'sindeki H'a None."""
-    plan = G.kur(_ie(KOK / "is_emri" / "adaylar" / "PA25.json"))
-    assert plan.h_baglantilar and all(G.ortadaki_h(plan, h) is None for h in plan.h_baglantilar)
-    yapay = G.HBaglanti(444.25, 434.5, 90.0, "ic")             # kalkan yerlerden biri: geçen duvar 381,5–507 panosunun ortası
-    t = G.ortadaki_h(plan, yapay)
-    assert t is not None and t.tur == "ic" and t.yon == "x"
-    tk = G.kur(_ie(KOK / "testler" / "motor" / "veri" / "TK02.json"))   # dış duvarın pano ekindeki ve nişteki H'lar (iç 100)
+def test_ortadaki_h_tanimi(monkeypatch):
+    """`ortadaki_h` BK-38'den önceki Motor'un H'larından yalnız panonun ortasındakileri seçer: PA25'te 3'ü (geçen duvar iç, x yönünde), pano
+    ekindeki 1'i değil; TK-02'de dış duvarın pano ekindeki ve nişteki H'ların hiçbirini; TK-03'te panonun ortasında olmayan eksiz T'leri değil."""
+    plan = _suzulmemis(_ie(KOK / "is_emri" / "adaylar" / "PA25.json"), monkeypatch)
+    secilen = sorted((round(h.x, 2), round(h.y, 2)) for h in plan.h_baglantilar if G.ortadaki_h(plan, h))
+    assert secilen == sorted(DEGISEN["PA25"]) and len(plan.h_baglantilar) == 4
+    assert all(G.ortadaki_h(plan, h).tur == "ic" for h in plan.h_baglantilar if (round(h.x, 2), round(h.y, 2)) in secilen)
+    tk = _suzulmemis(_ie(KOK / "testler" / "motor" / "veri" / "TK02.json"), monkeypatch)   # iç 100: dış duvarın pano ekindeki ve nişteki H
     assert any(h.tur == "dis" for h in tk.h_baglantilar) and all(G.ortadaki_h(tk, h) is None for h in tk.h_baglantilar)
+    tk3 = _suzulmemis(_ie(KOK / "testler" / "motor" / "veri" / "TK03.json"), monkeypatch)
+    bilinen = [h for h in tk3.h_baglantilar if (round(h.x, 2), round(h.y, 2)) in BILINEN["testler/motor/veri/TK03.json"]]
+    assert len(bilinen) == 3 and all(G.ortadaki_h(tk3, h) is None for h in bilinen)
 
 
 def test_dogrulama_ortadaki_h_yi_yakalar(tmp_path, monkeypatch):

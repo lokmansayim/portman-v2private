@@ -1633,8 +1633,11 @@ def ortadaki_h(plan: "Plan", hb: "HBaglanti"):
     """BK-38: 3'lü H geçen duvarın pano ekinde olur (iki panoyu ve T ile gelen duvarı birleştirir). T geçen duvarın panosunun ortasına geliyorsa
     (`dizilim.hiza: tam_izgara`: ek her tam aksta, iç duvar T'de bölünmez; İE-17) orada ek yoktur, parça 60'lık çektirme U'sudur (İE-27, D-45;
     Lokman, 3 Kasım 2026 09:52). Yükleme listesi bunu böyle sayıyordu (`prefabrik_liste.model_motor` › `t_orta`), çizim ise 3'lü H basıyordu.
-    Panonun ortasındaki H'ın geçen duvarını döndürür, değilse None. Ek toleransı listeninki (geçen duvarın yarı kalınlığı + 3,5 cm). Duvarın
-    ucundaki H (D-29 niş T'si, D-96: iki duvar uç uca) ve geçen duvarı bulunmayan H dokunulmaz. Yalnız okur."""
+    Panonun ortasındaki H'ın geçen duvarını döndürür, değilse None. Ek toleransı listeninki (geçen duvarın yarı kalınlığı + 3,5 cm). Kapsam
+    D-105'in kapsamı: T panonun ortasında (Lokman, 15 Kasım 2026 08:51:58: "125,5 cm ise ve böleceğimiz pano tam ortaya geliyorsa"; kart 09:14:09
+    "Evet, 15 yerin hepsinde": 122,5'lik panoda bir uç dik duvarın yüzünde, orta 1,5 cm kayık) → `ORTADAKI_H_PAYI_CM`. Panonun ortasında olmayan
+    eksiz T'deki H (TK-03'ün üç yeri) Lokman'ın sözünde yok, dokunulmaz. Duvarın ucundaki H (D-29 niş T'si, D-96: iki duvar uç uca) ve geçen
+    duvarı bulunmayan H dokunulmaz. Yalnız okur."""
     kol_x = hb.rot % 180 == 0                                 # kol x yönünde: geçen duvar düşey (yon y)
     hat, konum = (hb.x, hb.y) if kol_x else (hb.y, hb.x)
     for t in plan.duvarlar:
@@ -1642,9 +1645,14 @@ def ortadaki_h(plan: "Plan", hb: "HBaglanti"):
             continue
         if not (t.p0 + t.h + 1e-6 < konum < t.p1 - t.h - 1e-6):
             continue
-        if not any(abs(p.a1 - konum) <= t.h + 3.5 for p in t.panolar[:-1]):
+        if any(abs(p.a1 - konum) <= t.h + 3.5 for p in t.panolar[:-1]):
+            continue
+        if any(p.a0 - 1e-6 <= konum <= p.a1 + 1e-6 and abs(konum - (p.a0 + p.a1) / 2.0) <= ORTADAKI_H_PAYI_CM + 1e-6 for p in t.panolar):
             return t
     return None
+
+
+ORTADAKI_H_PAYI_CM = 1.5      # BK-38 (D-105): T'nin panonun ortasından en çok kayması (122,5'lik panoda 62,75 / 59,75)
 
 
 def tek_pano_araliklari(plan: "Plan", d: "Duvar") -> list:

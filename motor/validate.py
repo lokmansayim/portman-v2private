@@ -183,8 +183,9 @@ def dogrula(doc, plan: G.Plan, is_emri: dict) -> dict:
         ok = [any(r[0] - 1e-7 <= px <= r[2] + 1e-7 and r[1] - 1e-7 <= py <= r[3] + 1e-7 for r in rects) for px, py in probes]
         if not all(ok):
             hatalar.append(f"H bağlantısı ({x},{y}) kanallarında pano yok: {ok}")
-        # BK-38 (D-105): 3'lü H geçen duvarın pano ekinde olur. Geçen duvarın tek panosu H'ın iki yanını da örtüyorsa orada ek yoktur, parça
-        # çektirme U'sudur (yükleme listesi öyle sayar; Lokman, 15 Kasım 2026 08:51). Ek toleransı listeninki: yarı kalınlık + 3,5 cm
+        # BK-38 (D-105): 3'lü H geçen duvarın pano ekinde olur. Geçen duvarın tek panosu H'ın iki yanını da örtüyor ve H panonun ortasındaysa
+        # orada ek yoktur, parça çektirme U'sudur (yükleme listesi öyle sayar; Lokman, 15 Kasım 2026 08:51). Ek toleransı listeninki: yarı
+        # kalınlık + 3,5 cm; ortadan kayma en çok `G.ORTADAKI_H_PAYI_CM` (Lokman'ın sözünün ve kartın kapsamı)
         for p in panels:
             r = p["rect"]
             if dx:                                              # kol x yönünde: geçen duvar düşey
@@ -192,7 +193,8 @@ def dogrula(doc, plan: G.Plan, is_emri: dict) -> dict:
             else:
                 kal, ic_, a_, b_, v_ = r[3] - r[1], r[1] - 1e-6 <= y <= r[3] + 1e-6, r[0], r[2], x
             pay = kal / 2.0 + 3.5
-            if ic_ and b_ - a_ > kal + 1e-6 and a_ < v_ - pay - 1e-6 and v_ + pay + 1e-6 < b_:
+            if (ic_ and b_ - a_ > kal + 1e-6 and a_ < v_ - pay - 1e-6 and v_ + pay + 1e-6 < b_
+                    and abs(v_ - (a_ + b_) / 2.0) <= G.ORTADAKI_H_PAYI_CM + 1e-6):
                 hatalar.append(f"3'lü H ({x:g}, {y:g}) panonun ortasında: geçen duvarda ek yok, orada çektirme U'su olur ({p['name']})")
     # beklenen adetler
     exp_pen = sum(1 for p in plan.panolar for a in p.aciklar if a.tur == "pencere")
