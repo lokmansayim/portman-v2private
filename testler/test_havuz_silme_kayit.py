@@ -7,6 +7,8 @@ veranda Lokman'ın ev kartıyla kısalır.
 Büyümüş hâller (BK-31 PR-2 büyüme kalemi, yalnız Lokman'ın ev sözüyle): 140 m² 20:22:14 sözü ve 20:25:45 kartı (PA-33), 77 m² 20:35:43
 sözü ve 20:38:43 kartı (PA-34); bugünkü 140 m² (PA-08) ve 77 m² (PA-24) aynen.
 Kesim hattı, üçlü H ve kayan pencere (BK-34, D-96): 71 m² 20:46:54 sözü ve 20:57:28 kartı (PA-35); bugünkü 71 m² (PA-26) aynen.
+Veranda duvarı aksa, tam + yarım pano (BK-35): 60 m² 15 Kasım 06:07:17 ve 07:17:23 sözleri, 07:15:45 ve 07:24:23 kartları (PA-36);
+bugünkü 60 m² (PA-18) aynen (D-103).
 """
 from __future__ import annotations
 import hashlib
@@ -38,12 +40,20 @@ HALLER = {
              "20:38:43", "Bugünkü 77 m2 kalır; 773 × 1014 cm hâli (78,4 m2)"),
     "PA35": ("PA26", "AP-08", "testler/havuz/is_emirleri/PA26_UCLU_H.json", ((785.0, 900.0), (773.0, 888.5)), 68.68, 4.79,
              "20:57:28", "Bugünkü 71 m2 kalır; 773 × 888,5 cm üçlü H'lı hâl (kapı panosu 120,5)"),
+    "PA36": ("PA18", "AP-19", "testler/havuz/is_emirleri/PA18_GENIS.json", ((600.0, 1000.0), (647.5, 951.25)), 61.59, 7.18,
+             "07:24:23", "Bugünkü 60 m² kalır; 647,5 × 951,25 cm hâli (61,6 m²) yeni numarayla girer."),
 }
 # büyüyen hâl → (Lokman'ın ev sözünün saati, sözden parça, tamamlanan duvar sayısı)
 BUYUYEN = {"PA33": ("20:22:14", "101,5'u 125,5 a tamamlayabilirsin", 1), "PA34": ("20:35:43", "48,75'leride 62,75'e tamamla", 2),
-           "PA35": ("20:46:54", "120,5 panoyuda kendi ölçüsüne getirir misin", 1)}
+           "PA35": ("20:46:54", "120,5 panoyuda kendi ölçüsüne getirir misin", 1),
+           "PA36": ("07:17:23", "dış pano 78 cm olan panoyuda tam pano yap", 2)}
 # kesim hattı, üçlü H ve açıklık kayması (BK-34): yalnız 71 m² üçlü H'lı hâlde, Lokman'ın o evdeki sözüyle
-KESIMLI = {"PA35": ("on:17:770", [{"nokta_cm": [386.5, 758.0], "kaynakta_cm": [386.5, 775.0]}], ["pencere 120x120"])}
+# kod → (kesim hattı, üçlü H, kayan açıklık, kesim kartının saati, her biri düşünce hakemi durduran sözler)
+KESIMLI = {"PA35": ("on:17:770", [{"nokta_cm": [386.5, 758.0], "kaynakta_cm": [386.5, 775.0]}], ["pencere 120x120"], "20:57:28",
+                    ("kesim_sozu", "uclu_h_sozu", "aciklik_sozu")),
+           "PA36": ("on:37:795", None, ["pencere 120x180"], "07:15:45",
+                    ("kesim_sozu", "aks_sozu", "tam_yarim_sozu", "aciklik_sozu"))}
+KESIM_SOZLERI = {"kesim_sozu", "uclu_h_sozu", "aciklik_sozu", "aks_sozu", "tam_yarim_sozu"}
 KAYIT = {a["kod"]: a for a in havuz_kayitlari(yapi="prefabrik")}
 # kaynak evler: havuz kaydı (D-87) ya da ilk sekiz aday (D-80; 140 m² PA-08)
 KAYNAK = {**{a["kod"]: a for a in json.loads(ADAYLAR_PREFABRIK_JSON.read_text(encoding="utf-8"))}, **KAYIT}
@@ -61,7 +71,8 @@ def _sozler(kk: dict) -> dict:
     """Kayıttaki sözler `denetle_silme`'nin seçenekleri olarak (kesim hattının yazısı ölçümden)."""
     kesim = (kk["olcum"].get("kesim_hatti") or {}).get("yazi")
     return {"veranda_sozu": kk.get("veranda_sozu"), "buyume_sozu": kk.get("buyume_sozu"), "kesim_hatti": kesim,
-            "kesim_sozu": kk.get("kesim_sozu"), "uclu_h_sozu": kk.get("uclu_h_sozu"), "aciklik_sozu": kk.get("aciklik_sozu")}
+            "kesim_sozu": kk.get("kesim_sozu"), "uclu_h_sozu": kk.get("uclu_h_sozu"), "aciklik_sozu": kk.get("aciklik_sozu"),
+            "aks_sozu": kk.get("aks_sozu"), "tam_yarim_sozu": kk.get("tam_yarim_sozu")}
 
 
 @pytest.mark.parametrize("kod", sorted(HALLER))
@@ -157,21 +168,27 @@ def test_silinmis_hal_anahtarli_kaynak_ev_anahtarsiz():
 
 @pytest.mark.parametrize("kod", sorted(HALLER))
 def test_kesim_hatti_yalniz_ev_soziyle(kod):
-    """Kesim hattı, üçlü H ve kayan pencere (BK-34) yalnız 71 m² üçlü H'lı hâlde, Lokman'ın 20:46:54 sözü ve 20:57:28 kartıyla; öteki
+    """Kesim hattı ve kayan pencere yalnız iki hâlde, Lokman'ın o evdeki sözleri ve kartlarıyla: 71 m² üçlü H'lı hâl (BK-34; 20:46:54
+    sözü, 20:57:28 kartı) ve 60 m² veranda duvarı aksta hâl (BK-35; 06:07:17 ve 07:17:23 sözleri, 07:15:45 ve 07:24:23 kartları). Öteki
     hâllerde yok. Sözlerden biri düşerse hakem kalır."""
     kaynak, kart, *_ = HALLER[kod]
     kk = KAYIT[kod]["kaynak"]["kart_kiyasi"]
     olc = kk["olcum"]
     if kod not in KESIMLI:
-        assert not ({"kesim_sozu", "uclu_h_sozu", "aciklik_sozu"} & set(kk)) and not (
-            {"kesim_hatti", "uclu_h", "kayan_aciklik"} & set(olc)), kod
+        assert not (KESIM_SOZLERI & set(kk)) and not (
+            {"kesim_hatti", "uclu_h", "kayan_aciklik", "aksa_oturan", "tam_yarim"} & set(olc)), kod
         return
-    yazi, uclu_h, kayan = KESIMLI[kod]
-    assert olc["kesim_hatti"]["yazi"] == yazi and olc["uclu_h"] == uclu_h
-    assert [a["aciklik"] for a in olc["kayan_aciklik"]] == kayan
-    assert "20:57:28" in kk["kesim_sozu"] and "20:57:28" in kk["aciklik_sozu"] and "üçlü H olacak" in kk["uclu_h_sozu"]
-    assert _sablon(kod)["yapi"]["birlesimler"] == [{"nokta_cm": [386.5, 758.0], "t": "uclu_h"}]
-    for dusen in ("kesim_sozu", "uclu_h_sozu", "aciklik_sozu"):
+    yazi, uclu_h, kayan, saat, dusenler = KESIMLI[kod]
+    assert olc["kesim_hatti"]["yazi"] == yazi and olc.get("uclu_h") == uclu_h and saat in kk["kesim_sozu"]
+    assert [a["aciklik"] for a in olc["kayan_aciklik"]] == kayan and set(dusenler) == KESIM_SOZLERI & set(kk)
+    if kod == "PA35":
+        assert "20:57:28" in kk["aciklik_sozu"] and "üçlü H olacak" in kk["uclu_h_sozu"]
+        assert _sablon(kod)["yapi"]["birlesimler"] == [{"nokta_cm": [386.5, 758.0], "t": "uclu_h"}]
+    else:                                                                              # 60 m²: veranda duvarı ek akstan ızgara aksına
+        assert "07:24:23" in kk["aciklik_sozu"] and "veranda duvarını aksa oturt" in kk["aks_sozu"] and "tam ve yarım pano" in kk["tam_yarim_sozu"]
+        assert olc["aksa_oturan"] == {"eksen": "y", "ek_aks_cm": 795.0, "aks_cm": 758.0} and "birlesimler" not in _sablon(kod)["yapi"]
+        assert [t["duvar"] for t in olc["tam_yarim"]] == ["dis y 5", "dis y 261"]
+    for dusen in dusenler:
         sozler = {**_sozler(kk), dusen: None}
         if dusen == "kesim_sozu":
             sozler["kesim_hatti"] = None

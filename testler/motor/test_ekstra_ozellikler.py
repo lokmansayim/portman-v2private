@@ -178,7 +178,14 @@ def test_ic_100_pano_sayisi_ayni_60lik_kalem_kalmaz(ev):
     assert not [k for k in y if IC_60.search(k[1])]
     assert _pano(y) == _pano(t)
     assert sum(v for k, v in y.items() if k[1] == "100'lük duvar omegası") > sum(v for k, v in t.items() if k[1] == "100'lük duvar omegası")   # M-04
-    assert _gruplar(*_fark(t, y)) <= {"Panel", "Metal aksam", "Tavan", "Vida"}
+    eklenen, cikan, degisen = _fark(t, y)
+    assert _gruplar(eklenen, cikan, degisen) <= {"Panel", "Metal aksam", "Tavan", "Vida", "Depo"}
+    # D-104 (Lokman, 15 Kasım 2026 07:32:42; kart 07:55:12): üçlü H yalnız iç duvar dış duvarla aynı kalınlıktaysa. Giriş nişli evde (PA-07)
+    # iç 100'de nişin iki ucu dış duvar T'si (3'lü H, dübelli), iç 60'ta köşe direği: dübel ve şase pul yalnız o fark kadar değişir.
+    depo = {k: v for k, v in degisen.items() if k[0] == "Depo"}
+    assert not [k for k in (*eklenen, *cikan) if k[0] == "Depo"] and set(k[1] for k in depo) <= {"Çelik dübel", "Şase pul"}
+    dis_t = lambda L: sum(v for k, v in L.items() if k[1].startswith("3'lü H 100 × 100 × ") and k[1].endswith("(dış duvar T'si)"))
+    assert all(b - a == dis_t(y) - dis_t(t) for a, b in depo.values()), (depo, dis_t(t), dis_t(y))
 
 
 # ── çatı kaplaması ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
