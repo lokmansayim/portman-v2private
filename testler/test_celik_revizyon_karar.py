@@ -1282,3 +1282,28 @@ def test_hakem24_celik_hitapli_secim_sorusu_sorulur(s, metin):
     k = s.yaz(metin)
     assert k.eylem == "sor" and k.mesaj.startswith("Hangi çatı olsun?"), k.mesaj
     assert s.plan["revizyon"] == 1 and s.k.d["secenek_seti"]["durum"] == "acik" and not s.k.d.get("onaylanan"), k.mesaj
+
+
+# ── İE-42 · geometri hakemi yirmi beşinci tur (15 Kasım 2026 öğleden sonra) ─────────────────────────────────────────────────────────────────────
+@pytest.mark.parametrize("metin", [
+    "Ç8801 olsun, ne yapalım bilemedik teslim ne zaman?", "K olsun, ne yapalım bilemedik fiyat ne kadar?",
+    "Ç8801 olsun, olur mu usta?", "Ç8801 olsun, en iyisi bu mu?", "Ç8801 olsun, yeter mi?", "K olsun, olur mu usta?",
+    "K olsun, müşteri ne der?", "K olsun, müşterim beğenir mi?", "K olsun, doğru tercih mi?", "K olsun, sıkıntı olur mu?",
+    "Ç8801 olsun, müşteri ne der?", "Ç8801 olsun, ama aklımız değişebilir", "Ç8801 olsun, müşterinin onayı gerekecek",
+    "Ç8801 olsun geçici bir süre böyle kalsın", "Geçici bir süre Ç8801 olsun", "Ç8801 olsun, doğru tercih mi?"])
+def test_hakem25_celik_kararsizlik_ve_secim_sorusu_sorulur(s, metin):
+    """Tur 25 (Y1, Y2, O1–O5) çelikte: onayı mühendis kontrolüne gönderiyor, onaylanabilir r02 çiziyor ya da kayıtsız
+    yönlendiriyordu: seçim sorulur."""
+    cati_seti(s)
+    k = s.yaz(metin)
+    assert k.eylem == "sor" and k.mesaj.startswith("Hangi çatı olsun?"), k.mesaj
+    assert s.plan["revizyon"] == 1 and s.k.d["secenek_seti"]["durum"] == "acik" and not s.k.d.get("onaylanan"), k.mesaj
+
+
+@pytest.mark.parametrize("metin", [
+    "K olsun, kapora yatırırsak ödeme tarihini sonra değiştirebilir miyiz?"])
+def test_hakem25_celik_acik_secim_soruya_donmez(s, metin):
+    """Tur 25 (O6) çelikte: zaman sözü konudan sonra gelen süreç sorusu açık seçimi soruya çevirmez: r02 K."""
+    cati_seti(s)
+    k = s.yaz(metin)
+    assert k.eylem == "is_emri" and k.revizyon == 2 and s.plan["yapi"]["kod"] == "Ç8801K", k.mesaj
