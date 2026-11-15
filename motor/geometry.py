@@ -1732,7 +1732,7 @@ def _tek_ozel_pano(plan: "Plan", ayna_y: bool) -> list:
 def pano_harcamasi(boylar) -> float:
     """D-108: parçaların harcadığı pano (Lokman, 15 Kasım 2026 22:04: "eğer yarısı olan 62,75 den büyük bir sayı alırsan o tam pano
     sayılır"): 62,75'ten büyük parça 1, 62,75 ve küçüğü 0,5."""
-    return sum(1.0 if b > YARIM_PANO_CM + 0.05 else 0.5 for b in boylar)
+    return sum(1.0 if b > YARIM_PANO_CM + 1e-6 else 0.5 for b in boylar)
 
 
 def _ic_duvar_dis_ucu(plan: "Plan") -> list:
@@ -1743,12 +1743,14 @@ def _ic_duvar_dis_ucu(plan: "Plan") -> list:
     seçeneğin metni: "İç duvar dış duvardan 62,75'ten küçük parçayla başlar, 125,5 öteki köşeye gider. Bugün yalnız 67 m² değişir.").
 
     Aralıklar `tek_pano_araliklari`'ndan (açıklıklı ve karkaslı pano, T eki ve boşluk keser). Yalnız bir ucu dış duvarın iç yüzünde olan,
-    açıklıksız ve en az iki panolu iç duvar aralığı denetlenir. Aralığın panoları `pano_harcamasi`'na göre 125,5'ler + tek kalan
-    diziliminden fazla pano harcıyorsa (ör. 120,5 + 64,75 = 2 pano; 59,75 + 125,5 = 1,5 pano) yeniden dizilir: 125,5'ler öteki uçtan
-    (köşe ya da T) dizilir, kalan parça dış duvar ucundadır. Fazla harcamayan aralığa dokunulmaz (aks düzeni aynen; Lokman 22:21:41
-    "standart aks düzenimizi bozma"). İki ucu da dış duvarda ya da hiçbir ucu dış duvarda olmayan aralık bu kuralın dışındadır (D-108 ›
-    Açık). Dış duvar, açıklıklı pano, dış ölçü ve odalar değişmez. 20 cm'den kısa yeni panoya Motor'un kısa pano uyarısı düşer. Dönüş:
-    değişen aralıklar ({duvar, once, sonra}; boylar cm, duvar sırasıyla)."""
+    açıklıksız iç duvar aralığı denetlenir. Aralıkta 62,75'ten büyük en az iki eksik parça (125,5'ten kısa pano; kartın Okuma 1'i) varsa ve
+    yeni dizilim `pano_harcamasi`'na göre daha az pano harcıyorsa (ör. 120,5 + 64,75 = 2 pano; 59,75 + 125,5 = 1,5 pano) aralık yeniden
+    dizilir: 125,5'ler öteki uçtan dizilir, kalan parça dış duvar ucundadır. Öteki uçta boy D-92 gibi aks üstünden ölçülür (uç dik duvarın
+    eksenine `TEK_PANO_EKSEN_PAYI_CM` içindeyse oradan; köşe ve T payı uçtaki panodan düşer, ekler ızgara aksında kalır; Lokman 22:21:41
+    "standart aks düzenimizi bozma"). Fazla harcamayan aralığa dokunulmaz. Kalan 0,05 cm'den kısa ama sıfır değilse aralığa dokunulmaz
+    (kıymık pano yok, komşu pano 125,5'i aşmaz). İki ucu da dış duvarda ya da hiçbir ucu dış duvarda olmayan aralık bu kuralın dışındadır
+    (D-108 › Açık). Dış duvar, açıklıklı pano, dış ölçü ve odalar değişmez. 20 cm'den kısa yeni panoya Motor'un kısa pano uyarısı düşer.
+    Dönüş: değişen aralıklar ({duvar, once, sonra}; boylar cm, duvar sırasıyla)."""
     kisa = lambda d, p: f"Duvar {d.id}: {p.boy} cm'lik çok kısa pano (özel pano kuralı doğrulanmalı)"   # `_kur`'un pano döngüsündeki yazı
     cik = []
     for d in plan.duvarlar:
@@ -1757,28 +1759,40 @@ def _ic_duvar_dis_ucu(plan: "Plan") -> list:
         yuzler = [d2.c + s * d2.h for d2 in plan.duvarlar if d2.tur == "dis" and d2.yon != d.yon
                   and min(d2.p0, d2.p1) - d2.h - 1 <= d.c <= max(d2.p0, d2.p1) + d2.h + 1 for s in (-1, 1)]
         dis_uc = lambda v: any(abs(v - f) < IC_DUVAR_YUZ_PAYI_CM for f in yuzler)
+        eksenler = [d.a0, d.a1] + [d2.c for d2 in plan.duvarlar
+                                   if d2.yon != d.yon and min(d2.a0, d2.a1) - 1 <= d.c <= max(d2.a0, d2.a1) + 1]
+        eksen = lambda v: min(eksenler, key=lambda a: abs(a - v)) if min(abs(a - v) for a in eksenler) <= TEK_PANO_EKSEN_PAYI_CM else v
+        eksik = lambda p: YARIM_PANO_CM + 1e-6 < p.boy < MOD - 1e-6
         yeni, degisti = [], False
         for grup in tek_pano_araliklari(plan, d):
-            if len(grup) < 2 or grup[0].aciklar or grup[0].karkasli:
+            if len(grup) < 2 or grup[0].aciklar or grup[0].karkasli or sum(1 for p in grup if eksik(p)) < 2:
                 yeni += grup
                 continue
             a0, a1 = grup[0].a0, grup[-1].a1
             u0, u1 = dis_uc(a0), dis_uc(a1)
-            once = [round(p.boy, 2) for p in grup]
-            boy = a1 - a0
-            k = int(boy // MOD + 1e-9)
-            kalan = round(boy - k * MOD, 6)
-            en_az = k + (0.0 if kalan < 0.05 else (0.5 if kalan <= YARIM_PANO_CM + 0.05 else 1.0))
-            if u0 == u1 or pano_harcamasi(once) <= en_az + 1e-9:
+            if u0 == u1:
                 yeni += grup
                 continue
-            if u0:                                            # kalan a0'da (dış duvar ucu); 125,5'ler a1'den geriye
-                ekler = [round(a1 - MOD * i, 6) for i in range(k, 0, -1) if a1 - MOD * i > a0 + 0.05]
-            else:                                             # kalan a1'de; 125,5'ler a0'dan ileri
-                ekler = [round(a0 + MOD * i, 6) for i in range(1, k + 1) if a0 + MOD * i < a1 - 0.05]
+            once = [round(p.boy, 2) for p in grup]
+            e = eksen(a1) if u0 else eksen(a0)                # öteki ucun aksı (köşe ya da T payı uçtaki panodan düşer)
+            nom = round(abs(e - (a0 if u0 else a1)), 6)       # dış duvarın iç yüzünden öteki ucun aksına
+            k = int(nom // MOD + 1e-9)
+            kalan = round(nom - k * MOD, 6)
+            if 1e-6 < kalan < 0.05:                           # kıymık: kalan pano olmaz, komşusu 125,5'i aşardı (D-69); dokunulmaz
+                yeni += grup
+                continue
+            if u0:                                            # kalan a0'da (dış duvar ucu); 125,5'ler öteki ucun aksından geriye
+                ekler = [round(e - MOD * i, 6) for i in range(k, 0, -1)]
+            else:                                             # kalan a1'de; 125,5'ler öteki ucun aksından ileri
+                ekler = [round(e + MOD * i, 6) for i in range(1, k + 1)]
+            ekler = [x for x in ekler if a0 + 1e-6 < x < a1 - 1e-6]
             sinirlar = [a0] + ekler + [a1]
             parca = [Pano(d, u, v) for u, v in zip(sinirlar, sinirlar[1:])]
             sonra = [round(p.boy, 2) for p in parca]
+            if (any(p.boy <= 1e-6 or p.boy > MOD + 1e-6 for p in parca)
+                    or pano_harcamasi([p.boy for p in parca]) >= pano_harcamasi([p.boy for p in grup]) - 1e-9):
+                yeni += grup                                  # fazla harcamayan aralık: aks düzeni aynen
+                continue
             yeni += parca
             degisti = True
             cik.append({"duvar": f"{d.tur} {d.yon} {d.c:g}", "once": once, "sonra": sonra})
