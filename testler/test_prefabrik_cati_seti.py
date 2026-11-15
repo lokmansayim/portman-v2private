@@ -2194,3 +2194,52 @@ def test_hakem19_acik_onay_soruya_donmez(tmp_path, metin):
     s, _ = _cati_seti(tmp_path)
     k = s.yaz(metin, niyet="diger")
     assert k.gerekce == K.PLAN_ONAYI and k.revizyon == 1, k.mesaj
+
+
+# ── İE-42 · geometri hakemi yirminci tur (15 Kasım 2026 sabah) ─────────────────────────────────────────────────────────────────────────
+@pytest.mark.parametrize("metin", [
+    "1 olsun, ikinci olabilir mi?", "1 olsun, sonuncu olabilir mi?", "1 olsun, ikinci olursa nasıl olur?", "1 olsun, ikinci yapılabilir mi?",
+    "1 olsun, ikinci numaraya geçelim mi?", "1 olsun, ikinci planı da gönderir misiniz?", "PA-06 olsun, ikinci olabilir mi?",
+    "Evin kendi çatısı olsun, ikinci olabilir mi?", "2 olsun, üçüncü olabilir mi?",
+    "1 olsun, fiyat için hangi çatı daha iyi?", "1 olsun, hangi modeli seçelim?", "2 olsun, hangi modeli önerirsiniz?",
+    "1 olsun, ikinci modeli nasıl?", "2 olsun, fiyat açısından hangi çatı daha uygun?",
+    "1 olsun, müşteri onaylayınca teslim ne zaman olur?", "1 olsun, fiyat uygunsa ne zaman teslim olur?",
+    "1 olsun, müşteri ne zaman onaylarsa çizin", "2 olsun, müşteri ne derse o olsun", "2 olsun, bakalım müşteri ne diyecek",
+    "2 olsun, sonra değiştirelim", "2 olsun, yarın tekrar yazalım", "2 olsun, kararı sonra değiştirmeyi düşünüyoruz",
+    "2 olsun, karar sonra değiştirmek mümkün", "2 olsun, tavsiyenize göre değiştirmek isteriz",
+    "2 olsun, eğime göre bir kez daha düşünmek isteriz", "2 olsun, yarın görüşürüz, karar o zaman", "2 olsun, karar o zaman",
+    "2 olsun, müşteri bakacak", "2 olsun, montaj hangisi kolay?", "2 olsun, hangisi daha iyi, sivri mi basık mı?",
+    "2 olsun, fiyat açısından hangisi daha uygun?", "2 olsun, montaj yönünden hangisi daha kolay?", "1 olsun, ikinci nasıl?",
+    "2 olsun, sonra revize edelim", "2 olsun, sonra gözden geçirelim", "2 olsun, sonra yeniden ele alalım",
+    "2 olsun, eğime göre modeli sonra seçeriz"])
+def test_hakem20_sira_olcut_kosul_ve_erteleme_sorulur(tmp_path, metin):
+    """Tur 20: Y1 (gerileme) eksiz sıra sözü ardından beyaz listede olmayan söz gelince ("ikinci olabilir mi?") onay kaydediyordu: sıra
+    sözü çatı numarasıdır, yalnız ardından çatı dışı konu, sayma ya da derece sözü gelirse sıfattır. Y2: "fiyat için hangi çatı", "hangi
+    modeli seçelim". Y3 (önceden var): soru cümlesinde müşteriye ya da paraya bağlı koşul ve ertelenen onay. O2–O4, O6, O7: istek kipinde
+    erteleme (kara liste), mastar kesinlik değil, göreli bizim fiilimiz, "karar o zaman", "müşteri bakacak", ölçüt sözü ve kıyas sıfatı.
+    Kalan (önceden var): "ikinci nasıl?", "sonra revize edelim / gözden geçirelim / ele alalım". Göre bağında setin seçeneğini de anan
+    konu ("modeli sonra seçeriz") ertelemedir. Seçim sorulur."""
+    s, _ = _cati_seti(tmp_path)
+    _soruldu(s, s.yaz(metin, niyet="diger"))
+
+
+@pytest.mark.parametrize("metin, al", [
+    ("Tamam ama, 2 olsun", {}), ("Peki ama, 2 olsun", {}), ("2 olsun. Ancak, yatak odası 2 penceresi 120x180 olsun", _Y2),
+    ("2 olsun ama, yatak odası 2 penceresi 120x180 olsun", _Y2), ("2 olsun, kararımızı verdik kaporayı müşteri yarın verecek", {}),
+    ("2 olsun, karar verildi kapora yarın verilecek", {}), ("2 olsun, hangisi daha iyi, salonda mı mutfakta mı?", {}),
+    ("2 olsun, eğime göre oluğu sonra seçeriz", {})])
+def test_hakem20_acik_secim_soruya_donmez(tmp_path, metin, al):
+    """Tur 20 (O1, O5, düşük; gerileme): sondaki bağlaç yalnız mesajın son parçasında kararsızlıktır ("Tamam ama, 2 olsun" değil); karar
+    fiilinin penceresi parayı anan sözde biter ("kaporayı müşteri yarın verecek"); "salonda mı mutfakta mı" setin seçeneği değil; "oluğu
+    sonra seçeriz" oluğun ertelemesidir (tur 18'den beri soruluyordu): r02."""
+    s, _ = _cati_seti(tmp_path)
+    k = s.yaz(metin, niyet="diger", **al)
+    assert k.eylem == "is_emri" and k.revizyon == 2 and k.is_emri["talep"]["kaynak"] == "PA06K", k.mesaj
+
+
+@pytest.mark.parametrize("metin", ["Tamam ama, 1 olsun", "Tamam ama, evin kendi çatısı olsun"])
+def test_hakem20_acik_onay_soruya_donmez(tmp_path, metin):
+    """Tur 20 (O1): baştaki "Tamam ama," seçimi bozmaz; evin çatısı r01'i onaylar."""
+    s, _ = _cati_seti(tmp_path)
+    k = s.yaz(metin, niyet="diger")
+    assert k.gerekce == K.PLAN_ONAYI and k.revizyon == 1, k.mesaj

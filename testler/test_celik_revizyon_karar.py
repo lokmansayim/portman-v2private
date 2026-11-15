@@ -1177,3 +1177,16 @@ def test_hakem19_celik_olcutlu_kiyas_ve_erteleme_sorulur(s, metin):
     k = s.yaz(metin)
     assert k.eylem == "sor" and k.mesaj.startswith("Hangi çatı olsun?"), k.mesaj
     assert s.plan["revizyon"] == 1 and s.k.d["secenek_seti"]["durum"] == "acik" and not s.k.d.get("onaylanan"), k.mesaj
+
+
+# ── İE-42 · geometri hakemi yirminci tur (15 Kasım 2026 sabah) ─────────────────────────────────────────────────────────────────────────
+@pytest.mark.parametrize("metin", ["Ç8801 olsun, ikinci olabilir mi?", "Ç8801 olsun, üçüncü olabilir mi?",
+                                   "Ç8801 olsun, ikinci olursa nasıl olur?", "Ç8801 olsun, fiyat için hangi çatı daha iyi?",
+                                   "Ç8801 olsun, hangi modeli seçelim?", "K olsun, üçüncü olabilir mi?", "K olsun, hangi modeli önerirsiniz?"])
+def test_hakem20_celik_sira_ve_olcut_sorulur(s, metin):
+    """Tur 20 (Y1, Y2) çelikte: eksiz sıra sözü ve "hangi çatı/modeli" onayı mühendis kontrolüne gönderiyor ya da setten çatı
+    kaydediyordu."""
+    cati_seti(s)
+    k = s.yaz(metin)
+    assert k.eylem == "sor" and k.mesaj.startswith("Hangi çatı olsun?"), k.mesaj
+    assert s.plan["revizyon"] == 1 and s.k.d["secenek_seti"]["durum"] == "acik" and not s.k.d.get("onaylanan"), k.mesaj
