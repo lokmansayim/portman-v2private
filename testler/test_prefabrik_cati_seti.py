@@ -1434,3 +1434,97 @@ def test_hakem7_sira_ve_haber_sozu_secimdir(tmp_path, metin, kod):
     """D1: "2. sıradaki olsun" seçimdir (tur 6'nın birleştirmesi soruya çeviriyordu). D2: "haber veririz" tek başına erteleme değildir."""
     s, _ = _cati_seti(tmp_path)
     _secildi(s, s.yaz(metin, niyet="diger"), kod)
+
+
+# ── İE-42 · geometri hakemi sekizinci tur (15 Kasım 2026 gece) ────────────────────────────────────────────────────────────────────────
+_Y12_120x180 = dict(pencereler=[pen("yatak odası 1", "120x180"), pen("yatak odası 2", "120x180")])
+_LISTE = "1. yatak odası penceresi 120x180 olsun\n2. mutfak penceresi 120x120 olsun"
+_LISTE_AL = dict(pencereler=[pen("yatak odası 1", "120x180"), pen("mutfak", "120x120")])
+
+
+def _set_kapali_r02(s: Sohbet, k):
+    """Çatı seçimi yok, istek var: set kapanır, r02 evin kendi çatısıyla (PA06) çizilir, r01 onayı geçersiz kalır, çatı kaydedilmez."""
+    assert k.eylem == "is_emri" and k.revizyon == 2 and k.is_emri["talep"]["kaynak"] == "PA06", k.mesaj
+    assert s.k.d["secenek_seti"]["durum"] == "eskidi" and not s.k.d.get("cati_secilen") and not s.k.d.get("onaylanan"), k.mesaj
+    assert "geçersiz kıldı" in k.mesaj and not k.mesaj.startswith("Çatı: "), k.mesaj
+    k = _onayla(s)                                       # çatı kaybolmaz: r02'nin onayında çatı yeniden sorulur
+    assert k.eylem == "secenek" and k.mesaj.startswith("Planınız onaylandı (r02). Şimdi çatıyı seçin."), k.mesaj
+
+
+@pytest.mark.parametrize("metin", [
+    "yatak odası 1 penceresi 120x180 olsun 2 de", "yatak odası 1 penceresi 120x180 olsun, 2 de",
+    "yatak odası 1'in penceresi 120x180 olsun 2'nin de", "yatak odası 1 penceresi 120x180 olsun ikinciye de",
+    "yatak odası 1 penceresi 120x180 olsun 2 de olsun", "yatak odası 1 penceresi 120x180 olsun sonuncuya da",
+    "yatak odası 1 penceresi 120x180 olsun 2 nolu da", "yatak odası 2 penceresi 120x180 olsun 1 de"])
+def test_hakem8_eksiltili_devam_cati_secimi_degil(tmp_path, metin):
+    """Y1: istekten sonra gelen eksiltili devam ("… olsun 2 de", "ikinciye de", "2'nin de") isteğin devamıdır: çatı seçmez. Tur 7'de
+    bölme "2 de"yi seçim sanıyor, bayinin seçmediği PA-06-K'yi çiziyordu; Onayla onu onaylıyordu."""
+    s, _ = _cati_seti(tmp_path)
+    _set_kapali_r02(s, s.yaz(metin, **_Y12_120x180))
+
+
+@pytest.mark.parametrize("metin", ["1 olsun, 2 de olabilir", "2 de olur", "1 olsun 2 de olur"])
+def test_hakem8_eksiltili_secim_kararsizdir(tmp_path, metin):
+    """Y1: istekten sonra gelmeyen eksiltili numara ("1 olsun, 2 de olabilir") seçimle çelişir ya da karar değildir: sorulur."""
+    s, _ = _cati_seti(tmp_path)
+    _soruldu(s, s.yaz(metin, niyet="diger"))
+
+
+@pytest.mark.parametrize("metin, al", [
+    (_LISTE + "\nSon olarak teşekkürler", _LISTE_AL), (_LISTE + "\nSon olarak, teşekkürler", _LISTE_AL),
+    (_LISTE + "\nikinci olarak teşekkürler", _LISTE_AL), ("Son haliyle onaylıyoruz", dict(niyet="onay")),
+    ("Son haliyle kalsın", {}), ("Son hali güzel", {}), ("son hali uygun", {})])
+def test_hakem8_sira_sozu_cati_numarasi_degil(tmp_path, metin, al):
+    """Y2, Y3: "son olarak", "son haliyle", "ikinci olarak" sıra sözü değil (sonuncu çatı değil): numaralı listenin kapanışı çatıyı
+    seçmez, sorulur. Tur 7'de "Son olarak teşekkürler" PA-06-C'yi çizdiriyor, "Son haliyle onaylıyoruz" PA-06-C r02 açıyordu."""
+    s, _ = _cati_seti(tmp_path)
+    k = s.yaz(metin, **al)
+    _soruldu(s, k)
+    assert not s.k.d.get("cati_secilen"), k.mesaj
+
+
+@pytest.mark.parametrize("metin", ["Son olarak, yatak odası 2 penceresi 120x180 olsun", "İlk olarak, yatak odası 2 penceresi 120x180 olsun",
+                                   "Son olarak yatak odası 2 penceresi 120x180 olsun"])
+def test_hakem8_son_olarak_istek_cati_secmez(tmp_path, metin):
+    """Y2: "Son olarak, …" isteği çatı seçmez (tur 7'de PA-06-C çiziliyordu)."""
+    s, _ = _cati_seti(tmp_path)
+    _set_kapali_r02(s, s.yaz(metin, **_Y2_120x180))
+
+
+@pytest.mark.parametrize("metin", ["Şimdilik 1, haber veririz", "1 olsun, haber vereceğiz", "1 olsun ama haber vereceğiz",
+                                   "1 olsun, kesinleşince haber vereceğiz", "1 olsun, müşteri karar verince haber vereceğiz",
+                                   "Müşteri karar verince haber vereceğiz", "2 olsun, haber vereceğiz"])
+def test_hakem8_haber_sozu_ertelemedir(tmp_path, metin):
+    """O3: konusu olmayan "haber veririz" kararı erteler: onay kaydedilmez, sorulur. "Montaj tarihini haber veririz" seçimdir (tur 7 D2)."""
+    s, _ = _cati_seti(tmp_path)
+    _soruldu(s, s.yaz(metin, niyet="diger"))
+
+
+@pytest.mark.parametrize("metin, al", [("2 olsun banyo 2 tane", {}), ("2 olsun pencere 2 tane", {}),
+                                       ("3 olsun yatak odası 3 tane", dict(oda_programi="3+1")),
+                                       ("2 olsun yatak odası 2 tane", dict(oda_programi="2+1"))])
+def test_hakem8_devrik_sayi_ve_adet_sorulur(tmp_path, metin, al):
+    """Y4: "2 olsun banyo 2 tane" çatı numarası da banyo sayısı da okunur: sorulur; istek sessizce düşmez (tur 7'de PA-06-K çiziliyor,
+    "2 olsun pencere 2 tane" BK-29 süzgecinde isteği düşürüyordu)."""
+    s, _ = _cati_seti(tmp_path)
+    k = s.yaz(metin, **al)
+    _soruldu(s, k)
+    assert "Mesajınızdaki öteki isteği uygulamadım" in k.mesaj, k.mesaj
+
+
+@pytest.mark.parametrize("metin", ["1 olsun, hangisi ucuzsa", "1 olsun, hangisi uygunsa", "1 olsun, hangisi daha ucuzsa o",
+                                   "hangisi ucuzsa o olsun", "2 olsun, ikisinden biri", "2 olsun, ikisinin fiyatını da gönderin"])
+def test_hakem8_secimi_bize_birakan_soz_sorulur(tmp_path, metin):
+    """O4: "hangisi ucuzsa", "ikisinden biri", "ikisinin fiyatını da gönderin" seçimi bize bırakır ya da karar verilmedi: sorulur
+    (tur 7'de "1 olsun, hangisi ucuzsa" r01'i onaylıyor, "2 olsun, ikisinin fiyatını da gönderin" PA-06-K çiziyordu)."""
+    s, _ = _cati_seti(tmp_path)
+    _soruldu(s, s.yaz(metin, niyet="diger"))
+
+
+@pytest.mark.parametrize("metin, kod", [("K'da kalalım", "PA06K"), ("Plan aynı kalsın çatı K olsun", "PA06K"),
+                                        ("çatı K olsun plan aynı kalsın", "PA06K"), ("plan aynı kalsın 1 olsun", "PA06")])
+def test_hakem8_secim_okunur(tmp_path, metin, kod):
+    """D1: plan sözü seçim cümlesine virgülsüz bağlansa da çatı seçilir ("Plan aynı kalsın, çatı K olsun" ile aynı); "K'da" eki eksiltili
+    "da" değildir."""
+    s, _ = _cati_seti(tmp_path)
+    _secildi(s, s.yaz(metin, niyet="diger"), kod)

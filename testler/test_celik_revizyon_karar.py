@@ -912,3 +912,41 @@ def test_hakem7_celik_sira_sozu_secimdir(s):
     cati_seti(s)
     k = s.yaz("2. sıradaki olsun")
     assert k.eylem == "is_emri" and s.plan["revizyon"] == 2 and s.plan["yapi"]["kod"] == "Ç8801K", k.mesaj
+
+
+# ── İE-42 · geometri hakemi sekizinci tur (15 Kasım 2026 gece) ────────────────────────────────────────────────────────────────────────
+@pytest.mark.parametrize("metin", ["Son olarak, mutfak penceresi 120x120 olsun", "İlk olarak, mutfak penceresi 120x120 olsun"])
+def test_hakem8_celik_son_olarak_cati_secmez(s, metin):
+    """Y2 çelikte: "Son olarak, …" isteği çatı seçmez (tur 7'de Ç8801-L çiziliyordu); pencere evin çatısıyla r02'de, çatı r02'nin onayında
+    yeniden sorulur."""
+    cati_seti(s)
+    k = s.yaz(metin, **_MUTFAK)
+    assert k.eylem == "is_emri" and s.plan["revizyon"] == 2 and s.plan["yapi"]["kod"] == "Ç8801", k.mesaj
+    assert s.k.d["secenek_seti"]["durum"] == "eskidi" and not s.k.d.get("cati_secilen") and not s.k.d.get("onaylanan"), k.mesaj
+
+
+@pytest.mark.parametrize("metin", ["mutfak penceresi 120x120 olsun 2 de", "mutfak penceresi 120x120 olsun ikinciye de"])
+def test_hakem8_celik_eksiltili_devam_cati_secmez(s, metin):
+    """Y1 çelikte: eksiltili devam çatı seçmez; okunamayan istek bayiye sorulur, çatı ve onay kaydedilmez."""
+    cati_seti(s)
+    k = s.yaz(metin, **_MUTFAK)
+    assert s.plan["yapi"]["kod"] == "Ç8801" and not s.k.d.get("cati_secilen") and not s.k.d.get("onaylanan"), k.mesaj
+
+
+@pytest.mark.parametrize("metin, al", [("1 olsun, hangisi ucuzsa", {}), ("1 olsun, haber vereceğiz", {}), ("2 olsun, ikisinden biri", {}),
+                                       ("Son haliyle onaylıyoruz", dict(niyet="onay")), ("Son haliyle kalsın", {}),
+                                       ("Müşteri karar verince haber vereceğiz", {})])
+def test_hakem8_celik_kararsiz_soz_sorulur(s, metin, al):
+    """O3, O4, Y3 çelikte: erteleme, seçimi bize bırakan söz ve "son haliyle" sorulur; onay ve seçim kaydedilmez."""
+    cati_seti(s)
+    k = s.yaz(metin, **al)
+    assert k.eylem == "sor" and k.mesaj.startswith("Hangi çatı olsun?"), k.mesaj
+    assert s.plan["revizyon"] == 1 and s.k.d["secenek_seti"]["durum"] == "acik" and not s.k.d.get("onaylanan"), k.mesaj
+
+
+@pytest.mark.parametrize("metin", ["Plan aynı kalsın çatı K olsun", "K'da kalalım"])
+def test_hakem8_celik_secim_okunur(s, metin):
+    """D1 çelikte: plan sözü seçim cümlesine virgülsüz bağlansa da çatı seçilir; "K'da" eki eksiltili "da" değildir."""
+    cati_seti(s)
+    k = s.yaz(metin)
+    assert k.eylem == "is_emri" and s.plan["revizyon"] == 2 and s.plan["yapi"]["kod"] == "Ç8801K", k.mesaj
