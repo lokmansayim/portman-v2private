@@ -196,7 +196,8 @@ def test_celik_formu_yaziyla_secim_islenemeyen_140(depo, wa, tmp_path, hizli_gen
 
 def test_celik2_kimligi_varsa_yeni_form_sunulur_cevabi_ayni_yoldan(depo, wa, tmp_path, hizli_genel):  # noqa: F811
     """İE-20 PR-12 (D-102): `celik2_flow_id` ayarda varsa [Çelik] düğmesi yeni formu açar (trapez saclı seçenek yok). Cevabı çelik formun
-    yolundan işlenir: shingle seçimi "OSB + membran + shingle" diye okunur, özel istekte kalır."""
+    yolundan işlenir: shingle seçimi "OSB + membran + shingle" diye okunur. BK-33'ten (D-100) beri Motor bu kaplamayı hesaplar: seçim taslağa
+    `form_kaplama` diye girer, ön not "Çizime işlerim" der (önceden özel istekte kalırdı)."""
     kabul(depo, YEDI)
     s = cf_ayar(tmp_path)
     s = {**s, "talep_formu": {**s["talep_formu"], "celik2_flow_id": "6666666666"}}
@@ -214,10 +215,12 @@ def test_celik2_kimligi_varsa_yeni_form_sunulur_cevabi_ayni_yoldan(depo, wa, tmp
     assert j["cikarim"]["form"]["durum"] == "talep" and j["sonuc"]["llm"]["backend"] == "form", r        # LLM'siz
     assert j["cikarim"]["form"]["talep"]["bina_ozellikleri"]["Çatı Kaplaması"] == "OSB + membran + shingle"
     assert r["eylem"] == "secenek", r
-    assert "Standart dışı seçimlerinizi aldım: çatı kaplaması OSB + membran + shingle. Bu seçimler çizimi değiştirmez." \
-        in dugmeli(depo)["satir"]["body"]
+    govde = dugmeli(depo)["satir"]["body"]
+    assert govde.startswith("Çatı kaplaması OSB + membran + shingle seçtiniz. Çizime işlerim. İşleyemezsem plan mesajında yazarım. "), govde
+    assert "Standart dışı seçimlerinizi aldım" not in govde
     d, _ = depo.konusma_oku(NUMARA_A)
-    assert d["taslak"]["form"] == "celik" and "form_kaplama" not in d["taslak"]
+    assert d["taslak"]["form"] == "celik" and d["taslak"]["form_kaplama"] == "osb_shingle"
+    assert d["taslak"]["form_kaplama_yazi"] == "OSB + membran + shingle"
 
 
 def test_celik_formu_kimligi_yokken_bugunku_form(depo, wa, tmp_path):

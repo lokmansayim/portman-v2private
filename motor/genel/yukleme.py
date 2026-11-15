@@ -63,10 +63,12 @@ GRUP_SIRASI = ["Çelik panel", "Metal aksam", "Dış cephe kaplama", "İç cephe
 KAPLAMA_ADI = {"sandvic_panel": "sandviç panel", "tek_kat_panel": "tek kat panel", "osb_kiremit": "OSB + nem bariyeri + kiremit desen sac (metal kiremit)",
                "osb_trapez": "OSB + nem bariyeri + trapez sac", "trapez_sac": "trapez sac", "osb_shingle": "OSB + membran + shingle"}
 OSBLI_KAPLAMA = ("osb_kiremit", "osb_trapez", "osb_shingle")
-# Genel modelde (çelik) kodu yazılmış OSB'li kaplamalar (D-98, BK-33). Kural kitabının `genel_osbli_kaplama` anahtarı bunlardan birini açar;
+# Genel modelde (çelik) kodu yazılmış OSB'li kaplamalar (D-98, D-100; BK-33). Kural kitabının `genel_osbli_kaplama` anahtarı bunlardan birini açar;
 # kodu yazılmamış bir kaplamayı kitaba eklemek listeyi sessizce eksik üretmez, durdurur (`girdi_genel` aynı kümeyi okur).
-GENEL_OSBLI_KODDA = ("osb_kiremit",)
-GENEL_UST_ORTU = ("nem_bariyeri",)
+GENEL_OSBLI_KODDA = ("osb_kiremit", "osb_shingle")
+GENEL_UST_ORTU = ("nem_bariyeri", "membran")
+# Levha olmayan kaplama (D-100): shingle çatı yüzeyinden sayılır, çatı açılımında dizilmez (`girdi_genel` dizilim kurmaz).
+GENEL_DIZILIMSIZ = ("osb_shingle",)
 PANEL_KAPLAMALARI = ("sandvic_panel", "tek_kat_panel")
 
 
@@ -641,20 +643,27 @@ def _hesapla(g: dict, k: dict) -> dict:
                           "2025 listelerindeki sac kapama. Tek kat panel kapaması listeden çıktı (Lokman, 4 Ekim 16:18); sandviç panelde şimdilik kalıyor "
                           "(Lokman, 4 Ekim 17:46). Adet formülü 2025 listelerinden çıkarıldı")
     elif c.get("dizilim") and kaplama in (kural_degeri("genel_osbli_kaplama") or {}) and kaplama in GENEL_OSBLI_KODDA:
-        # Genel model (çelik), OSB'li kaplama (D-98, BK-33; Lokman, 15 Kasım 2026 05:22:05 UTC). Kural: `genel_osbli_kaplama`. Çatı yüzeyi açılımın
-        # gerçek yüzeyidir: çatı katsayısıyla çarpılmaz. Kaplama levhaları açılımın dizilimiyle, her levha boyu ayrı satır (sandviç ve tek kat paneldeki gibi).
+        # Genel model (çelik), OSB'li kaplama (D-98, BK-33; Lokman, 15 Kasım 2026 05:22:05 UTC; shingle D-100, 07:14:40 UTC). Kural: `genel_osbli_kaplama`.
+        # Çatı yüzeyi açılımın gerçek yüzeyidir: çatı katsayısıyla çarpılmaz. Kaplama levhaları açılımın dizilimiyle, her levha boyu ayrı satır (sandviç ve
+        # tek kat paneldeki gibi); shingle levha değildir, yüzeyden sayılır.
         ok = kural_degeri("genel_osbli_kaplama")[kaplama]
         if ok.get("ust_ortu") not in GENEL_UST_ORTU:
             raise SystemExit(f"genel_osbli_kaplama.{kaplama}.ust_ortu: {ok.get('ust_ortu')!r} hesaplanmıyor (bilinen: {', '.join(GENEL_UST_ORTU)}).")
         d98 = "D-98 (Lokman, 15 Kasım 2026)"
+        d100 = "D-100 (Lokman, 15 Kasım 2026)"
         yuzey = c["yuzey_m2"]
         zk = ok["osb_zayiat"]
         ekle("Çatı kaplamaları", "Çatı OSB", osb_boyut, tavan(yuzey * (1 + zk) / deg(k, "levha_m2", "osb")), yuzey,
              formul=f"çatı yüzeyi × {tr(1 + zk)} ÷ {tr(deg(k, 'levha_m2', 'osb'))}", durum=k["genel_osbli_kaplama"]["durum"],
-             not_=f"{d98}: iki gerçek çelik listeden (140 m² ve 166 m²); levhalar kesilerek dizilir, %{round(zk * 100)} fire")
+             not_=f"{d98}: iki gerçek çelik listeden (140 m² ve 166 m²); levhalar kesilerek dizilir, %{round(zk * 100)} fire"
+                  + (f". {d100}: shingle çatıda da aynı (43 m² gerçek listede 20)" if kaplama == "osb_shingle" else ""))
         if ok["ust_ortu"] == "nem_bariyeri":
             ekle("Çatı kaplamaları", "Nem bariyeri", "m²", tavan(yuzey), yuzey, formul="çatı yüzeyi (OSB'nin üstü)", durum=k["genel_osbli_kaplama"]["durum"],
                  not_=f"{d98}: OSB'nin üstünde nem bariyeri; mahya bandı kalır")
+        else:   # membran (D-100; Lokman 05:23:08: "Shingle sadece Memran ile kullanılır")
+            b = deg(k, "membran_adet_m2")
+            ekle("Çatı kaplamaları", "Membran", f"adet / {tr(b, 0)} m²", tavan(yuzey / b), yuzey, formul=f"çatı yüzeyi (OSB'nin üstü) ÷ {tr(b, 0)}",
+                 durum=k["genel_osbli_kaplama"]["durum"], not_=f"{d100}: OSB'nin üstünde membran; 43 m² gerçek listede 7 (52,5 m² ÷ 8)")
         mahyalar = ()
         if kaplama == "osb_kiremit":
             kap = kapatma_genisligi(k, c, kaplama)
@@ -669,8 +678,19 @@ def _hesapla(g: dict, k: dict) -> dict:
                      not_=(f"toplam {dg['adet']} levha ({tr(dg['panel_m2'], 1)} m²; çatı yüzeyi {tr(yuzey, 1)} m²): {dg['tam_boy']} şerit tam boy, {dg['karma']} köşesi kesilen. "
                            f"Saçaktan {tr(dg['tasma_cm'], 0)} cm taşma, kesim payı {tr(dg['kesim_payi_mm'], 0)} mm; {d98}: ustanın yerleşim planı gibi") if i == 0 else None)
             mahyalar = ("Metal kiremit mahyası", "OSB mahyası")
+        elif kaplama == "osb_shingle":
+            # D-100: shingle levha değil, dizilim yok; mahyada yalnız OSB mahyası (mühendisin Excel hesap motoru gibi), metal mahya ve damlalık yok
+            if c["dizilim"].get("satirlar"):
+                raise SystemExit("Girdide shingle için kaplama dizilimi var; shingle levha değildir. Girdi o kaplamayla yeniden üretilmeli (tanımda `cati.kaplama`).")
+            b = deg(k, "shingle_adet_m2")
+            ekle("Çatı kaplamaları", "Shingle", f"adet / {tr(b, 0)} m²", tavan(yuzey / b), yuzey, formul=f"çatı yüzeyi ÷ {tr(b, 0)}",
+                 durum=k["genel_osbli_kaplama"]["durum"],
+                 not_=f"{d100}: membranın üstünde; 43 m² gerçek listede 7 (52,5 m² ÷ 8). Damlalık yazılmaz (Lokman, 4 Ekim 2026 15:18; kart 15 Kasım 07:14:40)")
+            mahyalar = ("OSB mahyası",)
         for ad in mahyalar:
-            ekle("Çatı kaplamaları", ad, "L 2800", tavan(c["mahya_hatti_m"] / (pm - bm)), c["mahya_hatti_m"], birim="m", formul=mahya_formul, durum=mahya_durum, not_=mahya_notu)
+            ekle("Çatı kaplamaları", ad, "L 2800", tavan(c["mahya_hatti_m"] / (pm - bm)), c["mahya_hatti_m"], birim="m", formul=mahya_formul, durum=mahya_durum,
+                 not_=(f"{d100}: shingle çatıda mahyada yalnız OSB mahyası (mühendisin Excel hesap motoru gibi); metal mahya yok"
+                       if kaplama == "osb_shingle" else mahya_notu))
     elif c.get("dizilim") and kaplama not in PANEL_KAPLAMALARI:
         # genel model: kodu yazılmamış ya da kural setinde açılmamış kaplama; 0.4 hattının dikdörtgen kırma çatı formülleri bu girdiye uymaz
         raise SystemExit(f"Genel model {KAPLAMA_ADI.get(kaplama, kaplama)} kaplamasını bu kural setiyle hesaplamaz "
