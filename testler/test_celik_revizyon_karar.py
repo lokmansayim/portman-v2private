@@ -1038,3 +1038,26 @@ def test_hakem12_celik_acik_secim_soruya_donmez(s, metin, kod):
     cati_seti(s)
     k = s.yaz(metin)
     assert k.eylem == "is_emri" and k.revizyon == 2 and s.plan["yapi"]["kod"] == kod, k.mesaj
+
+
+# ── İE-42 · geometri hakemi on üçüncü tur (15 Kasım 2026 sabah) ──────────────────────────────────────────────────────────────────────
+@pytest.mark.parametrize("metin", ["1 olsun, onaylamaktan vazgeçtik", "Evin kendi çatısı olsun, onaylamaktan vazgeçtik",
+                                   "Ç8801 olsun, onaylamaktan vazgeçtik", "K olsun, onaylamaktan vazgeçtik", "1 olsun, K'nın çatısı mı olsa?",
+                                   "1 olsun, Ç8801-K'nın çatısı mı olsa?", "Evin kendi çatısı olsun, L'nin çatısı mı olsa?",
+                                   "Ç8801 olsun, Ç8801-L'nin çatısı mı olsa?", "K'nın çatısı mı olsun, müşteri Ayşe Kaya", "K olsun, Fiyat Uygunsa",
+                                   "K olsun, ödeme bitince gönderin"])
+def test_hakem13_celik_ilgi_ekli_secim_sorusu_ve_cekince_sorulur(s, metin):
+    """Yüksek-1, Yüksek-2, Orta-2, Orta-4 çelikte: on ikinci tur kodunda "onaylamaktan vazgeçtik" ve ilgi ekli seçim sorusu onay
+    kaydediyordu (plan teknik kontrole gidiyordu) ya da sorulan çatı çiziliyordu."""
+    cati_seti(s)
+    k = s.yaz(metin)
+    assert k.eylem == "sor" and k.mesaj.startswith("Hangi çatı olsun?"), k.mesaj
+    assert s.plan["revizyon"] == 1 and s.k.d["secenek_seti"]["durum"] == "acik" and not s.k.d.get("onaylanan"), k.mesaj
+
+
+@pytest.mark.parametrize("metin", ["Ç8801 olsun, onaylıyoruz başka değişiklik istemiyoruz", "1 olsun, onaylıyoruz başka değişiklik istemiyoruz"])
+def test_hakem13_celik_olumlu_onay_soruya_donmez(s, metin):
+    """Orta-1 çelikte: "başka değişiklik istemiyoruz" onayı olumsuzlamaz."""
+    cati_seti(s)
+    k = s.yaz(metin)
+    assert k.gerekce == K.PLAN_ONAYI and k.revizyon == 1, k.mesaj
