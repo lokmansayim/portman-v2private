@@ -1696,3 +1696,65 @@ def test_bk29_tur9_kod_ve_musteri_adi_cati_setinde(tmp_path, metin, kod, al):
     assert s.k.d.get("cati_secilen") == kod and (s.k.d["taslak"].get("musteri") or {}).get("ad") == "Ayşe Kaya"
     k = _onayla(s)
     assert k.gerekce == K.PLAN_ONAYI and k.revizyon == 2, k.mesaj
+
+
+# ── İE-42 · geometri hakemi on ikinci tur (15 Kasım 2026 sabaha karşı) ─────────────────────────────────────────────────────────────
+@pytest.mark.parametrize("metin", [
+    "1 olsun, onaylayamadık", "1 olsun, onaylayamayız", "1 olsun, müşteri onaylayamadı", "1 olsun, onaylatmadık", "1 olsun, müşteri onaylatmadı",
+    "1 olsun, onaylatamadık", "1 olsun, onaylatamıyoruz", "1 olsun, onaylanamaz", "1 olsun, onaylamak yok", "1 olsun, onaylamak istemiyoruz",
+    "Evin kendi çatısı olsun, onaylatmadık", "1 olsun, onay yok", "1 olsun, onayımız yok", "1 olsun, onay daha yok",
+    "1 olsun, müşterinin onayı yok", "1 olsun, müşteri onay vermedi", "1 olsun, onay alamadık", "1 olsun, onayı henüz gelmedi",
+    "1 olsun, netleşince gönderin", "1 olsun, netleşince işleme alın", "1 olsun, sonra netleşince işleme alın",
+    "Evin kendi çatısı olsun, netleşince gönderin", "2 olsun, netleşince gönderin", "3 olsun, avans gelince çizin",
+    "2 olsun, kapora yatınca gönderin", "2 olsun, ödeme yapılınca çizin", "2 olsun, sözleşme imzalanınca gönderin",
+    "2 olsun, kredi çıkınca gönderin", "2 olsun, stok varsa gönderin", "2 olsun, müşteri onayı varsa çizin", "2 olsun, imkan varsa çizin",
+    "1 olsun, itiraz yoksa gönderin", "1 olsun, mümkünse", "PA-06-K olsun, müşteri İsterse"])
+def test_hakem12_olumsuz_onay_ve_bagli_secim_sorulur(tmp_path, metin):
+    """Y-1, Y-2, Y-3, O-4, O-5: onay kökünün olumsuz biçimi ("onaylayamadık", "onaylatmadık", "onaylanamaz"), onaydan sonra "yok" ya da
+    olumsuz fiil ("onay yok", "onaylamak istemiyoruz", "onay vermedi"), emirle biten "netleşince" ve müşterinin ya da paranın zamanı
+    ("kapora yatınca gönderin"), sorun sözü olmayan "varsa" + emir ("stok varsa gönderin") sorulur. Tur 11 kodunda çoğu onay diye
+    kaydediliyordu ya da başka çatıyı r02 çiziyordu."""
+    s, _ = _cati_seti(tmp_path)
+    _soruldu(s, s.yaz(metin, niyet="diger"))
+    _soruldu(s, _onayla(s))                                    # Onayla da seçim değildir: soru yinelenir, onay kaydedilmez
+
+
+@pytest.mark.parametrize("metin, kod, ad", [
+    ("PA-06-K olsun, müşteri Nursen Kaya", "PA06K", "Nursen Kaya"), ("PA-06-K olsun, müşteri Ersan Yılmaz", "PA06K", "Ersan Yılmaz"),
+    ("PA-06-K olsun müşteri Ersen Kaya", "PA06K", "Ersen Kaya"), ("PA-06-K olsun, müşteri Nurşen Arslan", "PA06K", "Nurşen Arslan")])
+def test_hakem12_kod_ve_rsen_adli_musteri_cati_setinde(tmp_path, metin, kod, ad):
+    """O-1: "-rsen/-rsan" ile biten müşteri adı ("Nursen", "Ersan") koşul eki değildir: BK-29 tur 9 kuralı çalışır, çatı seçilir, ad
+    plana girer, plan r02 (tur 11 kodunda soruluyor, ad "öteki istek" diye düşüyordu)."""
+    s, _ = _cati_seti(tmp_path)
+    k = s.yaz(metin, niyet="diger")
+    assert k.eylem == "is_emri" and k.revizyon == 2 and k.is_emri["talep"]["kaynak"] == kod, k.mesaj
+    assert s.k.d.get("cati_secilen") == kod and (s.k.d["taslak"].get("musteri") or {}).get("ad") == ad, k.mesaj
+
+
+@pytest.mark.parametrize("metin, kod, al", [
+    ("Neyse, 2 olsun", "PA06K", {}), ("2 olsun, ev Fransa'ya gidecek", "PA06K", {}), ("2 olsun, müşteri Fransa'da", "PA06K", {}),
+    ("2 olsun, mümkünse yatak odası 2 penceresi 120x180 olsun", "PA06K", dict(pencereler=[pen("yatak odası 2", "120x180")])),
+    ("2 olsun, yatak odası 2 penceresi 120x180 olsun, müşteri Fransa'da", "PA06K", dict(pencereler=[pen("yatak odası 2", "120x180")])),
+    ("2 olsun, yatak odası 2 penceresi 120x180 olsun, uzunca olsun", "PA06K", dict(pencereler=[pen("yatak odası 2", "120x180")])),
+    ("2 olsun, yatak odası 2 penceresi 120x180 olsun, kapıdan girildiğinde solda kalsın", "PA06K",
+     dict(pencereler=[pen("yatak odası 2", "120x180")])),
+    ("2 olsun, 2'nin fiyatı ne olacak?", "PA06K", {}), ("K olsun, K'nın fiyatı ne olacak?", "PA06K", {}),
+    ("PA-06-K olsun. PA-06-K'nın fiyatı ne kadar olacak?", "PA06K", {}), ("2 olsun. 2 numaranın montajı kaç gün olacak?", "PA06K", {}),
+    ("2 olsun, çizim bitince gönderin", "PA06K", {}), ("2 olsun, müsait olunca gönderin", "PA06K", {})])
+def test_hakem12_acik_secim_soruya_donmez(tmp_path, metin, kod, al):
+    """O-1, O-2, O-3: "Neyse", yer adı ("Fransa"), planın bir yerini anan istekteki koşul ve zaman ("mümkünse yatak odası 2 penceresi …",
+    "kapıdan girildiğinde …", "uzunca"), seçilen çatının fiyat ya da süre sorusu ("2'nin fiyatı ne olacak?") ve bizim işimizin zamanı
+    ("çizim bitince gönderin") açık seçimi soruya çevirmez (tur 11 kodunda soruluyordu)."""
+    s, _ = _cati_seti(tmp_path)
+    k = s.yaz(metin, niyet="diger", **al)
+    assert k.eylem == "is_emri" and k.revizyon == 2 and k.is_emri["talep"]["kaynak"] == kod, k.mesaj
+    assert s.k.d.get("cati_secilen") == kod
+
+
+@pytest.mark.parametrize("metin", ["1 olsun, 1'in teslimi ne zaman olacak?", "1 olsun, onaylıyoruz, sorun yok", "1 olsun, onaylıyoruz, değişiklik yok",
+                                   "1 olsun, onayımızdır, başka isteğimiz yok", "1 olsun, müşteri onaylamış", "1 olsun, onaylamak istiyoruz"])
+def test_hakem12_acik_onay_soruya_donmez(tmp_path, metin):
+    """O-2 ve Y-1'in öbür yanı: evin kendi çatısının süre sorusu ve olumlu onay ("onaylamış", "onaylıyoruz, sorun yok") onaydır."""
+    s, _ = _cati_seti(tmp_path)
+    k = s.yaz(metin, niyet="diger")
+    assert k.gerekce == K.PLAN_ONAYI and k.revizyon == 1, k.mesaj
