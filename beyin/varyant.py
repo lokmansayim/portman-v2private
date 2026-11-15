@@ -160,7 +160,15 @@ def _norm(s: str) -> str:
 #   {"op": "dis_karkas_140"}                                          dış duvar karkası 140 (kurallar/model/secenekler/dis_karkas_140.json)
 # İE-23 PR-2a (banka germe; ayar `banka_germe.acik` arkasında okunur):
 #   {"op": "oda_buyut" | "oda_kucult", "mahal": "Yatak Odası 1", "yon": "K", "cm": 50}   dış kenar: ev o yöne uzar; iç kenar: duvar kayar
+# İE-20 PR-11 (D-97; Lokman, kart 15 Kasım 2026 04:44:37 UTC "Plana ve listeye işlensin"):
+#   {"op": "cati_kaplamasi", "kaplama": "sandvic_panel" | "osb_kiremit" | "osb_shingle"}   çatı kaplaması: tanımın `cati.kaplama`'sı; geometri değişmez
 KARKAS_140_CM = 14.0
+# Genel motorun hesapladığı çatı kaplamaları (`motor/genel/girdi_genel.py`). İki liste birbirini
+# `testler/test_cati_kaplamasi_islemi.py`'de denetler: Motor bir kaplamayı öğrenince burası da genişler. Kiremit desen sac + OSB + nem
+# bariyeri 15 Kasım 2026'da girdi (BK-33, D-98; kural kitabı `genel_osbli_kaplama`), OSB + membran + shingle da (BK-33, D-100); çelikte trapez sac yok (D-102).
+CIZILEN_KAPLAMALAR = ("tek_kat_panel", "sandvic_panel", "osb_kiremit", "osb_shingle")
+# Bayiye yazılan ad kitabın adından farklıysa: formdaki seçeneğin adı (`kanal/talep_formu.C_KAPLAMA`; test ikisini kıyaslar).
+KAPLAMA_ADI = {"osb_kiremit": "kiremit desen sac + OSB", "osb_shingle": "OSB + membran + shingle"}
 LENTO_VARSAYILAN = 70          # bilgi: Ç8801/Ç8201'de pencere üstü 270 − 70 = 200; pencere_olcu üst kotu tanımdan korur
 _TOL = 0.01
 PENCERE_EN = (30, 400)        # cm; bayinin söyleyebileceği makul aralık (daha büyüğü otomatik yapılmaz, mühendise)
@@ -190,6 +198,8 @@ def tanim_uygula(t: dict, d: dict) -> dict:
         t2 = pencere_olcu(t, d.get("aciklik"), d.get("en"), d.get("yuk"))
     elif op == "cati_varyanti":
         return cati_varyanti(t, d.get("kod"))
+    elif op == "cati_kaplamasi":                             # geometri değişmez: açıklık denetimi gerekmez
+        return cati_kaplamasi(t, d.get("kaplama"))
     elif op == "dis_karkas_140":
         t2 = dis_karkas_140(t)
     elif op in ("oda_buyut", "oda_kucult"):                  # İE-23 PR-2a: germe / iç duvar kaydırma; hakemi kendi içinde (tanim_germe.denetle)
@@ -272,6 +282,42 @@ def cati_varyanti(t: dict, kod: str | None) -> dict:
     if _kod_norm(t.get("kod")) != _kod_norm(kod):
         raise VaryantHatasi(f"çatı varyantı {kod} bu tanıma uygulanamaz (tanım {t.get('kod')})")
     return copy.deepcopy(t)
+
+
+def kaplama_oku(t: dict) -> str:
+    """Tanımın çatı kaplaması (kural kitabının `cati_kaplama` anahtarı); tanım yazmıyorsa kitabın baz paketi (çelikte tek kat panel).
+    Genel motorun okuduğu değerle aynı (`girdi_genel`, `sablon_pafta`, `yukleme`)."""
+    from motor.genel import kural
+    return (t.get("cati") or {}).get("kaplama") or kural.oku()["baz_paket_cati_kaplamasi"]["deger"]
+
+
+def kaplama_adi(kaplama: str) -> str:
+    """Kaplamanın bayiye yazılan adı: formdaki seçeneğin adı (`KAPLAMA_ADI`), yoksa kural kitabındaki ad küçük harfle ("sandviç panel",
+    "tek kat panel")."""
+    return KAPLAMA_ADI[kaplama] if kaplama in KAPLAMA_ADI else kaplama_kitap_adi(kaplama).lower()
+
+
+def kaplama_kitap_adi(kaplama: str) -> str:
+    """Kaplamanın kural kitabındaki adı: pafta tablosunun "Çatı Kaplaması" satırı bu adı yazar ("OSB + Nem Bariyeri + Kiremit Desen Sac")."""
+    from motor.genel import kural
+    return str(kural.oku()["cati_kaplama"]["deger"].get(kaplama, kaplama))
+
+
+def cati_kaplamasi(t: dict, kaplama: str | None) -> dict:
+    """Çatı kaplaması (İE-20 PR-11, D-97): tanımın `cati.kaplama`'sı değişir; duvar, açıklık, çatı biçimi ve ölçü değişmez. Genel motor
+    pafta tablosunu ("Çatı Kaplaması") ve yükleme listesini bu alandan üretir. Motorun hesaplamadığı kaplama VaryantHatasi'dır (çizim
+    düşmez; kural katmanı seçimi özel isteğe yazar ve bayiye söyler)."""
+    if kaplama not in CIZILEN_KAPLAMALAR:
+        raise VaryantHatasi(f"bu çatı kaplaması çizime işlenemiyor: {kaplama}")
+    if not isinstance(t.get("cati"), dict):
+        raise VaryantHatasi("tanımda çatı yok")
+    t2 = copy.deepcopy(t)
+    if kaplama_oku(t2) == kaplama:
+        return t2
+    t2["cati"]["kaplama"] = kaplama
+    t2["cati"]["kaplama_kaynak"] = "bayinin seçimi (çelik talep formu)"
+    _kur(t2)
+    return t2
 
 
 def dis_karkas_140(t: dict) -> dict:
