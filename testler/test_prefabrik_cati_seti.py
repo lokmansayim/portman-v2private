@@ -2004,3 +2004,69 @@ def test_hakem16_acik_onay_soruya_donmez(tmp_path, metin):
     s, _ = _cati_seti(tmp_path)
     k = s.yaz(metin, niyet="diger")
     assert k.gerekce == K.PLAN_ONAYI and k.revizyon == 1, k.mesaj
+
+
+# ── İE-42 · geometri hakemi on yedinci tur (15 Kasım 2026 sabah) ───────────────────────────────────────────────────────────────────────
+_KAPI_ = "2 olsun, {} kapıdan girince soldaki yatak odası 2 penceresi 120x180 olsun"
+
+
+@pytest.mark.parametrize("metin, al", [
+    ("1 olsun, hangisi olsun?", {}), ("1 olsun, en iyisi hangisi?", {}), ("1 olsun, hangisi iyi?", {}),
+    ("1 olsun, başka çatı daha mı iyi?", {}), ("1 olsun, başka çatı mı güzel?", {}), ("2 olsun, hangisi olsun?", {}),
+    ("2 olsun, hangisini önerirsiniz?", {}), ("2 olsun, sizce hangisi?", {}), ("2 olsun, hangisini tavsiye edersiniz?", {}),
+    ("2 olsun, diğer çatı daha mı iyi?", {}), ("2 olsun, öbür çatı daha mı iyi?", {}), ("2 olsun, diğer ikisi daha mı iyi?", {}),
+    ("2 olsun, ilki salona daha mı uygun?", {}), ("2 olsun, hangisi verandaya daha çok yakışır?", {}),
+    ("2 olsun, hangi çatı daha iyi?", {}),
+    ("2 olsun, kararı müşteri verecek", {}), ("2 olsun, kararı müşteri verir", {}), ("2 olsun, kararı müşteri versin", {}),
+    ("2 olsun, son kararı eşim verecek", {}), ("2 olsun, son söz müşterinin", {}), ("2 olsun, karar müşteriye kaldı", {}),
+    ("2 olsun, kararı müşteriye bıraktık", {}), ("2 olsun, karar tamamen müşteriye ait", {}),
+    ("2 olsun, karar yine müşterinin", {}), ("2 olsun, kararımız yoktur", {}), ("1 olsun, kararı müşteri verecek", {}),
+    ("2 olsun, karar müşterinin onayına kaldı", {}), ("2 olsun, fotoğrafa bakarak", {}),
+    ("1 olsun, 2 katalogda daha mı iyi görünüyor?", {}), ("2 olsun, 3 kışın daha mı iyi?", {}),
+    ("2 olsun, salona girince görürüz", {}), ("2 olsun, salona girince kontrol ederiz", {}),
+    ("2 olsun, odaya girince netlik kazanır", {}), ("2 olsun, salona girince belli olur", {}),
+    (_Y2_.format("salona girince görürüz,"), _Y2),
+    ("2 olsun, fiyata göre daha sonra konuşuruz", {}), ("2 olsun, fiyata göre en geç yarın söyleriz", {}),
+    ("2 olsun, fiyata göre en son karar", {}), ("2 olsun, fiyata göre daha uygun olabilir", {}),
+    ("2 olsun, bütçeye göre en uygun olanı seçeriz", {}),
+    ("2 olsun, yatak odası 2 penceresi paranın gelmesine göre 120x180 olsun", _Y2)])
+def test_hakem17_tavsiye_karar_birakma_ve_erteleme_sorulur(tmp_path, metin, al):
+    """Y-A' (tur 14 kodundan beri): soru eki ya da "daha" taşımayan tavsiye sorusu ("hangisi olsun?", "en iyisi hangisi?") ve çatıyı
+    anan sıfat ("başka çatı", "diğer ikisi") onay ya da çatı kaydediyordu. Y-B': kararı başkasına bırakan sözün öteki biçimleri
+    ("kararı müşteri verecek", "müşteriye kaldı", "son söz müşterinin"). Birim öneki "katalog"u ve "kışın"ı yutuyordu. O-K ("görürüz",
+    "kontrol ederiz") ve O-L ("fiyata göre daha sonra", "en uygun olanı seçeriz") onaylanabilir r02 çizdiriyordu. Seçim sorulur."""
+    s, _ = _cati_seti(tmp_path)
+    _soruldu(s, s.yaz(metin, niyet="diger", **al))
+
+
+@pytest.mark.parametrize("metin, al", [
+    (_KAPI_.format("yalnız"), _Y2), (_KAPI_.format("sadece"), _Y2), (_KAPI_.format("abi"), _Y2), (_KAPI_.format("hocam"), _Y2),
+    (_KAPI_.format("şimdi"), _Y2), (_KAPI_.format("ek olarak"), _Y2), (_KAPI_.format("tek isteğimiz"), _Y2),
+    (_KAPI_.format("sürgülü"), _Y2), (_KAPI_.format("evin girişinden ana"), _Y2), (_KAPI_.format("2 numaralı"), _Y2),
+    ("2 olsun, kapıdan girince soldaki yatak odası 2 penceresini 120x180 yazalım", _Y2),
+    ("2 olsun, kapıdan girince soldaki yatak odası 2 penceresini 120x180 verelim", _Y2),
+    ("2 olsun, kapıdan girince soldaki yatak odası 2 penceresini 120x180 seçelim", _Y2),
+    ("2 olsun, yatak odası 2 penceresi manzaraya göre 120x180 olsun", _Y2),
+    ("2 olsun, yatak odası 2 penceresi eğime göre 120x180 olsun", _Y2),
+    ("2 olsun, ilk taksit daha mı az?", {}), ("2 olsun, birinci kalite malzeme mi?", {}), ("2 olsun, ilk ödeme mi daha fazla?", {}),
+    ("2 olsun, öteki evin teslimi daha mı geç?", {}), ("2 olsun, kararımız sonunda netleşti", {}),
+    ("2 olsun, karar müşterinin onayıyla verildi", {}), ("2 olsun, karar konusunda netiz", {}),
+    ("2 olsun, bütçeye bağlı olarak 2'yi seçtik", {}), ("2 olsun, teslim 1,5 ay mı?", {}), ("2 olsun, teslim 3 iş günü mü?", {})])
+def test_hakem17_acik_secim_soruya_donmez(tmp_path, metin, al):
+    """O-J, O-M, O-N, O-O, O-B, O-A (tur 16 daraltmalarının bedeli): hitap, dolgu ve kapının türü ("abi", "yalnız", "sürgülü kapıdan"),
+    isteğin kendi kipi ("120x180 yazalım"), evin özelliğine göre istek ("manzaraya göre 120x180"), sıfat sıra sözü ("ilk taksit"),
+    olumlu karar sözü ("kararımız sonunda netleşti") ve sayı aralığı açık seçimi soruya çevirmez: r02."""
+    s, _ = _cati_seti(tmp_path)
+    k = s.yaz(metin, niyet="diger", **al)
+    assert k.eylem == "is_emri" and k.revizyon == 2 and k.is_emri["talep"]["kaynak"] == "PA06K", k.mesaj
+    assert s.k.d.get("cati_secilen") == "PA06K"
+
+
+@pytest.mark.parametrize("metin", ["1 olsun, teslim 2-3 hafta mı?", "1 olsun, teslim 2,5 ay mı?", "1 olsun, teslim 2 ila 3 hafta mı?",
+                                   "1 olsun, teslim 2 veya 3 hafta mı?", "PA-06 olsun, teslim 2-3 hafta mı?",
+                                   "Evin kendi çatısı olsun, teslim 2-3 hafta mı?"])
+def test_hakem17_acik_onay_soruya_donmez(tmp_path, metin):
+    """O-A kalanı: sayı aralığı ve ondalık ("2-3 hafta", "2,5 ay", "2 ila 3 hafta") setin numarası değildir; evin çatısı r01'i onaylar."""
+    s, _ = _cati_seti(tmp_path)
+    k = s.yaz(metin, niyet="diger")
+    assert k.gerekce == K.PLAN_ONAYI and k.revizyon == 1, k.mesaj

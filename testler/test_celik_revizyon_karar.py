@@ -1122,3 +1122,22 @@ def test_hakem16_celik_birimli_sayi_secimi_bozmaz(s):
     cati_seti(s)
     k = s.yaz("Ç8801 olsun, 3 haftada mı teslim?")
     assert k.gerekce == K.PLAN_ONAYI and k.revizyon == 1, k.mesaj
+
+
+# ── İE-42 · geometri hakemi on yedinci tur (15 Kasım 2026 sabah) ───────────────────────────────────────────────────────────────────────
+@pytest.mark.parametrize("metin", ["K olsun, en iyisi hangisi?", "K olsun, hangisi iyi?", "K olsun, diğer çatı daha mı iyi?",
+                                   "1 olsun, hangisi olsun?", "K olsun, kararı müşteri verecek"])
+def test_hakem17_celik_tavsiye_ve_karar_birakma_sorulur(s, metin):
+    """Y-A', Y-B' çelikte: setten çatı kaydediliyor ya da onay mühendis kontrolüne gidiyordu."""
+    cati_seti(s)
+    k = s.yaz(metin)
+    assert k.eylem == "sor" and k.mesaj.startswith("Hangi çatı olsun?"), k.mesaj
+    assert s.plan["revizyon"] == 1 and s.k.d["secenek_seti"]["durum"] == "acik" and not s.k.d.get("onaylanan"), k.mesaj
+
+
+@pytest.mark.parametrize("metin", ["1 olsun, teslim 2-3 hafta mı?", "Ç8801 olsun, teslim 2,5 ay mı?"])
+def test_hakem17_celik_sayi_araligi_onayi_bozmaz(s, metin):
+    """O-A kalanı çelikte: "2-3 hafta", "2,5 ay" setin numarası değildir; evin çatısı r01'i onaylar."""
+    cati_seti(s)
+    k = s.yaz(metin)
+    assert k.gerekce == K.PLAN_ONAYI and k.revizyon == 1, k.mesaj
