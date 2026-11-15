@@ -549,6 +549,7 @@ def _karar_ver(talep: Talep, k: Konusma, bayi: dict | None, katalog: Katalog, me
         if yp is not None:
             t, yp_komut = yp
     t = _bayi_adi_musteri_degil(k, t, bayi, metin)   # BK-29 tur 7: LLM'in bağlamdan aldığı bayi adı müşteri adı değildir (K18)
+    t = _kaplama_cumlesini_talebe_yaz(k, t, metin)   # İE-20 PR-11 eki (canlı K7): formdan sonra yazılan başka çatı kaplaması düşmez
     k.birlestir(t.model_dump())
     if yp_komut:
         k.d["taslak"]["yarim_pano"] = list(k.d["taslak"].get("yarim_pano") or []) + yp_komut
@@ -1471,7 +1472,8 @@ def _yeni_plan_sorusu(k: Konusma, metin: str, gerekce: str = "yeni plan: değiş
     return _bitir(k, Karar(eylem="sor", soru_alani="yeni_plan_degisiklik", mesaj=metin, gerekce=gerekce))
 
 
-def _celik_degisiklikler(k: Konusma, katalog: Katalog, aday: dict, t: dict, onceki: list[dict], ayni_proje: bool) -> tuple[list[dict], set[str]] | Karar:
+def _celik_degisiklikler(k: Konusma, katalog: Katalog, aday: dict, t: dict, onceki: list[dict], ayni_proje: bool,
+                         kap_cumle: list[str] | tuple = ()) -> tuple[list[dict], set[str]] | Karar:
     """Bu mesajın (ve set sunulurken saklanan isteğin) çelik değişiklikleri, bayinin sözünden cümle cümle (K18). Dönen: ([op, …], okunan
     türler) ya da sorulacak/yönlendirilecek Karar. Sıra (kapanış incelemesi 13.10): önce desteklenmeyen LLM varyantı ve revizyonda tanınmayan
     cümle yönlendirilir (soru sormadan: sorulan soru öteki isteği düşürmesin), sonra ekleme/kaldırma, sonra revizyonda olumsuz ya da
@@ -1529,6 +1531,8 @@ def _celik_degisiklikler(k: Konusma, katalog: Katalog, aday: dict, t: dict, once
         if tur == "cati_degistir":
             if r["cati"]:
                 continue                                        # çatı cümlesi okundu (katalog/K/L); `_celik_dali` seçti
+            if kap_cumle and not any((p.get("isaret") or {}).get("cati") or (p.get("isaret") or {}).get("cati_sekil") for p in r["parcalar"]):
+                continue                                        # LLM kaplama cümlesini çatı değişikliği okudu (canlı K8): kaplama kuralı işledi
             return _bitir(k, Karar(eylem="yonlendir", gerekce=f"çelikte varyant henüz desteklenmiyor: {tur}",
                                     mesaj=f"\"{v.get('aciklama', '')}\" değişikliği çelik modelde otomatik yapılamıyor"
                                           + ("; çatı için katalog çatısı, K ya da L seçilebilir. " if kat_aday.get("varyantlar") else ". ") + YONLENDIRME))
@@ -1536,7 +1540,7 @@ def _celik_degisiklikler(k: Konusma, katalog: Katalog, aday: dict, t: dict, once
                                 mesaj=f"\"{v.get('aciklama', '')}\" değişikliği çelik modelde henüz otomatik yapılamıyor. " + YONLENDIRME))
     # 2) revizyonda tanınmayan içerik: bina özelliği (renk, malzeme) değilse yönlendirme (K21: yanlış uygulanmaz, sessizce düşmez)
     if ayni_proje:
-        baska = [p["metin"] for p in r["parcalar"] if p["tur"] == "baska" and not _bilgi_cumlesi(p, llm)]
+        baska = [p["metin"] for p in r["parcalar"] if p["tur"] == "baska" and not _bilgi_cumlesi(p, llm) and p["metin"] not in kap_cumle]
         if baska:
             # gerekçe günlüğe yazılır (vps/agent.py): bayinin cümlesi yalnız bayiye giden mesajda (mesaj metni günlüğe yazılmaz)
             return _bitir(k, Karar(eylem="yonlendir", gerekce="çelik revizyonunda otomatik yapılamayan istek (cümle bayiye söylendi)",
@@ -1753,6 +1757,67 @@ def _kaplama_satiri_mi(anahtar) -> bool:
         and not any(w.startswith(("renk", "reng") + _KAP_CATI_PARCASI) for w in ws)
 
 
+def _baska_kaplama_sozu(soz: str, kap: str, adlar=()) -> bool:
+    """Serbest söz (özel istek ya da bayinin cümlesi) `kap` dışında bir çatı kaplaması mı anıyor? Çatıdan söz etmeyen cephe, duvar, zemin
+    sözü sayılmaz ("dış cephe trapez sac"); "çatı" demeyen sözde yalnız çatıya özgü malzeme sayılır ("kiremit olsun")."""
+    cati = _kaplama_istegi_mi(soz)
+    if not cati and any(w.startswith(_KAP_BASKA_YER) for w in _kap_sozcukleri(soz)):
+        return False
+    return _kaplama_kiyasi(soz, kap, adlar, baglam=cati) == "baska"
+
+
+def _mesajin_kaplama_cumleleri(k: Konusma, aday: dict, kap: str, adlar=()) -> list[str]:
+    """Bayinin BU mesajında, çizime işlenmiş kaplamadan (`kap`) başka bir çatı kaplaması isteyen cümleler (K18: kural bayinin kendi
+    sözünü okur; LLM cümleyi özellik satırına, özel isteğe ya da çatı değişikliğine yazmış olabilir, hiç yazmamış da olabilir). Cümle
+    `celik_okuma` ile bölünür. Yalnız yalın kaplama cümlesi sayılır: olumsuz ve soru biçimi ("… olabilir mi?"), oda, pencere, dış 140,
+    ekleme ve çatı şekli işareti taşıyan cümle sayılmaz (onlar bugünkü yoldan sorulur ya da yönlendirilir; K21)."""
+    metin = k.d.get("son_metin") or ""
+    if not metin.strip():
+        return []
+    try:
+        t0 = celik.tanim_oku(aday)
+        try:
+            y = varyant._kur(t0)
+        except varyant.VaryantHatasi:
+            y = None
+        parcalar = CO.oku(metin, t0, aday, y=y)["parcalar"]
+    except Exception:                                          # okuma düşerse kural susar: bugünkü yol (yönlendirme) işler
+        return []
+    return [p["metin"] for p in parcalar
+            if p["tur"] == "baska" and not p.get("olumsuz") and not p.get("odalar") and not any((p.get("isaret") or {}).values())
+            and _baska_kaplama_sozu(p["metin"], kap, adlar)]
+
+
+def _kaplama_cumlesini_talebe_yaz(k: Konusma, t: Talep, metin: str | None) -> Talep:
+    """İE-20 PR-11 eki (canlı deneme K7, 15 Kasım 2026, v2026.11.15d). Çelik formda çatı kaplaması seçildi, plan henüz çizilmedi; bayi
+    sohbette başka bir çatı kaplaması yazdı ("çatı kiremit olsun"). Canlıda LLM cümleyi hiçbir alana yazmadı: plan form seçimiyle çizildi,
+    söz talebe yazılmadı, bayiye söylenmedi (sessiz düşme). Kural bayinin kendi cümlesini okur (K18):
+    - LLM bu mesajda kaplamayı bir özellik satırına ya da özel isteğe yazmadıysa cümle özel isteğe yazılır. İlk planda `_kaplama_sozleri`
+      onu bayinin son sözü sayar: form seçimi çizime işlenmez, bayiye söylenir (`_celik_is_emri_uret`).
+    - LLM cümleyi çatı değişikliği (`cati_degistir`) okuduysa ve mesajda çatı seçimi (katalog, K, L) ya da çatı şekli sözü yoksa o
+      varyant düşer: kaplama isteği çatı şekli isteği değildir, plan onun yüzünden geri çevrilmez.
+    Açık plan varken (revizyon) dokunulmaz: zarftaki kaplama işlemini `_celik_is_emri_uret` bayinin cümlesiyle çıkarır. Form mesajının
+    kendisi ve formda kaplama seçilmemiş talep bugünkü yoldan gider."""
+    ts = k.d["taslak"]
+    kap = ts.get("form_kaplama")
+    if getattr(k, "celik_formu", None) is not None or ts.get("form") != "celik" or not kap or not (metin or "").strip() or _acik_plan_var(k):
+        return t
+    adlar = (ts.get("form_kaplama_yazi"),)
+    cumleler = [c.strip(" ,") for c in re.split(r"[\n.!?;]+", metin) if c.strip(" ,") and _baska_kaplama_sozu(c, kap, adlar)]
+    if not cumleler:
+        return t
+    degisen: dict = {}
+    bu = {"bina_ozellikleri": dict(t.bina_ozellikleri or {}), "ozel_istekler": list(t.ozel_istekler or []), "form_kaplama_yazi": adlar[0]}
+    if not _kaplama_sozleri(bu, kap, hepsi=True)[1]:           # LLM kaplamayı hiçbir alana yazmadı: bayinin cümlesi talebe
+        degisen["ozel_istekler"] = list(t.ozel_istekler or []) + [c for c in cumleler if c not in (t.ozel_istekler or [])]
+        k.not_dus("kural", "çelik formu: bayinin yazdığı başka çatı kaplaması özel isteğe yazıldı (LLM alan doldurmadı)")
+    sekil = CO.cati_secenekleri(metin) or any(CO._CATI_GEO_T.fullmatch(w) for w in CO.norm(metin).split())
+    if not sekil and any(v.tur == "cati_degistir" for v in t.varyantlar):
+        degisen["varyantlar"] = [v for v in t.varyantlar if v.tur != "cati_degistir"]
+        k.not_dus("kural", "çelik formu: kaplama cümlesinden okunan çatı değişikliği düştü (çatı seçimi ya da şekli yok)")
+    return t.model_copy(update=degisen) if degisen else t
+
+
 def _kaplama_sozleri(ts: dict, kap: str, hepsi: bool = False) -> tuple[list[str], list[str]]:
     """Taslakta çizime işlenen kaplamayla (`kap`) ilgili sözler: (tabloda zaten görünen "ayni" satırların adları, bayinin yazdığı başka
     kaplamalar). Özellik satırı "ad: değer" biçiminde, serbest istek kendi metniyle döner. Tablonun öteki satırlarına (dış duvar, renk)
@@ -1774,12 +1839,7 @@ def _kaplama_sozleri(ts: dict, kap: str, hepsi: bool = False) -> tuple[list[str]
         elif s == "baska":
             baska.append(f"{a}: {v}")
     for x in ts.get("ozel_istekler") or []:
-        if not isinstance(x, str):
-            continue
-        ws, cati = _kap_sozcukleri(x), _kaplama_istegi_mi(x)
-        if not cati and any(w.startswith(_KAP_BASKA_YER) for w in ws):
-            continue                                           # "dış cephe trapez sac": çatı değil
-        if _kaplama_kiyasi(x, kap, adlar, baglam=cati) == "baska":
+        if isinstance(x, str) and _baska_kaplama_sozu(x, kap, adlar):
             baska.append(x)
     if not hepsi:
         once = set(ts.get("form_kaplama_once") or [])
@@ -1803,8 +1863,17 @@ def _celik_is_emri_uret(k: Konusma, bayi: dict, katalog: Katalog, aday: dict, ts
     # İE-20 PR-11 (D-97, geometri hakemi): formdan çizilmiş kaplama zarfta dururken bayi revizyonda başka bir kaplama yazarsa işlem
     # zarftan çıkar (plan modelin kendi kaplamasına döner), yazdığı kaplama özel isteğe gider, bayiye söylenir. Liste bayinin son sözüne
     # karşın eski seçimi saymaz. Taslak değişmez: erken dönüşlerde bir şey kaybolmaz.
-    kap_notu = ""
+    # Canlı deneme K8 (15 Kasım 2026, v2026.11.15d): LLM "çatı kaplaması kiremit olsun" cümlesini çatı değişikliği (`cati_degistir`) diye
+    # okudu, özellik satırı yazmadı; istek kaplama kuralına gelmeden geri çevrildi. Kural bayinin kendi cümlesine de bakar (K18):
+    # `kap_cumle` bu mesajın başka kaplama isteyen cümleleridir; `_celik_degisiklikler` onları yönlendirmez, söz özel isteğe yazılır.
+    kap_notu, kap_cumle = "", []
     kap_op = next((d for d in onceki if d.get("op") == "cati_kaplamasi"), None)
+    if kap_op is not None:
+        kap_cumle = _mesajin_kaplama_cumleleri(k, aday, kap_op.get("kaplama"), (ts.get("form_kaplama_yazi"),))
+        if kap_cumle and not _kaplama_sozleri(ts, kap_op.get("kaplama"))[1]:
+            # LLM cümleyi hiçbir alana yazmadı: söz taslağa (özel istek) yazılır. Araya soru girse de (pencere sorusu) cevapta kural onu
+            # bulur; "Yazdığınız kaplamayı talebe yazdım" doğru olur. Geri çevrilen istekte konuşma önceki hâline döner (BK-29).
+            ts["ozel_istekler"] = list(ts.get("ozel_istekler") or []) + [c.strip(" ,.;") for c in kap_cumle]
     if kap_op is not None and _kaplama_sozleri(ts, kap_op.get("kaplama"))[1]:
         k.not_dus("kural", f"çelik revizyonu: çatı kaplaması {kap_op.get('kaplama')} zarftan çıktı, bayi başka kaplama yazdı")
         onceki = [d for d in onceki if d is not kap_op]
@@ -1849,7 +1918,7 @@ def _celik_is_emri_uret(k: Konusma, bayi: dict, katalog: Katalog, aday: dict, ts
                                    mesaj="İsteğinizi kurallara uyan bir plana otomatik çeviremedim; önceki planınız geçerli. " + YONLENDIRME))
         sonuc: tuple[list[dict], set[str]] | Karar = ([], set())   # yalnız bilgi: banka yoluyla aynı, plan antet bilgisiyle yeniden
     else:
-        sonuc = _celik_degisiklikler(k, katalog, aday, t, onceki, ayni_proje)
+        sonuc = _celik_degisiklikler(k, katalog, aday, t, onceki, ayni_proje, kap_cumle=kap_cumle)
     if isinstance(sonuc, Karar):
         return sonuc
     yeni, okunan = sonuc
