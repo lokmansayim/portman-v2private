@@ -10,6 +10,7 @@ Bütün ölçüler cm. Koordinat: sol-alt dış köşe (0,0); +x sağa, +y arkay
 from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Optional
+import difflib
 import json
 import math
 import re
@@ -1872,13 +1873,18 @@ TERAS_PANELI_KALINLIK_CM = 8.0
 TERAS_PANELI_EGIM_SINIRI = 20.0      # % (açık hata üstünde; eğimsiz teras paneli yok)
 
 
+VERANDA_D109_ANAHTARLARI = {"nis": "mi", "ara_kolon": "mu"}     # anahtar → soru eki (hata yazısında)
+VERANDA_BILINEN_ANAHTARLAR = frozenset({"ad", "tur", "cephe", "bas_cm", "bit_cm", "derinlik_cm", "cati", "alan_m2", "kenar", "kiris", "kolon",
+                                        *VERANDA_D109_ANAHTARLARI})   # depodaki İş Emri'lerinde bugün geçenler (15 Kasım 2026)
+
+
 def _kose_boslugu(plan: "Plan", nm: "Mahal", ad: str, cephe: str, ic: tuple, bas: float, bit: float, sinir) -> dict:
     """D-109 (BK-40; Lokman 15 Kasım 2026 22:10:48 "kiriş olacak ama kolon olmayacak", 22:16:59, 22:17:51 "242,5 tek kiriş 100*100 profil
     olacak yani altında 1 tane daha kolon olmayacak"; eskiz r04 kartı 22:30:06): verandanın `nis`'i gövdedeki köşe boşluğudur (52 m² ve 55 m²
     paftası). Denetim: boşluk dikdörtgen, ağzı verandanın iç kenarında, yalnız bir yanı açık ve o yan verandanın bir yanıyla aynı hatta;
     iç kenarın gövdeye oturmayan kısmı boşluğun ağzı, öteki iç köşe gövdede, yanın uzak ucu gövdenin köşesinde. Döner: `yan` (0 bas, 1 bit),
     `uzak` (yan kirişin gövde köşesindeki ucu), `kutu` (boşluğun kendisi), silinecek açık kenarlar ve köşe kolonu. Nişin köşesine İş Emri
-    dikme yazmışsa açık hata (K21; orada kolon yok)."""
+    dikme yazmışsa açık hata (K21; nişte kolon yok: köşesinde, ağzında ve yan kirişin altında)."""
     from shapely.geometry import LineString, Point
     yatay = cephe in ("on", "arka")
     uv = (lambda x, y: (x, y)) if yatay else (lambda x, y: (y, x))      # (cephe boyunca, cepheye dik); kendi tersi
@@ -1919,11 +1925,13 @@ def _kose_boslugu(plan: "Plan", nm: "Mahal", ad: str, cephe: str, ic: tuple, bas
     kose = Point(uv(yan_u, c))
     kolon_sil = []
     for r in plan.dikmeler:
-        if box(*r).distance(kose) < KOSE_KOLONU_YAKIN_CM:
-            if r not in plan.kose_kolonlari:
-                raise IsEmriHatasi(f"Veranda {ad}: nişin köşesinde İş Emri dikmesi var; köşe boşluğundan taşan verandada orada kolon yok "
-                                   f"(yan kiriş tek parça, D-109)")
-            kolon_sil.append(r)
+        b = box(*r)
+        if r in plan.kose_kolonlari:
+            if b.distance(kose) < KOSE_KOLONU_YAKIN_CM:
+                kolon_sil.append(r)                     # D-38'in köşe kolonu kalkar
+        elif b.intersection(nm.poly).area > 1e-6 or b.distance(kose) < KOSE_KOLONU_YAKIN_CM:
+            raise IsEmriHatasi(f"Veranda {ad}: nişte ({nm.ad}) İş Emri dikmesi var ({r[0]:g}, {r[1]:g}); köşe boşluğundan taşan verandada "
+                               f"nişin köşesinde, ağzında ve yan kirişin altında kolon yok (yan kiriş tek parça, D-109)")
     return {"yan": s, "uzak": uzak_nokta, "kutu": (nx0, ny0, nx1, ny1), "kenar_sil": kenarlar, "kolon_sil": kolon_sil}
 
 
@@ -1962,8 +1970,14 @@ def _dis_verandalar(plan: "Plan", is_emri: dict) -> None:
     for v in liste:
         nis_ad = v.get("nis")                           # D-109: köşe boşluğundan taşan veranda (boşlukla tek mahal)
         ad, cephe = v.get("ad", nis_ad), v.get("cephe")
+        if isinstance(v, dict):                         # K21: yeni anahtarın yanlış yazımı sessizce eski yola düşmez (ör. ara_kolonu, nıs)
+            yanlis = [a for a in v if a not in VERANDA_BILINEN_ANAHTARLAR
+                      and difflib.get_close_matches(a, VERANDA_D109_ANAHTARLARI, n=1, cutoff=0.6)]
+            if yanlis:
+                oneri = difflib.get_close_matches(yanlis[0], VERANDA_D109_ANAHTARLARI, n=1, cutoff=0.6)[0]
+                raise IsEmriHatasi(f"Veranda {ad}: bilinmeyen anahtar {yanlis[0]!r}; {oneri} {VERANDA_D109_ANAHTARLARI[oneri]}?")
         nm = None
-        if nis_ad is not None:
+        if "nis" in v:
             nm = plan.mahaller.get(nis_ad) if isinstance(nis_ad, str) else None
             if nm is None or not nm.acik or not nm.cells or any(x["ad"] == nis_ad for x in plan.dis_verandalar):
                 raise IsEmriHatasi(f"Veranda {ad}: nis gövdedeki (ızgaradaki) bir açık mahalin adı olur: {nis_ad!r}")

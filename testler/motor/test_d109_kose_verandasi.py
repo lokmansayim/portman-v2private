@@ -124,6 +124,10 @@ def test_anahtarsiz_eski_yol():
     ({"ara_kolon": 30}, "çok kısa"),
     ({"cati": {"tip": "teras_paneli", "cikma_cm": 130, "egim_yuzde": 5}}, "teras panelinde yan kiriş yok"),
     ({"bas_cm": 507}, "ağzı verandanın iç kenarında değil"),
+    ({"nis": None}, "açık mahalin adı"),
+    ({"ara_kolon": None}, "ara_kolon 0 ya da pozitif"),
+    ({"ara_kolonu": 1}, "bilinmeyen anahtar 'ara_kolonu'; ara_kolon mu"),
+    ({"nıs": "VERANDA"}, "bilinmeyen anahtar 'nıs'; nis mi"),
 ])
 def test_hatalar(bozuk, mesaj):
     ie = _ie("52m2")
@@ -132,10 +136,16 @@ def test_hatalar(bozuk, mesaj):
         _kur(ie)
 
 
-def test_nis_kosesinde_is_emri_dikmesi_hata():
+@pytest.mark.parametrize("dikme", [
+    [1004, 0],                                                          # nişin köşesi (sol-alt köşe, gerçek çerçevede)
+    [1004, 50],                                                         # yan kirişin altı (nişin içinde)
+    [700, 0],                                                           # nişin ağzı
+])
+def test_niste_is_emri_dikmesi_hata(dikme):
+    """Lokman 22:17:51 "altında 1 tane daha kolon olmayacak": nişe yazılan İş Emri dikmesi sessizce kalmaz (K21; geometri hakemi bulgusu)."""
     ie = _ie("52m2")
-    ie["dikmeler"] = [[1004, 0]]                                       # sol-alt köşe, gerçek çerçevede
-    with pytest.raises(G.IsEmriHatasi, match="nişin köşesinde İş Emri dikmesi var"):
+    ie["dikmeler"] = [dikme]
+    with pytest.raises(G.IsEmriHatasi, match=r"nişte \(VERANDA\) İş Emri dikmesi var"):
         _kur(ie)
 
 

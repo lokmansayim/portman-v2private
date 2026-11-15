@@ -1085,7 +1085,7 @@
   {
    "kod": "PC-45",
    "baslik": "Köşe boşluğundan taşan veranda tek mahal, yan kiriş tek parça; taşan verandada ara kolon",
-   "kural": "Taşan verandanın iç kenarı gövdenin köşe boşluğunun (önü ve yanı açık, ızgaradaki açık mahal) ağzına oturuyorsa İş Emri `verandalar[].nis` boşluğun adını yazar: boşluk ve taşan şerit tek mahal olur; boşluğun yanındaki kiriş gövdenin köşesinden ön kolona tek parça (52 m² 242,5, 55 m² 250,5; 100 × 100), altında kolon yok; boşluğun ağzında kiriş ve köşesinde kolon yok (D-38'in köşe kolonu kalkar). `ara_kolon: n` dış kenara eşit aralıkla n kolon koyar, dış kiriş n + 1 eşit parça (67 m²: 355,1 + 355,1). Ön onay çiziminde verandanın eni, boşluk yanında yan kirişin boyu, öteki yanda taşma; boşluğun kendi ölçüsü yok; aks numaralarının yanına düşen ölçü verandanın içinde. Görünüşte yan kirişin gövdenin ardında kalan kısmı çizilmez. Anahtarsız İş Emri aynen (BK-14). Ara kolon eşiği açık soru: Motor yalnız yazılan `ara_kolon`'u kurar.",
+   "kural": "Taşan verandanın iç kenarı gövdenin köşe boşluğunun (önü ve yanı açık, ızgaradaki açık mahal) ağzına oturuyorsa İş Emri `verandalar[].nis` boşluğun adını yazar: boşluk ve taşan şerit tek mahal olur; boşluğun yanındaki kiriş gövdenin köşesinden ön kolona tek parça (52 m² 242,5, 55 m² 250,5; 100 × 100), altında kolon yok; boşluğun ağzında kiriş ve köşesinde kolon yok (D-38'in köşe kolonu kalkar). `ara_kolon: n` dış kenara eşit aralıkla n kolon koyar, dış kiriş n + 1 eşit parça (67 m²: 355,1 + 355,1). Ön onay çiziminde verandanın eni, boşluk yanında yan kirişin boyu, öteki yanda taşma; boşluğun kendi ölçüsü yok; aks numaralarının yanına düşen ölçü verandanın içinde (bu ölçüler Lokman uyurken önerilen seçildi; çalışma kuralı 13 ile \"kalsın mı?\" diye sorulur). Görünüşte yan kirişin gövdenin ardında kalan kısmı çizilmez. Anahtarsız İş Emri aynen (BK-14). Ara kolon eşiği açık soru: Motor yalnız yazılan `ara_kolon`'u kurar.",
    "karar": "D-109",
    "lokman": {
     "tarih": "2026-11-15",
@@ -1109,7 +1109,7 @@
     "testler/motor/test_d109_kose_verandasi.py::test_67m2_ortada_kolon_on_kiris_iki_parca",
     "testler/motor/test_d109_kose_verandasi.py::test_anahtarsiz_eski_yol",
     "testler/motor/test_d109_kose_verandasi.py::test_hatalar",
-    "testler/motor/test_d109_kose_verandasi.py::test_nis_kosesinde_is_emri_dikmesi_hata",
+    "testler/motor/test_d109_kose_verandasi.py::test_niste_is_emri_dikmesi_hata",
     "testler/motor/test_d109_kose_verandasi.py::test_yalniz_onu_acik_giris_nisine_nis_yazilmaz",
     "testler/motor/test_d109_kose_verandasi.py::test_gorunuste_govdenin_ardindaki_kiris_yok",
     "testler/motor/test_d109_kose_verandasi.py::test_cizim_olculeri",

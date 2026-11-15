@@ -1,5 +1,10 @@
 {
  "aciklama": "D-109 hedef örneği (BK-40, PC-45): köşe boşluğundan taşan veranda (52 m², 55 m²) ve taşan verandada ara kolon (52 m², 67 m²). Girdiler disk arşivinin montaj paftalarından elle girildi (oda sınırları ve ölçüler paftadan; veranda eskiz r04). Önce: anahtarsız Motor (52 ve 55 m² açık hata, 67 m² iki kolon tek ön kiriş). Sonra: `nis` ve `ara_kolon` ile. Lokman, 15 Kasım 2026 (UTC): 22:10:48 \"kolon ver kiriş kavramları bir birine karıştı kiriş olacak ama kolon olmayacak\"; 22:16:38 (67 m²) \"aynen böyle olacak doğrusu bu\"; 22:16:59 (55 m²) \"bu yeşil niş mi kiriş mi neyse olmayacak\"; 22:17:51 (52 m²) \"bu olmayacak plana iyice bak bak 242,5 tek kiriş 100*100 profil olacak yani altında 1 tane daha kolon olmayacak\"; kart 22:30:06 \"Doğru, böyle yap\" (soru: \"Köşe verandası eskizi bu hâliyle doğru mu?\"; eskiz PF Kose_Verandasi_Motor/2026-11-15_eskiz_r04/). Ön onay çizimleri (PF Kose_Verandasi_Motor/2026-11-15_on_onay/) Lokman'ın bakışını bekliyor; değerler o bakışla değişirse bu dosya onun sözüyle yeniden yazılır (D-02).",
+ "onay": {
+  "plan": "Lokman, eskiz r04 kartı 15 Kasım 2026 22:30:06 \"Doğru, böyle yap\": veranda tek mahal, yan kiriş tek parça, altında kolon yok, nişin ağzında kiriş yok; 52 m² 3 kolon (ortadaki VARSAYIM, kartla), 55 m² 2, 67 m² ortada 1",
+  "liste": "TASLAK: kiriş boyları (yan kiriş açık kenar − 10, dış kiriş parçası) Lokman uyurken önerilen seçildi; liste aşamasında sorulur",
+  "cizim_olculeri": "Lokman uyurken önerilen seçildi (242,5 / 250,5 ve 117 / 125); çalışma kuralı 13 ile \"kalsın mı?\" diye soruluyor"
+ },
  "evler": {
   "52m2": {
    "girdi": "testler/motor/veri/BK40_52m2.json",
