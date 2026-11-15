@@ -1,4 +1,4 @@
-"""kiyas.py <geo.json> <ie.json> [<çıktı.json>]: paftanın pano dizilimi ↔ Motor'un pano dizilimi, duvar duvar; açıklıkların yeri.
+"""pafta_kiyas.py <geo.json> <ie.json> [<çıktı.json>]: paftanın pano dizilimi ↔ Motor'un pano dizilimi, duvar duvar; açıklıkların yeri.
 Çerçeve: paftanın Motor çerçevesi (arka-sol: x soldan, y arkadan). Motor'un planı gerçek çerçevede (ön altta) → y = H − y."""
 import json, sys
 from pathlib import Path

@@ -5,7 +5,7 @@ import copy, json, sys
 from pathlib import Path
 KOK = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(KOK)); sys.path.insert(0, str(Path(__file__).resolve().parent))
-import kiyas as K
+import pafta_kiyas as K
 MOD = 125.5
 
 

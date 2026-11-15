@@ -1,4 +1,4 @@
-"""Arşiv montaj paftasından İş Emri (`araclar/hdd_turev/plan_geometri.py`), pano dizilimi uydurma (`uydur.py`) ve kıyas (`kiyas.py`).
+"""Arşiv montaj paftasından İş Emri (`araclar/hdd_turev/plan_geometri.py`), pano dizilimi uydurma (`uydur.py`) ve kıyas (`pafta_kiyas.py`).
 
 Gerçek pafta depoya girmez (kişisel veri; İE-43). 2019–2020 şablonundaki bir ev burada kodla çizilir: 10'luk dış duvar, 6'lık iç duvar,
 duvar yüzleri pano pano (her pano bir dikdörtgen), pencere bloğu ve yazısı, kapı yayı, oda yazıları, başlık ve ölçüler. Beklenen:
@@ -18,7 +18,7 @@ KOK = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(KOK)); sys.path.insert(0, str(KOK / "araclar" / "hdd_turev"))
 ezdxf = pytest.importorskip("ezdxf")
 pytest.importorskip("shapely")
-import kiyas  # noqa: E402
+import pafta_kiyas as kiyas  # noqa: E402  (testler/kimlik/hakem/kiyas.py ile ad çakışmasın)
 import pafta_kart  # noqa: E402
 import plan_geometri as PG  # noqa: E402
 import uydur  # noqa: E402

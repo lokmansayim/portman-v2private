@@ -13,7 +13,7 @@ from ezdxf.addons.drawing import RenderContext, Frontend
 from ezdxf.addons.drawing.matplotlib import MatplotlibBackend
 from ezdxf.addons.drawing.config import Configuration, BackgroundPolicy, ColorPolicy
 import pafta_kart as PK
-import kiyas as K
+import pafta_kiyas as K
 from motor import dizilim_kiyas as DK
 
 dxf, kart, j, geo, iey, cikti = sys.argv[1:7]
