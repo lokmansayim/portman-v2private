@@ -1056,6 +1056,33 @@
    ]
   },
   {
+   "kod": "PC-41",
+   "baslik": "Üçlü H yalnız iç duvar dış duvarla aynı kalınlıktaysa; 60'lıkta köşe direği",
+   "kural": "Üçlü H (dış duvar T'si: dış duvar aynı hatta ve eksende iç duvar olarak sürer, öteki dış duvar ona dik) yalnız iç duvar dış duvarla aynı kalınlıktaysa kurulur; standart H'da 100'lükten 60'lığa geçen parça yoktur. İç duvar 60'lık, dış duvar 100'lükse D-29'un niş T'si (PC-03) kurulmaz, orada köşe direği kalır; aynı hatta süren 60'lık iç duvar köşeye çektirme U'suyla bağlanır. İş Emri'nin yazdığı üçlü H (PC-40, `yapi.birlesimler` › `t: \"uclu_h\"`) farklı kalınlıkta açık hatadır (K21; sessizce köşe direğine dönmez). PC-03 ve PC-40'ın metni aynen; bu satır ikisinin koşuludur. 90 m² 3+1 hedef ev (TK-01 r07/r08, iç 60): nişte iki üçlü H yerine iki köşe direği, nişin kapı panosu 115,5 → 125,5, nişin yan duvarlarında ve hol duvarlarında ilk pano 125,5 → 120,5. Ön onay çiziminde dar açık mahalin (tek pano şeridi: eni 125,5 cm'den dar, ör. giriş nişi 115,5; veranda değil) yan duvarının özel pano ölçüsü kapalı mahalin yanına geçer; nişin iki ölçüsü nişin içinde kalınca adına ve m²'sine yer kalmıyordu. 71 m² 2+1 (iç 100) ve TK-02 (iç 100) aynen. 160 / 100 seçeneğinde de (dış 160, iç 100) üçlü H kurulmaz, köşe direği kalır (Lokman, kart 15 Kasım 09:02:23 \"Evet, köşe direği\"; depoda böyle ev yok).",
+   "karar": "D-104",
+   "lokman": {
+    "tarih": "2026-11-15",
+    "saat": "07:32",
+    "soz": "bu 71 m² deki üçlü H iç duvarlar 100'lük olduğu için olur ama iç duvarlar 60'lık olursa olmaz köşe kullanmak zorunda kalırız şöyle bir mantık vereyim standart H'larda 100'lükten 60'lığa geçen redisyon gibi bir malzeme yok (07:47:55 \"bunlar olmaz buralara mecburen 100'lük köşeler gelecek\"; kart 07:55:12 \"Doğru, hedef örnekler güncellensin\"; 160 / 100 için kart 09:02:23 \"Evet, köşe direği\")"
+   },
+   "kod_yeri": [
+    "motor/geometry.py::_kur",
+    "motor/dxf_out.py::Cizici._dar_acik_mahal_yani",
+    "motor/dxf_out.py::Cizici._ozel_olcu"
+   ],
+   "test": [
+    "testler/motor/test_d104_uclu_h_kalinlik.py::test_90m2_girdi_ic_60",
+    "testler/motor/test_d104_uclu_h_kalinlik.py::test_90m2_niste_kose_diregi",
+    "testler/motor/test_d104_uclu_h_kalinlik.py::test_90m2_yalniz_nis_degisir",
+    "testler/motor/test_d104_uclu_h_kalinlik.py::test_90m2_liste",
+    "testler/motor/test_d104_uclu_h_kalinlik.py::test_cizim_dogrulamasi_gecer",
+    "testler/motor/test_d104_uclu_h_kalinlik.py::test_71m2_ic_100_uclu_h_aynen",
+    "testler/motor/test_d104_uclu_h_kalinlik.py::test_71m2_ic_60_uclu_h_hata",
+    "testler/motor/test_d104_uclu_h_kalinlik.py::test_ic_100_nis_t_kalir",
+    "testler/motor/test_d104_uclu_h_kalinlik.py::test_nis_olcusu_oda_yaninda"
+   ]
+  },
+  {
    "kod": "PC-42",
    "baslik": "Panonun ortasındaki T'de 3'lü H çizilmez (çizim listeyle aynı parçayı gösterir)",
    "kural": "İç duvar geçen duvarın panosunun ortasına T ile geliyorsa (pano eki yok, ek toleransı yükleme listesininki: geçen duvarın yarı kalınlığı + 3,5 cm; ortadan kayma en çok `ORTADAKI_H_PAYI_CM` = 1,5 cm) parça çektirme U'sudur; Motor orada 3'lü H çizmez (ana plan, net alan kopyası, saha montaj planı, A4 ön onay sayfası). 3'lü H geçen duvarın pano ekinde ya da iki duvarın uç uca birleştiği yerde (niş T'si, D-29, D-96) çizilir; panonun ortasında olmayan eksiz T'deki H'a (TK-03'ün üç yeri) dokunulmaz. Süzme `_kur`'un sonunda, D-92'nin yeniden dizdiği panolardan sonradır. Motor'un doğrulaması (K23) DXF'teki bir 3'lü H'ın iki yanını geçen duvarın tek panosu örtüyor ve H o panonun ortasındaysa hata verir; teslim PDF'i yazılmaz. Pano dizilimi, ölçüler ve yükleme listesi değişmez (liste İE-27'den beri orada çektirme U'su sayar). 125,5'lik panonun tam ortasındaki 13 yer ve 122,5'lik panodaki 2 yer (havuzda 9 evde 15 yer) kartın \"15 yerin hepsinde\" seçimiyle.",

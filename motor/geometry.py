@@ -1098,8 +1098,15 @@ def _kur(is_emri: dict) -> Plan:
         return (hat[0], ic[0], dik[0]) if len(hat) == 1 and len(dik) == 1 else None
     # D-29: giriş nişinin kapı duvarı iki ucunda da böyle T yapar (yan duvarlar içeride sürer); verandanın iç köşesi (PK-01 paftası: kapı
     # duvarının öteki ucu serbest) köşe parçasıyla kalır
-    nis_t = {P: m for P in ends_at if dis_t_bolme and not through_at.get(P) and (m := _nis_t(ends_at[P]))}
+    # D-104 (Lokman, 15 Kasım 2026 07:32:42 ve 07:47:55): üçlü H yalnız aynı hatta süren iç duvar dış duvarla aynı kalınlıktaysa (100'lük);
+    # standart H'da 100'lükten 60'lığa geçiş parçası yok, 60'lık iç duvarlı evde orada köşe direği kalır (niş T'si kurulmaz)
+    ayni_kalinlik = abs(T_IC - T_DIS) < 1e-9
+    nis_t = {P: m for P in ends_at if dis_t_bolme and ayni_kalinlik and not through_at.get(P) and (m := _nis_t(ends_at[P]))}
     nis_t = {P: m for P, m in nis_t.items() if sum(1 for q in nis_t.values() if q[2][0] is m[2][0]) == 2}
+    if uclu_h_nokta and not ayni_kalinlik:       # D-104: yazılan üçlü H da yalnız aynı kalınlıkta (K21: sessizce köşe direğine dönmez)
+        yazilan = ", ".join(f"({_AKS['x'][i]:g}, {_AKS['y'][j]:g})" for i, j in sorted(uclu_h_nokta))
+        raise IsEmriHatasi(f"yapi.birlesimler: üçlü H yalnız iç duvar dış duvarla aynı kalınlıktaysa kurulur (iç {_mm(T_IC)}, dış "
+                           f"{_mm(T_DIS)} mm; 100'lükten 60'lığa geçen H yok, orada köşe direği kalır; D-104): {yazilan}")
     for P in uclu_h_nokta:                        # D-96: İş Emri'nin yazdığı köşede köşe direği yerine 3'lü H (yalnız o nokta)
         if P in ends_at and not through_at.get(P) and (m := _nis_t(ends_at[P])):
             nis_t[P] = m; birlesim_kullanildi.add(P)
