@@ -1528,3 +1528,70 @@ def test_hakem8_secim_okunur(tmp_path, metin, kod):
     "da" değildir."""
     s, _ = _cati_seti(tmp_path)
     _secildi(s, s.yaz(metin, niyet="diger"), kod)
+
+
+# ── İE-42 · geometri hakemi dokuzuncu tur (15 Kasım 2026 sabaha karşı) ───────────────────────────────────────────────────────────────
+_ISTEK_Y2 = "yatak odası 2 penceresi 120x180 olsun, "
+
+
+@pytest.mark.parametrize("ek", ["çatı 2 de olsun", "çatısı 2 de olsun", "çatı olarak 2 de olur", "çatı 3 de olabilir",
+                                "çatı tercihimiz 2 de", "K de olsun", "K da olabilir", "C de olsun", "PA-06-K de olsun", "sonuncu da olur",
+                                "çatı K de olsun"])
+def test_hakem9_istekten_sonra_eksiltili_cati_sozu_sorulur(tmp_path, ek):
+    """Y-1, O-2: istekten sonra gelen eksiltili çatı sözü ("…, çatı 2 de olsun", "…, K da olabilir") çatıya atıftır; seçim mi "o da olur"
+    mu belli değil: sorulur, istek uygulanmaz. Tur 8'de rakamlı biçimde çatı sessizce düşüyor, harfli biçimde K seçiliyordu."""
+    s, _ = _cati_seti(tmp_path)
+    k = s.yaz(_ISTEK_Y2 + ek, **_Y2_120x180)
+    _soruldu(s, k)
+    assert "Mesajınızdaki öteki isteği uygulamadım" in k.mesaj and not s.k.d.get("cati_secilen"), k.mesaj
+
+
+@pytest.mark.parametrize("metin, al", [
+    ("Peki 2 olsun banyo 2 tane", {}), ("Ok 2 olsun banyo 2 tane", {}), ("Şimdilik 2 olsun banyo 2 tane", {}),
+    ("Bence 2 olsun banyo 2 tane", {}), ("Müşteri 2 olsun dedi banyo 2 tane", {}), ("plan aynı kalsın 2 olsun banyo 2 tane", {}),
+    ("2 numara olsun banyo 2 tane", {}), ("Peki 3 olsun yatak odası 3 tane", dict(oda_programi="3+1")), ("Biz de 2 diyoruz", {}),
+    ("Müşteri de 2 diyor", {}), ("plan aynı kalsın müşteri 2 diyor", {})])
+def test_hakem9_onekli_devrik_sayi_sorulur(tmp_path, metin, al):
+    """Y-2: devrik sayı cümlesinin önünde söz olsa da ("Peki 2 olsun banyo 2 tane") ya da sayıdan sonra seçim fiili gelse de ("Biz de 2
+    diyoruz") çatı numarası mı oda sayısı mı belli değil: sorulur. Tur 8'de set kapanıyor, çatı sessizce düşüyordu."""
+    s, _ = _cati_seti(tmp_path)
+    _soruldu(s, s.yaz(metin, **al))
+
+
+@pytest.mark.parametrize("metin", ["2 olsun, montaj tarihi ve çatıyı haber veririz", "2 olsun, montaj tarihini ve çatı kararını bildiririz",
+                                   "2 olsun, kesin çatıyı ve teslim tarihini haber veririz", "2 olsun, fiyatına göre haber veririz",
+                                   "2 olsun, fiyatı gelince haber veririz", "1 olsun, fiyatı öğrenince karar vereceğiz",
+                                   "Müşteri karar verecek", "1 olsun, müşteri fiyatı görünce karar verir"])
+def test_hakem9_cati_ya_da_kosula_bagli_haber_ertelemedir(tmp_path, metin):
+    """Y-3: haberin konusu çatıysa ya da haber bir koşula bağlıysa ("fiyatına göre", "fiyatı gelince") karar ertelenir: sorulur. Tur 8'de
+    PA-06-K çiziliyor, Onayla onu kaydediyordu."""
+    s, _ = _cati_seti(tmp_path)
+    _soruldu(s, s.yaz(metin, niyet="diger"))
+
+
+@pytest.mark.parametrize("metin", ["1 olsun, müşteri onaylarsa", "1 olsun, uygunsa", "1 olsun, olursa", "Evin kendi çatısı olsun, müşteri onaylarsa",
+                                   "1 olsun müşteri isterse", "1 olsun, müşteri tamam derse", "1 olsun, sorun yoksa",
+                                   "1 olsun, müşteri beğenirse onaylarız"])
+def test_hakem9_kosullu_soz_onay_degildir(tmp_path, metin):
+    """Y-4: koşullu söz ("müşteri onaylarsa", "uygunsa") onay değildir: onay kaydedilmez, sorulur (tur 8'de r01 onaylanıyordu)."""
+    s, _ = _cati_seti(tmp_path)
+    _soruldu(s, s.yaz(metin, niyet="diger"))
+
+
+@pytest.mark.parametrize("metin", ["yatak odalarının ikisinin de penceresi 120x180 olsun", "ikisi de 120x180 olsun",
+                                   "yatak odası penceresi ikisi de 120x180 olsun"])
+def test_hakem9_istekte_ikisi_pencerelerdir(tmp_path, metin):
+    """O-1: ölçülü ya da odalı istekte "ikisi" pencerelerdir: kararsızlık değil; set kapanır, r02 evin çatısıyla (tur 8'de soruluyordu)."""
+    s, _ = _cati_seti(tmp_path)
+    _set_kapali_r02(s, s.yaz(metin, **_Y12_120x180))
+
+
+@pytest.mark.parametrize("metin, kod", [("2 olsun, yatak odalarının ikisinin de penceresi 120x180 olsun", "PA06K"),
+                                        ("plan olduğu gibi kalsın 2 olsun", "PA06K"), ("2 olsun, bize bildirin", "PA06K"),
+                                        ("2 olsun, montaj tarihini haber veririz", "PA06K")])
+def test_hakem9_secim_okunur(tmp_path, metin, kod):
+    """O-1, D-1: seçimle gelen pencere isteğindeki "ikisi", planı anan "olduğu gibi" ve emir kipindeki "bildirin" seçimi bozmaz."""
+    s, _ = _cati_seti(tmp_path)
+    k = s.yaz(metin, **(_Y12_120x180 if "pencere" in metin else dict(niyet="diger")))
+    assert k.eylem == "is_emri" and k.revizyon == 2 and k.is_emri["talep"]["kaynak"] == kod, k.mesaj
+    assert s.k.d.get("cati_secilen") == kod

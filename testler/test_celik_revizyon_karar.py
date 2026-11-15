@@ -950,3 +950,18 @@ def test_hakem8_celik_secim_okunur(s, metin):
     cati_seti(s)
     k = s.yaz(metin)
     assert k.eylem == "is_emri" and s.plan["revizyon"] == 2 and s.plan["yapi"]["kod"] == "Ç8801K", k.mesaj
+
+
+# ── İE-42 · geometri hakemi dokuzuncu tur (15 Kasım 2026 sabaha karşı) ───────────────────────────────────────────────────────────────
+@pytest.mark.parametrize("metin, al", [("mutfak penceresi 120x120 olsun, çatı 2 de olsun", _MUTFAK),
+                                       ("mutfak penceresi 120x120 olsun, K de olsun", _MUTFAK),
+                                       ("mutfak penceresi 120x120 olsun, çatı L de olsun", _MUTFAK),
+                                       ("Peki 2 olsun banyo 2 tane", {}), ("1 olsun, müşteri onaylarsa", {}), ("1 olsun, uygunsa", {}),
+                                       ("2 olsun, montaj tarihi ve çatıyı haber veririz", {}), ("Biz de 2 diyoruz", {})])
+def test_hakem9_celik_kararsiz_soz_sorulur(s, metin, al):
+    """Y-1, O-2, Y-2, Y-3, Y-4 çelikte: eksiltili çatı sözü, önekli devrik sayı, koşullu söz ve çatıyı da anan haber sorulur; onay ve
+    seçim kaydedilmez."""
+    cati_seti(s)
+    k = s.yaz(metin, **al)
+    assert k.eylem == "sor" and k.mesaj.startswith("Hangi çatı olsun?"), k.mesaj
+    assert s.plan["revizyon"] == 1 and s.k.d["secenek_seti"]["durum"] == "acik" and not s.k.d.get("onaylanan"), k.mesaj
