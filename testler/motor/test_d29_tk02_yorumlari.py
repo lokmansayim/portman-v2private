@@ -73,9 +73,23 @@ def test_pk01_paftasi_degismez():
 
 
 def test_nis_kapisinda_kose_yok_3lu_h(ie):
+    """D-104 (Lokman, 15 Kasım 2026 07:32:42 "standart H'larda 100'lükten 60'lığa geçen ... malzeme yok", 07:47:55 "buralara mecburen 100'lük
+    köşeler gelecek"; kart 07:55:12 "Doğru, hedef örnekler güncellensin"): niş T'si yalnız iç duvar dış duvarla aynı kalınlıktaysa (TK-02,
+    iç 100). TK-01 r06'da (iç 60) nişin iki ucunda 100'lük köşe direği: kapı panosu akstan aksa 125,5, kapı hattında dış T'si yok."""
     plan = G.kur(ie)
     kapi = next(p for p in plan.panolar if p.acilim and p.acilim.tur == "dis_kapi")
     d = kapi.duvar
+    kal = ie["yapi"]["duvar_kalinligi_cm"]
+    if kal["ic"] != kal["dis"]:                                              # D-104: 60'lık iç duvarlı ev
+        assert (d.p0, d.p1, kapi.boy) == (386.5, 512.0, 125.5)
+        kose = sorted(tuple(round(v, 2) for v in k.rect) for k in plan.koseler if k.rect[1] < d.c + d.h and k.rect[3] > d.c - d.h)
+        assert kose == [(381.5, 125.5, 386.5, 135.5), (512.0, 125.5, 517.0, 135.5)] and len(plan.koseler) == 10
+        assert not [b for b in plan.h_baglantilar if abs(b.y - d.c) < 1e-6] and G.uc_uca_ekler(plan) == []
+        L = PL.is_emrinden(ie)
+        adet = lambda bas: sum(r["adet"] for r in L["satirlar"] if r["kalem"].startswith(bas))
+        assert adet("3'lü H 100 × 100") == sum(b.tur == "dis" for b in plan.h_baglantilar) == 6
+        assert adet("10'luk köşe direği") + adet("6'lık köşe direği") == len(plan.koseler)
+        return
     assert (d.p0, d.p1, kapi.boy) == (391.5, 507.0, 115.5)                    # yan duvarların yüzleri arası
     assert not [k for k in plan.koseler if k.rect[1] < d.c + d.h and k.rect[3] > d.c - d.h]   # kapı hattında köşe parçası yok
     assert len(plan.koseler) == 8                                            # nişin ağzındaki iki köşe kalır

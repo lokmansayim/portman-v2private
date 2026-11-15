@@ -43,7 +43,10 @@ HEDEFLER = {   # girdi, beklenen iz, onay dayanağı
                  "Lokman'ın 19:55 kartıyla açıldı): iz yalnız antet m² yazısıyla yeniden donduruldu."
              " 14 Kasım 2026 21:01 antetteki net verandayla, bütün mahaller (D-95, \"biz verandayıda net alana alır sayarız\"; "
              "M-02 Lokman'ın 21:07:29 sözüyle açıldı: \"ben izin veriyorum varsa mühür bunu gir ve mühürle\"): iz yalnız antet m² "
-             "yazısıyla yeniden donduruldu."),
+             "yazısıyla yeniden donduruldu."
+                 " 15 Kasım 2026 07:32:42 üçlü H yalnız iç duvar dış duvarla aynı kalınlıktaysa (D-104, \"standart H'larda 100'lükten 60'lığa "
+                 "geçen ... malzeme yok\"; 07:47:55 \"buralara mecburen 100'lük köşeler gelecek\"; M-02 Lokman'ın 07:55:12 kartıyla açıldı: "
+                 "\"Doğru, hedef örnekler güncellensin\"): iz giriş nişinin iki köşe direğiyle yeniden donduruldu."),
 }
 
 

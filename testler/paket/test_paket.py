@@ -161,12 +161,14 @@ def test_liste_canlidakiyle_ayni(paketler):
     aynı yol, `is_emrinden`). D-29 (Lokman 29 Ekim, TK-02 yorumları) ile 128 / 126: pencerenin iki yanı 62,75'lik yarım pano (dolu panonun
     dört boyu tek boya), giriş nişinde köşe direği yerine 3'lü H (10'luk köşe direği 8 → 6, dış T'si 3'lü H 6 → 8), kapılı pano 115,5.
     D-30 (Lokman 29 Ekim 10:48) ile 125 / 123: dış ölçü 898,5 × 888,5, kesik son panolar (1245, 620) tam boya (1250, 625), makas açıklığı
-    8980 → 8985. İE-27 (D-45, Lokman 3 Kasım 2026): 5,5 × 25 trapez vida satırı, 126 / 124."""
+    8980 → 8985. İE-27 (D-45, Lokman 3 Kasım 2026): 5,5 × 25 trapez vida satırı, 126 / 124. D-104 (Lokman 15 Kasım 2026 07:32:42, kart
+    07:55:12; iç 60): nişte üçlü H yerine köşe direği (10'luk köşe direği 6 → 8, dış T'si 3'lü H 8 → 6), kapılı pano 125,5, nişin yan
+    duvarında ve hol duvarında 120,5; 60'lık kasalı pano 1200'lük yeni satır, 127 / 125."""
     from openpyxl import load_workbook
     from motor import prefabrik_liste as PL
     kok, _, _ = paketler
     ie = json.loads((KOK / _model("TK-01")["is_emri"]).read_text(encoding="utf-8"))
-    for s, n in (("asma", 126), ("ters", 124)):
+    for s, n in (("asma", 127), ("ters", 125)):
         L = PL.is_emrinden(copy.deepcopy(ie), ozellikler={"Tavan": s.capitalize()})
         ws = load_workbook(kok / "prefabrik" / "TK-01" / f"TK-01_yukleme_listesi_{s}.xlsx").active
         satir = [r[1:5] for r in ws.iter_rows(min_row=3, values_only=True)]
@@ -295,7 +297,7 @@ def test_baslikta_brut_ve_net(paketler):
     from motor import dxf_out, geometry as G
     from motor.prefabrik_liste import bina_brut_cm2
     kok, _, _ = paketler
-    beklenen = {"TK-01": "90,21 m² brüt · 84,54 m² net", "AP-19": "60,00 m² brüt · 55,53 m² net"}   # TK-01 r06, PK-01
+    beklenen = {"TK-01": "90,21 m² brüt · 84,53 m² net", "AP-19": "60,00 m² brüt · 55,53 m² net"}   # TK-01 r06, PK-01 (D-104: niş köşesi, 84,54 → 84,53)
     for kod, yazi in beklenen.items():
         ie = json.loads((KOK / _model(kod)["is_emri"]).read_text(encoding="utf-8"))
         plan = G.kur(ie)
@@ -422,7 +424,7 @@ def test_is_emri_ile_paket(paketler, tmp_path):
     assert kagit.sub('"src":""', html).replace("TK-98", "TK-01").replace("TK98", "TK01") == kagit.sub('"src":""', ka)
     yazi = _yazilar(b)
     # antette kime ait ve m² (D-31 madde 14, Lokman 29 Ekim 2026 13:13; önceden "PORTMAN | Bayi TK-98 / TK-98 | İş Emri"); brüt verandayla (D-49; TK-01 r06, listedeki bina_m2 90,211)
-    assert "PORTMAN | Bayi TK-98 / TK-98 | 90,21 m² brüt · 84,54 m² net | İş Emri" in yazi["TK-98_cizim.dxf"] and "'TK-98 " in yazi["TK-98_model.ifc"]
+    assert "PORTMAN | Bayi TK-98 / TK-98 | 90,21 m² brüt · 84,53 m² net | İş Emri" in yazi["TK-98_cizim.dxf"] and "'TK-98 " in yazi["TK-98_model.ifc"]
     for ad, t in yazi.items():
         t = re.sub(r"`[0-9a-f]{64}`", "", t)
         assert not any(x in t for x in ("Sahteadi", "Sahtebayi", "XBAYIX9", no[-9:], no[-9:].replace(" ", ""))), ad

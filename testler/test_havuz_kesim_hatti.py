@@ -8,7 +8,10 @@ Lokman, 14 Kasım 2026 UTC (proje sohbeti ve standart pano sohbeti, 71 m² 2+1'i
 - kart 20:57:28 "Doğru, yanına eklensin": "Bugünkü 71 m2 kalır; 773 × 888,5 cm üçlü H'lı hâl (kapı panosu 120,5) Motor eklemesinden sonra
   ayrı ev olarak girer." (eskiz `05c_71m2_2+1_on_5_uclu_h_once_sonra.png`: sağ 12 cm içeri, ön 17 cm içeri (770 hattında), ön 5,5 cm dışarı).
 CIO, 15 Kasım 2026 05:59: kesim hattı kalemi, kapsam büyüme kalemi gibi yalnız ev kartının sözüyle. Silme ve büyüme kalemleri (BK-31) aynen.
-Girdi: `testler/motor/veri/D96_71m2_uclu_h.json` (D-96'nın hedef örneğinin girdisi; Motor'un planı eskizle birebir, BK-32).
+Girdi: `testler/havuz/is_emirleri/PA26_UCLU_H.json` (havuzdaki 71 m² üçlü H'lı hâlin kaynağı). 15 Kasım 2026'ya kadar girdi D-96'nın
+hedef örneğinin girdisiydi (`testler/motor/veri/D96_71m2_uclu_h.json`, geometrisi aynı). Lokman'ın 15 Kasım 09:42:35 kartıyla ("Evet,
+paftadaki gibi") 71 m²'nin iki kaydında sağ dış duvar paftadaki gibi (40,75 + 147,5 karkaslı pano + 62,75; D-87 › Ek); D-96'nın hedef
+örneği aynen kalır, hakem iki kaydı birbiriyle kıyaslar. Beklenen değerler iki girdide aynı.
 """
 from __future__ import annotations
 import json
@@ -29,7 +32,7 @@ SOZ_71 = ("Lokman 14 Kasım 2026 20:46:54 UTC: \"salon ön tarafta ki 120,5 pano
           "olur\"; kart 20:57:28 \"Doğru, yanına eklensin\"")
 KART_71 = ("Lokman, 14 Kasım 2026 20:57:28 UTC kartı \"Doğru, yanına eklensin\": \"Bugünkü 71 m2 kalır; 773 × 888,5 cm üçlü H'lı hâl (kapı "
            "panosu 120,5) Motor eklemesinden sonra ayrı ev olarak girer.\" (eskiz 05c: sağ 12 cm içeri, ön 17 cm içeri, ön 5,5 cm dışarı)")
-UCLU_H = "testler/motor/veri/D96_71m2_uclu_h.json"
+UCLU_H = "testler/havuz/is_emirleri/PA26_UCLU_H.json"
 KAYNAK = "is_emri/adaylar/PA26.json"
 KART = "AP-08"
 KESIM = "on:17:770"
