@@ -1595,3 +1595,104 @@ def test_hakem9_secim_okunur(tmp_path, metin, kod):
     k = s.yaz(metin, **(_Y12_120x180 if "pencere" in metin else dict(niyet="diger")))
     assert k.eylem == "is_emri" and k.revizyon == 2 and k.is_emri["talep"]["kaynak"] == kod, k.mesaj
     assert s.k.d.get("cati_secilen") == kod
+
+
+# ── İE-42 · geometri hakemi onuncu tur (15 Kasım 2026 sabaha karşı) ──────────────────────────────────────────────────────────────────
+@pytest.mark.parametrize("metin", ["1 olsun, müşteri onaylayınca", "1 olsun, müşteri onaylayınca teklif gönderin", "2 olsun, müşteri onaylayınca",
+                                   "1 olsun, müşteri daha onaylamadı", "1 olsun, müşteri onaylamadı daha", "1 olsun, müşteri onaylayacak",
+                                   "K olsun, müşteri onaylayacak", "1 olsun, müşteri onayladıktan sonra", "1 olsun, müşteri onayından sonra",
+                                   "Evin kendi çatısı olsun, müşteri onayından sonra", "2 olsun, müşteri onayından sonra",
+                                   "1 olsun, müşteri onayını bekliyoruz", "Evin kendi çatısı olsun, müşteri onayını bekliyoruz",
+                                   "1 olsun, müşteriye gönderip onay alalım"])
+def test_hakem10_ertelenen_onay_sozu_onay_degildir(tmp_path, metin):
+    """Y-1: onay kökü taşıyan ertelenen ya da olumsuz söz ("müşteri onaylayınca", "onayından sonra", "daha onaylamadı", "onaylayacak",
+    "onayını bekliyoruz") onay değildir: sorulur. Tur 9'da onay sözü okunmadan silindiği için r01 onaylanıyor ya da çatı çiziliyordu."""
+    s, _ = _cati_seti(tmp_path)
+    _soruldu(s, s.yaz(metin, niyet="diger"))
+
+
+@pytest.mark.parametrize("metin", ["2'yi seçtik banyo 2 tane", "2'yi seçtik banyo 2 tane olsun", "Müşteri 2'yi seçti banyo 2 tane",
+                                   "2 numarayı seçtik banyo 2 tane", "Müşteri 2'yi istiyor banyo 2 tane", "Çatıya siz karar verin",
+                                   "Siz karar verin", "Çatıyı siz bildirin", "Fiyatları haber verin, ona göre çatıyı seçeriz",
+                                   "2 olsun, ikisinin fiyatını da 3 gün içinde gönderin", "2 olsun, ikisinin de 3D görselini gönderin"])
+def test_hakem10_secim_sozu_ve_birakma_sorulur(tmp_path, metin):
+    """Y-2, O-3, O-4: "2'yi seçtik" (ekli sayı) istekle de çatıya atıftır; çatıyı bize bırakan söz ve "ikisinin fiyatı" (ölçü olmadan
+    rakamla da) sorulur. Tur 9'da set kapanıyor ya da PA-06-K çiziliyordu."""
+    s, _ = _cati_seti(tmp_path)
+    _soruldu(s, s.yaz(metin, niyet="diger"))
+
+
+@pytest.mark.parametrize("metin, kod", [
+    ("2 olsun, müşteri Bursa'da", "PA06K"), ("2 olsun, montaj adresi Bursa", "PA06K"), ("K olsun, giriş kapısı terse açılsın", "PA06K"),
+    ("2 olsun, sorun varsa arayın", "PA06K"), ("K olsun, veranda ön cephe boyunca olsun", "PA06K"), ("Çatıya gelince, K olsun", "PA06K"),
+    ("2 olsun, olabildiğince çabuk gönderin", "PA06K"), ("2 olsun, mümkün olduğunca erken gönderin", "PA06K"),
+    ("K olsun, yönetmelik gereğince yapın", "PA06K"), ("2 olsun, kalınca sac kullanın", "PA06K"),
+    ("2 olsun, montaj tarihini kesinleşince bildiririz", "PA06K"), ("2 olsun, kesin montaj tarihini bildiririz", "PA06K"),
+    ("çatı 2 olsun, pencere 1 olsun", "PA06K"), ("K olsun, kapı 3 olsun", "PA06K"), ("2 olsun, hazır olunca haber verin", "PA06K")])
+def test_hakem10_acik_secim_soruya_donmez(tmp_path, metin, kod):
+    """O-1, O-2, D-1: koşul ya da zaman bildirmeyen söz ("Bursa", "terse", "boyunca", "olabildiğince", "çatıya gelince"), başka konudaki
+    "varsa", montaj tarihinin haberi ve istekteki adet ("pencere 1 olsun") açık seçimi soruya çevirmez (tur 10 kodunda soruluyordu)."""
+    s, _ = _cati_seti(tmp_path)
+    k = s.yaz(metin, niyet="diger")
+    assert k.eylem == "is_emri" and k.revizyon == 2 and k.is_emri["talep"]["kaynak"] == kod, k.mesaj
+    assert s.k.d.get("cati_secilen") == kod
+
+
+# ── İE-42 · geometri hakemi on birinci tur (15 Kasım 2026 sabaha karşı) ─────────────────────────────────────────────────────────────
+@pytest.mark.parametrize("metin", [
+    "2 olsun, müşteri kabul edince", "PA-06-K olsun, müşteri kabul edince", "K olsun, müşteri evet deyince", "3 olsun, kapora yatınca",
+    "3 olsun, müşteri tamam deyince", "2 olsun, müşteri imzalayınca", "2 olsun, kredi çıkınca", "2 olsun, banka onayı çıkınca",
+    "K olsun, ödeme yapılınca", "2 olsun, avans yatırılınca", "2 olsun, stok varsa", "2 olsun, müşterinin itirazı varsa değiştiririz",
+    "2 olsun, fiyat farkı varsa değiştiririz", "2 olsun, müşteri kabul ettikten sonra", "2 olsun, müşteri kabul ettiğinde",
+    "2 olsun, müşteri kabul etmeden önce", "2 olsun, müşteri kabul ettiği takdirde", "2 olsun, müşteri kabul etmişse",
+    "2 olsun, fiyat makulse", "2 olsun, fiyat düşükse", "PA-06-K mı olsun, müşteri Ayşe Kaya", "2 mi olsun, müşteri Ayşe Kaya",
+    "Tamam katalogdaki 3 olsun banyo 2 tane", "katalogtaki 2 numara olsun banyo 2 tane"])
+def test_hakem11_kosullu_zamanli_ve_soru_bicimli_secim_sorulur(tmp_path, metin):
+    """Y-1, Y-2, Y-3, O-3: zamana ("müşteri kabul edince", "kredi çıkınca", "kabul ettikten sonra") ya da koşula ("stok varsa", "fiyat
+    makulse", "kabul etmişse") bağlı seçim, soru biçimli seçim ("PA-06-K mı olsun, müşteri Ayşe Kaya") ve "katalogdaki 3 olsun" + istek
+    sorulur. Tur 10 kodunda çoğu başka çatıyı r02 çiziyordu (tek Onayla ile kaydediliyordu) ya da çatı sözü düşüyordu."""
+    s, _ = _cati_seti(tmp_path)
+    _soruldu(s, s.yaz(metin, niyet="diger"))
+    _soruldu(s, _onayla(s))                                    # Onayla da seçim değildir: soru yinelenir, onay kaydedilmez
+
+
+@pytest.mark.parametrize("metin", ["1 olsun, onayımızdır", "1 olsun, onayımdır", "1 olsun, onayımızı veriyoruz", "1 olsun, onaylanmış",
+                                   "1 olsun, onaylamak istiyoruz", "1 olsun, onaylayıp gönderiyoruz", "1 olsun, onaylarımızla",
+                                   "1 olsun, teklifi bekliyoruz", "Evin kendi çatısı olsun, teklifi bekliyoruz", "1 olsun, teklifinizi bekleriz"])
+def test_hakem11_acik_onay_soruya_donmez(tmp_path, metin):
+    """O-1, O-2: onay kökünün ertelenmemiş biçimleri onaydır; "teklifi bekliyoruz" müşterinin kararını beklemek değildir (tur 10 kodunda
+    soruluyordu)."""
+    s, _ = _cati_seti(tmp_path)
+    k = s.yaz(metin, niyet="diger")
+    assert k.gerekce == K.PLAN_ONAYI and k.revizyon == 1, k.mesaj
+
+
+@pytest.mark.parametrize("metin, kod", [
+    ("2 olsun, müşterinin onayını aldık", "PA06K"), ("2 olsun, yeni çizimi bekliyorum", "PA06K"), ("2 olsun, beklemeden çizin", "PA06K"),
+    ("2 olsun, ona göre fiyat verin", "PA06K"), ("2 olsun, buna göre çizin", "PA06K"), ("Çatıya gelince 2 olsun", "PA06K"),
+    ("Çatı konusuna gelince 3 olsun", "PA06C"), ("2 olsun, pahalı da olsa", "PA06K"), ("2 olsun, ne olursa olsun", "PA06K")])
+def test_hakem11_acik_secim_soruya_donmez(tmp_path, metin, kod):
+    """O-2, D-1: "bekliyorum", "ona göre … verin", "çatıya gelince" (söylem sözü, atılır) ve ödünleme ("da olsa", "ne olursa olsun") açık
+    seçimi soruya çevirmez."""
+    s, _ = _cati_seti(tmp_path)
+    k = s.yaz(metin, niyet="diger")
+    assert k.eylem == "is_emri" and k.revizyon == 2 and k.is_emri["talep"]["kaynak"] == kod, k.mesaj
+    assert s.k.d.get("cati_secilen") == kod
+
+
+# ── İE-42 × BK-29 tur 9 (main c0a31afb, 15 Kasım 2026): kod ve müşteri adı çatı setinde ───────────────────────────────────────────────
+@pytest.mark.parametrize("metin, kod, al", [
+    ("PA-06 olsun, müşteri Ayşe Kaya", "PA06", dict(niyet="diger")), ("PA-06-K olsun, müşteri Ayşe Kaya", "PA06K", dict(niyet="diger")),
+    ("PA-06, müşteri Ayşe Kaya", "PA06", dict(niyet="onay")),
+    ("PA-06-C olsun, müşteri Ayşe Kaya", "PA06C", dict(niyet="yeni_talep", katalog_kodu="PA06C", musteri={"ad": "Ayşe Kaya"}))])
+def test_bk29_tur9_kod_ve_musteri_adi_cati_setinde(tmp_path, metin, kod, al):
+    """BK-29 tur 9'un kuralı (kod + "müşteri <ad>" o modelin seçimidir, ad müşteri adıdır) çatı setinde de koşar: çatı seçilir, ad plana
+    girer, aynı plan r02 çizilir ("r01 onayınızı geçersiz kıldı"). Onay sessizce kaydedilmez, ad düşmez; çatı aynı mesajda seçildiği için
+    r02'nin Onayla'sı çatıyı yeniden sormaz."""
+    s, _ = _cati_seti(tmp_path)
+    k = s.yaz(metin, **al)
+    assert k.eylem == "is_emri" and k.revizyon == 2 and k.is_emri["talep"]["kaynak"] == kod, k.mesaj
+    assert "geçersiz kıldı" in k.mesaj and not s.k.d.get("onaylanan"), k.mesaj
+    assert s.k.d.get("cati_secilen") == kod and (s.k.d["taslak"].get("musteri") or {}).get("ad") == "Ayşe Kaya"
+    k = _onayla(s)
+    assert k.gerekce == K.PLAN_ONAYI and k.revizyon == 2, k.mesaj

@@ -965,3 +965,53 @@ def test_hakem9_celik_kararsiz_soz_sorulur(s, metin, al):
     k = s.yaz(metin, **al)
     assert k.eylem == "sor" and k.mesaj.startswith("Hangi çatı olsun?"), k.mesaj
     assert s.plan["revizyon"] == 1 and s.k.d["secenek_seti"]["durum"] == "acik" and not s.k.d.get("onaylanan"), k.mesaj
+
+
+# ── İE-42 · geometri hakemi onuncu tur (15 Kasım 2026 sabaha karşı) ──────────────────────────────────────────────────────────────────
+@pytest.mark.parametrize("metin", ["2 olsun, müşteri onaylayınca", "1 olsun, müşteri onaylayacak", "1 olsun, müşteri onayından sonra",
+                                   "Evin kendi çatısı olsun, müşteri onayından sonra", "2'yi seçtik banyo 2 tane", "Çatıyı siz bildirin"])
+def test_hakem10_celik_ertelenen_onay_ve_secim_sozu_sorulur(s, metin):
+    """Y-1, Y-2, O-4 çelikte: ertelenen onay sözü, ekli sayıyla seçim ve çatıyı bize bırakan söz sorulur; onay ve seçim kaydedilmez."""
+    cati_seti(s)
+    k = s.yaz(metin)
+    assert k.eylem == "sor" and k.mesaj.startswith("Hangi çatı olsun?"), k.mesaj
+    assert s.plan["revizyon"] == 1 and s.k.d["secenek_seti"]["durum"] == "acik" and not s.k.d.get("onaylanan"), k.mesaj
+
+
+# ── İE-42 · geometri hakemi on birinci tur (15 Kasım 2026 sabaha karşı) ─────────────────────────────────────────────────────────────
+@pytest.mark.parametrize("metin", ["2 olsun, müşteri kabul edince", "L olsun, kredi çıkınca", "2 olsun, stok varsa", "2 olsun, fiyat makulse",
+                                   "K mı olsun, müşteri Ayşe Kaya"])
+def test_hakem11_celik_kosullu_zamanli_ve_soru_bicimli_secim_sorulur(s, metin):
+    """Y-1, Y-2, Y-3 çelikte: zamana ya da koşula bağlı seçim ve soru biçimli seçim sorulur; çatı ve onay kaydedilmez."""
+    cati_seti(s)
+    k = s.yaz(metin)
+    assert k.eylem == "sor" and k.mesaj.startswith("Hangi çatı olsun?"), k.mesaj
+    assert s.plan["revizyon"] == 1 and s.k.d["secenek_seti"]["durum"] == "acik" and not s.k.d.get("onaylanan"), k.mesaj
+
+
+@pytest.mark.parametrize("metin, kod", [("Çatıya gelince L olsun", "Ç8801L"), ("Çatıya gelince, K olsun", "Ç8801K")])
+def test_hakem11_celik_catiya_gelince_secimdir(s, metin, kod):
+    """D-1 çelikte: "Çatıya gelince" söylem sözüdür; tur 10 kodunda istek diye Lokman'a iletiliyordu, çatı kaydedilmiyordu."""
+    cati_seti(s)
+    k = s.yaz(metin)
+    assert k.eylem == "is_emri" and k.revizyon == 2 and s.plan["yapi"]["kod"] == kod, k.mesaj
+
+
+@pytest.mark.parametrize("metin", ["1 olsun, teklifi bekliyoruz", "1 olsun, onayımızdır"])
+def test_hakem11_celik_acik_onay_soruya_donmez(s, metin):
+    """O-1, O-2 çelikte: açık onay ve "teklifi bekliyoruz" onaydır."""
+    cati_seti(s)
+    k = s.yaz(metin)
+    assert k.gerekce == K.PLAN_ONAYI and k.revizyon == 1, k.mesaj
+
+
+# ── İE-42 × BK-29 tur 9 (main c0a31afb, 15 Kasım 2026): kod ve müşteri adı çatı setinde ───────────────────────────────────────────────
+@pytest.mark.parametrize("metin, kod", [("Ç8801 olsun, müşteri Ayşe Kaya", "Ç8801"), ("Ç8801K olsun, müşteri Ayşe Kaya", "Ç8801K")])
+def test_bk29_tur9_celik_kod_ve_musteri_adi_cati_setinde(s, metin, kod):
+    """Çelikte de: kod + "müşteri <ad>" çatıyı seçer, ad plana girer, plan r02; onay sessizce kaydedilmez, r02'nin Onayla'sı onaylar."""
+    cati_seti(s)
+    k = s.yaz(metin)
+    assert k.eylem == "is_emri" and k.revizyon == 2 and s.plan["yapi"]["kod"] == kod, k.mesaj
+    assert not s.k.d.get("onaylanan") and (s.k.d["taslak"].get("musteri") or {}).get("ad") == "Ayşe Kaya"
+    k = onayla(s)
+    assert k.gerekce == K.PLAN_ONAYI and k.revizyon == 2, k.mesaj
