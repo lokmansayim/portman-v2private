@@ -1,4 +1,4 @@
-"""BK-40 · Kayıtlı prefabrik aday resmini (`is_emri/adaylar/<kod>.png`, bayinin seçenek kartı) bugünkü koddan yeniden çizer.
+"""BK-42 · Kayıtlı prefabrik aday resmini (`is_emri/adaylar/<kod>.png`, bayinin seçenek kartı) bugünkü koddan yeniden çizer.
 
     python3 araclar/aday_gorseli_yenile.py PA09 PA36 … [--yazi-tipi sunucu|makine] [--kuru]
 

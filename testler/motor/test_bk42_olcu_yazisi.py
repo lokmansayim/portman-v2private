@@ -1,4 +1,4 @@
-"""BK-40 · Bayi plan görselinde dış ölçü DXF ve PDF'teki gibi yazılır (Lokman, 15.11.2026 21:50 kartı "Evet, iş açılsın").
+"""BK-42 · Bayi plan görselinde dış ölçü DXF ve PDF'teki gibi yazılır (Lokman, 15.11.2026 21:50 kartı "Evet, iş açılsın").
 
 Görsel dış ölçüyü tek ondalıkla yazıyordu: 60 m² 2+1'in yeni hâlinde (PA-36) 951,25 cm başlıkta ve ölçüde "951,2 cm" çıkıyordu; DXF ve
 PDF "951,25" yazar. Görselin ölçü yazısı artık DXF'in biçimlendiricisinden (`dxf_out.fmt`: en çok iki ondalık, sondaki sıfırlar atılır).
