@@ -1668,8 +1668,9 @@ _KAPLAMA_SATIRI = "Çatı Kaplaması"                            # çelik pafta 
 
 # ── İE-20 PR-11 (D-97; geometri hakemi, üç tur) · bayinin yazdığı çatı kaplaması, çizime işlenen form seçimine göre ──
 # Desen geniş, istisna dar: sözcük kökleriyle (Türkçe harfsiz, küçük harf) bakılır; kalınlık, ek ve sıra fark etmez.
-_KAP_KOK = {"sandvic_panel": ("sandvic", "sandwic", "sandvij"), "osb_kiremit": ("kiremit", "marsilya"), "trapez_sac": ("trapez",),
+_KAP_KOK = {"sandvic_panel": ("sandvic", "sandwic", "sandvij"), "osb_kiremit": ("kiremit", "kiremid", "marsilya"), "trapez_sac": ("trapez",),
             "osb_trapez": ("trapez",), "osb_shingle": ("shingle", "shingil", "shingl", "singil", "singl")}
+#   "kiremid": ünsüz yumuşaması ("çatı kiremidi olsun"); "kiremit" kökü bu yazımı yakalamıyordu (BK-33 geometri hakemi, 15 Kasım 2026)
 _KAP_KESIN = ("ondulin", "eternit")                            # kitapta olmayan ama yalnız çatı örtüsü olan malzemeler
 _KAP_BAGLAMLI = ("sac", "galvaniz", "aluminyum", "bakir", "cinko")   # yalnız çatı / kaplama sözüyle birlikte çatı kaplamasıdır
 _KAP_KENDI_BAGLAMLI = {"osb_kiremit": ("sac",), "osb_trapez": ("sac",), "trapez_sac": ("sac",)}   # kaplamanın kendi adındaki sözcük: yalnız
@@ -1700,7 +1701,7 @@ def _kap_oteki_malzemeler(deger, kap: str, baglam: bool = True) -> set[str]:
     `baglam` False ise yalnız çatıya özgü malzemeler sayılır ("sac" cephe de olabilir). Çatının bir parçasına yazılan metal ("çatı oluğu
     galvaniz", "alüminyum çatı penceresi") çatı örtüsü değildir."""
     ws = _kap_sozcukleri(deger)
-    ws = [w for i, w in enumerate(ws) if not (w.startswith("kiremit") and i + 1 < len(ws) and ws[i + 1].startswith(_KAP_RENK))]
+    ws = [w for i, w in enumerate(ws) if not (w.startswith(("kiremit", "kiremid")) and i + 1 < len(ws) and ws[i + 1].startswith(_KAP_RENK))]
     kendi_kok = _KAP_KOK.get(kap, ())
     oteki_kok = tuple({x for a, ks in _KAP_KOK.items() if a != kap for x in ks} - set(kendi_kok)) + _KAP_KESIN
     bulunan = {kok for w in ws for kok in oteki_kok if w.startswith(kok)}
