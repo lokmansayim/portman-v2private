@@ -294,7 +294,8 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | BK | BK-37 | havuz hakeminde köşe profili kalemi (köşe profili sohbeti, `claude/project-thread-are9gn`) | alındı (15.11; 08:35) |
 | BK | BK-38 | montaj çizimi ile liste eşitliği (D-105, PC-42; `claude/project-thread-3o0qzh`) | alındı (15.11) |
 | BK | BK-39 | Pano Motor'unda tavan kirişi (D-107, PC-43; Motor bakım sohbeti, tavan kirişi) | alındı (15.11) |
-| BK | **BK-40** | — | **sıradaki boş** |
+| BK | BK-40 | Bayi plan görselinde dış ölçü DXF ve PDF'teki gibi iki ondalık (951,25 cm "951,2" yazılıyordu); 12 kayıtlı seçenek resmi yeniden çizildi (Lokman 15.11 21:50 kartı "Evet, iş açılsın"; `claude/project-thread-r8278d`) | alındı (15.11; 21:58) |
+| BK | **BK-41** | — | **sıradaki boş** |
 
 ## 27 Eylülde Lokman'ın verdiği kararlar
 
