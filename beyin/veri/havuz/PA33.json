@@ -1,0 +1,184 @@
+{
+ "kod": "PA33",
+ "gosterim": "PA-33",
+ "durum": "gecerli",
+ "sablon": "adaylar/PA33.json",
+ "gorsel": "adaylar/PA33.png",
+ "referans_model": "PA-33",
+ "yapi_turu": "prefabrik",
+ "kat": 1,
+ "oda_programi": "3+1",
+ "katalog_m2": 142.0,
+ "kapali_m2": 118.4,
+ "veranda_m2": 24.0,
+ "ozet": {
+  "grid": {
+   "x_pano": 11.0,
+   "y_pano": 8.0
+  },
+  "dis_olcu_cm": [
+   1390.5,
+   1024.0
+  ],
+  "brut_m2": 142.39,
+  "pano": 78,
+  "pencere": 8,
+  "kapi": 10,
+  "odalar": {
+   "SALON": 27.27,
+   "VERANDA": 24.0,
+   "HOL VE KORİDOR": 14.97,
+   "MUTFAK": 13.19,
+   "EBV BANYO 1": 2.82,
+   "GENEL BANYO": 3.23,
+   "YATAK ODASI 1": 15.33,
+   "YATAK ODASI 2": 13.84,
+   "EBV BANYO 2": 2.96,
+   "EBV BANYO 3": 2.96,
+   "YATAK ODASI 3": 14.42
+  }
+ },
+ "kaynak": {
+  "metin": "D-92 (İE-40): 140 m² 3+1 evin (PA-08, AP-01) tek özel pano kuralının bıraktığı 9,5 cm kısa parçası silinmiş, ön cephesi salonda 101,5 cm panoyu 125,5 cm panoya tamamlamak için 24 cm büyümüş hâli (Lokman 14 Kasım 2026 19:39:46 kartı \"Kısa parça silinsin\"; 20:22:14 sözü \"sağ taraf doğru ön tarafta da salon kısmında 101,5'u 125,5 a tamamlayabilirsin\"; 20:25:45 kartı \"Doğru, yanına eklensin\": \"Bugünkü 140 m2 kalır; 1390,5 × 1024 cm hâli (142,4 m2, veranda 24,0 m2) yeni numarayla girer.\")",
+  "dosya": "testler/havuz/is_emirleri/PA08_BUYUME.json",
+  "ayna": null,
+  "karar": "D-92",
+  "standart": true,
+  "kart_kiyasi": {
+   "kart": "AP-01",
+   "kart_sha256": "c9417f52ed3bb047c3f246272e4b94848353ed94de4a7c91983218414f710c86",
+   "sonuc": "geçti",
+   "olcum": {
+    "dis_olcu_cm": [
+     1390.5,
+     1024.0
+    ],
+    "acikla_olcu_cm": [
+     1390.5,
+     1024.0
+    ],
+    "brut_m2": 142.39,
+    "kubbe_m2": 0.0,
+    "yatak_odasi": 3,
+    "pencereler": {
+     "120x120": 3,
+     "120x180": 2,
+     "60x40": 3
+    },
+    "dis_kapi": 1,
+    "ic_kapi": 9,
+    "veranda": 1,
+    "kat": 1,
+    "kaynak_dis_olcu_cm": [
+     1400.0,
+     1000.0
+    ],
+    "silinen_cm": [
+     9.5,
+     0.0
+    ],
+    "buyuyen_cm": [
+     0.0,
+     24.0
+    ],
+    "silinen": [
+     {
+      "duvar": "dis x 700.25",
+      "boy": 9.5
+     }
+    ],
+    "tamamlanan": [
+     {
+      "duvar": "dis y 5",
+      "once": 101.5,
+      "sonra": 125.5
+     }
+    ],
+    "yeniden_dizilen": [
+     {
+      "duvar": "dis x 5",
+      "once": [
+       125.5,
+       125.5,
+       125.5,
+       125.5,
+       125.5,
+       125.5,
+       62.75,
+       125.5,
+       125.5,
+       125.5,
+       125.5,
+       72.25
+      ],
+      "sonra": [
+       125.5,
+       125.5,
+       125.5,
+       125.5,
+       125.5,
+       125.5,
+       62.75,
+       125.5,
+       125.5,
+       62.75,
+       125.5,
+       125.5
+      ]
+     },
+     {
+      "duvar": "ic x 386.5",
+      "once": [
+       122.5,
+       62.75,
+       125.5,
+       125.5,
+       125.5,
+       125.5,
+       125.5,
+       125.5,
+       125.5,
+       125.5,
+       67.25
+      ],
+      "sonra": [
+       122.5,
+       62.75,
+       125.5,
+       125.5,
+       125.5,
+       125.5,
+       125.5,
+       62.75,
+       125.5,
+       125.5,
+       120.5
+      ]
+     },
+     {
+      "duvar": "dis y 632.5",
+      "once": [
+       120.5,
+       125.5,
+       38.75
+      ],
+      "sonra": [
+       57.75,
+       125.5,
+       125.5
+      ]
+     }
+    ],
+    "veranda_kisalan": [
+     "VERANDA"
+    ]
+   },
+   "kip": "silme_hali",
+   "kaynak_is_emri": "is_emri/adaylar/PA08.json",
+   "kaynak_sha256": "f0e988f5227580a359e4cb8d59d4e2a6780dd057eed965b4be1ba7648b171619",
+   "veranda_sozu": "Lokman, 14 Kasım 2026 20:25:45 UTC kartı \"Doğru, yanına eklensin\": \"Bugünkü 140 m2 kalır; 1390,5 × 1024 cm hâli (142,4 m2, veranda 24,0 m2) yeni numarayla girer.\"",
+   "buyume_sozu": "Lokman 14 Kasım 2026 20:22:14 UTC: \"sağ taraf doğru ön tarafta da salon kısmında 101,5'u 125,5 a tamamlayabilirsin\"; kart 20:25:45 \"Doğru, yanına eklensin\""
+  }
+ },
+ "not": ""
+}
