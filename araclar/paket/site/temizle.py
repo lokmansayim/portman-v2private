@@ -31,6 +31,7 @@ ON_DEGISIM = [   # cümle düşürmeden önce anlamı koruyan kısa değişimler
     (r'Veranda çatılarında da sıralar kart modelinden, aynı kuralla\.', 'Veranda çatılarında da sıralar aynı düzende.'),
 ]
 ATILAN_ANAHTAR = {'kaynak', 'makas_kaynak', 'dvr_kaynak'}
+TEKRAR = re.compile(r'\bprefabrik prefabrik\b')   # 62 m² verisi: "__PROJE__ prefabrik konut", proje adı "62 m² prefabrik" (hedef örnek)
 KARAR = re.compile(r'\s?\((?:(?:D|İE|BK|PC|M)-\d{2}[;,]?\s*)+\)|(?<=\()(?:D|İE|BK|PC|M)-\d{2}[;,]\s*|[;,]\s*(?:D|İE|BK|PC|M)-\d{2}(?=\))')
 S = r'''(?:"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|`(?:[^`\\]|\\.)*`)'''
 JS_DEGISIM = [   # esbuild çıktısında (çift tırnak, boşluksuz): (desen, yerine, ad)
@@ -73,7 +74,7 @@ class Temizleyici:
 
     def deger(self, s):
         if isinstance(s, str):
-            s = KARAR.sub('', s)
+            s = TEKRAR.sub('prefabrik', KARAR.sub('', s))
         if not isinstance(s, str) or not self.ic.search(s):
             return s
         for d, y in ON_DEGISIM:
