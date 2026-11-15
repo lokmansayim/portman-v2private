@@ -744,3 +744,70 @@ def test_cati_kaplamasi_revizyonda_kalir(tmp_path):
     assert [d["op"] for d in kr3.is_emri["yapi"]["degisiklikler"]] == ["cati_kaplamasi", "pencere_olcu"]   # çatı artık planın kendisi
     assert varyant.kaplama_oku(W._cizim_tanimi(kr3.is_emri["yapi"]["tanim"], kr3.is_emri["yapi"]["degisiklikler"])) == "sandvic_panel"
 
+
+# ─── İE-20 PR-12 (D-99) · çelik formun ikinci sürümü: trapez sac yok, shingle satırı OSB + membran + shingle ───
+AYAR_CF2 = {**AYAR_CF, "talep_formu": {**AYAR_CF["talep_formu"], "celik2_flow_id": "6666666666"}}
+YAYIMLI_CELIK_SHA = "9057e44c735d1d56ac86b86a4e9cd661248720eace9d8b10209a38148a7d5f74"
+
+
+def _kaplama_secenekleri(tanim: dict) -> list[tuple[str, str]]:
+    c = next(c for c in tanim["screens"][1]["layout"]["children"] if c.get("name") == "kaplama")
+    return [(x["id"], x["title"]) for x in c["data-source"]]
+
+
+def test_celik2_yayimli_formun_trapez_sacsiz_kopyasi():
+    """Hedef liste Lokman'ın sözü (15 Kasım 2026 05:23:34 UTC: "Trapez Sac çelik konstrüksiyonda yok ... seçenek olarak çelikte sunma";
+    05:23:08: "OSB + mebran + Shingle olacak"; kart 05:28:14 "Yalnız trapez sac kalksın": trapez sac + OSB kalır). Yayımlı form
+    (`celik.json`, Meta'da değişmez) bayt bayt aynı kalır; yeni form onun kopyasıdır, yalnız çatı kaplaması seçenekleri değişir."""
+    import hashlib
+    assert hashlib.sha256((TF.FORMLAR / "celik.json").read_bytes()).hexdigest() == YAYIMLI_CELIK_SHA
+    eski, yeni = TF.tanim("celik"), TF.tanim("celik2")
+    assert _kaplama_secenekleri(yeni) == [("tek_kat", "Tek kat panel (standart)"), ("sandvic", "Sandviç panel"),
+                                          ("kiremit", "Kiremit desen sac + OSB"), ("osb_trapez", "Trapez sac + OSB"),
+                                          ("shingle", "OSB + membran + shingle")]
+    assert [i for i, _ in _kaplama_secenekleri(eski) if i not in dict(_kaplama_secenekleri(yeni))] == ["trapez"]
+    assert all(len(t) <= 30 for _, t in _kaplama_secenekleri(yeni))                                   # Meta: seçenek başlığı ≤ 30
+    for t in (eski, yeni):                                                                            # öteki her şey aynı
+        next(c for c in t["screens"][1]["layout"]["children"] if c.get("name") == "kaplama")["data-source"] = []
+    assert eski == yeni
+    assert TF.EKRAN["celik2"] == TF.EKRAN["celik"] and TF.DUGME["celik2"] == TF.DUGME["celik"]
+    # bayiye okunan adlar: shingle Lokman'ın sırasıyla; "trapez" yalnız eski formun cevabı için durur
+    assert TF.C_KAPLAMA["shingle"] == "OSB + membran + shingle" and TF.C_KAPLAMA["trapez"] == "trapez sac"
+    assert set(dict(_kaplama_secenekleri(TF.tanim("celik2")))) == set(TF.C_KAPLAMA) - {"trapez"}
+    assert '"trapez sac"' not in (TF.FORMLAR / "celik2.json").read_text(encoding="utf-8").lower()
+
+
+def test_celik2_kimligi_varsa_celik_formun_yerine_sunulur():
+    assert "celik2_flow_id" not in AY.VARSAYILAN["talep_formu"]
+    celik_ts = {"yapi_turu": "celik", "oda_programi": "2+1"}
+    assert W.form_kimligi(AYAR_CF, "celik2") is None and W.form_kimligi(AYAR_CF2, "celik2") == "6666666666"
+    assert W.talep_formu_sunusu(GELEN, None, celik_ts, AYAR_CF)[0] == "celik"                         # kimlik yok: davranış aynı
+    for bayi, taslak in ((None, celik_ts), ({"varsayilanlar": {"yapi_turu": "celik"}}, None)):
+        fs = W.talep_formu_sunusu(GELEN, bayi, taslak, AYAR_CF2)
+        assert fs[0] == "celik2" and fs[1].startswith("cf:") and fs[1].endswith(":1") == (taslak is not None)
+        assert fs[2] == TF.celik_ekran_verisi(bayi, taslak)
+        satir = W.form_satiri(GELEN, "Talebinizi formla iletin.", fs, AYAR_CF2)
+        p = satir["interactive"]["action"]["parameters"]
+        assert p["flow_id"] == "6666666666" and p["flow_action_payload"]["screen"] == "TALEP_C" and p["flow_cta"] == "Talep formu"
+        assert set(p["flow_action_payload"]["data"]) == set(TF.tanim("celik2")["screens"][0]["data"])
+        M.mesaj_yuku(satir, "905550000001")
+    # eski formun kimliği olmadan da sunulur; prefabrik ve bilinmeyen yapı tipi aynen
+    yalniz = {**AYAR_PF, "talep_formu": {**AYAR_PF["talep_formu"], "celik2_flow_id": "6666666666"}}
+    assert W.talep_formu_sunusu(GELEN, None, celik_ts, yalniz)[0] == "celik2"
+    assert W.talep_formu_sunusu(GELEN, None, {"yapi_turu": "prefabrik"}, AYAR_CF2)[0] == "prefabrik"
+    assert W.talep_formu_sunusu(GELEN, None, None, AYAR_CF2)[0] == "yapi_sor"
+    # bozuk kimlik sunulmaz: yayımlı çelik formu
+    bozuk = {**AYAR_CF, "talep_formu": {**AYAR_CF["talep_formu"], "celik2_flow_id": "12a"}}
+    assert W.talep_formu_sunusu(GELEN, None, celik_ts, bozuk)[0] == "celik"
+    assert W.YAPI_FORM_METNI["celik2"] == W.YAPI_FORM_METNI["celik"]
+
+
+def test_celik2_cevabi_ayni_yoldan_okunur():
+    """Yeni formun cevabı eski formunkiyle aynı token ve aynı alanlarla gelir. Eski formdan yolda kalmış "trapez" cevabı okunur."""
+    oz = _cevap(alan=88, kaplama="shingle")
+    assert (oz["tur"], oz["form"]) == ("talep", "celik") and TF.celik_standart_disi(oz) == ["çatı kaplaması OSB + membran + shingle"]
+    assert TF.talep(oz)["bina_ozellikleri"]["Çatı Kaplaması"] == "OSB + membran + shingle" and TF.celik_kaplamasi(oz) is None
+    assert "çatı kaplaması OSB + membran + shingle. Bu seçimler çizimi değiştirmez." in TF.celik_notu(oz)
+    eski = _cevap(alan=88, kaplama="trapez")
+    assert TF.celik_standart_disi(eski) == ["çatı kaplaması trapez sac"] and TF.talep(eski)["bina_ozellikleri"]["Çatı Kaplaması"] == "trapez sac"
+

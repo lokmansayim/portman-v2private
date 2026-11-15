@@ -189,6 +189,32 @@ def test_celik_formu_yaziyla_secim_islenemeyen_140(depo, wa, tmp_path, hizli_gen
     assert not [y for y in sorgu(depo, "SELECT alici FROM giden") if y["alici"] == "PATRON"]               # Patron'a yönlendirme yok
 
 
+def test_celik2_kimligi_varsa_yeni_form_sunulur_cevabi_ayni_yoldan(depo, wa, tmp_path, hizli_genel):  # noqa: F811
+    """İE-20 PR-12 (D-99): `celik2_flow_id` ayarda varsa [Çelik] düğmesi yeni formu açar (trapez sac seçeneği yok). Cevabı çelik formun
+    yolundan işlenir: shingle seçimi "OSB + membran + shingle" diye okunur, özel istekte kalır."""
+    kabul(depo, YEDI)
+    s = cf_ayar(tmp_path)
+    s = {**s, "talep_formu": {**s["talep_formu"], "celik2_flow_id": "6666666666"}}
+    ids, dis = yapi_dugmeleri(depo, wa, s)
+    assert depo.mesaj_kaydet(buton(ids[1], dis))
+    [r] = isle_hepsi(depo, s)
+    assert son_sonuc(depo)["form_sunuldu"] == "celik2", r
+    satir, dis_form = form_satiri(depo, wa)
+    assert satir["body"] == "Çelik talep formunu doldurun. İsterseniz talebinizi yazın."
+    p = parametreler(satir)
+    assert p["flow_id"] == "6666666666" and p["flow_token"].startswith("cf:") and p["flow_action_payload"]["screen"] == "TALEP_C"
+    form_cevabi(depo, tmp_path, p["flow_token"], {**STD, "alan": 88, "oncelik": "yok", "kaplama": "shingle"}, dis_form)
+    [r] = isle_hepsi(depo, s)
+    j = tek(depo, "SELECT cikarim, sonuc FROM isler ORDER BY id DESC LIMIT 1")
+    assert j["cikarim"]["form"]["durum"] == "talep" and j["sonuc"]["llm"]["backend"] == "form", r        # LLM'siz
+    assert j["cikarim"]["form"]["talep"]["bina_ozellikleri"]["Çatı Kaplaması"] == "OSB + membran + shingle"
+    assert r["eylem"] == "secenek", r
+    assert "Standart dışı seçimlerinizi aldım: çatı kaplaması OSB + membran + shingle. Bu seçimler çizimi değiştirmez." \
+        in dugmeli(depo)["satir"]["body"]
+    d, _ = depo.konusma_oku(NUMARA_A)
+    assert d["taslak"]["form"] == "celik" and "form_kaplama" not in d["taslak"]
+
+
 def test_celik_formu_kimligi_yokken_bugunku_form(depo, wa, tmp_path):
     """`celik_flow_id` ayarda yok: [Çelik] düğmesi bugünkü formu açar (kurulum davranışı değiştirmez)."""
     s = pf_ayar(tmp_path)
