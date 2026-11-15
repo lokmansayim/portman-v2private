@@ -334,29 +334,38 @@ def aks_dizini(v: float, yon: str) -> int:
     raise IsEmriHatasi(f"Sınır aks üstünde değil ({yon} = {v} cm); `yapi.ek_akslar_cm` ile ekleyin. Akslar: {[round(t, 2) for t in tab]}")
 
 
-def _birlesimleri_oku(birlesimler, tablo: bool) -> tuple[dict, set]:
+BIRLESIM_T = ("cektirme_u", "uclu_h")
+
+
+def _birlesimleri_oku(birlesimler, tablo: bool) -> tuple[dict, set, set]:
     """D-49 madde 3 (Lokman, 4 Kasım 2026 19:59; TK-04: "5 numaralı aks ile D aksının kesiştiği iç köşenin yönünü değiştir ... C ve D aksları
     ortasındaki pano tam pano oluyor ortasına 3'lü H değil Çektirme U'su koyacaksın"): İş Emri tek tek birleşimi yazar, Motor'un kuralı orada
     uygulanmaz. `yapi.birlesimler`: [{"nokta_cm": [x, y], "kose": "x" | "y"}] iki iç duvarın L köşesinde geçen duvar (x: x boyunca uzanan,
     öteki onun yüzünde biter); [{"nokta_cm": [x, y], "t": "cektirme_u"}] bir duvarın ortasına iç duvarın T ile geldiği yer: geçen duvar orada
-    bölünmez, 3'lü H yok, listede çektirme U'su (İE-27). Nokta mahallerin `konum_cm`'i gibi (aks tablosunda, Motor çerçevesinde)."""
-    kose_yonu, eklemsiz_t = {}, set()
+    bölünmez, 3'lü H yok, listede çektirme U'su (İE-27). Nokta mahallerin `konum_cm`'i gibi (aks tablosunda, Motor çerçevesinde).
+    D-96 (Lokman, 14 Kasım 2026 20:46:54, 71 m²: "orada köşe direği olmayacak üçlü H olacak yanlış çizmiş mühendis"; kart 20:57:28):
+    [{"nokta_cm": [x, y], "t": "uclu_h"}] iki dış ve bir iç duvarın buluştuğu köşede (dış duvarlardan biri iç duvarla aynı hatta sürer,
+    öteki ona dik) köşe direği yerine 3'lü H: D-29'un niş T'si yalnız bu noktada, `dis_duvar_t_bolme` ve kapı duvarının iki ucu aranmadan.
+    Yalnız yazılan noktada; genel kural değildir."""
+    kose_yonu, eklemsiz_t, uclu_h = {}, set(), set()
     for b in birlesimler or []:
         if not isinstance(b, dict) or set(b) - {"nokta_cm", "kose", "t"} or ("kose" in b) == ("t" in b) \
                 or not isinstance(b.get("nokta_cm"), list) or len(b["nokta_cm"]) != 2 \
                 or not all(isinstance(v, (int, float)) and not isinstance(v, bool) for v in b["nokta_cm"]) \
-                or b.get("kose", "x") not in ("x", "y") or b.get("t", "cektirme_u") != "cektirme_u":
-            raise IsEmriHatasi(f"yapi.birlesimler: nokta_cm [x, y] ve ya kose (x | y) ya da t (cektirme_u) ister: {b}")
+                or b.get("kose", "x") not in ("x", "y") or b.get("t", "cektirme_u") not in BIRLESIM_T:
+            raise IsEmriHatasi(f"yapi.birlesimler: nokta_cm [x, y] ve ya kose (x | y) ya da t (cektirme_u | uclu_h) ister: {b}")
         if not tablo:
             raise IsEmriHatasi("yapi.birlesimler aks tablosu ister (`konum_cm` ya da `yapi.ek_akslar_cm`)")
         P = (aks_dizini(tamamla_cm(b["nokta_cm"][0], "x"), "x"), aks_dizini(tamamla_cm(b["nokta_cm"][1], "y"), "y"))
-        if P in kose_yonu or P in eklemsiz_t:
+        if P in kose_yonu or P in eklemsiz_t or P in uclu_h:
             raise IsEmriHatasi(f"yapi.birlesimler: aynı nokta iki kez yazılmış: {b}")
         if "kose" in b:
             kose_yonu[P] = b["kose"]
+        elif b["t"] == "uclu_h":
+            uclu_h.add(P)
         else:
             eklemsiz_t.add(P)
-    return kose_yonu, eklemsiz_t
+    return kose_yonu, eklemsiz_t, uclu_h
 
 
 def _ayna_aciklik(ac: dict) -> dict:
@@ -710,7 +719,7 @@ def _kur(is_emri: dict) -> Plan:
         normal_ = {"on": "-y", "arka": "+y", "sol": "-x", "sag": "+x", None: None}[cephe_]
         dayanaklar[yon_[0]].append((lo_, hi_, aks_, bool(dy.get("ic_duvarlar", False)), normal_))
     dayanak_duvari: set = set()
-    kose_yonu, eklemsiz_t = _birlesimleri_oku(yapi.get("birlesimler"), tablo)   # D-49 madde 3
+    kose_yonu, eklemsiz_t, uclu_h_nokta = _birlesimleri_oku(yapi.get("birlesimler"), tablo)   # D-49 madde 3, D-96
     birlesim_kullanildi: set = set()
     eklemsiz_yer: dict = {}                                 # D-49 madde 3: nokta → (geçen duvar, T ile gelen duvar)
     uyarilar = list(tamamlama_uyarisi)                    # D-30: tam panoya tamamlama söylenir
@@ -1091,6 +1100,9 @@ def _kur(is_emri: dict) -> Plan:
     # duvarının öteki ucu serbest) köşe parçasıyla kalır
     nis_t = {P: m for P in ends_at if dis_t_bolme and not through_at.get(P) and (m := _nis_t(ends_at[P]))}
     nis_t = {P: m for P, m in nis_t.items() if sum(1 for q in nis_t.values() if q[2][0] is m[2][0]) == 2}
+    for P in uclu_h_nokta:                        # D-96: İş Emri'nin yazdığı köşede köşe direği yerine 3'lü H (yalnız o nokta)
+        if P in ends_at and not through_at.get(P) and (m := _nis_t(ends_at[P])):
+            nis_t[P] = m; birlesim_kullanildi.add(P)
     for P in set(ends_at) | set(through_at):
         ends = ends_at.get(P, []); thr = through_at.get(P, [])
         if not ends:
@@ -1155,10 +1167,11 @@ def _kur(is_emri: dict) -> Plan:
     if bos_kose:                                              # K21: L köşesine düşmeyen giriş sessizce yutulmaz
         raise IsEmriHatasi(f"dizilim.kose_uzayan L köşesine düşmüyor: {', '.join(f'({x:g}, {y:g})' for x, y in bos_kose)}")
 
-    for P in sorted((set(kose_yonu) | eklemsiz_t) - birlesim_kullanildi):
+    for P in sorted((set(kose_yonu) | eklemsiz_t | uclu_h_nokta) - birlesim_kullanildi):
         nokta = f"{X(P[0] / 2):g}, {Y(P[1] / 2):g} cm"
         raise IsEmriHatasi(f"yapi.birlesimler: {nokta} " + ("iki iç duvarın L köşesi değil" if P in kose_yonu else
-                           "bir duvarın ortasına tek iç duvarın T ile geldiği yer değil"))
+                           "iki dış ve bir iç duvarın köşesi değil (t: uclu_h; dış duvarlardan biri iç duvarla aynı hatta ve eksende sürer, "
+                           "öteki ona dik)" if P in uclu_h_nokta else "bir duvarın ortasına tek iç duvarın T ile geldiği yer değil"))
 
     # ---------------- açıklık listesi (aynalı çerçevede) ve oda ortası pencere hedefleri (İE-11; bölmeden önce gerekir)
     NORMAL = {"sol": "-x", "sag": "+x", "on": "-y", "arka": "+y"}
