@@ -81,10 +81,13 @@ def main() -> int:
     a = ap.parse_args()
     if a.standart_hal and a.silme_hali:
         print("DUR: --standart-hal ve --silme-hali ayrı kalemlerdir; birlikte verilmez"); return 2
-    if (a.veranda_sozu or a.buyume_sozu or a.kesim_hatti or a.kesim_sozu or a.uclu_h_sozu or a.aciklik_sozu) and not a.silme_hali:
+    if (a.veranda_sozu or a.buyume_sozu or a.kesim_hatti or a.kesim_sozu or a.uclu_h_sozu or a.aciklik_sozu or a.aks_sozu
+            or a.tam_yarim_sozu) and not a.silme_hali:
         print("DUR: --veranda-sozu, --buyume-sozu, --kesim-hatti ve öteki söz seçenekleri yalnız --silme-hali ile"); return 2
     if bool(a.kesim_hatti) != bool(a.kesim_sozu and a.kesim_sozu.strip()):
         print("DUR: --kesim-hatti ve --kesim-sozu birlikte verilir (içerideki hatta kesim yalnız Lokman'ın ev kartıyla; BK-34)"); return 2
+    if a.aks_sozu and not a.kesim_hatti:
+        print("DUR: --aks-sozu yalnız --kesim-hatti ile (aksa oturan duvar kesim hattıyla yazılır; BK-35)"); return 2
     if a.motor == "genel":
         if a.standart_hal or a.silme_hali:
             print("DUR: --standart-hal ve --silme-hali yalnız prefabrikte (D-91, BK-31); çelikte yok"); return 2
@@ -119,7 +122,7 @@ def main() -> int:
         elif a.silme_hali:                                                     # BK-31: kısa parça silinmiş ev
             kaynak_ie = json.loads(Path(a.silme_hali).read_text(encoding="utf-8"))
             bulgular, olc = HH.denetle_silme(ie, kart, kaynak_ie, a.veranda_sozu, a.buyume_sozu, a.kesim_hatti, a.kesim_sozu,
-                                             a.uclu_h_sozu, a.aciklik_sozu)
+                                             a.uclu_h_sozu, a.aciklik_sozu, a.aks_sozu, a.tam_yarim_sozu)
         else:
             bulgular, olc = HH.denetle(ie, kart)
         if bulgular:
@@ -131,7 +134,9 @@ def main() -> int:
                        **({"buyume_sozu": a.buyume_sozu} if a.buyume_sozu and olc.get("tamamlanan") else {}),
                        **({"kesim_sozu": a.kesim_sozu} if olc.get("kesim_hatti") else {}),
                        **({"uclu_h_sozu": a.uclu_h_sozu} if a.uclu_h_sozu and olc.get("uclu_h") else {}),
-                       **({"aciklik_sozu": a.aciklik_sozu} if a.aciklik_sozu and olc.get("kayan_aciklik") else {})}
+                       **({"aciklik_sozu": a.aciklik_sozu} if a.aciklik_sozu and olc.get("kayan_aciklik") else {}),
+                       **({"aks_sozu": a.aks_sozu} if a.aks_sozu and olc.get("aksa_oturan") else {}),
+                       **({"tam_yarim_sozu": a.tam_yarim_sozu} if a.tam_yarim_sozu and olc.get("tam_yarim") else {})}
     elif a.standart_hal or a.silme_hali:
         print("DUR: --standart-hal ve --silme-hali yalnız --kart ile (kaynak evin proje kartı)"); return 2
     kod = kod_normalize(a.kod)                                                 # PA-04 → PA04 (kayıt kodu); bayinin gördüğü `gosterim`
