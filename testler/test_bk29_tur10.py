@@ -2,7 +2,7 @@
 
 Kabul seti D5 (pano 207): canlıda her revizyon yeni numara alıyordu (…4303 r03 → …4342 r04); bayi aynı evin iki planını iki ayrı
 iş sanıyordu. Numara artık ilk planda kurulur, revizyonu rNN ayırır (…8813 r01, …8813 r02). Yeni numara: konuşma sıfırlandıysa (iptal,
-yeni talep) ve kanalın sıradaki revizyon klasörünü dolu bulduğu işte (`k.yeni_numara`). Çelikte bugünkü yol (kartın kapsamı prefabrik).
+yeni talep) ve kanalın sıradaki revizyon klasörünü dolu bulduğu işte (`k.yeni_numara`). Çelik planın testleri `test_bk29_tur11.py`'de.
 LLM yok, Postgres yok: `karar_ver` elle kurulmuş `Talep`lerle sürülür; saat testte ileri alınır (numara saatten kurulur).
 """
 from __future__ import annotations
@@ -104,26 +104,3 @@ def test_degismeyen_plan_numarayi_ve_revizyonu_tuketmez(s, saat):
     k = s.yaz("yatak odası 1 penceresi 120x180 olsun", pencereler=[pen("yatak odası 1", "120x180")])
     assert k.eylem == "cevapla" and f"Planınız ({no} r02) değişmedi" in k.mesaj
     assert (s.plan["is_emri_no"], s.plan["revizyon"]) == (no, 2)
-
-
-def test_celikte_bugunku_yol(tmp_path, saat):
-    """Kartın kapsamı prefabrik: çelik revizyonun numarası bugünkü gibi her planda yeniden kurulur (çelik sorusu Lokman'da, D-101 › Açık)."""
-    c = Sohbet(tmp_path)
-    r01_k(c)
-    no = c.plan["is_emri_no"]
-    saat(1000)
-    k = c.yaz("salondaki sol taraftaki pencere 120x180 olsun", pencereler=[pen("salon", "120x180", duvar="sol")])
-    if k.eylem == "sor":
-        k = c.dugme("q:okuma:2")
-    assert k.eylem == "is_emri" and k.revizyon == 2 and k.is_emri["is_emri_no"] != no
-
-
-def test_celik_planin_numarasi_prefabrik_plana_gecmez(tmp_path, saat):
-    """Çelik plandan sonra aynı konuşmada prefabrik ev seçilirse prefabrik plan çelik planın numarasını almaz."""
-    c = Sohbet(tmp_path, kabul=KABUL)
-    r01_k(c)
-    no = c.plan["is_emri_no"]
-    saat(1000)
-    k = c.yaz("PA-04", katalog_kodu="PA04", niyet="yeni_talep")
-    assert k.eylem == "is_emri" and (k.is_emri.get("yapi") or {}).get("sistem") != "celik", k.mesaj
-    assert k.is_emri["is_emri_no"] != no

@@ -3523,6 +3523,21 @@ def _kaplama_sozleri(ts: dict, kap: str, hepsi: bool = False) -> tuple[list[str]
     return ayni, baska
 
 
+def _talep_numarasi(k: Konusma, bayi: dict) -> str:
+    """D-101 (Lokman, kartlar 15 Kasım 2026: 07:26:12 UTC "Sabit kalsın", prefabrik; 21:51:26 UTC "Çelikte de sabit kalsın"): planda
+    revizyon talebin numarasını taşır (…8813 r01, …8813 r02); revizyonu rNN ayırır. Prefabrik (`_is_emri_uret`) ve çelik (`celik.zarf`)
+    aynı kuralla. Yeni numara yalnız ilk planda (konuşma sıfırlandıysa son plan yoktur) ve kanalın o numaranın sıradaki revizyon
+    klasörünü dolu bulduğu işte (`k.yeni_numara`; yarım kalmış bir işin klasörü: üzerine yazılmaz) üretilir."""
+    onceki_no = (k.d.get("son_is_emri") or {}).get("is_emri_no")
+    if onceki_no and not getattr(k, "yeni_numara", False):
+        return str(onceki_no)
+    seq = int(time.time()) % 100000
+    no = f"PM-{bayi.get('kod', 'BAYI')}-{time.strftime('%Y%m%d')}-{seq}"
+    if no == onceki_no:                                # aynı saniye: yeni numara eskisiyle aynı çıkmaz
+        no = f"PM-{bayi.get('kod', 'BAYI')}-{time.strftime('%Y%m%d')}-{(seq + 1) % 100000}"
+    return no
+
+
 def _celik_is_emri_uret(k: Konusma, bayi: dict, katalog: Katalog, aday: dict, ts: dict) -> Karar:
     """İE-08 A3/A4 · çelik İş Emri zarfı (`beyin/celik.zarf`): tanım gömülmez (yol + sha256), antet bilgisi bayi kartından (D-09).
     A4 (PR-2b): değişiklikler bayinin sözünden okunur (`celik_okuma`, cümle cümle), aynı projede birikir (`yapi.degisiklikler`), tanıma
@@ -3690,7 +3705,7 @@ def _celik_is_emri_uret(k: Konusma, bayi: dict, katalog: Katalog, aday: dict, ts
                 form_notu += (f"Çatı kaplaması {ad} seçiminizi bu plana otomatik işleyemedim. Planı modelin kendi çatı kaplamasıyla çizdim. "
                               "İsteğinizi talebe yazdım. ")
     ts.pop("pencereler", None); ts["varyantlar"] = []          # tüketildi: sonraki revizyon bunları yeniden okumaz (değişiklikler zarfta birikir)
-    ie = celik.zarf(aday, bayi, k.gonderen, ts, son, onceki + yeni, kaynak=f"aday {aday['kod']}")
+    ie = celik.zarf(aday, bayi, k.gonderen, ts, son, onceki + yeni, kaynak=f"aday {aday['kod']}", is_emri_no=_talep_numarasi(k, bayi))
     ie["yapi"]["bu_revizyon"] = [{**d} for d in yeni]
     ie["yapi"]["uygulanan"] = [CO.aciklama(d) for d in onceki + yeni]
     ie["yapi"]["onceki"] = ({"kod": son_y.get("kod"), "tanim": son_y.get("tanim"), "tanim_sha256": son_y.get("tanim_sha256"),
@@ -3767,7 +3782,7 @@ def _yeni_plan_revizyonu(k: Konusma, bayi: dict, aday: dict, ts: dict, son: dict
               "ozet": {"dis_olcu_cm": oz.get("dis_olcu_cm"), "odalar": oz.get("odalar_m2")}}
     k.d["uretilen_plan"] = guncel
     fark = list(ly.get("fark") or []) or ["plan isteğinize göre yeniden düzenlendi"]
-    ie = celik.zarf(guncel, bayi, k.gonderen, ts, son, [], kaynak=f"yeni plan {aday['kod']} (revizyon)")
+    ie = celik.zarf(guncel, bayi, k.gonderen, ts, son, [], kaynak=f"yeni plan {aday['kod']} (revizyon)", is_emri_no=_talep_numarasi(k, bayi))
     ie["yapi"]["bu_revizyon"] = [{"op": "plan_duzenleme", "aciklama": f} for f in fark]
     ie["yapi"]["uygulanan"] = fark
     ie["yapi"]["onceki"] = {"kod": son_y.get("kod"), "tanim": son_y.get("tanim"), "tanim_sha256": son_y.get("tanim_sha256"),
@@ -3915,18 +3930,7 @@ def _is_emri_uret(k: Konusma, bayi: dict, katalog: Katalog, sablon: dict, kaynak
                            for g in _pencere_gruplari(ie_pencere0, oda_adi) if set(g["sira"]) & set(r["pencere_sira"])]
                 notlar.append(f"{oda_adi} " + ", ".join(_grup_adi(g, kisa=True) for g in gruplar) + f" penceresi {r['olcu']}")
     notlar = list(dict.fromkeys(notlar))              # BK-29 tur 4: aynı değişiklik iki kez yazılmaz (canlı B5: "ODA 1 …, ODA 1 …")
-    # D-101 (Lokman, kart 15 Kasım 2026 07:26:12 UTC, "Sabit kalsın"): prefabrik planda revizyon talebin numarasını taşır (…8813 r01,
-    # …8813 r02); revizyonu rNN ayırır. Yeni numara yalnız ilk planda (konuşma sıfırlandıysa son plan yoktur) ve kanalın o numaranın
-    # sıradaki revizyon klasörünü dolu bulduğu işte (`k.yeni_numara`; yarım kalmış bir işin klasörü: üzerine yazılmaz) üretilir.
-    son_plan = k.d.get("son_is_emri") or {}
-    onceki_no = son_plan.get("is_emri_no") if (son_plan.get("yapi") or {}).get("sistem") != "celik" else None   # çelik planın numarası taşınmaz
-    if onceki_no and not getattr(k, "yeni_numara", False):
-        ie["is_emri_no"] = str(onceki_no)
-    else:
-        seq = int(time.time()) % 100000
-        ie["is_emri_no"] = f"PM-{bayi.get('kod','BAYI')}-{time.strftime('%Y%m%d')}-{seq}"
-        if ie["is_emri_no"] == onceki_no:              # aynı saniye: yeni numara eskisiyle aynı çıkmaz
-            ie["is_emri_no"] = f"PM-{bayi.get('kod','BAYI')}-{time.strftime('%Y%m%d')}-{(seq + 1) % 100000}"
+    ie["is_emri_no"] = _talep_numarasi(k, bayi)       # D-101: revizyon talebin numarasını taşır
     # G-2 (29.09): numara, gönderilmiş son planın numarasından (konuşma sıfırlandıysa 1); sayaç plan sayısıyla eşitlenir.
     ie["revizyon"] = int((k.d.get("son_is_emri") or {}).get("revizyon") or 0) + 1
     k.d["revizyon"] = ie["revizyon"] - 1

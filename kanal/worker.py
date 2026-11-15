@@ -434,7 +434,7 @@ def isle(gelen: dict, settings: dict, k=None, cikarim: dict | None = None, proje
     k.yarim_pano = bool((settings.get("yarim_pano") or {}).get("acik"))   # İE-39 PR-2 (D-90): kapalıysa bugünkü yol
     k.llm_golge = None
     son0 = k.d.get("son_is_emri") or {}
-    # D-101: prefabrik revizyon talebin numarasını taşır. O numaranın sıradaki revizyon klasörü doluysa (kaydı yazılamamış yarım bir
+    # D-101: revizyon (prefabrik ve çelik) talebin numarasını taşır. O numaranın sıradaki revizyon klasörü doluysa (kaydı yazılamamış yarım bir
     # işin klasörü; `kalici._yerlestir` üzerine yazmaz ve iş sıraya geri dönerdi) bu iş yeni numara alır: iş aynı klasörde dönüp durmaz.
     k.yeni_numara = bool(son0.get("is_emri_no")) and \
         (KANAL / "projects" / str(son0["is_emri_no"]) / f"r{int(son0.get('revizyon') or 0) + 1:02d}").exists()
@@ -518,6 +518,7 @@ def isle(gelen: dict, settings: dict, k=None, cikarim: dict | None = None, proje
             cizim = {"motor": motor_adi, "sure_s": round(time.time() - t0, 1), "passed": False, "errors": [maske_numaralar(f"{type(e).__name__}: {str(e)[:300]}")]}
         sonuc["is_emri_no"] = no; sonuc["revizyon"] = rev; sonuc["cizim"] = cizim
         if motor_adi == "genel" and not cizim["passed"]:
+            _dusen_klasoru_ayir(hedef, cizim)                   # D-101: düşen çizim rNN klasörünü tutmaz; aynı istek aynı numarayla rNN olur
             return _cizim_hatasi(k, d0, karar, talep, meta, cizim, ie, settings, sonuc, satirlar, ekle, patrona, kim, patron_mu)
     if fc is not None and not medya and not form_on and (form or {}).get("form") == "prefabrik":
         import talep_formu as TF                  # İE-20 PR-6: ölçü ve standart dışı seçimler ön notta (yönlendirme ve plan metni ölçüyü kendisi söyler)
@@ -693,6 +694,31 @@ def _cizim_hatasi(k, d0: dict, karar, talep, meta: dict, cizim: dict, ie: dict, 
     sonuc.update(eylem="cizim_hatasi", gerekce="çelik çizim üretilemedi; hak düşmez (konuşma önceki duruma döndü)", asama=k.d.get("asama"),
                  denenen={"is_emri_no": no, "revizyon": rev, "yapi": {a: y.get(a) for a in ("kod", "tanim", "tanim_sha256", "degisiklikler", "bu_revizyon")}})
     return {"satirlar": satirlar, "sonuc": sonuc}
+
+
+def _dusen_klasoru_ayir(hedef: Path, cizim: dict) -> None:
+    """D-101 (çelik; Lokman, kart 15 Kasım 2026 21:51:26 UTC "Çelikte de sabit kalsın"): çelik çizim düşünce konuşma önceki plana döner
+    (`_cizim_hatasi`, hak düşmez) ve aynı istek yine aynı numaranın rNN'i olur. Düşen denemenin klasörü (`failure.json`, yarım çıktı)
+    `rNN-dusen-<8 hane>` adını alır: `rNN` boş kalır, yeniden denenen revizyon talebin numarasını taşır (klasör `rNN` adıyla kalsaydı
+    kanal onu dolu bulur, `k.yeni_numara` ile yeni numara verirdi). Kayıt silinmez; `cizim` kaydındaki yollar yeni ada çevrilir."""
+    import uuid
+    if not hedef.is_dir():
+        return
+    yeni = hedef.with_name(f"{hedef.name}-dusen-{uuid.uuid4().hex[:8]}")
+    try:
+        os.replace(hedef, yeni)
+    except OSError:                                 # ad değişmedi: hak düşmez yolu yine koşar; sonraki deneme `k.yeni_numara` ile yeni numara alır
+        return
+    eski = str(hedef)
+
+    def cevir(x):
+        if isinstance(x, dict):
+            return {a: cevir(b) for a, b in x.items()}
+        if isinstance(x, list):
+            return [cevir(b) for b in x]
+        return str(yeni) + x[len(eski):] if isinstance(x, str) and x.startswith(eski + os.sep) else x
+    for a in list(cizim):
+        cizim[a] = cevir(cizim[a])
 
 
 def _anlik(d: dict) -> dict:
