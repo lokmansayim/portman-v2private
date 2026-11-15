@@ -63,13 +63,17 @@ def test_islem_yalniz_cati_kaplamasini_degistirir():
     kt = _tanim("KT02")
     assert varyant.kaplama_oku(kt) == "sandvic_panel" and varyant.tanim_uygula(kt, {"op": "cati_kaplamasi", "kaplama": "sandvic_panel"}) == kt
     # motorun hesaplamadığı ya da bilinmeyen kaplama: VaryantHatasi (çizim düşmez, kural katmanı bayiye söyler)
-    for kotu in ("trapez_sac", "osb_trapez", "osb_shingle", "kamis", None):
+    for kotu in ("trapez_sac", "osb_trapez", "kamis", None):
         with pytest.raises(varyant.VaryantHatasi):
             varyant.tanim_uygula(t0, {"op": "cati_kaplamasi", "kaplama": kotu})
-    assert [varyant.kaplama_adi(x) for x in varyant.CIZILEN_KAPLAMALAR] == ["tek kat panel", "sandviç panel", "kiremit desen sac + OSB"]
+    assert [varyant.kaplama_adi(x) for x in varyant.CIZILEN_KAPLAMALAR] == ["tek kat panel", "sandviç panel", "kiremit desen sac + OSB",
+                                                                             "OSB + membran + shingle"]
     t2 = varyant.tanim_uygula(t0, {"op": "cati_kaplamasi", "kaplama": "osb_kiremit"})                # BK-33 (D-98): Motor hesaplar
     assert varyant.kaplama_oku(t2) == "osb_kiremit" and {a: v for a, v in t2.items() if a != "cati"} == {a: v for a, v in t0.items() if a != "cati"}
     assert {a: v for a, v in t2["cati"].items() if not a.startswith("kaplama")} == t0["cati"]
+    t3 = varyant.tanim_uygula(t0, {"op": "cati_kaplamasi", "kaplama": "osb_shingle"})                # BK-33 (D-100): Motor hesaplar
+    assert varyant.kaplama_oku(t3) == "osb_shingle" and {a: v for a, v in t3.items() if a != "cati"} == {a: v for a, v in t0.items() if a != "cati"}
+    assert {a: v for a, v in t3["cati"].items() if not a.startswith("kaplama")} == t0["cati"]
 
 
 def test_hedef_cikti_sandvic_panel_tabloda_ve_listede(tmp_path):
@@ -107,6 +111,28 @@ def test_kiremit_desen_sac_islemi_onayli_hedefle_ayni(tmp_path):
     assert sonra["cati_kaplamasi_anahtar"] == "osb_kiremit"
     kalemler = {s["kalem"] for s in hedef["ozet"]["satirlar"]}                                      # hedefin kaplamaya bağlı satırları
     assert {"Çatı OSB", "Nem bariyeri", "Kiremit desen sac"} <= kalemler
+    assert {"pafta_cati_kaplamasi": oz["Çatı Kaplaması"],
+            "satirlar": [{"kalem": s["kalem"], "liste_adi": s.get("liste_adi") or s["kalem"], "boyut": s["boyut"], "adet": s["adet"]}
+                         for s in sonra["satirlar"] if s["kalem"] in kalemler],
+            "cikan": sorted({s["kalem"] for s in sonra["satirlar"] if s["kalem"] in ("Tek kat panel", "Sandviç panel")
+                             or s["kalem"].startswith(("Trapez vida (5,5 × 76", "Trapez vida (5,5 × 110"))})} == hedef["ozet"]
+    for yol in sorted((tmp_path / "once").glob("*_plan.png")) + sorted((tmp_path / "once").glob("*_gorunusler.png")):
+        assert yol.read_bytes() == (tmp_path / "sonra" / yol.name).read_bytes(), yol.name
+
+
+def test_shingle_islemi_onayli_hedefle_ayni(tmp_path):
+    """BK-33'ün shingle hedef örneği (43 m² çelik ev, D-100, Lokman'ın onayı dosyada): formun işlemi (`cati_kaplamasi`, `osb_shingle`) o
+    evin tanımına uygulanınca pafta tablosu ve listenin kaplamaya bağlı satırları hedefle aynıdır; çizimin geometrisi değişmez."""
+    hedef = json.loads((KOK / "testler" / "genel" / "beklenen" / "KT11_osb_shingle.json").read_text(encoding="utf-8"))
+    t0 = json.loads((KOK / "modeller" / "havuz" / "KT11.json").read_text(encoding="utf-8"))
+    t1 = varyant.tanim_uygula(t0, {"op": "cati_kaplamasi", "kaplama": "osb_shingle"})
+    assert _uret(t0, tmp_path / "once", bayi=True) and _uret(t1, tmp_path / "sonra", bayi=True)
+    oz = json.loads(next((tmp_path / "sonra").glob("*_pafta_ozet.json")).read_text(encoding="utf-8"))["ozellikler"]
+    sonra = _liste(tmp_path / "sonra")
+    assert sonra["cati_kaplamasi_anahtar"] == "osb_shingle"
+    kalemler = {s["kalem"] for s in hedef["ozet"]["satirlar"]}                                      # hedefin kaplamaya bağlı satırları
+    assert {"Çatı OSB", "Membran", "Shingle", "OSB mahyası"} <= kalemler
+    assert not {"Nem bariyeri", "Kiremit desen sac", "Metal kiremit mahyası"} & {s["kalem"] for s in sonra["satirlar"]}
     assert {"pafta_cati_kaplamasi": oz["Çatı Kaplaması"],
             "satirlar": [{"kalem": s["kalem"], "liste_adi": s.get("liste_adi") or s["kalem"], "boyut": s["boyut"], "adet": s["adet"]}
                          for s in sonra["satirlar"] if s["kalem"] in kalemler],
