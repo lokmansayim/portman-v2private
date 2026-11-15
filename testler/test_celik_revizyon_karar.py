@@ -1343,3 +1343,37 @@ def test_hakem26_celik_kendi_yoklamamiz_sorulur(s, metin):
     k = s.yaz(metin)
     assert k.eylem == "sor" and k.mesaj.startswith("Hangi çatı olsun?"), k.mesaj
     assert s.plan["revizyon"] == 1 and s.k.d["secenek_seti"]["durum"] == "acik" and not s.k.d.get("onaylanan"), k.mesaj
+
+
+# ── İE-42 · geometri hakemi yirmi yedinci tur (15 Kasım 2026 gece) ─────────────────────────────────────────────────────────────────────────────
+@pytest.mark.parametrize("metin", [
+    "K olsun, sizce abi olur mu?", "K olsun, müşterinin onayı gerekiyor alınmadı daha", "K olsun, değiştirmek gerekebilir",
+    "Ç8801 olsun, usta müşteriye kalsın", "Ç8801 olsun, usta seçim müşteriye kalsın", "K olsun, usta müşteriye kalsın",
+    "Ç8801 olsun, müşteriye bıraktık. Onaylamış olabilir", "Ç8801 olsun, müşteriye bıraktık seçtiği olsun"])
+def test_hakem27_celik_kararsizlik_ve_erteleme_sorulur(s, metin):
+    """Tur 27 (Y1, Y2, O3, O6, O7) çelikte: "usta müşteriye kalsın", seçimi bildirmeyen "bıraktık", hitaplı seçim sorusu, alınmamış onay
+    ve olasılık sözlü değişiklik: seçim sorulur."""
+    cati_seti(s)
+    k = s.yaz(metin)
+    assert k.eylem == "sor" and k.mesaj.startswith("Hangi çatı olsun?"), k.mesaj
+    assert s.plan["revizyon"] == 1 and s.k.d["secenek_seti"]["durum"] == "acik" and not s.k.d.get("onaylanan"), k.mesaj
+
+
+@pytest.mark.parametrize("metin", [
+    "K olsun, montaj için ne düşünüyorsunuz?", "K olsun, kapı için ne düşünüyorsun?"])
+def test_hakem27_celik_acik_secim_soruya_donmez(s, metin):
+    """Tur 27 (O4) çelikte: konulu ölçüt sorusu açık seçimi soruya çevirmez: r02 K."""
+    cati_seti(s)
+    k = s.yaz(metin)
+    assert k.eylem == "is_emri" and k.revizyon == 2 and s.plan["yapi"]["kod"] == "Ç8801K", k.mesaj
+
+
+@pytest.mark.parametrize("metin", [
+    "Ç8801 olsun, ne zaman?", "Ç8801 olsun, teklifi gönderir misiniz?", "Ç8801 olsun, kaç günde olur?",
+    "1 olsun, pdf gönderir misiniz?", "Ç8801 olsun, teklifi ne zaman gönderirsiniz?", "Ç8801 olsun, pdf gönderir misiniz?",
+    "Merhaba, iyi misiniz? Ç8801 olsun"])
+def test_hakem27_celik_acik_onay_soruya_donmez(s, metin):
+    """Tur 27 (O1) çelikte: süreç sorusu ve selam evin çatısının onayını bozmaz."""
+    cati_seti(s)
+    k = s.yaz(metin)
+    assert k.gerekce == K.PLAN_ONAYI and k.revizyon == 1, k.mesaj
