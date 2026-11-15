@@ -1027,6 +1027,33 @@
     "testler/motor/test_d92_tek_ozel_pano.py::test_bilinmeyen_deger_hata",
     "testler/motor/test_d92_tek_ozel_pano.py::test_cektirme_u_ile_cakisma_hata"
    ]
+  },
+  {
+   "kod": "PC-40",
+   "baslik": "Yazılan köşede köşe direği yerine üçlü H",
+   "kural": "İş Emri'nde `yapi.birlesimler` öğesi {nokta_cm: [x, y], t: \"uclu_h\"} yazılıysa Motor o noktada köşe direği koymaz, dış üçlü H koyar: D-29'un niş T'si (`geometry._kur` içindeki `_nis_t`; iki dış ve bir iç duvar ucu, dış duvarlardan biri iç duvarla aynı hatta ve eksende sürer, öteki ona dik) yalnız yazılan noktada kurulur; `dizilim.dis_duvar_t_bolme` ve \"kapı duvarının iki ucu\" koşulu aranmaz. Köşe direğinin 5 cm'si aynı hatta süren dış ve iç duvara geçer, dik duvar onların yüzünde biter (71 m² 2+1: veranda yan duvarı 120,5 → 125,5, iç duvarın ilk panosu 120,5 → 125,5, ana giriş kapısının panosu 125,5 → 120,5). Nokta Motor çerçevesindedir (arka-solda y arkadan). Nokta iki dış ve bir iç duvarın köşesi değilse, aks üstünde değilse, `t` bilinmiyorsa ya da aynı nokta iki kez yazılmışsa açık hata (K21). Niş T'si zaten olan noktada anahtar planı değiştirmez. Genel kural değildir: yalnız yazılan noktada çalışır (her evde mi sorusu Lokman'da). Anahtarsız İş Emri'nin planı değişmez.",
+   "karar": "D-96",
+   "lokman": {
+    "tarih": "2026-11-14",
+    "saat": "20:46",
+    "soz": "120,5 aksındaki 115,5 pano ana giriş kapısını dik kesen pano orada köşe direği olmayacak üçlü H olacak yanlış çizmiş mühendis"
+   },
+   "kod_yeri": [
+    "motor/geometry.py::_birlesimleri_oku",
+    "motor/geometry.py::BIRLESIM_T",
+    "motor/geometry.py::_kur"
+   ],
+   "test": [
+    "testler/motor/test_d96_uclu_h.py::test_girdi_yalniz_birlesim_anahtari",
+    "testler/motor/test_d96_uclu_h.py::test_anahtarsiz_ev_bugunku_gibi",
+    "testler/motor/test_d96_uclu_h.py::test_motor_eskizle_ayni",
+    "testler/motor/test_d96_uclu_h.py::test_yalniz_yazilan_koseye_uclu_h",
+    "testler/motor/test_d96_uclu_h.py::test_kapi_panosu_ve_liste",
+    "testler/motor/test_d96_uclu_h.py::test_cizim_dogrulamasi_gecer",
+    "testler/motor/test_d96_uclu_h.py::test_nis_t_olan_yerde_degisiklik_yok",
+    "testler/motor/test_d96_uclu_h.py::test_yanlis_nokta_hata",
+    "testler/motor/test_d96_uclu_h.py::test_ayni_nokta_iki_kez_hata"
+   ]
   }
  ]
 }
