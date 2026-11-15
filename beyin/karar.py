@@ -6,7 +6,7 @@ from __future__ import annotations
 import json, math, re, time
 from pathlib import Path
 
-from .sema import Talep, Karar
+from .sema import Talep, Karar, Musteri
 from .katalog import Katalog
 from .konusma import Konusma, MAX_REVIZYON, MAX_SORU, ESKI_TASLAK_SN, _tekillestir
 from . import varyant
@@ -347,6 +347,18 @@ def _karar_ver(talep: Talep, k: Konusma, bayi: dict | None, katalog: Katalog, me
         if kod:
             k.not_dus("kural", f"mesajda yalnız model kodu: {kod}")
             t = t.model_copy(update={"niyet": "yeni_talep", "katalog_kodu": kod, "belirsizlikler": []})
+    # BK-29 tur 9 (v2026.11.15b canlı, adım 5): kodun yanında müşteri adı da yazılınca ("PA-04, müşteri Ayşe Kaya", "PA-04 olsun,
+    # müşteri Ayşe Kaya") LLM mesajı "diğer" ya da "onay" okuyor, plan gelmiyordu ("Anlayamadım", "Onaylanacak açık bir plan
+    # görünmüyor"). Mesaj yalnız bir model kodu, seçim sözcükleri ve "müşteri <ad>" parçasıysa o modelin seçimidir ve ad müşteri adıdır
+    # (K18). LLM kodu ve adı doğru okuyup "yeni talep" dediyse dokunulmaz. Açık planın üstüne yazılan mesaj bugünkü yoldan gider.
+    if (_set_acik(k) or not _acik_plan_var(k)) and not (t.niyet == "yeni_talep" and t.katalog_kodu and t.musteri and t.musteri.ad):
+        kod, ad = _kod_ve_musteri(metin, katalog, t.musteri.ad if t.musteri else None)
+        if kod and t.katalog_kodu and str(Katalog.kod_normalize(t.katalog_kodu) or "").upper() != kod:
+            kod = None                                           # LLM başka bir kod okudu: karışmaz, bugünkü yol
+        if kod:
+            k.not_dus("kural", f"mesajda model kodu ve müşteri adı: {kod}")
+            t = t.model_copy(update={"niyet": "yeni_talep", "katalog_kodu": kod, "belirsizlikler": [],
+                                     "musteri": (t.musteri or Musteri()).model_copy(update={"ad": ad})})
 
     # D-01: askıda "yeni talep mi, önceki taslağın değişikliği mi?" sorusu varken gelen mesaj. Yalnız kısa ve saf bir cevap
     # ("yeni", "değişiklik", "önceki taslağın değişikliği") cevap sayılır; o zaman soruyu doğuran mesaj (bekletilen talep ve
@@ -1218,6 +1230,33 @@ def _yalniz_kod(metin: str | None, katalog: Katalog) -> str | None:
     if len(kodlar) != 1 or any(w not in _KOD_DOLGU for w in CO.norm(kalan).split()):
         return None
     return kodlar[0]
+
+
+_MUSTERI_SOZU = {"musteri", "musterisi", "musterimiz", "musterim"}
+_AD_SOZU = {"adi", "ismi", "ad", "isim"}
+
+
+def _kod_ve_musteri(metin: str | None, katalog: Katalog, llm_adi: str | None = None) -> tuple[str | None, str | None]:
+    """Mesaj bir model kodu, seçim sözcükleri ve "müşteri <ad>" parçasından oluşuyorsa (kod, ad); değilse (None, None).
+    Ad bayinin kendi sözünden alınır (K18): "müşteri" sözünden sonraki 1–4 sözcük, yalnız harf. Ad sayılması için sözcüklerin hepsi
+    büyük harfle başlar ("Ayşe Kaya") ya da LLM'in okuduğu müşteri adıyla aynıdır ("müşteri adı ayşe kaya"). Başka söz taşıyan mesaj
+    ("PA-04, müşteri salonu büyük istiyor", "PA-04 müşteri Ayşe Kaya, mutfak penceresi 120x120") bu kurala girmez; LLM'in okumasıyla gider."""
+    kodlar, kalan = _model_kodlari_ve_kalan(metin, katalog)
+    kodlar = list(dict.fromkeys(str(Katalog.kod_normalize(c) or "").upper() for c in kodlar))
+    sozler = kalan.split()
+    i = next((j for j, w in enumerate(sozler) if CO.norm(w) in _MUSTERI_SOZU), None)
+    if len(kodlar) != 1 or i is None or any(CO.norm(w) not in _KOD_DOLGU for w in sozler[:i]):
+        return None, None
+    ad = sozler[i + 1:]
+    if ad and CO.norm(ad[0]) in _AD_SOZU:
+        ad = ad[1:]
+    while ad and ad[-1][:1].islower() and CO.norm(ad[-1]) in _KOD_DOLGU:          # "… Ayşe Kaya olsun": sondaki seçim sözcüğü ad değil
+        ad = ad[:-1]
+    if not 1 <= len(ad) <= 4 or any(not w.isalpha() for w in ad):
+        return None, None
+    buyuk = all(w[:1].isupper() for w in ad)
+    llm_ayni = bool(llm_adi) and _ad_sozcukleri(llm_adi) == _ad_sozcukleri(" ".join(ad))
+    return (kodlar[0], " ".join(ad)) if (buyuk or llm_ayni) else (None, None)
 
 
 def _celik_seti_acik(k: Konusma) -> bool:
