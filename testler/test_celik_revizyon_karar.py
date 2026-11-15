@@ -1307,3 +1307,39 @@ def test_hakem25_celik_acik_secim_soruya_donmez(s, metin):
     cati_seti(s)
     k = s.yaz(metin)
     assert k.eylem == "is_emri" and k.revizyon == 2 and s.plan["yapi"]["kod"] == "Ç8801K", k.mesaj
+
+
+# ── İE-42 · geometri hakemi yirmi altıncı tur (15 Kasım 2026 akşam) ─────────────────────────────────────────────────────────────────────────────
+@pytest.mark.parametrize("metin", [
+    "Ç8801 olsun, seçimi müşteriye bıraktık", "Ç8801 olsun, müşteriye bıraktık", "Ç8801 olsun, tercihi müşteriye bıraktık",
+    "Ç8801 olsun, müşterinin tercihine bıraktık", "K olsun, seçimi müşteriye bıraktık", "K olsun, müşteriye bıraktık",
+    "Ç8801 olsun, abi müşteriye kalsın", "Ç8801 olsun, hocam müşteriye kalsın", "Ç8801 olsun, en iyisi müşteriye kalsın",
+    "K olsun, abi müşteriye kalsın", "Ç8801 olsun, okey mi?", "Ç8801 olsun, diyelim mi?", "Ç8801 olsun, haliyle mi kalsın?",
+    "K olsun, diyelim mi?", "K olsun, olur mu kral?", "Ç8801 olsun tamammı", "K olsun tamammı"])
+def test_hakem26_celik_birakilan_karar_ve_secim_sorusu_sorulur(s, metin):
+    """Tur 26 (Y1–Y4) çelikte: "müşteriye bıraktık", "abi müşteriye kalsın", "okey mi?", "diyelim mi?", "tamammı" onayı mühendis
+    kontrolüne gönderiyor ya da onaylanabilir r02 çiziyordu: seçim sorulur."""
+    cati_seti(s)
+    k = s.yaz(metin)
+    assert k.eylem == "sor" and k.mesaj.startswith("Hangi çatı olsun?"), k.mesaj
+    assert s.plan["revizyon"] == 1 and s.k.d["secenek_seti"]["durum"] == "acik" and not s.k.d.get("onaylanan"), k.mesaj
+
+
+@pytest.mark.parametrize("metin", [
+    "K olsun, değiştirip gönderebilir misiniz?", "K olsun, değiştirip atabilir misiniz?", "K olsun, değişikliği gönderebilir misiniz?",
+    "K olsun, değişiklik yapabilir misiniz?", "K olsun, iki usta yeter mi?", "K olsun, montajda usta olur mu?",
+    "K olsun, montaj için usta yeterli mi?", "K olsun, nasıl yapalım?"])
+def test_hakem26_celik_acik_secim_soruya_donmez(s, metin):
+    """Tur 26 (O1, O2) çelikte: değişikliği isteyen rica ve çatı dışı soru açık seçimi soruya çevirmez: r02 K."""
+    cati_seti(s)
+    k = s.yaz(metin)
+    assert k.eylem == "is_emri" and k.revizyon == 2 and s.plan["yapi"]["kod"] == "Ç8801K", k.mesaj
+
+
+@pytest.mark.parametrize("metin", ["Geçici bir süre K olsun", "K olsun, rüzgar için sağlam mı?"])
+def test_hakem26_celik_kendi_yoklamamiz_sorulur(s, metin):
+    """Tur 26 sonrası çelikte: etiketli "geçici bir süre" ve dayanıklılık sorusu: seçim sorulur."""
+    cati_seti(s)
+    k = s.yaz(metin)
+    assert k.eylem == "sor" and k.mesaj.startswith("Hangi çatı olsun?"), k.mesaj
+    assert s.plan["revizyon"] == 1 and s.k.d["secenek_seti"]["durum"] == "acik" and not s.k.d.get("onaylanan"), k.mesaj
