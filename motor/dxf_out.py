@@ -996,10 +996,10 @@ class Cizici:
             self.dim((r[0] + ox, yk + oy), (r[2] + ox, yk + oy), (0, yd + oy), 0, layer)
 
     def _dar_acik_mahal_yani(self, d, r, ic: int) -> bool:
-        """D-104: özel pano ölçüsünün yanı dar açık mahalse (tek pano şeridi, ör. giriş nişi) ve duvarın öteki yanı kapalı mahalse ölçü
-        kapalı mahalin yanına geçer. 60'lık iç duvarlı 90 m² 3+1'de nişin iki yan duvarı 120,5 oldu; iki ölçü nişin içinde kalınca nişin
-        adına ve m²'sine yer kalmıyordu (açık mahalin kendi ölçüsü de dar mahalde plan dışına alınır). Pano dizilimi eskizinde de bu
-        ölçüler odanın yanındaydı. Öteki durumlarda ölçünün yanı aynen."""
+        """D-104: özel pano ölçüsünün yanı dar açık mahalse (tek pano şeridi: eni bir panodan, 125,5 cm'den dar; ör. giriş nişi, 115,5)
+        ve duvarın öteki yanı kapalı mahalse ölçü kapalı mahalin yanına geçer. 60'lık iç duvarlı 90 m² 3+1'de nişin iki yan duvarı 120,5
+        oldu; iki ölçü nişin içinde kalınca nişin adına ve m²'sine yer kalmıyordu (açık mahalin kendi ölçüsü de dar mahalde plan dışına
+        alınır). Pano dizilimi eskizinde de bu ölçüler odanın yanındaydı. Öteki durumlarda (veranda dahil) ölçünün yanı aynen."""
         orta = ((r[1] + r[3]) / 2) if d.yon == "y" else ((r[0] + r[2]) / 2)
 
         def mahal(yan: int):
@@ -1010,7 +1010,7 @@ class Cizici:
         if a is None or k is None or not a.acik or k.acik:
             return False
         x0, y0, x1, y1 = a.poly.bounds
-        return ((x1 - x0) if d.yon == "y" else (y1 - y0)) < 2 * G.MOD - 1e-6
+        return ((x1 - x0) if d.yon == "y" else (y1 - y0)) < G.MOD + 1e-6     # veranda (ör. katalog P3701, 241) dar sayılmaz
 
     def _dis_parca_olculeri(self, ox: float, oy: float, dolu: list | None = None) -> None:
         """D-34 (Lokman, 30 Ekim 2026 14:45: "mor ile çizdiğim yerleri de ölçeklendir rengi de mor olsun"): girintili gövdede (İE-24) kapalı
