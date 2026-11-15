@@ -966,3 +966,138 @@ def test_hakem3_baska_eve_gecince_onceki_onay_yazilir(tmp_path):
     no = s.plan["is_emri_no"]
     k = s.yaz("PA-04 olsun", niyet="yeni_talep", katalog_kodu="PA-04")
     assert k.eylem == "is_emri" and k.mesaj.startswith(f"Önceki planınızın ({no} r01) onayı kaydedilmedi; çatısı seçilmemişti."), k.mesaj
+
+
+# ── İE-42 · geometri hakemi dördüncü tur (15 Kasım 2026 gecesi) ──────────────────────────────────────────────────────────────────────
+@pytest.mark.parametrize("metin, alan", [
+    ("1 olsun, yatak odası 1 penceresi 120x120 ve yükseklik 260 olsun", {"pencereler": [pen("yatak odası 1", "120x120")]}),
+    ("1 olsun, yatak odaları 120x120 olsun, iç kapılar ahşap olsun",
+     {"pencereler": [pen("yatak odası 1", "120x120"), pen("yatak odası 2", "120x120")]}),
+])
+def test_hakem4_zaten_olan_pencere_ve_baska_istek_onay_kaydetmez(tmp_path, metin, alan):
+    """Y-A: planda zaten olan pencere + aynı mesajın başka isteği (aynı cümlede ya da ayrı): istek cümlesi sayısı not sayısıyla değil, her
+    cümle notla tümüyle açıklanıyor mu diye kıyaslanır. Onay kaydedilmez; bayiye zaten olan pencere ve öteki isteğin uygulanmadığı yazılır."""
+    s, _ = _cati_seti(tmp_path)
+    k = s.yaz(metin, **alan)
+    assert K.PLAN_ONAYI not in k.gerekce and not s.k.d.get("onaylanan"), k.mesaj
+    assert "penceresi zaten 120x120; öteki isteğinizi plana uygulayamadım" in k.mesaj and "kaydetmedim" in k.mesaj, k.mesaj
+
+
+@pytest.mark.parametrize("kod", ["1", "2"])
+def test_hakem4_llm_yankisi_pencere_notu_degil(tmp_path, kod):
+    """Y-A: LLM'in yinelediği eski pencere ("1 olsun, iç kapılar ahşap olsun" → YATAK ODASI 1 120x120) bayinin sözü değildir: "zaten"
+    notu cevaba girmez, onay kaydedilmez, kapı isteği "uygulayamadım" diye yazılır (başka çatıda da)."""
+    s, _ = _cati_seti(tmp_path)
+    k = s.yaz(f"{kod} olsun, iç kapılar ahşap olsun", pencereler=[pen("yatak odası 1", "120x120")])
+    assert K.PLAN_ONAYI not in k.gerekce and not s.k.d.get("onaylanan") and "zaten" not in k.mesaj, k.mesaj
+    assert "isteğinizi plana uygulayamadım" in k.mesaj, k.mesaj
+    if kod == "2":
+        _secildi(s, k, "PA06K")
+
+
+def test_hakem4_llm_yankisi_pencere_sorusu_acmaz(tmp_path):
+    """Y5: sözde pencere yokken LLM'in yinelediği pencere taslağa girmez, "Hangi pencere?" sorusu açılmaz."""
+    s, _ = _cati_seti(tmp_path)
+    k = s.yaz("1 olsun, verandayı kaldırın", pencereler=[pen("salon", "120x120")])
+    assert k.soru_alani != "pencere_secim" and "pencere" not in k.mesaj.lower() and not s.k.d.get("onaylanan"), k.mesaj
+
+
+@pytest.mark.parametrize("metin", ["1 olsun, ev 2 katlı olsun", "1 olsun, dubleks olsun", "1 olsun, çelik olsun",
+                                   "1 olsun, prefabrik değil çelik olsun"])
+def test_hakem4_kat_ve_yapi_sozu_talep_degisikligi(tmp_path, metin):
+    """B2: kat ve yapı türü sözü LLM alanı boşken de bayinin sözünden okunur: talep değişti, onay kaydedilmez."""
+    s, _ = _cati_seti(tmp_path)
+    k = s.yaz(metin)
+    assert k.mesaj.startswith("Talebiniz değişti; bu değişiklik r01 onayınızı geçersiz kıldı."), k.mesaj
+    assert K.PLAN_ONAYI not in k.gerekce and not s.k.d.get("onaylanan")
+
+
+@pytest.mark.parametrize("metin", ["PA-06 tek katlı prefabrik, 1 olsun", "1 olsun, 2 katlı olmasın"])
+def test_hakem4_evin_kendi_kat_ve_yapi_sozu_talep_degil(tmp_path, metin):
+    """B2: evin kendi kat ve yapı sözü ("tek katlı prefabrik") ve olumsuz kat sözü talebi değiştirmez."""
+    s, _ = _cati_seti(tmp_path)
+    k = s.yaz(metin)
+    assert "Talebiniz değişti" not in k.mesaj and s.k.d["taslak"]["alan_m2"] == 85, k.mesaj
+
+
+@pytest.mark.parametrize("metin, alan", [
+    ("1 olsun, 15 m2'lik veranda ekleyin", {"veranda": {"istiyor": True, "alan_m2": 15}, "alan_m2": 15}),
+    ("1 olsun, 15 m²'lik teras olsun", {"alan_m2": 15}),
+    ("1 olsun, veranda kısmının alanı da 12 m2 olsun", {"alan_m2": 12}),
+    ("1 olsun, sundurma 15 m2 olsun", {"alan_m2": 15}),
+    ("1 olsun, giriş 12 m2 olsun", {"alan_m2": 12}),
+])
+def test_hakem4_ekli_ve_uzak_alan_sozu_evin_m2_si_degil(tmp_path, metin, alan):
+    """B1: "15 m2'lik veranda", "veranda kısmının alanı da 12 m2", sundurma ve giriş m²'si evin alanı değildir: talep değişmez, onay
+    kaydedilmez (istek uygulanmadıysa bayiye yazılır)."""
+    s, _ = _cati_seti(tmp_path)
+    k = s.yaz(metin, **alan)
+    assert "Talebiniz değişti" not in k.mesaj and K.PLAN_ONAYI not in k.gerekce and not s.k.d.get("onaylanan"), k.mesaj
+    assert s.k.d["taslak"]["alan_m2"] == 85
+
+
+@pytest.mark.parametrize("metin, alan", [("2 olsun, mutfak 3x4 olsun", {"dis_olcu": {"en_m": 3, "boy_m": 4}}),
+                                         ("1 olsun, salonu 5x6 yapın", {"dis_olcu": {"en_m": 5, "boy_m": 6}}),
+                                         ("1 olsun, yatak odası 1 3x4 olsun", {})])
+def test_hakem4_oda_olcusu_dis_olcu_degil(tmp_path, metin, alan):
+    """B8: oda sözüyle gelen ölçü evin dış ölçüsü değildir: talep değişmez, taslak boşalmaz, onay kaydedilmez."""
+    s, _ = _cati_seti(tmp_path)
+    k = s.yaz(metin, **alan)
+    assert "Talebiniz değişti" not in k.mesaj and "dış ölçü" not in k.mesaj and not s.k.d.get("onaylanan"), k.mesaj
+    assert s.k.d["taslak"]["alan_m2"] == 85 and not s.k.d["taslak"].get("dis_olcu"), s.k.d["taslak"]
+
+
+@pytest.mark.parametrize("metin", ["Mehmet Yılmazın evi için de aynısı lazım", "Mehmet beye de aynısı"])
+def test_hakem4_ekli_ad_baska_musteri(tmp_path, metin):
+    """B6: ekli ad ("Yılmazın", "beye") da müşterinin adıdır: Ayşe'nin planının revizyonu çizilmez, özel isteği taşınmaz."""
+    s = _ayse_seti(tmp_path)
+    no = s.plan["is_emri_no"]
+    k = s.yaz(metin, niyet="yeni_talep", musteri={"ad": "Mehmet Yılmaz" if "Yılmaz" in metin else "Mehmet Bey"},
+              ozel_istekler=["mutfak dolapları beyaz olsun"])
+    assert k.eylem != "is_emri" and k.mesaj.startswith(f"Önceki planınızın ({no} r01) onayı kaydedilmedi"), k.mesaj
+    assert not s.k.d["taslak"].get("ozel_istekler"), s.k.d["taslak"]
+
+
+def test_hakem4_baska_musteride_ozel_istek_yankisi_tasinmaz(tmp_path):
+    """B7: başka müşterinin talebinde LLM'in yinelediği eski özel istek yeni talebe girmez."""
+    s = _ayse_seti(tmp_path)
+    s.yaz("Mehmet Deneme için 85 m2 2+1 lazım", niyet="yeni_talep", alan_m2=85, oda_programi="2+1", musteri={"ad": "Mehmet Deneme"},
+          ozel_istekler=["mutfak dolapları beyaz olsun"])
+    ts = s.k.d["taslak"]
+    assert ts["musteri"]["ad"] == "Mehmet Deneme" and not ts.get("ozel_istekler"), ts
+
+
+@pytest.mark.parametrize("metin", ["1 olsun, onay veriyoruz", "1 olsun, devam edelim", "1 olsun, işleme alın", "1 olsun, saygılar",
+                                   "1 olsun, müşteri beğendi", "PA-06'da kalalım", "1 olsun, 85 m²'lik olan", "1 olsun abi",
+                                   "1 numaralı çatı olsun hocam", "birinciyi seçiyoruz", "1 olsun saol", "ilk çatı yeterli", "1 yeter",
+                                   "1 olsun sağ olun", "1 olsun kolay gelsin", "1'i seçtik, bu şekilde devam", "1 olsun, başka isteğimiz yok",
+                                   "evin kendi çatısı olsun", "olduğu gibi kalsın", "1 olsun bu haliyle onaylıyoruz", "1 uygun"])
+def test_hakem4_onay_ve_nezaket_sozu_secimdir(tmp_path, metin):
+    """O-B, D-D: onay, devam, teşekkür, hitap ve yeterlik sözü istek değildir; ekli sıra sözü ve "evin kendi çatısı" seçimdir: r01 onaylanır."""
+    s, _ = _cati_seti(tmp_path)
+    k = s.yaz(metin)
+    _secildi(s, k, "PA06")
+
+
+@pytest.mark.parametrize("metin", ["1 olsun, bir de başka model gönderin", "1 olsun, paravan olur mu?", "1 olsun, 85 değil 95 olsun",
+                                   "1 olsun, sağ tarafa kapı", "aynı çatı kalsın, salon büyük olsun", "1 olsun, 2 kat olsun"])
+def test_hakem4_istek_ve_soru_onay_kaydetmez(tmp_path, metin):
+    """O-C, D-E: "başka model", "paravan" ("para" değil), sayı ve oda isteği seçimle birlikte gelince onay kaydedilmez."""
+    s, _ = _cati_seti(tmp_path)
+    k = s.yaz(metin)
+    assert K.PLAN_ONAYI not in k.gerekce and not s.k.d.get("onaylanan"), k.mesaj
+
+
+def test_hakem4_fiyat_ve_teslim_sorusu_cevaplanir(tmp_path):
+    """D-E: seçimle birlikte gelen fiyat, süre ya da teslim sorusu onayı engellemez ve cevapsız kalmaz."""
+    s, _ = _cati_seti(tmp_path)
+    k = s.yaz("1 olsun, teslim ne zaman olur?")
+    _secildi(s, k, "PA06")
+    assert k.mesaj.endswith("Teklif aşamasına geçiliyor. Fiyat, süre ve teslim bilgisi teklifle gelir."), k.mesaj
+
+
+def test_hakem4_seti_kapatan_istek_yazilir(tmp_path):
+    """Çatı seçimi olmadan gelen ve planı değiştirmeyen istek ("yükseklik 260 olsun") seti kapatır; bayiye uygulanmadığı yazılır."""
+    s, _ = _cati_seti(tmp_path)
+    k = s.yaz("yükseklik 260 olsun")
+    assert k.gerekce == K.PLAN_DEGISMEDI and "değişmedi; isteğinizi plana uygulayamadım. Onaylayabilir" in k.mesaj, k.mesaj

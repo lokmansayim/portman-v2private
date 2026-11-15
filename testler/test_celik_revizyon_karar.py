@@ -767,3 +767,22 @@ def test_hakem3_celik_oda_m2_si_ve_yanki_talep_degil(s, metin, alan):
     cati_seti(s)
     k = s.yaz(metin, **alan)
     assert "Talebiniz değişti" not in k.mesaj and s.plan["revizyon"] == 1 and s.k.d.get("cati_adimi"), k.mesaj
+
+
+# ── İE-42 · geometri hakemi dördüncü tur (15 Kasım 2026 gecesi) ──────────────────────────────────────────────────────────────────────
+@pytest.mark.parametrize("metin", ["1 olsun, prefabrik olsun", "1 olsun, ev 2 katlı olsun"])
+def test_hakem4_celik_yapi_ve_kat_sozu_talep_degisikligi(s, metin):
+    """B2: çelik evde "prefabrik olsun" ve "2 katlı olsun" talebi değiştirir (LLM alanı boşken de): onay kaydedilmez, mühendise gitmez."""
+    cati_seti(s)
+    k = s.yaz(metin)
+    assert k.mesaj.startswith("Talebiniz değişti; bu değişiklik r01 onayınızı geçersiz kıldı."), k.mesaj
+    assert K.PLAN_ONAYI not in k.gerekce and not s.k.d.get("onaylanan")
+
+
+@pytest.mark.parametrize("metin", ["1 olsun, onay veriyoruz", "1 olsun abi", "kendi çatısı olsun", "aynı kalsın", "1 olsun, müşteri beğendi",
+                                   "1 olsun, çelik olsun"])
+def test_hakem4_celik_onay_ve_nezaket_sozu_secimdir(s, metin):
+    """O-B, D-D: çelikte onay ve nezaket sözü, evin kendi çatısı ve evin kendi yapı sözü seçimdir: r01 onaylanır (mühendis kontrolü)."""
+    cati_seti(s)
+    k = s.yaz(metin)
+    assert k.gerekce == K.PLAN_ONAYI and s.k.d.get("onaylanan"), k.mesaj
