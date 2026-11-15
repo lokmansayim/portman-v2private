@@ -120,7 +120,8 @@ Biçim: karar · gerekçe · reddedilen seçenekler · geri alma yolu · kim ve 
 | [D-95](D-95.md) | Brüt ve net m²: brüt çatının örttüğü her yer (bugünkü D-49 brütü), net bütün mahaller, veranda, giriş nişi ve balkon dahil; ön onay antedi (`dxf_out.alan_yazisi`) ve montaj rehberinin başlığı bu tanımla; M-02 ve M-12 açılıp kapandı, tanım M-18 ile mühürlü | 14.11 (Lokman 20:43:23, 21:01:02, 21:01:25, 21:07:29 "ben izin veriyorum varsa mühür bunu gir ve mühürle") |
 | [D-96](D-96.md) | Yazılan köşede köşe direği yerine üçlü H: İş Emri anahtarı `yapi.birlesimler` › `t: "uclu_h"`, Motor D-29'un niş T'sini yalnız o noktada kurar (`geometry._birlesimleri_oku`, PC-40; BK-32); 71 m² 2+1'in veranda köşesi (kapı panosu 125,5 → 120,5, veranda yan duvarı 120,5 → 125,5); genel kural değil, her evde mi sorusu açık | 14.11 (Lokman 20:46:54; kart 20:57:28 "Doğru, yanına eklensin") |
 | [D-97](D-97.md) | Çelik formda seçilen çatı kaplaması ilk planda Yapı Tanımı'nın `cati.kaplama`'sına yazılır (`varyant.cati_kaplamasi`): pafta tablosu ve yükleme listesi o kaplamayla çıkar, özel isteğe ayrıca yazılmaz; bugün sandviç panel (16 çelik plan); genel motorun hesaplamadığı dört kaplama özel istekte kalır (ayrı Motor bakım işi); plan ve görünüş çizimi değişmez (İE-20 PR-11) | 15.11 (Lokman kart 04:44:37 "Plana ve listeye işlensin") |
-| [D-99](D-99.md) | Çelik talep formunda trapez sac sunulmaz, shingle satırı "OSB + membran + shingle"; yayımlı form değişmez, yeni form `celik2.json` ve `talep_formu.celik2_flow_id` ayarıyla açılır; taslak, yayım ve ayar Lokman'ın ayrı sözüyle (İE-20 PR-12) | 15.11 (Lokman 05:23:08, 05:23:34; kart 05:28:14 "Yalnız trapez sac kalksın") |
+| [D-99](D-99.md) | Disk arşivi (Elements diskinin Mac kopyası, 628 proje, 8.163 dosya): ham dosyalar Mac'te ve Drive'da, depoya adsız dizin ve SHA-256 mührü (`testler/hdd/`, `araclar/hdd_dizin.py`); adlı eşleme yalnız Mac ve Drive'da (Lokman 15.11 05:37:53 kartı "Drive'da, depoya dizin ve kart"; İE-43) |
+| [D-102](D-102.md) | Çelik talep formunda trapez sac sunulmaz, shingle satırı "OSB + membran + shingle"; yayımlı form değişmez, yeni form `celik2.json` ve `talep_formu.celik2_flow_id` ayarıyla açılır; taslak, yayım ve ayar Lokman'ın ayrı sözüyle (İE-20 PR-12) | 15.11 (Lokman 05:23:08, 05:23:34; kart 05:28:14 "Yalnız trapez sac kalksın") |
 
 ## Numara defteri (14 Ekim 2026, BK-08; CIO planı › Görev 3)
 
@@ -213,8 +214,12 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | D | D-95 | brüt ve net m²'nin tanımı; montaj rehberinin başlığı (Lokman 14.11 21:01) | yazıldı (14.11; rehber sohbeti, `claude/project-thread-v9ykyo`) |
 | D | D-96 | yazılan köşede köşe direği yerine üçlü H; İş Emri anahtarı `birlesimler` › `t: "uclu_h"` (BK-32, PC-40; Lokman 14.11 20:46:54, kart 20:57:28 "Doğru, yanına eklensin") | yazıldı (14.11; tek pano Motor sohbeti, `claude/project-thread-9gdwir`; CIO 20:58 D-95 verdi, rehber sohbetinin D-95'i önce birleşti, D-96 oldu) |
 | D | D-97 | çelik formda seçilen çatı kaplaması plana, pafta tablosuna ve yükleme listesine (İE-20 PR-11; Lokman 15.11 04:44:37 kartı "Plana ve listeye işlensin") | yazıldı (15.11; talep formu sohbeti, `claude/project-thread-l5mh7r`) |
-| D | D-98 | çelikte kiremit desen sac + OSB kuralı (başka sohbet; BK-33, "Çelik planda dört çatı kaplamasını hesaplamak") | alındı (15.11) |
-| D | D-99 | çelik talep formunda trapez sac sunulmaz; shingle satırı OSB + membran + shingle (İE-20 PR-12; Lokman 15.11 05:28:14 kartı "Yalnız trapez sac kalksın") | yazıldı (15.11; talep formu sohbeti, `claude/project-thread-l5mh7r`) |
+| D | D-98 | çelikte kiremit desen sac + OSB (başka sohbet; BK-33) | alındı (15.11) |
+| D | D-99 | disk arşivi: ham dosyalar Drive'da, depoya adsız dizin ve SHA-256 mührü (Lokman 15.11 05:37:53 kartı "Drive'da, depoya dizin ve kart") | yazıldı (15.11; disk arşivi sohbeti, `claude/project-thread-wc6dw0`) |
+| D | D-100 | çelikte OSB + membran + shingle kuralı (başka sohbet; BK-33) | alındı (15.11) |
+| D | D-101 | prefabrikte talep numarası revizyonda sabit kalır (başka sohbet; BK-29 tur 10) | alındı (15.11) |
+| D | D-102 | çelik talep formunda trapez sac sunulmaz; shingle satırı OSB + membran + shingle (İE-20 PR-12; Lokman 15.11 05:28:14 kartı "Yalnız trapez sac kalksın") | yazıldı (15.11; talep formu sohbeti, `claude/project-thread-l5mh7r`) |
+| D | **D-103** | — | **sıradaki boş** |
 | D | **D-100** | — | **sıradaki boş** |
 | İE | İE-01–İE-08 | bu depo (`main`) | yazıldı |
 | İE | İE-09 | model atölyesi: kontrollü model üretimi ve banka hattı (Görev 6e; pano 30; P6001 güncellemesi kapsam dışı) | alındı (16.10; `claude/gorev-6e-model-atolyesi-rnhtcp`; PR-1 banka hattı 29.10, `claude/project-thread-rhjgzv`) |
@@ -250,7 +255,8 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | İE | İE-40 | havuz evlerinde özel ölçülü dış panoları standarda çekmek (D-91) | alındı (14.11; standart pano sohbeti) |
 | İE | İE-41 | rehber.portatifev.com sitesi main'deki koddan: paketleyici (`araclar/paket/site/`), yayın betiği `vps/rehber_yayin.sh` main'e, beş rehber (Lokman 14.11 20:37 kartı "Siteyi main'den kur"; D-28) | alındı (14.11; `claude/project-thread-v9ykyo`) |
 | İE | İE-42 | çatı seçimi (başka sohbet; D-94) | alındı (14.11) |
-| İE | **İE-43** | — | **sıradaki boş** |
+| İE | İE-43 | disk arşivi: adsız dizin ve SHA-256 mührü (`araclar/hdd_dizin.py`, `testler/hdd/`; D-99) | alındı (15.11; `claude/project-thread-wc6dw0`) |
+| İE | **İE-44** | — | **sıradaki boş** |
 | BK | BK-01–BK-08 | bu depo; BK-08 8a sonrası temizlik (`bk-08-8a-temizlik`) | yazıldı |
 | BK | BK-09 | metin ve çizim düzeltmeleri, G1 (`bk-09-metin-cizim`, `bk-09-cizim-g1`) | alındı (14.10) |
 | BK | BK-10 | 8b sonrası küçük işler (DXF `.txt` notu, geç gelen Excel, panelden Excel, plan değişince kontrol kapanır, D-19 24 saat kuralı, düğmeli mesajda satır sonları, `YENI-` kodu ve ilk çelik planda LLM özeti bayiye gitmez, komut freni metni; pano satır 15; çelikte kapı değişikliği kapsam dışı) | alındı (30.10; `claude/project-thread-h64uz2`) |
@@ -272,7 +278,9 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | BK | BK-30 | Pano Motor'unda tek özel pano kuralı (D-92, PC-39; `claude/project-thread-9gdwir`) | alındı (14.11; CIO) |
 | BK | BK-31 | Havuz hakeminde silme hâli kalemi: tek özel pano kuralının kısa parçası silinmiş ev (D-92 › Havuza uygulama; Lokman 14.11 kart 19:39:46 "Kısa parça silinsin", ev kartları 20:05:33, 20:09:12, 20:14:50 "Doğru, yanına eklensin"; `claude/project-thread-9gdwir`) | alındı (14.11; CIO) |
 | BK | BK-32 | Pano Motor'unda yazılan köşeye üçlü H (D-96, PC-40; `claude/project-thread-9gdwir`) | alındı (14.11; CIO 20:58:58) |
-| BK | **BK-33** | — | **sıradaki boş** |
+| BK | BK-33 | Çelikte dört çatı kaplaması (Motor işi; çelik dört çatı kaplaması sohbeti) | alındı (15.11; CIO, Lokman kartı 05:03:47) |
+| BK | BK-34 | Havuz hakeminde kesim hattı, üçlü H ve açıklık kayması kalemleri: 71 m² 2+1'in üçlü H'lı hâli (Lokman 14.11 20:46:54 sözü, kart 20:57:28 "Doğru, yanına eklensin"; `claude/project-thread-9gdwir`) | alındı (15.11; CIO 05:59) |
+| BK | **BK-35** | — | **sıradaki boş** |
 
 ## 27 Eylülde Lokman'ın verdiği kararlar
 

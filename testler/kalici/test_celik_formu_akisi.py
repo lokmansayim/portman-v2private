@@ -190,7 +190,7 @@ def test_celik_formu_yaziyla_secim_islenemeyen_140(depo, wa, tmp_path, hizli_gen
 
 
 def test_celik2_kimligi_varsa_yeni_form_sunulur_cevabi_ayni_yoldan(depo, wa, tmp_path, hizli_genel):  # noqa: F811
-    """İE-20 PR-12 (D-99): `celik2_flow_id` ayarda varsa [Çelik] düğmesi yeni formu açar (trapez sac seçeneği yok). Cevabı çelik formun
+    """İE-20 PR-12 (D-102): `celik2_flow_id` ayarda varsa [Çelik] düğmesi yeni formu açar (trapez sac seçeneği yok). Cevabı çelik formun
     yolundan işlenir: shingle seçimi "OSB + membran + shingle" diye okunur, özel istekte kalır."""
     kabul(depo, YEDI)
     s = cf_ayar(tmp_path)

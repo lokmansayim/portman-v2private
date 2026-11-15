@@ -28,7 +28,7 @@ yüklemek için; diske yazılmaz) · --bak (Meta'da hiçbir şeyi kurmaz ve değ
 --bak ile olmaz) · --form <talep | revizyon | prefabrik | talep2 | celik | celik2> (yinelenebilir; yalnız o formlar kurulur ve yayımlanır. Verilmezse talep ve
 revizyon: bugünkü davranış. İE-20 PR-6: prefabrik talep formu `--form prefabrik` ile, <kök>/kanal/formlar/prefabrik.json. İE-20 PR-8 (D-89):
 verandasız talep formu `--form talep2` ile, talep2.json; kurulu sürüm bu formu tanımıyorsa `--kaynak` ile koşulur. İE-20 PR-9 (D-93):
-çelik talep formu `--form celik` ile, celik.json; kurulu sürüm tanımıyorsa yine `--kaynak` ile. İE-20 PR-12 (D-99): çelik formun ikinci
+çelik talep formu `--form celik` ile, celik.json; kurulu sürüm tanımıyorsa yine `--kaynak` ile. İE-20 PR-12 (D-102): çelik formun ikinci
 sürümü `--form celik2` ile, celik2.json; yayımlı çelik forma dokunmaz). Çıkış: 0 tamam,
 2 Meta doğrulama hatası buldu, 1 durdu. Test için: PM_ETC, PM_GRAPH_BASE, PM_RAW_BASE (ağa çıkılmaz).
 """

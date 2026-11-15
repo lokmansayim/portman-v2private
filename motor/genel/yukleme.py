@@ -63,6 +63,22 @@ GRUP_SIRASI = ["Çelik panel", "Metal aksam", "Dış cephe kaplama", "İç cephe
 KAPLAMA_ADI = {"sandvic_panel": "sandviç panel", "tek_kat_panel": "tek kat panel", "osb_kiremit": "OSB + nem bariyeri + kiremit desen sac (metal kiremit)",
                "osb_trapez": "OSB + nem bariyeri + trapez sac", "trapez_sac": "trapez sac", "osb_shingle": "OSB + membran + shingle"}
 OSBLI_KAPLAMA = ("osb_kiremit", "osb_trapez", "osb_shingle")
+# Genel modelde (çelik) kodu yazılmış OSB'li kaplamalar (D-98, BK-33). Kural kitabının `genel_osbli_kaplama` anahtarı bunlardan birini açar;
+# kodu yazılmamış bir kaplamayı kitaba eklemek listeyi sessizce eksik üretmez, durdurur (`girdi_genel` aynı kümeyi okur).
+GENEL_OSBLI_KODDA = ("osb_kiremit",)
+GENEL_UST_ORTU = ("nem_bariyeri",)
+PANEL_KAPLAMALARI = ("sandvic_panel", "tek_kat_panel")
+
+
+def genel_kaplama_degisimi(c: dict, yeni: str | None) -> None:
+    """Genel modelden üretilmiş girdide (`dizilim` var) kaplama sonradan değiştirilecekse: yalnız iki panel arasında olur (dizilimleri aynı:
+    artan parça kullanılır, kapatma kuralda). Öteki her değişimde dizilim kaplamaya göre yeniden kurulmalı (kiremit desen sacda artan parça
+    kullanılmaz): durdurur. Eski girdi (kaplamasız) ve aynı kaplama serbest."""
+    eski = c.get("kaplama")
+    if "dizilim" not in c or not yeni or yeni == eski or (yeni in PANEL_KAPLAMALARI and (eski in PANEL_KAPLAMALARI or eski is None)):
+        return
+    raise SystemExit(f"Bu girdi genel modelden {KAPLAMA_ADI.get(eski, eski)} ile üretilmiş: kaplama {KAPLAMA_ADI.get(yeni, yeni)} olacaksa girdi o kaplamayla "
+                     "yeniden üretilmeli (tanımda `cati.kaplama`); çatının dizilimi kaplamaya göre kurulur.")
 ISLEV_ADI = {"yatak_odasi": "yatak odası", "banyo": "banyo", "salon": "salon", "mutfak": "mutfak", "hol": "hol", "veranda": "veranda", "depo": "depo (müştemilat)"}
 ELEKTRIK_KALEMLERI = ("tijli_duy", "glop", "tekli_anahtar", "cift_anahtar", "tekli_priz", "cift_priz", "uydu_prizi")
 YONTEM_ADI = {"panel": "A · çatı ve tavan paneli (çelik konstrüksiyon standardı)", "omega_asik": "B · tavan omegası, aşık, alın sacı, saçak sacı (prefabrik yöntemi)"}
@@ -624,6 +640,41 @@ def _hesapla(g: dict, k: dict) -> dict:
                      not_="listedeki uygulama (2025): sac kapama" if "panel_kapamasi" in c else
                           "2025 listelerindeki sac kapama. Tek kat panel kapaması listeden çıktı (Lokman, 4 Ekim 16:18); sandviç panelde şimdilik kalıyor "
                           "(Lokman, 4 Ekim 17:46). Adet formülü 2025 listelerinden çıkarıldı")
+    elif c.get("dizilim") and kaplama in (kural_degeri("genel_osbli_kaplama") or {}) and kaplama in GENEL_OSBLI_KODDA:
+        # Genel model (çelik), OSB'li kaplama (D-98, BK-33; Lokman, 15 Kasım 2026 05:22:05 UTC). Kural: `genel_osbli_kaplama`. Çatı yüzeyi açılımın
+        # gerçek yüzeyidir: çatı katsayısıyla çarpılmaz. Kaplama levhaları açılımın dizilimiyle, her levha boyu ayrı satır (sandviç ve tek kat paneldeki gibi).
+        ok = kural_degeri("genel_osbli_kaplama")[kaplama]
+        if ok.get("ust_ortu") not in GENEL_UST_ORTU:
+            raise SystemExit(f"genel_osbli_kaplama.{kaplama}.ust_ortu: {ok.get('ust_ortu')!r} hesaplanmıyor (bilinen: {', '.join(GENEL_UST_ORTU)}).")
+        d98 = "D-98 (Lokman, 15 Kasım 2026)"
+        yuzey = c["yuzey_m2"]
+        zk = ok["osb_zayiat"]
+        ekle("Çatı kaplamaları", "Çatı OSB", osb_boyut, tavan(yuzey * (1 + zk) / deg(k, "levha_m2", "osb")), yuzey,
+             formul=f"çatı yüzeyi × {tr(1 + zk)} ÷ {tr(deg(k, 'levha_m2', 'osb'))}", durum=k["genel_osbli_kaplama"]["durum"],
+             not_=f"{d98}: iki gerçek çelik listeden (140 m² ve 166 m²); levhalar kesilerek dizilir, %{round(zk * 100)} fire")
+        if ok["ust_ortu"] == "nem_bariyeri":
+            ekle("Çatı kaplamaları", "Nem bariyeri", "m²", tavan(yuzey), yuzey, formul="çatı yüzeyi (OSB'nin üstü)", durum=k["genel_osbli_kaplama"]["durum"],
+                 not_=f"{d98}: OSB'nin üstünde nem bariyeri; mahya bandı kalır")
+        mahyalar = ()
+        if kaplama == "osb_kiremit":
+            kap = kapatma_genisligi(k, c, kaplama)
+            dg = c["dizilim"]
+            if abs(dg["kapatma_m"] - kap) > 1e-9:
+                raise SystemExit(f"Girdideki kaplama dizilimi {tr(dg['kapatma_m'])} m kapatma genişliğiyle üretilmiş; kiremit desen sac {tr(kap)} m kapatır. "
+                                 "Girdi o kaplamayla yeniden üretilmeli (tanımda `cati.kaplama`).")
+            for i, sat in enumerate(dg["satirlar"]):
+                ekle("Çatı kaplamaları", "Kiremit desen sac", f"L {round(sat['boy_m'] * 1000)} · {round(kap * 100)} cm kapatır", sat["adet"], yuzey if i == 0 else None,
+                     formul="çatı açılımı: her yüz şerit şerit dizilir; levha boyları tam boy şeritlerin boyu; desen ters geldiği için artan parça kullanılmaz",
+                     durum=k["genel_osbli_kaplama"]["durum"],
+                     not_=(f"toplam {dg['adet']} levha ({tr(dg['panel_m2'], 1)} m²; çatı yüzeyi {tr(yuzey, 1)} m²): {dg['tam_boy']} şerit tam boy, {dg['karma']} köşesi kesilen. "
+                           f"Saçaktan {tr(dg['tasma_cm'], 0)} cm taşma, kesim payı {tr(dg['kesim_payi_mm'], 0)} mm; {d98}: ustanın yerleşim planı gibi") if i == 0 else None)
+            mahyalar = ("Metal kiremit mahyası", "OSB mahyası")
+        for ad in mahyalar:
+            ekle("Çatı kaplamaları", ad, "L 2800", tavan(c["mahya_hatti_m"] / (pm - bm)), c["mahya_hatti_m"], birim="m", formul=mahya_formul, durum=mahya_durum, not_=mahya_notu)
+    elif c.get("dizilim") and kaplama not in PANEL_KAPLAMALARI:
+        # genel model: kodu yazılmamış ya da kural setinde açılmamış kaplama; 0.4 hattının dikdörtgen kırma çatı formülleri bu girdiye uymaz
+        raise SystemExit(f"Genel model {KAPLAMA_ADI.get(kaplama, kaplama)} kaplamasını bu kural setiyle hesaplamaz "
+                         "(kural kitabında `genel_osbli_kaplama`; kodda `GENEL_OSBLI_KODDA`).")
     elif (kaplama in OSBLI_KAPLAMA or kaplama == "trapez_sac") and not c.get("yuzey_m2"):
         ekle("Çatı kaplamaları", f"Çatı kaplaması ({KAPLAMA_ADI[kaplama]})", "", None, birim="",
              formul="çatı yüzeyi girdide yok; kaplama kalemleri hesaplanmadı", durum="bekliyor")
@@ -1115,8 +1166,13 @@ def _hesapla(g: dict, k: dict) -> dict:
     sac_adedi = (adet_of("Metal kiremit (kiremit desen sac)") + adet_of("Trapez sac")) if c.get("panel_boyu_m") else 0
     if sac_adedi:   # motor: + metal kiremit boyu ÷ 200 × adet + trapez sac boyu ÷ 200 × adet
         say60 += (dz.get("panel_boyu_m") or c["panel_boyu_m"]) * 1000 / v["trapez_panel_boyu_bolu_mm"] * sac_adedi
+    # genel model, kiremit desen sac (D-98): levha boyları dizilimden, her boy kendi adediyle (5,5 × 76 ve 110'daki gibi)
+    dizilim_saci = bool(c.get("dizilim") and adet_of("Kiremit desen sac"))
+    if dizilim_saci:
+        say60 += sum(sat["boy_m"] * 1000 / v["trapez_panel_boyu_bolu_mm"] * sat["adet"] for sat in c["dizilim"]["satirlar"])
     ekle("Vida", "Trapez vida (5,5 × 60)", "adet", kat(say60, yv), say60, birim="vida",
-         formul="bina m² × 2,5" + (" + sac boyu ÷ 200 × sac adedi" if sac_adedi else "") + "; 250'ye yuvarlandı", durum="motor")
+         formul="bina m² × 2,5" + (" + sac boyu ÷ 200 × sac adedi" if sac_adedi else "")
+                + (" + Σ (levha boyu (mm) ÷ 200 × levha adedi)" if dizilim_saci else "") + "; 250'ye yuvarlandı", durum="motor")
     for anahtar, ad, vida_adi in (("tek_kat_panel", "Tek kat panel", "Trapez vida (5,5 × 76; tek kat panel)"), ("sandvic_panel", "Sandviç panel", "Trapez vida (5,5 × 110; sandviç panel)")):
         if kaplama == anahtar and adet_of(ad):
             if c.get("dizilim"):
@@ -1256,9 +1312,7 @@ def bayi_uygula(g: dict, anahtar: str, bk: dict) -> None:
             g[x] = b[x]
     c = g["cati"]
     yeni_kaplama = b.get("cati", {}).get("kaplama")
-    if "dizilim" in c and yeni_kaplama and yeni_kaplama != c.get("kaplama") and yeni_kaplama not in ("sandvic_panel", "tek_kat_panel"):
-        raise SystemExit("Bu girdi genel modelden üretilmiş: genel model şimdilik yalnız sandviç panel ve tek kat panel kaplamasını hesaplar "
-                         f"(bayi kuralındaki kaplama: {KAPLAMA_ADI.get(yeni_kaplama, yeni_kaplama)}).")
+    genel_kaplama_degisimi(c, yeni_kaplama)
     yeni_yontem = b.get("cati", {}).get("yontem")
     if "dizilim" in c and yeni_yontem and yeni_yontem != c.get("yontem", "omega_asik"):
         raise SystemExit("Bu girdi genel modelden üretilmiş: bayi kuralındaki çatı yöntemi için girdi o yöntemle yeniden üretilmeli (tanımda `cati.yontem`); "
@@ -1329,8 +1383,7 @@ def main() -> int:
         g["cati"].pop("inis_adedi", None)
         g["cati"]["inis_adedi_plan"] = a.inis_plan
     if a.kaplama:
-        if "dizilim" in g["cati"] and a.kaplama not in ("sandvic_panel", "tek_kat_panel"):
-            raise SystemExit("Bu girdi genel modelden üretilmiş: genel model şimdilik yalnız sandviç panel ve tek kat panel kaplamasını hesaplar.")
+        genel_kaplama_degisimi(g["cati"], a.kaplama)
         g["cati"]["kaplama"] = a.kaplama
     if a.mudahale_kapagi:
         g["cati_mudahale_kapagi"] = True

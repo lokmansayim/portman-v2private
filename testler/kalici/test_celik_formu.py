@@ -745,7 +745,7 @@ def test_cati_kaplamasi_revizyonda_kalir(tmp_path):
     assert varyant.kaplama_oku(W._cizim_tanimi(kr3.is_emri["yapi"]["tanim"], kr3.is_emri["yapi"]["degisiklikler"])) == "sandvic_panel"
 
 
-# ─── İE-20 PR-12 (D-99) · çelik formun ikinci sürümü: trapez sac yok, shingle satırı OSB + membran + shingle ───
+# ─── İE-20 PR-12 (D-102) · çelik formun ikinci sürümü: trapez sac yok, shingle satırı OSB + membran + shingle ───
 AYAR_CF2 = {**AYAR_CF, "talep_formu": {**AYAR_CF["talep_formu"], "celik2_flow_id": "6666666666"}}
 YAYIMLI_CELIK_SHA = "9057e44c735d1d56ac86b86a4e9cd661248720eace9d8b10209a38148a7d5f74"
 

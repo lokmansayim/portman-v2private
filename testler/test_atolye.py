@@ -223,7 +223,7 @@ def test_dondur_ve_tam_kontrol(atolye):
     # yeniden dondurma gerekçe ve var olan bir kararla (D-02); tam izler (sabit zaman, perspektifsiz, pim 0.19) iki koşuda aynı
     banka = atolye["banka"]
     assert kos(banka, "dondur", "Ç8801Z", "--gerekce", "", "--karar", "D-02") == 2
-    assert kos(banka, "dondur", "Ç8801Z", "--gerekce", "deneme", "--karar", "D-999") == 2
+    assert kos(banka, "dondur", "Ç8801Z", "--gerekce", "deneme", "--karar", "D-00") == 2
     assert kos(banka, "dondur", "Ç8801Z", "--gerekce", "deneme", "--karar", "D-02") == 0
     k = json.loads((banka / "C8801Z" / "kontrol.json").read_text(encoding="utf-8"))
     assert k["kural_seti"] == "kurallar/liste/setler/0.19.json" and k["dondurma"]["karar"] == "D-02"
@@ -485,3 +485,13 @@ def test_hakemli_kabul_pim_ve_kontrol(hakemli, tmp_path, capsys):
     kontrol = json.loads((banka / "KT99" / "kontrol.json").read_text(encoding="utf-8"))
     assert kontrol["kural_seti"] == k["pim"]["kural_seti"]["yol"] and kontrol["karkas_kurali"] == k["pim"]["karkas"]["yol"]
     assert B.denetle(banka) == [] and kos(banka, "kontrol", "KT99") == 0
+
+
+def test_karar_var_uc_haneli(tmp_path):
+    # D-100 ve sonrası da dondurmaya dayanak olur (kalıp dogrula.py'deki gibi); dosya adı tam eşleşir, önek saymaz
+    for ad in ("D-02", "D-100", "K21", "Z-03"):
+        (tmp_path / f"{ad}.md").write_text("x", encoding="utf-8")
+    assert all(A.karar_var(k, tmp_path) for k in ("D-02", "D-100", "K21", "Z-03"))
+    assert not A.karar_var("D-10", tmp_path)        # D-100.md var, D-10.md yok
+    assert not A.karar_var("D-1000", tmp_path) and not A.karar_var("", tmp_path) and not A.karar_var("D-00", tmp_path)
+    assert A.karar_var("D-02") and A.karar_var("D-99") and not A.karar_var("D-00")

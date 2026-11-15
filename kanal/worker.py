@@ -809,7 +809,7 @@ def talep_formu_sunusu(gelen: dict, bayi: dict | None, taslak: dict | None, sett
     (veranda ayrıca sorulmaz); yoksa bugünkü form, davranış aynı.
     İE-20 PR-9 (D-93): çelik formunun kimliği ayarda varsa (`talep_formu.celik_flow_id`) yapı tipi çelikken çelik talep formu sunulur
     (prefabrik formun kimliği olmasa da); yoksa bugünkü yol (verandasız ya da ilk form), davranış aynı.
-    İE-20 PR-12 (D-99): çelik formun ikinci sürümünün kimliği ayarda varsa (`talep_formu.celik2_flow_id`) çelik formun yerine o sunulur
+    İE-20 PR-12 (D-102): çelik formun ikinci sürümünün kimliği ayarda varsa (`talep_formu.celik2_flow_id`) çelik formun yerine o sunulur
     (trapez sac seçeneği yok); yoksa davranış aynı."""
     import talep_formu as TF
     iz = satir_id(gelen["id"], 0)[4:16]

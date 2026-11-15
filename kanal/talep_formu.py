@@ -33,7 +33,7 @@ alan listesi kartı 14 Kasım 2026 20:40 UTC "Evet, bu listeyle kur"):
   - Ölçü pano katına yuvarlanmaz (çelik serbest aks; varsayım, D-93): bayinin ölçüsü kalır. Tek kenar ve m² yazılıysa öteki kenarı kod
     m²'den hesaplar (`celik_olcusu`). Kimliği ayarda varsa (`talep_formu.celik_flow_id`) çelikte ilk formun yerine o sunulur.
   - Cevabın token'ı `cf:<iz>[:1]`; tür yine `talep`, `form` alanı `celik`.
-İE-20 PR-12 · Çelik talep formunun ikinci sürümü (`kanal/formlar/celik2.json`; D-99; Lokman, 15 Kasım 2026 05:23 ve 05:28 UTC):
+İE-20 PR-12 · Çelik talep formunun ikinci sürümü (`kanal/formlar/celik2.json`; D-102; Lokman, 15 Kasım 2026 05:23 ve 05:28 UTC):
   - Yayımlı form değişmez; `celik2.json` onun kopyasıdır: çatı kaplamasında "Trapez sac" yok (çelikte sunulmaz), shingle satırı
     "OSB + membran + shingle". Kimliği ayarda varsa (`talep_formu.celik2_flow_id`) çelik formun yerine o sunulur
     (`kanal/worker.py` › `talep_formu_sunusu`); yoksa davranış bugünküyle aynı. Token, ekran verisi ve cevabın okunması aynıdır;
@@ -94,7 +94,7 @@ EK_OZELLIK = "Ek İstekler"                                                     
 # altı kaplaması (`kurallar/liste/kurallar.json` › cati_kaplamasi); dış duvar `kurallar/model/duvar_tipleri.json` (DIS-80 baz, DIS-140
 # seçenek); iç duvar, pencere rengi ve ek istek bayi tekliflerinin taramasından (19 çelik proje). ──
 C_KAPLAMA = {"tek_kat": "tek kat panel", "sandvic": "sandviç panel", "kiremit": "kiremit desen sac + OSB", "trapez": "trapez sac",
-             "osb_trapez": "trapez sac + OSB", "shingle": "OSB + membran + shingle"}   # "trapez": yalnız eski formun cevabı (D-99)
+             "osb_trapez": "trapez sac + OSB", "shingle": "OSB + membran + shingle"}   # "trapez": yalnız eski formun cevabı (D-102)
 # Form seçeneği → kural kitabının `cati_kaplama` anahtarı (İE-20 PR-11, D-97). Genel motorun hesapladığı kaplama (`beyin/varyant.
 # CIZILEN_KAPLAMALAR`) ilk planda çizime işlenir; ötekiler özel isteğe yazılır.
 C_KAPLAMA_KITAP = {"tek_kat": "tek_kat_panel", "sandvic": "sandvic_panel", "kiremit": "osb_kiremit", "trapez": "trapez_sac",

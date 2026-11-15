@@ -45,10 +45,23 @@ ev kartları "Doğru, yanına eklensin" (85 m² 20:05:33, seçenek metni "Kayıt
 - kapı ve pencere yerinde (duvar boyunca aralığı aynı; kayan cephedeki açıklığın hattı duvarla kayar); açıklıklar aynen (oda ortasındaki
   açıklığa bugünkü panosu yazılabilir, yeri aynı kalır);
 - oda ve girinti köşeleri yalnız o bantta silinen kadar kayar; veranda (açık mahal) ve dikmesi yalnız Lokman'ın o evin kartıyla kısalır
-  (`--veranda-sozu`, söz ve saat kayda yazılır); öteki alanlar (çatı, açık sınırlar, ek akslar) aynen.
+  (`--veranda-sozu`, söz ve saat kayda yazılır); ek akslar duvarla kayar (BK-34); öteki alanlar (çatı, açık sınırlar) aynen.
 30 cm sınırı varsayımdır (yedi evde parça 9,5–27 cm; BK-31 › Varsayımlar). Brüt oturum kıyaslanmaz (kayıt Motor'un brütünü yazar).
 
     python3 araclar/havuz_hakemi.py testler/havuz/is_emirleri/PA12_SILME.json --kart AP-11 --silme-hali is_emri/adaylar/PA12.json
+
+Kesim hattı, üçlü H ve açıklık kayması (BK-34; silme hâlinin içinde, her biri yalnız Lokman'ın o evin kartı ya da sözüyle; tek ev sözleri,
+genelleme varsayımdır). 71 m² 2+1: Lokman 14 Kasım 2026 20:46:54 sözü, kart 20:57:28 "Doğru, yanına eklensin" (eskiz 05c, 773 × 888,5 cm):
+- kesim hattı (`--kesim-hatti <cephe>:<cm>:<hat>` + `--kesim-sozu`): kısa parça dizilim sonundaki cepheden içeride bir hatta kesilir; hattın
+  ötesindeki duvar, oda köşesi, açıklık, dikme, ek aks ve dayanak cm kadar kayar, sonra dış yüzün bandı kalan kadar (silme ya da büyüme);
+  kesilen bantta kaynak evin duvarı ya da oda köşesi olmaz; o eksende en az bir duvarda cm kadar kısa parça düşer;
+- üçlü H (`--uclu-h-sozu`; D-96): silinmiş hâlde yalnız `t: "uclu_h"` birleşimi eklenebilir; nokta kaynak evde bir duvar köşesine eşlenir,
+  kaynak ev o noktada üçlü H'la kurulur ve kıyas onunla yapılır (köşe direğinin kalkması pano dizisinde fark sayılmaz);
+- açıklık kayması (`--aciklik-sozu`): Motor'un yeniden dizdiği duvarda (kısa parçasız kısalan ya da uzayan) kapı ya da pencere duvar boyunca
+  kayabilir (oda ortasındaki pencere odanın ortasında kalır): hattı ve boyu aynı, duvarın içinde, kayma duvarın değişiminden çok değil.
+
+    python3 araclar/havuz_hakemi.py testler/motor/veri/D96_71m2_uclu_h.json --kart AP-08 --silme-hali is_emri/adaylar/PA26.json \
+        --kesim-hatti on:17:770 --kesim-sozu "<kart>" --buyume-sozu "<söz>" --veranda-sozu "<kart>" --uclu-h-sozu "<söz>" --aciklik-sozu "<kart>"
 
 Çelik (AICelik): proje kartı yok. Hedef değerler İE-16'da müşteri onay paftasından okunan tanımın adından (`testler/havuz/
 celik_kartlari.json`: antet m², oda programı, veranda): genel motor çizer ve doğrular, brüt oturum antet m²'sinden en çok 0,5 m² sapar,
@@ -91,6 +104,19 @@ YER_TOL_CM = 0.05
 # tamamlayabilirsin") ve 62,75 (77 m², 20:35:43 "salon ve mutfaktaki 1000cm çizgisindeki 48,75'leride 62,75'e tamamla"). Tek ev sözleri;
 # genelleme varsayımdır (CIO, 20:27).
 TAMAMLAMA_BOYLARI_CM = (125.5, 62.75)
+# BK-34 (kesim hattı ve üçlü H; yalnız Lokman'ın ev kartıyla): 71 m² 2+1, Lokman 14 Kasım 2026 20:46:54 sözü ve 20:57:28 kartı "Doğru,
+# yanına eklensin" (eskiz 05c, 773 × 888,5 cm): kısa parça dış yüzde değil, dizilim sonundaki cepheden içeride bir hatta kesilir
+# (`--kesim-hatti on:17:770`); hattın ötesindeki her şey parça kadar kayar. Üçlü H (D-96) silinmiş hâlde yazılır (`--uclu-h-sozu`).
+KESIM_CEPHELERI = ("sag", "sol", "on", "arka")
+KESIM_SECENEKLERI = (                                    # hakem ve aday kaydı aynı seçenekleri alır (BK-34)
+    ("--kesim-hatti", "--silme-hali ile: kısa parça dış yüzde değil, dizilim sonundaki cepheden içeride bir hatta kesildiyse "
+                      "<cephe>:<cm>:<hat> (ör. on:17:770; hat İş Emri'nin çerçevesinde); --kesim-sozu ile (BK-34)"),
+    ("--kesim-sozu", "--kesim-hatti ile: Lokman'ın o evin kartı, sözü ve saatiyle (BK-34; tek ev sözü)"),
+    ("--uclu-h-sozu", "--silme-hali ile: silinmiş hâlde köşe direği yerine üçlü H (yapi.birlesimler, D-96) yazıldıysa Lokman'ın o evdeki "
+                      "sözü ve saati (BK-34)"),
+    ("--aciklik-sozu", "--silme-hali ile: Motor'un yeniden dizdiği duvarda kapı ya da pencere kaydıysa Lokman'ın o evin kartı, sözü ve "
+                       "saati (BK-34)"),
+)
 SILME_KIMLIK = ("is_emri_no", "revizyon", "talep", "varsayimlar", "eksikler")   # kimlik ve talep yazıları: aday kaydı yeniden yazar
 
 
@@ -370,8 +396,56 @@ def _dizilim_bantta(diz: dict, sx, sy) -> dict:
     return out
 
 
+def _kesim_oku(yazi: str, kaynak_ie: dict, k: dict, t: float) -> tuple[tuple[str, float, float] | None, str | None]:
+    """BK-34: `<cephe>:<cm>:<hat>` (eskizin kayma yazımı, ör. "on:17:770"; hat İş Emri'nin çerçevesinde, dizilim sonundaki cepheden içeride)
+    → ((eksen, hat, cm), None) ya da (None, bulgu). Cephe dizilim sonunda olmalı (Motor çerçevesinde büyük uç); parça 0 ile 30 cm arası; hat
+    iki dış duvarın arasında ve kesilen bantta (hat − cm ile hat arası) kaynak evin duvar hattı, duvar ucu ya da oda köşesi yok."""
+    from beyin import yarim_pano as Y
+    m = re.fullmatch(r"\s*(sag|sol|on|arka):(\d+(?:[.,]\d+)?):(\d+(?:[.,]\d+)?)\s*", yazi or "")
+    if not m:
+        return None, f"kesim hattı: '{yazi}' okunmadı (<cephe>:<cm>:<hat>, cephe {' | '.join(KESIM_CEPHELERI)}; ör. on:17:770)"
+    cephe, cm, hat = m.group(1), float(m.group(2).replace(",", ".")), float(m.group(3).replace(",", "."))
+    eksen, kenar, _ = Y.yan(cephe, kaynak_ie)
+    L = k["W"] if eksen == "x" else k["H"]
+    if kenar != "max":
+        return None, f"kesim hattı: {cephe} cephesi dizilim sonunda değil (kısa parça yalnız dizilim sonunda kalır, D-92)"
+    if not 0 < cm < TOL_SILME_CM:
+        return None, f"kesim hattı: parça {cm:g} cm (0 ile {TOL_SILME_CM:g} cm arası kısa parça kesilir)"
+    if not t < hat <= L - cm - t - 0.5:
+        return None, f"kesim hattı: hat {hat:g} cm iki dış duvarın arasında değil ({t:g} ile {L - cm - t - 0.5:g} cm arası; dış yüzde kesim silme kalemidir)"
+    bant = []
+    for d in k["duvarlar"]:
+        bant += [d["c"]] if d["yon"] != eksen else [d["a0"], d["a1"]]
+    i0, i1 = (0, 2) if eksen == "x" else (1, 3)
+    for m_ in kaynak_ie.get("mahaller") or []:
+        for r in _sayi(m_.get("konum_cm") or []):
+            bant += [r[i0], r[i1]]
+    icinde = sorted({v for v in bant if hat - cm - YER_TOL_CM < v < hat - YER_TOL_CM})
+    if icinde:
+        return None, (f"kesim hattı: kesilen bantta ({hat - cm:g}–{hat:g} cm) kaynak evin duvarı ya da oda köşesi var "
+                      f"({', '.join(f'{v:g}' for v in icinde)}); kesim yalnız boş bantta")
+    return (eksen, hat, cm), None
+
+
+def _eksen_esle(L: float, t: float, d: float, kesim: tuple[float, float] | None):
+    """Bir eksende kaynak evin değeri → silinmiş hâldeki yeri (İş Emri'nin çerçevesi). Kesimsiz: dizilim sonundaki cephenin bandı (dış yüzden
+    bir dış duvar) d kadar kayar (BK-31). Kesimli (BK-34; hat, cm): hattın ötesi cm kadar kayar, sonra bant kalan d − cm kadar (büyüme ya da
+    silme)."""
+    if kesim is None:
+        return lambda v: round(v - d, 2) if v >= L - t - 0.5 else v
+    hat, cm = kesim
+    L1, kalan = L - cm, d - cm
+
+    def esle(v):
+        u = v - cm if v >= hat - YER_TOL_CM else v
+        u = u - kalan if u >= L1 - t - 0.5 else u
+        return round(u, 2) if u != v else v
+    return esle
+
+
 def denetle_silme(ie: dict, kart: dict, kaynak_ie: dict, veranda_sozu: str | None = None,
-                  buyume_sozu: str | None = None) -> tuple[list[str], dict]:
+                  buyume_sozu: str | None = None, kesim_hatti: str | None = None, kesim_sozu: str | None = None,
+                  uclu_h_sozu: str | None = None, aciklik_sozu: str | None = None) -> tuple[list[str], dict]:
     """(bulgular, ölçüm) silme hâli için (BK-31; D-92 › Havuza uygulama). Kaynak ev tek özel pano anahtarıyla (D-92, "dizilim_sonu") kurulunca
     dizilimin sonunda kalan 30 cm'den kısa parça silinmiş: o cephenin dış duvarı parça kadar içeri kaymış. Kalemler (Motor'un planından):
     kaynak ev proje kartıyla aynı (normal kip); silinmiş hâlde anahtar "dizilim_sonu"; dış ölçü her eksende 0 ile 30 cm arası küçülür (en az
@@ -383,7 +457,8 @@ def denetle_silme(ie: dict, kart: dict, kaynak_ie: dict, veranda_sozu: str | Non
     Büyüme (BK-31 PR-2; yalnız Lokman'ın ev sözüyle, `buyume_sozu`): bir eksende dış ölçü büyüyebilir. O eksende en az bir duvarda kalan özel
     pano büyüme kadar uzayıp tam panoya (125,5) ya da yarım panoya (62,75) tamamlanır (`_tamamlandi`); uzayan öteki duvarları Motor anahtarla
     yeniden dizer (açıklıklı panolar aynı, özel pano sayısı artmaz). Kayan cephenin bandı büyüme kadar dışarı kayar; öteki kalemler aynen.
-    Tek ev sözleri; genelleme varsayımdır."""
+    Kesim hattı (`kesim_hatti`, `kesim_sozu`), üçlü H (`uclu_h_sozu`) ve yeniden dizilen duvarda açıklık kayması (`aciklik_sozu`): BK-34,
+    modülün başındaki açıklama. Tek ev sözleri; genelleme varsayımdır."""
     from motor import geometry as G
     kaynak_b, _ = denetle(kaynak_ie, kart)
     bulgular, o = denetle(ie, kart)
@@ -398,16 +473,70 @@ def denetle_silme(ie: dict, kart: dict, kaynak_ie: dict, veranda_sozu: str | Non
     dx, dy = round(k["W"] - s["W"], 2), round(k["H"] - s["H"], 2)
     olc = {**o, "kaynak_dis_olcu_cm": [k["W"], k["H"]], "silinen_cm": [max(0.0, dx), max(0.0, dy)], "buyuyen_cm": [max(0.0, -dx), max(0.0, -dy)],
            "silinen": [], "tamamlanan": [], "yeniden_dizilen": [], "veranda_kisalan": []}
-    silinen_eksen, tamamlanan_eksen = set(), set()
+    silinen_eksen, tamamlanan_eksen, silinen_boy, dizilen = set(), set(), [], []
+    t = float(((kaynak.get("yapi") or {}).get("duvar_kalinligi_cm") or {}).get("dis") or 10)
+    kesim = None                                              # BK-34: (eksen, hat, cm), yalnız Lokman'ın ev kartıyla
+    if kesim_hatti:
+        if not (kesim_sozu and kesim_sozu.strip()):
+            return b + ["kesim hattı: içerideki hatta kesim yalnız Lokman'ın ev kartıyla (--kesim-sozu)"], olc
+        kesim, hata = _kesim_oku(kesim_hatti, kaynak_ie, k, t)
+        if hata:
+            return b + [hata], olc
+        olc["kesim_hatti"] = {"yazi": kesim_hatti.strip(), "eksen": kesim[0], "hat_cm": kesim[1], "cm": kesim[2]}
+    kes = {e: ((kesim[1], kesim[2]) if kesim and kesim[0] == e else None) for e in ("x", "y")}
+    kx, ky = (round(dx - (kes["x"] or (0, 0))[1], 2), round(dy - (kes["y"] or (0, 0))[1], 2))   # dış yüzde silinen (eksi: büyüyen)
+    olc["silinen_cm"] = [round(max(0.0, kx) + (kes["x"] or (0, 0))[1], 2), round(max(0.0, ky) + (kes["y"] or (0, 0))[1], 2)]
+    olc["buyuyen_cm"] = [max(0.0, -kx), max(0.0, -ky)]                # kesimli eksende silinen kesim dahil; dış ölçü farkı silinen − büyüyen
     buyume = bool(buyume_sozu and buyume_sozu.strip())
     alt = -max(TAMAMLAMA_BOYLARI_CM) if buyume else 0.0      # büyüme özel panoyu en çok tam panoya tamamlar
-    if not (alt <= dx < TOL_SILME_CM and alt <= dy < TOL_SILME_CM and (dx != 0 or dy != 0)):
-        return b + [f"dış ölçü: kaynak {k['W']:g} × {k['H']:g} cm, silinmiş {s['W']:g} × {s['H']:g} cm; silinen {dx:g} / {dy:g} cm (her "
-                    f"eksende 0 ile {TOL_SILME_CM:g} cm arası küçülür, en az birinde; büyüme yalnız Lokman'ın ev sözüyle, --buyume-sozu)"], olc
-    t = float(((kaynak.get("yapi") or {}).get("duvar_kalinligi_cm") or {}).get("dis") or 10)
-    sx = lambda v: round(v - dx, 2) if v >= k["W"] - t - 0.5 else v     # dizilim sonundaki cephenin bandı (dış yüzden bir dış duvar)
-    sy = lambda v: round(v - dy, 2) if v >= k["H"] - t - 0.5 else v     # silinen kadar içeri; öteki değerler yerinde
+    if not (alt <= kx < TOL_SILME_CM and alt <= ky < TOL_SILME_CM and (dx != 0 or dy != 0)):
+        return b + [f"dış ölçü: kaynak {k['W']:g} × {k['H']:g} cm, silinmiş {s['W']:g} × {s['H']:g} cm; silinen {dx:g} / {dy:g} cm"
+                    + (f" (kesim hattında {kesim[2]:g} cm, dış yüzde {kx:g} / {ky:g} cm)" if kesim else "")
+                    + f" (her eksende 0 ile {TOL_SILME_CM:g} cm arası küçülür, en az birinde; büyüme yalnız Lokman'ın ev sözüyle, --buyume-sozu)"], olc
+    sx = _eksen_esle(k["W"], t, dx, kes["x"])                # dizilim sonundaki cephenin bandı (dış yüzden bir dış duvar) silinen kadar
+    sy = _eksen_esle(k["H"], t, dy, kes["y"])                # içeri; kesim hattının ötesi kesilen kadar; öteki değerler yerinde
     yakin = lambda u, v: abs(u - v) <= YER_TOL_CM
+
+    # BK-34: üçlü H (D-96) silinmiş hâlde yazılır; kaynak evde eşlendiği noktaya da yazılır, duvarlar ve açıklıklar onunla kıyaslanır
+    bk_ = _sayi((kaynak_ie.get("yapi") or {}).get("birlesimler") or [])
+    bs_ = _sayi((ie.get("yapi") or {}).get("birlesimler") or [])
+    ayni_b = lambda p, q: ({a: v for a, v in p.items() if a != "nokta_cm"} == {a: v for a, v in q.items() if a != "nokta_cm"}
+                           and all(map(yakin, p.get("nokta_cm") or [], q.get("nokta_cm") or [])))
+    bek_b = [{**x, "nokta_cm": [sx(x["nokta_cm"][0]), sy(x["nokta_cm"][1])]} for x in bk_]
+    eksik_b = [x for x in bek_b if not any(ayni_b(x, y) for y in bs_)]
+    yeni_b = [y for y in bs_ if not any(ayni_b(x, y) for x in bek_b)]
+    if eksik_b:
+        b.append(f"birleşim: kaynak evin birleşimi silinmiş hâlde eşlendiği yerde değil ({eksik_b})")
+    if yeni_b:
+        uclar = [(d["a0"], d["c"]) for d in k["duvarlar"] if d["yon"] == "x"] + [(d["a1"], d["c"]) for d in k["duvarlar"] if d["yon"] == "x"] \
+            + [(d["c"], d["a0"]) for d in k["duvarlar"] if d["yon"] == "y"] + [(d["c"], d["a1"]) for d in k["duvarlar"] if d["yon"] == "y"]
+        diger_b, yeni_b = [y for y in yeni_b if y.get("t") != "uclu_h"], [y for y in yeni_b if y.get("t") == "uclu_h"]
+        if diger_b:
+            b.append(f"birleşim: silinmiş hâlde yalnız üçlü H eklenebilir (D-96); öteki birleşimler kaynak evle aynı ({diger_b})")
+        if yeni_b and not (uclu_h_sozu and uclu_h_sozu.strip()):
+            b.append("üçlü H: köşe direği yerine üçlü H yalnız Lokman'ın ev sözüyle (--uclu-h-sozu; D-96)")
+        elif yeni_b:
+            ek_b = []
+            for y in yeni_b:
+                (u, v), dxy = y["nokta_cm"], {"x": dx, "y": dy}
+                aday = lambda w, e: {round(w + a, 2) for a in (0.0, (kes[e] or (0, 0))[1], dxy[e] - (kes[e] or (0, 0))[1], dxy[e])}
+                nok = [(p, q) for p in aday(u, "x") for q in aday(v, "y")
+                       if yakin(sx(p), u) and yakin(sy(q), v) and any(yakin(p, a) and yakin(q, c) for a, c in uclar)]
+                if len(nok) != 1:
+                    b.append(f"üçlü H: {y['nokta_cm']} kaynak evde bir duvar köşesine eşlenmiyor (eşlenen: {nok or 'yok'})")
+                    continue
+                ek_b.append({"nokta_cm": list(nok[0]), "t": "uclu_h"})
+                olc.setdefault("uclu_h", []).append({"nokta_cm": y["nokta_cm"], "kaynakta_cm": list(nok[0])})
+            if ek_b:
+                kaynak = json.loads(json.dumps(kaynak))
+                kaynak["yapi"]["birlesimler"] = list((kaynak["yapi"].get("birlesimler") or [])) + ek_b
+                try:
+                    k2 = duvar_dizileri(kaynak)
+                except G.IsEmriHatasi as e:
+                    return b + [f"üçlü H: kaynak evde o köşede kurulmuyor ({e})"], olc
+                if (k2["W"], k2["H"]) != (k["W"], k["H"]):
+                    return b + [f"üçlü H: kaynak evin dış ölçüsü değişti ({k['W']:g} × {k['H']:g} → {k2['W']:g} × {k2['H']:g} cm)"], olc
+                k = k2
 
     # duvarlar ve pano dizileri
     serbest = list(s["duvarlar"])
@@ -438,19 +567,23 @@ def denetle_silme(ie: dict, kart: dict, kaynak_ie: dict, veranda_sozu: str | Non
             else:
                 olc["yeniden_dizilen"].append({"duvar": f"{dk['tur']} {dk['yon']} {dk['c']:g}", "once": [x for x, _ in dk["panolar"]],
                                                "sonra": [x for x, _ in ds["panolar"]]})
+                dizilen.append({**ds, "degisim": abs(kisalma)})
             continue
         boy = _kisa_parca_dustu(dk, ds, kisalma)
         if boy is not None:
             olc["silinen"].append({"duvar": f"{dk['tur']} {dk['yon']} {dk['c']:g}", "boy": boy})
-            silinen_eksen.add(dk["yon"])
+            silinen_eksen.add(dk["yon"]); silinen_boy.append((dk["yon"], boy))
         elif [p for p in ds["panolar"] if p[1]] != [p for p in dk["panolar"] if p[1]]:
             b.append(f"pano dizisi: duvar {_duvar_adi(dk)} {kisalma:g} cm kısaldı, açıklıklı ya da karkaslı pano değişti "
                      f"({[x for x, _ in dk['panolar']]} → {[x for x, _ in ds['panolar']]})")
         else:                                                 # kısa parçası olmayan kısalan duvar (veranda kenarı): Motor anahtarla yeniden dizer
             olc["yeniden_dizilen"].append({"duvar": f"{dk['tur']} {dk['yon']} {dk['c']:g}", "once": [x for x, _ in dk["panolar"]],
                                            "sonra": [x for x, _ in ds["panolar"]]})
+            dizilen.append({**ds, "degisim": abs(kisalma)})
     b += [f"duvar: silinmiş hâlde kaynak evde olmayan duvar {_duvar_adi(d)}" for d in serbest]
-    for yon, sil in (("x", dx), ("y", dy)):
+    for yon, sil in (("x", kx), ("y", ky)):
+        if kes[yon] and not any(e == yon and yakin(boy, kes[yon][1]) for e, boy in silinen_boy):
+            b.append(f"kesim hattı: {kes[yon][1]:g} cm hiçbir {yon} duvarında dizilim sonundaki kısa parça değil (kesim yalnız kısa parça kadar)")
         if sil > 0 and yon not in silinen_eksen:
             b.append(f"silinen: {sil:g} cm hiçbir {yon} duvarında dizilim sonundaki kısa parça değil (silinen yalnız kısa parça kadar)")
         if sil < 0 and yon not in tamamlanan_eksen:
@@ -465,12 +598,37 @@ def denetle_silme(ie: dict, kart: dict, kaynak_ie: dict, veranda_sozu: str | Non
     bek_yer = sorted(({**d, "hat": sy(d["hat"]) if d["yon"] == "x" else sx(d["hat"]),
                        "a0": sx(d["a0"]) if d["yon"] == "x" else sy(d["a0"]), "a1": sx(d["a1"]) if d["yon"] == "x" else sy(d["a1"])}
                       for d in yer_k), key=lambda d: (d["tur"], d["olcu"], d["duvar_tur"], d["yon"], d["hat"], d["a0"]))
-    if len(bek_yer) != len(yer_s) or any((d["tur"], d["olcu"], d["duvar_tur"], d["yon"]) != (e["tur"], e["olcu"], e["duvar_tur"], e["yon"])
-                                         or not all(yakin(d[x], e[x]) for x in ("hat", "a0", "a1")) for d, e in zip(bek_yer, yer_s)):
-        fark = [f"{d['tur']} {d['olcu']} ({d['duvar_tur']}, {d['yon']} duvarı) hat {d['hat']:g}, {d['a0']:g}–{d['a1']:g}"
-                for d in bek_yer if not any(all(d[x] == e[x] for x in ("tur", "olcu", "duvar_tur", "yon"))
-                                            and all(yakin(d[x], e[x]) for x in ("hat", "a0", "a1")) for e in yer_s)]
+    ozellik = lambda d: (d["tur"], d["olcu"], d["duvar_tur"], d["yon"])
+    kalan_s, kalan_b = list(yer_s), []
+    for d in bek_yer:
+        e = next((e for e in kalan_s if ozellik(e) == ozellik(d) and all(yakin(d[x], e[x]) for x in ("hat", "a0", "a1"))), None)
+        if e is None:
+            kalan_b.append(d)
+        else:
+            kalan_s.remove(e)
+    # BK-34: Motor'un yeniden dizdiği duvarda (kısa parçasız kısalan ya da uzayan) açıklık duvar boyunca kayabilir (oda ortasındaki pencere
+    # odanın ortasında kalır); hattı ve boyu aynı, duvarın içinde, kayma duvarın değişiminden çok değil; yalnız Lokman'ın ev kartıyla
+    kayan = []
+    for d in list(kalan_b):
+        for e in kalan_s:
+            w = next((w for w in dizilen if w["yon"] == e["yon"] and w["tur"] == e["duvar_tur"] and yakin(w["c"], e["hat"])
+                      and w["a0"] - YER_TOL_CM <= e["a0"] and e["a1"] <= w["a1"] + YER_TOL_CM), None)
+            if (w is not None and ozellik(e) == ozellik(d) and yakin(d["hat"], e["hat"]) and yakin(d["a1"] - d["a0"], e["a1"] - e["a0"])
+                    and abs(e["a0"] - d["a0"]) <= w["degisim"] + YER_TOL_CM):
+                kayan.append({"aciklik": f"{d['tur']} {d['olcu']}", "duvar": f"{w['tur']} {w['yon']} {w['c']:g}",
+                              "once_cm": [d["a0"], d["a1"]], "sonra_cm": [e["a0"], e["a1"]]})
+                kalan_b.remove(d); kalan_s.remove(e)
+                break
+    if kalan_b or kalan_s:
+        fark = [f"{d['tur']} {d['olcu']} ({d['duvar_tur']}, {d['yon']} duvarı) hat {d['hat']:g}, {d['a0']:g}–{d['a1']:g}" for d in kalan_b]
         b.append(f"açıklık yeri: kapı ve pencere kaynak evdeki yerinde değil (beklenen: {fark or 'sayı farkı'})")
+    if kayan:
+        if aciklik_sozu and aciklik_sozu.strip():
+            olc["kayan_aciklik"] = kayan
+        else:
+            b.append("açıklık yeri: " + ", ".join(f"{a['aciklik']} ({a['duvar']}) {a['once_cm'][0]:g}–{a['once_cm'][1]:g} → "
+                                                  f"{a['sonra_cm'][0]:g}–{a['sonra_cm'][1]:g}" for a in kayan)
+                     + " Motor'un yeniden dizdiği duvarda kaydı; açıklığın kayması yalnız Lokman'ın ev kartıyla (--aciklik-sozu)")
 
     # odalar, verandalar ve girintiler: köşe yalnız kayan cephenin bandında silinen kadar kayar
     mk_, ms_ = kaynak_ie.get("mahaller") or [], ie.get("mahaller") or []
@@ -521,9 +679,15 @@ def denetle_silme(ie: dict, kart: dict, kaynak_ie: dict, veranda_sozu: str | Non
         if _sayi(ie.get(alan)) != _sayi(kaynak_ie.get(alan)):
             b.append(f"{alan}: kaynak evle aynı değil")
     yk, ys = dict(kaynak_ie.get("yapi") or {}), dict(ie.get("yapi") or {})
-    for alan in sorted((set(yk) | set(ys)) - {"dis_olcu_cm", "grid", "referans_model", "dizilim"}):
+    for alan in sorted((set(yk) | set(ys)) - {"dis_olcu_cm", "grid", "referans_model", "dizilim", "birlesimler", "ek_akslar_cm"}):
         if _sayi(ys.get(alan)) != _sayi(yk.get(alan)):
             b.append(f"yapi.{alan}: kaynak evle aynı değil")
+    f_ek = {"x": sx, "x_yardimci": sx, "y": sy, "y_yardimci": sy}    # ek akslar Motor çerçevesinde: bant ve kesim hattı gibi kayar
+    ek_k = yk.get("ek_akslar_cm")
+    bek_ek = ({a: ([f_ek[a](float(v)) for v in vs] if a in f_ek and isinstance(vs, list) else vs) for a, vs in ek_k.items()}
+              if isinstance(ek_k, dict) else ek_k)
+    if _sayi(ys.get("ek_akslar_cm")) != _sayi(bek_ek):
+        b.append(f"yapi.ek_akslar_cm: kaynak evle aynı değil ya da kayan cepheden başka yerde kaydı ({ek_k} → {ys.get('ek_akslar_cm')})")
     diz_k = _dizilim_bantta(_sayi({x: v for x, v in (yk.get("dizilim") or {}).items() if x != "tek_ozel_pano"}), sx, sy)
     if _sayi({x: v for x, v in diz.items() if x != "tek_ozel_pano"}) != diz_k:
         b.append("dizilim: kaynak evle aynı değil (tek özel pano anahtarı dışında; paftanın dayanak akslarında yalnız kayan cephe kayar); "
@@ -599,11 +763,15 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--buyume-sozu", default=None,
                     help="--silme-hali ile: dış duvar kalan özel panoyu tamamlamak için dışarı kayarsa Lokman'ın o evdeki sözü ve saati "
                          "(BK-31 PR-2; tek ev sözü)")
+    for ad, yardim in KESIM_SECENEKLERI:
+        ap.add_argument(ad, default=None, help=yardim)
     a = ap.parse_args(argv)
     if a.standart_hal and a.silme_hali:
         print("DUR: --standart-hal ve --silme-hali ayrı kalemlerdir; birlikte verilmez"); return 2
-    if (a.veranda_sozu or a.buyume_sozu) and not a.silme_hali:
-        print("DUR: --veranda-sozu ve --buyume-sozu yalnız --silme-hali ile"); return 2
+    if (a.veranda_sozu or a.buyume_sozu or a.kesim_hatti or a.kesim_sozu or a.uclu_h_sozu or a.aciklik_sozu) and not a.silme_hali:
+        print("DUR: --veranda-sozu, --buyume-sozu, --kesim-hatti ve öteki söz seçenekleri yalnız --silme-hali ile"); return 2
+    if bool(a.kesim_hatti) != bool(a.kesim_sozu and a.kesim_sozu.strip()):
+        print("DUR: --kesim-hatti ve --kesim-sozu birlikte verilir (içerideki hatta kesim yalnız Lokman'ın ev kartıyla; BK-34)"); return 2
     if a.kart.upper().startswith(("ÇP", "CP")):
         if a.standart_hal or a.silme_hali:
             print("DUR: standart hâl ve silme hâli kipi yalnız prefabrikte (D-91, BK-31); çelikte yok"); return 2
@@ -622,14 +790,19 @@ def main(argv: list[str] | None = None) -> int:
     ie = json.loads(Path(a.is_emri).read_text(encoding="utf-8"))
     oku = lambda yol: json.loads(Path(yol).read_text(encoding="utf-8"))
     if a.silme_hali:
-        bulgular, o = denetle_silme(ie, kart, oku(a.silme_hali), a.veranda_sozu, a.buyume_sozu)
+        bulgular, o = denetle_silme(ie, kart, oku(a.silme_hali), a.veranda_sozu, a.buyume_sozu, a.kesim_hatti, a.kesim_sozu,
+                                    a.uclu_h_sozu, a.aciklik_sozu)
         sil = " + ".join(f"{p['duvar']} {p['boy']:g}" for p in o["silinen"])
         tam = " + ".join(f"{p['duvar']} {p['once']:g} → {p['sonra']:g}" for p in o.get("tamamlanan") or [])
         gecti = (f"GEÇTİ: silme hâli (BK-31), kaynak evin proje kartıyla aynı; silinen {o['silinen_cm'][0]:g} / {o['silinen_cm'][1]:g} cm "
                  f"(kısa parçalar: {sil or 'yok'})"
                  + (f"; büyüyen {o['buyuyen_cm'][0]:g} / {o['buyuyen_cm'][1]:g} cm (tamamlanan: {tam}); büyüme sözü: {a.buyume_sozu}" if tam else "")
                  + (f"; veranda {'değişti' if tam else 'kısaldı'} ({', '.join(o['veranda_kisalan'])}): {a.veranda_sozu}"
-                    if o["veranda_kisalan"] else ""))
+                    if o["veranda_kisalan"] else "")
+                 + (f"; kesim hattı {o['kesim_hatti']['yazi']}: {a.kesim_sozu}" if o.get("kesim_hatti") else "")
+                 + (f"; üçlü H {', '.join(str(u['nokta_cm']) for u in o['uclu_h'])}: {a.uclu_h_sozu}" if o.get("uclu_h") else "")
+                 + (f"; açıklık kaydı ({', '.join(u['aciklik'] for u in o['kayan_aciklik'])}): {a.aciklik_sozu}"
+                    if o.get("kayan_aciklik") else ""))
     else:
         bulgular, o = denetle_standart(ie, kart, oku(a.standart_hal)) if a.standart_hal else denetle(ie, kart)
         gecti = "GEÇTİ: standart hâl, kaynak evin proje kartıyla aynı (D-91)" if a.standart_hal else "GEÇTİ: proje kartıyla aynı"

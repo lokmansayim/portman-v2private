@@ -506,7 +506,7 @@ def test_form_celik_formunu_kurar_eski_surumde_kaynakla(etc, tmp_path):
 
 
 def test_form_celik2_yeni_taslak_kurar_yayimli_celik_formuna_dokunmaz(etc, tmp_path):
-    """İE-20 PR-12 (D-99): `--form celik2` çelik formun ikinci sürümünü (trapez sac yok) ayrı adla kurar; yayımlı çelik formu ve öteki
+    """İE-20 PR-12 (D-102): `--form celik2` çelik formun ikinci sürümünü (trapez sac yok) ayrı adla kurar; yayımlı çelik formu ve öteki
     formlar değişmez. Kurulu sürüm bu formu tanımıyorsa betik stdin'den, form `--kaynak` ile depodan gelir. Yayım yalnız `--yayimla` ile."""
     g = SahteGraph()
     try:
