@@ -1,0 +1,312 @@
+{
+ "is_emri_no": "PM-ADAY-PA35",
+ "revizyon": 1,
+ "talep": {
+  "bayi": {
+   "kod": "ADAY",
+   "ad": "Aday kaydı"
+  },
+  "musteri_adi": "ADAY PA35",
+  "metin": "D-92 ve D-96 (İE-40): 71 m² 2+1 evin (PA-26, AP-08) tek özel pano kuralının bıraktığı kısa parçaları silinmiş (sağ 12 cm, veranda arka duvarının hattında 17 cm), salonun ön duvarındaki 120 cm'lik panosu (sözde \"120,5 pano\") 125,5 cm'ye tamamlanmış (ön 5,5 cm öne) ve veranda köşesinde köşe direği yerine üçlü H'lı hâli (Lokman 14 Kasım 2026 19:39:46 kartı \"Kısa parça silinsin\"; 20:46:54 sözü \"... orada köşe direği olmayacak üçlü H olacak yanlış çizmiş mühendis ...\"; 20:57:28 kartı \"Doğru, yanına eklensin\": \"Bugünkü 71 m2 kalır; 773 × 888,5 cm üçlü H'lı hâl (kapı panosu 120,5) Motor eklemesinden sonra ayrı ev olarak girer.\")"
+ },
+ "yapi": {
+  "sistem": "prefabrik",
+  "kat_sayisi": 1,
+  "duvar_yuksekligi_cm": 250,
+  "duvar_kalinligi_cm": {
+   "dis": 10,
+   "ic": 10
+  },
+  "olcu_kaynagi": "dis_olcu",
+  "dis_olcu_cm": {
+   "x": 773.0,
+   "y": 888.5
+  },
+  "referans_model": "PA-35",
+  "grid": {
+   "x_pano": 6.0,
+   "y_pano": 7.0
+  },
+  "kisa_kenar": "x",
+  "giris_cephesi": "on",
+  "dis_dusey_duvar": "cevre_aks_disinda",
+  "dizilim": {
+   "baslangic": "arka-sol",
+   "hiza": "tam_izgara",
+   "dis_duvar_t_bolme": false,
+   "pencere": "oda_ortasi",
+   "kapi": "mantik",
+   "kose": "oda",
+   "son_pano": "son_aks",
+   "kapi_yeri": "ortada",
+   "dis_pano_dayanagi": [
+    {
+     "y": 695.25,
+     "aralik_cm": [
+      632.5,
+      758.0
+     ],
+     "ic_duvarlar": true
+    },
+    {
+     "y": 444.25,
+     "aralik_cm": [
+      256.0,
+      632.5
+     ],
+     "ic_duvarlar": true,
+     "duvar_cm": 512.0
+    }
+   ],
+   "tek_ozel_pano": "dizilim_sonu"
+  },
+  "ek_akslar_cm": {
+   "x": [],
+   "y": [
+    215.25,
+    758.0
+   ]
+  },
+  "birlesimler": [
+   {
+    "nokta_cm": [
+     386.5,
+     758.0
+    ],
+    "t": "uclu_h"
+   }
+  ]
+ },
+ "mahaller": [
+  {
+   "ad": "OTURMA ODASI",
+   "tur": "yatak_odasi",
+   "konum_cm": [
+    [
+     10.0,
+     5.0,
+     386.5,
+     381.5
+    ]
+   ]
+  },
+  {
+   "ad": "SALON",
+   "tur": "salon",
+   "konum_cm": [
+    [
+     10.0,
+     381.5,
+     386.5,
+     883.5
+    ]
+   ]
+  },
+  {
+   "ad": "MUTFAK",
+   "tur": "mutfak",
+   "konum_cm": [
+    [
+     386.5,
+     5.0,
+     763.0,
+     215.25
+    ],
+    [
+     386.5,
+     215.25,
+     512.0,
+     256.0
+    ]
+   ]
+  },
+  {
+   "ad": "HOL",
+   "tur": "antre_hol",
+   "konum_cm": [
+    [
+     386.5,
+     256.0,
+     512.0,
+     758.0
+    ]
+   ]
+  },
+  {
+   "ad": "WC & BANYO",
+   "tur": "banyo",
+   "konum_cm": [
+    [
+     512.0,
+     215.25,
+     763.0,
+     444.25
+    ]
+   ]
+  },
+  {
+   "ad": "YATAK ODASI",
+   "tur": "yatak_odasi",
+   "konum_cm": [
+    [
+     512.0,
+     444.25,
+     763.0,
+     758.0
+    ]
+   ]
+  },
+  {
+   "ad": "VERANDA",
+   "tur": "veranda",
+   "konum_cm": [
+    [
+     386.5,
+     758.0,
+     763.0,
+     883.5
+    ]
+   ]
+  }
+ ],
+ "acik_sinirlar": [],
+ "acikliklar": [
+  {
+   "tur": "pencere",
+   "olcu": "120x120",
+   "mahal": "OTURMA ODASI",
+   "duvar": "sol",
+   "pano": 1
+  },
+  {
+   "tur": "pencere",
+   "olcu": "120x120",
+   "mahal": "SALON",
+   "duvar": "sol",
+   "pano": 1
+  },
+  {
+   "tur": "pencere",
+   "olcu": "120x120",
+   "mahal": "SALON",
+   "duvar": "on",
+   "pano": 1
+  },
+  {
+   "tur": "pencere",
+   "olcu": "100x120",
+   "mahal": "MUTFAK",
+   "duvar": "sag",
+   "pano": 0
+  },
+  {
+   "tur": "pencere",
+   "olcu": "60x40",
+   "mahal": "WC & BANYO",
+   "duvar": "sag",
+   "pano": 0
+  },
+  {
+   "tur": "pencere",
+   "olcu": "120x120",
+   "mahal": "YATAK ODASI",
+   "duvar": "on"
+  },
+  {
+   "tur": "dis_kapi",
+   "olcu": 90,
+   "arasi": [
+    "VERANDA",
+    "HOL"
+   ]
+  },
+  {
+   "tur": "ic_kapi",
+   "olcu": 82,
+   "arasi": [
+    "HOL",
+    "OTURMA ODASI"
+   ]
+  },
+  {
+   "tur": "ic_kapi",
+   "olcu": 82,
+   "arasi": [
+    "HOL",
+    "SALON"
+   ]
+  },
+  {
+   "tur": "ic_kapi",
+   "olcu": 82,
+   "arasi": [
+    "HOL",
+    "MUTFAK"
+   ]
+  },
+  {
+   "tur": "ic_kapi",
+   "olcu": 82,
+   "arasi": [
+    "HOL",
+    "WC & BANYO"
+   ],
+   "pano": 0
+  },
+  {
+   "tur": "ic_kapi",
+   "olcu": 82,
+   "arasi": [
+    "HOL",
+    "YATAK ODASI"
+   ],
+   "pano": 0
+  }
+ ],
+ "dikmeler": [
+  [
+   763.0,
+   0.0
+  ]
+ ],
+ "cati": {
+  "tip": "besik",
+  "egim_yuzde": 32.9,
+  "sacak_cm": 30,
+  "topuk_cm": 10,
+  "makas_yonu": "kisa_kenar",
+  "makas_ekseni": "x",
+  "mahal_catilari": [
+   {
+    "mahal": "VERANDA",
+    "tip": "tek_yon",
+    "egim_yuzde": 5,
+    "yuksek_yan": "arka",
+    "sacak_cm": 0
+   }
+  ]
+ },
+ "cikti": {
+  "pdf": true,
+  "dxf": true,
+  "pafta": "A2",
+  "icerik": [
+   "aksli_plan",
+   "alanli_kopya",
+   "montaj_kopyasi",
+   "on_gorunus",
+   "cati_profili",
+   "ozellik_tablosu"
+  ]
+ },
+ "varsayimlar": [
+  "Izgara 6,5 × 7,5 pano; kısa kenar x (köşe 10 cm x yönünde). 785 cm'lik kenar son aksta 74,75'lik panoyla biter (dizilim.son_pano: son_aks; paftada 62,75 + 74,75).",
+  "Ek akslar y 215,25 (mutfak–WC duvarı) ve 775 (veranda duvarı), Motor çerçevesinde arkadan; paftadaki duvarların yeri.",
+  "Dayanak 1 (y 695,25, 632,5–775, iç duvarlar dahil): giriş tarafında dış ve iç duvarlarda 74,75 + 62,75, paftadaki gibi.",
+  "Dayanak 2 (y 444,25, 256–632,5, yalnız x 512'deki hol–yatak/WC duvarı): giriş kapısından sonra 74,75 + 62,75 + 62,75, WC ve yatak odası kapıları WC–yatak bölmesinin iki yanında sırt sırta (Lokman 08:16; paftada KAPI-01 ve KAPI-02).",
+  "Yatak odasının ön penceresi odanın ortasında (dizilim.pencere: oda_ortasi; yanları 71,25 ve 66,25; Lokman 08:16 'yatak odası penceresini ortala'). Öteki pencereler paftadaki panoda (pano dizini).",
+  "Veranda sağ önde, gömme, 388,5 × 120; çatısı tek eğim %5 (mahal_catilari), ana çatı beşik %32,9.",
+  "D-92 ve D-96 (Lokman, 14 Kasım 2026 UTC; kart 19:39:46 \"Kısa parça silinsin\"; söz 20:46:54 \"... orada köşe direği olmayacak üçlü H olacak ...\"; ev kartı 20:57:28 \"Doğru, yanına eklensin\"): bu İş Emri 71 m²'nin (PA-26) tek özel pano dizilimli, kısa parçaları silinmiş, veranda köşesinde üçlü H'lı hâlidir (PA-35). Sağ dış duvar 12 cm içeri; veranda arka duvarı (kapı duvarı) 775 → 758 (17 cm, kesim hattı 770); salonun ön duvarındaki 120 cm'lik pano (sözde \"120,5 pano\") 125,5 cm'ye tamamlanır, ön cephe 5,5 cm öne; dış ölçü 785 × 900 → 773 × 888,5 cm. Yukarıdaki maddelerdeki ölçüler kaynak evin paftasındandır."
+ ],
+ "eksikler": []
+}

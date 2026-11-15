@@ -69,7 +69,7 @@ def test_kayit_ve_sablon(kod):
 
 
 # Kısa parça silinmiş ya da büyümüş hâller (İE-40 PR-3, ev kartları "Doğru, yanına eklensin"): anahtarlı, yeni numarayla; kaynak evleri anahtarsız
-SILINMIS = {"PA30": "PA12", "PA31": "PA14", "PA32": "PA15", "PA33": "PA08", "PA34": "PA24"}  # ayrıntı test_havuz_silme_kayit.py
+SILINMIS = {"PA30": "PA12", "PA31": "PA14", "PA32": "PA15", "PA33": "PA08", "PA34": "PA24", "PA35": "PA26"}  # ayrıntı test_havuz_silme_kayit.py
 
 
 def test_anahtar_yalniz_95m2_evde():
