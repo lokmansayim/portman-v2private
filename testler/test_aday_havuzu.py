@@ -63,6 +63,7 @@ SILME_HAL = {
     "PA33": ("AP-01", "testler/havuz/is_emirleri/PA08_BUYUME.json", "3+1", 142.0),  # 140 m² büyüyen hâl (20:22:14 sözü, 20:25:45)
     "PA34": ("AP-27", "testler/havuz/is_emirleri/PA24_BUYUME.json", "2+1", 78.0),   # 77 m² büyüyen hâl (20:35:43 sözü, 20:38:43)
     "PA35": ("AP-08", "testler/havuz/is_emirleri/PA26_UCLU_H.json", "2+1", 69.0),   # 71 m² üçlü H'lı hâl (20:46:54 sözü, 20:57:28; BK-34)
+    "PA36": ("AP-19", "testler/havuz/is_emirleri/PA18_GENIS.json", "2+1", 62.0),   # 60 m² veranda duvarı aksta (15 Kasım 07:24:23; BK-35)
 }
 # D-96 › Havuza uygulama (İE-40 PR-7): iç duvarı 100'lük evlerin veranda köşesinde üçlü H, ev ev kartla (Lokman 15 Kasım 2026 07:32:42 sözü).
 # 91 m² 3+1 yeni numarayla (07:57:38 "Doğru, yanına eklensin"; PA-11 aynen); 143 m² 4+1 paftadaki gibi aynı numarayla (07:57:47 "Evet, havuzda
@@ -308,8 +309,8 @@ SETLER = {
     (50, "2+1"): ["PA23"],                                                            # tek aday: öncelik sorulmaz
     (40, "1+1"): ["PA29"],                                                            # D-91 kısalt (39,61 m²)
     (45, "1+1"): ["PA27", "PA28"],                                                    # eski hâl ve en yakın standart (D-91)
-    (60, "2+1"): ["PA01", "PA14", "PA18", "PA25", "PA31", "PA02", "PA09", "PA20"],  # PA-31: 60 m²'nin silinmiş hâli (59 m², D-92)
-    (65, "2+1"): ["PA02", "PA09", "PA20", "PA25", "PA32", "PA35", "PA01", "PA03", "PA14", "PA15"],  # PA-32, PA-35 (69 m²); liste 10, PA-18 düştü
+    (60, "2+1"): ["PA01", "PA14", "PA18", "PA25", "PA31", "PA36", "PA02", "PA09", "PA20"],  # PA-31 silinmiş hâl (59 m²); PA-36 geniş hâl (62 m²)
+    (65, "2+1"): ["PA02", "PA09", "PA20", "PA36", "PA25", "PA32", "PA35", "PA01", "PA03", "PA14"],  # PA-36 (62 m²) dördüncü; liste 10, PA-15 düştü
     (71, "2+1"): ["PA26", "PA03", "PA15", "PA32", "PA35", "PA24", "PA02", "PA04", "PA09", "PA20"],  # PA-35: 71 m²'nin üçlü H'lı hâli (69 m²); PA-34 10 sınırıyla düştü
     (77, "2+1"): ["PA24", "PA04", "PA34", "PA16", "PA05", "PA26", "PA03", "PA15", "PA19"],  # PA-34: 77 m²'nin büyüyen hâli (D-92)
     (80, "2+1"): ["PA16", "PA04", "PA05", "PA34", "PA24", "PA19", "PA06"],
