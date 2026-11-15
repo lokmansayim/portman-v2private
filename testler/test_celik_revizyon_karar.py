@@ -1247,3 +1247,28 @@ def test_hakem23_celik_acik_secim_soruya_donmez(s, metin):
     cati_seti(s)
     k = s.yaz(metin)
     assert k.eylem == "is_emri" and k.revizyon == 2 and s.plan["yapi"]["kod"] == "Ç8801K", k.mesaj
+
+
+# ── İE-42 · geometri hakemi yirmi dördüncü tur (15 Kasım 2026 öğleden sonra) ───────────────────────────────────────────────────────────
+@pytest.mark.parametrize("metin", [
+    "Ç8801 olsun, karar veremedik fiyat ne kadar?", "Ç8801 olsun, emin değiliz teslim ne zaman?",
+    "Ç8801 olsun, ustam karar veremedik ne yapalım?", "K olsun, emin değiliz teslim ne zaman?",
+    "K olsun, fiyatı görünce karar veririz ne zaman gelir?", "Ç8801 olsun, tamam mı?", "K olsun, olur mu?",
+    "K olsun, kapora yatırırsak montaja kadar değiştirebilir miyiz?", "Ç8801 olsun, müşteri dün aradı yarın bakacak",
+    "K olsun, müşteri dün aradı yarın bakacak", "K olsun ama, odalar sonra netleşsin"])
+def test_hakem24_celik_kararsizlik_ve_secim_sorusu_sorulur(s, metin):
+    """Tur 24 (Y1, Y2, O6, O7, O8) çelikte: onayı mühendis kontrolüne gönderiyor, onaylanabilir r02 çiziyor ya da kayıtsız
+    yönlendiriyordu: seçim sorulur."""
+    cati_seti(s)
+    k = s.yaz(metin)
+    assert k.eylem == "sor" and k.mesaj.startswith("Hangi çatı olsun?"), k.mesaj
+    assert s.plan["revizyon"] == 1 and s.k.d["secenek_seti"]["durum"] == "acik" and not s.k.d.get("onaylanan"), k.mesaj
+
+
+@pytest.mark.parametrize("metin", [
+    "K olsun, fatura şirkete mi olsun?", "K olsun, müşteri beğendi ne zaman başlıyoruz?"])
+def test_hakem24_celik_acik_secim_soruya_donmez(s, metin):
+    """Tur 24 (O1) çelikte: çatı dışı süreç sorusu açık seçimi soruya çevirmez: r02 K."""
+    cati_seti(s)
+    k = s.yaz(metin)
+    assert k.eylem == "is_emri" and k.revizyon == 2 and s.plan["yapi"]["kod"] == "Ç8801K", k.mesaj
