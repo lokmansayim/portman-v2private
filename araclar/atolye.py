@@ -1058,6 +1058,11 @@ def kontrol(a) -> int:
     return 0 if not kotu else 1
 
 
+def karar_var(karar: str, kararlar: Path = KOK / "KARARLAR") -> bool:
+    """`KARARLAR/<karar>.md` var mı (D-02, D-100, K21, Z-03)? Kalıp `testler/referans/dogrula.py`'deki gibi üç haneye izin verir."""
+    return bool(re.fullmatch(r"[A-Z]-\d{2,3}|K\d{2}|Z-\d{2}", karar or "")) and (kararlar / f"{karar}.md").is_file()
+
+
 def dondur(a) -> int:
     kod = kod_normalize(a.kod)
     kart = kart_oku(kod, a.banka)
@@ -1065,7 +1070,7 @@ def dondur(a) -> int:
         return dur("yalnız kabul edilmiş modelin kontrol dosyası yeniden dondurulur")
     if not a.gerekce.strip():
         return dur("--gerekce gerekli")
-    if not re.fullmatch(r"[A-Z]-\d{2}|K\d{2}|Z-\d{2}", a.karar) or not any((KOK / "KARARLAR").glob(f"{a.karar}*")):
+    if not karar_var(a.karar):
         return dur(f"--karar KARARLAR/ altında var olan bir karar olmalı: {a.karar}")
     tp = tanim_yolu(kod, a.banka)
     k = kontrol_kaydi(kart, tp, tam=True)

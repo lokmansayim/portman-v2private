@@ -119,6 +119,7 @@ Biçim: karar · gerekçe · reddedilen seçenekler · geri alma yolu · kim ve 
 | [D-93](D-93.md) | Çelik talep formu (`kanal/formlar/celik.json`): çatı şekli ve veranda sorulmaz; çeliğin standartları seçili (tek kat panel, antrasit gri, dış 80 mm karkas, iç alçıpan + 80 mm karkas, beyaz pencere); dış duvar 140 mm karkas ilk planda çizime işlenir, öteki seçimler özel isteğe; ölçü pano katına yuvarlanmaz; dört varsayım kartla kabul edildi; kimliği ayara yazılınca çelikte sunulur (İE-20 PR-9) | 14.11 (Lokman 13.11 21:26:26; 14.11 20:19:54; kart 20:40:05 "Evet, bu listeyle kur") |
 | [D-95](D-95.md) | Brüt ve net m²: brüt çatının örttüğü her yer (bugünkü D-49 brütü), net bütün mahaller, veranda, giriş nişi ve balkon dahil; ön onay antedi (`dxf_out.alan_yazisi`) ve montaj rehberinin başlığı bu tanımla; M-02 ve M-12 açılıp kapandı, tanım M-18 ile mühürlü | 14.11 (Lokman 20:43:23, 21:01:02, 21:01:25, 21:07:29 "ben izin veriyorum varsa mühür bunu gir ve mühürle") |
 | [D-96](D-96.md) | Yazılan köşede köşe direği yerine üçlü H: İş Emri anahtarı `yapi.birlesimler` › `t: "uclu_h"`, Motor D-29'un niş T'sini yalnız o noktada kurar (`geometry._birlesimleri_oku`, PC-40; BK-32); 71 m² 2+1'in veranda köşesi (kapı panosu 125,5 → 120,5, veranda yan duvarı 120,5 → 125,5); genel kural değil, her evde mi sorusu açık | 14.11 (Lokman 20:46:54; kart 20:57:28 "Doğru, yanına eklensin") |
+| [D-99](D-99.md) | Disk arşivi (Elements diskinin Mac kopyası, 628 proje, 8.163 dosya): ham dosyalar Mac'te ve Drive'da, depoya adsız dizin ve SHA-256 mührü (`testler/hdd/`, `araclar/hdd_dizin.py`); adlı eşleme yalnız Mac ve Drive'da (Lokman 15.11 05:37:53 kartı "Drive'da, depoya dizin ve kart"; İE-43) |
 | [D-103](D-103.md) | Uygulanmış asıl proje (örnek AIPrefabrik klasörü) havuzda aynen kalır; her değişiklik yeni proje olarak, yeni numara ve kendi kaydıyla girer; kart "yerine geçsin" sormaz; 95 m² 3+1'in (PA-10) yerine geçmiş kaydı Lokman'a soruldu | 15.11 (Lokman 07:25:56 "kesin talimat olarak ver orjinal uygulanmış projeler örneğin AIPrefabrik klasöründeki gibi modifikasyonlar yeni bir proje olarak girsin") |
 
 ## Numara defteri (14 Ekim 2026, BK-08; CIO planı › Görev 3)
@@ -211,7 +212,10 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | D | D-94 | çatı adımı (başka sohbet; CIO 14.11 21:07) | alındı (14.11) |
 | D | D-95 | brüt ve net m²'nin tanımı; montaj rehberinin başlığı (Lokman 14.11 21:01) | yazıldı (14.11; rehber sohbeti, `claude/project-thread-v9ykyo`) |
 | D | D-96 | yazılan köşede köşe direği yerine üçlü H; İş Emri anahtarı `birlesimler` › `t: "uclu_h"` (BK-32, PC-40; Lokman 14.11 20:46:54, kart 20:57:28 "Doğru, yanına eklensin") | yazıldı (14.11; tek pano Motor sohbeti, `claude/project-thread-9gdwir`; CIO 20:58 D-95 verdi, rehber sohbetinin D-95'i önce birleşti, D-96 oldu) |
-| D | D-97…D-102 | başka sohbetler (çelik çatı kaplaması, disk arşivi, talep numarası, çelik talep formu; defter `numara-defteri`) | alındı (15.11) |
+| D | D-97 | çelik formda çatı kaplaması (başka sohbet; İE-20) | alındı (15.11) |
+| D | D-98 | çelikte kiremit desen sac + OSB (başka sohbet; BK-33) | alındı (15.11) |
+| D | D-99 | disk arşivi: ham dosyalar Drive'da, depoya adsız dizin ve SHA-256 mührü (Lokman 15.11 05:37:53 kartı "Drive'da, depoya dizin ve kart") | yazıldı (15.11; disk arşivi sohbeti, `claude/project-thread-wc6dw0`) |
+| D | D-100…D-102 | başka sohbetler (çelik shingle kuralı, talep numarası, çelik talep formu; defter `numara-defteri`) | alındı (15.11) |
 | D | D-103 | uygulanmış asıl proje aynen kalır, her değişiklik yeni proje olarak girer (Lokman 15.11 07:25:56) | yazıldı (15.11; standart pano sohbeti, `claude/project-thread-xsq0je`) |
 | D | **D-104** | — | **sıradaki boş** |
 | İE | İE-01–İE-08 | bu depo (`main`) | yazıldı |
@@ -248,7 +252,8 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | İE | İE-40 | havuz evlerinde özel ölçülü dış panoları standarda çekmek (D-91) | alındı (14.11; standart pano sohbeti) |
 | İE | İE-41 | rehber.portatifev.com sitesi main'deki koddan: paketleyici (`araclar/paket/site/`), yayın betiği `vps/rehber_yayin.sh` main'e, beş rehber (Lokman 14.11 20:37 kartı "Siteyi main'den kur"; D-28) | alındı (14.11; `claude/project-thread-v9ykyo`) |
 | İE | İE-42 | çatı seçimi (başka sohbet; D-94) | alındı (14.11) |
-| İE | **İE-43** | — | **sıradaki boş** |
+| İE | İE-43 | disk arşivi: adsız dizin ve SHA-256 mührü (`araclar/hdd_dizin.py`, `testler/hdd/`; D-99) | alındı (15.11; `claude/project-thread-wc6dw0`) |
+| İE | **İE-44** | — | **sıradaki boş** |
 | BK | BK-01–BK-08 | bu depo; BK-08 8a sonrası temizlik (`bk-08-8a-temizlik`) | yazıldı |
 | BK | BK-09 | metin ve çizim düzeltmeleri, G1 (`bk-09-metin-cizim`, `bk-09-cizim-g1`) | alındı (14.10) |
 | BK | BK-10 | 8b sonrası küçük işler (DXF `.txt` notu, geç gelen Excel, panelden Excel, plan değişince kontrol kapanır, D-19 24 saat kuralı, düğmeli mesajda satır sonları, `YENI-` kodu ve ilk çelik planda LLM özeti bayiye gitmez, komut freni metni; pano satır 15; çelikte kapı değişikliği kapsam dışı) | alındı (30.10; `claude/project-thread-h64uz2`) |

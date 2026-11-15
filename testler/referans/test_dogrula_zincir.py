@@ -59,7 +59,7 @@ def test_kararsiz_degisiklik_reddedilir(ref):
 
 def test_olmayan_karar_reddedilir(ref):
     with pytest.raises(dogrula.ReferansHatasi, match="karar"):
-        dogrula.referans_zinciri(_yeni_referans(ref, "Karar: D-99"))
+        dogrula.referans_zinciri(_yeni_referans(ref, "Karar: D-00"))
 
 
 def test_var_olan_kararla_kabul(ref):
