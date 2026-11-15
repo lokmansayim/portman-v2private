@@ -23,7 +23,7 @@ VERI = KOK / "testler" / "motor" / "veri"
 
 # İş Emri → (brüt, net, kapalı odalar). Sayılar 14 Kasım 2026'da Motor'dan; net − kapalı = veranda, giriş nişi ve balkon.
 BEKLENEN = {
-    "TK01_r08": ("90,28", "84,60", "72,71"),     # 80 m² 3+1
+    "TK01_r08": ("90,28", "84,60", "72,70"),     # 80 m² 3+1 (D-104, 15 Kasım 2026: nişte köşe direği, hol 5,91 → 5,90; 72,71 → 72,70)
     "TK02_r04": ("90,28", "83,35", "71,45"),     # 80 m² 3+1, 100'lük iç duvar
     "TK03": ("87,72", "82,07", "76,01"),         # 88 m² 3+1
     "TK04_r08": ("77,95", "73,04", "65,22"),     # kampanyalı ev

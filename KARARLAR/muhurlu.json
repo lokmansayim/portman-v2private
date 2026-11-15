@@ -109,7 +109,8 @@
     "D-31",
     "D-34",
     "D-49",
-    "D-95"
+    "D-95",
+    "D-104"
    ],
    "pr": [
     79,
@@ -172,27 +173,27 @@
     },
     {
      "yer": "testler/motor/veri/TK01_r07_beklenen.json#onay",
-     "iz": "41e84bcf7de4c120"
+     "iz": "5846ac5c62bbd934"
     },
     {
      "yer": "testler/motor/veri/TK01_r07_beklenen.json#iz.dogrulama",
-     "iz": "952df656c1c67cae"
+     "iz": "5008e57fb401cfaf"
     },
     {
      "yer": "testler/motor/veri/TK01_r07_beklenen.json#iz.bom",
-     "iz": "348ab4dcd7a7110f"
+     "iz": "509cd9bf54070ad6"
     },
     {
      "yer": "testler/motor/veri/TK01_r07_beklenen.json#iz.gorunusler",
-     "iz": "06bc733cc090670b"
+     "iz": "6ca5f21f7c8dfd21"
     },
     {
      "yer": "testler/motor/veri/TK01_r07_beklenen.json#iz.pdf_izi",
-     "iz": "7e5fef4a8ae4fbec"
+     "iz": "7937c29415a27d3c"
     },
     {
      "yer": "testler/motor/veri/TK01_r07_beklenen.json#iz.dxf_izi",
-     "iz": "8c6981813b25530a"
+     "iz": "0228e8d57f72bf85"
     },
     {
      "yer": "testler/motor/veri/TK02.json",
@@ -204,7 +205,7 @@
     },
     {
      "yer": "testler/motor/test_d29_tk02_yorumlari.py",
-     "iz": "346d601ae5330537"
+     "iz": "69d67b55534ea805"
     },
     {
      "yer": "testler/motor/test_d30_tam_pano.py",
@@ -234,6 +235,13 @@
      "mesaj": "cmsg_01UAFvcnfVuTR1wfFux5fQPP7SruV1LNoB3e4rWdcYGX59",
      "kapanis": "2026-11-14T22:41Z",
      "karar": "D-95"
+    },
+    {
+     "tarih": "2026-11-15 07:55",
+     "soz": "Karar kartı \"90 m2 evin giriş nişinde köşe direği hâli doğru mu?\" → \"Doğru, hedef örnekler güncellensin\" (seçenek: \"Nişteki iki üçlü H köşe direği olur; bu evin mühürlü hedef örnekleri yeni hâlle yeniden dondurulur.\"; 07:32:42 \"standart H'larda 100'lükten 60'lığa geçen redisyon gibi bir malzeme yok\", 07:47:55 \"bunlar olmaz buralara mecburen 100'lük köşeler gelecek\")",
+     "mesaj": "cmsg_01UAFvcnfVuTR1wfFux5fQPPHVXEwbSd9anmKQks3KwbXw",
+     "kapanis": "2026-11-15T08:20Z",
+     "karar": "D-104"
     }
    ]
   },
@@ -1213,7 +1221,8 @@
    "konu": "Brüt ve net m²'nin tanımı",
    "kural": "Brüt m²: çatının örttüğü her yer; dış duvarların dış yüzleri, niş, gövdedeki ve taşan veranda, dikmeler dahil (yükleme listesinin bina_m2'si, tek kaynak motor/prefabrik_liste.bina_brut_cm2; D-49 madde 2). Net m²: bütün mahallerin net alanı; veranda, giriş nişi ve balkon dahil. Ön onay antedi (motor/dxf_out.alan_yazisi) \"<brüt> m² brüt · <net> m² net\" yazar; montaj rehberinin başlığı aynı yazıyı okur (araclar/paket/rehber/veri.baslik_alani), sahnenin genel bakış etiketi brütü yazar. Hesap her zaman brüt m² ile yapılır.",
    "kararlar": [
-    "D-95"
+    "D-95",
+    "D-104"
    ],
    "pr": [
     210
@@ -1250,11 +1259,19 @@
     },
     {
      "yer": "testler/motor/test_d95_alan.py",
-     "iz": "422025962d31d1f8"
+     "iz": "029053a88f429abf"
     }
    ],
    "durum": "mühürlü",
-   "gecmis": []
+   "gecmis": [
+    {
+     "tarih": "2026-11-15 07:55",
+     "soz": "Karar kartı \"90 m2 evin giriş nişinde köşe direği hâli doğru mu?\" → \"Doğru, hedef örnekler güncellensin\" (seçenek: \"Nişteki iki üçlü H köşe direği olur; bu evin mühürlü hedef örnekleri yeni hâlle yeniden dondurulur.\"; 07:32:42 \"standart H'larda 100'lükten 60'lığa geçen redisyon gibi bir malzeme yok\", 07:47:55 \"bunlar olmaz buralara mecburen 100'lük köşeler gelecek\")",
+     "mesaj": "cmsg_01UAFvcnfVuTR1wfFux5fQPPHVXEwbSd9anmKQks3KwbXw",
+     "kapanis": "2026-11-15T08:20Z",
+     "karar": "D-104"
+    }
+   ]
   }
  ]
 }
