@@ -52,6 +52,7 @@ def plan_gorseli(ie: dict, yol: Path, v: dict | None = None, genislik_px: int = 
     ax = fig.add_axes([0, 0, 1, 1]); ax.set_aspect("equal"); ax.axis("off")
     ax.set_xlim(bx0 - pay, bx1 + pay); ax.set_ylim(by0 - pay - 60, by1 + pay + 30)
     # mahaller
+    etiketler = []                               # (oda çokgeni, ad yazısı, m² yazısı, ad yazısının y'si): çizimden sonra sığdırılır
     for ad, m in plan.mahaller.items():
         poly = m.poly
         if poly is None or poly.is_empty:
@@ -66,8 +67,9 @@ def plan_gorseli(ie: dict, yol: Path, v: dict | None = None, genislik_px: int = 
                     hatch="//" if m.acik else None, edgecolor="#c9b99b" if m.acik else "none", linewidth=0)
         c = poly.representative_point()
         alan = rooms.get(ad, m.alan_m2)
-        ax.text(c.x, c.y + 14, ad, ha="center", va="center", fontsize=10, color="#1f1f1f", zorder=5, fontweight="bold")
-        ax.text(c.x, c.y - 16, f"{float(alan):.1f} m²".replace(".", ","), ha="center", va="center", fontsize=9.5, color="#333333", zorder=5)
+        t_ad = ax.text(c.x, c.y + 14, ad, ha="center", va="center", fontsize=10, color="#1f1f1f", zorder=5, fontweight="bold")
+        t_alan = ax.text(c.x, c.y - 16, f"{float(alan):.1f} m²".replace(".", ","), ha="center", va="center", fontsize=9.5, color="#333333", zorder=5)
+        etiketler.append((poly, t_ad, t_alan, c.y + 14))
     # açık kenarlar (veranda profili): kesik çizgi
     for (x0, y0, x1, y1, *_r) in plan.acik_kenarlar:
         ax.plot([x0, x1], [y0, y1], color="#b59a6a", linestyle=(0, (4, 3)), linewidth=1.6, zorder=3)
@@ -133,9 +135,100 @@ def plan_gorseli(ie: dict, yol: Path, v: dict | None = None, genislik_px: int = 
             color="#1f1f1f", fontweight="bold", zorder=6)
     ax.text(W / 2, by0 - pay - 42, "Şematik kat planı · net alanlar m² · ölçüler cm · üretim çizimi değildir; ölçülü plan PDF'te", ha="center", va="center",
             fontsize=8, color="#666666", zorder=6)
+    if G.yeni_anahtar_var(ie):                   # anahtarsız İş Emri (P6001, 6×8, Yan) bayt bayt eski yoldan (İE-11)
+        try:
+            _mahal_yazilarini_sigdir(fig, ax, etiketler, _duvar_ve_pencereler(plan))
+        except Exception as e:                   # sığdırma hatası görseli düşürmez; görsel yine yazılır
+            import warnings
+            warnings.warn(f"plan görseli: mahal yazısı sığdırılamadı ({type(e).__name__}: {e})")
     yol = Path(yol); yol.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(yol, dpi=100, facecolor="white"); plt.close(fig)
     return yol
+
+
+YAZI_EN_KUCUK_PT = 7.0                           # mahal yazısı en çok bu boya küçülür (pencere ölçüsü yazısının boyu)
+
+
+def _duvar_ve_pencereler(plan):
+    """Plan görselinde yazının binmemesi gereken koyu ve mavi yerler: duvar panoları, köşeler, kubbe bandı, dikmeler, pencere boşlukları."""
+    from shapely.geometry import box, Polygon as SPolygon
+    from shapely.ops import unary_union
+    parcalar = []
+    for d in plan.duvarlar:
+        for p in d.panolar:
+            parcalar += [box(*r) for r in p.rects()]
+            parcalar += [box(*p.bosluk_dortgeni(a)) for a in p.aciklar if a.tur == "pencere"]
+    parcalar += [box(*k.rect) for k in plan.koseler] + [box(*r) for r in plan.dikmeler]
+    parcalar += [SPolygon(kb["bant"]) for kb in plan.kubbeler]
+    return unary_union(parcalar) if parcalar else None
+
+
+def _mahal_yazilarini_sigdir(fig, ax, etiketler, engel) -> None:
+    """Mahal adı ve m² yazısı odanın içine sığmıyorsa (oda dışına, duvara, pencereye ya da pencere ölçüsü yazısına taşıyorsa) önce küçülür
+    (en az `YAZI_EN_KUCUK_PT`), yine sığmazsa ad bir boşluktan iki satıra bölünür; hiçbiri sığmazsa en az taşanı kalır.
+    Sığan yazıya dokunulmaz: o görsel bayt bayt eskisi gibidir. Ölçü çizimden sonra, yazı tipinin gerçek genişliğiyle
+    alınır; sunucunun yazı tipi (DejaVu Sans) dar ıslak hacimde 10 pt kalın adı komşu odaya taşırıyordu (PA-33'ün
+    95 cm'lik iki banyosu, 15.11.2026). Geometri ve yazının yeri (oda içindeki nokta) değişmez."""
+    from shapely.geometry import box
+    if not etiketler:
+        return
+    rnd = fig.canvas.get_renderer(); ters = ax.transData.inverted()
+
+    def kutu(t):
+        bb = t.get_window_extent(rnd)
+        (x0, y0), (x1, y1) = ters.transform([(bb.x0, bb.y0), (bb.x1, bb.y1)])
+        return box(min(x0, x1), min(y0, y1), max(x0, x1), max(y0, y1))
+
+    def tasan(t, ic):                            # oda dışında kalan yazı alanı (cm²); 0,01 cm²'nin altı kenar teması, sayılmaz
+        a = kutu(t).difference(ic).area
+        return a if a > 0.01 else 0.0
+
+    def boylar(bas):
+        n = int(round((bas - YAZI_EN_KUCUK_PT) / 0.5))
+        return [bas - 0.5 * i for i in range(n + 1)]
+
+    from shapely.ops import unary_union
+    pencere_yazilari = [kutu(t) for t in ax.texts if t.get_color() == PENCERE]     # pencere ölçüsü yazısı da engeldir
+    engel = unary_union(([engel] if engel is not None else []) + pencere_yazilari) if pencere_yazilari else engel
+    for poly, t_ad, t_alan, y_ad in etiketler:
+        ic = poly.difference(engel) if engel is not None else poly
+        if ic.is_empty:
+            continue
+        # m² yazısı: yalnız küçülür
+        if tasan(t_alan, ic) > 0:
+            bas = t_alan.get_fontsize(); en_iyi = (tasan(t_alan, ic), bas)
+            for fs in boylar(bas)[1:]:
+                t_alan.set_fontsize(fs); s = tasan(t_alan, ic)
+                if s < en_iyi[0]:
+                    en_iyi = (s, fs)
+                if s == 0:
+                    break
+            t_alan.set_fontsize(en_iyi[1])
+        # ad: önce küçülür, sonra iki satır (alt satırın altı tek satırın altında kalır, m² yazısına inmez)
+        if tasan(t_ad, ic) == 0:
+            continue
+        metin = t_ad.get_text(); bas = t_ad.get_fontsize(); x = t_ad.get_position()[0]
+        adaylar = [(metin, fs) for fs in boylar(bas)[1:]]
+        sozler = metin.split(" ")
+        bolumler = sorted((" ".join(sozler[:i]) + "\n" + " ".join(sozler[i:]) for i in range(1, len(sozler))),
+                          key=lambda m: max(len(s) for s in m.split("\n")))
+        adaylar += [(m, fs) for m in bolumler for fs in boylar(bas)]
+        en_iyi = (tasan(t_ad, ic), metin, bas, y_ad)
+        for m, fs in adaylar:
+            t_ad.set_text(metin); t_ad.set_fontsize(fs); t_ad.set_position((x, y_ad))
+            alt = kutu(t_ad).bounds[1]
+            y = y_ad
+            if "\n" in m:
+                t_ad.set_text(m)
+                y = y_ad + (alt - kutu(t_ad).bounds[1])
+                t_ad.set_position((x, y))
+            s = tasan(t_ad, ic)
+            if s < en_iyi[0]:
+                en_iyi = (s, m, fs, y)
+            if s == 0:
+                break
+        _s, m, fs, y = en_iyi
+        t_ad.set_text(m); t_ad.set_fontsize(fs); t_ad.set_position((x, y))
 
 
 CATI_GORUNUSLERI = ("on", "sol")           # İE-37: çatı görselinde ön görünüş üstte, sol görünüş altta (kalkan, kırma ve cumba ikisinde ayrılır)
