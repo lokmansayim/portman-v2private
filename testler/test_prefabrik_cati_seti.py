@@ -1244,3 +1244,101 @@ def test_hakem5_ad_degistirme_baska_musteri_degil(tmp_path):
     k = s.yaz("müşterinin adını Zeynep Deneme olarak değiştirin", niyet="diger", musteri={"ad": "Zeynep Deneme"})
     assert k.eylem == "is_emri" and k.revizyon == 2 and s.k.d["taslak"]["musteri"]["ad"] == "Zeynep Deneme", k.mesaj
     assert s.k.d["taslak"]["ozel_istekler"] == ["mutfak dolapları beyaz olsun"]
+
+
+# ── İE-42 · geometri hakemi altıncı tur (15 Kasım 2026 gece) ──────────────────────────────────────────────────────────────────────────
+
+_Y2_120x180 = dict(pencereler=[pen("yatak odası 2", "120x180")])
+
+
+@pytest.mark.parametrize("metin, kod", [
+    ("K olsun ama yatak odası 2 penceresi 120x180 olsun", "PA06K"), ("2 olsun yatak odası 2 penceresi 120x180 olsun", "PA06K"),
+    ("K olsun yatak odası 2 penceresi 120x180", "PA06K"), ("3 olsun ama yatak odası 2 penceresi 120x180 olsun", "PA06C"),
+    ("2 olsun kanka, yatak odası 2 penceresi 120x180 olsun", "PA06K"), ("PA06K yatak odası 2 penceresi 120x180", "PA06K"),
+    ("ikinci çatı olsun bir de yatak odası 2 penceresini 120x180 yapalım", "PA06K"),
+    ("PA-06-K olsun yatak odası 2 penceresi de 120x180 olsun", "PA06K")])
+def test_hakem6_virgulsuz_secim_ve_istek(tmp_path, metin, kod):
+    """Y1: seçim cümlesi istek cümlesine virgülsüz bağlanınca da (yüklemden sonra ayrılır) çatı seçilir, istek aynı revizyonda uygulanır:
+    virgüllü yazımla aynı. Önce set kapanıyor, r02 evin kendi çatısıyla çiziliyor, çatı sessizce düşüyordu."""
+    s, _ = _cati_seti(tmp_path)
+    k = s.yaz(metin, **_Y2_120x180)
+    assert k.eylem == "is_emri" and k.revizyon == 2 and k.is_emri["talep"]["kaynak"] == kod, k.mesaj
+    assert k.mesaj.startswith("Çatı: ") and "YATAK ODASI 2 penceresi 120x180" in k.mesaj and "geçersiz kıldı" in k.mesaj, k.mesaj
+    k = _onayla(s)                                                    # çatı seçildi: r02'nin onayı kaydedilir, çatı yeniden sorulmaz
+    assert k.gerekce == K.PLAN_ONAYI and s.k.d["asama"] == "onaylandi", k.mesaj
+
+
+@pytest.mark.parametrize("metin", ["çatı 2 yatak odası 2 penceresi 120x180", "2 numaralı çatıyla yatak odası 2 penceresi 120x180 olsun",
+                                   "yatak odası 2 penceresi 120x180 K olsun", "kırma çatı olsun ve yatak odası 2 penceresi 120x180 olsun"])
+def test_hakem6_istek_cumlesinde_cati_atfi_sorulur(tmp_path, metin):
+    """Y1: istek cümlesindeki çatı atfı (çatı sözüne bitişik numara ya da etiket, tek başına etiket harfi, seçenekleri ayıran ad) seçim
+    okunmadıysa sorulur; öteki isteğin uygulanmadığı da yazılır (çatı da istek de sessizce düşmez)."""
+    s, _ = _cati_seti(tmp_path)
+    k = s.yaz(metin, **_Y2_120x180)
+    _soruldu(s, k)
+    assert "Mesajınızdaki öteki isteği uygulamadım" in k.mesaj, k.mesaj
+
+
+@pytest.mark.parametrize("metin, al", [
+    ("2. yatak odası penceresi 120x180 olsun", _Y2_120x180), ("2. yatak odasının penceresi 120x180 olsun", _Y2_120x180),
+    ("2. odanın penceresi 120x180 olsun", _Y2_120x180),
+    ("1. yatak odası penceresi 120x180 olsun", dict(pencereler=[pen("yatak odası 1", "120x180")])),
+    ("3. olarak banyo penceresi 80x120 olsun", dict(pencereler=[pen("banyo", "80x120")]))])
+def test_hakem6_oda_sira_sayisi_cati_numarasi_degil(tmp_path, metin, al):
+    """Y2: oda ya da sıra sözünden önceki sıra sayısı ("2. yatak odası") çatı numarası değildir: set kapanır, r02 evin kendi çatısıyla ve
+    pencereyle çizilir; onaydan sonra çatı yeniden sorulur. Önce "2." ayrı cümle sayılıyor, bayinin seçmediği çatı çizilip onaylanıyordu."""
+    s, _ = _cati_seti(tmp_path)
+    k = s.yaz(metin, **al)
+    assert k.eylem == "is_emri" and k.revizyon == 2 and k.is_emri["talep"]["kaynak"] == "PA06", k.mesaj
+    assert not k.mesaj.startswith("Çatı:") and "geçersiz kıldı" in k.mesaj and not s.k.d.get("cati_secilen"), k.mesaj
+    k = _onayla(s)
+    assert k.eylem == "secenek" and s.k.d["secenek_seti"]["tur"] == "cati_varyanti" and not s.k.d.get("onaylanan"), k.mesaj
+
+
+def test_hakem6_secimle_gelen_oda_sira_sayisi(tmp_path):
+    """Y2: "2 olsun, 1. yatak odası penceresi 120x180": çatı 2, pencere birinci yatak odasının."""
+    s, _ = _cati_seti(tmp_path)
+    k = s.yaz("2 olsun, 1. yatak odası penceresi 120x180", pencereler=[pen("yatak odası 1", "120x180")])
+    assert k.eylem == "is_emri" and k.is_emri["talep"]["kaynak"] == "PA06K" and "YATAK ODASI 1 penceresi 120x180" in k.mesaj, k.mesaj
+
+
+@pytest.mark.parametrize("metin, kod", [("Pa-06K olsun", "PA06K"), ("PA-06K", "PA06K"), ("PA06-K", "PA06K"), ("pa 06k", "PA06K"),
+                                        ("pa06 k", "PA06K"), ("PA-06C", "PA06C"), ("pa06-c", "PA06C")])
+def test_hakem6_kod_yazimi(tmp_path, metin, kod):
+    """O1: setin çatı kodu tire ya da boşlukla yazılınca da seçimdir (gösterimine çevrilir). Önce set kapanıyor, "Planınız değişmedi;
+    isteğinizi plana uygulayamadım" gidiyordu."""
+    s, _ = _cati_seti(tmp_path)
+    _secildi(s, s.yaz(metin), kod)
+
+
+@pytest.mark.parametrize("metin", ["fark etmez", "farketmez siz seçin", "en ucuzu olsun", "standart olsun", "değiştirmeyin",
+                                   "ikisi de olur", "müşteriye soralım sonra döneriz", "tamam bakıp dönüş yapacağız",
+                                   "1 olsun, müşteriye soralım"])
+def test_hakem6_devir_ve_erteleme_sozu_sorulur(tmp_path, metin):
+    """O2: seçimi bize bırakan ve erteleyen söz istek değildir: "Hangi çatı olsun?" (set açık). Erteleyen söz seçimle gelse de onay
+    kaydedilmez. Önce set kapanıyor, "isteğinizi plana uygulayamadım" gidiyordu."""
+    s, _ = _cati_seti(tmp_path)
+    k = s.yaz(metin, niyet="diger")
+    _soruldu(s, k)
+    assert "öteki isteği" not in k.mesaj, k.mesaj
+
+
+@pytest.mark.parametrize("metin, kod", [("2 olsun eline sağlık", "PA06K"), ("2 olsun aga", "PA06K"), ("2 olsun saolasın", "PA06K"),
+                                        ("2 olsn", "PA06K"), ("2 olcak", "PA06K"), ("ilk çatı kalsın", "PA06")])
+def test_hakem6_whatsapp_yazimi_secimdir(tmp_path, metin, kod):
+    """O2: hitap, teşekkür ve yüklemin WhatsApp yazımı seçimi bozmaz."""
+    s, _ = _cati_seti(tmp_path)
+    _secildi(s, s.yaz(metin, niyet="diger"), kod)
+
+
+def test_hakem6_revizyon_sinirinda_cati_ve_istek(tmp_path):
+    """D3: revizyon hakkı dolmuş planda çatıyla gelen öteki istek sınıra takılır (yalnız çatı seçimi takılmaz); çatı seçimi kaydedilmez."""
+    s, _ = _plan(tmp_path)
+    for i, olcu in enumerate(["120x180", "120x120", "120x180", "120x120"][:K.MAX_REVIZYON]):
+        k = s.yaz(f"yatak odası 2 penceresi {olcu} olsun", pencereler=[pen("yatak odası 2", olcu)])
+        assert k.eylem == "is_emri" and k.revizyon == i + 2, k.mesaj
+    rev = s.plan["revizyon"]
+    assert _onayla(s).eylem == "secenek"
+    k = s.yaz("2 olsun, yatak odası 1 penceresi 120x180 olsun", pencereler=[pen("yatak odası 1", "120x180")])
+    assert k.eylem == "yonlendir" and "revizyon hakkı doldu" in k.mesaj and s.plan["revizyon"] == rev, k.mesaj
+    assert not s.k.d.get("onaylanan")

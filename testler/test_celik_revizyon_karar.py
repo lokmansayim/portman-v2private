@@ -820,3 +820,61 @@ def test_hakem5_celik_devam_sozu_secimdir(s, metin, kod):
         assert k.gerekce == K.PLAN_ONAYI and s.k.d.get("onaylanan"), k.mesaj
     else:
         assert k.eylem == "is_emri" and s.plan["revizyon"] == 2 and s.plan["yapi"]["kod"] == kod, k.mesaj
+
+
+# ── İE-42 · geometri hakemi altıncı tur (15 Kasım 2026 gece) ──────────────────────────────────────────────────────────────────────────
+
+_MUTFAK = dict(pencereler=[pen("mutfak", "120x120")])
+
+
+@pytest.mark.parametrize("metin", ["K olsun mutfak penceresi 120x120", "2 olsun mutfak penceresi 120x120 olsun",
+                                   "K olsun ama mutfak penceresi 120x120 olsun"])
+def test_hakem6_celik_virgulsuz_secim_ve_istek(s, metin):
+    """Y1 çelikte; D2: çatıyla gelen istekte de PDF başlığı model adı ve m²'yle başlar (İE-20 PR-10, C5)."""
+    cati_seti(s)
+    k = s.yaz(metin, **_MUTFAK)
+    assert k.eylem == "is_emri" and s.plan["revizyon"] == 2 and s.plan["yapi"]["kod"] == "Ç8801K", k.mesaj
+    assert [d["op"] for d in s.plan["yapi"]["degisiklikler"]] == ["pencere_olcu", "cati_varyanti"], s.plan["yapi"]["degisiklikler"]
+    assert s.plan["talep"]["metin"] == ("Ç8801-K (Beşik + cumba, doğu ucu kırma) · 88 m², 2+1. "
+                                        "Uygulanan: Mutfak penceresi 120/180 (arka cephe) → 120/120."), s.plan["talep"]["metin"]
+
+
+def test_hakem6_celik_istek_cumlesinde_cati_numarasi_sorulur(s):
+    """Y1 çelikte: "çatı 3 mutfak penceresi 120x120" çatı ve istek; seçim okunmadı: sorulur, öteki isteğin uygulanmadığı yazılır."""
+    cati_seti(s)
+    k = s.yaz("çatı 3 mutfak penceresi 120x120", **_MUTFAK)
+    assert k.mesaj.startswith("Hangi çatı olsun?") and "öteki isteği uygulamadım" in k.mesaj, k.mesaj
+    assert s.plan["revizyon"] == 1 and s.k.d["secenek_seti"]["durum"] == "acik"
+
+
+def test_hakem6_celik_oda_sira_sayisi_cati_degil(s):
+    """Y2 çelikte: "2. yatak odası penceresi …" çatı notu almaz; pencere sorusu ikinci yatak odasının pencerelerini sorar."""
+    cati_seti(s)
+    k = s.yaz("2. yatak odası penceresi 120x120 olsun", pencereler=[pen("yatak odası 2", "120x120")])
+    assert "çatı" not in k.mesaj.lower() and not s.k.d.get("cati_secilen"), k.mesaj
+    assert "Yatak Odası 1" not in k.mesaj and "Yatak Odası 2" in k.mesaj, k.mesaj
+
+
+@pytest.mark.parametrize("metin", ["2 olsun eline sağlık", "2 olsn"])
+def test_hakem6_celik_whatsapp_yazimi_secimdir(s, metin):
+    """O2 çelikte: "2 olsun eline sağlık" Lokman'a yönlendirilmez; çatı K seçilir (r02)."""
+    cati_seti(s)
+    k = s.yaz(metin)
+    assert k.eylem == "is_emri" and s.plan["revizyon"] == 2 and s.plan["yapi"]["kod"] == "Ç8801K", k.mesaj
+
+
+def test_hakem6_celik_cati_basliginda_olcu_farki(s):
+    """D1: ölçü değişen plandan sonra çatı seçilince PDF başlığında ölçü farkı ve taslak notu kalır."""
+    k = s.yaz("Ç8801", katalog_kodu="Ç8801", yapi_turu="celik")
+    s.k.llm_degisiklik = {"durum": "tamam", "germe": True, "islemler": [
+        {"tur": "oda_buyut", "aciklik": None, "adaylar": [], "en": None, "yuk": None, "cati_kodu": None,
+         "alinti": "banyoyu arkaya 30 cm büyütelim", "mahal": "Banyo", "yon": "K", "cm": 30}]}
+    k = s.yaz("banyoyu arkaya 30 cm büyütelim")
+    s.k.llm_degisiklik = None
+    assert k.eylem == "is_emri" and s.plan["revizyon"] == 2, k.mesaj
+    assert onayla(s).eylem == "secenek"
+    k = s.yaz("K olsun")
+    assert k.eylem == "is_emri" and s.plan["revizyon"] == 3 and s.plan["yapi"]["kod"] == "Ç8801K", k.mesaj
+    m = s.plan["talep"]["metin"]
+    assert m.startswith("Ç8801-K (Beşik + cumba, doğu ucu kırma) · 88 m², 2+1. Uygulanan: Banyo arkaya 30 cm büyütüldü.") and m.endswith(
+        "Ölçüler değiştiği için plan taslaktır; mühendis kontrolünde kesinleşir."), m

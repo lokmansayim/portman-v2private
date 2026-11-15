@@ -486,7 +486,8 @@ def _karar_ver(talep: Talep, k: Konusma, bayi: dict | None, katalog: Katalog, me
     k.d.pop("eski_taslak_soru", None)
     if t.niyet == "revizyon" and k.d.get("son_is_emri"):
         k.d["revizyon"] += 1
-        if k.d["revizyon"] > MAX_REVIZYON and not getattr(k, "cati_secimi", None):       # İE-42: onaydan sonraki çatı seçimi revizyon hakkına takılmaz
+        if k.d["revizyon"] > MAX_REVIZYON and not (getattr(k, "cati_secimi", None) and not getattr(k, "cati_ek", False)):
+            # İE-42: onaydan sonraki çatı seçimi revizyon hakkına takılmaz; çatıyla gelen öteki istek takılır (hakem tur 6, D3)
             celik_mi = ((k.d["son_is_emri"].get("yapi") or {}).get("sistem") == "celik")      # İE-08 PR-2b (Lokman, 12.10): mühendis incelemesi
             return _bitir(k, Karar(eylem="yonlendir", gerekce="revizyon sınırı",
                                     mesaj=f"Bu plan için {MAX_REVIZYON} revizyon hakkı doldu" + ("; plan mühendis incelemesine alındı. " if celik_mi else ". ") + YONLENDIRME))
@@ -1056,7 +1057,9 @@ _SECIM_NEZAKET = {"abi", "abim", "abla", "hocam", "hoca", "kardes", "kardesim", 
                   "eyvallah", "yeter", "yeterli", "tmm", "tm", "ok", "okey", "peki", "simdilik", "artik", "hadi", "haydi", "alalim", "aliyoruz",
                   "uygun", "uygundur", "iyi", "guzel",
                   # hakem tur 5 (D1): devam ve alma sözü ("K ile devam edelim", "2'yi alın", "K'da kalalım", "kendi çatısıyla devam")
-                  "devam", "edelim", "ediyoruz", "edin", "alin", "alinsin", "kalalim", "kaliyoruz", "gelsin", "isleme"}
+                  "devam", "edelim", "ediyoruz", "edin", "alin", "alinsin", "kalalim", "kaliyoruz", "gelsin", "isleme",
+                  # hakem tur 6 (O2): hitap, teşekkür ve yüklemin WhatsApp yazımı ("2 olsun aga", "2 olsun eline sağlık", "2 olsn", "K kalsın")
+                  "aga", "kanka", "saolasin", "saolun", "eline", "ellerine", "saglik", "olsn", "olcak", "kalsin", "kalacak"}
 
 
 def _nezaket(w: str) -> bool:
@@ -1201,6 +1204,15 @@ _SECIM_DOLGU = {"evet", "ok", "okey", "peki", "anladim", "anlasildi", "tabi", "t
                 "cizim", "cizimi", "sonra", "ayrica", "halini", "haline", "halinde", "halde"}
 _SECIM_KOKU = ("cati", "onay", "tamam", "tesekkur", "sagol", "besik", "kirma", "kalkan", "cumba", "katalog", "numara", "sira", "model",
                "sec", "tercih", "plan", "ilk", "birinci", "ikinci", "ucuncu", "sonuncu", "musteri", "gonder", "teklif")
+# İE-42 (hakem tur 6, O2): seçimi bize bırakan ("fark etmez", "siz seçin", "hangisi iyiyse", "standart olsun") ve seçimi erteleyen söz
+# ("müşteriye soralım, sonra döneriz") çatı setinde istek değildir: seçim yoksa "Hangi çatı olsun?" (set açık kalır; K21). Erteleyen söz
+# seçimle gelse de seçim kaydedilmez, sorulur (`_ERTELEME_SOZU`, `_cati_atiflari`).
+_DEVIR_SOZU = {"fark", "etmez", "farketmez", "siz", "size", "secin", "secebilirsiniz", "hangisi", "iyiyse", "uygunsa", "olursa", "ikisi",
+               "biraktik", "birakiyoruz", "birakiyorum", "standart", "normal", "ucuzu", "ucuz", "degistirmeyin", "dokunmayin",
+               "soralim", "sorup", "sorariz", "soracagiz", "doneriz", "donecegiz", "donus", "yapacagiz", "yapariz", "bakip", "dusunelim",
+               "dusunup", "dusunecegiz", "henuz", "haber", "verecegiz", "veririz"}
+_ERTELEME_SOZU = re.compile(r"\b(?:soralim|sorup|sorariz|soracagiz|doneriz|donecegiz|donus\s+yap\w*|bakip|dusunelim|dusunup|dusunecegiz"
+                            r"|henuz|haber\s+verecegiz|haber\s+veririz)\b")
 # soru cümlesinde fiyat, teslim ve süre sorusu planın isteği değildir ("1 olsun, fiyatı ne olur?"): cevabın sonuna "Fiyat, süre ve teslim
 # bilgisi teklifle gelir." eklenir (`karar_ver`; hakem tur 4, D-E). Önek yalnız konu sözlerinde ("paravan olur mu?" fiyat sorusu değildir).
 _SORU_KONU_KOKU = ("fiyat", "ucret", "tutar", "teslim", "nakliye", "odeme", "kdv", "pahali", "ucuz", "maliyet")
@@ -1242,7 +1254,8 @@ def _secim_sozcugu(w: str, adlar: set[str], harfler: set[str] | None = None, n: 
     if len(w) == 1 and not w.isdigit():
         return harfler is None or w in harfler or w in _CATI_EKLERI
     return (w in _CATI_BAGLAM or w in _NUMARA or w in _SIRA_SOZU or w in ("son", "sonuncu") or w in _KALSIN_BAGLAM or w in _SELAM
-            or w in _KOD_DOLGU or w in _CATI_EKLERI or w in _SORU_SOZU or w in _SECIM_DOLGU or w in adlar
+            or w in _KOD_DOLGU or w in _CATI_EKLERI or w in _SORU_SOZU or w in _SECIM_DOLGU or w in _DEVIR_SOZU or w in _SECIM_NEZAKET
+            or w in adlar
             or (w.isdigit() and 1 <= int(w) <= n) or w.startswith(_SECIM_KOKU))
 
 
@@ -1302,6 +1315,45 @@ def _cati_icerik_cumleleri(metin: str | None, katalog: Katalog, taban: dict, st:
         elif konu and fiyat_sorulari is not None:
             fiyat_sorulari.append(_cumle_temiz(h))
     return out
+
+
+# İE-42 (hakem tur 6, Y2): oda ya da sıra sözünden önceki sıra sayısı ("2. yatak odası", "3. olarak banyo") cümle sonu değildir
+_SIRA_NOKTASI = re.compile(r"(?<!\S)(\d{1,2})\.(?=[ \t]*(?:yatak|oda|banyo|wc|tuvalet|pencere|kap[ıi]|kat|olarak|s[ıi]ra)\w*)",
+                           re.IGNORECASE)
+# hakem tur 6 (Y1): seçim cümlesinin yüklemi ("K olsun ama yatak odası 2 penceresi …"); soru eki ("K olsun mu?") sınır değildir
+_YUKLEM_SINIRI = re.compile(r"\b(olsun|olsn|olcak|olacak|kals[ıi]n|kalacak)\b(?![ \t]*m[ıiuü]\b)[ \t]+"
+                            r"(?:(?:ama|fakat|ancak|ve|ayr[ıi]ca|bir[ \t]+de)\b[ \t]*)?", re.IGNORECASE)
+
+
+def _cati_adimi_on_okuma(metin: str | None, katalog: Katalog, taban: dict, st: dict) -> str:
+    """İE-42 (hakem tur 6): onaydan sonraki çatı setinde mesaj okunmadan önce bayinin yazımı düzenlenir (sözcük eklenmez, silinmez):
+    - setin çatı kodu tire ya da boşlukla yazılmışsa ("PA-06K", "pa 06k", "PA06-K") gösterimine çevrilir ("PA-06-K"; O1);
+    - oda ya da sıra sözünden önceki sıra sayısının noktası cümle sonu sayılmaz ("2. yatak odası penceresi" → "2 yatak odası …"; Y2);
+    - seçim cümlesi istek cümlesine virgülsüz bağlanmışsa yüklemden sonra ayrılır ("K olsun ama yatak odası 2 penceresi 120x180 olsun" →
+      "K olsun, yatak odası 2 penceresi 120x180 olsun"; Y1). Yalnız sol yan istek değilse ve sağ yan istekse ayrılır; soru cümlesi ayrılmaz.
+    Virgüllü yazımla aynı okuma: çatı seçilir, istek aynı revizyonda uygulanır."""
+    m = metin or ""
+    for x in st.get("adaylar") or []:
+        kod = str(x.get("kod") or "").upper()
+        p = re.fullmatch(r"([A-ZÇ]+)(\d+)([A-Z])", kod)
+        a = katalog.aday(kod)
+        if p is None or a is None:
+            continue
+        on = r"[\s\-_.]*".join("[çc]" if c == "Ç" else re.escape(c.lower()) for c in p.group(1))
+        desen = rf"(?<!\w){on}[\s\-_.]*0*{p.group(2).lstrip('0') or '0'}[\s\-_.]*{p.group(3).lower()}(?!\w)"
+        m = re.sub(desen, SC.gosterim(a), m, flags=re.IGNORECASE)
+    m = _SIRA_NOKTASI.sub(r"\1 ", m)
+
+    def bol(h: str) -> str:
+        for y in _YUKLEM_SINIRI.finditer(h):
+            sol, sag = h[:y.start()] + y.group(1), h[y.end():]
+            if not CO.norm(sol) or not CO.norm(sag) or _cati_icerik_cumleleri(sol, katalog, taban, st) \
+                    or not _cati_icerik_cumleleri(sag, katalog, taban, st):
+                continue
+            return f"{sol}, {bol(sag)}"
+        return h
+
+    return "".join(h if _soru_cumlesi(h) else bol(h) for h in _cumleler(m))
 
 
 # İE-42 (hakem tur 5, Y1, Y3): çatı adı kökleri ve evin kendi çatısını anan söz
@@ -1364,8 +1416,29 @@ def _cati_atiflari(metin: str | None, katalog: Katalog, taban: dict, st: dict) -
             kume = {c for c, g in adlar_kod.items() if any(n.startswith(kok) for n in g)}
             if not istek or 0 < len(kume) < len(adlar_kod):    # istek cümlesinde yalnız seçenekleri ayıran ad ("kırma çatıya pencere")
                 ad_kumeleri.append(kume)
+        if _ERTELEME_SOZU.search(" ".join(sozler)):
+            kararsiz = True                                    # hakem tur 6 (O2): "müşteriye soralım, sonra döneriz" seçim değildir
         if istek:
-            continue                                           # istek cümlesinde sayı ve harf isteğindir ("yatak odası 1 penceresi")
+            # istek cümlesinde sayı ve harf isteğindir ("yatak odası 1 penceresi"); hakem tur 6 (Y1): setin çatı kodu, çatı sözüne bitişik
+            # numara ya da etiket ("çatı 2 …", "2 numaralı çatıyla …", "K çatısıyla …") ve tek başına etiket harfi ("… 120x180 K olsun")
+            # çatıya atıftır: seçim okunmadıysa sorulur (istek sessizce düşmez, çatı da)
+            hedef = {c for c in kodlar if c in set_kodlari and c != tk}
+            for i, w in enumerate(sozler):
+                if w in harfler and not (i + 1 < len(sozler) and sozler[i + 1] in ("tip", "tipi", "seklinde", "sekli")):
+                    hedef.add(harfler[w])
+                if not w.startswith("cati"):
+                    continue
+                for j in (i - 1, i - 2, i + 1, i + 2):
+                    if not 0 <= j < len(sozler) or (abs(j - i) == 2 and sozler[(i + j) // 2] not in _NUMARA):
+                        continue
+                    v = sozler[j]
+                    sonraki = sozler[j + 1] if j + 1 < len(sozler) else ""
+                    if v in numaralar and not sonraki.startswith(("pencere", "oda", "kapi", "adet", "tane", "derece", "metre", "cm")):
+                        hedef.add(numaralar[v])
+                    elif v in harfler:
+                        hedef.add(harfler[v])
+            hedefler |= hedef
+            continue
         hedef = {c for c in kodlar if c in set_kodlari}
         kararsiz = kararsiz or any(c not in set_kodlari and Katalog.taban_kod(c) == Katalog.taban_kod(tk) for c in kodlar)
         hedef |= {harfler[w] for w in sozler if w in harfler}
@@ -1665,6 +1738,8 @@ def _cati_adimi(k: Konusma, t: Talep, metin: str | None, katalog: Katalog) -> tu
     if t.niyet == "red":
         _cati_adimini_kapat(k, st, "plan değişikliği istendi")
         return t, None
+    if metin:                                                  # hakem tur 6: kod yazımı, sıra sayısı, virgülsüz seçim + istek
+        metin = _cati_adimi_on_okuma(metin, katalog, taban, st)
     son_metin0 = k.d.get("son_metin")
     celik_mi = (ie.get("yapi") or {}).get("sistem") == "celik"
     onay_soru = t.niyet in ("onay", "soru")
@@ -2698,16 +2773,22 @@ def _celik_is_emri_uret(k: Konusma, bayi: dict, katalog: Katalog, aday: dict, ts
     mesaj = f"{on_not}{on_bilgi}{ozet} {uyg}{form_notu}Ön onay planınız hazır; plan görseli ve PDF ektedir.".replace("  ", " ")
     cati_metni = getattr(k, "cati_metni", "")
     if cati_metni:                                             # İE-42 (D-94): onaydan sonraki çatı setinden seçim
+        if yeni and any(d.get("op") == "cati_varyanti" for d in yeni):
+            # PDF başlığı: çatısı seçilen plan, eski akışın (İE-25) r01'i gibi model adı, m² ve çatı dışında planın bütün değişiklikleriyle
+            # (İE-20 PR-10, canlı C5: "model adı ve m² düşmez"; hakem tur 6, D1 ve D2: ölçü farkı ve taslak notu da, çatıyla gelen istek de)
+            obur = [d for d in onceki + yeni if d.get("op") != "cati_varyanti"]
+            baslik = on_bilgi + ("Uygulanan: " + "; ".join(CO.aciklama(d) for d in obur) + ". " if obur else "")
+            farklar = [d["fark"] for d in obur if d.get("fark")]
+            if farklar:
+                baslik += (" ".join(f[0].upper() + f[1:] + "." for f in farklar)
+                           + " Ölçüler değiştiği için plan taslaktır; mühendis kontrolünde kesinleşir. ")
+            ie["talep"]["metin"] = baslik.strip() if obur else baslik.strip().rstrip(".")
+            ie["talep"]["metin_koddan"] = True
         if yeni and all(d.get("op") == "cati_varyanti" for d in yeni):
             k.d.pop("cati_onayi_dustu", None)                  # hakem tur 1, bulgu 7: yalnız çatı değişti, "onayınızı geçersiz kıldı" yazılmaz
             # hakem tur 2 ve 3: mesajın istek cümlesi (bayinin sözü) planı değiştirmedi ve bilgi de değil: sessiz düşmez
             uyg_yok = "; isteğinizi plana uygulayamadım" if getattr(k, "cati_ek", False) and not bilgi and not kod_metni else ""
             mesaj = f"{on_not}{cati_metni} Plan aynı{uyg_yok}. Ön onay planınız hazır (r{ie['revizyon']:02d})."
-            # PDF başlığı: çatısı seçilen plan, eski akışın (İE-25) r01'i gibi model adı, m² ve çatı dışında uygulananlarla
-            # (İE-20 PR-10, canlı C5: "model adı ve m² düşmez"); "Uygulanan: çatı Ç8801-K." yalnız kodu yazıyordu
-            obur = [CO.aciklama(d) for d in onceki if d.get("op") != "cati_varyanti"]
-            ie["talep"]["metin"] = (on_bilgi + ("Uygulanan: " + "; ".join(obur) + "." if obur else "")).strip().rstrip("." if not obur else "")
-            ie["talep"]["metin_koddan"] = True
         else:
             mesaj = f"{on_not}{cati_metni} " + mesaj[len(on_not):]
     return _bitir(k, Karar(eylem="is_emri", is_emri=ie, revizyon=ie["revizyon"], gerekce=gerekce, mesaj=mesaj))
