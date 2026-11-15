@@ -1951,8 +1951,18 @@ def _is_emri_uret(k: Konusma, bayi: dict, katalog: Katalog, sablon: dict, kaynak
                            for g in _pencere_gruplari(ie_pencere0, oda_adi) if set(g["sira"]) & set(r["pencere_sira"])]
                 notlar.append(f"{oda_adi} " + ", ".join(_grup_adi(g, kisa=True) for g in gruplar) + f" penceresi {r['olcu']}")
     notlar = list(dict.fromkeys(notlar))              # BK-29 tur 4: aynı değişiklik iki kez yazılmaz (canlı B5: "ODA 1 …, ODA 1 …")
-    seq = int(time.time()) % 100000
-    ie["is_emri_no"] = f"PM-{bayi.get('kod','BAYI')}-{time.strftime('%Y%m%d')}-{seq}"
+    # D-101 (Lokman, kart 15 Kasım 2026 07:26:12 UTC, "Sabit kalsın"): prefabrik planda revizyon talebin numarasını taşır (…8813 r01,
+    # …8813 r02); revizyonu rNN ayırır. Yeni numara yalnız ilk planda (konuşma sıfırlandıysa son plan yoktur) ve kanalın o numaranın
+    # sıradaki revizyon klasörünü dolu bulduğu işte (`k.yeni_numara`; yarım kalmış bir işin klasörü: üzerine yazılmaz) üretilir.
+    son_plan = k.d.get("son_is_emri") or {}
+    onceki_no = son_plan.get("is_emri_no") if (son_plan.get("yapi") or {}).get("sistem") != "celik" else None   # çelik planın numarası taşınmaz
+    if onceki_no and not getattr(k, "yeni_numara", False):
+        ie["is_emri_no"] = str(onceki_no)
+    else:
+        seq = int(time.time()) % 100000
+        ie["is_emri_no"] = f"PM-{bayi.get('kod','BAYI')}-{time.strftime('%Y%m%d')}-{seq}"
+        if ie["is_emri_no"] == onceki_no:              # aynı saniye: yeni numara eskisiyle aynı çıkmaz
+            ie["is_emri_no"] = f"PM-{bayi.get('kod','BAYI')}-{time.strftime('%Y%m%d')}-{(seq + 1) % 100000}"
     # G-2 (29.09): numara, gönderilmiş son planın numarasından (konuşma sıfırlandıysa 1); sayaç plan sayısıyla eşitlenir.
     ie["revizyon"] = int((k.d.get("son_is_emri") or {}).get("revizyon") or 0) + 1
     k.d["revizyon"] = ie["revizyon"] - 1

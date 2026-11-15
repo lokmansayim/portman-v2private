@@ -433,6 +433,10 @@ def isle(gelen: dict, settings: dict, k=None, cikarim: dict | None = None, proje
     k.yarim_pano = bool((settings.get("yarim_pano") or {}).get("acik"))   # İE-39 PR-2 (D-90): kapalıysa bugünkü yol
     k.llm_golge = None
     son0 = k.d.get("son_is_emri") or {}
+    # D-101: prefabrik revizyon talebin numarasını taşır. O numaranın sıradaki revizyon klasörü doluysa (kaydı yazılamamış yarım bir
+    # işin klasörü; `kalici._yerlestir` üzerine yazmaz ve iş sıraya geri dönerdi) bu iş yeni numara alır: iş aynı klasörde dönüp durmaz.
+    k.yeni_numara = bool(son0.get("is_emri_no")) and \
+        (KANAL / "projects" / str(son0["is_emri_no"]) / f"r{int(son0.get('revizyon') or 0) + 1:02d}").exists()
     son_y0 = son0.get("yapi") or {}                               # gölge kıyası karar öncesi açık plana karşı
     okuma_k = None
     gk = cizim_karari(gelen, settings, k, talep, etk, medya, cikarim, katalog, bayi, proje_koku, ek_kaydet)    # İE-20; None: bugünkü yol
