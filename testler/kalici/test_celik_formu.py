@@ -582,8 +582,10 @@ def test_kaplama_kiyasi_genis_desen():
         assert kiyas(d) == "ek", d                                                 # çatı sözü ama malzeme yok
     for d in ("kiremit", "kiremit desen sac", "kiremit desen sac + OSB", "shingle", "OSB + membran + shingle", "şıngıl", "trapez sac",
               "trapez", "tek kat panel", "tek kat", "tek katlı panel", "sandviç değil kiremit", "sandviç yerine tek kat panel",
-              "galvaniz sac", "boyalı sac", "çatı sac olsun", "onduline", "eternit", "marsilya kiremidi", "alüminyum"):
+              "galvaniz sac", "boyalı sac", "çatı sac olsun", "onduline", "eternit", "marsilya kiremidi", "alüminyum",
+              "çatı kiremidi olsun", "kiremidi", "sandviç değil kiremidi olsun"):  # ünsüz yumuşaması da kiremittir (BK-33 hakemi, 15 Kasım 2026)
         assert kiyas(d) == kiyas(d, satir=True) == "baska", d
+    assert kiyas("kiremidi kırmızısı sandviç panel") == "ek"                       # renk adı yumuşamış yazımla da kaplama değil
     for d in ("5 cm", "antrasit", "çift kat yalıtım", "membranlı"):                # tablonun kaplama satırına yazılmış, sandviç anmıyor
         assert kiyas(d, satir=True) == "baska" and kiyas(d) == "ek", d
     for d in ("çatı oluğu galvaniz olsun", "çatı penceresi alüminyum", "çatı saçağı galvaniz", "alüminyum çatı penceresi",
@@ -759,7 +761,7 @@ def test_kiremit_desen_sac_ayni_kurallarla(tmp_path):
     for d in (ad, "Kiremit Desen Sac + OSB", "kiremit", "OSB + Nem Bariyeri + Kiremit Desen Sac"):   # sonuncusu pafta tablosunun adı
         assert kiyas(d) == kiyas(d, satir=True) == "ayni", d
     for d in ("kiremit desen sac", "kiremit desen sac olsun", "kiremit desenli sac", "kiremit desen sac kırmızı", "boyalı kiremit desen sac",
-              "metal kiremit", "kiremit kırmızısı"):
+              "metal kiremit", "kiremit kırmızısı", "çatı kiremidi olsun", "kiremidi"):   # "kiremidi": kendi kökü (yumuşamış yazım)
         assert kiyas(d) == kiyas(d, satir=True) == "ek", d
     assert kiyas("çift kat yalıtım") == "ek"
     for d in ("sandviç panel", "tek kat panel", "trapez sac", "trapez sac + OSB", "shingle", "OSB + membran + shingle",
