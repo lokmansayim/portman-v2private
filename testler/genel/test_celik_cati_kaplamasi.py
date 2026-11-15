@@ -10,7 +10,7 @@ Hedef örnek: 140 m² çelik ev (KT-12, `modeller/havuz/KT12.json`) tanımın ka
 5,5 × 60 vida). Üretim komutu: tanımın `cati.kaplama`'sı `osb_kiremit` iken `python -m motor.genel.uret <tanım> <çıktı>`.
 
 Shingle hedef örneği: 43 m² çelik ev (KT-11, `modeller/havuz/KT11.json`) tanımın kaplaması `osb_shingle` yapılarak; beklenen
-`testler/genel/beklenen/KT11_osb_shingle.json` (Lokman'ın onayıyla dondurulur)."""
+`testler/genel/beklenen/KT11_osb_shingle.json` (Lokman'ın onayıyla donduruldu, 15 Kasım 2026 07:26:24 UTC)."""
 from __future__ import annotations
 
 import copy
@@ -226,6 +226,13 @@ def test_hedef_ornekle_ayni_shingle():
     assert h["onay"]["karar"] == "D-100" and h["onay"]["soz"]
     cikti, _ = uretim("osb_shingle", "KT11")
     assert ozet(cikti, "KT11") == h["ozet"]
+    # mühendis paftasının (pafta.png) bilgi satırı: kartın seçeneğinde hedefe girdi
+    t = _tanim("osb_shingle", "KT11")
+    kur = kural.oku()
+    y = yapi.kur(t)
+    c = cati_genel.cati_kur(t["cati"], kur)
+    _, sag = girdi_genel.bilgi_satirlari(y, c, girdi_genel.metraj(y, c, kur), kur)
+    assert [x for x in sag if x.startswith("Kaplama dizilimi")] == h["muhendis_bilgi_satiri"]
 
 
 def test_shingle_satirlari():
