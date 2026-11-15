@@ -1959,3 +1959,48 @@ def test_hakem16_kisinin_zamani_ve_kosulu_sorulur(tmp_path, metin):
     koşulu ("hanım beğenirse çok sevinirim", "ucuz olursa çok iyi olur") rica yapmaz. Seçim sorulur."""
     s, _ = _cati_seti(tmp_path)
     _soruldu(s, s.yaz(metin, niyet="diger", **_Y2))
+
+
+# ── İE-42 · geometri hakemi on altıncı tur (15 Kasım 2026 sabah) ─────────────────────────────────────────────────────────────────────
+_Y2_ = "2 olsun, {} yatak odası 2 penceresi 120x180 olsun"
+
+
+@pytest.mark.parametrize("metin, al", [
+    ("1 olsun, hangisi daha iyi?", {}), ("1 olsun, ikincisi daha mı iyi?", {}), ("1 olsun, sonuncusu daha mı iyi?", {}),
+    ("2 olsun, hangisi daha iyi?", {}), ("1 olsun, karar yok", {}), ("1 olsun, son karar müşterinin", {}),
+    ("1 olsun, karar müşteride", {}), ("2 olsun, son karar müşterinin", {}), ("2 olsun, mutfak tamam ama kararsızız", {}),
+    ("Odalar güzel ama kararsızız, 2 olsun", {}), (_Y2_.format("usta eve gelince soldaki"), _Y2),
+    (_Y2_.format("akşam eve gelince soldaki"), _Y2), (_Y2_.format("Hollanda'dan dönünce"), _Y2), (_Y2_.format("kapıcıya gelince"), _Y2),
+    ("2 olsun, yatak odası 2 penceresi 120x180 olmazsa iyi olur", _Y2),
+    ("2 olsun, yatak odası 2 penceresi 120x180 yaparsanız memnun olmayız", _Y2), ("2 olsun, müşterinin cevabına göre", {}),
+    ("2 olsun, bütçeye bağlı", {}), ("2 olsun, duruma bakarak", {}), ("2 olsun, kaporanın yatmasına bağlı", {})])
+def test_hakem16_kiyas_karar_sahibi_ve_kosul_sorulur(tmp_path, metin, al):
+    """Y-A, Y-B (önceden var): "hangisi daha iyi?", sıra sözüyle kıyas ("ikincisi daha mı iyi?"), "karar yok", "son karar müşterinin"
+    onay ya da çatı kaydediyordu. O-D (gerileme): yer sözünden sonraki kararsızlık ("mutfak tamam ama kararsızız") r02 çizdiriyordu.
+    O-E, O-G, O-H, O-I (önceden var ya da gerileme): öznenin zamanı ("usta eve gelince soldaki"), yer olmayan söz ("Hollanda'dan",
+    "kapıcıya"), olumsuz nezaket ("olmazsa iyi olur", "memnun olmayız") ve "-e göre/bağlı/bakarak" bağı. Seçim sorulur."""
+    s, _ = _cati_seti(tmp_path)
+    _soruldu(s, s.yaz(metin, niyet="diger", **al))
+
+
+@pytest.mark.parametrize("metin, al", [
+    ("2 olsun, teslim 3 hafta mı?", {}), ("2 olsun, 2'nin rengi mi olacak?", {}),
+    ("2 olsun, kapıdan girince soldaki yatak odası 2 penceresini 120x180 istiyoruz", _Y2),
+    ("2 olsun, kapıdan girince soldaki yatak odası 2 penceresi 120x180 olsun teşekkür ederiz", _Y2),
+    ("2 olsun, yatak odasına girince penceresini 120x180 istiyorum", _Y2), (_Y2_.format("dışarıdan bakınca sağdaki"), _Y2),
+    (_Y2_.format("içeriden bakınca sağdaki"), _Y2), ("2 olsun, fiyata göre en uygunu bu", {})])
+def test_hakem16_acik_secim_soruya_donmez(tmp_path, metin, al):
+    """O-A, O-B, O-C, O-F (gerileme): birimli sayı ("teslim 3 hafta mı?"), yüklemli soruda seçilen çatının ilgi eki, isteğin birinci
+    kişi fiili ("istiyoruz", "teşekkür ederiz"), "dışarıdan bakınca" ve değer sözlü "göre" açık seçimi soruya çevirmez: r02."""
+    s, _ = _cati_seti(tmp_path)
+    k = s.yaz(metin, niyet="diger", **al)
+    assert k.eylem == "is_emri" and k.revizyon == 2 and k.is_emri["talep"]["kaynak"] == "PA06K", k.mesaj
+    assert s.k.d.get("cati_secilen") == "PA06K"
+
+
+@pytest.mark.parametrize("metin", ["1 olsun, teslim 3 hafta mı?", "1 olsun. Teslim 2 haftada mı?", "Evin kendi çatısı olsun, teslim 3 hafta mı?"])
+def test_hakem16_acik_onay_soruya_donmez(tmp_path, metin):
+    """O-A (gerileme): teslim süresi sorusundaki sayı setin numarası değildir; evin çatısı r01'i onaylar."""
+    s, _ = _cati_seti(tmp_path)
+    k = s.yaz(metin, niyet="diger")
+    assert k.gerekce == K.PLAN_ONAYI and k.revizyon == 1, k.mesaj

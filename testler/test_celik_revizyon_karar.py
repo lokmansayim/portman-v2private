@@ -1104,3 +1104,21 @@ def test_hakem15_celik_olumlu_onay_soruya_donmez(s, metin):
     cati_seti(s)
     k = s.yaz(metin)
     assert k.gerekce == K.PLAN_ONAYI and k.revizyon == 1, k.mesaj
+
+
+# ── İE-42 · geometri hakemi on altıncı tur (15 Kasım 2026 sabah) ─────────────────────────────────────────────────────────────────────
+@pytest.mark.parametrize("metin", ["1 olsun, hangisi daha iyi?", "1 olsun, ikincisi daha mı iyi?", "1 olsun, karar yok",
+                                   "1 olsun, son karar müşterinin"])
+def test_hakem16_celik_kiyas_ve_karar_sahibi_sorulur(s, metin):
+    """Y-A, Y-B çelikte: onay kaydediliyor, plan teknik kontrole gidiyordu."""
+    cati_seti(s)
+    k = s.yaz(metin)
+    assert k.eylem == "sor" and k.mesaj.startswith("Hangi çatı olsun?"), k.mesaj
+    assert s.plan["revizyon"] == 1 and s.k.d["secenek_seti"]["durum"] == "acik" and not s.k.d.get("onaylanan"), k.mesaj
+
+
+def test_hakem16_celik_birimli_sayi_secimi_bozmaz(s):
+    """O-A çelikte: "teslim 3 hafta mı?" setin 3. çatısı değildir."""
+    cati_seti(s)
+    k = s.yaz("Ç8801 olsun, 3 haftada mı teslim?")
+    assert k.gerekce == K.PLAN_ONAYI and k.revizyon == 1, k.mesaj
