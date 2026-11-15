@@ -32,7 +32,13 @@ alan listesi kartı 14 Kasım 2026 20:40 UTC "Evet, bu listeyle kur"):
     (`dis140`; `beyin/karar._celik_is_emri_uret`, işlem `dis_karkas_140`).
   - Ölçü pano katına yuvarlanmaz (çelik serbest aks; varsayım, D-93): bayinin ölçüsü kalır. Tek kenar ve m² yazılıysa öteki kenarı kod
     m²'den hesaplar (`celik_olcusu`). Kimliği ayarda varsa (`talep_formu.celik_flow_id`) çelikte ilk formun yerine o sunulur.
-  - Cevabın token'ı `cf:<iz>[:1]`; tür yine `talep`, `form` alanı `celik`."""
+  - Cevabın token'ı `cf:<iz>[:1]`; tür yine `talep`, `form` alanı `celik`.
+İE-20 PR-12 · Çelik talep formunun ikinci sürümü (`kanal/formlar/celik2.json`; D-102; Lokman, 15 Kasım 2026 05:23, 05:28 ve 07:54 UTC):
+  - Yayımlı form değişmez; `celik2.json` onun kopyasıdır: çatı kaplamasında "Trapez sac" ve "Trapez sac + OSB" yok (çelikte trapez
+    sac sunulmaz; Lokman 07:54:18 "çelikte Trapez sacı komple kaldır", 07:54:29 "yani Trapez sac + OSB de olmasın"), shingle satırı
+    "OSB + membran + shingle". Kimliği ayarda varsa (`talep_formu.celik2_flow_id`) çelik formun yerine o sunulur
+    (`kanal/worker.py` › `talep_formu_sunusu`); yoksa davranış bugünküyle aynı. Token, ekran verisi ve cevabın okunması aynıdır;
+    eski formdan gelen "trapez" ve "osb_trapez" cevapları okunmaya devam eder (`C_KAPLAMA`)."""
 from __future__ import annotations
 
 import json
@@ -40,9 +46,9 @@ import re
 from pathlib import Path
 
 FORMLAR = Path(__file__).resolve().parent / "formlar"
-EKRAN = {"talep": "TALEP", "revizyon": "REVIZYON", "prefabrik": "TALEP_P", "talep2": "TALEP", "celik": "TALEP_C"}
+EKRAN = {"talep": "TALEP", "revizyon": "REVIZYON", "prefabrik": "TALEP_P", "talep2": "TALEP", "celik": "TALEP_C", "celik2": "TALEP_C"}
 DUGME = {"talep": "Talep formu", "revizyon": "Revizyon formu", "prefabrik": "Talep formu", "talep2": "Talep formu",
-         "celik": "Talep formu"}                 # flow_cta (≤ 20)
+         "celik": "Talep formu", "celik2": "Talep formu"}                 # flow_cta (≤ 20)
 # tf:<iz>[:1] talep · pf:<iz>[:1] prefabrik talep formu · cf:<iz>[:1] çelik talep formu · rv:<İş Emri no>:<rev> revizyon
 TOKEN = re.compile(r"^(tf|pf|cf|rv):([^:\s]{1,80})(?::([0-9]{1,3}))?$")
 TOKEN_FORMU = {"pf": "prefabrik", "cf": "celik"}  # token öneki → cevabın `form` alanı (ilk form ve verandasız form: alan yok)
@@ -89,7 +95,11 @@ EK_OZELLIK = "Ek İstekler"                                                     
 # altı kaplaması (`kurallar/liste/kurallar.json` › cati_kaplamasi); dış duvar `kurallar/model/duvar_tipleri.json` (DIS-80 baz, DIS-140
 # seçenek); iç duvar, pencere rengi ve ek istek bayi tekliflerinin taramasından (19 çelik proje). ──
 C_KAPLAMA = {"tek_kat": "tek kat panel", "sandvic": "sandviç panel", "kiremit": "kiremit desen sac + OSB", "trapez": "trapez sac",
-             "osb_trapez": "trapez sac + OSB", "shingle": "shingle + OSB"}
+             "osb_trapez": "trapez sac + OSB", "shingle": "OSB + membran + shingle"}   # "trapez", "osb_trapez": yalnız eski formun cevabı (D-102)
+# Form seçeneği → kural kitabının `cati_kaplama` anahtarı (İE-20 PR-11, D-97). Genel motorun hesapladığı kaplama (`beyin/varyant.
+# CIZILEN_KAPLAMALAR`) ilk planda çizime işlenir; ötekiler özel isteğe yazılır.
+C_KAPLAMA_KITAP = {"tek_kat": "tek_kat_panel", "sandvic": "sandvic_panel", "kiremit": "osb_kiremit", "trapez": "trapez_sac",
+                   "osb_trapez": "osb_trapez", "shingle": "osb_shingle"}
 C_DIS_DUVAR = {"80": "80 mm karkas", "140": "140 mm karkas"}
 C_IC_DUVAR = {"alcipan": "alçıpan + 80 mm karkas", "osb": "OSB'li iç duvar"}
 C_EK = {"cift_yalitim": "çatıda çift kat yalıtım"}
@@ -337,25 +347,38 @@ def celik_dis140(oz: dict) -> bool:
     return oz.get("form") == "celik" and (oz.get("alanlar") or {}).get("dis_duvar") == "140"
 
 
+def celik_kaplamasi(oz: dict) -> str | None:
+    """Çelik formda standart dışı seçilen ve çizime işlenen çatı kaplaması (kural kitabının anahtarı; sandviç panel ve, BK-33'ten beri,
+    kiremit desen sac + OSB (D-98) ve OSB + membran + shingle (D-100)). Standart seçim (tek kat panel) ve genel motorun hesaplamadığı kaplamalar None: plan modelin kendi kaplamasıyla çizilir, standart
+    dışı seçim özel isteğe yazılır (İE-20 PR-11, D-97; `beyin/karar._celik_is_emri_uret`, işlem `cati_kaplamasi`)."""
+    from beyin import varyant
+    v = (oz.get("alanlar") or {}).get("kaplama") if oz.get("form") == "celik" else None
+    k = C_KAPLAMA_KITAP.get(v)
+    return k if v != C_STANDART["kaplama"] and k in varyant.CIZILEN_KAPLAMALAR else None
+
+
 def celik_notu(oz: dict, cizim: bool = True) -> str:
     """Çelik formun cevabından sonra bayiye gidecek ön not: m²'den hesaplanan kenar, standart dışı seçimler ve bunlardan hangisinin
-    çizime işlendiği (yalnız dış duvar 140 mm karkas), kısa montaj önceliğinin çelikte sıralama ölçüsü olmadığı. Söylenecek şey yoksa
-    boş. `cizim` False ise (talep yönlendirildi ya da plan bu mesajda çıktı) çizim cümlesi yazılmaz. Not yazılırken plan henüz
-    seçilmemiştir ve dış 140 her plana işlenemez (KT-01, KT-02): not kesin söz vermez, sonucu plan mesajı söyler (İE-20 PR-10,
-    15 Kasım 2026 canlı denemesi C6). Sade Teknik Türkçe (D-70): bir cümle bir iş."""
+    çizime işlendiği (dış duvar 140 mm karkas ve genel motorun hesapladığı çatı kaplaması; İE-20 PR-11), kısa montaj önceliğinin çelikte
+    sıralama ölçüsü olmadığı. Söylenecek şey yoksa boş. `cizim` False ise (talep yönlendirildi ya da plan bu mesajda çıktı) çizim cümlesi
+    yazılmaz. Not yazılırken plan henüz seçilmemiştir ve dış 140 her plana işlenemez (KT-01, KT-02): not kesin söz vermez, sonucu plan
+    mesajı söyler (İE-20 PR-10, 15 Kasım 2026 canlı denemesi C6). Sade Teknik Türkçe (D-70): bir cümle bir iş."""
     if oz.get("form") != "celik":
         return ""
     a, o, p = oz.get("alanlar") or {}, celik_olcusu(oz), []
     if o and o["hesaplanan"]:
         p.append(f"{'Uzun' if o['hesaplanan'] == 'uzun' else 'Kısa'} kenarı m²'den hesapladım: {_olcu(o['en_m'])} × {_olcu(o['boy_m'])} m.")
     sd = celik_standart_disi(oz)
-    if sd and cizim and celik_dis140(oz) and len(sd) == 1:
-        p.append("Dış duvar 140 mm karkas seçtiniz. Çizime işlerim. " + C_ISLENEMEZSE)
+    d140, kap = celik_dis140(oz), celik_kaplamasi(oz)
+    islenen = (["dış duvar 140 mm karkası"] if d140 else []) + (["çatı kaplamasını"] if kap else [])
+    if sd and cizim and len(sd) == 1 and islenen:
+        p.append(("Dış duvar 140 mm karkas" if d140 else f"Çatı kaplaması {C_KAPLAMA[a['kaplama']]}") + " seçtiniz. Çizime işlerim. "
+                 + C_ISLENEMEZSE)
     elif sd:
         p.append("Standart dışı seçimlerinizi aldım: " + ", ".join(sd) + ".")
         if cizim:
-            p.append("Çizime yalnız dış duvar 140 mm karkası işlerim. " + C_ISLENEMEZSE if celik_dis140(oz)
-                     else "Bu seçimler çizimi değiştirmez.")
+            p.append(("Çizime işlerim. " if len(islenen) == len(sd) else f"Çizime yalnız {' ve '.join(islenen)} işlerim. ") + C_ISLENEMEZSE
+                     if islenen else "Bu seçimler çizimi değiştirmez.")
     if a.get("oncelik") == "montaj":
         p.append("Çelik planlarda kısa montaj sıralaması yok.")
     return " ".join(p)
