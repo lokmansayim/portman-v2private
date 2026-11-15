@@ -3,8 +3,9 @@
 Dayanak: Lokman, 15 Kasım 2026 07:59:14 UTC; kapsam CIO'nun okuması (varsayım). Kart paftanın H profil montaj planından okunur
 (`araclar/profil_karti.py`); pafta depoya girmez, CI kartı okur.
 
-- Her kayıtta paftayla kaydın birleşim farkı kartta yazılı farkların aynısı: yeni fark ya da kaybolan fark testi kırar. Bekleyen fark
-  Lokman'ın ev kartını bekler (15 Kasım 2026: 140 m², 71 m², 45 m², 84 m²).
+- Her kayıtta paftayla kaydın birleşim farkı kartta yazılı farkların aynısı: yeni fark ya da kaybolan fark testi kırar. Farkın durumu
+  Lokman'ın ev kartından, sözü ve saatiyle (15 Kasım 2026): 140 m² ve 84 m² kabul (kayıt doğru, 08:51:58, 08:54:31); 71 m² ve
+  45 m² kayıt hatası (pafta doğru, 08:53:28, 08:53:55). Kayıt düzelince kayıt hatası satırı kart dosyasından silinir.
 - Hakemin kaydı okuyuşu yükleme listesinin saydığıyla aynı (3'lü H'lı ek, düz ek, çektirme U'sunun üç yeri): hakem listenin mantığından
   sapmaz.
 - Kartın paftası mühürdeki dosya (SHA-256), hizalama birleşimlerin en az %70'inde tutuyor (45 m² 1+1: 20/27; öteki 5 daire dış
@@ -47,10 +48,12 @@ def test_farklar_kayitli_ve_durumlu():
     for kod, fs in K["farklar"].items():
         assert kod in K["evler"]
         for f in fs:
-            assert f["durum"] in ("bekleyen", "kabul"), (kod, f)
-            if f["durum"] == "kabul":                         # kabul yalnız Lokman'ın ev kartıyla, sözü ve saatiyle
-                assert re.search(r"\d{2}:\d{2}", f.get("soz", "")), (kod, f)
-    assert sorted(K["farklar"]) == ["PA-08", "PA-19", "PA-26", "PA-27"]
+            assert f["durum"] in ("bekleyen", "kabul", "kayit_hatasi"), (kod, f)
+            if f["durum"] != "bekleyen":                      # kabul ve kayıt hatası yalnız Lokman'ın sözüyle ve saatiyle
+                assert re.search(r"Lokman .*\d{2}:\d{2}:\d{2} UTC", f.get("soz", "")), (kod, f)
+                assert f.get("sonuc"), (kod, f)
+    assert {k: sorted({f["durum"] for f in fs}) for k, fs in K["farklar"].items()} == {
+        "PA-08": ["kabul"], "PA-19": ["kabul"], "PA-26": ["kayit_hatasi"], "PA-27": ["kayit_hatasi"]}
 
 
 @pytest.mark.parametrize("kod", KIYASLI)
@@ -73,8 +76,10 @@ def test_kayit_okuyusu_listeyle_ayni(ad):
     assert {x: k["cektirme_yerleri"].get(x, 0) for x in ("t_orta", "dis_kose", "serbest")} == N["cektirme_yerleri"]
 
 
-def test_hakem_komutu_bekleyeni_soyler(capsys):
-    assert BH.main(["PA-19"]) == 1
+def test_hakem_komutu_kartlari_ayirir(capsys):
+    assert BH.main(["PA-26"]) == 1                            # 71 m²: Lokman paftayı doğru buldu, kayıt düzeltilene kadar kalır
     cikti = capsys.readouterr().out
-    assert "BEKLİYOR" in cikti and "paftada düz H, kayıtta 3'lü H" in cikti
+    assert "KAYIT HATASI" in cikti and "paftada 3'lü H, kayıtta çektirme U'su" in cikti
+    assert BH.main(["PA-19"]) == 0                            # 84 m²: Lokman kaydın 3'lü H'ını doğru buldu
+    assert "2 fark Lokman'ın kartıyla kabul" in capsys.readouterr().out
     assert BH.main(["PA-02"]) == 0

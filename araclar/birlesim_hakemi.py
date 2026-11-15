@@ -16,8 +16,14 @@ Paftanın birleşimleri `testler/havuz/profil_kartlari.json`'dadır (`araclar/pr
 - paftada düz H olan yerde kayıtta 3'lü H var;
 - kayıtta 3'lü H olan yerde paftada 3'lü ya da 4'lü H yok.
 Dört kollu birleşimde (BK-14, `plan.arti_birlesimler`; liste uyarır) paftanın 4'lü H'ı fark sayılmaz.
-Bir fark Lokman'ın ev kartıyla kabul edildiyse (`farklar[].durum` "kabul", sözü ve saatiyle) bulgu sayılmaz; kartı bekleyen fark
-"bekleyen" diye yazılır ve hakemden geçmez. Köşe direği ve özel kaynaklı profiller (kolon, kiriş, pencere karkası) bu kalemde yok.
+Lokman'ın ev kartına göre (`farklar[].durum`, sözü ve saatiyle): "kabul" (kayıt doğru) fark bulgu sayılmaz; "kayit_hatasi" (pafta
+doğru) kayıt düzeltilene kadar "KAYIT HATASI" diye yazılır ve hakemden geçmez (düzeltme ayrı iş; düzelince kart satırı silinir);
+"bekleyen" kartı bekler ve hakemden geçmez. Köşe direği ve özel kaynaklı profiller (kolon, kiriş, pencere karkası) bu kalemde yok.
+
+Lokman'ın cevapları (15 Kasım 2026): 125,5'lik panonun tam ortasına gelen iç duvarda paftanın 3'lü H'ı yerine çektirme U'su bir
+uygulamadır (08:51:58; 140 m²); T panonun ortasına gelmiyorsa pafta panoyu bölüp 3'lü H koyar, kayıt hatalı (08:53:28 71 m²,
+08:53:55 45 m²); dış duvar ekindeki 60'lık iç T'de kaydın 3'lü H'ı doğru (08:54:31; 84 m²). Sözler kart dosyasındadır; kalem bunları
+genel kural diye uygulamaz, her farkı kendi kartıyla ayırır.
 
     python3 araclar/birlesim_hakemi.py PA-08
     python3 araclar/birlesim_hakemi.py hepsi
@@ -168,9 +174,9 @@ def denetle(kod: str, ie: dict, kart: dict) -> tuple[list[dict], dict]:
 
 
 def durumlar(kod: str, bulgular: list[dict], farklar: list[dict]) -> dict:
-    """Bulguları Lokman'ın kartlarına göre ayırır: kabul (kartla kabul edilmiş), bekleyen (kart Lokman'da), yeni (kayıtlı değil).
-    Kayıtlı olup artık çıkmayan fark `kalkan`."""
-    out = {"kabul": [], "bekleyen": [], "yeni": [], "kalkan": []}
+    """Bulguları Lokman'ın kartlarına göre ayırır: kabul (kayıt doğru), kayit_hatasi (pafta doğru, kayıt düzeltilecek), bekleyen
+    (kart Lokman'da), yeni (kayıtlı değil). Kayıtlı olup artık çıkmayan fark `kalkan` (kayıt düzeldiyse kart satırı silinir)."""
+    out = {"kabul": [], "kayit_hatasi": [], "bekleyen": [], "yeni": [], "kalkan": []}
     kullanildi = set()
     for b in bulgular:
         f = next((i for i, f in enumerate(farklar) if f["tur"] == b["tur"] and _yakin(f["xy"], b["xy"], 2.0)), None)
@@ -178,7 +184,9 @@ def durumlar(kod: str, bulgular: list[dict], farklar: list[dict]) -> dict:
             out["yeni"].append(b)
             continue
         kullanildi.add(f)
-        out["kabul" if farklar[f].get("durum") == "kabul" else "bekleyen"].append({**b, "kart": farklar[f].get("kart")})
+        durum = farklar[f].get("durum")
+        out[durum if durum in ("kabul", "kayit_hatasi") else "bekleyen"].append({**b, "kart": farklar[f].get("kart"),
+                                                                                  "sonuc": farklar[f].get("sonuc")})
     out["kalkan"] = [f for i, f in enumerate(farklar) if i not in kullanildi]
     return out
 
@@ -208,11 +216,16 @@ def main(argv: list[str] | None = None) -> int:
                 print(f"  - yeni fark: {b['yazi']}")
             for f in d["kalkan"]:
                 print(f"  - kayıtlı fark artık yok: {f['tur']} {f['xy']}")
-        elif d["bekleyen"]:
+        elif d["kayit_hatasi"] or d["bekleyen"]:
             sonuc = max(sonuc, 1)
-            print(f"{kod}: BEKLİYOR (Lokman'ın kartı)")
-            for b in d["bekleyen"]:
-                print(f"  - {b['yazi']}")
+            if d["kayit_hatasi"]:
+                print(f"{kod}: KAYIT HATASI (Lokman paftayı doğru buldu; düzeltme ayrı iş)")
+                for b in d["kayit_hatasi"]:
+                    print(f"  - {b['yazi']}: {b['sonuc']}")
+            if d["bekleyen"]:
+                print(f"{kod}: BEKLİYOR (Lokman'ın kartı)")
+                for b in d["bekleyen"]:
+                    print(f"  - {b['yazi']}")
         else:
             print(f"{kod}: GEÇTİ: birleşimler paftayla aynı" + (f" ({len(d['kabul'])} fark Lokman'ın kartıyla kabul)" if d["kabul"] else ""))
     return sonuc
