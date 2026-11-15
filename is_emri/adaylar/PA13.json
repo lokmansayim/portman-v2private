@@ -7,7 +7,7 @@
    "ad": "Aday kaydı"
   },
   "musteri_adi": "ADAY PA13",
-  "metin": "AP-12 montaj paftasından İş Emri (İE-33 kör ölçümü). Aday: D-87 (Lokman 13 Kasım 2026 21:41)."
+  "metin": "AP-12 montaj paftasından İş Emri (İE-33 kör ölçümü). Aday: D-87 (Lokman 13 Kasım 2026 21:41). Veranda köşesi paftadaki gibi üçlü H: D-96 (Lokman 15 Kasım 2026 07:32:42 sözü; ev kartı 07:57:47 \"Evet, havuzda yenilensin\"). Önceki kayıtta köşe direği vardı; paftada özel 3'lü H (D-103: asıl proje esas)."
  },
  "yapi": {
   "sistem": "prefabrik",
@@ -82,7 +82,16 @@
     946.25,
     1583.25
    ]
-  }
+  },
+  "birlesimler": [
+   {
+    "nokta_cm": [
+     512.0,
+     1260.0
+    ],
+    "t": "uclu_h"
+   }
+  ]
  },
  "mahaller": [
   {
@@ -487,7 +496,8 @@
   "Pano dizilimi arkadan (dizilim.baslangic: arka-sol): mahallerin y'si arka dış yüzden; açıklıkların cepheleri gerçek çerçevede. Arkada iki banyo, ortada iki holün iki yanında dört yatak odası, kiler ve mutfak, sağda salon; önde solda veranda (önü yarım duvar h:80), sağda açık veranda. Sağdaki gövde 1390,7'de, açık veranda 1638,25'e kadar; soldaki veranda 1588,25'te biter (girinti 50).",
   "Mahal alanları paftanın elektrik planından: banyolar 5,74 ve 4,17, yatak odaları 13,61, 13,24, 11,28, 10,98, holler 7,85 ve 4,95, kiler 4,29, mutfak 11,28, salon 20,05, veranda 15,56, açık veranda 9,25 m².",
   "Kapılar paftadaki kanat izinden; genişlikler paftada yazılı değil: dış kapı 90, iç kapı 82 (Motor'un ölçüsü). Dış kapı (çelik) holden verandaya; verandanın sağ duvarındaki kapı açık verandaya (paftada ikisi de 82'lik kanat; ikisi de dış kapı sayıldı). Pencereler paftadaki yazıyla: 60/40 (iki banyo, kiler), 120/120 (yatak odaları, salonda iki, veranda), 120/100 (mutfak), 160/180 sürgülü (mutfak ve salondan verandalara, 251'lik panoda).",
-  "Çatı: beşik + çift cumba (İE-29). Ana beşik mahyası y boyunca (makaslar x'i geçer), arkada kalkan, önde sağ gövdenin ön duvarında kalkan (paftanın aşık planı: ana yüzlerin mahyaya yakın kısmı −30 → 1419,5); önünde yan yana iki küçük beşik: solda 0–517,1 (veranda), sağda 507,1–888,5 (açık veranda), dış yüzleri ana çatının yüzlerinin devamı, iç yüzleri orta duvarın ekseninde (512,1) derede buluşur. Eğim %32,88 (aşık planında ana yüzün eğik eni 499,6 ≈ 474,25 × 1,0527), saçak 30, topuk 10. Kaplama OSB + nem bariyeri + trapez (özellik tablosu)."
+  "Çatı: beşik + çift cumba (İE-29). Ana beşik mahyası y boyunca (makaslar x'i geçer), arkada kalkan, önde sağ gövdenin ön duvarında kalkan (paftanın aşık planı: ana yüzlerin mahyaya yakın kısmı −30 → 1419,5); önünde yan yana iki küçük beşik: solda 0–517,1 (veranda), sağda 507,1–888,5 (açık veranda), dış yüzleri ana çatının yüzlerinin devamı, iç yüzleri orta duvarın ekseninde (512,1) derede buluşur. Eğim %32,88 (aşık planında ana yüzün eğik eni 499,6 ≈ 474,25 × 1,0527), saçak 30, topuk 10. Kaplama OSB + nem bariyeri + trapez (özellik tablosu).",
+  "Veranda köşesinde (salon/veranda dış duvarı, salon/hol iç duvarı ile veranda arka duvarının birleştiği köşe; Motor çerçevesinde x 512, y 1260 arkadan) köşe direği yerine üçlü H (yapi.birlesimler, D-96), paftadaki gibi: özel kaynaklı profiller planında bu köşe 'D' = özel 3'lü H (dübelli ve kulaklı) 100 × 100 × 100; montaj planında kapı panosu 120,5, köşenin iki yanı 125,5. Ev kartı 15 Kasım 07:57:47 'Evet, havuzda yenilensin'. Önceki kayıtta Motor köşe direği koymuştu (kapı panosu 125,5, iki yan 120,5)."
  ],
  "eksikler": [],
  "girintiler": [

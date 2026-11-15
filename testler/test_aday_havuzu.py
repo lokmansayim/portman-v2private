@@ -63,7 +63,15 @@ SILME_HAL = {
     "PA34": ("AP-27", "testler/havuz/is_emirleri/PA24_BUYUME.json", "2+1", 78.0),   # 77 m² büyüyen hâl (20:35:43 sözü, 20:38:43)
     "PA35": ("AP-08", "testler/havuz/is_emirleri/PA26_UCLU_H.json", "2+1", 69.0),   # 71 m² üçlü H'lı hâl (20:46:54 sözü, 20:57:28; BK-34)
 }
-HAVUZ_EVLERI = {**EVLER, **STANDART_HAL, **SILME_HAL}
+# D-96 › Havuza uygulama (İE-40 PR-7): iç duvarı 100'lük evlerin veranda köşesinde üçlü H, ev ev kartla (Lokman 15 Kasım 2026 07:32:42 sözü).
+# 91 m² 3+1 yeni numarayla (07:57:38 "Doğru, yanına eklensin"; PA-11 aynen); 143 m² 4+1 paftadaki gibi aynı numarayla (07:57:47 "Evet, havuzda
+# yenilensin"). Ayrıntı test_havuz_uclu_h.py
+D96 = (KOK / "KARARLAR" / "D-96.md").read_text(encoding="utf-8")
+UCLU_H_HAL = {
+    "PA37": ("AP-06", "testler/havuz/is_emirleri/AP06_UCLU_H.json", "3+1", 91.0),   # 91 m² üçlü H'lı hâl (07:57:38)
+}
+UCLU_H_YENI = {"PA13": "testler/havuz/is_emirleri/AP12_UCLU_H.json"}                # 143 m² paftadaki üçlü H (07:57:47)
+HAVUZ_EVLERI = {**EVLER, **STANDART_HAL, **SILME_HAL, **UCLU_H_HAL}
 # D-92 › Havuz evlerine uygulama: tek özel pano anahtarı yazılan evlerin kaynağı kör İş Emri'nin anahtarlı kopyası (kör dosya aynen;
 # ayrıntı test_havuz_tek_pano.py). Kayıt yeniden yazıldı, karar D-92; D-87'nin tablosu evin havuza girdiği kaynağı yazmaya devam eder.
 D92 = (KOK / "KARARLAR" / "D-92.md").read_text(encoding="utf-8")
@@ -71,9 +79,14 @@ TEK_PANO = {"PA10": "testler/havuz/is_emirleri/AP04_D92.json"}                  
 
 
 def _kayit_kaynagi(kod: str) -> tuple[str, str, str]:
-    """(kaynak İş Emri, karar, karar metni) kayıttaki gibi: D-92 evleri ve silinmiş hâlleri, D-91 standart hâlleri, öteki D-87 evleri."""
+    """(kaynak İş Emri, karar, karar metni) kayıttaki gibi: D-92 evleri ve silinmiş hâlleri, D-96 üçlü H evleri, D-91 standart hâlleri,
+    öteki D-87 evleri."""
     if kod in TEK_PANO:
         return TEK_PANO[kod], "D-92", D92
+    if kod in UCLU_H_YENI:
+        return UCLU_H_YENI[kod], "D-96", D96
+    if kod in UCLU_H_HAL:
+        return UCLU_H_HAL[kod][1], "D-96", D96
     if kod in SILME_HAL:
         return SILME_HAL[kod][1], "D-92", D92
     return HAVUZ_EVLERI[kod][1], *(("D-87", D87) if kod in EVLER else ("D-91", D91))
@@ -134,7 +147,7 @@ def test_havuz_kaydi_bicimi():
     for kod, a in PREFABRIK.items():
         proje, _, oda, m2 = HAVUZ_EVLERI[kod]
         kaynak, karar, karar_metni = _kayit_kaynagi(kod)
-        if kod in TEK_PANO:
+        if kod in TEK_PANO or kod in UCLU_H_YENI:
             assert f"| {kod[:2]}-{kod[2:]} | {proje} | `{EVLER[kod][1]}` |" in D87, kod     # havuza girdiği kaynak D-87'de aynen
         g = kod[:2] + "-" + kod[2:]
         assert a["gosterim"] == g == a["referans_model"]
@@ -300,7 +313,7 @@ SETLER = {
     (77, "2+1"): ["PA24", "PA04", "PA34", "PA16", "PA05", "PA26", "PA03", "PA15", "PA19"],  # PA-34: 77 m²'nin büyüyen hâli (D-92)
     (80, "2+1"): ["PA16", "PA04", "PA05", "PA34", "PA24", "PA19", "PA06"],
     (80, "3+1"): ["PA21", "PA30", "PA12"],                                            # PA-30: 85 m²'nin silinmiş hâli (83 m², D-92)
-    (90, "3+1"): ["PA07", "PA11", "PA17", "PA10", "PA12", "PA30"],
+    (90, "3+1"): ["PA07", "PA11", "PA17", "PA37", "PA10", "PA12", "PA30"],          # PA-37: 91 m²'nin üçlü H'lı hâli (D-96)
     (100, "2+1"): ["PA22"],
     (140, "3+1"): ["PA08", "PA33"],                                                   # PA-33: 140 m²'nin büyüyen hâli (142 m², D-92)
     (140, "4+1"): ["PA13"],
