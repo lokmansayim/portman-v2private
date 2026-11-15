@@ -161,11 +161,14 @@ def _norm(s: str) -> str:
 # İE-23 PR-2a (banka germe; ayar `banka_germe.acik` arkasında okunur):
 #   {"op": "oda_buyut" | "oda_kucult", "mahal": "Yatak Odası 1", "yon": "K", "cm": 50}   dış kenar: ev o yöne uzar; iç kenar: duvar kayar
 # İE-20 PR-11 (D-97; Lokman, kart 15 Kasım 2026 04:44:37 UTC "Plana ve listeye işlensin"):
-#   {"op": "cati_kaplamasi", "kaplama": "sandvic_panel"}              çatı kaplaması: tanımın `cati.kaplama`'sı; geometri değişmez
+#   {"op": "cati_kaplamasi", "kaplama": "sandvic_panel" | "osb_kiremit"}   çatı kaplaması: tanımın `cati.kaplama`'sı; geometri değişmez
 KARKAS_140_CM = 14.0
-# Genel motorun hesapladığı çatı kaplamaları (`motor/genel/girdi_genel.py`: öteki dördü yalnız dikdörtgen kırma çatılı 0.4 hattında).
-# İki liste birbirini `testler/test_cati_kaplamasi_islemi.py`'de denetler: Motor bir kaplamayı öğrenince burası da genişler.
-CIZILEN_KAPLAMALAR = ("tek_kat_panel", "sandvic_panel")
+# Genel motorun hesapladığı çatı kaplamaları (`motor/genel/girdi_genel.py`). İki liste birbirini
+# `testler/test_cati_kaplamasi_islemi.py`'de denetler: Motor bir kaplamayı öğrenince burası da genişler. Kiremit desen sac + OSB + nem
+# bariyeri 15 Kasım 2026'da girdi (BK-33, D-98; kural kitabı `genel_osbli_kaplama`); OSB + membran + shingle bekler; çelikte trapez sac yok (D-102).
+CIZILEN_KAPLAMALAR = ("tek_kat_panel", "sandvic_panel", "osb_kiremit")
+# Bayiye yazılan ad kitabın adından farklıysa: formdaki seçeneğin adı (`kanal/talep_formu.C_KAPLAMA`; test ikisini kıyaslar).
+KAPLAMA_ADI = {"osb_kiremit": "kiremit desen sac + OSB"}
 LENTO_VARSAYILAN = 70          # bilgi: Ç8801/Ç8201'de pencere üstü 270 − 70 = 200; pencere_olcu üst kotu tanımdan korur
 _TOL = 0.01
 PENCERE_EN = (30, 400)        # cm; bayinin söyleyebileceği makul aralık (daha büyüğü otomatik yapılmaz, mühendise)
@@ -289,9 +292,15 @@ def kaplama_oku(t: dict) -> str:
 
 
 def kaplama_adi(kaplama: str) -> str:
-    """Kaplamanın bayiye yazılan adı: kural kitabındaki ad, küçük harfle ("sandviç panel", "tek kat panel")."""
+    """Kaplamanın bayiye yazılan adı: formdaki seçeneğin adı (`KAPLAMA_ADI`), yoksa kural kitabındaki ad küçük harfle ("sandviç panel",
+    "tek kat panel")."""
+    return KAPLAMA_ADI[kaplama] if kaplama in KAPLAMA_ADI else kaplama_kitap_adi(kaplama).lower()
+
+
+def kaplama_kitap_adi(kaplama: str) -> str:
+    """Kaplamanın kural kitabındaki adı: pafta tablosunun "Çatı Kaplaması" satırı bu adı yazar ("OSB + Nem Bariyeri + Kiremit Desen Sac")."""
     from motor.genel import kural
-    return str(kural.oku()["cati_kaplama"]["deger"].get(kaplama, kaplama)).lower()
+    return str(kural.oku()["cati_kaplama"]["deger"].get(kaplama, kaplama))
 
 
 def cati_kaplamasi(t: dict, kaplama: str | None) -> dict:

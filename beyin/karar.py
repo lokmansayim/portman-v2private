@@ -1672,9 +1672,16 @@ _KAP_KOK = {"sandvic_panel": ("sandvic", "sandwic", "sandvij"), "osb_kiremit": (
             "osb_trapez": ("trapez",), "osb_shingle": ("shingle", "shingil", "shingl", "singil", "singl")}
 _KAP_KESIN = ("ondulin", "eternit")                            # kitapta olmayan ama yalnız çatı örtüsü olan malzemeler
 _KAP_BAGLAMLI = ("sac", "galvaniz", "aluminyum", "bakir", "cinko")   # yalnız çatı / kaplama sözüyle birlikte çatı kaplamasıdır
+_KAP_KENDI_BAGLAMLI = {"osb_kiremit": ("sac",), "osb_trapez": ("sac",), "trapez_sac": ("sac",)}   # kaplamanın kendi adındaki sözcük: yalnız
+#   adın içinde, kendi kökünün hemen ardında ("kiremit desen sac", "kiremit desenli sac", "kiremit sac"); "kiremit istemiyorum sac olsun"
+#   ve "çatı düz sac olsun" başka malzemedir (geometri hakemi, 5. tur B1)
 _KAP_RENK = ("kirmizi", "reng", "renk", "tonu")                # "kiremit kırmızısı", "kiremit rengi": renk adı, kaplama değil
 _KAP_BASKA_YER = ("cephe", "duvar", "zemin", "tavan", "kapi", "doseme")
 _KAP_CATI_PARCASI = ("oluk", "olug", "pencere", "sacak", "sacag", "baca")   # "çatı oluğu galvaniz": çatının parçası, örtüsü değil
+
+
+def _bas_harf(s: str) -> str:
+    return s[:1].upper() + s[1:]                               # `capitalize` kalanı küçültür ("… + osb")
 
 
 def _kap_sozcukleri(metin) -> list[str]:
@@ -1700,13 +1707,17 @@ def _kap_oteki_malzemeler(deger, kap: str, baglam: bool = True) -> set[str]:
     bitisik = "".join(ws)
     if kap != "tek_kat_panel" and (any(x in bitisik for x in ("tekkatpanel", "tekkatlipanel", "tekkatsac")) or bitisik == "tekkat"):
         bulunan.add("tekkat")
+    if kap in _KAP_KENDI_BAGLAMLI and any(w.startswith(kendi_kok) for w in ws):
+        baglam = True                                          # kendi adını anan söz çatıdan söz eder ("kiremit istemiyorum sac olsun")
     if baglam:
         parca = lambda n: 0 <= n < len(ws) and ws[n].startswith(_KAP_CATI_PARCASI)
         for i, w in enumerate(ws):
             sonraki = parca(i + 1) or (i + 1 < len(ws) and ws[i + 1].startswith("cati") and parca(i + 2))
             if w.startswith(_KAP_CATI_PARCASI) or parca(i - 1) or (sonraki and not (i and ws[i - 1].startswith("cati"))):
                 continue                                       # "oluğu galvaniz", "alüminyum çatı penceresi"; "çatı galvaniz, pencere …" değil
-            bulunan |= {kok for kok in _KAP_BAGLAMLI if w.startswith(kok)}
+            adinda = bool(kendi_kok) and i > 0 and (ws[i - 1].startswith(kendi_kok)
+                                                    or ws[i - 1].startswith("desen") and i > 1 and ws[i - 2].startswith(kendi_kok))
+            bulunan |= {kok for kok in _KAP_BAGLAMLI if w.startswith(kok) and not (adinda and kok in _KAP_KENDI_BAGLAMLI.get(kap, ()))}
     return bulunan
 
 
@@ -1718,7 +1729,8 @@ def _kaplama_kiyasi(deger, kap: str, adlar=(), satir: bool = False, baglam: bool
     "ek"    başka malzeme anmıyor ("sandviç panel 5 cm", "çift kat yalıtım"): seçim işlenir, söz özel istekte kalır (bilgi düşmez).
     `baglam` False ise (çatıdan söz etmeyen satır ya da istek) yalnız çatıya özgü malzemeler sayılır ("sac" cephe de olabilir)."""
     d = varyant._norm(str(deger))
-    if d in {varyant._norm(x) for ad in (*adlar, varyant.kaplama_adi(kap)) if ad for x in (str(ad), str(ad).split()[0])}:
+    if d in {varyant._norm(x) for ad in (*adlar, varyant.kaplama_adi(kap)) if ad for x in (str(ad), str(ad).split()[0])} \
+            or d == varyant._norm(varyant.kaplama_kitap_adi(kap)):       # pafta tablosunun yazdığı ad da aynı kaplamadır (hakem 5. tur B3)
         return "ayni"
     ws = _kap_sozcukleri(deger)
     kendi_kok = _KAP_KOK.get(kap, ())
@@ -1795,7 +1807,7 @@ def _celik_is_emri_uret(k: Konusma, bayi: dict, katalog: Katalog, aday: dict, ts
     if kap_op is not None and _kaplama_sozleri(ts, kap_op.get("kaplama"))[1]:
         k.not_dus("kural", f"çelik revizyonu: çatı kaplaması {kap_op.get('kaplama')} zarftan çıktı, bayi başka kaplama yazdı")
         onceki = [d for d in onceki if d is not kap_op]
-        kap_notu = (f"Mesajınızda başka bir çatı kaplaması yazdınız. {varyant.kaplama_adi(kap_op.get('kaplama')).capitalize()} seçiminizi "
+        kap_notu = (f"Mesajınızda başka bir çatı kaplaması yazdınız. {_bas_harf(varyant.kaplama_adi(kap_op.get('kaplama')))} seçiminizi "
                     "plandan çıkardım. Planı modelin kendi çatı kaplamasıyla çizdim. Yazdığınız kaplamayı talebe yazdım. ")
     t = celik.tanim_oku(aday)
     try:

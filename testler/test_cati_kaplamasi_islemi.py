@@ -4,6 +4,8 @@
 pafta tablosunu ("Çatı Kaplaması") ve yükleme listesini bu alandan üretir. Bu dosya üç şeyi denetler:
 1. İşlem yalnız `cati`'yi değiştirir; standart kaplamada tanım aynen kalır (bugünkü çıktı bayt bayt aynı).
 2. Hedef çıktı (Ç8801 + sandviç panel): pafta tablosunda "Sandviç Panel", listede sandviç panel satırları, kapaması ve 5,5 × 110 vida.
+   Kiremit desen sac + OSB (BK-33, D-98): işlemin çıktısı BK-33'ün Lokman onaylı hedef örneğiyle (`testler/genel/beklenen/
+   KT12_osb_kiremit.json`) aynıdır; hedef orada durur, burada yalnız işlemin aynı çıktıyı verdiği denetlenir (tek kaynak, D-28).
 3. `varyant.CIZILEN_KAPLAMALAR` genel motorun gerçekten hesapladığı kaplamalardır: kural kitabının altı kaplamasından motorun ürettiği
    her kaplama listededir, üretemediği hiçbir kaplama listede değildir (Motor bir kaplamayı öğrenince bu test listeyi genişlettirir).
 
@@ -61,10 +63,13 @@ def test_islem_yalniz_cati_kaplamasini_degistirir():
     kt = _tanim("KT02")
     assert varyant.kaplama_oku(kt) == "sandvic_panel" and varyant.tanim_uygula(kt, {"op": "cati_kaplamasi", "kaplama": "sandvic_panel"}) == kt
     # motorun hesaplamadığı ya da bilinmeyen kaplama: VaryantHatasi (çizim düşmez, kural katmanı bayiye söyler)
-    for kotu in ("osb_kiremit", "trapez_sac", "osb_trapez", "osb_shingle", "kamis", None):
+    for kotu in ("trapez_sac", "osb_trapez", "osb_shingle", "kamis", None):
         with pytest.raises(varyant.VaryantHatasi):
             varyant.tanim_uygula(t0, {"op": "cati_kaplamasi", "kaplama": kotu})
-    assert [varyant.kaplama_adi(x) for x in varyant.CIZILEN_KAPLAMALAR] == ["tek kat panel", "sandviç panel"]
+    assert [varyant.kaplama_adi(x) for x in varyant.CIZILEN_KAPLAMALAR] == ["tek kat panel", "sandviç panel", "kiremit desen sac + OSB"]
+    t2 = varyant.tanim_uygula(t0, {"op": "cati_kaplamasi", "kaplama": "osb_kiremit"})                # BK-33 (D-98): Motor hesaplar
+    assert varyant.kaplama_oku(t2) == "osb_kiremit" and {a: v for a, v in t2.items() if a != "cati"} == {a: v for a, v in t0.items() if a != "cati"}
+    assert {a: v for a, v in t2["cati"].items() if not a.startswith("kaplama")} == t0["cati"]
 
 
 def test_hedef_cikti_sandvic_panel_tabloda_ve_listede(tmp_path):
@@ -88,6 +93,27 @@ def test_hedef_cikti_sandvic_panel_tabloda_ve_listede(tmp_path):
                                           ("Vida", "Trapez vida (5,5 × 110; sandviç panel)", "adet", 750)}
     for ad in ("C8801_plan.png", "C8801_gorunusler.png"):                                           # çizimin geometrisi aynı
         assert (tmp_path / "once" / ad).read_bytes() == (tmp_path / "sonra" / ad).read_bytes(), ad
+
+
+def test_kiremit_desen_sac_islemi_onayli_hedefle_ayni(tmp_path):
+    """BK-33'ün hedef örneği (140 m² çelik ev, Lokman'ın onayı dosyada): formun işlemi (`cati_kaplamasi`, `osb_kiremit`) o evin
+    tanımına uygulanınca pafta tablosu ve listenin kaplamaya bağlı satırları hedefle aynıdır; çizimin geometrisi değişmez."""
+    hedef = json.loads((KOK / "testler" / "genel" / "beklenen" / "KT12_osb_kiremit.json").read_text(encoding="utf-8"))
+    t0 = json.loads((KOK / "modeller" / "havuz" / "KT12.json").read_text(encoding="utf-8"))
+    t1 = varyant.tanim_uygula(t0, {"op": "cati_kaplamasi", "kaplama": "osb_kiremit"})
+    assert _uret(t0, tmp_path / "once", bayi=True) and _uret(t1, tmp_path / "sonra", bayi=True)
+    oz = json.loads(next((tmp_path / "sonra").glob("*_pafta_ozet.json")).read_text(encoding="utf-8"))["ozellikler"]
+    sonra = _liste(tmp_path / "sonra")
+    assert sonra["cati_kaplamasi_anahtar"] == "osb_kiremit"
+    kalemler = {s["kalem"] for s in hedef["ozet"]["satirlar"]}                                      # hedefin kaplamaya bağlı satırları
+    assert {"Çatı OSB", "Nem bariyeri", "Kiremit desen sac"} <= kalemler
+    assert {"pafta_cati_kaplamasi": oz["Çatı Kaplaması"],
+            "satirlar": [{"kalem": s["kalem"], "liste_adi": s.get("liste_adi") or s["kalem"], "boyut": s["boyut"], "adet": s["adet"]}
+                         for s in sonra["satirlar"] if s["kalem"] in kalemler],
+            "cikan": sorted({s["kalem"] for s in sonra["satirlar"] if s["kalem"] in ("Tek kat panel", "Sandviç panel")
+                             or s["kalem"].startswith(("Trapez vida (5,5 × 76", "Trapez vida (5,5 × 110"))})} == hedef["ozet"]
+    for yol in sorted((tmp_path / "once").glob("*_plan.png")) + sorted((tmp_path / "once").glob("*_gorunusler.png")):
+        assert yol.read_bytes() == (tmp_path / "sonra" / yol.name).read_bytes(), yol.name
 
 
 def test_cizilen_kaplamalar_motorun_hesapladiklaridir(tmp_path):

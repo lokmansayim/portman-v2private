@@ -97,19 +97,23 @@ def test_celik_formu_dis_140_plana_islenir(depo, wa, tmp_path, hizli_genel):  # 
                           "Uygulanan: dış duvarlar 140'lık karkas (16,5 cm); çatı kaplaması sandviç panel."), belge
 
 
-@pytest.mark.parametrize("kod, beklenen", [("Ç8801", [("cati_kaplamasi", "sandvic_panel")]), ("KT02", [])])
-def test_celik_formu_cati_kaplamasi_plana_islenir(depo, wa, tmp_path, hizli_genel, kod, beklenen):  # noqa: F811
+@pytest.mark.parametrize("kod, secim, beklenen", [("Ç8801", "sandvic", [("cati_kaplamasi", "sandvic_panel")]), ("KT02", "sandvic", []),
+                                                  ("Ç8801", "kiremit", [("cati_kaplamasi", "osb_kiremit")]),
+                                                  ("KT02", "kiremit", [("cati_kaplamasi", "osb_kiremit")])])
+def test_celik_formu_cati_kaplamasi_plana_islenir(depo, wa, tmp_path, hizli_genel, kod, secim, beklenen):  # noqa: F811
     """PR-11 (D-97; Lokman, kart 15 Kasım 2026 04:44:37 UTC "Plana ve listeye işlensin"). Formda yalnız çatı kaplaması sandviç panel:
     ön not söyler; seçilen planda (Ç8801, kendi kaplaması tek kat panel) işlem tanıma yazılır, özel istekte kaplama yok. Aynı formla
-    kendi paftası sandviç panel olan plan (KT-02) seçilirse işlem eklenmez (tablo zaten sandviç panel), özel istek yine boş."""
+    kendi paftası sandviç panel olan plan (KT-02) seçilirse işlem eklenmez (tablo zaten sandviç panel), özel istek yine boş.
+    Kiremit desen sac + OSB (BK-33, D-98; Motor 15 Kasım 2026'dan beri hesaplar) aynı yoldan: iki planda da işlem tanıma yazılır."""
+    ad = TF.C_KAPLAMA[secim]
     kabul(depo, YEDI)
     s = cf_ayar(tmp_path)
     satir, dis = celik_formu(depo, wa, s)
-    form_cevabi(depo, tmp_path, parametreler(satir)["flow_token"], {**STD, "alan": 88, "oncelik": "yok", "kaplama": "sandvic"}, dis)
+    form_cevabi(depo, tmp_path, parametreler(satir)["flow_token"], {**STD, "alan": 88, "oncelik": "yok", "kaplama": secim}, dis)
     [r] = isle_hepsi(depo, s)
     assert r["eylem"] == "secenek", r
     govde = dugmeli(depo)["satir"]["body"]
-    assert govde.startswith("Çatı kaplaması sandviç panel seçtiniz. Çizime işlerim. İşleyemezsem plan mesajında yazarım. "), govde
+    assert govde.startswith(f"Çatı kaplaması {ad} seçtiniz. Çizime işlerim. İşleyemezsem plan mesajında yazarım. "), govde
     r = sec(depo, wa, s, kod)
     if kod == "Ç8801":                                                                                    # çatı seti (İE-25): evin kendi çatısı
         assert r["eylem"] == "secenek", r
@@ -119,27 +123,28 @@ def test_celik_formu_cati_kaplamasi_plana_islenir(depo, wa, tmp_path, hizli_gene
     assert ie["yapi"]["kod"] == kod and [(x["op"], x.get("kaplama")) for x in ie["yapi"]["degisiklikler"]] == beklenen
     assert ie["bilgi"]["ozel_istekler"] == [] and ie["bilgi"]["ozellikler"] == {"Çatı Kaplama Rengi": "antrasit gri"}
     [onay] = [y for y in bayiye(depo) if y["kind"] == "interactive"]
-    assert ("Uygulanan: çatı kaplaması sandviç panel." in onay["satir"]["body"]) is bool(beklenen), onay["satir"]["body"]
+    assert (f"Uygulanan: çatı kaplaması {ad}." in onay["satir"]["body"]) is bool(beklenen), onay["satir"]["body"]
     assert "işleyemedim" not in onay["satir"]["body"]
 
 
 def test_celik_formu_hesaplanmayan_kaplama_ozel_istekte_kalir(depo, wa, tmp_path, hizli_genel):  # noqa: F811
-    """PR-11: genel motorun hesaplamadığı dört kaplama (burada kiremit desen sac + OSB) bugünkü gibi özel isteğe yazılır; plan modelin
-    kendi kaplamasıyla çizilir, ön not "çizimi değiştirmez" der (Motor bu kaplamaları öğrenene kadar; ayrı bakım işi)."""
+    """PR-11: genel motorun hesaplamadığı kaplamalar (burada yayımlı formun trapez sac + OSB cevabı) bugünkü gibi özel isteğe yazılır; plan modelin kendi
+    kaplamasıyla çizilir, ön not "çizimi değiştirmez" der (Motor bu kaplamaları öğrenene kadar; BK-33). Örnek 15 Kasım 2026'da kiremit
+    desen sac + OSB'den trapez sac + OSB'ye alındı: Motor kiremit desen sacı o gün öğrendi (D-98), o seçim artık plana işlenir."""
     kabul(depo, YEDI)
     s = cf_ayar(tmp_path)
     satir, dis = celik_formu(depo, wa, s)
-    form_cevabi(depo, tmp_path, parametreler(satir)["flow_token"], {**STD, "alan": 88, "oncelik": "yok", "kaplama": "kiremit"}, dis)
+    form_cevabi(depo, tmp_path, parametreler(satir)["flow_token"], {**STD, "alan": 88, "oncelik": "yok", "kaplama": "osb_trapez"}, dis)
     [r] = isle_hepsi(depo, s)
     govde = dugmeli(depo)["satir"]["body"]
-    assert govde.startswith("Standart dışı seçimlerinizi aldım: çatı kaplaması kiremit desen sac + OSB. Bu seçimler çizimi değiştirmez. "), govde
+    assert govde.startswith("Standart dışı seçimlerinizi aldım: çatı kaplaması trapez sac + OSB. Bu seçimler çizimi değiştirmez. "), govde
     d, _ = depo.konusma_oku(NUMARA_A)
     assert "form_kaplama" not in d["taslak"]
     assert sec(depo, wa, s, "Ç8801")["eylem"] == "secenek"                                               # çatı seti (İE-25)
     r = sec(depo, wa, s, "Ç8801")
     assert r["eylem"] == "is_emri", r
     ie = tek(depo, "SELECT is_emri FROM revizyonlar ORDER BY id DESC LIMIT 1")["is_emri"]
-    assert ie["yapi"]["degisiklikler"] == [] and ie["bilgi"]["ozel_istekler"] == ["Çatı Kaplaması: kiremit desen sac + OSB"]
+    assert ie["yapi"]["degisiklikler"] == [] and ie["bilgi"]["ozel_istekler"] == ["Çatı Kaplaması: trapez sac + OSB"]
 
 
 def test_celik_formu_standart_secimle_bugunku_plan(depo, wa, tmp_path, hizli_genel):  # noqa: F811
@@ -190,7 +195,7 @@ def test_celik_formu_yaziyla_secim_islenemeyen_140(depo, wa, tmp_path, hizli_gen
 
 
 def test_celik2_kimligi_varsa_yeni_form_sunulur_cevabi_ayni_yoldan(depo, wa, tmp_path, hizli_genel):  # noqa: F811
-    """İE-20 PR-12 (D-102): `celik2_flow_id` ayarda varsa [Çelik] düğmesi yeni formu açar (trapez sac seçeneği yok). Cevabı çelik formun
+    """İE-20 PR-12 (D-102): `celik2_flow_id` ayarda varsa [Çelik] düğmesi yeni formu açar (trapez saclı seçenek yok). Cevabı çelik formun
     yolundan işlenir: shingle seçimi "OSB + membran + shingle" diye okunur, özel istekte kalır."""
     kabul(depo, YEDI)
     s = cf_ayar(tmp_path)

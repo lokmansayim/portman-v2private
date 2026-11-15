@@ -530,7 +530,7 @@ def test_form_celik2_yeni_taslak_kurar_yayimli_celik_formuna_dokunmaz(etc, tmp_p
         [olustur] = _yazma_istekleri(g)
         govde = json.loads(olustur["govde"])
         assert olustur["yol"] == f"{WABA}/flows" and govde["name"] == "Portman Çelik Talep Formu 2" and govde["publish"] is False
-        assert json.loads(govde["flow_json"]) == TF.tanim("celik2") and '"Trapez sac"' not in govde["flow_json"]
+        assert json.loads(govde["flow_json"]) == TF.tanim("celik2") and "rapez" not in govde["flow_json"]
         assert "celik2_flow_id 91004" in cikti and "celik_flow_id" not in cikti and "== sonuç: tamam" in cikti
         link = next(s.strip() for s in r.stdout.splitlines() if "interactive=true" in s and "91004" in s)
         yuk = json.loads(dict(urllib.parse.parse_qsl(urllib.parse.urlsplit(link).query))["flow_action_payload"])
