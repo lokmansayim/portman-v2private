@@ -124,8 +124,8 @@ Biçim: karar · gerekçe · reddedilen seçenekler · geri alma yolu · kim ve 
 | [D-98](D-98.md) | Çelik planda (genel motor) kiremit desen sac + OSB + nem bariyeri: çatı OSB yüzey × 1,20 ÷ 2,98, nem bariyeri m² (OSB'nin üstü), kiremit desen sac dizilimden, mahya + OSB mahyası; kitap anahtarı `genel_osbli_kaplama`; eski kural setleri eski davranış; hedef örnek 140 m² çelik ev (KT-12; BK-33, PR #223) | 15.11 (Lokman 05:03:47 kartı "Evet, Motor işi açılsın"; 05:22:05 kartı "Evet, nem bariyeriyle"; 05:57:23 kartı "Evet, hedef örnek olsun") |
 | [D-99](D-99.md) | Disk arşivi (Elements diskinin Mac kopyası, 628 proje, 8.163 dosya): ham dosyalar Mac'te ve Drive'da, depoya adsız dizin ve SHA-256 mührü (`testler/hdd/`, `araclar/hdd_dizin.py`); adlı eşleme yalnız Mac ve Drive'da (Lokman 15.11 05:37:53 kartı "Drive'da, depoya dizin ve kart"; İE-43) |
 | [D-100](D-100.md) | Çelik planda (genel motor) OSB + membran + shingle: çatı OSB yüzey × 1,20 ÷ 2,98, membran ve shingle yüzey ÷ 8 (shingle çatı renginde), dizilim yok, mahyada yalnız OSB mahyası, damlalık yok; pafta satırı "OSB+Membran+Shingle"; hedef örnek 43 m² çelik ev (KT-11; BK-33) | 15.11 (Lokman 05:23:08 "Shingle sadece Memran ile kullanılır"; kart 07:14:40 "Evet, damlalıksız"; kart 07:26:24 "Evet, hedef örnek olsun") |
-| [D-101](D-101.md) | Prefabrik planda revizyon talebin numarasını taşır (…8813 r01, …8813 r02); yeni numara yalnız ilk planda ve sıradaki revizyon klasörü kayıtsız doluysa (`karar._is_emri_uret`, `worker.isle` › `yeni_numara`); çelik bugünkü gibi, Lokman'a sorulacak (BK-29 PR-10) | 15.11 (Lokman, kart 07:26:12 "Sabit kalsın") |
 | [D-102](D-102.md) | Çelik talep formunda trapez sac ve trapez sac + OSB sunulmaz (4 seçenek), shingle satırı "OSB + membran + shingle"; yayımlı form değişmez, yeni form `celik2.json` ve `talep_formu.celik2_flow_id` ayarıyla açılır; taslak, yayım ve ayar Lokman'ın ayrı sözüyle (İE-20 PR-12) | 15.11 (Lokman 05:23:08, 05:23:34; kart 05:28:14 "Yalnız trapez sac kalksın"; 07:54:18 "çelikte Trapez sacı komple kaldır", 07:54:29 "yani Trapez sac + OSB de olmasın") |
+| [D-103](D-103.md) | Uygulanmış asıl proje (örnek AIPrefabrik klasörü) havuzda aynen kalır; her değişiklik yeni proje olarak, yeni numara ve kendi kaydıyla girer; kart "yerine geçsin" sormaz; 95 m² 3+1'in (PA-10) yerine geçmiş kaydı Lokman'a soruldu | 15.11 (Lokman 07:25:56 "kesin talimat olarak ver orjinal uygulanmış projeler örneğin AIPrefabrik klasöründeki gibi modifikasyonlar yeni bir proje olarak girsin") |
 
 ## Numara defteri (14 Ekim 2026, BK-08; CIO planı › Görev 3)
 
@@ -221,11 +221,11 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | D | D-98 | çelikte kiremit desen sac + OSB + nem bariyeri (BK-33; Lokman 15.11 05:22:05 kartı "Evet, nem bariyeriyle") | main'de (15.11; PR #223; çelik dört çatı kaplaması sohbeti, `claude/project-thread-awk9nj`) |
 | D | D-99 | disk arşivi: ham dosyalar Drive'da, depoya adsız dizin ve SHA-256 mührü (Lokman 15.11 05:37:53 kartı "Drive'da, depoya dizin ve kart") | yazıldı (15.11; disk arşivi sohbeti, `claude/project-thread-wc6dw0`) |
 | D | D-100 | çelikte OSB + membran + shingle (BK-33; Lokman 15.11 07:14:40 kartı "Evet, damlalıksız") | yazıldı (15.11; çelik dört çatı kaplaması sohbeti, `claude/project-thread-awk9nj`) |
-| D | D-101 | prefabrik planda revizyon talebin numarasını taşır (BK-29 PR-10; Lokman 15.11 07:26:12 kartı "Sabit kalsın") | yazıldı (15.11; WhatsApp revizyon sohbeti, `claude/project-thread-2ypd6m`) |
+| D | D-101 | prefabrikte talep numarası revizyonda sabit kalır (başka sohbet; BK-29 tur 10) | alındı (15.11) |
 | D | D-102 | çelik talep formunda trapez saclı seçenek sunulmaz; shingle satırı OSB + membran + shingle (İE-20 PR-12; Lokman 15.11 05:28:14 kartı, 07:54:18 ve 07:54:29 sözleri) | yazıldı (15.11; talep formu sohbeti, `claude/project-thread-l5mh7r`) |
-| D | D-103 | standart pano (başka sohbet; İE-40) | alındı (15.11) |
-| D | D-104 | tek pano Motor (başka sohbet; BK-36) | alındı (15.11) |
-| D | **D-105** | — | **sıradaki boş** |
+| D | D-103 | uygulanmış asıl proje aynen kalır, her değişiklik yeni proje olarak girer (Lokman 15.11 07:25:56) | yazıldı (15.11; standart pano sohbeti, `claude/project-thread-xsq0je`) |
+| D | D-104, D-105 | başka sohbetler (üçlü H yalnız aynı kalınlıkta; montaj çizimi ile listenin eşitliği; defter `numara-defteri`) | alındı (15.11) |
+| D | **D-106** | — | **sıradaki boş** |
 | İE | İE-01–İE-08 | bu depo (`main`) | yazıldı |
 | İE | İE-09 | model atölyesi: kontrollü model üretimi ve banka hattı (Görev 6e; pano 30; P6001 güncellemesi kapsam dışı) | alındı (16.10; `claude/gorev-6e-model-atolyesi-rnhtcp`; PR-1 banka hattı 29.10, `claude/project-thread-rhjgzv`) |
 | İE | İE-10, İE-11, İE-12 | prefabrik hattı (PR #12, PR #14, `ie-12-prefabrik-bayi-paftasi`) | `main`'e BK-12 ile (PR-1: motor ve bayi paftası; liste ve mühür kıyası sonraki PR'larda) |

@@ -1,0 +1,196 @@
+{
+ "kod": "PA35",
+ "gosterim": "PA-35",
+ "durum": "gecerli",
+ "sablon": "adaylar/PA35.json",
+ "gorsel": "adaylar/PA35.png",
+ "referans_model": "PA-35",
+ "yapi_turu": "prefabrik",
+ "kat": 1,
+ "oda_programi": "2+1",
+ "katalog_m2": 69.0,
+ "kapali_m2": 63.9,
+ "veranda_m2": 4.79,
+ "ozet": {
+  "grid": {
+   "x_pano": 6.0,
+   "y_pano": 7.0
+  },
+  "dis_olcu_cm": [
+   773.0,
+   888.5
+  ],
+  "brut_m2": 68.68,
+  "pano": 47,
+  "pencere": 6,
+  "kapi": 6,
+  "odalar": {
+   "OTURMA ODASI": 13.62,
+   "SALON": 18.28,
+   "MUTFAK": 7.91,
+   "HOL": 5.68,
+   "WC & BANYO": 5.39,
+   "YATAK ODASI": 7.47,
+   "VERANDA": 4.79
+  }
+ },
+ "kaynak": {
+  "metin": "D-92 ve D-96 (İE-40): 71 m² 2+1 evin (PA-26, AP-08) tek özel pano kuralının bıraktığı kısa parçaları silinmiş (sağ 12 cm, veranda arka duvarının hattında 17 cm), salonun ön duvarındaki 120 cm'lik panosu (sözde \"120,5 pano\") 125,5 cm'ye tamamlanmış (ön 5,5 cm öne) ve veranda köşesinde köşe direği yerine üçlü H'lı hâli (Lokman 14 Kasım 2026 19:39:46 kartı \"Kısa parça silinsin\"; 20:46:54 sözü \"... orada köşe direği olmayacak üçlü H olacak yanlış çizmiş mühendis ...\"; 20:57:28 kartı \"Doğru, yanına eklensin\": \"Bugünkü 71 m2 kalır; 773 × 888,5 cm üçlü H'lı hâl (kapı panosu 120,5) Motor eklemesinden sonra ayrı ev olarak girer.\")",
+  "dosya": "testler/havuz/is_emirleri/PA26_UCLU_H.json",
+  "ayna": null,
+  "karar": "D-92",
+  "standart": true,
+  "kart_kiyasi": {
+   "kart": "AP-08",
+   "kart_sha256": "1d35e05aa6f2c3e546f9af8e1da03e09d30a306c67f5d5dd7f0ff066df949292",
+   "sonuc": "geçti",
+   "olcum": {
+    "dis_olcu_cm": [
+     773.0,
+     888.5
+    ],
+    "acikla_olcu_cm": [
+     773.0,
+     888.5
+    ],
+    "brut_m2": 68.68,
+    "kubbe_m2": 0.0,
+    "yatak_odasi": 2,
+    "pencereler": {
+     "100x120": 1,
+     "120x120": 4,
+     "60x40": 1
+    },
+    "dis_kapi": 1,
+    "ic_kapi": 5,
+    "veranda": 1,
+    "kat": 1,
+    "kaynak_dis_olcu_cm": [
+     785.0,
+     900.0
+    ],
+    "silinen_cm": [
+     12.0,
+     17.0
+    ],
+    "buyuyen_cm": [
+     0.0,
+     5.5
+    ],
+    "silinen": [
+     {
+      "duvar": "dis x 5",
+      "boy": 12.0
+     },
+     {
+      "duvar": "ic x 215.25",
+      "boy": 12.0
+     },
+     {
+      "duvar": "ic x 444.25",
+      "boy": 12.0
+     },
+     {
+      "duvar": "dis y 5",
+      "boy": 11.5
+     },
+     {
+      "duvar": "ic y 386.5",
+      "boy": 17.0
+     },
+     {
+      "duvar": "dis y 780",
+      "boy": 17.0
+     }
+    ],
+    "tamamlanan": [
+     {
+      "duvar": "dis y 386.5",
+      "once": 120.0,
+      "sonra": 125.5
+     }
+    ],
+    "yeniden_dizilen": [
+     {
+      "duvar": "dis x 775",
+      "once": [
+       120.5,
+       71.25,
+       125.5,
+       66.25
+      ],
+      "sonra": [
+       120.5,
+       62.75,
+       125.5,
+       62.75
+      ]
+     },
+     {
+      "duvar": "ic y 512",
+      "once": [
+       40.75,
+       62.75,
+       125.5,
+       125.5,
+       125.5,
+       74.75
+      ],
+      "sonra": [
+       40.75,
+       62.75,
+       125.5,
+       125.5,
+       125.5,
+       57.75
+      ]
+     }
+    ],
+    "veranda_kisalan": [
+     "VERANDA"
+    ],
+    "kesim_hatti": {
+     "yazi": "on:17:770",
+     "eksen": "y",
+     "hat_cm": 770.0,
+     "cm": 17.0
+    },
+    "uclu_h": [
+     {
+      "nokta_cm": [
+       386.5,
+       758.0
+      ],
+      "kaynakta_cm": [
+       386.5,
+       775.0
+      ]
+     }
+    ],
+    "kayan_aciklik": [
+     {
+      "aciklik": "pencere 120x120",
+      "duvar": "dis x 758",
+      "once_cm": [
+       583.25,
+       708.75
+      ],
+      "sonra_cm": [
+       574.75,
+       700.25
+      ]
+     }
+    ]
+   },
+   "kip": "silme_hali",
+   "kaynak_is_emri": "is_emri/adaylar/PA26.json",
+   "kaynak_sha256": "0b8db40e7aaef3693e5f478836a61a1579f9014b97821e9f8f52a923b9f05521",
+   "veranda_sozu": "Lokman, 14 Kasım 2026 20:57:28 UTC kartı \"Doğru, yanına eklensin\": \"Bugünkü 71 m2 kalır; 773 × 888,5 cm üçlü H'lı hâl (kapı panosu 120,5) Motor eklemesinden sonra ayrı ev olarak girer.\" (eskiz 05c: sağ 12 cm içeri, ön 17 cm içeri, ön 5,5 cm dışarı)",
+   "buyume_sozu": "Lokman 14 Kasım 2026 20:46:54 UTC: \"salon ön tarafta ki 120,5 panoyuda kendi ölçüsüne getirir misin birde başka bir düzeltilmesi gereken yer 120,5 aksındaki 115,5 pano ana giriş kapısını dik kesen pano orada köşe direği olmayacak üçlü H olacak yanlış çizmiş mühendis yani 120,5 panoyu 125,5 yaparsan 115,5 pano 120,5 olur ama oradaki köşe direğini alırsan 115,5 panoda 125,5 olur\"; kart 20:57:28 \"Doğru, yanına eklensin\"",
+   "kesim_sozu": "Lokman, 14 Kasım 2026 20:57:28 UTC kartı \"Doğru, yanına eklensin\": \"Bugünkü 71 m2 kalır; 773 × 888,5 cm üçlü H'lı hâl (kapı panosu 120,5) Motor eklemesinden sonra ayrı ev olarak girer.\" (eskiz 05c: sağ 12 cm içeri, ön 17 cm içeri, ön 5,5 cm dışarı)",
+   "uclu_h_sozu": "Lokman 14 Kasım 2026 20:46:54 UTC: \"salon ön tarafta ki 120,5 panoyuda kendi ölçüsüne getirir misin birde başka bir düzeltilmesi gereken yer 120,5 aksındaki 115,5 pano ana giriş kapısını dik kesen pano orada köşe direği olmayacak üçlü H olacak yanlış çizmiş mühendis yani 120,5 panoyu 125,5 yaparsan 115,5 pano 120,5 olur ama oradaki köşe direğini alırsan 115,5 panoda 125,5 olur\"; kart 20:57:28 \"Doğru, yanına eklensin\"",
+   "aciklik_sozu": "Lokman, 14 Kasım 2026 20:57:28 UTC kartı \"Doğru, yanına eklensin\": \"Bugünkü 71 m2 kalır; 773 × 888,5 cm üçlü H'lı hâl (kapı panosu 120,5) Motor eklemesinden sonra ayrı ev olarak girer.\" (eskiz 05c: sağ 12 cm içeri, ön 17 cm içeri, ön 5,5 cm dışarı)"
+  }
+ },
+ "not": ""
+}
