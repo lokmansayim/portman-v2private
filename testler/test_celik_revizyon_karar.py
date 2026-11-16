@@ -1788,3 +1788,13 @@ def test_hakem42_celik_kararsiz_soz_kaydedilmez(s, metin):
     cati_seti(s)
     k = s.yaz(metin)
     assert K.PLAN_ONAYI not in k.gerekce and k.eylem != "is_emri" and s.plan["revizyon"] == 1 and not s.k.d.get("onaylanan"), k.mesaj
+
+
+
+@pytest.mark.parametrize("metin", [
+    "Ç8801 olsun, sorun değil gibi", "Ç8801 olsun, sorun yok inşallah", "Ç8801 olsun, uygun gibi", "Ç8801 olsun, sorun değil inşallah"])
+def test_hakem44_celik_kararsiz_soz_kaydedilmez(s, metin):
+    """Tur 44 çelikte: kararsız söz kayıt almaz: plan r01, onay yok, r02 yok."""
+    cati_seti(s)
+    k = s.yaz(metin)
+    assert K.PLAN_ONAYI not in k.gerekce and k.eylem != "is_emri" and s.plan["revizyon"] == 1 and not s.k.d.get("onaylanan"), k.mesaj
