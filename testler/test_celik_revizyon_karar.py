@@ -1575,3 +1575,34 @@ def test_hakem33_celik_acik_secim_soruya_donmez(s, metin):
     cati_seti(s)
     k = s.yaz(metin)
     assert k.eylem == "is_emri" and k.revizyon == 2 and s.plan["yapi"]["kod"] == "Ç8801K", k.mesaj
+
+
+
+@pytest.mark.parametrize("metin", [
+    "K olsun, müşteri istedi tamam mı?", "K olsun, bakalım bu ay ne kadar olur?", "K olsun, yarın kesinleşir",
+    "Ç8801 olsun, bakalım bu ay ne kadar olur?", "Ç8801 olsun, bakalım kaç gün ne kadar olur?",
+    "Ç8801 olsun, müşteri beğendi bence olur bakalım", "Ç8801 olsun, müşteri onayladı bence de olur bakalım",
+    "Ç8801 olsun, müşteri kabul etmez bence de olur", "K olsun, bakalım kaç gün ne kadar olur?",
+    "K olsun, müşteri beğendi bence olur bakalım", "K olsun, müşteri onayladı bence de olur bakalım",
+    "K olsun, müşteri istedi bence de olur mu acaba", "K olsun, müşteri istedi bence tamam mı?", "K olsun, bakalım metrekaresi ne kadar?",
+    "Ç8801 olsun, siz seçin dedimya", "Ç8801 olsun, siz seçin diyorum", "Ç8801 olsun, ne gönderirseniz fark etmez",
+    "K olsun, kırma ya da beşik hangisi uygunsa fark etmez", "Ç8801 olsun, bence müşteri doğru karar verecek",
+    "Ç8801 olsun, bakalım metrekaresi ne kadar tutar?", "Ç8801 olsun, bakalım kaç gün ne kadar tutar?", "Ç8801 olsun, siz seçin dedim ya",
+    "Ç8801 olsun, bakalım nakliye dahil fiyat ne kadar?", "Ç8801 olsun, bakalım kaç gün, ne kadar?",
+    "K olsun, bakalım nakliye dahil fiyat ne kadar?"])
+def test_hakem34_celik_kararsiz_soz_kaydedilmez(s, metin):
+    """Tur 34 çelikte: "bakalım bu ay ne kadar olur?", "müşteri beğendi bence olur bakalım", "müşteri istedi tamam mı?", "yarın
+    kesinleşir" kayıt almaz: plan r01, onay yok, r02 yok."""
+    cati_seti(s)
+    k = s.yaz(metin)
+    assert K.PLAN_ONAYI not in k.gerekce and k.eylem != "is_emri" and s.plan["revizyon"] == 1 and not s.k.d.get("onaylanan"), k.mesaj
+
+
+
+@pytest.mark.parametrize("metin", [
+    "K olsun, hangi gün gelmeniz fark etmez", "K olsun, ne zaman gelmeniz fark etmez"])
+def test_hakem34_celik_acik_secim_soruya_donmez(s, metin):
+    """Tur 34 çelikte: fiilimsiyle işin devri ("hangi gün gelmeniz fark etmez") r02 K'yı çizer."""
+    cati_seti(s)
+    k = s.yaz(metin)
+    assert k.eylem == "is_emri" and k.revizyon == 2 and s.plan["yapi"]["kod"] == "Ç8801K", k.mesaj

@@ -3695,3 +3695,129 @@ def test_hakem33_olumlu_soz_onay(tmp_path, metin):
     s, _ = _cati_seti(tmp_path)
     k = s.yaz(metin, niyet="diger")
     assert k.gerekce == K.PLAN_ONAYI and k.revizyon == 1, k.mesaj
+
+
+
+# İE-42 hakem tur 34: zaman adı fiyatın zamanıdır ("bu ay ne kadar olur?"), katılmanın ardındaki bekleme ve soru kararsızdır, "kabul
+# etmez" bildirim değildir; fiilimsi ve iyelikli iş adı ("ne zaman gelmeniz", "kurulum ücreti") işin devridir
+@pytest.mark.parametrize("metin", [
+    "1 olsun, bugün görünüş fark etmez", "1 olsun, kırma olması fark etmez", "2 olsun, evin görünüşü fark etmez",
+    "2 olsun, neyin olduğu fark etmez", "2 olsun, hangisinin olduğu fark etmez", "2 olsun, hangisi olması fark etmez",
+    "1 olsun, bakalım bu ay ne kadar olur?", "1 olsun, bakalım kaç gün, ne kadar?", "1 olsun, bakalım nakliye dahil fiyat ne kadar?",
+    "1 olsun, bakalım nakliye dahil ne kadar?", "1 olsun, bakalım kurulumlu ne kadar olur?", "1 olsun, bakalım montajsız ne kadar?",
+    "1 olsun, bakalım toplam ne kadar metrekaresi kaç?", "1 olsun, müşteri beğendi bence süper bakalım",
+    "1 olsun, müşteri beğendi bence olur bakalım", "1 olsun, müşteri kabul etmez", "1 olsun, müşteri kabul eder",
+    "1 olsun, müşteri istedi bence de olur ama yarın kesinleşir", "2 olsun, seçim sizde", "2 olsun, tercih sizin",
+    "2 olsun, telefonda seçimi size bırakmıştık", "2 olsun, siz seçin dediydim", "2 olsun, yalıtım olarak fark etmez",
+    "2 olsun, ruhsat için fark etmez", "2 olsun, kiremit için fark etmez", "2 olsun, yarın kesinleşir",
+    "2 olsun, müşteri istedi ama yarın kesinleşir", "2 olsun, müşteri istedi ama değişebilir",
+    "2 olsun, müşteri istedi ama yarın teyit ederim", "2 olsun, müşteri istedi tamam mı?", "2 olsun, müşteri istedi olur mu acaba",
+    "2 olsun, belki diğer plan", "2 olsun, belki diğer plan olur", "1 olsun, bakalım kiremitli ne kadar?",
+    "1 olsun, bakalım bu ay ne kadar tutar?", "1 olsun, bakalım bu hafta ne kadar olur?", "1 olsun, bakalım bu ay ne kadar olacak?",
+    "1 olsun, bakalım 1 haftada ne kadar olur?", "1 olsun, bakalım 2 haftada ne kadar olur?", "1 olsun, bakalım kaç gün ne kadar olur?",
+    "1 olsun, bakalım kaç günde ne kadar olur?", "Merhaba 1 olsun, bakalım bu ay ne kadar olur?", "1 olsun. Bakalım bu ay ne kadar olur?",
+    "1 olsun, müşteri beğendi bence de olur bakalım", "1 olsun, müşteri onayladı bence de olur bakalım",
+    "1 olsun, müşteri onayladı bence tamam bakalım", "1 olsun, müşteri onayladı bence sorun yok bakalım",
+    "1 olsun, müşteri onayladı bence aynı bakalım", "1 olsun, müşteri seçti bence de olur görelim",
+    "Merhaba 1 olsun, müşteri beğendi bence olur bakalım", "1 olsun, müşteri kabul etmez bence de olur",
+    "1 olsun, müşteri kabul etmez bence de", "1 olsun, müşteri kabul etmez bence tamam", "2 olsun, bakalım bu ay ne kadar olur?",
+    "2 olsun, bakalım bu hafta ne kadar olur?", "2 olsun, bakalım 1 haftada ne kadar olur?", "2 olsun, bakalım kaç gün ne kadar olur?",
+    "2 olsun, bakalım ayda ne kadar olur?", "2 olsun, müşteri beğendi bence olur bakalım",
+    "2 olsun, müşteri beğendi bence de olur bakalım", "2 olsun, müşteri onayladı bence de olur bakalım",
+    "2 olsun, müşteri istedi bence de olur ama yarın kesinleşir", "2 olsun, müşteri istedi bence de olur mu acaba",
+    "2 olsun, müşteri istedi bence tamam mı?", "2 olsun, müşteri istedi bence de olur mu?", "2 olsun, müşteri kabul eder bence de olur",
+    "2 olsun, müşteri kabul edecek bence de olur", "2 olsun, müşteri istedi bence sorun yok ama yarın teyit ederim",
+    "2 olsun, müşteri istedi bence tamam ama değişebilir", "2 olsun, müşteri istedi bence de olur ama siz bilirsiniz",
+    "2 olsun, bence müşteri iyi karar verdi ama yarın teyit edeceğim", "2 olsun, müşteri kabul etmez bence de olur",
+    "2 olsun, whatsappta seçimi size bırakmıştık", "2 olsun, telefonda tercihi size bırakmıştık",
+    "2 olsun, telefonda seçimi size bırakmıştım", "2 olsun, mailde seçimi size bırakmıştık",
+    "2 olsun, telefonda seçim size kalmış demiştim", "2 olsun, izolasyon olarak fark etmez", "2 olsun, ısı yalıtımı için fark etmez",
+    "2 olsun, kredi olarak fark etmez", "2 olsun, banka kredisi için fark etmez", "2 olsun, garanti olarak fark etmez",
+    "2 olsun, bakalım metrekaresi ne kadar?", "2 olsun, bakalım metrekaresi ne kadar olur?", "2 olsun, bakalım m2 ne kadar?",
+    "2 olsun, bakalım kaç metrekare ne kadar olur?", "2 olsun, bakalım toplam ne kadar metrekaresi kaç?",
+    "1 olsun, bakalım net fiyat ne kadar?", "1 olsun, bakalım KDV dahil toplam fiyat ne kadar?",
+    "1 olsun, bakalım yaklaşık fiyat ne olur?", "1 olsun, bakalım kurulumla birlikte fiyat ne kadar?",
+    "1 olsun, bakalım metrekaresi ne kadar tutar?", "1 olsun, bakalım toplam metrekare fiyatı ne kadar?",
+    "1 olsun, bakalım toplamda metrekare fiyatı ne olur?", "1 olsun, bakalım haftaya ne kadar olur?",
+    "1 olsun, bakalım bu sene ne kadar olur?", "1 olsun, bakalım kaç gün ne kadar tutar?",
+    "1 olsun, bakalım toplam kaç metrekare ne kadar tutar?", "1 olsun, siz seçin dedim ya", "1 olsun, siz seçin dedimya",
+    "1 olsun, siz seçin demiştik ya", "1 olsun, siz seçin demiştim zaten", "1 olsun, siz seçin dediğim gibi",
+    "1 olsun, ben siz seçin dedim", "1 olsun, siz seçin diyorum", "1 olsun, siz seçin derim", "Merhaba 1 olsun. Siz seçin dedim.",
+    "1 olsun, siz seçin demişiz", "1 olsun, yarın seçim size kalmış", "1 olsun, kırma ya da beşik hangisi uygunsa fark etmez",
+    "1 olsun, ne gönderirseniz fark etmez", "1 olsun, yarın hangisini yaparsanız fark etmez", "1 olsun, sabah yapın görünüş fark etmez",
+    "1 olsun, sabah gelin şekli fark etmez", "1 olsun, bence müşteri doğru karar verecek", "1 olsun, bence müşteri iyi karar verir",
+    "1 olsun, bence müşteri iyi seçecek", "1 olsun, müşteri istedi bence de olur, sizce?",
+    "1 olsun, müşteri onayladı bence de tamam ama eşine soracak", "1 olsun, müşteri beğendi bence de olur ama fiyatına bakalım",
+    "1 olsun, müşteri razı olur bence de olur", "1 olsun, müşteri onaylar bence de", "1 olsun, müşteri istedi bence tamam bakalım",
+    "1 olsun, belki öteki plan", "1 olsun, belki diğer seçenek", "2 olsun, kırma ya da beşik hangisi uygunsa fark etmez",
+    "2 olsun, ne gönderirseniz fark etmez", "2 olsun, hangisi uygunsa fark etmez", "2 olsun, size uygunsa fark etmez",
+    "2 olsun, yarın hangisini yaparsanız fark etmez", "2 olsun, hangisini çizerseniz çizin fark etmez", "2 olsun, sizde fark etmez",
+    "2 olsun, kararı sizde fark etmez", "2 olsun, siz seçin diyorum", "2 olsun, siz seçin dedik", "2 olsun, siz seçin demiştim",
+    "2 olsun, maliyet olarak fark etmez", "2 olsun, bütçe olarak fark etmez", "2 olsun, yalıtım açısından fark etmez",
+    "2 olsun, kredi açısından fark etmez", "2 olsun, ruhsat açısından fark etmez", "2 olsun, kış için fark etmez",
+    "2 olsun, sağlamlık için fark etmez", "2 olsun, bence müşteri doğru karar verecek", "2 olsun, bence müşteri iyi karar verir",
+    "2 olsun, müşteri razı olur bence de olur", "2 olsun, müşteri onaylar bence de", "2 olsun, sabah yapın görünüş fark etmez",
+    "2 olsun, öğleden sonra gelin görüntüsü fark etmez", "2 olsun, eğim seçimi size kalmış", "2 olsun, karar sizde",
+    "1 olsun, bakalım nakliye dahil toplam ne kadar?", "1 olsun, bakalım nakliyeli fiyat ne kadar?",
+    "1 olsun, bakalım teslim dahil fiyat ne kadar?", "1 olsun, bakalım nakliye dahil kaç para?",
+    "Merhaba 1 olsun, bakalım nakliye dahil fiyat ne kadar?", "1 olsun, bakalım kaç gün, fiyat ne kadar?",
+    "1 olsun, bakalım ne zaman teslim, ne kadar?", "1 olsun, bakalım teslim kaç gün ne kadar tutar?",
+    "1 olsun, bakalım teslim süresi ve fiyat ne kadar?", "1 olsun, müşteri beğendi bence de güzel bakalım",
+    "2 olsun, bakalım kurulum dahil fiyat ne kadar?", "2 olsun, bakalım nakliye dahil fiyat ne kadar?",
+    "2 olsun, bakalım kaç gün, ne kadar?", "2 olsun, müşteri kabul etmez"])
+def test_hakem34_kararsiz_ve_kosullu_soz_kaydedilmez(tmp_path, metin):
+    """Tur 34 (Y1–Y3, önceden var Yüksek ve Orta): zamanlı fiyat sorusu ("bakalım bu ay ne kadar olur?", "kaç gün ne kadar olur?"),
+    çatıya katılan iş ("nakliye dahil ne kadar?", "kurulumlu fiyat"), katılmanın ardındaki bekleme ("müşteri beğendi bence olur bakalım"),
+    "müşteri kabul etmez", öznesiz kesinleşme ("müşteri istedi ama yarın kesinleşir"), bildirilmiş seçimin onay sorusu ("müşteri istedi
+    tamam mı?"), "seçim sizde", "dediydim" ve ölçüt olan iş kalemiyle bakış ("yalıtım olarak fark etmez") kayıt almaz: plan r01, onay
+    yok, r02 yok."""
+    s, _ = _cati_seti(tmp_path)
+    k = s.yaz(metin, niyet="diger")
+    assert K.PLAN_ONAYI not in k.gerekce and k.eylem != "is_emri" and s.plan["revizyon"] == 1 and not s.k.d.get("onaylanan"), k.mesaj
+
+
+@pytest.mark.parametrize("metin", [
+    "2 olsun, ne zaman gelmeniz fark etmez", "2 olsun, hangi gün gelmeniz fark etmez", "2 olsun, kurulum ücreti fark etmez",
+    "2 olsun, kombi yeri fark etmez", "2 olsun, hafta içi hafta sonu fark etmez", "2 olsun, faturanın kime kesildiği fark etmez",
+    "2 olsun, çatının rengi fark etmez", "2 olsun, bakalım kapı fiyatı ne kadar?", "2 olsun, bakalım vinç ne kadar?",
+    "2 olsun, perde tipi fark etmez", "2 olsun, seramik seçimini size bırakıyoruz", "2 olsun, ödeme olarak fark etmez",
+    "2 olsun, montaj tarihi yarın kesinleşir", "2 olsun, ödeme yarın kesinleşir", "2 olsun, çatı değişmeyecek", "2 olsun, müşteri istedi",
+    "2 olsun, müşteri onayladı", "2 olsun, teşekkürler", "2 olsun, değişiklik yok", "2 olsun, pencereyi değiştirin",
+    "2 olsun, diğer planda da aynı çatı olsun", "2 olsun, saat kaçta gelmeniz fark etmez", "2 olsun, sabah gelmeniz fark etmez",
+    "2 olsun, sabah ya da akşam gelmeniz fark etmez", "2 olsun, ekibin sabah gelmesi fark etmez",
+    "2 olsun, nakit ya da kart olması fark etmez", "2 olsun, sabah ya da akşam olması fark etmez", "2 olsun, kargo ücreti fark etmez",
+    "2 olsun, kimin geleceği fark etmez", "2 olsun, ekibin kaç kişi olduğu fark etmez", "2 olsun, kurulumun ne zaman olacağı fark etmez",
+    "2 olsun, kurulumu sabah yapmanız fark etmez", "2 olsun, vinç ayarlamasını size bırakıyorum",
+    "2 olsun, kurulum organizasyonunu size bırakıyorum", "2 olsun, kargo takibini size bırakıyorum", "2 olsun, sabah yapın fark etmez",
+    "2 olsun, sabah müsaitseniz fark etmez", "2 olsun, kombi kurun fark etmez", "2 olsun, buradan ya da mailden atın fark etmez",
+    "2 olsun, kartlı ödeme olarak fark etmez", "2 olsun, taksit olarak fark etmez", "2 olsun, tarih olarak fark etmez",
+    "2 olsun, zamanlama olarak fark etmez", "2 olsun, marka seçimi size kalmış", "2 olsun, firma tercihi size kalmış",
+    "2 olsun, desen tipi fark etmez", "2 olsun, tarih seçimi size kalmış", "2 olsun, gün seçimi size kalmış",
+    "2 olsun, iletişim şekli fark etmez", "2 olsun, kiremit tipi fark etmez", "2 olsun, sonrasını size bırakıyorum",
+    "2 olsun, gönderimi size bırakıyorum", "2 olsun, sevkiyatı size bırakıyorum", "2 olsun, müşteri istedi bence de aynı",
+    "2 olsun, müşteri istedi bence de katılıyorum", "2 olsun, müşteri istedi bizce de uygundur",
+    "2 olsun, müşteri istedi bence de doğrudur", "2 olsun. kombi tipi fark etmez. teşekkürler", "2 olsun, bakalım toplam kaç gün",
+    "2 olsun, ne zaman gelirseniz fark etmez", "2 olsun, ne zaman gelseniz fark etmez", "2 olsun, ekip ne zaman gelirse fark etmez",
+    "2 olsun, kombinin markası fark etmez", "2 olsun, ödemenin nakit olması fark etmez", "2 olsun, kurulum gününü size bırakıyorum",
+    "2 olsun, kapı modeli fark etmez", "2 olsun, bakalım toplam süre ne kadar?", "Merhaba 2 olsun. Kurulum için fark etmez.",
+    "2 olsun, kurulum için de fark etmez"])
+def test_hakem34_acik_secim_soruya_donmez(tmp_path, metin):
+    """Tur 34 (O1, s225): fiilimsi ("ne zaman gelmeniz", "nakit ya da kart olması", "kimin geleceği"), iyelikli iş adı ("kurulum
+    ücreti", "kombi yeri", "kargo takibini"), zamanın parçası ("hafta içi hafta sonu") ve işin kesinleşmesi ("montaj tarihi yarın
+    kesinleşir") açık seçimi soruya çevirmez: r02 PA-06-K."""
+    s, _ = _cati_seti(tmp_path)
+    k = s.yaz(metin, niyet="diger")
+    assert k.eylem == "is_emri" and k.revizyon == 2 and k.is_emri["talep"]["kaynak"] == "PA06K", k.mesaj
+
+
+
+@pytest.mark.parametrize("metin", [
+    "1 olsun, bakalım süre ne kadar?", "1 olsun, bakalım toplam ne kadar süre?", "1 olsun, müşteri kabul etti",
+    "1 olsun, müşteri kabul etti bence de olur", "1 olsun, bence müşteri iyi seçti", "1 olsun, müşteri kabul etti bence de",
+    "1 olsun, bakalım toplam süre ne kadar?"])
+def test_hakem34_olumlu_soz_onay(tmp_path, metin):
+    """Tur 34: başka işin tutarı ("bakalım vinç ne kadar?"), ölçünün miktarı ("bakalım alan ne kadar?") ve bildirilmiş kabul ("müşteri
+    kabul etti bence de olur") evin çatısının onayıdır: r01 onaylanır."""
+    s, _ = _cati_seti(tmp_path)
+    k = s.yaz(metin, niyet="diger")
+    assert k.gerekce == K.PLAN_ONAYI and k.revizyon == 1, k.mesaj
