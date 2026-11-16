@@ -65,6 +65,11 @@
     "veranda": 1,
     "kat": 1
    }
+  },
+  "havuz_denetimi": {
+   "sonuc": "geçti",
+   "karar": "D-112",
+   "uyarilar": []
   }
  },
  "not": ""

@@ -64,6 +64,13 @@
     "veranda": 1,
     "kat": 1
    }
+  },
+  "havuz_denetimi": {
+   "sonuc": "geçti",
+   "karar": "D-112",
+   "uyarilar": [
+    "HD-06: ['makas yeri (ana çatı): saçak duvarının pano ekleri düzensiz (7 makas, listede 7; aralıklar 125.5, 125.5, 62.75, 125.5, 125.5, 125.55); eşit aralıklı 7 makas', \"makas yeri (cumba): yavru makas AP-06'nın kuralıyla kurulamadı (uçlar 83.75–271.4 o kesitte derelerin 56.75–267.005 dışında); D-47'nin yerinde\"]"
+   ]
   }
  },
  "not": "Bilinen fark (yükleme listesi, D-111): cumba makası Motor'da 2 × 384 cm; paftada 380 cm + yavru makas 192 cm."

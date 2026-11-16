@@ -88,3 +88,17 @@ def test_arac_cati_uygula():
         with pytest.raises(SystemExit):
             CV.cati_uygula(copy.deepcopy(ie), yanlis)
     assert CV.ev_kaydi("PA43")["gosterim"] == "PA-43" and CV.ev_kaydi("PA06")["gosterim"] == "PA-06" and CV.ev_kaydi("PA99") is None
+
+
+def test_kayit_kapisindan_gecti():
+    """D-112 (havuz denetimi kapısı): beş ev ve PA-43-B kapıdan geçerek yazıldı; hata yok, uyarılar kayıtta.
+    37 ve 59 m² HD-06 (cumbanın yavru makası; 37 m²'de ana çatının düzensiz pano ekleri), PA-43-B HD-09 (veranda beşiğinde 3D makas)."""
+    from beyin.katalog import havuz_kayitlari
+    evler = {a["kod"]: a for a in havuz_kayitlari(yapi="prefabrik")}
+    beklenen = {"PA39": ["HD-06"], "PA40": [], "PA41": ["HD-06"], "PA42": [], "PA43": []}
+    for kod, kalemler in beklenen.items():
+        d = evler[kod]["kaynak"]["havuz_denetimi"]
+        assert (d["sonuc"], d["karar"]) == ("geçti", "D-112"), kod
+        assert sorted({u.split(":")[0] for u in d["uyarilar"]}) == kalemler, kod
+    d = KAYIT["varyantlar"][0]["kaynak"]["havuz_denetimi"]
+    assert (d["sonuc"], d["karar"]) == ("geçti", "D-112") and [u.split(":")[0] for u in d["uyarilar"]] == ["HD-09"]

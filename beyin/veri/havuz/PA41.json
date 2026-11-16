@@ -65,6 +65,13 @@
     "veranda": 1,
     "kat": 1
    }
+  },
+  "havuz_denetimi": {
+   "sonuc": "geçti",
+   "karar": "D-112",
+   "uyarilar": [
+    "HD-06: [\"makas yeri (cumba): yavru makas AP-06'nın kuralıyla kurulamadı (uçlar 94.2–292.3 o kesitte derelerin 56.75–267.005 dışında); D-47'nin yerinde\"]"
+   ]
   }
  },
  "not": "Bilinen fark (yükleme listesi, D-111): cumba makası Motor'da 2 × 384 cm; paftada 1 × 374 cm."

@@ -47,7 +47,14 @@
    "kaynak": {
     "metin": "Lokman 16 Kasım 2026 08:08:55 UTC: \"92 m² ninkide ikiside doğru yani 2 veranda çatı modeli üretime uygun sorun yok 92 m² nin ikisinide al\" (D-111)",
     "karar": "D-111",
-    "ev": "PA-43"
+    "ev": "PA-43",
+    "havuz_denetimi": {
+     "sonuc": "geçti",
+     "karar": "D-112",
+     "uyarilar": [
+      "HD-09: veranda çatısı: listede 3 makas, 3D modelde bu parçanın makası yok"
+     ]
+    }
    }
   }
  ]
