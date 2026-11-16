@@ -15,6 +15,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from test_celik_revizyon_karar import Sohbet  # noqa: E402
 from test_bk29_revizyon_reddi import KABUL  # noqa: E402
 import talep_formu as TF  # noqa: E402
+from beyin import karar as K  # noqa: E402
 
 STD = {"kat": "1", "oda": "2+1", "oncelik": "butce", **TF.STANDART}
 
@@ -22,6 +23,23 @@ STD = {"kat": "1", "oda": "2+1", "oncelik": "butce", **TF.STANDART}
 @pytest.fixture
 def s(tmp_path) -> Sohbet:
     return Sohbet(tmp_path, kabul=KABUL)
+
+
+@pytest.fixture
+def sabit_saat(monkeypatch):
+    """Karar katmanının saati test boyunca durur. Mesaj kimliği yokken seçenek setinin kimliği `gönderen:saniye`den kurulur
+    (`beyin/karar.py`) ve gerekçeye girer: iki sohbet ayrı saniyelere düşerse gerekçeler yalnız saat yüzünden ayrışırdı."""
+    import time as _time
+    an = _time.time()
+
+    class _DuranSaat:
+        def __getattr__(self, ad):
+            return getattr(_time, ad)
+
+        def time(self):
+            return an
+
+    monkeypatch.setattr(K, "time", _DuranSaat())
 
 
 def form(s: Sohbet, **alanlar):
@@ -50,7 +68,7 @@ def test_formdan_gelen_olcu_m2_ye_gore_set_oncelik_sorulmaz(s):
     assert k.eylem == "is_emri" and s.plan["talep"]["kaynak"] == "PA03"
 
 
-def test_sohbette_yazilan_pano_olcusu_bugunku_yoldan(s, tmp_path):
+def test_sohbette_yazilan_pano_olcusu_bugunku_yoldan(s, tmp_path, sabit_saat):
     """Formdan gelmeyen talepte pano ve m² birlikteyse bugünkü gibi pano ızgarasıyla aranır (m² yok sayılır)."""
     k1 = s.yaz("5,5 x 8 pano, 72 m², 2+1", yapi_turu="prefabrik", oda_programi="2+1", pano={"nx": 5.5, "ny": 8}, alan_m2=72)
     s2 = Sohbet(tmp_path / "b", kabul=KABUL)
