@@ -174,8 +174,31 @@ def test_plan_secilince_r01_onaydan_sonra_cati_seti(tmp_path):
     assert (eski["durum"], eski["secilen_kod"]) == ("secildi", "PA06")
 
 
+@pytest.fixture
+def sabit_saat(monkeypatch):
+    """Karar katmanının saati test boyunca durur. Prefabrik planın numarası her revizyonda saniyeden üretilir (`_is_emri_uret`, ilk
+    sürümden beri): r01 ile r02 ayrı saniyeye düşerse numara yalnız saat yüzünden ayrışır (BK-43 saat dedektörü, 16 Kasım 2026)."""
+    import time as _time
+    an = _time.time()
+
+    class _DuranSaat:
+        def __getattr__(self, ad):
+            return getattr(_time, ad)
+
+        def time(self):
+            return an
+
+        def localtime(self, t=None):
+            return _time.localtime(an if t is None else t)
+
+        def strftime(self, fmt, t=None):
+            return _time.strftime(fmt, self.localtime() if t is None else t)
+
+    monkeypatch.setattr(K, "time", _DuranSaat())
+
+
 @pytest.mark.parametrize("kod", ["PA06", "PA06K", "PA06C"])
-def test_dugmeyle_cati_secimi(tmp_path, kod):
+def test_dugmeyle_cati_secimi(tmp_path, kod, sabit_saat):
     """Evin çatısı: r01 aynen onaylanır ("Çatı: … Plan r01 aynen kalır. Onayınız kaydedildi …"). Başka çatı: aynı plan o çatıyla r02
     ("Çatı: Kırma (PA-06-K). Plan aynı. …"); r02'nin onayı kaydedilir, çatı yeniden sorulmaz."""
     s, _ = _cati_seti(tmp_path)
@@ -189,9 +212,7 @@ def test_dugmeyle_cati_secimi(tmp_path, kod):
                                   "revizyon 1)."), k.mesaj
         return
     ie = k.is_emri
-    assert (ie["cati"], ie["mahaller"], ie["acikliklar"]) == (sab["cati"], r01["mahaller"], r01["acikliklar"])
-    # hakem tur 19 (düşük): İş Emri numarası her revizyonda saatten üretilir; r01 ile r02 ayrı saniyeye düşünce sıra kısmı farklıdır
-    assert ie["is_emri_no"].rsplit("-", 1)[0] == r01["is_emri_no"].rsplit("-", 1)[0]
+    assert (ie["cati"], ie["mahaller"], ie["acikliklar"], ie["is_emri_no"]) == (sab["cati"], r01["mahaller"], r01["acikliklar"], r01["is_emri_no"])
     ad = {"PA06K": "Kırma", "PA06C": "Beşik + salonda cumba"}[kod]
     assert k.mesaj == (f"Çatı: {ad} ({kod[:2]}-{kod[2:4]}-{kod[4:]}). Plan aynı. Ön onay planınız hazır (r02); PDF'teki 4 görünüş "
                        f"{ad.lower()} çatıyı gösterir."), k.mesaj
@@ -753,13 +774,10 @@ def test_hakem2_tamam_ve_kartin_m2_si(tmp_path):
     ("mutfak penceresi 120x180 olsun", {"pencereler": [pen("mutfak", "120x180")]}),
 ])
 @pytest.mark.parametrize("niyet", ["diger", "yeni_talep"])
-def test_hakem2_diger_ve_yeni_talep_okunan_istek(tmp_path, monkeypatch, metin, alan, niyet):
+def test_hakem2_diger_ve_yeni_talep_okunan_istek(tmp_path, metin, alan, niyet, sabit_saat):
     """O5: "diğer" ya da "yeni talep" okunan istek ve bilgi planın değişikliğidir: set sessizce kapanmaz, konuşma sıfırlanmaz; plan
     değişikliği bugünkü yoldan (r02 ya da pencere sorusu), r01'in onayı düşer.
-    Saat sabit: prefabrik planın numarası her revizyonda saniyeden üretilir (`_is_emri_uret`, ilk sürümden beri); r01 ile r02 ayrı
-    saniyeye düşünce numara değişiyor ve test yükte ara sıra kırmızı oluyordu (15 Kasım 2026)."""
-    t0 = K.time.time()
-    monkeypatch.setattr(K.time, "time", lambda: t0)
+    Saat sabit (`sabit_saat`): r01 ile r02 ayrı saniyeye düşünce numara değişiyor ve test yükte ara sıra kırmızı oluyordu (15 Kasım 2026)."""
     s, _ = _cati_seti(tmp_path)
     no = s.plan["is_emri_no"]
     k = s.yaz(metin, niyet=niyet, **alan)
