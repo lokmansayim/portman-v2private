@@ -277,6 +277,16 @@ def _celik_adayi(kod: str) -> dict:
     return a
 
 
+def _bayinin(ie: dict) -> list[dict]:
+    """Zarfın bayiden gelen değişiklikleri: D-113'ün `standart_kaplama` işlemi (havuz evi standart kaplamayla; bayinin değişikliği değil)
+    düşer. KT-01 … KT-10'da işlem her yeni projede vardır (`_std`)."""
+    return [d for d in ie["yapi"]["degisiklikler"] if d["op"] != "standart_kaplama"]
+
+
+def _std(kod: str) -> list[str]:
+    return ["standart_kaplama"] if kod.startswith("KT") else []
+
+
 def _plan(tmp_path, kod: str, taslak: dict):
     from beyin.katalog import Katalog
     k = _konusma(tmp_path, {"yapi_turu": "celik", "oda_programi": "2+1", "alan_m2": 88.0, **taslak})
@@ -296,11 +306,12 @@ def test_formdaki_dis_140_ilk_planda_cizime_islenir(tmp_path):
     # seçim yoksa, form çelik değilse ya da model zaten 140'lıksa işlem eklenmez (bugünkü plan aynen)
     for kod, taslak in (("Ç8801", {"form": "celik"}), ("Ç8801", {"form_dis140": True}), ("Ç8801", {}), ("KT03", {"form": "celik", "form_dis140": True})):
         k, kr = _plan(tmp_path, kod, taslak)
-        assert kr.eylem == "is_emri" and kr.is_emri["yapi"]["degisiklikler"] == [] and "Uygulanan" not in kr.mesaj, (kod, taslak)
+        assert kr.eylem == "is_emri" and _bayinin(kr.is_emri) == [] and "Uygulanan" not in kr.mesaj, (kod, taslak)
+        assert [d["op"] for d in kr.is_emri["yapi"]["degisiklikler"]] == _std(kod), (kod, taslak)
         assert "140 mm karkastır" not in kr.mesaj, (kod, taslak)
     # formda 80 mm (standart) kaldı ama seçilen model zaten 140'lık (KT-03): bayiye söylenir; form çelik değilse bugünkü metin
     k, kr = _plan(tmp_path, "KT03", {"form": "celik"})
-    assert kr.eylem == "is_emri" and kr.is_emri["yapi"]["degisiklikler"] == [] and "Bu planın dış duvarı 140 mm karkastır. Ön onay" in kr.mesaj
+    assert kr.eylem == "is_emri" and _bayinin(kr.is_emri) == [] and "Bu planın dış duvarı 140 mm karkastır. Ön onay" in kr.mesaj
     assert "140 mm karkastır" not in _plan(tmp_path, "KT03", {})[1].mesaj
 
 
@@ -314,7 +325,7 @@ def test_formdaki_dis_140_uygulanamayan_modelde_plan_dusmez(tmp_path):
     except varyant.VaryantHatasi:
         pass
     k, kr = _plan(tmp_path, "KT01", {"form": "celik", "form_dis140": True})
-    assert kr.eylem == "is_emri" and kr.is_emri["yapi"]["degisiklikler"] == []
+    assert kr.eylem == "is_emri" and _bayinin(kr.is_emri) == [] and _std("KT01") == ["standart_kaplama"]
     assert ("Dış duvar 140 mm karkası bu plana otomatik işleyemedim. Planı modelin kendi dış duvarıyla çizdim. İsteğinizi talebe yazdım. "
             "Ön onay planınız hazır") in kr.mesaj
     assert "Dış duvar: 140 mm karkas (formdan; çizime işlenemedi)" in kr.is_emri["bilgi"]["ozel_istekler"]
@@ -538,14 +549,19 @@ def test_formdaki_cati_kaplamasi_ilk_planda_tanima_yazilir(tmp_path):
     k, kr = _plan(tmp_path, "Ç8801", {"form": "celik", "form_dis140": True, "form_kaplama": "sandvic_panel", "bina_ozellikleri": dict(bo)})
     assert [d["op"] for d in kr.is_emri["yapi"]["degisiklikler"]] == ["dis_karkas_140", "cati_kaplamasi"]
     assert "Uygulanan: dış duvarlar 140'lık karkas (16,5 cm); çatı kaplaması sandviç panel." in kr.mesaj
-    # plan zaten sandviç panelli (KT-02): işlem yok, özel istek yok, "Uygulanan" yok
+    # KT-02'nin kendi paftası sandviç panel: D-113'ten beri plan önce standarda döner, formun seçimi sonra işlenir ve "Uygulanan"da
+    # yazılır (önce işlem yoktu); özel istek yok
     k, kr = _plan(tmp_path, "KT02", {"form": "celik", "form_kaplama": "sandvic_panel", "bina_ozellikleri": dict(bo)})
-    assert kr.eylem == "is_emri" and kr.is_emri["yapi"]["degisiklikler"] == [] and "Uygulanan" not in kr.mesaj
+    assert kr.eylem == "is_emri" and [d["op"] for d in kr.is_emri["yapi"]["degisiklikler"]] == ["standart_kaplama", "cati_kaplamasi"]
+    assert "Uygulanan: çatı kaplaması sandviç panel." in kr.mesaj and "standart" not in kr.mesaj
+    assert kr.is_emri["yapi"]["uygulanan"] == ["çatı kaplaması sandviç panel"]
     assert kr.is_emri["bilgi"]["ozel_istekler"] == []
-    # form çelik değilse ya da seçim yoksa bugünkü plan aynen; formda standart kaldıysa plan modelin kendi kaplamasıyla (VARSAYIM)
+    # form çelik değilse ya da seçim yoksa bugünkü plan aynen; formda standart kaldıysa plan standart kaplamayla (D-113; önce VARSAYIM:
+    # modelin kendi kaplaması). KT-02'de standart işlem zarfta durur, bayiye "Uygulanan" diye yazılmaz.
     for kod, taslak in (("Ç8801", {"form_kaplama": "sandvic_panel"}), ("Ç8801", {"form": "celik"}), ("KT02", {"form": "celik"})):
         k, kr = _plan(tmp_path, kod, taslak)
-        assert kr.eylem == "is_emri" and kr.is_emri["yapi"]["degisiklikler"] == [] and "kaplama" not in kr.mesaj, (kod, taslak)
+        assert kr.eylem == "is_emri" and _bayinin(kr.is_emri) == [] and "kaplama" not in kr.mesaj, (kod, taslak)
+        assert [d["op"] for d in kr.is_emri["yapi"]["degisiklikler"]] == _std(kod) and kr.is_emri["yapi"]["uygulanan"] == [], (kod, taslak)
     # OSB + membran + shingle: Motor 15 Kasım 2026'dan beri hesaplar (BK-33, D-100); sandviç paneldeki gibi işlem olur
     k, kr = _plan(tmp_path, "Ç8801", {"form": "celik", "form_kaplama": "osb_shingle", "form_kaplama_yazi": "OSB + membran + shingle",
                                       "bina_ozellikleri": {"Çatı Kaplaması": "OSB + membran + shingle"}})
@@ -641,7 +657,7 @@ def test_sohbette_yazilan_baska_kaplama_dusmez(tmp_path):
             ("Ç8801", {"bina_ozellikleri": {"Çatı Kaplaması": "sandviç panel"}, "ozel_istekler": ["trapez sac olsun"]}, ["trapez sac olsun"]),
             ("Ç8801", {"bina_ozellikleri": {"Çatı Kaplaması": "sandviç panel"}, "ozel_istekler": ["çatı sac olsun"]}, ["çatı sac olsun"])):
         k, kr = _plan(tmp_path, kod, {**_KAP_ORTAK, **ek})
-        assert kr.eylem == "is_emri" and kr.is_emri["yapi"]["degisiklikler"] == [], (kod, ek)
+        assert kr.eylem == "is_emri" and _bayinin(kr.is_emri) == [], (kod, ek)
         assert kr.is_emri["bilgi"]["ozel_istekler"] == beklenen and "Uygulanan" not in kr.mesaj, (kod, ek)
         assert _BASKA_NOTU in kr.mesaj, kr.mesaj                                                   # bayiye söylenir
         assert not {"form_kaplama", "form_kaplama_yazi", "form_kaplama_once"} & set(k.d["taslak"])
