@@ -1889,6 +1889,26 @@ def _kose_kolonlari(plan: "Plan") -> None:
 
 VERANDA_KOLON_CM = 10.0      # veranda dikmesi 10 × 10 (DXF bloğu VERANDA_DIKME_100x100; liste "Özel kutu profil (kolon) 100 × 100")
 VERANDA_CATI_TIPLERI = ("besik", "tek_yon", "teras_paneli", "cumba")   # cumba: ana çatının ikinci cumbası (`cati_prefabrik.cumba_dikdortgenleri`)
+# D-109 (BK-40, PC-45; Lokman, kart 16 Kasım 2026 08:42:16 "Kolon arası en çok 565 cm"): taşan verandanın dış kenarında kolon ekseni
+# arası 565 cm'yi geçerse Motor eşit aralıkla ara kolon koyar (`_gerekli_ara_kolon`). Arşivde (112 veranda) bunu geçen yok; daha kısada pafta
+# ara kolon gösteriyorsa İş Emri `ara_kolon` yazar.
+VERANDA_KOLON_ARASI_EN_COK_CM = 565.0
+
+
+def _kolon_eksen_araligi(en: float, ara: int, k: float = VERANDA_KOLON_CM) -> float:
+    """Dış kenarda `ara` ara kolonla en büyük kolon ekseni arası (cm): köşe kolonları uçta (ekseni uçtan k / 2), ara kolonlar n + 1 eşit
+    parçanın eklerinde (`_dis_verandalar` ile aynı yer)."""
+    eksen = [k / 2] + [en * i / (ara + 1) for i in range(1, ara + 1)] + [en - k / 2]
+    return max(b - a for a, b in zip(eksen, eksen[1:]))
+
+
+def _gerekli_ara_kolon(en: float, k: float = VERANDA_KOLON_CM) -> int:
+    """D-109: kolon ekseni arası `VERANDA_KOLON_ARASI_EN_COK_CM`'yi geçmeyen en az ara kolon sayısı (52 m² 635,5 → 1; 55 m² 449,25 → 0;
+    67 m² 710,25 → 1)."""
+    n = 0
+    while _kolon_eksen_araligi(en, n, k) > VERANDA_KOLON_ARASI_EN_COK_CM + 1e-6:
+        n += 1
+    return n
 # D-52 (İE-30; Lokman 4 Kasım 2026 20:42: "teras ayrı bir teknikle yapılıyor çatı saçağının 10 cm altında çatı paneli olarak kullandığımız bir
 # 8 cm genişliğinde C den oluşan panel yapıyoruz üzerine yine Trapez sac araya damlalık atıyoruz yani çatı gibi şekilli değil"; 21:14 "Paftadan,
 # ev ev"): verandanın üstü `cati: {tip: teras_paneli, cikma_cm}` → düz panel, üst yüzü ana çatının saçak altı çizgisinin (duvar üstü) 10 cm
@@ -1974,7 +1994,9 @@ def _dis_verandalar(plan: "Plan", is_emri: dict) -> None:
     D-109 (BK-40, PC-45; Lokman, eskiz r04 kartı 15 Kasım 2026 22:30:06 "Doğru, böyle yap"): `nis` gövdedeki köşe boşluğunun (önü ve yanı açık
     açık mahal) adıysa veranda o boşluktan öne taşar ve boşlukla tek mahal olur (`_kose_boslugu`): nişin ağzında kiriş yok, nişin köşesinde
     kolon yok (D-38'in köşe kolonu kalkar), boşluğun yanındaki kiriş gövdenin köşesinden ön kolona tek parça. `ara_kolon` n → dış kenarda eşit
-    aralıkla n kolon daha, dış kiriş n + 1 eşit parça (`dis_parcalar`). İkisi de yazılmazsa veranda eski yoldan."""
+    aralıkla n kolon daha, dış kiriş n + 1 eşit parça (`dis_parcalar`). `ara_kolon` yazılmazsa Motor kolon ekseni arası 565 cm'yi geçmeyen en
+    az sayıyı koyar (kart 16 Kasım 08:42:16); yazılan sayı bundan azsa açık hata. İkisi de yazılmazsa ve dış kenar 575 cm'yi geçmiyorsa
+    veranda eski yoldan."""
     liste = is_emri.get("verandalar") or []
     if not liste:
         return
@@ -2014,8 +2036,8 @@ def _dis_verandalar(plan: "Plan", is_emri: dict) -> None:
                 raise IsEmriHatasi(f"Veranda {ad}: türü nişinkiyle aynı olur ({nm.tur})")
         elif not ad or ad in plan.mahaller:
             raise IsEmriHatasi(f"Veranda adı boş ya da başka mahalle aynı: {ad}")
-        ara = v.get("ara_kolon", 0)                     # D-109: dış kenarda eşit aralıkla ara kolon (67 m² 2+1: 1)
-        if isinstance(ara, bool) or not isinstance(ara, int) or ara < 0:
+        ara = v.get("ara_kolon")                        # D-109: dış kenarda eşit aralıkla ara kolon (67 m² 2+1: 1); yazılmazsa Motor (565)
+        if "ara_kolon" in v and (isinstance(ara, bool) or not isinstance(ara, int) or ara < 0):
             raise IsEmriHatasi(f"Veranda {ad}: ara_kolon 0 ya da pozitif tam sayı olur: {ara!r}")
         if cephe not in ("on", "arka", "sol", "sag"):
             raise IsEmriHatasi(f"Veranda cephesi bilinmiyor: {cephe} (on | arka | sol | sag)")
@@ -2029,6 +2051,12 @@ def _dis_verandalar(plan: "Plan", is_emri: dict) -> None:
             raise IsEmriHatasi(f"Verandada bas_cm, bit_cm ve derinlik_cm sayı olmalı: {v}") from None
         if bit - bas < 2 * k + 20 - 1e-9 or d < k + 20 - 1e-9:
             raise IsEmriHatasi(f"Veranda {ad}: {bit - bas:g} × {d:g} cm çok dar (en az {2 * k + 20:g} × {k + 20:g})")
+        gerekli = _gerekli_ara_kolon(bit - bas, k)      # D-109 (kart 08:42:16): kolon ekseni arası en çok 565 cm
+        if ara is None:
+            ara = gerekli
+        elif ara < gerekli:                             # K21: yazılan sayı Lokman'ın kuralıyla çelişiyorsa sessizce değişmez
+            raise IsEmriHatasi(f"Veranda {ad}: {ara} ara kolonla kolon ekseni arası {_kolon_eksen_araligi(bit - bas, ara, k):g} cm, "
+                               f"{VERANDA_KOLON_ARASI_EN_COK_CM:g}'i geçiyor; en az {gerekli} ara kolon (ara_kolon yazılmazsa Motor koyar)")
         if ara and (bit - bas) / (ara + 1) < 2 * k + 20 - 1e-9:
             raise IsEmriHatasi(f"Veranda {ad}: {ara} ara kolonla dış kirişin parçası {(bit - bas) / (ara + 1):g} cm, çok kısa "
                                f"(en az {2 * k + 20:g})")

@@ -7,7 +7,9 @@ Kart 22:30:06 "Doğru, böyle yap" (eskiz r04: yan kiriş tek parça, altında k
 
 Motor `verandalar[].nis` yazılınca verandayı gövdenin köşe boşluğuyla (önü ve yanı açık açık mahal) tek mahal yapar: nişin ağzında kiriş
 yok, nişin köşesinde kolon yok (D-38'in köşe kolonu kalkar), boşluğun yanındaki kiriş gövdenin köşesinden ön kolona tek parça.
-`ara_kolon` n dış kenara eşit aralıkla n kolon koyar; dış kiriş n + 1 eşit parça. İkisi de yazılmazsa veranda eski yoldan (bayt bayt).
+`ara_kolon` n dış kenara eşit aralıkla n kolon koyar; dış kiriş n + 1 eşit parça. `ara_kolon` yazılmazsa Motor kolon ekseni arası 565 cm'yi
+geçmeyen en az sayıyı koyar (kart 16 Kasım 2026 08:42:16 "Kolon arası en çok 565 cm"); azı açık hata. İkisi de yazılmazsa ve dış kenar
+575 cm'yi geçmiyorsa veranda eski yoldan (bayt bayt).
 Hedef örnek `veri/D109_kose_verandasi_beklenen.json`; girdiler paftalardan elle girilmiş üç ev (`veri/BK40_52m2.json`, `_55m2`, `_67m2`).
 """
 from __future__ import annotations
@@ -116,19 +118,61 @@ def test_67m2_ortada_kolon_on_kiris_iki_parca():
 
 
 def test_anahtarsiz_eski_yol():
-    """`nis` yazılmazsa köşe boşluğundan taşan veranda bugünkü gibi açık hata; `ara_kolon` yazılmazsa iki köşe dikmesi ve tek dış kiriş."""
+    """`nis` yazılmazsa köşe boşluğundan taşan veranda bugünkü gibi açık hata. `ara_kolon` yazılmaz ve kolon ekseni arası 565 cm'yi
+    geçmezse iki köşe dikmesi ve tek dış kiriş (55 m²: 439,25)."""
     ie = _ie("52m2")
     for v in ie["verandalar"]:
         v.pop("nis"); v.pop("ara_kolon"); v["ad"] = "VERANDA 2"
     with pytest.raises(G.IsEmriHatasi, match="gövdenin dış yüzüne tam oturmuyor"):
         _kur(ie)
+    ie = _ie("55m2")
+    assert "ara_kolon" not in ie["verandalar"][0]
+    v = _kur(ie).dis_verandalar[0]
+    assert len(v["kolonlar"]) == 2 and "dis_parcalar" not in v and "ara_kolon" not in v
+
+
+# Lokman, kart 16 Kasım 2026 08:42:16 "Kolon arası en çok 565 cm": kolon ekseni arası 565 cm'yi geçerse Motor ara kolon koyar.
+@pytest.mark.parametrize("ev, ara", [("52m2", 1), ("55m2", 0), ("67m2", 1)])
+def test_ara_kolon_565_motor_koyar(ev, ara):
+    """`ara_kolon` yazılmazsa Motor 565 kuralıyla koyar; sonuç paftadaki sayıyla (yazılan) aynı: plan, liste, çatı bir bir aynı."""
+    ie = _ie(ev)
+    yazili = copy.deepcopy(ie)
+    ie["verandalar"][0].pop("ara_kolon", None)
+    v = _kur(ie).dis_verandalar[0]
+    assert len(v["kolonlar"]) - 2 == ara
+    eksen = sorted(((r[0] + r[2]) / 2) if v["cephe"] in ("on", "arka") else ((r[1] + r[3]) / 2) for r in v["kolonlar"])
+    assert max(b - a for a, b in zip(eksen, eksen[1:])) <= G.VERANDA_KOLON_ARASI_EN_COK_CM
+    assert ozet(ie) == ozet(yazili)
+
+
+@pytest.mark.parametrize("en, ara, aralik", [
+    (449.25, 0, 439.25), (575.0, 0, 565.0), (575.01, 1, 282.505), (635.5, 1, 312.75), (710.25, 1, 350.125),
+    (1140.0, 1, 565.0), (1140.01, 2, 380.003), (1695.0, 2, 565.0), (1696.0, 3, 424.0),
+])
+def test_ara_kolon_esigi(en, ara, aralik):
+    """Köşe kolonunun ekseni uçtan 5 cm, ara kolonlar n + 1 eşit parçanın eklerinde; 565 cm'yi geçmeyen en az ara kolon."""
+    assert G._gerekli_ara_kolon(en) == ara
+    assert round(G._kolon_eksen_araligi(en, ara), 3) == aralik
+
+
+@pytest.mark.parametrize("ev", ["52m2", "67m2"])
+def test_ara_kolon_az_yazilirsa_hata(ev):
+    """Yazılan sayı 565 kuralıyla çelişirse sessizce değişmez (K21)."""
+    ie = _ie(ev)
+    ie["verandalar"][0]["ara_kolon"] = 0
+    with pytest.raises(G.IsEmriHatasi, match=r"565'i geçiyor; en az 1 ara kolon"):
+        _kur(ie)
+
+
+def test_ara_kolon_fazlasi_paftadan():
+    """Daha kısa verandada pafta ara kolon gösteriyorsa İş Emri yazar (kart 08:42:16): 55 m²'de 1, 67 m²'de 2 eşit aralıkla."""
+    ie = _ie("55m2")
+    ie["verandalar"][0]["ara_kolon"] = 1
+    assert len(_kur(ie).dis_verandalar[0]["kolonlar"]) == 3
     ie = _ie("67m2")
-    ie["verandalar"][0].pop("ara_kolon")
-    p = _kur(ie)
-    v = p.dis_verandalar[0]
-    assert len(v["kolonlar"]) == 2 and "dis_parcalar" not in v and "ara_kolon" not in v and "nis" not in v
-    o = ozet(ie)
-    assert o["liste"]["kolon"] == [["L 2500", 2]] and "L 7102,5" in o["liste"]["kirisler"]
+    ie["verandalar"][0]["ara_kolon"] = 2
+    v = _kur(ie).dis_verandalar[0]
+    assert len(v["kolonlar"]) == 4 and [round(a[2] - a[0], 2) for a, _k in v["dis_parcalar"]] == [236.75] * 3
 
 
 @pytest.mark.parametrize("bozuk, mesaj", [
