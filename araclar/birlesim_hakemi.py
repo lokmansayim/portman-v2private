@@ -89,9 +89,8 @@ def kayit_birlesimleri(ie: dict) -> dict:
                 continue
             o = W_[int(m.group(1))]
             xy = [o.c, d.c] if d.yon == "x" else [d.c, o.c]
-            if "köşe" in m.group(2):
-                if d.h < o.h - 1e-6:
-                    cektirme.append({"xy": xy, "alt": "dis_kose"})
+            if "köşe" in m.group(2):                                # BK-38 (D-105 madde 2): her kalınlıkta, `model_motor` gibi
+                cektirme.append({"xy": xy, "alt": "dis_kose"})
                 continue
             if any(w is not d and w.yon == d.yon and abs(w.c - d.c) < 1e-6
                    and (abs(w.p1 - d.p0) < 1e-6 if uc == 0 else abs(w.p0 - d.p1) < 1e-6) for w in plan.duvarlar):

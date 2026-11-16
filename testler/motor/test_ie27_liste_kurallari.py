@@ -147,13 +147,15 @@ def test_giris_nisi_60_kose():
 
 
 @pytest.mark.parametrize("kod", ["AP11", "AP15", "AP21"])
-def test_dis_kose_yalniz_60_gecisinde(kod, modeller):
-    """Madde 13 "100'lük köşelerde 60'lığa geçiş": iç duvar 100 olunca dış köşeye gelen iç duvar geçiş değildir, çektirme almaz."""
+def test_dis_kose_her_kalinlikta(kod, modeller):
+    """Madde 13 "100'lük köşelerde 60'lığa geçiş": dış köşeye gelen 60'lık iç duvar çektirme U'su alır. BK-38 (D-105 madde 2; Lokman, kart
+    15 Kasım 2026 09:14:41 "Evet, 1 adet 100'lük"): iç duvar 100 olunca da alır (paftada köşe direği + 10'luk çektirme U'su). Önce bu test
+    100'lükte 0 bekliyordu; vaka Lokman'ın kartıyla değişti (gerekçe `docs/is_emirleri/BK-38.md`)."""
     assert modeller[kod]["cektirme_yerleri"]["dis_kose"] == 1
     ie = _ie(kod)
     ie["yapi"]["duvar_kalinligi_cm"]["ic"] = 10
     cy = PL.model_motor(ie)["cektirme_yerleri"]
-    assert cy["dis_kose"] == 0 and cy["t_orta"] == modeller[kod]["cektirme_yerleri"]["t_orta"]
+    assert cy["dis_kose"] == 1 and cy["t_orta"] == modeller[kod]["cektirme_yerleri"]["t_orta"]
 
 
 def test_cektirme_serbest_uc_sayilir(modeller):
