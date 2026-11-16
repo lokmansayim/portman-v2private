@@ -38,4 +38,7 @@ def test_ayrim_varsa_toplam_denetlenmez():
 
 
 def test_proje_kartlarinda_kapi_toplami_yok():
-    assert all("kapi_adedi" not in k for k in HH.kartlar().values())
+    """AIPrefabrik'in kartları dış ve iç kapıyı ayırır; toplam yalnız disk arşivinin kartlarında (HD-NNN)."""
+    k = HH.kartlar()
+    assert all("kapi_adedi" not in v for a, v in k.items() if a.startswith("AP-"))
+    assert all(v.get("kapi_adedi") is not None for a, v in k.items() if a.startswith("HD-"))

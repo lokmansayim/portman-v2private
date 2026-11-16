@@ -1,0 +1,170 @@
+{
+ "aciklama": "Disk arşivinin (İE-43, D-99) Parti 1 evlerinin proje kartı: montaj paftasının yazılarından okunan yapı alanları (`araclar/hdd_turev/pafta_kart.py`), `proje_kartlari.json` biçiminde. Ad yok; `kart_sha256` mühürdeki DWG'nin SHA-256'sı (`testler/hdd/muhur.csv`). 2019–2020 bantlı şablonda dış kapının yazısı olmadığı için dış ve iç kapı ayrılmaz, toplam `kapi_adedi` (hakem toplamı kıyaslar). Okuyucunun bulamadığı alan `varsayim`'da yazılı.",
+ "kaynak": "Disk arşivi Parti 1 (PR #239 okuyucusu, PR #245 düzeltmesi)",
+ "evler": {
+  "HD-252": {
+   "dis_olcu_cm": [
+    700.25,
+    522.0
+   ],
+   "brut_oturum_m2": 37.0,
+   "baslik_m2": 37.0,
+   "oda_sayisi": "1+1",
+   "yatak_odasi": 1,
+   "kat_adedi": 1,
+   "cati_sekli": "Beşik Çatı",
+   "acikliklar": {
+    "120/120": 1,
+    "120/180": 2,
+    "60/40": 1
+   },
+   "dis_kapi_adedi": 1,
+   "ic_kapi_adedi": 3,
+   "kapi_adedi": 4,
+   "veranda_adedi": 1,
+   "kart_sha256": "67a18caf2da3cc8625b3d34c5e1478c1bafe16b0a2562492a982d223fe98256e",
+   "kaynak": {
+    "dosya": "HD-252;22",
+    "plan_sirasi": 0,
+    "sablon": "cerceveli",
+    "sacak_olcusu_cm": [
+     null,
+     null
+    ],
+    "okuyucu": "araclar/hdd_turev/pafta_kart.py (İE-43 PR-4)"
+   },
+   "varsayim": [
+    "Paftada oda adı yok. Mutfak (eviye) ve banyo (duş, klozet) eşyadan; eşyasız kalan oda yatak odası sayıldı (oda_sayisi 1+1, yatak_odasi 1). Veranda gövdenin içinde, kolonlu (paftada 100 × 100 kolon)."
+   ]
+  },
+  "HD-506": {
+   "dis_olcu_cm": [
+    647.5,
+    700.25
+   ],
+   "brut_oturum_m2": 45.0,
+   "baslik_m2": 45.0,
+   "oda_sayisi": "1+1",
+   "yatak_odasi": 1,
+   "kat_adedi": 1,
+   "cati_sekli": null,
+   "acikliklar": {
+    "120/120": 1,
+    "120/180": 3,
+    "60/40": 1
+   },
+   "dis_kapi_adedi": null,
+   "ic_kapi_adedi": null,
+   "kapi_adedi": 2,
+   "veranda_adedi": 1,
+   "kart_sha256": "83d1425ab47d4f0149f1c8873a7848f74b3d4d96dc3174115e87cba6f980304d",
+   "kaynak": {
+    "dosya": "HD-506;9",
+    "plan_sirasi": 46,
+    "sablon": "bantli",
+    "sacak_olcusu_cm": [
+     null,
+     null
+    ],
+    "okuyucu": "araclar/hdd_turev/pafta_kart.py (İE-43 PR-4)"
+   }
+  },
+  "HD-431": {
+   "dis_olcu_cm": [
+    763.0,
+    773.0
+   ],
+   "brut_oturum_m2": 58.98,
+   "baslik_m2": 63.0,
+   "oda_sayisi": "2+1",
+   "yatak_odasi": 2,
+   "kat_adedi": 1,
+   "cati_sekli": null,
+   "acikliklar": {
+    "120/120": 5,
+    "60/40": 1
+   },
+   "dis_kapi_adedi": null,
+   "ic_kapi_adedi": null,
+   "kapi_adedi": 5,
+   "veranda_adedi": 1,
+   "kart_sha256": "6bc540bd4d790c1a4f75e3b4dd1926912f265689580740081a4092ec3712a9c0",
+   "kaynak": {
+    "dosya": "HD-431;12",
+    "plan_sirasi": 46,
+    "sablon": "bantli",
+    "sacak_olcusu_cm": [
+     null,
+     823.0
+    ],
+    "okuyucu": "araclar/hdd_turev/pafta_kart.py (İE-43 PR-4)"
+   },
+   "varsayim": [
+    "Başlık 63 m², duvarların dış ölçüsü 763 × 773 cm (58,98 m²). Brüt oturum M-18 tanımıyla (dış duvarların dış yüzleri) duvar ölçüsünden; paftadaki 823 cm'lik ölçü saçağın ölçüsü (gövde + 2 × 25)."
+   ]
+  },
+  "HD-228": {
+   "dis_olcu_cm": [
+    825.75,
+    1014.0
+   ],
+   "brut_oturum_m2": 84.0,
+   "baslik_m2": 84.0,
+   "oda_sayisi": "3+1",
+   "yatak_odasi": 3,
+   "kat_adedi": 1,
+   "cati_sekli": null,
+   "acikliklar": {
+    "120/120": 5,
+    "60/40": 1
+   },
+   "dis_kapi_adedi": null,
+   "ic_kapi_adedi": null,
+   "kapi_adedi": 6,
+   "veranda_adedi": 1,
+   "kart_sha256": "06ef777bc8e2b844df41b540e5bf99a761b5f72680b7eee694c82324b0b1c826",
+   "kaynak": {
+    "dosya": "HD-228;5",
+    "plan_sirasi": 62,
+    "sablon": "bantli",
+    "sacak_olcusu_cm": [
+     null,
+     null
+    ],
+    "okuyucu": "araclar/hdd_turev/pafta_kart.py (İE-43 PR-4)"
+   }
+  },
+  "HD-143": {
+   "dis_olcu_cm": [
+    860.0,
+    961.25
+   ],
+   "brut_oturum_m2": 92.0,
+   "baslik_m2": 92.0,
+   "oda_sayisi": "3+1",
+   "yatak_odasi": 3,
+   "kat_adedi": 1,
+   "cati_sekli": null,
+   "acikliklar": {
+    "120/120": 5,
+    "120/180": 1,
+    "60/40": 1
+   },
+   "dis_kapi_adedi": null,
+   "ic_kapi_adedi": null,
+   "kapi_adedi": 7,
+   "veranda_adedi": 1,
+   "kart_sha256": "ca3346a869395e8f6a7f2379942ceaa2bfcbff828ca6252c6980e9b2fb1bcd70",
+   "kaynak": {
+    "dosya": "HD-143;13",
+    "plan_sirasi": 68,
+    "sablon": "bantli",
+    "sacak_olcusu_cm": [
+     null,
+     null
+    ],
+    "okuyucu": "araclar/hdd_turev/pafta_kart.py (İE-43 PR-4)"
+   }
+  }
+ }
+}

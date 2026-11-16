@@ -100,6 +100,7 @@ KOK = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(KOK))
 KARTLAR = KOK / "testler" / "havuz" / "proje_kartlari.json"
 CELIK_KARTLARI = KOK / "testler" / "havuz" / "celik_kartlari.json"
+HDD_KARTLARI = KOK / "testler" / "havuz" / "hdd_kartlari.json"     # İE-43 PR-4b: disk arşivinin evleri (HD-NNN), aynı biçimde
 TOL_OLCU_CM = 5.0
 TOL_BRUT_M2 = 0.5
 # D-91 (Lokman kartı 14 Kasım 2026 10:10:11 UTC): standart hâlde ölçü her yönde en çok yarım pano değişir; dış duvarda özel pano yok
@@ -144,7 +145,11 @@ SILME_KIMLIK = ("is_emri_no", "revizyon", "talep", "varsayimlar", "eksikler")   
 
 
 def kartlar() -> dict:
-    return json.loads(KARTLAR.read_text(encoding="utf-8"))["evler"]
+    """AIPrefabrik'in proje kartları (AP-NN) ve disk arşivinin kartları (HD-NNN; İE-43 PR-4b). Kodlar ayrı seridir, çakışmaz."""
+    k = json.loads(KARTLAR.read_text(encoding="utf-8"))["evler"]
+    hdd = json.loads(HDD_KARTLARI.read_text(encoding="utf-8"))["evler"] if HDD_KARTLARI.exists() else {}
+    assert not set(k) & set(hdd), "proje kartı kodu iki dosyada"
+    return {**k, **hdd}
 
 
 def _olcu(s) -> str:

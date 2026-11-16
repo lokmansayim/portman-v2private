@@ -1,0 +1,73 @@
+{
+ "kod": "PA43",
+ "gosterim": "PA-43",
+ "durum": "gecerli",
+ "sablon": "adaylar/PA43.json",
+ "gorsel": "adaylar/PA43.png",
+ "referans_model": "PA-43",
+ "yapi_turu": "prefabrik",
+ "kat": 1,
+ "oda_programi": "3+1",
+ "katalog_m2": 92.0,
+ "kapali_m2": 82.7,
+ "veranda_m2": 9.06,
+ "ozet": {
+  "grid": {
+   "x_pano": 7.0,
+   "y_pano": 7.5
+  },
+  "dis_olcu_cm": [
+   860.0,
+   961.25
+  ],
+  "brut_m2": 91.73,
+  "pano": 58,
+  "pencere": 7,
+  "kapi": 7,
+  "odalar": {
+   "Y.ODASI": 11.45,
+   "WC": 4.43,
+   "Y.ODASI 2": 10.6,
+   "HOL": 9.31,
+   "Y.ODASI 3": 9.56,
+   "SALON": 23.23,
+   "MUTFAK": 8.62,
+   "VERANDA": 9.06
+  }
+ },
+ "kaynak": {
+  "metin": "HD-143 montaj paftasından İş Emri (İE-43, disk arşivi Parti 1; kodla okundu, ad yok). Havuz: D-111 (Lokman 16 Kasım 2026 06:50:02 kartı \"Evet, beşi girsin\"; Motor'un aks düzeniyle). Asıl uygulanmış proje: D-103.",
+  "dosya": "testler/havuz/is_emirleri/HD143.json",
+  "ayna": null,
+  "karar": "D-111",
+  "standart": true,
+  "kart_kiyasi": {
+   "kart": "HD-143",
+   "kart_sha256": "ca3346a869395e8f6a7f2379942ceaa2bfcbff828ca6252c6980e9b2fb1bcd70",
+   "sonuc": "geçti",
+   "olcum": {
+    "dis_olcu_cm": [
+     860.0,
+     961.25
+    ],
+    "acikla_olcu_cm": [
+     1060.0,
+     961.25
+    ],
+    "brut_m2": 91.73,
+    "kubbe_m2": 0.0,
+    "yatak_odasi": 3,
+    "pencereler": {
+     "120x120": 5,
+     "120x180": 1,
+     "60x40": 1
+    },
+    "dis_kapi": 1,
+    "ic_kapi": 6,
+    "veranda": 1,
+    "kat": 1
+   }
+  }
+ },
+ "not": ""
+}

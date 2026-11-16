@@ -1,0 +1,248 @@
+{
+ "is_emri_no": "HDD-HD-252",
+ "revizyon": 1,
+ "talep": {
+  "bayi": {
+   "kod": "HD-252",
+   "ad": "Arşiv HD-252"
+  },
+  "musteri_adi": "HD-252",
+  "metin": "İE-43: HD-252 montaj paftasından okundu (plan_geometri v1). Pafta düzeltilmedi; farklar uyarılarda."
+ },
+ "yapi": {
+  "sistem": "prefabrik",
+  "kat_sayisi": 1,
+  "duvar_yuksekligi_cm": 250,
+  "duvar_kalinligi_cm": {
+   "dis": 10,
+   "ic": 6.0
+  },
+  "olcu_kaynagi": "dis_olcu",
+  "dis_olcu_cm": {
+   "x": 700.25,
+   "y": 522.0
+  },
+  "referans_model": "HD-252",
+  "grid": {
+   "x_pano": 5.5,
+   "y_pano": 4.0
+  },
+  "kisa_kenar": "y",
+  "giris_cephesi": "on",
+  "dis_dusey_duvar": "cevre_aks_disinda",
+  "dizilim": {
+   "baslangic": "arka-sol",
+   "hiza": "izgara",
+   "dis_duvar_t_bolme": false,
+   "pencere": "oda_ortasi",
+   "kapi": "mantik",
+   "kose": "oda",
+   "son_pano": "son_aks",
+   "kapi_yeri": "ortada",
+   "dis_pano_dayanagi": [
+    {
+     "y": 135.5,
+     "aralik_cm": [
+      135.5,
+      261.0
+     ],
+     "cephe": "sol"
+    },
+    {
+     "y": 10.0,
+     "aralik_cm": [
+      10.0,
+      386.5
+     ],
+     "ic_duvarlar": true,
+     "duvar_cm": 444.25
+    },
+    {
+     "x": 318.75,
+     "aralik_cm": [
+      256.0,
+      695.25
+     ],
+     "cephe": "arka"
+    },
+    {
+     "x": 193.25,
+     "aralik_cm": [
+      193.25,
+      318.75
+     ],
+     "cephe": "on"
+    }
+   ]
+  },
+  "ek_akslar_cm": {
+   "x": [],
+   "y": []
+  }
+ },
+ "mahaller": [
+  {
+   "ad": "SALON & MUTFAK",
+   "tur": "salon",
+   "konum_cm": [
+    [
+     5.0,
+     10.0,
+     256.0,
+     198.25
+    ],
+    [
+     5.0,
+     198.25,
+     318.75,
+     512.0
+    ]
+   ]
+  },
+  {
+   "ad": "BANYO",
+   "tur": "banyo",
+   "konum_cm": [
+    [
+     256.0,
+     10.0,
+     444.25,
+     198.25
+    ]
+   ]
+  },
+  {
+   "ad": "HOL",
+   "tur": "antre_hol",
+   "konum_cm": [
+    [
+     318.75,
+     198.25,
+     444.25,
+     386.5
+    ]
+   ]
+  },
+  {
+   "ad": "VERANDA",
+   "tur": "veranda",
+   "konum_cm": [
+    [
+     318.75,
+     386.5,
+     695.25,
+     512.0
+    ]
+   ]
+  },
+  {
+   "ad": "YATAK ODASI",
+   "tur": "yatak_odasi",
+   "konum_cm": [
+    [
+     444.25,
+     10.0,
+     695.25,
+     386.5
+    ]
+   ]
+  }
+ ],
+ "acik_sinirlar": [],
+ "acikliklar": [
+  {
+   "tur": "ic_kapi",
+   "olcu": 82,
+   "arasi": [
+    "HOL",
+    "BANYO"
+   ],
+   "pano": 0
+  },
+  {
+   "tur": "ic_kapi",
+   "olcu": 82,
+   "arasi": [
+    "HOL",
+    "YATAK ODASI"
+   ],
+   "pano": 0
+  },
+  {
+   "tur": "ic_kapi",
+   "olcu": 82,
+   "arasi": [
+    "HOL",
+    "SALON & MUTFAK"
+   ],
+   "pano": 0
+  },
+  {
+   "tur": "dis_kapi",
+   "olcu": 90,
+   "arasi": [
+    "VERANDA",
+    "HOL"
+   ],
+   "pano": 0
+  },
+  {
+   "tur": "pencere",
+   "olcu": "120x180",
+   "mahal": "YATAK ODASI",
+   "duvar": "on"
+  },
+  {
+   "tur": "pencere",
+   "olcu": "120x180",
+   "mahal": "SALON & MUTFAK",
+   "duvar": "on"
+  },
+  {
+   "tur": "pencere",
+   "olcu": "120x120",
+   "mahal": "SALON & MUTFAK",
+   "duvar": "sol",
+   "pano": 1
+  },
+  {
+   "tur": "pencere",
+   "olcu": "60x40",
+   "mahal": "BANYO",
+   "duvar": "arka",
+   "pano": 1
+  }
+ ],
+ "cati": {
+  "tip": "besik",
+  "egim_yuzde": 32.9,
+  "sacak_cm": 30,
+  "topuk_cm": 10,
+  "makas_yonu": "kisa_kenar",
+  "makas_ekseni": "y"
+ },
+ "cikti": {
+  "pdf": true,
+  "dxf": true,
+  "pafta": "A2",
+  "icerik": [
+   "aksli_plan"
+  ]
+ },
+ "varsayimlar": [
+  "Bölge 0 (14.57 m² aks alanı): paftada oda adı yok; SALON & MUTFAK sayıldı (tefriş: mutfak).",
+  "Bölge 1 (3.54 m² aks alanı): paftada oda adı yok; BANYO sayıldı (tefriş: banyo).",
+  "Bölge 2 (2.36 m² aks alanı): paftada oda adı yok; HOL sayıldı (tefriş yok).",
+  "VERANDA: gövdenin içinde açık mahal (paftada kolon); 1 dikme yazıldı.",
+  "Bölge 4 (9.45 m² aks alanı): paftada oda adı yok; YATAK ODASI sayıldı (tefriş yok).",
+  "İç duvar kalınlıkları karışık {6.0: 4, 10.0: 2}; çoğunluk 6 cm yazıldı.",
+  "Çatı beşik, %32,9, saçak 30, topuk 10 (paftanın planında eğim yok; prefabrik standardı).",
+  "Pano dizilimi paftadan: sol hattında y 135.5'dan 125,5; 444.25 hattında y 10'dan 125,5; arka hattında x 318.75'dan 125,5; on hattında x 193.25'dan 125,5 (dizilim.dis_pano_dayanagi)."
+ ],
+ "dikmeler": [
+  [
+   690.3,
+   0.0
+  ]
+ ]
+}

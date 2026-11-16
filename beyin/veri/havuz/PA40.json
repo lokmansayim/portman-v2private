@@ -1,0 +1,69 @@
+{
+ "kod": "PA40",
+ "gosterim": "PA-40",
+ "durum": "gecerli",
+ "sablon": "adaylar/PA40.json",
+ "gorsel": "adaylar/PA40.png",
+ "referans_model": "PA-40",
+ "yapi_turu": "prefabrik",
+ "kat": 1,
+ "oda_programi": "1+1",
+ "katalog_m2": 45.0,
+ "kapali_m2": 37.5,
+ "veranda_m2": 8.03,
+ "ozet": {
+  "grid": {
+   "x_pano": 5.0,
+   "y_pano": 5.5
+  },
+  "dis_olcu_cm": [
+   647.5,
+   700.25
+  ],
+  "brut_m2": 45.48,
+  "pano": 29,
+  "pencere": 5,
+  "kapi": 2,
+  "odalar": {
+   "WC": 4.39,
+   "SALON": 20.8,
+   "Y.ODASI": 9.09,
+   "VERANDA": 8.03
+  }
+ },
+ "kaynak": {
+  "metin": "HD-506 montaj paftasından İş Emri (İE-43, disk arşivi Parti 1; kodla okundu, ad yok). Havuz: D-111 (Lokman 16 Kasım 2026 06:50:02 kartı \"Evet, beşi girsin\"; Motor'un aks düzeniyle). Asıl uygulanmış proje: D-103.",
+  "dosya": "testler/havuz/is_emirleri/HD506.json",
+  "ayna": null,
+  "karar": "D-111",
+  "standart": true,
+  "kart_kiyasi": {
+   "kart": "HD-506",
+   "kart_sha256": "83d1425ab47d4f0149f1c8873a7848f74b3d4d96dc3174115e87cba6f980304d",
+   "sonuc": "geçti",
+   "olcum": {
+    "dis_olcu_cm": [
+     647.5,
+     700.25
+    ],
+    "acikla_olcu_cm": [
+     647.5,
+     700.25
+    ],
+    "brut_m2": 45.48,
+    "kubbe_m2": 0.0,
+    "yatak_odasi": 1,
+    "pencereler": {
+     "120x120": 1,
+     "120x180": 3,
+     "60x40": 1
+    },
+    "dis_kapi": 1,
+    "ic_kapi": 1,
+    "veranda": 1,
+    "kat": 1
+   }
+  }
+ },
+ "not": ""
+}
