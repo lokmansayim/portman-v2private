@@ -65,6 +65,7 @@ SILME_HAL = {
     "PA34": ("AP-27", "testler/havuz/is_emirleri/PA24_BUYUME.json", "2+1", 78.0),   # 77 m² büyüyen hâl (20:35:43 sözü, 20:38:43)
     "PA35": ("AP-08", "testler/havuz/is_emirleri/PA26_UCLU_H.json", "2+1", 69.0),   # 71 m² üçlü H'lı hâl (20:46:54 sözü, 20:57:28; BK-34)
     "PA36": ("AP-19", "testler/havuz/is_emirleri/PA18_GENIS.json", "2+1", 62.0),   # 60 m² veranda duvarı aksta (15 Kasım 07:24:23; BK-35)
+    "PA44": ("AP-05", "testler/havuz/is_emirleri/PA23_BUYUME.json", "2+1", 49.0),  # 49 m² tam panolu hâl, 700 × 700,25 (16 Kasım 06:58:39)
 }
 # D-96 › Havuza uygulama (İE-40 PR-7): iç duvarı 100'lük evlerin veranda köşesinde üçlü H, ev ev kartla (Lokman 15 Kasım 2026 07:32:42 sözü).
 # 91 m² 3+1 yeni numarayla (07:57:38 "Doğru, yanına eklensin"; PA-11 aynen); 143 m² 4+1 paftadaki gibi aynı numarayla (07:57:47 "Evet, havuzda
@@ -141,7 +142,7 @@ KALANLAR = {
 }
 # D-87 › Veranda (Lokman, 14 Kasım 2026 07:34 UTC): veranda bir oda gibi sayılır; verandasız ev de havuza girer
 VERANDA_SOZU = "veranda ayrıca var mı yok mu belirtilmez verandayı da bir oda gibi kabul et"
-VERANDASIZ = {"PA23", "PA24", "PA34", "KT09", "KT11"}                           # KT-11 (ÇP-22): antette sundurma, veranda yok; PA-34 77 m² hâli
+VERANDASIZ = {"PA23", "PA24", "PA34", "PA44", "KT09", "KT11"}                   # KT-11 (ÇP-22): antette sundurma, veranda yok; PA-34 77 m² hâli; PA-44 49 m² hâli
 # AP-14: paftada oda adı yok; oda programı Lokman'ın karar kartından (14 Kasım 2026 07:50:30 UTC, "Evet, 2+1 olarak girsin")
 AP14_SOZU = '"Evet, 2+1 olarak girsin"'
 # AP-08: Lokman 14 Kasım 2026 08:16:22 UTC düzeltmesi (hol panoları, sırt sırta kapılar, ortada pencere), 08:29:26 kartı
@@ -326,7 +327,7 @@ def test_kabulsuz_yolda_havuz_gorunmez():
 
 # Bütün havuz kabul edilince seçenek seti: düğme ve görsel en çok 3, liste en çok 10 satır, satır başlığı ≤ 24, açıklama ≤ 72
 SETLER = {
-    (50, "2+1"): ["PA23"],                                                            # tek aday: öncelik sorulmaz
+    (50, "2+1"): ["PA23", "PA44"],                                                    # bugünkü 49 m² ve tam panolu hâli (PA-44, 49,02 m²)
     (40, "1+1"): ["PA29", "PA39"],                                                    # D-91 kısalt (39,61 m²); PA-39: disk arşivinin 37 m²'si (D-111)
     (45, "1+1"): ["PA27", "PA40", "PA28"],                                            # eski hâl ve en yakın standart (D-91); PA-40: disk arşivinin 45 m²'si (D-111)
     (60, "2+1"): ["PA01", "PA14", "PA18", "PA25", "PA31", "PA41", "PA36", "PA02", "PA09", "PA20"],  # PA-31 silinmiş hâl (59 m²); PA-36 geniş hâl (62 m²); PA-41 disk arşivi (59 m², D-111)
