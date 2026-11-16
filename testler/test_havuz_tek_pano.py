@@ -90,19 +90,27 @@ def test_asil_hal_aynen(kod):
 # Kısa parça silinmiş ya da büyümüş hâller (İE-40 PR-3, ev kartları "Doğru, yanına eklensin"): anahtarlı, yeni numarayla; kaynak evleri anahtarsız
 SILINMIS = {"PA30": "PA12", "PA31": "PA14", "PA32": "PA15", "PA33": "PA08", "PA34": "PA24", "PA35": "PA26",
             "PA36": "PA18", "PA44": "PA23"}  # ayrıntı test_havuz_silme_kayit.py; PA-44: 49 m² tam panolu hâl (16 Kasım 06:58:39, D-30 gibi)
+# Anahtarlı evin çatı seçenekleri (D-115, İE-44; Lokman kartı 16 Kasım 08:46:30 "9'u girsin, bekleyenler size gelsin"): plan evinkiyle
+# aynı, yalnız `cati` değişir; şablon evin İş Emri'sini anahtarıyla taşır. Ayrıntı test_cati_secenekleri_toplu.py.
+CATI_SECENEKLERI = {"PA31B": "PA31", "PA33C": "PA33", "PA34C": "PA34"}
 
 
 def test_anahtar_yalniz_95m2_evde():
     """Kısa parça bırakan yedi ev (silme kartı 19:39:46; ev ev gösterilir), 77 m² (kart 20:38:43), 49 m² (D-30), paftalı 60 m² (PK-01) ve
     mühürlü iki ev anahtarsız. Anahtar yalnız bu dosyanın evlerinde ve kısa parçası silinmiş ya da büyümüş hâllerde (yeni numara; bugünkü ev
-    aynen);
+    aynen); anahtarlı evin çatı seçeneği evin anahtarını taşır (D-115);
     yeni ev eklenirse bilinçli olarak buraya yazılır."""
-    anahtarli = set()
+    anahtarli, anahtar = set(), {}
     for f in sorted(glob.glob(str(SABLON_DIR / "adaylar" / "*.json"))):
         ie = json.loads(Path(f).read_text(encoding="utf-8"))
-        if ((ie.get("yapi") or {}).get("dizilim") or {}).get("tek_ozel_pano"):
+        anahtar[Path(f).stem] = ((ie.get("yapi") or {}).get("dizilim") or {}).get("tek_ozel_pano")
+        if anahtar[Path(f).stem]:
             anahtarli.add(Path(f).stem)
-    assert anahtarli == set(EVLER) | set(SILINMIS)
+    assert anahtarli == set(EVLER) | set(SILINMIS) | set(CATI_SECENEKLERI)
+    for secenek, ev in CATI_SECENEKLERI.items():
+        kayit = json.loads((KOK / "beyin/veri/cati_varyantlari" / f"{ev}.json").read_text(encoding="utf-8"))
+        assert ev in SILINMIS and anahtar[secenek] == anahtar[ev] and kayit["karar"] == "D-115"
+        assert [v["sablon"] for v in kayit["varyantlar"] if v["kod"] == secenek] == [f"adaylar/{secenek}.json"]
     assert not set(SILINMIS.values()) & anahtarli and not {e[4] for e in EVLER.values()} & anahtarli
     for kod in ("PA08", "PA21", "PA26", "PA12", "PA14", "PA15", "PA27", "PA24", "PA23", "PA18", "PA03", "PA22"):
         assert kod in TABLO["evler"] and kod not in anahtarli

@@ -127,3 +127,22 @@ Motor'da çizilemedi 51. "Evin çatısı": o tür evin kendi çatısıdır, seç
 - **PA-13-C** Beşik + salonda cumba: çizilemedi. Gövde girintili: çıkıntısız cumba girintisiz gövdede kurulur
 
 Ayrıntılı bulgular (havuz denetiminin HD kalemleri, Motor uyarıları) aracın `sonuc.json` dosyasındadır.
+
+## Ek (16 Kasım 09:45 UTC): kayıt ve düz iskelet denemesi
+
+- **Kayıt (D-115):** Lokman'ın kartı 08:46:30 "9'u girsin, bekleyenler size gelsin". Dokuz seçenek main'deki
+  `cati_varyanti_kaydet.py` ile kaydedildi; dokuzu da kayıt anındaki havuz denetiminden geçti (D-112).
+- **Düz iskelet (straight skeleton), Lokman 09:29:31 isteği:** "sen bu çatı olayını repoları incele Straight skeleton vardı bunları bir
+  incele yani modelden çatı çıkartabiliriz". Depoda iskelet elle üç yerde kullanılmış: Ç8801-K (doğu ucu kırma) ve Ç8801-D (tam kırma)
+  düzlemleri, KT-03 (`deneme/2026-10-09_kor_test_3/tanim/kt03_tanim_uret.py`) ve ÇP-03 (`testler/celik/projeler/CP03`). Genel araç yok;
+  plan üretimi işinde (İE-14) genel iskelet ve L kırma kapsam dışı kalmıştı.
+- **Deneme (yalnız görsel, Motor'a dokunmadan, yeni paket kurmadan):** gövde çizgisi saçak payıyla büyütülür, içe doğru eşit adımla
+  daraltılır; her noktanın ilk ulaştığı kenar çatı yüzünü verir (kırma). 91 m² (PA-17), 143 m² (PA-13), 46 m² (PA-28) evde kırma çıktı.
+  Görseller PF `Cati_Secimi/Havuz_Toplu/2026-11-16_iskelet_denemesi/`.
+- **Açılabilecek seçenek:** çizilemeyen 26 kırma seçeneğinin 15'inde tek engel gövde biçimi (köşe yönü 6, girinti 4, kareye yakın 2,
+  birlikte 3). İkisi mühürlü evde (PA-01-K, PA-05-K; M-07), 13'ü açılabilir.
+- **Sınırlar:** iskelet yalnız kırma verir (beşik ve cumba için kalkan kuralı ya da ağırlıklı iskelet gerekir); küçük girintide ince şerit
+  kalır (143 m²); verandanın kendi çatısı ayrı iş (46 m²); makas, aşık ve yükleme listesi bu yüzlerden Motor'da kurulmalı (Motor bakımı).
+- **Hazır kütüphaneler (lisans):** CGAL Straight_skeleton_2, 5.6'dan beri ağırlıklı iskelet (kalkan kurar; GPL ya da ücretli);
+  bpypolyskel (GPL-3.0, yalnız kırma); polyskel (LGPL-3.0; yazarı bazı girdilerde hatalı olduğunu yazıyor); ladybug-geometry-polyskel (PyPI).
+  Kurulmadı. Karar Lokman'da (kart: ayrı Motor bakım işi açılsın mı).
