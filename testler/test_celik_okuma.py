@@ -300,3 +300,24 @@ def test_yedinci_tur_eksiltili_istek_sifat_yonelme():
     assert CO.parca_oku("tuvalette pencereyi 60x60 yapalım", C8801, KATALOG)["tur"] == "pencere"
     for s, beklenen in (("Ç8801L olsun başka bir şeye gerek yok", False), ("Ç8801K olsun harici tuvalet olsun", False), ("L çatı olamaz", True)):
         assert CO.cati_olumsuz(s, M) is beklenen, s
+
+
+def test_cati_isaretinin_nedeni_ayrilir():
+    """İE-20 PR-14 (canlı deneme D3, 16 Kasım 2026, v2026.11.16a): "çatı kiremidi olsun". Okuyucu harfsiz "çatı" cümlesinde tanıdığı renk ya
+    da malzeme sözü bulamazsa cümleyi çatı şekli isteği işaretler (`cati_sekil`); yumuşamış yazımı ("kiremidi") tanımaz. İşaretler ve
+    sınıflama değişmedi (formsuz çelik aynı yoldan gider). İşaretin nedeni iki alanla ayrılır: `cati_geo` şekil, eğim ya da yön sözü;
+    `cati_secim` çatı seçimi sözü (harf, varyant kodu, "katalog"). Karar katmanının kaplama kuralı bu iki alana bakar."""
+    for s, tur, sekil, geo, secim in (
+            ("çatı kiremidi olsun", "baska", True, False, False), ("çatı şıngıl olsun", "baska", True, False, False),
+            ("çatı alüminyum olsun", "baska", True, False, False), ("çatı oluğu galvaniz olsun", "baska", True, False, False),
+            ("çatı güzel olsun", "cati", True, False, False),
+            ("çatı kiremit olsun", "baska", False, False, False), ("çatı kaplaması kiremidi olsun", "baska", False, False, False),
+            ("kiremidi olsun", "baska", False, False, False),
+            ("çatı eğimi dik olsun kaplaması kiremidi olsun", "baska", True, True, False),
+            ("çatıyı kırma yap kiremidi olsun", "baska", True, True, False), ("çatı yüksek olsun", "cati", True, True, False),
+            ("çatı L olsun kiremidi olsun", "baska", True, False, True), ("Ç8801L kiremidi olsun", "baska", False, False, True),
+            ("katalog çatısı kiremidi olsun", "baska", True, False, True),
+            ("mutfak penceresi 120x120 olsun", "pencere", False, False, False), ("dışlar 140'lık olsun", "dis140", False, False, False)):
+        p = CO.parca_oku(s, C8801, KATALOG)
+        assert (p["tur"], p["isaret"]["cati_sekil"], p["cati_geo"], p["cati_secim"]) == (tur, sekil, geo, secim), s
+    assert CO.parca_oku("çatı kiremidi olmasın", C8801, KATALOG)["olumsuz"] and CO.parca_oku("çatı kiremidi olabilir mi?", C8801, KATALOG)["olumsuz"]
