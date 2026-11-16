@@ -19,7 +19,7 @@ Seçenekler (harf, ad; evin kendi çatısıyla aynı olan kurulmaz):
 Her seçenek için denetim: (1) Motor kurar ve çizim doğrulaması geçer (K23); (2) plan evinkiyle aynı (Motor'un brüt alanı ve pano sayısı);
 (3) havuz denetimi (D-112, BK-47: `araclar/havuz_denetimi.py`; hata sınıfı HD-01, 03, 04, 05, 08, 10 seçeneği düşürür, uyarı yazılır).
 Mühürlü evin (kaynağı `KARARLAR/muhurlu.json`'da kilitli) seçenekleri çizilir ama "mühürlü" işaretlenir: eklemek için Lokman'a ayrıca sorulur
-(D-83 › Kapsam dışı). Zaten çatı seçeneği olan ev (`beyin/veri/cati_varyantlari/`) atlanır.
+(D-83 › Kapsam dışı). Kayıtlı çatı seçeneği (`beyin/veri/cati_varyantlari/`) yeniden kurulmaz; evin öteki seçenekleri kurulur; bütün seçenekleri kayıtlı ev atlanır.
 
     python -m araclar.cati_secenekleri_toplu --cikti <klasör> [--ev PA-09 PA-12 …] [--is 4]
     python -m araclar.cati_secenekleri_toplu --cikti <klasör> --kaydet-komutlari --karar D-NN [--ev …]   # onaydan sonra
@@ -69,7 +69,11 @@ def evler(kok: Path = KOK) -> list[dict]:
     veri = kok / "beyin" / "veri"
     kayitlar = list(json.loads((veri / "adaylar_prefabrik.json").read_text(encoding="utf-8")))
     kayitlar += [json.loads(f.read_text(encoding="utf-8")) for f in sorted((veri / "havuz").glob("PA*.json"))]
-    secenekli = {f.stem.upper() for f in (veri / "cati_varyantlari").glob("*.json")}
+    kayitli: dict[str, set[str]] = {}                            # ev → kayıtlı seçenek harfleri (D-83, D-115 …)
+    for f in (veri / "cati_varyantlari").glob("*.json"):
+        r = json.loads(f.read_text(encoding="utf-8"))
+        t = str(r.get("taban") or f.stem).upper().replace("-", "")
+        kayitli.setdefault(t, set()).update(str(v["kod"]).upper()[len(t):] for v in r.get("varyantlar") or [])
     muhur = muhurlu_yerler(kok)
     out = []
     for k in kayitlar:
@@ -78,7 +82,7 @@ def evler(kok: Path = KOK) -> list[dict]:
         dosya = str((k.get("kaynak") or {}).get("dosya") or "")
         out.append({"kod": str(k["kod"]).upper(), "gosterim": k.get("gosterim") or k["kod"], "sablon": str(kok / "is_emri" / k["sablon"]),
                     "m2": k.get("katalog_m2"), "oda": k.get("oda_programi"), "muhur": muhur.get(dosya),
-                    "secenekli": str(k["kod"]).upper() in secenekli})
+                    "secenekli": str(k["kod"]).upper() in kayitli, "kayitli": sorted(kayitli.get(str(k["kod"]).upper(), ()))})
     return out
 
 
@@ -237,7 +241,8 @@ def ev_isle(ev: dict, cikti: Path) -> dict:
     """Bir ev: evin çatısı görseli, seçenekler, her seçeneğin çizimi ve denetimi. Süreç havuzunda da koşar."""
     from motor import geometry as G
     ie = json.loads(Path(ev["sablon"]).read_text(encoding="utf-8"))
-    sonuc = {**{k: ev[k] for k in ("kod", "gosterim", "m2", "oda", "muhur")}, "cati": ie.get("cati"), "secenekler": []}
+    sonuc = {**{k: ev[k] for k in ("kod", "gosterim", "m2", "oda", "muhur")}, "kayitli": ev.get("kayitli") or [], "cati": ie.get("cati"),
+             "secenekler": []}
     sonuc["cati_adi"] = cati_adi(ie.get("cati") or {})
     evin = ciz(ie, cikti / f"{ev['kod']}_cati.png")
     sonuc["evin_cizimi"] = evin
@@ -246,6 +251,8 @@ def ev_isle(ev: dict, cikti: Path) -> dict:
         return sonuc
     plan = G.kur(copy.deepcopy(ie))
     for s in secenekler(ie, plan):
+        if s["harf"] in (ev.get("kayitli") or ()):          # kayıtlı seçenek yeniden kurulmaz (evin öteki seçenekleri kurulur)
+            continue
         kod = f"{ev['kod']}{s['harf']}"
         r = {"harf": s["harf"], "kod": kod, "gosterim": f"{ev['gosterim']}-{s['harf']}", "ad": s["ad"], "cati": s["cati"]}
         if s["cati"] is None:
@@ -411,7 +418,7 @@ td,th {{ text-align:left; padding:6px 8px; border-bottom:1px solid var(--cizgi);
 <p>Motor havuzdaki {ev_sayisi} prefabrik evin çatı seçeneklerini kuralla çizdi ve her birini havuz denetiminden geçirdi. Her seçenekte plan
 evinkiyle aynıdır; yalnız çatı değişir. Görselde ön ve sol görünüş vardır; bayi de bunu görür.</p>
 <p class="not">Kural: kırma (dört yüz, mahya uzun kenar boyunca), beşik + salonun üstünde cumba (mahya önde, 87 m²'deki gibi), beşik (cumbasız ya
-da kırmasız). Eğim, saçak ve topuk evin kendi çatısından. Zaten çatı seçeneği olan ev: {h(atlanan)}.</p></header>
+da kırmasız). Eğim, saçak ve topuk evin kendi çatısından. Bütün seçenekleri kayıtlı ev: {h(atlanan)}.</p></header>
 <div class="ozet">
 <div class="sayi h"><b>{say['gecti']}</b>seçenek hazır</div>
 <div class="sayi b"><b>{say['denetimden_gecmedi']}</b>seçenek çizildi, denetimi bekliyor</div>
@@ -440,7 +447,7 @@ def kaydet_komutlari(sonuc: list[dict], karar: str, onaylanan: set[str] | None =
         p = ["python3", "araclar/cati_varyanti_kaydet.py", "--taban", ev["gosterim"], "--karar", karar, "--cati-adi", ev["cati_adi"]]
         for s in sec:
             p += ["--varyant", s["harf"], s["ad"], json.dumps(s["cati"], ensure_ascii=False)]
-        p += ["--kaynak", f"İE-44 toplu çatı seçenekleri ({karar})"]
+        p += ["--kaynak", f"İE-44 toplu çatı seçenekleri ({karar})"] + (["--ekle"] if ev.get("kayitli") else [])   # kayıtlı ev: eklenir
         out.append(" ".join(shlex.quote(x) for x in p))
     return out
 
@@ -470,8 +477,7 @@ def main(argv: list[str] | None = None) -> int:
     from beyin.katalog import Katalog
     istenen = {Katalog.kod_normalize(k) for k in a.ev}
     secilen = [e for e in evler() if not istenen or e["kod"] in istenen]
-    atlanan = [e["gosterim"] for e in secilen if e["secenekli"]]
-    isler = [(e, str(cikti)) for e in secilen if not e["secenekli"]]
+    isler = [(e, str(cikti)) for e in secilen]
     if a.isci > 1:
         from multiprocessing import get_context
         with get_context("spawn").Pool(a.isci) as p:
@@ -484,10 +490,12 @@ def main(argv: list[str] | None = None) -> int:
             ozet[s["durum"]] = ozet.get(s["durum"], 0) + 1
         print(f"{ev['gosterim']}: " + ("; ".join(f"{s['harf']} {s['durum']}" + (f" ({s['neden'][:120]})" if s.get('neden') else "")
                                                 for s in ev.get("secenekler") or []) or ev.get("neden", "seçenek yok")))
+    atlanan = [ev["gosterim"] for ev, (e, _) in zip(sonuc, isler) if e["kayitli"] and not ev.get("secenekler") and not ev.get("neden")]
+    sonuc = [ev for ev in sonuc if ev["gosterim"] not in atlanan]
     kayit = {"ozet": ozet, "atlanan": atlanan, "evler": sonuc}
     (cikti / "sonuc.json").write_text(json.dumps(kayit, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
     sayfa(kayit, cikti)
-    print(f"özet: {ozet}; zaten seçenekli (atlandı): {', '.join(atlanan) or 'yok'} → {cikti / 'sonuc.json'}")
+    print(f"özet: {ozet}; bütün seçenekleri kayıtlı (atlandı): {', '.join(atlanan) or 'yok'} → {cikti / 'sonuc.json'}")
     return 0
 
 

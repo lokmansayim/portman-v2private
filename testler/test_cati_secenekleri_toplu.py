@@ -78,3 +78,59 @@ def test_kayit_komutu_yalniz_kararla_ve_gecen_secenekle():
 def test_neden_yazisi_sade():
     assert "3D modelde kırma çatı beşik" in T.neden_yazisi({"durum": "denetimden_gecmedi", "neden": "HD-10 3D'deki ana çatı …"})
     assert "HD-" not in T.neden_yazisi({"durum": "denetimden_gecmedi", "neden": "HD-08 …; HD-03 …"})
+
+
+def test_kayitli_secenek_yeniden_kurulmaz(monkeypatch, tmp_path):
+    """D-115'ten sonra (bakımlar birleşince yeniden koşu): kayıtlı harf yeniden kurulmaz, evin öteki seçeneği kurulur; kayıt komutu
+    kayıtlı evde `--ekle` yazar. Çizim ve denetim burada sahte (yalnız seçenek süzgeci denenir)."""
+    ev = {e["gosterim"]: e for e in T.evler()}
+    assert ev["PA-06"]["kayitli"] == ["C", "K"] and ev["PA-08"]["kayitli"] == ["C"] and ev["PA-12"]["kayitli"] == []
+    monkeypatch.setattr(T, "ciz", lambda ie, png: {"gecti": True, "brut_cm2": 1, "pano": 1, "uyarilar": []})
+    monkeypatch.setattr(T, "denetle", lambda ie: {"dur": []})
+    s = T.ev_isle(ev["PA-08"], tmp_path)
+    assert [x["harf"] for x in s["secenekler"]] == ["B"] and s["kayitli"] == ["C"]          # evin çatısı kırma, C kayıtlı
+    k = T.kaydet_komutlari([{**s, "cati_adi": "Kırma"}], "D-999")
+    assert len(k) == 1 and "--varyant B" in k[0] and k[0].endswith("--ekle")
+
+
+def _cv_argv(*ek):
+    return ["cati_varyanti_kaydet.py", "--taban", "PA-06", "--karar", "D-83", "--cati-adi", "Beşik",
+            "--varyant", "K", "Kırma", json.dumps(_ie("PA06K")["cati"]), *ek]
+
+
+def test_kayitli_secenek_dusurulmez(monkeypatch, capsys):
+    """`cati_varyanti_kaydet.py` kayıtlı seçeneği düşürecek yeniden yazımı durdurur; `--ekle` kayıtlı harfi yeniden yazmaz. Dosya değişmez."""
+    import sys
+    from araclar import cati_varyanti_kaydet as CV, havuz_denetimi as HD
+    monkeypatch.setattr(HD, "denetle_prefabrik", lambda ie, kart=None: {"bulgular": []})
+    yol = KOK / "beyin/veri/cati_varyantlari/PA06.json"
+    once = yol.read_bytes()
+    monkeypatch.setattr(sys, "argv", _cv_argv())
+    assert CV.main() == 2 and "PA06C" in capsys.readouterr().out                           # yalnız K ile yazılsa C düşerdi
+    monkeypatch.setattr(sys, "argv", _cv_argv("--ekle"))
+    assert CV.main() == 2 and "zaten kayıtlı: PA06K" in capsys.readouterr().out
+    assert yol.read_bytes() == once
+
+
+def test_ekle_eski_secenekleri_aynen_tutar(monkeypatch, tmp_path, capsys):
+    """`--ekle`: yeni seçenek dosyanın sonuna; eski seçenekler, evin adı ve ilk karar aynen; yeni karar `ek_kararlar`'da; evin görseli
+    yeniden yazılmaz. Geçici klasörde (Motor sahte)."""
+    import sys
+    from araclar import cati_varyanti_kaydet as CV, havuz_denetimi as HD
+    (tmp_path / "KARARLAR").mkdir()
+    (tmp_path / "KARARLAR" / "D-999.md").write_text("PA-08-B", encoding="utf-8")
+    vd, ad = tmp_path / "beyin/veri/cati_varyantlari", tmp_path / "is_emri/adaylar"
+    vd.mkdir(parents=True); ad.mkdir(parents=True)
+    eski = (KOK / "beyin/veri/cati_varyantlari/PA08.json").read_text(encoding="utf-8")
+    (vd / "PA08.json").write_text(eski, encoding="utf-8")
+    monkeypatch.setattr(CV, "KOK", tmp_path); monkeypatch.setattr(CV, "VARYANT_DIR", vd); monkeypatch.setattr(CV, "ADAY_DIR", ad)
+    monkeypatch.setattr(CV, "ciz", lambda ie, png: {"brut_cm2": 1, "pano": 1, "uyarilar": []})
+    monkeypatch.setattr(HD, "denetle_prefabrik", lambda ie, kart=None: {"bulgular": []})
+    besik = {**_ie("PA08")["cati"], "tip": "besik"}
+    monkeypatch.setattr(sys, "argv", ["cati_varyanti_kaydet.py", "--taban", "PA-08", "--karar", "D-999", "--cati-adi", "başka ad",
+                                      "--varyant", "B", "Beşik", json.dumps(besik), "--ekle"])
+    assert CV.main() == 0, capsys.readouterr().out
+    yeni, e = json.loads((vd / "PA08.json").read_text(encoding="utf-8")), json.loads(eski)
+    assert [v["kod"] for v in yeni["varyantlar"]] == ["PA08C", "PA08B"] and yeni["varyantlar"][0] == e["varyantlar"][0]
+    assert (yeni["cati_adi"], yeni["karar"], yeni["ek_kararlar"]) == (e["cati_adi"], "D-115", ["D-999"])
+    assert yeni["varyantlar"][1]["kaynak"]["karar"] == "D-999" and not (ad / "PA08_cati.png").exists()
