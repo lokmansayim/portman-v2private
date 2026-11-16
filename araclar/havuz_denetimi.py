@@ -280,10 +280,14 @@ def denetle_genel(tanim: Path) -> dict:
 
 
 def kaplama_bulgusu(t: dict) -> list[dict]:
-    """HD-11: tanımın çizdiği çatı kaplaması (`cati.kaplama`, yoksa kitabın baz paketi) havuzun standardı mı (Lokman, 16 Kasım 2026
-    08:27:26 kartı "Standart: tek kat panel"). Gerçek projenin kaplaması bilgi olarak yazılır."""
+    """HD-11: bayiye çizilen çatı kaplaması (`cati.kaplama`, yoksa kitabın baz paketi) havuzun standardı mı (Lokman, 16 Kasım 2026
+    08:27:26 kartı "Standart: tek kat panel"). D-113'ten (BK-48) beri tanım dosyası asıl projedir ve değişmez; yeni projenin zarfına konan
+    `standart_kaplama` işlemi (`varyant.standart_kaplama_islemi`) uygulanmış tanım denetlenir. Gerçek projenin kaplaması bilgi olarak yazılır."""
+    from beyin import varyant
     from motor.genel.girdi_genel import KAPLAMA_ADI
     baz = json.loads((KOK / "kurallar" / "liste" / "kurallar.json").read_text(encoding="utf-8"))["baz_paket_cati_kaplamasi"]["deger"]
+    for op in varyant.standart_kaplama_islemi(t):
+        t = varyant.tanim_uygula(t, op)
     tanim = (t.get("cati") or {}).get("kaplama") or baz
     if tanim == baz:
         return []

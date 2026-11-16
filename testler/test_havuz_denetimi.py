@@ -45,11 +45,19 @@ def test_celik_havuz_evi_standart_kaplamayla():
     t = lambda kaplama=None, gercek=None: {"teknik_ozellikler": {"Çatı kaplaması": gercek} if gercek else {},
                                           "cati": {"tip": "besik", **({"kaplama": kaplama} if kaplama else {})}}
     assert HD.kaplama_bulgusu(t()) == [] and HD.kaplama_bulgusu(t("tek_kat_panel", "OSB + membran + shingle")) == []
-    b = HD.kaplama_bulgusu(t("sandvic_panel", "sandviç panel"))
-    assert [x["kalem"] for x in b] == ["HD-11"] and b[0]["sinif"] == "uyari" and "havuz standardı tek kat panel" in b[0]["metin"]
-    assert HD.kayit_kapisi({"bulgular": b})[0] == []                          # uyarı kaydı durdurmaz
+    # D-113 (BK-48): sandviç panelli tanım bayiye standart işlemle çizilir; uyarı yok. KT-07 (ve öteki 9 ev) artık uyarısız.
     kt07 = json.loads((KOK / "modeller" / "havuz" / "KT07.json").read_text(encoding="utf-8"))
-    assert "sandviç panel çiziyor" in HD.kaplama_bulgusu(kt07)[0]["metin"]
+    assert kt07["cati"]["kaplama"] == "sandvic_panel" and HD.kaplama_bulgusu(kt07) == []
+    # standart işlem bozulursa (bayiye standart dışı kaplama çizilirse) HD-11 uyarı verir; uyarı kaydı durdurmaz
+    from beyin import varyant
+    gercek = varyant.standart_kaplama_islemi
+    try:
+        varyant.standart_kaplama_islemi = lambda _t: []
+        b = HD.kaplama_bulgusu(t("sandvic_panel", "sandviç panel"))
+    finally:
+        varyant.standart_kaplama_islemi = gercek
+    assert [x["kalem"] for x in b] == ["HD-11"] and b[0]["sinif"] == "uyari" and "havuz standardı tek kat panel" in b[0]["metin"]
+    assert HD.kayit_kapisi({"bulgular": b})[0] == []
 
 
 def test_tabloda_denetlenmeyen_kalem_cizgi():
