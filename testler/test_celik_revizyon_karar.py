@@ -1653,3 +1653,40 @@ def test_hakem36_celik_acik_secim_soruya_donmez(s, metin):
     cati_seti(s)
     k = s.yaz(metin)
     assert k.eylem == "is_emri" and k.revizyon == 2 and s.plan["yapi"]["kod"] == "Ç8801K", k.mesaj
+
+
+
+@pytest.mark.parametrize("metin", [
+    "Ç8801 olsun, müşteri istedi bence de olur ama ustaya gösterilsin", "Ç8801 olsun, bakalım nakliye dahil yaklaşık ne kadar?",
+    "K olsun, bakalım kurulum dahil KDV dahil ne kadar?", "Ç8801 olsun, bakalım kurulumla beraber genel olarak ne kadar?",
+    "Ç8801 olsun, bakalım nakliye dahil kaça olur?", "Ç8801 olsun, bakalım nakliye dahil hepsi ne kadar?",
+    "Ç8801 olsun, bakalım nakliye dahil kdvli ne kadar?", "K olsun, bakalım nakliye dahil hepsi ne kadar?",
+    "Ç8801 olsun, müşteri istedi bence de olur ama kontrol edilsin", "K olsun, müşteri istedi bence de olur ama askıya alın",
+    "K olsun, bakalım nakliye dahil kdv dahil ne kadar?"])
+def test_hakem37_celik_kararsiz_soz_kaydedilmez(s, metin):
+    """Tur 37 çelikte: "bakalım nakliye dahil KDV dahil / hepsi ne kadar?", "nakliye dahil kaça olur?" kayıt almaz: plan r01, onay
+    yok, r02 yok."""
+    cati_seti(s)
+    k = s.yaz(metin)
+    assert K.PLAN_ONAYI not in k.gerekce and k.eylem != "is_emri" and s.plan["revizyon"] == 1 and not s.k.d.get("onaylanan"), k.mesaj
+
+
+
+@pytest.mark.parametrize("metin", [
+    "K olsun kabul ederiz eline sağlık", "K olsun, müşteri beğendi bence de güzel abi", "K olsun abi kabul ederiz eline sağlık",
+    "K olsun, bu şekilde kabul ederiz"])
+def test_hakem37_celik_acik_secim_soruya_donmez(s, metin):
+    """Tur 37 çelikte: "K olsun, tabi ki kabul ederiz", "bence de güzel abi", "montaj işinin fiyatını konuşuruz" r02 K'yı çizer."""
+    cati_seti(s)
+    k = s.yaz(metin)
+    assert k.eylem == "is_emri" and k.revizyon == 2 and s.plan["yapi"]["kod"] == "Ç8801K", k.mesaj
+
+
+
+@pytest.mark.parametrize("metin", [
+    "Ç8801 olsun, müşteri beğendi bence de güzel abi", "Ç8801 olsun, bu şekilde kabul ederiz"])
+def test_hakem37_celik_olumlu_soz_onay(s, metin):
+    """Tur 37 çelikte: evin çatısının vurgulu açık sözü onaydır."""
+    cati_seti(s)
+    k = s.yaz(metin)
+    assert k.gerekce == K.PLAN_ONAYI and k.revizyon == 1, k.mesaj

@@ -3993,3 +3993,148 @@ def test_hakem36_olumlu_soz_onay(tmp_path, metin):
     s, _ = _cati_seti(tmp_path)
     k = s.yaz(metin, niyet="diger")
     assert k.gerekce == K.PLAN_ONAYI and k.revizyon == 1, k.mesaj
+
+
+
+# İE-42 hakem tur 37: dahil fiyatının "KDV dahil / hepsi / kaça" ile sorulması, katılmanın ardındaki emir ve edilgen istek, ödemenin
+# koşulu kararsızdır; taahhüdün ve katılmanın vurgu, selam, övgü ve nezaket sözü, işin "için / işinin / ilgili" fiyatı, kesinleşmenin
+# öznesi ve işin, günün seçeneğinin devri açık sözdür
+@pytest.mark.parametrize("metin", [
+    "1 olsun, müşteri gelince kabul ederiz", "1 olsun, kabul ederiz ama müşteri bir baksın",
+    "2 olsun, müşteri istedi bence de olur ama bir daha konuşulsun", "2 olsun, müşteri istedi bence de olur ama ustaya gösterilsin",
+    "2 olsun, müşteri istedi bence de olur ama mühendise gösterilsin", "2 olsun, müşteri istedi bence de olur ama kapora yatırılsın",
+    "2 olsun, müşteri istedi bence de olur ama bize biraz zaman verin", "2 olsun, müşteri istedi bence de olur ama tartışılsın",
+    "2 olsun, müşteri istedi bence de olur ama askıya alın", "2 olsun, müşteri istedi bence de olur ama çizimi durdurun",
+    "2 olsun, müşteri istedi bence de olur ama ortağın fikrini alın", "2 olsun, müşteri istedi bence de olur ama bir de ustaya sorulsun",
+    "2 olsun, müşteri istedi bence de olur ama kontrol edilsin", "1 olsun, müşteri istedi bence de olur ama ustaya gösterilsin",
+    "1 olsun, müşteri istedi bence de olur ama bir daha konuşulsun", "1 olsun, bakalım nakliye dahil yaklaşık ne kadar?",
+    "1 olsun, bakalım kurulum dahil KDV dahil ne kadar?", "1 olsun, bakalım kurulumla beraber genel olarak ne kadar?",
+    "1 olsun, bakalım nakliye dahil tahminen ne kadar?", "1 olsun, bakalım nakliye dahil hepsi ne kadar?",
+    "1 olsun, bakalım nakliye dahil peşin ne kadar?", "1 olsun, bakalım montaj dahil kabaca ne kadar?",
+    "1 olsun, bakalım nakliyesiyle beraber aşağı yukarı ne kadar?", "1 olsun, bakalım nakliye dahil şu an ne kadar?",
+    "1 olsun, bakalım montajlı olarak ortalama ne kadar?", "1 olsun, bakalım nakliye dahil bize ne kadar?",
+    "1 olsun, bakalım kurulumla beraber genel ne kadar?", "1 olsun, bakalım nakliye dahil kdvli ne kadar?",
+    "1 olsun, bakalım nakliye dahil hepsi birlikte ne kadar?", "1 olsun, bakalım montaj dahil komple ne kadar?",
+    "1 olsun, bakalım nakliye dahil ev ne kadar?", "1 olsun, bakalım nakliye dahil bu ev ne kadar?",
+    "1 olsun, bakalım montaj ile beraber son ne kadar?", "1 olsun, bakalım nakliye dahil kaça olur?",
+    "1 olsun, bakalım nakliye dahil kaç lira?", "1 olsun, bakalım anahtar teslim yaklaşık ne kadar?",
+    "1 olsun, bakalım nakliye dahil yaklaşık olarak ne kadar?", "1 olsun, bakalım montaj dahil tamamı ne kadar?",
+    "1 olsun, bakalım nakliye dahil net ne kadar?", "2 olsun, bakalım nakliye dahil yaklaşık ne kadar?",
+    "2 olsun, bakalım kurulum dahil KDV dahil ne kadar?", "2 olsun, bakalım kurulumla beraber genel olarak ne kadar?",
+    "2 olsun, bakalım nakliye dahil tahminen ne kadar?", "2 olsun, bakalım montaj dahil kabaca ne kadar?",
+    "2 olsun, ödeme gelince kesinleşir", "2 olsun, ödemeden sonra kesinleşir", "2 olsun, hangisi olursa fark etmez",
+    "2 olsun, saçağın nerede olacağı fark etmez", "1 olsun, bakalım kaça çıkar?", "1 olsun, bakalım kaça mal olur?",
+    "1 olsun, bakalım kaç lira olur?", "1 olsun, bakalım kurulumla kaça olur?", "1 olsun, nakliye dahil kaça olur bakalım?",
+    "2 olsun, bakalım kaça olur?", "2 olsun, bakalım nakliye dahil kaça olur?", "1 olsun, bakalım montaj dahil hepsi ne kadar?",
+    "1 olsun, bakalım nakliye dahil komple ne kadar olur?", "1 olsun, bakalım nakliye dahil bu ne kadar?",
+    "1 olsun, bakalım nakliye dahil bu çatı ne kadar?", "1 olsun, bakalım nakliye dahil bu model ne kadar?",
+    "1 olsun, bakalım nakliye dahil ev kaça?", "1 olsun, bakalım nakliyeyle birlikte bu ev ne kadar?",
+    "1 olsun, bakalım kurulumla birlikte hepsi ne kadar?", "1 olsun, bakalım nakliye dahil kdv dahil ne kadar?",
+    "1 olsun. Bakalım nakliye dahil hepsi ne kadar?", "1 olsun, bakalım montaj dahil hepsi ne kadar olur?",
+    "1 olsun, bakalım nakliye dahil evimiz ne kadar?", "1 olsun, bakalım nakliye dahil hepsi kaç?",
+    "1 olsun, bakalım nakliye dahil hepsine ne kadar?", "1 olsun, bakalım nakliye dahil kdvsi ile ne kadar?",
+    "1 olsun, bakalım nakliye dahil kdvli olarak ne kadar?", "1 olsun, bakalım montaj dahil kdv dahil ne kadar?",
+    "1 olsun, bakalım nakliye ve montaj dahil hepsi ne kadar?", "2 olsun, bakalım nakliye dahil hepsi ne kadar?",
+    "2 olsun, bakalım nakliye dahil kdvli ne kadar?", "2 olsun, bakalım nakliye dahil bu ev ne kadar?",
+    "2 olsun, müşteri istedi bence de olur gerisi ortağın", "2 olsun, müşteri istedi bence de olur ama yazın",
+    "2 olsun, müşteri istedi bence de olur ama bu iş ortağın", "2 olsun, müşteri istedi bence de olur ama fikir ortağın",
+    "2 olsun, müşteri istedi bence de olur onay ortağımın", "2 olsun, müşteri istedi bence de olur ama ertelensin",
+    "2 olsun, müşteri istedi bence de olur ama durdurulsun", "2 olsun, müşteri istedi bence de olur teyit edilsin",
+    "2 olsun, müşteri istedi bence de olur ama biraz sabredin", "2 olsun, müşteri istedi bence de olur ama durun",
+    "1 olsun, müşteri istedi bence de olur ama kontrol edilsin", "1 olsun, müşteri istedi bence de olur ama askıya alın",
+    "1 olsun, müşteri istedi bence de olur ama çizimi durdurun", "1 olsun, müşteri istedi bence de olur ama bize biraz zaman verin",
+    "1 olsun, müşteri istedi bence de olur ama kapora yatırılsın", "1 olsun, müşteri istedi bence de olur ama tartışılsın",
+    "1 olsun, müşteri istedi bence de olur ama biraz sabredin", "1 olsun, müşteri istedi bence de olur gerisi ortağın",
+    "1 olsun, ödemeden sonra kesinleşir", "2 olsun, kaporadan sonra kesinleşir", "2 olsun, imzadan sonra netleşir",
+    "1 olsun, bakalım kaç para?", "2 olsun, hafta arası bakarız", "2 olsun, montaj dahil fiyatı konuşuruz",
+    "2 olsun, fiyatı sonra konuşuruz", "2 olsun, montajla fiyatı sonra konuşuruz", "2 olsun, fiyat konusunu ve montajı sonra konuşuruz",
+    "1 olsun, müşteri istedi bence kırma daha güzel", "2 olsun, müşteri istedi bence de olur ama kapora gelsin",
+    "2 olsun, müşteri istedi bence de olur ama müşteriye gösterin", "2 olsun, müşteri istedi bence de olur ama gerisi ortağın",
+    "2 olsun, müşteri istedi bence de olur ama bir daha konuşalım", "1 olsun, kabul ediyoruz inşallah", "1 olsun, sonra onaylıyoruz",
+    "1 olsun, onaylıyoruz sanırım", "1 olsun, olur inşallah", "2 olsun, olur inşallah", "2 olsun, kabul ederiz gibi",
+    "2 olsun, onaylarız gibi geliyor", "2 olsun, bence de kabul ederiz", "2 olsun, kapora gelince netleşir",
+    "2 olsun, sözleşmeden sonra kesinleşir", "2 olsun, ödeme gelince, yarın kesinleşir", "2 olsun, bakalım toplam ne kadar tutar?",
+    "2 olsun, bakalım nakliye dahil toplam kaça olur?", "2 olsun, çatının hangisi olduğu fark etmez",
+    "2 olsun, bakalım nakliye dahil hepsi kaç?", "2 olsun, bakalım kombiyle beraber ne kadar?", "1 olsun, bakalım ne tutar?",
+    "1 olsun, bakalım nakliye dahil ne tutar?", "1 olsun, bakalım kaç gün, ne kadar tutar?"])
+def test_hakem37_kararsiz_ve_kosullu_soz_kaydedilmez(tmp_path, metin):
+    """Tur 37 (Y1, Y2, önceden var): dahil fiyatı ("nakliye dahil KDV dahil / hepsi / bu ev ne kadar?", "nakliye dahil kaça olur?",
+    "hepsi kaç?", "bakalım kaça olur?"), iki parça önceki fiyat ("fiyatı, montajı sonra konuşuruz, ne kadar?"), katılmanın ardındaki
+    emir ve edilgen istek ("ama ustaya gösterilsin", "ama kapora yatırılsın", "durun", "gerisi ortağın"), ödemenin koşulu ("ödemeden
+    sonra kesinleşir", "imzadan sonra netleşir"), şimdiki zamanlı taahhüdün şüphesi ("sonra kabul ediyoruz") ve "olur inşallah" kayıt
+    almaz: plan r01, onay yok, r02 yok."""
+    s, _ = _cati_seti(tmp_path)
+    k = s.yaz(metin, niyet="diger")
+    assert K.PLAN_ONAYI not in k.gerekce and k.eylem != "is_emri" and s.plan["revizyon"] == 1 and not s.k.d.get("onaylanan"), k.mesaj
+
+
+@pytest.mark.parametrize("metin", [
+    "2 olsun kabul ederiz eline sağlık", "2 olsun kabul ederiz çizimi gönderin", "2 olsun, bu şekilde kabul ederiz",
+    "2 olsun, tamamdır kabul ederiz", "2 olsun, peki kabul ederiz", "2 olsun, okey kabul ederiz", "2 olsun, kabul ederiz sorun yok",
+    "2 olsun, seve seve kabul ederiz", "2 olsun, memnuniyetle kabul ederiz", "2 olsun, kabul ederiz çok güzel olmuş",
+    "2 olsun çok güzel olmuş kabul ederiz", "2 olsun, kabul ederiz devam edin", "2 olsun, kabul ederiz selamlar",
+    "2 olsun, kabul ederiz sağ olun", "2 olsun kabul ederiz iyi günler", "2 olsun, şartsız kabul ederiz", "2 olsun, onaylarız tabi ki",
+    "2 olsun, tabi ki kabul ederiz", "2 olsun, elbette kabul ederiz", "2 olsun, kabul ederiz elbette", "2 olsun, kabul ederiz tabiki",
+    "2 olsun, kabul ederiz valla", "2 olsun, kabul ederiz itirazımız yok", "2 olsun, kabul ederiz anlaştık",
+    "2 olsun, müşteri de biz de kabul ederiz", "2 olsun, biz kabul ederiz müşteri de onayladı", "2 olsun, onay veririz eline sağlık",
+    "2 olsun, onaylarız gönderin", "2 olsun, kabul ederiz maşallah", "2 olsun, kabul ederiz ellerinize sağlık",
+    "2 olsun, müşteri beğendi bence de güzel abi", "2 olsun, müşteri beğendi bence de çok güzel olmuş eline sağlık",
+    "2 olsun, müşteri beğendi bence de güzel olmuş ellerinize sağlık", "2 olsun, müşteri istedi bence de olur hocam",
+    "2 olsun, müşteri istedi bence de olur kardeşim", "2 olsun, müşteri istedi bence de olur valla",
+    "2 olsun, müşteri istedi bence de olur zaten", "2 olsun, müşteri istedi bence de olur hemen başlayalım",
+    "2 olsun, müşteri istedi bence de olur onaylayalım", "2 olsun, müşteri istedi bence de olur siparişi verelim",
+    "2 olsun, müşteri istedi bence de olur işe başlayalım", "2 olsun, müşteri istedi bence de olur iyi günler",
+    "2 olsun, müşteri istedi bence de olur selamlar", "2 olsun, müşteri beğendi bence de güzel maşallah",
+    "2 olsun, müşteri beğendi bence de harika olmuş tebrikler", "2 olsun, müşteri beğendi bence de süper olmuş emeğinize sağlık",
+    "2 olsun, müşteri istedi bence de olur gönderebilirsiniz", "2 olsun, müşteri istedi bence de olur sözleşmeyi hazırlayalım",
+    "2 olsun, müşteri istedi bence de olur yola çıkalım", "2 olsun, müşteri istedi bence de olur bu iş tamam",
+    "2 olsun, müşteri istedi bence de olur hadi hayırlısı", "2 olsun, müşteri istedi bence de olur ev çok güzel olacak",
+    "2 olsun, müşteri beğendi bizce de uygun abi", "2 olsun, bakalım montaj ücretiyle birlikte nakliye ne kadar?",
+    "2 olsun, bakalım nakliye ücreti dahil montaj ne kadar?", "2 olsun, bakalım nakliye fiyatıyla montaj fiyatı ne kadar?",
+    "2 olsun, bakalım montaj ücreti hariç nakliye ne kadar?", "2 olsun, bakalım vinç ücreti dahil nakliye ne kadar tutar?",
+    "2 olsun, montaj için fiyatı sonra konuşuruz", "2 olsun, montaj ve nakliye için fiyatları konuşuruz",
+    "2 olsun, montaj işinin fiyatını konuşuruz", "2 olsun, montaj kısmının fiyatını sonra konuşuruz",
+    "2 olsun, montajla ilgili fiyatı konuşuruz", "2 olsun, nakliye için ayrıca fiyat konuşuruz",
+    "2 olsun, fiyatlarını konuşuruz montaj ve nakliyenin", "2 olsun, bu fiyata montajı da konuşuruz",
+    "2 olsun, vinç parasını sonra konuşuruz", "2 olsun, montaj için ücret konusunu sonra konuşuruz",
+    "2 olsun, kurulum ekibinin ücretini konuşuruz", "2 olsun, montaj tarihi gelecek hafta, yarın kesinleşir",
+    "2 olsun, montaj tarihi değişecek, yarın kesinleşir", "2 olsun, ödeme planı çıkacak, yarın netleşir",
+    "2 olsun, montaj ekibi pazartesi gelecek, yarın kesinleşir", "2 olsun, nakliye günü ayarlanacak, yarın netleşir",
+    "2 olsun, günlerden hangisi olursa fark etmez", "2 olsun, kombinin hangisi olduğu fark etmez",
+    "2 olsun, kapıların hangisi olursa fark etmez", "2 olsun, haftanın hangisi olursa fark etmez",
+    "2 olsun, hafta içi ya da sonu hangisi olursa fark etmez", "2 olsun, sabah mı akşam mı hangisi olursa fark etmez",
+    "2 olsun hocam müşteri istedi bence de olur iyi akşamlar", "2 olsun, öyleyse kabul ederiz", "2 olsun, bu şekilde onaylarız",
+    "2 olsun, çizildiği gibi kabul ederiz", "2 olsun, müşteri istedi bence de olur eşi de gördü",
+    "2 olsun, müşteri istedi bence de olur müşteri de baktı beğendi", "2 olsun, müşteri istedi bence de olur müşteri de geldi gördü",
+    "2 olsun, müşteri beğendi bence de güzel kardeşim", "2 olsun, müşteri beğendi bence de çok şık",
+    "2 olsun, müşteri beğendi bence de güzel duruyor", "2 olsun, müşteri beğendi bence de güzel görünüyor",
+    "2 olsun, bakalım kaç gün sürer?", "2 olsun, kombiyi sonra konuşuruz", "2 olsun, müşteri istedi bence de olur müşteriye gösterdik",
+    "2 olsun, müşteri beğendi bence de güzel, ortağım da gördü", "2 olsun, ödeme planı yarın kesinleşir",
+    "2 olsun, montaj günü gelecek hafta kesinleşir", "2 olsun, bakalım kurulum ile nakliye ne kadar tutar?",
+    "2 olsun, bakalım vinç kaça olur?", "2 olsun, bakalım vinç kaç para?", "2 olsun, bakalım nakliye dahil vinç ne kadar?",
+    "2 olsun, bakalım kombiyle beraber klima ne kadar?", "2 olsun, bakalım kurulum ile nakliye ne tutar?",
+    "2 olsun, bakalım vinç ne tutar?", "2 olsun, bakalım montajlı klima ne kadar tutar?"])
+def test_hakem37_acik_secim_soruya_donmez(tmp_path, metin):
+    """Tur 37 (O1, O2, O3, O4, O5, önceden var): taahhüdün vurgu, selam ve nezaket sözü ("bu şekilde / tabi ki / elbette kabul ederiz",
+    "kabul ederiz eline sağlık", "çizildiği gibi"), katılmanın hitap, övgü ve isteği ("bence de güzel abi", "güzel duruyor", "hemen
+    başlayalım", "eşi de gördü"), başka işin tutarı ("montaj ücreti hariç nakliye ne kadar?", "kurulum ile nakliye ne kadar tutar?"),
+    işin fiyatının beklemesi ("montaj için fiyatı sonra konuşuruz", "vinç parasını"), kesinleşmenin öznesi ("montaj tarihi değişecek,
+    yarın kesinleşir") ve işin, günün seçeneğinin devri ("günlerden hangisi olursa fark etmez") açık seçimi soruya çevirmez: r02
+    PA-06-K."""
+    s, _ = _cati_seti(tmp_path)
+    k = s.yaz(metin, niyet="diger")
+    assert k.eylem == "is_emri" and k.revizyon == 2 and k.is_emri["talep"]["kaynak"] == "PA06K", k.mesaj
+
+
+
+@pytest.mark.parametrize("metin", [
+    "1 olsun, kabul ederiz abi eline sağlık", "1 olsun, bu şekilde kabul ederiz", "1 olsun, planı kabul ederiz",
+    "1 olsun, bu planı onaylarız", "1 olsun, kabul ediyoruz", "1 olsun, müşteri beğendi bence de güzel abi",
+    "1 olsun, müşteri beğendi bence de çok güzel olmuş eline sağlık", "1'i seçtik onaylarız", "1 olsun, öyleyse kabul ederiz",
+    "1 olsun, olduğu gibi onaylarız", "1 olsun, onaylıyoruz"])
+def test_hakem37_olumlu_soz_onay(tmp_path, metin):
+    """Tur 37: evin çatısının vurgulu ve övgülü açık sözü ("1 olsun, bu şekilde kabul ederiz", "olduğu gibi onaylarız", "bence de
+    güzel abi") onaydır: r01 onaylanır."""
+    s, _ = _cati_seti(tmp_path)
+    k = s.yaz(metin, niyet="diger")
+    assert k.gerekce == K.PLAN_ONAYI and k.revizyon == 1, k.mesaj
