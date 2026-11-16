@@ -10,6 +10,10 @@ Ev başına bir dosya: evin kaydı (`adaylar_prefabrik.json`, referans girdi) de
 Her seçenek önce havuz denetiminden geçer (D-112, BK-47): hata veren seçenek varsa hiçbir dosya yazılmaz. Seçenek `gecerli` yazılır, yalnız Lokman'ın kararıyla (`--karar D-NN`; karar dosyası her seçeneğin kodunu yazar, İE-36 kuralı). Bayiye
 sunulma yine K-A10 kabul kaydına bağlıdır (her kod ayrı). Plan aynı kalmalı: Motor'un brüt alanı ve pano sayısı evinkiyle aynı değilse durur.
 LLM, ağ ve sunucu yok.
+
+D-111 (İE-43 PR-4b): taban aday havuzundaki ev de olabilir (`beyin/veri/havuz/<kod>.json`; havuz kaydı da değişmez). CATI_JSON ya ana
+çatıdır (`{"tip": …}`, bugünkü yol) ya da yalnız verandanın çatısını değiştiren seçenektir: `{"veranda_catilari": {"<veranda adı>": {…}}}`
+(92 m²'nin iki veranda çatısı; ana çatı ve plan aynı). İkisi birlikte: `{"cati": {…}, "veranda_catilari": {…}}`. Değişiklik yoksa durur.
 """
 from __future__ import annotations
 import argparse, copy, json, re, sys, tempfile
@@ -36,8 +40,33 @@ def ciz(ie: dict, png: Path) -> dict:
         return {"brut_cm2": round(PL.bina_brut_cm2(plan)), "pano": len(plan.panolar), "uyarilar": list(m.get("warnings") or [])}
 
 
+def cati_uygula(ie: dict, deger: dict) -> None:
+    """Seçeneğin çatısını şablonun kopyasına yazar: `{"tip": …}` ana çatı; ya da `cati` ve/veya `veranda_catilari` {veranda adı: çatı}."""
+    if not isinstance(deger, dict) or not deger:
+        raise SystemExit(f"DUR: çatı JSON nesnesi olur: {deger}")
+    if "tip" in deger:
+        ie["cati"] = deger
+        return
+    if set(deger) - {"cati", "veranda_catilari"}:
+        raise SystemExit(f"DUR: çatı seçeneği {{'tip': …}} ya da cati / veranda_catilari alır: {sorted(deger)}")
+    if "cati" in deger:
+        ie["cati"] = deger["cati"]
+    verandalar = {str(v.get("ad")): v for v in ie.get("verandalar") or []}
+    for ad, c in (deger.get("veranda_catilari") or {}).items():
+        if ad not in verandalar:
+            raise SystemExit(f"DUR: şablonda {ad} adlı veranda yok ({', '.join(verandalar) or 'veranda yok'})")
+        verandalar[ad]["cati"] = c
+
+
+def ev_kaydi(taban: str) -> dict | None:
+    """Evin aday kaydı: önce `adaylar_prefabrik.json` (İE-36), yoksa aday havuzu (İE-38; D-111: disk arşivi evleri)."""
+    from beyin.katalog import ADAYLAR_PREFABRIK_JSON, havuz_kayitlari
+    ev = next((x for x in json.loads(ADAYLAR_PREFABRIK_JSON.read_text(encoding="utf-8")) if str(x.get("kod")).upper() == taban), None)
+    return ev if ev is not None else next((x for x in havuz_kayitlari(yapi="prefabrik") if str(x.get("kod")).upper() == taban), None)
+
+
 def main() -> int:
-    from beyin.katalog import Katalog, ADAYLAR_PREFABRIK_JSON, SABLON_DIR
+    from beyin.katalog import Katalog, SABLON_DIR
     ap = argparse.ArgumentParser()
     ap.add_argument("--taban", required=True, help="evin kodu (ör. PA-06)")
     ap.add_argument("--karar", required=True, help="Lokman'ın kararı (KARARLAR/<D-NN>.md; her seçeneğin kodunu yazar)")
@@ -46,9 +75,9 @@ def main() -> int:
     ap.add_argument("--kaynak", default="")
     a = ap.parse_args()
     taban = Katalog.kod_normalize(a.taban)
-    ev = next((x for x in json.loads(ADAYLAR_PREFABRIK_JSON.read_text(encoding="utf-8")) if str(x.get("kod")).upper() == taban), None)
+    ev = ev_kaydi(taban)
     if ev is None or not ev.get("sablon"):
-        print(f"DUR: {a.taban} prefabrik aday kaydında yok"); return 2
+        print(f"DUR: {a.taban} prefabrik aday kaydında ve havuzda yok"); return 2
     karar_yolu = KOK / "KARARLAR" / f"{a.karar}.md" if re.fullmatch(r"D-\d{2,3}", a.karar) else None
     karar_metni = karar_yolu.read_text(encoding="utf-8").upper() if karar_yolu and karar_yolu.exists() else ""
     gosterim_taban = str(ev.get("gosterim") or ev["kod"])
@@ -63,7 +92,7 @@ def main() -> int:
     denetim = {}
     for h, _ad, cati_json in a.varyant:                                         # D-112 (BK-47): hata veren seçenek havuza yazılmaz;
         h = h.upper(); gosterim = f"{gosterim_taban}-{h}"                       # önce hepsi denetlenir, hiçbir dosya yazılmadan
-        ie = copy.deepcopy(sablon); ie["cati"] = json.loads(cati_json)
+        ie = copy.deepcopy(sablon); cati_uygula(ie, json.loads(cati_json))
         dur, uyari = HD.kayit_kapisi(HD.denetle_prefabrik(ie))
         if dur:
             print(f"DUR: {gosterim} havuz denetimi geçmedi (D-112); kayıt yazılmadı:\n- " + "\n- ".join(dur)); return 1
@@ -75,7 +104,9 @@ def main() -> int:
     for h, ad, cati_json in a.varyant:
         h = h.upper(); kod = f"{taban}{h}"; gosterim = f"{gosterim_taban}-{h}"
         ie = copy.deepcopy(sablon)
-        ie["cati"] = json.loads(cati_json)
+        cati_uygula(ie, json.loads(cati_json))
+        if ie == {**sablon, "is_emri_no": ie["is_emri_no"], "yapi": ie["yapi"]}:
+            print(f"DUR: {gosterim} çatısı evinkiyle aynı"); return 2
         ie["is_emri_no"] = f"PM-ADAY-{kod}"
         ie.setdefault("yapi", {})["referans_model"] = gosterim
         png = ADAY_DIR / f"{kod}.png"
