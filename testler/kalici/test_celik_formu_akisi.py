@@ -475,6 +475,106 @@ def test_standart_formdan_sonra_yazilan_kaplama_form_yenilenince_son_soz_form(de
     assert "Uygulanan: çatı kaplaması sandviç panel." in govde and "Mesajınızda" not in govde, govde
 
 
+# İE-20 PR-14 (canlı deneme D3, 16 Kasım 2026, v2026.11.16a). Çelik plan r01 açıkken "çatı kiremidi olsun" yazıldı; r02 gelmedi, istek
+# geri çevrildi ("… çatı için katalog çatısı, K ya da L seçilebilir"). Neden: cümle okuyucusu (`celik_okuma`) "kiremidi" yazımını malzeme
+# sözü saymadı ve cümleyi çatı şekli isteği okudu; kaplama kuralı şekil işaretli cümleyi saymaz. PR #233 "kiremid" kökünü yalnız karar
+# katmanına eklemişti ve yalnız kıyas düzeyinde denemişti; akış testi yoktu. Hedef: K8'in (D-97) ve D-106'nın onaylı cümleleri, çatı
+# kaplamasının her yazımında. Yeni bayi cümlesi yok.
+YAZIMLAR = ["çatı kiremidi olsun", "çatı marsilya kiremidi olsun", "çatı şıngıl olsun", "çatı ondulin olsun", "çatı alüminyum olsun",
+            "çatıyı galvaniz yap"]
+
+
+@pytest.mark.parametrize("okuma", sorted(OKUMA))
+def test_revizyonda_kiremidi_yazimi_bayinin_cumlesinden(depo, wa, tmp_path, hizli_genel, okuma):  # noqa: F811
+    """Canlı deneme D3: r01 formdan sandviç panelle çizildi; bayi "çatı kiremidi olsun" yazdı. Sonuç K8'in cümlesindeki gibidir ("çatı
+    kaplaması kiremit olsun"): r02 gelir, seçim plandan çıkar, söz talebe yazılır. İstek geri çevrilmez. LLM okuması ne olursa olsun."""
+    s = _sandvic_formu(depo, wa, tmp_path)
+    assert _c8801(depo, wa, s)["eylem"] == "is_emri"
+    soz = "çatı kiremidi olsun"
+    assert depo.mesaj_kaydet(mesaj(soz, talep("revizyon", ozet=soz, katalog_kodu="Ç8801", **OKUMA[okuma](soz))))
+    [r] = isle_hepsi(depo, s)
+    assert r["eylem"] == "is_emri", r
+    ie, govde = _son_plan(depo)
+    assert ie["revizyon"] == 2 and ie["yapi"]["degisiklikler"] == [] and ie["yapi"]["uygulanan"] == []
+    assert ie["bilgi"]["ozel_istekler"] == (["Çatı Kaplaması: kiremit"] if "satir" in okuma else [soz])
+    assert ("Mesajınızda başka bir çatı kaplaması yazdınız. Sandviç panel seçiminizi plandan çıkardım. Planı modelin kendi çatı "
+            "kaplamasıyla çizdim. Yazdığınız kaplamayı talebe yazdım. Ön onay planınız hazır") in govde, govde
+
+
+@pytest.mark.parametrize("okuma", ["bos", "cati_degistir"])                     # canlıda görülen iki okuma biçimi (K7, K8)
+@pytest.mark.parametrize("soz", YAZIMLAR)
+@pytest.mark.parametrize("kaplama", ["sandvic", "tek_kat"])
+def test_revizyonda_kaplamanin_oteki_yazimlari_bayinin_cumlesinden(depo, wa, tmp_path, hizli_genel, kaplama, soz, okuma):  # noqa: F811
+    """D3'ün ailesi: karar katmanının çatı kaplaması saydığı her yazım revizyonda da kaplama cümlesidir. Formda sandviç panel seçildiyse
+    K8'in cümlesi (D-97), form standart kaldıysa üç cümle (D-106) gider; r02 gelir, söz talebe yazılır, istek geri çevrilmez."""
+    s = _sandvic_formu(depo, wa, tmp_path, kaplama=kaplama)
+    assert _c8801(depo, wa, s)["eylem"] == "is_emri"
+    assert depo.mesaj_kaydet(mesaj(soz, talep("revizyon", ozet=soz, katalog_kodu="Ç8801", **OKUMA[okuma](soz))))
+    [r] = isle_hepsi(depo, s)
+    assert r["eylem"] == "is_emri", r
+    ie, govde = _son_plan(depo)
+    assert ie["revizyon"] == 2 and ie["yapi"]["kod"] == "Ç8801" and ie["yapi"]["degisiklikler"] == [] and ie["yapi"]["uygulanan"] == []
+    assert ie["bilgi"]["ozel_istekler"] == [soz]
+    if kaplama == "sandvic":
+        assert ("Mesajınızda başka bir çatı kaplaması yazdınız. Sandviç panel seçiminizi plandan çıkardım. Planı modelin kendi çatı "
+                "kaplamasıyla çizdim. Yazdığınız kaplamayı talebe yazdım. Ön onay planınız hazır") in govde, govde
+    else:
+        assert f"{UC_CUMLE} Ön onay planınız hazır" in govde and "plandan çıkardım" not in govde, govde
+
+
+@pytest.mark.parametrize("okuma", ["bos", "cati_degistir"])
+@pytest.mark.parametrize("kaplama", ["sandvic", "tek_kat"])
+def test_formdan_sonra_kiremidi_yazimi_ilk_planda(depo, wa, tmp_path, hizli_genel, kaplama, okuma):  # noqa: F811
+    """D3'ün ilk plan karşılığı (K7 ve D-106'nın ilk plan yolu): formdan sonra, plandan önce "çatı kiremidi olsun". Plan modelin kendi
+    kaplamasıyla çizilir, söz talebe yazılır, bayiye söylenir; plan geri çevrilmez."""
+    s = _sandvic_formu(depo, wa, tmp_path, kaplama=kaplama)
+    soz = "çatı kiremidi olsun"
+    assert depo.mesaj_kaydet(mesaj(soz, talep(ozet=soz, **OKUMA[okuma](soz))))
+    [r] = isle_hepsi(depo, s)
+    assert r["eylem"] == "secenek", r
+    assert _c8801(depo, wa, s)["eylem"] == "is_emri"
+    ie, govde = _son_plan(depo)
+    assert ie["revizyon"] == 1 and ie["yapi"]["degisiklikler"] == [] and ie["bilgi"]["ozel_istekler"] == [soz]
+    if kaplama == "sandvic":
+        assert ("Formda çatı kaplaması sandviç panel seçtiniz. Mesajınızda başka bir kaplama yazdınız. Planı modelin kendi çatı "
+                "kaplamasıyla çizdim. Yazdığınız kaplamayı talebe yazdım.") in govde and "Uygulanan" not in govde, govde
+    else:
+        assert f"{UC_CUMLE} Ön onay planınız hazır" in govde and "Formda çatı kaplaması" not in govde, govde
+
+
+@pytest.mark.parametrize("kaplama", ["sandvic", "tek_kat"])
+def test_revizyonda_kiremidi_yazimi_pencere_istegiyle_birlikte(depo, wa, tmp_path, hizli_genel, kaplama):  # noqa: F811
+    """D3, karma mesaj: "çatı kiremidi olsun, mutfak penceresi 120x120 olsun". Pencere işlenir, kaplama sözü talebe yazılır; ikisi de düşmez."""
+    s = _sandvic_formu(depo, wa, tmp_path, kaplama=kaplama)
+    assert _c8801(depo, wa, s)["eylem"] == "is_emri"
+    soz = "çatı kiremidi olsun, mutfak penceresi 120x120 olsun"
+    assert depo.mesaj_kaydet(mesaj(soz, talep("revizyon", ozet=soz, katalog_kodu="Ç8801", varyantlar=_cati_v("çatı kiremidi olsun"),
+                                              pencereler=[{"mahal": "mutfak", "olcu": "120x120", "islem": "degistir"}])))
+    [r] = isle_hepsi(depo, s)
+    assert r["eylem"] == "is_emri", r
+    ie, govde = _son_plan(depo)
+    assert ie["revizyon"] == 2 and [x["op"] for x in ie["yapi"]["degisiklikler"]] == ["pencere_olcu"]
+    assert ie["bilgi"]["ozel_istekler"] == ["çatı kiremidi olsun"]
+    assert ("Sandviç panel seçiminizi plandan çıkardım." if kaplama == "sandvic" else UC_CUMLE) in govde and "→ 120/120" in govde, govde
+
+
+@pytest.mark.parametrize("soz", [
+    "çatı eğimi dik olsun kaplaması kiremidi olsun",               # çatı şekli isteği taşıyan cümle kaplama cümlesi değildir
+    "çatı kiremidi olmasın",                                       # olumsuz cümle (K21)
+    "çatı kiremidi olabilir mi?",                                  # soru biçimi (K21)
+    "çatı oluğu galvaniz olsun",                                   # çatının parçası; çatı örtüsü değil
+    "çatı penceresi alüminyum olsun",                              # çatının parçası; çatı örtüsü değil
+])
+@pytest.mark.parametrize("kaplama", ["sandvic", "tek_kat"])
+def test_revizyonda_oteki_yazimlarin_siniri_bugunku_yoldan(depo, wa, tmp_path, hizli_genel, kaplama, soz):  # noqa: F811
+    """D3 düzeltmesinin sınırı: yeni tanınan yazımlar da yalnız yalın kaplama cümlesinde sayılır. Çatı şekli, olumsuz, soru ve çatının
+    parçasını anan cümle bugünkü yoldan gider: istek geri çevrilir, plan r01 kalır, söz talebe yazılmaz, form seçimi zarfta kalır."""
+    if kaplama == "sandvic":
+        test_revizyonda_kaplama_cumlesi_olmayan_cati_istegi_bugunku_yoldan(depo, wa, tmp_path, hizli_genel, soz, "yonlendir")
+    else:
+        test_standart_formda_revizyonda_kaplama_cumlesi_olmayan_istek_bugunku_yoldan(depo, wa, tmp_path, hizli_genel, soz, "yonlendir")
+
+
 @pytest.mark.parametrize("soz,kod,islem", [("çatı L olsun", "Ç8801L", [("cati_kaplamasi", "sandvic_panel")]),
                                            ("mutfak penceresi 120x120 olsun", "Ç8801", None)])
 def test_formdan_sonra_kaplama_disi_istek_bugunku_yoldan(depo, wa, tmp_path, hizli_genel, soz, kod, islem):  # noqa: F811

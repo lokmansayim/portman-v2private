@@ -7,7 +7,7 @@ koşumu (doğrulama geçmeli, K23) → çatı görseli (ön ve sol görünüş) 
 Yazdıkları: is_emri/adaylar/<taban>_cati.png (evin kendi çatısı), is_emri/adaylar/<taban><harf>.json (şablon; is_emri_no PM-ADAY-<kod>,
 yapi.referans_model bayinin gördüğü kod), is_emri/adaylar/<taban><harf>.png (çatı görseli), beyin/veri/cati_varyantlari/<taban>.json.
 Ev başına bir dosya: evin kaydı (`adaylar_prefabrik.json`, referans girdi) değişmez; Katalog seçenekleri evin kaydına bellekte bağlar.
-Seçenek `gecerli` yazılır, yalnız Lokman'ın kararıyla (`--karar D-NN`; karar dosyası her seçeneğin kodunu yazar, İE-36 kuralı). Bayiye
+Her seçenek önce havuz denetiminden geçer (D-112, BK-47): hata veren seçenek varsa hiçbir dosya yazılmaz. Seçenek `gecerli` yazılır, yalnız Lokman'ın kararıyla (`--karar D-NN`; karar dosyası her seçeneğin kodunu yazar, İE-36 kuralı). Bayiye
 sunulma yine K-A10 kabul kaydına bağlıdır (her kod ayrı). Plan aynı kalmalı: Motor'un brüt alanı ve pano sayısı evinkiyle aynı değilse durur.
 LLM, ağ ve sunucu yok.
 """
@@ -59,6 +59,15 @@ def main() -> int:
         if f"{gosterim_taban}-{h}".upper() not in karar_metni:
             print(f"DUR: {a.karar} {gosterim_taban}-{h} kodunu yazmıyor (seçenek yalnız Lokman'ın kararıyla; İE-36 kuralı)"); return 2
     sablon = json.loads((SABLON_DIR / ev["sablon"]).read_text(encoding="utf-8"))
+    from araclar import havuz_denetimi as HD
+    denetim = {}
+    for h, _ad, cati_json in a.varyant:                                         # D-112 (BK-47): hata veren seçenek havuza yazılmaz;
+        h = h.upper(); gosterim = f"{gosterim_taban}-{h}"                       # önce hepsi denetlenir, hiçbir dosya yazılmadan
+        ie = copy.deepcopy(sablon); ie["cati"] = json.loads(cati_json)
+        dur, uyari = HD.kayit_kapisi(HD.denetle_prefabrik(ie))
+        if dur:
+            print(f"DUR: {gosterim} havuz denetimi geçmedi (D-112); kayıt yazılmadı:\n- " + "\n- ".join(dur)); return 1
+        denetim[h] = {"sonuc": "geçti", "karar": "D-112", "uyarilar": uyari}
     ev_png = ADAY_DIR / f"{taban}_cati.png"
     ev_ozet = ciz(sablon, ev_png)
     print(f"{gosterim_taban}: evin çatısı {sablon.get('cati', {}).get('tip')}, brüt {ev_ozet['brut_cm2']} cm², {ev_ozet['pano']} pano → {ev_png.relative_to(KOK)}")
@@ -79,7 +88,7 @@ def main() -> int:
                            "gorsel": f"adaylar/{kod}.png", "cati_adi": ad, "referans_model": gosterim,
                            **{k: copy.deepcopy(ev[k]) for k in EVDEN if k in ev},
                            "uyarilar": [u for u in oz["uyarilar"] if u not in ev_ozet["uyarilar"]],
-                           "kaynak": {"metin": a.kaynak, "karar": a.karar, "ev": gosterim_taban}})
+                           "kaynak": {"metin": a.kaynak, "karar": a.karar, "ev": gosterim_taban, "havuz_denetimi": denetim[h]}})
         print(f"{gosterim}: {ad} ({ie['cati'].get('tip')}) → {png.relative_to(KOK)}; yeni uyarı: {varyantlar[-1]['uyarilar'] or 'yok'}")
     kayit = {"taban": taban, "cati_adi": a.cati_adi, "cati_gorsel": f"adaylar/{taban}_cati.png", "karar": a.karar, "varyantlar": varyantlar}
     VARYANT_DIR.mkdir(parents=True, exist_ok=True)
