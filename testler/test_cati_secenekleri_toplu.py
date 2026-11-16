@@ -60,7 +60,7 @@ def test_muhurlu_evler_ve_secenekli_ev():
     ev = {e["gosterim"]: e for e in T.evler()}
     assert {k for k, e in ev.items() if e["muhur"]} == {"PA-01", "PA-02", "PA-03", "PA-05", "PA-07", "PA-22"}
     assert ev["PA-01"]["muhur"] == "M-07" and ev["PA-22"]["muhur"] == "M-12" and ev["PA-07"]["muhur"] == "M-16"
-    assert ev["PA-06"]["secenekli"] and not ev["PA-12"]["secenekli"]
+    assert ev["PA-06"]["secenekli"] and not ev["PA-01"]["secenekli"]                       # mühürlü evin seçeneği yok
 
 
 def test_kayit_komutu_yalniz_kararla_ve_gecen_secenekle():
@@ -84,10 +84,10 @@ def test_kayitli_secenek_yeniden_kurulmaz(monkeypatch, tmp_path):
     """D-115'ten sonra (bakımlar birleşince yeniden koşu): kayıtlı harf yeniden kurulmaz, evin öteki seçeneği kurulur; kayıt komutu
     kayıtlı evde `--ekle` yazar. Çizim ve denetim burada sahte (yalnız seçenek süzgeci denenir)."""
     ev = {e["gosterim"]: e for e in T.evler()}
-    assert ev["PA-06"]["kayitli"] == ["C", "K"] and ev["PA-08"]["kayitli"] == ["C"] and ev["PA-12"]["kayitli"] == []
+    assert ev["PA-06"]["kayitli"] == ["C", "K"] and "C" in ev["PA-08"]["kayitli"] and ev["PA-01"]["kayitli"] == []
     monkeypatch.setattr(T, "ciz", lambda ie, png: {"gecti": True, "brut_cm2": 1, "pano": 1, "uyarilar": []})
     monkeypatch.setattr(T, "denetle", lambda ie: {"dur": []})
-    s = T.ev_isle(ev["PA-08"], tmp_path)
+    s = T.ev_isle({**ev["PA-08"], "kayitli": ["C"]}, tmp_path)                              # D-115'teki hâli: yalnız C kayıtlı
     assert [x["harf"] for x in s["secenekler"]] == ["B"] and s["kayitli"] == ["C"]          # evin çatısı kırma, C kayıtlı
     k = T.kaydet_komutlari([{**s, "cati_adi": "Kırma"}], "D-999")
     assert len(k) == 1 and "--varyant B" in k[0] and k[0].endswith("--ekle")
@@ -121,7 +121,9 @@ def test_ekle_eski_secenekleri_aynen_tutar(monkeypatch, tmp_path, capsys):
     (tmp_path / "KARARLAR" / "D-999.md").write_text("PA-08-B", encoding="utf-8")
     vd, ad = tmp_path / "beyin/veri/cati_varyantlari", tmp_path / "is_emri/adaylar"
     vd.mkdir(parents=True); ad.mkdir(parents=True)
-    eski = (KOK / "beyin/veri/cati_varyantlari/PA08.json").read_text(encoding="utf-8")
+    e = json.loads((KOK / "beyin/veri/cati_varyantlari/PA08.json").read_text(encoding="utf-8"))   # D-115'teki hâli: yalnız PA08C
+    e = {**{k: v for k, v in e.items() if k != "ek_kararlar"}, "varyantlar": [v for v in e["varyantlar"] if v["kod"] == "PA08C"]}
+    eski = json.dumps(e, ensure_ascii=False, indent=1) + "\n"
     (vd / "PA08.json").write_text(eski, encoding="utf-8")
     monkeypatch.setattr(CV, "KOK", tmp_path); monkeypatch.setattr(CV, "VARYANT_DIR", vd); monkeypatch.setattr(CV, "ADAY_DIR", ad)
     monkeypatch.setattr(CV, "ciz", lambda ie, png: {"brut_cm2": 1, "pano": 1, "uyarilar": []})
