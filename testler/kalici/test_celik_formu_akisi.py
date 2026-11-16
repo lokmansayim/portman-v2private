@@ -124,13 +124,15 @@ def test_celik_formu_dis_140_plana_islenir(depo, wa, tmp_path, hizli_genel):  # 
                           "Uygulanan: dış duvarlar 140'lık karkas (16,5 cm); çatı kaplaması sandviç panel."), belge   # çatısı seçilen plan: eski r01 başlığı
 
 
-@pytest.mark.parametrize("kod, secim, beklenen", [("Ç8801", "sandvic", [("cati_kaplamasi", "sandvic_panel")]), ("KT02", "sandvic", []),
+@pytest.mark.parametrize("kod, secim, beklenen", [("Ç8801", "sandvic", [("cati_kaplamasi", "sandvic_panel")]),
+                                                  ("KT02", "sandvic", [("standart_kaplama", "tek_kat_panel"), ("cati_kaplamasi", "sandvic_panel")]),
                                                   ("Ç8801", "kiremit", [("cati_kaplamasi", "osb_kiremit")]),
-                                                  ("KT02", "kiremit", [("cati_kaplamasi", "osb_kiremit")])])
+                                                  ("KT02", "kiremit", [("standart_kaplama", "tek_kat_panel"), ("cati_kaplamasi", "osb_kiremit")])])
 def test_celik_formu_cati_kaplamasi_plana_islenir(depo, wa, tmp_path, hizli_genel, kod, secim, beklenen):  # noqa: F811
     """PR-11 (D-97; Lokman, kart 15 Kasım 2026 04:44:37 UTC "Plana ve listeye işlensin"). Formda yalnız çatı kaplaması sandviç panel:
     ön not söyler; seçilen planda (Ç8801, kendi kaplaması tek kat panel) işlem tanıma yazılır, özel istekte kaplama yok. Aynı formla
-    kendi paftası sandviç panel olan plan (KT-02) seçilirse işlem eklenmez (tablo zaten sandviç panel), özel istek yine boş.
+    kendi paftası sandviç panel olan plan (KT-02) seçilirse D-113'ten (16 Kasım 2026) beri plan önce standarda (tek kat panel) döner,
+    formun seçimi ondan sonra işlenir ve bayiye "Uygulanan" diye yazılır (önce işlem eklenmiyordu); özel istek yine boş.
     Kiremit desen sac + OSB (BK-33, D-98; Motor 15 Kasım 2026'dan beri hesaplar) aynı yoldan: iki planda da işlem tanıma yazılır."""
     ad = TF.C_KAPLAMA[secim]
     kabul(depo, YEDI)
@@ -147,7 +149,7 @@ def test_celik_formu_cati_kaplamasi_plana_islenir(depo, wa, tmp_path, hizli_gene
     assert ie["yapi"]["kod"] == kod and [(x["op"], x.get("kaplama")) for x in ie["yapi"]["degisiklikler"]] == beklenen
     assert ie["bilgi"]["ozel_istekler"] == [] and ie["bilgi"]["ozellikler"] == {"Çatı Kaplama Rengi": "antrasit gri"}
     [onay] = [y for y in bayiye(depo) if y["kind"] == "interactive"]
-    assert (f"Uygulanan: çatı kaplaması {ad}." in onay["satir"]["body"]) is bool(beklenen), onay["satir"]["body"]
+    assert f"Uygulanan: çatı kaplaması {ad}." in onay["satir"]["body"] and "standart" not in onay["satir"]["body"], onay["satir"]["body"]
     assert "işleyemedim" not in onay["satir"]["body"]
 
 
@@ -418,20 +420,23 @@ def test_standart_formdan_sonra_kaplama_istegi_olmayan_cumle_talebe_yazilmaz(dep
 
 
 def test_modelin_kendi_kaplamasi_form_secimiyse_revizyonda_yazilan_kaplama_talebe_yazilir(depo, wa, tmp_path, hizli_genel):  # noqa: F811
-    """D-106, revizyon: formda sandviç panel seçildi, model zaten sandviç panel (KT-02): zarfta kaplama işlemi yok. Bayi revizyonda
-    başka bir kaplama yazarsa söz talebe yazılır, üç cümle gider; plan geri çevrilmez."""
+    """D-106, revizyon: formda sandviç panel seçildi, KT-02'nin kendi paftası da sandviç panel. D-113'ten (16 Kasım 2026) beri yeni
+    projede plan önce standarda döner, formun seçimi zarfa işlem olarak girer (önce zarf boştu, D-106'nın üç cümlesi giderdi). Bayi
+    revizyonda başka bir kaplama yazarsa Ç8801'deki gibi (K8): form seçimi zarftan çıkar, r02 standart kaplamayla, söz talebe yazılır."""
     s = _sandvic_formu(depo, wa, tmp_path)
     r = sec(depo, wa, s, "KT02")
     assert r["eylem"] == "is_emri", r
     ie, _ = _son_plan(depo)
-    assert ie["yapi"]["kod"] == "KT02" and ie["yapi"]["degisiklikler"] == []
+    assert ie["yapi"]["kod"] == "KT02" and [(x["op"], x.get("kaplama")) for x in ie["yapi"]["degisiklikler"]] == \
+        [("standart_kaplama", "tek_kat_panel"), ("cati_kaplamasi", "sandvic_panel")]
     soz = "çatı kaplaması kiremit olsun"
     assert depo.mesaj_kaydet(mesaj(soz, talep("revizyon", ozet=soz, katalog_kodu="KT02", varyantlar=_cati_v(soz))))
     [r] = isle_hepsi(depo, s)
     assert r["eylem"] == "is_emri", r
     ie, govde = _son_plan(depo)
-    assert ie["revizyon"] == 2 and ie["yapi"]["degisiklikler"] == [] and ie["bilgi"]["ozel_istekler"] == [soz]
-    assert f"{UC_CUMLE} Ön onay planınız hazır" in govde and "plandan çıkardım" not in govde, govde
+    assert ie["revizyon"] == 2 and [(x["op"], x.get("kaplama")) for x in ie["yapi"]["degisiklikler"]] == [("standart_kaplama", "tek_kat_panel")]
+    assert ie["bilgi"]["ozel_istekler"] == [soz]
+    assert "Sandviç panel seçiminizi plandan çıkardım. Planı modelin kendi çatı kaplamasıyla çizdim." in govde, govde
 
 
 def test_standart_formdan_sonra_modelin_kendi_kaplamasi_yazilirsa_not_yok(depo, wa, tmp_path, hizli_genel):  # noqa: F811
@@ -536,7 +541,7 @@ def test_celik_formu_yaziyla_secim_islenemeyen_140(depo, wa, tmp_path, hizli_gen
     [r] = isle_hepsi(depo, s)
     assert r["eylem"] == "is_emri" and "dis_karkas_140" not in r["gerekce"], r
     ie = tek(depo, "SELECT is_emri FROM revizyonlar ORDER BY id DESC LIMIT 1")["is_emri"]
-    assert ie["yapi"]["kod"] == "KT02" and ie["yapi"]["degisiklikler"] == []
+    assert ie["yapi"]["kod"] == "KT02" and [x["op"] for x in ie["yapi"]["degisiklikler"]] == ["standart_kaplama"]      # D-113'ten beri
     assert ie["bilgi"]["ozel_istekler"] == ["Dış duvar: 140 mm karkas (formdan; çizime işlenemedi)"]       # "KT-02 olsun" yok
     [onay] = [y for y in bayiye(depo) if y["kind"] == "interactive"]
     assert onay["satir"]["body"].startswith("KT-02 · 92 m², 2+1. Dış duvar 140 mm karkası bu plana otomatik işleyemedim. "

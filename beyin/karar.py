@@ -3441,6 +3441,10 @@ YAZILAN_KAPLAMA_NOTU = ("Mesajınızda çatı kaplaması yazdınız. Planı mode
                         "Yazdığınız kaplamayı talebe yazdım. ")
 
 
+# D-113: zarfta duran ama bayinin değişikliği olmayan işlemler ("Uygulanan" metnine, PDF başlığına ve LLM bağlamına yazılmaz).
+_BAYI_DISI = ("standart_kaplama",)
+
+
 def _baska_kaplama_sozu(soz: str, kap: str, adlar=()) -> bool:
     """Serbest söz (özel istek ya da bayinin cümlesi) `kap` dışında bir çatı kaplaması mı anıyor? Çatıdan söz etmeyen cephe, duvar, zemin
     sözü sayılmaz ("dış cephe trapez sac"); "çatı" demeyen sözde yalnız çatıya özgü malzeme sayılır ("kiremit olsun")."""
@@ -3568,6 +3572,12 @@ def _celik_is_emri_uret(k: Konusma, bayi: dict, katalog: Katalog, aday: dict, ts
     son_y = son.get("yapi") or {}
     ayni_proje = son_y.get("sistem") == "celik" and Katalog.taban_kod(son_y.get("kod")) == Katalog.taban_kod(aday["kod"])
     onceki = [d for d in (son_y.get("degisiklikler") or []) if d.get("op") != "cati_varyanti"] if ayni_proje else []
+    if not ayni_proje and not aday.get("uretilen") and not celik.tanim_gomulu(aday):
+        # D-113 (BK-48; Lokman, kart 16 Kasım 2026 08:27:26 UTC "Standart: tek kat panel"): havuzdaki çelik ev yeni projede standart
+        # kaplamayla çizilir; tanım dosyası (asıl proje, D-103) aynen. İşlem zarfta öteki değişikliklerden önce durur, revizyonda birikir
+        # (`onceki`); bu karardan önce açılmış projenin revizyonu bugünkü gibi modelin kaplamasıyla sürer. Bayinin değişikliği değildir:
+        # "Uygulanan" metnine ve PDF başlığına yazılmaz (`_BAYI_DISI`). Formda seçilen kaplama bundan sonra gelir (D-97).
+        onceki = varyant.standart_kaplama_islemi(celik.tanim_oku(aday))
     # İE-20 PR-11 (D-97, geometri hakemi): formdan çizilmiş kaplama zarfta dururken bayi revizyonda başka bir kaplama yazarsa işlem
     # zarftan çıkar (plan modelin kendi kaplamasına döner), yazdığı kaplama özel isteğe gider, bayiye söylenir. Liste bayinin son sözüne
     # karşın eski seçimi saymaz. Taslak değişmez: erken dönüşlerde bir şey kaybolmaz.
@@ -3648,8 +3658,9 @@ def _celik_is_emri_uret(k: Konusma, bayi: dict, katalog: Katalog, aday: dict, ts
     form_notu = "Bu planın dış duvarı 140 mm karkastır. " if form_ilk and not ts.get("form_dis140") and _zaten_140(t, []) else ""
     form_notu += kap_notu
     # İE-20 PR-11 (D-97; Lokman, kart 15 Kasım 2026 04:44:37 UTC "Plana ve listeye işlensin"): formda seçilen çatı kaplaması ilk planda
-    # tanıma yazılır. Model zaten o kaplamadaysa işlem yok. VARSAYIM (Lokman'ın sözü değil): formda kaplama standart kaldıysa plan modelin
-    # kendi kaplamasıyla çizilir (KT-01 … KT-10 kendi paftasında sandviç panel; bugünkü davranış, değişmedi).
+    # tanıma yazılır. Model zaten o kaplamadaysa işlem yok. D-113 (Lokman, kart 16 Kasım 2026 08:27:26 UTC "Standart: tek kat panel"):
+    # formda kaplama standart kaldıysa plan standart kaplamayla çizilir; KT-01 … KT-10 (kendi paftasında sandviç panel) yeni projede
+    # `standart_kaplama` işlemiyle (yukarıda). Bu kararın yerine geçtiği VARSAYIM: "plan modelin kendi kaplamasıyla çizilir".
     form_kap = ts.get("form_kaplama") if form_ilk else None
     kendi_kap = varyant.kaplama_oku(t)
     tekil: dict[str, dict] = {}
@@ -3739,7 +3750,7 @@ def _celik_is_emri_uret(k: Konusma, bayi: dict, katalog: Katalog, aday: dict, ts
     ts.pop("pencereler", None); ts["varyantlar"] = []          # tüketildi: sonraki revizyon bunları yeniden okumaz (değişiklikler zarfta birikir)
     ie = celik.zarf(aday, bayi, k.gonderen, ts, son, onceki + yeni, kaynak=f"aday {aday['kod']}", is_emri_no=_talep_numarasi(k, bayi))
     ie["yapi"]["bu_revizyon"] = [{**d} for d in yeni]
-    ie["yapi"]["uygulanan"] = [CO.aciklama(d) for d in onceki + yeni]
+    ie["yapi"]["uygulanan"] = [CO.aciklama(d) for d in onceki + yeni if d.get("op") not in _BAYI_DISI]
     ie["yapi"]["onceki"] = ({"kod": son_y.get("kod"), "tanim": son_y.get("tanim"), "tanim_sha256": son_y.get("tanim_sha256"),
                              "degisiklikler": list(son_y.get("degisiklikler") or []), "revizyon": son.get("revizyon")} if ayni_proje else None)
     k.d["revizyon"] = ie["revizyon"] - 1                       # G-2: sayaç plan sayısıyla eşitlenir (prefabrikle aynı kural)
@@ -3779,7 +3790,7 @@ def _celik_is_emri_uret(k: Konusma, bayi: dict, katalog: Katalog, aday: dict, ts
         if yeni and any(d.get("op") == "cati_varyanti" for d in yeni):
             # PDF başlığı: çatısı seçilen plan, eski akışın (İE-25) r01'i gibi model adı, m² ve çatı dışında planın bütün değişiklikleriyle
             # (İE-20 PR-10, canlı C5: "model adı ve m² düşmez"; hakem tur 6, D1 ve D2: ölçü farkı ve taslak notu da, çatıyla gelen istek de)
-            obur = [d for d in onceki + yeni if d.get("op") != "cati_varyanti"]
+            obur = [d for d in onceki + yeni if d.get("op") != "cati_varyanti" and d.get("op") not in _BAYI_DISI]
             baslik = on_bilgi + ("Uygulanan: " + "; ".join(CO.aciklama(d) for d in obur) + ". " if obur else "")
             farklar = [d["fark"] for d in obur if d.get("fark")]
             if farklar:
