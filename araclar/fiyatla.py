@@ -69,8 +69,9 @@ _KOR_KASA = re.compile(r"^Pencere kör kasası \((\d+)×(\d+)\)(?: \((\d+'l[ıü
 
 
 def eski_anahtar(k: str) -> str | None:
-    """D-122 (BK-51): "Pencere kör kasası (EN×BOY)" satırının eski adıyla anahtarı. Eski defterler ve o günkü kayıtlar kalemi
-    "Özel pencere karkası (EN×BOY) (100'lük çektirme U'su + 100'lük H geçen)" adıyla tutar; yeni liste onları bu adla bulur."""
+    """D-122 (BK-51): "Pencere kör kasası (EN×BOY)" satırının eski adıyla anahtarı. Defterler ve CRM eşlemesi (`crm_esleme.json`, son elle
+    defterin anahtarlarıyla aynı sırada; `test_crm_fiyat`) kalemi "Özel pencere karkası (EN×BOY) (100'lük çektirme U'su + 100'lük H geçen)"
+    adıyla tutar; yeni liste onları bu adla bulur."""
     m = _KOR_KASA.match(k)
     if not m:
         return None

@@ -703,8 +703,8 @@ def test_komut_satiri(tmp_path):
     openpyxl = pytest.importorskip("openpyxl")
     assert PL.main([str(PK01), str(tmp_path), "--pafta", str(PAFTA_KATMANI)]) == 0
     L = _oku(tmp_path / "PK01_liste.json")
-    # BK-12 PR-2f: elektrik oda kuralıyla 89 → 107; İE-27 (D-45): 5,5 × 25 trapez vida satırı, 107 → 108
-    assert L["kod"] == "PK-01" and L["ozet"]["satir"] == len(L["satirlar"]) == 108
+    # BK-12 PR-2f: elektrik oda kuralıyla 89 → 107; İE-27 (D-45): 5,5 × 25 trapez vida satırı, 107 → 108; D-122: şase pul satırı yok, 108 → 107
+    assert L["kod"] == "PK-01" and L["ozet"]["satir"] == len(L["satirlar"]) == 107
     assert L["kural_seti"]["prefabrik"] == "portman.prefabrik_liste/1.0"
     wb = openpyxl.load_workbook(tmp_path / "PK01_liste.xlsx")
     assert wb.sheetnames == ["Liste"] and wb["Liste"].max_row == 108 + 2

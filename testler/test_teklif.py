@@ -78,7 +78,7 @@ def test_tk01_toplamlar(T):
     assert list(ozet) == ["Asma tavan", "Ters tavan"]
     assert ozet["Asma tavan"]["toplam"] == 464163.13 and ozet["Ters tavan"]["toplam"] == 463342.13   # D-122: şase pul çıktı (26 × 59,23)
     assert (ozet["Asma tavan"]["satir"], ozet["Asma tavan"]["fiyatli"], len(ozet["Asma tavan"]["fiyatsiz"])) == (122, 121, 1)
-    assert (ozet["Ters tavan"]["satir"], ozet["Ters tavan"]["fiyatli"], len(ozet["Ters tavan"]["fiyatsiz"])) == (121, 120, 1)
+    assert (ozet["Ters tavan"]["satir"], ozet["Ters tavan"]["fiyatli"], len(ozet["Ters tavan"]["fiyatsiz"])) == (120, 119, 1)   # D-122: şase pul satırı yok
     makas = [(x["kalem"], x["olcu"], x["adet"], x["birim_fiyat"], x["durum"]) for x in T["secenekler"][0]["fiyat"]["satirlar"] if "akas" in x["kalem"]
              and x["durum"].endswith("makas kuralı")]
     assert [m[:4] for m in makas] == [("Makas (baş) · ana çatı", "açıklık 8985", 2, 3110), ("Makas (orta) · ana çatı", "açıklık 8985", 6, 3110),
@@ -319,7 +319,7 @@ def test_oneri_gosterimi(tmp_path):
     assert sari["Kutu profil (kiriş) 100 × 100 · L 3860"].startswith("öneri birim fiyat 3.217 TL (tam boyun fiyatından boyla orantılı)")
     assert sari["Kaçak akım rölesi (ikili) · adet"].startswith("öneri birim fiyat 2.000 TL (87 m² listesinde") and len(sari) == 3
     assert TK.main([str(IE), str(tmp_path / "b"), "--tavan", "asma,ters", "--defter", str(tmp_path / "r03.json"), "--oneri"]) == 0
-    assert [s["fiyat"]["ozet"]["toplam"] for s in _oku(tmp_path / "b" / "TK01_teklif.json")["secenekler"]] == [425748.13, 424477.13]
+    assert [s["fiyat"]["ozet"]["toplam"] for s in _oku(tmp_path / "b" / "TK01_teklif.json")["secenekler"]] == [424208.13, 422937.13]   # D-122
 
 
 def test_is_emrindeki_teklif_bolumu(tmp_path):
