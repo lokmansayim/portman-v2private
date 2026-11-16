@@ -1445,3 +1445,29 @@ def test_hakem29_celik_surec_sorusu_onay(s, metin):
     cati_seti(s)
     k = s.yaz(metin)
     assert k.gerekce == K.PLAN_ONAYI and k.revizyon == 1, k.mesaj
+
+
+
+@pytest.mark.parametrize("metin", [
+    "Ç8801 olsun, fark etmez ya", "Ç8801 olsun, bence fark etmez", "Ç8801 olsun, müşteri için fark etmez", "K olsun, fark etmez ya",
+    "K olsun, bence fark etmez", "Ç8801 olsun, ödemeden sonra mı onaylayalım?", "K olsun, ödemeden sonra mı onaylayalım?",
+    "K olsun, montajdan sonra mı karar verelim?", "K olsun, teslim tarihine göre mi karar verelim?", "K olsun, modeli sonra mı seçelim?",
+    "Ç8801 olsun son karar müşteriye", "Ç8801 olsun, müşteri razı olur", "Ç8801 olsun gibi", "Ç8801 olsun gibi düşünüyoruz",
+    "K olsun, müşteri razı olur", "K olsun gibi", "Merhaba hocam Ç8801 olsun ama sonra", "K olsun, son karar müşteriye"])
+def test_hakem30_celik_kararsiz_soz_kaydedilmez(s, metin):
+    """Tur 30 (Y1–Y5, O4) çelikte: "fark etmez ya", "bence fark etmez", "ödemeden sonra mı onaylayalım?", "son karar müşteriye", "müşteri
+    razı olur", "Ç8801 olsun gibi" ve selamlı erteleme kayıt almaz: plan r01, onay yok, r02 yok."""
+    cati_seti(s)
+    k = s.yaz(metin)
+    assert K.PLAN_ONAYI not in k.gerekce and k.eylem != "is_emri" and s.plan["revizyon"] == 1 and not s.k.d.get("onaylanan"), k.mesaj
+
+
+@pytest.mark.parametrize("metin", [
+    "K olsun allah razı olsun", "K olsun planı atın", "K olsun hemen çizin", "K olsun değişiklik yok", "K olsun montaj ne zaman",
+    "K olsun tamamdır", "K olsun değişiklik yok teklif gönderin", "Hocam merhaba K olsun"])
+def test_hakem30_celik_acik_secim_soruya_donmez(s, metin):
+    """Tur 30 (O1) çelikte: virgülsüz olumlu söz ("K olsun Allah razı olsun", "planı atın", "değişiklik yok", "montaj ne zaman") r02 K'yı
+    çizer."""
+    cati_seti(s)
+    k = s.yaz(metin)
+    assert k.eylem == "is_emri" and k.revizyon == 2 and s.plan["yapi"]["kod"] == "Ç8801K", k.mesaj

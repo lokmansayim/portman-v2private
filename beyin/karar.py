@@ -2189,7 +2189,7 @@ def _secim_bildirildi(sozler: list[str]) -> bool:
     for n, a in enumerate(sozler):
         s = sozler[n + 1] if n + 1 < len(sozler) else ""
         if s in ("mi", "mu") or s.startswith(("olabil", "olmali", "olur")) or (a == "kabul" and not _GECMIS_ETTI.fullmatch(s)) \
-                or (a == "razi" and (s.startswith(("degil", "olmad", "olmaz", "olmay", "olac", "olsa", "olmas")))):
+                or (a == "razi" and (s.startswith(("degil", "olmad", "olmaz", "olmay", "olac", "olsa", "olmas", "olur", "gibi", "gorun")))):
             continue                                           # tur 28 (Y5): "razı değil", "razı olacak"
         if _SECIM_BILDIRIMI.fullmatch(a):
             return True
@@ -2214,6 +2214,17 @@ _BAKILAN_IS = ("zemin", "arsa", "arazi", "temel", "montaj", "stati", "saha", "ol
 _KISI_KARARI = ("karar", "tercih", "secim", "onay", "takdir", "inisiyatif", "insiyatif")
 
 
+_KARAR_ADI = re.compile(r"(?:karar|tercih|secim|onay|takdir|inisiyatif|insiyatif)(?:[iu]|[iu]n[iu]|[iu]m[iu]z[iu]?)?")   # ad; fiil değil
+
+
+def _eksiltili_devir_sozu(a: str) -> bool:
+    """Fiilsiz devir cümlesinin sözü (tur 30): karar ya da onay adı, kişi, seçim sözü, yüklem, hitap ve "son, de, ve" gibi dolgu."""
+    return bool(_KARAR_ADI.fullmatch(a)) or a.startswith(_ERTELEYEN_KISI + ("cati",) + _CATI_AD_KOKU) or a in _YUKLEM_SOZU \
+        or a in _HITAP_SOZU \
+        or a in ("son", "nihai", "de", "da", "ve", "artik", "tamamen", "zaten", "ise", "evin", "kendi", "numara", "numarali", "nolu") \
+        or a[:1].isdigit() or len(a) == 1
+
+
 def _musteri_ertelemesi(ham: list[str], ardi: list[str] | tuple = ()) -> bool:
     """Müşteri ya da yakını kararı ileride verecek mi ("müşteri bakacak", "bakalım müşteri ne diyecek", "eşi de görsün", "müşteri bir
     bakar"); fiil başka bir konunun nesnesini alıyorsa ("müşteri teslim tarihini soracak", "fiyatı soracak") ya da gelip görmekse ("müşteri
@@ -2236,6 +2247,10 @@ def _musteri_ertelemesi(ham: list[str], ardi: list[str] | tuple = ()) -> bool:
             return True                                        # tur 24 (Y3): "müşteriye kalsın", "müşterinin tercihine kalsın", "çatı
                                                                # müşterinin kararı"; tur 25 (O7): "temel müşteriye kalsın", "müşteriye
                                                                # bıraktık o da 2 dedi" değil; tur 26 (Y1): "müşteriye bıraktık" ertelemedir
+        if not konulu and any(_KARAR_ADI.fullmatch(a) for a in ham[max(0, i - 2):i] + ham[i + 1:i + 3]) \
+                and not tamlayan and not re.fullmatch(r"\w+(?:d[iu]|t[iu]|m[iu]s)", x) and all(_eksiltili_devir_sozu(a) for a in ham):
+            return True                                        # tur 30 (önceden var): "son karar müşteriye", "onay müşteriden", "onayı
+                                                               # müşteri" (fiilsiz); "onayı müşteri verdi", "karar müşterinindi" değil
         for j in range(max(0, i - 2), min(len(ham), i + 10)):
             v = ham[j]
             if j > i and not konulu and _MUSTERI_GEREGI.fullmatch(v) and _gerek_ardi(ham, j):
@@ -2398,6 +2413,18 @@ _TAHMIN_SOZU = {"herhalde", "galiba", "sanirim", "saniyorum", "sanki", "muhtemel
                                                                # "1 olsun olabilir"
 
 
+_DEVIR_DISI_KOKU = ("geri", "detay", "ayrinti", "zaman", "tarih", "nakit", "kart", "havale", "taksit", "odeme", "gelir", "gelse",
+                    "gelince", "gelecek", "teslim", "renk", "reng", "model")
+_DEVIR_DISI = {"gun", "gunu", "gunde", "hafta", "haftaya", "ay", "ayda", "saat", "saatte", "kim", "kimin", "nereye", "nerede", "kac"}
+
+
+def _devir_disi(w: str) -> bool:
+    """"Fark etmez" ve "size bırakıyorum"u çatı dışı bir şeye bağlayan söz (tur 30, Y1; kara liste): "gerisini size bırakıyorum", "fark
+    etmez ne zaman gelirse", "hangi gün gelirse fark etmez", "nakit ya da kart fark etmez". "fark etmez ya", "bence fark etmez", "müşteri
+    için fark etmez" seçimin devridir."""
+    return w.startswith(_DEVIR_DISI_KOKU) or w in _DEVIR_DISI
+
+
 def _ucret_ardi(ham: list[str], k: int) -> bool:
     """"değişiklik ücreti", "değişiklik için ücret": değişmenin ücreti sorulur, değişme olasılığı değil (tur 28, O6). Tur 29 (O8): "sonra
     değiştirmek isterse ücret olabilir mi?" değişme olasılığıdır."""
@@ -2416,19 +2443,29 @@ def _kararsizlik_var(ham: list[str], soru: bool = False, ardi: list[str] | tuple
             for w in ham):
         return True                                            # tur 28: "2 olsun herhalde", "galiba 1 olsun" tahmindir; "sanırım teklif
                                                                # yarın gelir" değil
-    def secim_sozu_mu(x: str) -> bool:                       # tur 29 (O5): devrin konusu seçim olmalı ("gerisini size bırakıyorum",
-        return x in _DEVIR_KALIBI or x in _HITAP_SOZU or x in _YUKLEM_SOZU or (len(x) == 1 and not x.isdigit()) \
-            or x.startswith(("cati", "fark", "birak", "secim", "secen", "karar", "tercih") + _CATI_AD_KOKU) \
-            or (x[:1].isdigit() and not _birimli(ham, ham.index(x)))   # "nakit ya da kart fark etmez", "belki 2 ay sonra" değil
     if not any(_konu_adi(x) or _yer_koku(x) for x in ham) and (
             ((any(a == "fark" and b.startswith(("etmez", "etmiyor")) for a, b in zip(ham, ham[1:])) or "farketmez" in ham
               or any(a in ("size", "sana", "sizlere") and b.startswith("birak") for a, b in zip(ham, ham[1:])))
-             and all(secim_sozu_mu(x) for x in ham))
-            or any(a == "belki" and ((b[:1].isdigit() and not _birimli(ham, k + 1)) or (len(b) == 1 and not b.isdigit())
-                                     or b.startswith(("cati",) + _CATI_AD_KOKU))
-                   for k, (a, b) in enumerate(zip(ham, ham[1:])))):
+             and not any(_devir_disi(x) or (x[:1].isdigit() and _birimli(ham, k)) for k, x in enumerate(ham)))
+            or any(a == "belki" and ((b[:1].isdigit() and not _birimli(hb, k + 1)) or (len(b) == 1 and not b.isdigit())
+                                     or b.startswith(("cati", "diger", "obur", "otek", "sonra") + _CATI_AD_KOKU))
+                   for hb in ([x for k, x in enumerate(ham) if not (x in ("de", "da") and ham[k - 1:k] == ["belki"])],)
+                   for k, (a, b) in enumerate(zip(hb, hb[1:]))) or ham[-1:] == ["belki"]):
         return True                                            # tur 28: "1 olsun, fark etmez", "size bırakıyorum", "2 olsun belki 3"
-                                                               # seçimi bize bırakır ya da öteki çatıyı anar; "renk fark etmez" değil
+                                                               # seçimi bize bırakır ya da öteki çatıyı anar; "renk fark etmez" değil.
+                                                               # Tur 30 (Y1): kara liste; "fark etmez ya", "bence fark etmez", "müşteri
+                                                               # için fark etmez", "belki diğeri", "2 olsun, belki", "belki de 1" de
+    konusuz = not any(_konu_adi(x) or _yer_koku(x) for x in ham)
+    if konusuz and (any(a in _YUKLEM_SOZU and b == "gibi" for a, b in zip(ham, ham[1:]))
+                    or any(a == "gibi" and b.startswith("dusun") for a, b in zip(ham, ham[1:]))):
+        return True                                            # tur 30 (önceden var): "1 olsun gibi", "Ç8801 olsun gibi düşünüyoruz";
+                                                               # "pencereler aynı kalsın gibi" değil
+    if konusuz and any(a in ("o", "bu", "su", "oteki", "obur", "oburu", "digeri") and b in ("de", "da")
+                       and c.startswith(("olur", "olabilir")) for a, b, c in zip(ham, ham[1:], ham[2:])):
+        return True                                            # tur 30 (önceden var): "2 olsun, o da olur" öteki çatıyı da kabul eder
+    if any(w in _TAHMIN_SOZU or w in ("bence", "bizce") for w in ham) \
+            and any(_SECIM_BILDIRIMI.fullmatch(w) or _SOZ_BILDIRIMI.fullmatch(w) for w in ham):
+        return True                                            # tur 30 (önceden var): "müşteri istedi galiba", "müşteri istedi bence"
     cati = any(x.startswith("cati") for x in ham)
     konulu = any(_konu_adi(x) for x in ham) and not any(x.startswith(("cati",) + _CATI_AD_KOKU) for x in ham)
     if not konulu and not any(_yer_koku(x) for x in ham) and any(
@@ -2719,6 +2756,8 @@ def _onay_ertelenmis(ham: list[str]) -> bool:
                                                                # gerekmeyen onaydır, verilmeyen onay değil ("onaylamaya gerek yok" değil)
             if x.startswith(_CEKINCE_KOKU) and not x.startswith(_CEKINCE_DISI):
                 return True                                    # tur 13 (Yüksek-2): "onaydan vazgeçtik", "onaylamakta tereddüt ediyoruz"
+            if x in ("gelir", "gelecek", "gelsin", "gelmedi", "gelmez", "gelince") and re.fullmatch(r"onay(?:[iu]|[iu]n[iu]|lar[iu])?", w):
+                return True                                    # tur 30 (önceden var): "müşteri onayı ne zaman gelir" onay beklenir
             if (x == "yok" or x.startswith("degil") or _OLUMSUZ_FIIL.fullmatch(x)) \
                     and not (any(y.startswith(_OLUMSUZ_DISI) for y in ham[i + 1:j]) and x.startswith(_YOKLUK_SOZU)):
                 return True                                    # tur 12 (Y-1, Y-3): "onay yok", "onaylamak istemiyoruz", "onay vermedi";
@@ -2781,19 +2820,22 @@ _BEKLE_GOR = {"bakalim", "gorelim", "bakariz", "goruruz", "konusuruz", "konusali
 _ERTELE_KALIBI = {"sonra", "sonraya", "sonrasi", "degil", "simdi", "simdilik", "acele", "yok", "yarin", "aksam", "aksama", "haftaya",
                   "ona", "gore", "daha", "biraz", "bir", "bi", "ama", "fakat", "ancak", "ve", "hele", "hadi", "bakalim", "olsun", "kalsin",
                   "evin", "kendi", "cati", "catisi", "numara", "numarali", "nolu"}
-_ERTELE_IPUCU = ("sonra", "degil", "acele", "yarin", "aksam", "haftaya", "bekl")
+_ERTELE_IPUCU = ("sonra", "degil", "yarin", "aksam", "haftaya", "bekl")   # tur 30 (O2): "acele" yalnız olumsuzla ("acele yok")
+_ACIL_SOZU = ("acele", "acil", "ivedi", "hemen")
 _RAZI_KOSULU = ("olmasi", "olmali", "olacak", "olacaklar", "olursa", "olsa", "olmazsa", "olacagini", "degil", "olmadi", "olmaz", "olmuyor",
-                "edecek", "ederse")
+                "edecek", "ederse", "olur", "gibi", "gorun")       # tur 30: "müşteri razı olur", "razı gibi", "razı görünüyor"
 
 
-_BEKLE_DISI_KOKU = ("diger", "baska", "konu", "detay", "ayrinti", "kalan")
+_BEKLE_DISI_KOKU = ("diger", "baska", "detay", "ayrinti", "kalan", "geris")
+_KONU_ADI_SOZU = re.compile(r"konu(?:yu|ya|da|lar|lari|lara|larda|nun|muz|muzu)?")   # "konuşuruz" değil
 _FIYAT_KOKU = ("fiyat", "ucret", "masraf", "bedel")
 
 
 def _bekle_disi(w: str) -> bool:
     """Bekleyip görme sözünü seçimden ayıran öteki konu (tur 30 ara gerileme): "diğer konuları sonra konuşuruz", "montajı konuşuruz".
     Fiyat konu sayılmaz: "fiyatına bakalım" seçimi bekletir."""
-    return (_konu_adi(w) and not w.startswith(_FIYAT_KOKU)) or w.startswith(_KARAR_DISI_KONU + _BEKLE_DISI_KOKU) or bool(_yer_koku(w))
+    return (_konu_adi(w) and not w.startswith(_FIYAT_KOKU)) or w.startswith(_KARAR_DISI_KONU + _BEKLE_DISI_KOKU) or bool(_yer_koku(w)) \
+        or bool(_KONU_ADI_SOZU.fullmatch(w))
 
 
 def _bekle_gor(ham: list[str], secim, tum: list[str] = ()) -> bool:
@@ -2801,16 +2843,24 @@ def _bekle_gor(ham: list[str], secim, tum: list[str] = ()) -> bool:
     "acele yok"), bekleyip görme sözü ("teklif gelsin bakalım", "teklifi görelim") ya da koşullu rıza ("müşteri razı olması lazım").
     "Teklif bekliyoruz", "sonra teklifi gönderin" değil. Tur 30 ara gerileme: öteki konuyu ("diğer konuları sonra konuşuruz") ya da
     mesajda bildirilmiş onayı ("müşteri onayladı, ekibimizle bakacağız") bekleyen söz seçimi bekletmez; karşıtlık ya da fiyat sözü varsa
-    ("beğendi ama fiyatına bakalım") bekletir."""
+    ("beğendi ama fiyatına bakalım") bekletir. Tur 30: bildirim muafiyeti bekleme sözünün kendi tümleciyle ("ekibimizle", "teklif
+    gelsin"); "müşteri beğendi, bakalım ne olacak" bekletir. Aciliyet ("2 olsun, acele", "acele bekliyoruz") erteleme değildir."""
+    tumlec = [w for w in ham if not (secim(w) or w in _BEKLE_GOR or w in _ERTELE_KALIBI or w in _HITAP_SOZU or w in _YUKLEM_SOZU
+                                     or w in ("ne", "neler", "olacak", "olur", "nasil", "de", "da", "ki") or w.startswith(_ERTELEYEN_KISI)
+                                     or _SECIM_BILDIRIMI.fullmatch(w) or _SOZ_BILDIRIMI.fullmatch(w))]
     if (any(w in _BEKLE_GOR for w in ham) or ham[-2:] in (["ona", "gore"], ["buna", "gore"])) and not any(map(_bekle_disi, ham)) \
-            and not (_secim_bildirildi(list(tum) or ham)
+            and not (_secim_bildirildi(list(tum) or ham) and tumlec
                      and not any(w in ("ama", "fakat", "ancak") or w.startswith(_FIYAT_KOKU) for w in ham)):
         return True                                            # "teklif gelsin ona göre"; "ona göre fiyat verin" değil
     if any(w == "razi" and n + 1 < len(ham) and ham[n + 1].startswith(_RAZI_KOSULU) for n, w in enumerate(ham)):
         return True
     kalan = [w for w in ham if not (secim(w) or w in _HITAP_SOZU or w in _YUKLEM_SOZU)]
-    return bool(kalan) and all(w in _ERTELE_KALIBI or re.fullmatch(r"bekl\w*", w) for w in kalan) \
-        and any(w.startswith(_ERTELE_IPUCU) for w in kalan)
+    acele_yok = [n for n, w in enumerate(kalan) if w.startswith("acele")
+                 and (kalan[n + 1:n + 2] in (["yok"], ["degil"], ["gerek"]) or kalan[n + 1:n + 2][:1] and kalan[n + 1].startswith("etme"))]
+    if any(w.startswith(_ACIL_SOZU) for w in kalan) and not acele_yok:
+        return False                                           # tur 30 (O2): "2 olsun, acele", "acele bekliyoruz" aciliyettir
+    return bool(kalan) and all(w in _ERTELE_KALIBI or re.fullmatch(r"bekl\w*", w) or w.startswith("acele") for w in kalan) \
+        and (any(w.startswith(_ERTELE_IPUCU) for w in kalan) or bool(acele_yok))
 
 
 def _plan_cumlesi(h: str) -> bool:
@@ -2950,9 +3000,12 @@ def _bitisik_secim(sol: str, katalog: Katalog, taban: dict, st: dict) -> bool:
 
 
 # tur 28: selam ve hitapla başlayan virgülsüz seçim ("Merhaba hocam 1 olsun", "Hocam iyi misiniz 1 olsun"): selamdan sonra ayrılır
-_BASTAKI_SELAM = re.compile(
-    r"^(\s*(?:(?:merhabalar|merhaba|selamlar|selam|slm|mrb|g[üu]nayd[ıi]n|iyi\s+(?:g[üu]nler|ak[şs]amlar|[çc]al[ıi][şs]malar)"
-    r"|kolay\s+gelsin|selam[üu]n\s+aleyk[üu]m)(?:\s+(?:hocam|hoca|abi|abim|abla|usta|ustam|karde[şs]im|reis|bey|efendim))*"
+_SELAM_DESENI = (r"(?:merhabalar|merhaba|selamlar|selam|slm|mrb|g[üu]nayd[ıi]n|iyi\s+(?:g[üu]nler|ak[şs]amlar|[çc]al[ıi][şs]malar)"
+               r"|kolay\s+gelsin|selam[üu]n\s*aleyk[üu]m)")
+_SELAM_HITAP_DESENI = r"(?:\s+(?:hocam|hoca|abi|abim|abla|usta|ustam|karde[şs]im|reis|bey|efendim))*"
+_BASTAKI_SELAM = re.compile(                                   # tur 30 (Düşük): hitap önde ("Hocam merhaba"), iki selam ("Merhaba hocam
+    r"^(\s*(?:(?:(?:hocam|hoca|abi|abim|abla|usta|ustam|karde[şs]im|reis|efendim)\s+)?"   # iyi akşamlar"), "Selamünaleyküm"
+    + _SELAM_DESENI + _SELAM_HITAP_DESENI + r"(?:\s+" + _SELAM_DESENI + _SELAM_HITAP_DESENI + r")?" +
     r"(?:\s+(?:iyi\s*mi(?:siniz|sin)|iyimi(?:siniz|sin)|nas[ıi]ls[ıi]n(?:[ıi]z)?))?"
     r"|(?:hocam|hoca|abi|abim|abla|usta|ustam|karde[şs]im|reis|efendim)\s+(?:iyi\s*mi(?:siniz|sin)|iyimi(?:siniz|sin)|nas[ıi]ls[ıi]n(?:[ıi]z)?)))"
     r"(?:[ \t]*[,.!?]+)?[ \t]+(?=\S)(?!(?:hocam|hoca|abi|abim|abla|usta|ustam|karde[şs]im|reis|bey|efendim|iyi|nas[ıi]l)\b)", re.IGNORECASE)
@@ -2961,7 +3014,7 @@ _BASTAKI_SELAM = re.compile(
 # tur 29 (hakem Y1, O1, O2): virgülsüz seçimden sonra ayrılan söz yalnız olumludur: teklif isteği ("teklifi gönderin", "teklif atar
 # mısınız", "teklif ne zaman gelir"), müşterinin bildirilmiş onayı ("müşteri kabul etti", "onu seçti", "onay verdi"), selam, teşekkür ve
 # veda. Öteki her söz (erteleme, bekleme, kararsızlık, başkasına soru, soru biçimli istek) ayrılmaz; cümle bütün olarak okunur, sorulur.
-_BITISIK_OLUMLU = {"tamam", "tmm", "evet", "ok", "okey", "olur", "kesin", "kesinlikle", "insallah", "hayirli", "hayirlisi", "olsun",
+_BITISIK_OLUMLU = {"tamam", "tmm", "evet", "ok", "okey", "olur", "kesin", "kesinlikle", "insallah", "hayirli", "olsun",
                    "hayirlara", "musteri", "musterimiz", "musterim", "musteriye", "o", "onu", "bunu", "de", "da", "ve", "onayladi",
                    "onayladilar", "onaylandi", "onayladik", "onayladim", "onayliyoruz", "onayliyorum", "onaylariz", "begendi",
                    "begendiler", "begendik", "secti", "sectiler", "sectik", "istedi", "istediler", "kabul", "etti", "ettiler", "ettik",
@@ -2969,10 +3022,23 @@ _BITISIK_OLUMLU = {"tamam", "tmm", "evet", "ok", "okey", "olur", "kesin", "kesin
                    "gorusmek", "uzere", "tesekkurler", "tesekkur", "ederim", "ederiz", "sagolun", "sagol", "saol", "lutfen", "rica",
                    "simdiden", "mail", "maile", "mailden", "maille", "mailine", "eposta", "whatsapp", "whatsapptan", "wp", "wpden",
                    "watsap", "buradan", "buraya", "bize", "bana", "hemen", "cok", "gercekten", "bayagi", "pek", "onay", "onayi",
-                   "onayini", "onayimiz", "onayimizi", "ne", "zaman", "nezaman", "gelir", "gelecek", "teslim"}
-_BITISIK_TEKLIF = ("teklif", "pdf", "cizim", "proje", "dosya", "liste", "fiyat")
+                   "onayini", "onayimiz", "onayimizi", "ne", "zaman", "nezaman", "gelir", "gelecek", "teslim",
+                   # tur 30 (O1): onay ve beğeni ("tamamdır", "aynen", "süper", "çok güzel olmuş", "müşteri bayıldı", "eşi de beğendi",
+                   # "müşteri böyle istiyor", "müşterinin seçimi bu"), "acil", "aslında" (tek başına)
+                   "tamamdir", "aynen", "super", "guzel", "olmus", "harika", "mukemmel", "valla", "vallahi", "bayildi", "bayildilar",
+                   "esi", "esim", "boyle", "istiyor", "istiyorlar", "istiyoruz", "musterinin", "secimi", "secimimiz", "bu", "acil",
+                   "aslinda", "tekrar", "yeniden", "mutlu", "memnun"}
+_BITISIK_TEKLIF = ("teklif", "pdf", "cizim", "proje", "dosya", "liste", "fiyat", "plan")
 _BITISIK_TEKLIFLE = {"bekliyoruz", "bekliyorum", "bekleriz", "ne", "zaman", "nezaman", "gelir", "gelsin", "gelecek", "kac", "gunde",
-                     "simdi"}
+                     "simdi", "kadar", "olarak", "bugun", "sonra"}
+_BITISIK_ISTEK = ("gonder", "ilet", "yolla", "hazirla", "ciz")       # tur 30 (O1): "hemen çizin", "yeniden çizin"
+# tur 30 (O1): başka konunun süreç sorusu ("montaj ne zaman", "kapora ne kadar", "montaja kaç usta gelir", "müşteri yarın imzaya gelecek")
+_BITISIK_SUREC_KONU = ("montaj", "kapora", "nakliye", "teslim", "odeme", "fiyat", "usta", "ekip", "kurulum", "sevk", "imza")
+_BITISIK_SUREC_SORU = {"ne", "zaman", "nezaman", "kadar", "kac", "gun", "gunde", "gunu", "hafta", "haftada", "gelir", "gelecek", "olur",
+                       "yapilir", "baslar", "biter", "bugun", "yarin", "kisi", "olacak"}
+# tur 30 (O1): başka konuyu sonraya bırakma ("detayları sonra konuşuruz", "diğer konuları sonra hallederiz")
+_BITISIK_DEVIR_KONU = ("detay", "diger", "kalan", "ayrinti", "geris")
+_BITISIK_DEVIR_SOZU = {"sonra", "konusuruz", "konusalim", "bakariz", "hallederiz", "halledelim", "goruruz", "ayrica", "de", "da"}
 _BITISIK_AT = {"at", "atin", "atiniz", "atar", "atarsiniz", "atarsin", "atarmisin", "atarmisiniz", "atabilir", "atabilirsiniz",
                "atabilirmisiniz", "atabilirmisin", "atsaniz", "atarmsn"}
 
@@ -2981,21 +3047,56 @@ def _bitisik_olumlu(ws: list[str]) -> bool:
     """Virgülsüz seçimin sağ yanı yalnız olumlu sözden mi kurulmuş (tur 29): teklif isteği, bildirilmiş onay, selam, teşekkür, veda."""
     if not ws:
         return False
-    teklif = any(w.startswith(_BITISIK_TEKLIF + ("gonder", "ilet", "yolla", "hazirla")) or w in _BITISIK_AT for w in ws)
+    def istek_fiili(w: str) -> bool:
+        return w in _BITISIK_AT or (w.startswith(_BITISIK_ISTEK) and not w.startswith("cizim")
+                                    and not re.match(r"(?:gonder|ilet|yolla|hazirla|ciz)m[ae]", w))
+    teklif = any(w.startswith(_BITISIK_TEKLIF) or istek_fiili(w) for w in ws)
+    istek = any(istek_fiili(w) for w in ws)
+    surec = any(w.startswith(_BITISIK_SUREC_KONU) and not w.startswith("imzal") for w in ws)   # "imzalayacak" değil
+    devir = any(w.startswith(_BITISIK_DEVIR_KONU) or _KONU_ADI_SOZU.fullmatch(w) for w in ws)
     for n, w in enumerate(ws):
         onceki, sonraki = (ws[n - 1] if n else ""), (ws[n + 1] if n + 1 < len(ws) else "")
-        istek_fiili = w in _BITISIK_AT or (w.startswith(("gonder", "ilet", "yolla", "hazirla"))
-                                           and not re.match(r"(?:gonder|ilet|yolla|hazirla)m[ae]", w))
-        if w in _BITISIK_OLUMLU or w in _HITAP_SOZU or istek_fiili or w.startswith(_BITISIK_TEKLIF):
+        if w in _BITISIK_OLUMLU or w in _HITAP_SOZU or istek_fiili(w) or w.startswith(_BITISIK_TEKLIF):
             continue
-        if teklif and w in _BITISIK_TEKLIFLE:
+        if (teklif and w in _BITISIK_TEKLIFLE) or (surec and (w in _BITISIK_SUREC_SORU
+                                                            or (w.startswith(_BITISIK_SUREC_KONU) and not w.startswith("imzal")))) \
+                or (devir and (w in _BITISIK_DEVIR_SOZU or w.startswith(_BITISIK_DEVIR_KONU) or _KONU_ADI_SOZU.fullmatch(w))):
             continue
         if w in ("verdi", "verdik", "verdiler", "verildi", "veriyoruz", "veriyorum", "verdim", "veriyor", "veriyorlar") \
-                and onceki.startswith(("karar", "onay")):
+                and onceki.startswith(("karar", "onay", "ok", "okey", "olur")):
+            continue                                           # "onay verdi", "müşteri ok verdi"
+        if w == "var" and onceki.startswith(("onay", "karar", "izin")):
+            continue                                           # tur 30: "müşterinin onayı var"
+        if w in ("dedi", "dediler", "dedik", "dedim") and onceki in ("evet", "tamam", "tmm", "ok", "okey", "olur", "aynen"):
+            continue                                           # tur 30 (O1): "müşteri evet dedi"
+        if (w == "allah" and sonraki == "razi") or (w == "razi" and onceki == "allah"):
+            continue                                           # tur 30 (O1): "allah razı olsun"
+        if (w in ("eline", "elinize", "ellerinize") and sonraki.startswith("saglik")) \
+                or (w.startswith("saglik") and onceki in ("eline", "elinize", "ellerinize")):
+            continue                                           # tur 30: "süper olmuş eline sağlık"
+        if w.startswith(("degisiklik", "degisik")) and sonraki in ("yok", "istemiyoruz", "istemiyor", "istemiyorlar", "olmasin",
+                                                                     "yapmayin", "gerekmiyor"):
+            continue                                           # tur 30 (O1): "değişiklik yok", "değişiklik istemiyoruz"
+        if w in ("yok", "istemiyoruz", "istemiyor", "istemiyorlar", "olmasin", "yapmayin", "gerekmiyor") \
+                and onceki.startswith(("degisiklik", "degisik")):
             continue
-        if _SORU_EKI.fullmatch(w) or w in ("misin", "musun"):
-            if onceki in _BITISIK_AT or onceki.startswith(("gonder", "ilet", "yolla", "hazirla")):
-                continue
+        if w == "baska" and sonraki.startswith(("degisiklik", "degisik")):
+            continue
+        if re.fullmatch(r"(?:duzelt|degistir)[iu]p", w) and istek:
+            continue                                           # tur 30 (O1): "düzeltip gönderin", "değiştirip gönderebilir misiniz"
+        if w.startswith("acele") and sonraki in ("ediyor", "ediyorlar", "ediyoruz", "bekliyoruz", "bekliyor", ""):
+            continue                                           # tur 30 (O1, O2): "müşteri acele ediyor", "acele bekliyoruz"; "acele
+                                                               # yok" değil
+        if w in ("ediyor", "ediyorlar", "ediyoruz") and onceki.startswith("acele"):
+            continue
+        if w in ("bekliyoruz", "bekliyor") and onceki.startswith(("acele", "acil")):
+            continue
+        if re.fullmatch(r"\w+(?:[ae]bilir|[ae]r|[iu]r)", w) and sonraki in ("misiniz", "misin", "musunuz", "musun") and istek:
+            continue                                           # "değiştirip gönderebilir misiniz"
+        if _SORU_EKI.fullmatch(w) or w in ("misin", "musun", "misiniz", "musunuz"):
+            if istek_fiili(onceki) or re.fullmatch(r"\w+(?:[ae]bilir|[ae]r|[iu]r)", onceki) and istek \
+                    or ((teklif or surec) and onceki in ("gelir", "gelecek", "olur", "yapilir")):
+                continue                                       # tur 30 (O1): "bugün teklif gelir mi"
             return False
         if (w == "iyi" and sonraki in ("aksamlar", "gunler", "calismalar", "geceler")) or (w == "kolay" and sonraki == "gelsin") \
                 or (w in ("aksamlar", "gunler", "calismalar", "geceler", "gelsin") and onceki in ("iyi", "kolay")):
@@ -3219,7 +3320,22 @@ _SUREC_KOKU = ("plan", "cizim", "proje", "gonder", "teklif", "pdf", "gorsel", "k
 
 _KARAR_SORUSU_KOKU = ("onay", "dusun", "sec", "karar", "tercih", "bekle")   # "_KARAR_FIILI" başkadır
 _KARAR_DISI_KONU = ("renk", "reng", "tarih", "montaj", "seramik", "fayans", "parke", "teslim", "odeme", "fatura", "kapora", "taksit",
-                    "nakliye", "boya", "model", "desen", "ebat", "olcu")
+                    "nakliye", "boya", "desen", "ebat", "olcu")    # tur 30 (O4): "model" setin seçeneğini de anar ("modeli sonra mı seçelim?")
+_ZARF_FIIL = re.compile(r"\w+(?:[iu]nc[ae]|[ae]nc[ae]|[iu]nca|[ae]rken)")   # "görünce", "alınca", "gelince", "bitince"
+
+
+def _zaman_konusu(ws: list[str], n: int) -> bool:
+    """`ws[n]`'deki konu sözü zaman bildiriyor mu (tur 30, Y2): "ödemeden sonra", "montajdan önce", "teslim tarihine göre", "faturayı
+    görünce", "ölçüyü alınca", "ödemeyle birlikte". Kararın nesnesi değildir: "ödemeden sonra mı onaylayalım?" onayın sorusudur;
+    "kapı rengini sonra mı seçelim?" değil."""
+    for k in range(n, min(n + 2, len(ws))):
+        a, b = ws[k], (ws[k + 1] if k + 1 < len(ws) else "")
+        if (re.fullmatch(r"\w+(?:d[ae]n|t[ae]n)", a) and b in ("sonra", "once", "itibaren", "beri")) \
+                or (re.fullmatch(r"\w+(?:y?[ae]|n[ae])", a) and b in ("kadar", "gore")) \
+                or (re.fullmatch(r"\w+y?l[ae]", a) and b in ("birlikte", "beraber")) \
+                or (_ZARF_FIIL.fullmatch(b) and b not in ("bence", "sence", "bizce", "sizce")):
+            return True
+    return False
 _SUREC_KONUSU = ("plan", "cizim", "proje", "teklif", "pdf", "gorsel", "katalog", "fatura", "odeme", "teslim", "fiyat", "ucret")
 _ZAMAN_SOZU = {"hemen", "simdi", "simdilik", "sonra", "bugun", "yarin", "artik", "once", "direkt", "direk", "boyle", "yani"}
 _TEYIT_SOZU = {"tamam", "olur", "uygun", "iyi", "yeter", "yeterli", "dogru", "ok", "okey", "tmm", "emin", "olmaz", "peki"}
@@ -3237,16 +3353,20 @@ def _karar_sorusu(ws: list[str]) -> bool:
     "şimdi mi seçelim?", "onayı hafta sonu verelim mi?", "hemen mi onaylansın?", "şimdi mi onaylıyoruz?", "onaylayıp gönderelim mi?".
     "onay gönderir misiniz?", "teklifi bekleyelim mi?" ve "onaylıyoruz, teklif ne zaman?" değil."""
     konu = any(w.startswith(_SUREC_KONUSU) for w in ws)
+    onayli = any(w.startswith(("onay", "karar")) for w in ws)   # zaman yalnız onayın ya da kararın sorusunda: "rengi görünce mi seçelim?"
     if not any(w.startswith(("cati",) + _CATI_AD_KOKU) for w in ws) \
             and any((_konu_adi(w) or _yer_koku(w) or w.startswith(_KARAR_DISI_KONU))
-                    and not w.startswith(("plan", "cizim", "proje", "teklif", "pdf", "gorsel", "katalog", "onay")) for w in ws):
+                    and not w.startswith(("plan", "cizim", "proje", "teklif", "pdf", "gorsel", "katalog", "onay"))
+                    and not (onayli and _zaman_konusu(ws, n)) for n, w in enumerate(ws)):
         return False                                           # tur 29 (O3): "kapı rengini sonra mı seçelim?", "montaj tarihini ne zaman
-                                                               # seçelim?" başka konunun kararıdır
+                                                               # seçelim?" başka konunun kararıdır; tur 30 (Y2): "ödemeden sonra mı
+                                                               # onaylayalım?" değil (`_zaman_konusu`)
     for n, w in enumerate(ws):
         o, s = (ws[n - 1] if n else ""), (ws[n + 1] if n + 1 < len(ws) else "")
         kok = w.startswith(_KARAR_SORUSU_KOKU) and not w.startswith(("secenek", "secim", "kararli")) and not (w.startswith("bekle") and konu)
         ad = (w.startswith(("ver", "yap")) and any(re.fullmatch(r"(?:onay|karar|secim|tercih)(?:[iu]|[iu]n[iu]|[iu]m[iu]z[iu]?|l[ae]r[iu])?", x)
-                                                    for x in ws[max(0, n - 3):n]))   # "onayı verelim mi?"; "onayladı ne yapalım?" değil
+                                                    for x in ws[max(0, n - 4):n]))   # "onayı verelim mi?"; "onayladı ne yapalım?" değil;
+                                                               # tur 30: "onayı ödemeden sonra mı verelim?"
         if not (kok or ad):
             continue
         if _dilek_fiili(w) or (re.fullmatch(r"\w+yor(?:[iu]z)?", w) and (_SORU_EKI.fullmatch(o) or _SORU_EKI.fullmatch(s)
@@ -3344,7 +3464,8 @@ def _secim_sorusu(ws: list[str]) -> bool:
 _DUZELTME_SOZU = {"pardon", "hayir", "yanlis", "yanlislikla", "ozur", "pardn", "duzeltme", "duzeltiyorum", "veya", "yada", "yahut",
                   "aslinda", "yok"}
 _DUZELTME_ARDI = {"olsun", "kalsin", "numara", "numarali", "nolu", "cati", "catisi", "yi", "i", "u", "yu", "olacak", "dedim", "demek",
-                  "istedim", "yazdim", "olarak", "ile", "devam", "secenek", "secenegi", "secelim", "sectik", "evet", "tamam"}
+                  "istedim", "yazdim", "olarak", "ile", "devam", "secenek", "secenegi", "secelim", "sectik", "evet", "tamam", "de", "da",
+                  "olur", "olabilir"}                          # tur 30 (önceden var): "2 olsun aslında 1 de olur"
 
 
 def _cati_atiflari(metin: str | None, katalog: Katalog, taban: dict, st: dict) -> tuple[bool, set[str], list[set[str]]]:
@@ -3405,8 +3526,12 @@ def _cati_atiflari(metin: str | None, katalog: Katalog, taban: dict, st: dict) -
                 return w in harfler or w.startswith(_CATI_AD_KOKU) or bool(_secim_kodlari(w, katalog))
             def guclu_atif(k: int, w: str) -> bool:            # tur 29 (Y3, Y8): "2'yi aynı fiyata yapabilir misiniz?", "Kırma çatıyı
                 sonra = w0[k + 1] if k + 1 < len(w0) else ""   # kaporayla alabilir miyiz?" çatının ricasıdır; "kapıları 2'ye" değil
-                if w in numaralar:
-                    return not _birimli(w0, k) and (sonra in ("yi", "i", "yu", "u") or sonra.startswith(("numaray", "numarali", "nolu")))
+                once, s3 = (w0[k - 1] if k else ""), (w0[k + 2] if k + 2 < len(w0) else "")
+                if w in numaralar:                             # tur 30 (O3): "2 numaralı pencereyi", "yatak odası 2'yi" değil
+                    return not _birimli(w0, k) and not (_konu_adi(once) or _yer_koku(once) or once.startswith("oda")) \
+                        and (sonra in ("yi", "i", "yu", "u")
+                             or (sonra.startswith(("numaray", "numarali", "nolu"))
+                                 and not (_konu_adi(s3) or _yer_koku(s3) or s3.startswith(("oda", "pencere", "kapi")))))
                 return w in harfler or w.startswith(_CATI_AD_KOKU) or bool(_secim_kodlari(w, katalog))
             if rica and (any(guclu_atif(k, w) for k, w in enumerate(w0)) or (any(rica_atfi(k, w) for k, w in enumerate(w0))
                     and not any((_konu_adi(w) or _yer_koku(w) or w.startswith(("odeme", "teslim", "tarih", "fatura", "kapora", "taksit")))
@@ -3414,6 +3539,13 @@ def _cati_atiflari(metin: str | None, katalog: Katalog, taban: dict, st: dict) -
                 kararsiz = True                                # tur 27 (Y3): "Çatıyı 2 ile değiştirebilir misiniz?" çatı isteğidir: seti
                                                                # düşürmez, sorulur; tur 28 (Y4): "2'yi yapabilir misiniz?", "Kırma
                                                                # alabilir miyiz?"; başka konunun ricası değil
+            if any(w in _BEKLE_GOR for w in w0) and not [
+                    w for w in w0 if not (w in numaralar or w in harfler or w in sira or w in _BEKLE_GOR or w in _HITAP_SOZU
+                                          or w in _YUKLEM_SOZU or w in ("ne", "neler", "olacak", "olur", "nasil", "diyecek", "der", "de",
+                                                                        "da", "ki")
+                                          or w.startswith(_ERTELEYEN_KISI) or _SECIM_BILDIRIMI.fullmatch(w) or _SOZ_BILDIRIMI.fullmatch(w))]:
+                kararsiz = True                                # tur 30 (önceden var): "2 olsun, müşteri beğendi, bakalım ne olacak";
+                                                               # "bakalım teklif ne zaman gelir?" değil
             if "hangisi" in w0 and not ayrik and not _konu_oncesi(w0, w0.index("hangisi")) \
                     and any(w.endswith(("sa", "se")) or w.startswith(_KARARSIZ_KOKU) for w in w0):
                 kararsiz = True                                # hakem tur 8 (O4): "hangisi ucuzsa", "hangisi uygunsa" seçimi bize bırakır
