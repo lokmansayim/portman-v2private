@@ -286,8 +286,8 @@ def test_dis_160_havuz_evinde(ev):
     assert any(k[1].startswith("160'lık") for k in _liste(ev, "dis_160"))
 
 
-@pytest.mark.xfail(strict=True, reason="PA-06K (iki uçlu kırma, mahya y boyunca): makas planı kıyaslanmadı, liste yazılmaz")
 def test_pa06k_listesi():
+    """BK-45 (D-114, Lokman 16 Kasım 2026 kartları 08:22:50 ve 08:39:39): PA-06K'nın kırması (mahya y boyunca) yazılır; önce xfail'di."""
     assert _liste("PA06K")
 
 

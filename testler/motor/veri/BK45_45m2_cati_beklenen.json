@@ -1,0 +1,195 @@
+{
+ "aciklama": "BK-45 hedef örneği: 45 m² 1+1 (yatak odası cumbalı, sundurmalı; havuzda PA-27/28/29) yükleme listesinin çatı satırları. Motor sütunu Lokman'ın onayladığı tablodaki gibi; pafta sütunu evin paftasındaki gerçek liste (kör test TS-01, açık set), yalnız bilgi.",
+ "onay": {
+  "tarih": "2026-11-16T08:11:39Z",
+  "soz": "Evet, girsin",
+  "soru": "45 m² evin listesi tablodaki gibi girsin mi?",
+  "tablo": "PF Portman_Proje_Dosyalari/Liste_Cumba_Kirma/02_45m2_cati_satirlari_kiyas.png"
+ },
+ "girdi": {
+  "is_emri": "testler/havuz/is_emirleri/AP07_PAFTA.json",
+  "ozellikler_kaynagi": "testler/kor/projeler/TS01/yapi_pafta.json",
+  "ozellikler": {
+   "Çatı Kaplaması": "OSB + Nem Bariyeri + Metal Kiremit",
+   "Çatı Kaplama Rengi": "Bordo",
+   "Yağmur İniş Borusu": "Metal",
+   "Açıklama": "1- İç cephe alçıpan kaplama olacak. 2- Çatı izolasyon mineral yün 3- Yağmur inişleri metal (antrasit gri) olacak. 4- Dış cephede mastik olacak. 5- Çatı müdahale kapağı gidecek."
+  }
+ },
+ "komut": "motor.prefabrik_liste.is_emrinden(is_emri, ozellikler=ozellikler)",
+ "satirlar": [
+  {
+   "kalem": "Makas (baş) · ana çatı",
+   "motor": 2,
+   "pafta": "ana 8 (baş + orta)",
+   "fark": "ana çatıda 7 / 8: paftada yarım pano ekinde de makas var"
+  },
+  {
+   "kalem": "Makas (orta) · ana çatı",
+   "motor": 5,
+   "pafta": ""
+  },
+  {
+   "kalem": "Yavru makas · cumba",
+   "motor": 3,
+   "pafta": "3",
+   "fark": "aynı"
+  },
+  {
+   "kalem": "Yavru makas · sundurma çatısı",
+   "motor": 2,
+   "pafta": "2",
+   "fark": "aynı"
+  },
+  {
+   "kalem": "Aşık",
+   "motor": 30,
+   "pafta": "32"
+  },
+  {
+   "kalem": "100'lük saçak omegası",
+   "motor": 7,
+   "pafta": "7",
+   "fark": "aynı"
+  },
+  {
+   "kalem": "Saçak sacı (30'luk, 3'ü menfezli)",
+   "motor": 8,
+   "pafta": "8",
+   "fark": "aynı"
+  },
+  {
+   "kalem": "Alın sacı (30'luk)",
+   "motor": 9,
+   "pafta": "9",
+   "fark": "aynı"
+  },
+  {
+   "kalem": "Baş makas omegası",
+   "motor": 8,
+   "pafta": "7",
+   "fark": "sundurmanın dış kirişindeki dahil (D-32)"
+  },
+  {
+   "kalem": "Baş makas Z'si",
+   "motor": 12,
+   "pafta": "7",
+   "fark": "alın kenarı başına: ana 8, cumba 2, sundurma 2"
+  },
+  {
+   "kalem": "Baş makas betopanı",
+   "motor": 6,
+   "pafta": "6",
+   "fark": "aynı"
+  },
+  {
+   "kalem": "OSB 11 mm (çatı)",
+   "motor": 26,
+   "pafta": "27"
+  },
+  {
+   "kalem": "Metal kiremit (100 cm kapatır) · ana çatı",
+   "olcu": "L 3210",
+   "motor": 18,
+   "pafta": "16 × L 3200",
+   "fark": "paftada 105 cm kapatır, bizde 100"
+  },
+  {
+   "kalem": "Metal kiremit (100 cm kapatır) · cumba",
+   "olcu": "L 1950",
+   "motor": 7,
+   "pafta": "6 × L 1950"
+  },
+  {
+   "kalem": "Metal kiremit (100 cm kapatır) · sundurma çatısı",
+   "olcu": "L 1080",
+   "motor": 5,
+   "pafta": "4 × L 1080"
+  },
+  {
+   "kalem": "Metal kiremit mahyası",
+   "motor": 6,
+   "pafta": "6",
+   "fark": "aynı"
+  },
+  {
+   "kalem": "Ters mahya (dere içi)",
+   "motor": 4,
+   "pafta": "4",
+   "fark": "aynı"
+  },
+  {
+   "kalem": "Ters mahya kenar kutusu",
+   "motor": 8,
+   "pafta": "8",
+   "fark": "aynı"
+  },
+  {
+   "kalem": "Nem bariyeri",
+   "motor": 70,
+   "pafta": "59,16 m²",
+   "fark": "çatı alanı 68,4 m², 10 m²'ye yukarı"
+  },
+  {
+   "kalem": "Mahya bandı",
+   "motor": 2,
+   "pafta": "5"
+  },
+  {
+   "kalem": "Çatı şiltesi / izolasyonu (9,6 m²/paket)",
+   "motor": 5,
+   "pafta": "6"
+  },
+  {
+   "kalem": "Metal dere",
+   "motor": 5,
+   "pafta": "5",
+   "fark": "aynı"
+  },
+  {
+   "kalem": "Metal dere inişi aparatı",
+   "motor": 8,
+   "pafta": "7",
+   "fark": "ek çatı parçasına 2 iniş"
+  },
+  {
+   "kalem": "Dere kapağı",
+   "motor": 8,
+   "pafta": "8",
+   "fark": "aynı"
+  },
+  {
+   "kalem": "Dere kelepçesi",
+   "motor": 40,
+   "pafta": "40",
+   "fark": "aynı"
+  },
+  {
+   "kalem": "Kutu profil (kiriş) 100 × 100",
+   "olcu": "L 1200",
+   "motor": 2,
+   "pafta": "2 × L 1200",
+   "fark": "aynı"
+  },
+  {
+   "kalem": "Kutu profil (kiriş) 100 × 100",
+   "olcu": "L 1355",
+   "motor": 1,
+   "pafta": "1 × L 1155",
+   "fark": "kural: kolonun dış yüzünden dış yüzüne"
+  },
+  {
+   "kalem": "Özel kutu profil (kolon) 100 × 100",
+   "motor": 2,
+   "pafta": "2",
+   "fark": "aynı"
+  }
+ ],
+ "satirsiz": [
+  {
+   "kalem": "OSB mahyası",
+   "pafta": "6",
+   "fark": "kural kitabında yok; liste satır yazmaz"
+  }
+ ]
+}

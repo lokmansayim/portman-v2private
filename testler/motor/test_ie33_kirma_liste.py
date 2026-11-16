@@ -5,8 +5,9 @@ AP-01'in geometrisi İE-17'nin İş Emri'si (`testler/cizim/evler/AP01.json`; ö
 dere yerleşim planından (s. 6): M10–M20 ana makas (mahyaya dik, 11), M02–M08 ve M22–M28 kırma uçlarındaki kısa makaslar (7 + 7), M01, M09,
 M21, M29 köşelerdeki çapraz makas (4); kırma uçlarının altında CP1–CP6 çatı paneli. Paftadaki ölçüler makas yüzünden yüzünedir
 (117,5 + 8 = 125,5; 54,75 + 8 = 62,75): makaslar saçak duvarının pano eklemlerinde. Kendi listemiz gerçek liste açılmadan önce commit'lendi
-(cd3a443); gerçek listede "ÇATI MAKAS PANELLERİ" 29 ve "ÇATI PANELLERİ" 6. Paftanın dışında kalan iki uçlu kırmada (mahya y boyunca,
-girintili gövde, taşan veranda, paftadan geniş makas aralığı; geometri hakemi, 6 Kasım) liste yazılmaz (D-66). LLM yok.
+(cd3a443); gerçek listede "ÇATI MAKAS PANELLERİ" 29 ve "ÇATI PANELLERİ" 6. Paftanın dışında kalan iki uçlu kırmada (girintili gövde,
+taşan veranda, paftadan geniş makas aralığı; geometri hakemi, 6 Kasım) liste yazılmaz (D-66). Mahya y boyunca BK-45'ten beri aynı kuralla,
+90° dönmüş; uç bandı geniş kalırsa ilk ana makas mahyanın ucuna en yakın duvarda (D-114, 87 m²). LLM yok.
 """
 from __future__ import annotations
 
@@ -79,9 +80,62 @@ def test_kor_is_emri_geometrisi_ayni():
     assert L["girdi_ozeti"]["makas"] == 29 and sum(_adet(L, "Sandviç panel (").values()) == 36
 
 
-def test_mahyasi_y_boyunca_yazilmaz():
-    with pytest.raises(PL.ListeYazilmaz, match="mahya y boyunca"):     # AP-09'un dikdörtgen gövdesi kırmayla: mahya y boyunca
-        PL.model_motor(_kirma(AP09))
+def test_mahyasi_y_boyunca_yazilir():
+    """BK-45: mahya y boyunca kırma aynı kuralla, 90° dönmüş (önce liste yazılmazdı). AP-09'un dikdörtgen gövdesi kırmayla: ana makaslar
+    kesintisiz saçak duvarının pano eklerinde (y), uçlardan en az bir pano içeride; uç bandı 1,5 panodan dar, D-114 duvarı aranmaz."""
+    c = PL.model_motor(_kirma(AP09))["cati"][0]
+    km = c["kirma_makas"]
+    assert km["mahya"] == "y" and km["ana_x_cm"] == [186.5, 312.0, 437.5, 563.0, 688.5, 814.0]
+    assert [(u["uc"], u["bant_cm"], u["kisa"], u["cati_paneli"]) for u in km["uclar"]] == [("ön", 186.5, 4, 1), ("arka", 130.5, 5, 2)]
+    assert not any("ilk_ana_duvarda_cm" in u for u in km["uclar"])
+
+
+PA06K = KOK / "is_emri" / "adaylar" / "PA06K.json"
+
+
+def test_87m2_kirma_on_uc_duvarda():
+    """D-114 (Lokman, 16 Kasım 2026; kart 08:22:50 "330'daki duvardan başlasın", eskiz r02): 87 m² kırmada (mahya y boyunca) ön uçta ilk
+    pano eki (79) uca bir panodan yakın, sonraki (204,5) bandı 1,5 panodan geniş bırakır; ilk ana makas mahyanın ucuyla (400) ön uç
+    arasındaki en yakın duvarın (330, verandanın arkasındaki dış duvar) üstünde. Arka uç bugünkü kural (957,5; bant 130,5).
+    Eskizdeki sayılar: ana 7, kısa 2 + 6, çapraz 4 = 19 makas, çatı paneli 1 + 3."""
+    c = PL.model_motor(_ie(PA06K))["cati"][0]
+    km = c["kirma_makas"]
+    assert km["mahya"] == "y" and km["ana_x_cm"] == [330.0, 455.5, 581.0, 643.75, 769.25, 832.0, 957.5]
+    on, arka = km["uclar"]
+    assert (on["uc"], on["bant_cm"], on["ilk_ana_duvarda_cm"], on["kisa_y_cm"], on["cati_paneli"]) == ("ön", 330.0, 330.0, [330.0, 470.0], 1)
+    assert (arka["uc"], arka["bant_cm"], arka["kisa"], arka["cati_paneli"]) == ("arka", 130.5, 6, 3) and "ilk_ana_duvarda_cm" not in arka
+    L = PL.is_emrinden(_ie(PA06K))
+    assert L["girdi_ozeti"]["makas"] == 19
+    assert {s["kalem"]: (s["olcu"], s["adet"]) for s in L["satirlar"] if s["kalem"].startswith(("Makas (", "Çatı paneli"))} == {
+        "Makas (ana, mahyaya dik) · ana çatı": ("açıklık 8000", 7),
+        "Makas (kısa, ön uç) · ana çatı": ("L 3600", 2), "Makas (kısa, arka uç) · ana çatı": ("L 1605", 6),
+        "Makas (çapraz, kırma, ön uç) · ana çatı": ("L 5091", 2), "Makas (çapraz, kırma, arka uç) · ana çatı": ("L 2270", 2),
+        "Çatı paneli (makas arası) · ana çatı": ("—", 4)}
+    assert not [s for s in L["satirlar"] if s["adet"] is None]
+
+
+def test_87m2_liste_hedef_ornek():
+    """BK-45 hedef örneği (D-114): 87 m² kırmanın çatı satırları Lokman'ın onayladığı tablodaki gibi (16 Kasım 2026 08:39:39 UTC kartı
+    "Evet, girsin"; tablo PF Liste_Cumba_Kirma/04_87m2_kirma_cati_satirlari.png). Kırmada olmayan satırlar (alın, baş makas, dere
+    kapağı) 0 adetle yazılır."""
+    H = json.loads((KOK / "testler" / "motor" / "veri" / "BK45_87m2_kirma_beklenen.json").read_text(encoding="utf-8"))
+    assert H["onay"]["soz"] == "Evet, girsin" and len(H["satirlar"]) == 20
+    L = PL.is_emrinden(_ie(KOK / H["girdi"]["is_emri"]))
+    assert len(L["satirlar"]) == H["toplam_satir"] and L["girdi_ozeti"]["makas"] == H["makas"]
+    bulunan = [[(r["olcu"], r["adet"]) for r in L["satirlar"] if r["kalem"] == h["kalem"]] for h in H["satirlar"]]
+    assert bulunan == [[(h["olcu"], h["motor"])] for h in H["satirlar"]]
+
+
+def test_87m2_duvar_yoksa_yazilmaz():
+    """D-114 yalnız mahyanın ucuyla uç arasında duvar varsa: 330'daki duvar olmasa ön uç bandı (204,5) 1,5 panodan geniş kalır, liste
+    sessizce yazılmaz (K21; D-66 › Sınır aynen)."""
+    from motor import geometry as G
+    ie = _ie(PA06K)
+    plan = G.kur(json.loads(json.dumps(ie)))
+    assert [round(d.c, 2) for d in plan.duvarlar if d.yon == "x" and 204.5 < d.c < 400] == [330.0]
+    plan.duvarlar = [d for d in plan.duvarlar if not (d.yon == "x" and abs(d.c - 330.0) < 1e-6)]
+    with pytest.raises(PL.ListeYazilmaz, match="1,5 panodan geniş"):
+        PL._iki_uclu_kirma_catilari(plan, ie)
 
 
 def test_tek_uclu_kirma_aynen():

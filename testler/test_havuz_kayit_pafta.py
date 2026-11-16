@@ -159,15 +159,16 @@ def test_45m2_kaynak_yeni_dosya():
 
 def test_45m2_salonun_on_dis_duvari():
     """Yalnız salonun ön dış duvarı değişir: 86,5 cm'lik pano → köşeden 23,75 + 62,75. Öteki duvarlar (yan dış duvar ve yatak odası–salon
-    duvarı dahil; karta girmedi) aynı. Liste yazılmaz (iki cumba)."""
+    duvarı dahil; karta girmedi) aynı. Liste iki cumbayı BK-45'ten beri sayar: cumbada 3, sundurmada 2 makas (paftadaki gibi)."""
     p0, p1 = G.kur(_ie(AP07)), G.kur(copy.deepcopy(_sablon("PA27")))
     assert (p0.W, p0.H) == (p1.W, p1.H) and (len(p0.panolar), len(p1.panolar)) == (36, 37)
     k0, k1 = {_an(q): q for q in p0.panolar}, {_an(q): q for q in p1.panolar}
     ozet = lambda qs: sorted((q.duvar.yon, q.duvar.tur, q.duvar.c, round(q.a0, 2), round(q.boy, 2)) for q in qs)  # noqa: E731
     assert ozet(q for k, q in k0.items() if k not in k1) == [("x", "dis", 155.0, 295.0, 86.5)]
     assert ozet(q for k, q in k1.items() if k not in k0) == [("x", "dis", 155.0, 295.0, 23.75), ("x", "dis", 155.0, 318.75, 62.75)]
-    with pytest.raises(PL.ListeYazilmaz):
-        _satirlar(_sablon("PA27"))
+    satir = _satirlar(_sablon("PA27"))
+    assert satir[("1005", "Yavru makas · cumba", "L 3600")] == 3
+    assert satir[("1005", "Yavru makas · sundurma çatısı", "L 1955")] == 2
 
 
 def test_45m2_standart_halleri_bu_durumda_degil():
