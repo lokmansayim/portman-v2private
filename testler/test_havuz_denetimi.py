@@ -1,6 +1,7 @@
 """Havuz denetimi (`araclar/havuz_denetimi.py`): havuz listesi, makas sayımı ve bir evde uçtan uca koşu. Araç yalnız okur."""
 import json
 from pathlib import Path
+import pytest
 
 from araclar import havuz_denetimi as HD
 
@@ -26,10 +27,11 @@ def test_makas_sayimi_parca_parca():
     sat = [{"grup": "1005", "kalem": "Makas (baş) · ana çatı", "adet": 2},
            {"grup": "1005", "kalem": "Makas (orta) · ana çatı", "adet": 5},
            {"grup": "1005", "kalem": "Cumba makası · sağ cumba", "adet": 1},
+           {"grup": "1005", "kalem": "Kubbe makası", "adet": 3},
            {"grup": "1005", "kalem": "Çatı paneli (makas arası) · VERANDA çatısı", "adet": 4},
            {"grup": "1002", "kalem": "Baş makas omegası", "adet": 9}]
-    assert HD.makas_sayisi(sat) == 8
-    assert HD.parca_makaslari(sat) == {"ana çatı": 7, "sağ cumba": 1}
+    assert HD.makas_sayisi(sat) == 11
+    assert HD.parca_makaslari(sat) == {"ana çatı": 7, "sağ cumba": 1, "kubbe": 3}
 
 
 def test_bir_ev_uctan_uca():
@@ -38,6 +40,19 @@ def test_bir_ev_uctan_uca():
     assert not [b for b in r["bulgular"] if b["sinif"] == "hata"], r["bulgular"]
     assert r["makas"] == r["makas_3d"] and r["makas"]
     assert "| PA11 |" in HD.markdown({"PA11": r})
+
+
+@pytest.mark.parametrize("kod", ["PA09", "PA24"])
+def test_bk46_kubbe_ve_tek_uclu_kirma(kod):
+    """BK-46: kubbeli evde (64 m²) kubbe makası listeyle 3D arasında eşlenir; tek uçlu kırmada (77 m²) 3D kırma ve 25 makas. 64 m²'nin
+    veranda çatısının makası 3D'de bugün de yok (HD-09 uyarısı; ayrı iş)."""
+    ie = json.loads((KOK / "is_emri" / "adaylar" / f"{kod}.json").read_text(encoding="utf-8"))
+    r = HD.denetle_prefabrik(ie)
+    bul = [b for b in r["bulgular"] if b["kalem"] in ("HD-05", "HD-08", "HD-09", "HD-10")]
+    assert [b["metin"] for b in bul] == (["veranda çatısı: listede 5 makas, 3D modelde bu parçanın makası yok"] if kod == "PA09" else [])
+    parca = {"PA09": ["ana çatı", "kubbe"], "PA24": ["ana çatı"]}[kod]
+    assert [r["makas_parca"][p] for p in parca] == [r["makas_3d_parca"][p] for p in parca]
+    assert r["makas_3d_parca"].get("kubbe") == (3 if kod == "PA09" else None)
 
 
 def test_celik_havuz_evi_standart_kaplamayla():

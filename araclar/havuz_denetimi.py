@@ -144,10 +144,12 @@ def makas_sayisi(satirlar: list[dict]) -> int | None:
 
 
 def parca_makaslari(satirlar: list[dict]) -> dict[str, int]:
-    """Listedeki makas adedi çatı parçası başına: "Makas (orta) · ana çatı" → {"ana çatı": …}."""
+    """Listedeki makas adedi çatı parçası başına: "Makas (orta) · ana çatı" → {"ana çatı": …}. Kubbe makasının satırında parça eki yok
+    ("Kubbe makası"): parçası "kubbe" (3D'de `uret()["kubbe"]`, BK-46)."""
     out: dict[str, int] = {}
     for s in makas_satirlari(satirlar):
-        parca = str(s.get("kalem", "")).split(" · ")[-1].strip().lower() if " · " in str(s.get("kalem", "")) else "?"
+        kalem = str(s.get("kalem", ""))
+        parca = kalem.split(" · ")[-1].strip().lower() if " · " in kalem else "kubbe" if kalem.startswith("Kubbe makası") else "?"
         if isinstance(s.get("adet"), (int, float)):
             out[parca] = out.get(parca, 0) + int(s["adet"])
     return out
@@ -213,7 +215,9 @@ def denetle_prefabrik(ie: dict, kart: dict | None = None) -> dict:
                     B.append(_b("HD-10", f"İş Emri'nde kırma çatı; 3D modelin çatısı {', '.join(cesit) or 'yok'} (beşik çiziliyor)"))
             if cati.get("uyari"):
                 B.append(_b("HD-06", str(cati["uyari"])))
-            r["makas_3d"] = len(cati["makaslar"]) if cati.get("makaslar") else cati.get("makas")
+            kubbe = sum(int(k.get("makas") or 0) for k in (oz or {}).get("kubbe") or [])   # BK-46: kubbe makası çatının özetinde değil
+            n3 = len(cati["makaslar"]) if cati.get("makaslar") else cati.get("makas")
+            r["makas_3d"] = (n3 or 0) + kubbe if (n3 is not None or kubbe) else None
             uc: dict[str, int] = {}
             for m in cati.get("makaslar") or []:
                 k = str(m.get("parca") or "?").strip().lower()
@@ -221,6 +225,8 @@ def denetle_prefabrik(ie: dict, kart: dict | None = None) -> dict:
             ozet_yolu = not cati.get("makaslar") and cati.get("makas") is not None
             if ozet_yolu:                                                # parça kırılımı olmayan özet (makaslar y'yi geçer ya da kırma)
                 uc = {"ana çatı": int(cati["makas"])}
+            if kubbe:
+                uc["kubbe"] = kubbe
             r["makas_3d_parca"] = uc
             liste_p = r.get("makas_parca") or {}
             for parca in sorted(set(liste_p) | set(uc)):
