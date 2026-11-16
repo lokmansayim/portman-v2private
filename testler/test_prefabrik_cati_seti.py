@@ -4242,3 +4242,82 @@ def test_hakem38_olumlu_soz_onay(tmp_path, metin):
     s, _ = _cati_seti(tmp_path)
     k = s.yaz(metin, niyet="diger")
     assert k.gerekce == K.PLAN_ONAYI and k.revizyon == 1, k.mesaj
+
+
+
+# İE-42 hakem tur 39: kişinin razılığı ve onayı ("müşteri razı olsun", "müşteri evet desin"), bitişik sıra sözlü taahhüt ("ikincide
+# olur"), "teslim fiyatı", fiyatın "kaça"sı ve ardında kesinleşme olan işçi isteği kararsızdır; "kolay gelsin", başka işin isteği, -cI'lı
+# meslek ve bileşik ad, "bekletmeyin" ve "bekleyemeyiz" değil
+@pytest.mark.parametrize("metin", [
+    "1 olsun, müşteri razı olsun", "2 olsun, müşteri bir uğrasın", "2 olsun, müşteri razı olsun", "2 olsun, müşteri evet desin",
+    "2 olsun, babası bir baksın", "1 olsun, ikincide olur kabul ederiz", "1 olsun, kabul ederiz ikincide olur",
+    "1 olsun, bakalım teslim fiyatı ne kadar?", "2 olsun, bakalım kdv dahil teslim ne kadar?", "2 olsun, bakalım metrekaresi kaça?",
+    "2 olsun, bakalım metrekaresi kaça geliyor?", "2 olsun, bakalım metrekaresi kaça gelir?", "2 olsun, bakalım m2 kaça?",
+    "2 olsun, bakalım metrekare kaça?", "2 olsun, bakalım metrekaresi kaç liradan?", "2 olsun, bakalım metrekaresi kaç euro?",
+    "2 olsun, bakalım metrekaresi kaç dolar?", "2 olsun, bakalım metrekaresi kaç ediyor?", "2 olsun, bakalım metrekaresi kaç tutuyor?",
+    "2 olsun, bakalım metrekaresi kaça mal olur?", "2 olsun, bakalım metrekaresi kaça çıkar?", "2 olsun, bakalım metrekaresi kaça olur?",
+    "2 olsun, bakalım panel kaça?", "2 olsun, bakalım brüt kaça?", "2 olsun, bakalım net kaça?", "2 olsun, bakalım metresi kaça?",
+    "2 olsun, bakalım tane kaça?", "2 olsun, bakalım metrekareye kaç?", "2 olsun, bakalım toplam metrekare kaça?",
+    "Selam 2 olsun, bakalım metrekaresi kaça?", "2 olsun, güzel ama bekleyelim", "2 olsun, müşteri istedi bence de olur fiyatı öğrenelim",
+    "2 olsun, müşteri istedi bence de olur önce fiyatı öğrenelim", "2 olsun. Bakalım metrekaresi kaça geliyor",
+    "1 olsun, usta gelsin baksın", "1 olsun, montajdan önce müşteri bir görsün", "1 olsun, müşteri kaporayı yatırsın",
+    "1 olsun, müşteri tamam olsun", "2 olsun, müşteri emin olsun", "2 olsun, vinci fiyatı sonra konuşuruz",
+    "2 olsun, güzel ama beklemede kalsın", "2 olsun, bekleyelim"])
+def test_hakem39_kararsiz_ve_kosullu_soz_kaydedilmez(tmp_path, metin):
+    """Tur 39 (Y1, Y2, Y3, önceden var): kişinin razılığı ve onayı ("müşteri bir razı olsun", "müşteri emin olsun", "müşteri evet
+    desin", "babası bir baksın", "müşteri bir uğrasın"), bitişik sıra sözlü taahhüt ("ikincide olur kabul ederiz"), "teslim fiyatı ne
+    kadar?", fiyatın "kaça"sı ("metrekaresi kaça?", "kaç euro?", "kaça mal olur?") ve ardında kesinleşme olan işçi isteği ("montaj
+    ekibi gelsin, kesinleşir") kayıt almaz: plan r01, onay yok, r02 yok."""
+    s, _ = _cati_seti(tmp_path)
+    k = s.yaz(metin, niyet="diger")
+    assert K.PLAN_ONAYI not in k.gerekce and k.eylem != "is_emri" and s.plan["revizyon"] == 1 and not s.k.d.get("onaylanan"), k.mesaj
+
+
+@pytest.mark.parametrize("metin", [
+    "2 olsun, usta kolay gelsin", "Patron kolay gelsin, 2 olsun", "2 olsun patron kolay gelsin", "Ustalar kolay gelsin, 2 olsun",
+    "Ekip kolay gelsin, 2 olsun", "2 olsun, montajcı arkadaşlara kolay gelsin", "2 olsun, ekip arkadaşlara kolay gelsin",
+    "2 olsun, ustalar kolay gelsin", "Hocam 2 olsun, ekip kolay gelsin", "2 olsun, usta gelsin montaja başlasın",
+    "2 olsun, ekip gelsin kursun", "2 olsun, montaj ekibi gelsin montaja başlasın", "2 olsun, ustalar pazartesi gelsin",
+    "2 olsun, ekip hafta sonu gelsin", "2 olsun, nakliyeci cumartesi gelsin", "2 olsun, montaj ekibi hemen gelsin",
+    "2 olsun, montajcı arkadaş gelsin kursun", "2 olsun, müşteri gelsin teslim alsın", "2 olsun, usta temeli kontrol etsin",
+    "2 olsun, usta zemini kontrol etsin", "2 olsun, ekip zemine baksın", "2 olsun, usta arsaya baksın",
+    "2 olsun, usta zemine bir baksın montajdan önce", "2 olsun, mühendis statiği kontrol etsin", "2 olsun, nakliyeyi müşteri ödesin",
+    "2 olsun, nakliye parasını müşteri ödesin", "2 olsun, vinç parasını müşteri ödesin", "2 olsun, temel parasını müşteri ödesin",
+    "2 olsun, müşteri faturayı imzalasın", "2 olsun, temel için mühendise danışırız", "2 olsun, montaj ekibine danışırız gün için",
+    "2 olsun, montaj günü için ekibe sorarız", "2 olsun, montaj tarihi için ekibe sorun", "2 olsun, usta pazartesi baksın temele",
+    "2 olsun, usta gelsin temeli kontrol etsin", "2 olsun, ekip gelsin vinçle indirsin", "2 olsun, müşteri gelsin anahtarı alsın",
+    "2 olsun, hiç sorun yok kabul ederiz", "2 olsun, bakalım teslimat ücreti ne kadar?", "2 olsun, bakalım klima montajlı ne kadar?",
+    "2 olsun, bakalım kombi montajlı ne kadar?", "2 olsun, bakalım mutfak dolabı montajlı ne kadar?",
+    "2 olsun, montajcı fiyatını sonra konuşuruz", "2 olsun, nakliyeci fiyatını sonra konuşuruz",
+    "2 olsun, nakliyeci ücretini sonra konuşuruz", "2 olsun, montajcı ücretini sonra konuşuruz",
+    "2 olsun, elektrikçi fiyatını sonra konuşuruz", "2 olsun, tesisatçı fiyatını sonra konuşuruz",
+    "2 olsun, boyacı fiyatını sonra konuşuruz", "2 olsun, vinççi fiyatını sonra konuşuruz",
+    "2 olsun, montajcının fiyatını sonra konuşuruz", "2 olsun, panel montajı ücretini sonra konuşuruz",
+    "2 olsun, su tesisatı fiyatını sonra konuşuruz", "2 olsun, montajcı fiyatı verir sonra konuşuruz",
+    "2 olsun, montajcıyla fiyatı sonra konuşuruz", "2 olsun, nakliyeciyle fiyatı sonra konuşuruz",
+    "2 olsun, fiyatı nakliyeciyle sonra konuşuruz", "2 olsun, güzel ama bekleyemeyiz", "2 olsun, güzel ama beklemek yok",
+    "2 olsun, güzel ama bekletmeden", "2 olsun, güzel ama bekletmeyin", "2 olsun, güzel ama beklemeyelim", "2 olsun, güzel ama beklemeyin",
+    "2 olsun, güzel ama dondurmayın", "2 olsun, beğendik ama bekletmeyin", "2 olsun, müşteri beğendi ama bekletmeyin",
+    "2 olsun, tamamdır ama bekletmeyin", "2 olsun, güzel ama bekletmeyelim", "2 olsun, kombi modellerinden hangisi uygunsa",
+    "Selam hocam, 2 olsun, ustalar kolay gelsin", "Kolay gelsin, 2 olsun. Ekip pazartesi gelsin", "2 olsun. Ekip cumartesi gelsin kursun",
+    "2 olsun. Usta zemine bi baksın", "2 olsun, nakliyeci fiyatını sonra konuşuruz abi", "2 olsun. Montajcı fiyatını sonra konuşuruz",
+    "Hayırlı işler, 2 olsun, ekip kolay gelsin", "2 olsun, bekletmeyin"])
+def test_hakem39_acik_secim_soruya_donmez(tmp_path, metin):
+    """Tur 39 (O1, O2, O4, sınır): "kolay gelsin", başka işin isteği ("ustalar pazartesi gelsin", "nakliyeyi müşteri ödesin", "usta
+    zemine bir baksın"), -cI'lı meslek ("tesisatçı fiyatını sonra konuşuruz"), "klima montajlı ne kadar?", "bekletmeyin",
+    "bekleyemeyiz" ve "bekletmeden" açık seçimi soruya çevirmez: r02 PA-06-K."""
+    s, _ = _cati_seti(tmp_path)
+    k = s.yaz(metin, niyet="diger")
+    assert k.eylem == "is_emri" and k.revizyon == 2 and k.is_emri["talep"]["kaynak"] == "PA06K", k.mesaj
+
+
+
+@pytest.mark.parametrize("metin", [
+    "1 olsun, usta kolay gelsin", "1 olsun, müşteri de kabul etti onaylarız", "1 olsun, müşteri de onay verdi kabul ederiz",
+    "1 olsun, güzel ama bekleyemeyiz", "1 olsun, güzel ama bekletmeyin", "1 olsun, güzel ama bekletmeden"])
+def test_hakem39_olumlu_soz_onay(tmp_path, metin):
+    """Tur 39: evin çatısının "kolay gelsin"li, bildirimli, "sorun yok"lu ve "bekletmeyin"li açık sözü ("1 olsun, usta kolay gelsin",
+    "müşteri de onay verdi kabul ederiz", "güzel ama bekleyemeyiz") onaydır: r01 onaylanır."""
+    s, _ = _cati_seti(tmp_path)
+    k = s.yaz(metin, niyet="diger")
+    assert k.gerekce == K.PLAN_ONAYI and k.revizyon == 1, k.mesaj
