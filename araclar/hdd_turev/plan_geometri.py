@@ -5,7 +5,8 @@ Paftanın çizgilerinden okunur, pafta düzeltilmez:
 - gövde: 10'luk duvarların dış kutusu; akslar 125,5 / 2 ızgarası, ızgaraya oturmayan duvar ek aks olur;
 - oda: aks hücrelerinin duvarsız kenarlardan dolgusu, adı `pafta_kart`'ın oda yazısından (yazının noktası hangi bölgedeyse);
 - açıklık: pano blokları (pencere, vasistas, kapı), ölçüsü en yakın açıklık yazısından;
-- taşan veranda: gövdenin dışındaki kesik çizgili dikdörtgen ve köşelerindeki kolon kareleri;
+- taşan veranda: gövdenin dışındaki kesik çizgili dikdörtgen ve kolon kareleri; köşedekilerden fazla kolon `ara_kolon` olur (D-109,
+  `veranda_ara_kolonu`);
 - pano dizilimi: her duvarın pano ekleri (bandı enine kesen, boyu duvar kalınlığı kadar çizgiler).
 Okunamayan ya da emin olunmayan her şey `uyarilar`'a yazılır (K21); İş Emri'ndeki varsayımlar `varsayimlar`'a.
 
@@ -860,6 +861,34 @@ def _bol(hucreler, yazilar, AX, AY):
     return pA + pB, ac
 
 
+def veranda_ara_kolonu(v: dict, H: float) -> tuple[int | None, str | None]:
+    """D-109 (BK-40, PC-45; Lokman, kart 16 Kasım 2026 08:42:16 "Kolon arası en çok 565 cm"): taşan verandanın dış kenarında kolon ekseni
+    arası 565 cm'yi geçerse Motor ara kolon koyar (`geometry._gerekli_ara_kolon`); daha kısa verandada pafta ara kolon gösteriyorsa İş Emri
+    `ara_kolon` yazar. Pafta kuralın istediğinden az ara kolon gösteriyorsa sayı yazılmaz (Motor koyar), not düşer; paftadaki yer Motor'un
+    eşit aralığından 5 cm'den çok ayrılıyorsa not düşer (pafta düzeltilmez). `v`: `geometri`'nin verandası (kolon kareleri g çerçevesinde;
+    sol ve sağ cephede gerçek çerçeve y önden, `H - y`). Dönüş: (İş Emri'nin `ara_kolon`'u ya da None, varsayım notu ya da None)."""
+    from motor.geometry import _gerekli_ara_kolon
+    kol, en = v["kolonlar"], v["bit_cm"] - v["bas_cm"]
+    gerekli = _gerekli_ara_kolon(en)
+    if len(kol) <= 2:
+        if gerekli:
+            return None, (f"paftada {len(kol)} kolon; dış kenar {en:g} cm, Motor kolon ekseni arası 565 cm kuralıyla {gerekli} ara kolon "
+                          f"koyar (D-109).")
+        return None, None
+    ara = len(kol) - 2
+    if v["cephe"] in ("on", "arka"):
+        u = sorted((q[0] + q[2]) / 2 - v["bas_cm"] for q in kol)
+    else:
+        u = sorted(H - (q[1] + q[3]) / 2 - v["bas_cm"] for q in kol)
+    pafta = [round(c, 1) for c in u[1:-1]]
+    esit = [round(en * i / (ara + 1), 1) for i in range(1, ara + 1)]
+    yer = ("" if all(abs(a - b) <= 5 for a, b in zip(pafta, esit)) else
+           f" Paftada ara kolon {', '.join(f'{c:g}' for c in pafta)} cm'de; Motor eşit aralıkla {', '.join(f'{c:g}' for c in esit)} cm'ye koyar.")
+    if ara < gerekli:
+        return None, f"paftada {ara} ara kolon; Motor kolon ekseni arası 565 cm kuralıyla {gerekli} ara kolon koyar (D-109).{yer}"
+    return ara, f"paftada {len(kol)} kolon; İş Emri'ne ara_kolon: {ara} yazıldı (D-109).{yer}"
+
+
 def is_emri(g, plan, kod, teknik=None):
     V, U = [], list(g["uyarilar"])
     AX, AY = g["AX"], g["AY"]
@@ -941,8 +970,11 @@ def is_emri(g, plan, kod, teknik=None):
     for k, v in enumerate(g["verandalar"]):
         ad = "VERANDA" if not sayac["VERANDA"] and k == 0 else f"VERANDA {sayac['VERANDA'] + k + 1}"
         verandalar.append({"ad": ad, "cephe": v["cephe"], "bas_cm": v["bas_cm"], "bit_cm": v["bit_cm"], "derinlik_cm": v["derinlik_cm"]})
-        if len(v["kolonlar"]) > 2:
-            V.append(f"{ad}: paftada {len(v['kolonlar'])} kolon; Motor taşan verandaya iki köşe dikmesi koyar.")
+        ara, not_ = veranda_ara_kolonu(v, g["H"])
+        if ara:
+            verandalar[-1]["ara_kolon"] = ara
+        if not_:
+            V.append(f"{ad}: {not_}")
         V.append(f"{ad}: çatısı paftanın planında yok; İş Emri'ne yazılmadı (Motor ana çatının eğimiyle beşik alır, uyarıyla).")
     acik = []
     for a in g["acikliklar"]:
