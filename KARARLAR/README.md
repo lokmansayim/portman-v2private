@@ -134,6 +134,7 @@ Biçim: karar · gerekçe · reddedilen seçenekler · geri alma yolu · kim ve 
 | [D-110](D-110.md) | Bayinin seçenek kartındaki kayıtlı ev resimleri dış ölçüyü plan görseli, DXF ve PDF gibi yazar (en çok iki ondalık: 951,25, 835,75; BK-42); 13 kayıtlı resim yeniden çizildi (`araclar/aday_gorseli_yenile.py`); çatı seçimi örneğinin (`testler/cati_secimi/prefabrik_hedef.json`) alan seti görsel izi yeniden dondu (2. ev PA-05) | 15.11 (Lokman, kart 22:29:00 "Evet, 12 resim de düzelsin"; hedefin yeniden dondurulması 22:45:18 talimatıyla, uyurken önerilen seçildi) |
 | [D-111](D-111.md) | Disk arşivi Parti 1'in beş evi (37, 45, 59, 84, 92 m²) Motor'un aks düzeniyle havuzda, PA-39 … PA-43; çatı paftadaki gibi (37 ve 59 m² ön cumba, 92 m² verandada panel çatı); 92 m²'nin ikinci çatısı PA-43-B verandada beşik; listede iki bilinen fark (cumba makası, panel çatının yan kirişi) Lokman'ın kararında; asıl proje (D-103) | 16.11 (Lokman, kart 06:50:02 "Evet, beşi girsin"; 08:08:55 "… 92 m² nin ikisinide al") |
 | [D-112](D-112.md) | Havuza giren yeni ev havuz denetiminden geçer: kayıt araçları (`aday_kaydet.py`, `cati_varyanti_kaydet.py`) yeni evi yazmadan `araclar/havuz_denetimi.py`'yi koşar; hata (Motor doğrulaması, liste yazılmaz, adetsiz satır, 3D kurulmaz, 3D makas sayısı listeden farklı, kırma çatı 3D'de beşik) varsa kayıt yazılmaz; uyarı kayda yazılır; var olan 20 ev havuzda kalır, Motor bakımıyla düzelir (BK-47) | 16.11 (Lokman 07:05:58, 07:07:03; kart 08:07:06 "Evet, hatalı yeni ev girmesin") |
+| [D-115](D-115.md) | Havuz evlerinin hazır 9 çatı seçeneği havuzda (İE-44): PA-08-C, PA-11-B, PA-14-B, PA-19-C, PA-24-C, PA-25-C, PA-31-B, PA-33-C, PA-34-C (C beşik + salonda çıkıntısız cumba, B beşik; D-83 kuralı); her biri Motor doğrulamasından ve havuz denetiminden (D-112) geçti, sonucu kaydın `kaynak.havuz_denetimi`'nde; denetimi bekleyen 16 seçenek BK-45/BK-46 birleşince aynı sayfayla yeniden Lokman'a gelir; çizilemeyen 51 girmez | 16.11 (Lokman kartı 08:46:30 "9'u girsin, bekleyenler size gelsin") |
 
 ## Numara defteri (14 Ekim 2026, BK-08; CIO planı › Görev 3)
 
@@ -243,7 +244,7 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | D | D-112 | (başka sohbet: havuz denetimi kayıt kapısı; BK-47) | alındı (16.11) |
 | D | D-113 | (başka sohbet: çelik havuz evleri tek kat panel; BK-48) | alındı (16.11) |
 | D | D-114 | (başka sohbet: iki cumba ve boyuna kırma listesi; BK-45) | alındı (16.11) |
-| D | D-115 | (başka sohbet: havuz evlerine hazır 9 çatı seçeneği; İE-44) | alındı (16.11) |
+| D | D-115 | havuz evlerinin hazır 9 çatı seçeneği havuzda (İE-44; Lokman 16.11 08:46:30 kartı) | yazıldı (16.11; çatı seçenekleri sohbeti, `claude/project-thread-co84co`) |
 | D | **D-116** | — | **sıradaki boş** |
 | İE | İE-01–İE-08 | bu depo (`main`) | yazıldı |
 | İE | İE-09 | model atölyesi: kontrollü model üretimi ve banka hattı (Görev 6e; pano 30; P6001 güncellemesi kapsam dışı) | alındı (16.10; `claude/gorev-6e-model-atolyesi-rnhtcp`; PR-1 banka hattı 29.10, `claude/project-thread-rhjgzv`) |
@@ -280,7 +281,8 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | İE | İE-41 | rehber.portatifev.com sitesi main'deki koddan: paketleyici (`araclar/paket/site/`), yayın betiği `vps/rehber_yayin.sh` main'e, beş rehber (Lokman 14.11 20:37 kartı "Siteyi main'den kur"; D-28) | alındı (14.11; `claude/project-thread-v9ykyo`) |
 | İE | İE-42 | çatı plan onayından sonra (D-94; pano 41): onayda çatı seti, seçilen çatıyla r02, çelikte teknik kontrol çatıdan sonra; M-08 yeniden mühürlenir | alındı (14.11; `claude/project-thread-91gav7`) |
 | İE | İE-43 | disk arşivi: adsız dizin ve SHA-256 mührü (`araclar/hdd_dizin.py`, `testler/hdd/`; D-99) | alındı (15.11; `claude/project-thread-wc6dw0`) |
-| İE | **İE-44** | — | **sıradaki boş** |
+| İE | İE-44 | havuz evlerine toplu çatı seçenekleri: Motor kuralla çizer (K kırma, C beşik + salonda cumba, B beşik; D-83 ailesi), havuz denetimi süzer (D-112), Lokman tek sayfada onaylar (Lokman 16.11 08:21:45 kartı "Toplu çizilsin, ben onaylayayım") | alındı (16.11; `claude/project-thread-co84co`) |
+| İE | **İE-45** | — | **sıradaki boş** |
 | BK | BK-01–BK-08 | bu depo; BK-08 8a sonrası temizlik (`bk-08-8a-temizlik`) | yazıldı |
 | BK | BK-09 | metin ve çizim düzeltmeleri, G1 (`bk-09-metin-cizim`, `bk-09-cizim-g1`) | alındı (14.10) |
 | BK | BK-10 | 8b sonrası küçük işler (DXF `.txt` notu, geç gelen Excel, panelden Excel, plan değişince kontrol kapanır, D-19 24 saat kuralı, düğmeli mesajda satır sonları, `YENI-` kodu ve ilk çelik planda LLM özeti bayiye gitmez, komut freni metni; pano satır 15; çelikte kapı değişikliği kapsam dışı) | alındı (30.10; `claude/project-thread-h64uz2`) |

@@ -1,0 +1,63 @@
+{
+ "taban": "PA19",
+ "cati_adi": "Beşik, kalkan önde",
+ "cati_gorsel": "adaylar/PA19_cati.png",
+ "karar": "D-115",
+ "varyantlar": [
+  {
+   "kod": "PA19C",
+   "gosterim": "PA-19-C",
+   "durum": "gecerli",
+   "taban": "PA19",
+   "sablon": "adaylar/PA19C.json",
+   "gorsel": "adaylar/PA19C.png",
+   "cati_adi": "Beşik + salonda cumba",
+   "referans_model": "PA-19-C",
+   "yapi_turu": "prefabrik",
+   "kat": 1,
+   "oda_programi": "2+1",
+   "katalog_m2": 84.0,
+   "kapali_m2": 75.0,
+   "veranda_m2": 9.2,
+   "ozet": {
+    "grid": {
+     "x_pano": 7,
+     "y_pano": 7.5
+    },
+    "dis_olcu_cm": [
+     888.0,
+     948.25
+    ],
+    "brut_m2": 84.2,
+    "pano": 50,
+    "pencere": 7,
+    "kapi": 6,
+    "odalar": {
+     "YATAK ODASI 1": 13.76,
+     "WC": 4.43,
+     "YATAK ODASI 2": 11.81,
+     "HOL": 5.9,
+     "YAŞAM ALANI": 20.65,
+     "MUTFAK": 13.38,
+     "VERANDA": 9.2
+    }
+   },
+   "uyarilar": [
+    "Makas y'yi geçiyor ama kisa_kenar x: montaj paftalarında köşe makasın oturduğu duvarlardadır; pano ızgarası iki yönde 5 cm kayık olabilir, kisa_kenar: y doğrulanmalı"
+   ],
+   "kaynak": {
+    "metin": "İE-44 toplu çatı seçenekleri (D-115)",
+    "karar": "D-115",
+    "ev": "PA-19",
+    "havuz_denetimi": {
+     "sonuc": "geçti",
+     "karar": "D-112",
+     "uyarilar": [
+      "HD-02: Makas y'yi geçiyor ama kisa_kenar x: montaj paftalarında köşe makasın oturduğu duvarlardadır; pano ızgarası iki yönde 5 cm kayık olabilir, kisa_kenar: y doğrulanmalı",
+      "HD-06: ['makas yeri (ana çatı): saçak duvarının pano ekleri düzensiz (8 makas, listede 8; aralıklar 130.5, 125.5, 125.5, 125.5, 125.5, 125.5, 120); eşit aralıklı 8 makas']"
+     ]
+    }
+   }
+  }
+ ]
+}
