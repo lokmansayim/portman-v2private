@@ -1412,3 +1412,36 @@ def test_hakem28_celik_virgulsuz_onay_soruya_donmez(s, metin):
     cati_seti(s)
     k = s.yaz(metin)
     assert k.gerekce == K.PLAN_ONAYI and k.revizyon == 1, k.mesaj
+
+
+
+@pytest.mark.parametrize("metin", [
+    "Ç8801 olsun ama sonra", "Ç8801 olsun ama bekliyoruz", "Ç8801 olsun sonra", "Ç8801 olsun bekliyoruz",
+    "Ç8801 olsun teklif gelsin bakalım", "Ç8801 olsun teklifi görelim", "Ç8801 olsun, ama şimdi değil", "Ç8801 olsun ama şimdi değil",
+    "Ç8801 olsun şimdi değil", "Ç8801 olsun, teklifi atın bakalım", "K olsun ama şimdi değil", "K olsun teklif gelsin bakalım",
+    "K olsun ama sonra", "K olsun ama bekliyoruz", "Ç8801 olsun, usta bunu müşteri seçecek", "K olsun, usta bunu müşteri seçecek"])
+def test_hakem29_celik_erteleme_kaydedilmez(s, metin):
+    """Tur 29 (Y1, Y5, Y4, Y2) çelikte: virgülsüz ve virgüllü erteleme ("Ç8801 olsun ama sonra", "şimdi değil", "teklif gelsin bakalım",
+    "bekliyoruz") ve "usta bunu müşteri seçecek" kayıt almaz: plan r01, onay yok, r02 yok."""
+    cati_seti(s)
+    k = s.yaz(metin)
+    assert K.PLAN_ONAYI not in k.gerekce and k.eylem != "is_emri" and s.plan["revizyon"] == 1 and not s.k.d.get("onaylanan"), k.mesaj
+
+
+@pytest.mark.parametrize("metin", [
+    "K olsun, kapı rengini sonra mı seçelim?", "K olsun, renk seçimini ne zaman yapalım?", "K olsun, montaj tarihini ne zaman seçelim?",
+    "Günaydın hocam K olsun", "Merhaba hocam iyi misiniz K olsun", "K olsun inşallah"])
+def test_hakem29_celik_acik_secim_soruya_donmez(s, metin):
+    """Tur 29 (O3 ve selamlı yazım) çelikte: başka konunun karar sorusu ve selamlı seçim r02 K'yı çizer."""
+    cati_seti(s)
+    k = s.yaz(metin)
+    assert k.eylem == "is_emri" and k.revizyon == 2 and s.plan["yapi"]["kod"] == "Ç8801K", k.mesaj
+
+
+@pytest.mark.parametrize("metin", [
+    "Ç8801 olsun, bunu ne zaman gönderirsiniz?"])
+def test_hakem29_celik_surec_sorusu_onay(s, metin):
+    """Tur 29 (O4) çelikte: gösterme sözlü süreç sorusu evin çatısının onayını soruya çevirmez."""
+    cati_seti(s)
+    k = s.yaz(metin)
+    assert k.gerekce == K.PLAN_ONAYI and k.revizyon == 1, k.mesaj
