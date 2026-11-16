@@ -33,7 +33,10 @@ ONAY = ("AP-26 ön onay çizimi (İE-30, D-52; mühür M-12). Lokman, 4 Kasım 2
         "ve yan görünüşten kaldırayım mı?\"): \"Kaldır, gerçek liste gibi\" (D-56; M-12 bununla açıldı, iz yalnız yan kirişin kalkmasıyla "
         "yeniden donduruldu). 14 Kasım 2026 21:01 antetteki net verandayla, bütün mahaller (D-95, \"biz verandayıda net alana alır "
         "sayarız\"; M-12 Lokman'ın 21:07:29 sözüyle açıldı: \"ben izin veriyorum varsa mühür bunu gir ve mühürle\"): iz yalnız antet m² "
-        "yazısıyla yeniden donduruldu.")
+        "yazısıyla yeniden donduruldu. 15 Kasım 2026 08:51:58 sözü (\"duvar tam ise yani 125,5 cm ise ve böleceğimiz pano tam ortaya "
+        "geliyorsa 3'lü H kullanmak yerine tam ortaya çektirme U'su koyuyoruz\") ve 09:14:09 kartı (\"Panonun ortasına gelen iç duvarda "
+        "çizimden 3'lü H kalksın mı?\"): \"Evet, 15 yerin hepsinde\" (D-105; M-12 bununla açıldı): iz yalnız panonun ortasındaki üç 3'lü "
+        "H'ın kalkmasıyla yeniden donduruldu.")
 GORUNUS_KATMANLARI = ("ON_GORUNUS", "ON_DERZ", "ON_CATI", "ON_TOPUK")
 
 
