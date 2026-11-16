@@ -1513,3 +1513,40 @@ def test_hakem31_celik_olumlu_soz_onay(s, metin):
     cati_seti(s)
     k = s.yaz(metin)
     assert k.gerekce == K.PLAN_ONAYI and k.revizyon == 1, k.mesaj
+
+
+
+@pytest.mark.parametrize("metin", [
+    "Ç8801 olsun, çatı tipi fark etmez", "Ç8801 olsun, bence müşteri de onayladı", "Ç8801 olsun, bakalım teklif uygun mu?",
+    "Ç8801 olsun, çatı şekli fark etmez", "Ç8801 olsun, tip fark etmez", "Ç8801 olsun, çatı seçimini size bırakıyorum",
+    "Ç8801 olsun, neyse fark etmez", "Ç8801 olsun, uygun olanı size bırakıyorum", "Ç8801 olsun, birincisi ya da ikincisi fark etmez",
+    "Ç8801 olsun, müşteri bence bunu seçti", "K olsun, çatı tipi fark etmez", "K olsun, çatı seçimini size bırakıyorum",
+    "K olsun, ödemeyi yaptıktan sonra mı onaylayalım?", "K olsun, montajı bitirdikten sonra mı onaylayalım?", "Ç8801 olsun, acil değil",
+    "Ç8801 olsun, hemen gerek yok", "Ç8801 olsun, teklif sonra", "Ç8801 olsun, karar müşteri ile", "K olsun, acil değil",
+    "Ç8801 olsun, siz seçin", "Ç8801 olsun, bakalım maliyet ne olur?"])
+def test_hakem32_celik_kararsiz_soz_kaydedilmez(s, metin):
+    """Tur 32 çelikte: "çatı tipi fark etmez", "çatı seçimini size bırakıyorum", "bence müşteri de onayladı", "bakalım teklif uygun mu?"
+    kayıt almaz: plan r01, onay yok, r02 yok."""
+    cati_seti(s)
+    k = s.yaz(metin)
+    assert K.PLAN_ONAYI not in k.gerekce and k.eylem != "is_emri" and s.plan["revizyon"] == 1 and not s.k.d.get("onaylanan"), k.mesaj
+
+
+@pytest.mark.parametrize("metin", [
+    "K olsun, bakalım vinç fiyatı ne kadar?", "K olsun, bakalım kurulum fiyatı ne kadar?", "K olsun, mail ya da whatsapp fark etmez",
+    "K olsun, müşteri onayladı bence de güzel"])
+def test_hakem32_celik_acik_secim_soruya_donmez(s, metin):
+    """Tur 32 çelikte: işin devri, başka işin fiyatı ("bakalım vinç fiyatı ne kadar?") r02 K'yı çizer."""
+    cati_seti(s)
+    k = s.yaz(metin)
+    assert k.eylem == "is_emri" and k.revizyon == 2 and s.plan["yapi"]["kod"] == "Ç8801K", k.mesaj
+
+
+
+@pytest.mark.parametrize("metin", [
+    "Ç8801 olsun, gerisini sonra konuşuruz", "Ç8801 olsun, mail ya da whatsapp fark etmez"])
+def test_hakem32_celik_olumlu_soz_onay(s, metin):
+    """Tur 32 çelikte: öteki konuyu sonraya bırakma ve işin devri evin çatısının onayıdır."""
+    cati_seti(s)
+    k = s.yaz(metin)
+    assert k.gerekce == K.PLAN_ONAYI and k.revizyon == 1, k.mesaj
