@@ -391,8 +391,8 @@ def model_motor(ie: dict) -> dict:
     from . import cati_prefabrik as CP
     if c.get("tip") == "kirma":                                # İE-29: tek uçlu kırma (AP-27); İE-33: iki ucu kırma (AP-01), makas planı paftadan
         serit = _tek_uclu_kirma_catilari(plan, ie) if c.get("kalkan_ucu") is not None else _iki_uclu_kirma_catilari(plan, ie)
-    elif c.get("tip") == "besik_cumba" and not CP.tek_veranda_cumbasi(c):   # İE-17 PR-1b/K7: beşik + çıkıntılı çapraz cumba (AP-22), çizimdeki
-        serit = _capraz_cumba_catilari(plan, ie)               # çatıdan; D-109: köşe verandasının tek cumbası ana beşik + verandanın çatısı (BK-14)
+    elif c.get("tip") == "besik_cumba":                        # İE-17 PR-1b/K7: beşik + çıkıntılı çapraz cumba (AP-22), çizimdeki çatıdan;
+        serit = _capraz_cumba_catilari(plan, ie)               # D-109: köşe verandasının cumbası da (ayak izi verandanın taşan dikdörtgeni)
     elif plan.girintili or _cs.mahal_catilari_var(ie):         # İE-24 girintili gövde; İE-17 PR-1b/K7 açık mahalin kendi çatısı (AP-09, AP-03)
         serit = _serit_catilari(plan, ie)                      # (çatı parçaları, çatı tanımı)
     # kitap `kablo_en_uzak_mesafe`: sigorta kutusu (yeri İş Emri'nde yok) giriş kapısında; kapının ortasından kapalı kısmın en uzak köşesine kuş uçuşu
@@ -721,7 +721,9 @@ def _capraz_cumba_catilari(plan, ie: dict) -> tuple[list[dict], dict]:
     except CP.PrefabrikCatiHatasi as e:
         raise ListeYazilmaz(f"beşik + cumba çatı kurulmadı: {e}") from None
     s, eg = float(t["sacak"]), float(c["egim_yuzde"])
-    ana_k, cb_k = CP._cumba(c, tuple(float(v) for v in G.govde_kutusu(plan)), plan)
+    ana_k, rs_ = CP.cumba_dikdortgenleri(c, tuple(float(v) for v in G.govde_kutusu(plan)), plan)   # tek gövde cumbasında `_cumba`nın aynısı
+    cb_k = rs_[0]
+    veranda_ = CP.tek_veranda_cumbasi(c)                       # D-109: cumbanın altı taşan veranda; kalkanı dış kirişin üstünde (BK-14 gibi)
     ck = cati_genel.cati_kur(t)
     parca = lambda d: "ana" if d.startswith("ana ") else "cumba"          # noqa: E731 (genel motorun cumba düzlem adları)
     k_ = {"ana": {"sacak": [], "alin": [], "mahya": [], "vadi": []}, "cumba": {"sacak": [], "alin": [], "mahya": [], "vadi": []}}
@@ -776,7 +778,8 @@ def _capraz_cumba_catilari(plan, ie: dict) -> tuple[list[dict], dict]:
             "mahya_boy_cm": round(mh[0]["plan_boy"], 2), "sacak_hatlari_m": [round(e["plan_boy"] / 100, 3) for e in k_["cumba"]["sacak"]],
             "alin_kenarlari_m": [round(e["boy"] / 100, 3) for e in k_["cumba"]["alin"]],
             "dere_ici_m": [round(e["boy"] / 100, 3) for e in k_["cumba"]["vadi"]], "makas_kosu_cm": birlesim,
-            **({"cikintisiz": True} if float(cumbalar[0].get("cikinti_cm", 0)) == 0 else {}),
+            **({"cikintisiz": True} if float(cumbalar[0].get("cikinti_cm", 0)) == 0 and not veranda_ else {}),
+            **({"kalkan_kirisli": True, "acik": True} if veranda_ else {}),
             **({"kisa_makaslar_cm": kisa} if kisa else {}), **({"kose_inisi_birlesen": birlesen} if birlesen else {}),
             "not": "Motor (İE-17): ana çatıya dik çapraz cumba (taşan verandanın çapraz beşiği gibi); iki deresi ana çatının yüzüyle"}]
     return out, t

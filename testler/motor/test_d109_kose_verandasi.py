@@ -245,13 +245,34 @@ def test_veranda_cumbasi_iki_vadi(ev, cephe_x):
 
 
 @pytest.mark.parametrize("ev", ("52m2", "55m2"))
-def test_veranda_cumbasi_liste_ayni(ev):
-    """Liste (TASLAK) cumbayı verandanın çapraz beşiğiyle sayar: satırlar karttan önceki girdiyle aynı (mahya derelerin birleştiği yere kadar)."""
+def test_veranda_cumbasi_liste_cizimden(ev):
+    """Liste (TASLAK) cumbayı çizimdeki çatıdan sayar (AP-22'nin çapraz cumbası gibi, D-47): saçak hatları ve dere içi çatının kendi
+    kenarlarından; cumbanın altı taşan veranda (kalkanı dış kirişin üstünde). Ana çatının ön saçağı cumbanın altında sayılmaz."""
     ie = _ie(ev)
+    p = _kur(ie)
     with contextlib.redirect_stdout(io.StringIO()):
-        yeni = PL.liste(PL.model_motor(copy.deepcopy(ie)))
-        eski = PL.liste(PL.model_motor(_cumbasiz(ie)))
-    assert yeni["satirlar"] == eski["satirlar"]
+        N = PL.model_motor(copy.deepcopy(ie))
+        k = cati_genel.cati_kur(CP.cati(p, ie))["kenarlar"]
+    toplam = lambda tur: sum(e["plan_boy"] for e in k if e["tur"] == tur) / 100                  # noqa: E731 (m; liste 3 hanede yuvarlar)
+    assert [c["ad"] for c in N["cati"]] == ["ana çatı", "cumba"]
+    assert abs(sum(h for c in N["cati"] for h in c["sacak_hatlari_m"]) - toplam("sacak")) < 0.005
+    cb = N["cati"][1]
+    assert abs(sum(cb["dere_ici_m"]) - sum(e["boy"] for e in k if e["tur"] == "vadi") / 100) < 0.005
+    assert cb["kalkan_kirisli"] and cb["acik"] and "cikintisiz" not in cb
+
+
+@pytest.mark.parametrize("bozma", [
+    lambda ie: ie["cati"]["cumbalar"][0].update(cephe="arka"),
+    lambda ie: ie["cati"]["cumbalar"][0].update(bas_cm=0),
+    lambda ie: ie["cati"]["cumbalar"][0].pop("cephe"),
+])
+def test_veranda_cumbasi_liste_yanlis_tanim(bozma):
+    """Çizimin kurmadığı veranda cumbasını liste de yazmaz (K21; geometri hakemi, 16 Kasım)."""
+    ie = _ie("52m2")
+    bozma(ie)
+    with pytest.raises(PL.ListeYazilmaz):
+        with contextlib.redirect_stdout(io.StringIO()):
+            PL.model_motor(ie)
 
 
 def test_veranda_cumbasi_ifc_ve_kart_modeli_kurmaz():
