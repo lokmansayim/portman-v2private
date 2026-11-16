@@ -68,5 +68,14 @@
     "dayanak": "45. hafta fiyat listesi prefabrik malzemesi (liste tarihi 3.11.2026) › 8 Doğrama kasası › 10 PENCERE KÖR KASA Takım 120/180 Pencereye Göre / Kaynaksız; Lokman 16 Kasım 2026 21:34:47 UTC: \"bunları listede bizim mühendis yanlış yazmış … bunu gerçek isim PENCERE KÖR KASASI sen düzeltip fiyatını girer misin fiyatıda \\\"45.HAFTA FİYAT LİSTESİ PREFABRİK MALZEMESİ.pdf\\\" yazıyor\""
    }
   }
- }
+ },
+ "atla": {
+  "prefabrik": [
+   "Şase pul"
+  ],
+  "celik": [
+   "Şase pul"
+  ]
+ },
+ "atla_dayanak": "Lokman 16 Kasım 2026 21:35:12 UTC: \"şase pulunu kople yükleme listelerinden kaldır\". Bu ayın bayi fiyat listesinden çıkar; yükleme listelerinden kaldırılması ayrı bakım işi (Motor)."
 }

@@ -425,6 +425,9 @@ def istisna_oku(p: Path | str, tarih: datetime.date) -> dict:
                 raise CrmHatasi(f"istisna › {hat} › {k}: fiyat, birim ve dayanak olur")
             if "kdv_grubu" in x and x["kdv_grubu"] not in (oku(ESLEME).get("kdv") or {}).get("gruplar", {}):
                 raise CrmHatasi(f"istisna › {hat} › {k}: bilinmeyen KDV grubu {x['kdv_grubu']!r}")
+    for hat, kalemler in (I.get("atla") or {}).items():
+        if not isinstance(kalemler, list) or not all(isinstance(k, str) and k.strip() for k in kalemler):
+            raise CrmHatasi(f"istisna › atla › {hat}: kalem adları listesi olur")
     return I
 
 
@@ -433,6 +436,7 @@ def istisnali_defter(A: dict, I: dict, E: dict | None = None) -> dict:
     yerde uygulanır, CRM fiyatı hiçbir yerde ezilmez:
     - `kod_fiyatlari`: CRM'de fiyatı 0 ya da boş olan kodun fiyatı; eşlemenin hesabı aynen işler (ör. kutu profil, D-119).
     - `kalemler`: defterde fiyatsız (CRM'de yok) kalemin fiyatı; KDV oranı defterdeki kayıttan (D-76).
+    - `atla`: hattın listesinden bu ay çıkan kalemler (kalem adı; Motor'un yükleme listesi değişmez).
     İstisnadan gelen her kayıt `kaynak` ISTISNA ve durum "Lokman istisnası" taşır; defterin `istisna` bölümü neyin uygulandığını sayar."""
     E = E if E is not None else oku(ESLEME)
     A2 = json.loads(json.dumps(A))
@@ -484,6 +488,10 @@ def istisnali_defter(A: dict, I: dict, E: dict | None = None) -> dict:
             if x.get("kdv_grubu") and H["kalemler"][k].get("kdv") is None:      # eşlemede grubu olmayan kalem (D-76 grupları)
                 H["kalemler"][k] |= {"kdv": E["kdv"]["gruplar"][x["kdv_grubu"]], "kdv_grubu": x["kdv_grubu"]}
             sayim["kalem"].append(f"{hat} › {k}")
+    for hat, kalemler in (I.get("atla") or {}).items():         # Lokman'ın bu listeden çıkardığı kalemler (ad); Motor listesi aynen
+        if hat in D["hatlar"]:
+            D["hatlar"][hat]["atla"] = list(D["hatlar"][hat].get("atla") or []) + [k for k in kalemler if k not in (D["hatlar"][hat].get("atla") or [])]
+    sayim["atla"] = I.get("atla") or {}
     D["surum"] += f" + istisna {I['karar']}"
     D["istisna"] = {"karar": I["karar"], "ad": I["ad"], "gecerli": I["gecerli"], "dayanak": I["dayanak"], **sayim}
     return D

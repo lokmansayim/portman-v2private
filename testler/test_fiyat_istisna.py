@@ -70,6 +70,8 @@ def test_istisna_yalniz_crm_fiyati_olmayan_yerde(A0, E, I):
     assert (g["fiyat"], g["teklif_adi"], g["teklif_olcu"], g["kdv"]) == (237.08, "PENCERE KÖR KASASI", "120/120", 0.2)
     assert D["istisna"]["kod"] == ["MA11", "MA12"] and D["istisna"]["crm_fiyatli_kod"] == []
     assert "ISTISNA" in D["kaynaklar"] and D["surum"].endswith("+ istisna D-120")
+    assert "Şase pul" in D["hatlar"]["prefabrik"]["atla"] and "Şase pul" in D["hatlar"]["celik"]["atla"]   # Lokman 21:35:12
+    assert "Şase pul" not in D0["hatlar"]["prefabrik"]["atla"]
 
 
 def test_crm_fiyati_varsa_istisna_uygulanmaz(E, I):
