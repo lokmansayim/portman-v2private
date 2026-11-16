@@ -1,8 +1,8 @@
 # Havuz denetimi · ev ev tablo (16 Kasım 2026)
 
-Komut: `python -m araclar.havuz_denetimi --is 4 --kart-klasoru <Proje_Karti> --md <bu dosya>` (`main` 4a654e9f). Özet ve açıklama: `docs/raporlar/2026-11-16_havuz_denetimi.md`.
+Komut: `python -m araclar.havuz_denetimi --is 4 --kart-klasoru <Proje_Karti> --md <bu dosya>` (`main` 4a654e9f; HD-11 16 Kasım ~08:40). Özet ve açıklama: `docs/raporlar/2026-11-16_havuz_denetimi.md`.
 
-İşaret: ✓ temiz · ✗ hata · ! uyarı · ≠ gerçek projeyle fark · – kart yok.
+İşaret: ✓ temiz · ✗ hata · ! uyarı · ≠ gerçek projeyle fark · – denetlenmedi (kart yok ya da o Motor'da yok).
 
 - HD-01: Motor kurar, çizim doğrulaması geçer (hata)
 - HD-02: Motor uyarısı yok (uyari)
@@ -14,66 +14,67 @@ Komut: `python -m araclar.havuz_denetimi --is 4 --kart-klasoru <Proje_Karti> --m
 - HD-09: Listedeki her makaslı çatı parçası 3D'de de makaslı (uyari)
 - HD-10: 3D'deki ana çatı İş Emri'nin çatı biçiminde (hata)
 - HD-07: Makas sayısı gerçek projenin kartıyla (bilgi)
+- HD-11: Çatı kaplaması gerçek projeninkiyle (bilgi)
 
-| Ev | m² | Oda | Çatı | HD-01 | HD-02 | HD-03 | HD-04 | HD-05 | HD-06 | HD-08 | HD-09 | HD-10 | HD-07 |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| PA-01 | 60.0 | 2+1 | besik + girintili gövde | ✓ | ! | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| PA-02 | 64.0 | 2+1 | besik + VERANDA: kirma | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ! | ✓ | ≠ |
-| PA-03 | 70.0 | 2+1 | besik + VERANDA: tek_yon | ✓ | ✓ | ✓ | ✗ | ✓ | ✓ | ✓ | ✓ | ✓ | ≠ |
-| PA-04 | 78.0 | 2+1 | besik_cumba + cumba + girintili gövde | ✓ | ✓ | ✓ | ✓ | ✓ | ! | ✓ | ✓ | ✓ | – |
-| PA-05 | 82.0 | 2+1 | besik_cumba + cumba (çıkıntı 62.75) + girintili gövde | ✓ | ✓ | ✓ | ✓ | ✗ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| PA-06 | 87.0 | 2+1 | besik | ✓ | ! | ✓ | ✓ | ✓ | ! | ✓ | ✓ | ✓ | – |
-| PA-07 | 90.0 | 3+1 | besik + taşan veranda ÖN VERANDA: besik + taşan veranda ARKA VERANDA: besik | ✓ | ! 2 | ✓ | ✓ | ✓ | ! | ✓ | ! 2 | ✓ | – |
-| PA-08 | 140.0 | 3+1 | kirma | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✗ | ✓ | ✗ | ✓ |
-| PA-06-K | 87.0 | 2+1 | kirma | ✓ | ! | ✗ | ✓ | ✓ | ! | ✓ | ✓ | ✗ | – |
-| PA-06-C | 87.0 | 2+1 | besik_cumba + cumba | ✓ | ! 2 | ✓ | ✓ | ✓ | ! | ✓ | ✓ | ✓ | – |
-| PA-09 | 64.0 | 2+1 | besik + VERANDA: kirma + kubbe × 1 | ✓ | ✓ | ✓ | ✓ | ✗ | ✓ | ✓ | ✓ | ✓ | ≠ |
-| PA-10 | 95.0 | 3+1 | besik | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| PA-11 | 91.0 | 3+1 | besik_cumba + cumba | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| PA-12 | 85.0 | 3+1 | besik | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✗ | ✓ | ✓ | ✓ |
-| PA-13 | 143.0 | 4+1 | besik + girintili gövde | ✓ | ! 4 | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ≠ |
-| PA-14 | 60.0 | 2+1 | besik_cumba + cumba | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| PA-15 | 70.0 | 2+1 | besik_cumba + cumba | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| PA-16 | 80.0 | 2+1 | besik + kubbe × 1 | ✓ | ! 2 | ✓ | ✓ | ✗ | ✓ | ✓ | ✓ | ✓ | ≠ |
-| PA-17 | 91.0 | 3+1 | besik_cumba + cumba (çıkıntı 220) + girintili gövde | ✓ | ✓ | ✓ | ✓ | ✗ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| PA-18 | 60.0 | 2+1 | besik | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| PA-19 | 84.0 | 2+1 | besik | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| PA-20 | 64.0 | 2+1 | besik + VERANDA: kirma + kubbe × 1 | ✓ | ✓ | ✓ | ✓ | ✗ | ✓ | ✓ | ✓ | ✓ | ≠ |
-| PA-21 | 80.0 | 3+1 | besik + girintili gövde | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ≠ |
-| PA-22 | 102.0 | 2+1 | besik + taşan veranda ÖN TERAS: teras_paneli + taşan veranda ARKA TERAS: teras_paneli | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✗ | ✓ | ✓ | ≠ |
-| PA-23 | 49.0 | 2+1 | besik | ✓ | ✓ | ✓ | ✓ | ✓ | ! | ✓ | ✓ | ✓ | ✓ |
-| PA-24 | 77.0 | 2+1 | kirma | ✓ | ! | ✓ | ✓ | ✓ | ✓ | ✗ | ✓ | ✗ | ✓ |
-| PA-25 | 61.0 | 2+1 | besik | ✓ | ! | ✓ | ✓ | ✓ | ✓ | ✗ | ✓ | ✓ | ✓ |
-| PA-26 | 71.0 | 2+1 | besik + VERANDA: tek_yon | ✓ | ✓ | ✓ | ✗ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| PA-27 | 45.0 | 1+1 | besik_cumba + cumba (çıkıntı 150) + cumba (veranda SUNDURMA) + taşan veranda SUNDURMA: cumba + girintili gövde | ✓ | ! 4 | ✗ | ✓ | ✗ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| PA-28 | 46.0 | 1+1 | besik_cumba + cumba (çıkıntı 193.25) + cumba (veranda SUNDURMA) + taşan veranda SUNDURMA: cumba + girintili gövde | ✓ | ! 2 | ✗ | ✓ | ✗ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| PA-29 | 40.0 | 1+1 | besik_cumba + cumba (çıkıntı 130.5) + cumba (veranda SUNDURMA) + taşan veranda SUNDURMA: cumba + girintili gövde | ✓ | ! 2 | ✗ | ✓ | ✗ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| PA-30 | 83.0 | 3+1 | besik | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✗ | ✓ | ✓ | ≠ |
-| PA-31 | 59.0 | 2+1 | besik_cumba + cumba | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| PA-32 | 69.0 | 2+1 | besik_cumba + cumba | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| PA-33 | 142.0 | 3+1 | kirma | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✗ | ✓ | ✗ | ✓ |
-| PA-34 | 78.0 | 2+1 | kirma | ✓ | ! | ✓ | ✓ | ✓ | ✓ | ✗ | ✓ | ✗ | ✓ |
-| PA-35 | 69.0 | 2+1 | besik + VERANDA: tek_yon | ✓ | ✓ | ✓ | ✗ | ✓ | ✓ | ✓ | ✓ | ✓ | ≠ |
-| PA-36 | 62.0 | 2+1 | besik | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| PA-37 | 91.0 | 3+1 | besik_cumba + cumba | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| PA-38 | 95.0 | 3+1 | besik | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| Ç8801 | 88.0 | 2+1 | besik_cumba | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | – |
-| Ç8801-K | 88.0 | 2+1 | besik_cumba | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | – |
-| Ç8801-L | 88.0 | 2+1 | besik_cumba | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | – |
-| Ç8201 | 82.0 | 2+1 | kirma | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | – |
-| KT-01 | 99.0 | 2+1 | besik_cumba | ✓ | ! | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | – |
-| KT-02 | 92.0 | 2+1 | kirma | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | – |
-| KT-03 | 94.0 | 2+1 | kirma | ✓ | ! | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | – |
-| KT-05 | 90.0 | 2+1 | besik_cumba | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | – |
-| KT-06 | 90.0 | 2+1 | besik | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | – |
-| KT-07 | 90.0 | 2+1 | kirma | ✓ | ! 2 | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | – |
-| KT-08 | 90.0 | 3+1 | besik_cumba | ✓ | ! 2 | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | – |
-| KT-09 | 81.0 | 2+1 | besik_cumba | ✓ | ! 3 | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | – |
-| KT-10 | 82.0 | 2+1 | besik | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | – |
-| KT-11 | 49.0 | 1+1 | besik | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | – |
-| KT-12 | 130.0 | 3+1 | besik | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | – |
-| KT-13 | 167.0 | 3+1 | besik_cumba | ✓ | ! 2 | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | – |
-| KT04 |  | 4+1 | besik_cumba | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | – |
+| Ev | m² | Oda | Çatı | HD-01 | HD-02 | HD-03 | HD-04 | HD-05 | HD-06 | HD-08 | HD-09 | HD-10 | HD-07 | HD-11 |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| PA-01 | 60.0 | 2+1 | besik + girintili gövde | ✓ | ! | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | – |
+| PA-02 | 64.0 | 2+1 | besik + VERANDA: kirma | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ! | ✓ | ≠ | – |
+| PA-03 | 70.0 | 2+1 | besik + VERANDA: tek_yon | ✓ | ✓ | ✓ | ✗ | ✓ | ✓ | ✓ | ✓ | ✓ | ≠ | – |
+| PA-04 | 78.0 | 2+1 | besik_cumba + cumba + girintili gövde | ✓ | ✓ | ✓ | ✓ | ✓ | ! | ✓ | ✓ | ✓ | – | – |
+| PA-05 | 82.0 | 2+1 | besik_cumba + cumba (çıkıntı 62.75) + girintili gövde | ✓ | ✓ | ✓ | ✓ | ✗ | ✓ | ✓ | ✓ | ✓ | ✓ | – |
+| PA-06 | 87.0 | 2+1 | besik | ✓ | ! | ✓ | ✓ | ✓ | ! | ✓ | ✓ | ✓ | – | – |
+| PA-07 | 90.0 | 3+1 | besik + taşan veranda ÖN VERANDA: besik + taşan veranda ARKA VERANDA: besik | ✓ | ! 2 | ✓ | ✓ | ✓ | ! | ✓ | ! 2 | ✓ | – | – |
+| PA-08 | 140.0 | 3+1 | kirma | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✗ | ✓ | ✗ | ✓ | – |
+| PA-06-K | 87.0 | 2+1 | kirma | ✓ | ! | ✗ | ✓ | ✓ | ! | ✓ | ✓ | ✗ | – | – |
+| PA-06-C | 87.0 | 2+1 | besik_cumba + cumba | ✓ | ! 2 | ✓ | ✓ | ✓ | ! | ✓ | ✓ | ✓ | – | – |
+| PA-09 | 64.0 | 2+1 | besik + VERANDA: kirma + kubbe × 1 | ✓ | ✓ | ✓ | ✓ | ✗ | ✓ | ✓ | ✓ | ✓ | ≠ | – |
+| PA-10 | 95.0 | 3+1 | besik | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | – |
+| PA-11 | 91.0 | 3+1 | besik_cumba + cumba | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | – |
+| PA-12 | 85.0 | 3+1 | besik | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✗ | ✓ | ✓ | ✓ | – |
+| PA-13 | 143.0 | 4+1 | besik + girintili gövde | ✓ | ! 4 | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ≠ | – |
+| PA-14 | 60.0 | 2+1 | besik_cumba + cumba | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | – |
+| PA-15 | 70.0 | 2+1 | besik_cumba + cumba | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | – |
+| PA-16 | 80.0 | 2+1 | besik + kubbe × 1 | ✓ | ! 2 | ✓ | ✓ | ✗ | ✓ | ✓ | ✓ | ✓ | ≠ | – |
+| PA-17 | 91.0 | 3+1 | besik_cumba + cumba (çıkıntı 220) + girintili gövde | ✓ | ✓ | ✓ | ✓ | ✗ | ✓ | ✓ | ✓ | ✓ | ✓ | – |
+| PA-18 | 60.0 | 2+1 | besik | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | – |
+| PA-19 | 84.0 | 2+1 | besik | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | – |
+| PA-20 | 64.0 | 2+1 | besik + VERANDA: kirma + kubbe × 1 | ✓ | ✓ | ✓ | ✓ | ✗ | ✓ | ✓ | ✓ | ✓ | ≠ | – |
+| PA-21 | 80.0 | 3+1 | besik + girintili gövde | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ≠ | – |
+| PA-22 | 102.0 | 2+1 | besik + taşan veranda ÖN TERAS: teras_paneli + taşan veranda ARKA TERAS: teras_paneli | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✗ | ✓ | ✓ | ≠ | – |
+| PA-23 | 49.0 | 2+1 | besik | ✓ | ✓ | ✓ | ✓ | ✓ | ! | ✓ | ✓ | ✓ | ✓ | – |
+| PA-24 | 77.0 | 2+1 | kirma | ✓ | ! | ✓ | ✓ | ✓ | ✓ | ✗ | ✓ | ✗ | ✓ | – |
+| PA-25 | 61.0 | 2+1 | besik | ✓ | ! | ✓ | ✓ | ✓ | ✓ | ✗ | ✓ | ✓ | ✓ | – |
+| PA-26 | 71.0 | 2+1 | besik + VERANDA: tek_yon | ✓ | ✓ | ✓ | ✗ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | – |
+| PA-27 | 45.0 | 1+1 | besik_cumba + cumba (çıkıntı 150) + cumba (veranda SUNDURMA) + taşan veranda SUNDURMA: cumba + girintili gövde | ✓ | ! 4 | ✗ | ✓ | ✗ | ✓ | ✓ | ✓ | ✓ | ✓ | – |
+| PA-28 | 46.0 | 1+1 | besik_cumba + cumba (çıkıntı 193.25) + cumba (veranda SUNDURMA) + taşan veranda SUNDURMA: cumba + girintili gövde | ✓ | ! 2 | ✗ | ✓ | ✗ | ✓ | ✓ | ✓ | ✓ | ✓ | – |
+| PA-29 | 40.0 | 1+1 | besik_cumba + cumba (çıkıntı 130.5) + cumba (veranda SUNDURMA) + taşan veranda SUNDURMA: cumba + girintili gövde | ✓ | ! 2 | ✗ | ✓ | ✗ | ✓ | ✓ | ✓ | ✓ | ✓ | – |
+| PA-30 | 83.0 | 3+1 | besik | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✗ | ✓ | ✓ | ≠ | – |
+| PA-31 | 59.0 | 2+1 | besik_cumba + cumba | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | – |
+| PA-32 | 69.0 | 2+1 | besik_cumba + cumba | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | – |
+| PA-33 | 142.0 | 3+1 | kirma | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✗ | ✓ | ✗ | ✓ | – |
+| PA-34 | 78.0 | 2+1 | kirma | ✓ | ! | ✓ | ✓ | ✓ | ✓ | ✗ | ✓ | ✗ | ✓ | – |
+| PA-35 | 69.0 | 2+1 | besik + VERANDA: tek_yon | ✓ | ✓ | ✓ | ✗ | ✓ | ✓ | ✓ | ✓ | ✓ | ≠ | – |
+| PA-36 | 62.0 | 2+1 | besik | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | – |
+| PA-37 | 91.0 | 3+1 | besik_cumba + cumba | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | – |
+| PA-38 | 95.0 | 3+1 | besik | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | – |
+| Ç8801 | 88.0 | 2+1 | besik_cumba | ✓ | ✓ | ✓ | ✓ | ✓ | – | – | – | – | – | ✓ |
+| Ç8801-K | 88.0 | 2+1 | besik_cumba | ✓ | ✓ | ✓ | ✓ | ✓ | – | – | – | – | – | ✓ |
+| Ç8801-L | 88.0 | 2+1 | besik_cumba | ✓ | ✓ | ✓ | ✓ | ✓ | – | – | – | – | – | ✓ |
+| Ç8201 | 82.0 | 2+1 | kirma | ✓ | ✓ | ✓ | ✓ | ✓ | – | – | – | – | – | ✓ |
+| KT-01 | 99.0 | 2+1 | besik_cumba | ✓ | ! | ✓ | ✓ | ✓ | – | – | – | – | – | ✓ |
+| KT-02 | 92.0 | 2+1 | kirma | ✓ | ✓ | ✓ | ✓ | ✓ | – | – | – | – | – | ✓ |
+| KT-03 | 94.0 | 2+1 | kirma | ✓ | ! | ✓ | ✓ | ✓ | – | – | – | – | – | ✓ |
+| KT-05 | 90.0 | 2+1 | besik_cumba | ✓ | ✓ | ✓ | ✓ | ✓ | – | – | – | – | – | ✓ |
+| KT-06 | 90.0 | 2+1 | besik | ✓ | ✓ | ✓ | ✓ | ✓ | – | – | – | – | – | ✓ |
+| KT-07 | 90.0 | 2+1 | kirma | ✓ | ! 2 | ✓ | ✓ | ✓ | – | – | – | – | – | ≠ |
+| KT-08 | 90.0 | 3+1 | besik_cumba | ✓ | ! 2 | ✓ | ✓ | ✓ | – | – | – | – | – | ✓ |
+| KT-09 | 81.0 | 2+1 | besik_cumba | ✓ | ! 3 | ✓ | ✓ | ✓ | – | – | – | – | – | ✓ |
+| KT-10 | 82.0 | 2+1 | besik | ✓ | ✓ | ✓ | ✓ | ✓ | – | – | – | – | – | ✓ |
+| KT-11 | 49.0 | 1+1 | besik | ✓ | ✓ | ✓ | ✓ | ✓ | – | – | – | – | – | ≠ |
+| KT-12 | 130.0 | 3+1 | besik | ✓ | ✓ | ✓ | ✓ | ✓ | – | – | – | – | – | ≠ |
+| KT-13 | 167.0 | 3+1 | besik_cumba | ✓ | ! 2 | ✓ | ✓ | ✓ | – | – | – | – | – | ≠ |
+| KT04 |  | 4+1 | besik_cumba | ✓ | ✓ | ✓ | ✓ | ✓ | – | – | – | – | – | ✓ |
 
 ### Bulgular
 
@@ -152,10 +153,14 @@ Komut: `python -m araclar.havuz_denetimi --is 4 --kart-klasoru <Proje_Karti> --m
 - **KT-03** · HD-02 (uyari): UYARI: K6: iç kapı boşluğu 80 × 214; kural 90 × 214 (modeldeki ölçü kullanıldı)
 - **KT-07** · HD-02 (uyari): UYARI: karkas kuralı: makas: batı/doğu ailesinin kırma ucunda duvar bulunamadı; uç 0.0 (saçak − saçak payı)
 - **KT-07** · HD-02 (uyari): UYARI: karkas kuralı: ara panel: batı/doğu ailesinin kuzey düzleminde 73 cm² parça, kısa kenarı 8.8 cm (makas kalınlığı 8 cm, en küçük parça 100 cm²): panel yok
+- **KT-07** · HD-11 (bilgi): tanım sandviç panel çiziyor; gerçek projede "OSB + nem bariyeri + metal kiremit"
 - **KT-08** · HD-02 (uyari): UYARI: karkas kuralı: makas: güney cumba batı/güney cumba doğu ailesinde 336.5 konumunda çatının içinde çizgi yok: makas yok
 - **KT-08** · HD-02 (uyari): UYARI: karkas kuralı: makas: kuzey cumba batı/kuzey cumba doğu ailesinde 468.2 konumunda çatının içinde çizgi yok: makas yok
 - **KT-09** · HD-02 (uyari): UYARI: karkas kuralı: makas: 1. cumba batı/1. cumba doğu ailesinde 142.0 konumunda makas çizgisi 39.4 cm (en kısa 40): makas yok
 - **KT-09** · HD-02 (uyari): UYARI: karkas kuralı: makas: 2. cumba batı/2. cumba doğu ailesinin uzanım ucunda duvar bulunamadı; uç 256.0 (düzlemlerin ucu)
 - **KT-09** · HD-02 (uyari): UYARI: karkas kuralı: makas: 2. cumba batı/2. cumba doğu ailesinde 256.0 konumunda makas çizgisi 1.4 cm (en kısa 40): makas yok
+- **KT-11** · HD-11 (bilgi): tanım tek kat panel (çelik standardı) çiziyor; gerçek projede "OSB + membran + shingle"
+- **KT-12** · HD-11 (bilgi): tanım tek kat panel (çelik standardı) çiziyor; gerçek projede "OSB + membran + metal kiremit"
 - **KT-13** · HD-02 (uyari): UYARI: K2: iç kapı boşluğu 100 × 214; kural 90 × 214 (modeldeki ölçü kullanıldı)
 - **KT-13** · HD-02 (uyari): UYARI: K1: dış kapı boşluğu 100 × 210; kural 95 × 210 (modeldeki ölçü kullanıldı)
+- **KT-13** · HD-11 (bilgi): tanım tek kat panel (çelik standardı) çiziyor; gerçek projede "OSB + membran + metal kiremit"

@@ -27,7 +27,7 @@ Sınıflar: **H** havuz hakemi (`araclar/havuz_hakemi.py`; kayıt `aday_kaydet.p
 | 3D model (IFC) ve 3D sayfası | Z-07, BK-12 PR-R, İE-21 | Y | 3D kuruluyor mu (HD-05), makas yeri uyarısı (HD-06), makas sayısı listeyle (HD-08, HD-09), kırma çatı (HD-10) |
 | Montaj rehberi | M-13, M-17, D-53, D-73 | Rehber istenince kendi denetimiyle | Havuza girişte bakılmıyor (bu denetimin dışında) |
 | Teklif ve fiyat | M-14, M-15, D-64, D-72 | Teklif istenince | Havuza girişle ilgisi yok |
-| Çelik: duvar paneli, çizim seti, 15 cm notu, çatı kaplaması | M-09, M-10, D-10, D-16, D-97, D-98, D-100 | A (genel motor altın testleri); bankada çelik hakemi (İE-16) | Karkas kuralı uyarıları (Y: HD-02) |
+| Çelik: duvar paneli, çizim seti, 15 cm notu, çatı kaplaması | M-09, M-10, D-10, D-16, D-97, D-98, D-100 | A (genel motor altın testleri); bankada çelik hakemi (İE-16) | Karkas kuralı uyarıları (Y: HD-02); tanımın çatı kaplaması gerçek projeninkiyle (Y: HD-11, bilgi) |
 | Mühendis paftası hata kaynağı | Lokman, 15 Kasım 2026 09:45 | – | Fark eskizle gösterilir; denetim yalnız farkı bulur (HD-07, bilgi) |
 
 ## 2. Denetim komutu
@@ -52,6 +52,9 @@ Yalnız okur; çıkış 1 en az bir evde hata demektir. Kalemler:
 | HD-09 | Listede makaslı her çatı parçası 3D'de de makaslı | uyarı |
 | HD-10 | 3D'deki ana çatı İş Emri'nin çatı biçiminde | hata |
 | HD-07 | Makas sayısı gerçek projenin kartıyla (`--kart-klasoru` verilirse) | bilgi |
+| HD-11 | Çelik: tanımın çizdiği çatı kaplaması (`cati.kaplama`, yoksa baz paket) gerçek projenin teknik özelliklerindeki kaplamayla | bilgi |
+
+Çelik evde (genel motor) HD-01…HD-05 ve HD-11 denetlenir; tabloda öteki kalemler "–".
 
 ## 3. Sonuç (16 Kasım 2026, `main` 4a654e9f, `--is 4`, 2 dk 18 sn)
 
@@ -72,10 +75,12 @@ Bilgi (HD-07, hata değil):
 - Kısa parçası silinen evler (D-92, BK-31): PA-30 (83 m²: 10, kaynak ev 11), PA-35 (69 m²: 8, kaynak ev 10); makas aralığı 125,5 cm'yi geçmiyor.
 - Kuralla açıklanmayan, eskizle sorulacak: PA-16 (80 m² kubbeli: liste 11, proje 9; İE-29'da açık), PA-20 (64 m² kubbeli: 16, 14; İE-29'da açık), PA-22 (102 m² teraslı: liste 7 makas hattı, gerçek liste 14 yarım makas).
 
+Bilgi (HD-11, çelik çatı kaplaması; koordinatörün 16 Kasım 08:18 notu): dört çelik ev gerçek projesindeki kaplamayla çizilmiyor. KT-07 (90 m² 2+1 kırma): tanım sandviç panel, gerçek proje "OSB + nem bariyeri + metal kiremit". KT-11 (49 m² 1+1): tanım tek kat panel, gerçek proje "OSB + membran + shingle". KT-12 (130 m² 3+1) ve KT-13 (167 m² 3+1): tanım tek kat panel, gerçek proje "OSB + membran + metal kiremit". Öteki çelik evlerin tanımı gerçek projeyle aynı (KT-01…KT-06 ve KT-08…KT-10 sandviç panel); Ç8801 ailesi ve Ç8201 gerçek projenin kaplamasını yazmıyor. İki okuma var, karar Lokman'ın: (1) havuz evi gerçek projenin kaplamasıyla çizilir: dört evin tanımı değişir; (2) havuz şablonuna müşterinin seçimi girmez (D-87 › Standart) ve çelikte standart tek kat panel (`kurallar.json › baz_paket_cati_kaplamasi`, Lokman 4 Ekim 2026; M-16): KT-11…13 bugün standartta, sandviç panelli on ev (KT-01…KT-10) standart dışında. Tanım dosyası Lokman'ın kararı olmadan değişmez (yeni dosya ya da sürüm, D-07).
+
 Uyarılar (HD-02, HD-06, HD-09; 14 evde yalnız uyarı): dört kollu birleşim profili kural kitabında yok (PA-07, PA-13, PA-16); kısa pano 10,5 cm (PA-25), 18 cm × 2 (PA-27); 160×180 ve 150×190 pencere oda ortasına alınmadı (PA-06, 06-C, 06-K, 27, 28, 29); `kisa_kenar: y` doğrulanmalı (PA-06-C, PA-24, PA-34); köşe paftadan (PA-01, PA-16; M-07); 3D makas yeri düzensiz, eşit aralık alındı (PA-04, 06, 06-C, 06-K, 07, 23); listedeki veranda ve köşe kırması makası 3D'de yok (PA-02, PA-07); çelikte karkas kuralının "makas yok" uyarısı (KT-07, KT-08, KT-09) ve modeldeki kapı ölçüsü kuraldan farklı (KT-01, KT-03, KT-13). Taşan verandası varsayılan çatı alan ("çatısı İş Emri'nde yok") ya da "dere çizimde yok" uyarısı veren ev yok.
 
 **Açık soru (disk arşivi sohbeti, 16 Kasım 07:35).** 2019–2020 paftalarında saçak 25 cm (59 m²: 823 = 773 + 2 × 25); havuzdaki prefabrik İş Emri'lerinin hiçbiri `sacak_cm` yazmıyor, Motor 30 alıyor. Havuz geneli bir kural sorusu; bu denetimin kalemi değil, Lokman'a ayrıca sorulur.
 
-## 4. Önerilen kayıt kalemleri (Lokman'ın onayı bekleniyor)
+## 4. Kayıt kapısı (D-112, BK-47; Lokman 16 Kasım 2026 08:07:06 kartı "Evet, hatalı yeni ev girmesin")
 
-Kayıt aracı (`aday_kaydet.py`) yeni evi havuza yazmadan önce bu denetimi koşar: hata sınıfındaki bir kalem (HD-01, 03, 04, 05, 08, 10) geçmezse kayıt yazılmaz; uyarı ve bilgi kayda yazılır, Lokman'a özetle gider. Var olan 20 ev havuzda kalır, sorunları Motor bakımıyla düzelir (her sorun ayrı bakım sohbeti, çalışma kuralı 10). Onay gelmeden kayıt aracı değişmez.
+Kayıt aracı (`aday_kaydet.py`) yeni evi havuza yazmadan önce bu denetimi koşar: hata sınıfındaki bir kalem (HD-01, 03, 04, 05, 08, 10) geçmezse kayıt yazılmaz; uyarı ve bilgi kayda yazılır, Lokman'a özetle gider. Var olan 20 ev havuzda kalır, sorunları Motor bakımıyla düzelir (her sorun ayrı bakım sohbeti, çalışma kuralı 10). Bilgi kalemleri (HD-07, HD-11) kaydı durdurmaz.

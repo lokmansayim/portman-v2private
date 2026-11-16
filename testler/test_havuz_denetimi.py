@@ -40,6 +40,30 @@ def test_bir_ev_uctan_uca():
     assert "| PA11 |" in HD.markdown({"PA11": r})
 
 
+def test_celik_cati_kaplamasi_gercek_projeyle():
+    """HD-11 (bilgi): tanımın çizdiği kaplama ↔ gerçek projenin teknik özelliklerindeki kaplama; kapıya girmez."""
+    assert HD.kaplama_anahtari("OSB + membran + shingle") == "osb_shingle"
+    assert HD.kaplama_anahtari("OSB + nem bariyeri + metal kiremit") == "osb_kiremit"
+    assert HD.kaplama_anahtari("4 cm poliüretan sandviç panel") == "sandvic_panel"
+    assert HD.kaplama_anahtari("kaplama bilinmiyor") is None
+    t = lambda gercek, kaplama=None: {"teknik_ozellikler": {"Çatı kaplaması": gercek} if gercek else {},
+                                      "cati": {"tip": "besik", **({"kaplama": kaplama} if kaplama else {})}}
+    assert HD.kaplama_bulgusu(t("sandviç panel", "sandvic_panel")) == []
+    assert HD.kaplama_bulgusu(t(None, "sandvic_panel")) == []                  # gerçek projenin kaplaması yazmıyorsa denetlenmez
+    b = HD.kaplama_bulgusu(t("OSB + membran + shingle"))                       # kaplamasız tanım: kitabın baz paketi
+    assert [x["kalem"] for x in b] == ["HD-11"] and b[0]["sinif"] == "bilgi" and "tek kat panel (çelik standardı)" in b[0]["metin"]
+    assert HD.kayit_kapisi({"bulgular": b}) == ([], [])
+    kt07 = json.loads((KOK / "modeller" / "havuz" / "KT07.json").read_text(encoding="utf-8"))
+    assert "metal kiremit" in HD.kaplama_bulgusu(kt07)[0]["metin"]
+
+
+def test_tabloda_denetlenmeyen_kalem_cizgi():
+    r = {"motor": "genel", "bulgular": [], "gosterim": "KT-99"}
+    satir = [s for s in HD.markdown({"KT99": r}).splitlines() if s.startswith("| KT-99")][0].split(" | ")
+    kal = list(HD.KALEMLER)
+    assert satir[4 + kal.index("HD-08")] == "–" and satir[4 + kal.index("HD-01")] == "✓"
+
+
 # ---------------------------------------------------------------- kayıt kapısı (D-112, BK-47)
 
 HATA = {"bulgular": [{"kalem": "HD-05", "sinif": "hata", "metin": "3D kurulamadı: deneme"},

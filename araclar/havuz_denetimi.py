@@ -18,6 +18,8 @@ Kalemler:
   HD-09  Listede makası olan her çatı parçası 3D modelde de makaslı                (uyarı)
   HD-10  3D modelin ana çatısı İş Emri'nin çatı biçiminde (kırma çatı 3D'de kırma) (hata)
   HD-07  Makas sayısı gerçek projenin kartıyla (yalnız --kart-klasoru verilirse; fark D-44 gibi bilinen bir kuraldan olabilir)  (bilgi)
+  HD-11  Çelik: tanımın çatı kaplaması gerçek projenin teknik özelliklerindeki kaplamayla (`teknik_ozellikler["Çatı kaplaması"]`)  (bilgi:
+         D-87 havuz şablonuna müşterinin seçimini almaz, çelikte standart tek kat panel; Lokman 4 Ekim 2026; hangisi esas, Lokman'ın kararı)
 
 Kullanım:
   python -m araclar.havuz_denetimi [--kart-klasoru <Proje_Karti>] [--json <çıktı.json>] [--md <çıktı.md>]
@@ -51,8 +53,12 @@ KALEMLER = {
     "HD-09": "Listedeki her makaslı çatı parçası 3D'de de makaslı",
     "HD-10": "3D'deki ana çatı İş Emri'nin çatı biçiminde",
     "HD-07": "Makas sayısı gerçek projenin kartıyla",
+    "HD-11": "Çatı kaplaması gerçek projeninkiyle",
 }
-SINIF = {"HD-01": "hata", "HD-02": "uyari", "HD-03": "hata", "HD-04": "hata", "HD-05": "hata", "HD-06": "uyari", "HD-08": "hata", "HD-09": "uyari", "HD-10": "hata", "HD-07": "bilgi"}
+SINIF = {"HD-01": "hata", "HD-02": "uyari", "HD-03": "hata", "HD-04": "hata", "HD-05": "hata", "HD-06": "uyari", "HD-08": "hata", "HD-09": "uyari", "HD-10": "hata", "HD-07": "bilgi", "HD-11": "bilgi"}
+# Motor'a göre denetlenen kalemler; tablo ötekilere "–" yazar.
+DENETLENEN = {"prefabrik": {"HD-01", "HD-02", "HD-03", "HD-04", "HD-05", "HD-06", "HD-07", "HD-08", "HD-09", "HD-10"},
+              "genel": {"HD-01", "HD-02", "HD-03", "HD-04", "HD-05", "HD-11"}}
 
 
 # ---------------------------------------------------------------- havuz
@@ -259,14 +265,52 @@ def denetle_genel(tanim: Path) -> dict:
             s = satir.strip()
             if s.startswith("UYARI"):
                 B.append(_b("HD-02", s))
-        for f in Path(h).glob("*_yukleme.json"):
+        listeler = list(Path(h).glob("*_yukleme.json"))
+        if not listeler:
+            B.append(_b("HD-03", "yükleme listesi yazılmadı"))
+        for f in listeler:
             L = json.loads(f.read_text(encoding="utf-8"))
             for s in L.get("satirlar") or []:
                 if s.get("adet") in (None, ""):
                     B.append(_b("HD-04", f"{s.get('kalem') or s.get('ad')}: adet yok"))
         if not any(Path(h).glob("*.ifc")):
             B.append(_b("HD-05", "3D model (IFC) yazılmadı"))
+    B.extend(kaplama_bulgusu(t))
     return r
+
+
+def kaplama_anahtari(metin: str) -> str | None:
+    """Gerçek projenin teknik özelliklerindeki çatı kaplaması yazısını kitabın anahtarına çevirir (okunamazsa None)."""
+    m = metin.lower()
+    if "shingle" in m:
+        return "osb_shingle"
+    if "kiremit" in m:
+        return "osb_kiremit"
+    if "trapez" in m:
+        return "osb_trapez" if "osb" in m else "trapez_sac"
+    if "sandvi" in m:
+        return "sandvic_panel"
+    if "tek kat" in m:
+        return "tek_kat_panel"
+    return None
+
+
+def kaplama_bulgusu(t: dict) -> list[dict]:
+    """HD-11: tanımın çizdiği çatı kaplaması (`cati.kaplama`, yoksa kitabın baz paketi) gerçek projenin kaplamasıyla aynı mı.
+    Gerçek projenin kaplaması tanımda yazmıyorsa (ör. Ç8801 ailesi) denetlenmez."""
+    gercek = (t.get("teknik_ozellikler") or {}).get("Çatı kaplaması")
+    if not gercek:
+        return []
+    from motor.genel.girdi_genel import KAPLAMA_ADI
+    baz = json.loads((KOK / "kurallar" / "liste" / "kurallar.json").read_text(encoding="utf-8"))["baz_paket_cati_kaplamasi"]["deger"]
+    tanim = (t.get("cati") or {}).get("kaplama") or baz
+    g = kaplama_anahtari(gercek)
+    if g == tanim:
+        return []
+    ad = KAPLAMA_ADI.get(tanim, tanim) + (" (çelik standardı)" if tanim == baz else "")
+    if g is None:
+        return [_b("HD-11", f"gerçek projenin kaplaması okunamadı: \"{gercek}\"; tanım {ad} çiziyor")]
+    return [_b("HD-11", f"tanım {ad} çiziyor; gerçek projede \"{gercek}\"")]
 
 
 # ---------------------------------------------------------------- kayıt kapısı (D-112)
@@ -278,7 +322,7 @@ def havuza_mi(havuz: bool, durum: str, test_dosyasi: bool = False) -> bool:
 
 def kayit_kapisi(r: dict) -> tuple[list[str], list[str]]:
     """D-112 (Lokman, 16 Kasım 2026 08:07:06 kartı "Evet, hatalı yeni ev girmesin"): (kaydı durduran hata bulguları, kayda yazılan
-    uyarılar). Hata sınıfı: HD-01, HD-03, HD-04, HD-05, HD-08, HD-10; uyarı: HD-02, HD-06, HD-09; bilgi (HD-07) kapıya girmez."""
+    uyarılar). Hata sınıfı: HD-01, HD-03, HD-04, HD-05, HD-08, HD-10; uyarı: HD-02, HD-06, HD-09; bilgi (HD-07, HD-11) kapıya girmez."""
     dur = [f"{b['kalem']} {KALEMLER[b['kalem']]}: {b['metin']}" for b in r["bulgular"] if b["sinif"] == "hata"]
     uyari = [f"{b['kalem']}: {b['metin']}" for b in r["bulgular"] if b["sinif"] == "uyari"]
     return dur, uyari
@@ -293,18 +337,24 @@ def isaret(bulgular: list[dict], kalem: str) -> str:
     return {"hata": "✗", "uyari": "!", "bilgi": "≠"}[b[0]["sinif"]] + (f" {len(b)}" if len(b) > 1 else "")
 
 
+def _denetlendi(r: dict, kalem: str) -> bool:
+    if kalem == "HD-07" and not r.get("kart"):
+        return False
+    return kalem in DENETLENEN.get(r.get("motor") or "prefabrik", DENETLENEN["prefabrik"])
+
+
 def markdown(sonuc: dict) -> str:
     kal = list(KALEMLER)
     sat = ["| Ev | m² | Oda | Çatı | " + " | ".join(kal) + " |", "|" + "---|" * (4 + len(kal))]
     for kod, r in sonuc.items():
         sat.append(f"| {r.get('gosterim', kod)} | {r.get('m2') or ''} | {r.get('oda') or ''} | {r.get('cati') or ''} | "
-                   + " | ".join(isaret(r["bulgular"], k) if (k != "HD-07" or r.get("kart")) else "–" for k in kal) + " |")
+                   + " | ".join(isaret(r["bulgular"], k) if _denetlendi(r, k) else "–" for k in kal) + " |")
     ayrinti = []
     for kod, r in sonuc.items():
         for b in r["bulgular"]:
             ayrinti.append(f"- **{r.get('gosterim', kod)}** · {b['kalem']} ({b['sinif']}): {b['metin']}")
     acik = "\n".join(f"- {k}: {v} ({SINIF[k]})" for k, v in KALEMLER.items())
-    return ("İşaret: ✓ temiz · ✗ hata · ! uyarı · ≠ gerçek projeyle fark · – kart yok.\n\n" + acik + "\n\n" + "\n".join(sat)
+    return ("İşaret: ✓ temiz · ✗ hata · ! uyarı · ≠ gerçek projeyle fark · – denetlenmedi (kart yok ya da o Motor'da yok).\n\n" + acik + "\n\n" + "\n".join(sat)
             + "\n\n### Bulgular\n\n" + ("\n".join(ayrinti) or "Bulgu yok."))
 
 
