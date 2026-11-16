@@ -8,6 +8,7 @@ görünürlük K-A10 kabul kaydıyla (kabulsüz yol, harness dahil, aynen).
 from __future__ import annotations
 import hashlib
 import json
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -64,6 +65,7 @@ SILME_HAL = {
     "PA34": ("AP-27", "testler/havuz/is_emirleri/PA24_BUYUME.json", "2+1", 78.0),   # 77 m² büyüyen hâl (20:35:43 sözü, 20:38:43)
     "PA35": ("AP-08", "testler/havuz/is_emirleri/PA26_UCLU_H.json", "2+1", 69.0),   # 71 m² üçlü H'lı hâl (20:46:54 sözü, 20:57:28; BK-34)
     "PA36": ("AP-19", "testler/havuz/is_emirleri/PA18_GENIS.json", "2+1", 62.0),   # 60 m² veranda duvarı aksta (15 Kasım 07:24:23; BK-35)
+    "PA44": ("AP-05", "testler/havuz/is_emirleri/PA23_BUYUME.json", "2+1", 49.0),  # 49 m² tam panolu hâl, 700 × 700,25 (16 Kasım 06:58:39)
 }
 # D-96 › Havuza uygulama (İE-40 PR-7): iç duvarı 100'lük evlerin veranda köşesinde üçlü H, ev ev kartla (Lokman 15 Kasım 2026 07:32:42 sözü).
 # 91 m² 3+1 yeni numarayla (07:57:38 "Doğru, yanına eklensin"; PA-11 aynen); 143 m² 4+1 paftadaki gibi aynı numarayla (07:57:47 "Evet, havuzda
@@ -78,7 +80,18 @@ UCLU_H_YENI = {"PA13": "testler/havuz/is_emirleri/AP12_UCLU_H.json"}            
 TEK_PANO_HAL = {
     "PA38": ("AP-04", "testler/havuz/is_emirleri/AP04_D92.json", "3+1", 95.0),     # 95 m² 48 panolu hâl (14 Kasım 20:32:51; 15 Kasım 21:56:57)
 }
-HAVUZ_EVLERI = {**EVLER, **STANDART_HAL, **SILME_HAL, **UCLU_H_HAL, **TEK_PANO_HAL}
+# İE-43 PR-4b › Disk arşivi Parti 1: İş Emri paftadan kodla okundu (`araclar/hdd_turev/`), kart paftanın yazılarından
+# (`testler/havuz/hdd_kartlari.json`); mavi panolar Motor'un aks düzeninde. Lokman'ın kartı karar dosyasında.
+KARAR_HDD = "D-111"
+DHDD = (KOK / "KARARLAR" / f"{KARAR_HDD}.md").read_text(encoding="utf-8")
+HDD_EVLERI = {
+    "PA39": ("HD-252", "testler/havuz/is_emirleri/HD252.json", "1+1", 37.0),     # 37 m²; oda adı yok, yatak odası eşyasız kalan oda
+    "PA40": ("HD-506", "testler/havuz/is_emirleri/HD506.json", "1+1", 45.0),     # 45 m²
+    "PA41": ("HD-431", "testler/havuz/is_emirleri/HD431.json", "2+1", 59.0),     # başlık 63 m², duvarlar 763 × 773 cm (58,98 m²)
+    "PA42": ("HD-228", "testler/havuz/is_emirleri/HD228.json", "3+1", 84.0),     # 84 m²
+    "PA43": ("HD-143", "testler/havuz/is_emirleri/HD143.json", "3+1", 92.0),     # 92 m²; verandada panel çatı, ikinci çatı PA-43-B (D-111)
+}
+HAVUZ_EVLERI = {**EVLER, **STANDART_HAL, **SILME_HAL, **UCLU_H_HAL, **TEK_PANO_HAL, **HDD_EVLERI}
 # D-92 › Havuz evlerine uygulama: 95 m²'nin (PA-10) tek özel pano anahtarlı kaydı 15 Kasım 21:56:57 kartıyla PA-38'e geçti (TEK_PANO_HAL);
 # PA-10 asıl hâline döndü (D-87, kör İş Emri). Ayrıntı test_havuz_tek_pano.py.
 D92 = (KOK / "KARARLAR" / "D-92.md").read_text(encoding="utf-8")
@@ -87,6 +100,8 @@ D92 = (KOK / "KARARLAR" / "D-92.md").read_text(encoding="utf-8")
 def _kayit_kaynagi(kod: str) -> tuple[str, str, str]:
     """(kaynak İş Emri, karar, karar metni) kayıttaki gibi: D-92 evleri ve silinmiş hâlleri, D-96 üçlü H evleri, D-91 standart hâlleri,
     öteki D-87 evleri."""
+    if kod in HDD_EVLERI:
+        return HDD_EVLERI[kod][1], KARAR_HDD, DHDD
     if kod in TEK_PANO_HAL:
         return TEK_PANO_HAL[kod][1], "D-92", D92
     if kod in UCLU_H_YENI:
@@ -127,7 +142,7 @@ KALANLAR = {
 }
 # D-87 › Veranda (Lokman, 14 Kasım 2026 07:34 UTC): veranda bir oda gibi sayılır; verandasız ev de havuza girer
 VERANDA_SOZU = "veranda ayrıca var mı yok mu belirtilmez verandayı da bir oda gibi kabul et"
-VERANDASIZ = {"PA23", "PA24", "PA34", "KT09", "KT11"}                           # KT-11 (ÇP-22): antette sundurma, veranda yok; PA-34 77 m² hâli
+VERANDASIZ = {"PA23", "PA24", "PA34", "PA44", "KT09", "KT11"}                   # KT-11 (ÇP-22): antette sundurma, veranda yok; PA-34 77 m² hâli; PA-44 49 m² hâli
 # AP-14: paftada oda adı yok; oda programı Lokman'ın karar kartından (14 Kasım 2026 07:50:30 UTC, "Evet, 2+1 olarak girsin")
 AP14_SOZU = '"Evet, 2+1 olarak girsin"'
 # AP-08: Lokman 14 Kasım 2026 08:16:22 UTC düzeltmesi (hol panoları, sırt sırta kapılar, ortada pencere), 08:29:26 kartı
@@ -294,9 +309,10 @@ def test_hakem_kalemleri():
 
 
 def test_kartlarda_ad_yok():
-    """Proje kartı hedef değerleri yalnız kodla durur (CLAUDE.md › soru 15): ad, telefon ve adres alanı yok."""
+    """Proje kartı hedef değerleri yalnız kodla durur (CLAUDE.md › soru 15): ad, telefon ve adres alanı yok. Disk arşivinin kartları
+    HD kodlu (D-99 madde 3, D-111)."""
     for kod, k in HH.kartlar().items():
-        assert kod.startswith("AP-") and not {"ad", "musteri", "musteri_adi", "telefon", "adres", "proje_adi"} & set(k), kod
+        assert re.fullmatch(r"AP-\d{2}|HD-\d{3}", kod) and not {"ad", "musteri", "musteri_adi", "telefon", "adres", "proje_adi"} & set(k), kod
         assert len(k["kart_sha256"]) == 64 and int(k.get("kat_adedi") or 1) in (1, 2)
 
 
@@ -311,16 +327,16 @@ def test_kabulsuz_yolda_havuz_gorunmez():
 
 # Bütün havuz kabul edilince seçenek seti: düğme ve görsel en çok 3, liste en çok 10 satır, satır başlığı ≤ 24, açıklama ≤ 72
 SETLER = {
-    (50, "2+1"): ["PA23"],                                                            # tek aday: öncelik sorulmaz
-    (40, "1+1"): ["PA29"],                                                            # D-91 kısalt (39,61 m²)
-    (45, "1+1"): ["PA27", "PA28"],                                                    # eski hâl ve en yakın standart (D-91)
-    (60, "2+1"): ["PA01", "PA14", "PA18", "PA25", "PA31", "PA36", "PA02", "PA09", "PA20"],  # PA-31 silinmiş hâl (59 m²); PA-36 geniş hâl (62 m²)
+    (50, "2+1"): ["PA23", "PA44"],                                                    # bugünkü 49 m² ve tam panolu hâli (PA-44, 49,02 m²)
+    (40, "1+1"): ["PA29", "PA39"],                                                    # D-91 kısalt (39,61 m²); PA-39: disk arşivinin 37 m²'si (D-111)
+    (45, "1+1"): ["PA27", "PA40", "PA28"],                                            # eski hâl ve en yakın standart (D-91); PA-40: disk arşivinin 45 m²'si (D-111)
+    (60, "2+1"): ["PA01", "PA14", "PA18", "PA25", "PA31", "PA41", "PA36", "PA02", "PA09", "PA20"],  # PA-31 silinmiş hâl (59 m²); PA-36 geniş hâl (62 m²); PA-41 disk arşivi (59 m², D-111)
     (65, "2+1"): ["PA02", "PA09", "PA20", "PA36", "PA25", "PA32", "PA35", "PA01", "PA03", "PA14"],  # PA-36 (62 m²) dördüncü; liste 10, PA-15 düştü
     (71, "2+1"): ["PA26", "PA03", "PA15", "PA32", "PA35", "PA24", "PA02", "PA04", "PA09", "PA20"],  # PA-35: 71 m²'nin üçlü H'lı hâli (69 m²); PA-34 10 sınırıyla düştü
     (77, "2+1"): ["PA24", "PA04", "PA34", "PA16", "PA05", "PA26", "PA03", "PA15", "PA19"],  # PA-34: 77 m²'nin büyüyen hâli (D-92)
     (80, "2+1"): ["PA16", "PA04", "PA05", "PA34", "PA24", "PA19", "PA06"],
-    (80, "3+1"): ["PA21", "PA30", "PA12"],                                            # PA-30: 85 m²'nin silinmiş hâli (83 m², D-92)
-    (90, "3+1"): ["PA07", "PA11", "PA17", "PA37", "PA10", "PA12", "PA38", "PA30"],  # PA-37: 91 m² üçlü H'lı hâl (D-96); PA-38: 95 m² 48 panolu
+    (80, "3+1"): ["PA21", "PA30", "PA42", "PA12"],                                    # PA-30: 85 m²'nin silinmiş hâli (83 m², D-92); PA-42 disk arşivi (84 m², D-111)
+    (90, "3+1"): ["PA07", "PA11", "PA17", "PA37", "PA43", "PA10", "PA12", "PA38", "PA42", "PA30"],  # PA-37: 91 m² üçlü H'lı hâl (D-96); PA-38: 95 m² 48 panolu; PA-43, PA-42 disk arşivi (D-111)
     (100, "2+1"): ["PA22"],
     (140, "3+1"): ["PA08", "PA33"],                                                   # PA-33: 140 m²'nin büyüyen hâli (142 m², D-92)
     (140, "4+1"): ["PA13"],
@@ -532,7 +548,8 @@ def test_acik_alan_set_kaydinda(tmp_path):
     s, k = _set(tmp_path, 45, "1+1")
     a = s.k.d["secenek_seti"]["adaylar"][0]
     assert a["kod"] == "PA27" and a["acik_alan"] == "sundurma"
-    assert ", sundurma 1.76 ·" in k.mesaj and "veranda" not in k.mesaj, k.mesaj
+    satir = next(x for x in k.mesaj.splitlines() if "PA-27" in x)             # D-111'den beri sette verandalı PA-40 da var
+    assert ", sundurma 1.76 ·" in satir and "veranda" not in satir, k.mesaj
     assert "· sundurma 1.76 m² ·" in S.aciklama(a)
     s, k = _set(tmp_path / "71", 71, "2+1")
     assert all("acik_alan" not in a for a in s.k.d["secenek_seti"]["adaylar"])
