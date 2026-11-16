@@ -189,8 +189,11 @@ def test_hesaplar(A, D):
     g = P["Kutu profil (kiriş) 100 × 100 | L 1457,5"]                          # 6 m fiyatının çeyreği (D-119; 150 cm ve altı), tam TL
     assert (g["fiyat"], g["onay"]) == (_kurus(_fiyat(A, "MA11") / 4, "1"), True)
     assert P["Tek kat çatı paneli · ana çatı | L 5100"]["fiyat"] == _kurus(_fiyat(A, "CG6") * Decimal("5.1"))
-    g = P["Besleme kablo borusu | metre"]                                      # NYM'nin iki katı; NYM birimi varsayım → öneri
-    assert (g["fiyat"], g["onay"]) == (_kurus(_fiyat(A, "E7") * 2), False)
+    g = P["Besleme kablo borusu | metre"]                                      # NYM'nin iki katı; NYM metre fiyatı (kart 16 Kasım 21:31:40)
+    assert (g["fiyat"], g["onay"]) == (_kurus(_fiyat(A, "E7") * 2), True)
+    for c, k3, k2 in ((P, "NYM kablo 3 × 2,5 | metre", "NYM kablo 2 × 1,5 | metre"), (Cl, "NYM kablo (3 × 2,5) | metre", "NYM kablo (2 × 1,5) | metre")):
+        assert (c[k3]["fiyat"], c[k3]["onay"], c[k3]["durum"]) == (_kurus(_fiyat(A, "E7")), True, "eşleşti")
+        assert (c[k2]["fiyat"], c[k2]["onay"]) == (_kurus(_fiyat(A, "E8")), True)
     assert Cl["Banyo batarya grubu | takım"]["fiyat"] == _kurus(_fiyat(A, "VG5") + _fiyat(A, "VG7"))
     assert P["Silikonize mastik | adet"]["fiyat"] == _kurus(_fiyat(A, "DG14", "beyaz"))
     for c in (P, Cl):

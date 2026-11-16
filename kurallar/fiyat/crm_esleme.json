@@ -1,6 +1,6 @@
 {
  "sema": 1,
- "surum": "2026-11-16-r09",
+ "surum": "2026-11-16-r10",
  "karar": "D-72",
  "muhur": "M-15",
  "aciklama": "Fiyat defteri kaleminin CRM stok fiyatları API'sindeki karşılığı ve fiyatın nasıl hesaplandığı (İE-35). Fiyat yazmaz: fiyat her gün CRM'den gelir, `araclar/crm_fiyat.py` bu dosyayla defter üretir. Anahtarlar ve birimler fiyat defterinin (defter_2026-11 r13) kalemleri; Motor'un listesindeki anahtar. D-72'den sonra defter kapandı: Motor'un yeni anahtarı yalnız buraya, hattın kalemlerinin sonuna girer (r05, TK-06); yeni bant aralığı da bantların sonuna (r07, 280 ve 300 cm yükseklik). Eşleme değişikliği (yeni kalem, Lokman'ın birim cevabı, Samet'in CRM'e eklediği ürün) bu dosyaya PR'la girer; `kaynak` bölümü mühürlü (M-15).",
@@ -830,16 +830,16 @@
     "NYM kablo 3 × 2,5 | metre": {
      "kod": "E7",
      "hesap": "ayni",
-     "esleme": "birim varsayımı",
+     "esleme": "birebir",
      "birim": "m",
-     "not": "CRM'de birim 'Adet' yazıyor; metre fiyatı sayıldı"
+     "not": "Lokman 16 Kasım 2026 21:31:40 UTC kartı \"Evet, metre fiyatı\": CRM'deki NYM kablo fiyatı metre fiyatı (CRM'de birim \"Adet\" yazıyor)"
     },
     "NYM kablo 2 × 1,5 | metre": {
      "kod": "E8",
      "hesap": "ayni",
-     "esleme": "birim varsayımı",
+     "esleme": "birebir",
      "birim": "m",
-     "not": "CRM'de birim 'Adet' yazıyor; metre fiyatı sayıldı"
+     "not": "Lokman 16 Kasım 2026 21:31:40 UTC kartı \"Evet, metre fiyatı\": CRM'deki NYM kablo fiyatı metre fiyatı (CRM'de birim \"Adet\" yazıyor)"
     },
     "Uydu kablo | metre": {
      "kod": "E10",
@@ -858,9 +858,9 @@
      "kod": "E7",
      "hesap": "carp",
      "carpan": 2,
-     "esleme": "birim varsayımı",
+     "esleme": "kural",
      "birim": "m",
-     "not": "NYM 3 × 2,5 metre fiyatının iki katı (D-36); NYM fiyatı CRM'de birim varsayımıyla (Adet → metre)"
+     "not": "NYM 3 × 2,5 metre fiyatının iki katı (D-36); Lokman 16 Kasım 2026 21:31:40 UTC kartı \"Evet, metre fiyatı\": CRM'deki NYM kablo fiyatı metre fiyatı (CRM'de birim \"Adet\" yazıyor)"
     },
     "İzole bant | adet": {
      "kod": "E28",
@@ -3016,16 +3016,16 @@
     "NYM kablo (3 × 2,5) | metre": {
      "kod": "E7",
      "hesap": "ayni",
-     "esleme": "birim varsayımı",
+     "esleme": "birebir",
      "birim": "metre",
-     "not": "CRM'de birim 'Adet' yazıyor; metre fiyatı sayıldı"
+     "not": "Lokman 16 Kasım 2026 21:31:40 UTC kartı \"Evet, metre fiyatı\": CRM'deki NYM kablo fiyatı metre fiyatı (CRM'de birim \"Adet\" yazıyor)"
     },
     "NYM kablo (2 × 1,5) | metre": {
      "kod": "E8",
      "hesap": "ayni",
-     "esleme": "birim varsayımı",
+     "esleme": "birebir",
      "birim": "metre",
-     "not": "CRM'de birim 'Adet' yazıyor; metre fiyatı sayıldı"
+     "not": "Lokman 16 Kasım 2026 21:31:40 UTC kartı \"Evet, metre fiyatı\": CRM'deki NYM kablo fiyatı metre fiyatı (CRM'de birim \"Adet\" yazıyor)"
     },
     "Buat kasa | adet": {
      "kod": "E20",
@@ -3051,9 +3051,9 @@
      "kod": "E7",
      "hesap": "carp",
      "carpan": 2,
-     "esleme": "birim varsayımı",
+     "esleme": "kural",
      "birim": "metre",
-     "not": "NYM 3 × 2,5 metre fiyatının iki katı (D-36); NYM fiyatı CRM'de birim varsayımıyla (Adet → metre)"
+     "not": "NYM 3 × 2,5 metre fiyatının iki katı (D-36); Lokman 16 Kasım 2026 21:31:40 UTC kartı \"Evet, metre fiyatı\": CRM'deki NYM kablo fiyatı metre fiyatı (CRM'de birim \"Adet\" yazıyor)"
     },
     "Zil | adet": {
      "kod": "E32",
