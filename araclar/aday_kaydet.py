@@ -22,6 +22,8 @@
 Yazdıkları (prefabrik): is_emri/adaylar/<kod>.json (şablon; is_emri_no PM-ADAY-<kod>, revizyon 1), is_emri/adaylar/<kod>.png (bayi görseli),
 beyin/veri/adaylar_prefabrik.json (İE-36; ya da --test-dosyasi ile adaylar_test.json) içinde <kod> satırı (varsa yenilenir); `--havuz` ile
 beyin/veri/havuz/<kod>.json (İE-38, D-87: ev başına bir dosya).
+Havuza giden kayıt (`--havuz`, durum gecerli / kosullu) önce havuz denetiminden geçer (D-112, BK-47; `araclar/havuz_denetimi.py`):
+hata veren ev yazılmaz, uyarılar kaydın `kaynak.havuz_denetimi`'ne yazılır.
 Özet Motor doğrulamasından gelir (oda alanları, pano, pencere, kapı, dış ölçü); kapalı alan = dış kutu − veranda (kutu içi).
 Prefabrikte 'gecerli' yalnız Lokman'ın kararıyla verilir (`--karar D-NN`, dosyası KARARLAR/'da; İE-36, D-80: sekiz ev). Bayiye sunulma
 yine K-A10 kabul kaydına bağlıdır: Katalog 'gecerli' prefabrik adayı yalnız kabul kümesinde açıkça varsa gösterir (IE-04-aday-teslimi.md).
@@ -144,6 +146,15 @@ def main() -> int:
     ie["is_emri_no"] = f"PM-ADAY-{kod}"; ie["revizyon"] = 1
     ie.setdefault("yapi", {})["referans_model"] = a.referans or ie.get("yapi", {}).get("referans_model")
     ie["talep"] = {"bayi": {"kod": "ADAY", "ad": "Aday kaydı"}, "musteri_adi": f"ADAY {kod}", "metin": a.kaynak or ie.get("talep", {}).get("metin", "")}
+    havuz_denetimi = None
+    from araclar import havuz_denetimi as HD
+    if HD.havuza_mi(a.havuz, a.durum, a.test_dosyasi):                         # D-112 (BK-47): hata veren yeni ev havuza yazılmaz
+        dur, uyari = HD.kayit_kapisi(HD.denetle_prefabrik(json.loads(json.dumps(ie))))
+        if dur:
+            print("DUR: havuz denetimi geçmedi (D-112); kayıt yazılmadı:\n- " + "\n- ".join(dur)); return 1
+        havuz_denetimi = {"sonuc": "geçti", "karar": "D-112", "uyarilar": uyari}
+        for u in uyari:
+            print("UYARI (havuz denetimi):", u)
     with tempfile.TemporaryDirectory() as t:
         m = dxf_out.uret(ie, Path(t))
         v = json.loads((Path(t) / "validation.json").read_text(encoding="utf-8"))
@@ -177,7 +188,8 @@ def main() -> int:
                  "ozet": {"grid": ie["yapi"]["grid"], "dis_olcu_cm": [W, H], "brut_m2": round(brut, 2), "pano": v.get("panel_count"), "pencere": v.get("windows"), "kapi": v.get("doors"),
                           "odalar": {k: round(x, 2) for k, x in rooms.items()}, **({"brut_disi_acik_m2": disarida} if disarida else {})},
                  "kaynak": {"metin": a.kaynak, "dosya": str(Path(a.is_emri)), "ayna": a.ayna, "karar": a.karar,
-                            **({"standart": True} if a.standart else {}), **({"kart_kiyasi": kart_kiyasi} if kart_kiyasi else {})},
+                            **({"standart": True} if a.standart else {}), **({"kart_kiyasi": kart_kiyasi} if kart_kiyasi else {}),
+                            **({"havuz_denetimi": havuz_denetimi} if havuz_denetimi else {})},
                  "not": a.not_}
     _yaz(kayit, a.test_dosyasi, dosya="adaylar_prefabrik.json", havuz=a.havuz)
     return 0
@@ -216,6 +228,15 @@ def genel(a) -> int:
         if bulgular:
             print(f"DUR: çelik hakemi geçmedi ({kk}):\n- " + "\n- ".join(bulgular)); return 1
         kart_kiyasi = {"kart": kk, "tanim": kart["tanim"], "tanim_sha256": kart["tanim_sha256"], "sonuc": "geçti", "olcum": olc}
+    havuz_denetimi = None
+    from araclar import havuz_denetimi as HD
+    if HD.havuza_mi(a.havuz, a.durum, a.test_dosyasi):                         # D-112 (BK-47): hata veren yeni ev havuza yazılmaz
+        dur, uyari = HD.kayit_kapisi(HD.denetle_genel(tanim_yolu))
+        if dur:
+            print("DUR: havuz denetimi geçmedi (D-112); kayıt yazılmadı:\n- " + "\n- ".join(dur)); return 1
+        havuz_denetimi = {"sonuc": "geçti", "karar": "D-112", "uyarilar": uyari}
+        for u in uyari:
+            print("UYARI (havuz denetimi):", u)
     with tempfile.TemporaryDirectory() as tmp:
         m = U.uret(tanim_yolu, Path(tmp), is_emri_no=None, revizyon=None, set_yolu=None, yontem="panel", perspektif=not a.perspektifsiz, bayi=True,
                    kaynak=f"Yapı Tanımı 0.5 ({tanim_yolu.name})")          # revizyon None: aday kartında "TASLAK", r01 yok (Lokman 12.10)
@@ -258,7 +279,8 @@ def genel(a) -> int:
                           "cati": t.get("cati", {}).get("tip"), "liste_satir": v.get("liste_satir"), "kural_seti": Path(v.get("set", "")).name,
                           "perspektif": v.get("perspektif", {}).get("durum")},
                  "kaynak": {"metin": a.kaynak, "dosya": gorece, "dogrulama": "çizim seti (İE-08, 12 Ekim 2026)", "karar": a.karar or "D-08 madde 4; D-10",
-                            **({"kart_kiyasi": kart_kiyasi} if kart_kiyasi else {})},
+                            **({"kart_kiyasi": kart_kiyasi} if kart_kiyasi else {}),
+                            **({"havuz_denetimi": havuz_denetimi} if havuz_denetimi else {})},
                  "not": a.not_}
     _yaz(kayit, a.test_dosyasi, havuz=a.havuz)
     return 0

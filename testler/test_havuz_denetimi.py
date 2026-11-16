@@ -38,3 +38,67 @@ def test_bir_ev_uctan_uca():
     assert not [b for b in r["bulgular"] if b["sinif"] == "hata"], r["bulgular"]
     assert r["makas"] == r["makas_3d"] and r["makas"]
     assert "| PA11 |" in HD.markdown({"PA11": r})
+
+
+# ---------------------------------------------------------------- kayıt kapısı (D-112, BK-47)
+
+HATA = {"bulgular": [{"kalem": "HD-05", "sinif": "hata", "metin": "3D kurulamadı: deneme"},
+                     {"kalem": "HD-02", "sinif": "uyari", "metin": "deneme uyarısı"},
+                     {"kalem": "HD-07", "sinif": "bilgi", "metin": "makas: liste 7, gerçek proje 8"}]}
+
+
+def test_kayit_kapisi_siniflari():
+    dur, uyari = HD.kayit_kapisi(HATA)
+    assert len(dur) == 1 and dur[0].startswith("HD-05 3D model (IFC) kurulur") and uyari == ["HD-02: deneme uyarısı"]
+    assert HD.kayit_kapisi({"bulgular": HATA["bulgular"][1:]}) == ([], ["HD-02: deneme uyarısı"])
+    assert {k for k, s in HD.SINIF.items() if s == "hata"} == {"HD-01", "HD-03", "HD-04", "HD-05", "HD-08", "HD-10"}
+
+
+def test_havuza_mi():
+    assert HD.havuza_mi(True, "test") and HD.havuza_mi(False, "gecerli") and HD.havuza_mi(False, "kosullu")
+    assert not HD.havuza_mi(False, "test") and not HD.havuza_mi(True, "gecerli", test_dosyasi=True)
+
+
+def _yazilan():
+    return {p for d in ("is_emri/adaylar", "beyin/veri/havuz", "beyin/veri/cati_varyantlari") for p in (KOK / d).iterdir()}
+
+
+def test_aday_kaydet_hatali_evi_yazmaz(monkeypatch, capsys):
+    """Prefabrik: havuz denetiminde hata veren ev havuza yazılmaz (şablon, görsel, kayıt yok)."""
+    import sys
+    from araclar import aday_kaydet as AK
+    monkeypatch.setattr(HD, "denetle_prefabrik", lambda ie, kart=None: HATA)
+    once = _yazilan()
+    monkeypatch.setattr(sys, "argv", ["aday_kaydet.py", str(KOK / "is_emri/adaylar/PA11.json"), "--kod", "PA-97", "--durum", "test",
+                                      "--havuz", "--standart"])
+    assert AK.main() == 1
+    cikti = capsys.readouterr().out
+    assert "DUR: havuz denetimi geçmedi (D-112)" in cikti and "HD-05" in cikti
+    assert _yazilan() == once
+
+
+def test_aday_kaydet_celik_hatali_evi_yazmaz(monkeypatch, capsys):
+    """Çelik: aynı kapı; genel motorun koşusu kapıdan sonra."""
+    import sys
+    from araclar import aday_kaydet as AK
+    monkeypatch.setattr(HD, "denetle_genel", lambda tanim: HATA)
+    once = _yazilan()
+    monkeypatch.setattr(sys, "argv", ["aday_kaydet.py", "--motor", "genel", "--tanim", "modeller/KT01.json", "--kod", "KT-99",
+                                      "--durum", "test", "--havuz"])
+    assert AK.main() == 1
+    assert "DUR: havuz denetimi geçmedi (D-112)" in capsys.readouterr().out
+    assert _yazilan() == once
+
+
+def test_cati_varyanti_hatali_secenegi_yazmaz(monkeypatch, capsys):
+    """Çatı seçeneği: bütün seçenekler dosya yazılmadan denetlenir; hata veren varsa hiçbir dosya yazılmaz."""
+    import sys
+    from araclar import cati_varyanti_kaydet as CV
+    monkeypatch.setattr(HD, "denetle_prefabrik", lambda ie, kart=None: HATA)
+    once = _yazilan()
+    cati = json.loads((KOK / "is_emri/adaylar/PA06K.json").read_text(encoding="utf-8"))["cati"]
+    monkeypatch.setattr(sys, "argv", ["cati_varyanti_kaydet.py", "--taban", "PA-06", "--karar", "D-83", "--cati-adi", "Beşik",
+                                      "--varyant", "K", "Kırma", json.dumps(cati)])
+    assert CV.main() == 1
+    assert "PA-06-K havuz denetimi geçmedi (D-112)" in capsys.readouterr().out
+    assert _yazilan() == once

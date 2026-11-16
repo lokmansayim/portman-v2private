@@ -4,7 +4,8 @@ bakmadığı kalemleri denetler. Hiçbir dosyayı değiştirmez, kayda yazmaz; s
 Neden (Lokman, 16 Kasım 2026 07:05:58 ve 07:07:03): "hepsinin kontrolleri yapılsın öyle girsin havuza hata olmasın", "kontrolcü her
 yaptığımı ... kontrolleri yapsın öyle alsın havuza". Havuz hakemi bugün plan kimliğine bakar (dış ölçü, brüt, oda programı, pencere, kapı,
 açık mahal, kat); kayıt aracı (`aday_kaydet.py`) ek olarak Motor doğrulamasının geçmesini ister. Aşağıdaki kalemler havuza girişte bugün
-denetlenmiyor; bu araç onları raporlar. Kayıt kapısına bağlamak ayrı karardır (Lokman'ın onayıyla).
+denetlenmiyordu; bu araç onları raporlar. Kayıt kapısı (D-112, Lokman 16 Kasım 2026 08:07:06 kartı "Evet, hatalı yeni ev girmesin"):
+`aday_kaydet.py` ve `cati_varyanti_kaydet.py` havuza yeni ev yazmadan `kayit_kapisi`'nı koşar; hata sınıfındaki kalem kaydı durdurur.
 
 Kalemler:
   HD-01  Motor kurar, çizim doğrulaması geçer                                  (hata)
@@ -266,6 +267,21 @@ def denetle_genel(tanim: Path) -> dict:
         if not any(Path(h).glob("*.ifc")):
             B.append(_b("HD-05", "3D model (IFC) yazılmadı"))
     return r
+
+
+# ---------------------------------------------------------------- kayıt kapısı (D-112)
+
+def havuza_mi(havuz: bool, durum: str, test_dosyasi: bool = False) -> bool:
+    """Kayıt bayiye giden havuza mı yazılıyor (D-112): `--havuz` ya da durum gecerli / kosullu; test kaydı değil."""
+    return (havuz or durum in ("gecerli", "kosullu")) and not test_dosyasi
+
+
+def kayit_kapisi(r: dict) -> tuple[list[str], list[str]]:
+    """D-112 (Lokman, 16 Kasım 2026 08:07:06 kartı "Evet, hatalı yeni ev girmesin"): (kaydı durduran hata bulguları, kayda yazılan
+    uyarılar). Hata sınıfı: HD-01, HD-03, HD-04, HD-05, HD-08, HD-10; uyarı: HD-02, HD-06, HD-09; bilgi (HD-07) kapıya girmez."""
+    dur = [f"{b['kalem']} {KALEMLER[b['kalem']]}: {b['metin']}" for b in r["bulgular"] if b["sinif"] == "hata"]
+    uyari = [f"{b['kalem']}: {b['metin']}" for b in r["bulgular"] if b["sinif"] == "uyari"]
+    return dur, uyari
 
 
 # ---------------------------------------------------------------- rapor
