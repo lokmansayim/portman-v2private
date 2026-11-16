@@ -29,7 +29,7 @@ from araclar import birlesim_hakemi as BH  # noqa: E402
 K = BH.kartlar()
 KIYASLI = sorted(k for k, v in K["evler"].items() if not v.get("okunamadi"))
 KAYITLAR = sorted(p.stem for p in (KOK / "is_emri" / "adaylar").glob("PA[0-9][0-9]*.json"))
-LISTESIZ = ("PA06K", "PA27", "PA28", "PA29")       # liste yazılmaz (iki cumba, mahyası y boyunca kırma); hakem yine okur
+LISTESIZ: tuple = ()       # BK-45: iki cumba (PA27–29) ve mahyası y boyunca kırma (PA06K) artık yazılır; liste yazılmayan kayıt yok
 
 
 def test_kart_kaynagi_muhurde():

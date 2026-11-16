@@ -1,0 +1,152 @@
+{
+ "aciklama": "BK-45 hedef örneği (D-114): 87 m² 2+1 kırma çatı (mahya y boyunca; havuzda PA-06-K) yükleme listesinin çatı satırları. Motor sütunu Lokman'ın onayladığı tablodaki gibi; besik sütunu aynı evin havuzdaki beşik hâli, yalnız bilgi (bu ev için kırma paftası yok). Tablodaki 'Ana makas' satırının beşik değeri baş 2 + orta 8 = 10.",
+ "onay": {
+  "tarih": "2026-11-16T08:39:39Z",
+  "soz": "Evet, girsin",
+  "soru": "87 m² kırmanın listesi tablodaki gibi girsin mi?",
+  "tablo": "PF Portman_Proje_Dosyalari/Liste_Cumba_Kirma/04_87m2_kirma_cati_satirlari.png",
+  "makas_plani": "kart 2026-11-16T08:22:50Z '330'daki duvardan başlasın', eskiz PF Portman_Proje_Dosyalari/Liste_Cumba_Kirma/03_87m2_kirma_on_uc_eskiz_r02.png"
+ },
+ "girdi": {
+  "is_emri": "is_emri/adaylar/PA06K.json"
+ },
+ "komut": "motor.prefabrik_liste.is_emrinden(is_emri)",
+ "toplam_satir": 132,
+ "makas": 19,
+ "satirlar": [
+  {
+   "kalem": "Makas (ana, mahyaya dik) · ana çatı",
+   "olcu": "açıklık 8000",
+   "motor": 7,
+   "besik": null,
+   "not": "ön uçta ilk ana makas 330'daki duvarda (D-114)"
+  },
+  {
+   "kalem": "Makas (kısa, ön uç) · ana çatı",
+   "olcu": "L 3600",
+   "motor": 2,
+   "besik": null,
+   "not": "330'daki duvara kadar"
+  },
+  {
+   "kalem": "Makas (kısa, arka uç) · ana çatı",
+   "olcu": "L 1605",
+   "motor": 6,
+   "besik": null
+  },
+  {
+   "kalem": "Makas (çapraz, kırma, ön uç) · ana çatı",
+   "olcu": "L 5091",
+   "motor": 2,
+   "besik": null,
+   "not": "köşeden kırma noktasına"
+  },
+  {
+   "kalem": "Makas (çapraz, kırma, arka uç) · ana çatı",
+   "olcu": "L 2270",
+   "motor": 2,
+   "besik": null
+  },
+  {
+   "kalem": "Çatı paneli (makas arası) · ana çatı",
+   "olcu": "—",
+   "motor": 4,
+   "besik": null,
+   "not": "kırma uçlarının altındaki gözler"
+  },
+  {
+   "kalem": "Aşık",
+   "olcu": "L 4200",
+   "motor": 50,
+   "besik": 52
+  },
+  {
+   "kalem": "Trapez sac · ana çatı",
+   "olcu": "L 4580",
+   "motor": 25,
+   "besik": 24,
+   "not": "var olan kural: tek boy"
+  },
+  {
+   "kalem": "Trapez sac mahyası",
+   "olcu": "L 1000",
+   "motor": 31,
+   "besik": 12,
+   "not": "mahya + 4 kırma hattı"
+  },
+  {
+   "kalem": "Mahya bandı",
+   "olcu": "rulo 10 m",
+   "motor": 3,
+   "besik": 2
+  },
+  {
+   "kalem": "100'lük saçak omegası",
+   "olcu": "100 × 2500",
+   "motor": 17,
+   "besik": 10,
+   "not": "dört kenar saçak"
+  },
+  {
+   "kalem": "Saçak sacı (30'luk, 3'ü menfezli)",
+   "olcu": "300 × 2500",
+   "motor": 18,
+   "besik": 10,
+   "not": "dört kenar saçak"
+  },
+  {
+   "kalem": "Alın sacı (30'luk)",
+   "olcu": "300 × 2500",
+   "motor": 0,
+   "besik": 8,
+   "not": "kırmada alın yok"
+  },
+  {
+   "kalem": "Baş makas omegası",
+   "olcu": "L 2500",
+   "motor": 0,
+   "besik": 7,
+   "not": "kırmada baş makas yok"
+  },
+  {
+   "kalem": "Baş makas Z'si",
+   "olcu": "L 2800",
+   "motor": 0,
+   "besik": 8,
+   "not": "kırmada baş makas yok"
+  },
+  {
+   "kalem": "Baş makas betopanı",
+   "olcu": "1250 × 2500",
+   "motor": 0,
+   "besik": 6,
+   "not": "kırmada baş makas yok"
+  },
+  {
+   "kalem": "Metal dere",
+   "olcu": "L 4000",
+   "motor": 11,
+   "besik": 7,
+   "not": "dört saçakta kesintisiz"
+  },
+  {
+   "kalem": "Dere kelepçesi",
+   "olcu": "adet",
+   "motor": 88,
+   "besik": 56
+  },
+  {
+   "kalem": "Dere kapağı",
+   "olcu": "adet",
+   "motor": 0,
+   "besik": 4,
+   "not": "derenin serbest ucu yok"
+  },
+  {
+   "kalem": "Trapez vida 5,5 × 25 (aşık ve omega)",
+   "olcu": "adet",
+   "motor": 1100,
+   "besik": 1150
+  }
+ ]
+}

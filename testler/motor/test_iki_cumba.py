@@ -3,7 +3,8 @@
 Lokman, 14 Kasım 2026 08:41 UTC (sundurma eskizine yorum): "cumba çatısı gibi birleştireceksin vadi dere oluşacak böyle eğrelti olmayacak";
 08:41:58: "çapraz cumba çatısını nasıl çiziyorsan öyle çiz". Sundurma arkada taşan veranda (`verandalar`, `cati.tip` cumba); ana çatı beşik +
 önde yatak odasının çapraz cumbası; `cati.cumbalar`'ın ikinci öğesi `veranda` ile sundurmanın cumbası (`cati_prefabrik.cumba_dikdortgenleri`,
-`_iki_cumba`). Tek cumbalı evlerin çatısı eski yoldan, bayt bayt aynı (öteki testler).
+`_iki_cumba`). Tek cumbalı evlerin çatısı eski yoldan, bayt bayt aynı (öteki testler). Yükleme listesi iki cumbayı BK-45'ten beri
+sayar (`prefabrik_liste._iki_cumba_catilari`).
 """
 from __future__ import annotations
 
@@ -124,11 +125,48 @@ def test_cizim_dogrulamasi(tmp_path):
     assert r["pdf"] and r["tani_pdf"] is None
 
 
-def test_liste_yazilmaz():
-    """Liste iki cumbayı saymaz (tek çapraz cumba kuralı); yanlış liste yazılmaz."""
+def test_liste_yazilir():
+    """BK-45: liste iki cumbayı sayar. Ana çatı beşik (açıklık 540, boy 750); yatak odasının cumbası tek çapraz cumbanın kuralıyla
+    (kalkan ekseninden 125,5 arayla, vadilerin birleştiği yere kadar: 3 makas); sundurmanın cumbası aynı kuralla dış kirişin
+    ekseninden (2 makas; 45 m² paftası: cumba 3, sundurma 2). Sundurmanın alnı kirişli, altı açık (D-32: baş makas omegası ve betopan)."""
+    import contextlib
+    import io
     from motor import prefabrik_liste as PL
-    with pytest.raises(PL.ListeYazilmaz):
-        PL.model_motor(_ie())
+    N = PL.model_motor(_ie())
+    cati = {c["ad"]: c for c in N["cati"]}
+    assert list(cati) == ["ana çatı", "cumba", "sundurma çatısı"]
+    assert (cati["ana çatı"]["aciklik_cm"], cati["ana çatı"]["boy_cm"]) == (540.0, 750.0)
+    assert (cati["cumba"]["aciklik_cm"], cati["cumba"]["boy_cm"], cati["cumba"]["makas_adet"]) == (300.0, 150.0, 3)
+    s = cati["sundurma çatısı"]
+    assert (s["aciklik_cm"], s["boy_cm"], s["makas_adet"], s["mahya_boy_cm"]) == (135.5, 130.0, 2, 227.75)
+    assert s["kalkan_kirisli"] and s["acik"] and s["capraz"] and not cati["cumba"].get("acik")
+    # makasların plandaki yeri (3B aynı yeri okur): yatak odasının cumbası dış yüzden (y 0) gövdeye, sundurma dış kirişten (y 820) gövdeye
+    assert cati["cumba"]["makas_konum_cm"] == {"eksen": "y", "degerler": [5.0, 130.5, 256.0]}
+    assert s["makas_konum_cm"] == {"eksen": "y", "degerler": [815.0, 689.5]}
+    with contextlib.redirect_stdout(io.StringIO()):
+        L = PL.liste(N)
+    makas = {r["kalem"]: r["adet"] for r in L["satirlar"] if r["grup"] == "1005" and "akas" in r["kalem"]}
+    assert makas == {"Makas (baş) · ana çatı": 2, "Makas (orta) · ana çatı": 5, "Yavru makas · cumba": 3,
+                     "Yavru makas · sundurma çatısı": 2}
+    assert not [r for r in L["satirlar"] if r["adet"] is None]
+
+
+def test_liste_hedef_ornek():
+    """BK-45 hedef örneği: 45 m² evin çatı satırları Lokman'ın onayladığı tablodaki gibi (16 Kasım 2026 08:11:39 UTC kartı "Evet, girsin").
+    Kıyas için çatı kaplaması paftadaki gibi (OSB + nem bariyeri + metal kiremit; kör test TS-01'in özellikleri)."""
+    import contextlib
+    import io
+    from motor import prefabrik_liste as PL
+    H = json.loads((KOK / "testler" / "motor" / "veri" / "BK45_45m2_cati_beklenen.json").read_text(encoding="utf-8"))
+    assert H["onay"]["soz"] == "Evet, girsin" and len(H["satirlar"]) == 28
+    ie = json.loads((KOK / H["girdi"]["is_emri"]).read_text(encoding="utf-8"))
+    with contextlib.redirect_stdout(io.StringIO()):
+        S = PL.is_emrinden(ie, ozellikler=H["girdi"]["ozellikler"])["satirlar"]
+    bulunan = [sum(r["adet"] for r in S if r["kalem"] == h["kalem"] and h.get("olcu", r["olcu"]) == r["olcu"]) for h in H["satirlar"]]
+    assert bulunan == [h["motor"] for h in H["satirlar"]]
+    assert not [r for r in S if "OSB mahya" in r["kalem"]]
+    # metal kiremitte "Panel kapaması" adetsiz (var olan kural; ayrı bulgu, BK-45 › Ayrı bulgular)
+    assert [r["kalem"] for r in S if r["adet"] is None] == ["Panel kapaması"]
 
 
 @pytest.mark.parametrize("bozma, hata", [
