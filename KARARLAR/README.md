@@ -131,6 +131,7 @@ Biçim: karar · gerekçe · reddedilen seçenekler · geri alma yolu · kim ve 
 | [D-106](D-106.md) | Çelikte bayi formdan sonra mesajla çatı kaplaması yazarsa kaplama çizime işlenmez; söz talebe (özel istek) yazılır ve plan mesajında üç cümle söylenir ("Mesajınızda çatı kaplaması yazdınız. Planı modelin kendi çatı kaplamasıyla çizdim. Yazdığınız kaplamayı talebe yazdım."); ilk planda ve revizyonda; istek geri çevrilmez (İE-20 PR-13) | 15.11 (Lokman, kart 10:06:51 "Evet, talebe yazılsın"; kart 10:08:33 "Üç cümle") |
 | [D-107](D-107.md) | Prefabrikte tavan kirişi: makas yönünde 7 m'yi aşan açıklıkta köşeye bir kutu profil 100 × 100; makasa dik, iki ucu duvarda, en kısa çizgi, eşitse iki ucu köşede; bandı 125,5'ten dar açıklığa makas gelmez; listede 1 satır (yüzden yüze + 2 × 10, uçta kolon yok), kiriş yalnız saha montaj planında (`motor/tavan_kirisi.py`, PC-43; BK-39); 70, 65 ve 81 m²'de | 15.11 (Lokman 09:47:33 "eşik 7 metre olsun"; kart 10:22:40 "Evet, bu kuralla"; kart 10:48:34 "Eskizdeki gibi") |
 | [D-110](D-110.md) | Bayinin seçenek kartındaki kayıtlı ev resimleri dış ölçüyü plan görseli, DXF ve PDF gibi yazar (en çok iki ondalık: 951,25, 835,75; BK-42); 13 kayıtlı resim yeniden çizildi (`araclar/aday_gorseli_yenile.py`); çatı seçimi örneğinin (`testler/cati_secimi/prefabrik_hedef.json`) alan seti görsel izi yeniden dondu (2. ev PA-05) | 15.11 (Lokman, kart 22:29:00 "Evet, 12 resim de düzelsin"; hedefin yeniden dondurulması 22:45:18 talimatıyla, uyurken önerilen seçildi) |
+| [D-111](D-111.md) | Disk arşivi Parti 1'in beş evi (37, 45, 59, 84, 92 m²) Motor'un aks düzeniyle havuzda, PA-39 … PA-43; çatı paftadaki gibi (37 ve 59 m² ön cumba, 92 m² verandada panel çatı); 92 m²'nin ikinci çatısı PA-43-B verandada beşik; listede iki bilinen fark (cumba makası, panel çatının yan kirişi) Lokman'ın kararında; asıl proje (D-103) | 16.11 (Lokman, kart 06:50:02 "Evet, beşi girsin"; 08:08:55 "… 92 m² nin ikisinide al") |
 
 ## Numara defteri (14 Ekim 2026, BK-08; CIO planı › Görev 3)
 
@@ -236,7 +237,9 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | D | D-108 | (başka sohbet: iç duvarın dış duvar ucunda kalan parça; BK-41, PC-44) | alındı (15.11) |
 | D | D-109 | (başka sohbet: köşe verandası ve taşan verandada ara kolon; BK-40, PC-45) | alındı (15.11) |
 | D | D-110 | seçenek kartının kayıtlı resimleri yeni ölçü yazısıyla; çatı seçimi örneğinin seçenek kartı izi yeniden dondu (BK-42; Lokman 15.11 22:29:00 kartı) | yazıldı (16.11; bayi görseli sohbeti, `claude/project-thread-r8278d`) |
-| D | **D-111** | — | **sıradaki boş** |
+| D | D-111 | disk arşivi Parti 1'in beş evi havuzda, PA-39 … PA-43 ve PA-43-B (İE-43 PR-4b; Lokman 16.11 06:50:02 kartı, 08:08:55 sözü) | yazıldı (16.11; disk arşivi sohbeti, `claude/project-thread-wc6dw0`) |
+| D | D-112 | (başka sohbet: havuz denetimi kayıt kapısı; BK-47) | alındı (16.11) |
+| D | **D-113** | — | **sıradaki boş** |
 | İE | İE-01–İE-08 | bu depo (`main`) | yazıldı |
 | İE | İE-09 | model atölyesi: kontrollü model üretimi ve banka hattı (Görev 6e; pano 30; P6001 güncellemesi kapsam dışı) | alındı (16.10; `claude/gorev-6e-model-atolyesi-rnhtcp`; PR-1 banka hattı 29.10, `claude/project-thread-rhjgzv`) |
 | İE | İE-10, İE-11, İE-12 | prefabrik hattı (PR #12, PR #14, `ie-12-prefabrik-bayi-paftasi`) | `main`'e BK-12 ile (PR-1: motor ve bayi paftası; liste ve mühür kıyası sonraki PR'larda) |
