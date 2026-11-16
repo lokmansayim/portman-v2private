@@ -3209,8 +3209,10 @@ def _celik_degisiklikler(k: Konusma, katalog: Katalog, aday: dict, t: dict, once
         if tur == "cati_degistir":
             if r["cati"]:
                 continue                                        # çatı cümlesi okundu (katalog/K/L); `_celik_dali` seçti
-            if kap_cumle and not any((p.get("isaret") or {}).get("cati") or (p.get("isaret") or {}).get("cati_sekil") for p in r["parcalar"]):
-                continue                                        # LLM kaplama cümlesini çatı değişikliği okudu (canlı K8): kaplama kuralı işledi
+            if kap_cumle and not any((p.get("isaret") or {}).get("cati") or (p.get("isaret") or {}).get("cati_sekil")
+                                     for p in r["parcalar"] if p["metin"] not in kap_cumle):
+                continue                                        # LLM kaplama cümlesini çatı değişikliği okudu (canlı K8): kaplama kuralı işledi;
+                #                                                 kaplama cümlesinin kendi çatı işareti sayılmaz (canlı D3: "çatı kiremidi olsun")
             return _bitir(k, Karar(eylem="yonlendir", gerekce=f"çelikte varyant henüz desteklenmiyor: {tur}",
                                     mesaj=f"\"{v.get('aciklama', '')}\" değişikliği çelik modelde otomatik yapılamıyor"
                                           + ("; çatı için katalog çatısı, K ya da L seçilebilir. " if kat_aday.get("varyantlar") else ". ") + YONLENDIRME))
@@ -3472,8 +3474,25 @@ def _mesajin_kaplama_cumleleri(k: Konusma, aday: dict, kap: str, adlar=()) -> li
     except Exception:                                          # okuma düşerse kural susar: bugünkü yol (yönlendirme) işler
         return []
     return [p["metin"] for p in parcalar
-            if p["tur"] == "baska" and not p.get("olumsuz") and not p.get("odalar") and not any((p.get("isaret") or {}).values())
+            if p["tur"] == "baska" and not p.get("olumsuz") and not p.get("odalar") and _yalin_kaplama_isareti(p)
             and _baska_kaplama_sozu(p["metin"], kap, adlar)]
+
+
+def _cati_isareti_yalniz_malzemeden(p: dict) -> bool:
+    """Canlı deneme D3 (16 Kasım 2026, v2026.11.16a): "çatı kiremidi olsun". Okuyucu (`celik_okuma`) harfsiz "çatı" cümlesinde tanıdığı bir
+    renk ya da malzeme sözü bulamazsa cümleyi çatı şekli isteği işaretler; "kiremidi", "şıngıl", "ondulin", "alüminyum" yazımlarını tanımaz.
+    Cümlede şekil, eğim, yön sözü (`cati_geo`) ve çatı seçimi sözü (`cati_secim`: harf, kod, "katalog") yoksa işaretin tek nedeni budur.
+    Cümlenin çatı kaplaması olup olmadığına kaplama kuralının kendi kökleri karar verir (`_baska_kaplama_sozu`)."""
+    return bool((p.get("isaret") or {}).get("cati_sekil")) and not p.get("cati_geo") and not p.get("cati_secim")
+
+
+def _yalin_kaplama_isareti(p: dict) -> bool:
+    """Cümle yalın kaplama cümlesi olabilir mi: pencere, dış 140 ve ekleme işareti yok; çatı işareti yok ya da yalnız tanınmayan malzeme
+    yazımından (`_cati_isareti_yalniz_malzemeden`)."""
+    i = p.get("isaret") or {}
+    if i.get("pencere") or i.get("dis140") or i.get("ekle"):
+        return False
+    return not (i.get("cati") or i.get("cati_sekil")) or _cati_isareti_yalniz_malzemeden(p)
 
 
 def _kaplama_cumlesini_talebe_yaz(k: Konusma, t: Talep, metin: str | None) -> Talep:

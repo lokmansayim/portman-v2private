@@ -360,8 +360,21 @@ def _yaylar(e, derinlik: int = 0):
             return
 
 
-def teknik_oku(yazilar: list) -> dict:
-    """"Dış Duvarlar:" gibi etiketin aynı satırında sağdaki ilk yazı; sağda yoksa hemen altındaki yazı (teknik tablo)."""
+SACAK_FARKI_CM = 50.0   # 2020 montaj paftası: saçağın ölçüsü gövdeninkinden 2 × 25 cm büyük (makas planı gövde + 50; listede saçak sacı 250)
+
+
+def _sacak_ayir(degerler: list) -> tuple[list, float | None]:
+    """Bir yöndeki ölçüler (büyükten küçüğe) → (gövde ölçüsüyle başlayan liste, saçak ölçüsü ya da None). En büyük ölçü ikinci ölçüden
+    tam 50 cm (± 0,5) büyükse saçağın ölçüsüdür, gövde ölçüsü ikincisidir (İE-43 PR-4: 63 m² 823 ↔ 773, 58 m² 650 ↔ 600; gözlem, kural
+    değil). Taşan veranda ölçüsü (67 m² 940,25 ↔ 700,25) bu farkla karışmaz."""
+    if len(degerler) >= 2 and abs(degerler[0] - degerler[1] - SACAK_FARKI_CM) <= 0.5:
+        return degerler[1:], degerler[0]
+    return degerler, None
+
+
+def teknik_oku(yazilar: list, degerler: list | None = None) -> dict:
+    """"Dış Duvarlar:" gibi etiketin aynı satırında sağdaki ilk yazı; sağda yoksa hemen altındaki yazı (teknik tablo). `degerler`
+    verilirse değer olarak alınan yazılar oraya eklenir (plan okuması onları açıklık yazısı saymaz: "Dış Kapı: Çelik Kapı")."""
     T = {}
     etiket = {_ust(et): et for et in TEKNIK}
     for y in yazilar:
@@ -373,13 +386,19 @@ def teknik_oku(yazilar: list) -> dict:
                and z.get("aci", 0) == 0 and not OLCU_YAZI.match(z["t"])
                and _ust(z["t"].strip().rstrip(":").strip()) not in etiket and not z["t"].strip().endswith(":")]
         if yan:
-            T.setdefault(et, min(yan, key=lambda z: (abs(z["y"] - y["y"]), z["x0"]))["t"].strip())
+            z = min(yan, key=lambda z: (abs(z["y"] - y["y"]), z["x0"]))
+            if et not in T and degerler is not None:
+                degerler.append(z)
+            T.setdefault(et, z["t"].strip())
             continue
         # İkranur A4: değer etiketin altındaki satırda, aynı sol hizada
         alt = [z for z in yazilar if abs(z["x0"] - y["x0"]) < 20 and 0 < y["y"] - z["y"] <= 80
                and _ust(z["t"].strip().rstrip(":").strip()) not in etiket and z["t"].strip()]
         if alt:
-            T.setdefault(et, min(alt, key=lambda z: y["y"] - z["y"])["t"].strip())
+            z = min(alt, key=lambda z: y["y"] - z["y"])
+            if et not in T and degerler is not None:
+                degerler.append(z)
+            T.setdefault(et, z["t"].strip())
     return T
 
 
@@ -420,7 +439,8 @@ def plan_oku(d, kutular: list, cekirdek_i: int, antetler: tuple = ()) -> dict:
         baslik = _baslik_mi(y["t"])
         if baslik is not None:
             break
-    teknik = teknik_oku(sayfa_yazilari)
+    teknik_degerleri: list = []
+    teknik = teknik_oku(sayfa_yazilari, teknik_degerleri)
     ad_metinleri = [y["t"] for y in sayfa_yazilari if _baslik_mi(y["t"]) is not None or "PREF" in _ust(y["t"])]
     if cerceve:
         uzun = [o for o in olculer if o["yon"] in ("yatay", "dikey") and o["deger"] >= 300]
@@ -480,6 +500,8 @@ def plan_oku(d, kutular: list, cekirdek_i: int, antetler: tuple = ()) -> dict:
         u = _ust(y["t"])
         if MAHAL.match(y["t"]) or ALT_YAZI.search(u) or _baslik_mi(y["t"]) is not None:
             continue
+        if any(y is z for z in teknik_degerleri):      # teknik tablonun değeri ("Dış Kapı: Çelik Kapı") planın kapısı değil
+            continue
         olcu = OLCU.search(u.replace(" ", ""))
         if olcu and min(int(olcu.group(1)), int(olcu.group(2))) < 30:
             olcu = None                     # "17/3", "8/9": açıklık değil (en küçük açıklık 40 cm)
@@ -506,6 +528,7 @@ def plan_oku(d, kutular: list, cekirdek_i: int, antetler: tuple = ()) -> dict:
         yat, yat_k = sorted((_sayi(y["t"]) for y in Y if y["aci"] == 0), reverse=True), "yazi"
     if not dik:
         dik, dik_k = sorted((_sayi(y["t"]) for y in Y if y["aci"] in (90, 270)), reverse=True), "yazi"
+    (yat, sacak_yat), (dik, sacak_dik) = _sacak_ayir(yat), _sacak_ayir(dik)
     olcu_kaynagi = (yat_k if yat_k == dik_k else "karma") if (yat or dik) else None
     return {"sablon": "cerceveli" if cerceve else "bantli",
             "alt_yazi": "taslak" if TASLAK.search(_ust(_metin(kutular[cekirdek_i][0]))) else "montaj",
@@ -515,6 +538,7 @@ def plan_oku(d, kutular: list, cekirdek_i: int, antetler: tuple = ()) -> dict:
             "baslik_m2": baslik,
             "teknik": teknik,
             "dis_olcu_cm": [yat[0] if yat else None, dik[0] if dik else None],
+            "sacak_olcusu_cm": [sacak_yat, sacak_dik],
             "olcu_kaynagi": olcu_kaynagi,
             "mahaller": sorted(mahaller, key=lambda m: (-m["y"], m["x"])),
             "acikliklar": aciklik,
@@ -534,6 +558,7 @@ def kart_ozeti(p: dict) -> dict:
                                if a["olcu"] and a["tur"] in ("olcu", "acilim", "cift_acilim", "surgulu"))
     kubbe = collections.Counter(f"{a['olcu'][0]}/{a['olcu'][1]}" for a in p["acikliklar"] if a["olcu"] and a["tur"] == "pencere")
     dis_kapi = sum(1 for a in p["acikliklar"] if a["tur"] == "celik_kapi")
+    ayrik = dis_kapi > 0          # 2020 şablonunda dış kapının "Çelik" yazısı yok: dış ve iç ayrılamaz, yalnız toplam (kapı yayı)
     W, H = p["dis_olcu_cm"]
     return {"dis_olcu_cm": [W, H],
             "baslik_m2": p["baslik_m2"],
@@ -543,8 +568,9 @@ def kart_ozeti(p: dict) -> dict:
             "yatak_odasi": yatak if p["mahaller"] else None,
             "acikliklar": dict(sorted(olcu.items())),
             "kubbe_pencereleri": dict(sorted(kubbe.items())),
-            "dis_kapi_adedi": dis_kapi,
-            "ic_kapi_adedi": max(p["kapi_yayi"] - dis_kapi, 0) if p["kapi_yayi"] else None,
+            "dis_kapi_adedi": dis_kapi if ayrik else None,
+            "ic_kapi_adedi": (max(p["kapi_yayi"] - dis_kapi, 0) if p["kapi_yayi"] else None) if ayrik else None,
+            "kapi_adedi": p["kapi_yayi"] or None,
             "veranda_adedi": veranda if p["mahaller"] else None,
             "cati_sekli": p["teknik"].get("Çatı Şekli"),
             "dis_duvar": p["teknik"].get("Dış Duvarlar"),

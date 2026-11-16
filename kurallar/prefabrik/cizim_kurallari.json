@@ -1153,6 +1153,43 @@
      "deger": "TAVAN KİRİŞİ 10×10"
     }
    ]
+  },
+  {
+   "kod": "PC-44",
+   "baslik": "İç duvarın dış duvar ucunda kalan parça (62,75'ten büyük iki eksik parça yerine kalan parça + 125,5)",
+   "kural": "Pano harcaması: 62,75'ten büyük parça bir tam pano, 62,75 ve küçüğü yarım pano harcar (`pano_harcamasi`). Bir ucu dış duvarın iç yüzünde olan açıklıksız iç duvar aralığında (iki köşe ya da T arasında; açıklıklı ve karkaslı pano, T eki aralığı keser) 62,75'ten büyük en az iki eksik parça varsa ve 125,5'ler + tek kalan dizilimi daha az pano harcıyorsa aralık yeniden dizilir: 125,5'ler öteki uçtaki köşe ya da T'nin aksından dizilir, kalan parça (62,75 ya da küçüğü) dış duvar ucundadır. 67 m² 2+1'in banyo duvarları: 120,5 + 64,75 (2 pano) → arka duvardan 59,75 + köşeye 125,5 (1,5 pano). Fazla harcamayan aralığa, dış duvara, iki ucu ya da hiçbir ucu dış duvarda olmayan aralığa dokunulmaz (standart aks düzeni aynen; dış duvarların uçtaki 62,75'leri aynen). Kalan 0,05 cm'den kısa ama sıfır değilse aralık aynen. Öteki uç T ise 125,5 T'nin aksından ölçülür, T payı uçtaki panodan düşer: 64,75 + 120,5 → 122,5 + 62,75 (Lokman, kart 16 Kasım 2026 08:24:27 \"T'nin aksından: 122,5 + 62,75\"). Yeni ek çektirme U'lu T'ye denk gelirse açık hata (K21). Anahtar yok (D-29 madde 6); depodaki evlerde hiçbir aralık değişmez.",
+   "karar": "D-108",
+   "lokman": {
+    "tarih": "2026-11-15",
+    "saat": "22:04",
+    "soz": "bizim standart panomuz 125,5 cm eğer yarısı olan 62,75 den büyük bir sayı alırsan o tam pano sayılır yani sen burada 120,5 panoları 125,5 yapacaksın 64,75 panolarda 59,75 olacak"
+   },
+   "kod_yeri": [
+    "motor/geometry.py::_ic_duvar_dis_ucu",
+    "motor/geometry.py::pano_harcamasi",
+    "motor/geometry.py::YARIM_PANO_CM",
+    "motor/geometry.py::IC_DUVAR_YUZ_PAYI_CM",
+    "motor/geometry.py::_kur"
+   ],
+   "test": [
+    "testler/motor/test_d108_ic_duvar_dis_ucu.py::test_pano_harcamasi",
+    "testler/motor/test_d108_ic_duvar_dis_ucu.py::test_uydurma_ev_bugun_120_5_ve_64_75",
+    "testler/motor/test_d108_ic_duvar_dis_ucu.py::test_uydurma_ev_59_75_dis_duvar_ucunda",
+    "testler/motor/test_d108_ic_duvar_dis_ucu.py::test_uydurma_ev_oteki_panolar_aynen",
+    "testler/motor/test_d108_ic_duvar_dis_ucu.py::test_depodaki_evlerde_kural_bir_sey_degistirmez",
+    "testler/motor/test_d108_ic_duvar_dis_ucu.py::test_fazla_harcamayan_ya_da_kiymik_aralik_aynen",
+    "testler/motor/test_d108_ic_duvar_dis_ucu.py::test_t_ucunda_boy_aks_ustunden"
+   ],
+   "sabitler": [
+    {
+     "yer": "motor/geometry.py::YARIM_PANO_CM",
+     "deger": 62.75
+    },
+    {
+     "yer": "motor/geometry.py::IC_DUVAR_YUZ_PAYI_CM",
+     "deger": 0.6
+    }
+   ]
   }
  ]
 }

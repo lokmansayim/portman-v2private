@@ -1,0 +1,291 @@
+{
+ "is_emri_no": "PM-ADAY-PA42",
+ "revizyon": 1,
+ "talep": {
+  "bayi": {
+   "kod": "ADAY",
+   "ad": "Aday kaydı"
+  },
+  "musteri_adi": "ADAY PA42",
+  "metin": "HD-228 montaj paftasından İş Emri (İE-43, disk arşivi Parti 1; kodla okundu, ad yok). Havuz: D-111 (Lokman 16 Kasım 2026 06:50:02 kartı \"Evet, beşi girsin\"; Motor'un aks düzeniyle). Asıl uygulanmış proje: D-103."
+ },
+ "yapi": {
+  "sistem": "prefabrik",
+  "kat_sayisi": 1,
+  "duvar_yuksekligi_cm": 250,
+  "duvar_kalinligi_cm": {
+   "dis": 10,
+   "ic": 6.0
+  },
+  "olcu_kaynagi": "dis_olcu",
+  "dis_olcu_cm": {
+   "x": 825.75,
+   "y": 1014.0
+  },
+  "referans_model": "PA-42",
+  "grid": {
+   "x_pano": 6.5,
+   "y_pano": 8.0
+  },
+  "kisa_kenar": "x",
+  "giris_cephesi": "on",
+  "dis_dusey_duvar": "cevre_aks_disinda",
+  "dizilim": {
+   "baslangic": "arka-sol",
+   "hiza": "izgara",
+   "dis_duvar_t_bolme": false,
+   "pencere": "oda_ortasi",
+   "kapi": "mantik",
+   "kose": "oda",
+   "son_pano": "son_aks",
+   "kapi_yeri": "ortada",
+   "dis_pano_dayanagi": [
+    {
+     "x": 637.5,
+     "aralik_cm": [
+      637.5,
+      763.0
+     ],
+     "cephe": "arka"
+    },
+    {
+     "x": 637.5,
+     "aralik_cm": [
+      637.5,
+      763.0
+     ],
+     "ic_duvarlar": true,
+     "duvar_cm": 381.5
+    },
+    {
+     "x": 637.5,
+     "aralik_cm": [
+      637.5,
+      763.0
+     ],
+     "ic_duvarlar": true,
+     "duvar_cm": 758.0
+    }
+   ]
+  },
+  "ek_akslar_cm": {
+   "x": [],
+   "y": []
+  }
+ },
+ "mahaller": [
+  {
+   "ad": "Y.ODASI",
+   "tur": "yatak_odasi",
+   "konum_cm": [
+    [
+     10.0,
+     5.0,
+     323.75,
+     256.0
+    ],
+    [
+     10.0,
+     256.0,
+     386.5,
+     381.5
+    ]
+   ]
+  },
+  {
+   "ad": "SALON VE MUTFAK",
+   "tur": "salon",
+   "konum_cm": [
+    [
+     10.0,
+     381.5,
+     386.5,
+     1009.0
+    ]
+   ]
+  },
+  {
+   "ad": "WC",
+   "tur": "banyo",
+   "konum_cm": [
+    [
+     323.75,
+     5.0,
+     512.0,
+     256.0
+    ]
+   ]
+  },
+  {
+   "ad": "HOL",
+   "tur": "antre_hol",
+   "konum_cm": [
+    [
+     386.5,
+     256.0,
+     512.0,
+     758.0
+    ]
+   ]
+  },
+  {
+   "ad": "VERANDA",
+   "tur": "veranda",
+   "konum_cm": [
+    [
+     386.5,
+     758.0,
+     815.75,
+     1009.0
+    ]
+   ]
+  },
+  {
+   "ad": "Y.ODASI 2",
+   "tur": "yatak_odasi",
+   "konum_cm": [
+    [
+     512.0,
+     5.0,
+     815.75,
+     381.5
+    ]
+   ]
+  },
+  {
+   "ad": "Y.ODASI 3",
+   "tur": "yatak_odasi",
+   "konum_cm": [
+    [
+     512.0,
+     381.5,
+     815.75,
+     758.0
+    ]
+   ]
+  }
+ ],
+ "acik_sinirlar": [],
+ "acikliklar": [
+  {
+   "tur": "ic_kapi",
+   "olcu": 82,
+   "arasi": [
+    "HOL",
+    "Y.ODASI 2"
+   ],
+   "pano": 0
+  },
+  {
+   "tur": "ic_kapi",
+   "olcu": 82,
+   "arasi": [
+    "HOL",
+    "SALON VE MUTFAK"
+   ],
+   "pano": 0
+  },
+  {
+   "tur": "dis_kapi",
+   "olcu": 90,
+   "arasi": [
+    "VERANDA",
+    "HOL"
+   ],
+   "pano": 0
+  },
+  {
+   "tur": "ic_kapi",
+   "olcu": 82,
+   "arasi": [
+    "HOL",
+    "Y.ODASI 3"
+   ],
+   "pano": 0
+  },
+  {
+   "tur": "pencere",
+   "olcu": "120x120",
+   "mahal": "SALON VE MUTFAK",
+   "duvar": "on"
+  },
+  {
+   "tur": "pencere",
+   "olcu": "120x120",
+   "mahal": "Y.ODASI 3",
+   "duvar": "on",
+   "pano": 1
+  },
+  {
+   "tur": "pencere",
+   "olcu": "120x120",
+   "mahal": "Y.ODASI",
+   "duvar": "sol"
+  },
+  {
+   "tur": "pencere",
+   "olcu": "120x120",
+   "mahal": "Y.ODASI 2",
+   "duvar": "sag"
+  },
+  {
+   "tur": "pencere",
+   "olcu": "120x120",
+   "mahal": "SALON VE MUTFAK",
+   "duvar": "sol"
+  },
+  {
+   "tur": "pencere",
+   "olcu": "60x40",
+   "mahal": "WC",
+   "duvar": "arka",
+   "pano": 0
+  },
+  {
+   "tur": "ic_kapi",
+   "olcu": 82,
+   "arasi": [
+    "HOL",
+    "WC"
+   ],
+   "pano": 0
+  },
+  {
+   "tur": "ic_kapi",
+   "olcu": 82,
+   "arasi": [
+    "HOL",
+    "Y.ODASI"
+   ],
+   "pano": 0
+  }
+ ],
+ "cati": {
+  "tip": "besik",
+  "egim_yuzde": 32.9,
+  "sacak_cm": 30,
+  "topuk_cm": 10,
+  "makas_yonu": "kisa_kenar",
+  "makas_ekseni": "x"
+ },
+ "cikti": {
+  "pdf": true,
+  "dxf": true,
+  "pafta": "A2",
+  "icerik": [
+   "aksli_plan"
+  ]
+ },
+ "varsayimlar": [
+  "VERANDA: gövdenin içinde açık mahal (paftada kolon); 1 dikme yazıldı.",
+  "İç duvar kalınlıkları karışık {6.0: 6, 10.0: 2}; çoğunluk 6 cm yazıldı.",
+  "Çatı beşik, %32,9, saçak 30, topuk 10 (paftanın planında eğim yok; prefabrik standardı).",
+  "Pano dizilimi paftadan: arka hattında x 637.5'dan 125,5; 381.5 hattında x 637.5'dan 125,5; 758.0 hattında x 637.5'dan 125,5 (dizilim.dis_pano_dayanagi)."
+ ],
+ "dikmeler": [
+  [
+   817.8,
+   0.0
+  ]
+ ]
+}
