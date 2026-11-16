@@ -1,5 +1,5 @@
 {
- "aciklama": "D-96 hedef örneği: 71 m² 2+1 evin (PA-26 kaynaklı; sağ 12 cm içeri, verandanın arkasından 17 cm, ön 5,5 cm öne) veranda köşesinde üçlü H'lı hâli. Değerler Lokman'ın kartla onayladığı eskizin planından (PF Havuz_Standart_Pano/tek_pano_kurali/kisa_parca_silme/05c_71m2_2+1_on_5_uclu_h_once_sonra.png, uclu_h_yama.py; main e83d4f86 Motor'u + niş T'si yalnız x 386,5'teki köşede). Lokman 14 Kasım 2026 20:46:54: \"... 120,5 aksındaki 115,5 pano ana giriş kapısını dik kesen pano orada köşe direği olmayacak üçlü H olacak yanlış çizmiş mühendis ...\"; kart 20:57:28 \"Doğru, yanına eklensin\".",
+ "aciklama": "D-96 hedef örneği: 71 m² 2+1 evin (PA-26 kaynaklı; sağ 12 cm içeri, verandanın arkasından 17 cm, ön 5,5 cm öne) veranda köşesinde üçlü H'lı hâli. Değerler Lokman'ın kartla onayladığı eskizin planından (PF Havuz_Standart_Pano/tek_pano_kurali/kisa_parca_silme/05c_71m2_2+1_on_5_uclu_h_once_sonra.png, uclu_h_yama.py; main e83d4f86 Motor'u + niş T'si yalnız x 386,5'teki köşede). Lokman 14 Kasım 2026 20:46:54: \"... 120,5 aksındaki 115,5 pano ana giriş kapısını dik kesen pano orada köşe direği olmayacak üçlü H olacak yanlış çizmiş mühendis ...\"; kart 20:57:28 \"Doğru, yanına eklensin\". Liste farkına 15 Kasım 2026'da \"Çektirme U'su 100 (iç duvar)\" 3 → 2 eklendi (D-105 madde 2, BK-38): Lokman'ın 09:14:41 kartı \"Evet, 1 adet 100'lük\" (\"Köşe direği kalır; listeye o köşe için 1 adet 100'lük çektirme U'su eklenir. 91 m² 3+1 ve 71 m² 2+1'de birer adet.\"): köşe direkli hâlde o köşe 1 çektirme U'su alır, üçlü H'lı hâlde köşe direği ve U yok. Öteki satırlar aynen.",
  "girdi": "testler/motor/veri/D96_71m2_uclu_h.json",
  "once": {
   "WH": [
@@ -546,6 +546,13 @@
    "L 2500",
    3,
    4
+  ],
+  [
+   "1002",
+   "Çektirme U'su 100 (iç duvar)",
+   "100 × 2440",
+   3,
+   2
   ],
   [
    "1009",
