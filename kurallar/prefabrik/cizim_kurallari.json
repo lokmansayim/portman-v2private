@@ -1190,6 +1190,62 @@
      "deger": 0.6
     }
    ]
+  },
+  {
+   "kod": "PC-45",
+   "baslik": "Köşe boşluğundan taşan veranda tek mahal, yan kiriş tek parça, çatısı ana çatının cumbası; taşan verandada kolon arası en çok 565 cm",
+   "kural": "Taşan verandanın iç kenarı gövdenin köşe boşluğunun (önü ve yanı açık, ızgaradaki açık mahal) ağzına oturuyorsa İş Emri `verandalar[].nis` boşluğun adını yazar: boşluk ve taşan şerit tek mahal olur; boşluğun yanındaki kiriş gövdenin köşesinden ön kolona tek parça (52 m² 242,5, 55 m² 250,5; 100 × 100), altında kolon yok; boşluğun ağzında kiriş ve köşesinde kolon yok (D-38'in köşe kolonu kalkar). Taşan verandanın dış kenarında kolon ekseni arası 565 cm'yi geçerse Motor eşit aralıkla en az sayıda ara kolon koyar (kart 16 Kasım 2026 08:42:16 \"Kolon arası en çok 565 cm\"; 52 m² 635,5 → 1, 55 m² 449,25 → 0, 67 m² 710,25 → 1); dış kiriş n + 1 eşit parça (67 m²: 355,1 + 355,1). Daha kısada pafta ara kolon gösteriyorsa İş Emri `ara_kolon: n` yazar; yazılan sayı 565 kuralının istediğinden azsa açık hata (K21). Ön onay çiziminde verandanın eni, boşluk yanında yan kirişin boyu, öteki yanda taşma; boşluğun kendi ölçüsü yok; aks numaralarının yanına düşen ölçü verandanın içinde (ölçüler Lokman'ın ön onay çizimi kartıyla, 16 Kasım 2026 07:02:39 \"Doğru, ölçüler kalsın\"). Görünüşte yan kirişin gövdenin ardında kalan kısmı çizilmez. Çatı (çatı eskizi kartı, 16 Kasım 2026 08:05:51 \"52/55 öneri doğru, 67 böyle\"): köşe verandasının çatısı ana çatının cumbası olabilir, gövde cumbası olmadan (PC-38'in \"gövde cumbası olmadan veranda cumbası\" hatasının yalnız `nis` yazılan verandadaki istisnası): ana çatı `cati.tip` besik_cumba, `cumbalar` [{cephe, veranda: <adı>}], verandada `cati.tip` cumba; cumbanın ayak izi verandanın taşan dikdörtgeni, eğim, saçak ve topuk ana çatınınki, iki vadi ana çatının yüzüyle mahyanın iç ucunda birleşir (52 m²'de ortadaki kolon cumbanın tepesinin altında). Liste cumbayı çizimdeki çatıdan sayar (AP-22'nin çapraz cumbası gibi: saçak, alın ve dere içi çatının kenarlarından; TASLAK); IFC ve kart modeli bu çatıyı kurmaz (açık hata). Montaj rehberi ara kolonlu verandayı kurmaz (`Desteklenmiyor`; listeyle çelişmesin diye). Anahtarsız İş Emri aynen (BK-14), dış kenarı 575 cm'yi geçen veranda dışında (o, 565 kuralıyla ara kolon alır; depoda yok). İş Emri dikmesi ara kolonun yerindeyse açık hata.",
+   "karar": "D-109",
+   "lokman": {
+    "tarih": "2026-11-15",
+    "saat": "22:30",
+    "soz": "kart \"Doğru, böyle yap\" (soru: \"Köşe verandası eskizi bu hâliyle doğru mu?\", eskiz r04); 22:17:51 \"bu olmayacak  plana iyice bak bak 242,5 tek kiriş 100*100 profil olacak yani altında 1 tane daha kolon olmayacak\"; 22:16:59 \"bu yeşil niş mi kiriş mi neyse olmayacak\"; 22:16:38 (67 m²) \"aynen böyle olacak doğrusu bu\"; 22:10:48 \"kolon ver kiriş kavramları bir birine karıştı kiriş olacak ama kolon olmayacak\"; ön onay çizimi kartı 16 Kasım 2026 07:02:39 \"Doğru, ölçüler kalsın\" (soru: \"Köşe verandasının ön onay çizimi bu hâliyle doğru mu?\"); çatı: 16 Kasım 2026 07:03:57 \"cumbalı çatıda kurallarını bir yokla bir sıkıntın var gibi\", çatı eskizi kartı 08:05:51 \"52/55 öneri doğru, 67 böyle\" (soru: \"Köşe verandasının çatısı bu eskizdeki gibi mi olsun?\"); çatılı ön onay çizimi kartı 16 Kasım 2026 08:39:21 \"Doğru\" (soru: \"Köşe verandalı üç evin çatılı ön onay çizimi doğru mu?\"); ara kolon eşiği kartı 16 Kasım 2026 08:42:16 \"Kolon arası en çok 565 cm\" (soru: \"Taşan verandaya ara kolonu Motor hangi uzunlukta koysun?\")"
+   },
+   "kod_yeri": [
+    "motor/geometry.py::_kose_boslugu",
+    "motor/geometry.py::_dis_verandalar",
+    "motor/prefabrik_liste.py::model_motor",
+    "motor/prefabrik_liste.py::liste",
+    "motor/dxf_out.py::Cizici._kose_verandasi_olculeri",
+    "motor/veranda.py::gorunus_parcalari",
+    "motor/cephe_gorunus.py::_golge",
+    "motor/ifc_uret.py::hazirla",
+    "motor/cati_prefabrik.py::tek_veranda_cumbasi",
+    "motor/cati_prefabrik.py::_kose_verandasi_cumbasi",
+    "motor/cati_prefabrik.py::cati",
+    "motor/cati_capraz.py::tanim",
+    "motor/prefabrik_liste.py::_capraz_cumba_catilari",
+    "motor/geometry.py::_gerekli_ara_kolon",
+    "motor/geometry.py::_kolon_eksen_araligi",
+    "araclar/paket/rehber/veri.py::kur"
+   ],
+   "test": [
+    "testler/motor/test_d109_kose_verandasi.py::test_hedef_ornek",
+    "testler/motor/test_d109_kose_verandasi.py::test_52m2_yan_kiris_tek_parca_altinda_kolon_yok",
+    "testler/motor/test_d109_kose_verandasi.py::test_55m2_iki_kolon_sol_yan_kiris",
+    "testler/motor/test_d109_kose_verandasi.py::test_67m2_ortada_kolon_on_kiris_iki_parca",
+    "testler/motor/test_d109_kose_verandasi.py::test_anahtarsiz_eski_yol",
+    "testler/motor/test_d109_kose_verandasi.py::test_hatalar",
+    "testler/motor/test_d109_kose_verandasi.py::test_niste_is_emri_dikmesi_hata",
+    "testler/motor/test_d109_kose_verandasi.py::test_yalniz_onu_acik_giris_nisine_nis_yazilmaz",
+    "testler/motor/test_d109_kose_verandasi.py::test_gorunuste_govdenin_ardindaki_kiris_yok",
+    "testler/motor/test_d109_kose_verandasi.py::test_cizim_olculeri",
+    "testler/motor/test_d109_kose_verandasi.py::test_ifc_girdisi_birlesik_mahal",
+    "testler/motor/test_d109_kose_verandasi.py::test_veranda_cumbasi_iki_vadi",
+    "testler/motor/test_d109_kose_verandasi.py::test_veranda_cumbasi_liste_cizimden",
+    "testler/motor/test_d109_kose_verandasi.py::test_veranda_cumbasi_liste_yanlis_tanim",
+    "testler/motor/test_d109_kose_verandasi.py::test_veranda_cumbasi_ifc_ve_kart_modeli_kurmaz",
+    "testler/motor/test_d109_kose_verandasi.py::test_veranda_cumbasi_yanlis_tanim_hata",
+    "testler/motor/test_d109_kose_verandasi.py::test_67m2_veranda_besigi_aynen",
+    "testler/motor/test_d109_kose_verandasi.py::test_ara_kolon_565_motor_koyar",
+    "testler/motor/test_d109_kose_verandasi.py::test_ara_kolon_esigi",
+    "testler/motor/test_d109_kose_verandasi.py::test_ara_kolon_az_yazilirsa_hata",
+    "testler/motor/test_d109_kose_verandasi.py::test_ara_kolon_fazlasi_paftadan",
+    "testler/motor/test_d109_kose_verandasi.py::test_bozuk_genislik_hata",
+    "testler/motor/test_d109_kose_verandasi.py::test_ara_kolon_en_az_sayi",
+    "testler/motor/test_d109_kose_verandasi.py::test_ara_kolon_is_emri_dikmesi_hata",
+    "testler/motor/test_d109_kose_verandasi.py::test_rehber_ara_kolonlu_verandayi_kurmaz"
+   ]
   }
  ]
 }

@@ -1,0 +1,60 @@
+{
+ "taban": "PA25",
+ "cati_adi": "Beşik, kalkan yanda",
+ "cati_gorsel": "adaylar/PA25_cati.png",
+ "karar": "D-115",
+ "varyantlar": [
+  {
+   "kod": "PA25C",
+   "gosterim": "PA-25-C",
+   "durum": "gecerli",
+   "taban": "PA25",
+   "sablon": "adaylar/PA25C.json",
+   "gorsel": "adaylar/PA25C.png",
+   "cati_adi": "Beşik + salonda cumba",
+   "referans_model": "PA-25-C",
+   "yapi_turu": "prefabrik",
+   "kat": 1,
+   "oda_programi": "2+1",
+   "katalog_m2": 61.0,
+   "kapali_m2": 53.1,
+   "veranda_m2": 8.36,
+   "ozet": {
+    "grid": {
+     "x_pano": 6,
+     "y_pano": 6.5
+    },
+    "dis_olcu_cm": [
+     748.67,
+     821.0
+    ],
+    "brut_m2": 61.47,
+    "pano": 41,
+    "pencere": 7,
+    "kapi": 5,
+    "odalar": {
+     "YATAK ODASI 1": 9.08,
+     "BANYO": 4.54,
+     "YATAK ODASI 2": 9.68,
+     "HOL": 3.32,
+     "SALON+MUTFAK": 22.35,
+     "VERANDA": 8.36
+    }
+   },
+   "uyarilar": [],
+   "kaynak": {
+    "metin": "İE-44 toplu çatı seçenekleri (D-115)",
+    "karar": "D-115",
+    "ev": "PA-25",
+    "havuz_denetimi": {
+     "sonuc": "geçti",
+     "karar": "D-112",
+     "uyarilar": [
+      "HD-02: Duvar 7: 10.5 cm'lik çok kısa pano (özel pano kuralı doğrulanmalı)",
+      "HD-06: ['makas yeri (ana çatı): saçak duvarının pano ekleri düzensiz (6 makas, listede 7; aralıklar 251, 56.5, 125.5, 69, 236.67); eşit aralıklı 7 makas']"
+     ]
+    }
+   }
+  }
+ ]
+}

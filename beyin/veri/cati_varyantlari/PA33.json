@@ -1,0 +1,64 @@
+{
+ "taban": "PA33",
+ "cati_adi": "Kırma",
+ "cati_gorsel": "adaylar/PA33_cati.png",
+ "karar": "D-115",
+ "varyantlar": [
+  {
+   "kod": "PA33C",
+   "gosterim": "PA-33-C",
+   "durum": "gecerli",
+   "taban": "PA33",
+   "sablon": "adaylar/PA33C.json",
+   "gorsel": "adaylar/PA33C.png",
+   "cati_adi": "Beşik + salonda cumba",
+   "referans_model": "PA-33-C",
+   "yapi_turu": "prefabrik",
+   "kat": 1,
+   "oda_programi": "3+1",
+   "katalog_m2": 142.0,
+   "kapali_m2": 118.4,
+   "veranda_m2": 24.0,
+   "ozet": {
+    "grid": {
+     "x_pano": 11.0,
+     "y_pano": 8.0
+    },
+    "dis_olcu_cm": [
+     1390.5,
+     1024.0
+    ],
+    "brut_m2": 142.39,
+    "pano": 78,
+    "pencere": 8,
+    "kapi": 10,
+    "odalar": {
+     "SALON": 27.27,
+     "VERANDA": 24.0,
+     "HOL VE KORİDOR": 14.97,
+     "MUTFAK": 13.19,
+     "EBV BANYO 1": 2.82,
+     "GENEL BANYO": 3.23,
+     "YATAK ODASI 1": 15.33,
+     "YATAK ODASI 2": 13.84,
+     "EBV BANYO 2": 2.96,
+     "EBV BANYO 3": 2.96,
+     "YATAK ODASI 3": 14.42
+    }
+   },
+   "uyarilar": [],
+   "kaynak": {
+    "metin": "İE-44 toplu çatı seçenekleri (D-115)",
+    "karar": "D-115",
+    "ev": "PA-33",
+    "havuz_denetimi": {
+     "sonuc": "geçti",
+     "karar": "D-112",
+     "uyarilar": [
+      "HD-06: ['makas yeri (ana çatı): saçak duvarının pano ekleri düzensiz (13 makas, listede 12; aralıklar 125.5, 125.5, 125.5, 125.5, 125.5, 125.5, 62.75, 125.5, 125.5, 62.75, 125.5, 125.5); eşit aralıklı 12 makas']"
+     ]
+    }
+   }
+  }
+ ]
+}
