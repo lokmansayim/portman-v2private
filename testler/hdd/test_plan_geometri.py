@@ -123,3 +123,34 @@ def test_kutu_profil_kolon_tek_sayilir(tmp_path):
     assert len(kare) == 2                                                # çizimde iki kare
     g = PG.geometri(doc, (-200, -300, W + 300, H + 300), {"mahaller": [], "acikliklar": [], "kutu_dunya": (-200, -300, W + 300, H + 300)})
     assert len(g["kolonlar"]) == 1                                       # okuyucu tek kolon yazar
+
+
+def _kare(x, y, k=8.0):
+    return [x, y, x + k, y + k]
+
+
+def test_veranda_ara_kolonu_paftadan():
+    """D-109 (kart 16 Kasım 2026 08:42:16 "Kolon arası en çok 565 cm"): kısa verandada paftanın ara kolonu İş Emri'ne `ara_kolon` olur."""
+    v = {"cephe": "on", "bas_cm": 0.0, "bit_cm": 449.25, "derinlik_cm": 200.0,
+         "kolonlar": [_kare(0, 400), _kare(220.6, 400), _kare(441.25, 400)]}          # ortada, eşit aralıkta (224,6)
+    ara, not_ = PG.veranda_ara_kolonu(v, 396.5)
+    assert ara == 1 and "ara_kolon: 1" in not_ and "eşit aralıkla" not in not_
+    v["kolonlar"][1] = _kare(150, 400)                                                  # pafta düzeltilmez: yer farkı nota
+    ara, not_ = PG.veranda_ara_kolonu(v, 396.5)
+    assert ara == 1 and "154 cm'de" in not_ and "224.6 cm'ye" in not_
+    s = {"cephe": "sag", "bas_cm": 0.0, "bit_cm": 453.2, "derinlik_cm": 200.0,       # sağ cephe: gerçek çerçeve y önden (H - y)
+         "kolonlar": [_kare(700, 388.5), _kare(700, 165.9), _kare(700, -56.7)]}
+    ara, not_ = PG.veranda_ara_kolonu(s, 396.5)
+    assert ara == 1 and "eşit aralıkla" not in not_
+    s["kolonlar"][1] = _kare(700, 250)                                                  # önden 142,5: fark nota
+    assert "142.5 cm'de" in PG.veranda_ara_kolonu(s, 396.5)[1]
+
+
+def test_veranda_ara_kolonu_kural():
+    iki = lambda en: {"cephe": "on", "bas_cm": 0.0, "bit_cm": en, "derinlik_cm": 200.0, "kolonlar": [_kare(0, 400), _kare(en - 8, 400)]}
+    assert PG.veranda_ara_kolonu(iki(453.2), 396.5) == (None, None)                    # 92 m²: iki köşe kolonu, not yok
+    ara, not_ = PG.veranda_ara_kolonu(iki(710.25), 396.5)                               # 565'i geçen: Motor koyar, İş Emri yazmaz
+    assert ara is None and "1 ara kolon koyar" in not_
+    uc = iki(1200.0); uc["kolonlar"].insert(1, _kare(596, 400))                         # pafta kuraldan az gösteriyor: sayı yazılmaz
+    ara, not_ = PG.veranda_ara_kolonu(uc, 396.5)
+    assert ara is None and "2 ara kolon koyar" in not_
