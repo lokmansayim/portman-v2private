@@ -1471,3 +1471,45 @@ def test_hakem30_celik_acik_secim_soruya_donmez(s, metin):
     cati_seti(s)
     k = s.yaz(metin)
     assert k.eylem == "is_emri" and k.revizyon == 2 and s.plan["yapi"]["kod"] == "Ç8801K", k.mesaj
+
+
+
+@pytest.mark.parametrize("metin", [
+    "K olsun fark etmez ya", "Ç8801 olsun, ödemeyi yapınca onaylarız", "K olsun mu dersiniz", "Ç8801 olsun, hemen olmasın",
+    "Ç8801 olsun, çatı modeli fark etmez", "Ç8801 olsun, bakalım fiyat ne kadar olacak?", "Ç8801 olsun, görelim fiyat ne olacak?",
+    "Ç8801 olsun, model fark etmez", "Ç8801 olsun, modeli size bırakıyorum", "Ç8801 olsun, kaç olursa fark etmez",
+    "Ç8801 olsun, hemen değil", "Ç8801 olsun, hemen değil sonra", "Evin kendi çatısı olsun, hemen değil", "Ç8801 olsun onu da çizin",
+    "Ç8801 olsun plan sonra", "Ç8801 olsun, müşteri razı gibi", "Ç8801 olsun, bu da olur", "K olsun, o da olur",
+    "Ç8801 olsun, son karar müşteriye", "Ç8801 olsun, onay müşteriden", "Ç8801 olsun, montajdan sonra mı onaylayalım?",
+    "Ç8801 olsun, ödemeyle birlikte mi onaylayalım?", "K olsun, müşteri beğendi, bakalım ne olacak", "K olsun, bakalım ne olacak?",
+    "Ç8801 olsun, faturayı görünce mi onaylayalım?", "Ç8801 olsun, karar eşine", "K olsun, hemen değil",
+    "K olsun, bakalım fiyat ne kadar olacak?"])
+def test_hakem31_celik_kararsiz_soz_kaydedilmez(s, metin):
+    """Tur 31 (Y1–Y4) çelikte: "bakalım fiyat ne kadar olacak?", "model fark etmez", "hemen değil", "onu da çizin" kayıt almaz: plan r01,
+    onay yok, r02 yok."""
+    cati_seti(s)
+    k = s.yaz(metin)
+    assert K.PLAN_ONAYI not in k.gerekce and k.eylem != "is_emri" and s.plan["revizyon"] == 1 and not s.k.d.get("onaylanan"), k.mesaj
+
+
+@pytest.mark.parametrize("metin", [
+    "K olsun, klozet modelini sonra mı seçelim?", "K olsun, müşteri onayı", "K olsun, müşteri tercihi",
+    "K olsun, müşteri onayladı bence süper", "K olsun, kapıları montajdan sonra mı onaylayalım?",
+    "K olsun, rengi ödemeden sonra mı onaylayalım?", "K olsun, rengine montajdan sonra mı karar verelim?",
+    "K olsun, korkuluk modelini sonra mı seçelim?", "K olsun, kombi modelini sonra mı seçelim?", "K olsun tamamdır teklifi atın",
+    "Selamünaleyküm K olsun", "K olsun iki usta yeter mi"])
+def test_hakem31_celik_acik_secim_soruya_donmez(s, metin):
+    """Tur 31 (O1–O5) çelikte: konusu belli devir, bildirilmiş karar, görüş sözü, başka konunun zamanı ve modeli r02 K'yı çizer."""
+    cati_seti(s)
+    k = s.yaz(metin)
+    assert k.eylem == "is_emri" and k.revizyon == 2 and s.plan["yapi"]["kod"] == "Ç8801K", k.mesaj
+
+
+
+@pytest.mark.parametrize("metin", [
+    "Ç8801 olsun değişiklik yok", "Ç8801 olsun tamamdır teklifi atın"])
+def test_hakem31_celik_olumlu_soz_onay(s, metin):
+    """Tur 31 çelikte: konusu belli devir ve bildirilmiş karar evin çatısının onayıdır."""
+    cati_seti(s)
+    k = s.yaz(metin)
+    assert k.gerekce == K.PLAN_ONAYI and k.revizyon == 1, k.mesaj

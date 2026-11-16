@@ -3377,3 +3377,119 @@ def test_hakem30_virgulsuz_olumlu_onay(tmp_path, metin):
     s, _ = _cati_seti(tmp_path)
     k = s.yaz(metin, niyet="diger")
     assert k.gerekce == K.PLAN_ONAYI and k.revizyon == 1, k.mesaj
+
+
+
+# İE-42 hakem tur 31: fiyatı bekleyen soru, çatı modelinin devri ve zamirli istek kayıt almaz; konusu belli devir, bildirilmiş karar ve
+# başka konunun modeli açık seçimi bekletmez
+@pytest.mark.parametrize("metin", [
+    "2 olsun, karar müşterinindir", "1 olsun, ne zaman olursa olsun fark etmez çatı size kalmış", "1 olsun değişiklik olabilir",
+    "1 olsun müşteri hayır dedi", "1 olsun planı atın bakalım", "1 olsun çizin müşteri bakacak", "1 olsun montaj ne zaman belli değil",
+    "1 olsun aslında emin değilim", "2 olsun tekrar düşünelim", "1 olsun bu mu", "1 olsun acele etmeyin sonra", "1 olsun acele etmeyin",
+    "2 olsun acil değil", "2 olsun ama acele", "1 olsun, müşteri beğenir gibi", "1 olsun, müşteri onayı gelince",
+    "1 olsun onay gelince teklif atın", "1 olsun, karar müşterinin", "1 olsun, son söz müşterinin", "1 olsun, son karar eşinin",
+    "1 olsun, karar eşine", "1 olsun karar eşinde", "2 olsun müşteri onay vermedi", "2 olsun müşteri onay verecek mi",
+    "2 olsun hangisi daha iyi", "2 olsun hangisi ucuz", "2 olsun mu", "2 olsun olur mu acaba", "2 olsun ama emin değilim",
+    "1 olsun ya da diğeri", "2 olsun mu dersiniz", "1 olsun mu dersiniz", "2 olsun derim ama müşteri bilir",
+    "2 olsun dedim ama müşteri bakacak", "1 olsun, ödemeyi yapınca onaylarız", "2 olsun ödemeden sonra onaylarız",
+    "1 olsun ödeme yapılınca onay veririz", "1 olsun, ama onayı ödemeden sonra", "1 olsun, fark eder mi", "2 olsun fark eder mi",
+    "1 olsun, açıkçası fark etmez", "1 olsun, bana kalırsa fark etmez", "1 olsun, bizim için fark etmez",
+    "1 olsun, benim açımdan fark etmez", "1 olsun, ikisi de fark etmez", "1 olsun, her ikisi de fark etmez",
+    "1 olsun, hangisi olsa fark etmez", "1 olsun, müşteriye göre fark etmez", "1 olsun, çatı fark etmez",
+    "1 olsun, kırma ya da beşik fark etmez", "1 olsun, 1 ya da 2 fark etmez", "1 olsun, size kalmış", "1 olsun, siz seçin",
+    "2 olsun, siz karar verin", "1 olsun, fark etmez artık", "1 olsun, inanın fark etmez", "1 olsun valla fark etmez",
+    "2 olsun fark etmez", "2 olsun, bakalım fiyat ne kadar olacak?", "2 olsun, fiyat ne kadar bakalım?", "1 olsun, teklif sonra",
+    "1 olsun, bunu da gönderin", "2 olsun, galiba müşteri istedi", "2 olsun müşteri galiba istedi", "2 olsun, müşteri istedi sanırım",
+    "2 olsun, çatı modeli fark etmez", "1 olsun, modeli fark etmez", "1 olsun, ödemeden sonra onaylarız",
+    "2 olsun, teslimden sonra mı onaylayalım?", "2 olsun diğerine de bakarız", "2 olsun, diğerine de bakarız",
+    "2 olsun, başkasına da bakalım", "2 olsun belki diğeri", "2 olsun, tamam gibi", "1 olsun tamam gibi", "1 olsun, ama emin değilim",
+    "1 olsun ama karar müşteride", "1 olsun, karar müşteriyle", "1 olsun, karar müşteri ile", "1 olsun, bakalım fiyat ne kadar olacak?",
+    "1 olsun, bakalım fiyat ne olacak?", "1 olsun, bakalım fiyatı ne kadar?", "1 olsun, bakalım kaç para tutar?",
+    "1 olsun, görelim fiyat ne olacak?", "1 olsun, bakalım fiyat uygun mu?", "1 olsun, çatı modeli fark etmez",
+    "1 olsun, model fark etmez", "1 olsun, modeli size bırakıyorum", "1 olsun, modelini siz seçin", "1 olsun, kaç olursa fark etmez",
+    "1 olsun, kaç numara olursa fark etmez", "1 olsun, kaç olsa fark etmez", "1 olsun onu da çizin", "1 olsun bunu da çizin",
+    "1 olsun, onu da çizin", "1 olsun onu da hazırlayın", "1 olsun plan sonra", "1 olsun çizim sonra", "1 olsun planı sonra",
+    "1 olsun, plan sonra", "2 olsun diğerini de konuşuruz", "1 olsun o da olur", "1 olsun bu da olur", "1 olsun müşteri o da olur dedi",
+    "1 olsun diğeri de olur", "1 olsun hayırlısı", "1 olsun, tercih müşteriye", "1 olsun, onay eşinde", "1 olsun, inisiyatif müşteride",
+    "1 olsun, takdir müşteriye", "1 olsun, bu da olur müşteri için", "1 olsun, o da olur bu da", "1 olsun, olsun gibi",
+    "1 olsun, kalsın gibi düşündük", "2 olsun, şu da olur", "2 olsun, öteki de olur", "2 olsun, diğeri de olabilir",
+    "2 olsun, bu da olur bence", "1 olsun aslında 2 de olur", "1 olsun, aslında 2 de olabilir", "2 olsun, belki de 1",
+    "1 olsun belki de 2", "1 olsun, ödemeyle birlikte mi onaylayalım?", "1 olsun, montajla beraber mi onaylayalım?",
+    "1 olsun, faturayla birlikte mi onay verelim?", "1 olsun, teslimden itibaren mi onaylayalım?",
+    "1 olsun, ödeme yapınca mı onay verelim?", "1 olsun, kararımızı kaporayla birlikte mi verelim?", "1 olsun, müşteri seçti bakarız",
+    "1 olsun, acelemiz yok", "1 olsun, acelesi yok", "1 olsun, fark etmez ya, teslim tarihi önemli", "2 olsun, bakalım ne olacak?",
+    "2 olsun, müşteri ne der bakalım?", "1 olsun, karar eşiyle", "2 olsun, görelim fiyat ne olacak?", "2 olsun, kaç olursa fark etmez",
+    "2 olsun, model fark etmez"])
+def test_hakem31_kararsiz_ve_kosullu_soz_kaydedilmez(tmp_path, metin):
+    """Tur 31 (Y1, Y2, Y4, O6, O7): fiyatı bekleyen soru ("bakalım fiyat ne kadar olacak?", "görelim fiyat ne olacak?"), çatı modelinin
+    ya da numaranın devri ("çatı modeli fark etmez", "modeli size bırakıyorum", "kaç olursa fark etmez"), zamirli ek istek ("onu da
+    çizin", "bunu da çizin", "plan sonra") ve "diğerine de bakarız" kayıt almaz: plan r01, onay yok, r02 yok."""
+    s, _ = _cati_seti(tmp_path)
+    k = s.yaz(metin, niyet="diger")
+    assert K.PLAN_ONAYI not in k.gerekce and k.eylem != "is_emri" and s.plan["revizyon"] == 1 and not s.k.d.get("onaylanan"), k.mesaj
+
+
+@pytest.mark.parametrize("metin", [
+    "2 olsun, boyası fark etmez", "2 olsun, kaç kişi gelirse fark etmez", "2 olsun onay verildi",
+    "2 olsun müşteri onay verdi teklif gönderin", "2 olsun teklif ne zaman gelecek", "2 olsun hemen gönderin lütfen",
+    "2 olsun çizimi bekliyoruz", "2 olsun teşekkürler hocam iyi çalışmalar", "2 olsun hayırlı işler", "2 olsun, ödemeyi yarın yaparız",
+    "2 olsun, renk fark eder mi", "2 olsun, rengini siz seçin", "2 olsun, rengi size kalmış", "2 olsun, çatı rengi fark etmez",
+    "2 olsun, ödeme şekli fark etmez", "2 olsun, nakliye fark etmez", "2 olsun, montaj günü fark etmez", "2 olsun, kapı kolu size kalmış",
+    "2 olsun, banyo seramiği size kalmış", "2 olsun, iç kapılar fark etmez", "2 olsun, zemin fark etmez",
+    "2 olsun, fayans rengi fark etmez", "2 olsun, döşeme fark etmez", "2 olsun, izolasyon fark etmez", "2 olsun, yalıtım fark etmez",
+    "2 olsun, pencere fark etmez", "2 olsun, PVC rengi fark etmez", "2 olsun, montaj fiyatına bakalım mı?",
+    "2 olsun, teklifi sonra gönderin", "2 olsun, müşteri istedi bence çok güzel oldu", "2 olsun, klozet modeli fark etmez",
+    "2 olsun, kombi modelini siz seçin", "2 olsun, kapıları montajdan sonra onaylarız", "2 olsun, seramiği teslimden sonra mı seçelim?",
+    "2 olsun, diğer konuları yarın konuşuruz", "2 olsun diğer işleri sonra konuşuruz", "2 olsun, başka konuları sonra konuşuruz",
+    "2 olsun, belki diğer evde de yaparız", "2 olsun iki usta yeter mi", "2 olsun tarih yarın netleşecek",
+    "2 olsun, sabah ya da akşam fark etmez", "2 olsun, yarın ya da bugün fark etmez", "2 olsun, yarın da olur bugün de fark etmez",
+    "2 olsun, pazartesi ya da salı fark etmez", "2 olsun, teklifi mailden ya da buradan atın fark etmez",
+    "2 olsun, mail ya da whatsapp fark etmez", "2 olsun, telefonla ya da mesajla fark etmez", "2 olsun, teklif pdf ya da excel fark etmez",
+    "2 olsun, teklif bugün ya da yarın fark etmez", "2 olsun, teklif yarın da olur fark etmez", "2 olsun, marka fark etmez",
+    "2 olsun, maliyet fark etmez", "2 olsun, para fark etmez", "2 olsun, kargo fark etmez", "2 olsun, vinç fark etmez",
+    "2 olsun, peşinat fark etmez", "2 olsun, adres fark etmez", "2 olsun, kalınlık fark etmez", "2 olsun, ölçü fark etmez",
+    "2 olsun, dış cephe fark etmez", "2 olsun, kiremit fark etmez", "2 olsun, ekibi size bırakıyorum",
+    "2 olsun, pdf ya da resim fark etmez", "2 olsun, kiremit desen fark etmez", "Müşteri kararı: 2 olsun", "Müşteri kararı, 2 olsun",
+    "Müşteri kararı: 2", "Müşteri tercihi: 2 olsun", "Müşteri onayı: 2 olsun", "Müşteri onayı, 2 olsun", "2 olsun, müşteri kararı",
+    "2 olsun, müşteri tercihi", "2 olsun, müşteri onayı", "2 olsun müşteri onayı", "2 olsun, müşteri seçimi", "2 olsun, eşi tercihi",
+    "2 olsun, müşteri onayladı bence süper", "2 olsun, müşteri onayladı bence de güzel", "2 olsun, müşteri seçti bence de uygun",
+    "2 olsun müşteri istedi bence de mantıklı", "2 olsun müşteri istedi sanırım teklif yarın gelir",
+    "2 olsun, kapıları montajdan sonra mı onaylayalım?", "2 olsun, seramikleri teslimden önce mi onaylayalım?",
+    "2 olsun, rengi ödemeden sonra mı onaylayalım?", "2 olsun, boyayı montajdan sonra mı onaylayalım?",
+    "2 olsun, faturayı montajdan sonra mı onaylayalım?", "2 olsun, ödemeyi teslimden sonra mı onaylayalım?",
+    "2 olsun, pencereleri ödeme yapınca mı onaylayalım?", "2 olsun, parkeyi teslimden önce mi onaylayalım?",
+    "2 olsun, kapıları montaj bitince mi onaylayalım?", "2 olsun, taksiti kaporadan sonra mı onaylayalım?",
+    "2 olsun, ebatları montaja göre mi onaylayalım?", "2 olsun, ölçüleri montaja kadar mı onaylayalım?",
+    "2 olsun, rengine montajdan sonra mı karar verelim?", "2 olsun, desene ödemeden sonra mı karar verelim?",
+    "2 olsun, seramiğe ustayla birlikte mi karar verelim?", "2 olsun, renge numuneyi görünce mi karar verelim?",
+    "2 olsun, klozet modelini sonra mı seçelim?", "2 olsun, batarya modelini sonra mı seçelim?",
+    "2 olsun, kombi modelini sonra mı seçelim?", "2 olsun, kiremit modelini sonra mı seçelim?",
+    "2 olsun, korkuluk modelini sonra mı seçelim?", "2 olsun, belki diğer evde de bunu yaparız", "Hocam günaydın 2 olsun kolay gelsin",
+    "Usta merhaba 2 olsun", "Kardeşim selam 2 olsun", "Merhaba iyi günler 2 olsun", "Hocam merhaba nasılsınız 2 olsun",
+    "2 olsun montaj ne zaman başlar", "2 olsun nakliye ne kadar", "2 olsun ekip kaç kişi gelir", "2 olsun sevk ne zaman",
+    "2 olsun planı hazırlar mısınız", "2 olsun çizip gönderin", "2 olsun bugün atabilir misiniz", "2 olsun müşteri bunu istiyor",
+    "2 olsun müşterinin onayı var", "2 olsun hocam ellerinize sağlık teklif bekliyoruz", "2 olsun, montaj ne zaman olursa fark etmez",
+    "2 olsun, mutfak dolabı modelini sonra mı seçelim?", "2 olsun, kapı rengine montajdan sonra mı karar verelim?",
+    "2 olsun, teslim tarihine ödemeyle birlikte mi karar verelim?", "2 olsun, montaj tarihini kaporadan sonra mı onaylayalım?",
+    "2 olsun, müşteri onaylı", "2 olsun, müşteri onayı ile", "2 olsun, müşteri kararıdır", "2 olsun, bence de en iyisi bu",
+    "2 olsun, bizce de uygun, müşteri onayladı", "2 olsun, kapı rengini ödemeden sonra mı onaylayalım?",
+    "2 olsun, kombi modelini sonra seçeriz", "Çatı 2 olsun ayrıntıları yarın konuşalım", "Çatı K olsun kalanını yarın konuşuruz",
+    "Çatı 2 olsun tarih yarın netleşecek", "Çatı 2 olsun öteki işleri yarın hallederiz"])
+def test_hakem31_acik_secim_soruya_donmez(tmp_path, metin):
+    """Tur 31 (O1–O5, tur 30'dan kalan O1): konusu belli devir ("sabah ya da akşam fark etmez", "mail ya da whatsapp fark etmez",
+    "ekibi size bırakıyorum"), bildirilmiş karar ("Müşteri kararı: 2", "2 olsun, müşteri onayı"), görüş sözü ("müşteri onayladı bence
+    süper"), başka konunun zamanı ("kapıları montajdan sonra mı onaylayalım?") ve modeli ("klozet modelini sonra mı seçelim?") açık
+    seçimi soruya çevirmez: r02 PA-06-K."""
+    s, _ = _cati_seti(tmp_path)
+    k = s.yaz(metin, niyet="diger")
+    assert k.eylem == "is_emri" and k.revizyon == 2 and k.is_emri["talep"]["kaynak"] == "PA06K", k.mesaj
+
+
+@pytest.mark.parametrize("metin", [
+    "1 olsun karar verildi", "1 olsun onay verildi", "1 olsun, hemen gönderin", "1 olsun onay için sorun yok", "Hocam selam 1 olsun",
+    "Abi selamlar 1 olsun teklif gönderin", "1 olsun, müşteriyle karar verdik", "1 olsun böyle", "1 olsun müşteri olur verdi"])
+def test_hakem31_olumlu_soz_onay(tmp_path, metin):
+    """Tur 31 (O1–O3'ün evin çatısı yüzü): konusu belli devir ve bildirilmiş karar evin çatısının onayıdır: r01 onaylanır."""
+    s, _ = _cati_seti(tmp_path)
+    k = s.yaz(metin, niyet="diger")
+    assert k.gerekce == K.PLAN_ONAYI and k.revizyon == 1, k.mesaj
