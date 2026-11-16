@@ -776,7 +776,10 @@ def _capraz_cumba_catilari(plan, ie: dict) -> tuple[list[dict], dict]:
     yavru_p = CP.pafta_yavrulari(cumbalar[0])                                # BK-49 (D-116): makas planı evin paftasından (çatı tanımı aynı)
     if yavru_p is not None:
         from . import cati_capraz as CC
-        makas = CC.cumba_makaslari(t, ie, plan)["uzaklik"]
+        try:
+            makas = CC.cumba_makaslari(t, ie, plan)["uzaklik"]
+        except CP.PrefabrikCatiHatasi as e:
+            raise ListeYazilmaz(f"beşik + cumba: cumbanın makas planı kurulmadı: {e}") from None
     ana_mahya = sum(e["plan_boy"] for e in k_["ana"]["mahya"])
     # D-61 madde 1 (Lokman, 5 Kasım 2026 22:49, kart "Öneriyle düzelt"): ana çatının üstündeki ilk cumba makası iki ana makasa oturan kısa
     # makastır (AP-06 paftası; `kurallar/yerlesim/prefabrik.json › cumba_yavru_makasi`). Boyu çatının tanımından (`cati_capraz.tanim`, kart
@@ -1871,7 +1874,7 @@ def liste(N: dict, kurallar: dict | None = None, pafta: dict | None = None) -> d
                  f"paftasından (İş Emri `yavru_makaslari_cm`): {n_m} makas", d116)
             for L_k, n_k in sorted(Counter(round(v, 2) for v in kisa_m).items(), reverse=True):
                 ekle("1005", f"Yavru makas · {ad}", f"L {round(L_k * 10)}", n_k, "Pafta (D-116)",
-                     f"ana çatının üstündeki yavru makas, kalkan makasından {mm(makas_ara)} içeride, iki dere arasında; boy evin paftasının "
+                     f"ana çatının üstündeki yavru makas, kalkan makasından {mm(makas_ara)} içeride (paftadaki yer); boy evin paftasının "
                      "listesinden (İş Emri `yavru_makaslari_cm`)", d116)
         elif c is not ana:
             kisa_m = c.get("kisa_makaslar_cm") or []            # D-61 madde 1: ana çatının üstündeki ilk cumba makası kısa (çatı tanımından)

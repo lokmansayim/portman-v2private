@@ -73,8 +73,9 @@ def pafta_yavrulari(u: dict) -> list[float] | None:
     """BK-49 (D-116; Lokman, kart 16 Kasım 2026 12:08:22 "Her ev kendi paftasındaki gibi"): çıkıntısız cumbanın makas planı evin
     paftasından. `yavru_makaslari_cm` cumbanın kalkan makasının arkasındaki yavru makasların boyları (cm, paftanın listesinden): makas sayısı
     1 + bu listenin uzunluğu, yerleri kalkan duvarının ekseninden 125,5 arayla (37 m² PA-39: [192], kalkan makası + yavru 192; 59 m² PA-41:
-    [], yalnız kalkan makası). Yavru makas iki dere arasındadır, AP-06'nın kısa yavru kuralı (D-61) bu cumbada kurulmaz. Anahtar yoksa None:
-    D-47'nin kuralı (derelerin birleştiği yere kadar 125,5 arayla) ve D-61 aynen; öteki evler değişmez."""
+    [], yalnız kalkan makası). Yavru makasın yeri paftadaki gibi kalkan makasından 125,5 içeride, boyu paftanın listesinden; AP-06'nın kısa
+    yavru kuralı (D-61) bu cumbada kurulmaz. Boy kalkan makasının boyundan kısa olmalı (`cati_capraz.cumba_makaslari` denetler; K21). Anahtar
+    yoksa None: D-47'nin kuralı (derelerin birleştiği yere kadar 125,5 arayla) ve D-61 aynen; öteki evler değişmez."""
     if "yavru_makaslari_cm" not in u:
         return None
     y = u["yavru_makaslari_cm"]

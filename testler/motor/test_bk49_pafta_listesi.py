@@ -3,7 +3,8 @@
 
 - 37 m² (PA-39) ve 59 m² (PA-41): çıkıntısız ön cumbanın makas planı evin paftasından (`cumbalar[0].yavru_makaslari_cm`; kart 12:08:22
   "Her ev kendi paftasındaki gibi"): 37 m²'de kalkan makası + yavru 192, 59 m²'de yalnız kalkan makası. Çatı tanımı (kart modeli, rehber,
-  3B) aynı makasları okur; çizimdeki çatı aynı.
+  3B) aynı makasları aynı yerde okur; çizimdeki çatı aynı. Yavru makasın boyu listede paftanınki (192); o kesitte dereler arası 62,76
+  (paftanın planında 128,8), 3B dereler arasını çizer: bilinen fark, tanımda uyarı (K16; geometri hakemi).
 - 92 m² (PA-43): teras panelli verandada 2 yan kiriş, duvardan panelin dış kenarına (`verandalar[].cati.yan_kiris`; kart 12:10:16
   "Yalnız bu evde"). Plan ve çizim aynı (D-56'nın tek dış kirişi), AP-26 (M-12) ve öteki teras panelleri aynı.
 
@@ -65,21 +66,25 @@ def test_anahtarsiz_eski_liste(kod, sil):
 @pytest.mark.parametrize("kod,yavru", [("PA39", [192.0]), ("PA41", [])])
 def test_cati_tanimi_ayni_makaslar(kod, yavru):
     """Çatı tanımı (kart modeli, montaj rehberi ve 3B buradan okur) listeyle aynı makasları kurar: kalkan makası + paftanın yavruları,
-    125,5 arayla, iki dere arasında (AP-06'nın kısa yavru kuralı yok, uyarı yok). Çizimdeki çatı (`cati_prefabrik.cati`) aynı."""
+    125,5 arayla (AP-06'nın kısa yavru kuralı yok). Paftanın boyu o kesitteki dereler arasından uzunsa tanım bunu uyarı olarak yazar (K16):
+    37 m²'de L 1920 ↔ 62,76. Çizimdeki çatı (`cati_prefabrik.cati`) aynı."""
     ie = _ie(kod)
     plan = G.kur(ie)
     tn = CC.tanim(plan, ie)
     m = tn["parcalar"][1]["makaslar"]
     assert [x["uzaklik"] for x in m] == [5.0 + i * G.MOD for i in range(1 + len(yavru))]
     assert [x.get("boy_cm") for x in m[1:]] == yavru and not any("uclar" in x for x in m)
-    assert not any("makas yeri (cumba)" in u for u in tn["uyarilar"])
+    cu = [u for u in tn["uyarilar"] if "makas yeri (cumba)" in u]
+    assert cu == ([f"makas yeri (cumba): yavru makasın boyu evin paftasından L 1920 (yeri 130.5); o kesitte dereler arası 62.76 cm, 3B "
+                   "makası dereler arasında çizer (D-116)"] if yavru else [])
     eski = copy.deepcopy(ie)
     del eski["cati"]["cumbalar"][0]["yavru_makaslari_cm"]
     assert CP.cati(plan, ie) == CP.cati(G.kur(eski), eski)
 
 
 def test_teras_paneli_plani_ayni():
-    """92 m²: yan kiriş yalnız listede; planın verandası (çizim, 3B) D-56'daki gibi tek dış kirişle, anahtarsızla aynı."""
+    """92 m²: yan kiriş yalnız listede; planın verandası (çizim, 3B, kart modeli) D-56'daki gibi tek dış kirişle, anahtarsızla aynı.
+    Bilinen fark (D-116 Karar 2): liste 3 kiriş (4532 + 2 × 2010), plan ve kart modeli 1."""
     ie = _ie("PA43")
     eski = copy.deepcopy(ie)
     del eski["verandalar"][0]["cati"]["yan_kiris"]
@@ -89,7 +94,7 @@ def test_teras_paneli_plani_ayni():
 
 
 def test_anahtar_denetimi():
-    """Yanlış yazılan anahtar yok sayılmaz, hata verir (K21)."""
+    """Yanlış yazılan anahtar yok sayılmaz, hata verir (K21); liste yolunda `ListeYazilmaz` (teklif aracı yakalar)."""
     ie = _ie("PA39")
     for deger in ([0], ["192"], 192, [True]):
         bozuk = copy.deepcopy(ie)
@@ -100,10 +105,13 @@ def test_anahtar_denetimi():
     cikintili["cati"]["cumbalar"][0]["ana_makas"] = "cumba_makasindan"
     with pytest.raises(CP.PrefabrikCatiHatasi):
         CP.pafta_yavrulari(cikintili["cati"]["cumbalar"][0])
-    sigmaz = copy.deepcopy(ie)
-    sigmaz["cati"]["cumbalar"][0]["yavru_makaslari_cm"] = [192, 150, 100]      # derelerin birleştiği yere sığmaz
-    with pytest.raises(CP.PrefabrikCatiHatasi):
-        CC.tanim(G.kur(sigmaz), sigmaz)
+    for deger in ([192, 150, 100], [1920], [383.75]):       # derelerin birleştiği yere sığmaz; kalkan makasından (383,75) kısa değil
+        sigmaz = copy.deepcopy(ie)
+        sigmaz["cati"]["cumbalar"][0]["yavru_makaslari_cm"] = deger
+        with pytest.raises(CP.PrefabrikCatiHatasi):
+            CC.tanim(G.kur(sigmaz), sigmaz)
+        with pytest.raises(PL.ListeYazilmaz):
+            PL.is_emrinden(sigmaz)
     t = _ie("PA43")
     t["verandalar"][0]["cati"]["yan_kiris"] = False
     with pytest.raises(G.IsEmriHatasi):

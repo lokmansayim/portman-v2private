@@ -81,5 +81,9 @@
    "pafta": "92 m² 3+1, HD-143"
   }
  },
+ "bilinen_farklar": [
+  "37 m² (PA-39): yavru makas listede paftanın boyuyla L 1920; o kesitte dereler arası Motor'da 62,76 cm (paftanın planında 128,8). 3B ve kart modeli makası aynı yerde dereler arasında çizer; çatı tanımı uyarı yazar (K16). Geometri hakemi, BK-49 kapanışı.",
+  "92 m² (PA-43): liste 3 kiriş (4532 + 2 × 2010); plan, çizim, 3B ve kart modeli 1 kiriş (D-56; D-116 Karar 2)."
+ ],
  "test": "testler/motor/test_bk49_pafta_listesi.py"
 }
