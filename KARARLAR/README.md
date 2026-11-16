@@ -239,7 +239,8 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | D | D-110 | seçenek kartının kayıtlı resimleri yeni ölçü yazısıyla; çatı seçimi örneğinin seçenek kartı izi yeniden dondu (BK-42; Lokman 15.11 22:29:00 kartı) | yazıldı (16.11; bayi görseli sohbeti, `claude/project-thread-r8278d`) |
 | D | D-111 | disk arşivi Parti 1'in beş evi havuzda, PA-39 … PA-43 ve PA-43-B (İE-43 PR-4b; Lokman 16.11 06:50:02 kartı, 08:08:55 sözü) | yazıldı (16.11; disk arşivi sohbeti, `claude/project-thread-wc6dw0`) |
 | D | D-112 | (başka sohbet: havuz denetimi kayıt kapısı; BK-47) | alındı (16.11) |
-| D | **D-113** | — | **sıradaki boş** |
+| D | D-113 | (başka sohbet: çelik havuz evleri tek kat panel; BK-48) | alındı (16.11) |
+| D | **D-114** | — | **sıradaki boş** |
 | İE | İE-01–İE-08 | bu depo (`main`) | yazıldı |
 | İE | İE-09 | model atölyesi: kontrollü model üretimi ve banka hattı (Görev 6e; pano 30; P6001 güncellemesi kapsam dışı) | alındı (16.10; `claude/gorev-6e-model-atolyesi-rnhtcp`; PR-1 banka hattı 29.10, `claude/project-thread-rhjgzv`) |
 | İE | İE-10, İE-11, İE-12 | prefabrik hattı (PR #12, PR #14, `ie-12-prefabrik-bayi-paftasi`) | `main`'e BK-12 ile (PR-1: motor ve bayi paftası; liste ve mühür kıyası sonraki PR'larda) |
