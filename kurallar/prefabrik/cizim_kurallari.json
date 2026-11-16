@@ -1155,6 +1155,43 @@
    ]
   },
   {
+   "kod": "PC-44",
+   "baslik": "İç duvarın dış duvar ucunda kalan parça (62,75'ten büyük iki eksik parça yerine kalan parça + 125,5)",
+   "kural": "Pano harcaması: 62,75'ten büyük parça bir tam pano, 62,75 ve küçüğü yarım pano harcar (`pano_harcamasi`). Bir ucu dış duvarın iç yüzünde olan açıklıksız iç duvar aralığında (iki köşe ya da T arasında; açıklıklı ve karkaslı pano, T eki aralığı keser) 62,75'ten büyük en az iki eksik parça varsa ve 125,5'ler + tek kalan dizilimi daha az pano harcıyorsa aralık yeniden dizilir: 125,5'ler öteki uçtaki köşe ya da T'nin aksından dizilir, kalan parça (62,75 ya da küçüğü) dış duvar ucundadır. 67 m² 2+1'in banyo duvarları: 120,5 + 64,75 (2 pano) → arka duvardan 59,75 + köşeye 125,5 (1,5 pano). Fazla harcamayan aralığa, dış duvara, iki ucu ya da hiçbir ucu dış duvarda olmayan aralığa dokunulmaz (standart aks düzeni aynen; dış duvarların uçtaki 62,75'leri aynen). Kalan 0,05 cm'den kısa ama sıfır değilse aralık aynen. Öteki uç T ise 125,5 T'nin aksından ölçülür, T payı uçtaki panodan düşer: 64,75 + 120,5 → 122,5 + 62,75 (Lokman, kart 16 Kasım 2026 08:24:27 \"T'nin aksından: 122,5 + 62,75\"). Yeni ek çektirme U'lu T'ye denk gelirse açık hata (K21). Anahtar yok (D-29 madde 6); depodaki evlerde hiçbir aralık değişmez.",
+   "karar": "D-108",
+   "lokman": {
+    "tarih": "2026-11-15",
+    "saat": "22:04",
+    "soz": "bizim standart panomuz 125,5 cm eğer yarısı olan 62,75 den büyük bir sayı alırsan o tam pano sayılır yani sen burada 120,5 panoları 125,5 yapacaksın 64,75 panolarda 59,75 olacak"
+   },
+   "kod_yeri": [
+    "motor/geometry.py::_ic_duvar_dis_ucu",
+    "motor/geometry.py::pano_harcamasi",
+    "motor/geometry.py::YARIM_PANO_CM",
+    "motor/geometry.py::IC_DUVAR_YUZ_PAYI_CM",
+    "motor/geometry.py::_kur"
+   ],
+   "test": [
+    "testler/motor/test_d108_ic_duvar_dis_ucu.py::test_pano_harcamasi",
+    "testler/motor/test_d108_ic_duvar_dis_ucu.py::test_uydurma_ev_bugun_120_5_ve_64_75",
+    "testler/motor/test_d108_ic_duvar_dis_ucu.py::test_uydurma_ev_59_75_dis_duvar_ucunda",
+    "testler/motor/test_d108_ic_duvar_dis_ucu.py::test_uydurma_ev_oteki_panolar_aynen",
+    "testler/motor/test_d108_ic_duvar_dis_ucu.py::test_depodaki_evlerde_kural_bir_sey_degistirmez",
+    "testler/motor/test_d108_ic_duvar_dis_ucu.py::test_fazla_harcamayan_ya_da_kiymik_aralik_aynen",
+    "testler/motor/test_d108_ic_duvar_dis_ucu.py::test_t_ucunda_boy_aks_ustunden"
+   ],
+   "sabitler": [
+    {
+     "yer": "motor/geometry.py::YARIM_PANO_CM",
+     "deger": 62.75
+    },
+    {
+     "yer": "motor/geometry.py::IC_DUVAR_YUZ_PAYI_CM",
+     "deger": 0.6
+    }
+   ]
+  },
+  {
    "kod": "PC-45",
    "baslik": "Köşe boşluğundan taşan veranda tek mahal, yan kiriş tek parça, çatısı ana çatının cumbası; taşan verandada kolon arası en çok 565 cm",
    "kural": "Taşan verandanın iç kenarı gövdenin köşe boşluğunun (önü ve yanı açık, ızgaradaki açık mahal) ağzına oturuyorsa İş Emri `verandalar[].nis` boşluğun adını yazar: boşluk ve taşan şerit tek mahal olur; boşluğun yanındaki kiriş gövdenin köşesinden ön kolona tek parça (52 m² 242,5, 55 m² 250,5; 100 × 100), altında kolon yok; boşluğun ağzında kiriş ve köşesinde kolon yok (D-38'in köşe kolonu kalkar). Taşan verandanın dış kenarında kolon ekseni arası 565 cm'yi geçerse Motor eşit aralıkla en az sayıda ara kolon koyar (kart 16 Kasım 2026 08:42:16 \"Kolon arası en çok 565 cm\"; 52 m² 635,5 → 1, 55 m² 449,25 → 0, 67 m² 710,25 → 1); dış kiriş n + 1 eşit parça (67 m²: 355,1 + 355,1). Daha kısada pafta ara kolon gösteriyorsa İş Emri `ara_kolon: n` yazar; yazılan sayı 565 kuralının istediğinden azsa açık hata (K21). Ön onay çiziminde verandanın eni, boşluk yanında yan kirişin boyu, öteki yanda taşma; boşluğun kendi ölçüsü yok; aks numaralarının yanına düşen ölçü verandanın içinde (ölçüler Lokman'ın ön onay çizimi kartıyla, 16 Kasım 2026 07:02:39 \"Doğru, ölçüler kalsın\"). Görünüşte yan kirişin gövdenin ardında kalan kısmı çizilmez. Çatı (çatı eskizi kartı, 16 Kasım 2026 08:05:51 \"52/55 öneri doğru, 67 böyle\"): köşe verandasının çatısı ana çatının cumbası olabilir, gövde cumbası olmadan (PC-38'in \"gövde cumbası olmadan veranda cumbası\" hatasının yalnız `nis` yazılan verandadaki istisnası): ana çatı `cati.tip` besik_cumba, `cumbalar` [{cephe, veranda: <adı>}], verandada `cati.tip` cumba; cumbanın ayak izi verandanın taşan dikdörtgeni, eğim, saçak ve topuk ana çatınınki, iki vadi ana çatının yüzüyle mahyanın iç ucunda birleşir (52 m²'de ortadaki kolon cumbanın tepesinin altında). Liste cumbayı çizimdeki çatıdan sayar (AP-22'nin çapraz cumbası gibi: saçak, alın ve dere içi çatının kenarlarından; TASLAK); IFC ve kart modeli bu çatıyı kurmaz (açık hata). Montaj rehberi ara kolonlu verandayı kurmaz (`Desteklenmiyor`; listeyle çelişmesin diye). Anahtarsız İş Emri aynen (BK-14), dış kenarı 575 cm'yi geçen veranda dışında (o, 565 kuralıyla ara kolon alır; depoda yok). İş Emri dikmesi ara kolonun yerindeyse açık hata.",

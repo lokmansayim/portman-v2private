@@ -352,12 +352,12 @@ D.posts.forEach(p => {
   const kesit = ic ? `iç köşe (6'lık iç duvar): kanatlar 9 × 9 cm (6 + 3), iç kanat 8,5 cm, iç tırnak 3 cm, kutu ${fmtc(w)} × ${fmtc(k.e)} cm, sac 1 mm (Lokman)` : `${k.ic_yer ? "iç köşe (10'luk iç duvar)" : "dış köşe (10'luk dış duvar)"}: kanatlar 13 × 13 cm (10 + 3), iç kanat 12,5 cm, iç tırnak 3 cm, kutu ${fmtc(w)} × ${fmtc(k.e)} cm, sac 1 mm (Lokman çizimi)`;
   add(p.step, obj, p.order - 0.4, { kod: p.card, ad: kart(p.card, p.ad), satir: [['Oda', roomName(p.room)], ['Kesit', kesit], ...(p.baglanti ? [['Görev', p.baglanti.gorev], ['Liste', p.baglanti.liste]] : []), ...kartSat(p.card)] });
 });
-D.ceku.forEach(u => {   // çektirme U'su (iç duvarın kalınlığında): iç duvar dış duvara pano ortasında girer
+D.ceku.forEach(u => {   // çektirme U'su (iç duvarın kalınlığında): yeri listenin kaynağından (T panonun ortasında, dış köşe, serbest uç)
   const g = new THREE.Group(), m = mat('steel', u.step), [x, y] = u.xy, [ux, uy] = u.yon, hw = u.t / 2;
   const b = (a0, a1, b0, b1) => g.add(bp(Math.min(x + ux * a0 + uy * b0, x + ux * a1 + uy * b1), Math.max(x + ux * a0 + uy * b0, x + ux * a1 + uy * b1), Math.min(y + uy * a0 + ux * b0, y + uy * a1 + ux * b1), Math.max(y + uy * a0 + ux * b0, y + uy * a1 + ux * b1), 0, 244, m));
-  b(0, SAC, -hw - SAC, hw + SAC);             // sırt: dış panonun iç yüzünde
+  b(0, SAC, -hw - SAC, hw + SAC);             // sırt: panonun ucunda (T'de ve köşede öteki duvarın yüzüne dayanır)
   b(0, 3, -hw - SAC, -hw); b(0, 3, hw, hw + SAC);   // kanatlar: iç duvarın iki yüzünde 3 cm
-  add(u.step, g, u.order, { kod: null, ad: `Çektirme U'su (${IC_KAL})`, satir: [['Bu parça', 'iç duvarın dış duvara pano ortasında girdiği yer'], ['Oda', roomName(u.room)], ['Liste', M.ceku_liste]] });
+  add(u.step, g, u.order, { kod: null, ad: `Çektirme U'su (${IC_KAL})`, satir: [['Bu parça', u.bu || 'iç duvarın dış duvara pano ortasında girdiği yer'], ['Oda', roomName(u.room)], ['Liste', M.ceku_liste]] });
 });
 
 /* Veranda kolon ve kirişleri (62 m²: kaynaklı detaylar, A köşe direği, B ön kiriş, C özel H). Kolon ve kirişin yazısı veriden. */

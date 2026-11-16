@@ -221,28 +221,23 @@ def bina_brut_cm2(plan) -> float:
     return brut
 
 
-def model_motor(ie: dict) -> dict:
-    from . import geometry as G
-    from shapely.geometry import LineString, Point, box
-    from shapely.ops import linemerge, unary_union
-    plan = G.kur(json.loads(json.dumps(ie)))
-    y = ie["yapi"]; c = ie.get("cati") or {}
-    mx = c.get("makas_ekseni", "x") == "x"                     # makaslar x'i geçiyorsa saçak duvarları y yönünde koşar
-    eave_yon = "y" if mx else "x"
-    panolar, ekler = [], []
-    # İE-27 (Lokman, 3 Kasım 2026 09:52, madde 3 ve 13): iç duvarın bir duvara T ile geldiği yer. Pano ekine denk gelirse o ekte 3'lü H
-    # (dış duvarda da; bugüne kadar yalnız `dis_duvar_t_bolme` ile), panonun ortasına gelirse 60'lık çektirme U'su; iç duvar dış köşeye
-    # geliyorsa (100'lük köşede 60'lığa geçiş) ve bölme kapısız serbest bitiyorsa da çektirme U'su. Uç uca gelen iki duvarın eki (D-29 giriş
-    # nişi: yan duvar içeride iç duvar olarak sürer, kapı duvarı orada biter) T değildir: 3'lü H'ı `G.uc_uca_ekler`'den sayılır (geometri hakemi)
+def birlesim_uclari(plan) -> tuple[dict, list[dict]]:
+    """İç duvar uçlarının birleşimi (İE-27; Lokman, 3 Kasım 2026 09:52, madde 3 ve 13): iç duvarın bir duvara T ile geldiği yer pano
+    ekine denk gelirse o ekte 3'lü H (dış duvarda da), panonun ortasına gelirse çektirme U'su (`t_orta`); iç duvar dış köşeye geliyorsa
+    (100'lük köşede 60'lığa geçiş; D-104; D-105 madde 2 ile aynı kalınlıkta da, `ince` iç duvar dış duvardan inceyse) `dis_kose`, bölme
+    kapısız serbest bitiyorsa `serbest`.
+    Uç uca gelen iki duvarın eki (D-29 giriş nişi: yan duvar içeride iç duvar olarak sürer, kapı duvarı orada biter) T değildir: 3'lü H'ı
+    `G.uc_uca_ekler`'den sayılır (geometri hakemi). Tek kaynak (D-28 madde 1): yükleme listesi adedi, montaj rehberi yeri buradan okur.
+    Dönüş: ({dış duvar id: [3'lü H'lı T'nin ekseni]}, [{"duvar": iç duvar, "uc": 0 | 1, "tur": t_orta | dis_kose | serbest, "ince"?}])."""
     W_ = {d.id: d for d in plan.duvarlar}
-    t_uclari, cektirme = {}, {"t_orta": 0, "dis_kose": 0, "serbest": 0}
+    t_uclari, yerler = {}, []
     for d in plan.duvarlar:
         if d.tur != "ic":
             continue
         for uc in (0, 1):
             n = d.uc_notu.get(uc, "")
             if n == "serbest":
-                cektirme["serbest"] += 1
+                yerler.append({"duvar": d, "uc": uc, "tur": "serbest"})
                 continue
             m = re.match(r"T→(\d+)(.*)$", n)
             if not m:
@@ -252,7 +247,7 @@ def model_motor(ie: dict) -> dict:
                 # İE-27: 100'lük köşede 60'lığa geçiş. BK-38 (D-105 madde 2; Lokman, kart 15 Kasım 2026 09:14:41 "Evet, 1 adet 100'lük"):
                 # iç duvar dış duvarla aynı kalınlıktaysa da (100'lük) dış köşeye gelen iç duvara 1 çektirme U'su (paftada köşe direği +
                 # 10'luk çektirme U'su; 91 m² 3+1, 71 m² 2+1). Önce yalnız iç duvar dış duvardan inceyse sayılıyordu
-                cektirme["dis_kose"] += 1
+                yerler.append({"duvar": d, "uc": uc, "tur": "dis_kose", "ince": d.h < o.h - 1e-6})
                 continue
             if any(w is not d and w.yon == d.yon and abs(w.c - d.c) < 1e-6
                    and (abs(w.p1 - d.p0) < 1e-6 if uc == 0 else abs(w.p0 - d.p1) < 1e-6) for w in plan.duvarlar):
@@ -260,7 +255,24 @@ def model_motor(ie: dict) -> dict:
             if any(abs(p.a1 - d.c) <= o.h + 3.5 for p in o.panolar[:-1]):
                 t_uclari.setdefault(o.id, []).append(d.c)
             else:
-                cektirme["t_orta"] += 1
+                yerler.append({"duvar": d, "uc": uc, "tur": "t_orta"})
+    return t_uclari, yerler
+
+
+def model_motor(ie: dict) -> dict:
+    from . import geometry as G
+    from shapely.geometry import LineString, Point, box
+    from shapely.ops import linemerge, unary_union
+    plan = G.kur(json.loads(json.dumps(ie)))
+    y = ie["yapi"]; c = ie.get("cati") or {}
+    mx = c.get("makas_ekseni", "x") == "x"                     # makaslar x'i geçiyorsa saçak duvarları y yönünde koşar
+    eave_yon = "y" if mx else "x"
+    panolar, ekler = [], []
+    # İE-27: 3'lü H'lı T'ler ve çektirme U'ları `birlesim_uclari`'nden (montaj rehberi aynı yerleri okur, D-28 madde 1)
+    t_uclari, yerler = birlesim_uclari(plan)
+    cektirme = {"t_orta": 0, "dis_kose": 0, "serbest": 0}
+    for u in yerler:
+        cektirme[u["tur"]] += 1
     ac_ = lambda a: {"tur": a.tur, "olcu": a.olcu, "genislik": a.genislik, "mentese": a.mentese, "dograma": a.dograma,
                      **({"kapi_turu": a.kapi_turu} if getattr(a, "kapi_turu", None) else {})}       # D-52: cam PVC kapı
     kubbe_tabani = lambda p: p.acilim is not None and p.acilim.tur == "kubbe"   # noqa: E731

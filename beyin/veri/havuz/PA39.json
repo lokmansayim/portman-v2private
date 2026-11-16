@@ -1,0 +1,77 @@
+{
+ "kod": "PA39",
+ "gosterim": "PA-39",
+ "durum": "gecerli",
+ "sablon": "adaylar/PA39.json",
+ "gorsel": "adaylar/PA39.png",
+ "referans_model": "PA-39",
+ "yapi_turu": "prefabrik",
+ "kat": 1,
+ "oda_programi": "1+1",
+ "katalog_m2": 37.0,
+ "kapali_m2": 31.6,
+ "veranda_m2": 4.91,
+ "ozet": {
+  "grid": {
+   "x_pano": 5.5,
+   "y_pano": 4.0
+  },
+  "dis_olcu_cm": [
+   700.25,
+   522.0
+  ],
+  "brut_m2": 36.56,
+  "pano": 30,
+  "pencere": 4,
+  "kapi": 4,
+  "odalar": {
+   "SALON & MUTFAK": 14.12,
+   "BANYO": 3.38,
+   "HOL": 2.15,
+   "VERANDA": 4.91,
+   "YATAK ODASI": 9.03
+  }
+ },
+ "kaynak": {
+  "metin": "HD-252 montaj paftasından İş Emri (İE-43, disk arşivi Parti 1; kodla okundu, ad yok). Havuz: D-111 (Lokman 16 Kasım 2026 06:50:02 kartı \"Evet, beşi girsin\"; Motor'un aks düzeniyle). Asıl uygulanmış proje: D-103.",
+  "dosya": "testler/havuz/is_emirleri/HD252.json",
+  "ayna": null,
+  "karar": "D-111",
+  "standart": true,
+  "kart_kiyasi": {
+   "kart": "HD-252",
+   "kart_sha256": "67a18caf2da3cc8625b3d34c5e1478c1bafe16b0a2562492a982d223fe98256e",
+   "sonuc": "geçti",
+   "olcum": {
+    "dis_olcu_cm": [
+     700.25,
+     522.0
+    ],
+    "acikla_olcu_cm": [
+     700.25,
+     522.0
+    ],
+    "brut_m2": 36.56,
+    "kubbe_m2": 0.0,
+    "yatak_odasi": 1,
+    "pencereler": {
+     "120x120": 1,
+     "120x180": 2,
+     "60x40": 1
+    },
+    "dis_kapi": 1,
+    "ic_kapi": 3,
+    "veranda": 1,
+    "kat": 1
+   }
+  },
+  "havuz_denetimi": {
+   "sonuc": "geçti",
+   "karar": "D-112",
+   "uyarilar": [
+    "HD-06: ['makas yeri (ana çatı): saçak duvarının pano ekleri düzensiz (7 makas, listede 7; aralıklar 125.5, 125.5, 62.75, 125.5, 125.5, 125.55); eşit aralıklı 7 makas', \"makas yeri (cumba): yavru makas AP-06'nın kuralıyla kurulamadı (uçlar 83.75–271.4 o kesitte derelerin 56.75–267.005 dışında); D-47'nin yerinde\"]"
+   ]
+  }
+ },
+ "not": "Bilinen fark (yükleme listesi, D-111): cumba makası Motor'da 2 × 384 cm; paftada 380 cm + yavru makas 192 cm."
+}

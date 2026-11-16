@@ -10,7 +10,8 @@ Kalemler (her biri paftanın 1. sayfasındaki değerle):
 - oda programı: kartın oda sayısı (yoksa kartın yatak odası sayısı + 1) Motor'un yatak odası sayısıyla; paftada oda adı yoksa
   Lokman'ın karar kartıyla verdiği program (`oda_sayisi_lokman`, sözü ve saatiyle; AP-14, 14 Kasım 2026);
 - pencereler: ölçü ölçü aynı adet (kubbenin pencereleri kubbe panolarından);
-- dış kapı, iç kapı ve açık mahal sayısı aynı (kartın verandaları + sundurması; AP-07'nin sundurması, 14 Kasım 2026); kat 1.
+- dış kapı, iç kapı ve açık mahal sayısı aynı (kartın verandaları + sundurması; AP-07'nin sundurması, 14 Kasım 2026); kat 1. Kart dış
+  ve iç kapıyı ayıramıyorsa (disk arşivinin 2020 paftasında dış kapının yazısı yok; İE-43 PR-4) kapı toplamı (`kapi_adedi`) aynı.
 
     python3 araclar/havuz_hakemi.py testler/kor/projeler/AP14/is_emri.json --kart AP-14
 
@@ -99,6 +100,7 @@ KOK = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(KOK))
 KARTLAR = KOK / "testler" / "havuz" / "proje_kartlari.json"
 CELIK_KARTLARI = KOK / "testler" / "havuz" / "celik_kartlari.json"
+HDD_KARTLARI = KOK / "testler" / "havuz" / "hdd_kartlari.json"     # İE-43 PR-4b: disk arşivinin evleri (HD-NNN), aynı biçimde
 TOL_OLCU_CM = 5.0
 TOL_BRUT_M2 = 0.5
 # D-91 (Lokman kartı 14 Kasım 2026 10:10:11 UTC): standart hâlde ölçü her yönde en çok yarım pano değişir; dış duvarda özel pano yok
@@ -143,7 +145,11 @@ SILME_KIMLIK = ("is_emri_no", "revizyon", "talep", "varsayimlar", "eksikler")   
 
 
 def kartlar() -> dict:
-    return json.loads(KARTLAR.read_text(encoding="utf-8"))["evler"]
+    """AIPrefabrik'in proje kartları (AP-NN) ve disk arşivinin kartları (HD-NNN; İE-43 PR-4b). Kodlar ayrı seridir, çakışmaz."""
+    k = json.loads(KARTLAR.read_text(encoding="utf-8"))["evler"]
+    hdd = json.loads(HDD_KARTLARI.read_text(encoding="utf-8"))["evler"] if HDD_KARTLARI.exists() else {}
+    assert not set(k) & set(hdd), "proje kartı kodu iki dosyada"
+    return {**k, **hdd}
 
 
 def _olcu(s) -> str:
@@ -208,6 +214,10 @@ def denetle(ie: dict, kart: dict) -> tuple[list[str], dict]:
     for alan, ka in (("dis_kapi", "dis_kapi_adedi"), ("ic_kapi", "ic_kapi_adedi")):
         if kart.get(ka) is not None and int(kart[ka]) != o[alan]:
             b.append(f"{alan.replace('_', ' ')}: Motor {o[alan]}, pafta {kart[ka]}")
+    if kart.get("kapi_adedi") is not None and kart.get("dis_kapi_adedi") is None and kart.get("ic_kapi_adedi") is None:
+        # İE-43 PR-4: disk arşivinin 2020 paftasında dış kapının yazısı yok; kart dış ve iç kapıyı ayıramaz, toplamı (kapı kanadı) yazar
+        if int(kart["kapi_adedi"]) != o["dis_kapi"] + o["ic_kapi"]:
+            b.append(f"kapı: Motor {o['dis_kapi']} dış + {o['ic_kapi']} iç, pafta toplam {kart['kapi_adedi']} (dış ve iç ayrılamadı)")
     if kart.get("veranda_adedi") is not None:                                     # sundurma da açık mahal (Motor'da taşan veranda)
         acik = int(kart["veranda_adedi"]) + int(kart.get("sundurma_adedi") or 0)
         if acik != o["veranda"]:
