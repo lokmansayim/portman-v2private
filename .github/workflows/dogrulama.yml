@@ -1,8 +1,11 @@
 # Portman · otomatik doğrulama (Kurulum Panosu satır 12; Araştırma yol haritası KT1).
 #
 # Hazır (taslak olmayan) her PR'da ve main'e her push'ta oturumların tam doğrulaması koşar: `bash araclar/ortam_kur.sh --dogrula`'nın 4. adımındaki
-# komutların aynısı (Beyin harness'i 22 vaka, tam referans gerilemesi `testler/referans/dogrula.py`, bütün pytest'ler), dört
-# paralel işe bölünmüş. Tek işte 21–37 dk sürüyordu (pytest tek çekirdekte 17–28 dk); bölününce en uzun iş ~10–12 dk.
+# komutların aynısı (Beyin harness'i 22 vaka, tam referans gerilemesi `testler/referans/dogrula.py`, bütün pytest'ler), paralel
+# işlere bölünmüş: harness + referans, kalıcı akış (Postgres) ve öteki bütün pytest dosyaları beş parçada.
+# Tek işte 21–37 dk sürüyordu (pytest tek çekirdekte 17–28 dk); 27 Ekim'de dört işe bölündü. 15 Kasım'da "testler (kalan) · 3.12"
+# 33–45 dk'ya çıktı ve 45 dk sınırında kesilmeye başladı (BK-43): pytest dosyaları artık dosya dosya parçalara bölünür
+# (`araclar/pytest_parca.py`; her dosya tam bir parçada, birleşim bütün dosyalar; `testler/test_pytest_parca.py` denetler).
 # Ortam her işte `ortam_kur.sh` ile kurulur. `ortam_kur.sh --dogrula`'ya adım eklenirse burası da güncellenir.
 # İki Python: 3.11 (oturumların yerel ortamı, araclar/gereksinimler.txt) ve 3.12 (canlı sunucu 3.12.3; üstüne
 # vps/gereksinimler.txt: numpy 2.5.4, vtk). 3.12'den beri sum() float'ları telafili toplar; sürüme bağlı farkı burada görürüz.
@@ -12,8 +15,8 @@
 # bir koşu ~86 dk tutuyordu, 27–28 Ekim'de 14 saatte 49 koşu ~3.100 dk. Doğrulamanın içeriği aynı; değişen ne zaman ve kaç
 # Python'da koştuğu:
 # - Taslak PR'da koşmaz; PR "Ready for review" yapılınca koşar (AGENTS.md › Değişiklik disiplini). Taslak PR birleştirilemez.
-# - PR'da yalnız canlının Python'u 3.12 (dört iş). main'e her push'ta ve elle koşuda (workflow_dispatch) 3.11 + 3.12 (sekiz
-#   iş). Yalnız 3.11'de düşen bir hata PR'da görülmez; oturumun yerel tam doğrulaması (3.11) ya da main koşusu görür.
+# - PR'da yalnız canlının Python'u 3.12. main'e her push'ta ve elle koşuda (workflow_dispatch) 3.11 + 3.12. Yalnız 3.11'de
+#   düşen bir hata PR'da görülmez; oturumun yerel tam doğrulaması (3.11) ya da main koşusu görür.
 # - Belge değişikliği de koşar (paths-ignore yok): referans adımının sır taraması belgeleri de tarar, IE-16.md'deki mühür izi
 #   pytest'te sınanır.
 # - Dal korumasında zorunlu tutulacak denetim tek: "Doğrulama sonucu" (iş sayısı ve adları değişse de adı aynı kalır).
@@ -57,7 +60,7 @@ jobs:
       matrix:
         # PR'da yalnız canlının Python'u; main'e push'ta ve elle koşuda iki sürüm.
         python: ${{ fromJSON(github.event_name == 'pull_request' && '["3.12"]' || '["3.11", "3.12"]') }}
-        parca: [referans, kalici, genel_motor, kalan]
+        parca: [referans, kalici, p1, p2, p3, p4, p5]
         include:
           - parca: referans
             ad: harness + referans
@@ -65,13 +68,14 @@ jobs:
           - parca: kalici
             ad: testler (kalıcı akış)
             yollar: testler/kalici
-          - parca: genel_motor
-            ad: testler (genel motor, motor)
-            yollar: testler/genel testler/motor
-          # Kalan her şey: yeni bir test klasörü eklenince kendiliğinden buraya düşer.
-          - parca: kalan
-            ad: testler (kalan)
-            yollar: testler --ignore=testler/kalici --ignore=testler/genel --ignore=testler/motor
+          # Öteki bütün pytest dosyaları (`testler --ignore=testler/kalici`) beş parçada; yeni dosya kendiliğinden bir
+          # parçaya düşer. Parça sayısı değişirse `dilim`ler 1/N … N/N olur ve `testler/parca_haritasi.json` yeniden kurulur
+          # (`python araclar/pytest_parca.py harita <iş kayıtları> --n N`); `testler/test_pytest_parca.py` ikisini denetler.
+          - {parca: p1, ad: testler (parça 1/5), dilim: 1/5}
+          - {parca: p2, ad: testler (parça 2/5), dilim: 2/5}
+          - {parca: p3, ad: testler (parça 3/5), dilim: 3/5}
+          - {parca: p4, ad: testler (parça 4/5), dilim: 4/5}
+          - {parca: p5, ad: testler (parça 5/5), dilim: 5/5}
     steps:
       # Tam geçmiş: hakem ve mühür testleri git geçmişini okur, sığ klonda durur.
       - uses: actions/checkout@v5
@@ -92,11 +96,13 @@ jobs:
             sudo env "PATH=$PATH" HOME=/root /root/.cache/portman-venv/bin/python -m pip install -q -r vps/gereksinimler.txt
           fi
           sudo /root/.cache/portman-venv/bin/python -c "import sys, numpy; print('-- Python', sys.version.split()[0], '· numpy', numpy.__version__); sys.exit(sys.version_info[:2] != tuple(map(int, '${{ matrix.python }}'.split('.'))))"
+          echo "-- koşucu: $(nproc) çekirdek · $(grep -m1 'model name' /proc/cpuinfo | cut -d: -f2- | xargs) · $(free -g | awk '/^Mem:/{print $2}') GB"
 
       # Montaj rehberinin 62 m² kıyası (D-28 A1, `testler/paket/test_rehber.py`): şablon + 62'nin verisi = onaylı 62 sayfası. İz için
-      # three.js 0.160.0 ve Playwright'ın Chromium'u; yoksa test atlanırdı, burada kurulur ve testler kalan işte koşar.
+      # three.js 0.160.0 ve Playwright'ın Chromium'u; yoksa test atlanırdı. Rehber testleri hangi parçaya düşerse düşsün koşsun diye
+      # her pytest parçasında kurulur (~30 sn).
       - name: Rehber izi için three.js ve Playwright
-        if: matrix.parca == 'kalan'
+        if: matrix.dilim
         run: |
           JS="$RUNNER_TEMP/js"
           npm install --no-audit --no-fund --prefix "$JS" three@0.160.0 playwright@1.63.0
@@ -106,6 +112,7 @@ jobs:
       - name: ${{ matrix.ad }}
         env:
           YOLLAR: ${{ matrix.yollar }}
+          DILIM: ${{ matrix.dilim }}
         run: |
           R() { sudo env "PATH=$PATH" HOME=/root TMPDIR="$RUNNER_TEMP" THREE_DIR="${THREE_DIR:-}" NODE_PATH="${NODE_PATH:-}" \
                   PLAYWRIGHT_BROWSERS_PATH="${PLAYWRIGHT_BROWSERS_PATH:-}" "$@"; }
@@ -122,14 +129,18 @@ jobs:
                 || { echo "DUR: Postgres yok; kalıcı akış testleri atlanırdı"; exit 1; }
             fi
             # Rehber izi testleri (62 m² kıyası) araç yoksa atlanırdı; burada atlanmasınlar: kurulum eksikse iş kırmızı.
-            if [[ "${{ matrix.parca }}" == kalan ]]; then
+            # Parça: `araclar/pytest_parca.py` dosyaları parçalara böler; işin sonunda dosyaların süreleri (PARÇA-SÜRE) yazılır.
+            PARCA=()
+            if [[ -n "$DILIM" ]]; then
               R "$PY" -c "import sys; from araclar.paket.rehber import iz; h = iz.hazir(); print('-- rehber izi:', h or 'hazır'); sys.exit(1 if h else 0)" \
                 || { echo "DUR: rehber izi için three.js ya da Playwright yok; 62 m² kıyası atlanırdı"; exit 1; }
+              YOLLAR="testler --ignore=testler/kalici"
+              PARCA=(-p araclar.pytest_parca --parca "$DILIM")
             fi
             # PORTMAN_BANKA_TAM=1: bankanın kabul edilmiş modelleri çizim setinin içerik izleriyle de kıyaslanır (`testler/genel/test_banka.py`;
             # model başına ~30 sn; D-28 A11, İE-09 PR-7, KT-04). Yalnız o test okur.
             # shellcheck disable=SC2086
-            R PORTMAN_TEST_PG="$PG" PORTMAN_BANKA_TAM=1 "$PY" -m pytest -q -rfE -p no:cacheprovider $YOLLAR
+            R PORTMAN_TEST_PG="$PG" PORTMAN_BANKA_TAM=1 "$PY" -m pytest -q -rfE -p no:cacheprovider "${PARCA[@]}" $YOLLAR
           fi
 
       # Testler root ile koştu; işin sonundaki checkout temizliği .git/index'i okuyabilsin (yoksa sarı uyarı düşer).
