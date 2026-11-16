@@ -365,6 +365,10 @@ def model_motor(ie: dict) -> dict:
         dis_kenar_sira.append(len(kirisler))                   # `kenarlar`: dış, yan 1, yan 2
         kirisler += [max(x1 - x0, y1 - y0) for (x0, y0, x1, y1), _k in zip(v["kenarlar"], v["kirisler"])]   # D-56: teras panelinde yalnız dış
     t_dis = 2 * next(d.h for d in plan.duvarlar if d.tur == "dis")
+    # D-107 (BK-39, PC-43; Lokman 15 Kasım 2026, kart 10:48:34 "Eskizdeki gibi"): makas yönünde 7 m'yi aşan açıklıkta köşeye tavan kirişi
+    # (`tavan_kirisi.bul`); kirişsiz evin modelinde anahtar yok (liste aynen)
+    from . import tavan_kirisi as _tk
+    tavan = _tk.bul(plan, ie)
     brut = bina_brut_cm2(plan)                                 # D-49: antet de bunu okur; BK-14 taşan veranda, İE-24 girintili gövde orada
     if plan.dis_verandalar:                                    # BK-14: ana çatı gövdeyi örter; brüt gövde + veranda, dış kutunun boş köşeleri sayılmaz
         gx0, gy0, gx1, gy1 = G.govde_kutusu(plan)
@@ -399,6 +403,8 @@ def model_motor(ie: dict) -> dict:
             "veranda_kenarlari_cm": kirisler, **({"veranda_dis_kenar_sira": dis_kenar_sira} if dis_kenar_sira else {}),
             **({"veranda_kenar_uc_kolonlari": kenar_kolon} if any(n_ > 1 for n_ in kenar_kolon) else {}),
             **({"nis_agizlari_cm": nis_agizlari} if nis_agizlari else {}),
+            **({"tavan_kirisleri": tavan["kirisler"]} if tavan["kirisler"] else {}),
+            **({"tavan_kirisi_uyarilari": tavan["uyarilar"]} if tavan["uyarilar"] else {}),
             "kapali": [oda(m) for m in kapali], "acik": [{**oda(m), "tur": "veranda"} for m in acik],
             "sigorta_en_uzak": en_uzak,
             # BK-23 (D-55): `yapi.lento_cm` yazılmışsa pencere üst kotu modelde taşınır; liste modülün durumunu okumaz (yazılmamışsa anahtar yok, 200)
@@ -1091,6 +1097,12 @@ def elektrik_oda(N: dict, EO, odalar_k, AM) -> tuple[dict, dict]:
     return say, {a: " ".join(x for x in (uyari.get(a), " + ".join(d)) if x) for a, d in dokum.items()}
 
 
+def _tavan_kirisi_kurali() -> dict:
+    """D-107: `kurallar/yerlesim/prefabrik.json › tavan_kirisi` (eşik, duvara oturma, kalem; `tavan_kirisi.kural`)."""
+    from . import tavan_kirisi as _tk
+    return _tk.kural()
+
+
 def liste(N: dict, kurallar: dict | None = None, pafta: dict | None = None) -> dict:
     kurallar = kurallar or kurallari_oku()
     k, R = kurallar["ortak"], kurallar["prefabrik"]
@@ -1274,6 +1286,15 @@ def liste(N: dict, kurallar: dict | None = None, pafta: dict | None = None) -> d
         ekle("1002", "Kutu profil (kiriş) 100 × 100", f"L {mm(L_)}", 1, "Liste kuralı",
              "duvarsız sınırın boyu (İş Emri'nde açık sınır, aks arası)" if N["kaynak"] == "Motor" else "paftadan okunan kiriş boyu (çatı kenarında değil: duvarsız açıklık)",
              "E5 L 3255 ve TS-01 L 2800 gerçek listelerde var; duvarsız açıklığa kiriş gelir (Lokman, kart 22 Ekim)")
+    tk_ = None
+    for t_ in N.get("tavan_kirisleri") or []:                  # D-107: makas yönünde 7 m'yi aşan açıklığın kirişi; ucunda kolon yok
+        tk_ = tk_ or _tavan_kirisi_kurali()
+        ekle("1002", tk_["kalem"], f"L {mm(t_['liste_boyu_cm'])}", 1, "Liste kuralı",
+             f"tavan kirişi ({t_['oda']}, makas yönünde açıklık {sy(t_['aciklik_cm'])} cm > {sy(tk_['esik'])}): yüzden yüze {sy(t_['yuzden_yuze_cm'])}"
+             f" + 2 × {sy(tk_['oturma'])} (iki ucu duvarda; uçta kolon yok)",
+             "Lokman, 15 Kasım 2026: 09:47:33 \"eşik 7 metre olsun\"; kart 10:22:40 \"Evet, bu kuralla\"; kart 10:48:34 \"Eskizdeki gibi\" (D-107)")
+    for u_ in N.get("tavan_kirisi_uyarilari") or []:            # K21: yer bulunamadı ya da iki eşit yer: kiriş yazılmaz, sorulur
+        ekle("1002", "Kutu profil (kiriş) 100 × 100", "L ?", None, "Kural yok", f"UYARI: {u_} (D-107)", "")
     ec = Counter((e["duvar"], e["cins"]) for e in N["ekler"])
     ek_s = Counter((e["duvar"], e["cins"]) for e in N["ekler"] if e["sacak"])
     ekle("1002", f"H {dk} (dış pano eki)", f"{dk} × {dk} × {mm(H0)}", ec[("dis", "pano_eki")], "Sayım", "her dış ekte bir H", "kulaklı / dübelli ayrımı: aday",
