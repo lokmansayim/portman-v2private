@@ -669,7 +669,9 @@ class Cizici:
                 self._dis_parca_olculeri(ox, oy, dolu if getattr(self, "_girinti_kirisleri", None) else None)
             for v in ([] if en_boy else plan.dis_verandalar):   # BK-14: taşan verandanın eni ve derinliği
                 vx0, vy0, vx1, vy1 = v["rect"]
-                if v["cephe"] in ("on", "arka"):
+                if v.get("nis"):                            # D-109: boşluğun yanında yan kirişin boyu (52 m² 242,5), öteki yanda taşma
+                    self._kose_verandasi_olculeri(v, ox, oy)
+                elif v["cephe"] in ("on", "arka"):
                     self.dim((vx0 + ox, (vy0 if v["cephe"] == "on" else vy1) + oy), (vx1 + ox, (vy0 if v["cephe"] == "on" else vy1) + oy),
                              (0, (vy0 - 40 if v["cephe"] == "on" else vy1 + 40) + oy), 0)
                     self.dim((vx1 + ox, vy0 + oy), (vx1 + ox, vy1 + oy), (vx1 + 40 + ox, 0), 90)
@@ -682,8 +684,10 @@ class Cizici:
                     if abs(p.boy - G.MOD) < 1e-6: continue
                     if p.acilim is not None and p.acilim.tur == "kubbe": continue     # İE-29: kubbenin ölçüsü kendi zincirinde
                     self._ozel_olcu(d, p.rect(), W, H, ox, oy, "OZEL_PANEL_OLCU_CM", dolu)
+            nis_ad = {v["ad"] for v in plan.dis_verandalar if v.get("nis")}
             for ad, m in plan.mahaller.items():
                 if not m.acik or not m.cells: continue      # taşan veranda (BK-14) yukarıda ölçülü
+                if ad in nis_ad: continue                   # D-109: köşe boşluğu taşan verandayla tek mahal, ölçüsü yukarıda
                 if plan.girintili: continue                 # D-34: açık mahalin eni ve derinliği dış parça ölçüsünde (aynı yer iki kez ölçülmez)
                 us = [u for u, v in m.cells]; vs = [v for u, v in m.cells]
                 x0, x1 = G.X(min(us) / 2), G.X((max(us) + 1) / 2); y0, y1 = G.Y(min(vs) / 2), G.Y((max(vs) + 1) / 2)
@@ -1057,6 +1061,30 @@ class Cizici:
             return False
         x0, y0, x1, y1 = a.poly.bounds
         return ((x1 - x0) if d.yon == "y" else (y1 - y0)) < G.MOD + 1e-6     # veranda (ör. katalog P3701, 241) dar sayılmaz
+
+    def _kose_verandasi_olculeri(self, v: dict, ox: float, oy: float) -> None:
+        """D-109 (BK-40): köşe boşluğundan taşan verandanın ölçüleri: eni (dış kenarda, öteki taşan verandalar gibi), boşluğun yanında yan
+        kirişin boyu (gövdenin köşesinden dış kenara; 52 m² paftasında 242,5) ve öteki yanda taşma (117). Yanlar dışarıya 40 cm."""
+        vx0, vy0, vx1, vy1 = v["rect"]
+        s = v["nis"]["yan"]
+        ex0, ey0, ex1, ey1 = v["kenarlar"][1 + s]
+        fx0, _fy0, _fx1, fy1 = self.plan.footprint().bounds
+        if v["cephe"] in ("on", "arka"):
+            y_dis = vy0 if v["cephe"] == "on" else vy1
+            self.dim((vx0 + ox, y_dis + oy), (vx1 + ox, y_dis + oy), (0, (vy0 - 40 if v["cephe"] == "on" else vy1 + 40) + oy), 0)
+            x_n, x_o = (vx0, vx1) if s == 0 else (vx1, vx0)
+            yon = -1.0 if s == 0 else 1.0
+            ic = abs(x_n - fx0) < 1.0                       # gövdenin sol yüzünde: aks numaraları orada, ölçü verandanın içinde (55 m²)
+            self.dim((x_n + ox, ey0 + oy), (x_n + ox, ey1 + oy), (x_n + 40 * (-yon if ic else yon) + ox, 0), 90)
+            self.dim((x_o + ox, vy0 + oy), (x_o + ox, vy1 + oy), (x_o - 40 * yon + ox, 0), 90)
+        else:
+            x_dis = vx0 if v["cephe"] == "sol" else vx1
+            self.dim((x_dis + ox, vy0 + oy), (x_dis + ox, vy1 + oy), ((vx0 - 40 if v["cephe"] == "sol" else vx1 + 40) + ox, 0), 90)
+            y_n, y_o = (vy0, vy1) if s == 0 else (vy1, vy0)
+            yon = -1.0 if s == 0 else 1.0
+            ic = abs(y_n - fy1) < 1.0                       # gövdenin arka yüzünde: aks harfleri orada, ölçü verandanın içinde
+            self.dim((ex0 + ox, y_n + oy), (ex1 + ox, y_n + oy), (0, y_n + 40 * (-yon if ic else yon) + oy), 0)
+            self.dim((vx0 + ox, y_o + oy), (vx1 + ox, y_o + oy), (0, y_o - 40 * yon + oy), 0)
 
     def _dis_parca_olculeri(self, ox: float, oy: float, dolu: list | None = None) -> None:
         """D-34 (Lokman, 30 Ekim 2026 14:45: "mor ile çizdiğim yerleri de ölçeklendir rengi de mor olsun"): girintili gövdede (İE-24) kapalı

@@ -554,6 +554,9 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
     for vi, v in enumerate(VER):
         vk = v["rect"]
         kol = [b for b in BAG if b["tur"] == "dikme" and icinde_kutu(b["rect"], vk)]
+        if len(kol) > 2:                        # D-109 (PC-45): ara kolonlu dış kiriş listede parça parça; rehber tek dış kirişi kurar
+            raise Desteklenmiyor(f"{v['ad']}: {len(kol) - 2} ara kolonlu veranda (kolon arası en çok 565 cm, D-109); rehber iki kolonlu "
+                                 f"verandayı kurar")
         kir = [b for b in BAG if b["tur"] == "veranda_profil" and icinde_kutu(b["rect"], vk)]
         on = v["cephe"] == "on"
         dis_y = vk[1] if on else vk[3]          # verandanın dış kenarı (kiriş dış yüzü)

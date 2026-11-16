@@ -73,7 +73,7 @@ def _golge(plan: G.Plan, d, dis: str):
     from shapely.geometry import box
     from shapely.ops import unary_union
     x0, y0, x1, y1 = G.govde_kutusu(plan)
-    dis_v = {v["ad"] for v in plan.dis_verandalar}
+    dis_v = {v["ad"] for v in plan.dis_verandalar if not v.get("nis")}   # D-109: köşe boşluğu gövdede açık kalır (yanı görünüşte açık)
     acik = [m.poly for m in plan.mahaller.values() if m.acik and m.poly is not None and m.ad not in dis_v]
     govde = G.govde_cokgeni(plan)
     govde = govde.difference(unary_union(acik)) if acik else govde
