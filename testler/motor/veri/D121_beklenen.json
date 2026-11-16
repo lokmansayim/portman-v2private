@@ -1,0 +1,241 @@
+{
+ "sema": "portman.d121_hedef/1",
+ "aciklama": "D-121 hedef örneği: 60 m² 2+1 katalog evi (P6001 r03), Lokman'ın 60 m² sohbetinde onayladığı kat planının pano dizilimi. Girdi testler/motor/veri/D121_60m2_is_emri.json (r03'ün A′ ek aksı ve x 104,125 dayanağı yerine yapi.dizilim.dik_duvar_pencere: tam_orta). Dizilim r03'ün Motor çıktısından (dal claude/project-thread-di7i2v, commit c4a2c251).",
+ "onay": {
+  "tarih": "2026-11-16",
+  "saat": "20:57",
+  "soz": "kart \"Onaylıyorum\" (soru: \"60 m2 kat planını (A′ aksıyla) onaylıyor musunuz?\"); 20:56:44 \"tamam çok güzel oldu istediğim bu\"; 20:50:02 \"yatak odası 2 120/180 penceresini tam ortaya al yani 125,5 + 62,75 = 188,25 / 2 = 94,125 sağına ve soluna koy bu panoları\""
+ },
+ "duvarlar": [
+  {
+   "duvar": "dis x 5",
+   "panolar": [
+    [
+     10.0,
+     94.125,
+     ""
+    ],
+    [
+     104.125,
+     125.5,
+     "pencere"
+    ],
+    [
+     229.625,
+     94.125,
+     ""
+    ]
+   ]
+  },
+  {
+   "duvar": "dis x 256",
+   "panolar": [
+    [
+     328.75,
+     120.5,
+     "dis_kapi"
+    ],
+    [
+     449.25,
+     62.75,
+     ""
+    ],
+    [
+     512.0,
+     125.5,
+     "pencere"
+    ],
+    [
+     637.5,
+     125.5,
+     ""
+    ]
+   ]
+  },
+  {
+   "duvar": "ic x 256",
+   "panolar": [
+    [
+     10.0,
+     125.5,
+     ""
+    ],
+    [
+     135.5,
+     62.75,
+     ""
+    ],
+    [
+     198.25,
+     125.5,
+     "ic_kapi"
+    ]
+   ]
+  },
+  {
+   "duvar": "ic x 444.25",
+   "panolar": [
+    [
+     10.0,
+     125.5,
+     ""
+    ],
+    [
+     135.5,
+     62.75,
+     ""
+    ],
+    [
+     198.25,
+     125.5,
+     "ic_kapi"
+    ]
+   ]
+  },
+  {
+   "duvar": "dis x 758",
+   "panolar": [
+    [
+     10.0,
+     125.5,
+     ""
+    ],
+    [
+     135.5,
+     125.5,
+     ""
+    ],
+    [
+     261.0,
+     125.5,
+     ""
+    ],
+    [
+     386.5,
+     125.5,
+     ""
+    ],
+    [
+     512.0,
+     125.5,
+     ""
+    ],
+    [
+     637.5,
+     125.5,
+     ""
+    ]
+   ]
+  },
+  {
+   "duvar": "dis y 5",
+   "panolar": [
+    [
+     5.0,
+     125.5,
+     ""
+    ],
+    [
+     130.5,
+     125.5,
+     ""
+    ],
+    [
+     256.0,
+     125.5,
+     "pencere"
+    ],
+    [
+     381.5,
+     125.5,
+     ""
+    ],
+    [
+     507.0,
+     125.5,
+     "pencere"
+    ],
+    [
+     632.5,
+     125.5,
+     ""
+    ]
+   ]
+  },
+  {
+   "duvar": "ic y 198.25",
+   "panolar": [
+    [
+     259.0,
+     122.5,
+     "ic_kapi"
+    ],
+    [
+     381.5,
+     59.75,
+     ""
+    ]
+   ]
+  },
+  {
+   "duvar": "dis y 328.75",
+   "panolar": [
+    [
+     5.0,
+     125.5,
+     ""
+    ],
+    [
+     130.5,
+     120.5,
+     ""
+    ]
+   ]
+  },
+  {
+   "duvar": "ic y 323.75",
+   "panolar": [
+    [
+     447.25,
+     122.5,
+     ""
+    ],
+    [
+     569.75,
+     125.5,
+     ""
+    ],
+    [
+     695.25,
+     57.75,
+     ""
+    ]
+   ]
+  },
+  {
+   "duvar": "dis y 768",
+   "panolar": [
+    [
+     256.0,
+     125.5,
+     ""
+    ],
+    [
+     381.5,
+     125.5,
+     ""
+    ],
+    [
+     507.0,
+     125.5,
+     "pencere"
+    ],
+    [
+     632.5,
+     125.5,
+     ""
+    ]
+   ]
+  }
+ ]
+}

@@ -246,7 +246,13 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | D | D-113 | (başka sohbet: çelik havuz evleri tek kat panel; BK-48) | alındı (16.11) |
 | D | D-114 | (başka sohbet: iki cumba ve boyuna kırma listesi; BK-45) | alındı (16.11) |
 | D | D-115 | havuz evlerinin hazır 9 çatı seçeneği havuzda (İE-44; Lokman 16.11 08:46:30 kartı) | yazıldı (16.11; çatı seçenekleri sohbeti, `claude/project-thread-co84co`) |
-| D | **D-116** | — | **sıradaki boş** |
+| D | D-116 | (başka sohbet: BK-49 kararları, cumba makası ve teras paneli; BK-45) | alındı (16.11) |
+| D | D-117 | (başka sohbet: İE-44'ün 18 çatı seçeneği) | alındı (16.11) |
+| D | D-118 | (başka sohbet: prefabrik standart yükseklik 2,50 m, mühür M-19; PR #260) | alındı (16.11) |
+| D | D-119 | (başka sohbet: kutu profil fiyatı çeyrek boy; PR #261) | alındı (16.11) |
+| D | D-120 | (başka sohbet: Kasım 2026 fiyat istisnası; PR #261) | alındı (16.11) |
+| D | D-121 | makas aksı kaymaz; makasa dik duvarda pencere her zaman odanın tam ortasında, yan 125,5'i aşarsa 125,5 pencere yanında, kalan uçta; yalnız yeni çizilen evler (anahtar); çizime yeni aks çıkmaz (BK-52, PC-46; Lokman 16.11 20:56:44, kartlar 21:14:20, 21:15:33, 21:36:53, 21:38:12, 21:44:20) | yazıldı (16.11; aks kayma sohbeti, `claude/project-thread-qnrohi`) |
+| D | **D-122** | — | **sıradaki boş** |
 | İE | İE-01–İE-08 | bu depo (`main`) | yazıldı |
 | İE | İE-09 | model atölyesi: kontrollü model üretimi ve banka hattı (Görev 6e; pano 30; P6001 güncellemesi kapsam dışı) | alındı (16.10; `claude/gorev-6e-model-atolyesi-rnhtcp`; PR-1 banka hattı 29.10, `claude/project-thread-rhjgzv`) |
 | İE | İE-10, İE-11, İE-12 | prefabrik hattı (PR #12, PR #14, `ie-12-prefabrik-bayi-paftasi`) | `main`'e BK-12 ile (PR-1: motor ve bayi paftası; liste ve mühür kıyası sonraki PR'larda) |
@@ -316,7 +322,9 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | BK | BK-41 | Pano Motor'unda iç duvarın dış duvar ucunda kalan parça (D-108, PC-44; `claude/project-thread-myf3km`) | yazıldı (15.11; CIO 22:06) |
 | BK | BK-42 | Bayi plan görselinde dış ölçü DXF ve PDF'teki gibi iki ondalık (951,25 cm "951,2" yazılıyordu); 13 kayıtlı seçenek resmi yeniden çizildi (Lokman 15.11 21:50 kartı "Evet, iş açılsın", 22:29 kartı "Evet, 12 resim de düzelsin"; `claude/project-thread-r8278d`) | alındı (15.11; 21:58) |
 | BK | BK-43 | (başka sohbet: CI doğrulamasında pytest dosya dosya parçalara bölünür; gece bakım işi) | alındı (16.11) |
-| BK | **BK-44** | — | **sıradaki boş** |
+| BK | BK-44 … BK-51 | (başka sohbetler; numara defteri) | alındı (16.11) |
+| BK | BK-52 | Pano Motor'unda makas aksı kaymaz, makasa dik duvarda pencere tam ortada (anahtar `dizilim.dik_duvar_pencere`; hakem HD-12) (D-121, PC-46; `claude/project-thread-qnrohi`) | yazıldı (16.11) |
+| BK | **BK-53** | — | **sıradaki boş** |
 
 ## 27 Eylülde Lokman'ın verdiği kararlar
 

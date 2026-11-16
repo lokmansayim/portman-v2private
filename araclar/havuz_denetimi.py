@@ -20,6 +20,8 @@ Kalemler:
   HD-07  Makas sayısı gerçek projenin kartıyla (yalnız --kart-klasoru verilirse; fark D-44 gibi bilinen bir kuraldan olabilir)  (bilgi)
   HD-11  Çelik: havuz evi standart çatı kaplamasıyla çizilir (kitabın baz paketi, tek kat panel; Lokman 16 Kasım 2026 08:27:26 kartı
          "Standart: tek kat panel": havuzdaki her çelik ev tek kat panelle çizilir, bayi kaplamayı formda seçer)   (uyarı)
+  HD-12  Prefabrik: makas aksı kaymaz; saçak duvarlarının pano ekleri tek 62,75'lik ızgarada (D-121, Lokman 16 Kasım 2026 20:56:44
+         "makas yönündeki akslar çok önemli makasları o akslara oturtuyoruz", kart 21:14:20 "Okuma 1"; `G.makas_aksi_denetimi`)   (uyarı)
 
 Kullanım:
   python -m araclar.havuz_denetimi [--kart-klasoru <Proje_Karti>] [--json <çıktı.json>] [--md <çıktı.md>]
@@ -54,10 +56,11 @@ KALEMLER = {
     "HD-10": "3D'deki ana çatı İş Emri'nin çatı biçiminde",
     "HD-07": "Makas sayısı gerçek projenin kartıyla",
     "HD-11": "Çelik ev standart çatı kaplamasıyla",
+    "HD-12": "Makas aksı kaymaz (saçak duvarında ek tam ya da yarım aksta)",
 }
-SINIF = {"HD-01": "hata", "HD-02": "uyari", "HD-03": "hata", "HD-04": "hata", "HD-05": "hata", "HD-06": "uyari", "HD-08": "hata", "HD-09": "uyari", "HD-10": "hata", "HD-07": "bilgi", "HD-11": "uyari"}
+SINIF = {"HD-01": "hata", "HD-02": "uyari", "HD-03": "hata", "HD-04": "hata", "HD-05": "hata", "HD-06": "uyari", "HD-08": "hata", "HD-09": "uyari", "HD-10": "hata", "HD-07": "bilgi", "HD-11": "uyari", "HD-12": "uyari"}
 # Motor'a göre denetlenen kalemler; tablo ötekilere "–" yazar.
-DENETLENEN = {"prefabrik": {"HD-01", "HD-02", "HD-03", "HD-04", "HD-05", "HD-06", "HD-07", "HD-08", "HD-09", "HD-10"},
+DENETLENEN = {"prefabrik": {"HD-01", "HD-02", "HD-03", "HD-04", "HD-05", "HD-06", "HD-07", "HD-08", "HD-09", "HD-10", "HD-12"},
               "genel": {"HD-01", "HD-02", "HD-03", "HD-04", "HD-05", "HD-11"}}
 
 
@@ -178,6 +181,8 @@ def denetle_prefabrik(ie: dict, kart: dict | None = None) -> dict:
         plan = G.kur(kopya())
         for u in plan.uyarilar:
             B.append(_b("HD-02", u))
+        for u in G.makas_aksi_denetimi(plan, (ie.get("cati") or {}).get("makas_ekseni", "x")):   # D-121
+            B.append(_b("HD-12", u))
     except Exception as e:                                               # IsEmriHatasi dahil: ev kurulamıyor
         B.append(_b("HD-01", f"Motor kuramadı: {type(e).__name__}: {e}"))
         return r
@@ -311,7 +316,7 @@ def havuza_mi(havuz: bool, durum: str, test_dosyasi: bool = False) -> bool:
 
 def kayit_kapisi(r: dict) -> tuple[list[str], list[str]]:
     """D-112 (Lokman, 16 Kasım 2026 08:07:06 kartı "Evet, hatalı yeni ev girmesin"): (kaydı durduran hata bulguları, kayda yazılan
-    uyarılar). Hata sınıfı: HD-01, HD-03, HD-04, HD-05, HD-08, HD-10; uyarı: HD-02, HD-06, HD-09, HD-11; bilgi (HD-07) kapıya girmez."""
+    uyarılar). Hata sınıfı: HD-01, HD-03, HD-04, HD-05, HD-08, HD-10; uyarı: HD-02, HD-06, HD-09, HD-11, HD-12; bilgi (HD-07) kapıya girmez."""
     dur = [f"{b['kalem']} {KALEMLER[b['kalem']]}: {b['metin']}" for b in r["bulgular"] if b["sinif"] == "hata"]
     uyari = [f"{b['kalem']}: {b['metin']}" for b in r["bulgular"] if b["sinif"] == "uyari"]
     return dur, uyari
