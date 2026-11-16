@@ -304,12 +304,20 @@
   }
  ],
  "cati": {
-  "tip": "besik",
+  "tip": "besik_cumba",
   "egim_yuzde": 32.9,
   "sacak_cm": 30,
   "topuk_cm": 10,
   "makas_yonu": "kisa_kenar",
-  "makas_ekseni": "y"
+  "makas_ekseni": "y",
+  "cumbalar": [
+   {
+    "cephe": "on",
+    "bas_cm": 0,
+    "bit_cm": 323.75,
+    "cikinti_cm": 0
+   }
+  ]
  },
  "cikti": {
   "pdf": true,
@@ -323,7 +331,7 @@
   "HOL ve SALON: paftada aralarında duvar yok; aks çizgisinden bölündü, sınır açık (HOL paftada 1.53 m², SALON paftada 16.32 m²).",
   "VERANDA: gövdenin içinde açık mahal (paftada kesik çizgi); 0 dikme yazıldı.",
   "İç duvar kalınlıkları karışık {6.0: 6, 10.0: 2}; çoğunluk 6 cm yazıldı.",
-  "Çatı beşik, %32,9, saçak 30, topuk 10 (paftanın planında eğim yok; prefabrik standardı).",
+  "Çatı beşik + ön cumba, %32,9, saçak 30, topuk 10: cumba salonun önünde, ön cephede 0–323,75 cm (paftanın makas planı: cumba baş makası 374, profil 373,75 saçakla, tepe 56). Eğim paftanın planında yok; prefabrik standardı.",
   "Pano dizilimi paftadan: sol hattında y 135.5'dan 125,5; 318.75 hattında y 72.75'dan 125,5; 444.25 hattında y 198.25'dan 125,5; sag hattında y 135.5'dan 125,5; 323.75 hattında x 193.25'dan 125,5; 323.75 hattında x 569.75'dan 125,5; 574.75 hattında x 569.75'dan 125,5 (dizilim.dis_pano_dayanagi)."
  ]
 }

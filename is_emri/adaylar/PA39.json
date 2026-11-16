@@ -214,12 +214,20 @@
   }
  ],
  "cati": {
-  "tip": "besik",
+  "tip": "besik_cumba",
   "egim_yuzde": 32.9,
   "sacak_cm": 30,
   "topuk_cm": 10,
   "makas_yonu": "kisa_kenar",
-  "makas_ekseni": "y"
+  "makas_ekseni": "y",
+  "cumbalar": [
+   {
+    "cephe": "on",
+    "bas_cm": 0,
+    "bit_cm": 323.75,
+    "cikinti_cm": 0
+   }
+  ]
  },
  "cikti": {
   "pdf": true,
@@ -236,7 +244,7 @@
   "VERANDA: gövdenin içinde açık mahal (paftada kolon); 1 dikme yazıldı.",
   "Bölge 4 (9.45 m² aks alanı): paftada oda adı yok; YATAK ODASI sayıldı (tefriş yok).",
   "İç duvar kalınlıkları karışık {6.0: 4, 10.0: 2}; çoğunluk 6 cm yazıldı.",
-  "Çatı beşik, %32,9, saçak 30, topuk 10 (paftanın planında eğim yok; prefabrik standardı).",
+  "Çatı beşik + ön cumba, %32,9, saçak 30, topuk 10: cumba salon ve mutfağın önünde, ön cephede 0–323,75 cm (paftanın makas planı: cumba baş makası 380, yavru makas 192, iki ters mahya). Eğim paftanın planında yok; prefabrik standardı.",
   "Pano dizilimi paftadan: sol hattında y 135.5'dan 125,5; 444.25 hattında y 10'dan 125,5; arka hattında x 318.75'dan 125,5; on hattında x 193.25'dan 125,5 (dizilim.dis_pano_dayanagi)."
  ],
  "dikmeler": [
