@@ -347,9 +347,10 @@ def _cikintili_cumba_tanimi(plan, ie: dict) -> dict:
     kuralıyla (`cati_capraz.ana_makaslari`: saçak duvarının pano ekleri, değilse eşit aralık ve uyarı; sayı ⌈(boy − 2 × dış duvar) ÷ 125,5⌉
     + 1); gövdenin cumbası dış uçtaki kalkan duvarının ekseninden 125,5 arayla derelerin birleştiği yere kadar (D-47). Çıkıntının içindeki
     makaslar (ilki kalkan duvarında) cumbanın yan duvarlarına oturan beşik makası; çıkıntının ötesindekiler ana çatının üstünde iki dere
-    arasında (geometri hakemi, 16 Kasım: 91 m²'de çıkıntı 220, makas ana çatının saçağından taşıyordu). Liste yazılmıyorsa (iki cumba)
-    makaslar listenin kuralıyla kurulur, uyarıyla. Taşan verandanın cumbasının (PC-38) makas kuralı listede yok: o cumbada makas yok,
-    uyarıyla (K16)."""
+    arasında (geometri hakemi, 16 Kasım: 91 m²'de çıkıntı 220, makas ana çatının saçağından taşıyordu). Liste yazılmıyorsa makaslar
+    listenin kuralıyla kurulur, uyarıyla. Taşan verandanın cumbasının (PC-38) makasları listedeki yerde (`makas_konum_cm`: dış kirişin
+    ekseninden 125,5 arayla; BK-45, 45 m² paftası MK09–MK10) ve listedeki parça adıyla ("sundurma çatısı"); kirişlerin üstündekiler beşik
+    makası, ötekiler ana çatının üstünde. Listede yer yoksa o cumbada makas yok, uyarıyla (K16)."""
     from . import cati_prefabrik as CP
     from .cati_capraz import ana_makaslari
     from .cati_serit import _eksen
@@ -371,16 +372,18 @@ def _cikintili_cumba_tanimi(plan, ie: dict) -> dict:
                  "makaslar": [{"konum": round(x, 2), "rol": "bas" if i in (0, len(yer) - 1) else "orta"} for i, x in enumerate(yer)],
                  "makas_yeri": "pano ekleri" if not uyarilar else "eşit aralık", "komsu": None}]
     from . import prefabrik_liste as PL
+    lp = []                                                          # cumbaların liste parçaları, `cumbalar` sırasıyla
     try:
-        PL._capraz_cumba_catilari(plan, ie)
+        lp = PL._capraz_cumba_catilari(plan, ie)[0][1:]
     except PL.ListeYazilmaz as e:
         uyarilar = uyarilar + [f"makas yeri: yükleme listesi yazılmıyor ({e.neden}); makaslar listenin kuralıyla, liste gelince kıyaslanacak"]
     kenarlar = cati_genel.cati_kur(t)["kenarlar"]
     for j, (u, r) in enumerate(zip(c["cumbalar"], rs)):
         onek = "cumba " if j == 0 else "cumba 2 "
         yuzler = [d["ad"] for d in t["duzlemler"] if d["ad"].startswith(onek) and (j > 0 or not d["ad"].startswith("cumba 2 "))]
-        if "veranda" in u:                                           # PC-38: taşan verandanın cumbası; makas kuralı listede yok
-            uyarilar = uyarilar + [f"makas yeri: {u['veranda']} verandasının cumbasında makas kuralı listede yok; 3D'de makas yok"]
+        liste_yeri = ((lp[j].get("makas_konum_cm") or {}).get("degerler") if j < len(lp) else None) if "veranda" in u else None
+        if "veranda" in u and not liste_yeri:                        # PC-38: taşan verandanın cumbası; yer yalnız listeden (D-28)
+            uyarilar = uyarilar + [f"makas yeri: {u['veranda']} verandasının cumbasında makas yeri listede yok; 3D'de makas yok"]
             continue
         mh = [e for e in kenarlar if e["tur"] == "mahya" and set(e["duzlemler"]) <= set(yuzler)]
         if len(mh) != 1:
@@ -392,17 +395,20 @@ def _cikintili_cumba_tanimi(plan, ie: dict) -> dict:
         eks = 1 if cephe in ("on", "arka") else 0
         birlesim = max(abs(v[eks] - dis) for v in (mh[0]["p"], mh[0]["q"]))
         uzak = [h + i * MOD for i in range(int(math.floor((birlesim - h) / MOD - 1e-9)) + 1)]
-        cikinti = abs((cy1 - cy0) if eks == 1 else (cx1 - cx0))     # gövdenin çıkıntısı: altında cumbanın yan duvarları var
+        if liste_yeri:                                               # BK-46 eki (BK-45 listesi): verandanın cumbası dış kirişin ekseninden
+            uzak = [round(abs(v - dis), 2) for v in liste_yeri]
+        cikinti = abs((cy1 - cy0) if eks == 1 else (cx1 - cx0))     # gövdenin çıkıntısı (verandada derinliği): altında yan duvar ya da kiriş
         ca = sorted((dis, dis + ic * birlesim))
         cb = [cx0, cx1] if eks == 1 else [cy0, cy1]
         cbm = (cb[0] + cb[1]) / 2
-        parcalar.append({"ad": "cumba" if j == 0 else "cumba 2", "rol": "cumba", "capraz": True, "cephe": cephe, "dis_uc": round(dis, 2),
+        parcalar.append({"ad": lp[j]["ad"] if liste_yeri else "cumba" if j == 0 else "cumba 2", "rol": "cumba", "capraz": True, "cephe": cephe, "dis_uc": round(dis, 2),
                          "a": [round(v, 2) for v in ca], "b": [round(v, 2) for v in cb], "aciklik_cm": round(cb[1] - cb[0], 2),
                          "boy_cm": round(birlesim, 2), "mahya": [[round(v, 4) for v in mh[0]["p"]], [round(v, 4) for v in mh[0]["q"]]],
                          "mahya_kotu": round(zs + eg * (cbm - cb[0] + s), 2), "duzlemler": yuzler,
                          "makaslar": [{"konum": round(dis + ic * d_, 2), "rol": "bas" if i == 0 else "orta", "uzaklik": round(d_, 2),
                                        **({} if d_ < cikinti - 1e-6 else {"ana_ustunde": True})} for i, d_ in enumerate(uzak)],
-                         "makas_yeri": f"kalkan duvarının ekseninden {MOD:g} arayla, derelerin birleştiği yere kadar (D-47)", "komsu": "ana çatı"})
+                         "makas_yeri": lp[j]["makas_yeri"] if liste_yeri else
+                         f"kalkan duvarının ekseninden {MOD:g} arayla, derelerin birleştiği yere kadar (D-47)", "komsu": "ana çatı"})
     return {**t, "capraz": True, "parcalar": parcalar, "uyarilar": uyarilar}
 
 

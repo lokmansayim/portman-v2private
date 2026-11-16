@@ -8,8 +8,8 @@ Kural: makas sayısı ve yeri yükleme listesinden (D-28 tek kaynak); listede ye
 - Kubbe (D-54): çizimdeki kubbenin aynısı; üç pano, üç yüzlü çatı, üç makas (listede "Kubbe makası" 3).
 - İki uçlu kırma (İE-33): ana, kısa ve çapraz makaslar listenin `kirma_makas` planında; sayı ve rol listeyle aynı.
 - Tek uçlu kırma (İE-29): kalkan dolgusu var; makaslar AP-27 paftasının makas planında (listede yalnız sayılar), sayı ve rol listeyle aynı.
-- Çıkıntılı çapraz cumba: ana çatı + cumba, parça başına makas sayısı listeyle aynı. İki cumbalı evde (liste bugün yazılmıyor) 3D kurulur;
-  taşan verandanın cumbasında makas kuralı listede yok, uyarı.
+- Çıkıntılı çapraz cumba: ana çatı + cumba, parça başına makas sayısı listeyle aynı. İki cumbalı evde (45, 46, 40 m²) 3D kurulur; taşan
+  verandanın cumbasının makasları listedeki yerde ve adla (BK-45 listesi `main`'e girince, 16 Kasım 2026: "sundurma çatısı" 2).
 - Makaslar y'yi geçince: sayı her evde listeyle aynı; ekler düzensizse eşit aralık ve uyarı (`_cati_y`, `PortatifEv_Uyari`).
 
 Geometri hakemi (16 Kasım 2026) bulgularından: uç açıklık 125,5 + dış duvar ÷ 2'ye kadar düzenli sayılır (PK-02); çıkıntının içindeki
@@ -201,16 +201,27 @@ def test_cikintili_capraz_cumba(kod, beklenen, cikintida, tmp_path):
 
 @pytest.mark.parametrize("kod", ["PA27", "PA28", "PA29"])
 def test_iki_cumba(kod, tmp_path):
-    """İki cumbalı evde (biri taşan verandanın cumbası) 3D kurulur; gövdenin cumbasında 3 makas, verandanın cumbasında makas yok, uyarı."""
+    """İki cumbalı evde (biri taşan verandanın cumbası) 3D kurulur; parça başına makas sayısı listeyle aynı (ana çatı 7, gövdenin cumbası 3,
+    sundurma 2). Verandanın cumbasının makasları listedeki yerde (`makas_konum_cm`: dış kirişin ekseninden 125,5 arayla; 45 m² paftası
+    MK09–MK10) ve listedeki adla; kirişin üstündeki beşik makası, öteki ana çatının üstünde. BK-45'in listesi `main`'e girmeden önce liste
+    yazılmıyordu ve bu test o cumbada makas yok, uyarı bekliyordu (16 Kasım 2026, `docs/is_emirleri/BK-46.md` › Ek)."""
     oz, f = _uret(kod, tmp_path)
     c = oz["cati"]
     uc = Counter(m["parca"] for m in c["makaslar"])
-    assert uc["cumba"] == 3 and uc["ana çatı"] == 7
-    assert any("SUNDURMA verandasının cumbasında makas kuralı listede yok" in u for u in c["uyari"])
-    assert any("yükleme listesi yazılmıyor" in u for u in c["uyari"])
-    assert "yükleme listesi yazılmıyor" in ue.get_psets(_ana_cati(f))["PortatifEv_Uyari"]["MakasYeri"]
-    with pytest.raises(PL.ListeYazilmaz):                                 # liste bugün yazılmıyor (liste sohbetinin işi)
-        _liste_makaslari(kod)
+    liste = Counter()
+    for kalem, adet in _liste_makaslari(kod):
+        liste[_parca(kalem)] += adet
+    assert dict(uc) == dict(liste) == {"ana çatı": 7, "cumba": 3, "sundurma çatısı": 2}
+    ie = _ie(kod)
+    lp = PL._capraz_cumba_catilari(I.G.kur(copy.deepcopy(ie)), ie)[0][1:]
+    for p in lp:
+        assert [m["konum_cm"] for m in c["makaslar"] if m["parca"] == p["ad"]] == p["makas_konum_cm"]["degerler"]
+    assert not any("listede yok" in u or "yazılmıyor" in u for u in c.get("uyari", []))
+    T = I._cikintili_cumba_tanimi(I.G.kur(copy.deepcopy(ie)), ie)
+    q = next(p for p in T["parcalar"] if p["ad"] == "sundurma çatısı")
+    assert [bool(m.get("ana_ustunde")) for m in q["makaslar"]] == [False, True]
+    kalem = [ue.get_psets(a)["PortatifEv_Kapsam"]["BOMKalem"] for a in f.by_type("IfcElementAssembly") if a.Name.startswith("MAKAS_")]
+    assert kalem.count("Yavru makas · sundurma çatısı") == 2
 
 
 # ---------------------------------------------------------------- makaslar y'yi geçince
