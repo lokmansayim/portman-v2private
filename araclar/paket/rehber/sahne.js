@@ -286,7 +286,7 @@ D.panels.forEach(p => {
     if (along[1] > u) piece(u, along[1], 0, H, pm);
   } else {
     const { a0, a1, s: sill, top } = op;
-    const jm = (op.kind === 'win' && PW[op.size].karkas && !dvr) ? mat('steel', s) : pm;   // pencere karkası (X, Y); DVR'de pencere yanları da betopan kaplı ve fugalı (Lokman)
+    const jm = (op.kind === 'win' && PW[op.size].karkas && !dvr) ? mat('steel', s) : pm;   // pencere kör kasası (X, Y); DVR'de pencere yanları da betopan kaplı ve fugalı (Lokman)
     if (sill > 0) piece(along[0], along[1], 0, sill, pm);
     piece(along[0], along[1], top, H, pm);
     piece(along[0], a0, sill, top, jm);
@@ -299,9 +299,9 @@ D.panels.forEach(p => {
     if (sill > 0) fr(a0, a1, sill, sill + f);
     fr(a0, a0 + f, sill, top); fr(a1 - f, a1, sill, top);
   }
-  const yapi = p.karkas ? [['Yapı', 'karkaslı kaplama duvar panosu: tek parça çelik karkas, iki yüzü betopan; içinde derz ve H yok, pencerenin üst ve alt panosu ve özel pencere karkası yok'], ['Kaynak', 'İş Emri, montaj paftasındaki yerinden (D-46)']]
+  const yapi = p.karkas ? [['Yapı', 'karkaslı kaplama duvar panosu: tek parça çelik karkas, iki yüzü betopan; içinde derz ve H yok, pencerenin üst ve alt panosu ve pencere kör kasası yok'], ['Kaynak', 'İş Emri, montaj paftasındaki yerinden (D-46)']]
     : dvr ? [['Yapı', 'çelik karkas (alt ve üst başlık, dikmeler, pencere üstünde kafes başlık), iki yüzü betopan'], ['Kaynak', M.dvr_kaynak]]
-    : op && op.kind === 'win' && PW[op.size].karkas ? [['Yapı', PW[op.size].tip === 'b180' ? '' : `alt pano ${op.s} cm + üst pano ${H - op.top} cm, özel pencere karkası (100'lük çektirme U'su + H)`]] : [];
+    : op && op.kind === 'win' && PW[op.size].karkas ? [['Yapı', PW[op.size].tip === 'b180' ? '' : `alt pano ${op.s} cm + üst pano ${H - op.top} cm, pencere kör kasası`]] : [];
   add(s, g, p.order, { kod: p.card, ad: kart(p.card, p.ad), satir: [['Bu parça', `boy ${fmtc(p.boy)} cm · ${p.tur === 'STD' ? 'standart' : 'özel boy'}`], ['Oda', roomName(p.room)], ['Duvar', `${p.duvar === 'dis' ? 'dış' : 'iç'} · ${fmtc(p.t)} cm`], ...(p.ops && p.ops.length > 1 ? p.ops.map(o => ['Açıklık', openTxt(o)]) : op ? [['Açıklık', openTxt(op)]] : []), ...yapi, ...(disYuz >= 0 && D.fuga ? [['Cephe', D.fuga.metin]] : []), ...kartSat(p.card)] });
 });
 D.hs.forEach(h => {

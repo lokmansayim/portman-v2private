@@ -518,17 +518,17 @@
      "birim": "adet",
      "not": "3'lü H'da 60'lık standart 3'lü H fiyatı (D-36)"
     },
-    "Özel pencere karkası (120×120) (100'lük çektirme U'su + 100'lük H geçen) | 1200 × 1200": {
+    "Pencere kör kasası (120×120) | 1200 × 1200": {
      "kod": null,
      "esleme": "CRM'de yok",
      "birim": "adet",
-     "not": "CRM'de özel pencere karkası yok (D-72: yalnız CRM; CRM'e eklenmeli)"
+     "not": "CRM'de pencere kör kasası yok (D-72: yalnız CRM; CRM'e eklenmeli); D-122: önce \"Özel pencere karkası … (çektirme U'su + H geçen)\""
     },
-    "Özel pencere karkası (120×180) (100'lük çektirme U'su + 100'lük H geçen) | 1200 × 1800": {
+    "Pencere kör kasası (120×180) | 1200 × 1800": {
      "kod": null,
      "esleme": "CRM'de yok",
      "birim": "adet",
-     "not": "CRM'de özel pencere karkası yok (D-72: yalnız CRM; CRM'e eklenmeli)"
+     "not": "CRM'de pencere kör kasası yok (D-72: yalnız CRM; CRM'e eklenmeli); D-122: önce \"Özel pencere karkası … (çektirme U'su + H geçen)\""
     },
     "Çektirme U'su 100 | 100 × 2440": {
      "kod": "MA39",
@@ -1283,17 +1283,17 @@
      "birim": "adet",
      "not": "CRM'de 160'lık parça yok"
     },
-    "Özel pencere karkası (120×120) (160'lık çektirme U'su + 160'lık H geçen) | 1200 × 1200": {
+    "Pencere kör kasası (120×120) (160'lık) | 1200 × 1200": {
      "kod": null,
      "esleme": "CRM'de yok",
      "birim": "adet",
-     "not": "CRM'de özel pencere karkası yok (D-72: yalnız CRM; CRM'e eklenmeli)"
+     "not": "CRM'de pencere kör kasası yok (D-72: yalnız CRM; CRM'e eklenmeli); D-122: önce \"Özel pencere karkası … (çektirme U'su + H geçen)\""
     },
-    "Özel pencere karkası (120×180) (160'lık çektirme U'su + 160'lık H geçen) | 1200 × 1800": {
+    "Pencere kör kasası (120×180) (160'lık) | 1200 × 1800": {
      "kod": null,
      "esleme": "CRM'de yok",
      "birim": "adet",
-     "not": "CRM'de özel pencere karkası yok (D-72: yalnız CRM; CRM'e eklenmeli)"
+     "not": "CRM'de pencere kör kasası yok (D-72: yalnız CRM; CRM'e eklenmeli); D-122: önce \"Özel pencere karkası … (çektirme U'su + H geçen)\""
     },
     "100'lük yapıştırma dolu pano | 100 × 1250 × 2800": {
      "kod": "YP2",
@@ -1483,17 +1483,17 @@
      "birim": "adet",
      "not": "CRM'de alçıpan destek straforu 50 m² paket; listede paket 60 m². Birim anlaşılmadı, hesaplanmaz (TK-06, PR-5)"
     },
-    "Özel pencere karkası (120×100) (100'lük çektirme U'su + 100'lük H geçen) | 1200 × 1000": {
+    "Pencere kör kasası (120×100) | 1200 × 1000": {
      "kod": null,
      "esleme": "CRM'de yok",
      "birim": "adet",
-     "not": "CRM'de özel pencere karkası yok (D-72: yalnız CRM; CRM'e eklenmeli)"
+     "not": "CRM'de pencere kör kasası yok (D-72: yalnız CRM; CRM'e eklenmeli); D-122: önce \"Özel pencere karkası … (çektirme U'su + H geçen)\""
     },
-    "Özel pencere karkası (120×160) (100'lük çektirme U'su + 100'lük H geçen) | 1200 × 1600": {
+    "Pencere kör kasası (120×160) | 1200 × 1600": {
      "kod": null,
      "esleme": "CRM'de yok",
      "birim": "adet",
-     "not": "CRM'de özel pencere karkası yok (D-72: yalnız CRM; CRM'e eklenmeli)"
+     "not": "CRM'de pencere kör kasası yok (D-72: yalnız CRM; CRM'e eklenmeli); D-122: önce \"Özel pencere karkası … (çektirme U'su + H geçen)\""
     },
     "Karkaslı özel pencere panosu (160/180) | 100 × 2500 × 2500": {
      "kod": null,

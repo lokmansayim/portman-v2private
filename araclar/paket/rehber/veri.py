@@ -1202,7 +1202,7 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
         key = f"{en}/{by}"
         kod_ = KK.get(A["kod"])
         vas = en <= 60 and by <= 60
-        karkas = bool(satirlar(f"Özel pencere karkası ({en}×{by})"))
+        karkas = bool(satirlar(f"Pencere kör kasası ({en}×{by})"))   # D-122: önce "Özel pencere karkası"
         pencere[key] = {"kod": kod_, "ad": None if kod_ else f"PVC {'vasistas' if vas else 'pencere'} {key}",
                         "liste": ls("PVC vasistas" if vas else "PVC pencere", key, ad=f"PVC {'vasistas' if vas else 'pencere'}"),
                         "tip": "vasistas" if vas else "acilir", "karkas": karkas}
@@ -1287,7 +1287,7 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
         "ic_kapi_boslugu": "Kapı boşluğu 82 × 200 (kasalı)",
         "dvr_kaynak": "—",
         "ozel_h_liste": "—",
-        "dubel_ad": "Çelik dübel", "dubel_liste": f"{ls('Çelik dübel')} (dübelli H adedi kadar) + {ls('Şase pul', ad='şase pul')}",
+        "dubel_ad": "Çelik dübel", "dubel_liste": f"{ls('Çelik dübel')} (dübelli H adedi kadar)" + (f" + {ls('Şase pul', ad='şase pul')}" if satirlar("Şase pul") else ""),   # D-122: şase pul listede yok
         "ceku_liste": ls(f"Çektirme U'su {IC_MM} (iç duvar)") if satirlar(f"Çektirme U'su {IC_MM} (iç duvar)") else ls(f"Çektirme U'su {IC_MM}"),
         "omega_liste": {"sacak": ls("100'lük saçak omegası"), "duvar": ls("100'lük duvar omegası"), "bas": ls("Baş makas omegası"),
                         "ic": ls("60'lık duvar omegası") if satirlar("60'lık duvar omegası") else ls("60'lık tavan omegası")},
@@ -1477,7 +1477,7 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
               f"{'prefabrik çelik dış kapı (90 × 200, ' + dk_yon + ')' if dk else 'dış kapı'} yerine konur. İç kapılar ({ic_say}) Amerikan kapı; yer ve açılış yönü motorun planından. "
               "Bu adımda çatı, tavan ve izolasyon gizlenir; düğmeyle geri açılır. Kanatlar ve kapılar sırayla açılıp kapanır.",
          "kamera": K([0, 0.8, 0.3], 0.5, 1.0, 15.5),
-         "extra": [x for x in (LR("Özel pencere karkası"), LR("Prefabrik pencere vidası")) if x]},
+         "extra": [x for x in (LR("Pencere kör kasası"), LR("Prefabrik pencere vidası")) if x]},
     ]
     if GIR and not CAP:                           # İE-24: girintili gövdenin yazıları (ana çatı + cumbalar; saçaklar önde ve arkada)
         AD_ = {x["ad"]: x for x in adim if "ad" in x}
