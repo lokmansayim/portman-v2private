@@ -207,7 +207,10 @@
    "bas_cm": 0,
    "bit_cm": 710.25,
    "derinlik_cm": 240,
-   "ara_kolon": 1
+   "ara_kolon": 1,
+   "cati": {
+    "tip": "besik"
+   }
   }
  ],
  "cati": {

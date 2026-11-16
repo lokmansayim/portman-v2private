@@ -388,10 +388,11 @@ def model_motor(ie: dict) -> dict:
     aciklik, bina_boyu = (GW, GD) if mx else (GD, GW)
     serit = None
     from . import cati_serit as _cs
+    from . import cati_prefabrik as CP
     if c.get("tip") == "kirma":                                # İE-29: tek uçlu kırma (AP-27); İE-33: iki ucu kırma (AP-01), makas planı paftadan
         serit = _tek_uclu_kirma_catilari(plan, ie) if c.get("kalkan_ucu") is not None else _iki_uclu_kirma_catilari(plan, ie)
-    elif c.get("tip") == "besik_cumba":                        # İE-17 PR-1b/K7: beşik + çıkıntılı çapraz cumba (AP-22), çizimdeki çatıdan
-        serit = _capraz_cumba_catilari(plan, ie)
+    elif c.get("tip") == "besik_cumba" and not CP.tek_veranda_cumbasi(c):   # İE-17 PR-1b/K7: beşik + çıkıntılı çapraz cumba (AP-22), çizimdeki
+        serit = _capraz_cumba_catilari(plan, ie)               # çatıdan; D-109: köşe verandasının tek cumbası ana beşik + verandanın çatısı (BK-14)
     elif plan.girintili or _cs.mahal_catilari_var(ie):         # İE-24 girintili gövde; İE-17 PR-1b/K7 açık mahalin kendi çatısı (AP-09, AP-03)
         serit = _serit_catilari(plan, ie)                      # (çatı parçaları, çatı tanımı)
     # kitap `kablo_en_uzak_mesafe`: sigorta kutusu (yeri İş Emri'nde yok) giriş kapısında; kapının ortasından kapalı kısmın en uzak köşesine kuş uçuşu
@@ -422,7 +423,8 @@ def model_motor(ie: dict) -> dict:
             **({"ust_kot_cm": G.ust_kot()} if abs(G.ust_kot() - G.PENCERE_UST_KOTU_CM) > 1e-9 else {}),
             **({"cati_tanimi": serit[1]} if serit else {}),
             "cati": (serit[0] if serit else
-                     [{"ad": "ana çatı", "tip": c.get("tip", "besik"), "aciklik_cm": aciklik, "boy_cm": bina_boyu,
+                     [{"ad": "ana çatı", "tip": "besik" if CP.tek_veranda_cumbasi(c) else c.get("tip", "besik"), "aciklik_cm": aciklik,
+                       "boy_cm": bina_boyu,
                        "egim_yuzde": float(c.get("egim_yuzde", 33)), "sacak_cm": float(c.get("sacak_cm", 30)), "kalkan": 2,
                        "makas_kosu_cm": bina_boyu - 2 * t_dis}] + _veranda_catilari(plan, ie)) + _kubbe_catilari(plan, ie),
             "ozellikler": ie.get("ozellikler") or {}, "alici_ait": ie.get("alici_ait") or {}, "is_emri_no": ie.get("is_emri_no"),
@@ -508,15 +510,19 @@ def _veranda_catilari(plan, ie: dict) -> list[dict]:
                         "not": "Motor (D-52): teras paneli; saçağın 10 cm altında, dışarı eğimle panel, üstü trapez sac (panel, damlalık ve "  # kenarda,
                                "tavan satırları çizim onayından sonra)"})                                                           # iki yan alın
             continue
-        if c["tip"] == "besik":
-            mahya = "y" if v["cephe"] in ("on", "arka") else "x"
+        if c["tip"] == "cumba" and not (v.get("nis") and VR.ana_mahya_yonu(ie) != ("y" if v["cephe"] in ("on", "arka") else "x")):
+            raise ListeYazilmaz(f"{v['ad']}: çatısı ana çatının cumbası; liste yalnız köşe boşluğundan taşan verandanın, ana çatının saçak "
+                                "yüzündeki cumbasını sayar (D-109; PC-38'in iki cumbası sayılmaz)")
+        if c["tip"] in ("besik", "cumba"):                 # D-109: köşe verandasının cumbası çapraz beşiğin sayımıyla (iki dere, mahya derelerin
+            mahya = "y" if v["cephe"] in ("on", "arka") else "x"          # birleştiği yere; eğim ve saçak ana çatınınki)
             capraz = mahya != ana_mahya
             if capraz:                                     # saçak hattı dış kenardan ana çatının saçak hattına; mahya ana çatının yüzüne
                 b = (en / 2 + s) * (c["egim_yuzde"] / 100) / max(ana_eg, 1e-6)
                 out.append({"ad": ad, "tip": "besik", "aciklik_cm": en, "boy_cm": derin, "egim_yuzde": float(c["egim_yuzde"]), "sacak_cm": s,
                             "kalkan": 1, "kalkan_kirisli": True, "capraz": True, "acik": True, "mahya_boy_cm": round(derin + s - ana_s + b, 2),
                             "sacak_hatlari_m": [round((derin + s - ana_s) / 100, 3)] * 2,
-                            "not": "Motor (BK-14): ana çatının saçak yüzüne dik beşik; mahya ana çatının yüzüne kadar"})
+                            "not": ("Motor (D-109): verandanın çatısı ana çatının cumbası; iki dereyle girer, mahya derelerin birleştiği yere kadar"
+                                    if c["tip"] == "cumba" else "Motor (BK-14): ana çatının saçak yüzüne dik beşik; mahya ana çatının yüzüne kadar")})
             else:
                 out.append({"ad": ad, "tip": "besik", "aciklik_cm": en, "boy_cm": derin, "egim_yuzde": float(c["egim_yuzde"]), "sacak_cm": s,
                             "kalkan": 1, "kalkan_kirisli": True, "capraz": False, "acik": True, "mahya_boy_cm": derin + s,

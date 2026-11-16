@@ -22,7 +22,8 @@ import pytest
 
 KOK = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(KOK))
-from motor import geometry as G, prefabrik_liste as PL, veranda as VR  # noqa: E402
+from motor import cati_prefabrik as CP, geometry as G, prefabrik_liste as PL, veranda as VR  # noqa: E402
+from motor.genel import cati_genel  # noqa: E402
 
 VERI = KOK / "testler" / "motor" / "veri"
 BEKLENEN = json.loads((VERI / "D109_kose_verandasi_beklenen.json").read_text(encoding="utf-8"))
@@ -59,7 +60,24 @@ def ozet(ie: dict) -> dict:
             "veranda_m2": round(p.mahaller[v["ad"]].alan_m2, 2),
             "dikme_sayisi": len(p.dikmeler), "kose_kolonu": len(p.kose_kolonlari),
             "acik_kenarlar": sorted(_r(e[:4]) for e in p.acik_kenarlar),
-            "liste": {"kolon": kolon, "kirisler": kiris, "ic_kalan_dis_duvar_m": round(N["ic_kalan_dis_duvar_m"], 2), "brut_m2": N["brut_m2"]}}
+            "liste": {"kolon": kolon, "kirisler": kiris, "ic_kalan_dis_duvar_m": round(N["ic_kalan_dis_duvar_m"], 2), "brut_m2": N["brut_m2"]},
+            "cati": cati_ozeti(ie, p)}
+
+
+def cati_ozeti(ie: dict, p) -> dict:
+    """Çatı (16 Kasım 2026 kartı): 52 ve 55 m²'de verandanın çatısı ana çatının cumbası (düzlemler, iki vadi, cumbanın mahyası), 67 m²'de
+    verandanın kendi beşiği (ana çatının kalkan yüzünde)."""
+    c, v = ie["cati"], p.dis_verandalar[0]
+    o = {"tip": c["tip"], "veranda": v["cati"]["tip"]}
+    if CP.tek_veranda_cumbasi(c):
+        with contextlib.redirect_stdout(io.StringIO()):
+            t = CP.cati(p, ie)
+        k = cati_genel.cati_kur(t)["kenarlar"]
+        uc = lambda e: sorted([_r(e["p"][:2]), _r(e["q"][:2])])                  # noqa: E731
+        o.update({"duzlemler": sorted(d["ad"] for d in t["duzlemler"]), "kalkan": len(t["kalkanlar"]),
+                  "vadiler": sorted(uc(e) for e in k if e["tur"] == "vadi"),
+                  "cumba_mahyasi": next(uc(e) for e in k if e["tur"] == "mahya" and all(d.startswith("cumba") for d in e["duzlemler"]))})
+    return o
 
 
 @pytest.mark.parametrize("ev", EVLER)
@@ -188,9 +206,86 @@ def test_cizim_olculeri(tmp_path, ev, olculer, olmayan):
     assert olculer <= olcu and not (olmayan & olcu)
 
 
+def _cumbasiz(ie: dict) -> dict:
+    """Aynı ev, verandanın çatısı Motor'un varsayılan beşiği (16 Kasım kartından önceki girdi)."""
+    ie = copy.deepcopy(ie)
+    ie["cati"]["tip"] = "besik"; ie["cati"].pop("cumbalar")
+    ie["verandalar"][0].pop("cati")
+    return ie
+
+
 def test_ifc_girdisi_birlesik_mahal():
     from motor import ifc_uret
     with contextlib.redirect_stdout(io.StringIO()):
-        g = ifc_uret.hazirla(_ie("52m2"))
+        g = ifc_uret.hazirla(_cumbasiz(_ie("52m2")))
     v = g["dis_verandalar"][0]
     assert round(v["net_m2"], 2) == BEKLENEN["evler"]["52m2"]["sonra"]["veranda_m2"] and len(v["poligon"]) == 6
+
+
+# --- Çatı: Lokman, 16 Kasım 2026 07:03:57 "cumbalı çatıda kurallarını bir yokla bir sıkıntın var gibi"; çatı eskizi kartı 08:05:51
+# "52/55 öneri doğru, 67 böyle" (soru: "Köşe verandasının çatısı bu eskizdeki gibi mi olsun?"; eskiz PF Kose_Verandasi_Motor/
+# 2026-11-16_cati_eskiz_r01/): 52 ve 55 m²'de verandanın çatısı ana çatının cumbası, iki vadiyle girer; 67 m²'de verandanın beşiği.
+
+@pytest.mark.parametrize("ev, cephe_x", [("52m2", 696.25), ("55m2", 224.62)])
+def test_veranda_cumbasi_iki_vadi(ev, cephe_x):
+    """Cumbanın mahyası verandanın ortasında, cepheye dik; iki vadi ana çatının ön yüzüyle mahyanın iç ucunda birleşir. 52 m²'de ortadaki
+    kolon cumbanın tepesinin altında (paftanın veranda profili)."""
+    ie = _ie(ev)
+    p = _kur(ie)
+    o = cati_ozeti(ie, p)
+    (a, b) = o["cumba_mahyasi"]
+    assert a[0] == b[0] and abs(a[0] - cephe_x) < 0.01                   # mahya cepheye dik, verandanın ortasında
+    ic = max(a, b, key=lambda q: q[1])
+    assert len(o["vadiler"]) == 2 and all(ic in vd for vd in o["vadiler"])
+    v = p.dis_verandalar[0]
+    if ev == "52m2":
+        orta = sorted(v["kolonlar"])[1]
+        assert abs((orta[0] + orta[2]) / 2 - a[0]) < 0.01
+    assert not any(u.startswith(f"Veranda {v['ad']}: çatısı") for u in p.uyarilar)   # varsayım ve "dere çizimde yok" uyarısı yok
+
+
+@pytest.mark.parametrize("ev", ("52m2", "55m2"))
+def test_veranda_cumbasi_liste_ayni(ev):
+    """Liste (TASLAK) cumbayı verandanın çapraz beşiğiyle sayar: satırlar karttan önceki girdiyle aynı (mahya derelerin birleştiği yere kadar)."""
+    ie = _ie(ev)
+    with contextlib.redirect_stdout(io.StringIO()):
+        yeni = PL.liste(PL.model_motor(copy.deepcopy(ie)))
+        eski = PL.liste(PL.model_motor(_cumbasiz(ie)))
+    assert yeni["satirlar"] == eski["satirlar"]
+
+
+def test_veranda_cumbasi_ifc_ve_kart_modeli_kurmaz():
+    """IFC ve kart modeli köşe verandasının cumbasını bu sürümde kurmaz: açık hata (yanlış çatı kurulmaz)."""
+    from motor import cati_capraz, ifc_uret
+    ie = _ie("52m2")
+    with pytest.raises(CP.PrefabrikCatiHatasi, match="köşe verandasının cumbasını kart modeli ve IFC"):
+        with contextlib.redirect_stdout(io.StringIO()):
+            ifc_uret.hazirla(ie)
+    with pytest.raises(CP.PrefabrikCatiHatasi, match="köşe verandasının cumbasını"):
+        cati_capraz.tanim(_kur(ie), ie)
+
+
+@pytest.mark.parametrize("bozma, hata, mesaj", [
+    (lambda ie: ie["cati"]["cumbalar"][0].update(cephe="arka"), CP.PrefabrikCatiHatasi, "verandası VERANDA on cephesinde"),
+    (lambda ie: ie["cati"]["cumbalar"][0].update(bas_cm=0), CP.PrefabrikCatiHatasi, "yalnız cephe ve veranda"),
+    (lambda ie: ie["verandalar"][0].pop("cati"), G.IsEmriHatasi, None),
+    (lambda ie: ie["cati"].update(tip="besik"), G.IsEmriHatasi, "ana çatı besik_cumba olur"),
+])
+def test_veranda_cumbasi_yanlis_tanim_hata(bozma, hata, mesaj):
+    """Yanlış yazılan veranda cumbası sessizce çizilmez (K21)."""
+    ie = _ie("52m2")
+    bozma(ie)
+    with pytest.raises(hata, match=mesaj):
+        p = _kur(ie)
+        with contextlib.redirect_stdout(io.StringIO()):
+            CP.cati(p, ie)
+
+
+def test_67m2_veranda_besigi_aynen():
+    """67 m²: verandanın çatısı İş Emri'nde beşik (kartla); çizim karttan önceki varsayımla aynı, varsayım uyarısı yok."""
+    ie = _ie("67m2")
+    p = _kur(ie)
+    assert p.dis_verandalar[0]["cati"]["tip"] == "besik" and not any("çatısı İş Emri'nde yok" in u for u in p.uyarilar)
+    ie.get("verandalar")[0].pop("cati")
+    q = _kur(ie)
+    assert q.dis_verandalar[0]["cati"] == p.dis_verandalar[0]["cati"]

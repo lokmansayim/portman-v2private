@@ -148,6 +148,9 @@ def tanim(plan: G.Plan, ie: dict) -> dict:
     if c.get("tip") != "besik_cumba":
         raise PrefabrikCatiHatasi(f"çapraz cumba tanımı yalnız beşik + cumba çatıda ({c.get('tip')})")
     cs = c.get("cumbalar") or []
+    if CP.tek_veranda_cumbasi(c):                    # D-109: köşe verandasının cumbası çizimde ve listede; kart modeli ve IFC bu sürümde kurmaz
+        raise PrefabrikCatiHatasi("beşik + cumba: köşe verandasının cumbasını kart modeli ve IFC bu sürümde kurmaz (D-109; ön onay çizimi ve "
+                                  "liste kurar)")
     if len(cs) != 1 or float(cs[0].get("cikinti_cm", 0)) != 0 or (plan.girintili and CP.ana_geri_cm(c, plan) is None):   # geri çekilen
         # ana çatıda (TK-04 r07) gövde L: veranda ana çatının saçağı kadar içeride; birleşimi `cati_prefabrik.cati` denetler
         raise PrefabrikCatiHatasi("beşik + cumba: kart modeli tek, çıkıntısız çapraz cumbayı kurar (çıkıntılı cumba ve çift cumba bu sürümde yok)")
