@@ -1,0 +1,78 @@
+{
+ "kod": "PA41",
+ "gosterim": "PA-41",
+ "durum": "gecerli",
+ "sablon": "adaylar/PA41.json",
+ "gorsel": "adaylar/PA41.png",
+ "referans_model": "PA-41",
+ "yapi_turu": "prefabrik",
+ "kat": 1,
+ "oda_programi": "2+1",
+ "katalog_m2": 59.0,
+ "kapali_m2": 50.5,
+ "veranda_m2": 8.49,
+ "ozet": {
+  "grid": {
+   "x_pano": 6.0,
+   "y_pano": 6.0
+  },
+  "dis_olcu_cm": [
+   763.0,
+   773.0
+  ],
+  "brut_m2": 58.98,
+  "pano": 42,
+  "pencere": 6,
+  "kapi": 5,
+  "odalar": {
+   "Y.ODASI": 9.5,
+   "HOL": 1.54,
+   "SALON": 16.35,
+   "WC": 3.32,
+   "VERANDA": 8.49,
+   "MUTFAK": 8.32,
+   "Y.ODASI 2": 7.43
+  }
+ },
+ "kaynak": {
+  "metin": "HD-431 montaj paftasından İş Emri (İE-43, disk arşivi Parti 1; kodla okundu, ad yok). Havuz: D-111 (Lokman 16 Kasım 2026 06:50:02 kartı \"Evet, beşi girsin\"; Motor'un aks düzeniyle). Asıl uygulanmış proje: D-103.",
+  "dosya": "testler/havuz/is_emirleri/HD431.json",
+  "ayna": null,
+  "karar": "D-111",
+  "standart": true,
+  "kart_kiyasi": {
+   "kart": "HD-431",
+   "kart_sha256": "6bc540bd4d790c1a4f75e3b4dd1926912f265689580740081a4092ec3712a9c0",
+   "sonuc": "geçti",
+   "olcum": {
+    "dis_olcu_cm": [
+     763.0,
+     773.0
+    ],
+    "acikla_olcu_cm": [
+     763.0,
+     773.0
+    ],
+    "brut_m2": 58.98,
+    "kubbe_m2": 0.0,
+    "yatak_odasi": 2,
+    "pencereler": {
+     "120x120": 5,
+     "60x40": 1
+    },
+    "dis_kapi": 1,
+    "ic_kapi": 4,
+    "veranda": 1,
+    "kat": 1
+   }
+  },
+  "havuz_denetimi": {
+   "sonuc": "geçti",
+   "karar": "D-112",
+   "uyarilar": [
+    "HD-06: [\"makas yeri (cumba): yavru makas AP-06'nın kuralıyla kurulamadı (uçlar 94.2–292.3 o kesitte derelerin 56.75–267.005 dışında); D-47'nin yerinde\"]"
+   ]
+  }
+ },
+ "not": "Bilinen fark (yükleme listesi, D-111): cumba makası Motor'da 2 × 384 cm; paftada 1 × 374 cm."
+}
