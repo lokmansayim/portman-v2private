@@ -117,3 +117,60 @@ def test_makas_aksi_denetimi():
     assert G.makas_aksi_denetimi(G.kur(_oku("testler/motor/veri/TK01_r08.json")), "x") == []
     b = G.makas_aksi_denetimi(G.kur(_oku("is_emri/adaylar/PA39.json")), "y")
     assert len(b) == 2 and all("makas aksı kaymaz" in x for x in b)
+
+
+def _t_ve_pencereler(plan) -> dict:
+    """Her dış duvarda pano ekindeki T'ler ve pencerenin üstüne düşen T'ler (eksen, cm)."""
+    cik = {}
+    for d in plan.duvarlar:
+        if d.tur != "dis":
+            continue
+        ts = G._t_noktalari(plan, d)
+        ekler = [q.a1 for q in d.panolar[:-1]]
+        pencereler = [(q.a0, q.a1) for q in d.panolar if q.acilim is not None and q.acilim.tur == "pencere"]
+        cik[f"{d.yon} {d.c:g}"] = ([t for t in ts if any(abs(t - e) < 0.6 for e in ekler)],
+                                   sorted(t for t in ts for a, b in pencereler if a + 0.6 < t < b - 0.6))
+    return cik
+
+
+def test_pencere_odasinda_kalir_t_ekleri_degismez():
+    """Geometri hakemi (BK-52, 1. tur): oda duvarı panonun ortasındaki T'de (çektirme U) biter; pencere komşu odaya ya da iç duvarın
+    üstüne geçmez, T ekleri yerinde kalır. Havuzdaki her prefabrik İş Emri anahtarla."""
+    for f in sorted((KOK / "is_emri" / "adaylar").glob("*.json")):
+        ie = json.loads(f.read_text(encoding="utf-8"))
+        if not (isinstance(ie.get("yapi"), dict) and "grid" in ie["yapi"] and "mahaller" in ie):
+            continue
+        once, sonra = _t_ve_pencereler(G.kur(copy.deepcopy(ie))), _t_ve_pencereler(G.kur(_anahtarli(ie)))
+        for k in once:
+            assert sonra[k][0] == once[k][0], (f.name, k, "T eki değişti")
+            assert sonra[k][1] == once[k][1], (f.name, k, "pencere T'nin üstüne geçti")
+
+
+def test_ortadaki_t_odayi_keser_pa21_banyo():
+    """PA-21: banyonun vasistası (386,5–512) yerinde; oda duvarı 323,75'teki T'de biter, pencere yatak odasına geçmez; uyarı yazılır."""
+    ie = _oku("is_emri/adaylar/PA21.json")
+    once, sonra = G.kur(copy.deepcopy(ie)), G.kur(_anahtarli(ie))
+    d0 = next(d for d in once.duvarlar if d.tur == "dis" and d.yon == "x" and abs(d.c - 1024) < 1e-6)
+    d1 = next(d for d in sonra.duvarlar if d.tur == "dis" and d.yon == "x" and abs(d.c - 1024) < 1e-6)
+    assert [(q.a0, q.boy) for q in d1.panolar] == [(q.a0, q.boy) for q in d0.panolar]
+    assert any("panonun ortasındaki T" in u for u in sonra.uyarilar)
+
+
+def test_kirma_catida_uygulanmaz():
+    """Kırma çatıda makasa dik duvar da makas taşır (BK-46): kural uygulanmaz, plan anahtarsızla aynı, uyarı yazılır (VARSAYIM V7)."""
+    for kod in ("PA08", "PA33"):
+        ie = _oku(f"is_emri/adaylar/{kod}.json")
+        assert ie["cati"]["tip"] == "kirma"
+        sonra = G.kur(_anahtarli(ie))
+        assert _dizilim(sonra) == _dizilim(G.kur(copy.deepcopy(ie)))
+        assert sonra.dik_duvar_pencere == []
+        assert any("kırma çatıda" in u for u in sonra.uyarilar)
+
+
+def test_makas_aksi_denetimi_kirma_iki_yon():
+    """Kırma çatıda hakem makasa dik duvarın eklerini de kendi ızgarasında denetler: 77 m² paftasında (PA-24) bir ek dışarıda."""
+    ie = _oku("is_emri/adaylar/PA24.json")
+    plan = G.kur(ie)
+    assert G.makas_aksi_denetimi(plan, ie["cati"].get("makas_ekseni", "x")) == []
+    b = G.makas_aksi_denetimi(plan, ie["cati"].get("makas_ekseni", "x"), "kirma")
+    assert len(b) == 1 and b[0].startswith("Kırma çatının makasa dik duvarında")

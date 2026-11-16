@@ -1251,7 +1251,7 @@
   {
    "kod": "PC-46",
    "baslik": "Makas aksı kaymaz; makasa dik duvarda pencere odanın tam ortasında",
-   "kural": "Makasın oturduğu (saçak) duvarlarda pano ekleri tek bir 62,75 cm ızgarasında kalır: ek tam ya da yarım aksta, yarım pano serbest; havuz denetimi HD-12 ızgara dışındaki eki uyarı diye yazar. Makasa dik dış duvarda (makas x yönündeyse x yönündeki ön ve arka duvar) İş Emri `yapi.dizilim.dik_duvar_pencere: \"tam_orta\"` yazarsa Motor tek panoluk (125,5) pencereyi duvarın o aralığının (köşeden köşeye, köşeden T'ye ya da T'den T'ye, aralıkta başka açıklık yoksa) tam ortasına alır: pencere yanındaki iki parça eşit (60 m² küçük yatak odası 94,125 + 125,5 + 94,125). Yan 125,5'i aşarsa 125,5'lik panolar pencerenin yanında, kalan köşede ya da T'de (PA-06 kalkanı 44,875 + 125,5 + 125,5 + 125,5 + 44,875). 0,05 cm'den kısa kıymık kalırsa pencere kaymaz, uyarı yazılır. Çizime yeni aks çıkmaz; akslar ızgaradaki gibi kalır. Saçak duvarı, iç duvar ve kapı yerinde. Anahtarsız İş Emri aynen (D-103, yalnız yeni çizilen evler).",
+   "kural": "Makasın oturduğu (saçak) duvarlarda pano ekleri tek bir 62,75 cm ızgarasında kalır: ek tam ya da yarım aksta, yarım pano serbest; havuz denetimi HD-12 ızgara dışındaki eki uyarı diye yazar. Makasa dik dış duvarda (makas x yönündeyse x yönündeki ön ve arka duvar) İş Emri `yapi.dizilim.dik_duvar_pencere: \"tam_orta\"` yazarsa Motor tek panoluk (125,5) pencereyi duvarın o aralığının (köşeden köşeye, köşeden T'ye ya da T'den T'ye; aralıkta başka açıklık ya da panonun ortasına düşen T yoksa) tam ortasına alır: pencere yanındaki iki parça eşit (60 m² küçük yatak odası 94,125 + 125,5 + 94,125). Yan 125,5'i aşarsa 125,5'lik panolar pencerenin yanında, kalan köşede ya da T'de (PA-06 kalkanı 44,875 + 125,5 + 125,5 + 125,5 + 44,875). 0,05 cm'den kısa kıymık kalırsa pencere kaymaz. Kırma çatıda makasa dik duvar da makas taşır: kural uygulanmaz, hakem iki yönü de denetler. Ortalanmayan her pencere için uyarı yazılır. Çizime yeni aks çıkmaz; akslar ızgaradaki gibi kalır. Saçak duvarı, iç duvar ve kapı yerinde. Anahtarsız İş Emri aynen (D-103, yalnız yeni çizilen evler).",
    "karar": "D-121",
    "lokman": {
     "tarih": "2026-11-16",
@@ -1261,6 +1261,7 @@
    "kod_yeri": [
     "motor/geometry.py::_dik_duvar_pencere",
     "motor/geometry.py::_t_eki_var",
+    "motor/geometry.py::_t_noktalari",
     "motor/geometry.py::makas_aksi_denetimi",
     "araclar/havuz_denetimi.py::denetle_prefabrik"
    ],
@@ -1273,7 +1274,11 @@
     "testler/motor/test_d121_dik_duvar_pencere.py::test_pencere_dis_olcu_ve_pano_sayisi",
     "testler/motor/test_d121_dik_duvar_pencere.py::test_bilinmeyen_deger_hata",
     "testler/motor/test_d121_dik_duvar_pencere.py::test_anahtarla_havuzun_her_evi_kurulur",
-    "testler/motor/test_d121_dik_duvar_pencere.py::test_makas_aksi_denetimi"
+    "testler/motor/test_d121_dik_duvar_pencere.py::test_makas_aksi_denetimi",
+    "testler/motor/test_d121_dik_duvar_pencere.py::test_pencere_odasinda_kalir_t_ekleri_degismez",
+    "testler/motor/test_d121_dik_duvar_pencere.py::test_ortadaki_t_odayi_keser_pa21_banyo",
+    "testler/motor/test_d121_dik_duvar_pencere.py::test_kirma_catida_uygulanmaz",
+    "testler/motor/test_d121_dik_duvar_pencere.py::test_makas_aksi_denetimi_kirma_iki_yon"
    ]
   }
  ]

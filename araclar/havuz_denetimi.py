@@ -181,7 +181,7 @@ def denetle_prefabrik(ie: dict, kart: dict | None = None) -> dict:
         plan = G.kur(kopya())
         for u in plan.uyarilar:
             B.append(_b("HD-02", u))
-        for u in G.makas_aksi_denetimi(plan, (ie.get("cati") or {}).get("makas_ekseni", "x")):   # D-121
+        for u in G.makas_aksi_denetimi(plan, (ie.get("cati") or {}).get("makas_ekseni", "x"), (ie.get("cati") or {}).get("tip")):   # D-121
             B.append(_b("HD-12", u))
     except Exception as e:                                               # IsEmriHatasi dahil: ev kurulamıyor
         B.append(_b("HD-01", f"Motor kuramadı: {type(e).__name__}: {e}"))
