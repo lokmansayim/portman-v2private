@@ -259,6 +259,39 @@ def birlesim_uclari(plan) -> tuple[dict, list[dict]]:
     return t_uclari, yerler
 
 
+def ek_yerleri(plan, t_uclari: dict | None = None) -> list[dict]:
+    """Panoların ekleri: H'ın yeri ve türü. Tek kaynak (D-28 madde 1): yükleme listesinin H adedi ve 3D'nin H'ları (`ifc_uret.hazirla`;
+    montaj rehberi ve kart modeli 3D'yi okur) buradan (BK-50; Lokman, kart 16 Kasım 2026 12:09:48 "Evet, ayrı PR").
+    - Kubbenin iki ucunda H yok: açılı köşe direği (kubbe takımı, D-54).
+    - `cins` "uclu": ekte 3'lü H. Motor'un planındaki 3'lü H'lar (`plan.h_baglantilar`: iç T, nişin T'si) ya da dış duvarın ekine T ile
+      gelen iç duvar (İE-27; Lokman, 3 Kasım 2026 09:52, madde 3; `birlesim_uclari`): 3'lü H 100 × 100 × iç. İkincisi `ie27` ile işaretli
+      (Motor'un DXF'inde bloğu yok; 3D bağlantıyı buradan kurar).
+    - `arti`: dört kollu birleşimdeki ek (BK-14).
+    - Sonda aynı hatta uç uca gelen iki duvarın eki (D-29, `G.uc_uca_ekler`).
+    Dönen öğe `G.pano_ekleri`'nin biçiminde: {duvar, yon, c, h, e, x, y, cins, (ie27), (arti)}."""
+    from . import geometry as G
+    if t_uclari is None:
+        t_uclari = birlesim_uclari(plan)[0]
+    kubbe_tabani = lambda p: p.acilim is not None and p.acilim.tur == "kubbe"   # noqa: E731
+    cik = []
+    for d in plan.duvarlar:
+        for a_, _b in zip(d.panolar, d.panolar[1:]):
+            if kubbe_tabani(a_) or kubbe_tabani(_b):            # kubbenin iki ucunda H yok: açılı köşe direği (kubbe takımı, 4)
+                continue
+            x, yy = (a_.a1, d.c) if d.yon == "x" else (d.c, a_.a1)
+            uclu = any(abs(h.x - x) <= d.h + 3.5 and abs(h.y - yy) <= d.h + 3.5 for h in plan.h_baglantilar)
+            ie27 = False
+            if d.tur == "dis" and not uclu:                     # İE-27: dış duvarın ekine T ile gelen iç duvar (3'lü H 100 × 100 × iç)
+                uclu = ie27 = any(abs(a_.a1 - c_) <= d.h + 3.5 for c_ in t_uclari.get(d.id, []))
+            k = {"duvar": d.tur, "yon": d.yon, "c": d.c, "h": d.h, "e": a_.a1, "x": x, "y": yy, "cins": "uclu" if uclu else "pano_eki"}
+            if ie27:
+                k["ie27"] = True
+            if any(abs(ax - x) <= d.h + 3.5 and abs(ay - yy) <= d.h + 3.5 for ax, ay in plan.arti_birlesimler):
+                k["arti"] = True                                # BK-14: dört kollu birleşimdeki ek; profili kitapta yok, satır uyarır
+            cik.append(k)
+    return cik + [dict(k) for k in G.uc_uca_ekler(plan)]   # D-29: giriş nişinde yan duvarın hol duvarıyla eki (kapı duvarının 3'lü H'ı)
+
+
 def model_motor(ie: dict) -> dict:
     from . import geometry as G
     from shapely.geometry import LineString, Point, box
@@ -284,23 +317,13 @@ def model_motor(ie: dict) -> dict:
             panolar.append({"duvar": d.tur, "kal_mm": round(2 * d.h * 10), "boy": p.boy, "aciklik": None if a is None else ac_(a)})
             if p.karkasli:                                      # D-46: karkaslı kaplama duvar panosu ve içindeki bütün açıklıklar
                 panolar[-1].update({"karkasli": True, "aciklar": [ac_(x) for x in p.aciklar]})
-        for a_, _b in zip(d.panolar, d.panolar[1:]):
-            if kubbe_tabani(a_) or kubbe_tabani(_b):            # kubbenin iki ucunda H yok: açılı köşe direği (kubbe takımı, 4)
-                continue
-            x, yy = (a_.a1, d.c) if d.yon == "x" else (d.c, a_.a1)
-            uclu = any(abs(h.x - x) <= d.h + 3.5 and abs(h.y - yy) <= d.h + 3.5 for h in plan.h_baglantilar)
-            if d.tur == "dis" and not uclu:                     # İE-27: dış duvarın ekine T ile gelen iç duvar (3'lü H 100 × 100 × iç)
-                uclu = any(abs(a_.a1 - c_) <= d.h + 3.5 for c_ in t_uclari.get(d.id, []))
-            ekler.append({"duvar": d.tur, "cins": "uclu" if uclu else "pano_eki", "sacak": d.yon == eave_yon})
-            if any(abs(ax - x) <= d.h + 3.5 and abs(ay - yy) <= d.h + 3.5 for ax, ay in plan.arti_birlesimler):
-                ekler[-1]["arti"] = True                        # BK-14: dört kollu birleşimdeki ek; profili kitapta yok, satır uyarır
     for kb in plan.kubbeler:                                   # İE-29 (D-54): kubbenin üç panosu (yan 79, ön 125,5), kendi pencereleriyle, 203 boyunda
         for q in kb["panolar"]:
             pk_ = G.pencere_kurali(q["pencere"])
             panolar.append({"duvar": "dis", "kal_mm": round(G.T_DIS * 10), "boy": q["boy"], "yukseklik_cm": G.KUBBE["duvar_cm"], "kubbe": True,
                             "aciklik": {"tur": "pencere", "olcu": q["pencere"], "genislik": float(pk_.en), "mentese": None, "dograma": None}})
-    for k in G.uc_uca_ekler(plan):                             # D-29: giriş nişinde yan duvarın hol duvarıyla eki (kapı duvarının 3'lü H'ı)
-        ekler.append({"duvar": k["duvar"], "cins": k["cins"], "sacak": k["yon"] == eave_yon})
+    for k in ek_yerleri(plan, t_uclari):                       # BK-50: eklerin yeri ve türü tek kaynaktan (3D aynı yerleri okur)
+        ekler.append({"duvar": k["duvar"], "cins": k["cins"], "sacak": k["yon"] == eave_yon, **({"arti": True} if k.get("arti") else {})})
     kapali = [m for m in plan.mahaller.values() if not (m.acik or m.tur in G.ACIK_MAHAL_TURLERI)]
     acik = [m for m in plan.mahaller.values() if (m.acik or m.tur in G.ACIK_MAHAL_TURLERI)]
     g = unary_union([plan.footprint()] + [m.poly for m in plan.mahaller.values() if m.poly is not None] + [box(*r) for r in plan.dikmeler])
