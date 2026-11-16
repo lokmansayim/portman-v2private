@@ -1,0 +1,100 @@
+{
+ "kod": "PA44",
+ "gosterim": "PA-44",
+ "durum": "gecerli",
+ "sablon": "adaylar/PA44.json",
+ "gorsel": "adaylar/PA44.png",
+ "referans_model": "PA-44",
+ "yapi_turu": "prefabrik",
+ "kat": 1,
+ "oda_programi": "2+1",
+ "katalog_m2": 49.0,
+ "kapali_m2": 49.0,
+ "veranda_m2": 0,
+ "ozet": {
+  "grid": {
+   "x_pano": 5.5,
+   "y_pano": 5.5
+  },
+  "dis_olcu_cm": [
+   700.0,
+   700.25
+  ],
+  "brut_m2": 49.02,
+  "pano": 37,
+  "pencere": 7,
+  "kapi": 4,
+  "odalar": {
+   "ODA": 9.14,
+   "BANYO": 5.57,
+   "YATAK ODASI": 8.76,
+   "SALON & MUTFAK": 21.93
+  }
+ },
+ "kaynak": {
+  "metin": "D-92 (İE-40): 49 m² 2+1 evin (PA-23, AP-05) tek özel pano kuralıyla ön cephesi 0,25 cm büyümüş hâli; sol ve sağ dış duvarın önündeki 62,5 + 62,75 tam panoya (125,5) tamamlanır, D-30'daki gibi (122 cm ve üstü son pano tam panoya). Asıl hâl PA-23 aynen (D-103, Lokman 15 Kasım 2026 07:25:56). Lokman 16 Kasım 2026 04:34:58 UTC kartı \"49 m2 2+1'in standart panolu hâli havuza hangi ölçüyle girsin?\"; 06:58:39 seçim \"Seçenek 2: tam pano, 700,25\" (\"Bugünkü 49 m2 aynen kalır. Yan duvarlarda tam pano olan 700 × 700,25 cm hâli (37 pano) yeni numarayla yanına girer.\").",
+  "dosya": "testler/havuz/is_emirleri/PA23_BUYUME.json",
+  "ayna": null,
+  "karar": "D-92",
+  "standart": true,
+  "kart_kiyasi": {
+   "kart": "AP-05",
+   "kart_sha256": "57242b1598ffc089491153bbbda12a566b93a139395a0d6b07b8a2a88dd0f997",
+   "sonuc": "geçti",
+   "olcum": {
+    "dis_olcu_cm": [
+     700.0,
+     700.25
+    ],
+    "acikla_olcu_cm": [
+     700.0,
+     700.25
+    ],
+    "brut_m2": 49.02,
+    "kubbe_m2": 0.0,
+    "yatak_odasi": 2,
+    "pencereler": {
+     "100x100": 5,
+     "200x200": 1,
+     "50x50": 1
+    },
+    "dis_kapi": 1,
+    "ic_kapi": 3,
+    "veranda": 0,
+    "kat": 1,
+    "kaynak_dis_olcu_cm": [
+     700.0,
+     700.0
+    ],
+    "silinen_cm": [
+     0.0,
+     0.0
+    ],
+    "buyuyen_cm": [
+     0.0,
+     0.25
+    ],
+    "silinen": [],
+    "tamamlanan": [
+     {
+      "duvar": "dis y 5",
+      "once": 125.25,
+      "sonra": 125.5
+     },
+     {
+      "duvar": "dis y 695",
+      "once": 125.25,
+      "sonra": 125.5
+     }
+    ],
+    "yeniden_dizilen": [],
+    "veranda_kisalan": []
+   },
+   "kip": "silme_hali",
+   "kaynak_is_emri": "is_emri/adaylar/PA23.json",
+   "kaynak_sha256": "f7566b79c4ba7e84728b2c6eff9922c512334f96a233f3c5f63e5842a2ceb113",
+   "buyume_sozu": "Lokman 16 Kasım 2026 04:34:58 UTC kartı \"49 m2 2+1'in standart panolu hâli havuza hangi ölçüyle girsin?\"; 06:58:39 seçim \"Seçenek 2: tam pano, 700,25\" (\"Bugünkü 49 m2 aynen kalır. Yan duvarlarda tam pano olan 700 × 700,25 cm hâli (37 pano) yeni numarayla yanına girer.\")"
+  }
+ },
+ "not": ""
+}

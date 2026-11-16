@@ -9,6 +9,8 @@ sözü ve 20:38:43 kartı (PA-34); bugünkü 140 m² (PA-08) ve 77 m² (PA-24) a
 Kesim hattı, üçlü H ve kayan pencere (BK-34, D-96): 71 m² 20:46:54 sözü ve 20:57:28 kartı (PA-35); bugünkü 71 m² (PA-26) aynen.
 Veranda duvarı aksa, tam + yarım pano (BK-35): 60 m² 15 Kasım 06:07:17 ve 07:17:23 sözleri, 07:15:45 ve 07:24:23 kartları (PA-36);
 bugünkü 60 m² (PA-18) aynen (D-103).
+49 m² tam panolu hâl (D-92 › 49 m², D-30): 16 Kasım 04:34:58 kartı, 06:58:39 seçim "Seçenek 2: tam pano, 700,25" (PA-44); yan duvarların
+125,25'i tam panoya, ön cephe 0,25 cm öne; bugünkü 49 m² (PA-23) aynen.
 """
 from __future__ import annotations
 import hashlib
@@ -42,11 +44,16 @@ HALLER = {
              "20:57:28", "Bugünkü 71 m2 kalır; 773 × 888,5 cm üçlü H'lı hâl (kapı panosu 120,5)"),
     "PA36": ("PA18", "AP-19", "testler/havuz/is_emirleri/PA18_GENIS.json", ((600.0, 1000.0), (647.5, 951.25)), 61.59, 7.18,
              "07:24:23", "Bugünkü 60 m² kalır; 647,5 × 951,25 cm hâli (61,6 m²) yeni numarayla girer."),
+    "PA44": ("PA23", "AP-05", "testler/havuz/is_emirleri/PA23_BUYUME.json", ((700.0, 700.0), (700.0, 700.25)), 49.02, 0,
+             "06:58:39", "Bugünkü 49 m2 aynen kalır. Yan duvarlarda tam pano olan 700 × 700,25 cm hâli (37 pano)"),
 }
+# kartta seçilen seçenek "Doğru, yanına eklensin" değilse (49 m²: iki ölçü seçeneği, 16 Kasım 04:34:58 kartı)
+SECIM = {"PA44": "Seçenek 2: tam pano, 700,25"}
 # büyüyen hâl → (Lokman'ın ev sözünün saati, sözden parça, tamamlanan duvar sayısı)
 BUYUYEN = {"PA33": ("20:22:14", "101,5'u 125,5 a tamamlayabilirsin", 1), "PA34": ("20:35:43", "48,75'leride 62,75'e tamamla", 2),
            "PA35": ("20:46:54", "120,5 panoyuda kendi ölçüsüne getirir misin", 1),
-           "PA36": ("07:17:23", "dış pano 78 cm olan panoyuda tam pano yap", 2)}
+           "PA36": ("07:17:23", "dış pano 78 cm olan panoyuda tam pano yap", 2),
+           "PA44": ("06:58:39", "Seçenek 2: tam pano, 700,25", 2)}
 # kesim hattı, üçlü H ve açıklık kayması (BK-34): yalnız 71 m² üçlü H'lı hâlde, Lokman'ın o evdeki sözüyle
 # kod → (kesim hattı, üçlü H, kayan açıklık, kesim kartının saati, her biri düşünce hakemi durduran sözler)
 KESIMLI = {"PA35": ("on:17:770", [{"nokta_cm": [386.5, 758.0], "kaynakta_cm": [386.5, 775.0]}], ["pencere 120x120"], "20:57:28",
@@ -154,7 +161,7 @@ def test_karar_dosyasi():
     """D-92 kartları saatiyle ve üç kaydı kaynağıyla yazar (projeler kodla; CLAUDE.md › soru 15)."""
     assert "19:39:46 UTC, Lokman kartta seçti: **\"Kısa parça silinsin\"**" in D92
     for kod, (_, kart, silme, _, _, _, saat, _) in HALLER.items():
-        assert f"{saat} UTC, Lokman kartta seçti: **\"Doğru, yanına eklensin\"**" in D92, kod
+        assert f"{saat} UTC, Lokman kartta seçti: **\"{SECIM.get(kod, 'Doğru, yanına eklensin')}\"**" in D92, kod
         assert f"| PA-{kod[2:]} | {kart} | `{silme}` |" in D92, kod
 
 
