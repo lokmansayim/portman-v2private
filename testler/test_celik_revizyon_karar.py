@@ -1754,3 +1754,26 @@ def test_hakem39_celik_olumlu_soz_onay(s, metin):
     cati_seti(s)
     k = s.yaz(metin)
     assert k.gerekce == K.PLAN_ONAYI and k.revizyon == 1, k.mesaj
+
+
+
+@pytest.mark.parametrize("metin", [
+    "Ç8801 olsun, beklemeye alın", "Ç8801 olsun, beklemeye alalım", "Ç8801 olsun, bekleme yapalım", "Ç8801 olsun, beklemeyi tercih ederiz",
+    "K olsun, beklemeye alın", "K olsun, bakalım kaça patlar?", "K olsun, bakalım metrekaresi kaç geliyo?",
+    "K olsun, bakalım nakliye montajlı ne kadar?"])
+def test_hakem40_celik_kararsiz_soz_kaydedilmez(s, metin):
+    """Tur 40 çelikte: "beklemeye alalım", "bekleme yapalım", "kaça patlar?", "nakliye montajlı ne kadar?" kayıt almaz: plan r01,
+    onay yok, r02 yok."""
+    cati_seti(s)
+    k = s.yaz(metin)
+    assert K.PLAN_ONAYI not in k.gerekce and k.eylem != "is_emri" and s.plan["revizyon"] == 1 and not s.k.d.get("onaylanan"), k.mesaj
+
+
+
+@pytest.mark.parametrize("metin", [
+    "K olsun, bekletmeyin"])
+def test_hakem40_celik_acik_secim_soruya_donmez(s, metin):
+    """Tur 40 çelikte: "K olsun, bekletmeyin" r02 K'yı çizer."""
+    cati_seti(s)
+    k = s.yaz(metin)
+    assert k.eylem == "is_emri" and k.revizyon == 2 and s.plan["yapi"]["kod"] == "Ç8801K", k.mesaj

@@ -4321,3 +4321,82 @@ def test_hakem39_olumlu_soz_onay(tmp_path, metin):
     s, _ = _cati_seti(tmp_path)
     k = s.yaz(metin, niyet="diger")
     assert k.gerekce == K.PLAN_ONAYI and k.revizyon == 1, k.mesaj
+
+
+
+# İE-42 hakem tur 40: bekleme adı ("beklemeye alalım", "bekleme olsun", "biraz beklesek olmaz mı"), ekibin kendi adıyla inceleme
+# ("montaj ekibi bir baksın"), gelmenin ardındaki koşul ("usta gelsin ona göre", "müşteri gelsin konuşsun"), çatıyı da anan soru
+# ("çatı ve montaj için müşteriye sorarız"), iki hizmetli fiyat ("nakliye montajlı ne kadar?"), konuyla birlikte bekletilen çatı
+# ("montajcı fiyatını ve çatıyı sonra konuşuruz"), dolgulu kesinleşme ("bekletmeyin yarın kesinleşir") ve "kaç" fiyat soruları
+# kararsızdır; "ekip hazır olsun", "usta yarın uğrasın", "kapı rengini müşteriye sorarız", "Allah utandırmasın" değil
+@pytest.mark.parametrize("metin", [
+    "2 olsun, montaj ekibi bir baksın", "2 olsun, montaj ekibi baksın", "2 olsun, montaj ustası bir baksın",
+    "2 olsun, montaj ekibi gelsin baksın", "2 olsun, montaj ekibi bir görsün", "2 olsun, montaj ekibi incelesin",
+    "2 olsun, montaj ekibi kontrol etsin", "2 olsun, kurulum ekibi baksın", "2 olsun, montaj ustası gelsin görsün",
+    "Hocam 2 olsun, montaj ekibi bir baksın", "2 olsun abi, montaj ekibi gelsin bir baksın", "2 olsun, cuma günü usta bir baksın",
+    "2 olsun, usta gelsin ona göre", "2 olsun, usta gelsin konuşuruz", "2 olsun, usta gelsin bir ölçsün ona göre",
+    "2 olsun, müşteri gelsin konuşsun", "2 olsun, müşteri gelsin bir konuşsun", "2 olsun, müşteri gelsin kaporayı versin",
+    "2 olsun, müşteri gelsin parayı versin", "1 olsun, beklemeye alalım", "1 olsun, beklemeye alın", "1 olsun, beklemeye alın lütfen",
+    "Hocam 1 olsun, beklemeye alalım", "1 olsun. Beklemeye alalım", "1 olsun tamam, beklemeye alın", "1 olsun, tamam beklemeye alalım",
+    "1 olsun, beğendik beklemeye alalım", "1 olsun, güzel ama beklemeye alalım", "1 olsun, bekletmeye alın", "1 olsun, dondurmaya alalım",
+    "1 olsun, beklemeye geçelim", "1 olsun, beklemeyi düşünüyoruz", "1 olsun, beklemeyi isteriz", "1 olsun, beklemeyi tercih ederiz",
+    "1 olsun, beklemenizi rica ederiz", "1 olsun, bekletmenizi rica ederiz", "1 olsun, beklemenizi istiyoruz", "1 olsun, bekleme olsun",
+    "1 olsun, bekleme yapalım", "1 olsun, bekleme yapın", "Evin kendi çatısı olsun, beklemeye alın",
+    "Kendi çatısı kalsın, beklemeye alalım", "PA-06 olsun, beklemeye alın", "2 olsun, beklemeye alalım", "2 olsun, beklemeye alın",
+    "2 olsun, bekleme olsun", "2 olsun, beklemeyi tercih ederiz", "2 olsun, beklemenizi rica ederiz",
+    "2 olsun, beklemeyelim ama sonra kesinleşir", "2 olsun, bekletmeyin yarın kesinleşir", "2 olsun, biraz beklesek olmaz mı",
+    "2 olsun, itiraz yok ama sonra kesinleşir", "2 olsun, sorun yok yarın kesinleşir",
+    "2 olsun, montajcı fiyatını ve çatıyı sonra konuşuruz", "2 olsun, montajcı fiyatını da çatıyı da sonra konuşuruz",
+    "2 olsun, nakliyeci ücretini ve çatıyı sonra konuşuruz", "2 olsun, montajcı fiyatını ve çatı fiyatını sonra konuşuruz",
+    "2 olsun, montaj fiyatını ve çatı fiyatını sonra konuşuruz", "2 olsun, montaj fiyatını ve çatıyı sonra konuşuruz",
+    "2 olsun, elektrikçi fiyatını ve kırma çatıyı sonra konuşuruz", "2 olsun, montajcı fiyatını sonra konuşuruz çatıyı da",
+    "2 olsun, anahtar teslim fiyatını sonra konuşuruz", "2 olsun, ekiple çatıyı sonra konuşuruz",
+    "2 olsun, montajcıyla çatıyı sonra konuşuruz", "2 olsun, duvar fiyatı ile çatıyı sonra konuşuruz",
+    "2 olsun, montajcıyla çatı fiyatını sonra konuşuruz", "2 olsun, bakalım kaçtan?", "2 olsun, bakalım metrekaresi kaç bine?",
+    "2 olsun, bakalım metrekaresi kaçtan?", "2 olsun, bakalım metrekaresi kaç kuruş?", "2 olsun, bakalım metrekaresine kaç?",
+    "2 olsun, bakalım metrekaresini kaça veriyorsunuz?", "2 olsun, bakalım kaça verirsiniz?", "2 olsun, bakalım kaça patlar?",
+    "2 olsun, bakalım kaça yaparsınız?", "2 olsun, bakalım kaç liraya?", "2 olsun, bakalım metrekaresi kaç dolardan?",
+    "2 olsun, bakalım metrekaresi kaç ediyo?", "2 olsun, bakalım metrekaresi kaç tutuyo?", "2 olsun, bakalım metrekaresi kaç geliyo?",
+    "2 olsun, bakalım ne kadar tutuyo?", "2 olsun, bakalım ne kadar ediyo?", "2 olsun, bakalım kaça geliyo?",
+    "2 olsun, bakalım nakliye montajlı ne kadar?", "2 olsun, bakalım montaj nakliyeli ne kadar?",
+    "2 olsun, bakalım nakliye kurulumlu ne kadar?", "2 olsun, çatı ve montaj için müşteriye sorarız",
+    "2 olsun, çatı tipi ve teslim tarihi için müşteriye soralım", "2 olsun, çatı ve renk için müşteriye soracağız",
+    "Merhaba 1 olsun, beklemeye alalım", "2 olsun hocam, montaj ekibi gelsin bir baksın", "2 olsun. Montaj ekibi baksın",
+    "2 olsun, montaj ekibimiz bir baksın", "2 olsun, bizim montaj ekibi bir göz atsın", "2 olsun, montaj ustamız bir baksın",
+    "2 olsun, bakalım kaça verirsiniz", "2 olsun, bekletmeyin ama yarın kesinleşir", "2 olsun, beklemeye aldık",
+    "2 olsun, tamam yarın kesinleşir", "1 olsun, ertelemeyelim ama yarın kesinleşir"])
+def test_hakem40_kararsiz_ve_kosullu_soz_kaydedilmez(tmp_path, metin):
+    """Tur 40 (Y1, O1–O6, önceden var): bekleme adı ("1 olsun, beklemeye alalım", "bekleme olsun", "beklemenizi rica ederiz"),
+    "montaj ekibi bir baksın", "usta gelsin ona göre", "müşteri gelsin kaporayı versin", "çatı ve montaj için müşteriye sorarız",
+    "nakliye montajlı ne kadar?", "montajcı fiyatını ve çatıyı sonra konuşuruz", "anahtar teslim fiyatını sonra konuşuruz",
+    "bekletmeyin yarın kesinleşir", "tamam yarın kesinleşir", "kaça verirsiniz", "kaç liraya", "ne kadar tutuyo?" kayıt almaz: plan
+    r01, onay yok, r02 yok."""
+    s, _ = _cati_seti(tmp_path)
+    k = s.yaz(metin, niyet="diger")
+    assert K.PLAN_ONAYI not in k.gerekce and k.eylem != "is_emri" and s.plan["revizyon"] == 1 and not s.k.d.get("onaylanan"), k.mesaj
+
+
+@pytest.mark.parametrize("metin", [
+    "2 olsun, ekip hazır olsun", "2 olsun, ekip pazartesi hazır olsun", "2 olsun, montaj ekibi hazır olsun", "2 olsun, usta hazır olsun",
+    "2 olsun, ekip pazartesi uğrasın", "2 olsun, usta yarın uğrasın", "2 olsun, Allah utandırmasın", "2 olsun, beklemeyin hemen başlayın",
+    "2 olsun, bakalım eğim kaç derece?", "2 olsun, bakalım kaç kişi gelecek?", "Selam hocam 2 olsun, ekip pazartesi hazır olsun",
+    "Merhaba, 2 olsun. Ekip hazır olsun", "2 olsun. Bekletmeyelim", "2 olsun, beklemeye gerek yok", "2 olsun, beklemek yok",
+    "2 olsun, ekip pazartesi gelsin", "2 olsun, montaj tarihini sonra konuşuruz", "2 olsun, kapı rengini müşteriye sorarız",
+    "2 olsun, ustaya sorarız montaj gününü", "2 olsun, ertelemeyelim"])
+def test_hakem40_acik_secim_soruya_donmez(tmp_path, metin):
+    """Tur 40 (O7, önceden var, sınır): "ekip pazartesi hazır olsun", "usta yarın uğrasın", "kapı rengini müşteriye sorarız",
+    "ustaya sorarız montaj gününü", "Allah utandırmasın", "Bekletmeyelim", "beklemeye gerek yok", "eğim kaç derece?" ve "montaj
+    tarihini sonra konuşuruz" açık seçimi soruya çevirmez: r02 PA-06-K."""
+    s, _ = _cati_seti(tmp_path)
+    k = s.yaz(metin, niyet="diger")
+    assert k.eylem == "is_emri" and k.revizyon == 2 and k.is_emri["talep"]["kaynak"] == "PA06K", k.mesaj
+
+
+
+@pytest.mark.parametrize("metin", [
+    "1 olsun, hayırlı işler", "1 olsun, bekletmeyin", "1 olsun, ertelemeyelim"])
+def test_hakem40_olumlu_soz_onay(tmp_path, metin):
+    """Tur 40: evin çatısının "bekletmeyin"li ve "hayırlı işler"li açık sözü onaydır: r01 onaylanır."""
+    s, _ = _cati_seti(tmp_path)
+    k = s.yaz(metin, niyet="diger")
+    assert k.gerekce == K.PLAN_ONAYI and k.revizyon == 1, k.mesaj
