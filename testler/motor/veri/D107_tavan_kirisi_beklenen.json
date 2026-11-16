@@ -1,0 +1,167 @@
+{
+ "sema": "portman.tavan_kirisi_beklenen/1",
+ "aciklama": "D-107 (BK-39, PC-43) hedef örneği: Motor'un tavan kirişi kuralının (`motor/tavan_kirisi.bul`) bulduğu kirişler ve liste satırları. Kirişlerin yeri mühendisin paftalarındaki özel profil planından okundu (köşe profili sohbeti, 15 Kasım 2026); Lokman 10:22:20'de yerleri doğru buldu (\"koyulması gerekenleri ... doğru bulmuşsun\"), 10:22:40'ta kuralı kartla onayladı, 10:48:34'te listeyi ve saha montaj planını 70 m²'nin eskiziyle onayladı (\"Eskizdeki gibi\"; liste L 3257,5). 65 ve 81 m²'nin liste boyu aynı kuralla hesaplandı, eskizde ayrıca gösterilmedi. Ölçüler cm, Motor çerçevesi (x sol dış yüzden, y Motor'un dizilimiyle); `yon` kirişin koştuğu eksen. Kirişsiz evler: bandı makas aralığından dar açıklık, çıkıntılı cumba ve açıklığı duvarsız sınırın kirişiyle kesilen salon. Taramadaki öteki evlerde (havuzun 34 evi, TK-01…TK-06, PK-01, P6001, Yan Verandalı) kiriş yok; bunu test tarar.",
+ "onay": {
+  "karar": "D-107",
+  "lokman": [
+   {
+    "tarih": "2026-11-15T09:47:33Z",
+    "soz": "eşik 7 metre olsun"
+   },
+   {
+    "tarih": "2026-11-15T10:20:13Z",
+    "soz": "gerek yok çünkü buraya makas gelmiyor makaslar 125,5 cm arayla koyuluyor"
+   },
+   {
+    "tarih": "2026-11-15T10:22:20Z",
+    "soz": "şuan kirişi koyduğun köşeleri nasıl buldun bilmiyorum ama doğru bulmuşsun koyulması gerekenleri mesala 93 m2 cumba var onu yanlış koymuşsun zaten gerekte yok"
+   },
+   {
+    "tarih": "2026-11-15T10:22:40Z",
+    "kart": "Motor kirişin köşesini bu kuralla mı seçsin?",
+    "secim": "Evet, bu kuralla"
+   },
+   {
+    "tarih": "2026-11-15T10:48:34Z",
+    "kart": "Tavan kirişi listeye ve çizime eskizdeki gibi girsin mi?",
+    "secim": "Eskizdeki gibi"
+   }
+  ],
+  "eskiz": "/mnt/project-files/Portman_Proje_Dosyalari/Tavan_Kirisi/2026-11-15/tavan_kirisi_70m2_once_sonra.png"
+ },
+ "kirisli": {
+  "PA03": {
+   "is_emri": "is_emri/adaylar/PA03.json",
+   "katalog_m2": 70,
+   "kiris": {
+    "oda": "SALON+MUTFAK",
+    "yon": "y",
+    "eksen_cm": 386.5,
+    "uclar_cm": [
+     254.25,
+     560.0
+    ],
+    "yuzden_yuze_cm": 305.75,
+    "iki_ucu_kose": true,
+    "parcalar_cm": [
+     376.5,
+     343.5
+    ],
+    "liste_boyu_cm": 325.75,
+    "aciklik_cm": 720.0
+   },
+   "liste_satiri": {
+    "grup": "1002",
+    "kalem": "Kutu profil (kiriş) 100 × 100",
+    "olcu": "L 3257,5",
+    "adet": 1
+   },
+   "pafta": "70 m² paftası (AP-09): salonda kiriş, uçlar C (6 × 8 kutu profil + 6'lık çektirme U'su) ve B (10'luk dış köşe direği)",
+   "pafta_okumasi": {
+    "yon": "y",
+    "eksen_cm": 386.5,
+    "uclar_cm": [
+     254.2,
+     560.0
+    ],
+    "not": "paftanın özel profil planından elle okunan kiriş (köşe profili sohbeti, 15 Kasım 2026); Motor'un yeri 0,5 cm içinde"
+   }
+  },
+  "PA20": {
+   "is_emri": "is_emri/adaylar/PA20.json",
+   "katalog_m2": 65,
+   "kiris": {
+    "oda": "YAŞAMA ALANI",
+    "yon": "x",
+    "eksen_cm": 386.5,
+    "uclar_cm": [
+     321.75,
+     627.5
+    ],
+    "yuzden_yuze_cm": 305.75,
+    "iki_ucu_kose": true,
+    "parcalar_cm": [
+     376.5,
+     439.25
+    ],
+    "liste_boyu_cm": 325.75,
+    "aciklik_cm": 815.75
+   },
+   "liste_satiri": {
+    "grup": "1002",
+    "kalem": "Kutu profil (kiriş) 100 × 100",
+    "olcu": "L 3257,5",
+    "adet": 1
+   },
+   "pafta": "65 m² paftası: yaşama alanında kiriş; uçlar paftada yazmıyor",
+   "pafta_okumasi": {
+    "yon": "x",
+    "eksen_cm": 386.5,
+    "uclar_cm": [
+     321.8,
+     627.5
+    ],
+    "not": "paftanın özel profil planından elle okunan kiriş (köşe profili sohbeti, 15 Kasım 2026); Motor'un yeri 0,5 cm içinde"
+   }
+  },
+  "PA16": {
+   "is_emri": "is_emri/adaylar/PA16.json",
+   "katalog_m2": 81,
+   "kiris": {
+    "oda": "SALON",
+    "yon": "y",
+    "eksen_cm": 318.75,
+    "uclar_cm": [
+     198.25,
+     446.25
+    ],
+    "yuzden_yuze_cm": 248.0,
+    "iki_ucu_kose": false,
+    "parcalar_cm": [
+     308.75,
+     559.75
+    ],
+    "liste_boyu_cm": 268.0,
+    "aciklik_cm": 868.5
+   },
+   "liste_satiri": {
+    "grup": "1002",
+    "kalem": "Kutu profil (kiriş) 100 × 100",
+    "olcu": "L 2680",
+    "adet": 1
+   },
+   "pafta": "81 m² paftası: salonda kiriş, uçlar D (6'lık köşe profili) ve E (10'luk H, dübelli)",
+   "pafta_okumasi": {
+    "yon": "y",
+    "eksen_cm": 318.8,
+    "uclar_cm": [
+     198.2,
+     446.2
+    ],
+    "not": "paftanın özel profil planından elle okunan kiriş (köşe profili sohbeti, 15 Kasım 2026); Motor'un yeri 0,5 cm içinde"
+   }
+  }
+ },
+ "kirissiz": {
+  "PA22": {
+   "is_emri": "is_emri/adaylar/PA22.json",
+   "disinda": [
+    {
+     "oda": "ANTRE",
+     "aciklik_cm": 919.52,
+     "neden": "bant 117,5 cm, makas aralığı 125,5 cm'den dar: makas gelmez"
+    }
+   ]
+  },
+  "ALTIN_2plus1_6x8": {
+   "is_emri": "is_emri/ALTIN_2plus1_6x8.json",
+   "disinda": [],
+   "not": "6×8 referans evi: salon ile mutfak arasındaki duvarsız sınırın kirişi (listede var; Lokman, kart 22 Ekim) makas yönündeki açıklığı keser; 7 m'yi aşan açıklık yok (geometri hakemi, 15 Kasım)"
+  },
+  "PA17": {
+   "is_emri": "is_emri/adaylar/PA17.json",
+   "disinda": [],
+   "not": "93 m² 3+1: çıkıntılı cumbanın altı kapsam dışı; ana çatıda salonun açıklığı 5,35 m (Lokman 10:19:45 \"gerek yok\")"
+  }
+ }
+}

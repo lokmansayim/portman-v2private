@@ -130,10 +130,11 @@ def bayi_telefonu(bayi: dict | None, gonderen: str | None) -> str | None:
 
 
 def zarf(aday: dict, bayi: dict, gonderen: str | None, ts: dict, son_is_emri: dict | None, degisiklikler: list[dict] | None = None,
-         kaynak: str = "") -> dict:
-    """Çelik İş Emri zarfı (sistem celik, motor genel). Numara ve revizyon prefabrikle aynı kuralla (`karar._is_emri_uret`; G-2)."""
-    seq = int(time.time()) % 100000
-    ie = {"sema": "portman.is_emri_celik/0.1", "is_emri_no": f"PM-{bayi.get('kod', 'BAYI')}-{time.strftime('%Y%m%d')}-{seq}",
+         kaynak: str = "", is_emri_no: str | None = None) -> dict:
+    """Çelik İş Emri zarfı (sistem celik, motor genel). Revizyon prefabrikle aynı kuralla (G-2). Numarayı karar verir (D-101,
+    `karar._talep_numarasi`: revizyon talebin numarasını taşır); numarasız çağrıda (karar dışı kullanım) saatten kurulur."""
+    ie = {"sema": "portman.is_emri_celik/0.1",
+          "is_emri_no": is_emri_no or f"PM-{bayi.get('kod', 'BAYI')}-{time.strftime('%Y%m%d')}-{int(time.time()) % 100000}",
           "revizyon": int((son_is_emri or {}).get("revizyon") or 0) + 1,
           "yapi": {"sistem": "celik", "motor": "genel", "referans_model": aday.get("referans_model") or aday["kod"], "kod": aday["kod"],
                    "gosterim": aday.get("gosterim") or aday["kod"], "tanim": aday["tanim"], "tanim_sha256": aday.get("tanim_sha256"),
