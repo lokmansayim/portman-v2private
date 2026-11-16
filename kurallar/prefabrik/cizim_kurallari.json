@@ -1083,6 +1083,35 @@
    ]
   },
   {
+   "kod": "PC-42",
+   "baslik": "Panonun ortasındaki T'de 3'lü H çizilmez (çizim listeyle aynı parçayı gösterir)",
+   "kural": "İç duvar geçen duvarın panosunun ortasına T ile geliyorsa (pano eki yok, ek toleransı yükleme listesininki: geçen duvarın yarı kalınlığı + 3,5 cm; ortadan kayma en çok `ORTADAKI_H_PAYI_CM` = 1,5 cm) parça çektirme U'sudur; Motor orada 3'lü H çizmez (ana plan, net alan kopyası, saha montaj planı, A4 ön onay sayfası). 3'lü H geçen duvarın pano ekinde ya da iki duvarın uç uca birleştiği yerde (niş T'si, D-29, D-96) çizilir; panonun ortasında olmayan eksiz T'deki H'a (TK-03'ün üç yeri) dokunulmaz. Süzme `_kur`'un sonunda, D-92'nin yeniden dizdiği panolardan sonradır. Motor'un doğrulaması (K23) DXF'teki bir 3'lü H'ın iki yanını geçen duvarın tek panosu örtüyor ve H o panonun ortasındaysa hata verir; teslim PDF'i yazılmaz. Pano dizilimi, ölçüler ve yükleme listesi değişmez (liste İE-27'den beri orada çektirme U'su sayar). 125,5'lik panonun tam ortasındaki 13 yer ve 122,5'lik panodaki 2 yer (havuzda 9 evde 15 yer) kartın \"15 yerin hepsinde\" seçimiyle.",
+   "karar": "D-105",
+   "lokman": {
+    "tarih": "2026-11-15",
+    "saat": "08:51",
+    "soz": "evet böyle bir uygulama var duvar tam ise yani 125,5 cm ise ve böleceğimiz pano tam ortaya geliyorsa 3'lü H kullanmak yerine tam ortaya çektirme U'su koyuyoruz maliyet ve hız açısından"
+   },
+   "kod_yeri": [
+    "motor/geometry.py::ortadaki_h",
+    "motor/geometry.py::ORTADAKI_H_PAYI_CM",
+    "motor/geometry.py::_kur",
+    "motor/validate.py::dogrula"
+   ],
+   "test": [
+    "testler/motor/test_bk38_cizim_liste.py::test_degisen_yerler",
+    "testler/motor/test_bk38_cizim_liste.py::test_cizim_listeyle_ayni",
+    "testler/motor/test_bk38_cizim_liste.py::test_ortadaki_h_tanimi",
+    "testler/motor/test_bk38_cizim_liste.py::test_dogrulama_ortadaki_h_yi_yakalar"
+   ],
+   "sabitler": [
+    {
+     "yer": "motor/geometry.py::ORTADAKI_H_PAYI_CM",
+     "deger": 1.5
+    }
+   ]
+  },
+  {
    "kod": "PC-43",
    "baslik": "Makas yönünde 7 m'yi aşan açıklıkta tavan kirişi (saha montaj planında)",
    "kural": "Prefabrikte makasın geçtiği yerde makas yönündeki açıklık 7 m'yi aşarsa odaya bir tavan kirişi (kutu profil 100 × 100) konur (`motor/tavan_kirisi.bul`; kural `kurallar/yerlesim/prefabrik.json › tavan_kirisi`). Kiriş makasa dik gider, iki ucu duvara oturur; en kısa çizgi seçilir, iki çizgi eşitse iki ucu da köşede olan. Açıklığın makasların dizildiği yöndeki genişliği makas aralığından (125,5) darsa oraya makas gelmez, kiriş de konmaz (genişlik 2,5 cm'lik adımla ölçülür; aralığa 2,5 cm'den yakınsa sorulur); çıkıntılı cumbanın altı kapsam dışı. Kiriş yalnız DXF'in saha montaj planında çizilir: 10 cm genişlikte kırmızı taralı dikdörtgen, yüzden yüze, ve \"TAVAN KİRİŞİ 10×10\" yazısı kirişin yanında, plandaki yazılara ve özel pano ölçülerine binmeyen ilk yerde (katman TAVAN_KIRISI, yalnız kirişli evde açılır). Akslı plan, net alan planı ve bayiye giden A4 ön onay sayfası değişmez; çizime ölçü eklenmez. Listede bir satır: Kutu profil (kiriş) 100 × 100, L yüzden yüze + 2 × 10, uçta kolon yok. İki oda arasındaki duvarsız sınırın kirişi açıklığı keser. Yer bulunamazsa, iki eşit yer kalırsa (1 cm payla), açıklık birden çok mahalden geçerse ya da odaya bir kiriş yetmezse kiriş konmaz; liste adetsiz \"Kural yok\" satırıyla sorar, çizime uyarı yazılmaz (K21). Kirişsiz evin çizimi ve listesi aynen.",

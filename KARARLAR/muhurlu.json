@@ -768,7 +768,8 @@
    "kararlar": [
     "D-52",
     "D-56",
-    "D-95"
+    "D-95",
+    "D-105"
    ],
    "pr": [
     116
@@ -827,15 +828,15 @@
     },
     {
      "yer": "testler/motor/veri/AP26_beklenen.json#onay",
-     "iz": "361a24e1dd8b440e"
+     "iz": "9a3582995a64b225"
     },
     {
      "yer": "testler/motor/veri/AP26_beklenen.json#iz.dogrulama",
-     "iz": "510e5775f9ade808"
+     "iz": "dff561815f31bcd7"
     },
     {
      "yer": "testler/motor/veri/AP26_beklenen.json#iz.bom",
-     "iz": "d8cfe0e0e463cd8d"
+     "iz": "2ed476ccae8c900d"
     },
     {
      "yer": "testler/motor/veri/AP26_beklenen.json#iz.gorunusler",
@@ -843,15 +844,15 @@
     },
     {
      "yer": "testler/motor/veri/AP26_beklenen.json#iz.pdf_izi",
-     "iz": "813abc8e0d4d3ea7"
+     "iz": "524adebdecc4c168"
     },
     {
      "yer": "testler/motor/veri/AP26_beklenen.json#iz.dxf_izi",
-     "iz": "38c37a7f052eb598"
+     "iz": "7dc400dfbfd3fc57"
     },
     {
      "yer": "testler/motor/test_m12_ap26.py",
-     "iz": "91429f065c088f8e"
+     "iz": "9dc84e182cfd44cd"
     },
     {
      "yer": "testler/motor/test_ie30_pencere_teras.py::test_ap26_is_emri_paftadan",
@@ -897,6 +898,13 @@
      "mesaj": "cmsg_01UAFvcnfVuTR1wfFux5fQPP7SruV1LNoB3e4rWdcYGX59",
      "kapanis": "2026-11-14T22:41Z",
      "karar": "D-95"
+    },
+    {
+     "tarih": "2026-11-15 09:14",
+     "soz": "Evet, 15 yerin hepsinde (karar kartı: \"Panonun ortasına gelen iç duvarda çizimden 3'lü H kalksın mı?\"; seçeneğin sonucu: \"Çizim listeyle aynı olur: 9 evde 15 yerde H kalkar, çektirme U'su kalır. Mühürlü 102 m² 2+1 çizimi bu hâliyle yeniden dondurulur.\")",
+     "mesaj": "cmsg_01UAFvcnfVuTR1wfFux5fQPPBZYnA9sQ1V7P5BvDuDZwcf",
+     "kapanis": "2026-11-15T09:24Z",
+     "karar": "D-105"
     }
    ]
   },
