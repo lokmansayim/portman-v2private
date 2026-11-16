@@ -1550,3 +1550,28 @@ def test_hakem32_celik_olumlu_soz_onay(s, metin):
     cati_seti(s)
     k = s.yaz(metin)
     assert k.gerekce == K.PLAN_ONAYI and k.revizyon == 1, k.mesaj
+
+
+
+@pytest.mark.parametrize("metin", [
+    "Ç8801 olsun, bakalım bu modelin fiyatı ne kadar?", "Ç8801 olsun, siz seçin dedim", "Ç8801 olsun, bakalım en iyi fiyat ne olur?",
+    "Ç8801 olsun, bakalım müşteriye fiyat ne olur?", "K olsun, bakalım bu modelin fiyatı ne kadar?",
+    "Ç8801 olsun, tercihini size bırakıyorum", "Ç8801 olsun, müşteri ile karar", "Ç8801 olsun, uygun olanı siz seçin",
+    "Ç8801 olsun, ödemeyi yaptıktan sonra mı onaylayalım?", "K olsun, ustayla birlikte mi karar verelim?",
+    "Ç8801 olsun, gerisini sonra konuşuruz çatı dahil", "Ç8801 olsun, bakalım bu modelin maliyeti ne olur?"])
+def test_hakem33_celik_kararsiz_soz_kaydedilmez(s, metin):
+    """Tur 33 çelikte: "bakalım bu modelin fiyatı ne kadar?", "siz seçin dedim" kayıt almaz: plan r01, onay yok, r02 yok."""
+    cati_seti(s)
+    k = s.yaz(metin)
+    assert K.PLAN_ONAYI not in k.gerekce and k.eylem != "is_emri" and s.plan["revizyon"] == 1 and not s.k.d.get("onaylanan"), k.mesaj
+
+
+
+@pytest.mark.parametrize("metin", [
+    "K olsun, bakalım toplam kaç gün?", "K olsun, bakalım alan ne kadar?", "K olsun, müşteri seçti bence de en iyisi",
+    "K olsun, rengi ustayla birlikte mi seçelim?"])
+def test_hakem33_celik_acik_secim_soruya_donmez(s, metin):
+    """Tur 33 çelikte: işi anan bakış sözü, iş kaleminin seçimi ve ölçü sorusu r02 K'yı çizer."""
+    cati_seti(s)
+    k = s.yaz(metin)
+    assert k.eylem == "is_emri" and k.revizyon == 2 and s.plan["yapi"]["kod"] == "Ç8801K", k.mesaj

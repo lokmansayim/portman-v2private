@@ -3589,3 +3589,109 @@ def test_hakem32_olumlu_soz_onay(tmp_path, metin):
     s, _ = _cati_seti(tmp_path)
     k = s.yaz(metin, niyet="diger")
     assert k.gerekce == K.PLAN_ONAYI and k.revizyon == 1, k.mesaj
+
+
+
+# İE-42 hakem tur 33: fiyatın sahibi yalnız evin iş kalemi, bayinin kendi devri ("siz seçin dedim") kayıt almaz; işi anan bakış sözü,
+# iş kaleminin seçimi, bayinin katılması ("bence de olur") ve ölçünün "ne kadar"ı açık seçimi bekletmez
+@pytest.mark.parametrize("metin", [
+    "1 olsun, bakalım bu modelin fiyatı ne kadar?", "1 olsun, bakalım en iyi fiyat ne olur?", "1 olsun, bakalım müşteriye fiyat ne olur?",
+    "1 olsun, bakalım KDV dahil fiyat ne kadar?", "1 olsun, bakalım güncel fiyat ne olur?", "1 olsun, bakalım ekstra masraf ne kadar?",
+    "1 olsun, bakalım metrekare fiyatı ne kadar?", "1 olsun, bakalım fark maliyeti ne olur?", "1 olsun, bakalım bu işin fiyatı ne kadar?",
+    "1 olsun, bakalım evin toplam fiyatı ne kadar?", "1 olsun, bakalım toplam ne kadar?", "1 olsun, bakalım güncel toplam ne kadar?",
+    "1 olsun, bakalım toplam kaç olur?", "1 olsun, bakalım bu haliyle ne kadar olur?", "1 olsun, bakalım kaç gün sürer ne kadar olur?",
+    "1 olsun, bakalım kaç günde biter ne kadar tutar?", "1 olsun, bakalım vinç ve toplam fiyat ne kadar?",
+    "1 olsun, bakalım yarın fiyat ne olur?", "1 olsun, bakalım şimdi fiyat ne olur?", "1 olsun, bakalım prefabrik fiyatı ne kadar?",
+    "1 olsun, siz seçin dedim", "1 olsun, siz seçin dedik", "1 olsun, sen seç demiştim", "1 olsun, siz seçin dediğimiz gibi",
+    "1 olsun, kişisel olarak fark etmez", "1 olsun, para olarak fark etmez", "1 olsun, bugün karar size kalmış",
+    "1 olsun, o zaman karar size kalmış", "1 olsun, yarın seçimi size bırakıyorum", "1 olsun, ev tipi fark etmez",
+    "1 olsun, model seçimini size bırakıyorum", "1 olsun, şimdi seçim size kalmış", "1 olsun, müşteri istedi sanırım olur",
+    "1 olsun, müşteri istedi bence olmaz", "1 olsun, müşteri istedi bence olur herhalde",
+    "1 olsun, müşteri istedi bence de olur ama emin değilim", "1 olsun, bence müşteri iyi seçer",
+    "1 olsun, yarın da olur görünüş fark etmez", "1 olsun, ev modeli fark etmez", "1 olsun, prefabrik modeli fark etmez",
+    "1 olsun, müşteri söyledi model fark etmez", "1 olsun, görünüşü fark etmez", "1 olsun, yarın gelse de görünüşü fark etmez",
+    "2 olsun, müşteri söyledi model fark etmez", "2 olsun, yarın da olur görünüş fark etmez", "1 olsun, belki diğer model",
+    "2 olsun, kombinasyon fark etmez", "1 olsun, kombinasyon fark etmez", "1 olsun, bakalım modelin fiyatı ne kadar?",
+    "1 olsun, bakalım bu seçeneğin fiyatı ne kadar?", "1 olsun, bakalım uygun fiyat olur mu?", "1 olsun, bakalım ev fiyatı ne kadar?",
+    "1 olsun, bakalım bu planın fiyatı ne kadar?", "1 olsun, bakalım bu haliyle fiyat ne olur?",
+    "1 olsun, bakalım bu şekilde fiyat ne olur?", "1 olsun, bakalım bu modelin fiyatı uygun mu?",
+    "1 olsun, bakalım en uygun fiyat ne olur?", "1 olsun, bakalım modelin toplam fiyatı ne kadar?",
+    "1 olsun, bakalım fark fiyatı ne olur?", "1 olsun, görelim modelin fiyatı ne kadar?", "1 olsun. Bakalım bu modelin fiyatı ne kadar?",
+    "Merhaba 1 olsun, bakalım bu modelin fiyatı ne kadar?", "1 olsun hocam, bakalım modelin fiyatı ne kadar?",
+    "1 olsun, size siz seçin dedim", "2 olsun, bakalım bu modelin fiyatı ne kadar?", "2 olsun, bakalım müşteriye fiyat ne olur?",
+    "2 olsun, bakalım ev fiyatı ne kadar?", "2 olsun, bakalım en iyi fiyat ne olur?", "2 olsun, bakalım uygun fiyat olur mu?",
+    "2 olsun, bakalım güncel fiyat ne olur?", "2 olsun, bakalım bu işin fiyatı ne kadar?", "2 olsun, siz seçin dedim",
+    "2 olsun, bakalım ekstra masraf ne kadar?", "2 olsun, bakalım KDV dahil fiyat ne kadar?",
+    "2 olsun, bakalım metrekare fiyatı ne kadar?", "1 olsun, eğim fark etmez", "1 olsun, görünüş fark etmez",
+    "1 olsun, çatının görünüşü fark etmez", "1 olsun, tasarımı size bırakıyorum", "1 olsun, dizaynı size bırakıyorum",
+    "1 olsun, firma olarak fark etmez", "1 olsun, şu an fark etmez", "1 olsun, ton olarak fark etmez",
+    "1 olsun, bütçe açısından fark etmez", "1 olsun, firma adına fark etmez", "1 olsun, bakalım bunun fiyatı ne kadar?",
+    "1 olsun, bakalım toplam maliyet ne olur?", "1 olsun, bakalım bu teklif ne olur?", "1 olsun, bakalım ötekinin fiyatı ne kadar?",
+    "1 olsun, bakalım diğerinin fiyatı ne kadar?", "1 olsun, bakalım bu çatının fiyatı ne kadar?",
+    "1 olsun, gerisini sonra konuşuruz çatı dahil", "1 olsun, gerisini çatıyla birlikte sonra konuşuruz",
+    "1 olsun, diğerlerini sonra konuşuruz", "1 olsun, size kaldı bu iş", "1 olsun, size kalıyor", "1 olsun, sizlere kalmış",
+    "1 olsun, müşteriyle karar", "1 olsun, uygun modeli siz seçin", "1 olsun, müşteri onayladı sanırım ama yarın teyit ederim",
+    "2 olsun, maliyet açısından fark etmez", "2 olsun, kapıyı taktıktan sonra mı onaylayalım?",
+    "2 olsun, rengi gördükten sonra mı onaylayalım?", "2 olsun, müşteri galiba onu seçti",
+    "2 olsun, müşteri onayladı sanırım ama yarın teyit ederim", "2 olsun, yeni modeli sonra mı seçelim?", "2 olsun, onay için müşteri",
+    "2 olsun, gerisini sonra konuşuruz çatı dahil", "2 olsun, diğerlerini sonra konuşuruz", "2 olsun, size kaldı bu iş",
+    "2 olsun, bakalım diğerinin fiyatı ne kadar?", "1 olsun, bakalım bu modelin maliyeti ne olur?",
+    "1 olsun, bakalım bu seçeneğin maliyeti ne olur?", "1 olsun, bakalım müşteriye maliyet ne olur?",
+    "1 olsun, bakalım müşteriye teklif ne olur?", "2 olsun, telefonda konuştuk zaten görünüşü fark etmez"])
+def test_hakem33_kararsiz_ve_kosullu_soz_kaydedilmez(tmp_path, metin):
+    """Tur 33 (Y1, Y2, önceden var Yüksek, s221): fiyatı bekleyen soru ("bakalım bu modelin fiyatı ne kadar?", "bakalım en iyi fiyat ne
+    olur?", "bakalım müşteriye maliyet ne olur?"), bayinin kendi devri ("siz seçin dedim", "sen seç demiştim"), devrin hemen önündeki
+    bilinmeyen söz ("yarın da olur görünüş fark etmez", "müşteri söyledi model fark etmez"), zaman zarfı ("bugün karar size kalmış") ve
+    tahmin ("müşteri istedi sanırım olur") kayıt almaz: plan r01, onay yok, r02 yok."""
+    s, _ = _cati_seti(tmp_path)
+    k = s.yaz(metin, niyet="diger")
+    assert K.PLAN_ONAYI not in k.gerekce and k.eylem != "is_emri" and s.plan["revizyon"] == 1 and not s.k.d.get("onaylanan"), k.mesaj
+
+
+@pytest.mark.parametrize("metin", [
+    "2 olsun, bakalım süre ne kadar?", "2 olsun, kurulum günü için fark etmez", "2 olsun, nakit olarak da kart olarak da fark etmez",
+    "2 olsun, parke çeşidi fark etmez", "2 olsun, gönderim şekli fark etmez", "2 olsun, bence müşteri doğru seçti",
+    "2 olsun, belki diğer planda da kullanırız", "2 olsun, sonrası size kalmış", "2 olsun, sabah için de akşam için de fark etmez",
+    "2 olsun, tarih konusunda fark etmez", "2 olsun, gün olarak fark etmez", "2 olsun, saat olarak fark etmez",
+    "2 olsun, zaman konusunda fark etmez", "2 olsun, cumartesi için de pazar için de fark etmez", "2 olsun, kombi için fark etmez",
+    "2 olsun, vinç için fark etmez", "2 olsun, kargo olarak fark etmez", "Merhaba 2 olsun, gün olarak fark etmez",
+    "2 olsun, seramik seçimini size bırakıyorum", "2 olsun, fayans tercihini size bırakıyorum", "2 olsun, zemin seçimini size bırakıyorum",
+    "2 olsun, kombi tipi fark etmez", "2 olsun, klozet tipi fark etmez", "2 olsun, zemin türü fark etmez",
+    "2 olsun, tezgah tipini size bırakıyorum", "2 olsun, seramik seçimini siz belirleyin",
+    "Merhaba 2 olsun, fayans seçimini size bırakıyoruz", "2 olsun, müşteri istedi bence de olur",
+    "2 olsun, müşteri onayladı bence de tamam", "2 olsun, müşteri seçti bence de en iyisi", "2 olsun, müşteri onayladı bence sorun yok",
+    "2 olsun, müşteri onayladı bence de", "2 olsun, müşteri kabul etti bence de olur", "2 olsun, müşteri beğendi bence de olur",
+    "2 olsun abi müşteri istedi bence de olur", "Merhaba 2 olsun. Müşteri istedi bence de olur.", "Müşteri istedi bence de olur, 2 olsun",
+    "2 olsun, bence müşteri iyi karar verdi", "2 olsun, müşteri istedi bence de en mantıklısı", "2 olsun, bakalım toplam kaç gün?",
+    "2 olsun, bakalım toplam kaç gün sürer?", "2 olsun, bakalım alan ne kadar?", "2 olsun, bakalım yükseklik ne kadar olur?",
+    "2 olsun, bakalım toplam kaç panel gider?", "2 olsun, bakalım toplamda kaç metrekare olur?",
+    "Merhaba 2 olsun. Bakalım toplam kaç gün.", "2 olsun, bakalım peşinat ne kadar olur?", "2 olsun, montaj için gün fark etmez",
+    "2 olsun, ödeme olarak nakit ya da kart fark etmez", "2 olsun, kurulum için gün fark etmez", "2 olsun, teslimat için gün fark etmez",
+    "2 olsun, iletişim olarak mail ya da whatsapp fark etmez", "2 olsun, kombi modeli fark etmez", "2 olsun, acil gerek",
+    "2 olsun, bakalım kurulum ücreti ne kadar?", "2 olsun, bakalım teklif nasıl gelir?", "2 olsun, bakalım teslim ne kadar sürer?",
+    "2 olsun, bakalım montaj toplam kaç gün sürer?", "2 olsun, toplam kaç gün?", "2 olsun, rengi ustayla birlikte mi seçelim?",
+    "2 olsun, seramiği ustayla birlikte mi onaylayalım?", "2 olsun, kombi modeli sonra mı seçelim?",
+    "2 olsun, müşteri onayladı bence de mantıklı", "2 olsun, müşteri onayladı bence de iyi olur",
+    "2 olsun. Müşteri istedi, bence de olur."])
+def test_hakem33_acik_secim_soruya_donmez(tmp_path, metin):
+    """Tur 33 (O2–O6, s220): işi anan bakış sözü ("tarih konusunda", "sabah için de akşam için de", "gün olarak", "kombi için fark
+    etmez"), iş kaleminin seçimi ("seramik seçimini size bırakıyorum", "kombi tipi fark etmez"), bayinin katılması ("müşteri istedi bence
+    de olur", "bence müşteri doğru seçti"), ölçünün "toplam / ne kadar"ı ("bakalım toplam kaç gün?", "bakalım alan ne kadar?"), "belki
+    diğer planda", "sonrası size kalmış" açık seçimi soruya çevirmez: r02 PA-06-K."""
+    s, _ = _cati_seti(tmp_path)
+    k = s.yaz(metin, niyet="diger")
+    assert k.eylem == "is_emri" and k.revizyon == 2 and k.is_emri["talep"]["kaynak"] == "PA06K", k.mesaj
+
+
+
+@pytest.mark.parametrize("metin", [
+    "1 olsun, bakalım toplam kaç gün?", "1 olsun, müşteri onayladı bence de tamam", "1 olsun, müşteri seçti bence de en iyisi",
+    "1 olsun, müşteri onayladı bence sorun yok", "1 olsun, müşteri onayladı bence de", "1 olsun, bence müşteri iyi karar verdi",
+    "1 olsun, başka konuları sonra konuşuruz", "1 olsun, tarihleri sonra konuşuruz", "Abi 1 olsun, gerisini yarın konuşuruz",
+    "1 olsun, müşteri onayladı bence de güzel"])
+def test_hakem33_olumlu_soz_onay(tmp_path, metin):
+    """Tur 33: başka işin fiyatı ("bakalım vinç fiyatı ne kadar?"), ölçü sorusu ve bayinin katılması evin çatısının onayıdır: r01
+    onaylanır."""
+    s, _ = _cati_seti(tmp_path)
+    k = s.yaz(metin, niyet="diger")
+    assert k.gerekce == K.PLAN_ONAYI and k.revizyon == 1, k.mesaj
