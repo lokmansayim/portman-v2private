@@ -506,6 +506,46 @@
    "tarih": "2026-11-05",
    "kaynak": "Lokman, 5 Kasım 2026, TK-04 montaj rehberi: 07:19 \"cumba makası ile ana makaslar arasında bir problem oldu ana makasları komple boydan boya geri çek yani veranda içeri girsin burada bir hata oluştu şöyle cumba makasının tam arkasına ana makası normal 10 cm topuk olarak koy yani ana makasın orta noktası binanın arkasına doğru kayacak tam oturması için eğimden dolayı bir sorun olacak vadiyi aşıklarla oluştur\"; 07:23 \"kesme yapmayacağız makasları geri çekeceğiz ama arka taraftaki 30 cm saçağıda bozmayacağız doğal olarak ana makaslar küçülecek ve orta noktası binanın arkasına doğru kayacak ve veranda içeri doğru çekilecek o zaman cumbanın sağında ve solunda 2 tane küçük dere oluşacak\"; 10:15, eskize: \"evet doğru gözüküyor\". Önce kesim istemişti (06:20, 06:43); kesik rehberi görünce geri çekmeyi seçti.",
    "not": "TK-04 r06'da (cumba 0–386,5) ana makaslar 7,5'ten arka saçak ucu 928,5'e: açıklık 861 (önce 898,5), mahya y 468 (önce 449,25); dereler (−30; 7,5) ve (416,5; 7,5)'ten (193,25; 230,75)'e; cumbanın yan saçakları 37,5 cm. Baş makas omegası makasın boyunca (M-03, D-53). Paftalardan farkı: AP-06 (MK05–MK08), AP-13 (M4–M7) ve AP-16 (MKS4–MKS7) makas planlarında cumbanın altındaki ana makaslar cumbanın baş makasında biter, verandanın üstündekiler saçağa kadar; kör İş Emri'leri anahtarsız, paftadaki gibi eski yolda ölçülür."
+  },
+  "tavan_kirisi": {
+   "kural": "D-107 (PC-43): prefabrikte makasın geçtiği yerde makas yönündeki açıklık 7 m'yi aşarsa odaya bir tavan kirişi (kutu profil 100 × 100) konur. Kiriş makasa dik gider, iki ucu duvara oturur; en kısa çizgi seçilir, iki çizgi eşitse iki ucu da köşede olan seçilir. Makaslar 125,5 cm arayla dizilir: açıklığın makasların dizildiği yöndeki genişliği makas aralığından darsa oraya makas gelmez, kiriş de konmaz. Kapsam kapalı odalar ve ana çatının altı; çıkıntılı cumbanın makası öteki yöne gider, cumba kapsam dışında. Okuyan `motor/tavan_kirisi.py`; liste (`prefabrik_liste`) ve DXF'in saha montaj planı (`dxf_out`, katman TAVAN_KIRISI) oradan alır. Ön onay A4 sayfası, IFC, kart modeli ve montaj rehberi bu sürümde kirişi çizmez. Yer bulunamazsa ya da iki eşit yer kalırsa kiriş konmaz, liste ve çizim uyarı yazar (K21).",
+   "esik_cm": {
+    "deger": 700,
+    "durum": "lokman",
+    "tarih": "2026-11-15",
+    "not": "Açıklık makas yönünde, duvar yüzünden duvar yüzüne; eşiği aşan (700'den uzun) açıklık kiriş alır. Lokman 09:47:33 \"eşik 7 metre olsun\"; 49 m²'nin 6,80 m'lik kirişi eve özel (kart 09:53:56)."
+   },
+   "makas_aralik": {
+    "okunan": "kurallar/liste/prefabrik.json › kurallar.makas_aralik_cm"
+   },
+   "duvara_oturma_cm": {
+    "deger": 10,
+    "durum": "lokman",
+    "tarih": "2026-11-15",
+    "not": "Kirişin her ucu duvara 10 cm girer: liste boyu yüzden yüze + 2 × 10 (70 m²: 305,75 + 20 = L 3257,5). Dayanak 49 m² paftası (kutu profil 325,5; yüzden yüze 305,5). Lokman'ın kartı 10:48:34 \"Eskizdeki gibi\"."
+   },
+   "kesit_cm": {
+    "deger": 10,
+    "durum": "lokman",
+    "tarih": "2026-11-15",
+    "not": "Kutu profil 100 × 100: saha montaj planında ekseninden 5'er cm, taralı (kart 10:48:34 \"Eskizdeki gibi\")."
+   },
+   "kalem": "Kutu profil (kiriş) 100 × 100",
+   "uc_kolonu": {
+    "deger": false,
+    "durum": "lokman",
+    "tarih": "2026-11-15",
+    "not": "Kirişin uçlarına yeni kolon ya da köşe profili konmaz; uçlar duvarın köşe direğine ve H'ına oturur (81 m² paftası; kart 10:48:34 \"Eskizdeki gibi\": \"Uçlarda yeni kolon yok\")."
+   },
+   "cati_tipleri": [
+    "besik",
+    "besik_cumba",
+    "kirma"
+   ],
+   "durum": "lokman",
+   "tarih": "2026-11-15",
+   "kaynak": "Lokman, 15 Kasım 2026 (UTC), köşe profili sohbeti: 09:39:57 \"şimdi inceledim makas yönüne göre 6 metreden daha geniş açıklıklarda mühendis uygun yere yani tam köşeye 1 tane profil koymuş bunu kurallaştırabilir misin bir bakmak lazım\"; 09:47:33 \"eşik 7 metre olsun\"; kart 09:53:56 \"7 m kalır; 49 m2 kirişi eve özel\"; eskize 10:19:45 (93 m² cumba) \"gerek yok\", 10:20:13 (102 m² antre) \"gerek yok çünkü buraya makas gelmiyor makaslar 125,5 cm arayla koyuluyor\", 10:20:31 (91 m²) \"gerek yok mesafe kısa\", 10:20:49 (49 m²) \"aslında gerek yok ama mühendis koymuş olabilir\"; 10:22:20 \"şuan kirişi koyduğun köşeleri nasıl buldun bilmiyorum ama doğru bulmuşsun koyulması gerekenleri mesala 93 m2 cumba var onu yanlış koymuşsun zaten gerekte yok\"; kart 10:22:40 \"Motor kirişin köşesini bu kuralla mı seçsin?\" → \"Evet, bu kuralla\". Tavan kirişi sohbeti: kart 10:48:34 \"Tavan kirişi listeye ve çizime eskizdeki gibi girsin mi?\" → \"Eskizdeki gibi\".",
+   "not": "Hedef örnek paftalardaki üç kiriş (`testler/motor/veri/D107_tavan_kirisi_beklenen.json`): 70 m² (PA-03, AP-09) salonda x 386,5, y 254,25–560 (305,75; iki ucu köşe); 65 m² (PA-20) y 386,5, x 321,75–627,5 (305,75; kalın duvarın ekseni); 81 m² (PA-16) x 318,75, y 198,25–446,25 (248; en kısa). Kiriş almayan: 102 m² antre ve 6×8 referans evinin salonu (bant 117,5 < 125,5), 93 m² cumba (ana çatıda 5,35 m), 91 m² (6,22 m), 49 m² (6,80 m). Paftalarda kirişin uçları birbirini tutmuyor (70 m²'de iç köşede 6 × 8 kutu profil, 81 m²'de köşe profili ve H); kural uçta yeni parça koymaz."
   }
  }
 }
