@@ -1798,3 +1798,33 @@ def test_hakem44_celik_kararsiz_soz_kaydedilmez(s, metin):
     cati_seti(s)
     k = s.yaz(metin)
     assert K.PLAN_ONAYI not in k.gerekce and k.eylem != "is_emri" and s.plan["revizyon"] == 1 and not s.k.d.get("onaylanan"), k.mesaj
+
+
+
+@pytest.mark.parametrize("metin", [
+    "Ç8801 olsun, hoş gibi", "Ç8801 olsun, daha iyi gibi", "Ç8801 olsun, en iyisi bu gibi"])
+def test_hakem45_celik_kararsiz_soz_kaydedilmez(s, metin):
+    """Tur 45 çelikte: "gibi"li değerlendirme ("Ç8801 olsun, daha iyi gibi") kayıt almaz: plan r01, onay yok, r02 yok."""
+    cati_seti(s)
+    k = s.yaz(metin)
+    assert K.PLAN_ONAYI not in k.gerekce and k.eylem != "is_emri" and s.plan["revizyon"] == 1 and not s.k.d.get("onaylanan"), k.mesaj
+
+
+
+@pytest.mark.parametrize("metin", [
+    "K olsun, inşallah güzel olacak"])
+def test_hakem45_celik_acik_secim_soruya_donmez(s, metin):
+    """Tur 45 çelikte: dilek ("K olsun, inşallah güzel olacak") r02 K'yı çizer."""
+    cati_seti(s)
+    k = s.yaz(metin)
+    assert k.eylem == "is_emri" and k.revizyon == 2 and s.plan["yapi"]["kod"] == "Ç8801K", k.mesaj
+
+
+
+@pytest.mark.parametrize("metin", [
+    "Ç8801 olsun, güzel olsun inşallah"])
+def test_hakem45_celik_olumlu_soz_onay(s, metin):
+    """Tur 45 çelikte: evin çatısının dilekli sözü ("Ç8801 olsun, güzel olsun inşallah") onaydır."""
+    cati_seti(s)
+    k = s.yaz(metin)
+    assert k.gerekce == K.PLAN_ONAYI and k.revizyon == 1, k.mesaj

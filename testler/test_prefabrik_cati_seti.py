@@ -4779,3 +4779,107 @@ def test_hakem44_olumlu_soz_onay(tmp_path, metin):
     s, _ = _cati_seti(tmp_path)
     k = s.yaz(metin, niyet="diger")
     assert k.gerekce == K.PLAN_ONAYI and k.revizyon == 1, k.mesaj
+
+
+
+# İE-42 hakem tur 45: "gibi"li değerlendirme ("daha iyi / süper / en iyisi bu gibi", "güzel olmuş gibi") ve "olur herhalde" kararsızdır;
+# başka evin kodu ("PA-08-C olsun") bu evin çatısını seçmez. Dilek ("inşallah güzel olacak", "güzel olsun inşallah"), çatı dışının
+# "sorun değil"i ("5 bin fark sorun değil"), nesnesi belli iş ("nakliyeyi montajla birlikte sonra konuşuruz") ve çatı dışının "olmasa"sı
+# ("vinç olmasa daha iyi") açık seçimdir
+@pytest.mark.parametrize("metin", [
+    "1 olsun, daha iyi gibi, yatak odası 2 penceresi 120x180 olsun", "2 olsun, daha iyi gibi, yatak odası 2 penceresi 120x180 olsun",
+    "1 olsun, süper gibi, yatak odası 2 penceresi 120x180 olsun", "1 olsun, en iyisi bu gibi", "1 olsun, bu daha uygun gibi",
+    "1 olsun, daha iyi gibi", "1 olsun, güzel olmuş gibi", "2 olsun, inşallah sıkıntı çıkmaz", "2 olsun, sıkıntı çıkmaz herhalde",
+    "2 olsun, problem çıkmaz inşallah", "2 olsun, uygun olur herhalde", "2 olsun, iyi olur herhalde", "2 olsun, iyi olur sanırım",
+    "2 olsun, müşteri beğenecektir inşallah", "2 olsun, sorun çıkmaz herhalde", "2 olsun, sanırım doğru seçim",
+    "2 olsun, doğru seçim gibi", "2 olsun, en iyisi bu gibi", "2 olsun, en uygunu bu herhalde", "2 olsun, bu daha uygun gibi",
+    "2 olsun, daha iyi gibi", "2 olsun, daha mantıklı gibi", "2 olsun, mantıklı gibi", "2 olsun, sanki daha güzel",
+    "2 olsun, güzel olmuş gibi", "1 olsun, daha güzel gibi", "1 olsun, bu daha güzel gibi", "1 olsun, en güzeli bu gibi",
+    "1 olsun, hoş gibi", "1 olsun, süper gibi", "1 olsun, harika gibi", "Hocam 1 olsun, daha iyi gibi", "1 olsun. Daha iyi gibi",
+    "1 olsun. En iyisi bu gibi", "Merhaba, 1 olsun. Güzel olmuş gibi", "1 olsun abi, daha güzel gibi", "1 numara olsun, daha iyi gibi",
+    "Evin kendi çatısı olsun, daha iyi gibi", "PA-06 olsun, daha iyi gibi", "Birinci olsun, en iyisi bu gibi",
+    "2 olsun, sıkıntı çıkmaz inşallah", "1 olsun, 3 sorun değil", "2 olsun, beşik hiç önemli değil", "kırma olmasa beşik olsun",
+    "2 olsun, olmasa da olur", "2 olsun, kendisini de rengini de sonra konuşuruz", "PA-08-C olsun", "PA-08-K olsun", "PA-03-C olsun",
+    "PA-08-C", "PA-08-K'yı istiyoruz", "pa08-c olsun", "PA-08 C olsun", "bizim için PA-06-K önemli değil",
+    "2 olsun, çatı tipi önemli değil", "Merhaba PA-06-K olmasa da olur"])
+def test_hakem45_kararsiz_ve_kosullu_soz_kaydedilmez(tmp_path, metin):
+    """Tur 45 (Y1, önceden var; koordinatörün canlı gözlemi): "1 olsun, daha iyi gibi", "1 olsun. En iyisi bu gibi", "2 olsun, iyi olur
+    herhalde", "PA-08-C olsun" kayıt almaz: plan r01, onay yok, r02 yok."""
+    s, _ = _cati_seti(tmp_path)
+    k = s.yaz(metin, niyet="diger")
+    assert K.PLAN_ONAYI not in k.gerekce and k.eylem != "is_emri" and s.plan["revizyon"] == 1 and not s.k.d.get("onaylanan"), k.mesaj
+
+
+@pytest.mark.parametrize("metin", [
+    "2 olsun, 5 bin fark sorun değil, yatak odası 2 penceresi 120x180 olsun",
+    "2 olsun, çatının farkı önemli değil, yatak odası 2 penceresi 120x180 olsun",
+    "2 olsun, vinç olmasa daha iyi, yatak odası 2 penceresi 120x180 olsun",
+    "2 olsun, nakliyeyi montajla birlikte sonra konuşuruz, yatak odası 2 penceresi 120x180 olsun",
+    "2 olsun, ustayla birlikte yarın araziye bakarız, yatak odası 2 penceresi 120x180 olsun",
+    "Yatak odası 2 penceresi 120x180 olsun, 2 olsun, 5 bin fark sorun değil", "2 olsun, vinç olmasa daha iyi",
+    "2 olsun, montajda vinç olmasa daha iyi olur", "2 olsun, yağmur olmasa montaja hemen başlarız",
+    "2 olsun, bayram olmasa bu hafta başlardık", "2 olsun, mutfakta pencere olmasa da olur", "2 olsun, kombi olmasa da olur",
+    "2 olsun, banyoda cam olmasa iyi olur", "2 olsun, kar olmasaydı geçen hafta kurulurdu", "2 olsun, 1 hafta gecikme sorun değil",
+    "2 olsun, 2 gün gecikme sorun değil", "2 olsun, 10 gün sonra olması sorun değil", "2 olsun, 3 gün geç gelmesi önemli değil",
+    "2 olsun, 1-2 gün gecikmesi problem değil", "2 olsun, 5 bin fark sorun değil", "2 olsun, 5000 TL fark önemli değil",
+    "2 olsun, 20 bin fark hiç sorun değil", "2 olsun, 500 lira fark önemli değil", "2 olsun, aradaki 5 bin lira sorun değil",
+    "2 olsun, %10 fark sorun değil", "2 olsun, 2. kat önemli değil", "2 olsun, 3 cm fark önemli değil",
+    "2 olsun, 1 hafta geç olması sıkıntı değil", "2 olsun, çatı rengi önemli değil", "2 olsun, çatının rengi hiç önemli değil",
+    "2 olsun, çatı kaplaması sorun değil", "2 olsun, çatının fiyat farkı sorun değil", "2 olsun, çatı farkı sorun değil",
+    "2 olsun, çatı için fiyat farkı önemli değil", "PA-06-K fiyat önemli değil", "PA-06-K'nın fiyat farkı sorun değil",
+    "2 olsun, kırmanın fiyatı önemli değil", "2 olsun, kırma pahalı ama sorun değil", "2 olsun, PA-06-K'nın fiyatı sorun değil",
+    "2 olsun, nakliyeyi de montajla birlikte yarın konuşuruz", "2 olsun, nakliyeyi montajla birlikte sonra konuşuruz",
+    "2 olsun, ödemeyi kaporayla birlikte sonra konuşuruz", "2 olsun, teslimi montajla birlikte sonra konuşuruz",
+    "2 olsun, kapı rengini montajla birlikte sonra konuşuruz", "2 olsun, vinci nakliyeyle birlikte sonra konuşuruz",
+    "2 olsun, montaj tarihini nakliyeyle birlikte sonra konuşuruz", "2 olsun, nakliye ücretini montajla beraber yarın konuşuruz",
+    "2 olsun, kapıyı pencereyle birlikte sonra konuşuruz", "2 olsun, ödeme planını montajla birlikte sonra netleştiririz",
+    "2 olsun, sözleşmeyi kaporayla birlikte yarın konuşuruz", "2 olsun, Ali bey kendisiyle nakliyeyi sonra konuşuruz",
+    "2 olsun, ekip montajla birlikte yarın bakar", "2 olsun, ustayla birlikte yarın bakarız zemine",
+    "2 olsun, ustayla birlikte yarın yere bakarız", "2 olsun, ustayla birlikte sonra araziye bakarız",
+    "2 olsun, ustayla birlikte yarın temeli konuşuruz", "Selam 2 olsun, 5 bin fark sorun değil", "2 olsun hocam. 5 bin fark sorun değil",
+    "Abi 2 olsun, aradaki fark 5 bin sorun değil", "2 olsun abi, 10 bin fark önemli değil müşteri öder",
+    "2 numara olsun, 5 bin fark sorun değil", "İkinci olsun, 3 bin fark sorun değil", "PA-06-K olsun, 5 bin fark sorun değil",
+    "2 olsun, nakliyeyi montajla birlikte yarın konuşuruz hocam", "Merhaba 2 olsun. Nakliyeyi montajla birlikte sonra konuşuruz",
+    "2 olsun abi, ödemeyi kaporayla beraber yarın konuşuruz", "2 olsun, teslim tarihini montajla birlikte sonra netleştiririz",
+    "2 olsun, zemini ustayla birlikte yarın konuşuruz", "2 olsun, temeli ustayla birlikte sonra konuşuruz",
+    "2 olsun, vinç olmasa iyi olur yol dar", "2 olsun, mutfak penceresi olmasa da olur", "2 olsun, kombi yeri olmasa da olur",
+    "2 olsun, kırmanın 5 bin farkı sorun değil", "2 olsun, kırmanın farkı sorun değil", "2 olsun, çatının farkı önemli değil",
+    "2 olsun, çatı farkını müşteri öder sorun değil", "2 olsun, güzel olsun inşallah", "2 olsun, inşallah güzel olsun",
+    "2 olsun, iyi olsun inşallah", "2 olsun, inşallah güzel olacak", "2 olsun, güzel olacak inşallah",
+    "2 olsun, çok güzel olacak inşallah", "2 olsun, kırma çok güzel olacak inşallah", "2 olsun, müşteri için iyi olsun inşallah",
+    "2 olsun, umarım güzel olacak", "2 olsun, tamam olsun inşallah", "2 olsun, iyi olacak inşallah",
+    "Kırma güzel olacak inşallah, 2 olsun", "2 olsun, inşallah müşteri için güzel olacak", "2 olsun abi, güzel olsun inşallah",
+    "2 olsun. İnşallah güzel olacak", "2 olsun, kırma gibi güzel bir çatı yok", "2 olsun, 5 bin fark önemli değil",
+    "2 olsun, 5 bin fark dert değil", "2 olsun, 5 bin fark mesele değil", "2 olsun, ustayla birlikte ekibi sonra konuşuruz",
+    "2 olsun, ustayla birlikte vinci sonra konuşuruz", "2 olsun, ustayla birlikte temeli sonra konuşuruz",
+    "2 olsun, montajla birlikte elektriği sonra konuşuruz", "2 olsun, montajla birlikte tesisatı sonra konuşuruz",
+    "Abi 2 olsun, inşallah güzel olacak", "Selamlar, 2 olsun. İnşallah güzel olacak", "2 olsun, güzel olsun inşallah 🙏",
+    "2 olsun. Hayırlı olsun, güzel olsun inşallah", "2 olsun, müşteri için güzel olacak inşallah", "2 numara olsun, inşallah güzel olacak",
+    "PA-06-K olsun, inşallah güzel olacak", "Kırma olsun dedik, 2 olsun, inşallah güzel olacak", "2 olsun hocam, 5 bin fark sorun değil",
+    "2 olsun abi. Aradaki 5 bin sorun değil", "Kırmayı seçtik, 2 olsun, 5 bin fark sorun değil", "2 olsun, 7.500 TL fark sorun değil",
+    "2 olsun, 7500 fark önemli değil", "2 olsun, kırmanın fiyat farkı sorun değil müşteri öder",
+    "2 olsun, kırmanın farkı müşteri için sorun değil", "2 olsun, çatı farkı müşteri için önemli değil",
+    "2 olsun, 2-3 gün gecikme önemli değil", "2 olsun, 2 hafta sonra teslim sorun değil",
+    "2 olsun abi, nakliyeyi montajla beraber sonra konuşuruz", "2 olsun. Ödemeyi montajla birlikte yarın konuşuruz",
+    "Selam 2 olsun, teslim tarihini nakliyeyle birlikte sonra konuşuruz", "2 olsun hocam, elektriği tesisatla birlikte sonra konuşuruz",
+    "2 olsun, kapı rengini pencere rengiyle birlikte sonra konuşuruz", "2 olsun, ustayla birlikte yarın arsaya bakarız",
+    "2 olsun, ustayla beraber yarın yere bakacağız", "2 olsun, ustayla birlikte yarın araziye bakarız", "2 olsun, inşallah güzel olur",
+    "2 olsun, hayırlı olsun inşallah", "abi vinç olmasa daha iyi, 2 olsun"])
+def test_hakem45_acik_secim_soruya_donmez(tmp_path, metin):
+    """Tur 45 (O1–O4): "2 olsun, inşallah güzel olacak", "2 olsun, 5 bin fark sorun değil", "2 olsun, nakliyeyi montajla birlikte sonra
+    konuşuruz", "2 olsun, vinç olmasa daha iyi" açık seçimi soruya çevirmez: r02 PA-06-K."""
+    s, _ = _cati_seti(tmp_path)
+    k = s.yaz(metin, niyet="diger")
+    assert k.eylem == "is_emri" and k.revizyon == 2 and k.is_emri["talep"]["kaynak"] == "PA06K", k.mesaj
+
+
+
+@pytest.mark.parametrize("metin", [
+    "1 olsun, güzel olsun inşallah", "1 olsun, inşallah güzel olacak", "1 olsun, iyi olsun inşallah", "1 olsun, inşallah iyi olacak",
+    "Evin kendi çatısı olsun, inşallah güzel olacak", "1 olsun abi, güzel olsun inşallah",
+    "1 olsun, müşteri onayladı, inşallah güzel olacak", "Tamam, 1 olsun inşallah"])
+def test_hakem45_olumlu_soz_onay(tmp_path, metin):
+    """Tur 45 (O1): evin çatısının dilekli sözü ("1 olsun, güzel olsun inşallah", "1 olsun, inşallah güzel olacak") onaydır."""
+    s, _ = _cati_seti(tmp_path)
+    k = s.yaz(metin, niyet="diger")
+    assert k.gerekce == K.PLAN_ONAYI and k.revizyon == 1, k.mesaj
