@@ -354,3 +354,44 @@ def test_67m2_veranda_besigi_aynen():
     ie.get("verandalar")[0].pop("cati")
     q = _kur(ie)
     assert q.dis_verandalar[0]["cati"] == p.dis_verandalar[0]["cati"]
+
+
+# Geometri hakemi (16 Kasım 2026, 565 kuralı): bozuk girdide Motor donmaz; İş Emri dikmesi ara kolonun yerinde olmaz; rehber listeyle çelişmez.
+@pytest.mark.parametrize("bit", [float("inf"), 3e6])
+def test_bozuk_genislik_hata(bit):
+    """Dış kenar sonsuz ya da çok büyükse ara kolon hesabından önce açık hata (eski kod gibi; donmaz)."""
+    ie = _ie("55m2")
+    ie["verandalar"][0]["bit_cm"] = bit
+    with pytest.raises(G.IsEmriHatasi):
+        _kur(ie)
+
+
+def test_ara_kolon_en_az_sayi():
+    """`_gerekli_ara_kolon` en az sayıdır: bir eksiğiyle aralık 565'i geçer."""
+    for en in [449.25, 575.01, 635.5, 710.25, 1140.01, 1500, 1695.01, 2300, 5000]:
+        n = G._gerekli_ara_kolon(en)
+        assert G._kolon_eksen_araligi(en, n) <= G.VERANDA_KOLON_ARASI_EN_COK_CM + 1e-6
+        assert n == 0 or G._kolon_eksen_araligi(en, n - 1) > G.VERANDA_KOLON_ARASI_EN_COK_CM
+
+
+def test_ara_kolon_is_emri_dikmesi_hata():
+    """İş Emri dikmesi ara kolonun yerindeyse kolon iki kez sayılmaz: açık hata (K21)."""
+    ie = _ie("67m2")
+    ie["verandalar"][0].pop("ara_kolon")
+    ie["dikmeler"] = [[350.125, -240]]
+    with pytest.raises(G.IsEmriHatasi, match="ara kolonun yerinde"):
+        _kur(ie)
+
+
+def test_rehber_ara_kolonlu_verandayi_kurmaz(tmp_path):
+    """Montaj rehberi tek dış kirişi kurar; ara kolonlu verandada listeyle çelişmesin diye `Desteklenmiyor` (D-28 madde 1)."""
+    from motor import kart_model
+    from araclar.paket.rehber import veri
+    ie = json.loads((VERI / "TK01_r08.json").read_text(encoding="utf-8"))
+    on = next(v for v in ie["verandalar"] if v["cephe"] == "on")
+    on["bit_cm"] = 856.5                                                # dış kenar 600,5 → Motor 1 ara kolon koyar
+    with contextlib.redirect_stdout(io.StringIO()):
+        kart_model.uret(copy.deepcopy(ie), tmp_path, "TK01")
+        L = PL.is_emrinden(copy.deepcopy(ie))["satirlar"]
+        with pytest.raises(veri.Desteklenmiyor, match="ara kolonlu veranda"):
+            veri.kur(copy.deepcopy(ie), tmp_path, "TK01", L, "TK-01")

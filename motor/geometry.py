@@ -1905,10 +1905,12 @@ def _kolon_eksen_araligi(en: float, ara: int, k: float = VERANDA_KOLON_CM) -> fl
 def _gerekli_ara_kolon(en: float, k: float = VERANDA_KOLON_CM) -> int:
     """D-109: kolon ekseni arası `VERANDA_KOLON_ARASI_EN_COK_CM`'yi geçmeyen en az ara kolon sayısı (52 m² 635,5 → 1; 55 m² 449,25 → 0;
     67 m² 710,25 → 1)."""
-    n = 0
-    while _kolon_eksen_araligi(en, n, k) > VERANDA_KOLON_ARASI_EN_COK_CM + 1e-6:
-        n += 1
-    return n
+    sinir = VERANDA_KOLON_ARASI_EN_COK_CM + 1e-6
+    if en - k <= sinir:                                 # ara kolonsuz: iki köşe kolonu
+        return 0
+    if en / 2 - k / 2 <= sinir:                         # tek ara kolon: ortada
+        return 1
+    return math.ceil(en / sinir) - 1                    # n ≥ 2: en büyük aralık ortadaki parçalar, en / (n + 1)
 # D-52 (İE-30; Lokman 4 Kasım 2026 20:42: "teras ayrı bir teknikle yapılıyor çatı saçağının 10 cm altında çatı paneli olarak kullandığımız bir
 # 8 cm genişliğinde C den oluşan panel yapıyoruz üzerine yine Trapez sac araya damlalık atıyoruz yani çatı gibi şekilli değil"; 21:14 "Paftadan,
 # ev ev"): verandanın üstü `cati: {tip: teras_paneli, cikma_cm}` → düz panel, üst yüzü ana çatının saçak altı çizgisinin (duvar üstü) 10 cm
@@ -2051,12 +2053,6 @@ def _dis_verandalar(plan: "Plan", is_emri: dict) -> None:
             raise IsEmriHatasi(f"Verandada bas_cm, bit_cm ve derinlik_cm sayı olmalı: {v}") from None
         if bit - bas < 2 * k + 20 - 1e-9 or d < k + 20 - 1e-9:
             raise IsEmriHatasi(f"Veranda {ad}: {bit - bas:g} × {d:g} cm çok dar (en az {2 * k + 20:g} × {k + 20:g})")
-        gerekli = _gerekli_ara_kolon(bit - bas, k)      # D-109 (kart 08:42:16): kolon ekseni arası en çok 565 cm
-        if ara is None:
-            ara = gerekli
-        elif ara < gerekli:                             # K21: yazılan sayı Lokman'ın kuralıyla çelişiyorsa sessizce değişmez
-            raise IsEmriHatasi(f"Veranda {ad}: {ara} ara kolonla kolon ekseni arası {_kolon_eksen_araligi(bit - bas, ara, k):g} cm, "
-                               f"{VERANDA_KOLON_ARASI_EN_COK_CM:g}'i geçiyor; en az {gerekli} ara kolon (ara_kolon yazılmazsa Motor koyar)")
         if ara and (bit - bas) / (ara + 1) < 2 * k + 20 - 1e-9:
             raise IsEmriHatasi(f"Veranda {ad}: {ara} ara kolonla dış kirişin parçası {(bit - bas) / (ara + 1):g} cm, çok kısa "
                                f"(en az {2 * k + 20:g})")
@@ -2091,6 +2087,12 @@ def _dis_verandalar(plan: "Plan", is_emri: dict) -> None:
         for m in plan.mahaller.values():
             if m.poly is not None and kutu.intersection(m.poly).area > 1e-6:
                 raise IsEmriHatasi(f"Veranda {ad} ile {m.ad} çakışıyor")
+        gerekli = _gerekli_ara_kolon(bit - bas, k)      # D-109 (kart 08:42:16): kolon ekseni arası en çok 565 cm
+        if ara is None:
+            ara = gerekli
+        elif ara < gerekli:                             # K21: yazılan sayı Lokman'ın kuralıyla çelişiyorsa sessizce değişmez
+            raise IsEmriHatasi(f"Veranda {ad}: {ara} ara kolonla kolon ekseni arası {_kolon_eksen_araligi(bit - bas, ara, k):g} cm, "
+                               f"{VERANDA_KOLON_ARASI_EN_COK_CM:g}'i geçiyor; en az {gerekli} ara kolon (ara_kolon yazılmazsa Motor koyar)")
         c = v.get("cati")
         varsayim = c is None
         c = dict(c or {})
@@ -2141,6 +2143,11 @@ def _dis_verandalar(plan: "Plan", is_emri: dict) -> None:
             plan.mahaller[ad] = mh
         ara_kolonlar = [(u, kolonlar[0][1]) if cephe in ("on", "arka") else (kolonlar[0][0], u)
                         for u in (bas + (bit - bas) * i / (ara + 1) - k / 2 for i in range(1, ara + 1))]
+        for x, y in ara_kolonlar:                       # K21: İş Emri dikmesi ara kolonun yerindeyse kolon iki kez sayılmaz (geometri hakemi)
+            r_ = next((r for r in plan.dikmeler if box(*r).intersection(box(x, y, x + k, y + k)).area > 1e-6), None)
+            if r_ is not None:
+                raise IsEmriHatasi(f"Veranda {ad}: İş Emri dikmesi ({r_[0]:g}, {r_[1]:g}) ara kolonun yerinde; taşan verandanın ara kolonunu "
+                                   f"Motor koyar (ara_kolon), dikme yazılmaz")
         dikmeler = [(x, y, x + k, y + k) for x, y in kolonlar + ara_kolonlar]
         plan.dikmeler.extend(dikmeler)
         plan.acik_kenarlar.extend(kenarlar)
