@@ -2907,6 +2907,9 @@ _DEGER_DOLGU = {"degil", "degildir", "yok", "yoktur", "hic", "pek", "cok", "goru
                 "etmez", "eder", "ederler", "etmezler", "simdilik", "zaten", "artik", "daha", "en", "bu", "su", "secim", "secimi",
                 "olur", "olmaz", "cikmaz", "olacaktir"}   # tur 45: "olur / olacak" dilek kipiyle `_deger_dilegi`
 _DILEK_TAHMINI = {"insallah", "inshallah", "umarim", "umariz"}
+_RIZA_DEGERI = {"tamam", "tamamdir", "razi", "kabul", "begenir", "begenecek", "begenecektir", "begenirler", "uygun", "uygundur"}
+_OTEKI_SOZU = {"o", "bu", "su", "oteki", "otekisi", "obur", "oburu", "digeri", "ilki", "birincisi", "ikincisi", "ucuncusu",
+               "dorduncusu", "sonuncusu"}   # tur 46 (Y2): sıra sözünün "-si" biçimi öteki çatıyı anar
 _DILEK_YUKLEMI = {"olsun", "olsn", "olacak", "olcak", "olacaktir", "olur"}
 
 
@@ -2926,6 +2929,10 @@ def _deger_dilegi(ham: list[str]) -> bool:
     if not tahmin or any(w not in _DILEK_TAHMINI for w in tahmin):
         return False
     deger = [k for k, w in enumerate(ham) if w in _DEGER_SOZU]
+    if any(ham[k] in _RIZA_DEGERI and any(x.startswith(_KENDI_KISI) for x in ham[:k]) for k in deger):
+        return False                                           # tur 46 (Y4): "inşallah müşteri tamam olur" kişinin rızasının tahminidir
+    if any(w in ("mu", "mi", "acaba", "bakalim") for w in ham):
+        return False                                           # tur 46 (önceden var): "güzel olur mu inşallah", "bakalım ne olacak"
     return bool(deger) and all(any(x in _DILEK_YUKLEMI for x in ham[k + 1:k + 4])
                                and not any(x in ("degil", "degildir", "yok", "yoktur", "olmaz", "cikmaz") for x in ham[k + 1:k + 4])
                                for k in deger)
@@ -3049,16 +3056,27 @@ def _kararsizlik_var(ham: list[str], soru: bool = False, ardi: list[str] | tuple
             and any(w in _DEGER_SOZU for w in ham) and not _deger_dilegi(ham) and all(
             w in _DEGER_TAHMINI or w in _DEGER_SOZU or w in _DEGER_DOLGU or w in _YUKLEM_SOZU or w[:1].isdigit() or len(w) == 1
             or w.startswith(("cati",) + _CATI_AD_KOKU) or w in _HITAP_SOZU or w in ("numara", "numarali", "nolu", "evin", "kendi")
-            for w in ham):
+            or w in _SECIM_DOLGU or w.startswith(_SECIM_KOKU) or re.fullmatch(r"pa(?:\d{2}\w{0,4})?|c\d{4}\w{0,4}", w)
+            or (w in _CATI_EKLERI and ham[k - 1:k] and ham[k - 1][:1].isdigit())
+            or w in ("mu", "mi", "acaba", "bakalim", "ne") or re.fullmatch(r"\w+[dt][ae]ki", w)
+            for k, w in enumerate(ham)):
         return True                                            # tur 44 (Y1, O1, önceden var): "1 olsun, sorun değil inşallah / gibi", "sorun
                                                                # yok inşallah", "uygun gibi", "tamam inşallah", "müşteri de beğenir
                                                                # inşallah" tahmindir; "bence sorun değil" görüştür, "hayırlı olsun
                                                                # inşallah" değil. Tur 45 (Y1): "daha iyi / süper / en iyisi bu gibi",
                                                                # "iyi olur herhalde"; (O1) "inşallah güzel olacak", "güzel olsun
-                                                               # inşallah" dilektir, "kırma gibi güzel bir çatı yok" karşılaştırmadır
-    if konusuz and any(a in ("o", "bu", "su", "oteki", "obur", "oburu", "digeri") and b in ("de", "da")
-                       and c.startswith(("olur", "olabilir")) for a, b, c in zip(ham, ham[1:], ham[2:])):
-        return True                                            # tur 30 (önceden var): "2 olsun, o da olur" öteki çatıyı da kabul eder
+                                                               # inşallah" dilektir, "kırma gibi güzel bir çatı yok" karşılaştırmadır.
+                                                               # Tur 46 (Y1, önceden var): seçim cümlesinin sözüyle ("birinci / plan /
+                                                               # çizim / bu model daha iyi gibi") ya da kodla ("Ç8801 olsun daha iyi gibi")
+    if konusuz and (any(a in _OTEKI_SOZU and b in ("de", "da")
+                        and (c.startswith(("olur", "olabilir"))
+                             or (a not in ("o", "bu", "su") and (c in _GORUS_DEGERI or c in ("sorun", "problem", "tamam", "tamamdir"))))
+                        for a, b, c in zip(ham, ham[1:], ham[2:]))
+                    or any(a in _OTEKI_SOZU and a not in ("o", "bu", "su") and b == "gibi" for a, b in zip(ham, ham[1:]))):
+        return True                                            # tur 30 (önceden var): "2 olsun, o da olur" öteki çatıyı da kabul eder;
+                                                               # tur 46 (Y2, önceden var): "ikincisi / sonuncusu de olur", "öteki de sorun
+                                                               # değil", "ikincisi de güzel", "ikincisi gibi güzel"; "K olsun, bu da
+                                                               # güzel" seçimin övgüsüdür
     if konusuz and any(a in _ZAMIR_DE and b in ("de", "da") and (c.startswith(("ciz", "hazirla", "gonder", "yolla", "ilet", "yap"))
                                                                   or c in _BITISIK_AT) for a, b, c in zip(ham, ham[1:], ham[2:])):
         return True                                            # tur 31 (Y4, önceden var): "1 olsun, onu da çizin" öteki çatıyı da ister
@@ -4329,17 +4347,26 @@ _GERI_ZAMIR = {"onu", "bunu", "sunu", "hepsini", "ikisini", "tumunu", "kendisini
 _KENDI_KISI = ("musteri", "usta", "ekip", "esi", "esim", "hanim", "sahib", "aile", "mimar", "muhendis")
 
 
-def _cati_geri_bag(ham: list[str]) -> bool:
+def _kisi_sozu(w: str) -> bool:
+    """Kişinin sözü mü ("ustayla", "müşteriyle", "ekip", "Ali beyle"; tur 46, G2)."""
+    return w.startswith(_KENDI_KISI + ("ekip", "ust", "montajci", "nakliyeci", "elektrikci", "tesisatci", "bey", "hanim", "abi", "abla",
+                                       "hoca", "kardes"))
+
+
+def _cati_geri_bag(ham: list[str], kisi_bagi: bool = True) -> bool:
     """Çatı başka konuyla birlikte mi ertelenmiş (tur 42, O9): "rengiyle beraber", "montajla birlikte", "ile birlikte", "rengini ve
-    kendisini"; "montaj ve nakliyeyi birlikte" değil."""
+    kendisini"; "montaj ve nakliyeyi birlikte" değil. `kisi_bagi` yanlışsa kişinin "-(y)lA birlikte"si ("ustayla birlikte") bağ değildir
+    (tur 46, G2: çatı sözü olmayan parçada kişi konuşmanın ortağıdır)."""
     return any(w in ("kendisini", "kendini") and not (j and ham[j - 1].startswith(_KENDI_KISI)) for j, w in enumerate(ham)) \
         or any(w == "kendisiyle" and not (j and (ham[j - 1].startswith(_KENDI_KISI) or ham[j - 1] in _HITAP_SOZU))
                and (ham[j + 1:j + 2] in (["birlikte"], ["beraber"])
                     or re.fullmatch(r"\w+(?:s[iu]|[^aeiou][iu])n[iu]", (ham[j + 1:j + 2] or [""])[0]))   # tur 45 (O3): "kendisiyle
                for j, w in enumerate(ham)) \
         or any(w in ("birlikte", "beraber") and j and re.fullmatch(r"\w+y?l[ae]|ile", ham[j - 1])
+               and (kisi_bagi or not _kisi_sozu(ham[j - 1]))
                and not any((_konu_adi(x) and x not in _GERI_ZAMIR)
-                           or (re.fullmatch(r"\w+(?:y[iu]|n[iu]|ler[iu]|lar[iu])", x) and x not in _GERI_ZAMIR) for x in ham[j + 1:j + 3])
+                           or (re.fullmatch(r"\w+(?:y[iu]|n[iu]|ler[iu]|lar[iu])", x) and x not in _GERI_ZAMIR
+                               and not x.startswith(("gun", "aksam", "sabah", "ogle", "hafta"))) for x in ham[j + 1:j + 3])
                for j, w in enumerate(ham))                    # rengini" çatıya, "Ali bey kendisiyle nakliyeyi" işe döner
                                                                # tur 43 (G4): "montajla birlikte nakliyeyi sonra konuşuruz" nakliyenindir;
                                                                # tur 44 (O3): "montajla birlikte onu / hepsini / tipini", "kendisini de
@@ -4347,32 +4374,32 @@ def _cati_geri_bag(ham: list[str]) -> bool:
                                                                # kendisiyle gurur duydu" değil
 
 
-_GERI_BAG_FIILI = ("konus", "bak", "netles", "gorus", "sec", "karar", "dusun", "hallet")
-_GERI_BAG_DOLGU = {"birlikte", "beraber", "ile", "ve", "de", "da", "ki", "bir", "daha", "tekrar", "ayrica", "detayli", "uzun", "uzunca",
-                   "kendisiyle", "kendisini", "kendini", "hep", "beraberce", "toplu", "topluca", "gun", "gunu", "icinde", "aksam",
-                   "aksamustu", "hafta", "bu", "ayrintili", "ayrinti"}
+_GERI_BAG_FIILI = ("konus", "bak", "netles", "gorus", "sec", "karar", "dusun", "hallet", "halled", "kesinles")   # tur 46: "kesinleştiririz"
+_BASKA_IS_KOKU = ("elektrik", "elektrig", "tesisat", "arazi", "arsa", "saha", "temel", "fatura", "vinc", "beton", "zemin", "dogalgaz",
+                  "kombi", "ruhsat", "izin", "tarih", "teslim", "sevk", "kargo", "kapora", "avans")
 
 
-def _geri_bag_sozu(w: str) -> bool:
-    """Çatısız geri bağ parçasında yer alabilecek söz (tur 45, O3): bağ, zaman, konuşma fiili, seçim sözü, hitap, geri zamir, çatının
-    iyelikli konusu ("rengini", "rengiyle") ve kişi olmayan "-(y)lA" sözü ("montajla"). Başka işin nesnesi ("nakliyeyi", "elektriği"),
-    kişi ("ustayla", "ekip", "Ali bey") ve yer ("araziye") parçayı o işe bağlar."""
-    if w in _GERI_BAG_DOLGU or w in _GERI_ZAMIR or w in _HITAP_SOZU or w in _YUKLEM_SOZU or w[:1].isdigit() or len(w) == 1 \
-            or w.startswith(_SONRAKI_ZAMAN + _GERI_BAG_FIILI) or w in ("numara", "numarali", "nolu", "evin", "kendi"):
-        return not (w in _HITAP_SOZU and w in ("usta", "bey", "hoca"))
-    if w.startswith(_KENDI_KISI) or w.startswith(("ekip", "ust", "montajci", "nakliyeci", "elektrikci", "tesisatci")):
+def _geri_bag_yabanci(w: str) -> bool:
+    """Çatısız geri bağ parçasını başka işe bağlayan söz mü (tur 46, G2; kara liste): başka işin ya da yerin adı ("nakliyeyi",
+    "elektriği", "araziye", "nakliyesini"). Bağ ve konuşma ortağı ("montajla", "müşteriyle", "telefonla"), geri zamir, hitap, çatının
+    iyelikli konusu ("rengini", "tipini") ve öteki sözler ("inşallah", "telefonda", "kolay gelsin") değil."""
+    if w in _GERI_ZAMIR or w in _HITAP_SOZU or re.fullmatch(r"\w+y?l[ae]|ile", w) \
+            or w.startswith(("reng", "renk", "tip", "sekl", "model", "turu", "cesid", "kendi")):
         return False
-    return bool(re.fullmatch(r"\w+(?:s[iu]|[^aeiou][iu])(?:n[iu]|y?l[ae])", w)) or bool(re.fullmatch(r"\w+y?l[ae]", w))
+    return bool(_konu_adi(w) or _yer_koku(w) or w.startswith(_BASKA_IS_KOKU)) \
+        or (bool(re.fullmatch(r"\w{2,}[aeiou](?:y[iuae]|s[iu]n[iu])", w)) and not _kisi_sozu(w)
+            and w not in ("iyi", "haftaya", "sonraya", "araya", "oraya", "buraya", "suraya", "kolaya"))   # "parkeyi", "sıvayı"
 
 
 def _cati_ertelemesi(ham: list[str], ardi: list[str] | tuple = ()) -> bool:
     """Çatıyı anan parçada bizim ertelememiz ya da sonraki zamanla seçim fiili var mı ("çatıyı sonra seçelim", "çatı sonra olacak", "çatı
     sonra değişebilir"; tur 22, Y2, Y3); çatının konusu ("çatı rengini sonra seçeriz") değil."""
     if not any(w.startswith(("cati",) + _CATI_AD_KOKU) for w in ham):
-        return _cati_geri_bag(ham) and any(w.startswith(_SONRAKI_ZAMAN) for w in ham) \
-            and any(w.startswith(_GERI_BAG_FIILI) for w in ham) and all(_geri_bag_sozu(w) for w in ham)
+        return _cati_geri_bag(ham, kisi_bagi=False) and any(w.startswith(_SONRAKI_ZAMAN) or _GUN_ADI.fullmatch(w) for w in ham) \
+            and any(w.startswith(_GERI_BAG_FIILI) for w in ham) and not any(_geri_bag_yabanci(w) for w in ham)
                                                                # tur 44 (önceden var): "2 olsun, rengiyle birlikte sonra konuşuruz",
-                                                               # "montajla birlikte onu sonra konuşuruz"; "nakliyeyi" değil
+                                                               # "montajla birlikte onu sonra konuşuruz"; "nakliyeyi" değil. Tur 46 (G2):
+                                                               # kara liste; "inşallah", "telefonda", "müşteriyle" bağı kesmez
     nesne = any(w.startswith(("cati",) + _CATI_AD_KOKU) and not re.fullmatch(r"\w+[dt][ae]n", w)
                 and (bool(re.fullmatch(r"\w+(?:y[iu]|s[iu]n[iu]|lar[iu])|besig[iu]|kalkan[iu]", w))
                      or (ham[k + 1:k + 2] and ham[k + 1].startswith(_FIYAT_KOKU)))
@@ -5441,14 +5468,18 @@ def _olumsuz_soz(kalan: list[str], i: int) -> bool:
     w = kalan[i]
     if re.fullmatch(r"olmasa(?:da)?|olmasaydi", w):
         j = i
-        while j and kalan[j - 1] in _HITAP_SOZU | {"ama", "yani", "ve", "de", "da", "merhaba", "selam", "selamlar"}:
+        while j and kalan[j - 1] in _HITAP_SOZU | {"ama", "yani", "ve", "de", "da", "merhaba", "selam", "selamlar", "eger", "sayet",
+                                                    "belki", "hani"}:
             j -= 1                                             # "Abi PA-06-K olmasa da" (kod ayrıldı): önündeki hitap özne değil
         o = kalan[j - 1] if j else ""
         return not o or o[:1].isdigit() or len(o) == 1 or o.startswith(("cati",) + _CATI_AD_KOKU) \
-            or o in ("bu", "o", "su", "digeri", "oburu", "otekisi", "ikinci", "birinci", "ucuncu")
+            or o in ("bu", "o", "su", "digeri", "oburu", "otekisi", "ikinci", "birinci", "ucuncu") \
+            or any((x[:1].isdigit() and not _birimli(kalan, i + 1 + n)) or (len(x) == 1 and x.isalpha() and x not in "aeiou")
+                   or x.startswith(("cati",) + _CATI_AD_KOKU) for n, x in enumerate(kalan[i + 1:]))
                                                                # tur 44 (Y2, önceden var): "PA-06-K olmasa da olur / sorun değil" reddir;
                                                                # tur 45 (O4): "vinç olmasa daha iyi", "mutfak penceresi olmasa da olur"
-                                                               # başka şeyin sözüdür
+                                                               # başka şeyin sözüdür; tur 46 (G3): ardında çatı varsa ("eğer / stok
+                                                               # olmasa 1") koşulludur
     return bool(CO._OLUMSUZ_FIIL_T.fullmatch(w)) and not _BEKLEME_OLUMSUZ.fullmatch(w) and not _ERTELEME_OLUMSUZ.fullmatch(w) \
         and not _bekleme_adinin_olumsuzu(kalan, i) \
         and not (w in ("degil", "degildir") and kalan[i + 1:i + 2] not in (["mi"], ["mu"]) and i
@@ -5462,8 +5493,12 @@ def _sorun_oznesi(z: str) -> bool:
     """"sorun / önemli değil"in çatı dışı öznesi mi (tur 45, O2): tutar, fark, süre, iş ya da konu adı ("PA-06-K'nın fiyatı", "5 bin
     fark", "1 hafta gecikme"); "bizim için", "o kadar" değil."""
     return z[:1].isdigit() or z in ("tl", "bin", "lira", "milyon") or _konu_adi(z) \
-        or z.startswith(_FIYAT_KOKU + ("fark", "renk", "reng", "sure", "gecik", "teslim", "tarih", "para", "odeme", "montaj", "nakliye"))
+        or z.startswith(_FIYAT_KOKU + ("fark", "renk", "reng", "sure", "gecik", "teslim", "tarih", "para", "odeme", "montaj", "nakliye",
+                                       "maliyet", "masraf", "ucret", "bedel", "tutar", "pahali", "ucuz", "agirlik", "bakim"))
 _SECIM_ADI = {"tipi", "modeli", "sekli", "turu", "cesidi", "secimi", "secenegi", "tercihi"}
+_SECIM_ADI_YALIN = {"tip", "model", "sekil", "tur", "secim", "secenek", "tercih"}   # tur 46 (önceden var): "2 olsun, model önemli değil"
+_OZNE_SINIRI = {"ama", "fakat", "ancak", "lakin", "gerisi", "gerisini", "gerikalan", "kalani", "kalanlar", "digeri", "digerleri", "oburu",
+                "otekisi", "obur", "oteki", "baska", "bunun", "onun", "ki"}
 
 
 def _catiyi_anan_sorun_degil(kalan: list[str], kod_sozu, harfler, tum_ad: set[str]) -> bool:
@@ -5477,14 +5512,24 @@ def _catiyi_anan_sorun_degil(kalan: list[str], kod_sozu, harfler, tum_ad: set[st
             j = i - 2 if kalan[i - 1] == "hic" else i - 1
             while j - 1 >= bas and kalan[j - 1] in ("de", "da", "pek", "cok", "hic"):
                 j -= 1
-            o = kalan[j - 1] if j - 1 >= bas else ""            # tur 45 (O2): yalnız sözün öznesi ("5 bin fark", "kırmanın farkı",
-            oo = kalan[j - 2] if j - 2 >= bas else ""           # "1 hafta gecikme", "PA-06-K'nın fiyatı" değil)
-            if ((kod_sozu and bas == 0 and not any(_sorun_oznesi(z) for z in kalan[bas:j]))
-                    or (o and (o[:1].isdigit() or o in harfler
-                               or (o.startswith("cati") and o != "catisiz" and not re.fullmatch(r"\w+n[iu]n", o))
-                               or _cati_adi_mi(o, tum_ad)
-                               or (o in _SECIM_ADI and (not oo or oo.startswith("cati") or _cati_adi_mi(oo, tum_ad)))))):
-                return True                                    # "çatı tipi önemli değil" seçimin kendisidir
+            if kod_sozu and bas == 0 and not any(_sorun_oznesi(z) for z in kalan[bas:j]):
+                return True                                    # tur 45 (O2): yalnız sözün öznesi ("5 bin fark", "kırmanın farkı",
+            for m in range(j - 1, bas - 1, -1):                 # "1 hafta gecikme", "PA-06-K'nın fiyatı" değil)
+                o = kalan[m]
+                oo = kalan[m - 1] if m - 1 >= bas else ""
+                if m + 1 < j and re.fullmatch(r"\w+n[iu]n", o) and kalan[m + 1] not in _SECIM_ADI \
+                        and not kalan[m + 1].startswith("kendi"):
+                    break                                      # "kırmanın maliyeti / pahalı olması": öznesi iyelikli addır
+                if (o[:1].isdigit() and m == j - 1) or o in harfler \
+                        or (o.startswith("cati") and o != "catisiz") or _cati_adi_mi(o, tum_ad) \
+                        or ((o in _SECIM_ADI or o in _SECIM_ADI_YALIN)
+                            and not (oo and (_konu_adi(oo) or _yer_koku(oo) or re.fullmatch(r"\w+n[iu]n", oo))
+                                     and not oo.startswith("cati") and not _cati_adi_mi(oo, tum_ad))):
+                    return True                                # "çatı tipi önemli değil" seçimin kendisidir
+                if _sorun_oznesi(o) or o in _OZNE_SINIRI or o in _GORUS_DEGERI or o in _YUKLEM_SOZU \
+                        or re.fullmatch(r"\w{2,}(?:mek|mak|mesi|masi|me|ma)", o):   # "kırma için bekleme sorun değil"
+                    break                                      # tur 46 (G1): "kırma o kadar / bizim için önemli değil" çatınındır;
+                                                               # özneyle "değil" arasındaki söz atlanır, konu adı ya da "gerisi" keser
     return False
 
 
@@ -5513,6 +5558,16 @@ def _cati_adi_mi(w: str, adlar: set[str]) -> bool:
     return any(w.startswith(g) and w[len(g):] in _CATI_EKLERI for g in adlar)
 
 
+def _unlu_etiket(sozler: list[str], j: int) -> bool:
+    """Koddan sonraki ünlü harf etiket mi (tur 46, Y3): ardında ek ("PA-06-A'yı"), "olsun" ya da mesajın sonu varsa etikettir ("PA-06 A
+    olsun", "PA-06-E olsun"); "PA-06'ya onay" ektir."""
+    if j >= len(sozler) or sozler[j] not in ("a", "e", "i", "u"):
+        return False                                           # "PA-06 o olsun": "o" zamirdir
+    n = sozler[j + 1] if j + 1 < len(sozler) else ""
+    return not n or (n in _CATI_EKLERI and len(n) >= 2) or n in ("olsun", "olsn", "olacak", "olur", "istiyoruz", "istiyorum", "sectik",
+                                                                 "secildi", "secelim", "secin", "secilsin", "yapalim", "yapin")
+
+
 def _kodlari_ayir(sozler: list[str], adlar: dict) -> tuple[list[str], set[str]]:
     """Cümleden model kodlarını çıkarır ("pa 06 k", "pa06k", kesme ekiyle "pa 06 k yi"): kalan sözler ve yazılı kodlar. Harf yalnız
     seçeneğin kodu olunca koda katılır ("PA-06 e" evin kodu)."""
@@ -5521,11 +5576,12 @@ def _kodlari_ayir(sozler: list[str], adlar: dict) -> tuple[list[str], set[str]]:
         w = sozler[i]
         if re.fullmatch(r"pa\d{2}[a-z]?", w):
             harf = sozler[i + 1] if len(w) == 4 and i + 1 < len(sozler) and len(sozler[i + 1]) == 1 else ""
-            harf = harf if harf and harf not in "aeiou" and w.upper() not in adlar and f"{w.upper()}{harf.upper()}" not in adlar else ""
+            harf = harf if harf and (_unlu_etiket(sozler, i + 1) or (harf not in "aeiou" and w.upper() not in adlar)) \
+                and f"{w.upper()}{harf.upper()}" not in adlar else ""
             yazili.add(w.upper() + harf.upper()); i += 2 if harf else 1   # tur 45: "pa08-c" başka evin kodu
         elif w == "pa" and i + 1 < len(sozler) and re.fullmatch(r"\d{2}", sozler[i + 1]):
             harf = sozler[i + 2] if i + 2 < len(sozler) and len(sozler[i + 2]) == 1 else ""
-            harf = harf if harf and (f"PA{sozler[i + 1]}{harf.upper()}" in adlar
+            harf = harf if harf and (f"PA{sozler[i + 1]}{harf.upper()}" in adlar or _unlu_etiket(sozler, i + 2)
                                      or (harf not in "aeiou" and f"PA{sozler[i + 1]}" not in adlar)) else ""
                                                                # tur 45 (koordinatör, canlı gözlemi): başka evin kodu "PA-08-C" bu
                                                                # evin "C"si değildir; kod bilinmez, çatı kaydedilmez
@@ -5644,6 +5700,9 @@ def _prefabrik_cati_istegi(k: Konusma, katalog: Katalog, aday: dict, ts: dict, b
     kodlar |= {c for c in yazili if c in adlar and (c != taban["kod"] or set_acik)}
     if taban["kod"] in yazili and any(c in adlar and c != taban["kod"] for c in yazili):
         olumsuz = True                                         # evin kodu ve bir çatı kodu birlikte ("şimdilik PA-06, PA-06-K'yı da görelim")
+    if kodlar and any(c not in adlar for c in yazili):
+        olumsuz = True                                         # tur 46 (önceden var): "PA-06-C ile PA-08-C arasında kaldık", "PA-08-C
+                                                               # olmazsa PA-06-C olsun"; bilinmeyen kod öteki seçimdir
     if istekler and not cati_cumlesi and not kodlar:
         uygulanamaz += [str(v.get("aciklama") or "çatı değişikliği") for v in istekler]   # önceki mesajın isteği: bugünkü gibi
     for v in istekler:                                         # hakem yedinci tur: LLM'in okuduğu istek ("yağmur oluğu", "baca") okunan

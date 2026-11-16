@@ -1828,3 +1828,26 @@ def test_hakem45_celik_olumlu_soz_onay(s, metin):
     cati_seti(s)
     k = s.yaz(metin)
     assert k.gerekce == K.PLAN_ONAYI and k.revizyon == 1, k.mesaj
+
+
+
+@pytest.mark.parametrize("metin", [
+    "Ç8801 olsun daha iyi gibi", "Ç8801 olsun süper gibi", "Ç8801 olsun uygun gibi", "Ç8801 olsun yani daha iyi gibi",
+    "Ç8801 olsun, birinci daha iyi gibi", "Ç8801 olsun, ilk çatı daha iyi gibi", "Ç8801 olsun, plan güzel gibi",
+    "Ç8801-K olsun daha iyi gibi", "K olsun, ikincisi daha iyi gibi", "Ç8801 olsun daha iyi gibi, yatak odası 1 penceresi 120x120 olsun",
+    "Ç8801 olsun, ikincisi de olur", "K olsun, üçüncüsü de olur", "Ç8801 olsun, inşallah müşteri tamam olur"])
+def test_hakem46_celik_kararsiz_soz_kaydedilmez(s, metin):
+    """Tur 46 çelikte: kodla gelen tahminli değerlendirme ("Ç8801 olsun daha iyi gibi") ve "ikincisi de olur" kayıt almaz."""
+    cati_seti(s)
+    k = s.yaz(metin)
+    assert K.PLAN_ONAYI not in k.gerekce and k.eylem != "is_emri" and s.plan["revizyon"] == 1 and not s.k.d.get("onaylanan"), k.mesaj
+
+
+
+@pytest.mark.parametrize("metin", [
+    "K olsun, bu da güzel"])
+def test_hakem46_celik_acik_secim_soruya_donmez(s, metin):
+    """Tur 46 çelikte: açık seçim r02 K'yı çizer."""
+    cati_seti(s)
+    k = s.yaz(metin)
+    assert k.eylem == "is_emri" and k.revizyon == 2 and s.plan["yapi"]["kod"] == "Ç8801K", k.mesaj

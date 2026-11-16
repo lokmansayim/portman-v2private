@@ -4883,3 +4883,119 @@ def test_hakem45_olumlu_soz_onay(tmp_path, metin):
     s, _ = _cati_seti(tmp_path)
     k = s.yaz(metin, niyet="diger")
     assert k.gerekce == K.PLAN_ONAYI and k.revizyon == 1, k.mesaj
+
+
+
+# İE-42 hakem tur 46: seçim cümlesinin sözüyle ya da kodla gelen tahminli değerlendirme ("1 olsun, plan güzel gibi", "PA-06 olsun
+# daha iyi gibi"), öteki çatıyı da kabul eden sıra sözü ("ikincisi de olur"), ünlü harfli etiket ("PA-06-A olsun"), kişinin rızası
+# ("inşallah müşteri tamam olur"), çatıyı anan "o kadar / bizim için önemli değil", çatıya dönen erteleme ("rengiyle birlikte sonra
+# telefonda konuşuruz") ve koşullu "olmasa" ("eğer olmasa 1") kayıt almaz. Başka işin ertelemesi ("montajla birlikte parkeyi") ve
+# iyelikli öznenin "sorun değil"i ("kırmanın maliyeti") açık seçimdir
+@pytest.mark.parametrize("metin", [
+    "2 olsun, güzel olur mu inşallah", "2 olsun, inşallah güzel olur mu", "2 olsun, inşallah güzel olur mu acaba",
+    "2 olsun, inşallah güzel olur bakalım ne olacak", "PA06K olsun daha iyi gibi", "2 olsun, eskizdeki daha güzel gibi",
+    "2 olsun, ikincisi daha iyi gibi", "2 olsun, ikinci daha güzel gibi", "2 olsun, çatı bizim için önemli değil",
+    "2 olsun, kırma bizim için önemli değil", "2 olsun, kırma o kadar önemli değil", "2 olsun, çatı o kadar önemli değil",
+    "2 olsun, çatı aslında önemli değil", "2 olsun, çatı şu an önemli değil", "2 olsun, çatı tipi bizim için önemli değil",
+    "2 olsun, çatı müşteri için önemli değil", "2 olsun, kırma müşteri için önemli değil", "2 olsun, çatı bizim için çok önemli değil",
+    "2 olsun, çatı sizin için önemli değil", "2 olsun, model önemli değil", "2 olsun, seçim önemli değil",
+    "2 olsun, diğeri de sorun değil", "2 olsun, rengiyle birlikte sonra konuşuruz inşallah",
+    "2 olsun, rengiyle birlikte sonra konuşuruz teşekkürler", "2 olsun, rengiyle birlikte yarın telefonda konuşuruz",
+    "2 olsun, rengiyle birlikte sonra yüz yüze konuşuruz", "2 olsun, rengiyle birlikte sonra ofiste konuşuruz",
+    "2 olsun, rengiyle birlikte sonra müşteriyle konuşuruz", "2 olsun, montajla birlikte onu sonra müşteriyle konuşuruz",
+    "2 olsun, montajla birlikte onu yarın ofiste konuşuruz", "2 olsun, rengiyle birlikte pazartesi konuşuruz",
+    "2 olsun, rengiyle birlikte sonra konuşuruz kolay gelsin", "2 olsun, rengiyle birlikte sonra konuşmak üzere",
+    "2 olsun, montajla birlikte onu sonra konuşuruz inşallah", "2 olsun, montajla birlikte onu sonra kesinleştiririz",
+    "2 olsun, rengiyle birlikte sonra halledelim", "2 olsun, rengiyle birlikte sonra hallederiz",
+    "2 olsun, rengiyle birlikte sonra kesinleştiririz", "2 olsun, şayet olmasa 1", "PA-06-A olsun", "PA-06-E olsun",
+    "2 olsun, PA-08-C gibi", "PA-08-C ile PA-06-C arasında kaldık", "1 olsun, birinci daha iyi gibi", "1 olsun, ilki daha iyi gibi",
+    "1 olsun, ilk çatı daha iyi gibi", "1 olsun, birinci çatı daha iyi gibi", "1 olsun, ilk seçenek daha iyi gibi",
+    "1 olsun, birinci seçenek daha uygun gibi", "1 olsun, bu model daha iyi gibi", "1 olsun, bu tercih daha iyi gibi",
+    "1 olsun, yani daha iyi gibi", "1 olsun, yani en iyisi bu gibi", "1 olsun, çizim güzel gibi", "1 olsun, çizimi daha güzel gibi",
+    "1 olsun, görseli daha güzel gibi", "1 olsun, plan güzel gibi", "1 olsun, plan daha iyi gibi", "1 olsun, teklif uygun gibi",
+    "1 olsun, katalogdaki daha iyi gibi", "1 olsun, şimdi daha iyi gibi", "1 olsun, tabi daha iyi gibi", "1 olsun, evet daha iyi gibi",
+    "1 olsun, bence daha iyi gibi", "1 olsun, bence de daha iyi gibi", "1 olsun, bizce daha uygun gibi",
+    "1 olsun, birinci daha iyi inşallah", "1 olsun, ilk çatı daha iyi inşallah", "1 olsun, plan güzel inşallah",
+    "1 olsun, çizim uygun inşallah", "1 olsun, birinci sorun yok gibi", "1 olsun, plan sorun yok gibi", "1 olsun, birinci uygun gibi",
+    "1 olsun, ilki güzel gibi", "1 olsun, modeli daha iyi gibi", "Birinci olsun, ilki daha iyi gibi",
+    "Evin kendi çatısı olsun, ilki daha iyi gibi", "1 olsun. Birinci daha iyi gibi", "1 olsun. Plan güzel gibi",
+    "Merhaba 1 olsun. Çizim güzel gibi", "PA06 olsun daha iyi gibi", "PA-06 olsun daha iyi gibi", "pa06 olsun süper gibi",
+    "PA-06 olsun sorun yok gibi", "PA-06 olsun uygun gibi", "PA-06'yı seçtik daha iyi gibi", "2 olsun, ikinci çatı daha iyi gibi",
+    "2 olsun, plan güzel gibi", "2 olsun, çizim güzel gibi", "2 olsun, yani daha iyi gibi", "PA-06-K olsun daha iyi gibi",
+    "PA-06-K olsun süper gibi", "PA06K olsun uygun gibi", "C8801 olsun daha iyi gibi", "2 olsun, kırma bizim için o kadar önemli değil",
+    "2 olsun, kırma benim için önemli değil", "2 olsun, kırma zaten önemli değil", "2 olsun, kırma artık önemli değil",
+    "2 olsun, kırma gerçekten önemli değil", "2 olsun, kırma şimdilik önemli değil", "2 olsun, kırma açıkçası önemli değil",
+    "2 olsun, kırma bence önemli değil", "2 olsun, kırma fazla önemli değil", "2 olsun, kırma öyle önemli değil",
+    "2 olsun, çatı bizim için sorun değil", "2 olsun, çatı tipi o kadar önemli değil", "2 olsun, çatı şekli bizim için önemli değil",
+    "2 olsun, çatı müşterimiz için önemli değil", "2 olsun, çatının şekli bizim için önemli değil",
+    "PA-06-K olsun, kırma o kadar önemli değil", "PA-06-K olsun, çatı bizim için önemli değil",
+    "Hocam 2 olsun, kırma o kadar önemli değil", "2 olsun. Kırma o kadar önemli değil", "2 olsun. Çatı bizim için önemli değil",
+    "Selam, 2 olsun. Kırma bizim için çok önemli değil", "2 numara olsun, çatı müşteri için önemli değil",
+    "İkinci olsun, çatı bizim için önemli değil", "2 olsun, kırma bizim için önemli değil, fiyat önemli",
+    "2 olsun, kırma o kadar önemli değil, yatak odası 2 penceresi 120x180 olsun", "1 olsun, ikincisi de sorun değil",
+    "2 olsun, öteki de sorun değil", "2 olsun, ikincisi de sorun değil", "1 olsun, ikincisi de güzel olacak inşallah",
+    "2 olsun, öbürü de güzel olur inşallah", "1 olsun, ikincisi de olur", "1 olsun, ikincisi de güzel", "1 olsun, ikincisi de uygun",
+    "1 olsun, ikincisi de olabilir", "1 olsun, sonuncusu da olur", "1 olsun, üçüncüsü de sorun değil", "2 olsun, stok olmasa 1",
+    "2 olsun, kırma mümkün olmasa 1", "2 olsun, eğer olmasa 1", "2 olsun, belki olmasa 1",
+    "2 olsun, rengiyle birlikte sonra bakarız inşallah", "2 olsun, rengiyle birlikte sonra arayıp konuşuruz",
+    "2 olsun, rengiyle birlikte yarın sabah konuşuruz", "2 olsun, rengiyle birlikte yarın öğlen konuşuruz",
+    "2 olsun, rengiyle birlikte sonra yine konuşuruz", "2 olsun, rengiyle birlikte sonra şirkette konuşuruz",
+    "2 olsun, rengiyle birlikte haftaya bakarız inşallah", "2 olsun, rengiyle birlikte sonra bir ara konuşuruz",
+    "2 olsun, rengiyle birlikte sonra müşteriyle birlikte bakarız", "2 olsun, montajla beraber hepsini sonra konuşuruz inşallah",
+    "2 olsun, montajla birlikte bunu da yarın netleştiririz inşallah", "2 olsun, kendisiyle rengini sonra konuşuruz inşallah",
+    "2 olsun, rengini ve kendisini sonra konuşuruz inşallah", "2 olsun, kendisini de rengini de sonra telefonda konuşuruz",
+    "Hocam 2 olsun, rengiyle birlikte sonra konuşuruz inşallah", "Selam, 2 olsun. Rengiyle birlikte sonra telefonda konuşuruz",
+    "2 numara olsun, montajla birlikte onu sonra müşteriyle konuşuruz", "PA-06-K olsun, rengiyle birlikte sonra konuşuruz inşallah",
+    "PA-06-A'yı istiyoruz", "PA-06 A olsun", "pa 06 a olsun", "PA-06-C ile PA-08-C arasında kaldık", "PA-06-C ya da PA-08-C olsun",
+    "PA-06-K ile PA-08-K arasında kaldık", "PA-06-K olsun, belki olmasa 1", "PA-06-K veya PA-08-C olsun", "PA-08-C olmazsa PA-06-C olsun",
+    "PA-06-C olsun, olmazsa PA-08-C", "2 olsun, birincisi de olur", "2 olsun, üçüncüsü de olur", "PA-06 olsun, ikincisi de olur",
+    "Evin kendi çatısı olsun, ikincisi de olur", "1 olsun, ikincisi de güzel olmuş", "1 olsun, inşallah müşteri tamam olur",
+    "1 olsun, inşallah müşteri de tamam olur", "1 olsun, inşallah müşteri kabul olur", "1 olsun, inşallah müşteri için de uygun olur",
+    "2 olsun, inşallah müşteri tamam olur", "1 olsun, plan güzel gibi, yatak odası 2 penceresi 120x180 olsun",
+    "1 olsun, ikincisi gibi güzel", "1 olsun, ikincisi de olur, yatak odası 2 penceresi 120x180 olsun",
+    "2 olsun, beklemek bizim için sorun değil",
+    "2 olsun, rengiyle birlikte sonra konuşuruz inşallah, yatak odası 2 penceresi 120x180 olsun",
+    "2 olsun, ustayla birlikte sonra konuşuruz", "2 olsun, eğer olmasa 1, yatak odası 2 penceresi 120x180 olsun",
+    "1 olsun, kapı rengi güzel gibi", "2 olsun, kırma için bekleme sorun değil", "2 olsun, kırma için 1 hafta beklemek sorun değil",
+    "2 olsun, rengiyle birlikte pazartesi günü konuşuruz", "2 olsun, rengiyle birlikte cuma konuşuruz", "PA-06 o olsun",
+    "2 olsun, kırmanın kendisi önemli değil", "2 olsun, montajla birlikte hepsini sonra müşteriyle konuşuruz",
+    "1 olsun, kırma bizim için önemli değil", "2 olsun, montajla birlikte onu pazartesi günü konuşuruz"])
+def test_hakem46_kararsiz_ve_kosullu_soz_kaydedilmez(tmp_path, metin):
+    """Tur 46 (Y1–Y4, önceden var; G1–G3): "1 olsun, plan güzel gibi", "1 olsun, ikincisi de olur", "PA-06-A olsun", "2 olsun, kırma
+    o kadar önemli değil", "2 olsun, eğer olmasa 1" kayıt almaz: plan r01, onay yok, r02 yok."""
+    s, _ = _cati_seti(tmp_path)
+    k = s.yaz(metin, niyet="diger")
+    assert K.PLAN_ONAYI not in k.gerekce and k.eylem != "is_emri" and s.plan["revizyon"] == 1 and not s.k.d.get("onaylanan"), k.mesaj
+
+
+@pytest.mark.parametrize("metin", [
+    "2 olsun, elektriğini montajla birlikte sonra konuşuruz", "2 olsun, nakliyesini montajla birlikte sonra konuşuruz",
+    "2 olsun, montajını nakliyeyle birlikte sonra konuşuruz", "2 olsun, kapısını pencereyle birlikte sonra konuşuruz",
+    "2 olsun, ödemesini kaporayla birlikte sonra konuşuruz", "2 olsun, faturasını montajla birlikte sonra konuşuruz",
+    "2 olsun, temelini montajla birlikte sonra konuşuruz", "2 olsun, tesisatını elektrikle birlikte sonra konuşuruz",
+    "PA-06-K'yı istiyoruz", "PA-06 K olsun", "pa06 k olsun", "2 olsun, çatının fiyatı sorun değil", "2 olsun, kırmanın rengi önemli değil",
+    "2 olsun, kırma güzel, gerisi önemli değil", "2 olsun, fiyat bizim için önemli değil", "2 olsun, kapı rengi bizim için önemli değil",
+    "2 olsun, nakliye o kadar önemli değil", "PA-06-K olsun, nakliye bizim için önemli değil", "2 olsun, kırmanın maliyeti sorun değil",
+    "2 olsun, elektriği tesisatla birlikte sonra konuşuruz", "2 olsun, kapı rengini sonra konuşuruz",
+    "2 olsun, montajla birlikte nakliyesini sonra konuşuruz", "2 olsun, yağmur olmasa yarın başlarız",
+    "PA-06-K olsun, vinç olmasa da olur", "2 olsun, vinç olmasa 2 gün erken başlarız", "2 olsun, inşallah müşteri için hayırlı olsun",
+    "2 olsun, kapı rengi güzel gibi", "2 olsun, kırma için montaj süresi önemli değil",
+    "2 olsun, montajla birlikte parkeyi sonra konuşuruz", "2 olsun, montajla birlikte sıvayı sonra konuşuruz",
+    "2 olsun, montajla birlikte kapısını sonra konuşuruz", "2 olsun, kırma için fiyat farkı önemli değil",
+    "2 olsun, montajla birlikte nakliyeyi pazartesi günü konuşuruz", "2 olsun, teklifi gönderin, inşallah güzel olur"])
+def test_hakem46_acik_secim_soruya_donmez(tmp_path, metin):
+    """Tur 46: "2 olsun, kırmanın maliyeti sorun değil", "2 olsun, montajla birlikte parkeyi sonra konuşuruz", "2 olsun, vinç olmasa 2
+    gün erken başlarız" açık seçimi soruya çevirmez: r02 PA-06-K."""
+    s, _ = _cati_seti(tmp_path)
+    k = s.yaz(metin, niyet="diger")
+    assert k.eylem == "is_emri" and k.revizyon == 2 and k.is_emri["talep"]["kaynak"] == "PA06K", k.mesaj
+
+
+
+@pytest.mark.parametrize("metin", [
+    "PA-06'ya onay veriyoruz", "PA-06'yı istiyoruz", "1 olsun, teklifi gönderin, inşallah güzel olur"])
+def test_hakem46_olumlu_soz_onay(tmp_path, metin):
+    """Tur 46: evin çatısının açık sözü ("PA-06'yı istiyoruz", "PA-06'ya onay veriyoruz") onaydır."""
+    s, _ = _cati_seti(tmp_path)
+    k = s.yaz(metin, niyet="diger")
+    assert k.gerekce == K.PLAN_ONAYI and k.revizyon == 1, k.mesaj
