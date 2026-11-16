@@ -272,7 +272,8 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | İE | İE-41 | rehber.portatifev.com sitesi main'deki koddan: paketleyici (`araclar/paket/site/`), yayın betiği `vps/rehber_yayin.sh` main'e, beş rehber (Lokman 14.11 20:37 kartı "Siteyi main'den kur"; D-28) | alındı (14.11; `claude/project-thread-v9ykyo`) |
 | İE | İE-42 | çatı plan onayından sonra (D-94; pano 41): onayda çatı seti, seçilen çatıyla r02, çelikte teknik kontrol çatıdan sonra; M-08 yeniden mühürlenir | alındı (14.11; `claude/project-thread-91gav7`) |
 | İE | İE-43 | disk arşivi: adsız dizin ve SHA-256 mührü (`araclar/hdd_dizin.py`, `testler/hdd/`; D-99) | alındı (15.11; `claude/project-thread-wc6dw0`) |
-| İE | **İE-44** | — | **sıradaki boş** |
+| İE | İE-44 | havuz evlerine toplu çatı seçenekleri: Motor kuralla çizer (K kırma, C beşik + salonda cumba, B beşik; D-83 ailesi), havuz denetimi süzer (D-112), Lokman tek sayfada onaylar (Lokman 16.11 08:21:45 kartı "Toplu çizilsin, ben onaylayayım") | alındı (16.11; `claude/project-thread-co84co`) |
+| İE | **İE-45** | — | **sıradaki boş** |
 | BK | BK-01–BK-08 | bu depo; BK-08 8a sonrası temizlik (`bk-08-8a-temizlik`) | yazıldı |
 | BK | BK-09 | metin ve çizim düzeltmeleri, G1 (`bk-09-metin-cizim`, `bk-09-cizim-g1`) | alındı (14.10) |
 | BK | BK-10 | 8b sonrası küçük işler (DXF `.txt` notu, geç gelen Excel, panelden Excel, plan değişince kontrol kapanır, D-19 24 saat kuralı, düğmeli mesajda satır sonları, `YENI-` kodu ve ilk çelik planda LLM özeti bayiye gitmez, komut freni metni; pano satır 15; çelikte kapı değişikliği kapsam dışı) | alındı (30.10; `claude/project-thread-h64uz2`) |
