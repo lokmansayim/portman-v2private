@@ -1,0 +1,85 @@
+{
+ "aciklama": "BK-49 hedef örneği (D-116): disk arşivi Parti 1'in üç evinde yükleme listesinin paftadaki gibi değişen satırları (D-111 › Bilinen farklar). 'motor' sütunu Lokman'ın onayladığı tablodaki 'Yeni (paftadaki gibi)' sütunu; 'once' BK-49'dan önceki Motor; 'pafta' evin paftasının listesi (yalnız bilgi; boylar saçak 25/28 ve 80 × 80 profille). Listenin öteki satırları değişmedi.",
+ "onay": {
+  "tarih": "2026-11-16T12:29:14Z",
+  "soz": "Evet, girsin",
+  "soru": "37, 59 ve 92 m2 listesi tablodaki gibi girsin mi?",
+  "tablo": "PF Portman_Proje_Dosyalari/Liste_Cumba_Kirma/07_37_59_92m2_liste_satirlari.png",
+  "kartlar": [
+   "2026-11-16T08:40:11Z 'Paftadaki gibi olsun' (D-111 › Bilinen farklar)",
+   "2026-11-16T12:08:22Z 'Her ev kendi paftasındaki gibi' (eskiz PF Portman_Proje_Dosyalari/Liste_Cumba_Kirma/06_37_59m2_cumba_makasi_eskiz.png)",
+   "2026-11-16T12:10:16Z 'Yalnız bu evde' (eskiz PF Portman_Proje_Dosyalari/Liste_Cumba_Kirma/05_92m2_veranda_yan_kiris_eskiz.png)"
+  ]
+ },
+ "komut": "motor.prefabrik_liste.is_emrinden(is_emri)",
+ "evler": {
+  "PA39": {
+   "is_emri": "is_emri/adaylar/PA39.json",
+   "toplam_satir": 120,
+   "makas": 9,
+   "once_makas": 9,
+   "satirlar": [
+    {
+     "kalem": "Yavru makas · cumba",
+     "olcu": "L 3838",
+     "motor": 1,
+     "once": 2,
+     "pafta": "CUMBA BAŞ MAKAS L 3800 × 1",
+     "not": "cumbanın kalkan makası; boy saçak 30'la"
+    },
+    {
+     "kalem": "Yavru makas · cumba",
+     "olcu": "L 1920",
+     "motor": 1,
+     "once": 0,
+     "pafta": "YAVRU MAKAS L 1920 × 1",
+     "not": "kalkan makasından 125,5 içeride; boy paftadan"
+    }
+   ],
+   "pafta": "37 m² 1+1, HD-252"
+  },
+  "PA41": {
+   "is_emri": "is_emri/adaylar/PA41.json",
+   "toplam_satir": 119,
+   "makas": 8,
+   "once_makas": 9,
+   "satirlar": [
+    {
+     "kalem": "Yavru makas · cumba",
+     "olcu": "L 3838",
+     "motor": 1,
+     "once": 2,
+     "pafta": "CUMBA BAŞ MAKAS L 3738 × 1",
+     "not": "yalnız kalkan makası; boy saçak 30'la"
+    }
+   ],
+   "pafta": "59 m² 2+1, HD-431"
+  },
+  "PA43": {
+   "is_emri": "is_emri/adaylar/PA43.json",
+   "toplam_satir": 125,
+   "makas": 8,
+   "once_makas": 8,
+   "satirlar": [
+    {
+     "kalem": "Kutu profil (kiriş) 100 × 100",
+     "olcu": "L 2010",
+     "motor": 2,
+     "once": 0,
+     "pafta": "KUTU PROFİL (KİRİŞ) 80 × 80 × 2010 × 2",
+     "not": "teras panelinin iki yan kenarı, duvardan panelin dış kenarına"
+    },
+    {
+     "kalem": "Kutu profil (kiriş) 100 × 100",
+     "olcu": "L 4532",
+     "motor": 1,
+     "once": 1,
+     "pafta": "KUTU PROFİL (KİRİŞ) 80 × 80 × 4372,5 × 1",
+     "not": "ön kiriş değişmedi (kartta değil)"
+    }
+   ],
+   "pafta": "92 m² 3+1, HD-143"
+  }
+ },
+ "test": "testler/motor/test_bk49_pafta_listesi.py"
+}

@@ -136,6 +136,7 @@ Biçim: karar · gerekçe · reddedilen seçenekler · geri alma yolu · kim ve 
 | [D-111](D-111.md) | Disk arşivi Parti 1'in beş evi (37, 45, 59, 84, 92 m²) Motor'un aks düzeniyle havuzda, PA-39 … PA-43; çatı paftadaki gibi (37 ve 59 m² ön cumba, 92 m² verandada panel çatı); 92 m²'nin ikinci çatısı PA-43-B verandada beşik; listede iki bilinen fark (cumba makası, panel çatının yan kirişi) Lokman'ın kararında; asıl proje (D-103) | 16.11 (Lokman, kart 06:50:02 "Evet, beşi girsin"; 08:08:55 "… 92 m² nin ikisinide al") |
 | [D-112](D-112.md) | Havuza giren yeni ev havuz denetiminden geçer: kayıt araçları (`aday_kaydet.py`, `cati_varyanti_kaydet.py`) yeni evi yazmadan `araclar/havuz_denetimi.py`'yi koşar; hata (Motor doğrulaması, liste yazılmaz, adetsiz satır, 3D kurulmaz, 3D makas sayısı listeden farklı, kırma çatı 3D'de beşik) varsa kayıt yazılmaz; uyarı kayda yazılır; var olan 20 ev havuzda kalır, Motor bakımıyla düzelir (BK-47) | 16.11 (Lokman 07:05:58, 07:07:03; kart 08:07:06 "Evet, hatalı yeni ev girmesin") |
 | [D-115](D-115.md) | Havuz evlerinin hazır 9 çatı seçeneği havuzda (İE-44): PA-08-C, PA-11-B, PA-14-B, PA-19-C, PA-24-C, PA-25-C, PA-31-B, PA-33-C, PA-34-C (C beşik + salonda çıkıntısız cumba, B beşik; D-83 kuralı); her biri Motor doğrulamasından ve havuz denetiminden (D-112) geçti, sonucu kaydın `kaynak.havuz_denetimi`'nde; denetimi bekleyen 16 seçenek BK-45/BK-46 birleşince aynı sayfayla yeniden Lokman'a gelir; çizilemeyen 51 girmez | 16.11 (Lokman kartı 08:46:30 "9'u girsin, bekleyenler size gelsin") |
+| [D-116](D-116.md) | Disk arşivinin üç evinde yükleme listesi paftadaki gibi (BK-49): 37 m² (PA-39) cumbada kalkan makası + yavru 192, 59 m² (PA-41) yalnız kalkan makası (`cumbalar[0].yavru_makaslari_cm`; çatı tanımı ve 3B aynı makasları okur); 92 m² (PA-43) teras panelinde 2 yan kiriş L 2010, yalnız listede (`verandalar[].cati.yan_kiris`); öteki evler ve AP-26 (M-12) aynı | 16.11 (Lokman kartları 12:08:22 "Her ev kendi paftasındaki gibi", 12:10:16 "Yalnız bu evde", 12:29:14 "Evet, girsin") |
 
 ## Numara defteri (14 Ekim 2026, BK-08; CIO planı › Görev 3)
 
@@ -246,7 +247,8 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | D | D-113 | (başka sohbet: çelik havuz evleri tek kat panel; BK-48) | alındı (16.11) |
 | D | D-114 | (başka sohbet: iki cumba ve boyuna kırma listesi; BK-45) | alındı (16.11) |
 | D | D-115 | havuz evlerinin hazır 9 çatı seçeneği havuzda (İE-44; Lokman 16.11 08:46:30 kartı) | yazıldı (16.11; çatı seçenekleri sohbeti, `claude/project-thread-co84co`) |
-| D | **D-116** | — | **sıradaki boş** |
+| D | D-116 | disk arşivinin üç evinde liste paftadaki gibi: cumba makası ve teras panelinin yan kirişi (BK-49; Lokman 16.11 12:08:22, 12:10:16, 12:29:14 kartları) | yazıldı (16.11; iki cumba ve kırma listesi sohbeti, `claude/project-thread-83lylo`) |
+| D | **D-117** | — | **sıradaki boş** |
 | İE | İE-01–İE-08 | bu depo (`main`) | yazıldı |
 | İE | İE-09 | model atölyesi: kontrollü model üretimi ve banka hattı (Görev 6e; pano 30; P6001 güncellemesi kapsam dışı) | alındı (16.10; `claude/gorev-6e-model-atolyesi-rnhtcp`; PR-1 banka hattı 29.10, `claude/project-thread-rhjgzv`) |
 | İE | İE-10, İE-11, İE-12 | prefabrik hattı (PR #12, PR #14, `ie-12-prefabrik-bayi-paftasi`) | `main`'e BK-12 ile (PR-1: motor ve bayi paftası; liste ve mühür kıyası sonraki PR'larda) |

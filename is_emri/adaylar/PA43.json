@@ -337,7 +337,8 @@
    "cati": {
     "tip": "teras_paneli",
     "cikma_cm": 201,
-    "egim_yuzde": 10
+    "egim_yuzde": 10,
+    "yan_kiris": true
    }
   }
  ]
