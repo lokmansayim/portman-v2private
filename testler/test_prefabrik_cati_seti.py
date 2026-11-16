@@ -3910,3 +3910,86 @@ def test_hakem35_olumlu_soz_onay(tmp_path, metin):
     s, _ = _cati_seti(tmp_path)
     k = s.yaz(metin, niyet="diger")
     assert k.gerekce == K.PLAN_ONAYI and k.revizyon == 1, k.mesaj
+
+
+
+# İE-42 hakem tur 36: ertelenmiş ya da koşullu taahhüt ("sonra kabul ederiz", "kabul ederiz inşallah"), fiyat sözünün kendi "-(y)le" eki
+# ve "dahil" sözü, katılmanın ardındaki kararsızlık, fiyatı bir işle erteleyen söz ve kesinleşmenin koşulu kararsızdır; başka işin tutarı
+# ("vinç ile nakliye ne kadar?"), çizimin zamanının devri ve katılmanın ardındaki istek açık sözdür
+@pytest.mark.parametrize("metin", [
+    "1 olsun, sonra kabul ederiz", "Sonra kabul ederiz, 1 olsun", "1 olsun, kabul ederiz ama sonra", "1 olsun, kabul ederiz daha sonra",
+    "1 olsun, kabul ederiz inşallah", "1 olsun kabul ederiz inşallah", "Abi 1 olsun, kabul ederiz inşallah",
+    "Kabul ederiz inşallah, 1 olsun", "1 olsun, inşallah kabul ederiz", "1 olsun, kabul ederiz bence", "1 olsun, bence de kabul ederiz",
+    "1 olsun, kabul ederiz bence de", "1 olsun, bizce kabul ederiz", "1 olsun, kabul ederiz gibi", "2 olsun, sonra kabul ederiz",
+    "2 olsun, kabul ederiz sonra", "2 olsun, yarın kabul ederiz", "2 olsun, kabul ederiz herhalde", "2 olsun, kabul ederiz sanırım",
+    "2 olsun, kabul ederiz galiba", "2 olsun, kabul ederiz umarım", "2 olsun, kabul ederiz büyük ihtimalle",
+    "2 olsun, kabul ederiz diye düşünüyorum", "2 olsun, kabul ederiz ama müşteriye sorayım", "2 olsun, müşteri kabul ederdi",
+    "1 olsun, sonra onaylarız", "1 olsun, sonra onay veririz", "1 olsun, onay veririz inşallah", "1 olsun, onaylarız inşallah",
+    "1 olsun, bence de onaylarız", "1 olsun, onaylarız bence", "2 olsun, sonra onaylarız", "1 olsun, bakalım nakliye ücretiyle ne kadar?",
+    "1 olsun, bakalım nakliye fiyatıyla ne kadar?", "1 olsun, bakalım nakliye ücreti dahil ne kadar?",
+    "1 olsun, bakalım nakliye fiyatı dahil ne kadar?", "1 olsun, bakalım nakliye ücreti de dahil ne kadar?",
+    "1 olsun, bakalım nakliye fiyatı da dahil ne kadar?", "1 olsun, bakalım nakliye parası dahil ne kadar?",
+    "1 olsun, nakliye ücretiyle ne kadar olur bakalım?", "2 olsun, bakalım nakliye ücretiyle ne kadar?",
+    "2 olsun, bakalım nakliye parası dahil ne kadar?", "1 olsun, bakalım kurulum ücretiyle ne kadar?",
+    "2 olsun, müşteri istedi bence de olur ama ortağım bir daha bakacak", "2 olsun, müşteri istedi bence de olur ne dersiniz",
+    "2 olsun, müşteri istedi bence de olur ama ne dersiniz", "2 olsun, müşteri istedi bence de olur ama hala tereddüdümüz var",
+    "2 olsun, müşteri istedi bence de olur ama aklım karıştı", "2 olsun, müşteri istedi bence de olur ama ortağıma da göstereyim",
+    "2 olsun, müşteri beğendi bence de güzel ama daha görüşeceğiz", "2 olsun, müşteri beğendi bence de güzel ama babama göstereyim",
+    "2 olsun, müşteri istedi bence de olur ama bir de usta baksın", "2 olsun, fiyatı ve montajı sonra konuşuruz, ne kadar?",
+    "2 olsun, fiyata da montaja da bakarız, toplam ne kadar?", "2 olsun, fiyatı ve teslimi konuşuruz, ne kadar olur?",
+    "2 olsun, fiyatla montajı konuşuruz, ne kadar?", "2 olsun, ücreti ve montajı konuşuruz, toplam ne kadar?",
+    "2 olsun, montajı ve fiyatı konuşuruz", "2 olsun, montaja ve fiyata bakarız", "2 olsun, kapora gelsin, kesinleşir",
+    "2 olsun, kapora yatsın, netleşir", "2 olsun, müşteri kaporayı yarın yatıracak, kesinleşir",
+    "2 olsun, bakalım anahtar teslim ne kadar?", "2 olsun, bakalım kurulum ücreti dahil ne kadar?", "2 olsun, bakalım ne kadar tutuyor?",
+    "2 olsun, salı günü kesinleşir", "2 olsun, biraz sonra kesinleşir", "2 olsun, yarın kesinleşir umarım",
+    "2 olsun, hafta içi kesinleşir", "2 olsun, müşteri istedi bence de olur ama ekip bir görsün", "2 olsun, fiyata ve teslime bakarız",
+    "2 olsun, hangisini çizmeniz fark etmez", "2 olsun, müşteri istedi bence de olur ama ortağım onaylasın",
+    "2 olsun, müşteri istedi bence de olur ama müşteri karar versin", "2 olsun, müşteri istedi bence de olur ama ne diyorsunuz",
+    "2 olsun, müşteri istedi bence de olur müşteri de onaylar", "2 olsun, müşteri istedi bence de güzel olur müşteri isterse"])
+def test_hakem36_kararsiz_ve_kosullu_soz_kaydedilmez(tmp_path, metin):
+    """Tur 36 (Y1, Y2, Y3, O1, O2, O3, önceden var): ertelenmiş ya da koşullu taahhüt ("sonra kabul ederiz", "kabul ederiz inşallah /
+    bence / herhalde", "sonra onaylarız", "onay veririz inşallah"), fiyat sözünün "-(y)le" eki ya da "dahil" sözü ("nakliye ücretiyle ne
+    kadar?", "kurulum ücreti dahil ne kadar?", "anahtar teslim ne kadar?", "ne kadar tutuyor?"), katılmanın ardındaki kararsızlık ("ama
+    ortağım bir daha bakacak", "ama ne dersiniz", "ama bir de usta baksın"), fiyatı bir işle erteleyen söz ("fiyatı ve montajı sonra
+    konuşuruz", "montaja ve fiyata bakarız"), kesinleşmenin koşulu ("kapora gelsin, kesinleşir") ve öznesiz kesinleşme ("salı günü
+    kesinleşir") kayıt almaz: plan r01, onay yok, r02 yok."""
+    s, _ = _cati_seti(tmp_path)
+    k = s.yaz(metin, niyet="diger")
+    assert K.PLAN_ONAYI not in k.gerekce and k.eylem != "is_emri" and s.plan["revizyon"] == 1 and not s.k.d.get("onaylanan"), k.mesaj
+
+
+@pytest.mark.parametrize("metin", [
+    "2 olsun, biz kabul ederiz bu haliyle", "2 olsun, hemen kabul ederiz", "2 olsun, onay veririz",
+    "2 olsun, bakalım nakliye ücreti ne kadar?", "2 olsun, montajı ve rengi sonra konuşuruz, fiyat ne kadar?",
+    "2 olsun, bakalım vinç ile nakliye ne kadar?", "2 olsun, bakalım kapı ile pencere ne kadar olur?",
+    "2 olsun, bakalım kombiyle klima ne kadar?", "2 olsun, bakalım kombi ile şofben ne kadar olur?",
+    "2 olsun, bakalım elektrik tesisatı ile su tesisatı ne kadar?", "2 olsun, bakalım vinçle indirme ne kadar?",
+    "2 olsun, bakalım montajlı klima ne kadar?", "2 olsun, bakalım kurulumlu kombi ne kadar?", "2 olsun, bakalım renkli kapı ne kadar?",
+    "2 olsun, bakalım ısı yalıtımlı kapı ne kadar?", "Hocam 2 olsun. Bakalım vinç ile nakliye ne kadar?",
+    "2 olsun, ne zaman çizmeniz fark etmez", "2 olsun, planı ne zaman çizmeniz fark etmez", "2 olsun, kimin çizmesi fark etmez",
+    "2 olsun, planın ne zaman çizileceği fark etmez", "2 olsun, montaj fiyatını konuşuruz", "2 olsun, montaj fiyatını sonra konuşuruz",
+    "2 olsun, müşteri istedi sanırım usta yarın gelir", "2 olsun, montajı konuşuruz", "2 olsun, hangi gün kurulum yapmanız fark etmez",
+    "2 olsun, müşteri istedi bence de olur bilginize", "2 olsun, müşteri beğendi bence de gayet iyi ama acele lazım",
+    "2 olsun, müşteri istedi bence de güzel ama kapıyı sağa alın", "2 olsun, müşteri seçti bence de doğru seçim",
+    "2 olsun, müşteri beğendi bence de güzel ama kapı sağda olsun teşekkürler",
+    "2 olsun, müşteri istedi bence de olur ama pencereyi büyütün", "2 olsun, müşteri istedi bence de olur ama kapı sağa alınsın",
+    "2 olsun, kabul ederiz teşekkürler"])
+def test_hakem36_acik_secim_soruya_donmez(tmp_path, metin):
+    """Tur 36 (O4, O5, O6): başka işin tutarı ("vinç ile nakliye ne kadar?", "montajlı klima ne kadar?", "vinçle indirme ne kadar?"),
+    çizimin zamanının devri ("ne zaman çizmeniz fark etmez", "kimin çizmesi fark etmez"), çatı adının ardındaki devir ("PA-06-K olsun
+    kırma çatı gerisi size kalmış"), katılmanın ardındaki istek ("ama kapıyı sağa alın", "ama pencereyi büyütün"), işin fiyatının
+    beklemesi ("montaj fiyatını konuşuruz") ve "kabul ederiz teşekkürler" açık seçimi soruya çevirmez: r02 PA-06-K."""
+    s, _ = _cati_seti(tmp_path)
+    k = s.yaz(metin, niyet="diger")
+    assert k.eylem == "is_emri" and k.revizyon == 2 and k.is_emri["talep"]["kaynak"] == "PA06K", k.mesaj
+
+
+
+@pytest.mark.parametrize("metin", [
+    "1 olsun, onaylarız", "1 olsun, bakalım nakliye ücreti ne kadar?", "1 olsun kabul ederiz teşekkürler"])
+def test_hakem36_olumlu_soz_onay(tmp_path, metin):
+    """Tur 36: "1 olsun, kabul ederiz", "onaylarız", "kabul ederiz teşekkürler" ve işin kendi fiyatı ("bakalım nakliye ücreti ne
+    kadar?") evin çatısının onayıdır: r01 onaylanır."""
+    s, _ = _cati_seti(tmp_path)
+    k = s.yaz(metin, niyet="diger")
+    assert k.gerekce == K.PLAN_ONAYI and k.revizyon == 1, k.mesaj

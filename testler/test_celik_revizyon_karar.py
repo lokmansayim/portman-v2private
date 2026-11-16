@@ -1629,3 +1629,27 @@ def test_hakem35_celik_acik_secim_soruya_donmez(s, metin):
     cati_seti(s)
     k = s.yaz(metin)
     assert k.eylem == "is_emri" and k.revizyon == 2 and s.plan["yapi"]["kod"] == "Ç8801K", k.mesaj
+
+
+
+@pytest.mark.parametrize("metin", [
+    "Ç8801 olsun, sonra kabul ederiz", "Ç8801 olsun, kabul ederiz inşallah", "Ç8801 olsun, kabul ederiz bence",
+    "K olsun, sonra kabul ederiz", "Ç8801 olsun, bakalım nakliye ücretiyle ne kadar?",
+    "Ç8801 olsun, bakalım nakliye fiyatı da dahil ne kadar?", "K olsun, bakalım nakliye ücretiyle ne kadar?",
+    "K olsun, müşteri istedi bence de olur ama ne dersiniz"])
+def test_hakem36_celik_kararsiz_soz_kaydedilmez(s, metin):
+    """Tur 36 çelikte: "sonra kabul ederiz", "kabul ederiz inşallah / bence", "bakalım nakliye ücretiyle ne kadar?", "nakliye
+    fiyatı da dahil ne kadar?" ve "bence de olur ama ne dersiniz" kayıt almaz: plan r01, onay yok, r02 yok."""
+    cati_seti(s)
+    k = s.yaz(metin)
+    assert K.PLAN_ONAYI not in k.gerekce and k.eylem != "is_emri" and s.plan["revizyon"] == 1 and not s.k.d.get("onaylanan"), k.mesaj
+
+
+
+@pytest.mark.parametrize("metin", [
+    "K olsun, bakalım vinç ile nakliye ne kadar?", "K olsun, bakalım montajlı klima ne kadar?"])
+def test_hakem36_celik_acik_secim_soruya_donmez(s, metin):
+    """Tur 36 çelikte: başka işin tutarı ("vinç ile nakliye ne kadar?", "montajlı klima ne kadar?") r02 K'yı çizer."""
+    cati_seti(s)
+    k = s.yaz(metin)
+    assert k.eylem == "is_emri" and k.revizyon == 2 and s.plan["yapi"]["kod"] == "Ç8801K", k.mesaj
