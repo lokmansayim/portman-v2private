@@ -88,7 +88,7 @@ HDD_EVLERI = {
     "PA40": ("HD-506", "testler/havuz/is_emirleri/HD506.json", "1+1", 45.0),     # 45 m²
     "PA41": ("HD-431", "testler/havuz/is_emirleri/HD431.json", "2+1", 59.0),     # başlık 63 m², duvarlar 763 × 773 cm (58,98 m²)
     "PA42": ("HD-228", "testler/havuz/is_emirleri/HD228.json", "3+1", 84.0),     # 84 m²
-    "PA43": ("HD-143", "testler/havuz/is_emirleri/HD143.json", "3+1", 92.0),     # 92 m²
+    # PA-43 (HD-143, 92 m²) bekler: veranda panelinin yan kirişi Motor bakımında (D-111 › Çatı).
 }
 HAVUZ_EVLERI = {**EVLER, **STANDART_HAL, **SILME_HAL, **UCLU_H_HAL, **TEK_PANO_HAL, **HDD_EVLERI}
 # D-92 › Havuz evlerine uygulama: 95 m²'nin (PA-10) tek özel pano anahtarlı kaydı 15 Kasım 21:56:57 kartıyla PA-38'e geçti (TEK_PANO_HAL);
@@ -335,7 +335,7 @@ SETLER = {
     (77, "2+1"): ["PA24", "PA04", "PA34", "PA16", "PA05", "PA26", "PA03", "PA15", "PA19"],  # PA-34: 77 m²'nin büyüyen hâli (D-92)
     (80, "2+1"): ["PA16", "PA04", "PA05", "PA34", "PA24", "PA19", "PA06"],
     (80, "3+1"): ["PA21", "PA30", "PA42", "PA12"],                                    # PA-30: 85 m²'nin silinmiş hâli (83 m², D-92); PA-42 disk arşivi (84 m², D-111)
-    (90, "3+1"): ["PA07", "PA11", "PA17", "PA37", "PA43", "PA10", "PA12", "PA38", "PA42", "PA30"],  # PA-37: 91 m² üçlü H'lı hâl (D-96); PA-38: 95 m² 48 panolu; PA-43, PA-42 disk arşivi (D-111)
+    (90, "3+1"): ["PA07", "PA11", "PA17", "PA37", "PA10", "PA12", "PA38", "PA42", "PA30"],  # PA-37: 91 m² üçlü H'lı hâl (D-96); PA-38: 95 m² 48 panolu; PA-42 disk arşivi (D-111)
     (100, "2+1"): ["PA22"],
     (140, "3+1"): ["PA08", "PA33"],                                                   # PA-33: 140 m²'nin büyüyen hâli (142 m², D-92)
     (140, "4+1"): ["PA13"],
