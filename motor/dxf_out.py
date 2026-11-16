@@ -159,6 +159,8 @@ def _dosemeden_pencereler(plan) -> list:
 class Cizici:
     def __init__(self, plan: G.Plan, katalog: Katalog):
         self.plan, self.kat = plan, katalog
+        from . import tavan_kirisi as TK                    # D-107: plan kurulur kurulmaz (cumbanın dikdörtgeni son ızgaradan)
+        self.tavan = TK.bul(plan, plan.is_emri)
         katalog.t_dis_cm, katalog.t_ic_cm = G.T_DIS, G.T_IC
         katalog.yukseklik_cm = float(plan.is_emri["yapi"].get("duvar_yuksekligi_cm", 250))   # 250 / 280 / 300 (D-14; kur() başkasını reddeder)
         self.h_blok_adi_dis = None
@@ -704,6 +706,7 @@ class Cizici:
                     self.dim((x0 + ox, y0 + oy), (x0 + ox, y1 + oy), (xb + ox, 0), 90)
                 nis_yazilari[ad] = f"{fmt((x1 - x0) / G.MOD)} x {fmt((y1 - y0) / G.MOD)} aks modülü"   # net alan planında adın üstünde (`_mahal_etiketleri`)
         if montaj:
+            self._tavan_kirisleri(ox, oy, n0, dolu)
             self.text("Mor: standart dışı pano (gerçek uçtan uca boy ölçülü) | Beyaz: standart 125,5 cm pano | Ölçüler cm", (W / 2 + ox, -145 - alt + oy), 13, "MONTAJ_YAZI")
             self.text("Pencere etiketi: malzeme kodu + en×yükseklik | Montaj kopyası BOM'a sayılmaz", (W / 2 + ox, -175 - alt + oy), 13, "MONTAJ_YAZI")
         if yerlesecek:
@@ -926,6 +929,49 @@ class Cizici:
         self.msp.add_text(s, dxfattribs={"height": h, "layer": layer, "style": "PORTMAN", "rotation": rot}).set_placement(pos, align=align)
 
     OZEL_OLCU_UZAKLIK_CM = (40, 25, 70, 100)
+
+    TAVAN_KIRISI_YAZISI = "TAVAN KİRİŞİ 10×10"
+
+    def _tavan_kirisleri(self, ox: float, oy: float, n0: int, dolu: list) -> None:
+        """D-107 (PC-43; Lokman, kart 15 Kasım 2026 10:48:34 "Eskizdeki gibi"): makas yönünde 7 m'yi aşan açıklığın tavan kirişi
+        (`tavan_kirisi.bul`) yalnız saha montaj planında: 10 cm genişlikte taralı dikdörtgen, yüzden yüze, ve "TAVAN KİRİŞİ 10×10" yazısı
+        kirişin yanında (y yönündekinde solda ya da sağda dik, x yönündekinde altta ya da üstte). Yazı, bu planda önce konmuş yazılara ve özel
+        pano ölçülerine (`dolu`) binmeyen ilk yere konur: önce ortada sol/alt, sonra sağ/üst, sonra kirişin üçte birinde; hepsi doluysa
+        ortada sol/alt. Katman TAVAN_KIRISI yalnız kirişli evde açılır (kirişsiz evin DXF'i aynen). Kiriş yeri bulunamazsa ya da iki eşit
+        yer kalırsa çizilmez; soruyu listenin "Kural yok" satırı sorar (K21). Uyarı antete yazılmaz: kirişsiz evin DXF'i, katalog planları
+        dahil, aynen kalır (geometri hakemi, 15 Kasım)."""
+        from . import tavan_kirisi as TK
+        bulunan = self.tavan
+        if not bulunan["kirisler"]:
+            return
+        e = TK.kural()["kesit"] / 2
+        if "TAVAN_KIRISI" not in self.doc.layers:
+            self.doc.layers.add("TAVAN_KIRISI", color=1, linetype="Continuous")
+        engel = list(dolu)                                        # plan çerçevesinde (ox, oy olmadan)
+        for t in list(self.msp)[n0:]:
+            if t.dxftype() == "TEXT" and t.dxf.layer != "TAVAN_KIRISI":
+                hiza, p, _ = t.get_placement()
+                if hiza == TextEntityAlignment.MIDDLE_CENTER:
+                    engel.append(self._yazi_kutusu(t.dxf.text, (p[0] - ox, p[1] - oy), t.dxf.height, t.dxf.rotation))
+        s, h = self.TAVAN_KIRISI_YAZISI, 15.0
+        uzak = 12.0 + h / 2                                        # kirişin ekseninden yazının ortasına: yarım kesit + 7 cm boşluk + yarım yazı
+        for k in bulunan["kirisler"]:
+            c, (a, b) = k["eksen_cm"], k["uclar_cm"]
+            dikey = k["yon"] == "y"
+            if dikey:
+                dik = [(ox + c - e, oy + a), (ox + c + e, oy + a), (ox + c + e, oy + b), (ox + c - e, oy + b)]
+            else:
+                dik = [(ox + a, oy + c - e), (ox + b, oy + c - e), (ox + b, oy + c + e), (ox + a, oy + c + e)]
+            h_ = self.msp.add_hatch(color=1, dxfattribs={"layer": "TAVAN_KIRISI"})
+            h_.paths.add_polyline_path(dik, is_closed=True)
+            h_.set_pattern_fill("ANSI31", scale=0.6, color=1)
+            self.msp.add_lwpolyline(dik, close=True, dxfattribs={"layer": "TAVAN_KIRISI", "color": 1, "lineweight": 50})
+            rot = 90.0 if dikey else 0.0
+            yerler = [(c + yan * uzak, a + (b - a) * oran) for oran in (0.5, 1 / 3, 2 / 3) for yan in (-1, 1)]
+            yerler = [(u, v) if dikey else (v, u) for u, v in yerler]
+            yer = next((q for q in yerler if not any(self._kesisir(self._yazi_kutusu(s, q, h, rot), o) for o in engel)), yerler[0])
+            engel.append(self._yazi_kutusu(s, yer, h, rot))
+            self.text(s, (yer[0] + ox, yer[1] + oy), h, "TAVAN_KIRISI", rot=rot)
 
     def _kubbe_plani(self, kb: dict, ox: float, oy: float, montaj: bool, olcu: bool) -> None:
         """İE-29 PR-2: kubbe planda (`G._kubbe_geometrisi`): her pano pencere boşluğunun iki yanında iki parça ve pano ortasında pencere bloğu
