@@ -1,11 +1,11 @@
 {
  "onay": {
   "kim": "Lokman",
-  "tarih": "2026-11-15T07:18:33Z",
-  "dayanak": "Proje thread'i \"Çatı seçenek adımını kurmak\" (Kurulum Panosu satır 41), mesaj cmsg_01UAFvcnfVuTR1wfFux5fQPPMBGuqdQKk8WBvgMHxcNwyC: \"onaylıyorum\". Sorulan (cmsg_01UAFvcnfVuTR1wfFux5fQPPNnMYqysmZWhXa7kxv8wvKF): \"Ekteki iki görsele bakın. Akış doğruysa 'Onaylıyorum' yazın.\" Ekler: PF Portman_Proje_Dosyalari/Cati_Secimi/Plan_Onayindan_Sonra/aday/prefabrik_aday.png ve celik_aday.png (r01 evin çatısıyla → Onayla → çatı seti → seçim → r02 ya da r01 onayı). Akışın kararı D-94 (kart 14 Kasım 2026 20:33:41 UTC \"Onaydan sonra, eskizdeki gibi\"). Bu yeniden dondurmada çatı seti plan onayından sonra gelir.",
+  "tarih": "2026-11-15T22:29:00Z",
+  "dayanak": "Proje thread'i \"Bayi görselinde ölçü yuvarlamasını düzelt\" (BK-42), karar kartı cmsg_01UAFvcnfVuTR1wfFux5fQPPQ3hj24vM31jVzg5Tw2fms4, Lokman'ın seçimi \"Evet, 12 resim de düzelsin\". Soru: \"Seçenek kartındaki 12 kayıtlı ev resmi de düzeltilsin mi?\" Seçeneğin sonucu: \"Seçenek kartı da 951,25 gibi doğru ölçüyü yazar.\" Bu yeniden dondurmada yalnız alan setinin görsel izi değişti: bileşik görselin 2. evinde (PA-05) dış ölçü \"835,8\" yerine \"835,75\" (710 piksel); mesaj, düğmeler, r01, kapanış, çatı seti ve seçim aynı. Yeniden dondurma Lokman uyurken yapıldı (22:45:18 talimatı \"tüm önerilenleri seç ve devam et\"); önce/sonra resmi sabah raporunda.",
   "komut": "python -m testler.cati_secimi.ornek_prefabrik <klasör> [--ciz PA06C]",
-  "kod": "dal claude/project-thread-91gav7, 09c58247 (İE-42, hakem tur 16)",
-  "karar": "İE-37 ve İE-42 (docs/is_emirleri/IE-42.md), D-83, D-94; r01 mesajı D-85; D-28 madde 2-3; yeniden dondurma yalnız Lokman'ın onayıyla ve gerekçeli kararla (D-02)"
+  "kod": "dal claude/project-thread-r8278d (BK-42, PR #240): motor/bayi_gorseli.py ölçü yazısı dxf_out.fmt'den; is_emri/adaylar/PA05.png yeniden çizildi",
+  "karar": "İE-37 ve İE-42, D-83, D-94; seçenek kartı resimleri D-110 (KARARLAR/D-110.md, BK-42); D-28 madde 2-3; yeniden dondurma yalnız Lokman'ın onayıyla ve gerekçeli kararla (D-02)"
  },
  "ozet": {
   "talep": "85 m² 2+1 prefabrik",
@@ -39,7 +39,7 @@
      "3. PA-04"
     ]
    ],
-   "gorsel_izi": "bafe2a9efabf3845c0b9f317c925b4711800ebf38ef7a85a5ad6a24978ec1f7b"
+   "gorsel_izi": "6ec7b3b3381983c7163d3fa58bb345d08cb361174cfe96b5813842f2f01ab795"
   },
   "r01": {
    "kaynak": "PA06",
@@ -152,6 +152,14 @@
   }
  },
  "onceki_onaylar": [
+  {
+   "kim": "Lokman",
+   "tarih": "2026-11-15T07:18:33Z",
+   "dayanak": "Proje thread'i \"Çatı seçenek adımını kurmak\" (Kurulum Panosu satır 41), mesaj cmsg_01UAFvcnfVuTR1wfFux5fQPPMBGuqdQKk8WBvgMHxcNwyC: \"onaylıyorum\". Sorulan (cmsg_01UAFvcnfVuTR1wfFux5fQPPNnMYqysmZWhXa7kxv8wvKF): \"Ekteki iki görsele bakın. Akış doğruysa 'Onaylıyorum' yazın.\" Ekler: PF Portman_Proje_Dosyalari/Cati_Secimi/Plan_Onayindan_Sonra/aday/prefabrik_aday.png ve celik_aday.png (r01 evin çatısıyla → Onayla → çatı seti → seçim → r02 ya da r01 onayı). Akışın kararı D-94 (kart 14 Kasım 2026 20:33:41 UTC \"Onaydan sonra, eskizdeki gibi\"). Bu yeniden dondurmada çatı seti plan onayından sonra gelir.",
+   "komut": "python -m testler.cati_secimi.ornek_prefabrik <klasör> [--ciz PA06C]",
+   "kod": "dal claude/project-thread-91gav7, 09c58247 (İE-42, hakem tur 16)",
+   "karar": "İE-37 ve İE-42 (docs/is_emirleri/IE-42.md), D-83, D-94; r01 mesajı D-85; D-28 madde 2-3; yeniden dondurma yalnız Lokman'ın onayıyla ve gerekçeli kararla (D-02)"
+  },
   {
    "kim": "Lokman",
    "tarih": "2026-11-13T19:15:09Z",

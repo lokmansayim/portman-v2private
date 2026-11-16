@@ -128,6 +128,7 @@ Biçim: karar · gerekçe · reddedilen seçenekler · geri alma yolu · kim ve 
 | [D-103](D-103.md) | Uygulanmış asıl proje (örnek AIPrefabrik klasörü) havuzda aynen kalır; her değişiklik yeni proje olarak, yeni numara ve kendi kaydıyla girer; kart "yerine geçsin" sormaz; 95 m² 3+1'in (PA-10) yerine geçmiş kaydı Lokman'a soruldu | 15.11 (Lokman 07:25:56 "kesin talimat olarak ver orjinal uygulanmış projeler örneğin AIPrefabrik klasöründeki gibi modifikasyonlar yeni bir proje olarak girsin") |
 | [D-104](D-104.md) | Üçlü H (dış duvar T'si: aynı hatta süren dış ve iç duvar, ona dik dış duvar) yalnız iç duvar dış duvarla aynı kalınlıktaysa; standart H'da 100'lükten 60'lığa geçen parça yok. 60'lık iç duvarlı evde (dış 160 / iç 100'de de) D-29'un niş T'si kurulmaz, köşe direği kalır, iç duvar köşeye çektirme U'suyla; yazılan üçlü H (D-96) farklı kalınlıkta açık hata (`geometry._kur`, PC-41, BK-36). 90 m² 3+1 hedef evin nişinde iki köşe direği; M-02 (TK-01 r07) ve M-18 hedefleri yeniden donduruldu; dar açık mahalde özel pano ölçüsü kapalı mahalin yanına (`dxf_out._dar_acik_mahal_yani`) | 15.11 (Lokman 07:32:42, 07:47:55, 07:48:04; kart 07:55:12 "Doğru, hedef örnekler güncellensin"; kart 09:02:23 "Evet, köşe direği") |
 | [D-106](D-106.md) | Çelikte bayi formdan sonra mesajla çatı kaplaması yazarsa kaplama çizime işlenmez; söz talebe (özel istek) yazılır ve plan mesajında üç cümle söylenir ("Mesajınızda çatı kaplaması yazdınız. Planı modelin kendi çatı kaplamasıyla çizdim. Yazdığınız kaplamayı talebe yazdım."); ilk planda ve revizyonda; istek geri çevrilmez (İE-20 PR-13) | 15.11 (Lokman, kart 10:06:51 "Evet, talebe yazılsın"; kart 10:08:33 "Üç cümle") |
+| [D-110](D-110.md) | Bayinin seçenek kartındaki kayıtlı ev resimleri dış ölçüyü plan görseli, DXF ve PDF gibi yazar (en çok iki ondalık: 951,25, 835,75; BK-42); 13 kayıtlı resim yeniden çizildi (`araclar/aday_gorseli_yenile.py`); çatı seçimi örneğinin (`testler/cati_secimi/prefabrik_hedef.json`) alan seti görsel izi yeniden dondu (2. ev PA-05) | 15.11 (Lokman, kart 22:29:00 "Evet, 12 resim de düzelsin"; hedefin yeniden dondurulması 22:45:18 talimatıyla, uyurken önerilen seçildi) |
 
 ## Numara defteri (14 Ekim 2026, BK-08; CIO planı › Görev 3)
 
@@ -230,7 +231,10 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | D | D-105 | montaj çizimi ile liste eşitliği: pano ekinde olmayan 3'lü H çizilmez, panonun ortasındaki T'de çektirme U'su (BK-38, PC-42) | alındı (15.11; montaj çizimi ile liste sohbeti, `claude/project-thread-3o0qzh`) |
 | D | D-106 | çelikte formdan sonra mesajla yazılan çatı kaplaması talebe yazılır, bayiye üç cümle (İE-20 PR-13; Lokman 15.11 10:06:51 ve 10:08:33 kartları) | yazıldı (15.11; talep formu sohbeti, `claude/project-thread-l5mh7r`) |
 | D | D-107 | tavan kirişi: makas yönünde 7 m'yi aşan açıklıkta köşeye 1 kiriş (BK-39, PC-43) | alındı (15.11; Motor bakım sohbeti, tavan kirişi) |
-| D | **D-108** | — | **sıradaki boş** |
+| D | D-108 | (başka sohbet: iç duvarın dış duvar ucunda kalan parça; BK-41, PC-44) | alındı (15.11) |
+| D | D-109 | (başka sohbet: köşe verandası ve taşan verandada ara kolon; BK-40, PC-45) | alındı (15.11) |
+| D | D-110 | seçenek kartının kayıtlı resimleri yeni ölçü yazısıyla; çatı seçimi örneğinin seçenek kartı izi yeniden dondu (BK-42; Lokman 15.11 22:29:00 kartı) | yazıldı (16.11; bayi görseli sohbeti, `claude/project-thread-r8278d`) |
+| D | **D-111** | — | **sıradaki boş** |
 | İE | İE-01–İE-08 | bu depo (`main`) | yazıldı |
 | İE | İE-09 | model atölyesi: kontrollü model üretimi ve banka hattı (Görev 6e; pano 30; P6001 güncellemesi kapsam dışı) | alındı (16.10; `claude/gorev-6e-model-atolyesi-rnhtcp`; PR-1 banka hattı 29.10, `claude/project-thread-rhjgzv`) |
 | İE | İE-10, İE-11, İE-12 | prefabrik hattı (PR #12, PR #14, `ie-12-prefabrik-bayi-paftasi`) | `main`'e BK-12 ile (PR-1: motor ve bayi paftası; liste ve mühür kıyası sonraki PR'larda) |
