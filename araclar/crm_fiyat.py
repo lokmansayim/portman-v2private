@@ -479,7 +479,7 @@ def istisnali_defter(A: dict, I: dict, E: dict | None = None) -> dict:
             onceki = g or {}
             H["kalemler"][k] = {"fiyat": x["fiyat"], "birim": x["birim"], "kaynak": ISTISNA_KAYNAK, "kaynak_satir": None,
                                 "kaynak_kalem": None, "durum": ISTISNA_DURUM, "onay": True, "istisna": I["karar"],
-                                "not": f"{I['karar']} istisnası: {x['dayanak']}",
+                                "not": f"{I['karar']} istisnası: {x['dayanak']}", **{a: x[a] for a in ("teklif_adi", "teklif_olcu") if x.get(a)},
                                 **{a: onceki[a] for a in ("kdv", "kdv_grubu") if a in onceki}}
             if x.get("kdv_grubu") and H["kalemler"][k].get("kdv") is None:      # eşlemede grubu olmayan kalem (D-76 grupları)
                 H["kalemler"][k] |= {"kdv": E["kdv"]["gruplar"][x["kdv_grubu"]], "kdv_grubu": x["kdv_grubu"]}

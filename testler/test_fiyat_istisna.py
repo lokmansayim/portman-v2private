@@ -66,6 +66,8 @@ def test_istisna_yalniz_crm_fiyati_olmayan_yerde(A0, E, I):
     for k, g in P.items():                                         # CRM'in verdiği her fiyat aynen
         if P0[k]["fiyat"] is not None:
             assert (g["fiyat"], g["kaynak"]) == (P0[k]["fiyat"], P0[k]["kaynak"]), k
+    g = P["Özel pencere karkası (120×120) (100'lük çektirme U'su + 100'lük H geçen) | 1200 × 1200"]   # Lokman 21:34:47: gerçek adı
+    assert (g["fiyat"], g["teklif_adi"], g["teklif_olcu"], g["kdv"]) == (237.08, "PENCERE KÖR KASASI", "120/120", 0.2)
     assert D["istisna"]["kod"] == ["MA11", "MA12"] and D["istisna"]["crm_fiyatli_kod"] == []
     assert "ISTISNA" in D["kaynaklar"] and D["surum"].endswith("+ istisna D-120")
 
