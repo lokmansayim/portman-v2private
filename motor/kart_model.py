@@ -232,6 +232,14 @@ def siniflandir(f: ifcopenshell.file, kartlar: dict, yerlesim: dict, makas_arali
                 kayit["h"] = hk[e.id()]
             out.append(kayit)
             continue
+        if e.is_a("IfcElementAssembly") and ue.get_predefined_type(e) == "TRUSS":
+            # BK-46: 3D kırma çatıyı kırma çizer; kırmanın makası (ana, kısa, çapraz) makas kartlarına uymaz, kitapta kırma makasının kartı
+            # yok: nedeni çatının tipi (K5), "hiçbir karta uymuyor" değil
+            izin = sorted({t for k in kartlar["kartlar"] for m in k.get("bugunku_ifc") or [] if m.get("sinif") == "IfcElementAssembly"
+                           for t in m.get("cati_tipleri") or []})
+            if izin and cati_tipi not in izin:
+                out.append({"e": e, "rol": "kural_yok", "neden": girdi.cati_disi(cati_tipi, "makas kartlarının eşlemesi", izin), "cati": cati_tipi})
+                continue
         ks = next((k for k in kartlar.get("kartsiz", []) if _uyar(e, k)), None)
         if ks:
             out.append({"e": e, "rol": "kartsiz", "neden": ks["neden"]})

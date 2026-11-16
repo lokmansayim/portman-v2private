@@ -712,15 +712,24 @@ def _capraz_cumba_catilari(plan, ie: dict) -> tuple[list[dict], dict]:
     mahya; vadi kenarları), mahyası dereler birleşene kadar. Cumba makası (yavru makas) dış ucundaki kalkan duvarının ekseninden başlar,
     125,5 arayla, derelerin birleştiği yere kadar (AP-22 paftası MK10–12: 3). Saçak, alın, mahya, vadi kenarları çatının kendi
     kenarlarından (`cati_genel.cati_kur`). Çıkıntısız cumba (alnı ana çatının saçak duvarında; AP-06, AP-13, AP-16) aynı kuralla: makas
-    planı üç paftada kıyaslandı (İE-29). Birden çok cumba: liste yazılmaz. Dönen: (parçalar, çatı tanımı; aşık ve kaplama yüz yüz ondan)."""
+    planı üç paftada kıyaslandı (İE-29).
+
+    BK-45 (PC-38, D-87; 45 m² ev, AP-07 ve iki standart hâli): ikinci cumba taşan verandanın çatısıysa (`cumbalar[1].veranda`; Lokman,
+    14 Kasım 2026 08:41:58 "çapraz cumba çatısını nasıl çiziyorsan öyle çiz") o da aynı kuralla bir çatı parçasıdır: makas dış kirişin
+    ekseninden 125,5 arayla derelerin birleştiği yere kadar (AP-07 paftası MK09–MK10: 2), kenarları çatının kendi kenarlarından; altı açık,
+    kalkanı dış kirişin üstünde (taşan verandanın beşiği gibi, `kalkan_kirisli`; D-32). Öteki çok cumbalı çatı: liste yazılmaz. Dönen:
+    (parçalar, çatı tanımı; aşık ve kaplama yüz yüz ondan)."""
     from . import cati_prefabrik as CP
     from . import geometry as G
     from .genel import cati_genel
     MOD_CM = G.MOD
     c = ie.get("cati") or {}
     cumbalar = c.get("cumbalar") or []
-    if len(cumbalar) != 1:
-        raise ListeYazilmaz(f"beşik + cumba: {len(cumbalar)} cumba; liste tek çapraz cumbayı sayar, liste yazılmaz")
+    iki = len(cumbalar) == 2 and bool(cumbalar[1].get("veranda")) and not cumbalar[0].get("veranda")
+    if len(cumbalar) != 1 and not iki:
+        raise ListeYazilmaz(f"beşik + cumba: {len(cumbalar)} cumba; liste tek çapraz cumbayı ve verandanın cumbasını sayar, liste yazılmaz")
+    if iki:
+        return _iki_cumba_catilari(plan, ie)
     # İE-29: çıkıntısız cumba (alnı ana çatının saçak duvarında; AP-06, AP-13, AP-16) aynı kuralla. Üç evin makas planında ana makaslar
     # gövdenin bütün derinliğini geçer (AP-13 M1–M7, AP-16 MKS1–7, AP-06 MK01–08) ve cumbada iki makas var: dış uçtaki kalkan makası
     # (M8, MKS8, MK09) ve onun arkasında, derelerin birleştiği yerden önce bir makas (M9, MKS9, MK10). Motor'un sayısı aynı (dış uçtan
@@ -797,6 +806,94 @@ def _capraz_cumba_catilari(plan, ie: dict) -> tuple[list[dict], dict]:
     return out, t
 
 
+def _iki_cumba_catilari(plan, ie: dict) -> tuple[list[dict], dict]:
+    """BK-45 (PC-38): beşik + gövdenin çapraz cumbası + taşan verandanın cumbası (`cati_prefabrik.cumba_dikdortgenleri`, `_iki_cumba`;
+    45 m² ev AP-07: yatak odasının öndeki cumbası ve arkadaki sundurma). Her cumba `_capraz_cumba_catilari`'nın tek cumbasının kuralıyla:
+    makas dış uçtaki kalkanın ekseninden 125,5 arayla derelerin birleştiği yere kadar; saçak, alın, mahya ve vadi kenarları çatının kendi
+    kenarlarından (`cati_genel.cati_kur`), her kenar o kenarın yüzünün sahibine. Verandanın cumbası açık çatı parçasıdır: altında duvar yok,
+    kalkanı dış kirişin üstünde (`kalkan_kirisli`; baş makas omegası ve betopanı taşan verandanın beşiği gibi, D-32). Paftayla kıyas
+    (AP-07 MK01–MK13): yatak odasının cumbası 3 (MK11–MK13), sundurma 2 (MK09–MK10)."""
+    from . import cati_prefabrik as CP
+    from . import geometry as G
+    from . import veranda as VR
+    from .genel import cati_genel
+    MOD_CM = G.MOD
+    c = ie.get("cati") or {}
+    cumbalar = c["cumbalar"]
+    try:
+        t = CP.cati(plan, ie)
+        ana_k, rs = CP.cumba_dikdortgenleri(c, tuple(float(v) for v in G.govde_kutusu(plan)), plan)
+    except CP.PrefabrikCatiHatasi as e:
+        raise ListeYazilmaz(f"beşik + iki cumba çatı kurulmadı: {e}") from None
+    if len(rs) != 2:
+        raise ListeYazilmaz(f"beşik + iki cumba: {len(rs)} cumba dikdörtgeni (iki beklenir); liste yazılmaz")
+    s, eg = float(t["sacak"]), float(c["egim_yuzde"])
+    ck = cati_genel.cati_kur(t)
+
+    def parca(d: str):
+        if d.startswith("ana "):
+            return "ana"
+        if d.startswith("cumba 2 "):                                      # `cati_prefabrik._iki_cumba`: verandanın cumbası
+            return 1
+        if d.startswith("cumba "):
+            return 0
+        raise ListeYazilmaz(f"beşik + iki cumba: tanınmayan çatı yüzü {d}; liste yazılmaz")
+    turler = ("sacak", "alin", "mahya", "vadi")
+    k_ = {sahip: {tr: [] for tr in turler} for sahip in ("ana", 0, 1)}
+    for e in ck["kenarlar"]:
+        if e["tur"] not in turler:
+            raise ListeYazilmaz(f"beşik + iki cumba: beklenmeyen çatı kenarı {e['tur']} ({', '.join(e['duzlemler'])})")
+        sahipler = {parca(d) for d in e["duzlemler"]} - {"ana"}
+        if len(sahipler) > 1:
+            raise ListeYazilmaz(f"beşik + iki cumba: iki cumbanın ortak kenarı ({', '.join(e['duzlemler'])}); liste yazılmaz")
+        k_[sahipler.pop() if sahipler else "ana"][e["tur"]].append(e)
+    mahya_ana = "x" if c.get("makas_ekseni", "x") == "y" else "y"
+    ax0, ay0, ax1, ay1 = ana_k
+    aciklik, boy = ((ay1 - ay0), (ax1 - ax0)) if mahya_ana == "x" else ((ax1 - ax0), (ay1 - ay0))
+    t_dis = 2 * next(d.h for d in plan.duvarlar if d.tur == "dis")
+    h = t_dis / 2
+    out = [{"ad": "ana çatı", "tip": "besik", "aciklik_cm": aciklik, "boy_cm": boy, "egim_yuzde": eg, "sacak_cm": s, "kalkan": 2,
+            "mahya_boy_cm": round(sum(e["plan_boy"] for e in k_["ana"]["mahya"]), 2),
+            "sacak_hatlari_m": [round(e["plan_boy"] / 100, 3) for e in k_["ana"]["sacak"]],
+            "alin_kenarlari_m": [round(e["boy"] / 100, 3) for e in k_["ana"]["alin"]], "makas_kosu_cm": boy - 2 * t_dis,
+            "not": "Motor (BK-45): beşik + iki cumbanın ana çatısı; kenarları çatının kenarlarından"}]
+    veranda_ad = {v["ad"]: v for v in plan.dis_verandalar}
+    for i, (cb, rect) in enumerate(zip(cumbalar, rs)):
+        cephe = cb["cephe"]
+        cx0, cy0, cx1, cy1 = rect
+        c_ac = (cx1 - cx0) if cephe in ("on", "arka") else (cy1 - cy0)
+        c_cik = (cy1 - cy0) if cephe in ("on", "arka") else (cx1 - cx0)
+        dis = {"on": cy0, "arka": cy1, "sol": cx0, "sag": cx1}[cephe]
+        mh = k_[i]["mahya"]
+        if len(mh) != 1:
+            raise ListeYazilmaz(f"beşik + iki cumba: {i + 1}. cumbanın mahyası {len(mh)} kenar (bir beklenir)")
+        eks = 1 if cephe in ("on", "arka") else 0
+        birlesim = max(abs(v[eks] - dis) for v in (mh[0]["p"], mh[0]["q"]))     # dış yüzden derelerin birleştiği yere (plan)
+        v = veranda_ad.get(cb.get("veranda")) if cb.get("veranda") else None
+        if cb.get("veranda") and v is None:
+            raise ListeYazilmaz(f"beşik + iki cumba: verandanın cumbası {cb['veranda']} planda taşan veranda değil; liste yazılmaz")
+        h_ = VR.KIRIS_CM / 2 if v else h                                  # ilk makas kalkan duvarının ya da dış kirişin ekseninde
+        makas = [h_ + j * MOD_CM for j in range(int(math.floor((birlesim - h_) / MOD_CM - 1e-9)) + 1)]
+        ortak = {"tip": "besik", "aciklik_cm": c_ac, "boy_cm": c_cik, "egim_yuzde": eg, "sacak_cm": s, "kalkan": 1, "capraz": True,
+                 "makas_adet": len(makas),
+                 "pafta_kaynagi": f"45 m² paftası (AP-07) {'MK09–MK10: 2' if v else 'MK11–MK13: 3'} tuttu",
+                 "makas_yeri": (f"{'dış kirişin' if v else 'kalkan duvarının'} ekseninden {sy(MOD_CM)} arayla, derelerin birleştiği yere "
+                                f"({sy(round(birlesim, 1))} cm) kadar"),
+                 "mahya_boy_cm": round(mh[0]["plan_boy"], 2), "sacak_hatlari_m": [round(e["plan_boy"] / 100, 3) for e in k_[i]["sacak"]],
+                 "alin_kenarlari_m": [round(e["boy"] / 100, 3) for e in k_[i]["alin"]],
+                 "dere_ici_m": [round(e["boy"] / 100, 3) for e in k_[i]["vadi"]], "makas_kosu_cm": birlesim,
+                 # makasların plandaki yeri (3B modeli aynı yeri okur, D-28): cumbanın ekseninde, dış yüzden gövdeye doğru
+                 "makas_konum_cm": {"eksen": "y" if eks == 1 else "x",
+                                    "degerler": [round(dis + (1 if cephe in ("on", "sol") else -1) * m, 2) for m in makas]}}
+        if v:
+            out.append({"ad": f"{_kucuk(v['ad'])} çatısı", **ortak, "kalkan_kirisli": True, "acik": True,
+                        "not": "Motor (BK-45, PC-38): taşan verandanın çatısı ana çatının cumbası; iki deresi ana çatının yüzüyle, kalkanı dış kirişin üstünde"})
+        else:
+            out.append({"ad": "cumba", **ortak,
+                        "not": "Motor (BK-45): ana çatıya dik çapraz cumba (taşan verandanın çapraz beşiği gibi); iki deresi ana çatının yüzüyle"})
+    return out, t
+
+
 def _tek_uclu_kirma_catilari(plan, ie: dict) -> tuple[list[dict], dict]:
     """İE-29 (AP-27): tek uçlu kırma (bir ucu kalkan, öteki ucu kırma yüzü; `cati_prefabrik`, `kalkan_ucu`), çizimdeki çatının aynısından.
     Saçak, alın, mahya ve kırma hatları çatının kendi kenarlarından (`cati_genel.cati_kur`); kaplama ve aşık yüz yüz çatı tanımından.
@@ -869,9 +966,11 @@ def _iki_uclu_kirma_catilari(plan, ie: dict) -> tuple[list[dict], dict]:
     kırma hattının ilk ana makası kestiği iki noktada (M02–M08, M22–M28: 7 + 7). Her köşede
     saçak köşesinden kırma hattı boyunca ilk ana makasa bir çapraz makas (M01, M09, M21, M29). Kırma ucunun üçgen yüzü altında iki ana
     makasın arasındaki göz çatı paneli (CP1–CP6; gözün ortası mahyanın ucundan dışarıda). Kural tek paftayla kıyaslandı (29 makas, 6
-    panel). Paftanın dışında kalanda liste yazılmaz (geometri hakemi, 6 Kasım): mahya y boyunca; girintili gövde; taşan veranda (verandanın
-    çatısı kırmayla kıyaslanmadı); iki ana makasın arası 125,5'ten geniş (saçak duvarında geniş pano); uç bandı ya da iki kısa makasın arası
-    1,5 panodan (188,25) geniş."""
+    panel). Mahya y boyunca (BK-45, 87 m² kırma) aynı kural 90° dönmüş; `kirma_makas › mahya` "y" (yoksa x), `ana_x_cm` mahya ekseninde.
+    Uç bandı 1,5 panodan genişse ilk ana makas mahyanın ucuyla uç arasındaki en yakın duvarın üstünde (D-114; Lokman 16 Kasım 2026: 87 m²'de
+    ön uç 330'daki duvar). Paftanın dışında kalanda liste yazılmaz (geometri hakemi, 6 Kasım): girintili gövde; taşan veranda (verandanın
+    çatısı kırmayla kıyaslanmadı); iki ana makasın arası 125,5'ten geniş (saçak duvarında geniş pano); uç bandı (D-114 duvarı yoksa) ya da
+    iki kısa makasın arası 1,5 panodan (188,25) geniş."""
     from . import cati_prefabrik as CP
     from . import geometry as G
     from .genel import cati_genel
@@ -898,35 +997,62 @@ def _iki_uclu_kirma_catilari(plan, ie: dict) -> tuple[list[dict], dict]:
         raise ListeYazilmaz(f"iki uçlu kırma: {len(kn['sacak'])} saçak, {len(kn['mahya'])} mahya, {len(kn['kirma'])} kırma hattı "
                             "(dört, bir ve dört beklenir); liste yazılmaz")
     mh = kn["mahya"][0]
-    if abs(mh["p"][1] - mh["q"][1]) > 1e-6:
-        raise ListeYazilmaz("iki uçlu kırma: mahya y boyunca; makas planı yalnız mahyası x boyunca olan paftayla kıyaslandı (AP-01), liste yazılmaz")
-    gx0, gy0, gx1, gy1 = (float(v) for v in G.govde_kutusu(plan))
+    if abs(mh["p"][1] - mh["q"][1]) <= 1e-6:
+        i = 0                                                           # mahya x boyunca (AP-01 paftası)
+    elif abs(mh["p"][0] - mh["q"][0]) <= 1e-6:
+        i = 1                                                           # BK-45: mahya y boyunca; aynı kural 90° dönmüş (x ↔ y)
+    else:
+        raise ListeYazilmaz("iki uçlu kırma: mahya eksenlere paralel değil; liste yazılmaz")
+    j = 1 - i
+    kutu = tuple(float(v) for v in G.govde_kutusu(plan))
+    gx0, gy0, gx1, gy1 = kutu
     W_, D_ = gx1 - gx0, gy1 - gy0
-    ax0, ax1 = sorted((float(mh["p"][0]), float(mh["q"][0])))           # mahyanın uçları (kırma uçlarının tepesi)
+    g0, g1 = kutu[i], kutu[i + 2]                                       # mahya yönünde gövdenin uçları (kırma uçları)
+    h0, h1 = kutu[j], kutu[j + 2]                                       # mahyaya dik yönde gövdenin kenarları (saçak duvarları)
+    boy_, aciklik_ = (W_, D_) if i == 0 else (D_, W_)
+    eksen, dik = ("x", "y") if i == 0 else ("y", "x")
+    ax0, ax1 = sorted((float(mh["p"][i]), float(mh["q"][i])))           # mahyanın uçları (kırma uçlarının tepesi)
     t_dis = 2 * next(d.h for d in plan.duvarlar if d.tur == "dis")
-    sacak_d = [d for d in plan.duvarlar if d.tur == "dis" and d.yon == "x" and d.panolar]
+    sacak_d = [d for d in plan.duvarlar if d.tur == "dis" and d.yon == eksen and d.panolar]
     if not sacak_d:
         raise ListeYazilmaz("iki uçlu kırma: saçak duvarı yok; liste yazılmaz")
     sd = max(sacak_d, key=lambda d: (d.panolar[-1].a1 - d.panolar[0].a0, -d.id))   # kesintisiz saçak duvarı (paftada arka)
     ana_x = [round(p.a1, 2) for p in sorted(sd.panolar, key=lambda p: p.a0)[:-1]
-             if p.a1 - gx0 >= MOD_CM - 1e-6 and gx1 - p.a1 >= MOD_CM - 1e-6]
+             if p.a1 - g0 >= MOD_CM - 1e-6 and g1 - p.a1 >= MOD_CM - 1e-6]
     if len(ana_x) < 2 or not (ana_x[0] < ax0 and ana_x[-1] > ax1):
         raise ListeYazilmaz(f"iki uçlu kırma: ana makas yerleri {ana_x} kırma uçlarını ({sy(ax0)}, {sy(ax1)}) geçmiyor; liste yazılmaz")
     aralik = max(b - a for a, b in zip(ana_x, ana_x[1:]))
     if aralik > MOD_CM + 1e-6:                                          # paftada en çok bir pano; geniş panoda makas yeri paftayla kıyaslanmadı
         raise ListeYazilmaz(f"iki uçlu kırma: iki ana makasın arası {sy(aralik)} cm, 125,5'ten geniş (saçak duvarında geniş pano); liste yazılmaz")
 
-    def _kesisim(e, x):                                                 # kırma hattının x'teki y'si (çatının kendi kenarından)
-        (px, py), (qx, qy) = e["p"][:2], e["q"][:2]
-        return py + (x - px) / (qx - px) * (qy - py)
+    # D-114 (Lokman, 16 Kasım 2026; 87 m² kırma): uç bandı 1,5 panodan genişse ilk ana makas, mahyanın ucuyla (Lokman'ın "kırma noktası")
+    # uç arasındaki, mahyanın ucuna en yakın duvarın üstünde: "tam bu işaretli noktanın aşağı tarafına yakınsa o duvardan başlardım".
+    # Duvar mahyaya dik (iç ya da dış), saçak duvarının bir pano ekinde ve bugünkü ilk ana makastan içeride; yoksa liste yazılmaz.
+    duvarda = {}
+    for k_uc, (tepe, kenar_x) in enumerate(((ax0, g0), (ax1, g1))):
+        xf = ana_x[0] if k_uc == 0 else ana_x[-1]
+        if abs(xf - kenar_x) <= 1.5 * MOD_CM + 1e-6:
+            continue
+        adaylar = sorted({x for x in ana_x for d in plan.duvarlar if d.yon == dik and abs(d.c - x) <= d.h + 1e-6
+                          and (xf < x < tepe if k_uc == 0 else tepe < x < xf)}, key=lambda x: abs(tepe - x))
+        if not adaylar:
+            continue                                                    # bant denetimi aşağıda liste yazmaz (K21)
+        duvarda[k_uc] = adaylar[0]
+    if duvarda:
+        ana_x = [x for x in ana_x if (0 not in duvarda or x >= duvarda[0] - 1e-6) and (1 not in duvarda or x <= duvarda[1] + 1e-6)]
 
+    def _kesisim(e, x):                                                 # kırma hattının mahya eksenindeki x'te öteki koordinatı (çatının kendi kenarından)
+        p_, q_ = e["p"], e["q"]
+        return p_[j] + (x - p_[i]) / (q_[i] - p_[i]) * (q_[j] - p_[j])
+
+    uc_adlari = ("sol", "sağ") if i == 0 else ("ön", "arka")
     uclar = []
-    for ad_, xf, tepe, kenar_x in (("sol", ana_x[0], ax0, gx0), ("sağ", ana_x[-1], ax1, gx1)):
-        hatlar = [e for e in kn["kirma"] if any(abs(v[0] - tepe) < 1e-6 for v in (e["p"], e["q"]))]
+    for k_uc, (ad_, xf, tepe, kenar_x) in enumerate(((uc_adlari[0], ana_x[0], ax0, g0), (uc_adlari[1], ana_x[-1], ax1, g1))):
+        hatlar = [e for e in kn["kirma"] if any(abs(v[i] - tepe) < 1e-6 for v in (e["p"], e["q"]))]
         if len(hatlar) != 2:
             raise ListeYazilmaz(f"iki uçlu kırma: {ad_} uçta {len(hatlar)} kırma hattı (iki beklenir); liste yazılmaz")
         y_lo, y_hi = sorted(_kesisim(e, xf) for e in hatlar)
-        uc_d = [d for d in plan.duvarlar if d.tur == "dis" and d.yon == "y" and abs(abs(d.c - kenar_x) - d.h) < 1e-6]
+        uc_d = [d for d in plan.duvarlar if d.tur == "dis" and d.yon == dik and abs(abs(d.c - kenar_x) - d.h) < 1e-6]
         J = sorted({round(p.a1, 2) for d in uc_d for p in sorted(d.panolar, key=lambda p: p.a0)[:-1]})
         if not J:
             raise ListeYazilmaz(f"iki uçlu kırma: {ad_} uç duvarında pano eklemi yok; liste yazılmaz")
@@ -941,26 +1067,30 @@ def _iki_uclu_kirma_catilari(plan, ie: dict) -> tuple[list[dict], dict]:
         bant = abs(xf - kenar_x)
         sira = [y_lo, *kisa_y, y_hi]
         genis = max(bant, *(b - a for a, b in zip(sira, sira[1:])))
+        if k_uc in duvarda:                                             # D-114: bant duvara kadar; yalnız kısa makas arası denetlenir
+            genis = max([0.0, *(b - a for a, b in zip(sira, sira[1:]))])
         if genis > 1.5 * MOD_CM + 1e-6:                                 # paftada uç bandı 130,5 ve 140, kısa makas arası en çok 132,9
             raise ListeYazilmaz(f"iki uçlu kırma: {ad_} uçta bant ya da kısa makas arası {sy(genis)} cm, 1,5 panodan geniş; liste yazılmaz")
-        capraz = [math.hypot(bant + s, yv - (gy0 - s)) if yv - gy0 < gy1 - yv else math.hypot(bant + s, (gy1 + s) - yv) for yv in (y_lo, y_hi)]
-        panel = sum(1 for a, b in zip(ana_x, ana_x[1:]) if ((a + b) / 2 < tepe if ad_ == "sol" else (a + b) / 2 > tepe))
+        capraz = [math.hypot(bant + s, yv - (h0 - s)) if yv - h0 < h1 - yv else math.hypot(bant + s, (h1 + s) - yv) for yv in (y_lo, y_hi)]
+        panel = sum(1 for a, b in zip(ana_x, ana_x[1:]) if ((a + b) / 2 < tepe if k_uc == 0 else (a + b) / 2 > tepe))
         uclar.append({"uc": ad_, "bant_cm": round(bant, 2), "kisa": len(kisa_y) + 2, "kisa_y_cm": [round(y_lo, 2), *kisa_y, round(y_hi, 2)],
-                      "kisa_boy_cm": round(bant + s, 2), "capraz_boy_cm": [round(v, 2) for v in capraz], "cati_paneli": panel})
+                      "kisa_boy_cm": round(bant + s, 2), "capraz_boy_cm": [round(v, 2) for v in capraz], "cati_paneli": panel,
+                      **({"ilk_ana_duvarda_cm": duvarda[k_uc]} if k_uc in duvarda else {})})
     uc_ = Counter((round(v[0], 1), round(v[1], 1)) for e in kn["sacak"] for v in (e["p"], e["q"]))   # dere dört saçakta kesintisiz: serbest uç yok
-    out = [{"ad": "ana çatı", "tip": "kirma", "aciklik_cm": D_, "boy_cm": W_, "egim_yuzde": eg, "sacak_cm": s, "kalkan": 0,
+    out = [{"ad": "ana çatı", "tip": "kirma", "aciklik_cm": aciklik_, "boy_cm": boy_, "egim_yuzde": eg, "sacak_cm": s, "kalkan": 0,
             "mahya_boy_cm": round(mh["plan_boy"], 2),
             "sacak_hatlari_m": [round(e["plan_boy"] / 100, 3) for e in kn["sacak"]], "alin_kenarlari_m": [],
-            "kirma_m": [round(e["boy"] / 100, 3) for e in kn["kirma"]], "makas_kosu_cm": W_ - 2 * t_dis,
+            "kirma_m": [round(e["boy"] / 100, 3) for e in kn["kirma"]], "makas_kosu_cm": boy_ - 2 * t_dis,
             "kirma_makas": {"tur": "iki_uclu", "ana": len(ana_x), "kisa": sum(u["kisa"] for u in uclar), "capraz": 2 * len(uclar),
-                            "kose_kisa": 0, "mod_cm": MOD_CM, "ana_x_cm": ana_x, "uclar": uclar},
+                            "kose_kisa": 0, "mod_cm": MOD_CM, "ana_x_cm": ana_x, "uclar": uclar, **({"mahya": "y"} if i == 1 else {})},
             "cati_paneli": sum(u["cati_paneli"] for u in uclar),
             "kaplama_alani_m2": round(ck["yuzey_m2"], 3), "plan_m2": round(ck["plan_m2"], 3), "dere_serbest_uc": sum(1 for n in uc_.values() if n == 1),
-            "not": "Motor (İE-33): iki uçlu kırma; kenarları çatının kenarlarından, makas planı AP-01 paftasından"}]
+            "not": ("Motor (İE-33): iki uçlu kırma; kenarları çatının kenarlarından, makas planı AP-01 paftasından" if i == 0 else
+                    "Motor (İE-33, BK-45): iki uçlu kırma, mahya y boyunca; kenarları çatının kenarlarından, makas planı AP-01 paftasının "
+                    "kuralı 90° dönmüş")}]
     return out, t
 
 
-# ── geometri: pafta kipi ────────────────────────────────────────────────────────
 def model_pafta(yp: dict) -> dict:
     """`yapi_pafta.json`: paftadan okunmuş geometri. Alanlar `model_motor` ile aynı; yalnız veranda kirişlerinin boyu
     `veranda_kirisleri_cm`'de paftadan okunmuş olarak gelir (Motor kipi açık kenarları verir, kiriş boyu kuraldan). Çatı kenarında olmayan kirişler
@@ -1722,7 +1852,7 @@ def liste(N: dict, kurallar: dict | None = None, pafta: dict | None = None) -> d
                  (f"çatı tanımının makas yerleri ({c.get('makas_yeri')}) = {n_m}" if "makas_adet" in c else
                   f"ek çatı parçasının pano koşusu {mm(c['makas_kosu_cm'])} ÷ {mm(makas_ara)} yukarı + 1")
                  + (f", − {len(kisa_m)} kısa (ana çatının üstünde, aşağıdaki satır)" if kisa_m else ""),
-                 "PK-03: yavru makas 3 (MK10–MK12)" + (("; çıkıntısız cumba (D-47): AP-13 M8–M9, AP-16 MKS8–MKS9, AP-06 MK09–MK10 paftası 2 "
+                 c["pafta_kaynagi"] if c.get("pafta_kaynagi") else "PK-03: yavru makas 3 (MK10–MK12)" + (("; çıkıntısız cumba (D-47): AP-13 M8–M9, AP-16 MKS8–MKS9, AP-06 MK09–MK10 paftası 2 "
                                                          "tuttu; paftada ikinci makas kalkan makasından 47–87 cm geride, iki ana makasın arasında "
                                                          + ("kısa (D-61: aşağıdaki satır)" if kisa_m else "kısa; burada yavru makas boyuyla (artık, K16)"))
                                                         if c.get("cikintisiz") else
