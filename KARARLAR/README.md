@@ -130,7 +130,8 @@ Biçim: karar · gerekçe · reddedilen seçenekler · geri alma yolu · kim ve 
 | [D-105](D-105.md) | Montaj çizimi ile yükleme listesi aynı parçayı gösterir: iç duvarın T ile geldiği yerde geçen duvarın panosu bölünmemişse parça çektirme U'sudur, çizim orada 3'lü H çizmez (`geometry.ortadaki_h`, PC-42; Motor doğrulamasına hakem kalemi; 9 evde 15 yer, mühürlü 102 m² 2+1 dahil, M-12 kartla açılıp kapandı); 100'lük iç duvarın dış köşeye geldiği yerde listede 1 çektirme U'su (`prefabrik_liste.model_motor`; 91 m² 3+1, 71 m² 2+1); BK-38 | 15.11 (Lokman 08:51:58; kartlar 09:14:09 "Evet, 15 yerin hepsinde", 09:14:41 "Evet, 1 adet 100'lük") |
 | [D-106](D-106.md) | Çelikte bayi formdan sonra mesajla çatı kaplaması yazarsa kaplama çizime işlenmez; söz talebe (özel istek) yazılır ve plan mesajında üç cümle söylenir ("Mesajınızda çatı kaplaması yazdınız. Planı modelin kendi çatı kaplamasıyla çizdim. Yazdığınız kaplamayı talebe yazdım."); ilk planda ve revizyonda; istek geri çevrilmez (İE-20 PR-13) | 15.11 (Lokman, kart 10:06:51 "Evet, talebe yazılsın"; kart 10:08:33 "Üç cümle") |
 | [D-107](D-107.md) | Prefabrikte tavan kirişi: makas yönünde 7 m'yi aşan açıklıkta köşeye bir kutu profil 100 × 100; makasa dik, iki ucu duvarda, en kısa çizgi, eşitse iki ucu köşede; bandı 125,5'ten dar açıklığa makas gelmez; listede 1 satır (yüzden yüze + 2 × 10, uçta kolon yok), kiriş yalnız saha montaj planında (`motor/tavan_kirisi.py`, PC-43; BK-39); 70, 65 ve 81 m²'de | 15.11 (Lokman 09:47:33 "eşik 7 metre olsun"; kart 10:22:40 "Evet, bu kuralla"; kart 10:48:34 "Eskizdeki gibi") |
-| [D-108](D-108.md) | İç duvarın dış duvar ucunda kalan parça: bir ucu dış duvarın iç yüzünde olan açıklıksız iç duvar aralığında 62,75'ten büyük iki eksik parça varsa ve yeni dizilim daha az pano harcıyorsa (62,75'ten büyük parça 1, küçüğü yarım pano) 125,5'ler öteki köşe ya da T'nin aksından, kalan parça dış duvar ucunda (`geometry._ic_duvar_dis_ucu`, BK-41, PC-44); 67 m² 2+1'in banyo duvarları 120,5 + 64,75 → 59,75 + 125,5; depodaki evler aynen, aks düzeni bozulmaz (Lokman 15.11 22:04:05, 22:21:41; kart 22:28:26 "Doğru, 59,75 başta") | Kodlandı (BK-41) |
+| [D-108](D-108.md) | İç duvarın dış duvar ucunda kalan parça: bir ucu dış duvarın iç yüzünde olan açıklıksız iç duvar aralığında 62,75'ten büyük iki eksik parça varsa ve yeni dizilim daha az pano harcıyorsa (62,75'ten büyük parça 1, küçüğü yarım pano) 125,5'ler öteki köşe ya da T'nin aksından, kalan parça dış duvar ucunda (`geometry._ic_duvar_dis_ucu`, BK-41, PC-44); 67 m² 2+1'in banyo duvarları 120,5 + 64,75 → 59,75 + 125,5; depodaki evler aynen, aks düzeni bozulmaz (Lokman 15.11 22:04:05, 22:21:41; kart 22:28:26 "Doğru, 59,75 başta"; T ucu kartı 16.11 08:24:27 "T'nin aksından: 122,5 + 62,75") | Kodlandı (BK-41) |
+| [D-110](D-110.md) | Bayinin seçenek kartındaki kayıtlı ev resimleri dış ölçüyü plan görseli, DXF ve PDF gibi yazar (en çok iki ondalık: 951,25, 835,75; BK-42); 13 kayıtlı resim yeniden çizildi (`araclar/aday_gorseli_yenile.py`); çatı seçimi örneğinin (`testler/cati_secimi/prefabrik_hedef.json`) alan seti görsel izi yeniden dondu (2. ev PA-05) | 15.11 (Lokman, kart 22:29:00 "Evet, 12 resim de düzelsin"; hedefin yeniden dondurulması 22:45:18 talimatıyla, uyurken önerilen seçildi) |
 
 ## Numara defteri (14 Ekim 2026, BK-08; CIO planı › Görev 3)
 
@@ -234,7 +235,9 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | D | D-106 | çelikte formdan sonra mesajla yazılan çatı kaplaması talebe yazılır, bayiye üç cümle (İE-20 PR-13; Lokman 15.11 10:06:51 ve 10:08:33 kartları) | yazıldı (15.11; talep formu sohbeti, `claude/project-thread-l5mh7r`) |
 | D | D-107 | prefabrikte tavan kirişi: makas yönünde 7 m'yi aşan açıklıkta köşeye bir kutu profil (BK-39, PC-43; Lokman 15.11 09:47:33, kart 10:22:40 "Evet, bu kuralla", kart 10:48:34 "Eskizdeki gibi") | yazıldı (15.11; tavan kirişi sohbeti, `claude/project-thread-bvls4f`) |
 | D | D-108 | iç duvarın dış duvar ucunda kalan parça; 67 m² banyo duvarları 59,75 + 125,5 (BK-41, PC-44; Lokman 15.11 22:04:05, 22:21:41, kart 22:28:26) | yazıldı (15.11; iç duvar sohbeti, `claude/project-thread-myf3km`) |
-| D | **D-109** | — | **sıradaki boş** |
+| D | D-109 | (başka sohbet: köşe verandası ve taşan verandada ara kolon; BK-40, PC-45) | alındı (15.11) |
+| D | D-110 | seçenek kartının kayıtlı resimleri yeni ölçü yazısıyla; çatı seçimi örneğinin seçenek kartı izi yeniden dondu (BK-42; Lokman 15.11 22:29:00 kartı) | yazıldı (16.11; bayi görseli sohbeti, `claude/project-thread-r8278d`) |
+| D | **D-111** | — | **sıradaki boş** |
 | İE | İE-01–İE-08 | bu depo (`main`) | yazıldı |
 | İE | İE-09 | model atölyesi: kontrollü model üretimi ve banka hattı (Görev 6e; pano 30; P6001 güncellemesi kapsam dışı) | alındı (16.10; `claude/gorev-6e-model-atolyesi-rnhtcp`; PR-1 banka hattı 29.10, `claude/project-thread-rhjgzv`) |
 | İE | İE-10, İE-11, İE-12 | prefabrik hattı (PR #12, PR #14, `ie-12-prefabrik-bayi-paftasi`) | `main`'e BK-12 ile (PR-1: motor ve bayi paftası; liste ve mühür kıyası sonraki PR'larda) |
@@ -299,9 +302,11 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | BK | BK-37 | havuz hakeminde köşe profili kalemi (köşe profili sohbeti, `claude/project-thread-are9gn`) | alındı (15.11; 08:35) |
 | BK | BK-38 | Montaj çizimi ile yükleme listesi aynı parçayı gösterir: panonun ortasındaki T'de 3'lü H çizilmez, Motor doğrulamasına hakem kalemi, 100'lük dış köşede çektirme U'su (D-105, PC-42; `claude/project-thread-3o0qzh`) | alındı (15.11; CIO 08:29:56) |
 | BK | BK-39 | Pano Motor'unda tavan kirişi: makas yönünde 7 m'yi aşan açıklıkta köşeye kutu profil, liste satırı ve saha montaj planı (D-107, PC-43; `claude/project-thread-bvls4f`) | yazıldı (15.11; defter 10:27) |
-| BK | BK-40 | (başka sohbet) | alındı (15.11) |
+| BK | BK-40 | (başka sohbet: köşe verandası ve taşan verandada ara kolon) | alındı (15.11) |
 | BK | BK-41 | Pano Motor'unda iç duvarın dış duvar ucunda kalan parça (D-108, PC-44; `claude/project-thread-myf3km`) | yazıldı (15.11; CIO 22:06) |
-| BK | **BK-42** | — | **sıradaki boş** |
+| BK | BK-42 | Bayi plan görselinde dış ölçü DXF ve PDF'teki gibi iki ondalık (951,25 cm "951,2" yazılıyordu); 13 kayıtlı seçenek resmi yeniden çizildi (Lokman 15.11 21:50 kartı "Evet, iş açılsın", 22:29 kartı "Evet, 12 resim de düzelsin"; `claude/project-thread-r8278d`) | alındı (15.11; 21:58) |
+| BK | BK-43 | (başka sohbet: CI doğrulamasında pytest dosya dosya parçalara bölünür; gece bakım işi) | alındı (16.11) |
+| BK | **BK-44** | — | **sıradaki boş** |
 
 ## 27 Eylülde Lokman'ın verdiği kararlar
 

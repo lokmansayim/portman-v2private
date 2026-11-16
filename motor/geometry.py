@@ -1774,7 +1774,7 @@ def _ic_duvar_dis_ucu(plan: "Plan") -> list:
     yeni dizilim `pano_harcamasi`'na göre daha az pano harcıyorsa (ör. 120,5 + 64,75 = 2 pano; 59,75 + 125,5 = 1,5 pano) aralık yeniden
     dizilir: 125,5'ler öteki uçtan dizilir, kalan parça dış duvar ucundadır. Öteki uçta boy D-92 gibi aks üstünden ölçülür (uç dik duvarın
     eksenine `TEK_PANO_EKSEN_PAYI_CM` içindeyse oradan; köşe ve T payı uçtaki panodan düşer, ekler ızgara aksında kalır; Lokman 22:21:41
-    "standart aks düzenimizi bozma"). Fazla harcamayan aralığa dokunulmaz. Kalan 0,05 cm'den kısa ama sıfır değilse aralığa dokunulmaz
+    "standart aks düzenimizi bozma"; kart 16 Kasım 2026 08:24:27 "T'nin aksından: 122,5 + 62,75"). Fazla harcamayan aralığa dokunulmaz. Kalan 0,05 cm'den kısa ama sıfır değilse aralığa dokunulmaz
     (kıymık pano yok, komşu pano 125,5'i aşmaz). İki ucu da dış duvarda ya da hiçbir ucu dış duvarda olmayan aralık bu kuralın dışındadır
     (D-108 › Açık). Dış duvar, açıklıklı pano, dış ölçü ve odalar değişmez. 20 cm'den kısa yeni panoya Motor'un kısa pano uyarısı düşer.
     Dönüş: değişen aralıklar ({duvar, once, sonra}; boylar cm, duvar sırasıyla)."""
