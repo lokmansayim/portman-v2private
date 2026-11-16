@@ -223,7 +223,8 @@ def test_ayni_is_emri_numarasi_uretilirse_oteki_bayinin_dosyasi_ezilmez(depo, wa
     import hashlib, types
     import beyin.karar as KR
     ortak = {"kod": "B1234", "ad": "Birinci", "rol": "bayi"}
-    sabit = types.SimpleNamespace(time=lambda: 1790580000.0, strftime=time.strftime)
+    an = 1790580000.0                                         # BK-44: saat ve tarih birlikte durur; numaranın tarih kısmı gece yarısında bölünmez
+    sabit = types.SimpleNamespace(time=lambda: an, strftime=lambda f, t=None: time.strftime(f, time.localtime(an) if t is None else t))
     monkeypatch.setattr(KR, "time", sabit)
     plan_iste(depo, wa, bayi=ortak)
     ra = tek(depo, "SELECT * FROM revizyonlar")
