@@ -4400,3 +4400,101 @@ def test_hakem40_olumlu_soz_onay(tmp_path, metin):
     s, _ = _cati_seti(tmp_path)
     k = s.yaz(metin, niyet="diger")
     assert k.gerekce == K.PLAN_ONAYI and k.revizyon == 1, k.mesaj
+
+
+
+# İE-42 hakem tur 41: kodla yazılmış ret "Allah …" ile açılsa da seçim değildir ("Allah aşkına PA-06-K olmasın"); zaman sözüyle kişiye
+# sorma ("pazartesi günü / gün içinde / teslim öncesi müşteriye sorarız", "montaj öncesi ustaya danışırız"), erteleme adı ("ertelemek
+# istiyoruz", "beklememiz lazım"), işçinin iyelik adıyla inceleme ("montaj işçileri baksın", "montaj ekibinin ustası baksın") ve
+# öznesiz değişme ("hiç sorun yok sonra değişebilir") kararsızdır; ivedilik ("beklemeye hiç gerek yok", "bekleme olmadan başlayın"),
+# bekleme adının başka anlamı ("bekleme parası"), beğenilmiş çatının yanındaki başka konunun ertelemesi ("çatıyı beğendik montaj
+# gününü sonra konuşuruz"), "ona göre"nin emri ("ona göre malzeme gönderin"), işçinin işi ("usta yerinde değiştirir") ve sayı ya da
+# saat sorusu ("kaç binaya yeter", "saat kaçtan itibaren") değil
+@pytest.mark.parametrize("metin", [
+    "1 olsun, beklemede kalsın", "2 olsun, bir süre beklemek istiyoruz", "2 olsun, biraz beklememiz lazım",
+    "2 olsun, montaj ekibinin ustası baksın", "2 olsun, usta gelsin ona göre karar veririz", "2 olsun, montaj işçileri bir baksın",
+    "2 olsun, gün içinde müşteriye sorarız", "2 olsun, iki gün sonra müşteriye sorarız", "2 olsun, 2 gün içinde müşteriye sorarız",
+    "2 olsun, pazartesi günü müşteriye sorarız", "1 olsun, pazartesi günü müşteriye sorarız", "2 olsun, cuma günü ustaya sorarız",
+    "2 olsun, gündüz müşteriye sorarız", "2 olsun, toplantı günü müşteriye sorarız", "2 olsun, teslim öncesi müşteriye sorarız",
+    "2 olsun, montaj öncesi müşteriye sorarız", "2 olsun, müşteriye sorarız gün içinde", "2 olsun, müşteriye sorarız montaj öncesi",
+    "2 olsun, müşteriye sorarız teslim öncesi", "2 olsun, müşteriye sorarız iki gün sonra", "2 olsun, bakalım nakliye montajlı kaça?",
+    "2 olsun, bakalım kaçtan veriyorsunuz?", "2 olsun, hiç sorun yok sonra değişebilir", "2 olsun, müşteri sonra değiştirir",
+    "2 olsun, ertelemeyi düşünüyoruz", "2 olsun, ertelemeye aldık", "2 olsun, ertelemek istiyoruz", "Allah aşkına 2 olmasın",
+    "Allah aşkına kırma olmasın", "Allah aşkına PA-06-K olmasın", "2 olsun hocam 2 gün sonra müşteriye sorarız",
+    "2 olsun, yarın gündüz müşteriye sorarız", "2 olsun, gün sonunda müşteriye sorarız", "2 olsun, randevu günü müşteriye sorarız",
+    "2 olsun, imza günü müşteriye sorarız", "2 olsun, kapora günü müşteriye sorarız", "2 olsun, montaj sırasında müşteriye sorarız",
+    "2 olsun, teslimde müşteriye sorarız", "2 olsun, nakliye öncesi müşteriye danışırız", "2 olsun, montaj günü müşteriye sorarız",
+    "2 olsun, montaj günü ustaya sorarız", "2 olsun, birkaç gün içinde müşteriye sorarız", "2 olsun, 1 gün sonra müşteriye sorarız",
+    "2 olsun, bir gün müşteriye sorarız", "2 olsun, aynı gün müşteriye sorarız", "2 olsun, ertesi gün müşteriye sorarız",
+    "2 olsun, haftaya salı günü müşteriye sorarız", "2 olsun, müşteriye sorarız pazartesi günü", "2 olsun, müşteriye sorarız teslimde",
+    "2 olsun, ustaya danışırız montaj öncesi", "2 olsun, eşine sorarız gün içinde", "2 olsun, ev sahibine sorarız pazartesi günü",
+    "2 olsun, mühendise sorarız teslim öncesi", "Merhaba 2 olsun, pazartesi günü müşteriye sorarız",
+    "2 olsun hocam, gün içinde müşteriye sorarız", "2 olsun. Pazartesi günü müşteriye sorarız",
+    "2 olsun, tamam pazartesi günü müşteriye sorarız", "PA-06-K olsun, pazartesi günü müşteriye sorarız",
+    "Çatı 2 olsun, pazartesi günü müşteriye sorarız", "2 numara olsun, gün içinde müşteriye sorarız",
+    "3 olsun, pazartesi günü müşteriye sorarız", "Allah aşkına PA06K olmasın", "Allah korusun PA-06-K olmasın",
+    "Allah korusun PA-06-C olmasın", "Allah bilir PA-06-K olmaz", "Allah aşkına PA-06-K istemiyoruz", "Allah aşkına PA-06-K yapmayın",
+    "Allah aşkına PA-06-K'yı çizmeyin", "Allah'tan PA-06-K olmasın", "Allah var PA-06-K olmaz", "Allah şahit PA-06-K olmaz",
+    "Allah aşkına PA-06-K değil", "Allah aşkına PA-06-K'yı seçmeyin", "Allah aşkına PA-06-K'dan vazgeçtik",
+    "Allah aşkına PA-06-K olmasın abi", "Allah rızası için PA-06-C olmasın", "Allah biliyor ya PA-06-K istemiyoruz",
+    "2 olsun, çatıyı müşteriye sorarız", "2 olsun, müşteriye sorun", "2 olsun, montajdan önce müşteri görsün",
+    "2 olsun, usta gelsin baksın", "2 olsun, müşteri yarın kesinleştirir", "2 olsun, beklemeye vaktimiz var",
+    "2 olsun, çatıyı ve montaj gününü sonra konuşuruz", "2 olsun, bakalım kaç bine?"])
+def test_hakem41_kararsiz_ve_kosullu_soz_kaydedilmez(tmp_path, metin):
+    """Tur 41 (Y1, O1, önceden var): "Allah aşkına PA-06-K olmasın", "Allah korusun PA-06-C olmasın", "2 olsun, pazartesi günü
+    müşteriye sorarız", "teslim öncesi müşteriye sorarız", "ustaya danışırız montaj öncesi", "ertelemek istiyoruz", "biraz beklememiz
+    lazım", "montaj işçileri bir baksın", "hiç sorun yok sonra değişebilir" kayıt almaz: plan r01, onay yok, r02 yok."""
+    s, _ = _cati_seti(tmp_path)
+    k = s.yaz(metin, niyet="diger")
+    assert K.PLAN_ONAYI not in k.gerekce and k.eylem != "is_emri" and s.plan["revizyon"] == 1 and not s.k.d.get("onaylanan"), k.mesaj
+
+
+@pytest.mark.parametrize("metin", [
+    "2 olsun, beklemeye hiç gerek yok", "2 olsun, beklemeye vakit yok", "2 olsun, beklemeye vaktimiz yok", "2 olsun, bekleme falan yok",
+    "2 olsun, bekleme mekleme yok", "2 olsun, beklemek bize uymaz", "2 olsun, beklemek istemiyoruz",
+    "2 olsun, beklemek istemiyoruz hemen başlayın", "2 olsun, beklemenize gerek yok", "2 olsun, beklemeye gerek kalmadı",
+    "2 olsun, beklemeye gerek görmüyoruz", "2 olsun, beklemeye almayın", "2 olsun, sakın beklemeye almayın",
+    "2 olsun, bekleme olmadan başlayın", "2 olsun, hiç bekleme yapmadan gönderin", "2 olsun, bekleme yapmayın", "2 olsun, bekleme olmasın",
+    "2 olsun, nakliyede bekleme olmasın", "2 olsun, bekletme hemen gönder", "2 olsun, beklemeden başlayın",
+    "2 olsun, dondurmayı düşünmüyoruz", "2 olsun, zemin için montaj ekibi bir baksın", "2 olsun, montaj ekibi zemine baksın",
+    "2 olsun, statik için montaj ustası baksın", "2 olsun, usta gelsin kursun", "2 olsun, usta gelsin sonra başlarız",
+    "2 olsun, usta gelsin montaja başlasın ona göre malzemeyi gönderin", "2 olsun, montaj tarihini müşteriye sorarız",
+    "2 olsun, teslim gününü müşteriye sorarız", "2 olsun, ölçüleri ustaya sorarız",
+    "2 olsun, çatıyı onayladık montaj tarihini sonra konuşuruz", "2 olsun, çatı rengini sonra seçeriz",
+    "2 olsun, bakalım saat kaçtan itibaren gelirsiniz?", "2 olsun, bakalım saat kaçtan sonra müsaitsiniz?",
+    "2 olsun, bakalım kaç binaya yeter?", "2 olsun, tamam montaj tarihi yarın kesinleşir", "2 olsun, kapıyı değiştirirler",
+    "2 olsun, usta yerinde değiştirir", "2 olsun, Allah mahcup etmesin", "2 olsun, Allah kimseyi darda bırakmasın",
+    "2 olsun, beklemeye gerek de yok", "2 olsun, beklemeye artık gerek yok", "2 olsun, beklemeye pek gerek yok",
+    "2 olsun, beklemenize hiç gerek yok", "2 olsun, beklemenize artık gerek yok", "2 olsun, bekletmeye hiç gerek yok",
+    "2 olsun, beklemeye tahammülümüz yok", "2 olsun, beklemeye mecalimiz yok", "2 olsun, beklemeye sabrımız yok",
+    "2 olsun, bekleme yapmadan başlayın", "2 olsun, bekleme olmadan çizin", "2 olsun, bekleme durumu yok",
+    "2 olsun, bekleme gibi bir durum yok", "2 olsun, bekleme söz konusu değil", "2 olsun, bekleme kesinlikle yok",
+    "2 olsun, bekletme bizi", "2 olsun abi beklemeye hiç gerek yok", "Hocam 2 olsun, bekleme falan yok hemen çizin",
+    "2 olsun, vinç bekleme parası ne kadar?", "2 olsun, nakliyede bekleme masrafı olur mu?",
+    "2 olsun, kırmayı beğendik rengini sonra seçeriz", "2 olsun, çatıları beğendik rengi sonra konuşuruz",
+    "2 olsun, çatıyı beğendik montaj gününü sonra konuşuruz", "2 olsun, kırma çatıyı beğendik montaj tarihini yarın konuşuruz",
+    "2 olsun, çatıyı tamam montajı sonra konuşuruz", "2 olsun, çatıyı onayladık nakliyeyi sonra konuşuruz",
+    "2 olsun, kırmayı seçtik rengini sonra konuşuruz", "2 olsun, çatıyı kırma yapalım rengini sonra seçeriz",
+    "2 olsun, usta gelsin montaja başlasın ona göre", "2 olsun, ekip gelsin ona göre malzeme gönderin",
+    "2 olsun, montaj ekibi gelsin ona göre kamyonu ayarlayın", "2 olsun, usta pazartesi gelsin ona göre hazırlık yapın",
+    "2 olsun, ekip gelsin konuşalım montajı", "2 olsun, usta gelsin montaj gününü konuşuruz",
+    "2 olsun, çatıyı çok beğendik montajı sonra konuşuruz", "2 olsun, rengini sonra müşteriye sorarız", "2 olsun, usta zemine bir baksın",
+    "Çatı 2 olsun, kırma çatıyı yarın ustaya anlatırız"])
+def test_hakem41_acik_secim_soruya_donmez(tmp_path, metin):
+    """Tur 41 (O2–O5, önceden var): "beklemeye hiç gerek yok", "beklemeye vakit yok", "bekleme olmadan başlayın", "beklemeye
+    almayın", "kamyon bekleme parası", "çatıyı beğendik montaj gününü sonra konuşuruz", "ekip gelsin ona göre malzeme gönderin",
+    "zemin için montaj ekibi baksın", "usta yerinde değiştirir", "saat kaçtan itibaren gelirsiniz?", "teslim tarihini gün içinde
+    müşteriye sorarız" açık seçimi soruya çevirmez: r02 PA-06-K."""
+    s, _ = _cati_seti(tmp_path)
+    k = s.yaz(metin, niyet="diger")
+    assert k.eylem == "is_emri" and k.revizyon == 2 and k.is_emri["talep"]["kaynak"] == "PA06K", k.mesaj
+
+
+
+@pytest.mark.parametrize("metin", [
+    "1 olsun, ertelemeyin", "1 olsun, bekletme", "1 olsun, bekletme hemen gönder"])
+def test_hakem41_olumlu_soz_onay(tmp_path, metin):
+    """Tur 41: evin çatısının ivedi açık sözü ("1 olsun, bekletme", "bekletme hemen gönder", "ertelemeyin") onaydır: r01 onaylanır."""
+    s, _ = _cati_seti(tmp_path)
+    k = s.yaz(metin, niyet="diger")
+    assert k.gerekce == K.PLAN_ONAYI and k.revizyon == 1, k.mesaj
