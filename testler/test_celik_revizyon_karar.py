@@ -1690,3 +1690,34 @@ def test_hakem37_celik_olumlu_soz_onay(s, metin):
     cati_seti(s)
     k = s.yaz(metin)
     assert k.gerekce == K.PLAN_ONAYI and k.revizyon == 1, k.mesaj
+
+
+
+@pytest.mark.parametrize("metin", [
+    "Ç8801 olsun, müşteri gelsin kabul ederiz", "Ç8801 olsun, kabul ederiz müşteriye sorun", "K olsun, müşteri gelsin kabul ederiz",
+    "Ç8801 olsun, müşteri istedi bence de olur emin olalım", "K olsun, müşteri istedi bence de olur önce fiyat alalım",
+    "Ç8801 olsun, bakalım nakliye ücreti dahil montajlı ne kadar?", "Ç8801 olsun, bakalım kaça gelir?",
+    "K olsun, bakalım nakliye fiyatı dahil montaj dahil ne kadar?", "K olsun, fiyat konusunu montajla beraber konuşuruz",
+    "Ç8801 olsun fiyatı montajı sonra konuşuruz", "Ç8801 olsun, montaj ekibi gelsin, yarın kesinleşir",
+    "Ç8801 olsun, usta baksın, yarın kesinleşir", "K olsun, usta baksın, yarın kesinleşir",
+    "Ç8801 olsun müşteri onayladı bence de olur emin olalım", "Ç8801 olsun, ikincisi de olur kabul ederiz",
+    "K olsun, müşteriye sorun kabul ederiz", "Ç8801 olsun, müşteri gelsin onaylarız",
+    "Ç8801 olsun, bakalım nakliye ücreti dahil anahtar teslim ne kadar?", "K olsun, fiyatı detayları sonra konuşuruz",
+    "K olsun, montaj ekibi gelsin, yarın kesinleşir", "K olsun, usta yarın bakacak, kesinleşir",
+    "K olsun, fiyatı ödeme şeklini sonra konuşuruz"])
+def test_hakem38_celik_kararsiz_soz_kaydedilmez(s, metin):
+    """Tur 38 çelikte: "müşteri gelsin kabul ederiz", "kabul ederiz müşteriye sorun", "ikincisi de olur kabul ederiz" kayıt almaz:
+    plan r01, onay yok, r02 yok."""
+    cati_seti(s)
+    k = s.yaz(metin)
+    assert K.PLAN_ONAYI not in k.gerekce and k.eylem != "is_emri" and s.plan["revizyon"] == 1 and not s.k.d.get("onaylanan"), k.mesaj
+
+
+
+@pytest.mark.parametrize("metin", [
+    "K olsun, bakalım m2 kaç?", "K olsun, sorun yok kabul ederiz"])
+def test_hakem38_celik_acik_secim_soruya_donmez(s, metin):
+    """Tur 38 çelikte: "K olsun, sorun yok kabul ederiz" r02 K'yı çizer."""
+    cati_seti(s)
+    k = s.yaz(metin)
+    assert k.eylem == "is_emri" and k.revizyon == 2 and s.plan["yapi"]["kod"] == "Ç8801K", k.mesaj
