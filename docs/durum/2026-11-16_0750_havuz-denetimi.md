@@ -9,9 +9,8 @@
 - **Kayıt kapısı (D-112, BK-47; Lokman 08:07:06 kartı "Evet, hatalı yeni ev girmesin"):** `aday_kaydet.py` (prefabrik, çelik) ve
   `cati_varyanti_kaydet.py` havuza yeni ev yazmadan denetimi koşar; hata sınıfı (HD-01, 03, 04, 05, 08, 10) kaydı durdurur, uyarı
   kayda yazılır. Var olan 20 ev havuzda kalır. Test 11 (`testler/test_havuz_denetimi.py`).
-- **HD-11 (16 Kasım ~08:40, koordinatörün 08:18 notu):** çelik tanımın çatı kaplaması ↔ gerçek projenin teknik özellikleri (bilgi,
-  kapıya girmez). Dört ev farklı: KT-07 (sandviç ↔ OSB + metal kiremit), KT-11 (tek kat ↔ OSB + shingle), KT-12 ve KT-13 (tek kat ↔
-  OSB + metal kiremit). Hangisi esas (gerçek proje mi, D-87 standardı tek kat panel mi) Lokman'ın kararı; tanım ondan önce değişmez.
+- **HD-11 (16 Kasım; koordinatörün 08:18 notu, Lokman 08:27:26 kartı "Standart: tek kat panel"):** çelik havuz evi standart
+  kaplamayla (tek kat panel) çizilir; denetim uyarı verir. Standart dışı 10 ev (KT-01…KT-10 sandviç panel). Değişiklik ayrı bakım sohbetinde.
 - **Durum:** Yerelde çalışıyor; PR #249 Ready, doğrulama bekleniyor. Birleştirmeyi Lokman yapar.
-- **Sıradaki:** PR yeşilde bağlantı Lokman'a; kaplama kararı; sorunlar Motor bakım sohbetlerinde (BK-45 liste, BK-46 3D). Açık soru:
+- **Sıradaki:** PR yeşilde bağlantı Lokman'a; 10 çelik evin standart kaplaması bakım sohbetinde; sorunlar Motor bakım sohbetlerinde (BK-45 liste, BK-46 3D). Açık soru:
   2019–2020 paftalarında saçak 25 cm.

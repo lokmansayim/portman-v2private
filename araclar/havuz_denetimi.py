@@ -18,8 +18,8 @@ Kalemler:
   HD-09  Listede makası olan her çatı parçası 3D modelde de makaslı                (uyarı)
   HD-10  3D modelin ana çatısı İş Emri'nin çatı biçiminde (kırma çatı 3D'de kırma) (hata)
   HD-07  Makas sayısı gerçek projenin kartıyla (yalnız --kart-klasoru verilirse; fark D-44 gibi bilinen bir kuraldan olabilir)  (bilgi)
-  HD-11  Çelik: tanımın çatı kaplaması gerçek projenin teknik özelliklerindeki kaplamayla (`teknik_ozellikler["Çatı kaplaması"]`)  (bilgi:
-         D-87 havuz şablonuna müşterinin seçimini almaz, çelikte standart tek kat panel; Lokman 4 Ekim 2026; hangisi esas, Lokman'ın kararı)
+  HD-11  Çelik: havuz evi standart çatı kaplamasıyla çizilir (kitabın baz paketi, tek kat panel; Lokman 16 Kasım 2026 08:27:26 kartı
+         "Standart: tek kat panel": havuzdaki her çelik ev tek kat panelle çizilir, bayi kaplamayı formda seçer)   (uyarı)
 
 Kullanım:
   python -m araclar.havuz_denetimi [--kart-klasoru <Proje_Karti>] [--json <çıktı.json>] [--md <çıktı.md>]
@@ -53,9 +53,9 @@ KALEMLER = {
     "HD-09": "Listedeki her makaslı çatı parçası 3D'de de makaslı",
     "HD-10": "3D'deki ana çatı İş Emri'nin çatı biçiminde",
     "HD-07": "Makas sayısı gerçek projenin kartıyla",
-    "HD-11": "Çatı kaplaması gerçek projeninkiyle",
+    "HD-11": "Çelik ev standart çatı kaplamasıyla",
 }
-SINIF = {"HD-01": "hata", "HD-02": "uyari", "HD-03": "hata", "HD-04": "hata", "HD-05": "hata", "HD-06": "uyari", "HD-08": "hata", "HD-09": "uyari", "HD-10": "hata", "HD-07": "bilgi", "HD-11": "bilgi"}
+SINIF = {"HD-01": "hata", "HD-02": "uyari", "HD-03": "hata", "HD-04": "hata", "HD-05": "hata", "HD-06": "uyari", "HD-08": "hata", "HD-09": "uyari", "HD-10": "hata", "HD-07": "bilgi", "HD-11": "uyari"}
 # Motor'a göre denetlenen kalemler; tablo ötekilere "–" yazar.
 DENETLENEN = {"prefabrik": {"HD-01", "HD-02", "HD-03", "HD-04", "HD-05", "HD-06", "HD-07", "HD-08", "HD-09", "HD-10"},
               "genel": {"HD-01", "HD-02", "HD-03", "HD-04", "HD-05", "HD-11"}}
@@ -279,38 +279,17 @@ def denetle_genel(tanim: Path) -> dict:
     return r
 
 
-def kaplama_anahtari(metin: str) -> str | None:
-    """Gerçek projenin teknik özelliklerindeki çatı kaplaması yazısını kitabın anahtarına çevirir (okunamazsa None)."""
-    m = metin.lower()
-    if "shingle" in m:
-        return "osb_shingle"
-    if "kiremit" in m:
-        return "osb_kiremit"
-    if "trapez" in m:
-        return "osb_trapez" if "osb" in m else "trapez_sac"
-    if "sandvi" in m:
-        return "sandvic_panel"
-    if "tek kat" in m:
-        return "tek_kat_panel"
-    return None
-
-
 def kaplama_bulgusu(t: dict) -> list[dict]:
-    """HD-11: tanımın çizdiği çatı kaplaması (`cati.kaplama`, yoksa kitabın baz paketi) gerçek projenin kaplamasıyla aynı mı.
-    Gerçek projenin kaplaması tanımda yazmıyorsa (ör. Ç8801 ailesi) denetlenmez."""
-    gercek = (t.get("teknik_ozellikler") or {}).get("Çatı kaplaması")
-    if not gercek:
-        return []
+    """HD-11: tanımın çizdiği çatı kaplaması (`cati.kaplama`, yoksa kitabın baz paketi) havuzun standardı mı (Lokman, 16 Kasım 2026
+    08:27:26 kartı "Standart: tek kat panel"). Gerçek projenin kaplaması bilgi olarak yazılır."""
     from motor.genel.girdi_genel import KAPLAMA_ADI
     baz = json.loads((KOK / "kurallar" / "liste" / "kurallar.json").read_text(encoding="utf-8"))["baz_paket_cati_kaplamasi"]["deger"]
     tanim = (t.get("cati") or {}).get("kaplama") or baz
-    g = kaplama_anahtari(gercek)
-    if g == tanim:
+    if tanim == baz:
         return []
-    ad = KAPLAMA_ADI.get(tanim, tanim) + (" (çelik standardı)" if tanim == baz else "")
-    if g is None:
-        return [_b("HD-11", f"gerçek projenin kaplaması okunamadı: \"{gercek}\"; tanım {ad} çiziyor")]
-    return [_b("HD-11", f"tanım {ad} çiziyor; gerçek projede \"{gercek}\"")]
+    gercek = (t.get("teknik_ozellikler") or {}).get("Çatı kaplaması")
+    return [_b("HD-11", f"tanım {KAPLAMA_ADI.get(tanim, tanim)} çiziyor; havuz standardı {KAPLAMA_ADI.get(baz, baz)}"
+                        + (f" (gerçek projede \"{gercek}\")" if gercek else ""))]
 
 
 # ---------------------------------------------------------------- kayıt kapısı (D-112)
@@ -322,7 +301,7 @@ def havuza_mi(havuz: bool, durum: str, test_dosyasi: bool = False) -> bool:
 
 def kayit_kapisi(r: dict) -> tuple[list[str], list[str]]:
     """D-112 (Lokman, 16 Kasım 2026 08:07:06 kartı "Evet, hatalı yeni ev girmesin"): (kaydı durduran hata bulguları, kayda yazılan
-    uyarılar). Hata sınıfı: HD-01, HD-03, HD-04, HD-05, HD-08, HD-10; uyarı: HD-02, HD-06, HD-09; bilgi (HD-07, HD-11) kapıya girmez."""
+    uyarılar). Hata sınıfı: HD-01, HD-03, HD-04, HD-05, HD-08, HD-10; uyarı: HD-02, HD-06, HD-09, HD-11; bilgi (HD-07) kapıya girmez."""
     dur = [f"{b['kalem']} {KALEMLER[b['kalem']]}: {b['metin']}" for b in r["bulgular"] if b["sinif"] == "hata"]
     uyari = [f"{b['kalem']}: {b['metin']}" for b in r["bulgular"] if b["sinif"] == "uyari"]
     return dur, uyari
