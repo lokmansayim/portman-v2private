@@ -1,0 +1,61 @@
+{
+ "taban": "PA43",
+ "cati_adi": "Beşik; verandada panel çatı",
+ "cati_gorsel": "adaylar/PA43_cati.png",
+ "karar": "D-111",
+ "varyantlar": [
+  {
+   "kod": "PA43B",
+   "gosterim": "PA-43-B",
+   "durum": "gecerli",
+   "taban": "PA43",
+   "sablon": "adaylar/PA43B.json",
+   "gorsel": "adaylar/PA43B.png",
+   "cati_adi": "Beşik; verandada beşik çatı",
+   "referans_model": "PA-43-B",
+   "yapi_turu": "prefabrik",
+   "kat": 1,
+   "oda_programi": "3+1",
+   "katalog_m2": 92.0,
+   "kapali_m2": 82.7,
+   "veranda_m2": 9.06,
+   "ozet": {
+    "grid": {
+     "x_pano": 7.0,
+     "y_pano": 7.5
+    },
+    "dis_olcu_cm": [
+     860.0,
+     961.25
+    ],
+    "brut_m2": 91.73,
+    "pano": 58,
+    "pencere": 7,
+    "kapi": 7,
+    "odalar": {
+     "Y.ODASI": 11.45,
+     "WC": 4.43,
+     "Y.ODASI 2": 10.6,
+     "HOL": 9.31,
+     "Y.ODASI 3": 9.56,
+     "SALON": 23.23,
+     "MUTFAK": 8.62,
+     "VERANDA": 9.06
+    }
+   },
+   "uyarilar": [],
+   "kaynak": {
+    "metin": "Lokman 16 Kasım 2026 08:08:55 UTC: \"92 m² ninkide ikiside doğru yani 2 veranda çatı modeli üretime uygun sorun yok 92 m² nin ikisinide al\" (D-111)",
+    "karar": "D-111",
+    "ev": "PA-43",
+    "havuz_denetimi": {
+     "sonuc": "geçti",
+     "karar": "D-112",
+     "uyarilar": [
+      "HD-09: veranda çatısı: listede 3 makas, 3D modelde bu parçanın makası yok"
+     ]
+    }
+   }
+  }
+ ]
+}

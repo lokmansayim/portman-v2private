@@ -216,3 +216,46 @@ def test_taslak_ve_baska_baslik_kopya_degil(cizim):
     taslak = [p for p in P if p["alt_yazi"] == "taslak"]
     assert len(taslak) == 1 and not taslak[0]["kopya"] and taslak[0]["baslik_m2"] == 72.0
     assert sum(1 for p in P if p["baslik_m2"] == 72.0 and not p["kopya"]) == 3     # asıl, taslak, öteki müşteri
+
+
+def test_2020_sacak_olcusu_ve_yazisiz_dis_kapi(tmp_path):
+    """İE-43 PR-4 (disk arşivi Parti 1, 15 Kasım 2026): 2020 paftasında gövde ölçüsünün yanında saçağın ölçüsü de çizili (63 m²: 773 ve
+    823; 58 m²: 600 ve 650) ve dış kapının "Çelik" yazısı yok. Kart gövde ölçüsünü yazar, saçağınkini ayrı alanda; dış ve iç kapıyı
+    ayıramaz, yalnız kapı toplamını yazar. Teknik tablonun "Dış Kapı: Çelik Kapı" değeri plan kutusunun içinde olsa da kapı sayılmaz."""
+    d = ezdxf.new("R2018")
+    b = d.blocks.new("KAPI_YAYI")
+    b.add_arc((0, 0), 90, 0, 90)
+    m = d.modelspace()
+    W, H = 763.0, 773.0
+    m.add_lwpolyline([(0, 0), (W, 0), (W, H), (0, H)], close=True)
+    _yazi(m, f"{AD} 63 M2", 0, H + 120, 40)
+    _yazi(m, "MONTAJ VE ELEKTRİK PLANI", 150, -140, 40)
+    for t, x, y in (("Y.ODASI\\P11.46 m²", 100, 600), ("Y.ODASI\\P9.50 m²", 500, 600), ("SALON\\P25.10 m²", 300, 300),
+                    ("VERANDA\\P8.27 m²", 600, 100)):
+        m.add_mtext(t, dxfattribs={"insert": (x, y), "char_height": 12})
+    for t, x, y in (("120/120 ÇİFT AÇILIM", 200, H + 10), ("120/120 ÇİFT AÇILIM", 500, -30), ("60/40", 400, H + 10),
+                    ("Dış Kapı:", 420, 60), ("Çelik Kapı", 515, 60)):
+        _yazi(m, t, x, y)
+    m.add_arc((100, 500), 80, 0, 90)
+    m.add_arc((600, 500), 80, 90, 180)
+    m.add_blockref("KAPI_YAYI", (400, 250))
+    for p1, p2, base, aci in ((((0, H), (W, H), (0, H + 40), 0)), (((W, 0), (W, H), (W + 40, 0), 90)),
+                              (((-25, H), (W + 25, H), (0, H + 80), 0)), (((W, -25), (W, H + 25), (W + 80, 0), 90))):
+        m.add_linear_dim(base=base, p1=p1, p2=p2, angle=aci).render()
+    yol = tmp_path / "sacak.dxf"
+    d.saveas(yol)
+    P = [p for p in pafta_kart.oku(str(yol)) if p["baslik_m2"] == 63.0]
+    assert len(P) == 1
+    p, k = P[0], P[0]["kart"]
+    assert k["dis_olcu_cm"] == [W, H] and p["sacak_olcusu_cm"] == [W + 50, H + 50]
+    assert p["teknik"]["Dış Kapı"] == "Çelik Kapı"
+    assert k["dis_kapi_adedi"] is None and k["ic_kapi_adedi"] is None and k["kapi_adedi"] == 3
+
+
+def test_sacak_ayrimi_yalniz_50_cm():
+    """Saçak ölçüsü yalnız ikinci ölçüden tam 50 cm (± 0,5) büyük en büyük ölçüdür; taşan veranda ölçüsü (67 m²: 940,25 ve 700,25) ve
+    öteki farklar ayrılmaz."""
+    assert pafta_kart._sacak_ayir([823.0, 773.0, 125.5]) == ([773.0, 125.5], 823.0)
+    assert pafta_kart._sacak_ayir([940.25, 700.25]) == ([940.25, 700.25], None)
+    assert pafta_kart._sacak_ayir([823.0, 763.0]) == ([823.0, 763.0], None)
+    assert pafta_kart._sacak_ayir([773.0]) == ([773.0], None) and pafta_kart._sacak_ayir([]) == ([], None)
