@@ -49,7 +49,7 @@ LISTE = {
         ("1001", "Karkaslı kaplama duvar panosu", "100 × 1475 × 2500", None, 1),
         ("1001", "Karkaslı özel pencere panosu (100/120)", "100 × 1250 × 2500", 1, None),
         ("1002", "3'lü H 100 × 100 × 100 (dış duvar T'si)", "L 2500", 3, 4),
-        ("1002", "Çektirme U'su 100 (iç duvar)", "100 × 2440", 2, 1),
+        ("1002", "Çektirme U'su 100 (iç duvar)", "100 × 2440", 3, 2),      # D-105 madde 2 (BK-38; Lokman kartı 15 Kasım 09:14:41 "Evet, 1 adet 100'lük"): köşe direkli 100'lük dış köşede 1 çektirme U'su (iki hâlde de); fark aynı, 1 az
         ("1009", "Çelik dübel", "adet", 26, 27),
         ("1009", "Şase pul", "adet", 26, 27),
     },

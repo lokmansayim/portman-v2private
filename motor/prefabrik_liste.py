@@ -224,10 +224,11 @@ def bina_brut_cm2(plan) -> float:
 def birlesim_uclari(plan) -> tuple[dict, list[dict]]:
     """İç duvar uçlarının birleşimi (İE-27; Lokman, 3 Kasım 2026 09:52, madde 3 ve 13): iç duvarın bir duvara T ile geldiği yer pano
     ekine denk gelirse o ekte 3'lü H (dış duvarda da), panonun ortasına gelirse çektirme U'su (`t_orta`); iç duvar dış köşeye geliyorsa
-    (100'lük köşede 60'lığa geçiş, yalnız iç duvar dış duvardan inceyse; D-104) `dis_kose`, bölme kapısız serbest bitiyorsa `serbest`.
+    (100'lük köşede 60'lığa geçiş; D-104; D-105 madde 2 ile aynı kalınlıkta da, `ince` iç duvar dış duvardan inceyse) `dis_kose`, bölme
+    kapısız serbest bitiyorsa `serbest`.
     Uç uca gelen iki duvarın eki (D-29 giriş nişi: yan duvar içeride iç duvar olarak sürer, kapı duvarı orada biter) T değildir: 3'lü H'ı
     `G.uc_uca_ekler`'den sayılır (geometri hakemi). Tek kaynak (D-28 madde 1): yükleme listesi adedi, montaj rehberi yeri buradan okur.
-    Dönüş: ({dış duvar id: [3'lü H'lı T'nin ekseni]}, [{"duvar": iç duvar, "uc": 0 | 1, "tur": t_orta | dis_kose | serbest}])."""
+    Dönüş: ({dış duvar id: [3'lü H'lı T'nin ekseni]}, [{"duvar": iç duvar, "uc": 0 | 1, "tur": t_orta | dis_kose | serbest, "ince"?}])."""
     W_ = {d.id: d for d in plan.duvarlar}
     t_uclari, yerler = {}, []
     for d in plan.duvarlar:
@@ -243,8 +244,10 @@ def birlesim_uclari(plan) -> tuple[dict, list[dict]]:
                 continue
             o = W_[int(m.group(1))]
             if "köşe" in m.group(2):
-                if d.h < o.h - 1e-6:                            # 60'lığa geçiş yalnız iç duvar dış duvardan inceyse
-                    yerler.append({"duvar": d, "uc": uc, "tur": "dis_kose"})
+                # İE-27: 100'lük köşede 60'lığa geçiş. BK-38 (D-105 madde 2; Lokman, kart 15 Kasım 2026 09:14:41 "Evet, 1 adet 100'lük"):
+                # iç duvar dış duvarla aynı kalınlıktaysa da (100'lük) dış köşeye gelen iç duvara 1 çektirme U'su (paftada köşe direği +
+                # 10'luk çektirme U'su; 91 m² 3+1, 71 m² 2+1). Önce yalnız iç duvar dış duvardan inceyse sayılıyordu
+                yerler.append({"duvar": d, "uc": uc, "tur": "dis_kose", "ince": d.h < o.h - 1e-6})
                 continue
             if any(w is not d and w.yon == d.yon and abs(w.c - d.c) < 1e-6
                    and (abs(w.p1 - d.p0) < 1e-6 if uc == 0 else abs(w.p0 - d.p1) < 1e-6) for w in plan.duvarlar):
@@ -1313,9 +1316,13 @@ def liste(N: dict, kurallar: dict | None = None, pafta: dict | None = None) -> d
     if cy is not None:                                          # İE-27 (Lokman, 3 Kasım 2026 09:52, madde 13): yeri planın birleşimlerinden
         ic_e = "100'lüğe" if ic_kal >= 100 else "60'lığa"
         gecis = "100'lük köşede 60'lığa geçiş" if dk == 100 else f"{dka} köşede {ic_e} geçiş"   # BK-25: 160 / 100'de "160'lık köşede 100'lüğe"
+        gecis_yeri = f"{gecis}te"
+        if ic_kal >= dk:                                        # BK-38 (D-105 madde 2): aynı kalınlıkta geçiş yok, köşeye gelen iç duvar
+            gecis, gecis_yeri = f"{dka} köşeye gelen {dka} iç duvar", "dış köşeye gelen iç duvarda"
         ekle("1002", f"Çektirme U'su {ic_kal}" + (" (iç duvar)" if ic_kal >= 100 else ""), f"{ic_kal} × {cu_boy}", cy["t_orta"] + cy["dis_kose"] + cy["serbest"],
-             "Kural (Lokman 3.11)", f"panonun ortasına T ile gelen bölme {cy['t_orta']} + {gecis} {cy['dis_kose']} + kapısız "
-             f"serbest biten bölme {cy['serbest']}", f"3'lü H olmayan yerde duvar odalara bölünüyorsa, {gecis}te, kapısız "
+             "Kural (Lokman 3.11)",
+             f"panonun ortasına T ile gelen bölme {cy['t_orta']} + {gecis} {cy['dis_kose']} + kapısız "
+             f"serbest biten bölme {cy['serbest']}", f"3'lü H olmayan yerde duvar odalara bölünüyorsa, {gecis_yeri}, kapısız "
              "yarım kalan bölmede (İE-27)")
     else:                                                       # pafta kipi: birleşimler okunmuyor, eski kural
         ekle("1002", f"Çektirme U'su {ic_kal}" + (" (iç duvar)" if ic_kal >= 100 else ""), f"{ic_kal} × {cu_boy}", r("cektirme_u_ic"), "Kural (Portatifev)",

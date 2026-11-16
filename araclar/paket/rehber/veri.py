@@ -502,7 +502,8 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
         oda = oda_sec([(uc[0] + yon[0] * 25 + yon[1] * 25, uc[1] + yon[1] * 25 + yon[0] * 25),
                        (uc[0] + yon[0] * 25 - yon[1] * 25, uc[1] + yon[1] * 25 - yon[0] * 25)])
         ceku.append({"xy": [_r(uc[0]), _r(uc[1])], "yon": yon, "t": _r(2 * d.h), "step": ADIM_ODA[oda], "order": 99, "room": KIM[oda],
-                     "id": f"U{len(ceku) + 1}", "bu": CEKU_BU[u["tur"]]})
+                     "id": f"U{len(ceku) + 1}",
+                     "bu": CEKU_BU[u["tur"]] if u.get("ince", True) else "iç duvar köşe direğinde biter"})   # D-105 madde 2: aynı kalınlık
 
     # ---------- alt çerçeve: duvar hatları, kapı boşluklarında kesik ----------
     hat = defaultdict(list)

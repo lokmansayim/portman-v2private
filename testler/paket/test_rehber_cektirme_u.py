@@ -53,3 +53,19 @@ def test_yeri_ve_turu(rehber):
     assert {tuple(u["xy"]) for u in d["ceku"]} == EVLER[ad][3]
     for u in d["ceku"]:
         assert u["t"] == 6 and sorted(map(abs, u["yon"])) == [0, 1]      # 60'lık iç duvar; U duvar boyunca, ucun içine bakar
+
+
+def test_100luk_dis_kose(tmp_path):
+    """D-105 madde 2 (Lokman, kart 15 Kasım 2026 09:14:41 "Evet, 1 adet 100'lük"): 100'lük iç duvar dış köşeye gelince de 1 U. Rehber
+    listeyle aynı yerde, 100'lük U'yla; karttaki yazıda "dış duvardan incedir" yok. 80 m² 2+1'in iç duvarı 100'lük yapılarak denenir."""
+    from motor import kart_model, prefabrik_liste as PL
+    from araclar.paket.rehber import veri
+    ie = json.loads((VERI / "TK04_r08.json").read_text(encoding="utf-8"))
+    ie["yapi"]["duvar_kalinligi_cm"]["ic"] = 10
+    kart_model.uret(copy.deepcopy(ie), tmp_path, "TK04")
+    L = PL.is_emrinden(copy.deepcopy(ie))["satirlar"]
+    d = veri.kur(copy.deepcopy(ie), tmp_path, "TK04", L, "TK-04")
+    liste = sum(s["adet"] for s in L if s["kalem"] == "Çektirme U'su 100 (iç duvar)")
+    assert len(d["ceku"]) == liste == 2
+    assert Counter(u["bu"] for u in d["ceku"]) == Counter({T: 1, "iç duvar köşe direğinde biter": 1})
+    assert all(u["t"] == 10 for u in d["ceku"])
