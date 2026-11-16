@@ -1,0 +1,76 @@
+{
+ "kod": "PA42",
+ "gosterim": "PA-42",
+ "durum": "gecerli",
+ "sablon": "adaylar/PA42.json",
+ "gorsel": "adaylar/PA42.png",
+ "referans_model": "PA-42",
+ "yapi_turu": "prefabrik",
+ "kat": 1,
+ "oda_programi": "3+1",
+ "katalog_m2": 84.0,
+ "kapali_m2": 73.0,
+ "veranda_m2": 10.9,
+ "ozet": {
+  "grid": {
+   "x_pano": 6.5,
+   "y_pano": 8.0
+  },
+  "dis_olcu_cm": [
+   825.75,
+   1014.0
+  ],
+  "brut_m2": 83.94,
+  "pano": 50,
+  "pencere": 6,
+  "kapi": 6,
+  "odalar": {
+   "Y.ODASI": 12.2,
+   "SALON VE MUTFAK": 23.09,
+   "WC": 4.43,
+   "HOL": 5.9,
+   "VERANDA": 10.9,
+   "Y.ODASI 2": 11.08,
+   "Y.ODASI 3": 11.08
+  }
+ },
+ "kaynak": {
+  "metin": "HD-228 montaj paftasından İş Emri (İE-43, disk arşivi Parti 1; kodla okundu, ad yok). Havuz: D-111 (Lokman 16 Kasım 2026 06:50:02 kartı \"Evet, beşi girsin\"; Motor'un aks düzeniyle). Asıl uygulanmış proje: D-103.",
+  "dosya": "testler/havuz/is_emirleri/HD228.json",
+  "ayna": null,
+  "karar": "D-111",
+  "standart": true,
+  "kart_kiyasi": {
+   "kart": "HD-228",
+   "kart_sha256": "06ef777bc8e2b844df41b540e5bf99a761b5f72680b7eee694c82324b0b1c826",
+   "sonuc": "geçti",
+   "olcum": {
+    "dis_olcu_cm": [
+     825.75,
+     1014.0
+    ],
+    "acikla_olcu_cm": [
+     825.75,
+     1014.0
+    ],
+    "brut_m2": 83.94,
+    "kubbe_m2": 0.0,
+    "yatak_odasi": 3,
+    "pencereler": {
+     "120x120": 5,
+     "60x40": 1
+    },
+    "dis_kapi": 1,
+    "ic_kapi": 5,
+    "veranda": 1,
+    "kat": 1
+   }
+  },
+  "havuz_denetimi": {
+   "sonuc": "geçti",
+   "karar": "D-112",
+   "uyarilar": []
+  }
+ },
+ "not": ""
+}

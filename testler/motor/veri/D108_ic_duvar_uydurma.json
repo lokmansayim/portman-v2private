@@ -1,0 +1,149 @@
+{
+  "is_emri_no": "TEST-D108",
+  "revizyon": 1,
+  "talep": {
+    "bayi": {
+      "kod": "TEST",
+      "ad": "Test"
+    },
+    "musteri_adi": "Test",
+    "metin": "D-108 testi: uydurma 1+1. Banyonun ön duvarı ek aksta (316,75: ızgaranın 2 cm dışında); banyo ile oda arasındaki duvar arka dış duvardan köşeye gider."
+  },
+  "yapi": {
+    "sistem": "prefabrik",
+    "kat_sayisi": 1,
+    "duvar_yuksekligi_cm": 250,
+    "duvar_kalinligi_cm": {
+      "dis": 10,
+      "ic": 6.0
+    },
+    "grid": {
+      "x_pano": 4,
+      "y_pano": 4
+    },
+    "kisa_kenar": "x",
+    "giris_cephesi": "on",
+    "dis_dusey_duvar": "cevre_aks_disinda",
+    "dizilim": {
+      "baslangic": "on-sol",
+      "hiza": "izgara",
+      "kose": "oda"
+    },
+    "ek_akslar_cm": {
+      "x": [],
+      "y": [
+        316.75
+      ]
+    }
+  },
+  "mahaller": [
+    {
+      "ad": "BANYO",
+      "tur": "banyo",
+      "konum_cm": [
+        [
+          261.0,
+          316.75,
+          512.0,
+          507.0
+        ]
+      ]
+    },
+    {
+      "ad": "ODA",
+      "tur": "yatak_odasi",
+      "konum_cm": [
+        [
+          10.0,
+          316.75,
+          261.0,
+          507.0
+        ],
+        [
+          10.0,
+          256.0,
+          386.5,
+          316.75
+        ]
+      ]
+    },
+    {
+      "ad": "SALON",
+      "tur": "salon",
+      "konum_cm": [
+        [
+          10.0,
+          5.0,
+          512.0,
+          256.0
+        ],
+        [
+          386.5,
+          256.0,
+          512.0,
+          316.75
+        ]
+      ]
+    }
+  ],
+  "acik_sinirlar": [],
+  "acikliklar": [
+    {
+      "tur": "dis_kapi",
+      "olcu": 90,
+      "arasi": [
+        "__DIS__",
+        "SALON"
+      ],
+      "duvar": "on",
+      "pano": 1
+    },
+    {
+      "tur": "ic_kapi",
+      "olcu": 82,
+      "arasi": [
+        "SALON",
+        "ODA"
+      ],
+      "pano": 0
+    },
+    {
+      "tur": "ic_kapi",
+      "olcu": 82,
+      "arasi": [
+        "SALON",
+        "BANYO"
+      ],
+      "pano": 0
+    },
+    {
+      "tur": "pencere",
+      "olcu": "120x120",
+      "mahal": "ODA",
+      "duvar": "sol",
+      "pano": 1
+    },
+    {
+      "tur": "pencere",
+      "olcu": "60x40",
+      "mahal": "BANYO",
+      "duvar": "arka",
+      "pano": 0
+    }
+  ],
+  "cati": {
+    "tip": "besik",
+    "egim_yuzde": 32.9,
+    "sacak_cm": 30,
+    "topuk_cm": 10,
+    "makas_yonu": "kisa_kenar"
+  },
+  "cikti": {
+    "pdf": true,
+    "dxf": true,
+    "pafta": "A2",
+    "icerik": [
+      "aksli_plan"
+    ]
+  }
+}
