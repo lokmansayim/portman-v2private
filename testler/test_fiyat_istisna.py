@@ -1,0 +1,102 @@
+"""D-120 · ayın istisnası (Lokman 16 Kasım 2026 21:13:11 UTC kartı "Bu ay istisna"): CRM'in fiyat vermediği yere Lokman'ın listesinden
+fiyat. CRM fiyatı ezilmez; dosya kendi ayının dışında kullanılmaz; `fiyatla.defter_sec` (M-15) değişmez. D-119 çeyrek boy kuralı kutu
+profilde istisna fiyatıyla da işler."""
+from __future__ import annotations
+
+import copy
+import datetime
+import json
+import sys
+from pathlib import Path
+
+import pytest
+
+KOK = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(KOK))
+sys.path.insert(0, str(KOK / "testler"))
+
+from araclar import crm_fiyat as C  # noqa: E402
+from araclar import fiyatla as F  # noqa: E402
+from test_crm_fiyat import sahte_anlik  # noqa: E402
+
+ISTISNA = KOK / "kurallar" / "fiyat" / "istisna" / "2026-11_bayi_listesi.json"
+GUN = datetime.date(2026, 11, 16)
+PENCERE = "PVC pencere | 120/120"
+VASISTASLI = "100'lük yapıştırma dolu vasistaslı pano (60/40) | 100 × 1250 × 2500"
+
+
+@pytest.fixture(scope="module")
+def E():
+    return C.oku(C.ESLEME)
+
+
+@pytest.fixture(scope="module")
+def A0(E):
+    """Sahte anlık görüntü; kutu profil kodları (MA11, MA12) bugünkü CRM gibi 0 TL."""
+    A = sahte_anlik(E)
+    for x in A["data"]:
+        if x["urunkodu"] in ("MA11", "MA12"):
+            x["fiyat"] = 0
+    return C.denetle(A)
+
+
+@pytest.fixture(scope="module")
+def I():
+    return C.istisna_oku(ISTISNA, GUN)
+
+
+def test_dosya_kendi_ayinda(I):
+    assert I["karar"] == "D-120" and I["gecerli"] == {"bas": "2026-11-01", "bit": "2026-11-30"}
+    for gun in (datetime.date(2026, 10, 31), datetime.date(2026, 12, 1)):
+        with pytest.raises(C.CrmHatasi, match="yalnız CRM"):
+            C.istisna_oku(ISTISNA, gun)
+
+
+def test_istisna_yalniz_crm_fiyati_olmayan_yerde(A0, E, I):
+    D0 = C.defter_uret(A0, E)
+    D = C.istisnali_defter(A0, I, E)
+    P0, P = D0["hatlar"]["prefabrik"]["kalemler"], D["hatlar"]["prefabrik"]["kalemler"]
+    for k in (PENCERE, VASISTASLI, "Kutu profil (kiriş) 100 × 100 | L 3760"):
+        assert P0[k]["fiyat"] is None, k
+    g = P["Kutu profil (kiriş) 100 × 100 | L 3760"]                 # 2.892,25 × 3/4 (D-119), tam TL
+    assert (g["fiyat"], g["kaynak"], g["onay"], g["durum"], g["istisna"]) == (2169.0, "ISTISNA", True, "Lokman istisnası", "D-120")
+    assert P["Özel kutu profil (kolon) 100 × 100 | L 2500"]["fiyat"] == 1446.0
+    assert (P[PENCERE]["fiyat"], P[PENCERE]["kaynak"], P[PENCERE]["kdv"]) == (6500.0, "ISTISNA", 0.2)
+    assert (P[VASISTASLI]["fiyat"], P[VASISTASLI]["kdv"], P[VASISTASLI]["kdv_grubu"]) == (2483.81, 0.2, "Yapıştırma pano")
+    for k, g in P.items():                                         # CRM'in verdiği her fiyat aynen
+        if P0[k]["fiyat"] is not None:
+            assert (g["fiyat"], g["kaynak"]) == (P0[k]["fiyat"], P0[k]["kaynak"]), k
+    assert D["istisna"]["kod"] == ["MA11", "MA12"] and D["istisna"]["crm_fiyatli_kod"] == []
+    assert "ISTISNA" in D["kaynaklar"] and D["surum"].endswith("+ istisna D-120")
+
+
+def test_crm_fiyati_varsa_istisna_uygulanmaz(E, I):
+    A = C.denetle(sahte_anlik(E))                                  # MA11, MA12 fiyatlı
+    J = copy.deepcopy(I)
+    D0, D = C.defter_uret(A, E), C.istisnali_defter(A, J, E)
+    k = "Kutu profil (kiriş) 100 × 100 | L 3760"
+    assert D["hatlar"]["prefabrik"]["kalemler"][k] == D0["hatlar"]["prefabrik"]["kalemler"][k]
+    assert D["istisna"]["kod"] == [] and D["istisna"]["crm_fiyatli_kod"] == ["MA11", "MA12"]
+    D0p = copy.deepcopy(D0)                                        # kalem CRM'de fiyatlıysa da ezilmez
+    J["kalemler"]["prefabrik"]["100'lük yapıştırma dolu pano | 100 × 1250 × 2500"] = {"fiyat": 1.0, "birim": "adet", "dayanak": "deneme"}
+    D = C.istisnali_defter(A, J, E)
+    assert D["hatlar"]["prefabrik"]["kalemler"]["100'lük yapıştırma dolu pano | 100 × 1250 × 2500"] == \
+        D0p["hatlar"]["prefabrik"]["kalemler"]["100'lük yapıştırma dolu pano | 100 × 1250 × 2500"]
+    assert D["istisna"]["crm_fiyatli_kalem"] == ["prefabrik › 100'lük yapıştırma dolu pano | 100 × 1250 × 2500"]
+
+
+def test_bicim_denetimi(tmp_path, I):
+    for bozuk in ({"karar": None}, {"gecerli": {"bas": "2026-11-01"}}, {"kod_fiyatlari": {"MA11": {"fiyat": 0, "dayanak": "x"}}},
+                  {"kalemler": {"prefabrik": {PENCERE: {"fiyat": 1, "birim": "adet"}}}},
+                  {"kalemler": {"prefabrik": {PENCERE: {"fiyat": 1, "birim": "adet", "dayanak": "x", "kdv_grubu": "yok"}}}}):
+        p = tmp_path / "b.json"
+        p.write_text(json.dumps(dict(I, **bozuk), ensure_ascii=False), encoding="utf-8")
+        with pytest.raises(C.CrmHatasi):
+            C.istisna_oku(p, GUN)
+
+
+def test_istisna_defterle_verilmez_ve_crm_ister(tmp_path):
+    with pytest.raises(SystemExit, match="--crm"):
+        F.istisnali_defter_sec(None, ISTISNA, GUN)
+    with pytest.raises(SystemExit):
+        F.main([str(tmp_path / "liste.json"), "--defter", "x.json", "--istisna", str(ISTISNA)])
