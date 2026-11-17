@@ -220,9 +220,9 @@ def test_veranda_listesi():
     assert [f.startswith("taşan verandanın dış kenarı") for f in formul] == [True, False, False, True, False, False]
     assert sat("Yavru makas · ön veranda çatısı") == [("L 4460", 3)] and sat("Yavru makas · arka veranda çatısı") == [("L 3210", 2)]
     assert sat("Metal dere") == [("L 4000", 7)]
-    assert L["ozet"]["satir"] == 125
+    assert L["ozet"]["satir"] == 124                    # D-122: şase pul satırı yok (önce 125)
     N["ozellikler"]["Tavan"] = "Ters"
-    assert PL.liste(N)["ozet"]["satir"] == 123
+    assert PL.liste(N)["ozet"]["satir"] == 122          # D-122: şase pul satırı yok (önce 123)
 
 
 def test_verandasiz_ayni():

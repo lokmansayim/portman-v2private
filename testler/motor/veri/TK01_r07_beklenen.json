@@ -2356,13 +2356,13 @@
    },
    {
     "grup": "1002",
-    "kalem": "Özel pencere karkası (120×120) (100'lük çektirme U'su + 100'lük H geçen)",
+    "kalem": "Pencere kör kasası (120×120)",
     "olcu": "1200 × 1200",
     "adet": 2
    },
    {
     "grup": "1002",
-    "kalem": "Özel pencere karkası (120×180) (100'lük çektirme U'su + 100'lük H geçen)",
+    "kalem": "Pencere kör kasası (120×180)",
     "olcu": "1200 × 1800",
     "adet": 4
    },
@@ -2767,12 +2767,6 @@
     "kalem": "Acil müdahale kapağı",
     "olcu": "adet",
     "adet": 1
-   },
-   {
-    "grup": "1009",
-    "kalem": "Şase pul",
-    "olcu": "adet",
-    "adet": 26
    },
    {
     "grup": "1009",
