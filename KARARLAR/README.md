@@ -138,6 +138,7 @@ Biçim: karar · gerekçe · reddedilen seçenekler · geri alma yolu · kim ve 
 | [D-115](D-115.md) | Havuz evlerinin hazır 9 çatı seçeneği havuzda (İE-44): PA-08-C, PA-11-B, PA-14-B, PA-19-C, PA-24-C, PA-25-C, PA-31-B, PA-33-C, PA-34-C (C beşik + salonda çıkıntısız cumba, B beşik; D-83 kuralı); her biri Motor doğrulamasından ve havuz denetiminden (D-112) geçti, sonucu kaydın `kaynak.havuz_denetimi`'nde; denetimi bekleyen 16 seçenek BK-45/BK-46 birleşince aynı sayfayla yeniden Lokman'a gelir; çizilemeyen 51 girmez | 16.11 (Lokman kartı 08:46:30 "9'u girsin, bekleyenler size gelsin") |
 | [D-118](D-118.md) | Prefabrikte standart yükseklik 2,50 m (pano 2500 mm, lento 50 cm); İş Emri yazmazsa Motor, yükleme listesi, talep formu ve teklif formu 2,50 alır; 2,80 ve 3,00 m yalnız yazılırsa (D-14); havuzda 44 prefabrikten 43'ü 2,50, 1'i 2,80 (143 m², aynen kalır, D-103); hiçbir çıktı değişmez; mühür M-19 | 16.11 (Lokman 20:58:27 "kesin kural bunu mühürle 2,50 m") |
 | [D-121](D-121.md) | Makas aksı kaymaz (saçak duvarında ek tam ya da yarım aksta; hakem HD-12, uyarı); makasa dik dış duvarda tek panoluk pencere odanın duvar parçasının tam ortasında, yan 125,5'i aşarsa 125,5 pencere yanında, kalan uçta; yalnız yeni çizilen evler (`dizilim.dik_duvar_pencere: tam_orta`); çizime yeni aks çıkmaz; kırma çatıda ve ortadaki T'li odada kural yok (V6, V7); BK-52, PC-46 | 16.11 (Lokman 20:56:44; kartlar 21:14:20, 21:15:33, 21:36:53, 21:38:12, 21:44:20) |
+| [D-123](D-123.md) | 85 m² katalog evi (P8501 r05): ana makaslar cumba makasının arkasında biter, kampanyalı ev gibi (D-53); ön-sol köşe kampanyalı evin rehberindeki gibi; plan aynı; BK-54 | 17.11 (Lokman 08:27:29) |
 | [D-124](D-124.md) | Çizim okumada dış kapı bayi çiziminde nerede çiziliyse orada: içeride çizili ve önü cephe duvarsızsa önü açık giriş nişi (GİRİŞ, gövdedeki açık mahal; TK-01 r06 gibi), kapı nişle iç oda arasında; cephede çiziliyse cephede (ANTRE bugünkü gibi); çelikte niş çizilmez; BK-55 | 17.11 (Lokman 08:33:02 yorum; kart 08:37:52 "Çizimde nasılsa öyle") |
 
 ## Numara defteri (14 Ekim 2026, BK-08; CIO planı › Görev 3)
@@ -328,8 +329,9 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | BK | BK-43 | (başka sohbet: CI doğrulamasında pytest dosya dosya parçalara bölünür; gece bakım işi) | alındı (16.11) |
 | BK | BK-44 … BK-51 | (başka sohbetler; numara defteri) | alındı (16.11) |
 | BK | BK-52 | Pano Motor'unda makas aksı kaymaz, makasa dik duvarda pencere tam ortada (anahtar `dizilim.dik_duvar_pencere`; hakem HD-12) (D-121, PC-46; `claude/project-thread-qnrohi`) | yazıldı (16.11) |
+| BK | BK-54 | Montaj rehberi ön-sol köşeden dizilen evi kurar; 85 m² katalog evi rehberi (D-123; `claude/project-thread-xmignz`) | yazıldı (17.11) |
 | BK | BK-55 | Çizim okumada önü açık giriş nişi (`beyin/gorsel_okuma.py`, işlev `giris`) (D-124; `claude/project-thread-mjv1ao`) | yazıldı (17.11) |
-| BK | **BK-56** | — | **sıradaki boş** (BK-53, BK-54 başka sohbetlerde alındı; numara defteri) |
+| BK | **BK-56** | — | **sıradaki boş** (BK-53 başka sohbette alındı; numara defteri) |
 
 ## 27 Eylülde Lokman'ın verdiği kararlar
 

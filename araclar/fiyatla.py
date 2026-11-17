@@ -84,6 +84,29 @@ def anahtar(s: dict, hat: str) -> str:
     return f"{s['kalem']} | {s['boyut'] if hat == 'celik' else s['olcu']}"
 
 
+_KOR_KASA = re.compile(r"^Pencere kör kasası \((\d+)×(\d+)\)(?: \((\d+'l[ıü]k)\))? \| (.*)$")
+
+
+def eski_anahtar(k: str) -> str | None:
+    """D-122 (BK-51): "Pencere kör kasası (EN×BOY)" satırının eski adıyla anahtarı. Defterler ve CRM eşlemesi (`crm_esleme.json`, son elle
+    defterin anahtarlarıyla aynı sırada; `test_crm_fiyat`) kalemi "Özel pencere karkası (EN×BOY) (100'lük çektirme U'su + 100'lük H geçen)"
+    adıyla tutar; yeni liste onları bu adla bulur."""
+    m = _KOR_KASA.match(k)
+    if not m:
+        return None
+    en, boy, kal, olcu = m.group(1), m.group(2), m.group(3) or "100'lük", m.group(4)
+    return f"Özel pencere karkası ({en}×{boy}) ({kal} çektirme U'su + {kal} H geçen) | {olcu}"
+
+
+def kalem_kaydi(kalemler: dict, s: dict, hat: str) -> dict | None:
+    """Satırın defterdeki kaydı: önce bugünkü adla, yoksa eski adla (D-122)."""
+    k = anahtar(s, hat)
+    g = kalemler.get(k)
+    if g is None and (e := eski_anahtar(k)):
+        g = kalemler.get(e)
+    return g
+
+
 def _sayilar(olcu: str) -> list[float]:
     return [float(x.replace(",", ".")) for x in re.findall(r"\d+(?:[.,]\d+)?", olcu or "")]
 
@@ -181,7 +204,7 @@ def fiyatla(L: dict, defter: dict, hat: str | None = None, oneri: bool = False) 
         if s.get("kalem") in atla:
             continue
         k = anahtar(s, hat)
-        g = kalemler.get(k)
+        g = kalem_kaydi(kalemler, s, hat)
         fiyat = tutar = oneri_fiyat = kayit = None
         durum, kaynak, birim = "fiyat yok", None, (g or {}).get("birim") or s.get("birim")
         if g is not None:                                          # defterde kaydı olan anahtar kendi kaydıyla; banda düşmez

@@ -89,8 +89,11 @@ def oda_sirasi(odalar: list[dict], baslangic: dict) -> tuple[list[str], dict[str
 
     Önce arka duvara değen odalar soldan sağa, sonra sağ duvara değenler arkadan öne, ön duvara değenler sağdan sola, sol duvara değenler
     önden arkaya, en son hiçbir dış kenara değmeyenler. Bir oda bir yana değer: o yanda, kenarına dik izdüşümü örtüşen başka oda yoksa."""
-    if baslangic != {"x": "min", "y": "max"}:
-        raise Desteklenmiyor(f"dizilim başlangıcı {baslangic}; rehber yalnız arka-sol köşeden dizer")
+    if baslangic not in ({"x": "min", "y": "max"}, {"x": "min", "y": "min"}):
+        raise Desteklenmiyor(f"dizilim başlangıcı {baslangic}; rehber yalnız arka-sol ve ön-sol köşeden dizer")
+    if baslangic["y"] == "min":                 # ön-sol (Motor'un varsayılanı): planın y'si aynalanır, sıra aynı kuralla (ön duvar soldan sağa, sağ
+        ayna = [dict(o, poligon=[[q[0], -q[1]] for q in o["poligon"]]) for o in odalar]   # duvar önden arkaya, arka sağdan sola, sol arkadan öne)
+        return oda_sirasi(ayna, {"x": "min", "y": "max"})
     kapali = [o for o in odalar if not o.get("acik")]
     adlar = {o["ad"] for o in kapali}
     birles = {"ANTRE": "HOL"} if {"ANTRE", "HOL"} <= adlar else {}
@@ -484,7 +487,8 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
     # Oda içinde sıra: dizilimin başladığı köşeden (odanın arka-sol köşesi) uzaklık; köşe direği aynı yerdeki panodan önce
     for ad, lst in oge.items():
         pol = [q for a in [ad] + [b for b, h in BIRLES.items() if h == ad] for q in POLY[a]["poligon"]]
-        bx, by = min(q[0] for q in pol), max(q[1] for q in pol)
+        bx = min(q[0] for q in pol)
+        by = min(q[1] for q in pol) if SAYIM["yerlesim"]["baslangic"].get("y") == "min" else max(q[1] for q in pol)
         lst.sort(key=lambda t: (round(math.hypot(t[0][0] - bx, t[0][1] - by), 1), t[1]))
         for j, (_, tur, k) in enumerate(lst):
             k["order"] = j + 0.4 if tur == 0 else j
@@ -1202,7 +1206,7 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
         key = f"{en}/{by}"
         kod_ = KK.get(A["kod"])
         vas = en <= 60 and by <= 60
-        karkas = bool(satirlar(f"Özel pencere karkası ({en}×{by})"))
+        karkas = bool(satirlar(f"Pencere kör kasası ({en}×{by})"))   # D-122: önce "Özel pencere karkası"
         pencere[key] = {"kod": kod_, "ad": None if kod_ else f"PVC {'vasistas' if vas else 'pencere'} {key}",
                         "liste": ls("PVC vasistas" if vas else "PVC pencere", key, ad=f"PVC {'vasistas' if vas else 'pencere'}"),
                         "tip": "vasistas" if vas else "acilir", "karkas": karkas}
@@ -1248,7 +1252,7 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
             t.append(f"{c['pdis']} dış pano (100'lük{', ' + str(c['pen']) + ' pencereli' if c['pen'] else ''})")
         if c["pic"]:
             t.append(f"{c['pic']} iç pano ({IC_KAL})")
-        s = ("Dizilim bu odanın arka sol köşesinden başlar. " if ilk else "") + \
+        s = (f"Dizilim bu odanın {'ön' if SAYIM['yerlesim']['baslangic'].get('y') == 'min' else 'arka'} sol köşesinden başlar. " if ilk else "") + \
             ("Bu odayla " + ", ".join(t) + " kurulur" if t else "Bu odanın duvarları önceki odalarla kuruldu")
         if c["kap"]:
             s += f"; {c['kap']} pano kapılı"
@@ -1287,7 +1291,7 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
         "ic_kapi_boslugu": "Kapı boşluğu 82 × 200 (kasalı)",
         "dvr_kaynak": "—",
         "ozel_h_liste": "—",
-        "dubel_ad": "Çelik dübel", "dubel_liste": f"{ls('Çelik dübel')} (dübelli H adedi kadar) + {ls('Şase pul', ad='şase pul')}",
+        "dubel_ad": "Çelik dübel", "dubel_liste": f"{ls('Çelik dübel')} (dübelli H adedi kadar)" + (f" + {ls('Şase pul', ad='şase pul')}" if satirlar("Şase pul") else ""),   # D-122: şase pul listede yok
         "ceku_liste": ls(f"Çektirme U'su {IC_MM} (iç duvar)") if satirlar(f"Çektirme U'su {IC_MM} (iç duvar)") else ls(f"Çektirme U'su {IC_MM}"),
         "omega_liste": {"sacak": ls("100'lük saçak omegası"), "duvar": ls("100'lük duvar omegası"), "bas": ls("Baş makas omegası"),
                         "ic": ls("60'lık duvar omegası") if satirlar("60'lık duvar omegası") else ls("60'lık tavan omegası")},
@@ -1477,7 +1481,7 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
               f"{'prefabrik çelik dış kapı (90 × 200, ' + dk_yon + ')' if dk else 'dış kapı'} yerine konur. İç kapılar ({ic_say}) Amerikan kapı; yer ve açılış yönü motorun planından. "
               "Bu adımda çatı, tavan ve izolasyon gizlenir; düğmeyle geri açılır. Kanatlar ve kapılar sırayla açılıp kapanır.",
          "kamera": K([0, 0.8, 0.3], 0.5, 1.0, 15.5),
-         "extra": [x for x in (LR("Özel pencere karkası"), LR("Prefabrik pencere vidası")) if x]},
+         "extra": [x for x in (LR("Pencere kör kasası"), LR("Prefabrik pencere vidası")) if x]},
     ]
     if GIR and not CAP:                           # İE-24: girintili gövdenin yazıları (ana çatı + cumbalar; saçaklar önde ve arkada)
         AD_ = {x["ad"]: x for x in adim if "ad" in x}

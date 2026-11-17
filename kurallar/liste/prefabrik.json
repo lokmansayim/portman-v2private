@@ -287,6 +287,11 @@
    "durum": "aday",
    "kaynak": "Şablon B (PK-02, PK-03): 3."
   },
+  "sase_pul": {
+   "deger": false,
+   "durum": "lokman",
+   "kaynak": "Şase pul Motor'un yükleme listesine yazılmaz (D-122, BK-51). Lokman, 16 Kasım 2026 21:35:12 UTC: \"şase pulunu kople yükleme listelerinden kaldır\". Önce dübel adedi kadar yazılıyordu (prefabrikte dübelli H adedi, çelikte duvar paneli × 2; Excel hesaplama motoru: şase pul = dübel). Fiyatı CRM'de ve 45. hafta fiyat listesinde yok. Çelik dübel aynen kalır. Anahtarı olmayan eski set eski çıktıyı verir (şase pullu)."
+  },
   "asik_sacak_esigi_m": {
    "deger": 0.3,
    "durum": "pafta",
@@ -594,7 +599,7 @@
    "kitap": "vida.celik_dubel_duvar_paneli_basina",
    "tur": "yontem",
    "karar_bekliyor": false,
-   "not": "Prefabrik dübelli H adedi kadar (O16 ve Portatifev şablonu; çelik dübel PK-07 27, PK-02 22, PK-06 24; şase pul PK-01 24); Şablon B'de şase pul yok (aday 0). Kitap duvar paneli × 2, şase pul = dübel (Excel hesaplama motoru)."
+   "not": "Prefabrik dübelli H adedi kadar (O16 ve Portatifev şablonu; çelik dübel PK-07 27, PK-02 22, PK-06 24; şase pul PK-01 24); Şablon B'de şase pul yok (aday 0). Kitap duvar paneli × 2, şase pul = dübel (Excel hesaplama motoru). D-122 (Lokman, 16 Kasım 2026 21:35:12): şase pul yazılmaz (`sase_pul`), çelik dübel aynen."
   },
   {
    "konu": "Boya",
