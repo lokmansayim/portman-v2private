@@ -5194,3 +5194,108 @@ def test_hakem48_cumba_secimi_soruya_donmez(tmp_path, metin):
     s, _ = _cati_seti(tmp_path)
     k = s.yaz(metin, niyet="diger")
     assert k.eylem == "is_emri" and k.revizyon == 2 and k.is_emri["talep"]["kaynak"] == "PA06C", k.mesaj
+
+
+
+# İE-42 hakem tur 49: kararsız "o da güzel" dolgu sözüyle ya da "olsun"suz seçimle gelince ("2 olsun, valla o da güzel", "2'yi alalım,
+# o da güzel") kayıt almaz; başka işin bildirimi ("müşteri de onayladı, o da tamam"), konuşma ortağı ya da yeriyle ertelenen başka iş
+# ("çiti sonra ustayla konuşuruz"), "için"li yan iş ("ama PA-08 için ayrıca teklif") ve sayılan kişi ("vinç olmasa 2 abi yollayın")
+# açık seçimdir
+@pytest.mark.parametrize("metin", [
+    "2 olsun, rengiyle birlikte bi ara herkesi toplayıp konuşuruz", "2 olsun, rengiyle birlikte bi ara herkesi toplar konuşuruz",
+    "2 olsun, rengiyle birlikte sonra babası konuşur", "2 olsun, rengiyle birlikte sonra ortağı konuşur",
+    "2 olsun, rengiyle birlikte sonra patronu konuşur", "2 olsun, rengiyle birlikte sonra müdürü bakar",
+    "2 olsun, rengiyle birlikte bayram ertesi konuşuruz", "2 olsun, rengiyle birlikte hafta arası konuşuruz",
+    "2 olsun, rengiyle birlikte sonra öğle arası konuşuruz", "2 olsun, rengiyle birlikte sonra iş çıkışı konuşuruz",
+    "2 olsun, rengiyle birlikte sonra Remzi konuşur", "2 olsun, rengiyle birlikte sonra Veli konuşur",
+    "2 olsun, rengiyle birlikte sonra ustası konuşur", "2 olsun, rengiyle birlikte ay sonuna doğru konuşuruz",
+    "2 olsun, rengiyle birlikte önümüzdeki günlerde konuşuruz", "2 olsun, rengiyle birlikte yakında konuşuruz",
+    "2 olsun, rengiyle birlikte en kısa zamanda konuşuruz", "2 olsun, rengiyle birlikte ayın 20si konuşuruz",
+    "2 olsun, rengiyle birlikte gelecek ay konuşuruz", "2 olsun, rengiyle birlikte gelecek hafta konuşuruz",
+    "2 olsun, rengiyle birlikte hafta içerisinde konuşuruz", "2 olsun, rengiyle birlikte gün içinde konuşuruz",
+    "2 olsun, rengiyle birlikte gün içi konuşuruz", "2 olsun, rengiyle birlikte akşam üstü konuşuruz",
+    "2 olsun, rengiyle birlikte öğlen konuşuruz", "2 olsun, rengiyle birlikte sezon sonu konuşuruz",
+    "2 olsun, rengiyle birlikte bayram öncesi konuşuruz", "2 olsun, rengiyle birlikte nakliyeden önce konuşuruz",
+    "2 olsun, rengiyle birlikte montajdan önce konuşuruz", "2 olsun, stok olmasa birinciyi alırız",
+    "2 olsun, kırma için o zaman önemli değil", "2 olsun, kırma için şu zamanda önemli değil",
+    "2 olsun, kırma için yüksek ihtimalle önemli değil", "2 olsun, gerçi o da güzel", "2 olsun, aslında o da güzel",
+    "2 olsun, açıkçası o da güzel", "2 olsun, valla o da güzel", "2 olsun, yalnız o da güzel", "2 olsun, tabi o da güzel",
+    "2 olsun, hoş o da güzel", "2 olsun, aslında şu da uygun", "2 olsun, aslında o da güzeldi", "2 olsun, bizce o da güzel",
+    "2 olsun, valla şu da güzel", "2 olsun, hatta o da güzel", "2 olsun, zaten o da güzel", "2 olsun. Gerçi o da güzel",
+    "2 olsun, ama yine de o da güzel", "2 olsun, valla o da güzel değil mi?", "2 olsun, gerçi o da uygun değil mi",
+    "İkinci olsun, o da güzel", "2'yi alalım, o da güzel", "2'yi seçtik, o da güzel", "2 ile devam edelim, o da güzel",
+    "2'de kalalım, o da güzel", "2 yapın, o da güzel", "2'yi tercih ediyoruz, o da güzel", "2 olsun lütfen, o da güzel",
+    "2 olsun inşallah, o da güzel", "Tamam 2 olsun, valla o da güzel", "PA-06-K olsun, aslında o da güzel",
+    "PA-06-K ile devam, o da güzel", "3 olsun, gerçi o da güzel", "2 olsun, ama valla o da güzel", "2 olsun, bi de o da güzel",
+    "2 olsun, cidden o da güzel", "2 olsun, yine de o da güzel", "2 olsun, bana göre o da güzel", "2 olsun, açıkçası şu da güzel",
+    "2 olsun, valla o da sorun değil", "2 olsun, valla o da tamam", "2 olsun, valla o da uygun", "2 olsun, aslında o da mantıklı",
+    "2 olsun, aslında o da hoş", "2 olsun, gerçi o da süper", "2 olsun, ha o da güzel", "2 olsun, eh o da güzel", "2 olsun, aa o da güzel",
+    "2 olsun, açıkçası müşteri için o da güzel", "2 numara olsun, valla o da güzel", "2'si olsun, o da güzel", "2 alalım, o da güzel",
+    "2 ile devam, o da güzel", "2 uygun, o da güzel", "2 iyi, o da güzel", "PA-06-K'yı seçtik, o da güzel",
+    "PA-06-K olsun lütfen, o da güzel", "3'ü alalım, o da güzel", "2 olsun abi, gerçi o da güzeldi", "2'yi alalım abi, valla o da güzel",
+    "Tamamdır 2 olsun, valla o da güzel", "2 olsun hocam. Aslında o da güzel", "PA06K olsun, aslında o da güzel",
+    "pa06k olsun valla o da güzel", "2 olsun. Rengiyle birlikte montajdan önce konuşuruz", "Müşteri onayladı 2 olsun, o da güzel",
+    "2 olsun, ben de baktım o da güzel", "2 olsun, şimdi baktım o da güzel", "2 olsun, diğerine baktık o da güzel",
+    "2 olsun, resmini gördüm o da güzel", "2 olsun, müşteri de beğendi, o da güzel", "2 olsun, müşteri de baktı o da güzel",
+    "2 olsun, şunu da gönderin o da güzel", "2 olsun, kırmayı da gördük o da güzel", "2 olsun, kırmayı da çizin, o da güzel",
+    "2 olsun, açıkçası beğendik o da güzel", "2 olsun, biz de düşündük o da güzel", "2 olsun valla o da güzel",
+    "2 olsun, rengiyle birlikte merkezi sonra arayıp konuşuruz", "2 olsun, rengiyle birlikte sonra kızı konuşur",
+    "2 olsun, rengiyle birlikte bi ara konuşuruz", "2 olsun, rengiyle birlikte iş çıkışı konuşuruz",
+    "2 olsun, rengiyle birlikte acelesi yok sonra konuşuruz", "PA-06-K olsun veya PA-08 için", "PA-06-K ile PA-08 gibi",
+    "2 olsun, stok olmasa 1 abi gönderin", "2 olsun, rengiyle birlikte sonra herkesi ofiste toplayıp konuşuruz",
+    "2 olsun, rengiyle birlikte sonra merkezi telefonda arayıp konuşuruz"])
+def test_hakem49_kararsiz_ve_kosullu_soz_kaydedilmez(tmp_path, metin):
+    """Tur 49 (G-Y5, önceden var): "2 olsun, valla o da güzel", "2'yi alalım, o da güzel", "2 olsun, stok olmasa 1 abi gönderin",
+    "2 olsun, rengiyle birlikte sonra ustası konuşur", "rengiyle birlikte montajdan önce konuşuruz" kayıt almaz: plan r01, onay yok,
+    r02 yok."""
+    s, _ = _cati_seti(tmp_path)
+    k = s.yaz(metin, niyet="diger")
+    assert K.PLAN_ONAYI not in k.gerekce and k.eylem != "is_emri" and s.plan["revizyon"] == 1 and not s.k.d.get("onaylanan"), k.mesaj
+
+
+@pytest.mark.parametrize("metin", [
+    "2 olsun, montajla birlikte çiti sonra ustayla konuşuruz", "2 olsun, montajla birlikte çiti sonra sizinle konuşuruz",
+    "2 olsun, montajla birlikte çiti sonra telefonda konuşuruz", "2 olsun, montajla birlikte çiti sonra yerinde konuşuruz",
+    "2 olsun, montajla birlikte çiti sonra ayrı konuşuruz", "2 olsun, montajla birlikte çiti sonra yüz yüze konuşuruz",
+    "2 olsun, montajla birlikte çiti sonra uzun uzun konuşuruz", "2 olsun, montajla birlikte çiti sonra gelip konuşuruz",
+    "2 olsun, montajla birlikte çiti sonra arayıp konuşuruz", "2 olsun, montajla birlikte çiti nakliyeden sonra konuşuruz",
+    "2 olsun, montajla birlikte çiti teslimden sonra konuşuruz", "2 olsun, montajla birlikte çiti müşteriyle sonra konuşuruz",
+    "2 olsun, montajla birlikte deposu sonra ekiple konuşuruz", "2 olsun, montajla birlikte kurulumu sonra telefonda konuşuruz",
+    "2 olsun hocam, montajla beraber çiti de sonra yerinde bakarız", "2 olsun, montajla birlikte çiti sonra bi ustayla konuşuruz",
+    "2 olsun, nakliyeyle birlikte çiti sonra hep beraber konuşuruz", "2 olsun, montajla birlikte çiti sonra mesajla konuşuruz",
+    "2 olsun, montajla birlikte çiti sonra bizim ustayla konuşuruz", "2 olsun, montajla birlikte çiti sonra kendi aramızda konuşuruz",
+    "2 olsun, montajla birlikte çiti sonra size söyleriz konuşuruz", "2 olsun, montajla birlikte çiti yarın ofiste konuşuruz",
+    "2 olsun, montajla birlikte çiti cuma günü ofiste konuşuruz", "2 olsun, vinç olmasa 2 abi yollayın",
+    "2 olsun, iskele olmasa 2 abi çatıya çıkar", "2 olsun, vinç olmasa 2 hoca gönderin", "2 olsun, kırma için vakit sorun değil",
+    "2 olsun, kırma için bir hafta sorun değil", "2 olsun, kırma için birkaç gün sorun değil", "2 olsun, kırmada kar sorun değil",
+    "2 olsun, kırmada rüzgar sorun değil", "2 olsun, kırma için fazla mesai sorun değil", "2 olsun, çatı detayı önemli değil",
+    "2 olsun, çatı kirişi önemli değil", "2 olsun, çatı kenarı önemli değil", "2 olsun, kırma için kamyon sorun değil",
+    "2 olsun, kırma için yol sorun değil", "2 olsun, kırmada su yalıtımı sorun değil", "2 olsun, kırmada izolasyon sorun değil",
+    "2 olsun, kırma için kiremit sorun değil", "2 olsun, kırmada tadilat sorun değil", "Abi 2 olsun, kırmada kar sorun değil",
+    "PA-06-K olsun, belki PA-08 için de teklif isteriz", "PA-06-K ile devam edelim PA-08 için ayrıca teklif atın",
+    "PA-06-K olsun ama PA-08 için ayrıca teklif atın", "PA-06-K olsun ancak PA-08 için de fiyat verin",
+    "PA-06-K olsun, ama PA-08 için ayrı teklif lazım", "PA-06-K olsun, belki ileride PA-08 için de yazarız",
+    "PA-06-K olsun, PA-08 için ya da PA-10 için de teklif lazım", "Hocam 2 olsun. Montajla birlikte çiti sonra yerinde konuşuruz",
+    "2 olsun, montajla beraber çiti de sonra telefonda konuşuruz", "2 olsun. Montajla birlikte çiti sonra sizinle konuşuruz",
+    "Selam abi, 2 olsun, montajla birlikte çiti sonra gelip konuşuruz", "pa06k olsun, belki pa08 için de teklif isteriz",
+    "Abi PA-06-K olsun ama PA-08 için de teklif at", "2 olsun, kırmada kar sorun değil abi", "2 olsun, teklif geldi. O da uygun",
+    "2 olsun, müşteri teklifi gördü, o da uygun", "2 olsun, arsa hazır o da tamam", "2 olsun, ruhsat çıktı o da tamam",
+    "2 olsun, müşteri sözleşmeyi imzaladı, o da tamam", "2 olsun, ödeme yapıldı o da tamam", "2 olsun, kapora yatırıldı, o da tamam",
+    "2 olsun ve teklifi de gönderin, o da tamam", "2 olsun, montajla birlikte çiti Remzi beyle konuşuruz",
+    "2 olsun, vinç olmasa 2 hocam yeter"])
+def test_hakem49_acik_secim_soruya_donmez(tmp_path, metin):
+    """Tur 49 (G-O1–G-O4 ve sınırlar): "2 olsun, montajla birlikte çiti sonra ustayla konuşuruz", "PA-06-K olsun ama PA-08 için ayrıca
+    teklif atın", "2 olsun, vinç olmasa 2 abi yollayın", "2 olsun, kırma için vakit sorun değil", "2 olsun ve teklifi de gönderin, o da
+    tamam" açık seçimi soruya çevirmez: r02 PA-06-K."""
+    s, _ = _cati_seti(tmp_path)
+    k = s.yaz(metin, niyet="diger")
+    assert k.eylem == "is_emri" and k.revizyon == 2 and k.is_emri["talep"]["kaynak"] == "PA06K", k.mesaj
+
+
+@pytest.mark.parametrize("metin", [
+    "3 olsun, cumba için vakit sorun değil"])
+def test_hakem49_cumba_secimi_soruya_donmez(tmp_path, metin):
+    """Tur 49: "3 olsun, cumba için vakit sorun değil": r02 PA-06-C."""
+    s, _ = _cati_seti(tmp_path)
+    k = s.yaz(metin, niyet="diger")
+    assert k.eylem == "is_emri" and k.revizyon == 2 and k.is_emri["talep"]["kaynak"] == "PA06C", k.mesaj

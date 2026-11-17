@@ -1871,3 +1871,23 @@ def test_hakem48_celik_acik_secim_soruya_donmez(s, metin):
     cati_seti(s)
     k = s.yaz(metin)
     assert k.eylem == "is_emri" and k.revizyon == 2 and s.plan["yapi"]["kod"] == "Ç8801K", k.mesaj
+
+
+
+@pytest.mark.parametrize("metin", [
+    "K'yı alalım, o da güzel", "K'yı seçtik, o da güzel", "K ile devam, o da güzel", "K olsun lütfen, o da güzel"])
+def test_hakem49_celik_kararsiz_soz_kaydedilmez(s, metin):
+    """Tur 49 çelikte: koşullu, ertelenen ya da kararsız söz kayıt almaz."""
+    cati_seti(s)
+    k = s.yaz(metin)
+    assert K.PLAN_ONAYI not in k.gerekce and k.eylem != "is_emri" and s.plan["revizyon"] == 1 and not s.k.d.get("onaylanan"), k.mesaj
+
+
+
+@pytest.mark.parametrize("metin", [
+    "K olsun, müşteri de onayladı, o da tamam"])
+def test_hakem49_celik_acik_secim_soruya_donmez(s, metin):
+    """Tur 49 çelikte: başka işin bildirimi ("K olsun, müşteri de onayladı, o da tamam") açık seçimdir: r02 K."""
+    cati_seti(s)
+    k = s.yaz(metin)
+    assert k.eylem == "is_emri" and k.revizyon == 2 and s.plan["yapi"]["kod"] == "Ç8801K", k.mesaj
