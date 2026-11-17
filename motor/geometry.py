@@ -1862,13 +1862,14 @@ def _yerinde_kalan_pencere(plan: "Plan"):
     """D-124 (D-121'in istisnası; Lokman, 17 Kasım 2026 08:35:02): "banyo ebeveyn banyo wc tuvalet yani vasistas pencresi ne varsa onlar
     kendi konumlarında kalacak ortalamıyacaksın". Pencere iki durumda yerinde kalır: odası ıslak hacimse (türü yükleme listesinin ıslak
     hacim türlerinden: `kurallar/liste/prefabrik.json › islak_hacim`, Lokman 13 Ekim; WC ve ebeveyn banyosu Motor'da `banyo` türündedir) ya da
-    pencere vasistassa (görünüşün vasistas ölçüleri, `dxf_out.VASISTAS_OLCULERI`, D-31 madde 6). Sözdeki "yani" iki okumayı eşitler; Motor
-    ikisini birlikte uygular: ıslak hacmin 120'lik penceresi de, kuru odanın 60×40'lığı da yerinde kalır. Dönüş: Acilim → bool."""
-    from motor.dxf_out import VASISTAS_OLCULERI          # döngüsel içe aktarma olmasın diye burada
+    pencere vasistassa (pencere kataloğunda türü vasistas olan her ölçü, `kurallar/pencere/pencereler.json`: 60x40, 100x60, 50x50, 60x60,
+    30x30; sözdeki "ne varsa"). Sözdeki "yani" iki okumayı eşitler; Motor ikisini birlikte uygular: ıslak hacmin 120'lik penceresi de, kuru
+    odanın vasistası da yerinde kalır. Dönüş: Acilim → bool."""
+    vasistas = {m["olcu"].lower() for m in PENCERE_VT["modeller"] if m.get("tur") == "vasistas"}
     kitap = json.loads((Path(__file__).resolve().parents[1] / "kurallar" / "liste" / "prefabrik.json").read_text(encoding="utf-8"))
     islak = set(kitap["kurallar"]["islak_hacim"]["deger"])
     turu = {ad: m.tur for ad, m in plan.mahaller.items()}
-    return lambda a: (a.olcu or "").lower() in VASISTAS_OLCULERI or turu.get(a.mahal) in islak
+    return lambda a: (a.olcu or "").lower() in vasistas or turu.get(a.mahal) in islak
 
 
 def _dik_duvar_pencere(plan: "Plan", makas_ekseni: str, cati_tipi=None) -> list:
@@ -1907,7 +1908,7 @@ def _dik_duvar_pencere(plan: "Plan", makas_ekseni: str, cati_tipi=None) -> list:
             w = g[0]
             if len(g) != 1 or w.acilim is None or w.acilim.tur != "pencere":
                 continue
-            if yerinde(w.acilim):
+            if yerinde(w.acilim) and not w.ek_acilimlar:     # ek açıklıklı pano aşağıda uyarıyla kalır (K16)
                 continue
             if w.ek_acilimlar or w.karkasli or abs(w.boy - MOD) > 1e-6:
                 ortalanmadi(d, w, "pencereli pano tek pano (125,5) değil ya da karkaslı")

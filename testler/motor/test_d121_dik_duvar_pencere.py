@@ -84,7 +84,7 @@ def test_kisa_yan_her_zaman_ortada():
 
 def test_islak_hacim_ve_vasistas_yerinde():
     """D-124 (Lokman, 17 Kasım 2026 08:35:02): "banyo ebeveyn banyo wc tuvalet yani vasistas pencresi ne varsa onlar kendi konumlarında
-    kalacak ortalamıyacaksın". 90 m²'nin banyo vasistası yerinde; ıslak hacmin 120'liği de, kuru odanın 60×40'ı da yerinde (iki okuma birlikte)."""
+    kalacak ortalamıyacaksın". 90 m²'nin banyo vasistası yerinde; ıslak hacmin 120'liği de, kuru odanın vasistası da (kataloğun her vasistas ölçüsü) yerinde (iki okuma birlikte)."""
     def banyo_duvari(ie):                                     # banyo penceresinin duvarındaki panolar (yer, boy)
         plan = G.kur(ie)
         d = next(d for d in plan.duvarlar if any(q.acilim and q.acilim.mahal == "BANYO" for q in d.panolar))
@@ -99,8 +99,11 @@ def test_islak_hacim_ve_vasistas_yerinde():
         if a.get("mahal") == "BANYO":
             a["olcu"] = "120x120"
     assert banyo_duvari(_anahtarli(islak_120))[0] == banyo_duvari(copy.deepcopy(islak_120))[0]
-    kuru_vasistas = _kuru_oda(ie, "BANYO", "60x40")           # kuru oda, vasistas: yerinde
-    assert banyo_duvari(_anahtarli(kuru_vasistas))[0] == banyo_duvari(copy.deepcopy(kuru_vasistas))[0]
+    vasistaslar = sorted({m["olcu"] for m in G.PENCERE_VT["modeller"] if m.get("tur") == "vasistas"})
+    assert vasistaslar == ["100x60", "30x30", "50x50", "60x40", "60x60"]   # pencere kataloğunun vasistasları ("ne varsa")
+    for olcu in vasistaslar:                                  # kuru oda, her vasistas ölçüsü: yerinde (geometri hakemi, PA-19 mutfak 100x60)
+        kuru_vasistas = _kuru_oda(ie, "BANYO", olcu)
+        assert banyo_duvari(_anahtarli(kuru_vasistas))[0] == banyo_duvari(copy.deepcopy(kuru_vasistas))[0], olcu
     kuru_120 = _kuru_oda(ie, "BANYO")                         # kuru oda, 120'lik: ortalanır
     assert banyo_duvari(_anahtarli(kuru_120))[0] != banyo_duvari(copy.deepcopy(kuru_120))[0]
 
