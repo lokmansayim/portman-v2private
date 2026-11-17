@@ -151,9 +151,9 @@ def test_esleme_son_defterin_butun_kalemlerini_kapsar(E):
         assert list(H["kalemler"])[:len(R["kalemler"])] == list(R["kalemler"]) and H["anahtar"] == R["anahtar"] and H["atla"] == R["atla"]
         assert {k: H["kalemler"][k]["birim"] for k in R["kalemler"]} == {k: g["birim"] for k, g in R["kalemler"].items()}
         assert set(H["kalemler"]) - set(R["kalemler"]) == \
-            (set(PR5_ANAHTARLAR) | set(R06_ANAHTARLAR) | set(R07_ANAHTARLAR) | set(R08_ANAHTARLAR) if hat == "prefabrik" else set())
+            (set(PR5_ANAHTARLAR) | set(R06_ANAHTARLAR) | set(R07_ANAHTARLAR) | set(R08_ANAHTARLAR) | set(R11_ANAHTARLAR) if hat == "prefabrik" else set())
         if hat == "prefabrik":                                              # yeni anahtarlar sürüm sırasıyla, sona
-            assert list(H["kalemler"])[-len(R08_ANAHTARLAR):] == list(R08_ANAHTARLAR)
+            assert list(H["kalemler"])[-len(R08_ANAHTARLAR) - len(R11_ANAHTARLAR):] == list(R08_ANAHTARLAR) + list(R11_ANAHTARLAR)
         assert [(b["kalem"], b["kalinlik_mm"], b["yukseklik_mm"], [(a["en_mm"], a["alt_haric"]) for a in b["araliklar"]]) for b in H["bantlar"]] == \
                [(b["kalem"], b["kalinlik_mm"], b["yukseklik_mm"], [(a["en_mm"], a.get("alt_haric", False)) for a in b["araliklar"]]) for b in R["bantlar"]] \
                + ([(k, kal, h, [(a[0], a[1]) for a in ar]) for h in (2800, 3000) for k, kal, ar in R07_BANT_ARALIK]
@@ -528,6 +528,20 @@ R08_ANAHTARLAR = {
 R08_BANT, R08_BANT_ARALIK = "100'lük yapıştırma dolu pano (FUGALI)", [([627.5, 1250], True), ([340, 627.5], False), ([225, 225], False)]
 R08_BANT_KOD = {2500: ["YP19", "YP22", "YP19"], 2800: ["YP20", "YP23", "YP20"], 3000: ["YP21", "YP24", "YP21"]}
 R08_YAPISTIRMA = ("YP19", "YP20", "YP21", "YP22", "YP23", "YP24")
+
+
+R11_ANAHTARLAR = {   # r11 (17 Kasım 2026): 85 m² katalog evinin (P8501) 180/180 penceresi; CRM'de yok, Kasım istisnasıyla fiyatlı (D-120)
+    "Karkaslı özel pencere panosu (180/180) | 100 × 2500 × 2500": "Yapıştırma pano",
+    "PVC pencere | 180/180": "Pencereler",
+}
+
+
+def test_r11_180_pencere(E):
+    """r11: Motor'un 180/180 pencereli evinde (85 m² katalog evi P8501) iki yeni anahtar "defterde yok" kalmaz: ikisi de "CRM'de yok",
+    kodsuz, KDV grubu yazılı. Kasım fiyatı istisna dosyasından (Lokman 17 Kasım 2026 05:49:59 UTC kartı "Girsin, kenar kutusu boş")."""
+    K = E["hatlar"]["prefabrik"]["kalemler"]
+    for k, grup in R11_ANAHTARLAR.items():
+        assert (_kod(K[k]), K[k]["esleme"], K[k]["birim"], K[k]["kdv_grubu"]) == (None, "CRM'de yok", "adet", grup), k
 
 
 def test_r08_fugali_duz_desen(E, A):
