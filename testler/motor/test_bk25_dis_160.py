@@ -52,7 +52,7 @@ def test_dis_duvar_profilleri_160lik(tk05):
     assert {k: tk05.get(k) for k in beklenen} == beklenen
     adlar = " ".join(k for k, _ in tk05)
     assert "H 100 (dış pano eki)" not in adlar and "100'lük saçak omegası" not in adlar and "Çektirme U'su 100 |" not in adlar
-    assert ("Özel pencere karkası (120×120) (160'lık çektirme U'su + 160'lık H geçen)", "1200 × 1200") in tk05
+    assert ("Pencere kör kasası (120×120) (160'lık)", "1200 × 1200") in tk05          # D-122: önce "Özel pencere karkası … (160'lık çektirme U'su + 160'lık H geçen)"
 
 
 def test_280_boylari(tk05):

@@ -61,7 +61,7 @@ def kaynak_durumu(s: dict, defter: dict, hat: str) -> tuple[str, dict | None]:
     """Satırın fiyatının defterdeki yeri: (durum, kayıt). Durum defterin `durum`'u (eşleşti, bant, öneri onaylı, ikinci kaynak, kaynakta
     yok, …), defterin bandıyla bulunduysa "bant", hiç yoksa "defterde yok"."""
     H = defter["hatlar"][hat]
-    g = H["kalemler"].get(F.anahtar(s, hat))
+    g = F.kalem_kaydi(H["kalemler"], s, hat)
     if g is not None:
         return g["durum"], g
     if hat == "prefabrik" and (b := F.bant_bul(s, H.get("bantlar") or [])):

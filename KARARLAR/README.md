@@ -138,6 +138,7 @@ Biçim: karar · gerekçe · reddedilen seçenekler · geri alma yolu · kim ve 
 | [D-115](D-115.md) | Havuz evlerinin hazır 9 çatı seçeneği havuzda (İE-44): PA-08-C, PA-11-B, PA-14-B, PA-19-C, PA-24-C, PA-25-C, PA-31-B, PA-33-C, PA-34-C (C beşik + salonda çıkıntısız cumba, B beşik; D-83 kuralı); her biri Motor doğrulamasından ve havuz denetiminden (D-112) geçti, sonucu kaydın `kaynak.havuz_denetimi`'nde; denetimi bekleyen 16 seçenek BK-45/BK-46 birleşince aynı sayfayla yeniden Lokman'a gelir; çizilemeyen 51 girmez | 16.11 (Lokman kartı 08:46:30 "9'u girsin, bekleyenler size gelsin") |
 | [D-118](D-118.md) | Prefabrikte standart yükseklik 2,50 m (pano 2500 mm, lento 50 cm); İş Emri yazmazsa Motor, yükleme listesi, talep formu ve teklif formu 2,50 alır; 2,80 ve 3,00 m yalnız yazılırsa (D-14); havuzda 44 prefabrikten 43'ü 2,50, 1'i 2,80 (143 m², aynen kalır, D-103); hiçbir çıktı değişmez; mühür M-19 | 16.11 (Lokman 20:58:27 "kesin kural bunu mühürle 2,50 m") |
 | [D-121](D-121.md) | Makas aksı kaymaz (saçak duvarında ek tam ya da yarım aksta; hakem HD-12, uyarı); makasa dik dış duvarda tek panoluk pencere odanın duvar parçasının tam ortasında, yan 125,5'i aşarsa 125,5 pencere yanında, kalan uçta; yalnız yeni çizilen evler (`dizilim.dik_duvar_pencere: tam_orta`); çizime yeni aks çıkmaz; kırma çatıda ve ortadaki T'li odada kural yok (V6, V7); BK-52, PC-46. V5: yeni bayi talebinde Beyin yazar (bayi çiziminden okunan ev; BK-53, kart 17.11 04:52:24 "Evet, ayrı işte açılsın") | 16.11 (Lokman 20:56:44; kartlar 21:14:20, 21:15:33, 21:36:53, 21:38:12, 21:44:20) |
+| [D-123](D-123.md) | 85 m² katalog evi (P8501 r05): ana makaslar cumba makasının arkasında biter, kampanyalı ev gibi (D-53); ön-sol köşe kampanyalı evin rehberindeki gibi; plan aynı; BK-54 | 17.11 (Lokman 08:27:29) |
 | [D-124](D-124.md) | D-121'in istisnası: ıslak hacmin (banyo, ebeveyn banyosu, WC, tuvalet) penceresi ve vasistas (kataloğun her vasistas ölçüsü) ortalanmaz, yerinde kalır; ikisi birlikte ("ne varsa"); BK-53, PC-46 | 17.11 (Lokman 08:35:02) |
 
 ## Numara defteri (14 Ekim 2026, BK-08; CIO planı › Görev 3)
@@ -255,7 +256,10 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | D | D-119 | (başka sohbet: kutu profil fiyatı çeyrek boy; PR #261) | alındı (16.11) |
 | D | D-120 | (başka sohbet: Kasım 2026 fiyat istisnası; PR #261) | alındı (16.11) |
 | D | D-121 | makas aksı kaymaz; makasa dik duvarda pencere her zaman odanın tam ortasında, yan 125,5'i aşarsa 125,5 pencere yanında, kalan uçta; yalnız yeni çizilen evler (anahtar); çizime yeni aks çıkmaz (BK-52, PC-46; Lokman 16.11 20:56:44, kartlar 21:14:20, 21:15:33, 21:36:53, 21:38:12, 21:44:20) | yazıldı (16.11; aks kayma sohbeti, `claude/project-thread-qnrohi`) |
-| D | **D-122** | — | **sıradaki boş** |
+| D | D-122, D-123 | (başka sohbetler: şase pul ve pencere kör kasası PR #264; 85 m² katalog rehberi PR #267) | alındı (16–17.11) |
+| D | D-124 | D-121'in istisnası: ıslak hacim ve vasistas penceresi ortalanmaz, yerinde kalır (Lokman 17.11 08:35:02; BK-53, PR #265) | yazıldı (17.11; `claude/project-thread-u9x1le`) |
+| D | D-125 | (başka sohbet: çizim okumada dış kapı, BK-55, PR #268) | alındı (17.11) |
+| D | **D-126** | — | **sıradaki boş** |
 | İE | İE-01–İE-08 | bu depo (`main`) | yazıldı |
 | İE | İE-09 | model atölyesi: kontrollü model üretimi ve banka hattı (Görev 6e; pano 30; P6001 güncellemesi kapsam dışı) | alındı (16.10; `claude/gorev-6e-model-atolyesi-rnhtcp`; PR-1 banka hattı 29.10, `claude/project-thread-rhjgzv`) |
 | İE | İE-10, İE-11, İE-12 | prefabrik hattı (PR #12, PR #14, `ie-12-prefabrik-bayi-paftasi`) | `main`'e BK-12 ile (PR-1: motor ve bayi paftası; liste ve mühür kıyası sonraki PR'larda) |
@@ -328,7 +332,8 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | BK | BK-44 … BK-51 | (başka sohbetler; numara defteri) | alındı (16.11) |
 | BK | BK-52 | Pano Motor'unda makas aksı kaymaz, makasa dik duvarda pencere tam ortada (anahtar `dizilim.dik_duvar_pencere`; hakem HD-12) (D-121, PC-46; `claude/project-thread-qnrohi`) | yazıldı (16.11) |
 | BK | BK-53 | Yeni bayi talebinde pencere ortalama kendiliğinden açık: bayinin çiziminden okunan prefabrik eve Beyin `dizilim.dik_duvar_pencere: tam_orta` yazar; havuz, katalog ve onaylı şablonlar anahtarsız; ıslak hacim ve vasistas penceresi ortalanmaz (D-124) (D-121 V5; Lokman kartı 17.11 04:52:24 "Evet, ayrı işte açılsın"; `claude/project-thread-u9x1le`) | yazıldı (17.11) |
-| BK | **BK-54** | — | **sıradaki boş** |
+| BK | BK-54 | Montaj rehberi ön-sol köşeden dizilen evi kurar; 85 m² katalog evi rehberi (D-123; `claude/project-thread-xmignz`) | yazıldı (17.11) |
+| BK | **BK-57** | — | **sıradaki boş** (BK-55 dış kapı, BK-56 başka sohbet; numara defteri) |
 
 ## 27 Eylülde Lokman'ın verdiği kararlar
 
