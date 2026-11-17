@@ -98,7 +98,10 @@ def test_tk01_okumasi_teklif_r04_geometrisini_verir():
     assert d["sorular"] == [] and d["cizilemez"] == []
     ie = d["cevrim"]["is_emri"]
     assert geometri(ie) == geometri(TK01_BEKLENEN)
-    beklenen_yapi = {**TK01_BEKLENEN["yapi"], "referans_model": "CIZIM"}
+    # BK-53 (D-121 V5; kart 17 Kasım 2026 04:52:24): çizimden okunan ev yeni çizilen evdir; r04'ün yapısına yalnız pencere ortalama
+    # anahtarı eklenir (r04 elle yazılmış onaylı İş Emri'dir, anahtarsız kalır; panoya etkisi `test_bk53_*`).
+    beklenen_yapi = {**TK01_BEKLENEN["yapi"], "referans_model": "CIZIM",
+                     "dizilim": {**TK01_BEKLENEN["yapi"]["dizilim"], "dik_duvar_pencere": "tam_orta"}}
     assert ie["yapi"] == beklenen_yapi
     assert ie["is_emri_no"] == "" and ie["revizyon"] == 0          # numara ve künye `karar._is_emri_uret`te
 
