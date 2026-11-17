@@ -667,7 +667,9 @@ def katalog_excel(kartlar: dict, say: dict | None, yol: Path) -> Path:
 
 
 # ----------------------------------------------------------------------------- komut
-def uret(ie: dict, klasor: Path, kod: str) -> dict:
+def uret(ie: dict, klasor: Path, kod: str, dxf: bool = False) -> dict:
+    """`dxf`: montaj paftasının (yerleşim planları) düzenlenebilir DXF'i de yazılır, `<kod>_yerlesim_planlari.dxf` (PDF'in sayfalarından,
+    `motor/yerlesim/dxf_yaz.py`); denetim sonucu `say["montaj_dxf"]`. Varsayılan kapalı: komutun öteki çıktıları aynen."""
     from motor import ifc_uret
     from motor.yerlesim import cizim
 
@@ -679,7 +681,8 @@ def uret(ie: dict, klasor: Path, kod: str) -> dict:
     say["sema_hatasi"] = {"bugunku_ifc": ozet["sema_hatasi"], "kart_modeli": ifc_uret.ozet(klasor / f"{kod}_model.ifc")["sema_hatasi"]}
     (klasor / f"{kod}_kart_sayim.json").write_text(json.dumps(say, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
     katalog_excel(_oku(KARTLAR), say, klasor / f"{kod}_kart_katalogu.xlsx")
-    cizim.ciz(klasor / f"{kod}_model.ifc", say, klasor / f"{kod}_yerlesim_planlari.pdf", kod)
+    cizim.ciz(klasor / f"{kod}_model.ifc", say, klasor / f"{kod}_yerlesim_planlari.pdf", kod,
+              dxf_yolu=klasor / f"{kod}_yerlesim_planlari.dxf" if dxf else None)
     return say
 
 
@@ -688,8 +691,9 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("is_emri", type=Path)
     ap.add_argument("klasor", type=Path)
     ap.add_argument("--kod", help="çıktı adlarının öneki (varsayılan: İş Emri dosyasının adı)")
+    ap.add_argument("--dxf", action="store_true", help="montaj paftasının düzenlenebilir DXF'i de (`<kod>_yerlesim_planlari.dxf`)")
     a = ap.parse_args(argv)
-    say = uret(_oku(a.is_emri), a.klasor, a.kod or a.is_emri.stem)
+    say = uret(_oku(a.is_emri), a.klasor, a.kod or a.is_emri.stem, dxf=a.dxf)
     for k in say["kartlar"]:
         if k["adet"] or "sabit" in k:
             ek = f"  {k['metre']:.2f} m" if "metre" in k else (f"  sabit {k['sabit']}" if "sabit" in k else "")
@@ -698,9 +702,13 @@ def main(argv: list[str] | None = None) -> int:
           f"şema hatası {say['sema_hatasi']}")
     for x in say["kural_yok"]:
         print(f"kural yok: {x['parca']}: {x['neden']}")
+    if "montaj_dxf" in say:
+        d = say["montaj_dxf"]
+        print(f"montaj paftası DXF: {d['dosya']}, {d['sayfa']} sayfa, denetim hatası 0" if d.get("dosya") else
+              f"montaj paftası DXF yazılmadı ({d['hatali'] or 'teslim adıyla dosya yok'}): {'; '.join(d['hatalar'])}")
     for u in say.get("yerlesim", {}).get("uyarilar", []) + say.get("elektrik", {}).get("uyarilar", []) + say.get("kenar", {}).get("uyarilar", []):
         print(f"uyarı ({u['katman']}): {u['metin']}")
-    return 1 if say["kural_yok"] or any(say["sema_hatasi"].values()) else 0
+    return 1 if say["kural_yok"] or any(say["sema_hatasi"].values()) or ("montaj_dxf" in say and not say["montaj_dxf"].get("dosya")) else 0
 
 
 if __name__ == "__main__":

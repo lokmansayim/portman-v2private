@@ -166,7 +166,9 @@ def _notlar(fig, say: dict, sayfa: int):
                  va="top", ha="left", color="#b03a2e")
 
 
-def ciz(model_yolu: Path, say: dict, yol: Path, kod: str) -> Path:
+def ciz(model_yolu: Path, say: dict, yol: Path, kod: str, dxf_yolu: Path | None = None) -> Path:
+    """`dxf_yolu` verilirse her sayfa PDF'e yazıldıktan sonra aynı figürden düzenlenebilir DXF'e de çevrilir (`dxf_yaz`); PDF aynen.
+    DXF denetiminin sonucu `say["montaj_dxf"]`'e yazılır."""
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
@@ -182,6 +184,27 @@ def ciz(model_yolu: Path, say: dict, yol: Path, kod: str) -> Path:
     kesim = say.get("kesim_plani", {})
     yol = Path(yol)
     yol.parent.mkdir(parents=True, exist_ok=True)
+    dxf = None
+    if dxf_yolu is not None:
+        from motor.yerlesim.dxf_yaz import DxfPafta, roller
+        dxf = DxfPafta(kod)
+
+    dxf_hata: list[str] = []
+
+    def kaydet(fig, pdf, renkler: tuple = (RENK,)) -> None:
+        """Sayfa önce PDF'e; sonra aynı figür DXF'e (D-28 madde 1). DXF'in hatası PDF'i kesmez: DXF o sayfadan sonra yazılmaz, sonuç
+        `montaj_dxf`'te hata olarak döner (K23: teslim adıyla DXF yok)."""
+        nonlocal dxf
+        pdf.savefig(fig)
+        if dxf is not None:
+            ust = fig._suptitle.get_text() if fig._suptitle is not None else (fig.axes[0].get_title(loc="left") if fig.axes else "")
+            try:
+                dxf.sayfa(fig, ust, roller(*renkler))
+            except Exception as e:                                  # noqa: BLE001 — PDF sürer, DXF yazılmaz
+                dxf_hata.append(f"{ust or 'sayfa'}: DXF'e çevrilemedi ({type(e).__name__}: {str(e)[:160]})")
+                dxf = None
+        plt.close(fig)
+
     with PdfPages(str(yol), metadata={"Creator": "motor.kart_model (İE-15 K2)", "CreationDate": None, "ModDate": None}) as pdf:
         # 1 · tavan omega
         fig, ax = plt.subplots(figsize=(16.54, 11.69))
@@ -221,7 +244,7 @@ def ciz(model_yolu: Path, say: dict, yol: Path, kod: str) -> Path:
                 + _tavan_lejanti(say, kesim))
         _cerceve(ax, f"{kod} · TAVAN OMEGA YERLEŞİM PLANI", alt)
         _notlar(fig, say, 1)
-        pdf.savefig(fig); plt.close(fig)
+        kaydet(fig, pdf, ({"omega": RENK["omega"]}, RENK))
 
         # 2 · makas ve dere
         fig, ax = plt.subplots(figsize=(16.54, 11.69))
@@ -272,7 +295,7 @@ def ciz(model_yolu: Path, say: dict, yol: Path, kod: str) -> Path:
             _cati_yazisi(ax, cn)
         _cerceve(ax, f"{kod} · MAKAS VE DERE YERLEŞİM PLANI", alt)
         _notlar(fig, say, 2)
-        pdf.savefig(fig); plt.close(fig)
+        kaydet(fig, pdf)
 
         # 3 · baş makas betopanı (görünüş)
         levhalar = m["k2"].get("BT-01", [])
@@ -325,7 +348,7 @@ def ciz(model_yolu: Path, say: dict, yol: Path, kod: str) -> Path:
         fig.suptitle(f"{kod} · BAŞ MAKAS BETOPAN YERLEŞİMİ", fontsize=15, fontweight="bold", x=0.02, ha="left", y=0.95 if say["kural_yok"] else 0.98)
         fig.text(0.02, 0.03, alt, fontsize=9, color="#444")
         _notlar(fig, say, 3)
-        pdf.savefig(fig); plt.close(fig)
+        kaydet(fig, pdf, ({"betopan": RENK["levha"]}, RENK))
 
         # 4 · aşık ve 5 · çatı kaplaması
         KP = [kk for kk in ("KP-01", "KP-02", "KP-03") if m["k2"].get(kk)] or ["KP-01"]   # sandviç, tek kat panel (K5b) ya da trapez sac (K6)
@@ -378,7 +401,7 @@ def ciz(model_yolu: Path, say: dict, yol: Path, kod: str) -> Path:
                 _cati_yazisi(ax, cn)
             _cerceve(ax, f"{kod} · {baslik}", alt)
             _notlar(fig, say, sayfa)
-            pdf.savefig(fig); plt.close(fig)
+            kaydet(fig, pdf)
 
         # 6 · elektrik (K3)
         if "elektrik" in say:
@@ -387,7 +410,7 @@ def ciz(model_yolu: Path, say: dict, yol: Path, kod: str) -> Path:
             _cerceve(ax, f"{kod} · ELEKTRİK YERLEŞİM PLANI", alt.replace("(İE-15 K2)", "(İE-15 K3)"))
             _lejant(fig, _elektrik_lejanti(say))
             _notlar(fig, say, 6)
-            pdf.savefig(fig); plt.close(fig)
+            kaydet(fig, pdf, (ELEKTRIK_RENK, RENK))
 
         # 7 · alt çerçeve ve çatı kenarları (K3b)
         if "kenar" in say:
@@ -401,7 +424,11 @@ def ciz(model_yolu: Path, say: dict, yol: Path, kod: str) -> Path:
             fig.text(0.02, 0.03, alt.replace("(İE-15 K2)", "(İE-15 K3b)"), fontsize=9, color="#444")
             _kenar_lejanti(fig, say, plt)
             _notlar(fig, say, 7)
-            pdf.savefig(fig); plt.close(fig)
+            kaydet(fig, pdf, (KENAR_RENK, RENK))
+    if dxf_hata:
+        say["montaj_dxf"] = {"dosya": None, "hatali": None, "hatalar": dxf_hata}
+    elif dxf is not None:
+        say["montaj_dxf"] = dxf.kaydet(Path(dxf_yolu))
     return yol
 
 
