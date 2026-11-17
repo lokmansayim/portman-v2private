@@ -3,7 +3,8 @@
 Yerel three.js 0.160.0 ve yazı tipleri, satır içi betiklerin CSP özetleri, son kapı taraması (YASAK, telefon),
 belirlenimci tgz ve `vps/rehber_yayin.sh`'ye gömülü tek dosya kurulum betiği. Gereken npm paketleri `npm pack` ile
 açılmış olarak --npm klasöründe: three-0.160.0, fontsource-barlow-condensed-*, fontsource-ibm-plex-mono-*,
-fontsource-source-sans-3-*.
+fontsource-source-sans-3-*. Canlıdaki sitenin yazı tipleri fontsource 5.1.0'dandır (üç paket de; 17 Kasım 2026'da bayt bayt
+denetlendi); başka sürüm yazi.css'i ve OFL metnini değiştirir.
 """
 from __future__ import annotations
 
@@ -137,3 +138,22 @@ def paketle_ve_kur(kok: Path, cikti: Path, mtime: int) -> tuple[str, Path]:
     kur.write_text(betik.replace('# __PAKET_YERI__', gomulu, 1), encoding='utf-8')
     print(f'kurulum betiği: {kur} ({kur.stat().st_size / 1e6:.2f} MB)')
     return ozet, kur
+
+
+def onceki_paket(yol: Path, beklenen_sha: str) -> dict[str, bytes]:
+    """Daha önce kurulmuş paketin dosyaları {yol: bayt}. `yol` ya `rehber_kur.sh` (gömülü paket) ya da `rehber_paket.tgz`.
+    Paketin sha256'sı `beklenen_sha` değilse durur: sabit rehber yalnız kayıttaki pakettan alınır."""
+    ham = Path(yol).read_bytes()
+    if b"<<'__PAKET_SONU__'" in ham:
+        m = re.search(rb"<<'__PAKET_SONU__'\n(.*?)^__PAKET_SONU__$", ham, flags=re.S | re.M)
+        if not m:
+            raise SiteHatasi(f'{yol}: gömülü paket okunamadı')
+        ham = base64.b64decode(m.group(1))
+    if sha(ham) != beklenen_sha:
+        raise SiteHatasi(f'{yol}: paket sha256 {sha(ham)}; kayıttaki {beklenen_sha} değil')
+    dosyalar = {}
+    with tarfile.open(fileobj=io.BytesIO(ham), mode='r:gz') as t:
+        for ti in t.getmembers():
+            if ti.isfile():
+                dosyalar[ti.name] = t.extractfile(ti).read()
+    return dosyalar
