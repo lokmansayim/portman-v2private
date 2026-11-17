@@ -243,7 +243,9 @@ def test_g4_tk01_bk14_ile_teklif_r04_geometrisi(depo, wa, tmp_path, monkeypatch,
     beklenen = okuma("TK01_beklenen.json")
     for a in ("mahaller", "acikliklar", "verandalar", "cati"):
         assert ie[a] == beklenen[a], a
-    assert ie["yapi"] == {**beklenen["yapi"], "referans_model": "CIZIM"}
+    # BK-53 (D-121 V5; kart 17 Kasım 2026 04:52:24): çizimden okunan yeni evin İş Emri'ne pencere ortalama anahtarı yazılır, kayda da gider
+    assert ie["yapi"] == {**beklenen["yapi"], "referans_model": "CIZIM",
+                          "dizilim": {**beklenen["yapi"]["dizilim"], "dik_duvar_pencere": "tam_orta"}}
 
 
 # ─── G3 ───

@@ -62,10 +62,50 @@ def test_uzun_yan_125_pencere_yaninda_kalan_ucta():
     assert p.acilim is not None and p.acilim.tur == "pencere" and abs(p.boy - 125.5) < 1e-9
 
 
+def _kuru_oda(ie: dict, mahal: str, olcu: str = "120x120") -> dict:
+    """D-124'ten sonra ıslak hacim ve vasistas penceresi kurala girmez. Kuralın kısa yan ve ortadaki T yolları bugün depoda yalnız ıslak
+    hacimde vardı; o yollar odayı kuru oda, pencereyi 120'lik yaparak sınanır (uydurma girdi, hedef örnek değil)."""
+    ie = copy.deepcopy(ie)
+    for m in ie["mahaller"]:
+        if m["ad"] == mahal:
+            m["tur"] = "yatak_odasi"
+    for a in ie["acikliklar"]:
+        if a["tur"] == "pencere" and a.get("mahal") == mahal:
+            a["olcu"] = olcu
+    return ie
+
+
 def test_kisa_yan_her_zaman_ortada():
-    """Kart 21:15:33 "Her zaman tam ortada": 90 m²'nin 188,25'lik oda parçasında 31,375 + pencere + 31,375."""
-    plan = G.kur(_anahtarli(_oku("testler/motor/veri/TK01_r08.json")))
+    """Kart 21:15:33 "Her zaman tam ortada": 188,25'lik oda parçasında 31,375 + pencere + 31,375. 90 m²'nin bu parçası banyodur; banyonun
+    vasistası D-124'ten beri yerinde kalır (`test_islak_hacim_ve_vasistas_yerinde`). Kural kuru odada sınanır."""
+    plan = G.kur(_anahtarli(_kuru_oda(_oku("testler/motor/veri/TK01_r08.json"), "BANYO")))
     assert {"duvar": "dis x 883.5", "once": [125.5, 62.75], "sonra": [31.375, 125.5, 31.375]} in plan.dik_duvar_pencere
+
+
+def test_islak_hacim_ve_vasistas_yerinde():
+    """D-124 (Lokman, 17 Kasım 2026 08:35:02): "banyo ebeveyn banyo wc tuvalet yani vasistas pencresi ne varsa onlar kendi konumlarında
+    kalacak ortalamıyacaksın". 90 m²'nin banyo vasistası yerinde; ıslak hacmin 120'liği de, kuru odanın vasistası da (kataloğun her vasistas ölçüsü) yerinde (iki okuma birlikte)."""
+    def banyo_duvari(ie):                                     # banyo penceresinin duvarındaki panolar (yer, boy)
+        plan = G.kur(ie)
+        d = next(d for d in plan.duvarlar if any(q.acilim and q.acilim.mahal == "BANYO" for q in d.panolar))
+        return [(round(q.a0, 3), round(q.boy, 3)) for q in d.panolar], plan
+
+    ie = _oku("testler/motor/veri/TK01_r08.json")
+    once, _ = banyo_duvari(copy.deepcopy(ie))
+    sonra, plan = banyo_duvari(_anahtarli(ie))
+    assert sonra == once and [c for c in plan.dik_duvar_pencere if c["duvar"] == "dis x 883.5"] == []
+    islak_120 = copy.deepcopy(ie)                             # ıslak hacim, 120'lik pencere: yerinde
+    for a in islak_120["acikliklar"]:
+        if a.get("mahal") == "BANYO":
+            a["olcu"] = "120x120"
+    assert banyo_duvari(_anahtarli(islak_120))[0] == banyo_duvari(copy.deepcopy(islak_120))[0]
+    vasistaslar = sorted({m["olcu"] for m in G.PENCERE_VT["modeller"] if m.get("tur") == "vasistas"})
+    assert vasistaslar == ["100x60", "30x30", "50x50", "60x40", "60x60"]   # pencere kataloğunun vasistasları ("ne varsa")
+    for olcu in vasistaslar:                                  # kuru oda, her vasistas ölçüsü: yerinde (geometri hakemi, PA-19 mutfak 100x60)
+        kuru_vasistas = _kuru_oda(ie, "BANYO", olcu)
+        assert banyo_duvari(_anahtarli(kuru_vasistas))[0] == banyo_duvari(copy.deepcopy(kuru_vasistas))[0], olcu
+    kuru_120 = _kuru_oda(ie, "BANYO")                         # kuru oda, 120'lik: ortalanır
+    assert banyo_duvari(_anahtarli(kuru_120))[0] != banyo_duvari(copy.deepcopy(kuru_120))[0]
 
 
 @pytest.mark.parametrize("yol", ["is_emri/adaylar/PA06.json", "testler/motor/veri/TK01_r08.json", "is_emri/adaylar/PA39.json",
@@ -147,8 +187,9 @@ def test_pencere_odasinda_kalir_t_ekleri_degismez():
 
 
 def test_ortadaki_t_odayi_keser_pa21_banyo():
-    """PA-21: banyonun vasistası (386,5–512) yerinde; oda duvarı 323,75'teki T'de biter, pencere yatak odasına geçmez; uyarı yazılır."""
-    ie = _oku("is_emri/adaylar/PA21.json")
+    """PA-21: banyonun penceresi (386,5–512) yerinde; oda duvarı 323,75'teki T'de biter, pencere yatak odasına geçmez; uyarı yazılır.
+    D-124'ten beri banyonun vasistası kurala hiç girmez; V6 yolu banyo kuru oda ve pencere 120'lik yapılarak sınanır."""
+    ie = _kuru_oda(_oku("is_emri/adaylar/PA21.json"), "BANYO 1")
     once, sonra = G.kur(copy.deepcopy(ie)), G.kur(_anahtarli(ie))
     d0 = next(d for d in once.duvarlar if d.tur == "dis" and d.yon == "x" and abs(d.c - 1024) < 1e-6)
     d1 = next(d for d in sonra.duvarlar if d.tur == "dis" and d.yon == "x" and abs(d.c - 1024) < 1e-6)
