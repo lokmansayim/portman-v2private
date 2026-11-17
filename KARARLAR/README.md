@@ -138,6 +138,7 @@ Biçim: karar · gerekçe · reddedilen seçenekler · geri alma yolu · kim ve 
 | [D-115](D-115.md) | Havuz evlerinin hazır 9 çatı seçeneği havuzda (İE-44): PA-08-C, PA-11-B, PA-14-B, PA-19-C, PA-24-C, PA-25-C, PA-31-B, PA-33-C, PA-34-C (C beşik + salonda çıkıntısız cumba, B beşik; D-83 kuralı); her biri Motor doğrulamasından ve havuz denetiminden (D-112) geçti, sonucu kaydın `kaynak.havuz_denetimi`'nde; denetimi bekleyen 16 seçenek BK-45/BK-46 birleşince aynı sayfayla yeniden Lokman'a gelir; çizilemeyen 51 girmez | 16.11 (Lokman kartı 08:46:30 "9'u girsin, bekleyenler size gelsin") |
 | [D-118](D-118.md) | Prefabrikte standart yükseklik 2,50 m (pano 2500 mm, lento 50 cm); İş Emri yazmazsa Motor, yükleme listesi, talep formu ve teklif formu 2,50 alır; 2,80 ve 3,00 m yalnız yazılırsa (D-14); havuzda 44 prefabrikten 43'ü 2,50, 1'i 2,80 (143 m², aynen kalır, D-103); hiçbir çıktı değişmez; mühür M-19 | 16.11 (Lokman 20:58:27 "kesin kural bunu mühürle 2,50 m") |
 | [D-121](D-121.md) | Makas aksı kaymaz (saçak duvarında ek tam ya da yarım aksta; hakem HD-12, uyarı); makasa dik dış duvarda tek panoluk pencere odanın duvar parçasının tam ortasında, yan 125,5'i aşarsa 125,5 pencere yanında, kalan uçta; yalnız yeni çizilen evler (`dizilim.dik_duvar_pencere: tam_orta`); çizime yeni aks çıkmaz; kırma çatıda ve ortadaki T'li odada kural yok (V6, V7); BK-52, PC-46 | 16.11 (Lokman 20:56:44; kartlar 21:14:20, 21:15:33, 21:36:53, 21:38:12, 21:44:20) |
+| [D-124](D-124.md) | Çizim okumada dış kapı bayi çiziminde nerede çiziliyse orada: içeride çizili ve önü cephe duvarsızsa önü açık giriş nişi (GİRİŞ, gövdedeki açık mahal; TK-01 r06 gibi), kapı nişle iç oda arasında; cephede çiziliyse cephede (ANTRE bugünkü gibi); çelikte niş çizilmez; BK-55 | 17.11 (Lokman 08:33:02 yorum; kart 08:37:52 "Çizimde nasılsa öyle") |
 
 ## Numara defteri (14 Ekim 2026, BK-08; CIO planı › Görev 3)
 
@@ -254,7 +255,8 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | D | D-119 | (başka sohbet: kutu profil fiyatı çeyrek boy; PR #261) | alındı (16.11) |
 | D | D-120 | (başka sohbet: Kasım 2026 fiyat istisnası; PR #261) | alındı (16.11) |
 | D | D-121 | makas aksı kaymaz; makasa dik duvarda pencere her zaman odanın tam ortasında, yan 125,5'i aşarsa 125,5 pencere yanında, kalan uçta; yalnız yeni çizilen evler (anahtar); çizime yeni aks çıkmaz (BK-52, PC-46; Lokman 16.11 20:56:44, kartlar 21:14:20, 21:15:33, 21:36:53, 21:38:12, 21:44:20) | yazıldı (16.11; aks kayma sohbeti, `claude/project-thread-qnrohi`) |
-| D | **D-122** | — | **sıradaki boş** |
+| D | D-124 | çizim okumada dış kapı çizimde nasılsa öyle; içerideyse önü açık giriş nişi (BK-55; Lokman 17.11 kart 08:37:52) | yazıldı (17.11; çizim okuma dış kapı sohbeti, `claude/project-thread-mjv1ao`) |
+| D | **D-125** | — | **sıradaki boş** (D-122, D-123 başka sohbetlerde alındı; numara defteri) |
 | İE | İE-01–İE-08 | bu depo (`main`) | yazıldı |
 | İE | İE-09 | model atölyesi: kontrollü model üretimi ve banka hattı (Görev 6e; pano 30; P6001 güncellemesi kapsam dışı) | alındı (16.10; `claude/gorev-6e-model-atolyesi-rnhtcp`; PR-1 banka hattı 29.10, `claude/project-thread-rhjgzv`) |
 | İE | İE-10, İE-11, İE-12 | prefabrik hattı (PR #12, PR #14, `ie-12-prefabrik-bayi-paftasi`) | `main`'e BK-12 ile (PR-1: motor ve bayi paftası; liste ve mühür kıyası sonraki PR'larda) |
@@ -326,7 +328,8 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | BK | BK-43 | (başka sohbet: CI doğrulamasında pytest dosya dosya parçalara bölünür; gece bakım işi) | alındı (16.11) |
 | BK | BK-44 … BK-51 | (başka sohbetler; numara defteri) | alındı (16.11) |
 | BK | BK-52 | Pano Motor'unda makas aksı kaymaz, makasa dik duvarda pencere tam ortada (anahtar `dizilim.dik_duvar_pencere`; hakem HD-12) (D-121, PC-46; `claude/project-thread-qnrohi`) | yazıldı (16.11) |
-| BK | **BK-53** | — | **sıradaki boş** |
+| BK | BK-55 | Çizim okumada önü açık giriş nişi (`beyin/gorsel_okuma.py`, işlev `giris`) (D-124; `claude/project-thread-mjv1ao`) | yazıldı (17.11) |
+| BK | **BK-56** | — | **sıradaki boş** (BK-53, BK-54 başka sohbetlerde alındı; numara defteri) |
 
 ## 27 Eylülde Lokman'ın verdiği kararlar
 
