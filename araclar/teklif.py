@@ -9,7 +9,8 @@ ile defterden; fiyat uydurulmaz, fiyatı olmayan satır boş kalır ve sayılır
 
 - Fiyat kaynağı (D-72, mühür M-15): yeni teklif `--crm` ile CRM'in o günkü fiyatından (sunucunun günlük anlık görüntüsü,
   `araclar/crm_fiyat.py`). `--defter` yalnız kapanmış teklifi o günkü defteriyle aynen vermek için (TK-04 r08, TK-05). Kaynak
-  verilmezse teklif üretilmez (`fiyatla.defter_sec`).
+  verilmezse teklif üretilmez (`fiyatla.defter_sec`). `--istisna kurallar/fiyat/istisna/<ay>.json` (D-120) CRM defterine yalnız CRM'in
+  fiyat vermediği yerde Lokman'ın o ayki listesinden fiyat ekler; dosya `--tarih`'in (verilmezse bugünün) ayı dışında kullanılmaz.
 
 - Proje kararları İş Emri'ndedir (D-28): isteğe bağlı `teklif` bölümü, `{"tavan": ["asma", "ters"], "kosullar": {...}}`. Motor bu
   bölümü okumaz.
@@ -39,6 +40,7 @@ ile defterden; fiyat uydurulmaz, fiyatı olmayan satır boş kalır ve sayılır
 from __future__ import annotations
 
 import argparse
+import datetime
 import json
 import re
 import sys
@@ -307,12 +309,19 @@ def main(argv: list[str] | None = None) -> int:
     a.add_argument("--defter", type=Path, help="kapanmış teklifin o günkü defteri"); a.add_argument("--oneri", action="store_true")
     a.add_argument("--tarih", help="teklif PDF'inin tarihi, GG.AA.YYYY (verilmezse bugün)")
     a.add_argument("--bayi", type=Path, help="bayi formunun girdisi (D-64; pazar, bayinin bilgileri, ödeme satırları)")
+    a.add_argument("--istisna", type=Path, help="ayın istisna dosyası (D-120): CRM'in fiyat vermediği yere Lokman'ın listesinden")
     o = a.parse_args(argv)
     if o.tarih and not re.fullmatch(r"\d{2}\.\d{2}\.\d{4}", o.tarih):
         a.error(f"--tarih GG.AA.YYYY olmalı: {o.tarih}")
     ie = json.loads(o.is_emri.read_text(encoding="utf-8"))
     secim = secenekler(ie, [t.strip() for t in o.tavan.split(",")] if o.tavan else None)
-    defter = F.defter_sec(o.crm, o.defter)
+    if o.istisna and o.defter:
+        a.error("--istisna --defter ile verilmez (D-120: istisna yalnız CRM defterine)")
+    if o.istisna:
+        gun = datetime.datetime.strptime(o.tarih, "%d.%m.%Y").date() if o.tarih else None
+        defter = F.istisnali_defter_sec(o.crm, o.istisna, gun)
+    else:
+        defter = F.defter_sec(o.crm, o.defter)
     try:
         T = uret(ie, defter, secim, kosullari_oku(o.kosullar, ie), o.oneri)
     except PL.ListeYazilmaz as e:
