@@ -1,6 +1,6 @@
 {
  "sema": 1,
- "surum": "2026-11-16-r10",
+ "surum": "2026-11-17-r11",
  "karar": "D-72",
  "muhur": "M-15",
  "aciklama": "Fiyat defteri kaleminin CRM stok fiyatları API'sindeki karşılığı ve fiyatın nasıl hesaplandığı (İE-35). Fiyat yazmaz: fiyat her gün CRM'den gelir, `araclar/crm_fiyat.py` bu dosyayla defter üretir. Anahtarlar ve birimler fiyat defterinin (defter_2026-11 r13) kalemleri; Motor'un listesindeki anahtar. D-72'den sonra defter kapandı: Motor'un yeni anahtarı yalnız buraya, hattın kalemlerinin sonuna girer (r05, TK-06); yeni bant aralığı da bantların sonuna (r07, 280 ve 300 cm yükseklik). Eşleme değişikliği (yeni kalem, Lokman'ın birim cevabı, Samet'in CRM'e eklediği ürün) bu dosyaya PR'la girer; `kaynak` bölümü mühürlü (M-15).",
@@ -2078,6 +2078,20 @@
      "esleme": "kural",
      "birim": "adet",
      "not": "2500'lük pencere latasının (KG3) boyla orantılısı (2800 / 2500): Lokman 14 Kasım 2026 08:28:03 UTC kartı (cmsg_01UAFvcnfVuTR1wfFux5fQPPUBALw1K3LRVk1XvVW3W5yq, \"Fugalı evdeki iki öneri fiyat onaylansın mı?\"), seçim \"İkisi de onaylı\". CRM'de 2800'lük lata yok (r08)"
+    },
+    "Karkaslı özel pencere panosu (180/180) | 100 × 2500 × 2500": {
+     "kod": null,
+     "esleme": "CRM'de yok",
+     "birim": "adet",
+     "not": "CRM'de yalnız 250/180 var (KP13, 100 × 3750 × 2500); 180/180 yok (D-72: CRM'e eklenmeli; 85 m² katalog evi P8501). Kasım 2026: istisna (D-120), Lokman 17 Kasım 05:49:59 kartı",
+     "kdv_grubu": "Yapıştırma pano"
+    },
+    "PVC pencere | 180/180": {
+     "kod": null,
+     "esleme": "CRM'de yok",
+     "birim": "adet",
+     "not": "CRM'de PVC pencere yok; Lokman 9 Kasım kartı: pencere de CRM'den fiyatlanır, Samet CRM'e ekler (D-72); 85 m² katalog evi P8501. Kasım 2026: istisna (D-120), Lokman 17 Kasım 05:49:59 kartı",
+     "kdv_grubu": "Pencereler"
     }
    },
    "bantlar": [
