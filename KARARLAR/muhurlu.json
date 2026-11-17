@@ -1280,6 +1280,75 @@
      "karar": "D-104"
     }
    ]
+  },
+  {
+   "kod": "M-19",
+   "konu": "Prefabrik standart yükseklik 2,50 m",
+   "kural": "Prefabrikte standart yükseklik 2,50 m: pano 2500 mm, lento 50 cm (pencere ve kapı üst kotu 200 cm). İş Emri, talep ya da form yükseklik yazmazsa Motor, yükleme listesi, talep formu ve teklif formu 2,50 alır. 2,80 ve 3,00 m yalnız İş Emri yazarsa (D-14); başka ölçü yok. Uygulanmış projeler aynen kalır (D-103). Çelik kapsam dışı.",
+   "kararlar": [
+    "D-118",
+    "D-14"
+   ],
+   "pr": [
+    260
+   ],
+   "lokman": [
+    {
+     "tarih": "2026-11-16 20:57",
+     "soz": "prefabrik te standart yüksekli ne?",
+     "mesaj": "cmsg_01UAFvcnfVuTR1wfFux5fQPPLVusfwaqiQRWan8Micrr3q"
+    },
+    {
+     "tarih": "2026-11-16 20:58",
+     "soz": "kesin kural bunu mühürle 2,50 m",
+     "mesaj": "cmsg_01UAFvcnfVuTR1wfFux5fQPPNapK6PjTGwyccX8fx27RLQ"
+    },
+    {
+     "tarih": "2026-11-16 21:13",
+     "soz": "Karar kartı \"2,50 m'de lento 50 cm, 2,80 ve 3,00 seçenek kalsın mı?\" → \"Evet, bugünkü gibi\" (seçenek: \"Standart 2,50 m, lento 50 cm. 2,80 m (lento 80 cm) ve 3,00 m (lento 100 cm) yalnız bayi isterse. Bu hâl mühürlenir.\")",
+     "mesaj": "cmsg_01UAFvcnfVuTR1wfFux5fQPPVZC1GyE8bw7JGABwLzRwQi"
+    }
+   ],
+   "kilitler": [
+    {
+     "yer": "motor/geometry.py::PANO_YUKSEKLIKLERI_CM",
+     "iz": "68d1113379ad36b9"
+    },
+    {
+     "yer": "motor/geometry.py::PENCERE_UST_KOTU_CM",
+     "iz": "b3698519617794e3"
+    },
+    {
+     "yer": "kurallar/pencere/pencereler.json#kural.ust_kot_cm",
+     "iz": "dd0845dbb2636695"
+    },
+    {
+     "yer": "motor/prefabrik_liste.py::STANDART_PANO_CM",
+     "iz": "8be89f58e8c37e33"
+    },
+    {
+     "yer": "kurallar/model/duvar_tipleri.json#tipler.PE-DIS-100.pano.yukseklik_cm",
+     "iz": "93b4edbf267d24b3"
+    },
+    {
+     "yer": "kanal/talep_formu.py::STANDART[yukseklik]",
+     "iz": "5790a680fefedbf1"
+    },
+    {
+     "yer": "kanal/talep_formu.py::YUKSEKLIK",
+     "iz": "4965501d14cc348b"
+    },
+    {
+     "yer": "kanal/formlar/prefabrik.json#screens[id=OZELLIK_P].layout.children[name=yukseklik]",
+     "iz": "63820753edd6c27a"
+    },
+    {
+     "yer": "testler/motor/test_d118_standart_yukseklik.py",
+     "iz": "ad42c1ccba1c1e08"
+    }
+   ],
+   "durum": "mühürlü",
+   "gecmis": []
   }
  ]
 }

@@ -50,12 +50,12 @@ def test_tk04_r08_toplami(tmp_path):
     """TK-04 r08 (asma tavan): 45. hafta defteriyle 335.467,98 TL (Patron'a 23:10 kartında söylenen önizleme), r10 defteriyle 374.965,01 TL
     (22:49 kartı). 121 satır, onay bekleyen öneri yok. Çırpı ipi r10'da fiyatsız (bilerek boş, D-36); r12'de 0 TL, hediye (D-65, Lokman 6 Kasım
     21:29): satır fiyatlı, toplam aynı."""
-    for ad, ek, toplam, fiyatsiz in (("yeni", ["--defter", str(YENI)], 335467.98, []), ("eski", ["--defter", str(ESKI)], 374965.01, ["Çırpı ipi | adet"])):
+    for ad, ek, toplam, fiyatsiz in (("yeni", ["--defter", str(YENI)], 334147.98, []), ("eski", ["--defter", str(ESKI)], 373645.01, ["Çırpı ipi | adet"])):
         assert TK.main([str(TK04), str(tmp_path / ad), "--tavan", "asma", "--tarih", "05.11.2026", *ek]) == 0
         T = json.loads((tmp_path / ad / "TK04_teklif.json").read_text(encoding="utf-8"))
         oz = T["secenekler"][0]["fiyat"]["ozet"]
         assert (oz["toplam"], oz["satir"], [f["anahtar"] for f in oz["fiyatsiz"]], oz["oneri_bekleyen"]["satir"]) == \
-            (toplam, 121, fiyatsiz, 0), ad
+            (toplam, 120, fiyatsiz, 0), ad                                     # D-122: şase pul satırı yok (önce 121; yeni 335.467,98)
     cirpi = [r for r in T["secenekler"][0]["fiyat"]["satirlar"] if r["kalem"] == "Çırpı ipi"]
     assert [(r["birim_fiyat"], r["tutar"]) for r in cirpi] == [(None, None)]                 # eski defter (son koşu)
     T = json.loads((tmp_path / "yeni" / "TK04_teklif.json").read_text(encoding="utf-8"))
@@ -200,5 +200,5 @@ def test_tk05_teklifi_onayli_fiyatlarla(tmp_path):
     T = json.loads((tmp_path / "c" / "TK05_teklif.json").read_text(encoding="utf-8"))
     assert T["defter_surumu"] == "2026-11-07-r13" and not T["oneri_dahil"]
     oz = T["secenekler"][0]["fiyat"]["ozet"]
-    assert (oz["toplam"], oz["satir"], oz["fiyatsiz"], oz["oneri_bekleyen"]) == (172548.93, 110, [], {"satir": 0, "tutar": 0.0})
+    assert (oz["toplam"], oz["satir"], oz["fiyatsiz"], oz["oneri_bekleyen"]) == (171833.93, 109, [], {"satir": 0, "tutar": 0.0})   # D-122: şase pul yok (önce 172.548,93, 110)
     assert not [s for s in T["secenekler"][0]["fiyat"]["satirlar"] if "öneri" in s["durum"]]
