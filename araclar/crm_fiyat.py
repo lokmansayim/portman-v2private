@@ -30,7 +30,7 @@ import datetime
 import json
 import re
 import sys
-from decimal import ROUND_HALF_UP, Decimal
+from decimal import ROUND_CEILING, ROUND_HALF_UP, Decimal
 from pathlib import Path
 
 KOK = Path(__file__).resolve().parents[1]
@@ -109,6 +109,13 @@ def _boy(anahtar: str) -> Decimal:
     return Decimal(m.group(1).replace(",", "."))
 
 
+def boy_tamamla(boy: Decimal, adim: Decimal) -> Decimal:
+    """Boyu `adim`ın katına yukarı tamamlar; tam katı aynen kalır. D-119 (Lokman 16 Kasım 2026 21:10:56, kart 21:12:53 "Doğru"): kutu
+    profilin tam boyu 6 m; 150 cm ve altı çeyrek, 151–300 cm yarım, 301–450 cm 3/4, 451–600 cm tam boy fiyatı; 6 m'yi aşan parçada her
+    6 m tam, kalan aynı kuralla. Bu, boyu 1500 mm'nin katına yukarı tamamlayıp 6 m fiyatıyla orantılamakla aynıdır."""
+    return (boy / adim).to_integral_value(rounding=ROUND_CEILING) * adim
+
+
 def _olcu_yaz(x: str | None) -> str:
     return re.sub(r"\s+", "", x or "").lower()
 
@@ -154,7 +161,10 @@ def hesapla(g: dict, dizin: dict, anahtar: str = "") -> dict:
     elif h == "carp":
         x = p[0] * Decimal(str(g["carpan"]))
     elif h == "boy_m":                                           # esas boy: metre (1000) ya da kutu profilde 6 m (6000, D-75)
-        x = p[0] * _boy(anahtar) / Decimal(str(g.get("esas_boy_mm", 1000)))
+        boy = _boy(anahtar)
+        if "boy_adim_mm" in g:                                   # D-119: kutu profilde boy 1500 mm'nin katına yukarı (çeyrek boy)
+            boy = boy_tamamla(boy, Decimal(str(g["boy_adim_mm"])))
+        x = p[0] * boy / Decimal(str(g.get("esas_boy_mm", 1000)))
     elif h == "ort":
         w = [Decimal(str(a)) for a in g["agirlik"]]
         x = sum(a * b for a, b in zip(p, w)) / sum(w)
@@ -243,6 +253,9 @@ def esleme_denetle(E: dict) -> list[str]:
                 sorun.append(f"{yer}: {e}")
         if "esas_boy_mm" in g and (h != "boy_m" or not isinstance(g["esas_boy_mm"], (int, float)) or g["esas_boy_mm"] <= 0):
             sorun.append(f"{yer}: esas_boy_mm yalnız boy hesabında ve sıfırdan büyük olur")
+        if anahtar and "boy_adim_mm" in g and (h != "boy_m" or isinstance(g["boy_adim_mm"], bool) or not isinstance(g["boy_adim_mm"], (int, float))
+                                   or g["boy_adim_mm"] <= 0):
+            sorun.append(f"{yer}: boy_adim_mm yalnız boy hesabında ve sıfırdan büyük olur")
         for a in ("icerir", "crm_olcu"):
             if a in g and (not isinstance(g[a], str) or not g[a].strip()):
                 sorun.append(f"{yer}: {a} boş olmayan yazı olur")
@@ -383,6 +396,105 @@ def defter_uret(A: dict, E: dict | None = None) -> dict:
         "crm": {"generated_at": A["generated_at"], "kalem": len(A["data"]), "esleme_surumu": E.get("surum"),
                 "durumlar": dict(sorted(sayim.items())), "fiyatsiz_kurallar": fiyatsiz_kurallar},
     }
+
+
+# ── ayın istisnası (D-120) ────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+ISTISNA_KAYNAK = "ISTISNA"
+ISTISNA_DURUM = "Lokman istisnası"
+
+
+def istisna_oku(p: Path | str, tarih: datetime.date) -> dict:
+    """İstisna dosyası (`kurallar/fiyat/istisna/<ay>.json`, D-120): biçim ve geçerlilik. Tarih `gecerli` aralığının dışındaysa durur:
+    istisna yalnız kendi ayında kullanılır, sonra fiyat yine yalnız CRM'den (D-72, M-15)."""
+    I = oku(p)
+    if I.get("sema") != "portman.fiyat_istisnasi/1" or not I.get("dayanak") or not I.get("karar"):
+        raise CrmHatasi(f"istisna dosyası biçimi: sema portman.fiyat_istisnasi/1, karar ve dayanak olur ({p})")
+    try:
+        bas, bit = (datetime.date.fromisoformat(I["gecerli"][a]) for a in ("bas", "bit"))
+    except (KeyError, TypeError, ValueError):
+        raise CrmHatasi(f"istisna dosyasında gecerli.bas ve gecerli.bit (YYYY-AA-GG) yok ({p})") from None
+    if not bas <= tarih <= bit:
+        raise CrmHatasi(f"istisna {I['karar']} {bas}–{bit} arasında geçerli; teklif tarihi {tarih}: fiyat yalnız CRM'den (M-15)")
+    for kod, x in (I.get("kod_fiyatlari") or {}).items():
+        if not _fiyat_mi(x.get("fiyat")) or not x.get("fiyat") or not x.get("dayanak"):
+            raise CrmHatasi(f"istisna › kod {kod}: sıfırdan büyük fiyat ve dayanak olur")
+    for hat, K in (I.get("kalemler") or {}).items():
+        for k, x in K.items():
+            if not _fiyat_mi(x.get("fiyat")) or x.get("fiyat") is None or not x.get("birim") or not x.get("dayanak"):
+                raise CrmHatasi(f"istisna › {hat} › {k}: fiyat, birim ve dayanak olur")
+            if "kdv_grubu" in x and x["kdv_grubu"] not in (oku(ESLEME).get("kdv") or {}).get("gruplar", {}):
+                raise CrmHatasi(f"istisna › {hat} › {k}: bilinmeyen KDV grubu {x['kdv_grubu']!r}")
+    for hat, kalemler in (I.get("atla") or {}).items():
+        if not isinstance(kalemler, list) or not all(isinstance(k, str) and k.strip() for k in kalemler):
+            raise CrmHatasi(f"istisna › atla › {hat}: kalem adları listesi olur")
+    return I
+
+
+def istisnali_defter(A: dict, I: dict, E: dict | None = None) -> dict:
+    """CRM defteri + ayın istisnası (D-120; Lokman 16 Kasım 2026 21:13:11 kartı "Bu ay istisna"). İstisna yalnız CRM'in fiyat vermediği
+    yerde uygulanır, CRM fiyatı hiçbir yerde ezilmez:
+    - `kod_fiyatlari`: CRM'de fiyatı 0 ya da boş olan kodun fiyatı; eşlemenin hesabı aynen işler (ör. kutu profil, D-119).
+    - `kalemler`: defterde fiyatsız (CRM'de yok) kalemin fiyatı; KDV oranı defterdeki kayıttan (D-76).
+    - `atla`: hattın listesinden bu ay çıkan kalemler (kalem adı; Motor'un yükleme listesi değişmez).
+    İstisnadan gelen her kayıt `kaynak` ISTISNA ve durum "Lokman istisnası" taşır; defterin `istisna` bölümü neyin uygulandığını sayar."""
+    E = E if E is not None else oku(ESLEME)
+    A2 = json.loads(json.dumps(A))
+    kodlar = I.get("kod_fiyatlari") or {}
+    uygulanan_kod, crm_fiyatli = [], []
+    for x in A2["data"]:
+        k = x["urunkodu"].strip()
+        if k in kodlar:
+            if x.get("fiyat"):
+                crm_fiyatli.append(k)
+            else:
+                x["fiyat"] = kodlar[k]["fiyat"]
+                uygulanan_kod.append(k)
+    D = defter_uret(A2, E)
+    D["kaynaklar"][ISTISNA_KAYNAK] = {"ad": I["kaynak"]["ad"], "kisa": I["kaynak"]["kisa"], "tarih": I["kaynak"].get("tarih"),
+                                      "patron_verdi": True, "not": f"{I['karar']}: {I['dayanak']}"}
+    isaretli = set(uygulanan_kod)
+
+    def isaretle(g: dict) -> bool:
+        if g.get("kaynak") == "CRM" and isaretli & set(g.get("kaynak_satir") or []):
+            g["kaynak"], g["istisna"] = ISTISNA_KAYNAK, I["karar"]
+            dayanak = "; ".join(kodlar[k]["dayanak"] for k in g["kaynak_satir"] if k in isaretli)
+            for a in ("not", "dayanak"):
+                if a in g:
+                    g[a] = "; ".join(x for x in (g[a], f"{I['karar']} istisnası: {dayanak}") if x)
+            if g.get("durum") is not None:
+                g["durum"] = ISTISNA_DURUM
+            return True
+        return False
+
+    sayim = {"kod": sorted(isaretli), "crm_fiyatli_kod": sorted(set(crm_fiyatli)), "kalem": [], "crm_fiyatli_kalem": []}
+    for hat, H in D["hatlar"].items():
+        for g in H["kalemler"].values():
+            isaretle(g)
+        for b in H.get("boy_onerileri") or []:
+            isaretle(b)
+        if H.get("makas_kurali"):
+            isaretle(H["makas_kurali"])
+        for k, x in ((I.get("kalemler") or {}).get(hat) or {}).items():
+            g = H["kalemler"].get(k)
+            if g is not None and g.get("fiyat") is not None:
+                sayim["crm_fiyatli_kalem"].append(f"{hat} › {k}")
+                continue
+            onceki = g or {}
+            H["kalemler"][k] = {"fiyat": x["fiyat"], "birim": x["birim"], "kaynak": ISTISNA_KAYNAK, "kaynak_satir": None,
+                                "kaynak_kalem": None, "durum": ISTISNA_DURUM, "onay": True, "istisna": I["karar"],
+                                "not": f"{I['karar']} istisnası: {x['dayanak']}", **{a: x[a] for a in ("teklif_adi", "teklif_olcu") if x.get(a)},
+                                **{a: onceki[a] for a in ("kdv", "kdv_grubu") if a in onceki}}
+            if x.get("kdv_grubu") and H["kalemler"][k].get("kdv") is None:      # eşlemede grubu olmayan kalem (D-76 grupları)
+                H["kalemler"][k] |= {"kdv": E["kdv"]["gruplar"][x["kdv_grubu"]], "kdv_grubu": x["kdv_grubu"]}
+            sayim["kalem"].append(f"{hat} › {k}")
+    for hat, kalemler in (I.get("atla") or {}).items():         # Lokman'ın bu listeden çıkardığı kalemler (ad); Motor listesi aynen
+        if hat in D["hatlar"]:
+            D["hatlar"][hat]["atla"] = list(D["hatlar"][hat].get("atla") or []) + [k for k in kalemler if k not in (D["hatlar"][hat].get("atla") or [])]
+    sayim["atla"] = I.get("atla") or {}
+    D["surum"] += f" + istisna {I['karar']}"
+    D["istisna"] = {"karar": I["karar"], "ad": I["ad"], "gecerli": I["gecerli"], "dayanak": I["dayanak"], **sayim}
+    return D
 
 
 def eksikler(A: dict, E: dict | None = None) -> dict:

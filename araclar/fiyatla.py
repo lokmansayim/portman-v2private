@@ -24,6 +24,10 @@ işaretlenir; fiyatı olmayan satır boş kalır, özette sayılır. Uygulanmaya
 (toplama girmez; teklif sarı gösterir, özette `oneri_bekleyen`). Defterde kaydı olan anahtar yalnız kendi kaydıyla fiyatlanır, banda
 düşmez. Basit yöntemin m² fiyatı defterde henüz yok: `--alan` ve `--m2-fiyat` ile verilir; verilmezse fark hesaplanmaz. `--esik` verilirse fark eşiği aşınca UYARI yazar (Z-10: eşik dışında mühendis inceler; eşik henüz
 kararla konmadı, varsayılan yok).
+
+Ayın istisnası (D-120; Lokman 16 Kasım 2026 21:13:11 kartı "Bu ay istisna"): `--istisna kurallar/fiyat/istisna/<ay>.json` CRM defterine
+yalnız CRM'in fiyat vermediği yerde Lokman'ın listesinden fiyat ekler (`araclar/crm_fiyat.istisnali_defter`); dosya kendi ayının dışında
+kullanılmaz. `defter_sec` (M-15) değişmedi.
 """
 from __future__ import annotations
 import argparse, json, re, sys
@@ -51,6 +55,21 @@ def defter_sec(crm: Path | str | None = None, defter: Path | str | None = None) 
         return crm_fiyat.defter_uret(crm_fiyat.anlik_oku(crm))
     except crm_fiyat.CrmHatasi as e:
         raise SystemExit(f"DUR: CRM anlık görüntüsü: {e}") from None
+
+
+def istisnali_defter_sec(crm: Path | str | None, istisna: Path | str, tarih=None) -> dict:
+    """CRM defteri + ayın istisnası (D-120, `araclar/crm_fiyat.istisnali_defter`): istisna yalnız `--crm` ile ve kendi ayında
+    (`tarih`, verilmezse bugün) kullanılır; CRM fiyatı ezilmez. Kapanmış teklifin `--defter`'iyle birlikte verilmez."""
+    if not crm:
+        raise SystemExit("DUR: istisna yalnız CRM defterine eklenir (D-120): --crm <CRM anlık görüntüsü> verin")
+    if str(KOK) not in sys.path:
+        sys.path.insert(0, str(KOK))
+    import datetime
+    from araclar import crm_fiyat
+    try:
+        return crm_fiyat.istisnali_defter(crm_fiyat.anlik_oku(crm), crm_fiyat.istisna_oku(istisna, tarih or datetime.date.today()))
+    except crm_fiyat.CrmHatasi as e:
+        raise SystemExit(f"DUR: {e}") from None
 
 
 def oku(p: Path | str) -> dict:
@@ -314,8 +333,11 @@ def main(argv=None) -> int:
     a.add_argument("--defter", help="kapanmış teklifin o günkü defteri (ör. kurallar/fiyat/defter_2026-11.json)")
     a.add_argument("--oneri", action="store_true"); a.add_argument("--alan", type=float); a.add_argument("--m2-fiyat", type=float)
     a.add_argument("--esik", type=float); a.add_argument("--json"); a.add_argument("--excel"); a.add_argument("--duzeltme")
+    a.add_argument("--istisna", help="ayın istisna dosyası (D-120; kurallar/fiyat/istisna/<ay>.json): CRM'in fiyat vermediği yere")
     o = a.parse_args(argv)
-    L, D = oku(o.liste), defter_sec(o.crm, o.defter)
+    if o.istisna and o.defter:
+        a.error("--istisna --defter ile verilmez (D-120: istisna yalnız CRM defterine)")
+    L, D = oku(o.liste), (istisnali_defter_sec(o.crm, o.istisna) if o.istisna else defter_sec(o.crm, o.defter))
     if o.duzeltme:
         L = duzelt(L, json.loads(Path(o.duzeltme).read_text(encoding="utf-8")), o.hat or hat_bul(L))
     R = fiyatla(L, D, o.hat, o.oneri)

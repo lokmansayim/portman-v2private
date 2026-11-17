@@ -1247,6 +1247,39 @@
     "testler/motor/test_d109_kose_verandasi.py::test_ara_kolon_is_emri_dikmesi_hata",
     "testler/motor/test_d109_kose_verandasi.py::test_rehber_ara_kolonlu_verandayi_kurmaz"
    ]
+  },
+  {
+   "kod": "PC-46",
+   "baslik": "Makas aksı kaymaz; makasa dik duvarda pencere odanın tam ortasında",
+   "kural": "Makasın oturduğu (saçak) duvarlarda pano ekleri tek bir 62,75 cm ızgarasında kalır: ek tam ya da yarım aksta, yarım pano serbest; havuz denetimi HD-12 ızgara dışındaki eki uyarı diye yazar. Makasa dik dış duvarda (makas x yönündeyse x yönündeki ön ve arka duvar) İş Emri `yapi.dizilim.dik_duvar_pencere: \"tam_orta\"` yazarsa Motor tek panoluk (125,5) pencereyi duvarın o aralığının (köşeden köşeye, köşeden T'ye ya da T'den T'ye; aralıkta başka açıklık ya da panonun ortasına düşen T yoksa) tam ortasına alır: pencere yanındaki iki parça eşit (60 m² küçük yatak odası 94,125 + 125,5 + 94,125). Yan 125,5'i aşarsa 125,5'lik panolar pencerenin yanında, kalan köşede ya da T'de (PA-06 kalkanı 44,875 + 125,5 + 125,5 + 125,5 + 44,875). 0,05 cm'den kısa kıymık kalırsa pencere kaymaz. Kırma çatıda makasa dik duvar da makas taşır: kural uygulanmaz, hakem iki yönü de denetler. Ortalanmayan her pencere için uyarı yazılır. Çizime yeni aks çıkmaz; akslar ızgaradaki gibi kalır. Saçak duvarı, iç duvar ve kapı yerinde. Anahtarsız İş Emri aynen (D-103, yalnız yeni çizilen evler).",
+   "karar": "D-121",
+   "lokman": {
+    "tarih": "2026-11-16",
+    "saat": "21:44",
+    "soz": "20:56:44 \"tamam çok güzel oldu istediğim bu bir yönerge veriyorum makas yönündeki akslar çok önemli makasları o akslara oturtuyoruz ama makas yönüne dik olan akslar kayabilir ama yine kurallı kaysın\"; 20:50:02 \"yatak odası 2 120/180 penceresini tam ortaya al yani 125,5 + 62,75 = 188,25 / 2 = 94,125 sağına ve soluna koy bu panoları\"; kart 21:14:20 \"Okuma 1: aks kaymaz, yarım pano olur\" (soru: \"Makas aksları için hangi okuma doğru?\"); kart 21:15:33 \"Her zaman tam ortada\" (soru: \"Ön ve arka duvarda pencere ne zaman odanın ortasına kaysın?\"); kart 21:36:53 \"B) 125,5 pencere yanında, kalan uçta\" (soru: \"Pencerenin yanı 125,5'i aşınca nasıl bölünsün?\"); kart 21:38:12 \"Yalnız yeni çizilen evlere\" (soru: \"Pencere ortalama kuralı hangi evlere uygulansın?\"); kart 21:44:20 \"Hayır, aks çıkmasın\" (soru: \"Pencere ortalanınca çizime A′ gibi yeni aks çıksın mı?\")"
+   },
+   "kod_yeri": [
+    "motor/geometry.py::_dik_duvar_pencere",
+    "motor/geometry.py::_t_eki_var",
+    "motor/geometry.py::_t_noktalari",
+    "motor/geometry.py::makas_aksi_denetimi",
+    "araclar/havuz_denetimi.py::denetle_prefabrik"
+   ],
+   "test": [
+    "testler/motor/test_d121_dik_duvar_pencere.py::test_hedef_ornek_60m2",
+    "testler/motor/test_d121_dik_duvar_pencere.py::test_anahtarsiz_eski_yol",
+    "testler/motor/test_d121_dik_duvar_pencere.py::test_uzun_yan_125_pencere_yaninda_kalan_ucta",
+    "testler/motor/test_d121_dik_duvar_pencere.py::test_kisa_yan_her_zaman_ortada",
+    "testler/motor/test_d121_dik_duvar_pencere.py::test_sacak_duvari_ve_ic_duvar_degismez",
+    "testler/motor/test_d121_dik_duvar_pencere.py::test_pencere_dis_olcu_ve_pano_sayisi",
+    "testler/motor/test_d121_dik_duvar_pencere.py::test_bilinmeyen_deger_hata",
+    "testler/motor/test_d121_dik_duvar_pencere.py::test_anahtarla_havuzun_her_evi_kurulur",
+    "testler/motor/test_d121_dik_duvar_pencere.py::test_makas_aksi_denetimi",
+    "testler/motor/test_d121_dik_duvar_pencere.py::test_pencere_odasinda_kalir_t_ekleri_degismez",
+    "testler/motor/test_d121_dik_duvar_pencere.py::test_ortadaki_t_odayi_keser_pa21_banyo",
+    "testler/motor/test_d121_dik_duvar_pencere.py::test_kirma_catida_uygulanmaz",
+    "testler/motor/test_d121_dik_duvar_pencere.py::test_makas_aksi_denetimi_kirma_iki_yon"
+   ]
   }
  ]
 }
