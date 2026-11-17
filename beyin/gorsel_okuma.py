@@ -53,7 +53,7 @@ KAPI_CM = {"dis": 90, "ic": 82}         # TK-01 teklif çalışmasının çalı�
 PENCERE_VARSAYILAN = {"banyo": "60x40", "wc": "60x40"}     # ölçüsü yazmayan pencere; başka odalarda 120x120 (bayiye yazılır)
 TUR = {"salon": "salon", "mutfak": "mutfak", "yatak_odasi": "yatak_odasi", "banyo": "banyo", "wc": "wc", "hol": "antre_hol",
        "antre": "antre_hol", "depo": "depo", "calisma": "calisma", "giyinme": "giyinme",
-       "giris": "veranda"}                  # D-124: önü cephe duvarsız giriş nişi (Motor'da gövdedeki açık mahal; TK-01 r06'nın GİRİŞ'i)
+       "giris": "veranda"}                  # D-125: önü cephe duvarsız giriş nişi (Motor'da gövdedeki açık mahal; TK-01 r06'nın GİRİŞ'i)
 CELIK_ISLEV = {"salon": "salon", "mutfak": "mutfak", "yatak_odasi": "yatak_odasi", "banyo": "banyo", "wc": "banyo", "hol": "hol",
                "antre": "hol", "depo": "depo", "calisma": "yatak_odasi", "giyinme": "yatak_odasi"}
 CEPHE_ADI = {"on": "önde", "arka": "arkada", "sol": "solda", "sag": "sağda"}
@@ -342,7 +342,7 @@ def kanonik(okuma: dict | CizimOkumasi) -> dict:
     if giris is None:
         dk = next((k.kenar for k in o.kapilar if _dis_mi(k, o) and k.kenar), None)
         kaynak = "giriş kapısından"
-        if dk is None and Wc and Hc:                # D-124: içerideki giriş kapısı: cephe, önündeki açık nişin değdiği tek kenar
+        if dk is None and Wc and Hc:                # D-125: içerideki giriş kapısı: cephe, önündeki açık nişin değdiği tek kenar
             kenarlar = {kn for x in o.odalar if x.islev == "giris" for kn in _ham_kenarlar(x.dikdortgenler, Wc, Hc)}
             dk, kaynak = (kenarlar.pop() if len(kenarlar) == 1 else None), "giriş nişinden"    # iki kenar: `denetle` sorar
         giris = dk or "alt"
@@ -360,7 +360,7 @@ def kanonik(okuma: dict | CizimOkumasi) -> dict:
     def kapi(k: KapiOkuma) -> dict:
         nis = next((a for a in k.arasinda if _norm(a) in nisler), None)
         kc = cephe[k.kenar] if k.kenar else None
-        if nis and kc is None:                      # D-124: kapı nişin dibinde; cephesi nişin ağzının cephesi (köşe nişte giriş kenarı)
+        if nis and kc is None:                      # D-125: kapı nişin dibinde; cephesi nişin ağzının cephesi (köşe nişte giriş kenarı)
             kenarlar = _ham_kenarlar(nisler[_norm(nis)].dikdortgenler, Wc, Hc)
             kn = giris if giris in kenarlar else (kenarlar[0] if len(kenarlar) == 1 else None)
             kc = cephe[kn] if kn else None
@@ -387,7 +387,7 @@ def _disari(ad: str, oda_adlari: set[str]) -> bool:
 
 
 def _dis_mi(k: KapiOkuma, o: CizimOkumasi) -> bool:
-    """Giriş kapısı mı: bir ucu dışarı ya da önü açık giriş nişi (D-124: kapı içeride, nişle iç oda arasında)."""
+    """Giriş kapısı mı: bir ucu dışarı ya da önü açık giriş nişi (D-125: kapı içeride, nişle iç oda arasında)."""
     adlar = {_norm(m.ad) for m in o.odalar}
     nisler = {_norm(m.ad) for m in o.odalar if m.islev == "giris"}
     return any(_disari(a, adlar) or _norm(a) in nisler for a in k.arasinda)
@@ -516,7 +516,7 @@ def denetle(okuma: dict, ayar: dict | None = None, bk14: bool | None = None) -> 
             sor.append("Giriş kapısının hangi odaya açıldığını bulamadım.")
     if not any(k["dis"] for k in kan["kapilar"]):
         sor.append("Giriş kapısını çizimde göremedim; hangi odadan giriliyor?")
-    # D-124: önü açık giriş nişi gövdenin bir kenarına açılır; dış kapı nişin dibinde, bir iç odayla arasında
+    # D-125: önü açık giriş nişi gövdenin bir kenarına açılır; dış kapı nişin dibinde, bir iç odayla arasında
     for x in kan["odalar"]:
         if x["islev"] != "giris":
             continue
@@ -743,7 +743,7 @@ def is_emri_prefabrik(kan: dict, o: CizimOkumasi, bk14: bool | None = None, esik
             for olcu, adlar in gruplar.items()))
     kapilar = sorted(kan["kapilar"], key=lambda k: not k["dis"])
     for k in kapilar:
-        if k["dis"] and k.get("nis"):           # D-124: kapı içeride, önü açık nişle iç oda arasında (TK-01 r06: GİRİŞ–HOL)
+        if k["dis"] and k.get("nis"):           # D-125: kapı içeride, önü açık nişle iç oda arasında (TK-01 r06: GİRİŞ–HOL)
             nis = ad_haritasi[_norm(k["nis"])]
             ic = next((ad_haritasi[_norm(a)] for a in k["arasinda"] if _norm(a) in ad_haritasi and _norm(a) != _norm(k["nis"])), None)
             if ic is None:
@@ -1065,7 +1065,7 @@ def degisenler(eski: dict, yeni: dict) -> list[str]:
         out.append(f"{_oda_adi(ob[k].ad)} eklendi")
     for k in oa.keys() & ob.keys():
         x, y = oa[k], ob[k]
-        if x.islev != y.islev and "giris" in (x.islev, y.islev):     # D-124: kapalı oda ↔ önü açık giriş nişi
+        if x.islev != y.islev and "giris" in (x.islev, y.islev):     # D-125: kapalı oda ↔ önü açık giriş nişi
             out.append(f"{_oda_adi(y.ad)} " + ("önü açık giriş nişi" if y.islev == "giris" else "kapalı oda") + " oldu")
         if x.dikdortgenler != y.dikdortgenler:
             out.append(f"{_oda_adi(y.ad)} ölçüsü değişti ({_tr(_alan(x.dikdortgenler))} → {_tr(_alan(y.dikdortgenler))} m²)")
@@ -1140,7 +1140,7 @@ def yerlesim_gorseli(okuma: dict, den: dict, hedef: Path) -> Path:
         ax.text((b[0] + b[2]) / 2, (b[1] + b[3]) / 2, _sar(x["ad"], b[2] - b[0], boy) + (f"\n{_tr(float(m2), 1)} m²" if m2 else ""),
                 ha="center", va="center", fontsize=boy)
     ax.add_patch(Rectangle((0, 0), W, H, fill=False, ec="#222", lw=2.4))
-    for x in kan["odalar"]:                     # D-124: önü açık giriş nişinin ağzında gövde çizgisi yok (cephe duvarsız)
+    for x in kan["odalar"]:                     # D-125: önü açık giriş nişinin ağzında gövde çizgisi yok (cephe duvarsız)
         if x["islev"] != "giris":
             continue
         for r in x["rects"]:
@@ -1158,7 +1158,7 @@ def yerlesim_gorseli(okuma: dict, den: dict, hedef: Path) -> Path:
             ax.plot([a0, a1], [b0, b1], color="#1f6fb2", lw=4, solid_capstyle="butt")
     giris = next((k for k in kan["kapilar"] if k["dis"] and k.get("cephe")), None)
     if giris:
-        ad = giris.get("nis")                  # D-124: ok nişin ağzına
+        ad = giris.get("nis")                  # D-125: ok nişin ağzına
         adlar = [_norm(ad)] if ad else [_norm(a) for a in giris["arasinda"]]
         oda = next((x for x in kan["odalar"] if _norm(x["ad"]) in adlar), None)
         r = _cephe_parcasi(oda["rects"], giris["cephe"], W, H) if oda else None

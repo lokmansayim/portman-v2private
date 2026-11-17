@@ -545,7 +545,7 @@ def test_giris_adli_oda_ve_disari_acilan_giris():
     assert "Giriş kapısının hangi odaya açıldığını bulamadım." in sor
 
 
-# ─── D-124 (BK-55): dış kapı çizimde nasılsa öyle; içerideyse önü açık giriş nişi (Lokman, kart 17 Kasım 2026 08:37:52 UTC) ───
+# ─── D-125 (BK-55): dış kapı çizimde nasılsa öyle; içerideyse önü açık giriş nişi (Lokman, kart 17 Kasım 2026 08:37:52 UTC) ───
 TK01_R06 = yukle("TK01_r06_okuma.json")
 TK01_R08 = json.loads((KOK / "testler" / "motor" / "veri" / "TK01_r08.json").read_text(encoding="utf-8"))
 
@@ -555,7 +555,7 @@ def _pano_izi(ie: dict) -> set:
     return {tuple(round(v, 2) for v in q.rect()) for q in G.kur(ie).panolar}
 
 
-def test_d124_nisli_okuma_onayli_r06_planini_verir():
+def test_d125_nisli_okuma_onayli_r06_planini_verir():
     """Bayi çiziminde holün önünde cephe duvarı yok, kapı 1 pano içeride: okumadan çıkan plan Lokman'ın onayladığı r06 düzeni (GİRİŞ açık
     niş, dış kapı GİRİŞ–HOL). Mahaller r08'le aynı, pano dizilimi r08'le pano pano aynı (60 pano)."""
     d = GO.denetle(TK01_R06, bk14=True)
@@ -571,7 +571,7 @@ def test_d124_nisli_okuma_onayli_r06_planini_verir():
     assert len(iz) == 60 and iz == _pano_izi(TK01_R08)
 
 
-def test_d124_cephedeki_kapi_cephede_kalir():
+def test_d125_cephedeki_kapi_cephede_kalir():
     """Kapı cephede çizildiyse (önü duvarlı küçük bölüm) okuma bugünkü gibi: kapalı ANTRE, dış kapı ön cephede (Lokman: "Çizimde nasılsa öyle")."""
     ie = GO.denetle(TK01, bk14=True)["cevrim"]["is_emri"]
     assert {"tur": "dis_kapi", "olcu": 90, "arasi": ["__DIS__", "ANTRE"], "duvar": "on"} in ie["acikliklar"]
@@ -579,7 +579,7 @@ def test_d124_cephedeki_kapi_cephede_kalir():
 
 
 @pytest.mark.parametrize("giris", ["ust", "sol", "sag"])
-def test_d124_dondurulmus_cizimde_ayni_plan(giris):
+def test_d125_dondurulmus_cizimde_ayni_plan(giris):
     """Aynı çizim döndürülmüş okunsa da aynı plan; giriş kenarı yazılmasa da nişin değdiği kenardan bulunur."""
     beklenen = GO.denetle(TK01_R06, bk14=True)["cevrim"]["is_emri"]
     o = dondur(TK01_R06, giris)
@@ -590,14 +590,14 @@ def test_d124_dondurulmus_cizimde_ayni_plan(giris):
     assert geometri(d["cevrim"]["is_emri"]) == geometri(beklenen)
 
 
-def test_d124_teyit_metni_nisi_soyler():
+def test_d125_teyit_metni_nisi_soyler():
     d = GO.denetle(TK01_R06, bk14=True)
     metin, _ = GO.teyit_metni(TK01_R06, d)
     assert "giriş kapısı önde, içeride; önü açık giriş nişi." in metin
     assert "antre" not in metin.split("Ölçüsü yazmayanları")[0].lower()
 
 
-def test_d124_nis_sorulari():
+def test_d125_nis_sorulari():
     """Niş tutarsız okunursa bayiye sorulur, sessizce çizilmez (K21)."""
     o = copy.deepcopy(TK01_R06)                 # niş cepheye değmiyor
     nis = next(x for x in o["odalar"] if x["islev"] == "giris")
@@ -617,7 +617,7 @@ def test_d124_nis_sorulari():
     assert any("2 kapı okudum" in s for s in GO.denetle(o, bk14=True)["sorular"])
 
 
-def test_d124_kose_nis_giris_kenari_yazmazsa_sorulur():
+def test_d125_kose_nis_giris_kenari_yazmazsa_sorulur():
     """İki cepheye değen niş (köşe) ve yazılmamış giriş kenarı: giriş cephesi sessizce seçilmez (K21)."""
     o = copy.deepcopy(TK01_R06)
     o["giris_kenari"] = None
@@ -632,19 +632,19 @@ def test_d124_kose_nis_giris_kenari_yazmazsa_sorulur():
     assert next(k for k in kan["kapilar"] if k.get("nis"))["cephe"] == "on"
 
 
-def test_d124_duzeltmede_nis_soylenir():
+def test_d125_duzeltmede_nis_soylenir():
     """Bayi düzeltmesi yalnız kapalı odayı önü açık nişe çevirse de fark bayiye yazılır."""
     eski = copy.deepcopy(TK01_R06)
     next(x for x in eski["odalar"] if x["ad"] == "GİRİŞ")["islev"] = "antre"
     assert GO.degisenler(eski, TK01_R06) == ["Giriş önü açık giriş nişi oldu"]
 
 
-def test_d124_celikte_nis_cizilemez():
+def test_d125_celikte_nis_cizilemez():
     d = GO.denetle({**TK01_R06, "yapi_turu": "celik"}, bk14=True)
     assert d["cevrim"] is None and d["cizilemez"] == ["gövdedeki önü açık giriş nişi (çelikte bugün otomatik çizemiyorum)"]
 
 
-def test_d124_nisli_plan_motorda_cizilir(tmp_path):
+def test_d125_nisli_plan_motorda_cizilir(tmp_path):
     from motor import dxf_out
     d = GO.denetle(TK01_R06)
     ie = json.loads(json.dumps(d["cevrim"]["is_emri"]))

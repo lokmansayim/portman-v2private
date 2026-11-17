@@ -1,5 +1,5 @@
 {
- "_aciklama": "D-124 (BK-55): TK-01 bayi çiziminin (PF Teklif_Calisma/TK-01/girdi; depoya girmez) doğru okuması. Çizimde holün önünde cephe duvarı yok, giriş kapısı 1 pano içeride: kapının önü açık giriş nişi (GİRİŞ, islev giris), kapı GİRİŞ–HOL. TK01_okuma.json'dan tek fark bu (ANTRE ve onun iki kapısı yerine). Okumadan çıkan plan Lokman'ın onayladığı r06 düzenidir (28 Ekim 2026 10:35; pano dizilimi testler/motor/veri/TK01_r08.json ile aynı). Elle yazıldı; gerçek LLM okuması ücretli denemedir.",
+ "_aciklama": "D-125 (BK-55): TK-01 bayi çiziminin (PF Teklif_Calisma/TK-01/girdi; depoya girmez) doğru okuması. Çizimde holün önünde cephe duvarı yok, giriş kapısı 1 pano içeride: kapının önü açık giriş nişi (GİRİŞ, islev giris), kapı GİRİŞ–HOL. TK01_okuma.json'dan tek fark bu (ANTRE ve onun iki kapısı yerine). Okumadan çıkan plan Lokman'ın onayladığı r06 düzenidir (28 Ekim 2026 10:35; pano dizilimi testler/motor/veri/TK01_r08.json ile aynı). Elle yazıldı; gerçek LLM okuması ücretli denemedir.",
  "tur": "plan",
  "yapi_turu": null,
  "kat_sayisi": 1,
