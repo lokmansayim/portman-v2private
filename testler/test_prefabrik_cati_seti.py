@@ -5299,3 +5299,131 @@ def test_hakem49_cumba_secimi_soruya_donmez(tmp_path, metin):
     s, _ = _cati_seti(tmp_path)
     k = s.yaz(metin, niyet="diger")
     assert k.eylem == "is_emri" and k.revizyon == 2 and k.is_emri["talep"]["kaynak"] == "PA06C", k.mesaj
+
+
+
+# İE-42 hakem tur 50: seçeneği anan ya da başka işin adı olmadan değerlendiren cümleden sonraki "o da güzel" ("2 olsun, bu daha uygun,
+# abi o da güzel"), başka seçilen rakamla "vinç olmasa 1 abi o zaman", "için"in ardındaki karar sözü ("belki PA-08 için karar veririz")
+# ve ulacın kendi nesnesi ("durumu sonra öğrenip konuşuruz") kayıt almaz; başka işin bildirimi ("kaporayı aldık, o da tamam") açık
+# seçimdir
+@pytest.mark.parametrize("metin", [
+    "2 olsun, bu daha uygun, o da güzel", "2 olsun, bu bize daha uygun, o da güzel", "2 olsun, bu müşteriye daha uygun, o da güzel",
+    "2 olsun, bu çok güzel olmuş, o da güzel", "2 olsun, bu daha şık duruyor, o da güzel", "2 olsun, hepsi güzel olmuş, o da güzel",
+    "2 olsun, eşi farklı istiyor, o da güzel", "2 olsun, eşi daha sade istiyor, o da güzel",
+    "2 olsun, eşi sivri olanı istiyor, o da güzel", "2 olsun, müşterinin aklı karışmış, o da güzel",
+    "2 olsun, açıkçası müşteri de bayıldı, o da güzel", "2 olsun, abi bu daha uygun, o da güzel", "2 olsun, bu daha uygun, abi o da güzel",
+    "2 olsun, bu daha uygun, hocam o da güzel", "2 olsun, bu çok güzel olmuş, abi o da güzel",
+    "2 olsun, bu çok güzel olmuş, hocam şu da güzel", "2 olsun, bu daha şık duruyor, abi o da güzel",
+    "2 olsun, bu daha uygun, ve o da güzel", "2 olsun, bu daha uygun. Abi o da güzel", "2 olsun. Bu daha uygun. O da güzel",
+    "2'yi seçtik, bu daha uygun, o da güzel", "2 olsun, bu daha mantıklı geldi, o da güzel", "2 olsun, bu daha hoşumuza gitti, o da güzel",
+    "2 olsun, bu tarz daha çok tutuluyor, o da güzel", "2 olsun, müşteri bunu daha çok istiyor, o da güzel",
+    "2 olsun, müşterinin içine sindi, o da güzel", "2 olsun, bu daha ucuz geldi, o da güzel", "2 olsun, bu daha uygun düştü, o da güzel",
+    "2 olsun, bu hesaplı çıktı, o da güzel", "2 olsun, bu daha uygun, o da sorun değil", "2 olsun, bu daha uygun, şu da güzel",
+    "3 olsun, bu daha uygun, o da güzel", "PA-06-K olsun, bu daha uygun, o da güzel",
+    "2 olsun, rengiyle birlikte müşterinin fikrini de alıp konuşuruz", "2 olsun, rengiyle birlikte müşterinin fikrini alıp konuşuruz",
+    "2 olsun, rengiyle birlikte eşinin de fikrini alıp konuşuruz", "2 olsun, rengiyle birlikte durumu sonra öğrenip konuşuruz",
+    "2 olsun, rengiyle birlikte işleri bitirip konuşuruz", "2 olsun, rengiyle birlikte işleri de bitirip konuşuruz",
+    "2 olsun, rengiyle birlikte bayramı da geçirip konuşuruz", "2 olsun, rengiyle birlikte haftayı da bekleyip konuşuruz",
+    "2 olsun, rengiyle birlikte toplantıyı da yapıp konuşuruz", "2 olsun, rengiyle birlikte hesabı da yapıp konuşuruz",
+    "2 olsun, montajla birlikte müşterinin fikrini de alıp bakarız", "2 olsun, rengiyle birlikte sonra arkadaşı konuşur",
+    "2 olsun, rengiyle birlikte sonra kocası bakar", "2 olsun, rengiyle birlikte sonra eniştesi bakar",
+    "2 olsun, rengiyle birlikte sonra muhasebeci bakar", "2 olsun, rengiyle birlikte sonra müşteriyi arayıp konuşuruz",
+    "2 olsun, rengiyle birlikte ekibi de toplayıp konuşuruz", "2 olsun, rengiyle birlikte müşteriyi de alıp gelip konuşuruz",
+    "2 olsun, montajla birlikte yeri görüp konuşuruz", "2 olsun, rengiyle birlikte sonra hesabı yerinde yapıp konuşuruz",
+    "2 olsun, rengiyle birlikte sonra durumu ustayla görüp konuşuruz", "2 olsun, rengiyle birlikte sonra cevabı ofiste alıp konuşuruz",
+    "2 olsun, rengiyle birlikte sonra sonucu da bekleyip konuşuruz", "2 olsun, rengiyle birlikte sonra fikrini de alıp konuşuruz",
+    "2 olsun, rengiyle birlikte sonra müşterinin fikrini de alıp konuşuruz", "2 olsun, montajla birlikte sonra hesabı da yapıp bakarız",
+    "2 olsun, rengiyle birlikte hesabı sonra yapıp konuşuruz", "2 olsun, rengiyle birlikte hesabı ustayla yapıp konuşuruz",
+    "2 olsun, rengiyle birlikte cevabı size söyleyip konuşuruz", "2 olsun, rengiyle beraber akşam işi bitirip konuşuruz",
+    "2 olsun, rengiyle beraber sonra bütçeyi hesaplayıp konuşuruz", "Hocam 2 olsun, rengiyle birlikte durumu sonra öğrenip konuşuruz",
+    "2 olsun, rengiyle birlikte sonra ustayla konuşuruz", "2 olsun, rengiyle birlikte sonra size söyleriz",
+    "2 olsun, rengiyle birlikte haftaya ustayla konuşuruz", "2 olsun, rengiyle birlikte ustabaşıyla sonra konuşuruz",
+    "2 olsun, rengiyle birlikte sonra kayınçoyu arayıp konuşuruz", "2 olsun, rengiyle birlikte sonra aileyi toplayıp konuşuruz",
+    "2 olsun, rengiyle birlikte sonra beyi de alıp gelip konuşuruz", "2 olsun, rengiyle birlikte akşamı bekleyip konuşuruz",
+    "2 olsun, rengiyle birlikte sonra akşamı da bekleyip konuşuruz", "2 olsun, rengiyle birlikte sonra pazartesiyi bekleyip konuşuruz",
+    "2 olsun, rengiyle birlikte sonra bayramı da geçirip konuşuruz", "2 olsun, rengiyle birlikte sonra krediyi de çekip konuşuruz",
+    "2 olsun, rengiyle birlikte sonra parayı da ayarlayıp konuşuruz", "2 olsun, rengiyle birlikte 15inde konuşuruz",
+    "2 olsun, rengiyle birlikte 2 3 güne konuşuruz", "2 olsun, rengiyle birlikte bi iki güne konuşuruz",
+    "2 olsun, rengiyle birlikte sonra yazışırız", "2 olsun, rengiyle birlikte sonra mesajlaşırız",
+    "PA-06-K olsun, belki PA-08 için karar veririz", "PA-06-K olsun, ama PA-08 için de düşünüyoruz",
+    "PA-06-K olsun ama müşteri PA-08 için de ısrar ediyor", "PA-06-K olsun, belki PA-08 için gideriz",
+    "PA-06-K olsun ancak PA-08 için de bakıyoruz", "PA-06-K olsun, ama müşteri PA-08 için de olabilir diyor",
+    "PA-06-K olsun, belki PA-08 için de olur", "PA-06-K olsun, ama PA-08 için de karar verebiliriz",
+    "PA-06-K olsun, fakat PA-08 için de içimiz gidiyor", "PA-06-K olsun, belki de PA-08 için değiştiririz",
+    "PA-06-K olsun, ama PA-08 için de güzel olurdu", "PA-06-K olsun ama belki PA-08 için yeniden düşünürüz",
+    "2 olsun, ama PA-08 için de düşünüyoruz", "2 olsun, belki PA-08 için karar veririz", "PA-06-K ile hatta PA-08-K gibi",
+    "PA-06-K olsun ile birlikte PA-08 benzeri", "2 olsun, vinç olmasa 1 abi o zaman", "2 olsun, vinç olmasa 1 abi uygun",
+    "2 olsun, vinç olmasa 1 abi olur", "2 olsun, vinç olmasa 1 abi de olur", "2 olsun, vinç olmasa 1 abi iyi olur",
+    "2 olsun, vinç olmasa 1 abi süper", "2 olsun, iskele olmasa 1 abi o zaman", "2 olsun, kamyon olmasa 1 abi olsun",
+    "2 olsun, vinç olmasa 1 abi çizin", "2 olsun, vinç olmasa 1 abi gönderin", "2 olsun, vinç olmasa 1 hoca olur",
+    "2 olsun, vinç olmasa 1 reis olur", "2 olsun, ekip olmasa 1 abi o zaman", "2 olsun, araç olmasa 1 abi o zaman",
+    "2 olsun, eleman olmasa 1 abi o zaman", "2 olsun, makine olmasa 1 abi o zaman", "2 olsun abi, vinç olmasa 1 abi olur",
+    "3 olsun, vinç olmasa 1 abi o zaman", "2 olsun, rengiyle birlikte akşama karşı konuşuruz",
+    "2 olsun, rengiyle birlikte müsait bir zamanda konuşuruz", "2 olsun, rengiyle birlikte kısa sürede konuşuruz",
+    "2 olsun, rengiyle birlikte ilerleyen günlerde konuşuruz", "2 olsun, rengiyle birlikte haftasonu konuşuruz",
+    "2 olsun, rengiyle birlikte ilk fırsatta konuşuruz", "2 olsun, rengiyle birlikte en yakın zamanda konuşuruz",
+    "2 olsun, çok sağolun, o da güzel", "2 olsun, sağ olun, o da güzel", "2 olsun, düşündük taşındık o da güzel",
+    "2 olsun, müşteri onun fiyatını da sordu, o da uygun", "2 olsun, müşteri bunu istedi, o da güzel",
+    "2 olsun, müşteri onu da istedi, o da güzel", "2 olsun, müşteri iki teklifi kıyasladı, o da uygun",
+    "2 olsun, bu eve daha çok yakışıyor, o da güzel", "2 olsun, bu evle uyumlu duruyor, o da güzel",
+    "2 olsun, rengiyle birlikte cuma ustayla konuşuruz", "2 olsun, gelecek hafta netleştiririz",
+    "2 olsun, önümüzdeki hafta kesinleştiririz", "2 olsun, en kısa zamanda netleştiririz", "2 olsun, montajdan önce netleştiririz",
+    "2 olsun, müşteriyle gelecek hafta netleştiririz", "2 olsun, müşteri mutlu, o da güzel", "2 olsun, eline sağlık, o da güzel",
+    "2 olsun, Allah razı olsun, o da güzel", "2 olsun, eşim beğendi, o da güzel", "2 olsun, müşteri de gördü, o da güzel",
+    "2 olsun, şu daha uygun, o da güzel", "2 olsun, şu bize uygun, o da güzel", "2 olsun, vinç olmasa 1 abi yollayın",
+    "PA-06-K olsun, ama PA-08 için karar verebiliriz", "PA-06-K olsun, ama PA-08 için güzel olurdu",
+    "2 olsun, müşteri de çok sevindi, o da güzel", "2 olsun, müşteri sevindi, o da güzel"])
+def test_hakem50_kararsiz_ve_kosullu_soz_kaydedilmez(tmp_path, metin):
+    """Tur 50 (G-Y5, G-O2–G-O4, önceden var): "2 olsun, bu daha uygun, abi o da güzel", "2 olsun, vinç olmasa 1 abi o zaman", "PA-06-K
+    olsun, belki PA-08 için karar veririz", "2 olsun, rengiyle birlikte durumu sonra öğrenip konuşuruz" kayıt almaz: plan r01, onay yok,
+    r02 yok."""
+    s, _ = _cati_seti(tmp_path)
+    k = s.yaz(metin, niyet="diger")
+    assert K.PLAN_ONAYI not in k.gerekce and k.eylem != "is_emri" and s.plan["revizyon"] == 1 and not s.k.d.get("onaylanan"), k.mesaj
+
+
+@pytest.mark.parametrize("metin", [
+    "2 olsun, kaporayı aldık, o da tamam", "2 olsun, kaporayı da aldık, o da tamam", "2 olsun, ödemeyi yaptık, o da tamam",
+    "2 olsun, sözleşmeyi yaptık, o da tamam", "2 olsun, siparişe geçtik, o da tamam", "2 olsun, müşteriden onayı aldık, o da tamam",
+    "2 olsun, ruhsatı aldık, o da tamam", "2 olsun, parayı aldık, o da tamam", "2 olsun, müşteriyle görüştük, o da tamam",
+    "2 olsun, ustayla görüştük, o da tamam", "2 olsun, bankayla görüştük, o da tamam", "2 olsun, müşteri görüştü, o da tamam",
+    "2 olsun, müşteri yeri gördü, o da tamam", "2 olsun, müşteri araziyi gördü, o da tamam",
+    "2 olsun, müşteri ustayla görüştü, o da tamam", "2 olsun, malzemeyi sevkettik, o da tamam", "2 olsun, kapora yatacak, o da tamam",
+    "2 olsun, müşteri kaporayı yatırır, o da tamam", "2 olsun, kapora yarın yatar, o da tamam", "2 olsun, teslim cuma, o da uygun",
+    "2 olsun, nakliye bizden, o da tamam", "2 olsun, fiyat makul, o da uygun", "2 olsun, kapora lazım, o da tamam",
+    "2 olsun, ödeme yapılacak, o da tamam", "2 olsun, teklif hazırdır, o da tamam", "2 olsun, ikinci taksit de yatırıldı, o da tamam",
+    "2 olsun, arsanın fotoğraflarını gönderdik, o da tamam", "2 olsun, montaj tarihini kararlaştırdık, o da tamam",
+    "2 olsun, çatı ustası geldi, o da tamam", "2 olsun, ilk ödeme yapıldı, o da tamam", "2 olsun, kendi aracımızla alacağız, o da tamam",
+    "2 olsun, müşteri ödemeyi yaptı, o da tamam", "2 olsun, zemini yaptık, o da tamam", "2 olsun, krediyi aldık, o da tamam",
+    "2 olsun, iznini aldık, o da tamam", "Abi 2 olsun, kaporayı da aldık, o da tamam", "2 olsun hocam. Ödemeyi yaptık, o da tamam",
+    "2 olsun abi, müşteriyle görüştük, o da tamam", "Selam abi 2 olsun, sözleşmeyi de yaptık, o da tamam",
+    "2 olsun, kapora 20 bin, o da tamam", "2 olsun, montaj 3 günde biter, o da tamam", "2 olsun, teslim 15 gün sonra, o da tamam",
+    "2 olsun, teslim cuma olsun, o da uygun", "2 olsun, ödeme nakit olacak, o da tamam", "2 olsun, ödemeyi peşin yapacağız, o da tamam",
+    "2 olsun, kaporayı yarın yatıracağız, o da tamam", "2 olsun, müşteri yeri görmüş, o da tamam", "2 olsun, su bağlandı, o da tamam",
+    "2 olsun, ödeme planını yaptık, o da tamam", "2 olsun, müşteri yarın gelip imzalayacak, o da tamam",
+    "2 olsun, müşteri yarın imzalar, o da tamam", "2 olsun, kaporayı aldım, o da tamam", "2 olsun, kaporayı alıyoruz, o da tamam",
+    "2 olsun. Kaporayı aldık. O da tamam", "2 olsun, kaporayı aldık, şu da tamam", "2'yi alalım, kaporayı da aldık, o da tamam",
+    "PA-06-K olsun, kaporayı aldık, o da tamam", "2 olsun, kaporayı yatırdık, o da tamam", "2 olsun, kaporayı yatırıyoruz, o da tamam",
+    "2 olsun, kaporayı yatıralım, o da tamam", "2 olsun, kapora alındı, o da tamam", "2 olsun, kapora geldi, o da tamam",
+    "2 olsun, müşteri kaporayı getirdi, o da tamam", "2 olsun, müşteri kaporayı yatırmış, o da tamam",
+    "2 olsun, müşteri sözleşmeyi okudu, o da tamam", "2 olsun, müşteri teklifi inceledi, o da tamam",
+    "2 olsun, müşteri planı beğendi, o da tamam", "2 olsun, eşi de onay verdi, o da tamam", "2 olsun, müşteri tamam dedi, o da tamam",
+    "2 olsun, ödeme tamamlandı, o da tamam", "2 olsun, nakliyeyi ayarladık, o da tamam", "2 olsun, vinci ayarladık, o da tamam",
+    "2 olsun, montaj ekibini ayarladık, o da tamam", "2 olsun, temeli attık, o da tamam", "2 olsun, betonu döktük, o da tamam",
+    "2 olsun, izin çıktı, o da tamam", "2 olsun, fiyatta anlaştık, o da tamam", "2 olsun, fiyata baktık, o da tamam",
+    "2 olsun, teslim tarihi belli, o da tamam", "2 olsun, kapora 20 bin yatırıldı, o da tamam", "2 olsun, müşteri razı oldu, o da tamam",
+    "2 olsun, vinç olmasa 1 abi gelir yardım eder", "2 olsun, vinç olmasa 1 usta olur",
+    "2 olsun, montajla birlikte çiti sonra sahada görüp konuşuruz", "2 olsun, montajla birlikte çiti sonra oturup konuşuruz",
+    "2 olsun, rengiyle birlikte nakliyeyi sonra konuşuruz", "2 olsun, rengiyle birlikte akşama teslim ederiz",
+    "2 olsun, montajla birlikte 15inde teslim edin", "2 olsun, montaj tarihi gelecek hafta kesinleşir", "2 olsun, fiyat yarın kesinleşir",
+    "2 olsun, montajla birlikte nakliyeyi ayarlayıp konuşuruz", "2 olsun, rengiyle birlikte nakliyeyi de sonra konuşuruz",
+    "2 olsun, montajla birlikte çiti yapıp teslim ederiz", "2 olsun, müşteri gelecek hafta gelip imzalayacak",
+    "2 olsun, kapora gelecek hafta yatacak", "2 olsun, montajla birlikte çiti sonra hep beraber konuşuruz",
+    "2 olsun, rengiyle birlikte teklifi sonra konuşuruz", "2 olsun, PA-08-C için de olur"])
+def test_hakem50_acik_secim_soruya_donmez(tmp_path, metin):
+    """Tur 50 (G-Y5 ve sınırlar): "2 olsun, kaporayı aldık, o da tamam", "2 olsun, müşteriyle görüştük, o da tamam", "2 olsun, kapora
+    20 bin, o da tamam", "2 olsun, vinç olmasa 2 abi yollayın", "2 olsun, montajla birlikte çiti sonra sahada görüp konuşuruz" açık seçimi
+    soruya çevirmez: r02 PA-06-K."""
+    s, _ = _cati_seti(tmp_path)
+    k = s.yaz(metin, niyet="diger")
+    assert k.eylem == "is_emri" and k.revizyon == 2 and k.is_emri["talep"]["kaynak"] == "PA06K", k.mesaj
