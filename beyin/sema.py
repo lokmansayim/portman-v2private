@@ -50,6 +50,17 @@ class Varyant(BaseModel):
     parametreler: dict = Field(default_factory=dict)
 
 
+class CatiCevabi(BaseModel):
+    """İE-42 (Lokman, 17 Kasım 2026: "LLM okusun, kod karar versin"): onaydan sonraki çatı setine bayinin cevabının okuması. Kararı kod
+    verir (`beyin/karar.py › _cati_adimi`); belirsiz okuma sorulur."""
+    durum: Literal["secti", "kararsiz", "secim_yok"] = Field(
+        ..., description="secti: listeden tek bir çatıyı açıkça seçti; kararsiz: iki çatı arasında kaldı, seçimi geri aldı ya da sözü "
+                         "iki türlü okunuyor; secim_yok: mesajda çatı seçimi yok (soru, başka iş, plan değişikliği, selam)")
+    secilen: Optional[int] = Field(None, description="durum secti ise bağlamdaki çatı listesinin sıra numarası (1, 2, 3); değilse null")
+    ek_istek: bool = Field(False, description="Mesajda çatı seçiminden başka, plana dokunan bir değişiklik isteği de var mı (pencere, oda, "
+                                               "ölçü, kapı); teşekkür, övgü, kapora, nakliye ve başka iş bilgisi istek değildir")
+
+
 class Musteri(BaseModel):
     ad: Optional[str] = None
     telefon: Optional[str] = None
@@ -80,6 +91,7 @@ class Talep(BaseModel):
     bina_ozellikleri: dict[str, str] = Field(default_factory=dict, description="Dış boya rengi, iç kapı rengi gibi pafta tablosu alanları; anahtar Türkçe, sadece söylenenler")
     ozel_istekler: list[str] = Field(default_factory=list, description="'çatıya OSB + nem bariyeri' gibi serbest istekler, bayinin sözleriyle")
     musteri: Optional[Musteri] = None
+    cati_cevabi: Optional[CatiCevabi] = Field(None, description="Yalnız bağlamda 'çatı seti açık' yazıyorsa doldurulur; yoksa null")
     belirsizlikler: list[str] = Field(default_factory=list, description="Çelişkili veya emin olunamayan noktalar, Türkçe kısa cümle")
     guven: Literal["dusuk", "orta", "yuksek"]
     ozet: str = Field(..., description="Anlaşılanın tek cümlelik Türkçe özeti; bayiye geri okunacak")

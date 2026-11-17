@@ -26,4 +26,11 @@ Kurallar:
    `orta`; mesaj kısa/anlaşılmazsa `dusuk`.
 10. `ozet`: bayiye geri okunacak tek cümle, Türkçe, örn. "P6001 modelinin aynalanmış hali için ön onay planı istiyorsunuz."
 
+11. `cati_cevabi`: yalnız bağlamda "çatı seti açık" ve çatı listesi varsa doldur; yoksa `null`. Bayi bu listeden tek çatıyı açıkça
+    seçtiyse `durum` `secti`, `secilen` listedeki sıra numarası (kod, ad, harf ya da "ilki, ikincisi" sözü de numaraya çevrilir).
+    İki çatı arasında kaldıysa, seçimini geri aldıysa ya da sözü iki türlü okunuyorsa `kararsiz`. Çatı seçimi yoksa `secim_yok`.
+    Emin değilsen `kararsiz` yaz; tahmin etme. Bağlamdaki "benzer örnekler" daha önce doğru okunmuş mesajlardır, bu mesajın yerine
+    geçmez. Çatıdan başka bir plan değişikliği (pencere, oda, ölçü, kapı) istenmişse `ek_istek` true; teşekkür, övgü, kapora, nakliye
+    ve başka iş bilgisi istek değildir.
+
 Çıktı yalnız şemaya uyan JSON'dur; başka metin yazma.

@@ -17,6 +17,7 @@ from . import celik_okuma as CO          # İE-08 PR-2b: çelik revizyonunda bay
 from . import form_ozellik               # İE-20 PR-6: prefabrik talep formundaki standart dışı seçimler İş Emri'ne
 from . import yarim_pano as YP            # İE-39 (D-90): havuz evinde dış duvar yarım pano kayar
 from . import yarim_pano_okuma as YPO     # İE-39 PR-2: bayinin "sağa yarım pano uzat" sözü (K18; ayar `yarim_pano.acik`)
+from . import cati_cevabi as CC          # İE-42 (17 Kasım 2026): çatı setine cevabı LLM okur (havuzdan örnekle), kod karar verir
 
 MOD = 125.5
 ROOT = Path(__file__).resolve().parent.parent
@@ -2412,6 +2413,13 @@ def _cati_adimi(k: Konusma, t: Talep, metin: str | None, katalog: Katalog) -> tu
     baska_llm = bool(t.katalog_kodu and Katalog.taban_kod(t.katalog_kodu) != Katalog.taban_kod(taban["kod"]))
     yeni_soz = _iptal_sozu(metin) or _acik_yeni_talep(metin)
     yeni_musteri = _yeni_musteri(k, t, metin)
+    llm_okuma = CC.okuma(t.cati_cevabi, st)
+    llm_yolu = llm_okuma is not None and not (yeni_soz or yeni_musteri)
+    if llm_yolu:
+        # İE-42, Lokman 17 Kasım 2026 ("LLM okusun, kod karar versin"): çatıdan başka istek LLM'in okumasından; LLM'in bu mesajda okuduğu
+        # pencere ve çatı dışı değişiklik de istektir (sessiz düşmez); yarım pano komutu koddan
+        ek = llm_okuma["ek_istek"] or bool(t.pencereler) or any(v.tur != "cati_degistir" for v in t.varyantlar) or any(YPO.oku(metin))
+        k.cati_ek = ek
     if t.niyet in ("diger", "yeni_talep") and ek and not baska and not baska_llm and not yeni_soz and not yeni_musteri:
         # hakem tur 2, O5: "diğer" ya da "yeni talep" okunan istek ve bilgi (başka ev, başka müşteri, iptal ve açık yeni talep sözü yok)
         # planın değişikliğidir; yalnız müşteri bilgisi konuşmayı sıfırlamaz. Talebin kendisi değiştiyse aşağıda yeni talep olur.
@@ -2457,7 +2465,7 @@ def _cati_adimi(k: Konusma, t: Talep, metin: str | None, katalog: Katalog) -> tu
                       + (" (başka müşteri)" if yeni_musteri else ""))
             return _cati_adimi_yeni_talep(k, t, taban, degisen, yeni_musteri), None
 
-    kararsiz, hedefler, ad_kumeleri = (False, set(), []) if (yeni_soz or baska or yeni_musteri) else \
+    kararsiz, hedefler, ad_kumeleri = (False, set(), []) if (yeni_soz or baska or yeni_musteri or llm_yolu) else \
         _cati_atiflari(metin, katalog, taban, st)              # yeni talep, başka ev ya da müşteri: çatı sözü okunmaz
     yedek, notlar = json.loads(json.dumps(k.d)), len(getattr(k, "yeni_notlar", None) or [])
 
@@ -2467,9 +2475,21 @@ def _cati_adimi(k: Konusma, t: Talep, metin: str | None, katalog: Katalog) -> tu
             del k.yeni_notlar[notlar:]
         k.d["son_metin"] = son_metin0
 
-    secim = oku()
-    acik = isinstance(secim, str) and bool(secim)
-    if acik:
+    if llm_yolu:
+        # İE-42 (17 Kasım 2026): seçimi LLM'in okuması verir (`cati_cevabi`); kararsız okuma sorulur. Mesajda açıkça yazılı set kodu
+        # LLM'in seçtiğinden başkaysa da sorulur (tahmin yok, K21).
+        secim = llm_okuma["kod"]
+        set_kodlari = {str(a.get("kod")).upper() for a in st.get("adaylar") or []}
+        yazili = {c for c in _secim_kodlari(secim_metni, katalog) if c in set_kodlari}
+        acik = bool(secim)
+        celiski = llm_okuma["durum"] == "kararsiz" or bool(acik and yazili - {secim.upper()})
+        k.not_dus("kural", f"çatı setinde LLM okuması: {llm_okuma['durum']}" + (f" {secim}" if secim else ""))
+    else:
+        secim = oku()
+        acik = isinstance(secim, str) and bool(secim)
+    if llm_yolu:
+        pass
+    elif acik:
         # hakem tur 5 (Y1, Y3): mesajın öteki çatı sözü seçimle çelişiyor ("1 olsun, kırmayı alın", "1 olsun, K ile devam edelim",
         # "1 olsun, mevcut çatıdan farklı olsun"): seçim yok, "Hangi çatı olsun?"
         celiski = kararsiz or bool(hedefler - {secim.upper()}) or any(secim.upper() not in a for a in ad_kumeleri)
