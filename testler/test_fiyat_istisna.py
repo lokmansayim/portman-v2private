@@ -104,3 +104,15 @@ def test_istisna_defterle_verilmez_ve_crm_ister(tmp_path):
         F.istisnali_defter_sec(None, ISTISNA, GUN)
     with pytest.raises(SystemExit):
         F.main([str(tmp_path / "liste.json"), "--defter", "x.json", "--istisna", str(ISTISNA)])
+
+
+def test_180_pencere_istisnasi(A0, E, I):
+    """85 m² katalog evi (P8501): 180/180 pencereli pano ve PVC pencere CRM'de yok; Kasım fiyatı 45. hafta listesinden (Lokman 17 Kasım 2026
+    05:49:59 UTC kartı "Girsin, kenar kutusu boş"). Ters mahya kenar kutusu fiyatsız kalır."""
+    D0, D = C.defter_uret(A0, E), C.istisnali_defter(A0, I, E)
+    P0, P = D0["hatlar"]["prefabrik"]["kalemler"], D["hatlar"]["prefabrik"]["kalemler"]
+    pano, pencere = "Karkaslı özel pencere panosu (180/180) | 100 × 2500 × 2500", "PVC pencere | 180/180"
+    assert P0[pano]["fiyat"] is None and P0[pencere]["fiyat"] is None
+    assert (P[pano]["fiyat"], P[pano]["kaynak"], P[pano]["kdv"]) == (4693.63, "ISTISNA", 0.2)
+    assert (P[pencere]["fiyat"], P[pencere]["kaynak"], P[pencere]["kdv"]) == (8993.0, "ISTISNA", 0.2)
+    assert P["Ters mahya kenar kutusu | L 21 × 40 × 21 × 2800"]["fiyat"] is None

@@ -1,0 +1,271 @@
+{
+ "is_emri_no": "PM-KATALOG-P8501",
+ "revizyon": 4,
+ "talep": {
+  "bayi": {
+   "kod": "TEST",
+   "ad": "Lokman"
+  },
+  "musteri_adi": "KATALOG P8501",
+  "metin": "Katalog P8501 — 2+1, 85 m², 6,5x8 pano; katalog sayfası PS-1085 yönünde (salon ön solda, veranda ön sağda, yatak odaları arkada, banyo arkada ortada)"
+ },
+ "yapi": {
+  "sistem": "prefabrik",
+  "kat_sayisi": 1,
+  "duvar_yuksekligi_cm": 250,
+  "olcu_kaynagi": "serbest",
+  "referans_model": "P8501",
+  "grid": {
+   "x_pano": 6.5,
+   "y_pano": 8.0
+  },
+  "kisa_kenar": "y",
+  "giris_cephesi": "on",
+  "dis_dusey_duvar": "aks_disinda",
+  "dizilim": {
+   "dik_duvar_pencere": "tam_orta",
+   "dis_pano_dayanagi": [
+    {
+     "x": 67.75,
+     "aralik_cm": [
+      5.0,
+      381.5
+     ],
+     "cephe": "on"
+    }
+   ]
+  },
+  "ek_akslar_cm": {
+   "x": [],
+   "y": []
+  }
+ },
+ "mahaller": [
+  {
+   "ad": "YASAM ALANI",
+   "tur": "salon",
+   "konum_pano": [
+    [
+     0,
+     0,
+     3,
+     5
+    ]
+   ]
+  },
+  {
+   "ad": "VERANDA",
+   "tur": "veranda",
+   "konum_pano": [
+    [
+     3,
+     0,
+     6.5,
+     2
+    ]
+   ]
+  },
+  {
+   "ad": "HOL",
+   "tur": "hol",
+   "konum_pano": [
+    [
+     3,
+     2,
+     4,
+     6
+    ]
+   ]
+  },
+  {
+   "ad": "MUTFAK",
+   "tur": "mutfak",
+   "konum_pano": [
+    [
+     4,
+     2,
+     6.5,
+     5
+    ]
+   ]
+  },
+  {
+   "ad": "YATAK ODASI 1",
+   "tur": "yatak_odasi",
+   "konum_pano": [
+    [
+     0,
+     5,
+     2.5,
+     8
+    ],
+    [
+     2.5,
+     5,
+     3,
+     6
+    ]
+   ]
+  },
+  {
+   "ad": "BANYO",
+   "tur": "banyo",
+   "konum_pano": [
+    [
+     2.5,
+     6,
+     4,
+     8
+    ]
+   ]
+  },
+  {
+   "ad": "YATAK ODASI 2",
+   "tur": "yatak_odasi",
+   "konum_pano": [
+    [
+     4,
+     5,
+     6.5,
+     8
+    ]
+   ]
+  }
+ ],
+ "acikliklar": [
+  {
+   "tur": "pencere",
+   "olcu": "180x180",
+   "mahal": "YASAM ALANI",
+   "duvar": "on"
+  },
+  {
+   "tur": "pencere",
+   "olcu": "120x120",
+   "mahal": "YASAM ALANI",
+   "duvar": "sol",
+   "pano": 3
+  },
+  {
+   "tur": "pencere",
+   "olcu": "180x180",
+   "mahal": "MUTFAK",
+   "duvar": "on"
+  },
+  {
+   "tur": "pencere",
+   "olcu": "120x120",
+   "mahal": "YATAK ODASI 1",
+   "duvar": "sol",
+   "pano": 1
+  },
+  {
+   "tur": "pencere",
+   "olcu": "120x120",
+   "mahal": "YATAK ODASI 2",
+   "duvar": "sag",
+   "pano": 1
+  },
+  {
+   "tur": "pencere",
+   "olcu": "60x40",
+   "mahal": "BANYO",
+   "duvar": "arka"
+  },
+  {
+   "tur": "dis_kapi",
+   "olcu": 90,
+   "arasi": [
+    "VERANDA",
+    "HOL"
+   ],
+   "mentese": "sol"
+  },
+  {
+   "tur": "ic_kapi",
+   "olcu": 82,
+   "arasi": [
+    "HOL",
+    "YASAM ALANI"
+   ],
+   "mentese": "sag",
+   "pano": 2
+  },
+  {
+   "tur": "ic_kapi",
+   "olcu": 82,
+   "arasi": [
+    "HOL",
+    "MUTFAK"
+   ],
+   "mentese": "sol",
+   "pano": 2
+  },
+  {
+   "tur": "ic_kapi",
+   "olcu": 82,
+   "arasi": [
+    "HOL",
+    "YATAK ODASI 1"
+   ],
+   "mentese": "sol"
+  },
+  {
+   "tur": "ic_kapi",
+   "olcu": 82,
+   "arasi": [
+    "HOL",
+    "YATAK ODASI 2"
+   ],
+   "mentese": "sag"
+  },
+  {
+   "tur": "ic_kapi",
+   "olcu": 82,
+   "arasi": [
+    "HOL",
+    "BANYO"
+   ],
+   "mentese": "sag"
+  }
+ ],
+ "cati": {
+  "tip": "besik_cumba",
+  "egim_yuzde": 33,
+  "sacak_cm": 30,
+  "topuk_cm": 10,
+  "makas_yonu": "uzun_kenar",
+  "makas_ekseni": "y",
+  "cumbalar": [
+   {
+    "cephe": "on",
+    "bas_cm": 0,
+    "bit_cm": 386.5,
+    "cikinti_cm": 0
+   }
+  ]
+ },
+ "cikti": {
+  "pdf": true,
+  "dxf": true,
+  "pafta": "A2",
+  "icerik": [
+   "aksli_plan",
+   "alanli_kopya",
+   "montaj_kopyasi",
+   "on_gorunus",
+   "cati_profili",
+   "ozellik_tablosu"
+  ]
+ },
+ "varsayimlar": [
+  "Yerleşim katalog sayfasından (PS-1085, 85 m² 2+1) ve ref_katalog/TEK_KAT_PREFABRIK_PLANLARI.dxf'ten (motor.cikarici --secici P8501); katalog 825 × 1010 cm, Motor ızgarası 6,5 × 8 pano. Köşeler makasın oturduğu duvarlarda (kisa_kenar y, makas y'yi geçer): 825,75 × 1024 cm (Lokman 17 Kasım 2026 05:57:53 UTC: \"köşe direkleri makaslar ile aynı yönde değil ... katalog evi 10 cm genişledi 10 cm kısaldı depoya alacaksan güncelleme yapmamız lazım\").",
+  "Banyo tek mahal (DXF'teki 'Çamaşır Mak.' yazısı banyonun içindeki cihazdır, ayrı mahal değil); banyo kapısı holden, banyonun ön duvarında.",
+  "Salonun ön penceresi ve mutfağın veranda penceresi katalogdaki gibi 180/180 (251'lik pano). Salonun ön penceresi katalogdaki gibi duvarın tam ortasında: 62,75 + 251 + 62,75 (dis_pano_dayanagi x 67,75, ızgaranın yarım aksı; yeni aks yok).",
+  "Dış kapı 90 cm, veranda–hol duvarında; iç kapılar 82 cm, beşi de holden.",
+  "Makasa dik duvarda tek panoluk pencere duvar parçasının tam ortasında (D-121, dizilim.dik_duvar_pencere: tam_orta; yalnız yeni evler).",
+  "Çatı katalog fotoğraflarındaki gibi (8501_1_1…3, '85 M2 YALANCI CUMBA'): ana beşiğin mahyası x boyunca (kalkanlar sol ve sağ duvarda, saçak önde ve arkada), salonun üstünde öne bakan çıkıntısız cumba (bas 0, bit 386,5 dış yüzden; PA-11 gibi). Eğim %33, saçak 30, topuk 10 (katalogda yazmıyor; standart).",
+  "Kat planı (r02) Lokman'ın kartıyla onaylı (17 Kasım 2026 05:45:59 UTC, 'Onaylıyorum'); çatı ve dört görünüş (r03) kartla onaylı (05:48:41 UTC, 'Onaylıyorum'). r04 yalnız köşe yönünü değiştirir (05:57:53 sözü); pano dizilimi aynı."
+ ],
+ "eksikler": []
+}
