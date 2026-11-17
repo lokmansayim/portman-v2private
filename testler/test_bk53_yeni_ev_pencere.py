@@ -52,19 +52,16 @@ def test_cizimden_okunan_evde_anahtar_yazilir(ad):
     G.kur(ie)                                                         # Motor anahtarı tanır, plan kurulur
 
 
-def test_cizimden_okunan_90m2_on_duvar_ortalanir():
-    """90 m² hedef evin (TK-01) bayi çizimi: ön duvardaki 188,25'lik oda parçası 125,5 + 62,75 → 31,375 + 125,5 + 31,375 (kart 21:15:33
-    "Her zaman tam ortada": "Kısa odada 31,375'lik kısa panolar çıkar, 90 m² hedef evin ön duvarı dahil."). Öteki bütün duvarlar ve T
-    ekleri anahtarsız hâliyle aynı."""
+def test_cizimden_okunan_90m2_banyo_vasistasi_yerinde():
+    """90 m² hedef evin (TK-01) bayi çizimi. Makasa dik duvardaki tek ortalanacak pencere banyonun vasistasıydı (125,5 + 62,75 →
+    31,375 + 125,5 + 31,375). Lokman, 17 Kasım 2026 08:35:02 (D-124): "banyo ebeveyn banyo wc tuvalet yani vasistas pencresi ne varsa onlar
+    kendi konumlarında kalacak ortalamıyacaksın". Anahtarlı plan anahtarsızla pano pano aynı; uyarı eklenmez. Kuru odanın ortalanması
+    D-121 testlerinde (`testler/motor/test_d121_dik_duvar_pencere.py`)."""
     ie = _cizimden("TK01_okuma.json")
     eski = copy.deepcopy(ie)
     del eski["yapi"]["dizilim"][ANAHTAR]
     p1, p0 = G.kur(ie), G.kur(eski)
-    assert p1.dik_duvar_pencere == [{"duvar": "dis x 883.5", "once": [125.5, 62.75], "sonra": [31.375, 125.5, 31.375]}]
-    once, sonra = _dizilim(p0), _dizilim(p1)
-    assert set(once) == set(sonra)
-    assert [k for k in once if once[k] != sonra[k]] == ["dis x 883.5"]
-    assert p0.dik_duvar_pencere == []
+    assert p1.dik_duvar_pencere == [] and _dizilim(p1) == _dizilim(p0)
     assert [u for u in p1.uyarilar if u not in p0.uyarilar] == []
 
 
@@ -80,8 +77,10 @@ def test_havuz_evi_anahtarsiz_r01_ve_revizyon(tmp_path):
 
 def test_sablonlarda_anahtar_yok():
     """Havuz, katalog ve onaylı ızgara şablonları anahtarsız (kart 21:38:12): Beyin bu kaynaklara anahtar eklemez."""
+    # Katalog evlerinin yeni revizyonları (ör. `is_emri/P8501_r0*.json`) anahtarı kendi sohbetlerinde, Lokman'ın onayıyla taşır; Beyin
+    # onları olduğu gibi okur. Burada denetlenen havuz ve aday şablonları ile onaylı ızgara şablonlarıdır.
     yollar = [KOK / "is_emri" / f for f in K.GRID_SABLON.values()]
-    yollar += sorted((KOK / "is_emri").rglob("*.json")) + sorted((KOK / "beyin" / "veri").rglob("*.json"))
+    yollar += sorted((KOK / "is_emri" / "adaylar").rglob("*.json")) + sorted((KOK / "beyin" / "veri").rglob("*.json"))
     assert len(yollar) > 50
     bulunan = [str(y.relative_to(KOK)) for y in yollar if f'"{ANAHTAR}"' in y.read_text(encoding="utf-8")]
     assert bulunan == []
