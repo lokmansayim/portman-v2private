@@ -75,7 +75,7 @@ def test_ad_kurali_ve_durum(paketler):
         for p in klasor.iterdir():
             assert re.fullmatch(re.escape(kod) + "_" + KALEM, p.name), p.name
         durum = _bilgi_durum(klasor / f"{kod}_bilgi.md")
-        assert len(durum) == 11 + (kod == "TK-01"), (kod, durum)
+        assert len(durum) == 12 + (kod == "TK-01"), (kod, durum)        # BK-56: montaj_paftasi.dxf
         for ad, d in durum.items():
             assert d == "Var" or re.fullmatch(r"Yok: .{10,}", d), (ad, d)
             assert (d == "Var") == (klasor / ad).exists(), (ad, d)
