@@ -9,8 +9,9 @@
   hariç). H türleri paftadaki 38 konumun türüyle bire bir. Kart modeli bugünkü IFC'nin parçalarını aynen taşır (GlobalId, sınıf, ad, alt tür,
   yer, geometri, özellik setleri, malzeme); bugünkü IFC'ye yazılmaz. Hakemin kıyası kapı 1'i 13 satırla geçer; yanlış H kuralını ve kartı
   silinen ürünü yakalar.
-- H türünün kaydı en yakın makası yazar (makaslar y ekseninde, iki makas aynı H'ye denk gelir). İş Emri'nin çatısı beşik değilse makaslar
-  ve makasa bağlı dış H'ler "kural yok" yazar, komut 1 döner (bugünkü IFC çatıyı hep beşik çizer; geometri hakemi K1, 20 Ekim).
+- H türünün kaydı en yakın makası yazar (iki makas aynı H'ye denk gelir; BK-46'dan beri ikiz makasla kurulur). İş Emri'nin çatısı
+  beşik değilse makaslar ve makasa bağlı dış H'ler "kural yok" yazar, komut 1 döner (geometri hakemi K1, 20 Ekim; BK-46'dan beri 3D
+  kırmayı kırma çizer).
 - Komut dört dosyayı yazar; iki IFC'de şema hatası 0; Excel'de kartlar, sayım, H türü ve kartsız sayfaları.
 
 K2'de (gerekçeleri `docs/is_emirleri/IE-15.md` › Değişiklik (K2)): kartın eşlemesi `bugunku_ifc`, `yerlesim` ya da `sabit`'ten biri; PK-01'in
@@ -234,17 +235,32 @@ def test_h_turleri_paftayla_bire_bir(pk01, cevap):
     assert not {h["makas"] for h in kulakli} & {"MAKAS_01", "MAKAS_09"}            # baş makaslar köşede: H'ye denk gelmez
 
 
-def test_h_kaydi_en_yakin_makas(tmp_path):
-    """Makaslar y ekseninde: iki makas aynı dış H'ye pay içinde denk gelir; kayıt en yakınını yazar (önceden sonraki makas üstüne yazıyordu)."""
+def test_h_kaydi_en_yakin_makas(tmp_path, monkeypatch):
+    """İki makas aynı dış H'ye pay içinde denk gelirse kayıt en yakınını yazar (önceden sonraki makas üstüne yazıyordu). Bu durum eskiden
+    makaslar y'yi geçince kendiliğinden çıkıyordu (13 makas); BK-46'dan beri orada da listenin sayısında, düzen denetimiyle (eşit aralıkta
+    hiçbir H'ye iki makas denk gelmiyor; gerekçe `docs/is_emirleri/BK-46.md`). Durum ikiz makasla kurulur: her makasın 10 cm ötesine bir
+    ikiz, önce makasların arkasına, sonra önüne; iki sırada da ikizsiz koşuda makasın tam üstündeki her H aynı makası ve 0,00'ı yazar."""
     ie = _oku(MOTOR_VERI / "PK01.json")
-    ie["cati"]["makas_ekseni"] = "y"
-    assert ifc_uret.uret(ie, tmp_path / "y.ifc")["sema_hatasi"] == 0
-    say = KM.kart_modeli(tmp_path / "y.ifc", tmp_path / "y_model.ifc", "besik")
-    h = {x["parca"]: x for x in say["h_turu"]}
-    assert (h["H_PANO_EKI_DIS_012"]["makas"], h["H_PANO_EKI_DIS_012"]["uzaklik_cm"]) == ("MAKAS_04", 0.0)
-    assert (h["BAGLANTI_B05_09"]["makas"], h["BAGLANTI_B05_09"]["uzaklik_cm"]) == ("MAKAS_05", 0.0)
-    f = ifcopenshell.open(str(tmp_path / "y_model.ifc"))
-    e = next(e for e in f.by_type("IfcMember") if e.Name == "H_PANO_EKI_DIS_012")
+    assert ifc_uret.uret(ie, tmp_path / "x.ifc")["sema_hatasi"] == 0
+    tek = {x["parca"]: (x["makas"], x["uzaklik_cm"]) for x in KM.kart_modeli(tmp_path / "x.ifc", tmp_path / "x_tek.ifc", "besik")["h_turu"]}
+    ustunde = {p: m for p, m in tek.items() if m[1] == 0.0}
+    assert len(ustunde) == 14 and ustunde["H_PANO_EKI_DIS_015"] == ("MAKAS_04", 0.0)
+    asil = KM.makaslar
+
+    def ikizli(once):
+        def f(ifc, kutu):
+            m = asil(ifc, kutu)
+            ikiz = [{**x, "ad": x["ad"] + "_IKIZ", "konum": x["konum"] + 10} for x in m]
+            return ikiz + m if once else m + ikiz
+        return f
+
+    for once in (False, True):
+        monkeypatch.setattr(KM, "makaslar", ikizli(once))
+        say = KM.kart_modeli(tmp_path / "x.ifc", tmp_path / f"x_ikiz_{int(once)}.ifc", "besik")
+        h = {x["parca"]: (x["makas"], x["uzaklik_cm"]) for x in say["h_turu"]}
+        assert {p: h[p] for p in ustunde} == ustunde, once
+    f = ifcopenshell.open(str(tmp_path / "x_ikiz_1.ifc"))
+    e = next(e for e in f.by_type("IfcMember") if e.Name == "H_PANO_EKI_DIS_015")
     assert ue.get_psets(e)[KM.PARCA_SETI]["Kural"] == "h_turu: dübelli & kulaklı (MAKAS_04 0.00 cm)"
 
 
@@ -279,17 +295,29 @@ def test_kart_modeli_tek_basina_yuklenir(pk01, tmp_path):
 
 
 def test_komut_kirma_catida_1_doner(tmp_path):
+    """Kırma çatıda komut 1 döner. BK-46'dan beri 3D kırmayı kırma çizer: PK-01'in kırması (mahya y boyunca) listede yazılmaz, 3D'de makas
+    yok (eskiden 9 beşik makası "kural yok" sayılıyordu); makasları olan kırmada (140 m², 29 makas) makas "kural yok" ve kartsız birleşimdir."""
     ie = _oku(MOTOR_VERI / "PK01.json")
     ie["cati"]["tip"] = "kirma"
     (tmp_path / "PK01_kirma.json").write_text(json.dumps(ie, ensure_ascii=False), encoding="utf-8")
     assert KM.main([str(tmp_path / "PK01_kirma.json"), str(tmp_path / "cikti")]) == 1
     say = _oku(tmp_path / "cikti" / "PK01_kirma_kart_sayim.json")
-    assert say["cati_tipi"] == "kirma" and len(say["kural_yok"]) == 33 + 4 + 6 + 1   # K2: dört çatı katmanı (aşık, kaplama, betopan, dere ve iniş); K3b: altı çatı kenarı; K5b-2: çatı izolasyonu
+    n_makas = sum(ue.get_predefined_type(e) == "TRUSS" for e in ifcopenshell.open(str(tmp_path / "cikti" / "PK01_kirma.ifc")).by_type("IfcElementAssembly"))
+    assert n_makas == 0
+    # makasa bağlı 24 dış H; K2: dört çatı katmanı (aşık, kaplama, betopan, dere ve iniş); K3b: altı çatı kenarı; K5b-2: çatı izolasyonu
+    assert say["cati_tipi"] == "kirma" and len(say["kural_yok"]) == n_makas + 24 + 4 + 6 + 1
+    assert {x.get("cati") for x in say["kural_yok"]} == {"kirma"}
     assert [x["cati"] for x in say["kural_yok"] if x["parca"] == "çatı izolasyonu"] == ["kirma"]
+    # makaslı kırma: her makas "kural yok" (çatının tipi), Excel'de kartsız birleşim
+    assert KM.main([str(KOK / "testler" / "cizim" / "evler" / "AP01.json"), str(tmp_path / "ap01")]) == 1
+    say = _oku(tmp_path / "ap01" / "AP01_kart_sayim.json")
+    makas = [x for x in say["kural_yok"] if x["sinif"] == "IfcElementAssembly"]
+    assert len(makas) == 29 and {x["cati"] for x in makas} == {"kirma"} and all("besik" in x["neden"] for x in makas)
     from openpyxl import load_workbook
-    bilesen = {r[0]: r[3] for r in load_workbook(tmp_path / "cikti" / "PK01_kirma_kart_katalogu.xlsx")["Kartsız"].iter_rows(values_only=True)
+    bilesen = {r[0]: r[3] for r in load_workbook(tmp_path / "ap01" / "AP01_kart_katalogu.xlsx")["Kartsız"].iter_rows(values_only=True)
                if r[2] == "bileşen"}
-    assert bilesen["MAKAS_01"] == "8 çubuk; birleşim kural yok, sayılmadı"                 # kartı olmayan birleşim "kartında" yazmaz
+    assert len(bilesen) == 29
+    assert all(re.fullmatch(r"\d+ çubuk; birleşim kural yok, sayılmadı", v) for v in bilesen.values())  # kartı olmayan birleşim "kartında" yazmaz
 
 
 def _ozdes(f, e) -> list[str]:

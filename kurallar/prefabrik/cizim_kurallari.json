@@ -971,7 +971,7 @@
   {
    "kod": "PC-38",
    "baslik": "Taşan verandanın çatısı ana çatının cumbası olabilir; iki cumba",
-   "kural": "Gövdeden taşan veranda (İş Emri `verandalar`) ana çatının saçak yanındaysa çatısı ana çatının çapraz cumbası gibi çizilir: verandada `cati.tip` \"cumba\" (eğim, saçak ve topuk ana çatınınki; başka alan yazılmaz), ana çatıda `cati.cumbalar`'a `{cephe, veranda: <verandanın adı>}` öğesi. Cumbanın ayak izi verandanın dikdörtgenidir (kolonlar içinde); kendi beşiği ana çatıya iki vadiyle girer, mahyası vadilerin birleştiği yere kadar (tek cumbanın kuralı, `cati_cumba`). Evde gövdenin cumbası da varsa iki cumba ana çatının karşı iki saçak yüzünde olur (`cati_prefabrik.cumba_dikdortgenleri`, `_iki_cumba`); ana çatının uç kalkanları iki kurulumun birleşimidir. Görünüşte verandanın kolonu ve kirişi çizilir, çatısı, saçağı ve topuğu ana çatının çizgilerindedir; cumbanın saçaklı alnı ardını örter (öndeki cumbanın vadisi ve topuğu arkadan görünmez, `cephe_gorunus._cumba_alinlari`). Bu sürümde yalnız tek dizilim var (Lokman'ın gördüğü): gövdenin çıkıntılı cumbası (`cikinti_cm` > 0) + karşı saçak yüzünde taşan verandanın cumbası. Yanlış yazılan cumba açık hatadır (K21): aynı yüzde iki cumba, verandasız ikinci gövde cumbası, iki veranda cumbası, gövde cumbası olmadan veranda cumbası, çıkıntısız gövde cumbasıyla veranda cumbası, cumbası olmayan cumba verandası, ana_makas (geri çekilen ana makas) ile iki cumba. Liste iki cumbayı saymaz (`ListeYazilmaz`); IFC ve montaj rehberi bu çatıyı henüz bilmez. Tek cumbalı ve cumbasız evlerin çizimi değişmez. İlk ev: 45 m² ev (AP-07, arka sundurma; `testler/havuz/is_emirleri/AP07.json`).",
+   "kural": "Gövdeden taşan veranda (İş Emri `verandalar`) ana çatının saçak yanındaysa çatısı ana çatının çapraz cumbası gibi çizilir: verandada `cati.tip` \"cumba\" (eğim, saçak ve topuk ana çatınınki; başka alan yazılmaz), ana çatıda `cati.cumbalar`'a `{cephe, veranda: <verandanın adı>}` öğesi. Cumbanın ayak izi verandanın dikdörtgenidir (kolonlar içinde); kendi beşiği ana çatıya iki vadiyle girer, mahyası vadilerin birleştiği yere kadar (tek cumbanın kuralı, `cati_cumba`). Evde gövdenin cumbası da varsa iki cumba ana çatının karşı iki saçak yüzünde olur (`cati_prefabrik.cumba_dikdortgenleri`, `_iki_cumba`); ana çatının uç kalkanları iki kurulumun birleşimidir. Görünüşte verandanın kolonu ve kirişi çizilir, çatısı, saçağı ve topuğu ana çatının çizgilerindedir; cumbanın saçaklı alnı ardını örter (öndeki cumbanın vadisi ve topuğu arkadan görünmez, `cephe_gorunus._cumba_alinlari`). Bu sürümde yalnız tek dizilim var (Lokman'ın gördüğü): gövdenin çıkıntılı cumbası (`cikinti_cm` > 0) + karşı saçak yüzünde taşan verandanın cumbası. Yanlış yazılan cumba açık hatadır (K21): aynı yüzde iki cumba, verandasız ikinci gövde cumbası, iki veranda cumbası, gövde cumbası olmadan veranda cumbası, çıkıntısız gövde cumbasıyla veranda cumbası, cumbası olmayan cumba verandası, ana_makas (geri çekilen ana makas) ile iki cumba. Liste iki cumbayı BK-45'ten beri sayar (D-114; Lokman, kart 16 Kasım 2026 08:11:39 \"Evet, girsin\"): ikisi de tek çapraz cumbanın makas kuralıyla, verandanınki dış kirişin ekseninden (`prefabrik_liste._iki_cumba_catilari`). IFC ve montaj rehberi bu çatıyı henüz bilmez. Tek cumbalı ve cumbasız evlerin çizimi değişmez. İlk ev: 45 m² ev (AP-07, arka sundurma; `testler/havuz/is_emirleri/AP07.json`).",
    "karar": "D-87",
    "lokman": {
     "tarih": "2026-11-14",
@@ -994,7 +994,8 @@
     "testler/motor/test_iki_cumba.py::test_yan_gorunus_cumba_bandi",
     "testler/motor/test_iki_cumba.py::test_veranda_kolon_ve_kiris",
     "testler/motor/test_iki_cumba.py::test_cizim_dogrulamasi",
-    "testler/motor/test_iki_cumba.py::test_liste_yazilmaz",
+    "testler/motor/test_iki_cumba.py::test_liste_yazilir",
+    "testler/motor/test_iki_cumba.py::test_liste_hedef_ornek",
     "testler/motor/test_iki_cumba.py::test_yanlis_tanim_hata",
     "testler/motor/test_iki_cumba.py::test_tek_cumba_eski_yol"
    ]
@@ -1053,6 +1054,231 @@
     "testler/motor/test_d96_uclu_h.py::test_nis_t_olan_yerde_degisiklik_yok",
     "testler/motor/test_d96_uclu_h.py::test_yanlis_nokta_hata",
     "testler/motor/test_d96_uclu_h.py::test_ayni_nokta_iki_kez_hata"
+   ]
+  },
+  {
+   "kod": "PC-41",
+   "baslik": "Üçlü H yalnız iç duvar dış duvarla aynı kalınlıktaysa; 60'lıkta köşe direği",
+   "kural": "Üçlü H (dış duvar T'si: dış duvar aynı hatta ve eksende iç duvar olarak sürer, öteki dış duvar ona dik) yalnız iç duvar dış duvarla aynı kalınlıktaysa kurulur; standart H'da 100'lükten 60'lığa geçen parça yoktur. İç duvar 60'lık, dış duvar 100'lükse D-29'un niş T'si (PC-03) kurulmaz, orada köşe direği kalır; aynı hatta süren 60'lık iç duvar köşeye çektirme U'suyla bağlanır. İş Emri'nin yazdığı üçlü H (PC-40, `yapi.birlesimler` › `t: \"uclu_h\"`) farklı kalınlıkta açık hatadır (K21; sessizce köşe direğine dönmez). PC-03 ve PC-40'ın metni aynen; bu satır ikisinin koşuludur. 90 m² 3+1 hedef ev (TK-01 r07/r08, iç 60): nişte iki üçlü H yerine iki köşe direği, nişin kapı panosu 115,5 → 125,5, nişin yan duvarlarında ve hol duvarlarında ilk pano 125,5 → 120,5. Ön onay çiziminde dar açık mahalin (tek pano şeridi: eni 125,5 cm'den dar, ör. giriş nişi 115,5; veranda değil) yan duvarının özel pano ölçüsü kapalı mahalin yanına geçer; nişin iki ölçüsü nişin içinde kalınca adına ve m²'sine yer kalmıyordu. 71 m² 2+1 (iç 100) ve TK-02 (iç 100) aynen. 160 / 100 seçeneğinde de (dış 160, iç 100) üçlü H kurulmaz, köşe direği kalır (Lokman, kart 15 Kasım 09:02:23 \"Evet, köşe direği\"; depoda böyle ev yok).",
+   "karar": "D-104",
+   "lokman": {
+    "tarih": "2026-11-15",
+    "saat": "07:32",
+    "soz": "bu 71 m² deki üçlü H iç duvarlar 100'lük olduğu için olur ama iç duvarlar 60'lık olursa olmaz köşe kullanmak zorunda kalırız şöyle bir mantık vereyim standart H'larda 100'lükten 60'lığa geçen redisyon gibi bir malzeme yok (07:47:55 \"bunlar olmaz buralara mecburen 100'lük köşeler gelecek\"; kart 07:55:12 \"Doğru, hedef örnekler güncellensin\"; 160 / 100 için kart 09:02:23 \"Evet, köşe direği\")"
+   },
+   "kod_yeri": [
+    "motor/geometry.py::_kur",
+    "motor/dxf_out.py::Cizici._dar_acik_mahal_yani",
+    "motor/dxf_out.py::Cizici._ozel_olcu"
+   ],
+   "test": [
+    "testler/motor/test_d104_uclu_h_kalinlik.py::test_90m2_girdi_ic_60",
+    "testler/motor/test_d104_uclu_h_kalinlik.py::test_90m2_niste_kose_diregi",
+    "testler/motor/test_d104_uclu_h_kalinlik.py::test_90m2_yalniz_nis_degisir",
+    "testler/motor/test_d104_uclu_h_kalinlik.py::test_90m2_liste",
+    "testler/motor/test_d104_uclu_h_kalinlik.py::test_cizim_dogrulamasi_gecer",
+    "testler/motor/test_d104_uclu_h_kalinlik.py::test_71m2_ic_100_uclu_h_aynen",
+    "testler/motor/test_d104_uclu_h_kalinlik.py::test_71m2_ic_60_uclu_h_hata",
+    "testler/motor/test_d104_uclu_h_kalinlik.py::test_ic_100_nis_t_kalir",
+    "testler/motor/test_d104_uclu_h_kalinlik.py::test_nis_olcusu_oda_yaninda"
+   ]
+  },
+  {
+   "kod": "PC-42",
+   "baslik": "Panonun ortasındaki T'de 3'lü H çizilmez (çizim listeyle aynı parçayı gösterir)",
+   "kural": "İç duvar geçen duvarın panosunun ortasına T ile geliyorsa (pano eki yok, ek toleransı yükleme listesininki: geçen duvarın yarı kalınlığı + 3,5 cm; ortadan kayma en çok `ORTADAKI_H_PAYI_CM` = 1,5 cm) parça çektirme U'sudur; Motor orada 3'lü H çizmez (ana plan, net alan kopyası, saha montaj planı, A4 ön onay sayfası). 3'lü H geçen duvarın pano ekinde ya da iki duvarın uç uca birleştiği yerde (niş T'si, D-29, D-96) çizilir; panonun ortasında olmayan eksiz T'deki H'a (TK-03'ün üç yeri) dokunulmaz. Süzme `_kur`'un sonunda, D-92'nin yeniden dizdiği panolardan sonradır. Motor'un doğrulaması (K23) DXF'teki bir 3'lü H'ın iki yanını geçen duvarın tek panosu örtüyor ve H o panonun ortasındaysa hata verir; teslim PDF'i yazılmaz. Pano dizilimi, ölçüler ve yükleme listesi değişmez (liste İE-27'den beri orada çektirme U'su sayar). 125,5'lik panonun tam ortasındaki 13 yer ve 122,5'lik panodaki 2 yer (havuzda 9 evde 15 yer) kartın \"15 yerin hepsinde\" seçimiyle.",
+   "karar": "D-105",
+   "lokman": {
+    "tarih": "2026-11-15",
+    "saat": "08:51",
+    "soz": "evet böyle bir uygulama var duvar tam ise yani 125,5 cm ise ve böleceğimiz pano tam ortaya geliyorsa 3'lü H kullanmak yerine tam ortaya çektirme U'su koyuyoruz maliyet ve hız açısından"
+   },
+   "kod_yeri": [
+    "motor/geometry.py::ortadaki_h",
+    "motor/geometry.py::ORTADAKI_H_PAYI_CM",
+    "motor/geometry.py::_kur",
+    "motor/validate.py::dogrula"
+   ],
+   "test": [
+    "testler/motor/test_bk38_cizim_liste.py::test_degisen_yerler",
+    "testler/motor/test_bk38_cizim_liste.py::test_cizim_listeyle_ayni",
+    "testler/motor/test_bk38_cizim_liste.py::test_ortadaki_h_tanimi",
+    "testler/motor/test_bk38_cizim_liste.py::test_dogrulama_ortadaki_h_yi_yakalar"
+   ],
+   "sabitler": [
+    {
+     "yer": "motor/geometry.py::ORTADAKI_H_PAYI_CM",
+     "deger": 1.5
+    }
+   ]
+  },
+  {
+   "kod": "PC-43",
+   "baslik": "Makas yönünde 7 m'yi aşan açıklıkta tavan kirişi (saha montaj planında)",
+   "kural": "Prefabrikte makasın geçtiği yerde makas yönündeki açıklık 7 m'yi aşarsa odaya bir tavan kirişi (kutu profil 100 × 100) konur (`motor/tavan_kirisi.bul`; kural `kurallar/yerlesim/prefabrik.json › tavan_kirisi`). Kiriş makasa dik gider, iki ucu duvara oturur; en kısa çizgi seçilir, iki çizgi eşitse iki ucu da köşede olan. Açıklığın makasların dizildiği yöndeki genişliği makas aralığından (125,5) darsa oraya makas gelmez, kiriş de konmaz (genişlik 2,5 cm'lik adımla ölçülür; aralığa 2,5 cm'den yakınsa sorulur); çıkıntılı cumbanın altı kapsam dışı. Kiriş yalnız DXF'in saha montaj planında çizilir: 10 cm genişlikte kırmızı taralı dikdörtgen, yüzden yüze, ve \"TAVAN KİRİŞİ 10×10\" yazısı kirişin yanında, plandaki yazılara ve özel pano ölçülerine binmeyen ilk yerde (katman TAVAN_KIRISI, yalnız kirişli evde açılır). Akslı plan, net alan planı ve bayiye giden A4 ön onay sayfası değişmez; çizime ölçü eklenmez. Listede bir satır: Kutu profil (kiriş) 100 × 100, L yüzden yüze + 2 × 10, uçta kolon yok. İki oda arasındaki duvarsız sınırın kirişi açıklığı keser. Yer bulunamazsa, iki eşit yer kalırsa (1 cm payla), açıklık birden çok mahalden geçerse ya da odaya bir kiriş yetmezse kiriş konmaz; liste adetsiz \"Kural yok\" satırıyla sorar, çizime uyarı yazılmaz (K21). Kirişsiz evin çizimi ve listesi aynen.",
+   "karar": "D-107",
+   "lokman": {
+    "tarih": "2026-11-15",
+    "saat": "09:47",
+    "soz": "eşik 7 metre olsun"
+   },
+   "kod_yeri": [
+    "motor/tavan_kirisi.py::bul",
+    "motor/tavan_kirisi.py::kural",
+    "motor/dxf_out.py::Cizici._tavan_kirisleri",
+    "motor/dxf_out.py::Cizici.TAVAN_KIRISI_YAZISI",
+    "motor/prefabrik_liste.py::model_motor",
+    "motor/prefabrik_liste.py::liste"
+   ],
+   "test": [
+    "testler/motor/test_d107_tavan_kirisi.py::test_kural_degerleri",
+    "testler/motor/test_d107_tavan_kirisi.py::test_paftadaki_kirisler",
+    "testler/motor/test_d107_tavan_kirisi.py::test_muhurlu_70m2_ayni_kiris",
+    "testler/motor/test_d107_tavan_kirisi.py::test_kirissiz_evler",
+    "testler/motor/test_d107_tavan_kirisi.py::test_tarama_butun_is_emirleri",
+    "testler/motor/test_d107_tavan_kirisi.py::test_liste_satiri",
+    "testler/motor/test_d107_tavan_kirisi.py::test_kirissiz_evin_modeli_aynen",
+    "testler/motor/test_d107_tavan_kirisi.py::test_kose_yoksa_sorulur",
+    "testler/motor/test_d107_tavan_kirisi.py::test_saha_montaj_planinda_kiris",
+    "testler/motor/test_d107_tavan_kirisi.py::test_81m2_yazisi_olcuye_binmez",
+    "testler/motor/test_d107_tavan_kirisi.py::test_kirissiz_evde_katman_yok",
+    "testler/motor/test_d107_tavan_kirisi.py::test_sorulan_evin_cizimi_aynen",
+    "testler/motor/test_d107_tavan_kirisi.py::test_duvarsiz_sinir_acikligi_keser",
+    "testler/motor/test_d107_tavan_kirisi.py::test_odaya_bir_kiris_yetmezse_sorulur",
+    "testler/motor/test_d107_tavan_kirisi.py::test_esitlik_payi_ve_ayni_kiris",
+    "testler/motor/test_d107_tavan_kirisi.py::test_makas_araligina_yakin_bant_sorulur"
+   ],
+   "sabitler": [
+    {
+     "yer": "motor/dxf_out.py::Cizici.TAVAN_KIRISI_YAZISI",
+     "deger": "TAVAN KİRİŞİ 10×10"
+    }
+   ]
+  },
+  {
+   "kod": "PC-44",
+   "baslik": "İç duvarın dış duvar ucunda kalan parça (62,75'ten büyük iki eksik parça yerine kalan parça + 125,5)",
+   "kural": "Pano harcaması: 62,75'ten büyük parça bir tam pano, 62,75 ve küçüğü yarım pano harcar (`pano_harcamasi`). Bir ucu dış duvarın iç yüzünde olan açıklıksız iç duvar aralığında (iki köşe ya da T arasında; açıklıklı ve karkaslı pano, T eki aralığı keser) 62,75'ten büyük en az iki eksik parça varsa ve 125,5'ler + tek kalan dizilimi daha az pano harcıyorsa aralık yeniden dizilir: 125,5'ler öteki uçtaki köşe ya da T'nin aksından dizilir, kalan parça (62,75 ya da küçüğü) dış duvar ucundadır. 67 m² 2+1'in banyo duvarları: 120,5 + 64,75 (2 pano) → arka duvardan 59,75 + köşeye 125,5 (1,5 pano). Fazla harcamayan aralığa, dış duvara, iki ucu ya da hiçbir ucu dış duvarda olmayan aralığa dokunulmaz (standart aks düzeni aynen; dış duvarların uçtaki 62,75'leri aynen). Kalan 0,05 cm'den kısa ama sıfır değilse aralık aynen. Öteki uç T ise 125,5 T'nin aksından ölçülür, T payı uçtaki panodan düşer: 64,75 + 120,5 → 122,5 + 62,75 (Lokman, kart 16 Kasım 2026 08:24:27 \"T'nin aksından: 122,5 + 62,75\"). Yeni ek çektirme U'lu T'ye denk gelirse açık hata (K21). Anahtar yok (D-29 madde 6); depodaki evlerde hiçbir aralık değişmez.",
+   "karar": "D-108",
+   "lokman": {
+    "tarih": "2026-11-15",
+    "saat": "22:04",
+    "soz": "bizim standart panomuz 125,5 cm eğer yarısı olan 62,75 den büyük bir sayı alırsan o tam pano sayılır yani sen burada 120,5 panoları 125,5 yapacaksın 64,75 panolarda 59,75 olacak"
+   },
+   "kod_yeri": [
+    "motor/geometry.py::_ic_duvar_dis_ucu",
+    "motor/geometry.py::pano_harcamasi",
+    "motor/geometry.py::YARIM_PANO_CM",
+    "motor/geometry.py::IC_DUVAR_YUZ_PAYI_CM",
+    "motor/geometry.py::_kur"
+   ],
+   "test": [
+    "testler/motor/test_d108_ic_duvar_dis_ucu.py::test_pano_harcamasi",
+    "testler/motor/test_d108_ic_duvar_dis_ucu.py::test_uydurma_ev_bugun_120_5_ve_64_75",
+    "testler/motor/test_d108_ic_duvar_dis_ucu.py::test_uydurma_ev_59_75_dis_duvar_ucunda",
+    "testler/motor/test_d108_ic_duvar_dis_ucu.py::test_uydurma_ev_oteki_panolar_aynen",
+    "testler/motor/test_d108_ic_duvar_dis_ucu.py::test_depodaki_evlerde_kural_bir_sey_degistirmez",
+    "testler/motor/test_d108_ic_duvar_dis_ucu.py::test_fazla_harcamayan_ya_da_kiymik_aralik_aynen",
+    "testler/motor/test_d108_ic_duvar_dis_ucu.py::test_t_ucunda_boy_aks_ustunden"
+   ],
+   "sabitler": [
+    {
+     "yer": "motor/geometry.py::YARIM_PANO_CM",
+     "deger": 62.75
+    },
+    {
+     "yer": "motor/geometry.py::IC_DUVAR_YUZ_PAYI_CM",
+     "deger": 0.6
+    }
+   ]
+  },
+  {
+   "kod": "PC-45",
+   "baslik": "Köşe boşluğundan taşan veranda tek mahal, yan kiriş tek parça, çatısı ana çatının cumbası; taşan verandada kolon arası en çok 565 cm",
+   "kural": "Taşan verandanın iç kenarı gövdenin köşe boşluğunun (önü ve yanı açık, ızgaradaki açık mahal) ağzına oturuyorsa İş Emri `verandalar[].nis` boşluğun adını yazar: boşluk ve taşan şerit tek mahal olur; boşluğun yanındaki kiriş gövdenin köşesinden ön kolona tek parça (52 m² 242,5, 55 m² 250,5; 100 × 100), altında kolon yok; boşluğun ağzında kiriş ve köşesinde kolon yok (D-38'in köşe kolonu kalkar). Taşan verandanın dış kenarında kolon ekseni arası 565 cm'yi geçerse Motor eşit aralıkla en az sayıda ara kolon koyar (kart 16 Kasım 2026 08:42:16 \"Kolon arası en çok 565 cm\"; 52 m² 635,5 → 1, 55 m² 449,25 → 0, 67 m² 710,25 → 1); dış kiriş n + 1 eşit parça (67 m²: 355,1 + 355,1). Daha kısada pafta ara kolon gösteriyorsa İş Emri `ara_kolon: n` yazar; yazılan sayı 565 kuralının istediğinden azsa açık hata (K21). Ön onay çiziminde verandanın eni, boşluk yanında yan kirişin boyu, öteki yanda taşma; boşluğun kendi ölçüsü yok; aks numaralarının yanına düşen ölçü verandanın içinde (ölçüler Lokman'ın ön onay çizimi kartıyla, 16 Kasım 2026 07:02:39 \"Doğru, ölçüler kalsın\"). Görünüşte yan kirişin gövdenin ardında kalan kısmı çizilmez. Çatı (çatı eskizi kartı, 16 Kasım 2026 08:05:51 \"52/55 öneri doğru, 67 böyle\"): köşe verandasının çatısı ana çatının cumbası olabilir, gövde cumbası olmadan (PC-38'in \"gövde cumbası olmadan veranda cumbası\" hatasının yalnız `nis` yazılan verandadaki istisnası): ana çatı `cati.tip` besik_cumba, `cumbalar` [{cephe, veranda: <adı>}], verandada `cati.tip` cumba; cumbanın ayak izi verandanın taşan dikdörtgeni, eğim, saçak ve topuk ana çatınınki, iki vadi ana çatının yüzüyle mahyanın iç ucunda birleşir (52 m²'de ortadaki kolon cumbanın tepesinin altında). Liste cumbayı çizimdeki çatıdan sayar (AP-22'nin çapraz cumbası gibi: saçak, alın ve dere içi çatının kenarlarından; TASLAK); IFC ve kart modeli bu çatıyı kurmaz (açık hata). Montaj rehberi ara kolonlu verandayı kurmaz (`Desteklenmiyor`; listeyle çelişmesin diye). Anahtarsız İş Emri aynen (BK-14), dış kenarı 575 cm'yi geçen veranda dışında (o, 565 kuralıyla ara kolon alır; depoda yok). İş Emri dikmesi ara kolonun yerindeyse açık hata.",
+   "karar": "D-109",
+   "lokman": {
+    "tarih": "2026-11-15",
+    "saat": "22:30",
+    "soz": "kart \"Doğru, böyle yap\" (soru: \"Köşe verandası eskizi bu hâliyle doğru mu?\", eskiz r04); 22:17:51 \"bu olmayacak  plana iyice bak bak 242,5 tek kiriş 100*100 profil olacak yani altında 1 tane daha kolon olmayacak\"; 22:16:59 \"bu yeşil niş mi kiriş mi neyse olmayacak\"; 22:16:38 (67 m²) \"aynen böyle olacak doğrusu bu\"; 22:10:48 \"kolon ver kiriş kavramları bir birine karıştı kiriş olacak ama kolon olmayacak\"; ön onay çizimi kartı 16 Kasım 2026 07:02:39 \"Doğru, ölçüler kalsın\" (soru: \"Köşe verandasının ön onay çizimi bu hâliyle doğru mu?\"); çatı: 16 Kasım 2026 07:03:57 \"cumbalı çatıda kurallarını bir yokla bir sıkıntın var gibi\", çatı eskizi kartı 08:05:51 \"52/55 öneri doğru, 67 böyle\" (soru: \"Köşe verandasının çatısı bu eskizdeki gibi mi olsun?\"); çatılı ön onay çizimi kartı 16 Kasım 2026 08:39:21 \"Doğru\" (soru: \"Köşe verandalı üç evin çatılı ön onay çizimi doğru mu?\"); ara kolon eşiği kartı 16 Kasım 2026 08:42:16 \"Kolon arası en çok 565 cm\" (soru: \"Taşan verandaya ara kolonu Motor hangi uzunlukta koysun?\")"
+   },
+   "kod_yeri": [
+    "motor/geometry.py::_kose_boslugu",
+    "motor/geometry.py::_dis_verandalar",
+    "motor/prefabrik_liste.py::model_motor",
+    "motor/prefabrik_liste.py::liste",
+    "motor/dxf_out.py::Cizici._kose_verandasi_olculeri",
+    "motor/veranda.py::gorunus_parcalari",
+    "motor/cephe_gorunus.py::_golge",
+    "motor/ifc_uret.py::hazirla",
+    "motor/cati_prefabrik.py::tek_veranda_cumbasi",
+    "motor/cati_prefabrik.py::_kose_verandasi_cumbasi",
+    "motor/cati_prefabrik.py::cati",
+    "motor/cati_capraz.py::tanim",
+    "motor/prefabrik_liste.py::_capraz_cumba_catilari",
+    "motor/geometry.py::_gerekli_ara_kolon",
+    "motor/geometry.py::_kolon_eksen_araligi",
+    "araclar/paket/rehber/veri.py::kur"
+   ],
+   "test": [
+    "testler/motor/test_d109_kose_verandasi.py::test_hedef_ornek",
+    "testler/motor/test_d109_kose_verandasi.py::test_52m2_yan_kiris_tek_parca_altinda_kolon_yok",
+    "testler/motor/test_d109_kose_verandasi.py::test_55m2_iki_kolon_sol_yan_kiris",
+    "testler/motor/test_d109_kose_verandasi.py::test_67m2_ortada_kolon_on_kiris_iki_parca",
+    "testler/motor/test_d109_kose_verandasi.py::test_anahtarsiz_eski_yol",
+    "testler/motor/test_d109_kose_verandasi.py::test_hatalar",
+    "testler/motor/test_d109_kose_verandasi.py::test_niste_is_emri_dikmesi_hata",
+    "testler/motor/test_d109_kose_verandasi.py::test_yalniz_onu_acik_giris_nisine_nis_yazilmaz",
+    "testler/motor/test_d109_kose_verandasi.py::test_gorunuste_govdenin_ardindaki_kiris_yok",
+    "testler/motor/test_d109_kose_verandasi.py::test_cizim_olculeri",
+    "testler/motor/test_d109_kose_verandasi.py::test_ifc_girdisi_birlesik_mahal",
+    "testler/motor/test_d109_kose_verandasi.py::test_veranda_cumbasi_iki_vadi",
+    "testler/motor/test_d109_kose_verandasi.py::test_veranda_cumbasi_liste_cizimden",
+    "testler/motor/test_d109_kose_verandasi.py::test_veranda_cumbasi_liste_yanlis_tanim",
+    "testler/motor/test_d109_kose_verandasi.py::test_veranda_cumbasi_ifc_ve_kart_modeli_kurmaz",
+    "testler/motor/test_d109_kose_verandasi.py::test_veranda_cumbasi_yanlis_tanim_hata",
+    "testler/motor/test_d109_kose_verandasi.py::test_67m2_veranda_besigi_aynen",
+    "testler/motor/test_d109_kose_verandasi.py::test_ara_kolon_565_motor_koyar",
+    "testler/motor/test_d109_kose_verandasi.py::test_ara_kolon_esigi",
+    "testler/motor/test_d109_kose_verandasi.py::test_ara_kolon_az_yazilirsa_hata",
+    "testler/motor/test_d109_kose_verandasi.py::test_ara_kolon_fazlasi_paftadan",
+    "testler/motor/test_d109_kose_verandasi.py::test_bozuk_genislik_hata",
+    "testler/motor/test_d109_kose_verandasi.py::test_ara_kolon_en_az_sayi",
+    "testler/motor/test_d109_kose_verandasi.py::test_ara_kolon_is_emri_dikmesi_hata",
+    "testler/motor/test_d109_kose_verandasi.py::test_rehber_ara_kolonlu_verandayi_kurmaz"
+   ]
+  },
+  {
+   "kod": "PC-46",
+   "baslik": "Makas aksı kaymaz; makasa dik duvarda pencere odanın tam ortasında",
+   "kural": "Makasın oturduğu (saçak) duvarlarda pano ekleri tek bir 62,75 cm ızgarasında kalır: ek tam ya da yarım aksta, yarım pano serbest; havuz denetimi HD-12 ızgara dışındaki eki uyarı diye yazar. Makasa dik dış duvarda (makas x yönündeyse x yönündeki ön ve arka duvar) İş Emri `yapi.dizilim.dik_duvar_pencere: \"tam_orta\"` yazarsa Motor tek panoluk (125,5) pencereyi duvarın o aralığının (köşeden köşeye, köşeden T'ye ya da T'den T'ye; aralıkta başka açıklık ya da panonun ortasına düşen T yoksa) tam ortasına alır: pencere yanındaki iki parça eşit (60 m² küçük yatak odası 94,125 + 125,5 + 94,125). Yan 125,5'i aşarsa 125,5'lik panolar pencerenin yanında, kalan köşede ya da T'de (PA-06 kalkanı 44,875 + 125,5 + 125,5 + 125,5 + 44,875). 0,05 cm'den kısa kıymık kalırsa pencere kaymaz. Kırma çatıda makasa dik duvar da makas taşır: kural uygulanmaz, hakem iki yönü de denetler. Ortalanmayan her pencere için uyarı yazılır. Çizime yeni aks çıkmaz; akslar ızgaradaki gibi kalır. Saçak duvarı, iç duvar ve kapı yerinde. Anahtarsız İş Emri aynen (D-103, yalnız yeni çizilen evler).",
+   "karar": "D-121",
+   "lokman": {
+    "tarih": "2026-11-16",
+    "saat": "21:44",
+    "soz": "20:56:44 \"tamam çok güzel oldu istediğim bu bir yönerge veriyorum makas yönündeki akslar çok önemli makasları o akslara oturtuyoruz ama makas yönüne dik olan akslar kayabilir ama yine kurallı kaysın\"; 20:50:02 \"yatak odası 2 120/180 penceresini tam ortaya al yani 125,5 + 62,75 = 188,25 / 2 = 94,125 sağına ve soluna koy bu panoları\"; kart 21:14:20 \"Okuma 1: aks kaymaz, yarım pano olur\" (soru: \"Makas aksları için hangi okuma doğru?\"); kart 21:15:33 \"Her zaman tam ortada\" (soru: \"Ön ve arka duvarda pencere ne zaman odanın ortasına kaysın?\"); kart 21:36:53 \"B) 125,5 pencere yanında, kalan uçta\" (soru: \"Pencerenin yanı 125,5'i aşınca nasıl bölünsün?\"); kart 21:38:12 \"Yalnız yeni çizilen evlere\" (soru: \"Pencere ortalama kuralı hangi evlere uygulansın?\"); kart 21:44:20 \"Hayır, aks çıkmasın\" (soru: \"Pencere ortalanınca çizime A′ gibi yeni aks çıksın mı?\")"
+   },
+   "kod_yeri": [
+    "motor/geometry.py::_dik_duvar_pencere",
+    "motor/geometry.py::_t_eki_var",
+    "motor/geometry.py::_t_noktalari",
+    "motor/geometry.py::makas_aksi_denetimi",
+    "araclar/havuz_denetimi.py::denetle_prefabrik"
+   ],
+   "test": [
+    "testler/motor/test_d121_dik_duvar_pencere.py::test_hedef_ornek_60m2",
+    "testler/motor/test_d121_dik_duvar_pencere.py::test_anahtarsiz_eski_yol",
+    "testler/motor/test_d121_dik_duvar_pencere.py::test_uzun_yan_125_pencere_yaninda_kalan_ucta",
+    "testler/motor/test_d121_dik_duvar_pencere.py::test_kisa_yan_her_zaman_ortada",
+    "testler/motor/test_d121_dik_duvar_pencere.py::test_sacak_duvari_ve_ic_duvar_degismez",
+    "testler/motor/test_d121_dik_duvar_pencere.py::test_pencere_dis_olcu_ve_pano_sayisi",
+    "testler/motor/test_d121_dik_duvar_pencere.py::test_bilinmeyen_deger_hata",
+    "testler/motor/test_d121_dik_duvar_pencere.py::test_anahtarla_havuzun_her_evi_kurulur",
+    "testler/motor/test_d121_dik_duvar_pencere.py::test_makas_aksi_denetimi",
+    "testler/motor/test_d121_dik_duvar_pencere.py::test_pencere_odasinda_kalir_t_ekleri_degismez",
+    "testler/motor/test_d121_dik_duvar_pencere.py::test_ortadaki_t_odayi_keser_pa21_banyo",
+    "testler/motor/test_d121_dik_duvar_pencere.py::test_kirma_catida_uygulanmaz",
+    "testler/motor/test_d121_dik_duvar_pencere.py::test_makas_aksi_denetimi_kirma_iki_yon"
    ]
   }
  ]

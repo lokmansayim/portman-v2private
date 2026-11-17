@@ -13,6 +13,7 @@ malzeme grubuna göre %20, %10 ya da KDV'siz; CRM fiyatı KDV hariç; oranı bil
 from __future__ import annotations
 
 import copy
+import math
 import json
 import os
 import re
@@ -185,11 +186,14 @@ def test_hesaplar(A, D):
     g = P["H 100 (dış pano eki) | 100 × 100 × 2500"]                         # kulaklı 11 / dübelli 9
     assert (g["fiyat"], g["onay"], g["durum"]) == (_kurus((_fiyat(A, "MA15") * 11 + _fiyat(A, "MA18") * 9) / 20), True, "hesap")
     assert P["60'lık alt çerçeve | 60 × 3750"]["fiyat"] == _kurus(_fiyat(A, "MA64") * 3750 / 2500)
-    g = P["Kutu profil (kiriş) 100 × 100 | L 1457,5"]                          # 6 m fiyatından boyla orantı, tam TL (D-36, D-75); kural
-    assert (g["fiyat"], g["onay"]) == (_kurus(_fiyat(A, "MA11") * Decimal("1457.5") / 6000, "1"), True)
+    g = P["Kutu profil (kiriş) 100 × 100 | L 1457,5"]                          # 6 m fiyatının çeyreği (D-119; 150 cm ve altı), tam TL
+    assert (g["fiyat"], g["onay"]) == (_kurus(_fiyat(A, "MA11") / 4, "1"), True)
     assert P["Tek kat çatı paneli · ana çatı | L 5100"]["fiyat"] == _kurus(_fiyat(A, "CG6") * Decimal("5.1"))
-    g = P["Besleme kablo borusu | metre"]                                      # NYM'nin iki katı; NYM birimi varsayım → öneri
-    assert (g["fiyat"], g["onay"]) == (_kurus(_fiyat(A, "E7") * 2), False)
+    g = P["Besleme kablo borusu | metre"]                                      # NYM'nin iki katı; NYM metre fiyatı (kart 16 Kasım 21:31:40)
+    assert (g["fiyat"], g["onay"]) == (_kurus(_fiyat(A, "E7") * 2), True)
+    for c, k3, k2 in ((P, "NYM kablo 3 × 2,5 | metre", "NYM kablo 2 × 1,5 | metre"), (Cl, "NYM kablo (3 × 2,5) | metre", "NYM kablo (2 × 1,5) | metre")):
+        assert (c[k3]["fiyat"], c[k3]["onay"], c[k3]["durum"]) == (_kurus(_fiyat(A, "E7")), True, "eşleşti")
+        assert (c[k2]["fiyat"], c[k2]["onay"]) == (_kurus(_fiyat(A, "E8")), True)
     assert Cl["Banyo batarya grubu | takım"]["fiyat"] == _kurus(_fiyat(A, "VG5") + _fiyat(A, "VG7"))
     assert P["Silikonize mastik | adet"]["fiyat"] == _kurus(_fiyat(A, "DG14", "beyaz"))
     for c in (P, Cl):
@@ -213,22 +217,25 @@ def test_hesaplar(A, D):
 def test_d75_kutu_profil_pencere_paneli_banyo_dolabi(E, A, D, tmp_path):
     """D-75 (Lokman 10 Kasım 10:01): "Profili yine 6 metresi kaç paraysa ona göre orantıla"; pencere üst paneli tam panonun (100 ×
     1250 × 2500) 1/5'i, alt paneli 1/3'ü; "Banyo dolabı şimdilik boş kalsın". Kutu profilin CRM fiyatı 6 metrelik boyun fiyatı: her
-    kalem ve listede olmayan boy (boy kuralı) fiyat × L ÷ 6000, tam TL, onaylı. Pencere paneli CRM'in kendi satırından değil YP1'den.
+    kalem ve listede olmayan boy (boy kuralı) D-119'dan beri çeyrek boyla (Lokman 16 Kasım 21:10:56, kart 21:12:53 "Doğru"): boy 1500
+    mm'nin katına yukarı, × fiyat ÷ 6000, tam TL, onaylı. Pencere paneli CRM'in kendi satırından değil YP1'den.
     Banyo dolabı CRM'de fiyatı olsa da fiyatsız ve Samet'e giden eksik listesinde yok."""
     P, Cl = D["hatlar"]["prefabrik"], D["hatlar"]["celik"]["kalemler"]
     for k, g in E["hatlar"]["prefabrik"]["kalemler"].items():
         if g.get("kod") in ("MA11", "MA12"):
             boy = Decimal(k.split("| L ")[1].replace(",", "."))
             d = P["kalemler"][k]
-            assert (g["esas_boy_mm"], g["esleme"]) == (6000, "kural"), k
-            assert (d["fiyat"], d["onay"], d["durum"]) == (_kurus(_fiyat(A, g["kod"]) * boy / 6000, "1"), True, "hesap"), k
-    assert P["kalemler"]["Kutu profil (kiriş) 100 × 100 | L 3760"]["fiyat"] == _kurus(_fiyat(A, "MA11") * Decimal("3.76") / 6, "1")
+            assert (g["esas_boy_mm"], g["boy_adim_mm"], g["esleme"]) == (6000, 1500, "kural"), k
+            ceyrek = math.ceil(boy / 1500)                                    # D-119: boy 1500 mm'nin katına yukarı
+            assert (d["fiyat"], d["onay"], d["durum"]) == (_kurus(_fiyat(A, g["kod"]) * ceyrek / 4, "1"), True, "hesap"), k
+    assert P["kalemler"]["Kutu profil (kiriş) 100 × 100 | L 3760"]["fiyat"] == _kurus(_fiyat(A, "MA11") * 3 / 4, "1")
     boy = {b["kalem"]: b for b in P["boy_onerileri"] if b.get("kalem")}
     for ad, kod in (("Kutu profil (kiriş) 100 × 100", "MA11"), ("Özel kutu profil (kolon) 100 × 100", "MA12")):
         b = boy[ad]
-        assert (b["boy_mm"], b["fiyat"], b["onay"], b["kaynak_satir"]) == (6000, _kurus(_fiyat(A, kod)), True, [kod])
-        s = {"anahtar": f"{ad} | L 3000", "kalem": ad, "olcu": "L 3000"}
-        assert F.boy_onerisi_bul(s, P["boy_onerileri"])[1] == _kurus(_fiyat(A, kod) / 2, "1")     # 3 m = 6 m'nin yarısı
+        assert (b["boy_mm"], b["boy_adim_mm"], b["fiyat"], b["onay"], b["kaynak_satir"]) == (6000, 1500, _kurus(_fiyat(A, kod)), True, [kod])
+        for olcu, pay in (("L 3000", 2), ("L 1500", 1), ("L 1501", 2), ("L 3010", 3), ("L 4292,5", 3), ("L 4510", 4), ("L 7000", 5)):
+            s = {"anahtar": f"{ad} | {olcu}", "kalem": ad, "olcu": olcu}             # D-119 (Lokman 16 Kasım 21:10:56, kart "Doğru")
+            assert F.boy_onerisi_bul(s, P["boy_onerileri"])[1] == _kurus(_fiyat(A, kod) * pay / 4, "1"), olcu
     tam = _fiyat(A, "YP1")
     for k, payda in (("Pencere üst panel | 100 × 1250 × 500", 5), ("Pencere alt panel (120/120) | 100 × 1250 × 800", 3),
                      ("Pencere alt panel (120/180) | 100 × 1250 × 200", 3)):

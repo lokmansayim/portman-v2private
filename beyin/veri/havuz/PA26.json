@@ -21,7 +21,7 @@
    900.0
   ],
   "brut_m2": 70.65,
-  "pano": 56,
+  "pano": 57,
   "pencere": 6,
   "kapi": 6,
   "odalar": {
@@ -35,7 +35,7 @@
   }
  },
  "kaynak": {
-  "metin": "AP-08 montaj paftasından İş Emri (14 Kasım 2026); Lokman'ın 08:16 düzeltmesiyle (hol panoları, sırt sırta kapılar, ortada pencere), kartı 08:29 'Evet, bu çizimle girsin'. Aday: D-87 (Lokman 13 Kasım 2026 21:41).",
+  "metin": "AP-08 montaj paftasından İş Emri (14 Kasım 2026); Lokman'ın 08:16 düzeltmesiyle (hol panoları, sırt sırta kapılar, ortada pencere), kartı 08:29 'Evet, bu çizimle girsin'. Aday: D-87 (Lokman 13 Kasım 2026 21:41). Sağ dış duvar paftadaki gibi (40,75 + 147,5 karkaslı pano + 62,75; 3'lü H): Lokman 15 Kasım 2026 08:53:28 UTC sözü \"bu doğru neden çektirme U'sunun koyulacağı ölçü net değil o yüzden panoyu bölmüş ama şunu söylemeliyim mühendis burada da iç bölmelerde hata yapmış istersen 71 m² de son güncellemeyi yap depoya al ve bırak çünkü bu projede hata çok fazla\"; kartı 09:42:35 \"Evet, paftadaki gibi\" (asıl proje paftadır, D-103; kayıt aynı numarayla yenilendi, D-87 › Ek).",
   "dosya": "testler/havuz/is_emirleri/AP08.json",
   "ayna": null,
   "karar": "D-87",

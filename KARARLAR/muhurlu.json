@@ -109,7 +109,8 @@
     "D-31",
     "D-34",
     "D-49",
-    "D-95"
+    "D-95",
+    "D-104"
    ],
    "pr": [
     79,
@@ -172,27 +173,27 @@
     },
     {
      "yer": "testler/motor/veri/TK01_r07_beklenen.json#onay",
-     "iz": "41e84bcf7de4c120"
+     "iz": "5846ac5c62bbd934"
     },
     {
      "yer": "testler/motor/veri/TK01_r07_beklenen.json#iz.dogrulama",
-     "iz": "952df656c1c67cae"
+     "iz": "5008e57fb401cfaf"
     },
     {
      "yer": "testler/motor/veri/TK01_r07_beklenen.json#iz.bom",
-     "iz": "348ab4dcd7a7110f"
+     "iz": "509cd9bf54070ad6"
     },
     {
      "yer": "testler/motor/veri/TK01_r07_beklenen.json#iz.gorunusler",
-     "iz": "06bc733cc090670b"
+     "iz": "6ca5f21f7c8dfd21"
     },
     {
      "yer": "testler/motor/veri/TK01_r07_beklenen.json#iz.pdf_izi",
-     "iz": "7e5fef4a8ae4fbec"
+     "iz": "7937c29415a27d3c"
     },
     {
      "yer": "testler/motor/veri/TK01_r07_beklenen.json#iz.dxf_izi",
-     "iz": "8c6981813b25530a"
+     "iz": "0228e8d57f72bf85"
     },
     {
      "yer": "testler/motor/veri/TK02.json",
@@ -204,7 +205,7 @@
     },
     {
      "yer": "testler/motor/test_d29_tk02_yorumlari.py",
-     "iz": "346d601ae5330537"
+     "iz": "69d67b55534ea805"
     },
     {
      "yer": "testler/motor/test_d30_tam_pano.py",
@@ -234,6 +235,13 @@
      "mesaj": "cmsg_01UAFvcnfVuTR1wfFux5fQPP7SruV1LNoB3e4rWdcYGX59",
      "kapanis": "2026-11-14T22:41Z",
      "karar": "D-95"
+    },
+    {
+     "tarih": "2026-11-15 07:55",
+     "soz": "Karar kartı \"90 m2 evin giriş nişinde köşe direği hâli doğru mu?\" → \"Doğru, hedef örnekler güncellensin\" (seçenek: \"Nişteki iki üçlü H köşe direği olur; bu evin mühürlü hedef örnekleri yeni hâlle yeniden dondurulur.\"; 07:32:42 \"standart H'larda 100'lükten 60'lığa geçen redisyon gibi bir malzeme yok\", 07:47:55 \"bunlar olmaz buralara mecburen 100'lük köşeler gelecek\")",
+     "mesaj": "cmsg_01UAFvcnfVuTR1wfFux5fQPPHVXEwbSd9anmKQks3KwbXw",
+     "kapanis": "2026-11-15T08:20Z",
+     "karar": "D-104"
     }
    ]
   },
@@ -760,7 +768,8 @@
    "kararlar": [
     "D-52",
     "D-56",
-    "D-95"
+    "D-95",
+    "D-105"
    ],
    "pr": [
     116
@@ -819,15 +828,15 @@
     },
     {
      "yer": "testler/motor/veri/AP26_beklenen.json#onay",
-     "iz": "361a24e1dd8b440e"
+     "iz": "9a3582995a64b225"
     },
     {
      "yer": "testler/motor/veri/AP26_beklenen.json#iz.dogrulama",
-     "iz": "510e5775f9ade808"
+     "iz": "dff561815f31bcd7"
     },
     {
      "yer": "testler/motor/veri/AP26_beklenen.json#iz.bom",
-     "iz": "d8cfe0e0e463cd8d"
+     "iz": "2ed476ccae8c900d"
     },
     {
      "yer": "testler/motor/veri/AP26_beklenen.json#iz.gorunusler",
@@ -835,15 +844,15 @@
     },
     {
      "yer": "testler/motor/veri/AP26_beklenen.json#iz.pdf_izi",
-     "iz": "813abc8e0d4d3ea7"
+     "iz": "524adebdecc4c168"
     },
     {
      "yer": "testler/motor/veri/AP26_beklenen.json#iz.dxf_izi",
-     "iz": "38c37a7f052eb598"
+     "iz": "7dc400dfbfd3fc57"
     },
     {
      "yer": "testler/motor/test_m12_ap26.py",
-     "iz": "91429f065c088f8e"
+     "iz": "9dc84e182cfd44cd"
     },
     {
      "yer": "testler/motor/test_ie30_pencere_teras.py::test_ap26_is_emri_paftadan",
@@ -889,6 +898,13 @@
      "mesaj": "cmsg_01UAFvcnfVuTR1wfFux5fQPP7SruV1LNoB3e4rWdcYGX59",
      "kapanis": "2026-11-14T22:41Z",
      "karar": "D-95"
+    },
+    {
+     "tarih": "2026-11-15 09:14",
+     "soz": "Evet, 15 yerin hepsinde (karar kartı: \"Panonun ortasına gelen iç duvarda çizimden 3'lü H kalksın mı?\"; seçeneğin sonucu: \"Çizim listeyle aynı olur: 9 evde 15 yerde H kalkar, çektirme U'su kalır. Mühürlü 102 m² 2+1 çizimi bu hâliyle yeniden dondurulur.\")",
+     "mesaj": "cmsg_01UAFvcnfVuTR1wfFux5fQPPBZYnA9sQ1V7P5BvDuDZwcf",
+     "kapanis": "2026-11-15T09:24Z",
+     "karar": "D-105"
     }
    ]
   },
@@ -1213,7 +1229,8 @@
    "konu": "Brüt ve net m²'nin tanımı",
    "kural": "Brüt m²: çatının örttüğü her yer; dış duvarların dış yüzleri, niş, gövdedeki ve taşan veranda, dikmeler dahil (yükleme listesinin bina_m2'si, tek kaynak motor/prefabrik_liste.bina_brut_cm2; D-49 madde 2). Net m²: bütün mahallerin net alanı; veranda, giriş nişi ve balkon dahil. Ön onay antedi (motor/dxf_out.alan_yazisi) \"<brüt> m² brüt · <net> m² net\" yazar; montaj rehberinin başlığı aynı yazıyı okur (araclar/paket/rehber/veri.baslik_alani), sahnenin genel bakış etiketi brütü yazar. Hesap her zaman brüt m² ile yapılır.",
    "kararlar": [
-    "D-95"
+    "D-95",
+    "D-104"
    ],
    "pr": [
     210
@@ -1250,7 +1267,84 @@
     },
     {
      "yer": "testler/motor/test_d95_alan.py",
-     "iz": "422025962d31d1f8"
+     "iz": "029053a88f429abf"
+    }
+   ],
+   "durum": "mühürlü",
+   "gecmis": [
+    {
+     "tarih": "2026-11-15 07:55",
+     "soz": "Karar kartı \"90 m2 evin giriş nişinde köşe direği hâli doğru mu?\" → \"Doğru, hedef örnekler güncellensin\" (seçenek: \"Nişteki iki üçlü H köşe direği olur; bu evin mühürlü hedef örnekleri yeni hâlle yeniden dondurulur.\"; 07:32:42 \"standart H'larda 100'lükten 60'lığa geçen redisyon gibi bir malzeme yok\", 07:47:55 \"bunlar olmaz buralara mecburen 100'lük köşeler gelecek\")",
+     "mesaj": "cmsg_01UAFvcnfVuTR1wfFux5fQPPHVXEwbSd9anmKQks3KwbXw",
+     "kapanis": "2026-11-15T08:20Z",
+     "karar": "D-104"
+    }
+   ]
+  },
+  {
+   "kod": "M-19",
+   "konu": "Prefabrik standart yükseklik 2,50 m",
+   "kural": "Prefabrikte standart yükseklik 2,50 m: pano 2500 mm, lento 50 cm (pencere ve kapı üst kotu 200 cm). İş Emri, talep ya da form yükseklik yazmazsa Motor, yükleme listesi, talep formu ve teklif formu 2,50 alır. 2,80 ve 3,00 m yalnız İş Emri yazarsa (D-14); başka ölçü yok. Uygulanmış projeler aynen kalır (D-103). Çelik kapsam dışı.",
+   "kararlar": [
+    "D-118",
+    "D-14"
+   ],
+   "pr": [
+    260
+   ],
+   "lokman": [
+    {
+     "tarih": "2026-11-16 20:57",
+     "soz": "prefabrik te standart yüksekli ne?",
+     "mesaj": "cmsg_01UAFvcnfVuTR1wfFux5fQPPLVusfwaqiQRWan8Micrr3q"
+    },
+    {
+     "tarih": "2026-11-16 20:58",
+     "soz": "kesin kural bunu mühürle 2,50 m",
+     "mesaj": "cmsg_01UAFvcnfVuTR1wfFux5fQPPNapK6PjTGwyccX8fx27RLQ"
+    },
+    {
+     "tarih": "2026-11-16 21:13",
+     "soz": "Karar kartı \"2,50 m'de lento 50 cm, 2,80 ve 3,00 seçenek kalsın mı?\" → \"Evet, bugünkü gibi\" (seçenek: \"Standart 2,50 m, lento 50 cm. 2,80 m (lento 80 cm) ve 3,00 m (lento 100 cm) yalnız bayi isterse. Bu hâl mühürlenir.\")",
+     "mesaj": "cmsg_01UAFvcnfVuTR1wfFux5fQPPVZC1GyE8bw7JGABwLzRwQi"
+    }
+   ],
+   "kilitler": [
+    {
+     "yer": "motor/geometry.py::PANO_YUKSEKLIKLERI_CM",
+     "iz": "68d1113379ad36b9"
+    },
+    {
+     "yer": "motor/geometry.py::PENCERE_UST_KOTU_CM",
+     "iz": "b3698519617794e3"
+    },
+    {
+     "yer": "kurallar/pencere/pencereler.json#kural.ust_kot_cm",
+     "iz": "dd0845dbb2636695"
+    },
+    {
+     "yer": "motor/prefabrik_liste.py::STANDART_PANO_CM",
+     "iz": "8be89f58e8c37e33"
+    },
+    {
+     "yer": "kurallar/model/duvar_tipleri.json#tipler.PE-DIS-100.pano.yukseklik_cm",
+     "iz": "93b4edbf267d24b3"
+    },
+    {
+     "yer": "kanal/talep_formu.py::STANDART[yukseklik]",
+     "iz": "5790a680fefedbf1"
+    },
+    {
+     "yer": "kanal/talep_formu.py::YUKSEKLIK",
+     "iz": "4965501d14cc348b"
+    },
+    {
+     "yer": "kanal/formlar/prefabrik.json#screens[id=OZELLIK_P].layout.children[name=yukseklik]",
+     "iz": "63820753edd6c27a"
+    },
+    {
+     "yer": "testler/motor/test_d118_standart_yukseklik.py",
+     "iz": "ad42c1ccba1c1e08"
     }
    ],
    "durum": "mühürlü",

@@ -159,6 +159,8 @@ def _dosemeden_pencereler(plan) -> list:
 class Cizici:
     def __init__(self, plan: G.Plan, katalog: Katalog):
         self.plan, self.kat = plan, katalog
+        from . import tavan_kirisi as TK                    # D-107: plan kurulur kurulmaz (cumbanın dikdörtgeni son ızgaradan)
+        self.tavan = TK.bul(plan, plan.is_emri)
         katalog.t_dis_cm, katalog.t_ic_cm = G.T_DIS, G.T_IC
         katalog.yukseklik_cm = float(plan.is_emri["yapi"].get("duvar_yuksekligi_cm", 250))   # 250 / 280 / 300 (D-14; kur() başkasını reddeder)
         self.h_blok_adi_dis = None
@@ -667,7 +669,9 @@ class Cizici:
                 self._dis_parca_olculeri(ox, oy, dolu if getattr(self, "_girinti_kirisleri", None) else None)
             for v in ([] if en_boy else plan.dis_verandalar):   # BK-14: taşan verandanın eni ve derinliği
                 vx0, vy0, vx1, vy1 = v["rect"]
-                if v["cephe"] in ("on", "arka"):
+                if v.get("nis"):                            # D-109: boşluğun yanında yan kirişin boyu (52 m² 242,5), öteki yanda taşma
+                    self._kose_verandasi_olculeri(v, ox, oy)
+                elif v["cephe"] in ("on", "arka"):
                     self.dim((vx0 + ox, (vy0 if v["cephe"] == "on" else vy1) + oy), (vx1 + ox, (vy0 if v["cephe"] == "on" else vy1) + oy),
                              (0, (vy0 - 40 if v["cephe"] == "on" else vy1 + 40) + oy), 0)
                     self.dim((vx1 + ox, vy0 + oy), (vx1 + ox, vy1 + oy), (vx1 + 40 + ox, 0), 90)
@@ -680,8 +684,10 @@ class Cizici:
                     if abs(p.boy - G.MOD) < 1e-6: continue
                     if p.acilim is not None and p.acilim.tur == "kubbe": continue     # İE-29: kubbenin ölçüsü kendi zincirinde
                     self._ozel_olcu(d, p.rect(), W, H, ox, oy, "OZEL_PANEL_OLCU_CM", dolu)
+            nis_ad = {v["ad"] for v in plan.dis_verandalar if v.get("nis")}
             for ad, m in plan.mahaller.items():
                 if not m.acik or not m.cells: continue      # taşan veranda (BK-14) yukarıda ölçülü
+                if ad in nis_ad: continue                   # D-109: köşe boşluğu taşan verandayla tek mahal, ölçüsü yukarıda
                 if plan.girintili: continue                 # D-34: açık mahalin eni ve derinliği dış parça ölçüsünde (aynı yer iki kez ölçülmez)
                 us = [u for u, v in m.cells]; vs = [v for u, v in m.cells]
                 x0, x1 = G.X(min(us) / 2), G.X((max(us) + 1) / 2); y0, y1 = G.Y(min(vs) / 2), G.Y((max(vs) + 1) / 2)
@@ -700,6 +706,7 @@ class Cizici:
                     self.dim((x0 + ox, y0 + oy), (x0 + ox, y1 + oy), (xb + ox, 0), 90)
                 nis_yazilari[ad] = f"{fmt((x1 - x0) / G.MOD)} x {fmt((y1 - y0) / G.MOD)} aks modülü"   # net alan planında adın üstünde (`_mahal_etiketleri`)
         if montaj:
+            self._tavan_kirisleri(ox, oy, n0, dolu)
             self.text("Mor: standart dışı pano (gerçek uçtan uca boy ölçülü) | Beyaz: standart 125,5 cm pano | Ölçüler cm", (W / 2 + ox, -145 - alt + oy), 13, "MONTAJ_YAZI")
             self.text("Pencere etiketi: malzeme kodu + en×yükseklik | Montaj kopyası BOM'a sayılmaz", (W / 2 + ox, -175 - alt + oy), 13, "MONTAJ_YAZI")
         if yerlesecek:
@@ -923,6 +930,49 @@ class Cizici:
 
     OZEL_OLCU_UZAKLIK_CM = (40, 25, 70, 100)
 
+    TAVAN_KIRISI_YAZISI = "TAVAN KİRİŞİ 10×10"
+
+    def _tavan_kirisleri(self, ox: float, oy: float, n0: int, dolu: list) -> None:
+        """D-107 (PC-43; Lokman, kart 15 Kasım 2026 10:48:34 "Eskizdeki gibi"): makas yönünde 7 m'yi aşan açıklığın tavan kirişi
+        (`tavan_kirisi.bul`) yalnız saha montaj planında: 10 cm genişlikte taralı dikdörtgen, yüzden yüze, ve "TAVAN KİRİŞİ 10×10" yazısı
+        kirişin yanında (y yönündekinde solda ya da sağda dik, x yönündekinde altta ya da üstte). Yazı, bu planda önce konmuş yazılara ve özel
+        pano ölçülerine (`dolu`) binmeyen ilk yere konur: önce ortada sol/alt, sonra sağ/üst, sonra kirişin üçte birinde; hepsi doluysa
+        ortada sol/alt. Katman TAVAN_KIRISI yalnız kirişli evde açılır (kirişsiz evin DXF'i aynen). Kiriş yeri bulunamazsa ya da iki eşit
+        yer kalırsa çizilmez; soruyu listenin "Kural yok" satırı sorar (K21). Uyarı antete yazılmaz: kirişsiz evin DXF'i, katalog planları
+        dahil, aynen kalır (geometri hakemi, 15 Kasım)."""
+        from . import tavan_kirisi as TK
+        bulunan = self.tavan
+        if not bulunan["kirisler"]:
+            return
+        e = TK.kural()["kesit"] / 2
+        if "TAVAN_KIRISI" not in self.doc.layers:
+            self.doc.layers.add("TAVAN_KIRISI", color=1, linetype="Continuous")
+        engel = list(dolu)                                        # plan çerçevesinde (ox, oy olmadan)
+        for t in list(self.msp)[n0:]:
+            if t.dxftype() == "TEXT" and t.dxf.layer != "TAVAN_KIRISI":
+                hiza, p, _ = t.get_placement()
+                if hiza == TextEntityAlignment.MIDDLE_CENTER:
+                    engel.append(self._yazi_kutusu(t.dxf.text, (p[0] - ox, p[1] - oy), t.dxf.height, t.dxf.rotation))
+        s, h = self.TAVAN_KIRISI_YAZISI, 15.0
+        uzak = 12.0 + h / 2                                        # kirişin ekseninden yazının ortasına: yarım kesit + 7 cm boşluk + yarım yazı
+        for k in bulunan["kirisler"]:
+            c, (a, b) = k["eksen_cm"], k["uclar_cm"]
+            dikey = k["yon"] == "y"
+            if dikey:
+                dik = [(ox + c - e, oy + a), (ox + c + e, oy + a), (ox + c + e, oy + b), (ox + c - e, oy + b)]
+            else:
+                dik = [(ox + a, oy + c - e), (ox + b, oy + c - e), (ox + b, oy + c + e), (ox + a, oy + c + e)]
+            h_ = self.msp.add_hatch(color=1, dxfattribs={"layer": "TAVAN_KIRISI"})
+            h_.paths.add_polyline_path(dik, is_closed=True)
+            h_.set_pattern_fill("ANSI31", scale=0.6, color=1)
+            self.msp.add_lwpolyline(dik, close=True, dxfattribs={"layer": "TAVAN_KIRISI", "color": 1, "lineweight": 50})
+            rot = 90.0 if dikey else 0.0
+            yerler = [(c + yan * uzak, a + (b - a) * oran) for oran in (0.5, 1 / 3, 2 / 3) for yan in (-1, 1)]
+            yerler = [(u, v) if dikey else (v, u) for u, v in yerler]
+            yer = next((q for q in yerler if not any(self._kesisir(self._yazi_kutusu(s, q, h, rot), o) for o in engel)), yerler[0])
+            engel.append(self._yazi_kutusu(s, yer, h, rot))
+            self.text(s, (yer[0] + ox, yer[1] + oy), h, "TAVAN_KIRISI", rot=rot)
+
     def _kubbe_plani(self, kb: dict, ox: float, oy: float, montaj: bool, olcu: bool) -> None:
         """İE-29 PR-2: kubbe planda (`G._kubbe_geometrisi`): her pano pencere boşluğunun iki yanında iki parça ve pano ortasında pencere bloğu
         (`pano_blok`'un V çerçevesi: x dış yüzden içeri, y pano boyunca), iki açılı köşe direği, düz duvarın ucunda iki kama; katman `KUBBE`
@@ -975,6 +1025,8 @@ class Cizici:
         boy = (r[3] - r[1]) if d.yon == "y" else (r[2] - r[0])
         yari_en = self.yazi_eni(f"{boy:.2f}".rstrip("0").rstrip(".").replace(".", ","), 14) / 2 + 2
         ic = (1 if d.c < W / 2 else -1) if d.yon == "y" else (1 if d.c < H / 2 else -1)
+        if self._dar_acik_mahal_yani(d, r, ic):
+            ic = -ic
 
         def kutu(u):
             if d.yon == "y":
@@ -992,6 +1044,47 @@ class Cizici:
         else:
             yd = r[3] + u if ic > 0 else r[1] - u; yk = r[1] if ic > 0 else r[3]
             self.dim((r[0] + ox, yk + oy), (r[2] + ox, yk + oy), (0, yd + oy), 0, layer)
+
+    def _dar_acik_mahal_yani(self, d, r, ic: int) -> bool:
+        """D-104: özel pano ölçüsünün yanı dar açık mahalse (tek pano şeridi: eni bir panodan, 125,5 cm'den dar; ör. giriş nişi, 115,5)
+        ve duvarın öteki yanı kapalı mahalse ölçü kapalı mahalin yanına geçer. 60'lık iç duvarlı 90 m² 3+1'de nişin iki yan duvarı 120,5
+        oldu; iki ölçü nişin içinde kalınca nişin adına ve m²'sine yer kalmıyordu (açık mahalin kendi ölçüsü de dar mahalde plan dışına
+        alınır). Pano dizilimi eskizinde de bu ölçüler odanın yanındaydı. Öteki durumlarda (veranda dahil) ölçünün yanı aynen."""
+        orta = ((r[1] + r[3]) / 2) if d.yon == "y" else ((r[0] + r[2]) / 2)
+
+        def mahal(yan: int):
+            u = d.c + yan * (d.h + 1.0)
+            nokta = Point(u, orta) if d.yon == "y" else Point(orta, u)
+            return next((m for m in self.plan.mahaller.values() if m.poly is not None and m.poly.contains(nokta)), None)
+        a, k = mahal(ic), mahal(-ic)
+        if a is None or k is None or not a.acik or k.acik:
+            return False
+        x0, y0, x1, y1 = a.poly.bounds
+        return ((x1 - x0) if d.yon == "y" else (y1 - y0)) < G.MOD + 1e-6     # veranda (ör. katalog P3701, 241) dar sayılmaz
+
+    def _kose_verandasi_olculeri(self, v: dict, ox: float, oy: float) -> None:
+        """D-109 (BK-40): köşe boşluğundan taşan verandanın ölçüleri: eni (dış kenarda, öteki taşan verandalar gibi), boşluğun yanında yan
+        kirişin boyu (gövdenin köşesinden dış kenara; 52 m² paftasında 242,5) ve öteki yanda taşma (117). Yanlar dışarıya 40 cm."""
+        vx0, vy0, vx1, vy1 = v["rect"]
+        s = v["nis"]["yan"]
+        ex0, ey0, ex1, ey1 = v["kenarlar"][1 + s]
+        fx0, _fy0, _fx1, fy1 = self.plan.footprint().bounds
+        if v["cephe"] in ("on", "arka"):
+            y_dis = vy0 if v["cephe"] == "on" else vy1
+            self.dim((vx0 + ox, y_dis + oy), (vx1 + ox, y_dis + oy), (0, (vy0 - 40 if v["cephe"] == "on" else vy1 + 40) + oy), 0)
+            x_n, x_o = (vx0, vx1) if s == 0 else (vx1, vx0)
+            yon = -1.0 if s == 0 else 1.0
+            ic = abs(x_n - fx0) < 1.0                       # gövdenin sol yüzünde: aks numaraları orada, ölçü verandanın içinde (55 m²)
+            self.dim((x_n + ox, ey0 + oy), (x_n + ox, ey1 + oy), (x_n + 40 * (-yon if ic else yon) + ox, 0), 90)
+            self.dim((x_o + ox, vy0 + oy), (x_o + ox, vy1 + oy), (x_o - 40 * yon + ox, 0), 90)
+        else:
+            x_dis = vx0 if v["cephe"] == "sol" else vx1
+            self.dim((x_dis + ox, vy0 + oy), (x_dis + ox, vy1 + oy), ((vx0 - 40 if v["cephe"] == "sol" else vx1 + 40) + ox, 0), 90)
+            y_n, y_o = (vy0, vy1) if s == 0 else (vy1, vy0)
+            yon = -1.0 if s == 0 else 1.0
+            ic = abs(y_n - fy1) < 1.0                       # gövdenin arka yüzünde: aks harfleri orada, ölçü verandanın içinde
+            self.dim((ex0 + ox, y_n + oy), (ex1 + ox, y_n + oy), (0, y_n + 40 * (-yon if ic else yon) + oy), 0)
+            self.dim((vx0 + ox, y_o + oy), (vx1 + ox, y_o + oy), (0, y_o - 40 * yon + oy), 0)
 
     def _dis_parca_olculeri(self, ox: float, oy: float, dolu: list | None = None) -> None:
         """D-34 (Lokman, 30 Ekim 2026 14:45: "mor ile çizdiğim yerleri de ölçeklendir rengi de mor olsun"): girintili gövdede (İE-24) kapalı

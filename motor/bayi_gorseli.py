@@ -21,7 +21,11 @@ DUVAR = "#2b2b2b"; PENCERE = "#4f93c8"; KAPI = "#8a6d3b"; OLCU = "#555555"
 
 
 def _fmt(cm: float) -> str:
-    return f"{cm:.1f}".rstrip("0").rstrip(".").replace(".", ",")
+    """Ölçü yazısı DXF ve PDF'teki gibi; tek kaynak `dxf_out.fmt` (en çok iki ondalık, sondaki sıfırlar atılır, ondalık virgül:
+    951,25 · 647,5 · 763). Eskiden burada tek ondalık vardı: 951,25 "951,2", 835,75 "835,8" yazılıyordu (BK-42; Lokman, 15.11.2026
+    21:50 kartı "Evet, iş açılsın"). Yerel içe aktarma: `dxf_out` ezdxf'i yükler, görsel modülünün yüklenişi hafif kalır."""
+    from .dxf_out import fmt
+    return fmt(cm)
 
 
 def _mentese_a0_ucunda(ac, kapi_mantik: bool = False) -> bool:

@@ -489,23 +489,21 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
         for j, (_, tur, k) in enumerate(lst):
             k["order"] = j + 0.4 if tur == 0 else j
 
-    # Çektirme U'su: iç duvarın dış duvara pano ortasında (H olmayan yerde) girdiği yer
-    ceku = []
-    eki_yer = [(h["xy"], h["o"]) for h in hs if h["stub"]]
-    for p in ic_panolar:
-        x0, y0, x1, y1 = p["rect"]
-        for uc, yon in ((([x0, (y0 + y1) / 2], [1, 0]), ([x1, (y0 + y1) / 2], [-1, 0])) if p["yon"] == "x" else
-                        (([(x0 + x1) / 2, y0], [0, 1]), ([(x0 + x1) / 2, y1], [0, -1]))):
-            dis_yuz = (abs(uc[0] - 10) < 0.6 or abs(uc[0] - (W - 10)) < 0.6) if p["yon"] == "x" else \
-                (abs(uc[1] - 10) < 0.6 or abs(uc[1] - (DY - 10)) < 0.6)
-            if GIR:                             # girintili gövde: ucun 10 cm dışı (dış duvarın dış yüzü) gövdenin dış çizgisinde
-                dis_yuz = SINIR.distance(Point(uc[0] - yon[0] * 10, uc[1] - yon[1] * 10)) < 0.6
-            if not dis_yuz or any(math.hypot(xy[0] - uc[0], xy[1] - uc[1]) < 12 for xy, _ in eki_yer):
-                continue
-            oda = oda_sec([(uc[0] + yon[0] * 25 + yon[1] * 25, uc[1] + yon[1] * 25 + yon[0] * 25),
-                           (uc[0] + yon[0] * 25 - yon[1] * 25, uc[1] + yon[1] * 25 - yon[0] * 25)])
-            ceku.append({"xy": [_r(uc[0]), _r(uc[1])], "yon": yon, "t": _r(p["kalinlik"]), "step": ADIM_ODA[oda], "order": 99, "room": KIM[oda],
-                         "id": f"U{len(ceku) + 1}"})
+    # Çektirme U'su: yeri ve sayısı yükleme listesinin kaynağından (`LU.birlesim_uclari`; D-28 madde 1). İç duvarın bir duvara panonun
+    # ortasında T ile girdiği yer, dış köşeye geldiği yer (100'lük köşede 60'lığa geçiş, D-104) ve kapısız serbest biten bölmenin ucu
+    # (İE-27; Lokman, 3 Kasım 2026 09:52, madde 13). U panonun ucunda: sırtı uçta, kanatları iç duvarın iki yüzünde 3 cm.
+    ceku, CEKU_BU = [], {"t_orta": "iç duvar bu duvara panonun ortasında T ile girer",
+                         "dis_kose": "iç duvar köşe direğinde biter; dış duvardan incedir",
+                         "serbest": "kapısız bölmenin serbest ucu"}
+    for u in LU.birlesim_uclari(plan)[1]:
+        d = u["duvar"]
+        a, yon = (d.p0, 1) if u["uc"] == 0 else (d.p1, -1)
+        uc, yon = ([a, d.c], [yon, 0]) if d.yon == "x" else ([d.c, a], [0, yon])
+        oda = oda_sec([(uc[0] + yon[0] * 25 + yon[1] * 25, uc[1] + yon[1] * 25 + yon[0] * 25),
+                       (uc[0] + yon[0] * 25 - yon[1] * 25, uc[1] + yon[1] * 25 - yon[0] * 25)])
+        ceku.append({"xy": [_r(uc[0]), _r(uc[1])], "yon": yon, "t": _r(2 * d.h), "step": ADIM_ODA[oda], "order": 99, "room": KIM[oda],
+                     "id": f"U{len(ceku) + 1}",
+                     "bu": CEKU_BU[u["tur"]] if u.get("ince", True) else "iç duvar köşe direğinde biter"})   # D-105 madde 2: aynı kalınlık
 
     # ---------- alt çerçeve: duvar hatları, kapı boşluklarında kesik ----------
     hat = defaultdict(list)
@@ -556,6 +554,9 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
     for vi, v in enumerate(VER):
         vk = v["rect"]
         kol = [b for b in BAG if b["tur"] == "dikme" and icinde_kutu(b["rect"], vk)]
+        if len(kol) > 2:                        # D-109 (PC-45): ara kolonlu dış kiriş listede parça parça; rehber tek dış kirişi kurar
+            raise Desteklenmiyor(f"{v['ad']}: {len(kol) - 2} ara kolonlu veranda (kolon arası en çok 565 cm, D-109); rehber iki kolonlu "
+                                 f"verandayı kurar")
         kir = [b for b in BAG if b["tur"] == "veranda_profil" and icinde_kutu(b["rect"], vk)]
         on = v["cephe"] == "on"
         dis_y = vk[1] if on else vk[3]          # verandanın dış kenarı (kiriş dış yüzü)

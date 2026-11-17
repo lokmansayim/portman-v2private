@@ -44,6 +44,8 @@ def _tekillestir(liste: list, alan: str) -> list:
 
 
 class Konusma:
+    yeni_numara = False     # D-101: kanal bu işte True yaparsa revizyon (prefabrik, çelik) talebin numarasını taşımaz, yeni numara alır
+
     def __init__(self, gonderen: str, kok: Path = DURUM_DIR):
         self.gonderen = gonderen
         self.path = kok / f"{gonderen}.json"

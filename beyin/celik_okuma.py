@@ -502,6 +502,11 @@ def parca_oku(parca: str, t: dict, katalog_aday: dict | None = None, y: dict | N
     r["isaret"] = {"pencere": m_pencere, "dis140": m_dis140, "ekle": m_ekle,
                    "cati": has("harf") or varyant_kodu or cati_sekil or any(s.startswith("katalog") for s in sinif.get("cati", [])),
                    "cati_sekil": cati_sekil}           # çatı şekli/eğimi isteği (seçim değil): ilk planda uygulanamadığı söylenir
+    # çatı işaretinin nedeni (karar katmanının kaplama kuralı için; İE-20 PR-14, canlı deneme D3, 16 Kasım 2026). `cati_secim`: çatı seçimi
+    # sözü (harf, varyant kodu, "katalog"); `cati_geo`: şekil, eğim ya da yön sözü. İkisi de yokken `cati_sekil` yalnız "çatı sözü var,
+    # tanınan renk ya da malzeme sözü yok" demektir ("çatı kiremidi olsun": yumuşamış yazım `_RENK_T`'de yok). İşaretler ve sınıflama aynen.
+    r["cati_secim"] = bool(has("harf") or varyant_kodu or any(s.startswith("katalog") for s in sinif.get("cati", [])))
+    r["cati_geo"] = bool(geo_ozel or any(_CATI_GEO_T.fullmatch(w) for w in tum))
     r["d140"] = bool(d140)
     # oda isteği (sıfat ya da dönüşüm: "odalar geniş olsun", "salonu büyütelim"): ilk planda uygulanamadığı söylenir (Lokman, 13.10: değişiklik
     # isteği taşıyan hiçbir cümle sessizce düşmez)
@@ -737,6 +742,10 @@ def aciklama(op: dict, adaylar: list[dict] | None = None) -> str:
         return op.get("aciklama") or f"çatı {op.get('kod')}"
     if op.get("op") == "dis_karkas_140":
         return "dış duvarlar 140'lık karkas (16,5 cm)"
+    if op.get("op") == "cati_kaplamasi":                         # İE-20 PR-11 (D-97): formda seçilen çatı kaplaması
+        return op.get("aciklama") or f"çatı kaplaması {op.get('kaplama')}"
+    if op.get("op") == "standart_kaplama":                       # D-113: havuz evi standart kaplamayla (bayinin değişikliği değil)
+        return op.get("aciklama") or f"çatı kaplaması {op.get('kaplama')} (standart)"
     if op.get("op") in ("oda_buyut", "oda_kucult"):              # İE-23 PR-2a: kısa anlatım karar uygularken yazılır (tanim_germe)
         return op.get("aciklama") or f"{op.get('mahal')} {op.get('cm')} cm {'büyütme' if op['op'] == 'oda_buyut' else 'küçültme'}"
     return str(op.get("op"))

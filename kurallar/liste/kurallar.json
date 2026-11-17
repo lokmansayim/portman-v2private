@@ -524,13 +524,27 @@
     "deger": {
       "sandvic_panel": "Sandviç Panel",
       "tek_kat_panel": "Tek Kat Panel",
-      "osb_kiremit": "OSB+Membran+Metal Kiremit",
+      "osb_kiremit": "OSB + Nem Bariyeri + Kiremit Desen Sac",
       "osb_trapez": "OSB+Nem Bariyeri+Trapez Saç",
       "trapez_sac": "Trapez Saç",
       "osb_shingle": "OSB+Membran+Shingle"
     },
     "durum": "muhendis",
-    "kaynak": "Ubeydullah (inşaat mühendisi), 3 Ekim 2026: Excel motorunda (CTKBF V1.1) bulunan çatı kaplamaları bu altısıdır (değerler motordaki adlar). Baz paketin kaplamasını ilk cevapta yazmadı; ikinci cevapta: sandviç panel (`baz_paket_cati_kaplamasi`). Lokman'ın 13:27'de saydığı üçüncü seçenek (OSB + nem bariyeri + kiremit desen sac) motorun 'OSB+Membran+Metal Kiremit' seçeneğiyle eşlendi: motor bu seçenekte OSB, OSB mahyası, nem bariyeri (m²), metal kiremit ve mahyasını hesaplıyor; membran satırı yalnız shingle seçeneğinde doluyor."
+    "kaynak": "Ubeydullah (inşaat mühendisi), 3 Ekim 2026: Excel motorunda (CTKBF V1.1) bulunan çatı kaplamaları bu altısıdır (değerler motordaki adlar). Baz paketin kaplamasını ilk cevapta yazmadı; ikinci cevapta: sandviç panel (`baz_paket_cati_kaplamasi`). Lokman'ın 13:27'de saydığı üçüncü seçenek (OSB + nem bariyeri + kiremit desen sac) motorun 'OSB+Membran+Metal Kiremit' seçeneğiyle eşlendi: motor bu seçenekte OSB, OSB mahyası, nem bariyeri (m²), metal kiremit ve mahyasını hesaplıyor; membran satırı yalnız shingle seçeneğinde doluyor. D-98 (Lokman, 15 Kasım 2026 05:22:05 UTC, karar kartı \"Evet, nem bariyeriyle\"): çelik paftanın tablosunda kiremit desen sac + OSB 'OSB + Nem Bariyeri + Kiremit Desen Sac' yazar (alttan üste katman sırası, kitaptaki öteki OSB'li adlar gibi; Portman Sözlüğü: kiremit desen sac; OSB'nin üstünde nem bariyeri). Anahtarlar değişmedi. D-100 (Lokman, 15 Kasım 2026 07:14:40 UTC, kart \"Evet, damlalıksız\"): çelik paftanın tablosunda OSB + membran + shingle kitabın yazısıyla 'OSB+Membran+Shingle' (bitişik) kalır: tablodaki boşluklu yazı ('OSB + Membran + Shingle') iki satıra sarılınca yazı çakışması denetimi (`yazi_cakisma`) bulgu verdi; bitişik yazı bulgusuz. Anahtarlar değişmedi."
+  },
+  "genel_osbli_kaplama": {
+    "deger": {
+      "osb_kiremit": {
+        "osb_zayiat": 0.2,
+        "ust_ortu": "nem_bariyeri"
+      },
+      "osb_shingle": {
+        "osb_zayiat": 0.2,
+        "ust_ortu": "membran"
+      }
+    },
+    "durum": "lokman",
+    "kaynak": "D-98 (BK-33). Lokman, 15 Kasım 2026 05:22:05 UTC, karar kartı \"Seçin: kiremit desen sac + OSB tablodaki kurallarla Motor'a girsin mi?\" → \"Evet, nem bariyeriyle\" (seçeneğin metni: \"OSB üstüne nem bariyeri (m²) yazılır, mahya bandı kalır. Öteki satırlar tablodaki öneriyle girer.\"). Dayanak: Lokman 15 Kasım 2026 04:44:37 \"Plana ve listeye işlensin\", 05:03:47 \"Evet, Motor işi açılsın\". Genel motor (çelik) bu anahtardaki kaplamaları hesaplar; anahtar yoksa ya da kaplama burada yoksa genel motor yalnız sandviç ve tek kat paneli hesaplar (eski davranış). Satırlar: kiremit desen sac çatı açılımının dizilimiyle, her levha boyu ayrı satır (100 cm kapatır, `kiremit_kapatma_m`); çatı OSB = çatı yüzeyi × (1 + osb_zayiat) ÷ 2,9768 (iki gerçek çelik listeden: 140 m² evde yüzey 151,5 m² → 62, listede 64, ustanın OSB planında 62; 166 m² evde 193 m² → 78, listede 77; kitabın × 1,05'i %10–16 az veriyordu); nem bariyeri (m²) = çatı yüzeyi, OSB'nin üstünde (`ust_ortu`); düz mahya ve OSB mahyası mahya hattı ÷ (2,8 − bindirme), aynı adet; vadi (ters mahya) ve mahya bandı eski kuralla; 5,5 × 60 vida = bina m² × 2,5 + Σ (levha boyu mm ÷ 200 × adet), 250'ye yukarı. Gerçek listeler (kiremit desen sac + OSB): 140 m² ve 166 m² tek kat çelik ev; kör ölçüm kümesi, liste açılış kaydıyla açık. D-100 (BK-33). Lokman, 15 Kasım 2026 07:14:40 UTC, karar kartı \"Seçin: OSB + membran + shingle tablodaki kurallarla Motor'a girsin mi?\" → \"Evet, damlalıksız\" (seçeneğin metni: \"Tablodaki kurallarla girer. Damlalık yazılmaz (4 Ekim sözünüz). Mahyada yalnız OSB mahyası olur.\"); 05:23:08: \"Shingle sadece Memran ile kullanılır yani OSB + mebran + Shingle olacak\". Tablo: PF `Celik_Cati_Kaplamasi/03_shingle_kural_tablosu.png`. OSB + membran + shingle: çatı OSB'si kiremitteki gibi; üstünde membran (`ust_ortu` membran: çatı yüzeyi ÷ `membran_adet_m2`); shingle çatı yüzeyi ÷ `shingle_adet_m2`; levha değil, dizilim yok; mahyada yalnız OSB mahyası (mühendisin Excel hesap motoru gibi), metal mahya yok, mahya bandı yalnız vadi (ters mahya) varsa eski kuralla; damlalık yok (Lokman, 4 Ekim 2026 15:18); 5,5 × 60 vida bina m² × 2,5. Gerçek liste: 43 m² tek kat çelik ev (parapet çatı, 52,5 m²): OSB 20, membran 7, shingle 7, damlalık 10 (yazılmadı), mahya yok; Motor'un alçak beşik tanımıyla (48,8 m²) OSB 20, membran 7, shingle 7."
   },
   "cati_katsayisi": {
     "deger": {
@@ -550,12 +564,12 @@
   "shingle_adet_m2": {
     "deger": 8.0,
     "durum": "motor",
-    "kaynak": "Excel hesaplama motoru (CTKBF V1.1): shingle 'adet / 8 m²'; adet = çatı yüzeyi × çatı katsayısı ÷ 8. Gerçek listeyle sınanmadı."
+    "kaynak": "Excel hesaplama motoru (CTKBF V1.1): shingle 'adet / 8 m²'; adet = çatı yüzeyi × çatı katsayısı ÷ 8. Gerçek listeyle sınanmadı. D-100 (15 Kasım 2026): 43 m² gerçek çelik listeyle sınandı (52,5 m² ÷ 8 → 7; listede 7); genel motor (çelik) çatı yüzeyini açılımdan alır, çatı katsayısıyla çarpmaz."
   },
   "membran_adet_m2": {
     "deger": 8.0,
     "durum": "motor",
-    "kaynak": "Excel hesaplama motoru (CTKBF V1.1): membran 'adet / 8 m²'; adet = çatı yüzeyi × çatı katsayısı ÷ 8; motorda yalnız shingle seçeneğinde doluyor. Gerçek listeyle sınanmadı."
+    "kaynak": "Excel hesaplama motoru (CTKBF V1.1): membran 'adet / 8 m²'; adet = çatı yüzeyi × çatı katsayısı ÷ 8; motorda yalnız shingle seçeneğinde doluyor. Gerçek listeyle sınanmadı. D-100 (15 Kasım 2026): 43 m² gerçek çelik listeyle sınandı (52,5 m² ÷ 8 → 7; listede 7); genel motor (çelik) çatı yüzeyini açılımdan alır, çatı katsayısıyla çarpmaz."
   },
   "kosebent": {
     "deger": {
@@ -859,6 +873,8 @@
     "deger": {
       "cati": [
         "Sandviç panel",
+        "Kiremit desen sac",
+        "Shingle",
         "Metal kiremit mahyası",
         "Sandviç panel kapaması",
         "Ters mahya",
@@ -875,7 +891,7 @@
       ]
     },
     "durum": "lokman",
-    "kaynak": "Kör test projesinin (KT-01; 98,7 m², tek kat çelik) Eylül 2026 tarihli gerçek yükleme listesi; liste 6 Ekim 2026'da, kendi listemiz depoya dondurulduktan sonra açıldı. Listede renk (antrasit) şu kalemlerin adında yazıyor: alın sacı, saçak sacı, sandviç panel, metal kiremit mahyası, sandviç panel kapaması, ters mahya, metal dere, dere iniş borusu, dere kapağı, silikonize mastik, dayson (şablonun notu: dayson 'çatı renginde olacak'). Baş makas Z'si, saçak omegası, ters mahya kenar kutusu, damlalık, dirsekler ve kelepçelerde renk yazmıyor. Projenin teknik özelliklerinde iki renk var: çatı kaplama rengi ve saçak ve alın rengi (bu projede ikisi de antrasit gri). Uygulama: girdide `renk` varsa (genel modelde tanımdan) alın sacı ve saçak sacına saçak ve alın rengi, ötekilere çatı kaplama rengi yazılır (satırda `renk` alanı; adet değişmez). Derenin ve mastiğin hangi renge bağlı olduğu bu projeden çıkmıyor (iki renk aynı): teyit bekliyor. Dondurulan listede renk yoktu (bizim eksiğimiz: teknik özelliklerde yazıyordu, listeye taşınmıyordu). Öteki çatı kaplamalarında (kiremit desen sac, trapez sac, shingle) hangi kalemlerin renkli yazıldığı bilinmiyor; eski örnek girdilerde renk yok. Lokman, 7 Ekim 2026 07:45 (10): dere ve mastik çatı rengine bağlı. 8 Ekim 2026: yöntem A'daki alın kapama da alın sacı gibi projenin \"saçak ve alın rengi\"yle yazılır (kör test projesinin teknik özelliklerinde bu renk ayrı bir alan; alın parçası olduğu için)."
+    "kaynak": "Kör test projesinin (KT-01; 98,7 m², tek kat çelik) Eylül 2026 tarihli gerçek yükleme listesi; liste 6 Ekim 2026'da, kendi listemiz depoya dondurulduktan sonra açıldı. Listede renk (antrasit) şu kalemlerin adında yazıyor: alın sacı, saçak sacı, sandviç panel, metal kiremit mahyası, sandviç panel kapaması, ters mahya, metal dere, dere iniş borusu, dere kapağı, silikonize mastik, dayson (şablonun notu: dayson 'çatı renginde olacak'). Baş makas Z'si, saçak omegası, ters mahya kenar kutusu, damlalık, dirsekler ve kelepçelerde renk yazmıyor. Projenin teknik özelliklerinde iki renk var: çatı kaplama rengi ve saçak ve alın rengi (bu projede ikisi de antrasit gri). Uygulama: girdide `renk` varsa (genel modelde tanımdan) alın sacı ve saçak sacına saçak ve alın rengi, ötekilere çatı kaplama rengi yazılır (satırda `renk` alanı; adet değişmez). Derenin ve mastiğin hangi renge bağlı olduğu bu projeden çıkmıyor (iki renk aynı): teyit bekliyor. Dondurulan listede renk yoktu (bizim eksiğimiz: teknik özelliklerde yazıyordu, listeye taşınmıyordu). Öteki çatı kaplamalarında (kiremit desen sac, trapez sac, shingle) hangi kalemlerin renkli yazıldığı bilinmiyor; eski örnek girdilerde renk yok. Lokman, 7 Ekim 2026 07:45 (10): dere ve mastik çatı rengine bağlı. 8 Ekim 2026: yöntem A'daki alın kapama da alın sacı gibi projenin \"saçak ve alın rengi\"yle yazılır (kör test projesinin teknik özelliklerinde bu renk ayrı bir alan; alın parçası olduğu için). D-98 (15 Kasım 2026): kiremit desen sac da çatının rengiyle yazılır (iki gerçek çelik listede 'ÇG10 ANTRAST METAL KİREMİT'). D-100 (15 Kasım 2026): shingle da çatının rengiyle yazılır (43 m² gerçek çelik listede '(ANTRASİT) SHİNGLE')."
   },
   "celik_cati_yontemi": {
     "deger": "panel",

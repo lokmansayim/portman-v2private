@@ -118,11 +118,12 @@ def test_cektirme_yerleri_ornek(modeller):
     assert modeller["PK02"]["cektirme_yerleri"] == {"t_orta": 0, "dis_kose": 0, "serbest": 0}
 
 
-@pytest.mark.parametrize("ad", ["TK02", "TK01_r07"])
+@pytest.mark.parametrize("ad", ["TK02"])
 def test_giris_nisi_t_degil(ad):
     """Geometri hakemi (İE-27): giriş nişinde yan duvar içeride iç duvar olarak sürer ve ucuna `T→<kapı duvarı>` yazılır, ama kapı duvarı
-    orada biter. O birleşim uç uca ektir, 3'lü H'ı `uc_uca_ekler`'den sayılır; "panonun ortasına T" sayılıp çektirme U'su almaz. TK-02 ve
-    TK-01 r07'de bütün T'ler pano ekinde: çektirme U'su (iç) 0."""
+    orada biter. O birleşim uç uca ektir, 3'lü H'ı `uc_uca_ekler`'den sayılır; "panonun ortasına T" sayılıp çektirme U'su almaz. TK-02'de
+    bütün T'ler pano ekinde: çektirme U'su (iç) 0. TK-01 r07 (iç 60) D-104'ten beri bu testte değil: nişte üçlü H yok, köşe direği var
+    (`test_giris_nisi_60_kose`)."""
     from motor import geometry as G
     ie = json.loads((KOK / "testler" / "motor" / "veri" / f"{ad}.json").read_text(encoding="utf-8"))
     plan = G.kur(ie)
@@ -133,14 +134,28 @@ def test_giris_nisi_t_degil(ad):
     assert len(ic) == 1 and ic[0]["adet"] == 0
 
 
+def test_giris_nisi_60_kose():
+    """D-104 (Lokman, 15 Kasım 2026 07:32:42, 07:47:55; kart 07:55:12): TK-01 r07'de (iç 60) nişin iki ucunda üçlü H yok, 100'lük köşe direği
+    var; hol duvarı (60'lık) köşeye çektirme U'suyla bağlanır: madde 13'ün "100'lük köşelerde 60'lığa geçiş"i (dış köşe 2)."""
+    from motor import geometry as G
+    ie = json.loads((KOK / "testler" / "motor" / "veri" / "TK01_r07.json").read_text(encoding="utf-8"))
+    assert G.uc_uca_ekler(G.kur(json.loads(json.dumps(ie)))) == []
+    N = PL.model_motor(ie)
+    assert N["cektirme_yerleri"] == {"t_orta": 0, "dis_kose": 2, "serbest": 0}
+    ic = [x for x in _liste(N) if x["kalem"].startswith("Çektirme U'su") and x["dayanak"] == "Kural (Lokman 3.11)"]
+    assert len(ic) == 1 and ic[0]["adet"] == 2
+
+
 @pytest.mark.parametrize("kod", ["AP11", "AP15", "AP21"])
-def test_dis_kose_yalniz_60_gecisinde(kod, modeller):
-    """Madde 13 "100'lük köşelerde 60'lığa geçiş": iç duvar 100 olunca dış köşeye gelen iç duvar geçiş değildir, çektirme almaz."""
+def test_dis_kose_her_kalinlikta(kod, modeller):
+    """Madde 13 "100'lük köşelerde 60'lığa geçiş": dış köşeye gelen 60'lık iç duvar çektirme U'su alır. BK-38 (D-105 madde 2; Lokman, kart
+    15 Kasım 2026 09:14:41 "Evet, 1 adet 100'lük"): iç duvar 100 olunca da alır (paftada köşe direği + 10'luk çektirme U'su). Önce bu test
+    100'lükte 0 bekliyordu; vaka Lokman'ın kartıyla değişti (gerekçe `docs/is_emirleri/BK-38.md`)."""
     assert modeller[kod]["cektirme_yerleri"]["dis_kose"] == 1
     ie = _ie(kod)
     ie["yapi"]["duvar_kalinligi_cm"]["ic"] = 10
     cy = PL.model_motor(ie)["cektirme_yerleri"]
-    assert cy["dis_kose"] == 0 and cy["t_orta"] == modeller[kod]["cektirme_yerleri"]["t_orta"]
+    assert cy["dis_kose"] == 1 and cy["t_orta"] == modeller[kod]["cektirme_yerleri"]["t_orta"]
 
 
 def test_cektirme_serbest_uc_sayilir(modeller):

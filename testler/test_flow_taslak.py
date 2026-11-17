@@ -503,3 +503,46 @@ def test_form_celik_formunu_kurar_eski_surumde_kaynakla(etc, tmp_path):
         assert "celik formu yayımlandı · kimlik 91003" in r.stdout
     finally:
         g.kapat()
+
+
+def test_form_celik2_yeni_taslak_kurar_yayimli_celik_formuna_dokunmaz(etc, tmp_path):
+    """İE-20 PR-12 (D-102): `--form celik2` çelik formun ikinci sürümünü (trapez sac yok) ayrı adla kurar; yayımlı çelik formu ve öteki
+    formlar değişmez. Kurulu sürüm bu formu tanımıyorsa betik stdin'den, form `--kaynak` ile depodan gelir. Yayım yalnız `--yayimla` ile."""
+    g = SahteGraph()
+    try:
+        assert kos(etc, g, "--yayimla").returncode == 0                      # talep ve revizyon yayımlı (91001, 91002)
+        assert kos(etc, g, "--form", "celik", "--yayimla").returncode == 0   # bugünkü hâl: çelik formu yayımlı (91003)
+        g.istekler.clear()
+        g.depo = {"celik2": TF.tanim("celik2")}
+        env = {"PM_ETC": str(etc), "PM_GRAPH_BASE": g.url, "PM_RAW_BASE": g.url.removesuffix("/v23.0") + "/raw", "PATH": "/usr/bin:/bin"}
+        eski = tmp_path / "celik2siz"
+        (eski / "kanal" / "formlar").mkdir(parents=True)
+        kaynak = (KOK / "kanal" / "talep_formu.py").read_text(encoding="utf-8")
+        assert ', "celik2": "TALEP_C"' in kaynak
+        (eski / "kanal" / "talep_formu.py").write_text(kaynak.replace(', "celik2": "TALEP_C"', ""), encoding="utf-8")
+        for tur in ("talep", "revizyon", "prefabrik", "talep2", "celik"):
+            (eski / "kanal" / "formlar" / f"{tur}.json").write_text((KOK / "kanal" / "formlar" / f"{tur}.json").read_text(encoding="utf-8"),
+                                                                    encoding="utf-8")
+        r = subprocess.run([sys.executable, "-", "--kok", str(eski), "--form", "celik2", "--kaynak", COMMIT], input=BETIK.read_text(), env=env,
+                           capture_output=True, text=True, timeout=60)
+        cikti = r.stdout + r.stderr
+        assert r.returncode == 0, cikti
+        [olustur] = _yazma_istekleri(g)
+        govde = json.loads(olustur["govde"])
+        assert olustur["yol"] == f"{WABA}/flows" and govde["name"] == "Portman Çelik Talep Formu 2" and govde["publish"] is False
+        assert json.loads(govde["flow_json"]) == TF.tanim("celik2") and "rapez" not in govde["flow_json"]
+        assert "celik2_flow_id 91004" in cikti and "celik_flow_id" not in cikti and "== sonuç: tamam" in cikti
+        link = next(s.strip() for s in r.stdout.splitlines() if "interactive=true" in s and "91004" in s)
+        yuk = json.loads(dict(urllib.parse.parse_qsl(urllib.parse.urlsplit(link).query))["flow_action_payload"])
+        assert yuk == {"screen": "TALEP_C", "data": TF.celik_ekran_verisi(None, None)}
+        assert {k: f["status"] for k, f in g.formlar.items()} == {"91001": "PUBLISHED", "91002": "PUBLISHED", "91003": "PUBLISHED",
+                                                                  "91004": "DRAFT"}
+        # yayım yalnız --yayimla ile; yayımlı çelik formuna yazılmaz
+        g.istekler.clear()
+        r = kos(etc, g, "--form", "celik2", "--yayimla")
+        assert r.returncode == 0, r.stdout + r.stderr
+        assert [i["yol"] for i in _yazma_istekleri(g)] == ["91004/assets", "91004/publish"]
+        assert "celik2 formu yayımlandı · kimlik 91004" in r.stdout
+    finally:
+        g.kapat()
+

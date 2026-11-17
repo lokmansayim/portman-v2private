@@ -1,0 +1,81 @@
+{
+ "sema": "portman.fiyat_istisnasi/1",
+ "ad": "Kasım 2026 bayi fiyat listesi: CRM'de fiyatı olmayan kalemler",
+ "karar": "D-120",
+ "gecerli": {
+  "bas": "2026-11-01",
+  "bit": "2026-11-30"
+ },
+ "dayanak": "Lokman, 16 Kasım 2026 21:10:56 UTC: \"40_Katalog_Ham. Klasörüne pencere fiyatını ve listede olmayan fiyatları ekledim\"; kart 21:13:11 UTC \"Bu ay istisna\" (yalnız bu ayın bayi fiyat listesi; D-72 tek kaynak CRM kuralı M-15 aynen); pencere kartı 21:14:59 UTC \"Boyla, beyaz\".",
+ "kural": "Yalnız CRM'in fiyat vermediği yerde uygulanır: kod fiyatı CRM'de 0 ya da boşsa, kalem CRM'de fiyatsızsa. CRM fiyatı varsa istisna uygulanmaz. Fiyatlar KDV hariç sayılır; KDV oranı eşlemenin KDV bölümünden (D-76).",
+ "kaynak": {
+  "ad": "Lokman'ın listesi: 45. hafta fiyat listesi prefabrik malzemesi (liste tarihi 3.11.2026) ve pencere teklifi (POZ 1–3, beyaz)",
+  "kisa": "Lokman'ın listesi (Kasım 2026 istisnası)",
+  "tarih": "2026-11-16"
+ },
+ "kod_fiyatlari": {
+  "MA11": {
+   "fiyat": 2892.25,
+   "dayanak": "45. hafta fiyat listesi prefabrik malzemesi (liste tarihi 3.11.2026) › 16 Kutu profil › SHS100x4, L 6000; 6 metrelik boyun fiyatı (D-119 çeyrek boy kuralıyla)"
+  },
+  "MA12": {
+   "fiyat": 2892.25,
+   "dayanak": "45. hafta fiyat listesi prefabrik malzemesi (liste tarihi 3.11.2026) › 16 Kutu profil › SHS100x4, L 6000; 6 metrelik boyun fiyatı (D-119 çeyrek boy kuralıyla)"
+  }
+ },
+ "kalemler": {
+  "prefabrik": {
+   "100'lük yapıştırma dolu vasistaslı pano (60/40) | 100 × 1250 × 2500": {
+    "fiyat": 2483.81,
+    "birim": "adet",
+    "dayanak": "45. hafta fiyat listesi prefabrik malzemesi (liste tarihi 3.11.2026) › 1 Panel grubu › F) Vasistaslı, Pres Panel",
+    "kdv_grubu": "Yapıştırma pano"
+   },
+   "PVC pencere | 120/120": {
+    "fiyat": 6500.0,
+    "birim": "adet",
+    "dayanak": "Pencere teklifi POZ 1, beyaz (kart 21:14:59 \"Boyla, beyaz\")"
+   },
+   "PVC pencere | 120/180": {
+    "fiyat": 8500.0,
+    "birim": "adet",
+    "dayanak": "Pencere teklifi POZ 2, beyaz (kart 21:14:59 \"Boyla, beyaz\")"
+   },
+   "PVC vasistas | 60/40": {
+    "fiyat": 2000.0,
+    "birim": "adet",
+    "dayanak": "Pencere teklifi POZ 3, beyaz (kart 21:14:59 \"Boyla, beyaz\")"
+   },
+   "Vitrifiye ve batarya (duş teknesi, klozet, lavabo, batarya grubu) | takım": {
+    "fiyat": 8599.7,
+    "birim": "takım",
+    "dayanak": "45. hafta fiyat listesi prefabrik malzemesi (liste tarihi 3.11.2026) › 22 Mekanik: duş teknesi 1.955 + mix banyo bataryası 1.124,70 + klozet ve rezervuar 2.760 + klozet kapağı 207 + iç takım 207 + ayaklı lavabo 1.725 + mix lavabo bataryası 621"
+   },
+   "Özel pencere karkası (120×120) (100'lük çektirme U'su + 100'lük H geçen) | 1200 × 1200": {
+    "fiyat": 237.08,
+    "birim": "adet",
+    "teklif_adi": "PENCERE KÖR KASASI",
+    "teklif_olcu": "120/120",
+    "kdv_grubu": "Pencereler",
+    "dayanak": "45. hafta fiyat listesi prefabrik malzemesi (liste tarihi 3.11.2026) › 8 Doğrama kasası › 8 PENCERE KÖR KASA Takım 120/120 Pencereye Göre / Kaynaksız; Lokman 16 Kasım 2026 21:34:47 UTC: \"bunları listede bizim mühendis yanlış yazmış … bunu gerçek isim PENCERE KÖR KASASI sen düzeltip fiyatını girer misin fiyatıda \\\"45.HAFTA FİYAT LİSTESİ PREFABRİK MALZEMESİ.pdf\\\" yazıyor\""
+   },
+   "Özel pencere karkası (120×180) (100'lük çektirme U'su + 100'lük H geçen) | 1200 × 1800": {
+    "fiyat": 297.72,
+    "birim": "adet",
+    "teklif_adi": "PENCERE KÖR KASASI",
+    "teklif_olcu": "120/180",
+    "kdv_grubu": "Pencereler",
+    "dayanak": "45. hafta fiyat listesi prefabrik malzemesi (liste tarihi 3.11.2026) › 8 Doğrama kasası › 10 PENCERE KÖR KASA Takım 120/180 Pencereye Göre / Kaynaksız; Lokman 16 Kasım 2026 21:34:47 UTC: \"bunları listede bizim mühendis yanlış yazmış … bunu gerçek isim PENCERE KÖR KASASI sen düzeltip fiyatını girer misin fiyatıda \\\"45.HAFTA FİYAT LİSTESİ PREFABRİK MALZEMESİ.pdf\\\" yazıyor\""
+   }
+  }
+ },
+ "atla": {
+  "prefabrik": [
+   "Şase pul"
+  ],
+  "celik": [
+   "Şase pul"
+  ]
+ },
+ "atla_dayanak": "Lokman 16 Kasım 2026 21:35:12 UTC: \"şase pulunu kople yükleme listelerinden kaldır\". Bu ayın bayi fiyat listesinden çıkar; yükleme listelerinden kaldırılması ayrı bakım işi (Motor)."
+}

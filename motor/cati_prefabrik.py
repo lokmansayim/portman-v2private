@@ -130,12 +130,37 @@ def _veranda_cumbasi(u: dict, plan: G.Plan | None) -> list[float]:
     return [float(t) for t in v["rect"]]
 
 
+def tek_veranda_cumbasi(c: dict) -> bool:
+    """Ana çatının tek cumbası taşan verandanın cumbası mı (`cumbalar` tek öğe, `veranda` ile; D-109). Liste ve IFC buna göre yol seçer."""
+    cs = c.get("cumbalar") or []
+    return c.get("tip") == "besik_cumba" and len(cs) == 1 and isinstance(cs[0], dict) and "veranda" in cs[0]
+
+
+def _kose_verandasi_cumbasi(u: dict, kutu: tuple, plan: G.Plan | None) -> list[float]:
+    """D-109 (BK-40): köşe boşluğundan taşan verandanın (`verandalar[].nis`) çatısı ana çatının tek cumbası, gövdenin cumbası olmadan.
+    Ayak izi verandanın taşan dikdörtgeni (`_veranda_cumbasi`); boşluk gövdede, ana çatının altında. Lokman, kart 16 Kasım 2026 08:05:51
+    "52/55 öneri doğru, 67 böyle" (soru: "Köşe verandasının çatısı bu eskizdeki gibi mi olsun?"; eskiz: veranda çatısı ana çatının cumbası,
+    iki vadiyle ana çatıya girer). Başka taşan verandada gövde cumbası olmadan veranda cumbası PC-38'in hatası (K21)."""
+    r = _veranda_cumbasi(u, plan)
+    v = next(v for v in plan.dis_verandalar if v["ad"] == u["veranda"])
+    if not v.get("nis"):
+        raise PrefabrikCatiHatasi("verandanın cumbası yalnız gövdenin çıkıntılı cumbasıyla birlikte, ikinci cumba olarak yazılır (PC-38); gövde "
+                                  "cumbası olmadan tek veranda cumbası yalnız köşe boşluğundan taşan verandada (`nis`, D-109)")
+    x0, y0, x1, y1 = kutu
+    bitisik = {"on": r[3] == y0, "arka": r[1] == y1, "sol": r[2] == x0, "sag": r[0] == x1}[u["cephe"]]
+    if not bitisik:
+        raise PrefabrikCatiHatasi(f"veranda {v['ad']}: cumbası ana çatının {u['cephe']} kenarına bitişik değil ({r} ↔ ana çatı {list(kutu)})")
+    return r
+
+
 def cumba_dikdortgenleri(c: dict, kutu: tuple, plan: G.Plan | None = None) -> tuple[list[float], list[list[float]]]:
     """`cumbalar` → (ana çatının dikdörtgeni, [cumba dikdörtgeni, …]). Tek cumba `_cumba` (eski yol, aynen). İki cumba (14 Kasım 2026, 45 m² ev:
     önde gövdenin cumbası, arkada sundurmanın cumbası): ana çatının iki karşı saçak yüzünde; her biri tek cumbanın kuralıyla kurulur, ana çatı
     iki çıkıntının arasında. Taşan verandanın cumbası `veranda` ile (`_veranda_cumbasi`). Ana makasın geri çekilmesi (`ana_makas`) iki cumbada yok."""
     cs = c.get("cumbalar") or []
     veranda_var = any(isinstance(u, dict) and "veranda" in u for u in cs)
+    if len(cs) == 1 and veranda_var:                                            # D-109 (BK-40): köşe boşluğundan taşan verandanın tek cumbası
+        return list(kutu), [_kose_verandasi_cumbasi(cs[0], kutu, plan)]
     if len(cs) != 2 or not veranda_var:                                         # verandasız: eski yol (iki gövde cumbası orada hata)
         if veranda_var:
             raise PrefabrikCatiHatasi("verandanın cumbası yalnız gövdenin çıkıntılı cumbasıyla birlikte, ikinci cumba olarak yazılır (PC-38)")
@@ -304,6 +329,18 @@ def cati(plan: G.Plan, ie: dict) -> dict:
             from .genel import cati_ortak as CO
             u["duzlemler"] = _kirma_farkli(kutu, mahya, round(float(c["egim_yuzde"]) / 100, 5), dict(c["kirma_egimleri"]),
                                            CO.baglam(k, round(float(c["egim_yuzde"]) / 100, 5), H0), k)
+    elif tek_veranda_cumbasi(c):                                                  # D-109 (BK-40): köşe boşluğundan taşan verandanın cumbası
+        ana, rs = cumba_dikdortgenleri(c, kutu, plan)
+        from shapely.geometry import box
+        from .cati_serit import cati_izi
+        fark = cati_izi(plan).symmetric_difference(box(*ana).union(box(*rs[0]))).area
+        if fark > 1.0:
+            raise PrefabrikCatiHatasi(f"veranda cumbası: gövdenin ve verandanın dış çizgisi ana çatı ile cumbanın birleşimi değil ({fark:.0f} cm² fark)")
+        ayak = [ana, rs[0]]
+        try:
+            u = CU.uret(ayak, "cumba", mahya=mahya, egim_yuzde=float(c["egim_yuzde"]), duvar_ustu=H0, kural=k)
+        except CU.CatiHatasi as e:
+            raise PrefabrikCatiHatasi(str(e))
     elif len(c.get("cumbalar") or []) == 2 and any(isinstance(u, dict) and "veranda" in u for u in c["cumbalar"]):   # PC-38: gövde + veranda cumbası
         ana, rs = cumba_dikdortgenleri(c, kutu, plan)
         from shapely.geometry import box

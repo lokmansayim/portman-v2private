@@ -1,0 +1,58 @@
+{
+ "taban": "PA11",
+ "cati_adi": "Beşik + cumba",
+ "cati_gorsel": "adaylar/PA11_cati.png",
+ "karar": "D-115",
+ "varyantlar": [
+  {
+   "kod": "PA11B",
+   "gosterim": "PA-11-B",
+   "durum": "gecerli",
+   "taban": "PA11",
+   "sablon": "adaylar/PA11B.json",
+   "gorsel": "adaylar/PA11B.png",
+   "cati_adi": "Beşik",
+   "referans_model": "PA-11-B",
+   "yapi_turu": "prefabrik",
+   "kat": 1,
+   "oda_programi": "3+1",
+   "katalog_m2": 91.0,
+   "kapali_m2": 75.0,
+   "veranda_m2": 16.0,
+   "ozet": {
+    "grid": {
+     "x_pano": 7,
+     "y_pano": 8
+    },
+    "dis_olcu_cm": [
+     888.5,
+     1024.0
+    ],
+    "brut_m2": 90.98,
+    "pano": 49,
+    "pencere": 7,
+    "kapi": 6,
+    "odalar": {
+     "YATAK ODASI 1": 13.62,
+     "WC": 4.38,
+     "YATAK ODASI 2": 11.28,
+     "HOL": 7.9,
+     "YATAK ODASI 3": 9.23,
+     "YAŞAM ALANI": 22.81,
+     "VERANDA": 16.0
+    }
+   },
+   "uyarilar": [],
+   "kaynak": {
+    "metin": "İE-44 toplu çatı seçenekleri (D-115)",
+    "karar": "D-115",
+    "ev": "PA-11",
+    "havuz_denetimi": {
+     "sonuc": "geçti",
+     "karar": "D-112",
+     "uyarilar": []
+    }
+   }
+  }
+ ]
+}

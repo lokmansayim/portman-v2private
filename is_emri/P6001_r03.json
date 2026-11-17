@@ -1,0 +1,228 @@
+{
+ "is_emri_no": "PM-KATALOG-P6001",
+ "revizyon": 3,
+ "talep": {
+  "bayi": {
+   "kod": "TEST",
+   "ad": "Lokman"
+  },
+  "musteri_adi": "KATALOG P6001",
+  "metin": "Katalog P6001 — 2+1, 60 m², 6x6 pano; katalog sayfasındaki yönde (veranda sağ altta, yatak odaları solda, hol ayrı)"
+ },
+ "yapi": {
+  "sistem": "prefabrik",
+  "kat_sayisi": 1,
+  "duvar_yuksekligi_cm": 250,
+  "olcu_kaynagi": "serbest",
+  "referans_model": "P6001",
+  "grid": {
+   "x_pano": 6,
+   "y_pano": 6
+  },
+  "kisa_kenar": "x",
+  "giris_cephesi": "on",
+  "dis_dusey_duvar": "aks_disinda",
+  "ek_akslar_cm": {
+   "x": [
+    104.125
+   ],
+   "y": []
+  },
+  "dizilim": {
+   "dis_pano_dayanagi": [
+    {
+     "x": 512.0,
+     "aralik_cm": [
+      449.25,
+      763.0
+     ],
+     "cephe": "on"
+    },
+    {
+     "x": 104.125,
+     "aralik_cm": [
+      10.0,
+      323.75
+     ],
+     "cephe": "on"
+    }
+   ]
+  }
+ },
+ "mahaller": [
+  {
+   "ad": "YASAM ALANI",
+   "tur": "salon",
+   "konum_pano": [
+    [
+     2.5,
+     2,
+     6,
+     6
+    ]
+   ]
+  },
+  {
+   "ad": "HOL",
+   "tur": "hol",
+   "konum_pano": [
+    [
+     1.5,
+     2,
+     2.5,
+     3.5
+    ]
+   ]
+  },
+  {
+   "ad": "VERANDA",
+   "tur": "veranda",
+   "konum_pano": [
+    [
+     2.5,
+     0,
+     6,
+     2
+    ]
+   ]
+  },
+  {
+   "ad": "YATAK ODASI 1",
+   "tur": "yatak_odasi",
+   "konum_pano": [
+    [
+     0,
+     3.5,
+     2.5,
+     6
+    ]
+   ]
+  },
+  {
+   "ad": "BANYO",
+   "tur": "banyo",
+   "konum_pano": [
+    [
+     0,
+     2,
+     1.5,
+     3.5
+    ]
+   ]
+  },
+  {
+   "ad": "YATAK ODASI 2",
+   "tur": "yatak_odasi",
+   "konum_pano": [
+    [
+     0,
+     0,
+     2.5,
+     2
+    ]
+   ]
+  }
+ ],
+ "acik_sinirlar": [
+  [
+   "YASAM ALANI",
+   "HOL"
+  ]
+ ],
+ "acikliklar": [
+  {
+   "tur": "pencere",
+   "olcu": "120x120",
+   "mahal": "YASAM ALANI",
+   "duvar": "sag",
+   "pano": 2
+  },
+  {
+   "tur": "pencere",
+   "olcu": "120x180",
+   "mahal": "YASAM ALANI",
+   "duvar": "on",
+   "pano": 2
+  },
+  {
+   "tur": "pencere",
+   "olcu": "120x120",
+   "mahal": "YATAK ODASI 1",
+   "duvar": "sol"
+  },
+  {
+   "tur": "pencere",
+   "olcu": "60x40",
+   "mahal": "BANYO",
+   "duvar": "sol"
+  },
+  {
+   "tur": "pencere",
+   "olcu": "120x180",
+   "mahal": "YATAK ODASI 2",
+   "duvar": "on",
+   "pano": 0
+  },
+  {
+   "tur": "dis_kapi",
+   "olcu": 90,
+   "arasi": [
+    "VERANDA",
+    "YASAM ALANI"
+   ],
+   "mentese": "sol",
+   "duvar_ucu": "sol"
+  },
+  {
+   "tur": "ic_kapi",
+   "olcu": 82,
+   "arasi": [
+    "HOL",
+    "YATAK ODASI 1"
+   ]
+  },
+  {
+   "tur": "ic_kapi",
+   "olcu": 82,
+   "arasi": [
+    "HOL",
+    "BANYO"
+   ]
+  },
+  {
+   "tur": "ic_kapi",
+   "olcu": 82,
+   "arasi": [
+    "HOL",
+    "YATAK ODASI 2"
+   ]
+  }
+ ],
+ "cati": {
+  "tip": "besik",
+  "egim_yuzde": 33,
+  "sacak_cm": 30,
+  "topuk_cm": 10,
+  "makas_yonu": "kisa_kenar"
+ },
+ "cikti": {
+  "pdf": true,
+  "dxf": true,
+  "pafta": "A2",
+  "icerik": [
+   "aksli_plan",
+   "alanli_kopya",
+   "montaj_kopyasi",
+   "on_gorunus",
+   "cati_profili",
+   "ozellik_tablosu"
+  ]
+ },
+ "varsayimlar": [
+  "Yerleşim katalog sayfasından (PS-1060, 60 m² 2+1): veranda sağ altta, yatak odaları solda, hol ayrı mahal ve yaşam alanına açık (Lokman, 16 Kasım 2026 23:50 İstanbul, kart: \"Katalog sayfası gibi\").",
+  "Dış kapı veranda–yaşam alanı duvarında hol köşesine yaslı (duvar_ucu sol); 62,75'lik yarım pano kapının yanında, öteki panolar standart aksta (dis_pano_dayanagi x 512). Lokman, 16 Kasım 2026 23:45: \"dış kapının yanındaki 57,75'i dış kapının soluna al kapıyı sağa yasla\" (eski yöndeki çizime; katalog yönünde aynası).",
+  "Küçük yatak odasının 120/180 penceresi odanın tam ortasında: 94,125 + 125,5 + 94,125 (ek aks x 104,125). Lokman, 16 Kasım 2026 23:50: \"yatak odası 2 120/180 penceresini tam ortaya al yani 125,5 + 62,75 = 188,25 / 2 = 94,125 sağına ve soluna koy bu panoları\".",
+  "Dış kapı 90 cm (21.09 kararı); iç kapılar 82 cm, üçü de holden."
+ ],
+ "eksikler": []
+}

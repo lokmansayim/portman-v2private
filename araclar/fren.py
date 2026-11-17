@@ -82,6 +82,8 @@ FREN = [
     (r"^\.claude/agents/", "hakem ajan (kapanış incelemesi)"),
     (r"^\.claude/skills/kapanis/", "kapanış adımları (doğrulama, kanıt)"),
     (r"^\.github/workflows/", "CI iş akışı (son kapı)"),
+    (r"^araclar/pytest_parca\.py$", "CI parçalayıcısı: hangi test dosyası hangi doğrulama işinde koşar (BK-43)"),
+    (r"^testler/test_pytest_parca\.py$", "CI parçalayıcısının testi (parçaların birleşimi bütün dosyalar)"),
     (r"^araclar/fren\.py$", "bu fren"),
     (r"^testler/test_fren\.py$", "bu frenin testi"),
     (r"^testler/test_muhurlu_konular\.py$", "mühür kilit testi"),

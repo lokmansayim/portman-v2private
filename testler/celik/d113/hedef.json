@@ -1,0 +1,1121 @@
+{
+ "karar": "D-113",
+ "onay": "Lokman, kart 16 Kasım 2026 08:57:28 UTC \"Doğru, böyle kalsın\" (soru: \"10 çelik evin tek kat panelli listesi tablodaki gibi doğru mu?\"; tablo PF Celik_Kaplama_D113/2026-11-16_on_ev_once_sonra.png)",
+ "uretim": "python -m araclar.celik_kaplama_kiyas <klasör> --json <yol> (main 64772808 + BK-48)",
+ "evler": [
+  {
+   "kod": "Ç8201",
+   "tanim": "modeller/C8201.json",
+   "degisir": false,
+   "kaplama": "tek_kat_panel"
+  },
+  {
+   "kod": "Ç8801",
+   "tanim": "modeller/C8801.json",
+   "degisir": false,
+   "kaplama": "tek_kat_panel"
+  },
+  {
+   "kod": "Ç8801-K",
+   "tanim": "modeller/C8801K.json",
+   "degisir": false,
+   "kaplama": "tek_kat_panel"
+  },
+  {
+   "kod": "Ç8801-L",
+   "tanim": "modeller/C8801L.json",
+   "degisir": false,
+   "kaplama": "tek_kat_panel"
+  },
+  {
+   "kod": "KT-01",
+   "tanim": "modeller/KT01.json",
+   "degisir": true,
+   "ad": "Tek kat çelik, 2+1, müştemilatlı, 98,65 m² (kör test projesi)",
+   "once_kaplama": "sandviç panel",
+   "sonra_kaplama": "tek kat panel (baz paket)",
+   "once_satir": 94,
+   "sonra_satir": 93,
+   "fark": [
+    {
+     "grup": "Çatı kaplamaları",
+     "kalem": "Sandviç panel",
+     "boyut": "L 5080 · 100 cm kapatır",
+     "once": {
+      "adet": 16,
+      "olcu": 116.55,
+      "birim": "m²"
+     },
+     "sonra": null
+    },
+    {
+     "grup": "Çatı kaplamaları",
+     "kalem": "Sandviç panel",
+     "boyut": "L 3430 · 100 cm kapatır",
+     "once": {
+      "adet": 6,
+      "olcu": null,
+      "birim": "m²"
+     },
+     "sonra": null
+    },
+    {
+     "grup": "Çatı kaplamaları",
+     "kalem": "Sandviç panel",
+     "boyut": "L 2880 · 100 cm kapatır",
+     "once": {
+      "adet": 5,
+      "olcu": null,
+      "birim": "m²"
+     },
+     "sonra": null
+    },
+    {
+     "grup": "Çatı kaplamaları",
+     "kalem": "Sandviç panel",
+     "boyut": "L 2350 · 100 cm kapatır",
+     "once": {
+      "adet": 6,
+      "olcu": null,
+      "birim": "m²"
+     },
+     "sonra": null
+    },
+    {
+     "grup": "Çatı kaplamaları",
+     "kalem": "Sandviç panel kapaması",
+     "boyut": "L 2500",
+     "once": {
+      "adet": 14,
+      "olcu": 29.92,
+      "birim": "m"
+     },
+     "sonra": null
+    },
+    {
+     "grup": "Vida",
+     "kalem": "Trapez vida (5,5 × 110; sandviç panel)",
+     "boyut": "adet",
+     "once": {
+      "adet": 750,
+      "olcu": 651.8,
+      "birim": "vida"
+     },
+     "sonra": null
+    },
+    {
+     "grup": "Çatı kaplamaları",
+     "kalem": "Tek kat panel",
+     "boyut": "L 5080 · 100 cm kapatır",
+     "once": null,
+     "sonra": {
+      "adet": 16,
+      "olcu": 116.55,
+      "birim": "m²"
+     }
+    },
+    {
+     "grup": "Çatı kaplamaları",
+     "kalem": "Tek kat panel",
+     "boyut": "L 3430 · 100 cm kapatır",
+     "once": null,
+     "sonra": {
+      "adet": 6,
+      "olcu": null,
+      "birim": "m²"
+     }
+    },
+    {
+     "grup": "Çatı kaplamaları",
+     "kalem": "Tek kat panel",
+     "boyut": "L 2880 · 100 cm kapatır",
+     "once": null,
+     "sonra": {
+      "adet": 5,
+      "olcu": null,
+      "birim": "m²"
+     }
+    },
+    {
+     "grup": "Çatı kaplamaları",
+     "kalem": "Tek kat panel",
+     "boyut": "L 2350 · 100 cm kapatır",
+     "once": null,
+     "sonra": {
+      "adet": 6,
+      "olcu": null,
+      "birim": "m²"
+     }
+    },
+    {
+     "grup": "Vida",
+     "kalem": "Trapez vida (5,5 × 76; tek kat panel)",
+     "boyut": "adet",
+     "once": null,
+     "sonra": {
+      "adet": 750,
+      "olcu": 651.8,
+      "birim": "vida"
+     }
+    }
+   ]
+  },
+  {
+   "kod": "KT-02",
+   "tanim": "modeller/KT02.json",
+   "degisir": true,
+   "ad": "Tek kat çelik, 2+1, verandalı ve sundurmalı, dört omuz çatı, 90 m² (ikinci kör test projesi)",
+   "once_kaplama": "sandviç panel",
+   "sonra_kaplama": "tek kat panel (baz paket)",
+   "once_satir": 84,
+   "sonra_satir": 83,
+   "fark": [
+    {
+     "grup": "Çatı kaplamaları",
+     "kalem": "Sandviç panel",
+     "boyut": "L 4390 · 100 cm kapatır",
+     "once": {
+      "adet": 26,
+      "olcu": 109.54,
+      "birim": "m²"
+     },
+     "sonra": null
+    },
+    {
+     "grup": "Çatı kaplamaları",
+     "kalem": "Sandviç panel",
+     "boyut": "L 1160 · 100 cm kapatır",
+     "once": {
+      "adet": 6,
+      "olcu": null,
+      "birim": "m²"
+     },
+     "sonra": null
+    },
+    {
+     "grup": "Çatı kaplamaları",
+     "kalem": "Sandviç panel kapaması",
+     "boyut": "L 2500",
+     "once": {
+      "adet": 20,
+      "olcu": 44.01,
+      "birim": "m"
+     },
+     "sonra": null
+    },
+    {
+     "grup": "Vida",
+     "kalem": "Trapez vida (5,5 × 110; sandviç panel)",
+     "boyut": "adet",
+     "once": {
+      "adet": 750,
+      "olcu": 605.5,
+      "birim": "vida"
+     },
+     "sonra": null
+    },
+    {
+     "grup": "Çatı kaplamaları",
+     "kalem": "Tek kat panel",
+     "boyut": "L 4390 · 100 cm kapatır",
+     "once": null,
+     "sonra": {
+      "adet": 26,
+      "olcu": 109.54,
+      "birim": "m²"
+     }
+    },
+    {
+     "grup": "Çatı kaplamaları",
+     "kalem": "Tek kat panel",
+     "boyut": "L 1160 · 100 cm kapatır",
+     "once": null,
+     "sonra": {
+      "adet": 6,
+      "olcu": null,
+      "birim": "m²"
+     }
+    },
+    {
+     "grup": "Vida",
+     "kalem": "Trapez vida (5,5 × 76; tek kat panel)",
+     "boyut": "adet",
+     "once": null,
+     "sonra": {
+      "adet": 750,
+      "olcu": 605.5,
+      "birim": "vida"
+     }
+    }
+   ]
+  },
+  {
+   "kod": "KT-03",
+   "tanim": "modeller/KT03.json",
+   "degisir": true,
+   "ad": "Tek kat çelik, 2+1, verandalı ve sundurmalı, kırma çatı, 80 m² (üçüncü kör test projesi)",
+   "once_kaplama": "sandviç panel",
+   "sonra_kaplama": "tek kat panel (baz paket)",
+   "once_satir": 100,
+   "sonra_satir": 99,
+   "fark": [
+    {
+     "grup": "Çatı kaplamaları",
+     "kalem": "Sandviç panel",
+     "boyut": "L 3700 · 100 cm kapatır",
+     "once": {
+      "adet": 5,
+      "olcu": 112.64,
+      "birim": "m²"
+     },
+     "sonra": null
+    },
+    {
+     "grup": "Çatı kaplamaları",
+     "kalem": "Sandviç panel",
+     "boyut": "L 3550 · 100 cm kapatır",
+     "once": {
+      "adet": 8,
+      "olcu": null,
+      "birim": "m²"
+     },
+     "sonra": null
+    },
+    {
+     "grup": "Çatı kaplamaları",
+     "kalem": "Sandviç panel",
+     "boyut": "L 3290 · 100 cm kapatır",
+     "once": {
+      "adet": 7,
+      "olcu": null,
+      "birim": "m²"
+     },
+     "sonra": null
+    },
+    {
+     "grup": "Çatı kaplamaları",
+     "kalem": "Sandviç panel",
+     "boyut": "L 3160 · 100 cm kapatır",
+     "once": {
+      "adet": 6,
+      "olcu": null,
+      "birim": "m²"
+     },
+     "sonra": null
+    },
+    {
+     "grup": "Çatı kaplamaları",
+     "kalem": "Sandviç panel",
+     "boyut": "L 2620 · 100 cm kapatır",
+     "once": {
+      "adet": 3,
+      "olcu": null,
+      "birim": "m²"
+     },
+     "sonra": null
+    },
+    {
+     "grup": "Çatı kaplamaları",
+     "kalem": "Sandviç panel",
+     "boyut": "L 2370 · 100 cm kapatır",
+     "once": {
+      "adet": 13,
+      "olcu": null,
+      "birim": "m²"
+     },
+     "sonra": null
+    },
+    {
+     "grup": "Çatı kaplamaları",
+     "kalem": "Sandviç panel",
+     "boyut": "L 1710 · 100 cm kapatır",
+     "once": {
+      "adet": 5,
+      "olcu": null,
+      "birim": "m²"
+     },
+     "sonra": null
+    },
+    {
+     "grup": "Çatı kaplamaları",
+     "kalem": "Sandviç panel kapaması",
+     "boyut": "L 2500",
+     "once": {
+      "adet": 21,
+      "olcu": 47.25,
+      "birim": "m"
+     },
+     "sonra": null
+    },
+    {
+     "grup": "Vida",
+     "kalem": "Trapez vida (5,5 × 110; sandviç panel)",
+     "boyut": "adet",
+     "once": {
+      "adet": 750,
+      "olcu": 680.55,
+      "birim": "vida"
+     },
+     "sonra": null
+    },
+    {
+     "grup": "Çatı kaplamaları",
+     "kalem": "Tek kat panel",
+     "boyut": "L 3700 · 100 cm kapatır",
+     "once": null,
+     "sonra": {
+      "adet": 5,
+      "olcu": 112.64,
+      "birim": "m²"
+     }
+    },
+    {
+     "grup": "Çatı kaplamaları",
+     "kalem": "Tek kat panel",
+     "boyut": "L 3550 · 100 cm kapatır",
+     "once": null,
+     "sonra": {
+      "adet": 8,
+      "olcu": null,
+      "birim": "m²"
+     }
+    },
+    {
+     "grup": "Çatı kaplamaları",
+     "kalem": "Tek kat panel",
+     "boyut": "L 3290 · 100 cm kapatır",
+     "once": null,
+     "sonra": {
+      "adet": 7,
+      "olcu": null,
+      "birim": "m²"
+     }
+    },
+    {
+     "grup": "Çatı kaplamaları",
+     "kalem": "Tek kat panel",
+     "boyut": "L 3160 · 100 cm kapatır",
+     "once": null,
+     "sonra": {
+      "adet": 6,
+      "olcu": null,
+      "birim": "m²"
+     }
+    },
+    {
+     "grup": "Çatı kaplamaları",
+     "kalem": "Tek kat panel",
+     "boyut": "L 2620 · 100 cm kapatır",
+     "once": null,
+     "sonra": {
+      "adet": 3,
+      "olcu": null,
+      "birim": "m²"
+     }
+    },
+    {
+     "grup": "Çatı kaplamaları",
+     "kalem": "Tek kat panel",
+     "boyut": "L 2370 · 100 cm kapatır",
+     "once": null,
+     "sonra": {
+      "adet": 13,
+      "olcu": null,
+      "birim": "m²"
+     }
+    },
+    {
+     "grup": "Çatı kaplamaları",
+     "kalem": "Tek kat panel",
+     "boyut": "L 1710 · 100 cm kapatır",
+     "once": null,
+     "sonra": {
+      "adet": 5,
+      "olcu": null,
+      "birim": "m²"
+     }
+    },
+    {
+     "grup": "Vida",
+     "kalem": "Trapez vida (5,5 × 76; tek kat panel)",
+     "boyut": "adet",
+     "once": null,
+     "sonra": {
+      "adet": 750,
+      "olcu": 680.55,
+      "birim": "vida"
+     }
+    }
+   ]
+  },
+  {
+   "kod": "KT-05",
+   "tanim": "modeller/havuz/KT05.json",
+   "degisir": true,
+   "ad": "Tek kat çelik, 2+1, verandalı, beşik + cumba, 90 m² (ÇP-06; aday havuzu, D-87)",
+   "once_kaplama": "sandviç panel",
+   "sonra_kaplama": "tek kat panel (baz paket)",
+   "once_satir": 94,
+   "sonra_satir": 93,
+   "fark": [
+    {
+     "grup": "Çatı kaplamaları",
+     "kalem": "Sandviç panel",
+     "boyut": "L 5080 · 100 cm kapatır",
+     "once": {
+      "adet": 18,
+      "olcu": 107.15,
+      "birim": "m²"
+     },
+     "sonra": null
+    },
+    {
+     "grup": "Çatı kaplamaları",
+     "kalem": "Sandviç panel",
+     "boyut": "L 2980 · 100 cm kapatır",
+     "once": {
+      "adet": 3,
+      "olcu": null,
+      "birim": "m²"
+     },
+     "sonra": null
+    },
+    {
+     "grup": "Çatı kaplamaları",
+     "kalem": "Sandviç panel",
+     "boyut": "L 2800 · 100 cm kapatır",
+     "once": {
+      "adet": 7,
+      "olcu": null,
+      "birim": "m²"
+     },
+     "sonra": null
+    },
+    {
+     "grup": "Çatı kaplamaları",
+     "kalem": "Sandviç panel kapaması",
+     "boyut": "L 2500",
+     "once": {
+      "adet": 11,
+      "olcu": 25.06,
+      "birim": "m"
+     },
+     "sonra": null
+    },
+    {
+     "grup": "Vida",
+     "kalem": "Trapez vida (5,5 × 110; sandviç panel)",
+     "boyut": "adet",
+     "once": {
+      "adet": 750,
+      "olcu": 599.9,
+      "birim": "vida"
+     },
+     "sonra": null
+    },
+    {
+     "grup": "Çatı kaplamaları",
+     "kalem": "Tek kat panel",
+     "boyut": "L 5080 · 100 cm kapatır",
+     "once": null,
+     "sonra": {
+      "adet": 18,
+      "olcu": 107.15,
+      "birim": "m²"
+     }
+    },
+    {
+     "grup": "Çatı kaplamaları",
+     "kalem": "Tek kat panel",
+     "boyut": "L 2980 · 100 cm kapatır",
+     "once": null,
+     "sonra": {
+      "adet": 3,
+      "olcu": null,
+      "birim": "m²"
+     }
+    },
+    {
+     "grup": "Çatı kaplamaları",
+     "kalem": "Tek kat panel",
+     "boyut": "L 2800 · 100 cm kapatır",
+     "once": null,
+     "sonra": {
+      "adet": 7,
+      "olcu": null,
+      "birim": "m²"
+     }
+    },
+    {
+     "grup": "Vida",
+     "kalem": "Trapez vida (5,5 × 76; tek kat panel)",
+     "boyut": "adet",
+     "once": null,
+     "sonra": {
+      "adet": 750,
+      "olcu": 599.9,
+      "birim": "vida"
+     }
+    }
+   ]
+  },
+  {
+   "kod": "KT-06",
+   "tanim": "modeller/havuz/KT06.json",
+   "degisir": true,
+   "ad": "Tek kat çelik, 2+1, verandalı, dış duvar 140, 90 m² (ÇP-18; aday havuzu, D-87)",
+   "once_kaplama": "sandviç panel",
+   "sonra_kaplama": "tek kat panel (baz paket)",
+   "once_satir": 74,
+   "sonra_satir": 73,
+   "fark": [
+    {
+     "grup": "Çatı kaplamaları",
+     "kalem": "Sandviç panel",
+     "boyut": "L 5260 · 100 cm kapatır",
+     "once": {
+      "adet": 22,
+      "olcu": 105.6,
+      "birim": "m²"
+     },
+     "sonra": null
+    },
+    {
+     "grup": "Çatı kaplamaları",
+     "kalem": "Sandviç panel kapaması",
+     "boyut": "L 2500",
+     "once": {
+      "adet": 9,
+      "olcu": 20.3,
+      "birim": "m"
+     },
+     "sonra": null
+    },
+    {
+     "grup": "Vida",
+     "kalem": "Trapez vida (5,5 × 110; sandviç panel)",
+     "boyut": "adet",
+     "once": {
+      "adet": 750,
+      "olcu": 578.6,
+      "birim": "vida"
+     },
+     "sonra": null
+    },
+    {
+     "grup": "Çatı kaplamaları",
+     "kalem": "Tek kat panel",
+     "boyut": "L 5260 · 100 cm kapatır",
+     "once": null,
+     "sonra": {
+      "adet": 22,
+      "olcu": 105.6,
+      "birim": "m²"
+     }
+    },
+    {
+     "grup": "Vida",
+     "kalem": "Trapez vida (5,5 × 76; tek kat panel)",
+     "boyut": "adet",
+     "once": null,
+     "sonra": {
+      "adet": 750,
+      "olcu": 578.6,
+      "birim": "vida"
+     }
+    }
+   ]
+  },
+  {
+   "kod": "KT-07",
+   "tanim": "modeller/havuz/KT07.json",
+   "degisir": true,
+   "ad": "Tek kat çelik, 2+1, önü verandalı, dört omuz, 90 m² (ÇP-19; aday havuzu, D-87)",
+   "once_kaplama": "sandviç panel",
+   "sonra_kaplama": "tek kat panel (baz paket)",
+   "once_satir": 85,
+   "sonra_satir": 84,
+   "fark": [
+    {
+     "grup": "Çatı kaplamaları",
+     "kalem": "Sandviç panel",
+     "boyut": "L 4290 · 100 cm kapatır",
+     "once": {
+      "adet": 29,
+      "olcu": 106.3,
+      "birim": "m²"
+     },
+     "sonra": null
+    },
+    {
+     "grup": "Çatı kaplamaları",
+     "kalem": "Sandviç panel kapaması",
+     "boyut": "L 2500",
+     "once": {
+      "adet": 18,
+      "olcu": 41.18,
+      "birim": "m"
+     },
+     "sonra": null
+    },
+    {
+     "grup": "Vida",
+     "kalem": "Trapez vida (5,5 × 110; sandviç panel)",
+     "boyut": "adet",
+     "once": {
+      "adet": 750,
+      "olcu": 622.05,
+      "birim": "vida"
+     },
+     "sonra": null
+    },
+    {
+     "grup": "Çatı kaplamaları",
+     "kalem": "Tek kat panel",
+     "boyut": "L 4290 · 100 cm kapatır",
+     "once": null,
+     "sonra": {
+      "adet": 29,
+      "olcu": 106.3,
+      "birim": "m²"
+     }
+    },
+    {
+     "grup": "Vida",
+     "kalem": "Trapez vida (5,5 × 76; tek kat panel)",
+     "boyut": "adet",
+     "once": null,
+     "sonra": {
+      "adet": 750,
+      "olcu": 622.05,
+      "birim": "vida"
+     }
+    }
+   ]
+  },
+  {
+   "kod": "KT-08",
+   "tanim": "modeller/havuz/KT08.json",
+   "degisir": true,
+   "ad": "Tek kat çelik, 3+1, verandalı, beşik + çift cumba, 90,11 m² (ÇP-20; aday havuzu, D-87)",
+   "once_kaplama": "sandviç panel",
+   "sonra_kaplama": "tek kat panel (baz paket)",
+   "once_satir": 90,
+   "sonra_satir": 89,
+   "fark": [
+    {
+     "grup": "Çatı kaplamaları",
+     "kalem": "Sandviç panel",
+     "boyut": "L 4500 · 100 cm kapatır",
+     "once": {
+      "adet": 15,
+      "olcu": 106.02,
+      "birim": "m²"
+     },
+     "sonra": null
+    },
+    {
+     "grup": "Çatı kaplamaları",
+     "kalem": "Sandviç panel",
+     "boyut": "L 3640 · 100 cm kapatır",
+     "once": {
+      "adet": 18,
+      "olcu": null,
+      "birim": "m²"
+     },
+     "sonra": null
+    },
+    {
+     "grup": "Çatı kaplamaları",
+     "kalem": "Sandviç panel kapaması",
+     "boyut": "L 2500",
+     "once": {
+      "adet": 5,
+      "olcu": 10.04,
+      "birim": "m"
+     },
+     "sonra": null
+    },
+    {
+     "grup": "Vida",
+     "kalem": "Trapez vida (5,5 × 110; sandviç panel)",
+     "boyut": "adet",
+     "once": {
+      "adet": 750,
+      "olcu": 665.1,
+      "birim": "vida"
+     },
+     "sonra": null
+    },
+    {
+     "grup": "Çatı kaplamaları",
+     "kalem": "Tek kat panel",
+     "boyut": "L 4500 · 100 cm kapatır",
+     "once": null,
+     "sonra": {
+      "adet": 15,
+      "olcu": 106.02,
+      "birim": "m²"
+     }
+    },
+    {
+     "grup": "Çatı kaplamaları",
+     "kalem": "Tek kat panel",
+     "boyut": "L 3640 · 100 cm kapatır",
+     "once": null,
+     "sonra": {
+      "adet": 18,
+      "olcu": null,
+      "birim": "m²"
+     }
+    },
+    {
+     "grup": "Vida",
+     "kalem": "Trapez vida (5,5 × 76; tek kat panel)",
+     "boyut": "adet",
+     "once": null,
+     "sonra": {
+      "adet": 750,
+      "olcu": 665.1,
+      "birim": "vida"
+     }
+    }
+   ]
+  },
+  {
+   "kod": "KT-09",
+   "tanim": "modeller/havuz/KT09.json",
+   "degisir": true,
+   "ad": "Tek kat çelik, 2+1, beşik + önde iki cumba, 81 m² (ÇP-08; aday havuzu, D-87)",
+   "once_kaplama": "sandviç panel",
+   "sonra_kaplama": "tek kat panel (baz paket)",
+   "once_satir": 97,
+   "sonra_satir": 96,
+   "fark": [
+    {
+     "grup": "Çatı kaplamaları",
+     "kalem": "Sandviç panel",
+     "boyut": "L 5070 · 100 cm kapatır",
+     "once": {
+      "adet": 19,
+      "olcu": 95.69,
+      "birim": "m²"
+     },
+     "sonra": null
+    },
+    {
+     "grup": "Çatı kaplamaları",
+     "kalem": "Sandviç panel",
+     "boyut": "L 3010 · 100 cm kapatır",
+     "once": {
+      "adet": 4,
+      "olcu": null,
+      "birim": "m²"
+     },
+     "sonra": null
+    },
+    {
+     "grup": "Çatı kaplamaları",
+     "kalem": "Sandviç panel",
+     "boyut": "L 2010 · 100 cm kapatır",
+     "once": {
+      "adet": 3,
+      "olcu": null,
+      "birim": "m²"
+     },
+     "sonra": null
+    },
+    {
+     "grup": "Çatı kaplamaları",
+     "kalem": "Sandviç panel kapaması",
+     "boyut": "L 2500",
+     "once": {
+      "adet": 5,
+      "olcu": 9.54,
+      "birim": "m"
+     },
+     "sonra": null
+    },
+    {
+     "grup": "Vida",
+     "kalem": "Trapez vida (5,5 × 110; sandviç panel)",
+     "boyut": "adet",
+     "once": {
+      "adet": 750,
+      "olcu": 572.0,
+      "birim": "vida"
+     },
+     "sonra": null
+    },
+    {
+     "grup": "Çatı kaplamaları",
+     "kalem": "Tek kat panel",
+     "boyut": "L 5070 · 100 cm kapatır",
+     "once": null,
+     "sonra": {
+      "adet": 19,
+      "olcu": 95.69,
+      "birim": "m²"
+     }
+    },
+    {
+     "grup": "Çatı kaplamaları",
+     "kalem": "Tek kat panel",
+     "boyut": "L 3010 · 100 cm kapatır",
+     "once": null,
+     "sonra": {
+      "adet": 4,
+      "olcu": null,
+      "birim": "m²"
+     }
+    },
+    {
+     "grup": "Çatı kaplamaları",
+     "kalem": "Tek kat panel",
+     "boyut": "L 2010 · 100 cm kapatır",
+     "once": null,
+     "sonra": {
+      "adet": 3,
+      "olcu": null,
+      "birim": "m²"
+     }
+    },
+    {
+     "grup": "Vida",
+     "kalem": "Trapez vida (5,5 × 76; tek kat panel)",
+     "boyut": "adet",
+     "once": null,
+     "sonra": {
+      "adet": 750,
+      "olcu": 572.0,
+      "birim": "vida"
+     }
+    }
+   ]
+  },
+  {
+   "kod": "KT-10",
+   "tanim": "modeller/havuz/KT10.json",
+   "degisir": true,
+   "ad": "Tek kat çelik, 2+1, verandalı, beşik, dış duvar 140, 82 m² (ÇP-23; aday havuzu, D-87)",
+   "once_kaplama": "sandviç panel",
+   "sonra_kaplama": "tek kat panel (baz paket)",
+   "once_satir": 73,
+   "sonra_satir": 72,
+   "fark": [
+    {
+     "grup": "Çatı kaplamaları",
+     "kalem": "Sandviç panel",
+     "boyut": "L 5530 · 100 cm kapatır",
+     "once": {
+      "adet": 20,
+      "olcu": 102.12,
+      "birim": "m²"
+     },
+     "sonra": null
+    },
+    {
+     "grup": "Çatı kaplamaları",
+     "kalem": "Sandviç panel kapaması",
+     "boyut": "L 2500",
+     "once": {
+      "adet": 9,
+      "olcu": 18.66,
+      "birim": "m"
+     },
+     "sonra": null
+    },
+    {
+     "grup": "Vida",
+     "kalem": "Trapez vida (5,5 × 110; sandviç panel)",
+     "boyut": "adet",
+     "once": {
+      "adet": 750,
+      "olcu": 553.0,
+      "birim": "vida"
+     },
+     "sonra": null
+    },
+    {
+     "grup": "Çatı kaplamaları",
+     "kalem": "Tek kat panel",
+     "boyut": "L 5530 · 100 cm kapatır",
+     "once": null,
+     "sonra": {
+      "adet": 20,
+      "olcu": 102.12,
+      "birim": "m²"
+     }
+    },
+    {
+     "grup": "Vida",
+     "kalem": "Trapez vida (5,5 × 76; tek kat panel)",
+     "boyut": "adet",
+     "once": null,
+     "sonra": {
+      "adet": 750,
+      "olcu": 553.0,
+      "birim": "vida"
+     }
+    }
+   ]
+  },
+  {
+   "kod": "KT-11",
+   "tanim": "modeller/havuz/KT11.json",
+   "degisir": false,
+   "kaplama": "tek_kat_panel"
+  },
+  {
+   "kod": "KT-12",
+   "tanim": "modeller/havuz/KT12.json",
+   "degisir": false,
+   "kaplama": "tek_kat_panel"
+  },
+  {
+   "kod": "KT-13",
+   "tanim": "modeller/havuz/KT13.json",
+   "degisir": false,
+   "kaplama": "tek_kat_panel"
+  },
+  {
+   "kod": "Ç8801D",
+   "tanim": "modeller/banka/C8801D/tanim.json",
+   "degisir": false,
+   "kaplama": "tek_kat_panel"
+  },
+  {
+   "kod": "KT-04",
+   "tanim": "modeller/banka/KT04/tanim.json",
+   "degisir": true,
+   "ad": "Tek kat çelik, 4+1, verandalı, beşik + iki cumba",
+   "once_kaplama": "sandviç panel",
+   "sonra_kaplama": "tek kat panel (baz paket)",
+   "once_satir": 103,
+   "sonra_satir": 102,
+   "fark": [
+    {
+     "grup": "Çatı kaplamaları",
+     "kalem": "Sandviç panel",
+     "boyut": "L 3300 · 100 cm kapatır",
+     "once": {
+      "adet": 28,
+      "olcu": 149.56,
+      "birim": "m²"
+     },
+     "sonra": null
+    },
+    {
+     "grup": "Çatı kaplamaları",
+     "kalem": "Sandviç panel",
+     "boyut": "L 2810 · 100 cm kapatır",
+     "once": {
+      "adet": 9,
+      "olcu": null,
+      "birim": "m²"
+     },
+     "sonra": null
+    },
+    {
+     "grup": "Çatı kaplamaları",
+     "kalem": "Sandviç panel",
+     "boyut": "L 2630 · 100 cm kapatır",
+     "once": {
+      "adet": 14,
+      "olcu": null,
+      "birim": "m²"
+     },
+     "sonra": null
+    },
+    {
+     "grup": "Çatı kaplamaları",
+     "kalem": "Sandviç panel",
+     "boyut": "L 1930 · 100 cm kapatır",
+     "once": {
+      "adet": 11,
+      "olcu": null,
+      "birim": "m²"
+     },
+     "sonra": null
+    },
+    {
+     "grup": "Çatı kaplamaları",
+     "kalem": "Sandviç panel kapaması",
+     "boyut": "L 2500",
+     "once": {
+      "adet": 18,
+      "olcu": 40.48,
+      "birim": "m"
+     },
+     "sonra": null
+    },
+    {
+     "grup": "Vida",
+     "kalem": "Trapez vida (5,5 × 110; sandviç panel)",
+     "boyut": "adet",
+     "once": {
+      "adet": 1000,
+      "olcu": 878.7,
+      "birim": "vida"
+     },
+     "sonra": null
+    },
+    {
+     "grup": "Çatı kaplamaları",
+     "kalem": "Tek kat panel",
+     "boyut": "L 3300 · 100 cm kapatır",
+     "once": null,
+     "sonra": {
+      "adet": 28,
+      "olcu": 149.56,
+      "birim": "m²"
+     }
+    },
+    {
+     "grup": "Çatı kaplamaları",
+     "kalem": "Tek kat panel",
+     "boyut": "L 2810 · 100 cm kapatır",
+     "once": null,
+     "sonra": {
+      "adet": 9,
+      "olcu": null,
+      "birim": "m²"
+     }
+    },
+    {
+     "grup": "Çatı kaplamaları",
+     "kalem": "Tek kat panel",
+     "boyut": "L 2630 · 100 cm kapatır",
+     "once": null,
+     "sonra": {
+      "adet": 14,
+      "olcu": null,
+      "birim": "m²"
+     }
+    },
+    {
+     "grup": "Çatı kaplamaları",
+     "kalem": "Tek kat panel",
+     "boyut": "L 1930 · 100 cm kapatır",
+     "once": null,
+     "sonra": {
+      "adet": 11,
+      "olcu": null,
+      "birim": "m²"
+     }
+    },
+    {
+     "grup": "Vida",
+     "kalem": "Trapez vida (5,5 × 76; tek kat panel)",
+     "boyut": "adet",
+     "once": null,
+     "sonra": {
+      "adet": 1000,
+      "olcu": 878.7,
+      "birim": "vida"
+     }
+    }
+   ]
+  }
+ ]
+}

@@ -1,7 +1,7 @@
 {
  "aciklama": "BK-18 · ön onay çiziminin hedef örneği (D-28 madde 2): A4 PDF ve DXF içerik izi, doğrulama özeti, pano BOM'u, görünüş çizgileri ve yükleme listesi satırları.",
  "girdi": "testler/motor/veri/TK01_r07.json",
- "onay": "TK-01 r07 (aynı proje, iç 60, standart) ön onay çizimi. Lokman 29 Ekim 2026: 13:41 \"ikiside çizim motorunda kurallar halinde olsun\", 13:47 kat planı \"60'lık versiyonunda onaylıyorum\", 13:48 görünüşler \"sen onayla\" (D-31 madde 16). 30 Ekim 2026 14:45 görünüş ölçüsü mor, yazısı siyah (D-34, PC-25): iz yalnız ölçü rengiyle yeniden donduruldu. 4 Kasım 2026 14:24 antetteki brüt m² verandayla, çatının örttüğü oturum (D-49 madde 2, \"çatı kapattığı için\"; M-02 Lokman'ın 19:55 kartıyla açıldı): iz yalnız antet m² yazısıyla yeniden donduruldu. 14 Kasım 2026 21:01 antetteki net verandayla, bütün mahaller (D-95, \"biz verandayıda net alana alır sayarız\"; M-02 Lokman'ın 21:07:29 sözüyle açıldı: \"ben izin veriyorum varsa mühür bunu gir ve mühürle\"): iz yalnız antet m² yazısıyla yeniden donduruldu.",
+ "onay": "TK-01 r07 (aynı proje, iç 60, standart) ön onay çizimi. Lokman 29 Ekim 2026: 13:41 \"ikiside çizim motorunda kurallar halinde olsun\", 13:47 kat planı \"60'lık versiyonunda onaylıyorum\", 13:48 görünüşler \"sen onayla\" (D-31 madde 16). 30 Ekim 2026 14:45 görünüş ölçüsü mor, yazısı siyah (D-34, PC-25): iz yalnız ölçü rengiyle yeniden donduruldu. 4 Kasım 2026 14:24 antetteki brüt m² verandayla, çatının örttüğü oturum (D-49 madde 2, \"çatı kapattığı için\"; M-02 Lokman'ın 19:55 kartıyla açıldı): iz yalnız antet m² yazısıyla yeniden donduruldu. 14 Kasım 2026 21:01 antetteki net verandayla, bütün mahaller (D-95, \"biz verandayıda net alana alır sayarız\"; M-02 Lokman'ın 21:07:29 sözüyle açıldı: \"ben izin veriyorum varsa mühür bunu gir ve mühürle\"): iz yalnız antet m² yazısıyla yeniden donduruldu. 15 Kasım 2026 07:32:42 üçlü H yalnız iç duvar dış duvarla aynı kalınlıktaysa (D-104, \"standart H'larda 100'lükten 60'lığa geçen ... malzeme yok\"; 07:47:55 \"buralara mecburen 100'lük köşeler gelecek\"; M-02 Lokman'ın 07:55:12 kartıyla açıldı: \"Doğru, hedef örnekler güncellensin\"): iz giriş nişinin iki köşe direğiyle yeniden donduruldu.",
  "iz": {
   "dogrulama": {
    "passed": true,
@@ -15,11 +15,11 @@
     7.0
    ],
    "panel_count": 60,
-   "corner_count": 8,
+   "corner_count": 10,
    "windows": 8,
    "doors": 8,
-   "h_connectors": 12,
-   "h_connectors_dis": 8,
+   "h_connectors": 10,
+   "h_connectors_dis": 6,
    "footprint_diff_cm2": 0.0,
    "warnings": [
     "Dış ölçü 898 × 888 → 898,5 × 888,5 cm: son pano (x: 125, y: 125 cm) 122 ve üzeri olduğu için tam panoya (125,5) tamamlandı (D-30)",
@@ -30,11 +30,11 @@
     "E. BANYO": 2.9038,
     "BANYO": 4.4287,
     "YATAK ODASI 2": 12.201,
-    "HOL": 5.9053,
+    "HOL": 5.9033,
     "GİRİŞ": 1.4495,
-    "SALON": 18.4268,
+    "SALON": 18.4258,
     "YATAK ODASI 3": 9.1508,
-    "MUTFAK": 9.0519,
+    "MUTFAK": 9.051,
     "ÖN VERANDA": 6.9866,
     "ARKA VERANDA": 3.458
    },
@@ -71,7 +71,7 @@
     },
     {
      "kind": "kapi",
-     "name": "BOM_D05_1155p0_DIS_K02_SOL",
+     "name": "BOM_D09_1255p0_DIS_K02_SOL",
      "gap": [
       404.25,
       125.5,
@@ -141,7 +141,7 @@
     },
     {
      "kind": "kapi",
-     "name": "BOM_I11_1255p0_IC_K01_SAG_UST_KAYP102p5",
+     "name": "BOM_I12_1205p0_IC_K01_SAG_UST_KAYP77p5",
      "gap": [
       509.0,
       162.5,
@@ -221,7 +221,7 @@
      100,
      null
     ],
-    "adet": 6,
+    "adet": 8,
     "birim": "adet"
    },
    {
@@ -254,7 +254,7 @@
      60.0,
      null
     ],
-    "adet": 8,
+    "adet": 6,
     "birim": "adet"
    },
    {
@@ -265,7 +265,7 @@
      100,
      2500
     ],
-    "adet": 15,
+    "adet": 13,
     "birim": "adet"
    },
    {
@@ -302,17 +302,6 @@
     "birim": "adet"
    },
    {
-    "kod": "D05",
-    "malzeme": "Dış kapılı özel pano",
-    "olcu_mm": [
-     1155,
-     100,
-     2500
-    ],
-    "adet": 1,
-    "birim": "adet"
-   },
-   {
     "kod": "D06",
     "malzeme": "Özel dolu pano",
     "olcu_mm": [
@@ -331,7 +320,18 @@
      100,
      2500
     ],
-    "adet": 2,
+    "adet": 4,
+    "birim": "adet"
+   },
+   {
+    "kod": "D09",
+    "malzeme": "Dış kapılı pano",
+    "olcu_mm": [
+     1255.0,
+     100,
+     2500
+    ],
+    "adet": 1,
     "birim": "adet"
    },
    {
@@ -342,7 +342,7 @@
      60,
      2500
     ],
-    "adet": 11,
+    "adet": 10,
     "birim": "adet"
    },
    {
@@ -353,7 +353,7 @@
      60,
      2500
     ],
-    "adet": 3,
+    "adet": 4,
     "birim": "adet"
    },
    {
@@ -408,7 +408,18 @@
      60,
      2500
     ],
-    "adet": 5,
+    "adet": 4,
+    "birim": "adet"
+   },
+   {
+    "kod": "I12",
+    "malzeme": "İç kapılı özel pano",
+    "olcu_mm": [
+     1205.0,
+     60,
+     2500
+    ],
+    "adet": 1,
     "birim": "adet"
    },
    {
@@ -919,6 +930,18 @@
     "ON_DERZ",
     false,
     [
+     386.5,
+     -1051.707
+    ],
+    [
+     386.5,
+     -801.707
+    ]
+   ],
+   [
+    "ON_DERZ",
+    false,
+    [
      391.5,
      -1051.707
     ],
@@ -936,6 +959,18 @@
     ],
     [
      507.0,
+     -801.707
+    ]
+   ],
+   [
+    "ON_DERZ",
+    false,
+    [
+     512.0,
+     -1051.707
+    ],
+    [
+     512.0,
      -801.707
     ]
    ],
@@ -2137,13 +2172,13 @@
     "grup": "1001",
     "kalem": "100'lük yapıştırma dolu pano",
     "olcu": "100 × 1250 × 2500",
-    "adet": 15
+    "adet": 13
    },
    {
     "grup": "1001",
     "kalem": "100'lük yapıştırma dolu pano",
     "olcu": "100 × 1200 × 2500",
-    "adet": 2
+    "adet": 4
    },
    {
     "grup": "1001",
@@ -2161,7 +2196,7 @@
     "grup": "1001",
     "kalem": "60'lık karkaslı + kasalı pano",
     "olcu": "60 × 1250 × 2500",
-    "adet": 5
+    "adet": 4
    },
    {
     "grup": "1001",
@@ -2171,9 +2206,15 @@
    },
    {
     "grup": "1001",
+    "kalem": "60'lık karkaslı + kasalı pano",
+    "olcu": "60 × 1200 × 2500",
+    "adet": 1
+   },
+   {
+    "grup": "1001",
     "kalem": "60'lık yapıştırma dolu pano",
     "olcu": "60 × 1250 × 2500",
-    "adet": 11
+    "adet": 10
    },
    {
     "grup": "1001",
@@ -2185,7 +2226,7 @@
     "grup": "1001",
     "kalem": "60'lık yapıştırma dolu pano",
     "olcu": "60 × 1200 × 2500",
-    "adet": 3
+    "adet": 4
    },
    {
     "grup": "1001",
@@ -2202,7 +2243,7 @@
    {
     "grup": "1001",
     "kalem": "Karkaslı çelik kapı panosu",
-    "olcu": "100 × 1150 × 2500",
+    "olcu": "100 × 1250 × 2500",
     "adet": 1
    },
    {
@@ -2227,7 +2268,7 @@
     "grup": "1002",
     "kalem": "10'luk köşe direği 100 × 100",
     "olcu": "100 × 100 × 2500",
-    "adet": 6
+    "adet": 8
    },
    {
     "grup": "1002",
@@ -2305,7 +2346,7 @@
     "grup": "1002",
     "kalem": "3'lü H 100 × 100 × 60 (dış duvar T'si)",
     "olcu": "L 2500",
-    "adet": 8
+    "adet": 6
    },
    {
     "grup": "1002",
@@ -2341,7 +2382,7 @@
     "grup": "1002",
     "kalem": "Çektirme U'su 60",
     "olcu": "60 × 2440",
-    "adet": 0
+    "adet": 2
    },
    {
     "grup": "1002",
@@ -2731,13 +2772,13 @@
     "grup": "1009",
     "kalem": "Şase pul",
     "olcu": "adet",
-    "adet": 28
+    "adet": 26
    },
    {
     "grup": "1009",
     "kalem": "Çelik dübel",
     "olcu": "adet",
-    "adet": 28
+    "adet": 26
    },
    {
     "grup": "1010",
@@ -2890,7 +2931,7 @@
     "adet": 2
    }
   ],
-  "pdf_izi": "c5ac1db6db552f990da68990f92f31e9df2119caed9e62e944151247629804aa",
-  "dxf_izi": "9b6577fc7adaacefabfb2d63ad2b62c65933239491317f612ba19fa8d0be779a"
+  "pdf_izi": "6c9cafcf12b295bf2cfa4ae8bfbdfe18c734d2848b57124e333de7bef43110fb",
+  "dxf_izi": "f229f749bba0a45e216bddfeb863d89a969492e61679b3edfad13d67253c671e"
  }
 }
