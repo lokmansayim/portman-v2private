@@ -89,8 +89,11 @@ def oda_sirasi(odalar: list[dict], baslangic: dict) -> tuple[list[str], dict[str
 
     Önce arka duvara değen odalar soldan sağa, sonra sağ duvara değenler arkadan öne, ön duvara değenler sağdan sola, sol duvara değenler
     önden arkaya, en son hiçbir dış kenara değmeyenler. Bir oda bir yana değer: o yanda, kenarına dik izdüşümü örtüşen başka oda yoksa."""
-    if baslangic != {"x": "min", "y": "max"}:
-        raise Desteklenmiyor(f"dizilim başlangıcı {baslangic}; rehber yalnız arka-sol köşeden dizer")
+    if baslangic not in ({"x": "min", "y": "max"}, {"x": "min", "y": "min"}):
+        raise Desteklenmiyor(f"dizilim başlangıcı {baslangic}; rehber yalnız arka-sol ve ön-sol köşeden dizer")
+    if baslangic["y"] == "min":                 # ön-sol (Motor'un varsayılanı): planın y'si aynalanır, sıra aynı kuralla (ön duvar soldan sağa, sağ
+        ayna = [dict(o, poligon=[[q[0], -q[1]] for q in o["poligon"]]) for o in odalar]   # duvar önden arkaya, arka sağdan sola, sol arkadan öne)
+        return oda_sirasi(ayna, {"x": "min", "y": "max"})
     kapali = [o for o in odalar if not o.get("acik")]
     adlar = {o["ad"] for o in kapali}
     birles = {"ANTRE": "HOL"} if {"ANTRE", "HOL"} <= adlar else {}
@@ -484,7 +487,8 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
     # Oda içinde sıra: dizilimin başladığı köşeden (odanın arka-sol köşesi) uzaklık; köşe direği aynı yerdeki panodan önce
     for ad, lst in oge.items():
         pol = [q for a in [ad] + [b for b, h in BIRLES.items() if h == ad] for q in POLY[a]["poligon"]]
-        bx, by = min(q[0] for q in pol), max(q[1] for q in pol)
+        bx = min(q[0] for q in pol)
+        by = min(q[1] for q in pol) if SAYIM["yerlesim"]["baslangic"].get("y") == "min" else max(q[1] for q in pol)
         lst.sort(key=lambda t: (round(math.hypot(t[0][0] - bx, t[0][1] - by), 1), t[1]))
         for j, (_, tur, k) in enumerate(lst):
             k["order"] = j + 0.4 if tur == 0 else j
@@ -1248,7 +1252,7 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
             t.append(f"{c['pdis']} dış pano (100'lük{', ' + str(c['pen']) + ' pencereli' if c['pen'] else ''})")
         if c["pic"]:
             t.append(f"{c['pic']} iç pano ({IC_KAL})")
-        s = ("Dizilim bu odanın arka sol köşesinden başlar. " if ilk else "") + \
+        s = (f"Dizilim bu odanın {'ön' if SAYIM['yerlesim']['baslangic'].get('y') == 'min' else 'arka'} sol köşesinden başlar. " if ilk else "") + \
             ("Bu odayla " + ", ".join(t) + " kurulur" if t else "Bu odanın duvarları önceki odalarla kuruldu")
         if c["kap"]:
             s += f"; {c['kap']} pano kapılı"
