@@ -5104,3 +5104,93 @@ def test_hakem47_cumba_secimi_soruya_donmez(tmp_path, metin):
     s, _ = _cati_seti(tmp_path)
     k = s.yaz(metin, niyet="diger")
     assert k.eylem == "is_emri" and k.revizyon == 2 and k.is_emri["talep"]["kaynak"] == "PA06C", k.mesaj
+
+
+
+# İE-42 hakem tur 48: çatıya dönen erteleme kapanış sözüyle ("rengiyle birlikte sonra konuşuruz Allah razı olsun", "bayram sonrası"),
+# "olmasa"dan sonra hitapla biten seçim ("stok olmasa 1 hocam"), çatının kendisi ("çatı tarzı / kırma için valla önemli değil") ve
+# seçenek ya da çelişen adla anılan kod ("belki PA-08-K gibi", "PA-08'deki gibi cumbalı") kayıt almaz. Önceki işi anan "o da tamam"
+# ("müşteri de onayladı, o da tamam") açık seçimdir
+@pytest.mark.parametrize("metin", [
+    "2 olsun, kırma tarzı önemli değil", "2 olsun, kırma için cidden önemli değil", "2 olsun, kırma için valla önemli değil",
+    "2 olsun, kırma için vallahi önemli değil", "2 olsun, kırma için harbiden önemli değil", "2 olsun, kırma için hakikaten önemli değil",
+    "2 olsun, kırma için kesinlikle önemli değil", "2 olsun, kırma için şu anda önemli değil",
+    "2 olsun, kırma için bana göre önemli değil", "2 olsun, kırma için öyle önemli değil",
+    "2 olsun, kırma için bizim açımızdan önemli değil", "2 olsun, kırma için müşteri açısından önemli değil",
+    "2 olsun, kırmada valla sorun değil", "2 olsun, kırma biçimi önemli değil", "2 olsun, kırma stili önemli değil",
+    "2 olsun, çatı tarzı önemli değil", "2 olsun, çatı stili önemli değil", "2 olsun, çatı biçimi önemli değil",
+    "2 olsun, çatı görüntüsü önemli değil", "2 olsun, çatı görünüşü önemli değil", "2 olsun, çatı formu önemli değil",
+    "2 olsun, kırmanın olup olmaması önemli değil", "2 olsun, kırmanın olması önemli değil",
+    "2 olsun, kırma için Ali bey için önemli değil", "2 olsun, rengiyle birlikte bayram sonrası konuşuruz",
+    "2 olsun, rengiyle birlikte tatil sonrası konuşuruz", "2 olsun, rengiyle birlikte yılbaşı sonrası konuşuruz",
+    "2 olsun, rengiyle birlikte sonra akşamüzeri konuşuruz", "2 olsun, rengiyle birlikte ayın 15'i konuşuruz",
+    "2 olsun, rengiyle birlikte hafta içi konuşuruz", "2 olsun, rengiyle birlikte sonra haftaiçi konuşuruz",
+    "2 olsun, rengiyle birlikte sonra gece yarısı konuşuruz", "2 olsun, rengiyle birlikte sonra konuşuruz Allah razı olsun",
+    "2 olsun, rengiyle birlikte sonra konuşuruz hayırlısı olsun", "2 olsun, rengiyle birlikte sonra konuşuruz acelesi yok",
+    "2 olsun, rengiyle birlikte sonra konuşuruz sıkıntısı yok", "2 olsun, rengiyle birlikte sonra konuşuruz zararı yok",
+    "2 olsun, rengiyle birlikte sonra konuşuruz bi problemi yok", "2 olsun, rengiyle birlikte sonra konuşuruz Allah razı olsun hocam",
+    "2 olsun rengiyle birlikte sonra konuşuruz Allah razı olsun",
+    "Selam 2 olsun rengini montajla birlikte sonra konuşuruz Allah razı olsun", "2 olsun, rengiyle birlikte sonra Remzi beyle konuşuruz",
+    "2 olsun, rengiyle birlikte sonra Sabri abiyle konuşuruz", "2 olsun, rengiyle birlikte sonra Veli ustayla konuşuruz",
+    "2 olsun, rengiyle birlikte sonra Remzi bey konuşur", "2 olsun, rengiyle birlikte sonra yazılı konuşuruz",
+    "2 olsun, rengiyle birlikte sonra ciddi ciddi konuşuruz", "2 olsun, rengiyle birlikte sonra resmi olarak konuşuruz",
+    "2 olsun, rengiyle birlikte sonra merkezi arayıp konuşuruz", "2 olsun, rengiyle birlikte sonra herkesi toplayıp konuşuruz",
+    "2 olsun, montajla birlikte onu sonra konuşuruz Allah razı olsun", "2 olsun, stok olmasa 1 numarayı alırız",
+    "2 olsun, stok olmasa diğerini çizin", "2 olsun, stok olmasa 1 hocam", "2 olsun, stok olmasa 1 abi", "2 olsun, stok olmasa 1 iyi olur",
+    "2 olsun, stok olmasa 1 numaraya geçeriz", "2 olsun, stok olmasa beşiği tercih ederiz", "3 olsun, stok olmasa 2 hocam",
+    "2 olsun, P6001'deki gibi cumbalı", "2 olsun, PA-08'deki gibi cumbalı", "PA-06-K olsun, PA-08 gibi cumbalı",
+    "PA-06-K veya PA-08-K gibi bir şey", "PA-06-K olsun ya da PA-08-K gibi bir şey", "PA-06-K olsun veya PA-08 gibi",
+    "PA-06-K ya da PA-08 benzeri", "PA-06-K olsun ama müşteri PA-08-C'yi beğenmişti", "PA-06-K olsun ama müşteri PA-08-C de istemişti",
+    "PA-06-K olsun, PA-08-C de olurmuş", "PA-06-K olsun, PA-08-C kadar güzel", "PA-06-K olsun, önceki PA-08-C olsun",
+    "PA-06-K olsun, PA-08'deki gibi beşik", "Selam 2 olsun çatı stili önemli değil müşteri öyle istiyor",
+    "2 olsun hocam rengiyle beraber sonra konuşuruz hayırlısı olsun", "2 olsun montajla beraber onu sonra konuşuruz Allah razı olsun",
+    "2 olsun stok olmasa 1 hocam", "Abi 2 olsun ama stok olmasa 1 abi", "2 olsun, stok olmasa 1 numaraya geçeriz hocam",
+    "PA-06-K ya da PA-08-K gibi bir şey olsun", "PA-06-C olsun, PA-08-C'deki gibi ama kırmalı", "PA-06-K olsun, PA-08-K'deki gibi cumbalı",
+    "PA-06-K olsun, PA-08-K gibi ama cumbalı olsun", "PA-06-K olsun, PA-08 gibi beşik olsun", "PA-06-K olsun, PA-08-K gibi beşik olsun",
+    "PA-06-K olsun ya PA-08-K gibi olsun", "PA-06-K olsun, ya da PA-08-K gibi", "PA-06-K olabilir ya da PA-08-K gibi",
+    "PA-06-K veya PA-08-K benzeri", "PA-06-K belki PA-08-K gibi", "PA-06-K olsun, belki PA-08-K gibi",
+    "PA-06-K olsun, PA-08-K gibi de olabilir", "PA-06-K olsun, PA-08-K tarzı da olur",
+    "2 olsun, rengiyle birlikte nakliyeden sonra konuşuruz", "PA-06-K olsun, stok olmasa 1 hocam",
+    "PA-06-K olsun, rengiyle birlikte sonra konuşuruz Allah razı olsun", "PA-06-K olsun, kırma için valla önemli değil",
+    "PA-06-K olsun, çatı tarzı önemli değil", "2 olsun. Rengiyle birlikte sonra konuşuruz Allah razı olsun",
+    "2 olsun, rengiyle birlikte sonra konuşuruz hayırlısı inşallah", "2 olsun, rengiyle birlikte sonra konuşuruz bi sorunu yok",
+    "2 olsun, montajla birlikte sonra konuşuruz Allah razı olsun", "2 olsun, rengiyle birlikte sonra konuşuruz, Allah razı olsun",
+    "1 olsun, rengiyle birlikte sonra konuşuruz Allah razı olsun", "2 olsun, stok olmasa 1 o zaman", "1 olsun, stok olmasa 2 hocam",
+    "1 olsun, stok olmasa 2 o zaman", "1 olsun, stok olmasa 2 iyi olur", "1 olsun, stok olmasa 2'yi gönderin",
+    "1 olsun, stok olmasa kırmayı tercih ederiz", "1 olsun, stok olmasa kırma yapılsın", "1 olsun, kırma için ekstra iş sorun değil",
+    "2 olsun, cumba için ekstra iş sorun değil", "3 olsun, kırma için ekstra iş sorun değil",
+    "PA-06-K olsun ya da PA-08-K gibi bir şey olsun", "PA-06-K olsun, PA-08-K gibi bir şey", "PA-06-K mı PA-08-K gibi mi",
+    "PA-06-K mı PA-08-K gibi mi olsun", "PA-06-K mı PA-08-K gibi mi abi", "PA-06-K mi yoksa PA-08-K gibi mi",
+    "PA-06-K olsun mu PA-08-K gibi mi", "PA-06-K yoksa PA-08-K gibi mi", "2 olsun o da güzel", "2 olsun hocam, o da güzel",
+    "PA-06-K olsun, PA-08 gibi kalkanlı olsun"])
+def test_hakem48_kararsiz_ve_kosullu_soz_kaydedilmez(tmp_path, metin):
+    """Tur 48 (G-O1–G-O4): "2 olsun, rengiyle birlikte sonra konuşuruz Allah razı olsun", "2 olsun, stok olmasa 1 hocam", "2 olsun,
+    çatı tarzı önemli değil", "PA-06-K olsun, belki PA-08-K gibi" kayıt almaz: plan r01, onay yok, r02 yok."""
+    s, _ = _cati_seti(tmp_path)
+    k = s.yaz(metin, niyet="diger")
+    assert K.PLAN_ONAYI not in k.gerekce and k.eylem != "is_emri" and s.plan["revizyon"] == 1 and not s.k.d.get("onaylanan"), k.mesaj
+
+
+@pytest.mark.parametrize("metin", [
+    "2 olsun, müşteri de onayladı, o da tamam", "2 olsun, teklif geldi o da uygun", "2 olsun, müşteri de istedi o da güzel",
+    "PA-08 için PA-06-K olsun", "PA-06-K olsun, PA-08-C için de olur", "PA-06-K olsun, müşteri PA-08-C'yi beğenmişti",
+    "Geçen hafta PA-08-C demiştik, şimdi PA-06-K olsun", "Önceki mesajda PA-08-C dedik ama PA-06-K olsun",
+    "PA-06-K olsun, geçen hafta PA-08-C de konuşmuştuk", "2 olsun, PA-08 için de", "2 olsun, PA-08 için de aynısı",
+    "PA-06-K olsun, PA-08 için de olsun", "PA-08 için de PA-06-K gibi olsun", "2 olsun, çiti ve kapıyı sonra konuşuruz",
+    "2 olsun, kapıyı ve çiti sonra konuşuruz", "2 olsun, vinç olmasa 2 usta yeter", "PA-06-K olsun, PA-08-K gibi kırma olsun",
+    "PA-06-K olsun, PA-08 gibi kırma"])
+def test_hakem48_acik_secim_soruya_donmez(tmp_path, metin):
+    """Tur 48 (G-Y5 ve sınırlar): "2 olsun, müşteri de onayladı, o da tamam", "2 olsun, çiti ve kapıyı sonra konuşuruz", "PA-06-K
+    olsun, geçen hafta PA-08-C de konuşmuştuk" açık seçimi soruya çevirmez: r02 PA-06-K."""
+    s, _ = _cati_seti(tmp_path)
+    k = s.yaz(metin, niyet="diger")
+    assert k.eylem == "is_emri" and k.revizyon == 2 and k.is_emri["talep"]["kaynak"] == "PA06K", k.mesaj
+
+
+@pytest.mark.parametrize("metin", [
+    "PA-06-C olsun, PA-08-C gibi", "PA-06-C olsun, PA-08-C gibi cumbalı olsun"])
+def test_hakem48_cumba_secimi_soruya_donmez(tmp_path, metin):
+    """Tur 48: "PA-06-C olsun, PA-08-C gibi": r02 PA-06-C."""
+    s, _ = _cati_seti(tmp_path)
+    k = s.yaz(metin, niyet="diger")
+    assert k.eylem == "is_emri" and k.revizyon == 2 and k.is_emri["talep"]["kaynak"] == "PA06C", k.mesaj
