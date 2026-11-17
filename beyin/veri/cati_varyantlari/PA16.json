@@ -1,0 +1,61 @@
+{
+ "taban": "PA16",
+ "cati_adi": "Beşik, kalkan önde",
+ "cati_gorsel": "adaylar/PA16_cati.png",
+ "karar": "D-117",
+ "varyantlar": [
+  {
+   "kod": "PA16C",
+   "gosterim": "PA-16-C",
+   "durum": "gecerli",
+   "taban": "PA16",
+   "sablon": "adaylar/PA16C.json",
+   "gorsel": "adaylar/PA16C.png",
+   "cati_adi": "Beşik + salonda cumba",
+   "referans_model": "PA-16-C",
+   "yapi_turu": "prefabrik",
+   "kat": 1,
+   "oda_programi": "2+1",
+   "katalog_m2": 80.0,
+   "kapali_m2": 71.6,
+   "veranda_m2": 8.27,
+   "ozet": {
+    "grid": {
+     "x_pano": 7,
+     "y_pano": 7
+    },
+    "dis_olcu_cm": [
+     888.5,
+     898.5
+    ],
+    "brut_m2": 79.83,
+    "pano": 49,
+    "pencere": 7,
+    "kapi": 5,
+    "odalar": {
+     "YATAK ODASI 1": 13.34,
+     "BANYO": 4.52,
+     "WC": 2.96,
+     "YATAK ODASI 2": 12.89,
+     "HOL": 3.43,
+     "SALON": 30.7,
+     "VERANDA": 8.27
+    }
+   },
+   "uyarilar": [],
+   "kaynak": {
+    "metin": "İE-44 toplu çatı seçenekleri (D-117)",
+    "karar": "D-117",
+    "ev": "PA-16",
+    "havuz_denetimi": {
+     "sonuc": "geçti",
+     "karar": "D-112",
+     "uyarilar": [
+      "HD-02: Aks noktası (8, 4): dört kollu birleşim; duvar 1 o noktada bölündü (1, 12), uçları geçen duvarın (9) yüzünde; birleşim profili kural kitabında yok",
+      "HD-06: ['makas yeri (ana çatı): saçak duvarının pano ekleri düzensiz (9 makas, listede 8; aralıklar 125.5, 125.5, 125.5, 125.5, 125.5, 62.75, 125.5, 62.75); eşit aralıklı 8 makas']"
+     ]
+    }
+   }
+  }
+ ]
+}
