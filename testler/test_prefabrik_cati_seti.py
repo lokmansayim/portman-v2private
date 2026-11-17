@@ -4999,3 +4999,101 @@ def test_hakem46_olumlu_soz_onay(tmp_path, metin):
     s, _ = _cati_seti(tmp_path)
     k = s.yaz(metin, niyet="diger")
     assert k.gerekce == K.PLAN_ONAYI and k.revizyon == 1, k.mesaj
+
+
+
+# İE-42 hakem tur 47: öteki çatıyı da anabilen "o / şu da güzel", çelişen karşılaştırma ("2 olsun, PA-08-C gibi"), çatıya dönen erteleme
+# ("rengiyle birlikte akşama / teslimde konuşuruz") ve koşullu "olmasa" kayıt almaz. Çatı için yapılan iş ya da çatının niteliği
+# ("kırma için ekstra iş sorun değil", "çatı eğimi önemli değil"), başka işin belirtme ekli nesnesi ("montajla birlikte çiti sonra
+# konuşuruz"), "olmasa"dan sonraki başka sayı ("vinç olmasa 2 adam yeter") ve yan sözde anılan kod ("PA-08'deki gibi") açık seçimdir
+@pytest.mark.parametrize("metin", [
+    "2 olsun, kırma olması önemli değil", "2 olsun, kırma yapılması önemli değil", "2 olsun, rengiyle birlikte pazartesiye konuşuruz",
+    "2 olsun, rengiyle birlikte cumaya konuşuruz", "2 olsun, rengiyle birlikte akşama konuşuruz",
+    "2 olsun, rengiyle birlikte sonra sahada konuşuruz", "2 olsun, rengiyle birlikte sonra arazide konuşuruz",
+    "2 olsun, kendisini de rengini de sonra sahada konuşuruz", "2 olsun, rengiyle birlikte teslimde konuşuruz",
+    "2 olsun, rengiyle birlikte montajda konuşuruz", "2 olsun, montajla birlikte onu sonra sahada konuşuruz",
+    "2 olsun, montajla birlikte onu sonra arazide konuşuruz", "2 olsun, kırma olup olmaması önemli değil",
+    "2 olsun, kırma olması bizim için önemli değil", "2 olsun, kırma için önemli değil", "2 olsun, şekli o kadar önemli değil",
+    "2 olsun, ama kırma önemli değil", "2 olsun, kırma pek önemli değil", "2 olsun, rengiyle birlikte sonra telefonda konuşuruz",
+    "2 olsun, rengiyle birlikte cuma akşamı konuşuruz", "2 olsun, stokta olmasa 1 olsun", "2 olsun, stok olmasa 1 de olur",
+    "2 olsun, stok olmasa kırmaya geçeriz", "2 olsun, stok olmasa beşik olsun", "PA-06-K mı PA-08-K mı", "1 olsun, şu da güzel",
+    "1 olsun. Şu da güzel", "1 olsun, şu da sorun değil", "1 olsun, şu da uygun", "Evin kendi çatısı olsun, şu da güzel",
+    "2 olsun, o da güzel", "2 olsun, şu da uygun", "1 olsun, o da güzel", "1 olsun, PA-08-K gibi",
+    "2 olsun, rengiyle birlikte sonra detaylı konuşuruz", "2 olsun, rengiyle birlikte sonra konuşuruz hayırlı işler",
+    "2 olsun, rengiyle birlikte sonra ayrıntılı konuşuruz"])
+def test_hakem47_kararsiz_ve_kosullu_soz_kaydedilmez(tmp_path, metin):
+    """Tur 47 (Y5, önceden var; G1–G3 sınırı): "1 olsun, şu da güzel", "2 olsun, PA-08-C gibi", "2 olsun, rengiyle birlikte akşama
+    konuşuruz", "2 olsun, stok olmasa 1" kayıt almaz: plan r01, onay yok, r02 yok."""
+    s, _ = _cati_seti(tmp_path)
+    k = s.yaz(metin, niyet="diger")
+    assert K.PLAN_ONAYI not in k.gerekce and k.eylem != "is_emri" and s.plan["revizyon"] == 1 and not s.k.d.get("onaylanan"), k.mesaj
+
+
+@pytest.mark.parametrize("metin", [
+    "2 olsun, kırma için kar yükü önemli değil", "2 olsun, çatı yüksekliği önemli değil", "2 olsun, çatı eğimi önemli değil",
+    "2 olsun, çatı eğimi bizim için önemli değil", "2 olsun, çatı izolasyonu önemli değil", "2 olsun, çatı kiremidi önemli değil",
+    "2 olsun, çatı yüksekliği o kadar önemli değil", "2 olsun, kırma için vinç önemli değil", "2 olsun, kırma için yükseklik önemli değil",
+    "2 olsun, kırmada eğim sorun değil", "2 olsun, çatıda kar yükü sorun değil", "2 olsun, kırmada işçilik önemli değil",
+    "2 olsun, çatı yalıtımı önemli değil", "2 olsun, kırma için ekstra iş sorun değil", "2 olsun, kırmada biraz fire sorun değil",
+    "2 olsun, evin şekli önemli değil", "PA-06-K olsun, çatı eğimi önemli değil", "PA-06-K olsun çatı eğimi önemli değil",
+    "2 olsun, kırma için çatı eğimi hiç önemli değil", "2 olsun, kırmada mahya önemli değil",
+    "2 olsun, çatı arası bizim için önemli değil", "2 olsun, çatıda kullanım alanı önemli değil", "2 olsun. Çatı eğimi önemli değil",
+    "2 olsun, kırma için zaman önemli değil", "2 olsun, kırma için biraz daha emek sorun değil", "2 olsun, kırma için işçilik sorun değil",
+    "2 olsun, kırma için bütçe sorun değil", "2 olsun, kırma için ek iş sorun değil", "2 olsun, kırma için uğraş sorun değil",
+    "PA-06-K olsun, kırma için ekstra iş sorun değil", "2 olsun, kırma çatı için ekstra iş sorun değil",
+    "2 olsun, çatıda biraz fazla iş sorun değil", "Hocam 2 olsun, kırma için ekstra iş sorun değil",
+    "Selam 2 olsun, kırmada işçilik bizim için sorun değil", "2 olsun, montajla birlikte çiti sonra konuşuruz",
+    "2 olsun, nakliyeyle birlikte çiti sonra konuşuruz", "2 olsun, montajla birlikte camı sonra konuşuruz",
+    "2 olsun, montajla birlikte sonra da prizleri konuşuruz", "2 olsun, montajla birlikte kurulumu sonra konuşuruz",
+    "2 olsun, montajla birlikte peyzajı sonra konuşuruz", "2 olsun, montajla birlikte deposu sonra konuşuruz",
+    "2 olsun, montajla birlikte kilidi sonra konuşuruz", "2 olsun, montajla birlikte çardağı sonra konuşuruz",
+    "2 olsun, montajla birlikte paneli sonra konuşuruz", "2 olsun, montajla birlikte kepengi sonra konuşuruz",
+    "2 olsun, montajla birlikte keşfi sonra konuşuruz", "2 olsun, montajla birlikte demiri sonra konuşuruz",
+    "2 olsun, nakliyeyle birlikte yarın çiti konuşuruz", "Selam 2 olsun. Montajla birlikte çiti sonra konuşuruz",
+    "2 olsun, çiti montajla birlikte sonra konuşuruz", "2 olsun, camları montajla birlikte sonra konuşuruz",
+    "2 olsun, paneli montajla birlikte sonra konuşuruz", "2 olsun, keşfi montajla birlikte yarın konuşuruz",
+    "2 olsun, kilitleri montajla birlikte sonra konuşuruz", "2 olsun, demir işini montajla birlikte sonra konuşuruz",
+    "2 olsun, peyzajı montajla birlikte sonra konuşuruz", "2 olsun, çardağı montajla birlikte sonra konuşuruz",
+    "2 olsun, montajla birlikte çiti de sonra konuşuruz", "2 olsun, bahçe çitini montajla birlikte sonra konuşuruz",
+    "2 olsun, vinç olmasa 2 adam yeter", "2 olsun, vinç olmasa çatıyı elle kurarız", "2 olsun, iskele olmasa çatıya çıkamayız",
+    "2 olsun, elektrik olmasa 2 jeneratör getiririz", "2 olsun vinç olmasa 3 adam yeter", "2 olsun, vinç olmasa 2 forklift yeter",
+    "2 olsun, vinç olmasa çatı 2 günde biter", "2 olsun, vinç olmasa çatıyı da elle kurarız", "2 olsun, iskele olmasa çatı işi zor",
+    "2 olsun abi vinç olmasa 3 adam yeter", "2 olsun, vinç olmasa da 2 adam yeter", "2 olsun, vinç olmasa 3 adamla kurarız",
+    "2 olsun, vinç olmasa çatıyı elle çıkarırız", "2 olsun, vinç olmasa kırmayı elle kurarız",
+    "2 olsun, vinç olmasa çatı panelleri elle taşınır", "2 olsun, yağmur olmasa çatıyı yarın kurarız",
+    "2 olsun, kar olmasa çatıyı hemen kaplarız", "2 olsun, rüzgar olmasa çatıyı yarın kapatırız", "2 olsun, vinç olmasa 2 3 adam yeter",
+    "2 olsun, elektrik olmasa 1 jeneratör yeter", "Hocam 2 olsun, vinç olmasa 2 adam yeter", "2 olsun, yol olmasa 2 traktörle taşırız",
+    "PA-08'deki gibi PA-06-K olsun", "PA-06-K olsun, PA-08-K gibi", "PA-06-K olsun, PA-08'deki gibi",
+    "PA-06-K olsun PA-08'deki gibi olsun", "PA-06-K olsun, geçen sefer PA-08'de yaptığımız gibi",
+    "Geçen ay PA-08 almıştık, şimdi PA-06-K olsun", "PA-06-K olsun, P6001'deki gibi", "Abi PA-08'deki gibi PA-06-K olsun",
+    "PA-06-K olsun, müşteri PA-08'i beğenmişti ama bu daha uygun", "PA-06-K olsun, PA-08 için ayrıca teklif isteyeceğiz",
+    "PA-06-K olsun, ayrıca PA-08 için de fiyat alalım", "PA-06-K olsun. PA-08 için ayrı yazacağım", "2 olsun, PA-08 için ayrıca yazacağım",
+    "PA-06-K olsun, Ç8801 için de ayrıca soracağız", "PA-08'deki gibi PA-06-K olsun hocam",
+    "2 olsun abi çatı yüksekliği önemli değil müşteri öyle istiyor", "Selamlar 2 olsun vinç olmasa 2 adam yeter",
+    "2 olsun, montajla birlikte günü sonra konuşuruz", "2 olsun, montajla birlikte saati sonra konuşuruz",
+    "2 olsun, nakliyeyle birlikte günü yarın netleştiririz", "2 olsun, nakliyeyle birlikte sabahı sonra konuşuruz",
+    "2 olsun, çatı ustası önemli değil", "2 olsun, kırmanın eğimi sorun değil", "2 olsun, kırma için fazla malzeme sorun değil",
+    "2 olsun, çatı için ekstra masraf sorun değil", "2 olsun, kırmanın getirdiği ekstra iş sorun değil",
+    "2 olsun, montajla birlikte duvarı sonra konuşuruz", "2 olsun, montajla birlikte merdiveni sonra konuşuruz",
+    "2 olsun, montajla birlikte bahçeyi sonra konuşuruz", "2 olsun, montajla birlikte bahçe kapısını sonra konuşuruz",
+    "2 olsun, montajla birlikte montaj gününü sonra konuşuruz", "2 olsun, montajla birlikte eğimini sonra konuşuruz",
+    "2 olsun, vinç olmasa 3 kişi yeter", "2 olsun, vinç olmasa 2 hafta sürer", "2 olsun, montajla birlikte rengini sonra konuşuruz",
+    "PA-08-K gibi olsun ama PA-06-K olsun", "2 olsun, montajla birlikte ölçüleri sonra konuşuruz",
+    "2 olsun, ölçüleri montajla birlikte sonra konuşuruz", "2 olsun, montajla birlikte profili sonra konuşuruz",
+    "2 olsun, montajla birlikte yolu sonra konuşuruz"])
+def test_hakem47_acik_secim_soruya_donmez(tmp_path, metin):
+    """Tur 47 (O1–O4): "2 olsun, kırma için ekstra iş sorun değil", "2 olsun, montajla birlikte çiti sonra konuşuruz", "2 olsun, vinç
+    olmasa 2 adam yeter", "PA-08'deki gibi PA-06-K olsun" açık seçimi soruya çevirmez: r02 PA-06-K."""
+    s, _ = _cati_seti(tmp_path)
+    k = s.yaz(metin, niyet="diger")
+    assert k.eylem == "is_emri" and k.revizyon == 2 and k.is_emri["talep"]["kaynak"] == "PA06K", k.mesaj
+
+
+@pytest.mark.parametrize("metin", [
+    "3 olsun, cumba için ekstra iş sorun değil", "3 olsun, cumba için kesim sorun değil", "PA-06-C olsun, PA-08-C'deki gibi",
+    "PA-08-C gibi PA-06-C olsun"])
+def test_hakem47_cumba_secimi_soruya_donmez(tmp_path, metin):
+    """Tur 47 (O1, O4): "3 olsun, cumba için ekstra iş sorun değil", "PA-08-C gibi PA-06-C olsun": r02 PA-06-C."""
+    s, _ = _cati_seti(tmp_path)
+    k = s.yaz(metin, niyet="diger")
+    assert k.eylem == "is_emri" and k.revizyon == 2 and k.is_emri["talep"]["kaynak"] == "PA06C", k.mesaj
