@@ -5020,7 +5020,13 @@ def test_hakem46_olumlu_soz_onay(tmp_path, metin):
     "1 olsun. Şu da güzel", "1 olsun, şu da sorun değil", "1 olsun, şu da uygun", "Evin kendi çatısı olsun, şu da güzel",
     "2 olsun, o da güzel", "2 olsun, şu da uygun", "1 olsun, o da güzel", "1 olsun, PA-08-K gibi",
     "2 olsun, rengiyle birlikte sonra detaylı konuşuruz", "2 olsun, rengiyle birlikte sonra konuşuruz hayırlı işler",
-    "2 olsun, rengiyle birlikte sonra ayrıntılı konuşuruz"])
+    "2 olsun, rengiyle birlikte sonra ayrıntılı konuşuruz",
+    "2 olsun, kırma işi önemli değil", "2 olsun, çatı meselesi önemli değil", "2 olsun, kırma konusu bizim için önemli değil",
+    "2 olsun, çatı kısmı önemli değil", "2 olsun, kırma aslında önemli değil", "2 olsun, kırma için şu an önemli değil",
+    "2 olsun, rengiyle birlikte ay başı konuşuruz", "2 olsun, rengiyle birlikte ay sonu konuşuruz",
+    "2 olsun, rengiyle birlikte hafta sonu konuşuruz", "2 olsun, rengiyle birlikte sonra karar veririz",
+    "2 olsun, stok olmasa 1 olsa da olur", "2 olsun, stok olmasa diğeri olsun", "2 olsun, stok olmasa ikincisi de olur",
+    "2 olsun, stok olmasa 1'le devam ederiz", "1 olsun, o da fena değil", "1 olsun, şu da fena değil"])
 def test_hakem47_kararsiz_ve_kosullu_soz_kaydedilmez(tmp_path, metin):
     """Tur 47 (Y5, önceden var; G1–G3 sınırı): "1 olsun, şu da güzel", "2 olsun, PA-08-C gibi", "2 olsun, rengiyle birlikte akşama
     konuşuruz", "2 olsun, stok olmasa 1" kayıt almaz: plan r01, onay yok, r02 yok."""
@@ -5080,7 +5086,8 @@ def test_hakem47_kararsiz_ve_kosullu_soz_kaydedilmez(tmp_path, metin):
     "2 olsun, vinç olmasa 3 kişi yeter", "2 olsun, vinç olmasa 2 hafta sürer", "2 olsun, montajla birlikte rengini sonra konuşuruz",
     "PA-08-K gibi olsun ama PA-06-K olsun", "2 olsun, montajla birlikte ölçüleri sonra konuşuruz",
     "2 olsun, ölçüleri montajla birlikte sonra konuşuruz", "2 olsun, montajla birlikte profili sonra konuşuruz",
-    "2 olsun, montajla birlikte yolu sonra konuşuruz"])
+    "2 olsun, montajla birlikte yolu sonra konuşuruz",
+    "2 olsun, kırma için para sorun değil", "PA-06-K olsun PA-08-K gibi olsun", "2 olsun, PA-08-C için fiyat verin"])
 def test_hakem47_acik_secim_soruya_donmez(tmp_path, metin):
     """Tur 47 (O1–O4): "2 olsun, kırma için ekstra iş sorun değil", "2 olsun, montajla birlikte çiti sonra konuşuruz", "2 olsun, vinç
     olmasa 2 adam yeter", "PA-08'deki gibi PA-06-K olsun" açık seçimi soruya çevirmez: r02 PA-06-K."""

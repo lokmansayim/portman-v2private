@@ -3070,7 +3070,7 @@ def _kararsizlik_var(ham: list[str], soru: bool = False, ardi: list[str] | tuple
                                                                # çizim / bu model daha iyi gibi") ya da kodla ("Ç8801 olsun daha iyi gibi")
     if konusuz and (any(a in _OTEKI_SOZU and b in ("de", "da")
                         and (c.startswith(("olur", "olabilir"))
-                             or (a != "bu" and (c in _GORUS_DEGERI or c in ("sorun", "problem", "tamam", "tamamdir"))))
+                             or (a != "bu" and (c in _GORUS_DEGERI or c in ("sorun", "problem", "tamam", "tamamdir", "fena"))))
                         for a, b, c in zip(ham, ham[1:], ham[2:]))
                     or any(a in _OTEKI_SOZU and a not in ("o", "bu", "su") and b == "gibi" for a, b in zip(ham, ham[1:]))):
         return True                                            # tur 30 (önceden var): "2 olsun, o da olur" öteki çatıyı da kabul eder;
@@ -4355,6 +4355,7 @@ def _kisi_sozu(w: str) -> bool:
 
 
 _ZAMAN_ADI = ("gun", "aksam", "sabah", "ogle", "hafta", "gece")
+_DONEM_ADI = {"ay", "ayin", "hafta", "haftanin", "yil", "yilin", "sene", "senenin", "donem", "donemin"}   # "ay sonu", "hafta başı"
 _ZAMAN_ONU = {"bu", "o", "su", "yarin", "ertesi", "bir", "iki", "uc", "her", "ayni", "sonraki", "gelecek", "onumuzdeki"}
 
 
@@ -4367,7 +4368,7 @@ def _zaman_sozu(ham: list[str], k: int) -> bool:
 
 _NESNE_DISI = {"simdi", "belki", "gibi", "sanki", "iyi", "yani", "hani", "dahi", "tabi", "tabii", "hepsi", "ikisi", "biri", "birisi",
                "digeri", "geri", "ileri", "dogru", "sonu", "ertesi", "bizi", "sizi", "beni", "seni", "onlari", "bunlari", "sunlari", "ayri",
-               "dedi", "istedi", "aradi", "soyledi", "aksamustu", "cogu", "kimi", "baska"}
+               "dedi", "istedi", "aradi", "soyledi", "aksamustu", "cogu", "kimi", "baska", "basi", "ortasi", "sonlari", "baslari"}
 _SIFAT_LI = {"ayrintili", "kaliteli", "faydali", "tehlikeli", "garantili", "sigortali", "kampanyali", "nakliyeli", "uzunlu"}
 
 
@@ -4395,7 +4396,7 @@ def _cati_geri_bag(ham: list[str], kisi_bagi: bool = True) -> bool:
         or any(w in ("birlikte", "beraber") and j and re.fullmatch(r"\w+y?l[ae]|ile", ham[j - 1])
                and (kisi_bagi or not _kisi_sozu(ham[j - 1]))
                and not any((_konu_adi(x) and x not in _GERI_ZAMIR and not re.fullmatch(r"\w+[dt][ae]", x))
-                           or (re.fullmatch(r"\w+(?:y[iu]|n[iu]|ler[iu]|lar[iu])", x) and x not in _GERI_ZAMIR
+                           or (re.fullmatch(r"\w+(?:y[iu]|n[iu]|ler[iu]|lar[iu])", x) and x not in _GERI_ZAMIR and x not in _NESNE_DISI
                                and not _zaman_sozu(ham, j + 1 + n)) or _belirtme_nesnesi(ham, j + 1 + n)
                            for n, x in enumerate(ham[j + 1:j + 3]))   # tur 47 (O2): "birlikte çiti / günü / saati"; bulunma
                                                                # ekli konu ("teslimde") yer ya da zamandır
@@ -4434,7 +4435,8 @@ def _cati_ertelemesi(ham: list[str], ardi: list[str] | tuple = ()) -> bool:
     if not any(w.startswith(("cati",) + _CATI_AD_KOKU) for w in ham):
         return _cati_geri_bag(ham, kisi_bagi=False) \
             and any(w.startswith(_SONRAKI_ZAMAN) or _GUN_ADI.fullmatch(w) or re.fullmatch(r"(?:aksam|sabah|ogle|gece)(?:y?[ae]|leyin)", w)
-                    or re.fullmatch(r"(?:teslim(?:at)?|montaj|kurulum|nakliye|sevk(?:iyat)?)[dt][ae]", w) for w in ham) \
+                    or re.fullmatch(r"(?:teslim(?:at)?|montaj|kurulum|nakliye|sevk(?:iyat)?)[dt][ae]", w)
+                    or (re.fullmatch(r"(?:sonu|basi|ortasi)(?:n?[dt][ae])?", w) and k and ham[k - 1] in _DONEM_ADI) for k, w in enumerate(ham)) \
             and any(w.startswith(_GERI_BAG_FIILI) for w in ham) and not any(_geri_bag_yabanci(ham, k) for k in range(len(ham)))
                                                                # tur 47 (önceden var): "rengiyle birlikte akşama / teslimde konuşuruz"
                                                                # tur 44 (önceden var): "2 olsun, rengiyle birlikte sonra konuşuruz",
@@ -5504,7 +5506,7 @@ _SORUN_ADI = ("sorun", "problem", "onemli", "mesele", "dert", "engel", "sikinti"
 
 _SECIM_ARDI = {"olur", "olabilir", "yapalim", "yapariz", "yapin", "secelim", "seceriz", "secin", "gecelim", "geceriz", "alalim", "aliriz",
                "alin", "cizin", "cizelim", "isteriz", "istiyoruz", "ile", "veya", "yoksa", "mi", "mu", "numara", "numarali", "nolu",
-               "devam", "dusunuruz", "bakariz", "kalsin", "kalir"} | _YUKLEM_SOZU
+               "devam", "dusunuruz", "bakariz", "kalsin", "kalir", "olsa", "le", "la"} | _YUKLEM_SOZU
 
 
 def _secim_bicimli(kalan: list[str], q: int) -> bool:
@@ -5533,7 +5535,8 @@ def _olumsuz_soz(kalan: list[str], i: int) -> bool:
         return not o or o[:1].isdigit() or len(o) == 1 or o.startswith(("cati",) + _CATI_AD_KOKU) \
             or o in ("bu", "o", "su", "digeri", "oburu", "otekisi", "ikinci", "birinci", "ucuncu") \
             or any(((x[:1].isdigit() and not _birimli(kalan, i + 1 + n)) or (len(x) == 1 and x.isalpha() and x not in "aeiou")
-                    or x.startswith(("cati",) + _CATI_AD_KOKU)) and _secim_bicimli(kalan, i + 1 + n) for n, x in enumerate(kalan[i + 1:]))
+                    or x.startswith(("cati",) + _CATI_AD_KOKU) or x in _OTEKI_SOZU - {"o", "bu", "su"} or x in ("ikinci", "ucuncu", "diger"))
+                   and _secim_bicimli(kalan, i + 1 + n) for n, x in enumerate(kalan[i + 1:]))
                                                                # tur 44 (Y2, önceden var): "PA-06-K olmasa da olur / sorun değil" reddir;
                                                                # tur 45 (O4): "vinç olmasa daha iyi", "mutfak penceresi olmasa da olur"
                                                                # başka şeyin sözüdür; tur 46 (G3): ardında çatı varsa ("eğer / stok
@@ -5561,7 +5564,8 @@ _OZNE_ARASI = {"bizim", "benim", "sizin", "bence", "bizce", "icin", "o", "kadar"
                "simdilik", "aslinda", "acikcasi", "gercekten", "yani", "su", "an", "biraz", "fazla", "hicbir", "sekilde", "musteri",
                "musterimiz", "musteriye", "musterimize", "musteri", "hocam", "abi", "bu", "konuda"}
 _IYELIK_DISI = {"simdi", "belki", "gibi", "sanki", "iyi", "yani", "hani", "dahi", "tabi", "tabii", "hepsi", "ikisi", "biri", "digeri", "geri",
-                "dogru", "cogu", "kimi", "asla", "olup"}
+                "dogru", "cogu", "kimi", "asla", "olup", "isi", "meselesi", "konusu", "kismi", "tarafi", "olayi", "durumu", "hususu",
+                "mevzusu", "hikayesi", "fasli"}                 # "kırma işi / meselesi önemli değil" çatının kendisidir
 
 
 def _cati_ozne_degil(kalan: list[str], m: int, j: int, tum_ad: set[str]) -> bool:
