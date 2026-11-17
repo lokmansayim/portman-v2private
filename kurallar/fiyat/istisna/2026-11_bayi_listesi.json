@@ -67,6 +67,14 @@
     "kdv_grubu": "Pencereler",
     "dayanak": "45. hafta fiyat listesi prefabrik malzemesi (liste tarihi 3.11.2026) › 8 Doğrama kasası › 10 PENCERE KÖR KASA Takım 120/180 Pencereye Göre / Kaynaksız; Lokman 16 Kasım 2026 21:34:47 UTC: \"bunları listede bizim mühendis yanlış yazmış … bunu gerçek isim PENCERE KÖR KASASI sen düzeltip fiyatını girer misin fiyatıda \\\"45.HAFTA FİYAT LİSTESİ PREFABRİK MALZEMESİ.pdf\\\" yazıyor\""
    },
+   "Özel pencere karkası (120×150) (100'lük çektirme U'su + 100'lük H geçen) | 1200 × 1500": {
+    "fiyat": 297.72,
+    "birim": "adet",
+    "teklif_adi": "PENCERE KÖR KASASI",
+    "teklif_olcu": "120/150",
+    "kdv_grubu": "Pencereler",
+    "dayanak": "120/180 pencere kör kasasının fiyatı (45. hafta fiyat listesi prefabrik malzemesi › 8 Doğrama kasası › 10 PENCERE KÖR KASA Takım 120/180); Lokman 17 Kasım 2026 09:39:41 UTC (76 m² Nimet Doğan teklifi): \"pencere kör kasasına 120/180 ne kadar aynı fiyatı ver sonucu çok etkilemiyor\""
+   },
    "Karkaslı özel pencere panosu (180/180) | 100 × 2500 × 2500": {
     "fiyat": 4693.63,
     "birim": "adet",

@@ -116,3 +116,14 @@ def test_180_pencere_istisnasi(A0, E, I):
     assert (P[pano]["fiyat"], P[pano]["kaynak"], P[pano]["kdv"]) == (4693.63, "ISTISNA", 0.2)
     assert (P[pencere]["fiyat"], P[pencere]["kaynak"], P[pencere]["kdv"]) == (8993.0, "ISTISNA", 0.2)
     assert P["Ters mahya kenar kutusu | L 21 × 40 × 21 × 2800"]["fiyat"] is None
+
+
+def test_120_150_kor_kasa_istisnasi(A0, E, I):
+    """76 m² Nimet Doğan teklifi: 120/150 kör kasası CRM'de yok; Kasım fiyatı 120/180 kör kasasınınki (Lokman 17 Kasım 2026 09:39:41 UTC:
+    "pencere kör kasasına 120/180 ne kadar aynı fiyatı ver sonucu çok etkilemiyor")."""
+    D0, D = C.defter_uret(A0, E), C.istisnali_defter(A0, I, E)
+    P0, P = D0["hatlar"]["prefabrik"]["kalemler"], D["hatlar"]["prefabrik"]["kalemler"]
+    k150 = "Özel pencere karkası (120×150) (100'lük çektirme U'su + 100'lük H geçen) | 1200 × 1500"
+    k180 = "Özel pencere karkası (120×180) (100'lük çektirme U'su + 100'lük H geçen) | 1200 × 1800"
+    assert P0[k150]["fiyat"] is None
+    assert (P[k150]["fiyat"], P[k150]["kaynak"]) == (P[k180]["fiyat"], "ISTISNA") == (297.72, "ISTISNA")
