@@ -19,7 +19,10 @@ liste (`prefabrik_liste._capraz_cumba_catilari`) aynı kuralla kendisi sayar, ka
   Ana çatının üstündeki ilk makasın yeri ve boyu AP-06 paftasından (`kurallar/yerlesim/prefabrik.json › cumba_yavru_makasi`; Lokman,
   5 Kasım 2026 00:45): baş makasın iç yüzünden net 46,75 geride, cumba mahyasının iki yanındaki ana makaslara oturur, uçları onların
   ekseninden 36,3 taşar (`uclar`, `oturdugu`). Kural kurulamazsa (dar cumba, mahyanın altında ana makas) D-47'nin yeri ve uyarı.
-  Ötekiler 125,5 aralığında, iki dere arasında.
+  Ötekiler 125,5 aralığında, iki dere arasında. Cumbada `yavru_makaslari_cm` yazılıysa (BK-49, D-116; 37 m² PA-39, 59 m² PA-41) makas
+  planı evin paftasından: kalkan makası + listedeki yavrular 125,5 arayla (`boy_cm` paftanın listesindeki boy), AP-06 kuralı yok. Paftanın
+  boyu o kesitteki dereler arasından uzunsa (37 m²: 192 ↔ 62,76) 3B ve kart modeli makası yine dereler arasında çizer; tanım bunu uyarı
+  olarak yazar (K16).
 
 Çıkıntılı cumba (AP-22: gövde girintili) ve birden çok cumba bu sürümde yok: `PrefabrikCatiHatasi` (yanlış çatı kurulmaz).
 """
@@ -102,8 +105,17 @@ def cumba_makaslari(t: dict, ie: dict, plan: G.Plan) -> dict:
     mh = _mahya_kenari(t)
     birlesim = max(abs(v[eks] - dis) for v in (mh["p"], mh["q"]))
     uzak = [h + i * MOD for i in range(int(math.floor((birlesim - h) / MOD - 1e-9)) + 1)]
+    from .cati_prefabrik import pafta_yavrulari
+    yavru = pafta_yavrulari(c["cumbalar"][0])                                  # BK-49 (D-116): makas planı evin paftasından
+    if yavru is not None:
+        uzak = [h + i * MOD for i in range(1 + len(yavru))]
+        if uzak[-1] >= birlesim:
+            raise PrefabrikCatiHatasi(f"cumbanın paftadaki {len(yavru)} yavru makası derelerin birleştiği yere ({birlesim:g} cm) sığmıyor")
+        kalkan = ((cx1 - cx0) if eks == 1 else (cy1 - cy0)) + 2 * float(t["sacak"])  # kalkan makasının boyu: açıklık + 2 × saçak
+        if any(v >= kalkan for v in yavru):
+            raise PrefabrikCatiHatasi(f"cumbanın yavru_makaslari_cm'si {yavru!r}: yavru makas kalkan makasından ({kalkan:g} cm) kısa olur")
     return {"cephe": cephe, "dis": dis, "ic": ic, "eks": eks, "h": h, "kutu": [cx0, cy0, cx1, cy1], "birlesim": birlesim, "mahya": mh,
-            "uzaklik": uzak, "konum": [dis + ic * u for u in uzak]}
+            "uzaklik": uzak, "konum": [dis + ic * u for u in uzak], **({"yavru_boylari": yavru} if yavru is not None else {})}
 
 
 def ana_makaslari(plan: G.Plan, eksen: str, a0: float, a1: float, b0: float, b1: float, h: float) -> tuple[list[float], list[str]]:
@@ -202,7 +214,16 @@ def tanim(plan: G.Plan, ie: dict) -> dict:
                           for i, (x, u) in enumerate(zip(m["konum"], m["uzaklik"]))],
              "makas_yeri": (f"kalkan duvarının ekseninden {MOD:g} arayla, derelerin birleştiği yere kadar (D-47); ana çatının üstündeki ilki "
                             "iki ana makasa oturur, AP-06 paftasındaki gibi (`cumba_yavru_makasi`)"), "komsu": "ana çatı"}
-    if len(cumba["makaslar"]) > 1:
+    if "yavru_boylari" in m:                                                     # BK-49 (D-116): paftadaki yavru makas, boyu paftadan
+        for mk, L_ in zip(cumba["makaslar"][1:], m["yavru_boylari"]):
+            mk.update({"boy_cm": L_, "paftadan": True})
+            u0, u1 = yavru_acikligi(t, cumba, mk["konum"])
+            if L_ > u1 - u0 + TOL:                                               # K16: liste paftanın boyunu yazar, 3B dereler arasını çizer
+                uyarilar = uyarilar + [f"makas yeri (cumba): yavru makasın boyu evin paftasından L {round(L_ * 10)} (yeri {mk['konum']:g}); "
+                                       f"o kesitte dereler arası {round(u1 - u0, 2):g} cm, 3B makası dereler arasında çizer (D-116)"]
+        cumba["makas_yeri"] = (f"evin paftasındaki makas planı (`yavru_makaslari_cm`, D-116): kalkan duvarının ekseninden {MOD:g} arayla "
+                               f"{len(cumba['makaslar'])} makas, yavru makasın boyu paftanın listesinden")
+    elif len(cumba["makaslar"]) > 1:
         yer_, uyari_ = _yavru_yeri(t, cumba, m, [mk["konum"] for mk in ana["makaslar"]])
         if yer_:
             cumba["makaslar"][1].update(yer_)
