@@ -12,6 +12,6 @@
  "liste_satiri": {"grup": "1002", "kalem": "Kutu profil (kiriş) 100 × 100", "olcu": "L 1982,5", "adet": 1},
  "kolonsuz": {
   "aciklama": "Aynı ev, verandanın ortasındaki kolon yok (r01): kiriş konmaz, listede \"Kural yok\" satırı sorar (K21).",
-  "disinda": [{"oda": "VERANDA", "aciklik_cm": 780.0, "neden": "verandada kirişin oturacağı kolon yok"}]
+  "disinda": [{"oda": "VERANDA", "aciklik_cm": 780.0, "neden": "açık kenarda kirişin oturacağı kolon bulunamadı"}]
  }
 }

@@ -133,6 +133,8 @@ def bul(plan: G.Plan, ie: dict) -> dict:
     acik_m = [m for m in tumu if m.acik or m.tur in G.ACIK_MAHAL_TURLERI]
     acik_icinde = {m.ad: m.poly.buffer(0.5) for m in acik_m}
     serit = _acik_kenar_kirisleri(plan, kap, [m.poly for m in acik_m], K["kesit"]) if K["acik_mahal"] else None
+    acik_engel = unary_union([duvar, serit]) if serit is not None else None
+    kendi_catisi = {m_.get("mahal"): m_.get("tip", "tek_yon") for m_ in c.get("mahal_catilari") or [] if isinstance(m_, dict)}
     cizgi = (lambda a, b, t: LineString([(a, t), (b, t)])) if e == "x" else (lambda a, b, t: LineString([(t, a), (t, b)]))
     eks = (lambda q: q[0]) if e == "x" else (lambda q: q[1])   # makas yönündeki koordinat
 
@@ -156,14 +158,20 @@ def bul(plan: G.Plan, ie: dict) -> dict:
             gecen = sorted(m.ad for m in tumu if m.poly.intersection(g).length > 1)   # tek bir kapalı odada değil
             if any(m.ad in gecen for m in kapali):
                 adaylar_.append((g, " + ".join(gecen), False))
-            elif serit is not None:                           # D-127: yalnız açık mahal; açıklık açık kenarların kirişlerinin arası
-                for q in (_parcalar(g.difference(serit)) if not g.difference(serit).is_empty else []):
-                    if q.length <= K["esik"]:
-                        continue
-                    ac_ = next((ad for ad, p_ in acik_icinde.items() if p_.contains(q)), None)
-                    gecen_ = sorted(m.ad for m in tumu if m.poly.intersection(q).length > 1)
-                    adaylar_.append((q, ac_ or " + ".join(gecen_), True))
-            # D-127'den önce (anahtar kapalı): yalnız açık mahal kapsam dışı
+            # yalnız açık mahalden geçen parça: D-127'den önce (anahtar kapalı) kapsam dışı; anahtar açıksa aşağıda dikmesiz bakılır
+        if serit is not None:                                 # D-127: açıklık açık kenarların kirişlerinin arası. Dikme açıklığı
+            ag = cizgi(A0 - 1, A1 + 1, t).intersection(kap).difference(acik_engel)   # kesmez (verandanın kolonu kirişin taşıyıcısıdır)
+            aps = _parcalar(ag)
+            if sinir is not None:
+                aps = [q for g in aps for q in _parcalar(split(g, sinir))]
+            for q in aps:
+                if q.length <= K["esik"]:
+                    continue
+                gecen_ = sorted(m.ad for m in tumu if m.poly.intersection(q).length > 1)
+                if not gecen_ or any(ad not in acik_icinde for ad in gecen_):   # mahalsiz ya da kapalı odaya değen parça açık bant değil
+                    continue
+                ac_ = next((ad for ad, p_ in acik_icinde.items() if p_.contains(q)), None)
+                adaylar_.append((q, ac_ or " + ".join(gecen_), True))
         for g, oda, acik in adaylar_:
             aa = [eks(q) for q in g.coords]
             a0, a1 = min(aa), max(aa)
@@ -201,6 +209,13 @@ def bul(plan: G.Plan, ie: dict) -> dict:
         a0 = max(s_[1] for s_ in bn["satirlar"])              # bandın bütün çizgilerinin ortak aralığı
         a1 = min(s_[2] for s_ in bn["satirlar"])
         ac = round(max(s_[2] - s_[1] for s_ in bn["satirlar"]), 2)
+        if bn["acik"] and bn["tek"] and bn["oda"] in kendi_catisi:   # D-127: kendi çatısı olan açık mahal ana çatının makasını almaz
+            tip_ = kendi_catisi[bn["oda"]]
+            if tip_ == "tek_yon":                              # tek eğimli panel çatı: makas yok, kiriş gerekmez
+                disari(bn, ac, "kendi tek eğimli çatısı var: makas gelmez")
+            else:
+                disari(bn, ac, f"kendi çatısı var ({tip_})", f"kendi çatısı ({tip_}) var, kiriş gerekir mi sorulur")
+            continue
         if hi - lo < K["makas"] - ADIM:
             disari(bn, ac, f"bant {_fmt(hi - lo)} cm, makas aralığı {_fmt(K['makas'])} cm'den dar: makas gelmez")
             continue
@@ -218,7 +233,8 @@ def bul(plan: G.Plan, ie: dict) -> dict:
         if bn["acik"]:                                        # D-127: kiriş açık kenardaki kolondan gövdenin duvarına
             aday = _kolon_adaylari(plan, bn, kap, engel, serit, duvar_t, acik_icinde[bn["oda"]], kyon, a0, a1, lo, hi)
             if not aday:
-                disari(bn, ac, "verandada kirişin oturacağı kolon yok", "kirişin oturacağı kolon yok, kiriş yeri sorulur")
+                disari(bn, ac, "açık kenarda kirişin oturacağı kolon bulunamadı",
+                       "açık kenarda kirişin oturacağı kolon bulunamadı, kiriş yeri sorulur")
                 continue
         for w in ([] if bn["acik"] else plan.duvarlar):
             if w.yon != kyon or not a0 + 1 < w.c < a1 - 1:

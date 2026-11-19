@@ -1286,7 +1286,7 @@
   {
    "kod": "PC-47",
    "baslik": "Verandada makas yönünde 7 m'yi aşan açıklıkta kolondan gövdeye tavan kirişi (saha montaj planında)",
-   "kural": "PC-43'ün (D-107) verandası (açık mahal; `kurallar/yerlesim/prefabrik.json › tavan_kirisi.acik_mahal`): verandada makas yönündeki açıklık açık kenarların kirişlerinin arasıdır (kiriş kenarın içinde, 10 cm). Açıklık 7 m'yi aşar ve bant tek bir açık mahalde kalırsa kiriş açık kenardaki kolondan (dikme; köşe kolonu değil, ekseni açıklığın içinde) makasa dik gider; öteki ucu gövdenin duvarına oturur (açık kenarın kirişine, sınır kirişine ya da başka kolona değil), aynı açık mahalde kalır ve bandın bütün makaslarını keser; adaylardan en kısası. Listede bir satır: Kutu profil (kiriş) 100 × 100, L yüzden yüze + 2 × 10 (kolondaki uç da 10 cm oturur; 76 m² L 1982,5), yeni kolon yok. Çizim PC-43 gibi yalnız saha montaj planında; yazı kirişten uzunsa kirişin boyuna sığacak kadar küçülür (en az 9; 2,12 m'den uzun kirişte 15 aynen). Kolon yoksa kiriş konmaz, liste adetsiz \"Kural yok\" satırıyla sorar (K21). Öteki kurallar (bant, makas aralığı, odaya bir kiriş, kalan parça) PC-43'teki gibi. Depoda yalnız 76 m² teklif evi (177 prefabrik İş Emri tarandı); öteki evlerin listesi ve çizimi aynen.",
+   "kural": "PC-43'ün (D-107) verandası (açık mahal; `kurallar/yerlesim/prefabrik.json › tavan_kirisi.acik_mahal`): verandada makas yönündeki açıklık açık kenarların kirişlerinin arasıdır (kiriş kenarın içinde, 10 cm). Açıklık 7 m'yi aşar ve bant tek bir açık mahalde kalırsa kiriş açık kenardaki kolondan (dikme; köşe kolonu değil, ekseni açıklığın içinde) makasa dik gider; öteki ucu gövdenin duvarına oturur (açık kenarın kirişine, sınır kirişine ya da başka kolona değil), aynı açık mahalde kalır ve bandın bütün makaslarını keser; adaylardan en kısası. Listede bir satır: Kutu profil (kiriş) 100 × 100, L yüzden yüze + 2 × 10 (kolondaki uç da 10 cm oturur; 76 m² L 1982,5), yeni kolon yok. Çizim PC-43 gibi yalnız saha montaj planında; yazı kirişe sığmazsa kirişin boyuna sığacak kadar küçülür (en az 9; 222 cm'den uzun kirişte 15 aynen, 76 m² 11,9). Dikme açıklığı kesmez; kendi tek eğimli çatısı olan açık mahale (`cati.mahal_catilari`) kiriş konmaz. Açık kenarda kolon yoksa ya da iki eşit yer kalırsa kiriş konmaz, liste adetsiz \"Kural yok\" satırıyla sorar (K21). Öteki kurallar (bant, makas aralığı, odaya bir kiriş, kalan parça) PC-43'teki gibi. Depoda yalnız 76 m² teklif evi (180 prefabrik İş Emri tarandı; bir deneme girdisinde sorulur); öteki evlerin listesi ve çizimi aynen.",
    "karar": "D-127",
    "lokman": {
     "tarih": "2026-11-19",
@@ -1308,6 +1308,9 @@
     "testler/motor/test_d127_veranda_kirisi.py::test_liste_satiri",
     "testler/motor/test_d127_veranda_kirisi.py::test_saha_montaj_planinda_kiris",
     "testler/motor/test_d127_veranda_kirisi.py::test_anahtar_kapaliyken_eski_yol",
+    "testler/motor/test_d127_veranda_kirisi.py::test_kendi_catisi_olan_veranda",
+    "testler/motor/test_d127_veranda_kirisi.py::test_verandanin_icindeki_dikme_bandi_bolmez",
+    "testler/motor/test_d127_veranda_kirisi.py::test_mahalsiz_parca_bant_acmaz",
     "testler/motor/test_d107_tavan_kirisi.py::test_tarama_butun_is_emirleri"
    ]
   }

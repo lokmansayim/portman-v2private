@@ -957,8 +957,8 @@ class Cizici:
         for k in bulunan["kirisler"]:
             c, (a, b) = k["eksen_cm"], k["uclar_cm"]
             dikey = k["yon"] == "y"
-            # D-127: yazı kirişten uzunsa (verandanın 178,25'lik kirişi) kirişin boyuna sığacak kadar küçülür (en az 9); 2,12 m'den uzun
-            # kirişte 15 aynen
+            # D-127: yazı kirişe sığmazsa (verandanın 178,25'lik kirişi) kirişin boyuna sığacak kadar küçülür (en az 9); yazının 15'lik eni
+            # 211,93 + 10 cm pay: 222 cm'den uzun kirişte 15 aynen
             h = max(9.0, min(h0, h0 * (b - a - 10.0) / self.yazi_eni(s, h0)))
             uzak = 12.0 + h / 2                                    # kirişin ekseninden yazının ortasına: yarım kesit + 7 cm boşluk + yarım yazı
             if dikey:
