@@ -1,0 +1,58 @@
+{
+ "taban": "PA30",
+ "cati_adi": "Beşik, kalkan yanda",
+ "cati_gorsel": "adaylar/PA30_cati.png",
+ "karar": "D-117",
+ "varyantlar": [
+  {
+   "kod": "PA30K",
+   "gosterim": "PA-30-K",
+   "durum": "gecerli",
+   "taban": "PA30",
+   "sablon": "adaylar/PA30K.json",
+   "gorsel": "adaylar/PA30K.png",
+   "cati_adi": "Kırma",
+   "referans_model": "PA-30-K",
+   "yapi_turu": "prefabrik",
+   "kat": 1,
+   "oda_programi": "3+1",
+   "katalog_m2": 83.0,
+   "kapali_m2": 69.9,
+   "veranda_m2": 12.8,
+   "ozet": {
+    "grid": {
+     "x_pano": 9.0,
+     "y_pano": 6
+    },
+    "dis_olcu_cm": [
+     1139.5,
+     726.0
+    ],
+    "brut_m2": 82.73,
+    "pano": 51,
+    "pencere": 7,
+    "kapi": 6,
+    "odalar": {
+     "SALON+MUTFAK": 18.5,
+     "YATAK ODASI 1": 9.56,
+     "BANYO": 5.66,
+     "YATAK ODASI 2": 10.67,
+     "HOL": 7.61,
+     "YATAK ODASI 3": 12.84,
+     "VERANDA": 12.8
+    }
+   },
+   "uyarilar": [],
+   "kaynak": {
+    "metin": "İE-44 toplu çatı seçenekleri (D-117)",
+    "karar": "D-117",
+    "ev": "PA-30",
+    "havuz_denetimi": {
+     "sonuc": "geçti",
+     "karar": "D-112",
+     "uyarilar": []
+    }
+   }
+  }
+ ]
+}

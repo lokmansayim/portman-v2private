@@ -154,16 +154,27 @@ def test_bugunku_91m2_aynen():
     assert (b["katalog_m2"], b["oda_programi"]) == (a["katalog_m2"], a["oda_programi"]) == (91.0, "3+1")
 
 
+# Üçlü H'lı evin çatı seçenekleri (İE-44; D-117, Lokman kartı 16 Kasım 16:17:03 "18'i girsin"): plan evinkiyle aynı, yalnız `cati`
+# değişir; şablon evin İş Emri'sini birleşimleriyle taşır. Kod → (ev, karar). Ayrıntı test_cati_secenekleri_toplu.py.
+CATI_SECENEKLERI = {"PA37B": ("PA37", "D-117")}
+
+
 def test_uclu_h_yalniz_kartli_evlerde():
     """Havuz şablonlarında üçlü H yalnız Lokman'ın ev kartıyla yazılan üç evde: 71 m² hâli (PA-35), 91 m² hâli (PA-37), 143 m² (PA-13).
+    Bu evlerin çatı seçeneği evin birleşimlerini aynen taşır (D-117).
     İç duvarı 60'lık evlerde köşe direği kalır, soru sorulmaz (07:32:42 sözü); yeni ev eklenirse bilinçli olarak buraya yazılır."""
-    uclu = set()
+    uclu, birlesim = set(), {}
     for f in sorted(glob.glob(str(SABLON_DIR / "adaylar" / "*.json"))):
         ie = json.loads(Path(f).read_text(encoding="utf-8"))
-        if any(b.get("t") == "uclu_h" for b in ((ie.get("yapi") or {}).get("birlesimler") or [])):
+        birlesim[Path(f).stem] = (ie.get("yapi") or {}).get("birlesimler")
+        if any(b.get("t") == "uclu_h" for b in birlesim[Path(f).stem] or []):
             uclu.add(Path(f).stem)
             assert ie["yapi"]["duvar_kalinligi_cm"]["ic"] == 10, f
-    assert uclu == {"PA35", "PA37", "PA13"}
+    assert uclu == {"PA35", "PA37", "PA13"} | set(CATI_SECENEKLERI)
+    for secenek, (ev, karar) in CATI_SECENEKLERI.items():
+        kayit = json.loads((KOK / "beyin/veri/cati_varyantlari" / f"{ev}.json").read_text(encoding="utf-8"))
+        assert ev in {"PA35", "PA37", "PA13"} and birlesim[secenek] == birlesim[ev]
+        assert [(v["sablon"], v["kaynak"]["karar"]) for v in kayit["varyantlar"] if v["kod"] == secenek] == [(f"adaylar/{secenek}.json", karar)]
 
 
 def test_karar_dosyasi_sozu_yazar():

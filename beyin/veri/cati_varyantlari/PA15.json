@@ -1,0 +1,58 @@
+{
+ "taban": "PA15",
+ "cati_adi": "Beşik + cumba",
+ "cati_gorsel": "adaylar/PA15_cati.png",
+ "karar": "D-117",
+ "varyantlar": [
+  {
+   "kod": "PA15B",
+   "gosterim": "PA-15-B",
+   "durum": "gecerli",
+   "taban": "PA15",
+   "sablon": "adaylar/PA15B.json",
+   "gorsel": "adaylar/PA15B.png",
+   "cati_adi": "Beşik",
+   "referans_model": "PA-15-B",
+   "yapi_turu": "prefabrik",
+   "kat": 1,
+   "oda_programi": "2+1",
+   "katalog_m2": 70.0,
+   "kapali_m2": 62.1,
+   "veranda_m2": 8.03,
+   "ozet": {
+    "grid": {
+     "x_pano": 6,
+     "y_pano": 7.5
+    },
+    "dis_olcu_cm": [
+     763.0,
+     918.5
+    ],
+    "brut_m2": 70.08,
+    "pano": 53,
+    "pencere": 7,
+    "kapi": 6,
+    "odalar": {
+     "SALON": 22.07,
+     "VERANDA": 8.03,
+     "MUTFAK": 5.9,
+     "BANYO 1": 4.43,
+     "BANYO 2": 4.43,
+     "YATAK ODASI 1": 11.39,
+     "YATAK ODASI 2": 9.14
+    }
+   },
+   "uyarilar": [],
+   "kaynak": {
+    "metin": "İE-44 toplu çatı seçenekleri (D-117)",
+    "karar": "D-117",
+    "ev": "PA-15",
+    "havuz_denetimi": {
+     "sonuc": "geçti",
+     "karar": "D-112",
+     "uyarilar": []
+    }
+   }
+  }
+ ]
+}

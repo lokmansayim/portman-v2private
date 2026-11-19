@@ -606,11 +606,18 @@ def _izgara(W: float, H: float, makas: str) -> tuple[float, list[float], float, 
     return nx, xs, ny, ys, sor
 
 
+# BK-53 (D-121 V5; Lokman, kart 17 Kasım 2026 04:52:24 UTC "Evet, ayrı işte açılsın"): bayinin çiziminden okunan ev yeni çizilen evdir;
+# Beyin İş Emri'ne `dizilim.dik_duvar_pencere: tam_orta` yazar, Motor makasa dik dış duvarda pencereyi odanın duvar parçasının tam ortasına
+# alır (`motor/geometry._dik_duvar_pencere`). Havuz, katalog ve onaylı şablonlar (`karar._is_emri_uret`'in öteki kaynakları) anahtarsız
+# kalır (kart 16 Kasım 21:38:12 "Yalnız yeni çizilen evlere"; D-103).
+DIK_DUVAR_PENCERE = "tam_orta"
+
+
 def is_emri_prefabrik(kan: dict, o: CizimOkumasi, bk14: bool | None = None, esik: dict | None = None, makas: str | None = None
                       ) -> tuple[dict | None, list[str], list[str], list[str]]:
     """Kanonik okuma → Pano Motor'u İş Emri şablonu (numarasız; `karar._is_emri_uret` numara ve künyeyi yazar). Teklif çalışmasının
     kuralları (TK-01 r04): dış ölçüye kesilmiş ızgara, oda sınırları yarım pano akslarına (en çok `tol` cm kayma; bayiye yazılır),
-    dizilim arka-sol, ızgaraya hizalı, oda ortası pencere, kapı mantığı; dış kapı 90, iç kapı 82; çatı kural kitabından (eğim %33, saçak 30,
+    dizilim arka-sol, ızgaraya hizalı, oda ortası pencere, makasa dik duvarda pencere tam ortada (D-121, BK-53), kapı mantığı; dış kapı 90, iç kapı 82; çatı kural kitabından (eğim %33, saçak 30,
     topuk 10). `makas`: mahya görünmeyen çizimde denenen makas ekseni (iç kullanım). Dönüş: (şablon | None, sorular, çizilemezler, notlar)."""
     W, H = float(kan["W"]), float(kan["H"])
     if makas is None and not o.cati.mahya:
@@ -821,7 +828,7 @@ def is_emri_prefabrik(kan: dict, o: CizimOkumasi, bk14: bool | None = None, esik
                  "olcu_kaynagi": "dis_olcu", "dis_olcu_cm": {"x": _yuvarla(W), "y": _yuvarla(H)}, "referans_model": "CIZIM",
                  "grid": {"x_pano": _yuvarla(nx), "y_pano": _yuvarla(ny)}, "kisa_kenar": makas, "giris_cephesi": "on", "dis_dusey_duvar": "cevre_aks_disinda",
                  "dizilim": {"baslangic": "arka-sol", "hiza": "izgara", "dis_duvar_t_bolme": True, "pencere": "oda_ortasi", "kapi": "mantik",
-                             "kose": "oda"},
+                             "kose": "oda", "dik_duvar_pencere": DIK_DUVAR_PENCERE},
                  "ek_akslar_cm": {"x": [], "y": []}},
         "mahaller": mahaller,
         "acik_sinirlar": [],
