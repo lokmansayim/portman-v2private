@@ -352,7 +352,8 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | BK | BK-57 | Yükleme listesinde alıcıya ait çatı izolasyonu: `prefabrik_liste.silte_alici` (D-126; `claude/project-thread-nngdr4`) | yazıldı (19.11) |
 | BK | BK-58 | Pano Motor'unda verandanın tavan kirişi: açık kenardaki kolondan gövdeye kutu profil, liste satırı ve saha montaj planı (D-127, PC-47; `claude/project-thread-bvls4f`) | yazıldı (19.11; defter 19:25) |
 | BK | BK-59 | Yükleme listesinde gövdedeki verandanın ara kolonlu açık kenarı: `prefabrik_liste._kenar_parcalari` (D-129; `claude/project-thread-61wl66`) | yazıldı (19.11) |
-| BK | **BK-60** | — | **sıradaki boş** |
+| BK | BK-60 | (tavan kirişi sohbeti: verandada her açık kenara kiriş, D-130) | alındı (19.11) |
+| BK | **BK-61** | — | **sıradaki boş** |
 
 ## 27 Eylülde Lokman'ın verdiği kararlar
 
