@@ -313,11 +313,13 @@ def _kenar_parcalari(dikmeler, e: str, hat: float, a0: float, a1: float) -> list
     kolonlar = sorted((k0_, k1_) for (kx0, ky0, kx1, ky1) in dikmeler
                       for (b0_, b1_, k0_, k1_) in [((ky0, ky1, kx0, kx1) if e == "x" else (kx0, kx1, ky0, ky1))]
                       if b0_ - 1.0 <= hat <= b1_ + 1.0 and k1_ > a0 - 1.0 and k0_ < a1 + 1.0)
-    ara = [(k0_, k1_) for k0_, k1_ in kolonlar if k0_ > a0 + 1.0 and k1_ < a1 - 1.0]
+    # uç kolon: kenarın ucuna yarım kolondan yakın (geometri hakemi: ucun 2 cm içindeki köşe kolonu 2 cm'lik parça açmaz); öteki ara kolon
+    uc_mu = lambda k0_, k1_: k0_ - a0 < (k1_ - k0_) / 2 or a1 - k1_ < (k1_ - k0_) / 2   # noqa: E731
+    ara = [(k0_, k1_) for k0_, k1_ in kolonlar if not uc_mu(k0_, k1_)]
     if not ara:
         return []
-    bas = max([a0] + [k1_ for k0_, k1_ in kolonlar if abs(k0_ - a0) < 1.0])
-    son = min([a1] + [k0_ for k0_, k1_ in kolonlar if abs(k1_ - a1) < 1.0])
+    bas = max([a0] + [k1_ for k0_, k1_ in kolonlar if uc_mu(k0_, k1_) and k0_ - a0 < (k1_ - k0_) / 2])
+    son = min([a1] + [k0_ for k0_, k1_ in kolonlar if uc_mu(k0_, k1_) and a1 - k1_ < (k1_ - k0_) / 2])
     uclar = [bas] + [u for k in ara for u in k] + [son]
     return [round(b - a, 2) for a, b in zip(uclar[::2], uclar[1::2])]
 
@@ -420,7 +422,8 @@ def model_motor(ie: dict) -> dict:
             if v.poly.buffer(1.0).contains(LineString([(x0, y0), (x1, y1)])):
                 yanlar.setdefault("x" if abs(y1 - y0) < 1e-6 else "y", y0 if abs(y1 - y0) < 1e-6 else x0)
         for e in sorted(yanlar):
-            parcalar_ = _kenar_parcalari(plan.dikmeler, e, yanlar[e], *((vx0, vx1) if e == "x" else (vy0, vy1)))
+            ic_kolon = [k for k in plan.dikmeler if v.poly.buffer(1.0).contains(Point((k[0] + k[2]) / 2, (k[1] + k[3]) / 2))]   # kenarın dışından değen dikme sayılmaz
+            parcalar_ = _kenar_parcalari(ic_kolon, e, yanlar[e], *((vx0, vx1) if e == "x" else (vy0, vy1)))
             if parcalar_:                                      # D-129: ara kolonlu açık kenar, parça parça (kolonun yüzünden yüzüne)
                 ara_parca_sira += range(len(kirisler), len(kirisler) + len(parcalar_))
                 kirisler += parcalar_
@@ -1095,6 +1098,19 @@ def _iki_uclu_kirma_catilari(plan, ie: dict) -> tuple[list[dict], dict]:
     sd = max(sacak_d, key=lambda d: (d.panolar[-1].a1 - d.panolar[0].a0, -d.id))   # kesintisiz saçak duvarı (paftada arka)
     ana_x = [round(p.a1, 2) for p in sorted(sd.panolar, key=lambda p: p.a0)[:-1]
              if p.a1 - g0 >= MOD_CM - 1e-6 and g1 - p.a1 >= MOD_CM - 1e-6]
+    # D-130 (BK-59; Lokman 19 Kasım 2026 21:49:23, 120 m² eskizine yorum: "çapraz makasları tam kırılma noktasını geçmiyorsa daha önce seninle
+    # konuşmuştuk bina duvarının üzerine al"): ana çatının örttüğü verandada kırma ucu duvarsızdır. Uçta dış duvar yoksa ilk ana makas uca en
+    # yakın, mahyaya dik dış duvarın (gövdenin duvarı) üstünde; kırma noktası o duvarla uç arasındaysa kural yok.
+    acik_uc = {}
+    for k_uc, kenar_x in enumerate((g0, g1)):
+        if any(d.tur == "dis" and d.yon == dik and abs(abs(d.c - kenar_x) - d.h) < 1e-6 for d in plan.duvarlar):
+            continue
+        govde = [d.c for d in plan.duvarlar if d.tur == "dis" and d.yon == dik and d.panolar
+                 and (d.c < (ana_x[0] if ana_x else g1) if k_uc == 0 else d.c > (ana_x[-1] if ana_x else g0))]
+        if not govde:
+            continue
+        acik_uc[k_uc] = min(govde, key=lambda c_: abs(c_ - kenar_x))
+    ana_x = sorted(set(ana_x) | {round(v, 2) for v in acik_uc.values()})
     if len(ana_x) < 2 or not (ana_x[0] < ax0 and ana_x[-1] > ax1):
         raise ListeYazilmaz(f"iki uçlu kırma: ana makas yerleri {ana_x} kırma uçlarını ({sy(ax0)}, {sy(ax1)}) geçmiyor; liste yazılmaz")
     aralik = max(b - a for a, b in zip(ana_x, ana_x[1:]))
@@ -1114,6 +1130,8 @@ def _iki_uclu_kirma_catilari(plan, ie: dict) -> tuple[list[dict], dict]:
         if not adaylar:
             continue                                                    # bant denetimi aşağıda liste yazmaz (K21)
         duvarda[k_uc] = adaylar[0]
+    for k_uc, x in acik_uc.items():                                     # D-130: duvarsız uçta ilk ana makas gövdenin duvarında
+        duvarda[k_uc] = round(x, 2)
     if duvarda:
         ana_x = [x for x in ana_x if (0 not in duvarda or x >= duvarda[0] - 1e-6) and (1 not in duvarda or x <= duvarda[1] + 1e-6)]
 
@@ -1130,6 +1148,10 @@ def _iki_uclu_kirma_catilari(plan, ie: dict) -> tuple[list[dict], dict]:
         y_lo, y_hi = sorted(_kesisim(e, xf) for e in hatlar)
         uc_d = [d for d in plan.duvarlar if d.tur == "dis" and d.yon == dik and abs(abs(d.c - kenar_x) - d.h) < 1e-6]
         J = sorted({round(p.a1, 2) for d in uc_d for p in sorted(d.panolar, key=lambda p: p.a0)[:-1]})
+        if not J and k_uc in acik_uc:                                   # D-130: duvarsız uçta kısa makaslar karşı uç duvarının eklemlerinde (pafta)
+            ot = g1 if k_uc == 0 else g0
+            J = sorted({round(p.a1, 2) for d in plan.duvarlar if d.tur == "dis" and d.yon == dik and abs(abs(d.c - ot) - d.h) < 1e-6
+                        for p in sorted(d.panolar, key=lambda p: p.a0)[:-1]})
         if not J:
             raise ListeYazilmaz(f"iki uçlu kırma: {ad_} uç duvarında pano eklemi yok; liste yazılmaz")
         izgara = set(J)

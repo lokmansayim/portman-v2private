@@ -31,6 +31,8 @@ def test_kenar_parcalari_yuzden_yuze():
     assert PL._kenar_parcalari(kolonlar[1:3], "x", 0.0, 0.0, 1014.0) == [333.0, 328.0, 333.0]
     # ara kolon yoksa boş: kenar bugünkü yoldan
     assert PL._kenar_parcalari([kolonlar[0], kolonlar[3]], "x", 0.0, 0.0, 1014.0) == []
+    # ucun 2 cm içindeki köşe kolonu ara kolon değil (geometri hakemi)
+    assert PL._kenar_parcalari([(2, 0, 12, 10), (500, 0, 510, 0 + 10)], "x", 0.0, 0.0, 1000.0) == [488.0, 490.0]
     # y yönündeki kenar
     assert PL._kenar_parcalari([(0, 240, 10, 250)], "y", 5.0, 0.0, 500.0) == [240.0, 250.0]
 
@@ -49,3 +51,17 @@ def test_ara_kolonsuz_veranda_aynen():
     N, k, _ = _kirisler(ie)
     assert "veranda_ara_kolon_parca_sira" not in N
     assert k["L 9940"] == 1
+
+
+def test_d130_dortomuz_duvarsiz_uc():
+    """D-130 (Lokman 19 Kasım 2026 21:49:23, 120 m² eskizine yorum): ana çatının örttüğü verandada dörtomuzun ucu duvarsız; ilk ana
+    makas gövdenin ön duvarında, kısa makaslar karşı uç duvarının ek yerlerinde. 120 m² (HD-251): ana 9, kısa 4 + 4, çapraz 4."""
+    N = PL.model_motor(_ie("D130_veranda_kirma_120m2.json"))
+    km = N["cati"][0]["kirma_makas"]
+    assert km["ana_x_cm"][0] == 261.0 and km["ana"] == 9 and km["kisa"] == 8 and km["capraz"] == 4
+    on, arka = km["uclar"]
+    assert on["ilk_ana_duvarda_cm"] == 261.0 and on["kisa_y_cm"] == arka["kisa_y_cm"] == [261.0, 381.5, 507.0, 627.5]
+    assert on["bant_cm"] == arka["bant_cm"] == 261.0
+    L = PL.liste(N, PL.kurallari_oku(), None)
+    adet = {x["kalem"]: x["adet"] for x in L["satirlar"] if "Makas" in x["kalem"]}
+    assert adet["Makas (ana, mahyaya dik) · ana çatı"] == 9 and adet["Makas (kısa, ön uç) · ana çatı"] == 4
