@@ -1,7 +1,7 @@
 """İE-41 · rehber.portatifev.com sitesi main'deki koddan (`araclar/paket/site/`; Lokman, 14 Kasım 2026 20:37 UTC kartı "Siteyi main'den kur").
 
 Paketleyici sahneyi değiştirmez, yalnız iç notları çıkarır. CI'da koşan sınamalar (esbuild ve yazı tipi paketleri gerekmez):
-- kayıt: beş rehber, klasörler eşsiz ve yayındaki üç yol korunur, adda kod yok, girdiler depoda;
+- kayıt: altı rehber (85 m² 17 Kasım 2026'da; beşi canlı paketten sabit), klasörler eşsiz ve yayındaki üç yol korunur, adda kod yok, girdiler depoda;
 - 62 m² ve kampanyalı ev (TK-04 r08, main'in komutuyla): veride iç not yok (`ortak.YASAK`), sayılar ve geometri aynı (metin dışındaki her
   değer main'in sayfasındakiyle aynı), başlıkta kod yok, ön onay paftasının üst satırı örtülü;
 - açılış sayfası; `vps/rehber_yayin.sh` ve belirlenimci paket.
@@ -45,7 +45,7 @@ def _yapraklar(x, yol=()):
 
 def test_kayit():
     kl = [r["klasor"] for r in KAYIT["rehberler"]]
-    assert len(kl) == len(set(kl)) == 5 and {"62m2", "80m2", "80m2-21"} <= set(kl)     # yayındaki yollar korunur
+    assert len(kl) == len(set(kl)) == 6 and {"62m2", "80m2", "80m2-21"} <= set(kl)     # yayındaki yollar korunur
     for r in KAYIT["rehberler"]:
         assert re.fullmatch(r"[a-z0-9-]+", r["klasor"]) and not re.search(r"\b(TK|AP|PK)-?\d", r["ad"]), r
         assert (KOK / (r.get("veri") or r["is_emri"])).exists(), r
