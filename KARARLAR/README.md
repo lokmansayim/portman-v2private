@@ -147,6 +147,7 @@ Biçim: karar · gerekçe · reddedilen seçenekler · geri alma yolu · kim ve 
 | [D-127](D-127.md) | Verandada tavan kirişi: D-107 verandaya (açık mahal) da uygulanır; açıklık açık kenarların kirişlerinin arası; 7 m'yi aşarsa kiriş açık kenardaki kolondan makasa dik gövdenin duvarına, makası ortadan taşır; listede L yüzden yüze + 2 × 10 (76 m² L 1982,5), yeni kolon yok; çizim yalnız saha montaj planında; kolon yoksa sorulur (`motor/tavan_kirisi.py`, PC-47; BK-58); depoda yalnız 76 m² teklif evi | 19.11 (Lokman 19:05:44 "verandanın tam ortasınada yani profil koyduğun yerede dikey bir kiriş gelecek …"; kart 19:33:12 "Eskizdeki gibi, L 1982,5") |
 | [D-129](D-129.md) | Gövdedeki verandanın (ana çatının örttüğü açık mahal) açık kenarında ara kolon varsa kiriş ara kolonlarda bölünür, her parça kolonun yüzünden yüzüne; ara kolonlu her eve (110 m² L 9940 → L 3230 × 2 + L 3280; 76 m², 140 m², 142 m², 83 m² yan verandalı ve bir deneme girdisi de değişir); ara kolonsuz kenar aynen (`prefabrik_liste._kenar_parcalari`; BK-59) | 19.11 (Lokman kart 21:39:45 "Eskizdeki gibi, yüzden yüze"; kart 21:45:21 "Ara kolonlu her eve") |
 | [D-131](D-131.md) | Ana çatının örttüğü verandada dörtomuzun (iki uçlu kırma) ucu duvarsızsa ilk ana makas uca en yakın gövde duvarının üstünde (D-114 gibi), kısa makaslar karşı uç duvarının pano eklerinde; 120 m² ana 9, kısa 4 + 4, çapraz 4 (BK-59) | 19.11 (Lokman 21:49:23 "çapraz makasları tam kırılma noktasını geçmiyorsa … bina duvarının üzerine al"; kart 21:59:00 "Eskizdeki gibi") |
+| [D-132](D-132.md) | Disk arşivi Parti 2'nin dört evi (45, 75, 76, 80 m²) Motor'un aks düzeniyle havuzda, PA-45 … PA-48; çatı paftadaki gibi (45 beşik, 75 dörtomuz, 76 ön cumba, 80 verandada sundurma %10); listede üç bilinen fark (75 makas sayısı, 76 cumba baş makası, 45 tepe); 110 ve 120 m² verandayı örten ana çatının Motor bakımını bekler; asıl proje (D-103) | 19.11 (Lokman, kart 21:31:40 "Altı ev girsin"; kart 21:39:32 "Dördü girsin, ikisi beklesin") |
 
 ## Numara defteri (14 Ekim 2026, BK-08; CIO planı › Görev 3)
 
@@ -268,9 +269,12 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | D | D-125 | çizim okumada dış kapı çizimde nasılsa öyle; içerideyse önü açık giriş nişi (BK-55; Lokman 17.11 kart 08:37:52) | yazıldı (17.11; çizim okuma dış kapı sohbeti, `claude/project-thread-mjv1ao`) |
 | D | D-126 | alıcıya ait çatı izolasyonu (izocam) çatı şiltesini 0 yapar (BK-57; Lokman 19.11 kart 19:00:47) | yazıldı (19.11; `claude/project-thread-nngdr4`) |
 | D | D-127 | verandada tavan kirişi: kolondan gövdeye, makası ortadan taşır (BK-58, PC-47; Lokman 19.11 19:05:44, kart 19:33:12 "Eskizdeki gibi, L 1982,5") | yazıldı (19.11; tavan kirişi sohbeti, `claude/project-thread-bvls4f`) |
-| D | **D-128** | — | **sıradaki boş** |
-| D | D-131 | dörtomuzun duvarsız ucunda ilk ana makas gövdenin duvarında (BK-59; Lokman 19.11 21:49:23, kart 21:59:00) | yazıldı (19.11; `claude/project-thread-61wl66`) |
+| D | D-128 | 60 m² katalog fiyat listesinin (P6001 r03) hedef örneği (Lokman 19.11 19:51:44 "onaylıyorum") | alındı (19.11; katalog fiyat sohbeti, `claude/project-thread-di7i2v`) |
 | D | D-129 | gövdedeki verandanın açık kenarı ara kolonlarda bölünür, yüzden yüze (BK-59; Lokman 19.11 kart 21:39:45, 21:45:21) | yazıldı (19.11; `claude/project-thread-61wl66`) |
+| D | D-130 | (tavan kirişi sohbeti: verandada her açık kenara kiriş) | alındı (19.11) |
+| D | D-131 | dörtomuzun duvarsız ucunda ilk ana makas gövdenin duvarında (BK-59; Lokman 19.11 21:49:23, kart 21:59:00) | yazıldı (19.11; `claude/project-thread-61wl66`) |
+| D | D-132 | disk arşivi Parti 2'nin dört evi havuzda, PA-45 … PA-48 (İE-43 PR-7; Lokman 19.11 kartları 21:31:40, 21:39:32) | yazıldı (19.11; disk arşivi sohbeti, `claude/project-thread-wc6dw0`) |
+| D | **D-133** | — | **sıradaki boş** |
 | İE | İE-01–İE-08 | bu depo (`main`) | yazıldı |
 | İE | İE-09 | model atölyesi: kontrollü model üretimi ve banka hattı (Görev 6e; pano 30; P6001 güncellemesi kapsam dışı) | alındı (16.10; `claude/gorev-6e-model-atolyesi-rnhtcp`; PR-1 banka hattı 29.10, `claude/project-thread-rhjgzv`) |
 | İE | İE-10, İE-11, İE-12 | prefabrik hattı (PR #12, PR #14, `ie-12-prefabrik-bayi-paftasi`) | `main`'e BK-12 ile (PR-1: motor ve bayi paftası; liste ve mühür kıyası sonraki PR'larda) |
