@@ -259,3 +259,29 @@ def test_sacak_ayrimi_yalniz_50_cm():
     assert pafta_kart._sacak_ayir([940.25, 700.25]) == ([940.25, 700.25], None)
     assert pafta_kart._sacak_ayir([823.0, 763.0]) == ([823.0, 763.0], None)
     assert pafta_kart._sacak_ayir([773.0]) == ([773.0], None) and pafta_kart._sacak_ayir([]) == ([], None)
+
+
+def test_ust_uste_yazi_bir_kez_cocuk_odasi_yatak_odasi(tmp_path):
+    """İE-43 PR-7 (disk arşivi Parti 2, 19 Kasım 2026): 120 m² paftasında bir "120/120" yazısı aynı yerde iki kez (üst üste kopya)
+    çizili; kart onu bir pencere sayar. "ÇOCUK ODASI" ve yalnız "ODA" yazılı oda yatak odasıdır (İş Emri okuyucusuyla aynı desen);
+    "OTURMA ODASI" salondur."""
+    d = ezdxf.new("R2018")
+    m = d.modelspace()
+    W, H = 888.5, 835.75
+    m.add_lwpolyline([(0, 0), (W, 0), (W, H), (0, H)], close=True)
+    _yazi(m, f"{AD} 75 M2", 0, H + 120, 40)
+    _yazi(m, "MONTAJ VE ELEKTRİK PLANI", 150, -140, 40)
+    for t, x, y in (("ÇOCUK ODASI\\P9.30 m²", 100, 600), ("ODA\\P12.20 m²", 500, 600), ("OTURMA ODASI\\P20.70 m²", 300, 300),
+                    ("WC\\P4.43 m²", 600, 300)):
+        m.add_mtext(t, dxfattribs={"insert": (x, y), "char_height": 12})
+    for t, x, y in (("120/120", 200, H + 10), ("120/120", 200, H + 10), ("120/120", 500, H + 10), ("60/40", 700, H + 10)):
+        _yazi(m, t, x, y)
+    m.add_linear_dim(base=(0, H + 40), p1=(0, H), p2=(W, H), angle=0).render()
+    m.add_linear_dim(base=(W + 40, 0), p1=(W, 0), p2=(W, H), angle=90).render()
+    yol = tmp_path / "kopya_yazi.dxf"
+    d.saveas(yol)
+    P = [p for p in pafta_kart.oku(str(yol)) if p["baslik_m2"] == 75.0]
+    assert len(P) == 1
+    k = P[0]["kart"]
+    assert k["acikliklar"] == {"120/120": 2, "60/40": 1}
+    assert k["oda_sayisi"] == "2+1" and k["yatak_odasi"] == 2

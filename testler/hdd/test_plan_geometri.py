@@ -42,7 +42,7 @@ def _duvar(m, yon, c, a0, a1, t, ekler):
             _pano(m, c - t / 2, a, c + t / 2, b)
 
 
-def _cizim(yol: Path, kolon=False):
+def _cizim(yol: Path, kolon=False, kesikler=()):
     d = ezdxf.new("R2018")
     pen = d.blocks.new("BFGNBFGN")            # 2019–2020 şablonunun pencere panosu bloğu
     pen.add_lwpolyline([(0, 0), (MOD, 0), (MOD, 10), (0, 10)], close=True)
@@ -74,6 +74,10 @@ def _cizim(yol: Path, kolon=False):
     if kolon:                                  # kutu profil kolon: dış ve iç kare (iç kare ikinci kolon değildir)
         m.add_lwpolyline([(W + 100, 0), (W + 110, 0), (W + 110, 10), (W + 100, 10)], close=True)
         m.add_lwpolyline([(W + 102, 2), (W + 108, 2), (W + 108, 8), (W + 102, 8)], close=True)
+    if kesikler:
+        d.linetypes.add("DASHED", [0.6, 0.5, -0.1])
+    for noktalar in kesikler:                  # kesik çizgi (veranda kenarı ya da notun gösterme çizgisi)
+        m.add_lwpolyline(noktalar, dxfattribs={"linetype": "DASHED"})
     d.saveas(yol)
     return yol
 
@@ -154,3 +158,48 @@ def test_veranda_ara_kolonu_kural():
     uc = iki(1200.0); uc["kolonlar"].insert(1, _kare(596, 400))                         # pafta kuraldan az gösteriyor: sayı yazılmaz
     ara, not_ = PG.veranda_ara_kolonu(uc, 396.5)
     assert ara is None and "2 ara kolon koyar" in not_
+
+
+def test_mutfak_tezgahi_ic_bloktan():
+    """2019 şablonunun mutfak tezgâhının adı anlamsız ("KDJFKLD"); içindeki "Faucet - kit sink top" bloğundan mutfak (İE-43 PR-6)."""
+    d = ezdxf.new("R2018")
+    d.blocks.new("Faucet - kit sink top").add_circle((0, 0), 5)
+    tez = d.blocks.new("KDJFKLD")
+    tez.add_lwpolyline([(0, 0), (46, 0), (46, 160), (0, 160)], close=True)
+    tez.add_blockref("Faucet - kit sink top", (23, 80))
+    d.blocks.new("JHKJKJ").add_circle((0, 0), 20)
+    m = d.modelspace()
+    assert PG._tefris_turu(m.add_blockref("KDJFKLD", (0, 0)), d) == "mutfak"
+    assert PG._tefris_turu(m.add_blockref("JHKJKJ", (0, 0)), d) is None
+    d.blocks.new("KLOZET").add_circle((0, 0), 20)
+    assert PG._tefris_turu(m.add_blockref("KLOZET", (0, 0)), d) == "banyo"
+
+
+def test_aciklik_sayilari_bolge_basina():
+    """Penceresiz, iki kapılı yazısız oda hol sayılır; sayım açıklığın iki yanındaki bölgeden (İE-43 PR-6)."""
+    g = {"AX": [0, 100, 200], "AY": [0, 100],
+         "odalar": [{"bolge": 0, "hucreler": [[0, 0]]}, {"bolge": 1, "hucreler": [[1, 0]]}],
+         "acikliklar": [{"tur": "kapi", "duvar_yon": "x", "c": 100, "orta": 50},        # 0 ile 1 arası
+                        {"tur": "kapi", "duvar_yon": "x", "c": 200, "orta": 50},        # 1'den dışarı
+                        {"tur": "pencere", "duvar_yon": "y", "c": 0, "orta": 50}]}      # 0'ın arka duvarı
+    say = PG.aciklik_sayilari(g)
+    assert dict(say[0]) == {"pencere": 1, "kapi": 1}
+    assert dict(say[1]) == {"pencere": 0, "kapi": 2}
+
+
+def _geometri(yol):
+    P = pafta_kart.oku(str(yol))
+    j = next(i for i, p in enumerate(P) if p["alt_yazi"] == "montaj" and not p["kopya"])
+    return PG.geometri(pafta_kart.yukle(str(yol)), P[j]["kutu_dunya"], P[j])
+
+
+def test_not_cizgisi_veranda_degil(tmp_path):
+    """İE-43 PR-7 (disk arşivi Parti 2, 52 m², 19 Kasım 2026): paftanın solundaki not ("dışarıya musluk çekilecek") kesik bir gösterme
+    çizgisiyle gövdeye bağlı: kısa yatay parça gövdenin solunda, eğik parça gövdeye girer. Okuyucu onu veranda okumazdı ama sol cephede
+    8 m²'lik veranda yazdı. Veranda yalnız cepheye paralel, gövdenin tamamen dışında bir kesik kenarla okunur; eğik kesik çizgi sayılmaz."""
+    not_ = [(-150, 300), (-60, 300), (150, 30)]
+    g = _geometri(_cizim(tmp_path / "not.dxf", kesikler=[not_]))
+    assert g["verandalar"] == []
+    on = [(5, 0), (5, -150), (W - 5, -150), (W - 5, 0)]                  # ön cephede kesik dikdörtgen: veranda
+    g = _geometri(_cizim(tmp_path / "veranda.dxf", kesikler=[not_, on]))
+    assert [(v["cephe"], v["derinlik_cm"]) for v in g["verandalar"]] == [("on", 150.0)]

@@ -1,0 +1,79 @@
+{
+ "kod": "PA48",
+ "gosterim": "PA-48",
+ "durum": "gecerli",
+ "sablon": "adaylar/PA48.json",
+ "gorsel": "adaylar/PA48.png",
+ "referans_model": "PA-48",
+ "yapi_turu": "prefabrik",
+ "kat": 1,
+ "oda_programi": "2+1",
+ "katalog_m2": 80.0,
+ "kapali_m2": 65.7,
+ "veranda_m2": 14.36,
+ "ozet": {
+  "grid": {
+   "x_pano": 8.0,
+   "y_pano": 5.0
+  },
+  "dis_olcu_cm": [
+   1014.0,
+   647.5
+  ],
+  "brut_m2": 80.01,
+  "pano": 44,
+  "pencere": 6,
+  "kapi": 5,
+  "odalar": {
+   "MUTFAK": 10.7,
+   "SALON": 24.28,
+   "WC": 3.38,
+   "Y.ODASI": 11.45,
+   "Y.ODASI 2": 11.45,
+   "VERANDA": 14.36
+  }
+ },
+ "kaynak": {
+  "metin": "HD-420 montaj paftasından İş Emri (İE-43, disk arşivi Parti 2; kodla okundu, ad yok). Havuz: D-132 (Lokman 19 Kasım 2026 21:31:40 kartı \"Altı ev girsin\", 21:39:32 kartı \"Dördü girsin, ikisi beklesin\"; Motor'un aks düzeniyle, çatı paftadaki gibi). Asıl uygulanmış proje: D-103.",
+  "dosya": "testler/havuz/is_emirleri/HD420.json",
+  "ayna": null,
+  "karar": "D-132",
+  "standart": true,
+  "kart_kiyasi": {
+   "kart": "HD-420",
+   "kart_sha256": "ec9a83e980106d3c7dde77c40b9fd41a0bc2bd0bf8a0610f511fd33b38080d79",
+   "sonuc": "geçti",
+   "olcum": {
+    "dis_olcu_cm": [
+     1014.0,
+     647.5
+    ],
+    "acikla_olcu_cm": [
+     1014.0,
+     871.5
+    ],
+    "brut_m2": 80.01,
+    "kubbe_m2": 0.0,
+    "yatak_odasi": 2,
+    "pencereler": {
+     "120x120": 4,
+     "120x180": 1,
+     "60x40": 1
+    },
+    "dis_kapi": 1,
+    "ic_kapi": 4,
+    "veranda": 1,
+    "kat": 1
+   }
+  },
+  "havuz_denetimi": {
+   "sonuc": "geçti",
+   "karar": "D-112",
+   "uyarilar": [
+    "HD-02: Veranda VERANDA: çatısı ana çatının saçak yanına dayanıyor, yüksek ucu saçağın üstünde; iki çatının birleşimi çizimde yok, kural kitabında yok",
+    "HD-09: veranda çatısı: listede 6 makas, 3D modelde bu parçanın makası yok"
+   ]
+  }
+ },
+ "not": "Çatı paftadaki gibi beşik, 9 makas; ön verandada tek eğimli sundurma %10 (eğim paftada yok, varsayım). Havuz denetimi uyarısı: sundurmanın yüksek ucu ana saçağın üstünde, birleşim çizimde yok (HD-02); listede sundurmanın makası var, 3B'de yok (HD-09)."
+}

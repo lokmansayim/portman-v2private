@@ -41,6 +41,21 @@ def test_teklif_sayfasi_okunur_sevkiyat_okunmaz(tmp_path):
     assert "Deneme" not in json.dumps(r, ensure_ascii=False)
 
 
+def test_gizli_satir_okunmaz(tmp_path):
+    """2019 şablonu: TEKLİF'in gizli satırlarında şablonun eski evinin değerleri kalmış; okunmaz (İE-43 PR-6)."""
+    wb = openpyxl.Workbook()
+    _sayfa(wb.active, [("100'LÜK YAPIŞTIRMA DOLU PANO", "100*1250*2500", 14), ("PENCERE ALT PANEL (120/120)", "100x1250x800", 6),
+                       ("PENCERE ALT PANEL (120/120)", "100x1250x800", 5)])
+    wb.active.title = "TEKLİF"
+    wb.active.row_dimensions[7].hidden = True                       # eski evin satırı (6 adet)
+    yol = tmp_path / "liste.xlsx"
+    wb.save(yol)
+    r = liste_oku.oku_liste(yol)
+    adet = [(x["malzeme"], x["adet"]) for x in r["satirlar"] if x.get("adet")]
+    assert adet == [("100'LÜK YAPIŞTIRMA DOLU PANO", 14), ("PENCERE ALT PANEL (120/120)", 5)]
+    assert r["gizli_satir"] == 1
+
+
 def test_teklif_yoksa_hata(tmp_path):
     wb = openpyxl.Workbook(); wb.active.title = "SEVKİYAT"
     yol = tmp_path / "liste.xlsx"; wb.save(yol)

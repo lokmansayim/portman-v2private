@@ -468,7 +468,13 @@ def plan_oku(d, kutular: list, cekirdek_i: int, antetler: tuple = ()) -> dict:
     plan_sec = [i for i in sec if _icinde(kutular[i][1], P, tol=0)
                 or (P[0] <= (kutular[i][1][0] + kutular[i][1][2]) / 2 <= P[2]
                     and P[1] <= (kutular[i][1][1] + kutular[i][1][3]) / 2 <= P[3])]
-    yazilar = [y for y in sayfa_yazilari if P[0] <= y["x"] <= P[2] and P[1] <= y["y"] <= P[3]]
+    yazilar, gorulen = [], set()
+    for y in sayfa_yazilari:
+        if P[0] <= y["x"] <= P[2] and P[1] <= y["y"] <= P[3]:
+            iz = (y["t"], round(y["x"]), round(y["y"]))   # aynı yazı aynı yerde iki kez (üst üste kopya) bir kez okunur (İE-43 PR-7)
+            if iz not in gorulen:
+                gorulen.add(iz)
+                yazilar.append(y)
     olculer = [o for o in olculer if _icinde(o["kutu"], P, tol=50)]
     panolar, yaylar = [], set()
     for i in plan_sec:
@@ -549,10 +555,16 @@ def plan_oku(d, kutular: list, cekirdek_i: int, antetler: tuple = ()) -> dict:
             "_ad_metinleri": ad_metinleri}
 
 
+# yatak odası: İş Emri okuyucusunun deseniyle aynı (`plan_geometri.MAHAL_TURU`; "ÇOCUK ODASI" ve yalnız "ODA" da yatak odası);
+# önce gelen veranda, salon ve mutfak desenine uyan ad yatak odası sayılmaz; "OTURMA ODASI" salondur. İE-43 PR-7.
+YATAK_ODASI = re.compile(r"Y\.?\s*ODA|YATAK|ÇOCUK|COCUK|ODA")
+BASKA_MAHAL = re.compile(r"VERANDA|TERAS|SUNDURMA|SALON|OTURMA|MUTFAK")
+
+
 def kart_ozeti(p: dict) -> dict:
     """Plan okumasından proje kartı alanları (`testler/havuz/proje_kartlari.json` biçiminde; yalnız paftada yazanlar)."""
-    yatak = sum(1 for m in p["mahaller"] if re.search(r"Y\.?\s*ODA|YATAK", m["ad"]))
-    salon = sum(1 for m in p["mahaller"] if "SALON" in m["ad"])
+    yatak = sum(1 for m in p["mahaller"] if YATAK_ODASI.search(m["ad"]) and not BASKA_MAHAL.search(m["ad"]))
+    salon = sum(1 for m in p["mahaller"] if re.search(r"SALON|OTURMA", m["ad"]))
     veranda = sum(1 for m in p["mahaller"] if "VERANDA" in m["ad"] or "TERAS" in m["ad"])
     olcu = collections.Counter(f"{a['olcu'][0]}/{a['olcu'][1]}" for a in p["acikliklar"]
                                if a["olcu"] and a["tur"] in ("olcu", "acilim", "cift_acilim", "surgulu"))
