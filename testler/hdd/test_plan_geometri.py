@@ -154,3 +154,30 @@ def test_veranda_ara_kolonu_kural():
     uc = iki(1200.0); uc["kolonlar"].insert(1, _kare(596, 400))                         # pafta kuraldan az gösteriyor: sayı yazılmaz
     ara, not_ = PG.veranda_ara_kolonu(uc, 396.5)
     assert ara is None and "2 ara kolon koyar" in not_
+
+
+def test_mutfak_tezgahi_ic_bloktan():
+    """2019 şablonunun mutfak tezgâhının adı anlamsız ("KDJFKLD"); içindeki "Faucet - kit sink top" bloğundan mutfak (İE-43 PR-6)."""
+    d = ezdxf.new("R2018")
+    d.blocks.new("Faucet - kit sink top").add_circle((0, 0), 5)
+    tez = d.blocks.new("KDJFKLD")
+    tez.add_lwpolyline([(0, 0), (46, 0), (46, 160), (0, 160)], close=True)
+    tez.add_blockref("Faucet - kit sink top", (23, 80))
+    d.blocks.new("JHKJKJ").add_circle((0, 0), 20)
+    m = d.modelspace()
+    assert PG._tefris_turu(m.add_blockref("KDJFKLD", (0, 0)), d) == "mutfak"
+    assert PG._tefris_turu(m.add_blockref("JHKJKJ", (0, 0)), d) is None
+    d.blocks.new("KLOZET").add_circle((0, 0), 20)
+    assert PG._tefris_turu(m.add_blockref("KLOZET", (0, 0)), d) == "banyo"
+
+
+def test_aciklik_sayilari_bolge_basina():
+    """Penceresiz, iki kapılı yazısız oda hol sayılır; sayım açıklığın iki yanındaki bölgeden (İE-43 PR-6)."""
+    g = {"AX": [0, 100, 200], "AY": [0, 100],
+         "odalar": [{"bolge": 0, "hucreler": [[0, 0]]}, {"bolge": 1, "hucreler": [[1, 0]]}],
+         "acikliklar": [{"tur": "kapi", "duvar_yon": "x", "c": 100, "orta": 50},        # 0 ile 1 arası
+                        {"tur": "kapi", "duvar_yon": "x", "c": 200, "orta": 50},        # 1'den dışarı
+                        {"tur": "pencere", "duvar_yon": "y", "c": 0, "orta": 50}]}      # 0'ın arka duvarı
+    say = PG.aciklik_sayilari(g)
+    assert dict(say[0]) == {"pencere": 1, "kapi": 1}
+    assert dict(say[1]) == {"pencere": 0, "kapi": 2}
