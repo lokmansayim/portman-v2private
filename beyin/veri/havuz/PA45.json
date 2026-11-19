@@ -1,0 +1,76 @@
+{
+ "kod": "PA45",
+ "gosterim": "PA-45",
+ "durum": "gecerli",
+ "sablon": "adaylar/PA45.json",
+ "gorsel": "adaylar/PA45.png",
+ "referans_model": "PA-45",
+ "yapi_turu": "prefabrik",
+ "kat": 1,
+ "oda_programi": "1+1",
+ "katalog_m2": 45.0,
+ "kapali_m2": 38.1,
+ "veranda_m2": 6.55,
+ "ozet": {
+  "grid": {
+   "x_pano": 6.0,
+   "y_pano": 4.5
+  },
+  "dis_olcu_cm": [
+   763.0,
+   584.75
+  ],
+  "brut_m2": 44.62,
+  "pano": 35,
+  "pencere": 5,
+  "kapi": 5,
+  "odalar": {
+   "SALON": 13.28,
+   "VERANDA": 6.55,
+   "WC": 3.38,
+   "HOL": 4.43,
+   "Y.ODASI": 7.55,
+   "MUTFAK": 6.0
+  }
+ },
+ "kaynak": {
+  "metin": "HD-596 montaj paftasından İş Emri (İE-43, disk arşivi Parti 2; kodla okundu, ad yok). Havuz: D-132 (Lokman 19 Kasım 2026 21:31:40 kartı \"Altı ev girsin\", 21:39:32 kartı \"Dördü girsin, ikisi beklesin\"; Motor'un aks düzeniyle, çatı paftadaki gibi). Asıl uygulanmış proje: D-103.",
+  "dosya": "testler/havuz/is_emirleri/HD596.json",
+  "ayna": null,
+  "karar": "D-132",
+  "standart": true,
+  "kart_kiyasi": {
+   "kart": "HD-596",
+   "kart_sha256": "4dff03a97b998aaceda1667ec20f629488afeb46effa844337ec9a4c55f5195a",
+   "sonuc": "geçti",
+   "olcum": {
+    "dis_olcu_cm": [
+     763.0,
+     584.75
+    ],
+    "acikla_olcu_cm": [
+     763.0,
+     584.75
+    ],
+    "brut_m2": 44.62,
+    "kubbe_m2": 0.0,
+    "yatak_odasi": 1,
+    "pencereler": {
+     "120x120": 2,
+     "120x180": 2,
+     "60x40": 1
+    },
+    "dis_kapi": 1,
+    "ic_kapi": 4,
+    "veranda": 1,
+    "kat": 1
+   }
+  },
+  "havuz_denetimi": {
+   "sonuc": "geçti",
+   "karar": "D-112",
+   "uyarilar": []
+  }
+ },
+ "not": "Çatı paftadaki gibi beşik, 7 makas. Paftanın makas kesitinde tepe 140 cm, Motor'da 116,66 cm (eğim paftada yazılı değil, prefabrik standardı %32,9; D-132 › Bilinen farklar)."
+}

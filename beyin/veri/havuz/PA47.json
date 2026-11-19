@@ -1,0 +1,79 @@
+{
+ "kod": "PA47",
+ "gosterim": "PA-47",
+ "durum": "gecerli",
+ "sablon": "adaylar/PA47.json",
+ "gorsel": "adaylar/PA47.png",
+ "referans_model": "PA-47",
+ "yapi_turu": "prefabrik",
+ "kat": 1,
+ "oda_programi": "2+1",
+ "katalog_m2": 74.0,
+ "kapali_m2": 68.5,
+ "veranda_m2": 5.73,
+ "ozet": {
+  "grid": {
+   "x_pano": 7.0,
+   "y_pano": 6.5
+  },
+  "dis_olcu_cm": [
+   888.5,
+   835.75
+  ],
+  "brut_m2": 74.26,
+  "pano": 50,
+  "pencere": 6,
+  "kapi": 6,
+  "odalar": {
+   "YATAK ODASI": 13.76,
+   "SALON": 18.79,
+   "BANYO": 4.52,
+   "HOL": 5.9,
+   "VERANDA": 5.73,
+   "YATAK ODASI 2": 11.42,
+   "MUTFAK": 9.35
+  }
+ },
+ "kaynak": {
+  "metin": "HD-137 montaj paftasından İş Emri (İE-43, disk arşivi Parti 2; kodla okundu, ad yok). Havuz: D-132 (Lokman 19 Kasım 2026 21:31:40 kartı \"Altı ev girsin\", 21:39:32 kartı \"Dördü girsin, ikisi beklesin\"; Motor'un aks düzeniyle, çatı paftadaki gibi). Asıl uygulanmış proje: D-103.",
+  "dosya": "testler/havuz/is_emirleri/HD137.json",
+  "ayna": null,
+  "karar": "D-132",
+  "standart": true,
+  "kart_kiyasi": {
+   "kart": "HD-137",
+   "kart_sha256": "29669ce5b3d079d1a90d06f73a25cc60494f4da489ed5a02c0edf2d0f34aab8b",
+   "sonuc": "geçti",
+   "olcum": {
+    "dis_olcu_cm": [
+     888.5,
+     835.75
+    ],
+    "acikla_olcu_cm": [
+     888.5,
+     835.75
+    ],
+    "brut_m2": 74.26,
+    "kubbe_m2": 0.0,
+    "yatak_odasi": 2,
+    "pencereler": {
+     "120x120": 3,
+     "120x180": 2,
+     "60x40": 1
+    },
+    "dis_kapi": 1,
+    "ic_kapi": 5,
+    "veranda": 1,
+    "kat": 1
+   }
+  },
+  "havuz_denetimi": {
+   "sonuc": "geçti",
+   "karar": "D-112",
+   "uyarilar": [
+    "HD-06: ['makas yeri (cumba): yavru makasın boyu evin paftasından L 2496 (yeri 130.5); o kesitte dereler arası 188.24 cm, 3B makası dereler arasında çizer (D-116)']"
+   ]
+  }
+ },
+ "not": "Çatı paftadaki gibi beşik + ön cumba (0–449,25 cm), yavru makas 249,6 cm paftadan (D-116 biçimi). Cumbanın baş makası Motor'da 509 cm, paftada 499 cm (saçak 30 ↔ 25; D-132 › Bilinen farklar)."
+}
