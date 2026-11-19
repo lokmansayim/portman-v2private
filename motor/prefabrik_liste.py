@@ -305,6 +305,23 @@ def ek_yerleri(plan, t_uclari: dict | None = None) -> list[dict]:
     return cik + [dict(k) for k in G.uc_uca_ekler(plan)]   # D-29: giriş nişinde yan duvarın hol duvarıyla eki (kapı duvarının 3'lü H'ı)
 
 
+def _kenar_parcalari(dikmeler, e: str, hat: float, a0: float, a1: float) -> list[float]:
+    """D-129 (BK-59; Lokman, kart 19 Kasım 2026 21:39:45 "Eskizdeki gibi, yüzden yüze"; 110 m² HD-380): gövdedeki açık mahalin (ana çatının
+    örttüğü veranda) bir açık kenarının ortasında kolon (ara kolon) varsa kiriş ara kolonlarda bölünür, her parça kolonun yüzünden yüzüne.
+    Kenarın ucunda kolon varsa parça o kolonun yüzünden, yoksa kenarın ucundan (D-61'in tek kolonlu kenarı gibi). Kenar `e` yönünde
+    (x: y = hat çizgisinde a0…a1). Ara kolon yoksa boş liste: kenar bugünkü yoldan (tek parça) gider."""
+    kolonlar = sorted((k0_, k1_) for (kx0, ky0, kx1, ky1) in dikmeler
+                      for (b0_, b1_, k0_, k1_) in [((ky0, ky1, kx0, kx1) if e == "x" else (kx0, kx1, ky0, ky1))]
+                      if b0_ - 1.0 <= hat <= b1_ + 1.0 and k1_ > a0 - 1.0 and k0_ < a1 + 1.0)
+    ara = [(k0_, k1_) for k0_, k1_ in kolonlar if k0_ > a0 + 1.0 and k1_ < a1 - 1.0]
+    if not ara:
+        return []
+    bas = max([a0] + [k1_ for k0_, k1_ in kolonlar if abs(k0_ - a0) < 1.0])
+    son = min([a1] + [k0_ for k0_, k1_ in kolonlar if abs(k1_ - a1) < 1.0])
+    uclar = [bas] + [u for k in ara for u in k] + [son]
+    return [round(b - a, 2) for a, b in zip(uclar[::2], uclar[1::2])]
+
+
 def model_motor(ie: dict) -> dict:
     from . import geometry as G
     from shapely.geometry import LineString, Point, box
@@ -381,7 +398,7 @@ def model_motor(ie: dict) -> dict:
         x0, y0, x1, y1 = m.poly.bounds
         en, derin = ((y1 - y0), (x1 - x0)) if mx else ((x1 - x0), (y1 - y0))
         return {"ad": m.ad, "tur": m.tur, "alan_m2": m.alan_m2, "en_cm": en, "derin_cm": derin}
-    kirisler, nis_agizlari, kenar_kolon = [], [], []
+    kirisler, nis_agizlari, kenar_kolon, ara_parca_sira = [], [], [], []
     for v in acik:
         if v.ad in dis_ad:
             continue                                           # BK-14: taşan verandanın üç açık kenarı aşağıda, kenar kenar
@@ -403,6 +420,12 @@ def model_motor(ie: dict) -> dict:
             if v.poly.buffer(1.0).contains(LineString([(x0, y0), (x1, y1)])):
                 yanlar.setdefault("x" if abs(y1 - y0) < 1e-6 else "y", y0 if abs(y1 - y0) < 1e-6 else x0)
         for e in sorted(yanlar):
+            parcalar_ = _kenar_parcalari(plan.dikmeler, e, yanlar[e], *((vx0, vx1) if e == "x" else (vy0, vy1)))
+            if parcalar_:                                      # D-129: ara kolonlu açık kenar, parça parça (kolonun yüzünden yüzüne)
+                ara_parca_sira += range(len(kirisler), len(kirisler) + len(parcalar_))
+                kirisler += parcalar_
+                kenar_kolon += [2] * len(parcalar_)
+                continue
             kirisler.append((vx1 - vx0) if e == "x" else (vy1 - vy0))
             # D-61 madde 3 (Lokman, 5 Kasım 2026 22:49, kart "Öneriyle düzelt"; TK-04 r07'nin salon duvarındaki kolonu, D-58): kenarın iki ucunda
             # da kolon varsa kiriş iki kolonun arasında, iki yüzünün arasına (dış ölçü − 2 × 10). Uçtaki kolon: kenarın çizgisinde, ucu kenarın ucunda.
@@ -465,6 +488,7 @@ def model_motor(ie: dict) -> dict:
             "veranda_kenarlari_cm": kirisler, **({"veranda_dis_kenar_sira": dis_kenar_sira} if dis_kenar_sira else {}),
             **({"teras_yan_kirisleri_cm": teras_yan} if teras_yan else {}),
             **({"veranda_dis_parca_sira": dis_parca_sira} if dis_parca_sira else {}),
+            **({"veranda_ara_kolon_parca_sira": ara_parca_sira} if ara_parca_sira else {}),
             **({"veranda_kenar_uc_kolonlari": kenar_kolon} if any(n_ > 1 for n_ in kenar_kolon) else {}),
             **({"nis_agizlari_cm": nis_agizlari} if nis_agizlari else {}),
             **({"tavan_kirisleri": tavan["kirisler"]} if tavan["kirisler"] else {}),
@@ -1480,9 +1504,13 @@ def liste(N: dict, kurallar: dict | None = None, pafta: dict | None = None) -> d
         dis_sira = set(N.get("veranda_dis_kenar_sira") or [])
         parca_sira = set(N.get("veranda_dis_parca_sira") or [])
         uc_k = N.get("veranda_kenar_uc_kolonlari") or []
+        ara_sira = set(N.get("veranda_ara_kolon_parca_sira") or [])
         kirisler = []
         for i, x in enumerate(N.get("veranda_kenarlari_cm", [])):
-            if i in parca_sira:                                 # D-109: ara kolonlu dış kirişin parçası, ara kolonun ortasında birleşir
+            if i in ara_sira:                                   # D-129: gövdedeki verandanın ara kolonlu açık kenarı, model parçayı yüzden yüze verir
+                kirisler.append((x, "gövdedeki verandanın açık kenarı ara kolonlarda bölünür; parça kolonun yüzünden yüzüne",
+                                 "Lokman, kart 19 Kasım 2026 21:39:45 \"Eskizdeki gibi, yüzden yüze\" (110 m², D-129)"))
+            elif i in parca_sira:                                 # D-109: ara kolonlu dış kirişin parçası, ara kolonun ortasında birleşir
                 e = r("tasan_veranda_dis_kirisi_eksik_cm")
                 kirisler.append((x - e, "taşan verandanın dış kirişi, ara kolonda eşit parçalara bölünür; köşe kolonunun dış yüzünden ara "
                                  "kolonun ortasına" + (f" − {mm(e)}" if e else ""),
