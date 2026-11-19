@@ -1,6 +1,6 @@
 {
  "sema": 1,
- "surum": "2026-11-17-r11",
+ "surum": "2026-11-17-r12",
  "karar": "D-72",
  "muhur": "M-15",
  "aciklama": "Fiyat defteri kaleminin CRM stok fiyatları API'sindeki karşılığı ve fiyatın nasıl hesaplandığı (İE-35). Fiyat yazmaz: fiyat her gün CRM'den gelir, `araclar/crm_fiyat.py` bu dosyayla defter üretir. Anahtarlar ve birimler fiyat defterinin (defter_2026-11 r13) kalemleri; Motor'un listesindeki anahtar. D-72'den sonra defter kapandı: Motor'un yeni anahtarı yalnız buraya, hattın kalemlerinin sonuna girer (r05, TK-06); yeni bant aralığı da bantların sonuna (r07, 280 ve 300 cm yükseklik). Eşleme değişikliği (yeni kalem, Lokman'ın birim cevabı, Samet'in CRM'e eklediği ürün) bu dosyaya PR'la girer; `kaynak` bölümü mühürlü (M-15).",
@@ -2092,6 +2092,28 @@
      "birim": "adet",
      "not": "CRM'de PVC pencere yok; Lokman 9 Kasım kartı: pencere de CRM'den fiyatlanır, Samet CRM'e ekler (D-72); 85 m² katalog evi P8501. Kasım 2026: istisna (D-120), Lokman 17 Kasım 05:49:59 kartı",
      "kdv_grubu": "Pencereler"
+    },
+    "100'lük yapıştırma dolu vasistaslı pano (60/60) | 100 × 1250 × 2500": {
+     "kod": "YP1",
+     "hesap": "ayni",
+     "esleme": "kural",
+     "birim": "adet",
+     "not": "Tam pano (100 × 1250 × 2500, YP1) fiyatı: Lokman 17 Kasım 2026 09:41:14 UTC (76 m² Nimet Doğan teklifi): \"100'lük yapıştırma dolu vasistaslı pano (60/60) bizim standart 100'lük yapıştırma dolu pano ile birebir ayın fiyatı sadece isim farkı var\" (r12). Öteki vasistaslı panolar aynen fiyatsız"
+    },
+    "Özel pencere karkası (120×150) (100'lük çektirme U'su + 100'lük H geçen) | 1200 × 1500": {
+     "kod": null,
+     "esleme": "CRM'de yok",
+     "birim": "adet",
+     "not": "CRM'de özel pencere karkası yok (D-72: yalnız CRM; CRM'e eklenmeli); 76 m² Nimet Doğan teklifi. Kasım 2026: istisna (D-120), 120/180'in fiyatı, Lokman 17 Kasım 09:39:41 UTC (r12)"
+    },
+    "Pencere alt panel (120/150) | 100 × 1250 × 500": {
+     "kod": "YP1",
+     "hesap": "oran",
+     "pay": 1,
+     "payda": 3,
+     "esleme": "kural",
+     "birim": "adet",
+     "not": "Tam pano (100 × 1250 × 2500, YP1) fiyatının 1/3'ü (Lokman 10 Kasım 10:01 \"Pencere üst panel tek 100x2500 panel kaç para ise 5 te 1'i fiyatını yaz pencere üst panelde 3 te 1 fiyatını yaz\", D-75; üst panel 1/5, alt panel 1/3). CRM'deki pencere paneli satırı (YP13, YP16) kullanılmaz"
     }
    },
    "bantlar": [
