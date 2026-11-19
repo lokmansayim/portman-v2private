@@ -146,6 +146,7 @@ Biçim: karar · gerekçe · reddedilen seçenekler · geri alma yolu · kim ve 
 | [D-126](D-126.md) | İş Emri çatı izolasyonunu alıcıya ait yazarsa (izocam, şilte, çatı izolasyonu) yükleme listesinde çatı şiltesi satırı 0 ve "alıcıya ait"; yazmayan İş Emri aynen; BK-57 | 19.11 (Lokman 19:00:47 kart "Evet, çatı şiltesi çıksın") |
 | [D-127](D-127.md) | Verandada tavan kirişi: D-107 verandaya (açık mahal) da uygulanır; açıklık açık kenarların kirişlerinin arası; 7 m'yi aşarsa kiriş açık kenardaki kolondan makasa dik gövdenin duvarına, makası ortadan taşır; listede L yüzden yüze + 2 × 10 (76 m² L 1982,5), yeni kolon yok; çizim yalnız saha montaj planında; kolon yoksa sorulur (`motor/tavan_kirisi.py`, PC-47; BK-58); depoda yalnız 76 m² teklif evi | 19.11 (Lokman 19:05:44 "verandanın tam ortasınada yani profil koyduğun yerede dikey bir kiriş gelecek …"; kart 19:33:12 "Eskizdeki gibi, L 1982,5") |
 | [D-129](D-129.md) | Gövdedeki verandanın (ana çatının örttüğü açık mahal) açık kenarında ara kolon varsa kiriş ara kolonlarda bölünür, her parça kolonun yüzünden yüzüne; ara kolonlu her eve (110 m² L 9940 → L 3230 × 2 + L 3280; 76 m², 140 m², 142 m², 83 m² yan verandalı ve bir deneme girdisi de değişir); ara kolonsuz kenar aynen (`prefabrik_liste._kenar_parcalari`; BK-59) | 19.11 (Lokman kart 21:39:45 "Eskizdeki gibi, yüzden yüze"; kart 21:45:21 "Ara kolonlu her eve") |
+| [D-131](D-131.md) | Ana çatının örttüğü verandada dörtomuzun (iki uçlu kırma) ucu duvarsızsa ilk ana makas uca en yakın gövde duvarının üstünde (D-114 gibi), kısa makaslar karşı uç duvarının pano eklerinde; 120 m² ana 9, kısa 4 + 4, çapraz 4 (BK-59) | 19.11 (Lokman 21:49:23 "çapraz makasları tam kırılma noktasını geçmiyorsa … bina duvarının üzerine al"; kart 21:59:00 "Eskizdeki gibi") |
 
 ## Numara defteri (14 Ekim 2026, BK-08; CIO planı › Görev 3)
 
@@ -268,6 +269,7 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | D | D-126 | alıcıya ait çatı izolasyonu (izocam) çatı şiltesini 0 yapar (BK-57; Lokman 19.11 kart 19:00:47) | yazıldı (19.11; `claude/project-thread-nngdr4`) |
 | D | D-127 | verandada tavan kirişi: kolondan gövdeye, makası ortadan taşır (BK-58, PC-47; Lokman 19.11 19:05:44, kart 19:33:12 "Eskizdeki gibi, L 1982,5") | yazıldı (19.11; tavan kirişi sohbeti, `claude/project-thread-bvls4f`) |
 | D | **D-128** | — | **sıradaki boş** |
+| D | D-131 | dörtomuzun duvarsız ucunda ilk ana makas gövdenin duvarında (BK-59; Lokman 19.11 21:49:23, kart 21:59:00) | yazıldı (19.11; `claude/project-thread-61wl66`) |
 | D | D-129 | gövdedeki verandanın açık kenarı ara kolonlarda bölünür, yüzden yüze (BK-59; Lokman 19.11 kart 21:39:45, 21:45:21) | yazıldı (19.11; `claude/project-thread-61wl66`) |
 | İE | İE-01–İE-08 | bu depo (`main`) | yazıldı |
 | İE | İE-09 | model atölyesi: kontrollü model üretimi ve banka hattı (Görev 6e; pano 30; P6001 güncellemesi kapsam dışı) | alındı (16.10; `claude/gorev-6e-model-atolyesi-rnhtcp`; PR-1 banka hattı 29.10, `claude/project-thread-rhjgzv`) |
