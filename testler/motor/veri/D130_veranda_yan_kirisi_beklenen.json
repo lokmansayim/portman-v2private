@@ -1,0 +1,21 @@
+{
+ "aciklama": "D-130 · BK-60 · Verandada her açık kenar kendi kirişini alır: aynı yöndeki ikinci yan kenar da (U veranda). Boy mahalin o kenarından (dış ölçü − 10; iki ucunda kolon varsa − 2 × 10). Yönde tek açık kenar bugünkü yoldan aynen (mahalin dış ölçüsü).",
+ "kaynak": "Lokman, karar kartı 19 Kasım 2026 21:43:35 UTC: \"Her açık kenara kiriş\" (soru: \"Verandanın ikinci yan kirişini listeye ekleyelim mi?\"; seçeneğin metni: \"76 m²'ye L 1782,5, 80 m² havuz evine L 500 eklenir. Çizim değişmez. Havuz evinin kıyası Mac'te yeniden koşar.\"). Eskiz PF `Tavan_Kirisi/2026-11-19_veranda/veranda_yan_kirisi_once_sonra.png`. Dayanak: 76 m² teklif evinin onaylı paftasında verandanın iki yanında da yeşil kesikli profil (BK-12: profil = kiriş).",
+ "evler": {
+  "76m2": {
+   "is_emri": "testler/motor/veri/D127_veranda_76m2.json",
+   "once": {"veranda_kenarlari_cm": [800.0, 313.75], "uc_kolon": [2, 1]},
+   "sonra": {"veranda_kenarlari_cm": [800.0, 313.75, 188.25], "uc_kolon": [2, 1, 1]},
+   "yeni_satirlar": [{"grup": "1002", "kalem": "Kutu profil (kiriş) 100 × 100", "olcu": "L 1782,5", "adet": 1}],
+   "not": "sağ yan: köşe kolonunun yüzünden salonun duvarına 178,25 (açık kenar 188,25 − 10)"
+  },
+  "80m2_3arti1": {
+   "is_emri": "is_emri/adaylar/PA21.json",
+   "once": {"veranda_kenarlari_cm": [413.5, 198.25], "uc_kolon": [1, 1]},
+   "sonra": {"veranda_kenarlari_cm": [413.5, 60.0, 198.25], "uc_kolon": [1, 1, 1]},
+   "yeni_satirlar": [{"grup": "1002", "kalem": "Kutu profil (kiriş) 100 × 100", "olcu": "L 500", "adet": 1}],
+   "not": "sol yan: köşe kolonundan mutfağın duvar ucuna 50 (açık kenar 60 − 10); kör ölçümün AP-25'i aynı İş Emri"
+  }
+ },
+ "tarama": ["is_emri/adaylar/PA21.json", "testler/kor/projeler/AP25/is_emri.json", "testler/motor/veri/D127_veranda_76m2.json"]
+}
