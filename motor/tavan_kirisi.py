@@ -21,6 +21,12 @@ kurulmuyor). Yöntem:
 4. Odaya bir kiriş (Lokman 09:39:57 "1 tane profil"): bir odaya iki ayrı kiriş gerekiyorsa ya da kirişten sonra 7 m'yi aşan parça
    kalıyorsa kiriş konmaz, sorulur (K21).
 
+5. Verandada (açık mahal; D-127, BK-58, PC-47; Lokman 19 Kasım 2026 19:05:44 "verandanın tam ortasınada yani profil koyduğun yerede dikey
+   bir kiriş gelecek makası ortadan taşıması için"): açıklık açık kenarların kirişlerinin arasıdır (kiriş kenarın içinde, kesit eninde).
+   7 m'yi aşan ve tek bir açık mahalde kalan bandın kirişi açık kenardaki bir kolondan (dikme; köşe kolonu değil, açıklığın içinde)
+   makasa dik gider, öteki ucu gövdenin duvarına oturur ve bandın bütün makaslarını keser. Adaylardan en kısası (3. madde gibi). Kolon
+   yoksa kiriş konmaz, sorulur (K21). Öteki kurallar (bant, makas aralığı, odaya bir kiriş, kalan parça) kapalı odadaki gibi.
+
 Çıktılar: listede "Kutu profil (kiriş) 100 × 100" satırı, boyu yüzden yüze + 2 × 10 (`duvara_oturma_cm`; kart 10:48:34 "Eskizdeki gibi"),
 ucunda kolon yok; DXF'in saha montaj planında kiriş (`dxf_out`, katman TAVAN_KIRISI). Uyarı listede adetsiz "Kural yok" satırıdır;
 çizime yazılmaz (kirişsiz evin, katalog planları dahil, DXF'i aynen). Ön onay A4 sayfası (M-02), IFC, kart modeli ve montaj rehberi bu
@@ -56,8 +62,10 @@ def kural() -> dict:
     dosya, anahtar = k["makas_aralik"]["okunan"].split(" › ")
     liste = json.loads((KOK / dosya).read_text(encoding="utf-8"))
     makas = liste["kurallar"][anahtar.split(".", 1)[1]]["deger"]
+    v = k.get("acik_mahal") or {}
     return {"esik": float(k["esik_cm"]["deger"]), "makas": float(makas), "oturma": float(k["duvara_oturma_cm"]["deger"]),
-            "kesit": float(k["kesit_cm"]["deger"]), "kalem": k["kalem"], "cati_tipleri": tuple(k["cati_tipleri"])}
+            "kesit": float(k["kesit_cm"]["deger"]), "kalem": k["kalem"], "cati_tipleri": tuple(k["cati_tipleri"]),
+            "acik_mahal": bool(v.get("deger")), "kolona_oturma": float((v.get("kolona_oturma_cm") or {}).get("deger", 0.0))}
 
 
 def _kapsam(plan: G.Plan, c: dict):
@@ -87,6 +95,17 @@ def _engeller(plan: G.Plan, e: str):
     return duvar, unary_union([duvar] + [box(*d) for d in plan.dikmeler]), (MultiLineString(sinir) if sinir else None)
 
 
+def _acik_kenar_kirisleri(plan: G.Plan, kap, acik_g: list, kesit: float):
+    """D-127: açık kenarın kirişi (veranda kirişi) kenarın içinde, açık mahalin yanında, kesit eninde (kolonun hizasında). Verandanın
+    makas yönündeki açıklığı bu kirişlerin arasıdır."""
+    if not acik_g or not plan.acik_kenarlar:
+        return None
+    a = unary_union(acik_g)
+    s = [LineString([(x0, y0), (x1, y1)]).buffer(kesit, cap_style=2) for (x0, y0, x1, y1, *_r) in plan.acik_kenarlar]
+    g = unary_union(s).intersection(a).intersection(kap)
+    return None if g.is_empty else g
+
+
 def bul(plan: G.Plan, ie: dict) -> dict:
     """Plan → {"kirisler": [...], "disinda": [...], "uyarilar": [...]}. Kiriş: oda, yön (kirişin koştuğu eksen), eksen, uçlar, yüzden yüze
     boy, liste boyu, iki ucu köşede mi, açıklık ve kirişin böldüğü iki parça (cm, Motor çerçevesi). `disinda`: 7 m'yi aşıp kiriş almayan
@@ -111,6 +130,9 @@ def bul(plan: G.Plan, ie: dict) -> dict:
     kapali = [m for m in plan.mahaller.values() if m.poly is not None and not (m.acik or m.tur in G.ACIK_MAHAL_TURLERI)]
     tumu = [m for m in plan.mahaller.values() if m.poly is not None]
     icinde = {m.ad: m.poly.buffer(0.5) for m in kapali}
+    acik_m = [m for m in tumu if m.acik or m.tur in G.ACIK_MAHAL_TURLERI]
+    acik_icinde = {m.ad: m.poly.buffer(0.5) for m in acik_m}
+    serit = _acik_kenar_kirisleri(plan, kap, [m.poly for m in acik_m], K["kesit"]) if K["acik_mahal"] else None
     cizgi = (lambda a, b, t: LineString([(a, t), (b, t)])) if e == "x" else (lambda a, b, t: LineString([(t, a), (t, b)]))
     eks = (lambda q: q[0]) if e == "x" else (lambda q: q[1])   # makas yönündeki koordinat
 
@@ -123,20 +145,31 @@ def bul(plan: G.Plan, ie: dict) -> dict:
         parcalar = _parcalar(cizgi(A0 - 1, A1 + 1, t).intersection(kap).difference(engel))
         if sinir is not None:                                 # duvarsız sınırın kirişi açıklığı keser
             parcalar = [q for g in parcalar for q in _parcalar(split(g, sinir))]
+        adaylar_ = []
         for g in parcalar:
             if g.length <= K["esik"]:
                 continue
             oda = next((ad for ad, p_ in icinde.items() if p_.contains(g)), None)
-            if oda is None:                                   # tek bir kapalı odada değil
-                gecen = sorted(m.ad for m in tumu if m.poly.intersection(g).length > 1)
-                if not any(m.ad in gecen for m in kapali):
-                    continue                                  # yalnız açık mahal (veranda, balkon, niş): kapsam dışı
-                oda = " + ".join(gecen)
+            if oda is not None:
+                adaylar_.append((g, oda, False))
+                continue
+            gecen = sorted(m.ad for m in tumu if m.poly.intersection(g).length > 1)   # tek bir kapalı odada değil
+            if any(m.ad in gecen for m in kapali):
+                adaylar_.append((g, " + ".join(gecen), False))
+            elif serit is not None:                           # D-127: yalnız açık mahal; açıklık açık kenarların kirişlerinin arası
+                for q in (_parcalar(g.difference(serit)) if not g.difference(serit).is_empty else []):
+                    if q.length <= K["esik"]:
+                        continue
+                    ac_ = next((ad for ad, p_ in acik_icinde.items() if p_.contains(q)), None)
+                    gecen_ = sorted(m.ad for m in tumu if m.poly.intersection(q).length > 1)
+                    adaylar_.append((q, ac_ or " + ".join(gecen_), True))
+            # D-127'den önce (anahtar kapalı): yalnız açık mahal kapsam dışı
+        for g, oda, acik in adaylar_:
             aa = [eks(q) for q in g.coords]
             a0, a1 = min(aa), max(aa)
             bn = next((b for b in acik_bant if b["oda"] == oda and a0 < b["son"] and a1 > b["ilk"] and all(b is not y_ for y_ in yeni)), None)
             if bn is None:
-                bn = {"oda": oda, "tek": oda in icinde, "lo": t - ADIM / 2, "satirlar": []}
+                bn = {"oda": oda, "tek": oda in (acik_icinde if acik else icinde), "acik": acik, "lo": t - ADIM / 2, "satirlar": []}
                 bantlar.append(bn)
             bn["satirlar"].append((t, a0, a1))
             bn["hi"], bn["ilk"], bn["son"] = t + ADIM / 2, a0, a1
@@ -182,7 +215,12 @@ def bul(plan: G.Plan, ie: dict) -> dict:
             disari(bn, ac, "açıklık birden çok mahalden geçiyor", "açıklık birden çok mahalden geçiyor, kiriş yeri sorulur")
             continue
         aday: dict = {}
-        for w in plan.duvarlar:
+        if bn["acik"]:                                        # D-127: kiriş açık kenardaki kolondan gövdenin duvarına
+            aday = _kolon_adaylari(plan, bn, kap, engel, serit, duvar_t, acik_icinde[bn["oda"]], kyon, a0, a1, lo, hi)
+            if not aday:
+                disari(bn, ac, "verandada kirişin oturacağı kolon yok", "kirişin oturacağı kolon yok, kiriş yeri sorulur")
+                continue
+        for w in ([] if bn["acik"] else plan.duvarlar):
             if w.yon != kyon or not a0 + 1 < w.c < a1 - 1:
                 continue
             for uc, yon in ((w.p0, -1), (w.p1, 1)):
@@ -245,6 +283,47 @@ def bul(plan: G.Plan, ie: dict) -> dict:
             disari(lst[0][0], ac, f"kirişten sonra {_fmt(max(k['parcalar_cm']))} cm'lik parça kalıyor",
                    f"bir kirişten sonra {_fmt(max(k['parcalar_cm']))} cm'lik parça kalıyor, sorulur")
             continue
-        sonuc["kirisler"].append({"oda": oda, "yon": kyon, **k, "liste_boyu_cm": round(k["yuzden_yuze_cm"] + 2 * K["oturma"], 2),
-                                  "aciklik_cm": ac})
+        if k.get("uc") == "kolon":                            # D-127: bir ucu kolonda (kolona oturma kuralı), öteki duvarda
+            boy = k["yuzden_yuze_cm"] + K["oturma"] + K["kolona_oturma"]
+        else:
+            boy = k["yuzden_yuze_cm"] + 2 * K["oturma"]
+        sonuc["kirisler"].append({"oda": oda, "yon": kyon, **k, "liste_boyu_cm": round(boy, 2), "aciklik_cm": ac})
     return sonuc
+
+
+def _kolon_adaylari(plan: G.Plan, bn: dict, kap, engel, serit, duvar_t, oda_g, kyon: str, a0: float, a1: float, lo: float, hi: float) -> dict:
+    """D-127: açık bandın kiriş adayları. Kolon (dikme) açık mahale değer ve ekseni açıklığın içindedir (köşe kolonu değil). Kiriş kolonun
+    yüzünden makasa dik gider; öteki ucu duvara varır (açık kenarın kirişine, sınır kirişine ya da başka kolona değil), aynı açık mahalde
+    kalır ve bandın bütün makaslarını keser."""
+    aday: dict = {}
+    eng = unary_union([engel, serit]) if serit is not None else engel
+    kk = (lambda q: [cc[1] for cc in q.coords]) if kyon == "y" else (lambda q: [cc[0] for cc in q.coords])
+    for d in plan.dikmeler:
+        if not oda_g.buffer(1.0).intersects(box(*d)):
+            continue
+        c = (d[0] + d[2]) / 2 if kyon == "y" else (d[1] + d[3]) / 2
+        if not a0 + 1 < c < a1 - 1:
+            continue
+        for uc, yon in (((d[3], 1), (d[1], -1)) if kyon == "y" else ((d[2], 1), (d[0], -1))):
+            uzak = uc + yon * 1e4
+            ray = LineString([(c, uc), (c, uzak)]) if kyon == "y" else LineString([(uc, c), (uzak, c)])
+            ps = sorted((q for q in _parcalar(ray.intersection(kap.buffer(0.01)).difference(eng)) if q.length > 1),
+                        key=lambda q: min(abs(v - uc) for v in kk(q)))
+            if not ps:
+                continue
+            q = ps[0]
+            vs = kk(q)
+            s0, s1 = (min(vs), max(vs)) if yon > 0 else (max(vs), min(vs))
+            if abs(s0 - uc) > 1.0:                            # kolonun yüzünden başlamalı
+                continue
+            ote = Point((c, s1 + yon * 0.5) if kyon == "y" else (s1 + yon * 0.5, c))
+            if not duvar_t.contains(ote) or not oda_g.contains(q):
+                continue
+            u0, u1 = sorted((s0, s1))
+            if u0 > lo + 2 or u1 < hi - 2:                    # bandın bütün makaslarını taşımalı
+                continue
+            parca = (round(max(c - s_[1] for s_ in bn["satirlar"]), 2), round(max(s_[2] - c for s_ in bn["satirlar"]), 2))
+            aday[(round(c, 2), round(u0, 2), round(u1, 2))] = {
+                "eksen_cm": round(c, 2), "uclar_cm": [round(u0, 2), round(u1, 2)], "yuzden_yuze_cm": round(u1 - u0, 2),
+                "iki_ucu_kose": False, "uc": "kolon", "kolon_cm": [round(v, 2) for v in d], "parcalar_cm": list(parca), "_h": 0.0}
+    return aday

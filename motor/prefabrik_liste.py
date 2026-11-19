@@ -1487,6 +1487,17 @@ def liste(N: dict, kurallar: dict | None = None, pafta: dict | None = None) -> d
     tk_ = None
     for t_ in N.get("tavan_kirisleri") or []:                  # D-107: makas yönünde 7 m'yi aşan açıklığın kirişi; ucunda kolon yok
         tk_ = tk_ or _tavan_kirisi_kurali()
+        if t_.get("uc") == "kolon":                              # D-127 (BK-58): verandada kiriş açık kenardaki kolondan gövdenin duvarına
+            ek_ = [v for v in (tk_["oturma"], tk_["kolona_oturma"]) if v]
+            ekle("1002", tk_["kalem"], f"L {mm(t_['liste_boyu_cm'])}", 1, "Liste kuralı",
+                 f"tavan kirişi ({t_['oda']}, makas yönünde açıklık {sy(t_['aciklik_cm'])} cm > {sy(tk_['esik'])}, açık kenarların kirişlerinin "
+                 f"arası): yüzden yüze {sy(t_['yuzden_yuze_cm'])}"
+                 + (f" + {' + '.join(sy(v) for v in ek_)}" if len(set(ek_)) > 1 else f" + 2 × {sy(ek_[0])}" if len(ek_) == 2 else
+                    f" + {sy(ek_[0])}" if ek_ else "")
+                 + " (bir ucu açık kenardaki kolonda, öteki duvarda; yeni kolon yok)",
+                 "Lokman, 19 Kasım 2026 19:05:44 \"verandanın tam ortasınada yani profil koyduğun yerede dikey bir kiriş gelecek makası ortadan "
+                 "taşıması için\" (D-127); tavan kirişi D-107")
+            continue
         ekle("1002", tk_["kalem"], f"L {mm(t_['liste_boyu_cm'])}", 1, "Liste kuralı",
              f"tavan kirişi ({t_['oda']}, makas yönünde açıklık {sy(t_['aciklik_cm'])} cm > {sy(tk_['esik'])}): yüzden yüze {sy(t_['yuzden_yuze_cm'])}"
              f" + 2 × {sy(tk_['oturma'])} (iki ucu duvarda; uçta kolon yok)",

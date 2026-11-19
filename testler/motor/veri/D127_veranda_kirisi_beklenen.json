@@ -1,0 +1,17 @@
+{
+ "aciklama": "D-127 · BK-58 · PC-47 hedef örneği: verandada (açık mahal) makas yönünde 7 m'yi aşan açıklığın kirişi. 76 m² teklif evi (TK-08 r04, 19 Kasım 2026; İş Emri adsız kopya `D127_veranda_76m2.json`).",
+ "kaynak": "Lokman, 19 Kasım 2026 19:05:44 UTC (76 m² teklif sohbeti): \"verandanın tam ortasınada yani profil koyduğun yerede dikey bir kiriş gelecek makası ortadan taşıması için aslında daha önce kural olarak girdik\". Onaylı pafta (19 Kasım 2026 18:58 UTC \"en son onaylı hali bu\"): verandanın ortasında, 391,5'teki kolondan salonun duvarına yeşil kesikli profil (kiriş; BK-12, Lokman 21 Ekim 16:22). Eskiz PF `Tavan_Kirisi/2026-11-19_veranda/veranda_kirisi_76m2_once_sonra.png`; kart 19 Kasım 2026 19:33:12 UTC \"Eskizdeki gibi, L 1982,5\" (soru: \"Verandanın ortasındaki kiriş eskizdeki gibi mi, boyu hangisi olsun?\").",
+ "is_emri": "testler/motor/veri/D127_veranda_76m2.json",
+ "pafta_okumasi": {"yon": "y", "kolon_eksen_cm": 391.5, "not": "paftanın alt ölçüsü 391,5 + 408,55 = 800,05; kiriş kolondan salonun ön duvarına (paftada salon önünde veranda 200,01, Motor'da 188,25 + duvar)"},
+ "kirisler": [
+  {"oda": "VERANDA", "yon": "y", "eksen_cm": 391.5, "uclar_cm": [10.0, 188.25], "yuzden_yuze_cm": 178.25, "iki_ucu_kose": false,
+   "uc": "kolon", "kolon_cm": [386.5, 0.0, 396.5, 10.0], "parcalar_cm": [381.5, 398.5], "liste_boyu_cm": 198.25, "aciklik_cm": 780.0},
+  {"oda": "SALON+MUTFAK", "yon": "y", "eksen_cm": 261.0, "uclar_cm": [323.75, 566.75], "yuzden_yuze_cm": 243.0, "iki_ucu_kose": true,
+   "parcalar_cm": [251.0, 529.0], "liste_boyu_cm": 263.0, "aciklik_cm": 780.0}
+ ],
+ "liste_satiri": {"grup": "1002", "kalem": "Kutu profil (kiriş) 100 × 100", "olcu": "L 1982,5", "adet": 1},
+ "kolonsuz": {
+  "aciklama": "Aynı ev, verandanın ortasındaki kolon yok (r01): kiriş konmaz, listede \"Kural yok\" satırı sorar (K21).",
+  "disinda": [{"oda": "VERANDA", "aciklik_cm": 780.0, "neden": "verandada kirişin oturacağı kolon yok"}]
+ }
+}

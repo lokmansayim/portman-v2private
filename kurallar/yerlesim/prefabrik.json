@@ -508,7 +508,7 @@
    "not": "TK-04 r06'da (cumba 0–386,5) ana makaslar 7,5'ten arka saçak ucu 928,5'e: açıklık 861 (önce 898,5), mahya y 468 (önce 449,25); dereler (−30; 7,5) ve (416,5; 7,5)'ten (193,25; 230,75)'e; cumbanın yan saçakları 37,5 cm. Baş makas omegası makasın boyunca (M-03, D-53). Paftalardan farkı: AP-06 (MK05–MK08), AP-13 (M4–M7) ve AP-16 (MKS4–MKS7) makas planlarında cumbanın altındaki ana makaslar cumbanın baş makasında biter, verandanın üstündekiler saçağa kadar; kör İş Emri'leri anahtarsız, paftadaki gibi eski yolda ölçülür."
   },
   "tavan_kirisi": {
-   "kural": "D-107 (PC-43): prefabrikte makasın geçtiği yerde makas yönündeki açıklık 7 m'yi aşarsa odaya bir tavan kirişi (kutu profil 100 × 100) konur. Kiriş makasa dik gider, iki ucu duvara oturur; en kısa çizgi seçilir, iki çizgi eşitse iki ucu da köşede olan seçilir. Makaslar 125,5 cm arayla dizilir: açıklığın makasların dizildiği yöndeki genişliği makas aralığından darsa oraya makas gelmez, kiriş de konmaz. Kapsam kapalı odalar ve ana çatının altı; çıkıntılı cumbanın makası öteki yöne gider, cumba kapsam dışında. Okuyan `motor/tavan_kirisi.py`; liste (`prefabrik_liste`) ve DXF'in saha montaj planı (`dxf_out`, katman TAVAN_KIRISI) oradan alır. Ön onay A4 sayfası, IFC, kart modeli ve montaj rehberi bu sürümde kirişi çizmez. Yer bulunamazsa ya da iki eşit yer kalırsa kiriş konmaz, liste ve çizim uyarı yazar (K21).",
+   "kural": "D-107 (PC-43): prefabrikte makasın geçtiği yerde makas yönündeki açıklık 7 m'yi aşarsa odaya bir tavan kirişi (kutu profil 100 × 100) konur. Kiriş makasa dik gider, iki ucu duvara oturur; en kısa çizgi seçilir, iki çizgi eşitse iki ucu da köşede olan seçilir. Makaslar 125,5 cm arayla dizilir: açıklığın makasların dizildiği yöndeki genişliği makas aralığından darsa oraya makas gelmez, kiriş de konmaz. Kapsam kapalı odalar ve ana çatının altı; çıkıntılı cumbanın makası öteki yöne gider, cumba kapsam dışında. Verandada (açık mahal; D-127, PC-47) açıklık açık kenarların kirişlerinin arasıdır; kiriş açık kenardaki kolondan gövdenin duvarına gider, kolon yoksa sorulur. Okuyan `motor/tavan_kirisi.py`; liste (`prefabrik_liste`) ve DXF'in saha montaj planı (`dxf_out`, katman TAVAN_KIRISI) oradan alır. Ön onay A4 sayfası, IFC, kart modeli ve montaj rehberi bu sürümde kirişi çizmez. Yer bulunamazsa ya da iki eşit yer kalırsa kiriş konmaz, liste ve çizim uyarı yazar (K21).",
    "esik_cm": {
     "deger": 700,
     "durum": "lokman",
@@ -536,6 +536,18 @@
     "durum": "lokman",
     "tarih": "2026-11-15",
     "not": "Kirişin uçlarına yeni kolon ya da köşe profili konmaz; uçlar duvarın köşe direğine ve H'ına oturur (81 m² paftası; kart 10:48:34 \"Eskizdeki gibi\": \"Uçlarda yeni kolon yok\")."
+   },
+   "acik_mahal": {
+    "deger": true,
+    "durum": "lokman",
+    "tarih": "2026-11-19",
+    "not": "D-127 (BK-58, PC-47): verandada (açık mahal) makas yönündeki açıklık açık kenarların kirişlerinin arası; 7 m'yi aşarsa kiriş açık kenardaki kolondan (köşe kolonu değil) makasa dik gövdenin duvarına gider. Kolon yoksa kiriş konmaz, sorulur (K21). Lokman, 19 Kasım 2026 19:05:44 UTC (76 m² teklif sohbeti): \"verandanın tam ortasınada yani profil koyduğun yerede dikey bir kiriş gelecek makası ortadan taşıması için aslında daha önce kural olarak girdik\". 76 m²'nin onaylı paftasında verandanın ortasında yeşil kesikli profil (kiriş; BK-12, 21 Ekim 16:22). Eskiz kartı 19 Kasım 2026 19:33:12 UTC \"Eskizdeki gibi, L 1982,5\".",
+    "kolona_oturma_cm": {
+     "deger": 10,
+     "durum": "lokman",
+     "tarih": "2026-11-19",
+     "not": "Kirişin kolondaki ucu da 10 cm oturur (duvardaki uç `duvara_oturma_cm`): liste boyu yüzden yüze + 2 × 10 (76 m²: 178,25 + 20 = L 1982,5). Lokman, kart 19 Kasım 2026 19:33:12 UTC \"Eskizdeki gibi, L 1982,5\" (soru: \"Verandanın ortasındaki kiriş eskizdeki gibi mi, boyu hangisi olsun?\"; seçeneğin sonucu: \"Tavan kirişi gibi: yüzden yüze 178,25 + 2 × 10. Kural verandaya da uygulanır; liste ve saha montaj planı değişir.\")."
+    }
    },
    "cati_tipleri": [
     "besik",

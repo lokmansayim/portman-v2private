@@ -1,0 +1,293 @@
+{
+ "is_emri_no": "D127-VERANDA-76M2",
+ "revizyon": 1,
+ "talep": {
+  "bayi": {
+   "kod": "TEST",
+   "ad": "Test"
+  },
+  "musteri_adi": "TEST",
+  "metin": "D-127 hedef örneği: 76 m² teklif evinin (TK-08 r04, 19 Kasım 2026) planı, adsız. Gövdenin içinde L biçimli veranda, ortasında kolon; makas yönünde açıklık 780 cm."
+ },
+ "yapi": {
+  "sistem": "prefabrik",
+  "kat_sayisi": 1,
+  "duvar_yuksekligi_cm": 250,
+  "duvar_kalinligi_cm": {
+   "dis": 10,
+   "ic": 6
+  },
+  "olcu_kaynagi": "dis_olcu",
+  "dis_olcu_cm": {
+   "x": 800,
+   "y": 951.25
+  },
+  "referans_model": "TK-08",
+  "grid": {
+   "x_pano": 6.5,
+   "y_pano": 7.5
+  },
+  "kisa_kenar": "x",
+  "giris_cephesi": "on",
+  "dis_dusey_duvar": "cevre_aks_disinda",
+  "dizilim": {
+   "baslangic": "arka-sol",
+   "hiza": "izgara",
+   "dis_duvar_t_bolme": true,
+   "kapi": "mantik",
+   "kose": "oda",
+   "dik_duvar_pencere": "tam_orta",
+   "dis_pano_dayanagi": [
+    {
+     "x": 449.25,
+     "aralik_cm": [
+      261,
+      790
+     ],
+     "duvar_cm": 758
+    }
+   ]
+  },
+  "ek_akslar_cm": {
+   "x": [],
+   "y": []
+  }
+ },
+ "mahaller": [
+  {
+   "ad": "YATAK ODASI 1",
+   "tur": "yatak_odasi",
+   "konum_cm": [
+    [
+     10,
+     5,
+     261,
+     381.5
+    ]
+   ]
+  },
+  {
+   "ad": "BANYO",
+   "tur": "banyo",
+   "konum_cm": [
+    [
+     261,
+     5,
+     449.25,
+     256
+    ]
+   ]
+  },
+  {
+   "ad": "HOL",
+   "tur": "antre_hol",
+   "konum_cm": [
+    [
+     261,
+     256,
+     449.25,
+     381.5
+    ]
+   ]
+  },
+  {
+   "ad": "YATAK ODASI 2",
+   "tur": "yatak_odasi",
+   "konum_cm": [
+    [
+     449.25,
+     5,
+     790,
+     381.5
+    ]
+   ]
+  },
+  {
+   "ad": "SALON+MUTFAK",
+   "tur": "salon",
+   "konum_cm": [
+    [
+     10,
+     381.5,
+     790,
+     632.5
+    ],
+    [
+     261,
+     632.5,
+     790,
+     758
+    ]
+   ]
+  },
+  {
+   "ad": "VERANDA",
+   "tur": "veranda",
+   "konum_cm": [
+    [
+     10,
+     632.5,
+     261,
+     946.25
+    ],
+    [
+     261,
+     758,
+     790,
+     946.25
+    ]
+   ]
+  }
+ ],
+ "acik_sinirlar": [
+  [
+   "HOL",
+   "SALON+MUTFAK"
+  ]
+ ],
+ "acikliklar": [
+  {
+   "tur": "pencere",
+   "olcu": "150x140",
+   "mahal": "YATAK ODASI 1",
+   "duvar": "arka"
+  },
+  {
+   "tur": "pencere",
+   "olcu": "60x40",
+   "mahal": "BANYO",
+   "duvar": "arka",
+   "bolmeler": [
+    {
+     "tur": "vasistas",
+     "en_cm": 60
+    }
+   ]
+  },
+  {
+   "tur": "pencere",
+   "olcu": "150x140",
+   "mahal": "YATAK ODASI 2",
+   "duvar": "arka"
+  },
+  {
+   "tur": "pencere",
+   "olcu": "120x100",
+   "mahal": "SALON+MUTFAK",
+   "duvar": "sol",
+   "acilis": "surgulu",
+   "pano": 0
+  },
+  {
+   "tur": "pencere",
+   "olcu": "120x150",
+   "mahal": "SALON+MUTFAK",
+   "duvar": "on",
+   "pano": 1
+  },
+  {
+   "tur": "pencere",
+   "olcu": "180x150",
+   "mahal": "SALON+MUTFAK",
+   "duvar": "on",
+   "pano": 4
+  },
+  {
+   "tur": "dis_kapi",
+   "olcu": 90,
+   "arasi": [
+    "VERANDA",
+    "SALON+MUTFAK"
+   ],
+   "pano": 5
+  },
+  {
+   "tur": "ic_kapi",
+   "olcu": 82,
+   "arasi": [
+    "HOL",
+    "YATAK ODASI 1"
+   ]
+  },
+  {
+   "tur": "ic_kapi",
+   "olcu": 82,
+   "arasi": [
+    "HOL",
+    "YATAK ODASI 2"
+   ]
+  },
+  {
+   "tur": "ic_kapi",
+   "olcu": 82,
+   "arasi": [
+    "HOL",
+    "BANYO"
+   ]
+  }
+ ],
+ "cati": {
+  "tip": "besik",
+  "egim_yuzde": 33,
+  "sacak_cm": 30,
+  "topuk_cm": 10,
+  "makas_yonu": "kisa_kenar",
+  "makas_ekseni": "x"
+ },
+ "cikti": {
+  "pdf": true,
+  "dxf": true,
+  "pafta": "A2",
+  "icerik": [
+   "aksli_plan",
+   "alanli_kopya",
+   "montaj_kopyasi",
+   "on_gorunus",
+   "cati_profili",
+   "ozellik_tablosu"
+  ]
+ },
+ "ozellikler": {
+  "Çatı Şekli": "Beşik",
+  "Çatı Kaplaması": "OSB + Nem Bariyeri + Trapez Saç",
+  "Çatı Kaplama Rengi": "Antrasit Gri",
+  "Tavan": "Ters",
+  "Dış Kapı": "Çelik Standart",
+  "İç Kapılar": "Standart Amerikan",
+  "Pencere Rengi": "Alıcıya ait",
+  "Saçak ve Alın Rengi": "Antrasit Gri",
+  "Dış Cephe Boya": "Alıcıya ait",
+  "İç Cephe Boya": "Alıcıya ait"
+ },
+ "alici_ait": {
+  "kalemler": [
+   "Pencere detayı",
+   "Boya grubu",
+   "Vitrifiye grubu",
+   "Su tesisatı grubu",
+   "Çatı arası izocam"
+  ],
+  "kaynak": "76 m² teklif evinin onaylı paftası (19 Kasım 2026)"
+ },
+ "pafta_uyarilari": [],
+ "varsayimlar": [
+  "Pafta 800,05 × 950,06 cm (dış 10 / iç 6). x: sol sütun 264 = 10 + 2 pano + 3; banyo ve hol 188,25 = 1,5 pano; sağ sütun 347,8, dış ölçü 800'e kesilir (TK-06 gibi, 6,5 pano).",
+  "y (arkadan, duvar ekseninden): yatak odaları 384,5 = 5 + 3 pano + 3 (planda aynı). Salon ön duvarı paftada 750,05 (ızgara dışı, 5,9 pano); Motor 6 pano (758 eksen, 763 dış yüz): salon ve mutfak 13 cm derinleşir. Mutfak ön duvarı 5 pano (632,5), adım 125,5 paftayla aynı. Toplam 7,5 pano = 951,25 (paftada 950,06).",
+  "Veranda gövdenin içinde L biçimli: mutfağın önünde 2,5 pano, salonun önünde 1,5 pano (paftada 200,01, Motor 188,25). Paftadaki ara kolon x 391,5.",
+  "Hol salona açık (paftada aradaki duvar yok). Dış kapı veranda ile salon arasında, x 261'deki 1 panoluk duvarda.",
+  "Pencereler paftanın pencere detayından: yatak odaları arkada 150/140 (2 adet), banyo arkada 60/60 vasistas, mutfak solda 120/120 sürgülü, mutfak önünde 120/150, salon önünde 180/150.",
+  "Antet: bina yüksekliği 2500 mm, dış 100 / iç 60, pres panel, beşik, trapez + OSB + nem bariyeri, antrasit gri, tavan 'Dizme' = asma dizme tavan, çelik dış kapı, Amerikan iç kapı, Polisan boya, beyaz pencere. Çatı eğimi paftada 18,2° (%32,9) → %33; saçak 30 (860 − 800).",
+  "Pano dizilimi: salonun ön duvarı yatak odası 2'nin arka duvarıyla aynı akslarda (dış pano dayanağı x 449,25): 62,75 + 125,5 + 251'lik pencereli pano (180/150) + 89,75; paftadaki pencere yeriyle aynı. Mutfağın ön duvarında 120/150 duvarın tam ortasında (D-121), paftada veranda köşesine yakın. Mutfağın sol duvarında 120/120 sürgülü arkadaki panoda (paftadaki gibi). Banyonun 60/60'ı arka duvarın tam ortasında (D-121): 31,38 + 125,5 + 31,38.",
+  "r02 (Lokman, 17 Kasım 2026 09:16:47 UTC, kart 'Onay, ortada kolon olsun'): kat planı r01 onaylı; verandanın ön kenarına paftadaki gibi x 391,5 eksende 10 × 10 kolon (dikme [386,5, 0], kolon 386,5–396,5).",
+  "r03 (Lokman, 17 Kasım 2026 09:17:48 UTC: \"60/60 pencereyi vasistaslı yap\"): banyonun 60/60 penceresi tek bölme vasistas (bolmeler, D-52). Plan ve çatı r02 ile aynı.",
+  "r04 (Lokman 19 Kasım 2026 18:58 UTC, onaylı pafta: \"en son onaylı hali bu bazı özellikleri değişti mesala ters tavan oldu pencereler boya grubu gibi antetli pdf'in sağ tarafına bak ve düzelt\"): tavan Dizme → Ters Tavan; dış ve iç cephe boya, pencere rengi ve pencere detayı alıcıya ait; açıklama: izocam, boya, vitrifiye, su tesisatı alıcıya ait; banyo penceresi 60/60 → 60/40; salonun yan sürgülü penceresi 120/120 → 120/100."
+ ],
+ "eksikler": [],
+ "dikmeler": [
+  [
+   386.5,
+   0
+  ]
+ ],
+ "verandalar": []
+}
