@@ -143,6 +143,7 @@ Biçim: karar · gerekçe · reddedilen seçenekler · geri alma yolu · kim ve 
 | [D-123](D-123.md) | 85 m² katalog evi (P8501 r05): ana makaslar cumba makasının arkasında biter, kampanyalı ev gibi (D-53); ön-sol köşe kampanyalı evin rehberindeki gibi; plan aynı; BK-54 | 17.11 (Lokman 08:27:29) |
 | [D-124](D-124.md) | D-121'in istisnası: ıslak hacmin (banyo, ebeveyn banyosu, WC, tuvalet) penceresi ve vasistas (kataloğun her vasistas ölçüsü) ortalanmaz, yerinde kalır; ikisi birlikte ("ne varsa"); BK-53, PC-46 | 17.11 (Lokman 08:35:02) |
 | [D-125](D-125.md) | Çizim okumada dış kapı bayi çiziminde nerede çiziliyse orada: içeride çizili ve önü cephe duvarsızsa önü açık giriş nişi (GİRİŞ, gövdedeki açık mahal; TK-01 r06 gibi), kapı nişle iç oda arasında; cephede çiziliyse cephede (ANTRE bugünkü gibi); çelikte niş çizilmez; BK-55 | 17.11 (Lokman 08:33:02 yorum; kart 08:37:52 "Çizimde nasılsa öyle") |
+| [D-126](D-126.md) | İş Emri çatı izolasyonunu alıcıya ait yazarsa (izocam, şilte, çatı izolasyonu) yükleme listesinde çatı şiltesi satırı 0 ve "alıcıya ait"; yazmayan İş Emri aynen; BK-57 | 19.11 (Lokman 19:00:47 kart "Evet, çatı şiltesi çıksın") |
 
 ## Numara defteri (14 Ekim 2026, BK-08; CIO planı › Görev 3)
 
@@ -262,7 +263,8 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | D | D-122, D-123 | (başka sohbetler: şase pul ve pencere kör kasası PR #264; 85 m² katalog rehberi PR #267) | alındı (16–17.11) |
 | D | D-124 | D-121'in istisnası: ıslak hacim ve vasistas penceresi ortalanmaz, yerinde kalır (Lokman 17.11 08:35:02; BK-53, PR #265) | yazıldı (17.11; `claude/project-thread-u9x1le`) |
 | D | D-125 | çizim okumada dış kapı çizimde nasılsa öyle; içerideyse önü açık giriş nişi (BK-55; Lokman 17.11 kart 08:37:52) | yazıldı (17.11; çizim okuma dış kapı sohbeti, `claude/project-thread-mjv1ao`) |
-| D | **D-126** | — | **sıradaki boş** |
+| D | D-126 | alıcıya ait çatı izolasyonu (izocam) çatı şiltesini 0 yapar (BK-57; Lokman 19.11 kart 19:00:47) | yazıldı (19.11; `claude/project-thread-nngdr4`) |
+| D | **D-127** | — | **sıradaki boş** |
 | İE | İE-01–İE-08 | bu depo (`main`) | yazıldı |
 | İE | İE-09 | model atölyesi: kontrollü model üretimi ve banka hattı (Görev 6e; pano 30; P6001 güncellemesi kapsam dışı) | alındı (16.10; `claude/gorev-6e-model-atolyesi-rnhtcp`; PR-1 banka hattı 29.10, `claude/project-thread-rhjgzv`) |
 | İE | İE-10, İE-11, İE-12 | prefabrik hattı (PR #12, PR #14, `ie-12-prefabrik-bayi-paftasi`) | `main`'e BK-12 ile (PR-1: motor ve bayi paftası; liste ve mühür kıyası sonraki PR'larda) |
@@ -337,7 +339,8 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | BK | BK-53 | Yeni bayi talebinde pencere ortalama kendiliğinden açık: bayinin çiziminden okunan prefabrik eve Beyin `dizilim.dik_duvar_pencere: tam_orta` yazar; havuz, katalog ve onaylı şablonlar anahtarsız; ıslak hacim ve vasistas penceresi ortalanmaz (D-124) (D-121 V5; Lokman kartı 17.11 04:52:24 "Evet, ayrı işte açılsın"; `claude/project-thread-u9x1le`) | yazıldı (17.11) |
 | BK | BK-54 | Montaj rehberi ön-sol köşeden dizilen evi kurar; 85 m² katalog evi rehberi (D-123; `claude/project-thread-xmignz`) | yazıldı (17.11) |
 | BK | BK-55 | Çizim okumada önü açık giriş nişi (`beyin/gorsel_okuma.py`, işlev `giris`) (D-125; `claude/project-thread-mjv1ao`) | yazıldı (17.11) |
-| BK | **BK-57** | — | **sıradaki boş** (BK-55 dış kapı, BK-56 başka sohbet; numara defteri) |
+| BK | BK-57 | Yükleme listesinde alıcıya ait çatı izolasyonu: `prefabrik_liste.silte_alici` (D-126; `claude/project-thread-nngdr4`) | yazıldı (19.11) |
+| BK | **BK-58** | — | **sıradaki boş** (BK-56 başka sohbet; numara defteri) |
 
 ## 27 Eylülde Lokman'ın verdiği kararlar
 
