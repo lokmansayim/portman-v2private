@@ -2,6 +2,8 @@
 
 Şablon: sayfalar TEKLİF, SEVKİYAT, İMALAT, DEPO; başlık satırı "S | Malzeme | Malzeme Ölçüsü | Adet". Evin gerçek listesi TEKLİF
 sayfasındadır; SEVKİYAT ve İMALAT her evde aynıdır (şablondan kalmış), okunmaz. Grup satırı ("KOD:" ölçü sütununda) atılır.
+Gizli satır okunmaz: 2019 şablonunun TEKLİF sayfasında gizli satırlarda şablonun eski evinin değerleri kalmıştır (İE-43 PR-6;
+aynı satırlar iki evde aynı adetle çıkıyordu).
 Okuma kör testin okuyucusuyla (`testler/kor/oku.py`). Excel'de TC kimlik no, telefon ve adres vardır: araç yalnız malzeme satırını yazar
 (malzeme, boyut, adet); dosya Mac'te koşulur, çıktı Mac'ten yalnız malzeme satırlarıyla çıkar.
 
@@ -25,14 +27,21 @@ if "MALZEME ÖLÇÜSÜ" not in oku.SUTUN_BOYUT:
 def oku_liste(yol: Path) -> dict:
     """Excel → {"sayfa", "satirlar": [{grup, malzeme, boyut, adet}], "okunmayan"}; TEKLİF sayfası yoksa OkumaHatasi."""
     import openpyxl
+    from openpyxl.cell.cell import MergedCell
     s: dict = {}
-    wb = openpyxl.load_workbook(str(yol), data_only=True, read_only=True)
+    wb = openpyxl.load_workbook(str(yol), data_only=True)          # read_only satırın gizli olduğunu bilmez
     adlar = [ws.title.strip().upper() for ws in wb.worksheets]
     i = next((k for k, a in enumerate(adlar) if a in SAYFA), None)
     if i is None:
         raise oku.OkumaHatasi(f"TEKLİF sayfası yok: {adlar}")
-    satir = [x for x in oku.excel_sayfasi(wb.worksheets[i], s) if (x.get("boyut") or "").upper() != "KOD:"]
-    return {"sayfa": wb.worksheets[i].title, "satirlar": satir, "okunmayan": s}
+    ws = wb.worksheets[i]
+    gizli = sorted(n for n, d in ws.row_dimensions.items() if d.hidden)
+    for n in gizli:                                                 # yalnız bellekte; dosya yazılmaz
+        for c in ws[n]:
+            if not isinstance(c, MergedCell):
+                c.value = None
+    satir = [x for x in oku.excel_sayfasi(ws, s) if (x.get("boyut") or "").upper() != "KOD:"]
+    return {"sayfa": ws.title, "satirlar": satir, "okunmayan": s, "gizli_satir": len(gizli)}
 
 
 def main(argv: list[str] | None = None) -> int:

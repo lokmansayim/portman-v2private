@@ -127,10 +127,10 @@ def _kenar_tablosu() -> dict:
 
 
 def test_kenar_kilidi():
-    """Öteki evler aynen (BK-60 A3): kenar tablosu kilitle aynı. Kilit D-130'un kodundan yazıldı; `main`'le (50aad0bc) farkı yalnız 76 m²
-    (+188,25), 80 m² 3+1 (PA21 ve kör AP25, +60) ve 160/100 denemesi (+251; `deneme/` tarama dışında) (geometri hakemi, 19 Kasım 2026:
-    180 İş Emri'nin yükleme listesi `main`'le kıyaslandı). Kilit bilinçli yazılır: `python testler/motor/test_d130_veranda_yan_kirisi.py
-    --kilit`, gerekçesi iş emrine."""
+    """Öteki evler aynen (BK-60 A3): kenar tablosu kilitle aynı. Kilit D-130'un kodundan yazıldı (124 İş Emri). `main`'le (50aad0bc)
+    farkı yalnız 76 m² (+188,25), 80 m² 3+1 (PA21 ve kör AP25, +60) ve 160/100 denemesi (+251; `deneme/` tarama dışında) (geometri
+    hakemi, 19 Kasım 2026: 180 İş Emri'nin yükleme listesi `main`'le kıyaslandı). Kilit bilinçli yazılır:
+    `python testler/motor/test_d130_veranda_yan_kirisi.py --kilit`, gerekçesi iş emrine."""
     assert _kenar_tablosu() == json.loads(KILIT.read_text(encoding="utf-8"))
 
 

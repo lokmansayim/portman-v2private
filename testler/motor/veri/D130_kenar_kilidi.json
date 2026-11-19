@@ -907,6 +907,42 @@
    ]
   ]
  },
+ "is_emri/adaylar/PA45.json": {
+  "VERANDA": [
+   [
+    502.0,
+    1
+   ],
+   [
+    130.5,
+    1
+   ]
+  ]
+ },
+ "is_emri/adaylar/PA46.json": {
+  "VERANDA": [
+   [
+    439.25,
+    1
+   ],
+   [
+    256.0,
+    1
+   ]
+  ]
+ },
+ "is_emri/adaylar/PA47.json": {
+  "VERANDA": [
+   [
+    439.25,
+    1
+   ],
+   [
+    130.5,
+    1
+   ]
+  ]
+ },
  "is_emri/adaylar/TEST01.json": {
   "VERANDA": [
    [

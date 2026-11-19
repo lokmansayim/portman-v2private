@@ -110,7 +110,29 @@ def _kesik_mi(e, doc) -> bool:
     return any(k in lt for k in ("ISO02", "ISO03", "DASH", "HIDDEN", "KESIK"))
 
 
-TEFRIS = [("EVYE", "mutfak"), ("KLOZET", "banyo"), ("DUS", "banyo"), ("LAVABO", "banyo"), ("BANYO", "banyo")]
+TEFRIS = [("EVYE", "mutfak"), ("KIT SINK", "mutfak"), ("KITCHEN", "mutfak"), ("OCAK", "mutfak"),
+          ("KLOZET", "banyo"), ("DUS", "banyo"), ("LAVABO", "banyo"), ("BANYO", "banyo")]
+
+
+def _tefris_turu(e, doc) -> str | None:
+    """Tefriş bloğunun türü: adından; adı anlamsızsa (2019 şablonunun mutfak tezgâhı "KDJFKLD") içindeki blokların adından
+    (tezgâhın içinde "Faucet - kit sink top"). Bir kat iner."""
+    ad = e.dxf.name.upper()
+    tf = next((v for b, v in TEFRIS if b in ad), None)
+    if tf:
+        return tf
+    try:
+        blok = doc.blocks.get(e.dxf.name)
+    except Exception:
+        blok = None
+    for x in (blok if blok is not None else ()):
+        if x.dxftype() == "INSERT":
+            tf = next((v for b, v in TEFRIS if b in x.dxf.name.upper()), None)
+            if tf:
+                return tf
+    return None
+
+
 OLCU_YAZI = re.compile(r"^\s*(\d{2,3})\s*/\s*(\d{2,3})\s*$")
 OLCU_SATIR = re.compile(r"(?<![\d*/])(\d{2,3})\s*/\s*(\d{2,3})(?![\d*/])")
 YUKSEKLIK_YAZI = re.compile(r"(?:\bH\s*=\s*|Y[ÜU]KSEKL[İI][ĞG][İI]\s*:?\s*)(\d{3})", re.I)
@@ -183,7 +205,7 @@ def topla(doc, kutu):
             lay = e.dxf.layer.upper()
             if any(lay.startswith(k_) for k_ in DISLA_KATMAN) and not _disla(e, 0):
                 KATMAN_KAPI.append(f"{e.dxf.name} ({e.dxf.layer} katmanında)")
-            tf = next((v for b, v in TEFRIS if b in ad), None)
+            tf = _tefris_turu(e, doc)
             if tf:
                 tefris.append({"tur": tf, "m": ((k[0] + k[2]) / 2, (k[1] + k[3]) / 2)})
             tur = next((v for b, v in ACIKLIK_BLOKLARI.items() if b in ad), None)
@@ -650,17 +672,25 @@ def geometri(doc, kutu, plan):
                 pay = 6 if a.get("kaynak") == "yay" else -1
                 d["ekler"] = [e for e in d["ekler"] if not a["bas"] - pay < e < a["bit"] + pay]
     # taşan veranda: gövdenin dışındaki kesik çizgiler
+    # İE-43 PR-7: eğik kesik çizgi (notun gösterme çizgisi, "dışarıya musluk çekilecek") veranda kenarı değildir; bir cephede veranda
+    # ancak o cepheye paralel ve gövdenin tamamen dışında bir kesik çizgi (verandanın dış kenarı) varsa okunur
     kes = []
     for a, b in kesik:
         ax_, ay_, bx_, by_ = mx(a[0]), my(a[1]), mx(b[0]), my(b[1])
+        if abs(ax_ - bx_) > 1 and abs(ay_ - by_) > 1:
+            continue
         if min(ax_, bx_) < -1 or max(ax_, bx_) > Wb + 1 or min(ay_, by_) < -1 or max(ay_, by_) > Hb + 1:
             kes.append((ax_, ay_, bx_, by_))
+    dis_kenar = {"on": lambda q: abs(q[1] - q[3]) <= 1 and min(q[1], q[3]) > Hb + 1,
+                 "arka": lambda q: abs(q[1] - q[3]) <= 1 and max(q[1], q[3]) < -1,
+                 "sol": lambda q: abs(q[0] - q[2]) <= 1 and max(q[0], q[2]) < -1,
+                 "sag": lambda q: abs(q[0] - q[2]) <= 1 and min(q[0], q[2]) > Wb + 1}
     verandalar = []
     if kes:
         for cephe, sec in (("on", lambda q: max(q[1], q[3]) > Hb + 1), ("arka", lambda q: min(q[1], q[3]) < -1),
                            ("sol", lambda q: min(q[0], q[2]) < -1), ("sag", lambda q: max(q[0], q[2]) > Wb + 1)):
             K = [q for q in kes if sec(q)]
-            if not K:
+            if not K or not any(dis_kenar[cephe](q) for q in K):
                 continue
             x0_ = min(min(q[0], q[2]) for q in K); x1_ = max(max(q[0], q[2]) for q in K)
             y0_ = min(min(q[1], q[3]) for q in K); y1_ = max(max(q[1], q[3]) for q in K)
@@ -889,19 +919,44 @@ def veranda_ara_kolonu(v: dict, H: float) -> tuple[int | None, str | None]:
     return ara, f"paftada {len(kol)} kolon; İş Emri'ne ara_kolon: {ara} yazıldı (D-109).{yer}"
 
 
+def aciklik_sayilari(g) -> dict:
+    """Bölge başına pencere ve kapı sayısı (yazısız odanın adı için). Açıklığın iki yanı `is_emri`'deki gibi duvardan 12 cm öteden;
+    vasistas pencere, kapı ve kapısız geçiş kapı sayılır."""
+    AX, AY = g["AX"], g["AY"]
+    hb = {tuple(h): o["bolge"] for o in g["odalar"] for h in o["hucreler"]}
+
+    def bolge(x, y):
+        i = next((k for k in range(len(AX) - 1) if AX[k] <= x <= AX[k + 1]), None)
+        j = next((k for k in range(len(AY) - 1) if AY[k] <= y <= AY[k + 1]), None)
+        return hb.get((i, j)) if i is not None and j is not None else None
+
+    say = collections.defaultdict(lambda: {"pencere": 0, "kapi": 0})
+    for a in g["acikliklar"]:
+        x, y = (a["c"], a["orta"]) if a["duvar_yon"] == "x" else (a["orta"], a["c"])
+        yanlar = (bolge(x - 12, y), bolge(x + 12, y)) if a["duvar_yon"] == "x" else (bolge(x, y - 12), bolge(x, y + 12))
+        tur = "pencere" if a["tur"] in ("pencere", "vasistas") else "kapi"
+        for b in {b for b in yanlar if b is not None}:
+            say[b][tur] += 1
+    return say
+
+
 def is_emri(g, plan, kod, teknik=None):
     V, U = [], list(g["uyarilar"])
     AX, AY = g["AX"], g["AY"]
     mahaller, ad_bolge, acik_ad, girintiler, dikmeler, acik_sinir = [], {}, set(), [], [], []
     sayac = collections.Counter()
     kapali = [o for o in g["odalar"] if not o["dis"]]
-    # yazısız odalar (2018 şablonu): tefrişten (evye mutfak, klozet / duş banyo); kalan en büyük salon, kalanlar yatak odası
+    # yazısız odalar (2018 şablonu): tefrişten (evye mutfak, klozet / duş banyo); penceresiz ve en az iki kapılı oda hol;
+    # kalan en büyük salon, kalanlar yatak odası
     yazisiz = [o for o in kapali if not o["yazilar"]]
     salon_var = any(mahal_turu(o["yazilar"][0]["ad"]) == "salon" for o in kapali if o["yazilar"])
+    say = aciklik_sayilari(g)
     tahmin = {}
     for o in sorted(yazisiz, key=lambda o: -o["aks_m2"]):
         if "banyo" in o["tefris"]:
             tahmin[o["bolge"]] = "BANYO"
+        elif not o["tefris"] and say[o["bolge"]]["pencere"] == 0 and say[o["bolge"]]["kapi"] >= 2:
+            tahmin[o["bolge"]] = "HOL"
         elif not salon_var and o["aks_m2"] >= 9:
             tahmin[o["bolge"]] = "SALON & MUTFAK" if "mutfak" in o["tefris"] else "SALON"
             salon_var = True
