@@ -953,11 +953,14 @@ class Cizici:
                 hiza, p, _ = t.get_placement()
                 if hiza == TextEntityAlignment.MIDDLE_CENTER:
                     engel.append(self._yazi_kutusu(t.dxf.text, (p[0] - ox, p[1] - oy), t.dxf.height, t.dxf.rotation))
-        s, h = self.TAVAN_KIRISI_YAZISI, 15.0
-        uzak = 12.0 + h / 2                                        # kirişin ekseninden yazının ortasına: yarım kesit + 7 cm boşluk + yarım yazı
+        s, h0 = self.TAVAN_KIRISI_YAZISI, 15.0
         for k in bulunan["kirisler"]:
             c, (a, b) = k["eksen_cm"], k["uclar_cm"]
             dikey = k["yon"] == "y"
+            # D-127: yazı kirişe sığmazsa (verandanın 178,25'lik kirişi) kirişin boyuna sığacak kadar küçülür (en az 9); yazının 15'lik eni
+            # 211,93 + 10 cm pay: 222 cm'den uzun kirişte 15 aynen
+            h = max(9.0, min(h0, h0 * (b - a - 10.0) / self.yazi_eni(s, h0)))
+            uzak = 12.0 + h / 2                                    # kirişin ekseninden yazının ortasına: yarım kesit + 7 cm boşluk + yarım yazı
             if dikey:
                 dik = [(ox + c - e, oy + a), (ox + c + e, oy + a), (ox + c + e, oy + b), (ox + c - e, oy + b)]
             else:
