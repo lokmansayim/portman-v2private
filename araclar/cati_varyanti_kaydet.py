@@ -6,7 +6,7 @@ koşumu (doğrulama geçmeli, K23) → çatı görseli (ön ve sol görünüş) 
 
 Yazdıkları: is_emri/adaylar/<taban>_cati.png (evin kendi çatısı), is_emri/adaylar/<taban><harf>.json (şablon; is_emri_no PM-ADAY-<kod>,
 yapi.referans_model bayinin gördüğü kod), is_emri/adaylar/<taban><harf>.png (çatı görseli), beyin/veri/cati_varyantlari/<taban>.json.
-Ev başına bir dosya: evin kaydı (`adaylar_prefabrik.json`, referans girdi) değişmez; Katalog seçenekleri evin kaydına bellekte bağlar.
+Ev başına bir dosya (İE-44: kayıtlı seçenek düşürülmez; yeni seçenek `--ekle` ile eklenir, karar `ek_kararlar`'a): evin kaydı (`adaylar_prefabrik.json`, referans girdi) değişmez; Katalog seçenekleri evin kaydına bellekte bağlar.
 Her seçenek önce havuz denetiminden geçer (D-112, BK-47): hata veren seçenek varsa hiçbir dosya yazılmaz. Seçenek `gecerli` yazılır, yalnız Lokman'ın kararıyla (`--karar D-NN`; karar dosyası her seçeneğin kodunu yazar, İE-36 kuralı). Bayiye
 sunulma yine K-A10 kabul kaydına bağlıdır (her kod ayrı). Plan aynı kalmalı: Motor'un brüt alanı ve pano sayısı evinkiyle aynı değilse durur.
 LLM, ağ ve sunucu yok.
@@ -73,6 +73,7 @@ def main() -> int:
     ap.add_argument("--cati-adi", required=True, help="evin kendi çatısının adı (bayinin kartında)")
     ap.add_argument("--varyant", nargs=3, action="append", metavar=("HARF", "AD", "CATI_JSON"), required=True)
     ap.add_argument("--kaynak", default="")
+    ap.add_argument("--ekle", action="store_true", help="evin kayıtlı seçenekleri var: yenileri dosyaya eklenir (eskiler aynen kalır)")
     a = ap.parse_args()
     taban = Katalog.kod_normalize(a.taban)
     ev = ev_kaydi(taban)
@@ -97,8 +98,25 @@ def main() -> int:
         if dur:
             print(f"DUR: {gosterim} havuz denetimi geçmedi (D-112); kayıt yazılmadı:\n- " + "\n- ".join(dur)); return 1
         denetim[h] = {"sonuc": "geçti", "karar": "D-112", "uyarilar": uyari}
+    yol = VARYANT_DIR / f"{taban}.json"
+    eski = json.loads(yol.read_text(encoding="utf-8")) if yol.exists() else None   # İE-44: kayıtlı seçenek ezilmez (denetimden sonra, yazmadan önce)
+    var = {str(v["kod"]).upper() for v in (eski or {}).get("varyantlar") or []}
+    yeni = {f"{taban}{h}" for h in harfler}
+    if eski is not None and not a.ekle and var - yeni:                          # yeniden yazmak kayıtlı seçeneği düşürürdü
+        print(f"DUR: {gosterim_taban} evinin kayıtlı seçenekleri ({', '.join(sorted(var - yeni))}) bu komutta yok; yeni seçenek --ekle ile "
+              "eklenir"); return 2
+    if a.ekle and eski is None:
+        print(f"DUR: --ekle: {gosterim_taban} evinin kayıtlı çatı seçeneği yok"); return 2
+    if a.ekle and var & yeni:
+        print(f"DUR: --ekle: {gosterim_taban} için bu seçenek zaten kayıtlı: {', '.join(sorted(var & yeni))}"); return 2
+    if not a.ekle:
+        eski = None                                                             # aynı seçeneklerle yeniden yazım (bugünkü yol)
     ev_png = ADAY_DIR / f"{taban}_cati.png"
-    ev_ozet = ciz(sablon, ev_png)
+    if eski is not None:                                                        # evin görseli kayıtlı; yeniden yazılmaz
+        with tempfile.TemporaryDirectory() as tmp:
+            ev_ozet = ciz(sablon, Path(tmp) / "ev.png")
+    else:
+        ev_ozet = ciz(sablon, ev_png)
     print(f"{gosterim_taban}: evin çatısı {sablon.get('cati', {}).get('tip')}, brüt {ev_ozet['brut_cm2']} cm², {ev_ozet['pano']} pano → {ev_png.relative_to(KOK)}")
     varyantlar = []
     for h, ad, cati_json in a.varyant:
@@ -122,8 +140,10 @@ def main() -> int:
                            "kaynak": {"metin": a.kaynak, "karar": a.karar, "ev": gosterim_taban, "havuz_denetimi": denetim[h]}})
         print(f"{gosterim}: {ad} ({ie['cati'].get('tip')}) → {png.relative_to(KOK)}; yeni uyarı: {varyantlar[-1]['uyarilar'] or 'yok'}")
     kayit = {"taban": taban, "cati_adi": a.cati_adi, "cati_gorsel": f"adaylar/{taban}_cati.png", "karar": a.karar, "varyantlar": varyantlar}
+    if eski is not None:                                                        # eski seçenekler, evin adı ve ilk karar aynen; yenisi sona
+        kayit = {**eski, "varyantlar": list(eski.get("varyantlar") or []) + varyantlar,
+                 "ek_kararlar": list(eski.get("ek_kararlar") or []) + ([a.karar] if a.karar != eski.get("karar") else [])}
     VARYANT_DIR.mkdir(parents=True, exist_ok=True)
-    yol = VARYANT_DIR / f"{taban}.json"
     yol.write_text(json.dumps(kayit, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
     print(f"kayıt: {yol.relative_to(KOK)} ({len(varyantlar)} seçenek)")
     return 0

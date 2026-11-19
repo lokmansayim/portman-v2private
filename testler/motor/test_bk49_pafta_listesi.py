@@ -37,17 +37,18 @@ def _adet(S: list[dict], kalem: str, olcu: str) -> int:
 
 @pytest.mark.parametrize("kod", sorted(H["evler"]))
 def test_liste_hedef_ornek(kod):
-    """Değişen satırlar Lokman'ın onayladığı tablodaki gibi; satır ve makas sayısı hedefteki gibi."""
+    """Değişen satırlar Lokman'ın onayladığı tablodaki gibi; makas sayısı hedefteki gibi."""
     assert H["onay"]["soz"] == "Evet, girsin"
     e = H["evler"][kod]
     L = PL.is_emrinden(_ie(kod))
-    assert len(L["satirlar"]) == e["toplam_satir"] and L["girdi_ozeti"]["makas"] == e["makas"]
+    assert L["girdi_ozeti"]["makas"] == e["makas"]
     assert [_adet(L["satirlar"], h["kalem"], h["olcu"]) for h in e["satirlar"]] == [h["motor"] for h in e["satirlar"]]
 
 
 @pytest.mark.parametrize("kod,sil", [("PA39", "cumba"), ("PA41", "cumba"), ("PA43", "veranda")])
 def test_anahtarsiz_eski_liste(kod, sil):
-    """Anahtar silinince liste BK-49'dan önceki gibi (`once` sütunu): öteki evler bu yoldan değişmez; satırların geri kalanı aynı."""
+    """Anahtar silinince liste BK-49'dan önceki gibi (`once` sütunu): öteki evler bu yoldan değişmez; satırların geri kalanı aynı, BK-49
+    yalnız `satir_farki` kadar satır ekler."""
     ie = _ie(kod)
     yeni = PL.is_emrinden(ie)["satirlar"]
     eski_ie = copy.deepcopy(ie)
@@ -59,6 +60,7 @@ def test_anahtarsiz_eski_liste(kod, sil):
     e = H["evler"][kod]
     assert [_adet(eski, h["kalem"], h["olcu"]) for h in e["satirlar"]] == [h["once"] for h in e["satirlar"]]
     assert PL.is_emrinden(eski_ie)["girdi_ozeti"]["makas"] == e["once_makas"]
+    assert len(yeni) - len(eski) == e["satir_farki"]
     anahtar = lambda S: Counter((r["kalem"], r["olcu"]) for r in S if r["kalem"] not in {h["kalem"] for h in e["satirlar"]})   # noqa: E731
     assert anahtar(yeni) == anahtar(eski)
 

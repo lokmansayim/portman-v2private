@@ -254,6 +254,7 @@
   "prefabrik.pvc_betopan_h": 7,
   "prefabrik.pvc_betopan_h_aday": 3,
   "prefabrik.sacak_omegasi_bolen_m": 2.5,
+  "prefabrik.sase_pul": false,
   "prefabrik.siparis_boyu.kesinti_mm": 2.5,
   "prefabrik.siparis_boyu.modul_siparis_mm": 1250,
   "prefabrik.siparis_boyu.modul_tolerans_cm": 0.06,

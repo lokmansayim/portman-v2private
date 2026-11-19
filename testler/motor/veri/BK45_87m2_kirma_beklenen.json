@@ -11,7 +11,7 @@
   "is_emri": "is_emri/adaylar/PA06K.json"
  },
  "komut": "motor.prefabrik_liste.is_emrinden(is_emri)",
- "toplam_satir": 132,
+ "toplam_satir": 131,
  "makas": 19,
  "satirlar": [
   {

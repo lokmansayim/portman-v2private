@@ -206,7 +206,7 @@ def test_liste_satiri_ve_ic_pencere():
     L0 = _liste(ie0)
     assert _adet(L0, "Pencere üst panel") - _adet(L, "Pencere üst panel") == 3          # 120/120 × 2 ve 120/180 karkaslı panoda
     assert _adet(L0, "Pencere alt panel") - _adet(L, "Pencere alt panel") == 3
-    assert _adet(L0, "Özel pencere karkası") - _adet(L, "Özel pencere karkası") == 3
+    assert _adet(L0, "Pencere kör kasası") - _adet(L, "Pencere kör kasası") == 3          # D-122: önce "Özel pencere karkası"
     assert _adet(L0, "Karkaslı özel pencere panosu (180/200)") == 1 and _adet(L, "Karkaslı özel pencere panosu") == 0
     for bas in ("PVC pencere", "Pencere", "Çelik kapı", "Kapı"):
         pen = lambda X: sorted((s["kalem"], s["olcu"], s["adet"]) for s in X if s["grup"] == "1003" and s["kalem"].startswith(bas))

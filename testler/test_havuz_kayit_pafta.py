@@ -51,7 +51,6 @@ LISTE = {
         ("1002", "3'lü H 100 × 100 × 100 (dış duvar T'si)", "L 2500", 3, 4),
         ("1002", "Çektirme U'su 100 (iç duvar)", "100 × 2440", 3, 2),      # D-105 madde 2 (BK-38; Lokman kartı 15 Kasım 09:14:41 "Evet, 1 adet 100'lük"): köşe direkli 100'lük dış köşede 1 çektirme U'su (iki hâlde de); fark aynı, 1 az
         ("1009", "Çelik dübel", "adet", 26, 27),
-        ("1009", "Şase pul", "adet", 26, 27),
     },
     "PA35": {
         ("1001", "100'lük yapıştırma dolu pano", "100 × 1250 × 2500", 25, 24),
@@ -62,7 +61,6 @@ LISTE = {
         ("1002", "3'lü H 100 × 100 × 100 (dış duvar T'si)", "L 2500", 4, 5),
         ("1002", "Çektirme U'su 100 (iç duvar)", "100 × 2440", 2, 1),
         ("1009", "Çelik dübel", "adet", 22, 23),
-        ("1009", "Şase pul", "adet", 22, 23),
     },
 }
 KAYIT = {a["kod"]: a for a in havuz_kayitlari(yapi="prefabrik")}

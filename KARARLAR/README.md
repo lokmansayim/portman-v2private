@@ -137,6 +137,11 @@ Biçim: karar · gerekçe · reddedilen seçenekler · geri alma yolu · kim ve 
 | [D-112](D-112.md) | Havuza giren yeni ev havuz denetiminden geçer: kayıt araçları (`aday_kaydet.py`, `cati_varyanti_kaydet.py`) yeni evi yazmadan `araclar/havuz_denetimi.py`'yi koşar; hata (Motor doğrulaması, liste yazılmaz, adetsiz satır, 3D kurulmaz, 3D makas sayısı listeden farklı, kırma çatı 3D'de beşik) varsa kayıt yazılmaz; uyarı kayda yazılır; var olan 20 ev havuzda kalır, Motor bakımıyla düzelir (BK-47) | 16.11 (Lokman 07:05:58, 07:07:03; kart 08:07:06 "Evet, hatalı yeni ev girmesin") |
 | [D-115](D-115.md) | Havuz evlerinin hazır 9 çatı seçeneği havuzda (İE-44): PA-08-C, PA-11-B, PA-14-B, PA-19-C, PA-24-C, PA-25-C, PA-31-B, PA-33-C, PA-34-C (C beşik + salonda çıkıntısız cumba, B beşik; D-83 kuralı); her biri Motor doğrulamasından ve havuz denetiminden (D-112) geçti, sonucu kaydın `kaynak.havuz_denetimi`'nde; denetimi bekleyen 16 seçenek BK-45/BK-46 birleşince aynı sayfayla yeniden Lokman'a gelir; çizilemeyen 51 girmez | 16.11 (Lokman kartı 08:46:30 "9'u girsin, bekleyenler size gelsin") |
 | [D-116](D-116.md) | Disk arşivinin üç evinde yükleme listesi paftadaki gibi (BK-49): 37 m² (PA-39) cumbada kalkan makası + yavru 192, 59 m² (PA-41) yalnız kalkan makası (`cumbalar[0].yavru_makaslari_cm`; çatı tanımı ve 3B aynı makasları aynı yerde okur; 3B yavruyu dereler arasında çizer, uyarıyla); 92 m² (PA-43) teras panelinde 2 yan kiriş L 2010, yalnız listede (`verandalar[].cati.yan_kiris`); öteki evler ve AP-26 (M-12) aynı | 16.11 (Lokman kartları 12:08:22 "Her ev kendi paftasındaki gibi", 12:10:16 "Yalnız bu evde", 12:29:14 "Evet, girsin") |
+| [D-117](D-117.md) | Bakımlardan (BK-45, BK-46) sonra hazır 18 çatı seçeneği havuzda (İE-44): D-115'te bekleyenlerden 12'si (PA-08-B, PA-10-K, PA-12-K, PA-15-B, PA-16-C, PA-24-B, PA-30-K, PA-32-B, PA-33-B, PA-34-B, PA-37-B, PA-38-K) ve disk arşivi evlerinden 6'sı (PA-39-B, PA-40-K, PA-40-C, PA-41-B, PA-42-K, PA-42-C); kayıtlı evde yeni seçenek `--ekle` ile dosyanın sonuna; iki uçlu kırmanın listesi yazılmayan 5 seçenek bekler | 16.11 (Lokman kartı 16:17:03 "18'i girsin") |
+| [D-118](D-118.md) | Prefabrikte standart yükseklik 2,50 m (pano 2500 mm, lento 50 cm); İş Emri yazmazsa Motor, yükleme listesi, talep formu ve teklif formu 2,50 alır; 2,80 ve 3,00 m yalnız yazılırsa (D-14); havuzda 44 prefabrikten 43'ü 2,50, 1'i 2,80 (143 m², aynen kalır, D-103); hiçbir çıktı değişmez; mühür M-19 | 16.11 (Lokman 20:58:27 "kesin kural bunu mühürle 2,50 m") |
+| [D-121](D-121.md) | Makas aksı kaymaz (saçak duvarında ek tam ya da yarım aksta; hakem HD-12, uyarı); makasa dik dış duvarda tek panoluk pencere odanın duvar parçasının tam ortasında, yan 125,5'i aşarsa 125,5 pencere yanında, kalan uçta; yalnız yeni çizilen evler (`dizilim.dik_duvar_pencere: tam_orta`); çizime yeni aks çıkmaz; kırma çatıda ve ortadaki T'li odada kural yok (V6, V7); BK-52, PC-46. V5: yeni bayi talebinde Beyin yazar (bayi çiziminden okunan ev; BK-53, kart 17.11 04:52:24 "Evet, ayrı işte açılsın") | 16.11 (Lokman 20:56:44; kartlar 21:14:20, 21:15:33, 21:36:53, 21:38:12, 21:44:20) |
+| [D-123](D-123.md) | 85 m² katalog evi (P8501 r05): ana makaslar cumba makasının arkasında biter, kampanyalı ev gibi (D-53); ön-sol köşe kampanyalı evin rehberindeki gibi; plan aynı; BK-54 | 17.11 (Lokman 08:27:29) |
+| [D-124](D-124.md) | D-121'in istisnası: ıslak hacmin (banyo, ebeveyn banyosu, WC, tuvalet) penceresi ve vasistas (kataloğun her vasistas ölçüsü) ortalanmaz, yerinde kalır; ikisi birlikte ("ne varsa"); BK-53, PC-46 | 17.11 (Lokman 08:35:02) |
 
 ## Numara defteri (14 Ekim 2026, BK-08; CIO planı › Görev 3)
 
@@ -248,7 +253,15 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | D | D-114 | (başka sohbet: iki cumba ve boyuna kırma listesi; BK-45) | alındı (16.11) |
 | D | D-115 | havuz evlerinin hazır 9 çatı seçeneği havuzda (İE-44; Lokman 16.11 08:46:30 kartı) | yazıldı (16.11; çatı seçenekleri sohbeti, `claude/project-thread-co84co`) |
 | D | D-116 | disk arşivinin üç evinde liste paftadaki gibi: cumba makası ve teras panelinin yan kirişi (BK-49; Lokman 16.11 12:08:22, 12:10:16, 12:29:14 kartları) | yazıldı (16.11; iki cumba ve kırma listesi sohbeti, `claude/project-thread-83lylo`) |
-| D | **D-117** | — | **sıradaki boş** |
+| D | D-117 | bakımlardan sonra hazır 18 çatı seçeneği havuzda (İE-44; Lokman 16.11 16:17:03 kartı) | yazıldı (16.11; çatı seçenekleri sohbeti, `claude/project-thread-co84co`) |
+| D | D-118 | prefabrikte standart yükseklik 2,50 m, mühür M-19 (Lokman 16.11 20:58:27) | yazıldı (16.11; yükseklik sohbeti, `claude/project-thread-5sq4mu`) |
+| D | D-119 | (başka sohbet: kutu profil fiyatı çeyrek boy; PR #261) | alındı (16.11) |
+| D | D-120 | (başka sohbet: Kasım 2026 fiyat istisnası; PR #261) | alındı (16.11) |
+| D | D-121 | makas aksı kaymaz; makasa dik duvarda pencere her zaman odanın tam ortasında, yan 125,5'i aşarsa 125,5 pencere yanında, kalan uçta; yalnız yeni çizilen evler (anahtar); çizime yeni aks çıkmaz (BK-52, PC-46; Lokman 16.11 20:56:44, kartlar 21:14:20, 21:15:33, 21:36:53, 21:38:12, 21:44:20) | yazıldı (16.11; aks kayma sohbeti, `claude/project-thread-qnrohi`) |
+| D | D-122, D-123 | (başka sohbetler: şase pul ve pencere kör kasası PR #264; 85 m² katalog rehberi PR #267) | alındı (16–17.11) |
+| D | D-124 | D-121'in istisnası: ıslak hacim ve vasistas penceresi ortalanmaz, yerinde kalır (Lokman 17.11 08:35:02; BK-53, PR #265) | yazıldı (17.11; `claude/project-thread-u9x1le`) |
+| D | D-125 | (başka sohbet: çizim okumada dış kapı, BK-55, PR #268) | alındı (17.11) |
+| D | **D-126** | — | **sıradaki boş** |
 | İE | İE-01–İE-08 | bu depo (`main`) | yazıldı |
 | İE | İE-09 | model atölyesi: kontrollü model üretimi ve banka hattı (Görev 6e; pano 30; P6001 güncellemesi kapsam dışı) | alındı (16.10; `claude/gorev-6e-model-atolyesi-rnhtcp`; PR-1 banka hattı 29.10, `claude/project-thread-rhjgzv`) |
 | İE | İE-10, İE-11, İE-12 | prefabrik hattı (PR #12, PR #14, `ie-12-prefabrik-bayi-paftasi`) | `main`'e BK-12 ile (PR-1: motor ve bayi paftası; liste ve mühür kıyası sonraki PR'larda) |
@@ -318,7 +331,11 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | BK | BK-41 | Pano Motor'unda iç duvarın dış duvar ucunda kalan parça (D-108, PC-44; `claude/project-thread-myf3km`) | yazıldı (15.11; CIO 22:06) |
 | BK | BK-42 | Bayi plan görselinde dış ölçü DXF ve PDF'teki gibi iki ondalık (951,25 cm "951,2" yazılıyordu); 13 kayıtlı seçenek resmi yeniden çizildi (Lokman 15.11 21:50 kartı "Evet, iş açılsın", 22:29 kartı "Evet, 12 resim de düzelsin"; `claude/project-thread-r8278d`) | alındı (15.11; 21:58) |
 | BK | BK-43 | (başka sohbet: CI doğrulamasında pytest dosya dosya parçalara bölünür; gece bakım işi) | alındı (16.11) |
-| BK | **BK-44** | — | **sıradaki boş** |
+| BK | BK-44 … BK-51 | (başka sohbetler; numara defteri) | alındı (16.11) |
+| BK | BK-52 | Pano Motor'unda makas aksı kaymaz, makasa dik duvarda pencere tam ortada (anahtar `dizilim.dik_duvar_pencere`; hakem HD-12) (D-121, PC-46; `claude/project-thread-qnrohi`) | yazıldı (16.11) |
+| BK | BK-53 | Yeni bayi talebinde pencere ortalama kendiliğinden açık: bayinin çiziminden okunan prefabrik eve Beyin `dizilim.dik_duvar_pencere: tam_orta` yazar; havuz, katalog ve onaylı şablonlar anahtarsız; ıslak hacim ve vasistas penceresi ortalanmaz (D-124) (D-121 V5; Lokman kartı 17.11 04:52:24 "Evet, ayrı işte açılsın"; `claude/project-thread-u9x1le`) | yazıldı (17.11) |
+| BK | BK-54 | Montaj rehberi ön-sol köşeden dizilen evi kurar; 85 m² katalog evi rehberi (D-123; `claude/project-thread-xmignz`) | yazıldı (17.11) |
+| BK | **BK-57** | — | **sıradaki boş** (BK-55 dış kapı, BK-56 başka sohbet; numara defteri) |
 
 ## 27 Eylülde Lokman'ın verdiği kararlar
 

@@ -55,6 +55,61 @@
      ]
     }
    }
+  },
+  {
+   "kod": "PA24B",
+   "gosterim": "PA-24-B",
+   "durum": "gecerli",
+   "taban": "PA24",
+   "sablon": "adaylar/PA24B.json",
+   "gorsel": "adaylar/PA24B.png",
+   "cati_adi": "Beşik",
+   "referans_model": "PA-24-B",
+   "yapi_turu": "prefabrik",
+   "kat": 1,
+   "oda_programi": "2+1",
+   "katalog_m2": 77.0,
+   "kapali_m2": 77.3,
+   "veranda_m2": 0,
+   "ozet": {
+    "grid": {
+     "x_pano": 6,
+     "y_pano": 8
+    },
+    "dis_olcu_cm": [
+     773.0,
+     1000.0
+    ],
+    "brut_m2": 77.3,
+    "pano": 52,
+    "pencere": 4,
+    "kapi": 6,
+    "odalar": {
+     "ÇOCUK ODASI": 16.08,
+     "YATAK ODASI": 13.4,
+     "BANYO": 5.66,
+     "HOL": 5.96,
+     "SALON": 18.2,
+     "MUTFAK": 12.97
+    }
+   },
+   "uyarilar": [],
+   "kaynak": {
+    "metin": "İE-44 toplu çatı seçenekleri (D-117)",
+    "karar": "D-117",
+    "ev": "PA-24",
+    "havuz_denetimi": {
+     "sonuc": "geçti",
+     "karar": "D-112",
+     "uyarilar": [
+      "HD-02: Makas y'yi geçiyor ama kisa_kenar x: montaj paftalarında köşe makasın oturduğu duvarlardadır; pano ızgarası iki yönde 5 cm kayık olabilir, kisa_kenar: y doğrulanmalı",
+      "HD-06: ['makas yeri: saçak duvarının pano ekleri düzensiz (6 makas, listede 7; aralıklar 130.5, 251, 62.75, 251, 67.75); eşit aralıklı 7 makas']"
+     ]
+    }
+   }
   }
+ ],
+ "ek_kararlar": [
+  "D-117"
  ]
 }

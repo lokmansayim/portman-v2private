@@ -107,12 +107,16 @@ def pencere_yazisi(olcu: str) -> str:
 YENI_ANAHTARLAR = ("duvar_kalinligi_cm", "dis_olcu_cm", "dizilim", "ek_akslar_cm")   # İE-11 (6 Ekim denemesi + genişletme)
 DIZILIM_ANAHTARLARI = frozenset({"baslangic", "hiza", "dis_duvar_t_bolme", "pencere", "kapi", "kose", "kapi_yeri", "son_pano",
                                  "dis_pano_dayanagi", "genis_pencere", "kose_uzayan", "karkasli_panolar",
-                                 "tek_ozel_pano"})   # İE-11, İE-17, D-34 madde 5, İE-17 PR-2, İE-29, D-46, D-92
+                                 "tek_ozel_pano", "dik_duvar_pencere"})   # İE-11, İE-17, D-34 madde 5, İE-17 PR-2, İE-29, D-46, D-92, D-121
 KARKAS_ARTIK_CM = 20.0        # D-46: karkaslı panonun dışında kalan bu boydan kısa parça komşu panoyla tek parça olur (AP-14 veranda: 8,25 + 54,67)
 KARKAS_ACIKLIK_TURLERI = ("pencere", "dis_kapi")   # D-46: karkaslı kaplama duvar panosunun içindeki açıklıklar (dış duvar)
 # D-92 (BK-30, PC-39; Lokman 14 Kasım 2026 13:12–13:24, kart 14:05:21 "Okuma 2: duvar boyunca"): tek özel pano kuralı (`_tek_ozel_pano`).
 # Değer kalan özel panonun yeridir; tek değer "dizilim_sonu" (Lokman, kart 14 Kasım 2026 14:27:09 "Montaj köşesinden uzak uçta"; başka yer yeni değerle gelir).
 TEK_OZEL_PANO_YERLERI = ("dizilim_sonu",)
+# D-121 (BK-52, PC-46; Lokman 16 Kasım 2026 20:56:44 "makas yönüne dik olan akslar kayabilir ama yine kurallı kaysın", kartlar 21:14:20,
+# 21:15:33, 21:36:53, 21:38:12): makasa dik dış duvarda pencere odanın duvar parçasının tam ortasına (`_dik_duvar_pencere`). Tek değer
+# "tam_orta"; anahtarsız İş Emri aynen (kart 21:38:12 "Yalnız yeni çizilen evlere").
+DIK_DUVAR_PENCERE_DEGERLERI = ("tam_orta",)
 TEK_PANO_TAM_ESIGI_CM = 119.9      # D-92 eskizi: köşe (120,5) ve T (122,5) payıyla kısalmış pano tam sayılır; altı "tam olmayan" pano
 TEK_PANO_EKSEN_PAYI_CM = 6.01      # D-92 eskizi: aralığın ucu dik duvarın eksenine ya da duvarın aks ucuna bu kadar yakınsa boy oradan ölçülür
 # D-108 (BK-41, PC-44; Lokman 15 Kasım 2026 22:04 ve 22:21:41, kart 22:28:26 "Doğru, 59,75 başta"): iç duvarın dış duvar ucu
@@ -559,6 +563,7 @@ class Plan:
     kose_kolonlari: list = field(default_factory=list)     # D-38: açık mahalin iki açık kenarının birleştiği köşeye Motor'un koyduğu dikmeler
     kubbeler: list = field(default_factory=list)           # İE-29: kubbeler (`_kubbeler`; gerçek çerçevede plan geometrisi)
     tek_ozel_pano: list = field(default_factory=list)      # D-92: kuralın yeniden dizdiği aralıklar ({duvar, once, sonra}; anahtarsız boş)
+    dik_duvar_pencere: list = field(default_factory=list)  # D-121: makasa dik duvarda ortalanan pencereler ({duvar, once, sonra}; anahtarsız boş)
     ic_duvar_dis_ucu: list = field(default_factory=list)   # D-108: iç duvarın dış duvar ucunda yeniden dizilen aralıklar ({duvar, once, sonra})
 
     @property
@@ -689,6 +694,9 @@ def _kur(is_emri: dict) -> Plan:
         raise IsEmriHatasi(f"dizilim.genis_pencere bilinmiyor: {genis_pencere} (komsu | yarim_pano | oda_ortasi)")   # AP-09) | "oda_ortasi" (D-46, AP-11)
     karkasli_satirlar = _karkasli_satirlari(dizilim.get("karkasli_panolar"))   # D-46: doğrulama burada, uygulama planın sonunda
     tek_ozel_pano = dizilim.get("tek_ozel_pano")           # D-92: None (eski yol) | "dizilim_sonu"; uygulama planın son hâlinde
+    dik_duvar_pencere = dizilim.get("dik_duvar_pencere")   # D-121: None (eski yol) | "tam_orta"; uygulama planın son hâlinde
+    if dik_duvar_pencere is not None and dik_duvar_pencere not in DIK_DUVAR_PENCERE_DEGERLERI:   # K21
+        raise IsEmriHatasi(f"dizilim.dik_duvar_pencere bilinmiyor: {dik_duvar_pencere!r} ({' | '.join(DIK_DUVAR_PENCERE_DEGERLERI)})")
     if tek_ozel_pano is not None and tek_ozel_pano not in TEK_OZEL_PANO_YERLERI:   # K21: bilinmeyen değer sessizce yutulmaz
         raise IsEmriHatasi(f"dizilim.tek_ozel_pano bilinmiyor: {tek_ozel_pano!r} ({' | '.join(TEK_OZEL_PANO_YERLERI)}; kalan özel panonun yeri)")
     # D-34 madde 5 (TK-03; Lokman 30 Ekim 2026 15:33, PC-29): dış duvarın panoları bir aralıkta ızgara yerine bir iç duvarın aksına dayanır
@@ -1644,6 +1652,13 @@ def _kur(is_emri: dict) -> Plan:
                 x_, y_ = (d.c, t.c) if t.yon == "x" else (t.c, d.c)
                 raise IsEmriHatasi(f"D-108: iç duvarın yeni pano eki {x_:g}, {y_:g} cm'deki çektirme U'lu T'ye denk geliyor (orada 3'lü H "
                                    f"olur); yapi.birlesimler'deki t: cektirme_u ile bu duvarda kural birlikte uygulanamaz")
+    if dik_duvar_pencere is not None:                         # D-121: D-92 ve D-108'den sonra, dizilimin son hâline
+        plan.dik_duvar_pencere = _dik_duvar_pencere(plan, makas_ekseni, (is_emri.get("cati") or {}).get("tip"))
+        for P, (t, d) in sorted(eklemsiz_yer.items()):        # D-49 madde 3 denetimi yeni eklerle yeniden
+            if any(abs(p.a1 - d.c) <= t.h + 3.5 for p in t.panolar[:-1]):
+                x_, y_ = (d.c, t.c) if t.yon == "x" else (t.c, d.c)
+                raise IsEmriHatasi(f"dizilim.dik_duvar_pencere: yeni pano eki {x_:g}, {y_:g} cm'deki çektirme U'lu T'ye denk geliyor "
+                                   f"(orada 3'lü H olur); yapi.birlesimler'deki t: cektirme_u ile bu duvarda kural birlikte uygulanamaz")
     plan.h_baglantilar = [hb for hb in plan.h_baglantilar if not ortadaki_h(plan, hb)]   # BK-38: çizim listeyle aynı parçayı gösterir (D-108'den sonra)
     genis_pano_denetimi(plan)                                 # D-69: bütün dizilim yollarından sonra, planın son hâlinde
     return plan
@@ -1830,6 +1845,157 @@ def _ic_duvar_dis_ucu(plan: "Plan") -> list:
             plan.uyarilar += [kisa(d, p) for p in parca if p.boy < 20 - 1e-9]
         if degisti:
             d.panolar = yeni
+    return cik
+
+
+def _t_eki_var(plan: "Plan", d: "Duvar", v: float) -> bool:
+    """`tek_pano_araliklari`'nın T denetimi: dik bir duvarın ekseni duvarın `v` noktasında ve o duvar bu duvara değiyor."""
+    return any(abs(d2.c - v) < 1.0 and min(d2.a0, d2.a1) - 20 <= d.c <= max(d2.a0, d2.a1) + 20 for d2 in plan.duvarlar if d2.yon != d.yon)
+
+
+def _t_noktalari(plan: "Plan", d: "Duvar") -> list:
+    """Duvara değen dik duvarların eksenleri (T ve köşe), pano ekinde olsun ya da panonun ortasında (çektirme U'lu T) olsun. Yalnız okur."""
+    return sorted(d2.c for d2 in plan.duvarlar if d2.yon != d.yon and min(d2.a0, d2.a1) - 20 <= d.c <= max(d2.a0, d2.a1) + 20)
+
+
+def _yerinde_kalan_pencere(plan: "Plan"):
+    """D-124 (D-121'in istisnası; Lokman, 17 Kasım 2026 08:35:02): "banyo ebeveyn banyo wc tuvalet yani vasistas pencresi ne varsa onlar
+    kendi konumlarında kalacak ortalamıyacaksın". Pencere iki durumda yerinde kalır: odası ıslak hacimse (türü yükleme listesinin ıslak
+    hacim türlerinden: `kurallar/liste/prefabrik.json › islak_hacim`, Lokman 13 Ekim; WC ve ebeveyn banyosu Motor'da `banyo` türündedir) ya da
+    pencere vasistassa (pencere kataloğunda türü vasistas olan her ölçü, `kurallar/pencere/pencereler.json`: 60x40, 100x60, 50x50, 60x60,
+    30x30; sözdeki "ne varsa"). Sözdeki "yani" iki okumayı eşitler; Motor ikisini birlikte uygular: ıslak hacmin 120'lik penceresi de, kuru
+    odanın vasistası da yerinde kalır. Dönüş: Acilim → bool."""
+    vasistas = {m["olcu"].lower() for m in PENCERE_VT["modeller"] if m.get("tur") == "vasistas"}
+    kitap = json.loads((Path(__file__).resolve().parents[1] / "kurallar" / "liste" / "prefabrik.json").read_text(encoding="utf-8"))
+    islak = set(kitap["kurallar"]["islak_hacim"]["deger"])
+    turu = {ad: m.tur for ad, m in plan.mahaller.items()}
+    return lambda a: (a.olcu or "").lower() in vasistas or turu.get(a.mahal) in islak
+
+
+def _dik_duvar_pencere(plan: "Plan", makas_ekseni: str, cati_tipi=None) -> list:
+    """D-121 (BK-52, PC-46): makasa dik dış duvarda pencere odanın duvar parçasının tam ortasında. Lokman, 16 Kasım 2026 20:56:44:
+    "makas yönündeki akslar çok önemli makasları o akslara oturtuyoruz ama makas yönüne dik olan akslar kayabilir ama yine kurallı kaysın";
+    örnek 20:50:02 (60 m² küçük yatak odası): "120/180 penceresini tam ortaya al yani 125,5 + 62,75 = 188,25 / 2 = 94,125 sağına ve soluna
+    koy bu panoları". Kartlar: 21:14:20 "Okuma 1: aks kaymaz, yarım pano olur" (makasın oturduğu saçak duvarı bu kuralın dışında);
+    21:15:33 "Her zaman tam ortada"; 21:36:53 "B) 125,5 pencere yanında, kalan uçta"; 21:38:12 "Yalnız yeni çizilen evlere" (anahtar).
+
+    Makas x'i geçiyorsa (`cati.makas_ekseni` x, varsayılan) makas y boyunca uzanan saçak duvarlarına oturur; makasa dik duvar x boyunca
+    uzanan dış duvardır (ön ve arka). Duvar parçası: pencereli panonun iki yanındaki açıklıksız aralıklar (`tek_pano_araliklari`), duvarın
+    ucuna ya da bir T ekine kadar. Parçada başka açıklık ya da karkaslı pano varsa (T'siz bitişik), pencere panodan genişse (125,5 değil) ya
+    da pencereli pano karkaslıysa dokunulmaz (VARSAYIM V1, V2; BK-52). Ortalama pano koordinatıyla: parçanın iki ucunun (köşe payı ya da T
+    aksı) ortası; 60 m²'de 10 ile 323,75 arası. Yan 125,5 ya da kısaysa tek pano; uzunsa pencerenin yanına 125,5'ler, kalan parça uçta
+    (köşede ya da T'de). Pencere ortadan 0,05 cm'den az kaçıksa ya da kalan 0,05 cm'den kısa ama sıfır değilse (kıymık; komşusu 125,5'i
+    aşardı, D-69) dokunulmaz. Parçanın içinde panonun ortasına düşen bir T varsa (çektirme U'lu T; parça iki odayı kapsar) dokunulmaz
+    (VARSAYIM V6; geometri hakemi, PA-21 banyosu). Kırma çatıda makasa dik duvar da makas taşır (ana ve kısa makas, BK-46): kural
+    uygulanmaz, uyarı yazılır (VARSAYIM V7; Lokman'ın sözü "makasları o akslara oturtuyoruz"). Ortalanmayan her pencere için uyarı
+    yazılır (K16). Islak hacmin ve vasistasın penceresi kurala girmez, yerinde kalır (D-124, `_yerinde_kalan_pencere`; uyarı yazılmaz:
+    sapma değil, kuraldır). Dış ölçü, odalar, T ekleri ve saçak duvarları değişmez. Dönüş: değişen parçalar ({duvar, once, sonra})."""
+    kisa = lambda d, p: f"Duvar {d.id}: {p.boy} cm'lik çok kısa pano (özel pano kuralı doğrulanmalı)"   # `_kur`'un pano döngüsündeki yazı
+    acik = lambda g: not g[0].aciklar and not g[0].karkasli
+    yerinde = _yerinde_kalan_pencere(plan)                   # D-124: ıslak hacim ve vasistas penceresi ortalanmaz
+    ortalanmadi = lambda d, w, neden: plan.uyarilar.append(f"Duvar {d.id}: pencere ({w.a0:g}–{w.a1:g}) ortalanmadı; {neden} (D-121)")
+    cik = []
+    if cati_tipi == "kirma":
+        plan.uyarilar.append("dizilim.dik_duvar_pencere: kırma çatıda makasa dik duvar da makas taşır; pencereler ortalanmadı (D-121)")
+        return cik
+    for d in plan.duvarlar:
+        if d.tur != "dis" or d.yon != makas_ekseni:
+            continue
+        tler = _t_noktalari(plan, d)
+        gruplar = tek_pano_araliklari(plan, d)
+        yeni_gruplar, degisti = list(gruplar), False
+        for gi, g in enumerate(gruplar):
+            w = g[0]
+            if len(g) != 1 or w.acilim is None or w.acilim.tur != "pencere":
+                continue
+            if yerinde(w.acilim) and not w.ek_acilimlar:     # ek açıklıklı pano aşağıda uyarıyla kalır (K16)
+                continue
+            if w.ek_acilimlar or w.karkasli or abs(w.boy - MOD) > 1e-6:
+                ortalanmadi(d, w, "pencereli pano tek pano (125,5) değil ya da karkaslı")
+                continue
+            yanlar, gecerli = [], True
+            for yon in (-1, 1):                               # sol (−1) ve sağ (+1) yan
+                sinir = w.a0 if yon < 0 else w.a1
+                j = gi + yon
+                kom = gruplar[j] if 0 <= j < len(gruplar) else None
+                bitisik = kom is not None and abs((kom[-1].a1 if yon < 0 else kom[0].a0) - sinir) < 0.6
+                if not bitisik or _t_eki_var(plan, d, sinir):
+                    yanlar.append([])                         # pencere duvarın ucunda ya da T ekinde
+                    continue
+                if not acik(kom):
+                    gecerli = False                           # aynı parçada başka açıklık: dokunulmaz (V1)
+                    break
+                uc = kom[0].a0 if yon < 0 else kom[-1].a1
+                k2 = j + yon
+                otesi = gruplar[k2] if 0 <= k2 < len(gruplar) else None
+                if otesi is not None and abs((otesi[-1].a1 if yon < 0 else otesi[0].a0) - uc) < 0.6 and not _t_eki_var(plan, d, uc):
+                    gecerli = False
+                    break
+                yanlar.append(kom)
+            if not gecerli:
+                ortalanmadi(d, w, "oda duvarında başka açıklık var")
+                continue
+            a = yanlar[0][0].a0 if yanlar[0] else w.a0
+            b = yanlar[1][-1].a1 if yanlar[1] else w.a1
+            m = (a + b) / 2.0
+            if any(a + 0.6 < t < b - 0.6 for t in tler):
+                ortalanmadi(d, w, "oda duvarı panonun ortasındaki T'de bitiyor")
+                continue
+            if abs(m - (w.a0 + w.a1) / 2.0) < 0.05:
+                continue
+            q0, q1 = round(m - MOD / 2.0, 6), round(m + MOD / 2.0, 6)
+            s_ = round(q0 - a, 6)
+            k = int(s_ // MOD + 1e-9) if s_ > MOD + 1e-6 else 0
+            kalan = round(s_ - k * MOD, 6)
+            if s_ < 0.05 or 1e-6 < kalan < 0.05:
+                plan.uyarilar.append(f"Duvar {d.id}: pencere ({w.a0:g}–{w.a1:g}) ortalanmadı; yan {s_:g} cm kıymık pano bırakırdı (D-121)")
+                continue
+            sinirlar = sorted({round(a, 6), q0, q1, round(b, 6)} | {round(q0 - MOD * i, 6) for i in range(1, k + 1)}
+                              | {round(q1 + MOD * i, 6) for i in range(1, k + 1)})
+            parca = [Pano(d, u, v) for u, v in zip(sinirlar, sinirlar[1:])]
+            for p in parca:
+                if abs(p.a0 - q0) < 1e-6:
+                    p.acilim = w.acilim
+            if any(p.boy <= 1e-6 or p.boy > MOD + 1e-6 for p in parca):
+                ortalanmadi(d, w, "yeni dizilim kurulamadı")
+                continue
+            once = [round(p.boy, 3) for p in yanlar[0] + [w] + yanlar[1]]
+            yeni_gruplar[gi], degisti = parca, True
+            if yanlar[0]:
+                yeni_gruplar[gi - 1] = []
+            if yanlar[1]:
+                yeni_gruplar[gi + 1] = []
+            for p in yanlar[0] + yanlar[1]:
+                if p.boy < 20 - 1e-9 and kisa(d, p) in plan.uyarilar:
+                    plan.uyarilar.remove(kisa(d, p))
+            plan.uyarilar += [kisa(d, p) for p in parca if p.boy < 20 - 1e-9]
+            cik.append({"duvar": f"{d.tur} {d.yon} {d.c:g}", "once": once, "sonra": [round(p.boy, 3) for p in parca]})
+        if degisti:
+            d.panolar = [p for g in yeni_gruplar for p in g]
+    return cik
+
+
+MAKAS_AKSI_IZGARASI_CM = MOD / 2.0   # D-121 kart 21:14:20 "Okuma 1": saçak duvarında ek tam ya da yarım aksta (125,5 ve 62,75)
+
+
+def makas_aksi_denetimi(plan: "Plan", makas_ekseni: str = "x", cati_tipi=None) -> list:
+    """D-121 hakemi (BK-52; Lokman, 16 Kasım 2026 20:56:44 "makas yönündeki akslar çok önemli makasları o akslara oturtuyoruz", kart
+    21:14:20 "Okuma 1: aks kaymaz, yarım pano olur"): makasın oturduğu saçak duvarlarının (makas x'i geçiyorsa y boyunca uzanan dış duvarlar)
+    bütün pano ekleri tek bir 62,75'lik ızgaradadır: ek tam aksta ya da yarım aksta olur, ek aksa kaymaz. Kırma çatıda makasa dik duvar da
+    makas taşır (ana ve kısa makas, BK-46): onun ekleri de kendi yönünde ayrı bir ızgarada denetlenir (VARSAYIM V7). Izgaranın başı eklerin
+    en çoğunu tutan ektir. Yalnız okur, planı değiştirmez. Dönüş: ızgara dışında kalan her ek için bir bulgu yazısı (boşsa kural sağlanıyor)."""
+    m = MAKAS_AKSI_IZGARASI_CM
+    disarida = lambda e, k: min((e - k) % m, m - (e - k) % m) > 0.05
+    sy = "y" if makas_ekseni == "x" else "x"
+    cik = []
+    for yon in [sy] + ([makas_ekseni] if cati_tipi == "kirma" else []):
+        ekler = sorted({round(p.a0, 3) for d in plan.duvarlar if d.tur == "dis" and d.yon == yon for p in d.panolar[1:]})
+        if not ekler:
+            continue
+        bas = min(ekler, key=lambda k: (sum(1 for e in ekler if disarida(e, k)), k))
+        ad = "Saçak duvarında" if yon == sy else "Kırma çatının makasa dik duvarında"
+        cik += [f"{ad} pano eki {yon} = {e:g} cm makas aksı ızgarasının dışında ({bas:g} ± 62,75k); makas aksı kaymaz (D-121)"
+                for e in ekler if disarida(e, bas)]
     return cik
 
 

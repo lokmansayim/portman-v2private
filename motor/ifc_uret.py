@@ -134,13 +134,27 @@ def hazirla(ie: dict) -> dict:
     # İE-12 (Lokman 13.10.2026 09:39): her iki panonun arasında H birleştirme profili; dışarıdan 5 cm, eke tam ortalı. Yalnız yeni anahtarlı
     # İş Emri'nde (prefabrik bayi sunumu); eski IFC'ler değişmez. Şerit duvar gövdesinden her yüzde 0,4 cm taşar ki görünüşte seçilsin.
     # Üçlü H olan eklerde şerit yalnız görünümdür (BOM satırı bağlantılarda, B03 / B05).
+    # BK-50 (Lokman, kart 16 Kasım 2026 12:09:48 "Evet, ayrı PR"): eklerin yeri ve türü yükleme listesinin kaynağından
+    # (`prefabrik_liste.ek_yerleri`, D-28 madde 1): kubbenin iki ucunda H yok (D-54); dış duvarın ekine T ile gelen iç duvarda 3'lü H
+    # (İE-27). Motor'un DXF'inde bu T'nin bloğu yok: bağlantı (B05, dış 3'lü H) buradan, DXF'teki 3'lü H bloğunun biçiminde kurulur
+    # (dış duvarın kalınlığı × iç duvarın kalınlığı, eke ortalı). Kart modeli ve montaj rehberi 3D'yi okur.
     pano_ekleri = []
     if G.yeni_anahtar_var(ie):
+        from . import prefabrik_liste as PL
         w = G.H_PROFIL_GORUNEN_CM / 2.0
-        for k in G.pano_ekleri(plan):
-            e, c, t = k["e"], k["c"], k["h"] + H_PROFIL_TASMA_CM
-            rect = [e - w, c - t, e + w, c + t] if k["yon"] == "x" else [c - t, e - w, c + t, e + w]
+        dis_t = [b for b in baglantilar if "_UCLU_H_DIS_" in b["blok"]]
+        kod_t = c.kat.baglanti("uclu_h_dis")
+        for k in PL.ek_yerleri(plan):
+            e, cc, t = k["e"], k["c"], k["h"] + H_PROFIL_TASMA_CM
+            rect = [e - w, cc - t, e + w, cc + t] if k["yon"] == "x" else [cc - t, e - w, cc + t, e + w]
             pano_ekleri.append({"duvar": k["duvar"], "cins": k["cins"], "rect": [_r(v) for v in rect]})
+            if k.get("ie27") and not any(abs((b["rect"][0] + b["rect"][2]) / 2 - k["x"]) <= k["h"] + 3.5
+                                         and abs((b["rect"][1] + b["rect"][3]) / 2 - k["y"]) <= k["h"] + 3.5 for b in dis_t):
+                yi = G.T_IC / 2.0
+                r = [e - yi, cc - k["h"], e + yi, cc + k["h"]] if k["yon"] == "x" else [cc - k["h"], e - yi, cc + k["h"], e + yi]
+                baglantilar.append({"kod": kod_t, "kalem": kalem(kod_t), "tur": "baglanti", "rect": [_r(v) for v in r],
+                                    "blok": f"BOM_{kod_t}_UCLU_H_DIS_{G._mm(G.T_DIS)}x{G._mm(G.T_IC)}",
+                                    "kaynak": "İE-27: dış duvarın ekine T ile gelen iç duvar (yükleme listesi; Motor DXF'inde blok yok)"})
 
     odalar, veranda = [], None
     dis_ad = {v["ad"] for v in plan.dis_verandalar}
@@ -1426,7 +1440,8 @@ class IfcUretici:
             self._pset(e, "PortatifEv_Kapsam", {"BOMKalem": b["kalem"], "BOMKod": b["kod"], "Blok": b.get("blok", ""),
                                                 "Kot_cm": f"{z0:.0f}–{z1:.0f}", "KesimBoyuTanimli": False,
                                                 "Not": "Kot varsayım (profil kotu kaynakta tanımlı değil)" if b["tur"] == "veranda_profil"
-                                                       else f"{H0:.0f} cm yalnız 3B gösterim; kesim boyu değil"})
+                                                       else f"{H0:.0f} cm yalnız 3B gösterim; kesim boyu değil",
+                                                **({"Kaynak": b["kaynak"]} if b.get("kaynak") else {})})     # BK-50
 
     def pano_ekleri(self):
         """İE-12: pano eki H profilleri (IfcMember, STUD; galvaniz). Görünen genişlik 5 cm, eke ortalı; yalnız sunum (hazirla'da varsa)."""

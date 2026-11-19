@@ -1,0 +1,58 @@
+{
+ "taban": "PA39",
+ "cati_adi": "Beşik + cumba",
+ "cati_gorsel": "adaylar/PA39_cati.png",
+ "karar": "D-117",
+ "varyantlar": [
+  {
+   "kod": "PA39B",
+   "gosterim": "PA-39-B",
+   "durum": "gecerli",
+   "taban": "PA39",
+   "sablon": "adaylar/PA39B.json",
+   "gorsel": "adaylar/PA39B.png",
+   "cati_adi": "Beşik",
+   "referans_model": "PA-39-B",
+   "yapi_turu": "prefabrik",
+   "kat": 1,
+   "oda_programi": "1+1",
+   "katalog_m2": 37.0,
+   "kapali_m2": 31.6,
+   "veranda_m2": 4.91,
+   "ozet": {
+    "grid": {
+     "x_pano": 5.5,
+     "y_pano": 4.0
+    },
+    "dis_olcu_cm": [
+     700.25,
+     522.0
+    ],
+    "brut_m2": 36.56,
+    "pano": 30,
+    "pencere": 4,
+    "kapi": 4,
+    "odalar": {
+     "SALON & MUTFAK": 14.12,
+     "BANYO": 3.38,
+     "HOL": 2.15,
+     "VERANDA": 4.91,
+     "YATAK ODASI": 9.03
+    }
+   },
+   "uyarilar": [],
+   "kaynak": {
+    "metin": "İE-44 toplu çatı seçenekleri (D-117)",
+    "karar": "D-117",
+    "ev": "PA-39",
+    "havuz_denetimi": {
+     "sonuc": "geçti",
+     "karar": "D-112",
+     "uyarilar": [
+      "HD-06: ['makas yeri: saçak duvarının pano ekleri düzensiz (7 makas, listede 7; aralıklar 125.5, 125.5, 62.75, 125.5, 125.5, 125.5); eşit aralıklı 7 makas']"
+     ]
+    }
+   }
+  }
+ ]
+}

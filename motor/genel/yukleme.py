@@ -1205,7 +1205,8 @@ def _hesapla(g: dict, k: dict) -> dict:
     if duvar_paneli is None and ce:
         duvar_paneli = sum((ce.get(x) or {}).get("panel_adedi") or 0 for x in ("dis", "ic")) or None
     if duvar_paneli:
-        for ad in ("Çelik dübel (klipsli)", "Şase pul"):
+        # D-122 (BK-51; Lokman 16 Kasım 2026 21:35:12): kitapta `sase_pul` false ise şase pul yazılmaz; anahtarsız eski set aynen
+        for ad in ("Çelik dübel (klipsli)",) + (("Şase pul",) if k.get("sase_pul", {}).get("deger", True) else ()):
             ekle("Vida", ad, "adet", duvar_paneli * v["celik_dubel_duvar_paneli_basina"], duvar_paneli, birim="panel",
                  formul="duvar paneli adedi × 2" if ad.startswith("Çelik") else "çelik dübel adedi kadar", durum="motor",
                  not_=None if "duvar_paneli_adedi" in g else "duvar paneli adedi tahmin")

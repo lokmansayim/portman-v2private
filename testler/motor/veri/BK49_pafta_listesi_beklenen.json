@@ -1,5 +1,5 @@
 {
- "aciklama": "BK-49 hedef örneği (D-116): disk arşivi Parti 1'in üç evinde yükleme listesinin paftadaki gibi değişen satırları (D-111 › Bilinen farklar). 'motor' sütunu Lokman'ın onayladığı tablodaki 'Yeni (paftadaki gibi)' sütunu; 'once' BK-49'dan önceki Motor; 'pafta' evin paftasının listesi (yalnız bilgi; boylar saçak 25/28 ve 80 × 80 profille). Listenin öteki satırları değişmedi.",
+ "aciklama": "BK-49 hedef örneği (D-116): disk arşivi Parti 1'in üç evinde yükleme listesinin paftadaki gibi değişen satırları (D-111 › Bilinen farklar). 'motor' sütunu Lokman'ın onayladığı tablodaki 'Yeni (paftadaki gibi)' sütunu; 'once' BK-49'dan önceki Motor; 'pafta' evin paftasının listesi (yalnız bilgi; boylar saçak 25/28 ve 80 × 80 profille). Listenin öteki satırları değişmedi. 'satir_farki': BK-49'un listeye eklediği satır sayısı (anahtarlı − anahtarsız); toplam satır sayısı öteki işlerle değişebilir (ör. D-122, 17 Kasım: şase pul kalktı), bu yüzden hedefte yok.",
  "onay": {
   "tarih": "2026-11-16T12:29:14Z",
   "soz": "Evet, girsin",
@@ -15,7 +15,7 @@
  "evler": {
   "PA39": {
    "is_emri": "is_emri/adaylar/PA39.json",
-   "toplam_satir": 120,
+   "satir_farki": 1,
    "makas": 9,
    "once_makas": 9,
    "satirlar": [
@@ -40,7 +40,7 @@
   },
   "PA41": {
    "is_emri": "is_emri/adaylar/PA41.json",
-   "toplam_satir": 119,
+   "satir_farki": 0,
    "makas": 8,
    "once_makas": 9,
    "satirlar": [
@@ -57,7 +57,7 @@
   },
   "PA43": {
    "is_emri": "is_emri/adaylar/PA43.json",
-   "toplam_satir": 125,
+   "satir_farki": 2,
    "makas": 8,
    "once_makas": 8,
    "satirlar": [
