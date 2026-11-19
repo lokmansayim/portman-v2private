@@ -138,3 +138,13 @@ def test_karkasli_pencere_panosu_tek_fiyat(A0, E, I):
         k = f"Karkaslı özel pencere panosu ({olcu}) | 100 × 2500 × 2500"
         assert P0[k]["fiyat"] is None and (P[k]["fiyat"], P[k]["kaynak"], P[k]["kdv"]) == (4000.0, "ISTISNA", 0.2), k
     assert P["Karkaslı özel pencere panosu (150/180) | 100 × 2500 × 2800"]["fiyat"] is None
+
+
+def test_120_100_kor_kasa_istisnasi(A0, E, I):
+    """76 m² Nimet Doğan r04: 120/100 kör kasası 120/120'ninkiyle aynı (Lokman 19 Kasım 2026 19:20:29 UTC: "120/120 ile aynı fiyat kör kasa")."""
+    D0, D = C.defter_uret(A0, E), C.istisnali_defter(A0, I, E)
+    P0, P = D0["hatlar"]["prefabrik"]["kalemler"], D["hatlar"]["prefabrik"]["kalemler"]
+    k100 = "Özel pencere karkası (120×100) (100'lük çektirme U'su + 100'lük H geçen) | 1200 × 1000"
+    k120 = "Özel pencere karkası (120×120) (100'lük çektirme U'su + 100'lük H geçen) | 1200 × 1200"
+    assert P0[k100]["fiyat"] is None
+    assert (P[k100]["fiyat"], P[k100]["kaynak"]) == (P[k120]["fiyat"], "ISTISNA") == (237.08, "ISTISNA")
