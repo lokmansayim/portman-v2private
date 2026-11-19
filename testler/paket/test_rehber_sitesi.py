@@ -1,7 +1,7 @@
 """İE-41 · rehber.portatifev.com sitesi main'deki koddan (`araclar/paket/site/`; Lokman, 14 Kasım 2026 20:37 UTC kartı "Siteyi main'den kur").
 
 Paketleyici sahneyi değiştirmez, yalnız iç notları çıkarır. CI'da koşan sınamalar (esbuild ve yazı tipi paketleri gerekmez):
-- kayıt: beş rehber, klasörler eşsiz ve yayındaki üç yol korunur, adda kod yok, girdiler depoda;
+- kayıt: altı rehber (85 m² 17 Kasım 2026'da; beşi canlı paketten sabit), klasörler eşsiz ve yayındaki üç yol korunur, adda kod yok, girdiler depoda;
 - 62 m² ve kampanyalı ev (TK-04 r08, main'in komutuyla): veride iç not yok (`ortak.YASAK`), sayılar ve geometri aynı (metin dışındaki her
   değer main'in sayfasındakiyle aynı), başlıkta kod yok, ön onay paftasının üst satırı örtülü;
 - açılış sayfası; `vps/rehber_yayin.sh` ve belirlenimci paket.
@@ -45,7 +45,7 @@ def _yapraklar(x, yol=()):
 
 def test_kayit():
     kl = [r["klasor"] for r in KAYIT["rehberler"]]
-    assert len(kl) == len(set(kl)) == 5 and {"62m2", "80m2", "80m2-21"} <= set(kl)     # yayındaki yollar korunur
+    assert len(kl) == len(set(kl)) == 6 and {"62m2", "80m2", "80m2-21"} <= set(kl)     # yayındaki yollar korunur
     for r in KAYIT["rehberler"]:
         assert re.fullmatch(r"[a-z0-9-]+", r["klasor"]) and not re.search(r"\b(TK|AP|PK)-?\d", r["ad"]), r
         assert (KOK / (r.get("veri") or r["is_emri"])).exists(), r
@@ -117,3 +117,29 @@ def test_sayfa_tam(sayfalar, tmp_path):
         assert "__CSP__" not in html and "Content-Security-Policy" in html
         addon = temizle.klasor_yaz(html, pafta, tmp_path / kl, Path(NPM))
         assert addon and (tmp_path / kl / "js" / "three.module.js").exists() and (tmp_path / kl / "yazi" / "yazi.css").exists()
+
+
+def test_sabit_rehber_kaydi():
+    """Sabit rehber (17 Kasım 2026): klasörü canlı paketten bayt bayt gelir; kayıtta paketin sürümü ve sha'sı durur."""
+    sabit = [r for r in KAYIT["rehberler"] if r.get("sabit")]
+    if sabit:
+        sp = KAYIT["sabit_paket"]
+        assert re.fullmatch(r"[0-9a-f]{64}", sp["sha256"]) and re.fullmatch(r"\d{14}", sp["surum"])
+    with pytest.raises(ortak.SiteHatasi, match="--onceki"):
+        uret.sabit_dosyalar({"rehberler": [{"sabit": True}], "sabit_paket": {"sha256": "0" * 64}}, None)
+    assert uret.sabit_dosyalar({"rehberler": [{"klasor": "a"}]}, None) == {}
+
+
+def test_onceki_paket(tmp_path):
+    site = tmp_path / "site"
+    (site / "a" / "gorsel").mkdir(parents=True)
+    (site / "index.html").write_text("<p>açılış</p>\n", encoding="utf-8")
+    (site / "a" / "index.html").write_text("<p>rehber</p>\n", encoding="utf-8")
+    (site / "a" / "gorsel" / "kapak.jpg").write_bytes(bytes(range(256)))
+    sha, kur = ortak.paketle_ve_kur(site, tmp_path, mtime=KAYIT["mtime"])
+    for kaynak in (kur, tmp_path / "rehber_paket.tgz"):
+        d = ortak.onceki_paket(kaynak, sha)
+        assert d["a/gorsel/kapak.jpg"] == bytes(range(256)) and d["index.html"] == "<p>açılış</p>\n".encode()
+        assert set(d) == {"index.html", "a/index.html", "a/gorsel/kapak.jpg", "SHA256SUMS"}
+    with pytest.raises(ortak.SiteHatasi, match="sha256"):
+        ortak.onceki_paket(kur, "0" * 64)
