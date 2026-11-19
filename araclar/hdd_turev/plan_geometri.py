@@ -672,17 +672,25 @@ def geometri(doc, kutu, plan):
                 pay = 6 if a.get("kaynak") == "yay" else -1
                 d["ekler"] = [e for e in d["ekler"] if not a["bas"] - pay < e < a["bit"] + pay]
     # taşan veranda: gövdenin dışındaki kesik çizgiler
+    # İE-43 PR-7: eğik kesik çizgi (notun gösterme çizgisi, "dışarıya musluk çekilecek") veranda kenarı değildir; bir cephede veranda
+    # ancak o cepheye paralel ve gövdenin tamamen dışında bir kesik çizgi (verandanın dış kenarı) varsa okunur
     kes = []
     for a, b in kesik:
         ax_, ay_, bx_, by_ = mx(a[0]), my(a[1]), mx(b[0]), my(b[1])
+        if abs(ax_ - bx_) > 1 and abs(ay_ - by_) > 1:
+            continue
         if min(ax_, bx_) < -1 or max(ax_, bx_) > Wb + 1 or min(ay_, by_) < -1 or max(ay_, by_) > Hb + 1:
             kes.append((ax_, ay_, bx_, by_))
+    dis_kenar = {"on": lambda q: abs(q[1] - q[3]) <= 1 and min(q[1], q[3]) > Hb + 1,
+                 "arka": lambda q: abs(q[1] - q[3]) <= 1 and max(q[1], q[3]) < -1,
+                 "sol": lambda q: abs(q[0] - q[2]) <= 1 and max(q[0], q[2]) < -1,
+                 "sag": lambda q: abs(q[0] - q[2]) <= 1 and min(q[0], q[2]) > Wb + 1}
     verandalar = []
     if kes:
         for cephe, sec in (("on", lambda q: max(q[1], q[3]) > Hb + 1), ("arka", lambda q: min(q[1], q[3]) < -1),
                            ("sol", lambda q: min(q[0], q[2]) < -1), ("sag", lambda q: max(q[0], q[2]) > Wb + 1)):
             K = [q for q in kes if sec(q)]
-            if not K:
+            if not K or not any(dis_kenar[cephe](q) for q in K):
                 continue
             x0_ = min(min(q[0], q[2]) for q in K); x1_ = max(max(q[0], q[2]) for q in K)
             y0_ = min(min(q[1], q[3]) for q in K); y1_ = max(max(q[1], q[3]) for q in K)
