@@ -1098,7 +1098,7 @@ def _iki_uclu_kirma_catilari(plan, ie: dict) -> tuple[list[dict], dict]:
     sd = max(sacak_d, key=lambda d: (d.panolar[-1].a1 - d.panolar[0].a0, -d.id))   # kesintisiz saçak duvarı (paftada arka)
     ana_x = [round(p.a1, 2) for p in sorted(sd.panolar, key=lambda p: p.a0)[:-1]
              if p.a1 - g0 >= MOD_CM - 1e-6 and g1 - p.a1 >= MOD_CM - 1e-6]
-    # D-130 (BK-59; Lokman 19 Kasım 2026 21:49:23, 120 m² eskizine yorum: "çapraz makasları tam kırılma noktasını geçmiyorsa daha önce seninle
+    # D-131 (BK-59; Lokman 19 Kasım 2026 21:49:23, 120 m² eskizine yorum: "çapraz makasları tam kırılma noktasını geçmiyorsa daha önce seninle
     # konuşmuştuk bina duvarının üzerine al"): ana çatının örttüğü verandada kırma ucu duvarsızdır. Uçta dış duvar yoksa ilk ana makas uca en
     # yakın, mahyaya dik dış duvarın (gövdenin duvarı) üstünde; kırma noktası o duvarla uç arasındaysa kural yok.
     acik_uc = {}
@@ -1130,7 +1130,7 @@ def _iki_uclu_kirma_catilari(plan, ie: dict) -> tuple[list[dict], dict]:
         if not adaylar:
             continue                                                    # bant denetimi aşağıda liste yazmaz (K21)
         duvarda[k_uc] = adaylar[0]
-    for k_uc, x in acik_uc.items():                                     # D-130: duvarsız uçta ilk ana makas gövdenin duvarında
+    for k_uc, x in acik_uc.items():                                     # D-131: duvarsız uçta ilk ana makas gövdenin duvarında
         duvarda[k_uc] = round(x, 2)
     if duvarda:
         ana_x = [x for x in ana_x if (0 not in duvarda or x >= duvarda[0] - 1e-6) and (1 not in duvarda or x <= duvarda[1] + 1e-6)]
@@ -1148,7 +1148,7 @@ def _iki_uclu_kirma_catilari(plan, ie: dict) -> tuple[list[dict], dict]:
         y_lo, y_hi = sorted(_kesisim(e, xf) for e in hatlar)
         uc_d = [d for d in plan.duvarlar if d.tur == "dis" and d.yon == dik and abs(abs(d.c - kenar_x) - d.h) < 1e-6]
         J = sorted({round(p.a1, 2) for d in uc_d for p in sorted(d.panolar, key=lambda p: p.a0)[:-1]})
-        if not J and k_uc in acik_uc:                                   # D-130: duvarsız uçta kısa makaslar karşı uç duvarının eklemlerinde (pafta)
+        if not J and k_uc in acik_uc:                                   # D-131: duvarsız uçta kısa makaslar karşı uç duvarının eklemlerinde (pafta)
             ot = g1 if k_uc == 0 else g0
             J = sorted({round(p.a1, 2) for d in plan.duvarlar if d.tur == "dis" and d.yon == dik and abs(abs(d.c - ot) - d.h) < 1e-6
                         for p in sorted(d.panolar, key=lambda p: p.a0)[:-1]})

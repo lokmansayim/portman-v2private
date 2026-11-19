@@ -54,9 +54,9 @@ def test_ara_kolonsuz_veranda_aynen():
 
 
 def test_d130_dortomuz_duvarsiz_uc():
-    """D-130 (Lokman 19 Kasım 2026 21:49:23, 120 m² eskizine yorum): ana çatının örttüğü verandada dörtomuzun ucu duvarsız; ilk ana
+    """D-131 (Lokman 19 Kasım 2026 21:49:23, 120 m² eskizine yorum): ana çatının örttüğü verandada dörtomuzun ucu duvarsız; ilk ana
     makas gövdenin ön duvarında, kısa makaslar karşı uç duvarının ek yerlerinde. 120 m² (HD-251): ana 9, kısa 4 + 4, çapraz 4."""
-    N = PL.model_motor(_ie("D130_veranda_kirma_120m2.json"))
+    N = PL.model_motor(_ie("D131_veranda_kirma_120m2.json"))
     km = N["cati"][0]["kirma_makas"]
     assert km["ana_x_cm"][0] == 261.0 and km["ana"] == 9 and km["kisa"] == 8 and km["capraz"] == 4
     on, arka = km["uclar"]
