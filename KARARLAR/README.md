@@ -141,6 +141,7 @@ Biçim: karar · gerekçe · reddedilen seçenekler · geri alma yolu · kim ve 
 | [D-121](D-121.md) | Makas aksı kaymaz (saçak duvarında ek tam ya da yarım aksta; hakem HD-12, uyarı); makasa dik dış duvarda tek panoluk pencere odanın duvar parçasının tam ortasında, yan 125,5'i aşarsa 125,5 pencere yanında, kalan uçta; yalnız yeni çizilen evler (`dizilim.dik_duvar_pencere: tam_orta`); çizime yeni aks çıkmaz; kırma çatıda ve ortadaki T'li odada kural yok (V6, V7); BK-52, PC-46. V5: yeni bayi talebinde Beyin yazar (bayi çiziminden okunan ev; BK-53, kart 17.11 04:52:24 "Evet, ayrı işte açılsın") | 16.11 (Lokman 20:56:44; kartlar 21:14:20, 21:15:33, 21:36:53, 21:38:12, 21:44:20) |
 | [D-123](D-123.md) | 85 m² katalog evi (P8501 r05): ana makaslar cumba makasının arkasında biter, kampanyalı ev gibi (D-53); ön-sol köşe kampanyalı evin rehberindeki gibi; plan aynı; BK-54 | 17.11 (Lokman 08:27:29) |
 | [D-124](D-124.md) | D-121'in istisnası: ıslak hacmin (banyo, ebeveyn banyosu, WC, tuvalet) penceresi ve vasistas (kataloğun her vasistas ölçüsü) ortalanmaz, yerinde kalır; ikisi birlikte ("ne varsa"); BK-53, PC-46 | 17.11 (Lokman 08:35:02) |
+| [D-125](D-125.md) | Çizim okumada dış kapı bayi çiziminde nerede çiziliyse orada: içeride çizili ve önü cephe duvarsızsa önü açık giriş nişi (GİRİŞ, gövdedeki açık mahal; TK-01 r06 gibi), kapı nişle iç oda arasında; cephede çiziliyse cephede (ANTRE bugünkü gibi); çelikte niş çizilmez; BK-55 | 17.11 (Lokman 08:33:02 yorum; kart 08:37:52 "Çizimde nasılsa öyle") |
 
 ## Numara defteri (14 Ekim 2026, BK-08; CIO planı › Görev 3)
 
@@ -259,7 +260,7 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | D | D-121 | makas aksı kaymaz; makasa dik duvarda pencere her zaman odanın tam ortasında, yan 125,5'i aşarsa 125,5 pencere yanında, kalan uçta; yalnız yeni çizilen evler (anahtar); çizime yeni aks çıkmaz (BK-52, PC-46; Lokman 16.11 20:56:44, kartlar 21:14:20, 21:15:33, 21:36:53, 21:38:12, 21:44:20) | yazıldı (16.11; aks kayma sohbeti, `claude/project-thread-qnrohi`) |
 | D | D-122, D-123 | (başka sohbetler: şase pul ve pencere kör kasası PR #264; 85 m² katalog rehberi PR #267) | alındı (16–17.11) |
 | D | D-124 | D-121'in istisnası: ıslak hacim ve vasistas penceresi ortalanmaz, yerinde kalır (Lokman 17.11 08:35:02; BK-53, PR #265) | yazıldı (17.11; `claude/project-thread-u9x1le`) |
-| D | D-125 | (başka sohbet: çizim okumada dış kapı, BK-55, PR #268) | alındı (17.11) |
+| D | D-125 | çizim okumada dış kapı çizimde nasılsa öyle; içerideyse önü açık giriş nişi (BK-55; Lokman 17.11 kart 08:37:52) | yazıldı (17.11; çizim okuma dış kapı sohbeti, `claude/project-thread-mjv1ao`) |
 | D | **D-126** | — | **sıradaki boş** |
 | İE | İE-01–İE-08 | bu depo (`main`) | yazıldı |
 | İE | İE-09 | model atölyesi: kontrollü model üretimi ve banka hattı (Görev 6e; pano 30; P6001 güncellemesi kapsam dışı) | alındı (16.10; `claude/gorev-6e-model-atolyesi-rnhtcp`; PR-1 banka hattı 29.10, `claude/project-thread-rhjgzv`) |
@@ -334,6 +335,7 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | BK | BK-52 | Pano Motor'unda makas aksı kaymaz, makasa dik duvarda pencere tam ortada (anahtar `dizilim.dik_duvar_pencere`; hakem HD-12) (D-121, PC-46; `claude/project-thread-qnrohi`) | yazıldı (16.11) |
 | BK | BK-53 | Yeni bayi talebinde pencere ortalama kendiliğinden açık: bayinin çiziminden okunan prefabrik eve Beyin `dizilim.dik_duvar_pencere: tam_orta` yazar; havuz, katalog ve onaylı şablonlar anahtarsız; ıslak hacim ve vasistas penceresi ortalanmaz (D-124) (D-121 V5; Lokman kartı 17.11 04:52:24 "Evet, ayrı işte açılsın"; `claude/project-thread-u9x1le`) | yazıldı (17.11) |
 | BK | BK-54 | Montaj rehberi ön-sol köşeden dizilen evi kurar; 85 m² katalog evi rehberi (D-123; `claude/project-thread-xmignz`) | yazıldı (17.11) |
+| BK | BK-55 | Çizim okumada önü açık giriş nişi (`beyin/gorsel_okuma.py`, işlev `giris`) (D-125; `claude/project-thread-mjv1ao`) | yazıldı (17.11) |
 | BK | **BK-57** | — | **sıradaki boş** (BK-55 dış kapı, BK-56 başka sohbet; numara defteri) |
 
 ## 27 Eylülde Lokman'ın verdiği kararlar
