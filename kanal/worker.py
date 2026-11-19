@@ -1606,7 +1606,8 @@ def cikar(gelen: dict, settings: dict, k):
     from beyin import llm
     llm_ayar = settings.get("llm") or {}
     backend = llm_ayar.get("backend", "openai_chat")
-    baglam = "; ".join(x for x in (bayi_tanimi(gelen.get("bayi")), baglam_ozeti(k)) if x)       # İE-08 8b M5: ad ve hitap (D-06), numara yok
+    from beyin import cati_cevabi as CC                      # İE-42 (17 Kasım 2026): çatı seti açıkken liste + havuzdan benzer örnekler
+    baglam = "; ".join(x for x in (bayi_tanimi(gelen.get("bayi")), baglam_ozeti(k), CC.baglam(k, gelen.get("text") or "")) if x)   # İE-08 8b M5: ad ve hitap (D-06), numara yok
     return llm.cikar_guvenli(gelen["text"], baglam, backend=backend, model=llm_ayar.get("model") or None,
                              hazir=gelen.get("test_cikarim") if backend == "manuel" else None,   # yalnız yerel test
                              ayarlar_json=settings.get("ayarlar_json"), timeout=int(llm_ayar.get("timeout_s", 60)))

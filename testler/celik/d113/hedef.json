@@ -34,8 +34,8 @@
    "ad": "Tek kat çelik, 2+1, müştemilatlı, 98,65 m² (kör test projesi)",
    "once_kaplama": "sandviç panel",
    "sonra_kaplama": "tek kat panel (baz paket)",
-   "once_satir": 94,
-   "sonra_satir": 93,
+   "once_satir": 93,
+   "sonra_satir": 92,
    "fark": [
     {
      "grup": "Çatı kaplamaları",
@@ -167,8 +167,8 @@
    "ad": "Tek kat çelik, 2+1, verandalı ve sundurmalı, dört omuz çatı, 90 m² (ikinci kör test projesi)",
    "once_kaplama": "sandviç panel",
    "sonra_kaplama": "tek kat panel (baz paket)",
-   "once_satir": 84,
-   "sonra_satir": 83,
+   "once_satir": 83,
+   "sonra_satir": 82,
    "fark": [
     {
      "grup": "Çatı kaplamaları",
@@ -256,8 +256,8 @@
    "ad": "Tek kat çelik, 2+1, verandalı ve sundurmalı, kırma çatı, 80 m² (üçüncü kör test projesi)",
    "once_kaplama": "sandviç panel",
    "sonra_kaplama": "tek kat panel (baz paket)",
-   "once_satir": 100,
-   "sonra_satir": 99,
+   "once_satir": 99,
+   "sonra_satir": 98,
    "fark": [
     {
      "grup": "Çatı kaplamaları",
@@ -455,8 +455,8 @@
    "ad": "Tek kat çelik, 2+1, verandalı, beşik + cumba, 90 m² (ÇP-06; aday havuzu, D-87)",
    "once_kaplama": "sandviç panel",
    "sonra_kaplama": "tek kat panel (baz paket)",
-   "once_satir": 94,
-   "sonra_satir": 93,
+   "once_satir": 93,
+   "sonra_satir": 92,
    "fark": [
     {
      "grup": "Çatı kaplamaları",
@@ -566,8 +566,8 @@
    "ad": "Tek kat çelik, 2+1, verandalı, dış duvar 140, 90 m² (ÇP-18; aday havuzu, D-87)",
    "once_kaplama": "sandviç panel",
    "sonra_kaplama": "tek kat panel (baz paket)",
-   "once_satir": 74,
-   "sonra_satir": 73,
+   "once_satir": 73,
+   "sonra_satir": 72,
    "fark": [
     {
      "grup": "Çatı kaplamaları",
@@ -633,8 +633,8 @@
    "ad": "Tek kat çelik, 2+1, önü verandalı, dört omuz, 90 m² (ÇP-19; aday havuzu, D-87)",
    "once_kaplama": "sandviç panel",
    "sonra_kaplama": "tek kat panel (baz paket)",
-   "once_satir": 85,
-   "sonra_satir": 84,
+   "once_satir": 84,
+   "sonra_satir": 83,
    "fark": [
     {
      "grup": "Çatı kaplamaları",
@@ -700,8 +700,8 @@
    "ad": "Tek kat çelik, 3+1, verandalı, beşik + çift cumba, 90,11 m² (ÇP-20; aday havuzu, D-87)",
    "once_kaplama": "sandviç panel",
    "sonra_kaplama": "tek kat panel (baz paket)",
-   "once_satir": 90,
-   "sonra_satir": 89,
+   "once_satir": 89,
+   "sonra_satir": 88,
    "fark": [
     {
      "grup": "Çatı kaplamaları",
@@ -789,8 +789,8 @@
    "ad": "Tek kat çelik, 2+1, beşik + önde iki cumba, 81 m² (ÇP-08; aday havuzu, D-87)",
    "once_kaplama": "sandviç panel",
    "sonra_kaplama": "tek kat panel (baz paket)",
-   "once_satir": 97,
-   "sonra_satir": 96,
+   "once_satir": 96,
+   "sonra_satir": 95,
    "fark": [
     {
      "grup": "Çatı kaplamaları",
@@ -900,8 +900,8 @@
    "ad": "Tek kat çelik, 2+1, verandalı, beşik, dış duvar 140, 82 m² (ÇP-23; aday havuzu, D-87)",
    "once_kaplama": "sandviç panel",
    "sonra_kaplama": "tek kat panel (baz paket)",
-   "once_satir": 73,
-   "sonra_satir": 72,
+   "once_satir": 72,
+   "sonra_satir": 71,
    "fark": [
     {
      "grup": "Çatı kaplamaları",
@@ -991,8 +991,8 @@
    "ad": "Tek kat çelik, 4+1, verandalı, beşik + iki cumba",
    "once_kaplama": "sandviç panel",
    "sonra_kaplama": "tek kat panel (baz paket)",
-   "once_satir": 103,
-   "sonra_satir": 102,
+   "once_satir": 102,
+   "sonra_satir": 101,
    "fark": [
     {
      "grup": "Çatı kaplamaları",
@@ -1117,5 +1117,6 @@
     }
    ]
   }
- ]
+ ],
+ "not_d122": "16 Kasım 2026 (D-122, BK-51; Lokman kartı 21:43:53 \"Hepsinden kaldır, dübel kalsın\"): şase pul güncel kitapta yazılmaz; her evde once_satir ve sonra_satir 1 azaldı, fark satırları aynı."
 }
