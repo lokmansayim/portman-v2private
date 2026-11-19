@@ -225,7 +225,10 @@
     "cephe": "on",
     "bas_cm": 0,
     "bit_cm": 323.75,
-    "cikinti_cm": 0
+    "cikinti_cm": 0,
+    "yavru_makaslari_cm": [
+     192
+    ]
    }
   ]
  },

@@ -34,9 +34,10 @@ def test_kayit():
 
 
 def test_yalniz_verandanin_catisi_farkli():
-    """Şablonlar yalnız verandanın çatısında (ve seçeneğin kimliğinde) ayrılır: evinki panel, seçeneğinki beşik."""
+    """Şablonlar yalnız verandanın çatısında (ve seçeneğin kimliğinde) ayrılır: evinki panel, seçeneğinki beşik. BK-49 (D-116, kart
+    16 Kasım 2026 12:10:16 "Yalnız bu evde"): evin panelinde paftadaki 2 yan kiriş (`yan_kiris`, yalnız liste)."""
     ev, b = _ie("PA43"), _ie("PA43B")
-    assert ev["verandalar"][0]["cati"] == {"tip": "teras_paneli", "cikma_cm": 201, "egim_yuzde": 10}
+    assert ev["verandalar"][0]["cati"] == {"tip": "teras_paneli", "cikma_cm": 201, "egim_yuzde": 10, "yan_kiris": True}
     assert b["verandalar"][0]["cati"] == {"tip": "besik"}
     assert (b["is_emri_no"], b["yapi"]["referans_model"]) == ("PM-ADAY-PA43B", "PA-43-B")
     ayni = copy.deepcopy(b)

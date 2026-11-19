@@ -2358,12 +2358,14 @@ def _dis_verandalar(plan: "Plan", is_emri: dict) -> None:
         if tip == "teras_paneli":                   # D-52: panel; saçağı, topuğu yok (K21: yazılırsa yok sayılmaz); D-52 ek: eğimi İş Emri'nden
             cikma, eg = c.get("cikma_cm"), c.get("egim_yuzde")
             sayi = lambda q: isinstance(q, (int, float)) and not isinstance(q, bool)
-            if (set(c) - {"tip", "cikma_cm", "egim_yuzde"} or not sayi(cikma) or not d <= float(cikma) <= d + 60
-                    or not sayi(eg) or not 0 < float(eg) <= TERAS_PANELI_EGIM_SINIRI):
+            if (set(c) - {"tip", "cikma_cm", "egim_yuzde", "yan_kiris"} or not sayi(cikma) or not d <= float(cikma) <= d + 60
+                    or not sayi(eg) or not 0 < float(eg) <= TERAS_PANELI_EGIM_SINIRI or c.get("yan_kiris", True) is not True):
                 raise IsEmriHatasi(f"Veranda {ad}: teras_paneli cikma_cm ve egim_yuzde alır (cikma_cm duvardan panelin dış kenarı, derinlikten "
                                    f"{d:g} en çok 60 cm fazla; egim_yuzde duvardan dışarı, 0'dan büyük, en çok "
-                                   f"{TERAS_PANELI_EGIM_SINIRI:g}): {c}")
+                                   f"{TERAS_PANELI_EGIM_SINIRI:g}; yan_kiris yazılırsa true): {c}")
             cati = {"tip": tip, "egim_yuzde": float(eg), "sacak_cm": 0.0, "topuk_cm": float(ana.get("topuk_cm", 10)), "cikma_cm": float(cikma)}
+            if c.get("yan_kiris"):                  # BK-49 (D-116; Lokman, kart 16 Kasım 2026 12:10:16 "Yalnız bu evde"; 92 m² PA-43): listede
+                cati["yan_kiris"] = True            # 2 yan kiriş, evin paftasındaki gibi (`prefabrik_liste`); çizim ve 3B aynı (D-56'nın kirişi)
         elif tip == "cumba":                        # 14 Kasım 2026 (Lokman 08:41–08:42): verandanın çatısı ana çatının cumbası; vadiyle girer
             if set(c) - {"tip"}:
                 raise IsEmriHatasi(f"Veranda {ad}: cumba çatısında eğim, saçak ve topuk ana çatınındır; yalnız tip yazılır: {c}")
