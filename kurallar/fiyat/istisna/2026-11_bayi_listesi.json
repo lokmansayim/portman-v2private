@@ -76,16 +76,34 @@
     "dayanak": "120/180 pencere kör kasasının fiyatı (45. hafta fiyat listesi prefabrik malzemesi › 8 Doğrama kasası › 10 PENCERE KÖR KASA Takım 120/180); Lokman 17 Kasım 2026 09:39:41 UTC (76 m² Nimet Doğan teklifi): \"pencere kör kasasına 120/180 ne kadar aynı fiyatı ver sonucu çok etkilemiyor\""
    },
    "Karkaslı özel pencere panosu (180/180) | 100 × 2500 × 2500": {
-    "fiyat": 4693.63,
+    "fiyat": 4000.0,
     "birim": "adet",
     "kdv_grubu": "Yapıştırma pano",
-    "dayanak": "45. hafta fiyat listesi prefabrik malzemesi (liste tarihi 3.11.2026) › 1 Panel grubu › I) Dış duble pencereli, Pres Panel; Lokman 17 Kasım 2026 05:49:59 UTC kart \"Girsin, kenar kutusu boş\" (85 m² katalog evi P8501; soru: \"180/180 pano ve pencere için 45. hafta fiyatları girsin mi?\")"
+    "dayanak": "Karkaslı özel pencere panosu (251 × 250 cm) pencere ölçüsünden bağımsız tek fiyat, şimdilik; Lokman 19 Kasım 2026 19:04:33 UTC (76 m² Nimet Doğan teklifi): \"karkaslı pencere panoları standart ... 251 genişlik 250 yükseklik içinde 120'den daha geniş bir pencere boşluğu varsa özel panoya girer fiyat standarttır yani panonun ortasındaki boşluk ister 140/150 olsun ister 180/180 olsun aynı fiyat olacak fiyatı şimdilik 4000 TL gir\". Önceki fiyat 4.693,63 (45. hafta listesi, 17 Kasım 05:49:59 kartı) bu sözle değişti"
    },
    "PVC pencere | 180/180": {
     "fiyat": 8993.0,
     "birim": "adet",
     "kdv_grubu": "Pencereler",
     "dayanak": "45. hafta fiyat listesi prefabrik malzemesi (liste tarihi 3.11.2026) › 19 Pencere grubu › 12 PVC & Beyaz 1800/1800 mm, pervaz dahil (pencere teklifinde 180/180 yok); Lokman 17 Kasım 2026 05:49:59 UTC kart \"Girsin, kenar kutusu boş\" (85 m² katalog evi P8501; soru: \"180/180 pano ve pencere için 45. hafta fiyatları girsin mi?\")"
+   },
+   "Karkaslı özel pencere panosu (150/140) | 100 × 2500 × 2500": {
+    "fiyat": 4000.0,
+    "birim": "adet",
+    "kdv_grubu": "Yapıştırma pano",
+    "dayanak": "Karkaslı özel pencere panosu (251 × 250 cm) pencere ölçüsünden bağımsız tek fiyat, şimdilik; Lokman 19 Kasım 2026 19:04:33 UTC (76 m² Nimet Doğan teklifi): \"karkaslı pencere panoları standart ... 251 genişlik 250 yükseklik içinde 120'den daha geniş bir pencere boşluğu varsa özel panoya girer fiyat standarttır yani panonun ortasındaki boşluk ister 140/150 olsun ister 180/180 olsun aynı fiyat olacak fiyatı şimdilik 4000 TL gir\""
+   },
+   "Karkaslı özel pencere panosu (160/180) | 100 × 2500 × 2500": {
+    "fiyat": 4000.0,
+    "birim": "adet",
+    "kdv_grubu": "Yapıştırma pano",
+    "dayanak": "Karkaslı özel pencere panosu (251 × 250 cm) pencere ölçüsünden bağımsız tek fiyat, şimdilik; Lokman 19 Kasım 2026 19:04:33 UTC (76 m² Nimet Doğan teklifi): \"karkaslı pencere panoları standart ... 251 genişlik 250 yükseklik içinde 120'den daha geniş bir pencere boşluğu varsa özel panoya girer fiyat standarttır yani panonun ortasındaki boşluk ister 140/150 olsun ister 180/180 olsun aynı fiyat olacak fiyatı şimdilik 4000 TL gir\""
+   },
+   "Karkaslı özel pencere panosu (180/150) | 100 × 2500 × 2500": {
+    "fiyat": 4000.0,
+    "birim": "adet",
+    "kdv_grubu": "Yapıştırma pano",
+    "dayanak": "Karkaslı özel pencere panosu (251 × 250 cm) pencere ölçüsünden bağımsız tek fiyat, şimdilik; Lokman 19 Kasım 2026 19:04:33 UTC (76 m² Nimet Doğan teklifi): \"karkaslı pencere panoları standart ... 251 genişlik 250 yükseklik içinde 120'den daha geniş bir pencere boşluğu varsa özel panoya girer fiyat standarttır yani panonun ortasındaki boşluk ister 140/150 olsun ister 180/180 olsun aynı fiyat olacak fiyatı şimdilik 4000 TL gir\""
    }
   }
  },

@@ -113,7 +113,7 @@ def test_180_pencere_istisnasi(A0, E, I):
     P0, P = D0["hatlar"]["prefabrik"]["kalemler"], D["hatlar"]["prefabrik"]["kalemler"]
     pano, pencere = "Karkaslı özel pencere panosu (180/180) | 100 × 2500 × 2500", "PVC pencere | 180/180"
     assert P0[pano]["fiyat"] is None and P0[pencere]["fiyat"] is None
-    assert (P[pano]["fiyat"], P[pano]["kaynak"], P[pano]["kdv"]) == (4693.63, "ISTISNA", 0.2)
+    assert (P[pano]["fiyat"], P[pano]["kaynak"], P[pano]["kdv"]) == (4000.0, "ISTISNA", 0.2)       # 19 Kasım 19:04:33: karkaslı pano tek fiyat
     assert (P[pencere]["fiyat"], P[pencere]["kaynak"], P[pencere]["kdv"]) == (8993.0, "ISTISNA", 0.2)
     assert P["Ters mahya kenar kutusu | L 21 × 40 × 21 × 2800"]["fiyat"] is None
 
@@ -127,3 +127,14 @@ def test_120_150_kor_kasa_istisnasi(A0, E, I):
     k180 = "Özel pencere karkası (120×180) (100'lük çektirme U'su + 100'lük H geçen) | 1200 × 1800"
     assert P0[k150]["fiyat"] is None
     assert (P[k150]["fiyat"], P[k150]["kaynak"]) == (P[k180]["fiyat"], "ISTISNA") == (297.72, "ISTISNA")
+
+
+def test_karkasli_pencere_panosu_tek_fiyat(A0, E, I):
+    """Karkaslı özel pencere panosu (251 × 250 cm) pencere ölçüsünden bağımsız tek fiyat, şimdilik 4.000 TL (Lokman 19 Kasım 2026 19:04:33
+    UTC: "ister 140/150 olsun ister 180/180 olsun aynı fiyat olacak fiyatı şimdilik 4000 TL gir"). 2800 ve 3000 boyu ile fugalı aynen."""
+    D0, D = C.defter_uret(A0, E), C.istisnali_defter(A0, I, E)
+    P0, P = D0["hatlar"]["prefabrik"]["kalemler"], D["hatlar"]["prefabrik"]["kalemler"]
+    for olcu in ("150/140", "160/180", "180/150", "180/180"):
+        k = f"Karkaslı özel pencere panosu ({olcu}) | 100 × 2500 × 2500"
+        assert P0[k]["fiyat"] is None and (P[k]["fiyat"], P[k]["kaynak"], P[k]["kdv"]) == (4000.0, "ISTISNA", 0.2), k
+    assert P["Karkaslı özel pencere panosu (150/180) | 100 × 2500 × 2800"]["fiyat"] is None
