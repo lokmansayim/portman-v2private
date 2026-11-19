@@ -305,6 +305,79 @@ def ek_yerleri(plan, t_uclari: dict | None = None) -> list[dict]:
     return cik + [dict(k) for k in G.uc_uca_ekler(plan)]   # D-29: giriş nişinde yan duvarın hol duvarıyla eki (kapı duvarının 3'lü H'ı)
 
 
+def yan_kenar_araliklari(poly, e: str, c: float, acik: list[tuple[float, float]], ad: str = "",
+                         dikmeler: list | tuple = ()) -> list[tuple[float, float]]:
+    """D-130 (Lokman kartı 19 Kasım 2026 21:43:35 "Her açık kenara kiriş"): aynı yönde birden çok açık kenarı olan mahalde bir çizginin
+    kirişleri. Mahalin dış çizgisinin o çizgi üstündeki bağlı parçaları; açık kenarla (`acik`, çizgideki açık kenarların aralıkları) 1 cm'den
+    çok örtüşen her parça bir kiriştir, boyu parçanın boyu. Çizgiyi dik kesen kenarın izi ve kapalı yan sayılmaz. Kiriş boyu uydurulmaz,
+    `ListeYazilmaz` (K21): açık kenarla örtüşen parça yoksa; parçanın içinde açık kenarlar arasında kolonla örtülmeyen kapalı bir aralık
+    varsa (aynı çizgide iki ayrı açık kenar: kirişlerin ucu mahalin çizgisinden okunmaz)."""
+    from shapely.geometry import LineString
+    ln = LineString([(-1e5, c), (1e5, c)]) if e == "x" else LineString([(c, -1e5), (c, 1e5)])
+    g = poly.exterior.intersection(ln.buffer(1.0))
+    parcalar = []
+    for gg in getattr(g, "geoms", [g]):
+        if gg.is_empty:
+            continue
+        ks = [q[0] if e == "x" else q[1] for q in (gg.exterior.coords if gg.geom_type == "Polygon" else gg.coords)]
+        parcalar.append([min(ks), max(ks)])
+    birlesik: list[list[float]] = []
+    for a, b in sorted(parcalar):
+        if birlesik and a <= birlesik[-1][1] + 0.5:
+            birlesik[-1][1] = max(birlesik[-1][1], b)
+        else:
+            birlesik.append([a, b])
+    tutan = [(a, b) for a, b in birlesik if any(min(b, q1) - max(a, q0) > 1.0 for q0, q1 in acik)]
+    if not tutan:
+        raise ListeYazilmaz(f"{ad}: açık kenar ({e} = {c:g}) mahalin dış çizgisinde bulunamadı; kirişin boyu sorulmalı (D-130, K21)")
+    for a, b in tutan:
+        ic = sorted((max(a, q0), min(b, q1)) for q0, q1 in acik if min(b, q1) - max(a, q0) > 1.0)
+        for (_p0, p1), (r0, _r1) in zip(ic, ic[1:]):
+            kolonlu = any(b0 - 1.0 <= c <= b1 + 1.0 and k0 <= p1 + 1.0 and k1 >= r0 - 1.0
+                          for (kx0, ky0, kx1, ky1) in dikmeler
+                          for (b0, b1, k0, k1) in [((ky0, ky1, kx0, kx1) if e == "x" else (kx0, kx1, ky0, ky1))])
+            if r0 - p1 > 1.0 and not kolonlu:
+                raise ListeYazilmaz(f"{ad}: açık kenarın ({e} = {c:g}) ortasında kapalı aralık var ({p1:g}–{r0:g}); kiriş sayısı ve boyu "
+                                    "sorulmalı (D-130, K21)")
+    return tutan
+
+
+def acik_mahal_kirisleri(plan, v) -> list[tuple[float, int]]:
+    """Dikmeli açık mahalin (taşan veranda ve giriş nişi hariç) açık kenar kirişleri: [(dış ölçü cm, uçtaki kolon sayısı)], yön sırasıyla
+    (x, sonra y). Yönde tek açık kenar: mahalin o yöndeki dış ölçüsü (BK-14'ten beri). Yönde birden çok açık kenar: her kenar kendi boyuyla
+    (D-130, `yan_kenar_araliklari`)."""
+    from shapely.geometry import LineString
+    cik: list[float] = []
+    cik_uc: list[int] = []
+    vx0, vy0, vx1, vy1 = v.poly.bounds
+    yanlar: dict = {}                                      # yön → açık kenarların çizgileri (ilk görülen önce)
+    acik_ = {}                                             # (yön, çizgi) → o çizgideki açık kenarların aralıkları
+    for (x0, y0, x1, y1, *_r) in plan.acik_kenarlar:
+        if v.poly.buffer(1.0).contains(LineString([(x0, y0), (x1, y1)])):
+            e_ = "x" if abs(y1 - y0) < 1e-6 else "y"
+            c_ = y0 if e_ == "x" else x0
+            c_ = next((k_ for k_ in yanlar.setdefault(e_, []) if abs(k_ - c_) < 1.0), round(c_, 2))   # 1 cm'den yakın iki çizgi tek kenar
+            if c_ not in yanlar[e_]:
+                yanlar[e_].append(c_)
+            acik_.setdefault((e_, c_), []).append(tuple(sorted((x0, x1) if e_ == "x" else (y0, y1))))
+    for e in sorted(yanlar):
+        for c_ in yanlar[e]:
+            if len(yanlar[e]) == 1:                         # yönde tek açık kenar: kiriş mahalin dış ölçüsü (bugünkü yol)
+                araliklar_ = [((vx0, vx1) if e == "x" else (vy0, vy1))]
+            else:                                           # D-130: aynı yönde ikinci açık kenar (U veranda); her kenar kendi boyuyla
+                araliklar_ = yan_kenar_araliklari(v.poly, e, c_, acik_[(e, c_)], v.ad, plan.dikmeler)
+            for (a0_, a1_) in araliklar_:
+                cik.append(a1_ - a0_)
+                # D-61 madde 3 (Lokman, 5 Kasım 2026 22:49, kart "Öneriyle düzelt"; TK-04 r07'nin salon duvarındaki kolonu, D-58): kenarın
+                # iki ucunda da kolon varsa kiriş iki kolonun arasında, iki yüzünün arasına (dış ölçü − 2 × 10). Uçtaki kolon: kenarın
+                # çizgisinde, ucu kenarın ucunda.
+                uc_kolon = {u for (kx0, ky0, kx1, ky1) in plan.dikmeler
+                            for (b0_, b1_, k0_, k1_) in [((ky0, ky1, kx0, kx1) if e == "x" else (kx0, kx1, ky0, ky1))]
+                            if b0_ - 1.0 <= c_ <= b1_ + 1.0 for u, var in ((0, abs(k0_ - a0_) < 1.0), (1, abs(k1_ - a1_) < 1.0)) if var}
+                cik_uc.append(len(uc_kolon))
+    return list(zip(cik, cik_uc))
+
+
 def model_motor(ie: dict) -> dict:
     from . import geometry as G
     from shapely.geometry import LineString, Point, box
@@ -397,32 +470,9 @@ def model_motor(ie: dict) -> dict:
             continue
         if not plan.dikmeler:
             continue
-        vx0, vy0, vx1, vy1 = v.poly.bounds
-        yanlar: dict = {}                                      # yön → açık kenarların çizgileri (ilk görülen önce)
-        for (x0, y0, x1, y1, *_r) in plan.acik_kenarlar:
-            if v.poly.buffer(1.0).contains(LineString([(x0, y0), (x1, y1)])):
-                e_ = "x" if abs(y1 - y0) < 1e-6 else "y"
-                c_ = round(y0 if e_ == "x" else x0, 2)
-                if c_ not in yanlar.setdefault(e_, []):
-                    yanlar[e_].append(c_)
-        for e in sorted(yanlar):
-            for c_ in yanlar[e]:
-                if len(yanlar[e]) == 1:                         # yönde tek açık kenar: kiriş mahalin dış ölçüsü (bugünkü yol)
-                    a0_, a1_ = (vx0, vx1) if e == "x" else (vy0, vy1)
-                else:                                           # D-130: aynı yönde ikinci açık kenar (U veranda); her kenar kendi boyuyla,
-                    ln_ = LineString([(-1e5, c_), (1e5, c_)]) if e == "x" else LineString([(c_, -1e5), (c_, 1e5)])   # mahalin o çizgideki kenarı
-                    g_ = v.poly.exterior.intersection(ln_.buffer(0.5))
-                    ks_ = [q[0] if e == "x" else q[1] for gg in getattr(g_, "geoms", [g_]) if not gg.is_empty
-                           for q in (gg.exterior.coords if gg.geom_type == "Polygon" else gg.coords)]
-                    a0_, a1_ = (min(ks_), max(ks_)) if ks_ else ((vx0, vx1) if e == "x" else (vy0, vy1))
-                kirisler.append(a1_ - a0_)
-                # D-61 madde 3 (Lokman, 5 Kasım 2026 22:49, kart "Öneriyle düzelt"; TK-04 r07'nin salon duvarındaki kolonu, D-58): kenarın iki
-                # ucunda da kolon varsa kiriş iki kolonun arasında, iki yüzünün arasına (dış ölçü − 2 × 10). Uçtaki kolon: kenarın çizgisinde,
-                # ucu kenarın ucunda.
-                uc_kolon = {u for (kx0, ky0, kx1, ky1) in plan.dikmeler
-                            for (b0_, b1_, k0_, k1_) in [((ky0, ky1, kx0, kx1) if e == "x" else (kx0, kx1, ky0, ky1))]
-                            if b0_ - 1.0 <= c_ <= b1_ + 1.0 for u, var in ((0, abs(k0_ - a0_) < 1.0), (1, abs(k1_ - a1_) < 1.0)) if var}
-                kenar_kolon.append(len(uc_kolon))
+        for boy_, uc_ in acik_mahal_kirisleri(plan, v):        # her açık kenar bir kiriş (D-130); boy ve uçtaki kolon sayısı (D-61)
+            kirisler.append(boy_)
+            kenar_kolon.append(uc_)
     dis_kenar_sira, dis_parca_sira = [], []                   # taşan verandanın dış kenarının `veranda_kenarlari_cm`'deki sırası
     for v in plan.dis_verandalar:                              # BK-14: dış kenar ve iki yan (TK-01 geçici yolu, PK-03/PK-06 paftası gibi)
         boylar = [max(x1 - x0, y1 - y0) for (x0, y0, x1, y1), _k in zip(v["kenarlar"], v["kirisler"])]   # D-56: teras panelinde yalnız dış
