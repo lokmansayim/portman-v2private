@@ -4,7 +4,8 @@
 - Havuz (`beyin/veri/cati_cevabi_havuzu.json`): geometri hakeminin 50 turda yazdığı mesajlar ve doğru okumaları.
 - `baglam`: çatı seti açıkken LLM'e giden bağlama çatı listesi ve havuzdan en benzer örnekler eklenir (aynı tek çağrı, K05). Havuzdaki
   okuma doğrudan karar olmaz: benzer iki mesaj ters anlama gelebilir; örnek yalnız LLM'in okumasına yardım eder.
-- `okuma`: LLM'in `cati_cevabi` alanı listeye göre denetlenir; kararı `karar._cati_adimi` verir. Alan yoksa bugünkü kural yolu.
+- `okuma`: LLM'in `cati_cevabi` alanı listeye göre denetlenir; kararı `karar._cati_adimi` (onaydan sonra) ve `karar._prefabrik_cati_istegi`
+  (onaydan önceki prefabrik set, 20 Kasım 2026) verir. Alan yoksa bugünkü kural yolu.
 Ağ yok, ücret yok; benzerlik harf üçlüsü örtüşmesiyle (bağımlılık yok)."""
 from __future__ import annotations
 import json
@@ -63,11 +64,16 @@ def benzerler(metin: str, n: int = ORNEK_SAYISI, yapi: str | None = None) -> lis
 
 
 def _acik_set(k) -> dict | None:
+    """Açık çatı seti: plan onayından sonraki set (İE-42) ya da onaydan önce açılan prefabrik çatı seti (İE-37; Lokman, kart 20 Kasım
+    2026 08:04:29 "Evet, LLM okusun"). Onaydan önceki çelik çatı seti (İE-25) bugünkü kural yolunda kalır."""
     d = k.d
     st = d.get("secenek_seti") or {}
-    if d.get("cati_adimi") and st.get("durum") == "acik" and st.get("tur") == "cati_varyanti" and d.get("asama") == "onay_bekliyor":
-        return st
-    return None
+    if st.get("durum") != "acik" or st.get("tur") != "cati_varyanti":
+        return None
+    if d.get("cati_adimi"):
+        return st if d.get("asama") == "onay_bekliyor" else None
+    adaylar = st.get("adaylar") or []
+    return st if adaylar and all(a.get("yapi_turu") == "prefabrik" for a in adaylar) else None
 
 
 def baglam(k, metin: str) -> str:
