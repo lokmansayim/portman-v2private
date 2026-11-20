@@ -20,6 +20,7 @@ mahale bakan dış duvarın omegası ayrı renkte; çatı izolasyonunun şeritle
 """
 from __future__ import annotations
 
+import math
 import textwrap
 from pathlib import Path
 
@@ -44,14 +45,15 @@ SAYFA = {1: (("tavan omegası", "tavan H'ı ve gözler"), ("OMEGA_", "DIS_DUVAR_
          4: (("aşık",), ("ASIK_", "VERANDA_ASIK_")), 5: (("çatı kaplaması",), ("KAPLAMA_", "VERANDA_KAPLAMA_")),
          6: (("elektrik", "elektrik noktaları", "kablo_priz", "kablo_aydinlatma"),
              ("DUY_", "GLOP_", "ANAHTAR_", "PRIZ_", "UYDU_", "ZIL_", "SIGORTA_", "KABLO_")),
-         7: (("alt çerçeve", "saçak omegası", "saçak sacı", "alın sacı", "baş makas Z'si", "C kapama", "mahya", "alt çerçeve ve çatı kenarları"),
-             ("ALT_CERCEVE_", "SACAK_OMEGASI_", "SACAK_SACI_", "ALIN_SACI_", "BAS_MAKAS_Z_", "C_KAPAMA_", "MAHYA_", "TRAPEZ_MAHYA_", "VERANDA_SACAK_",
+         7: (("alt çerçeve", "saçak omegası", "saçak sacı", "alın sacı", "baş makas Z'si", "C kapama", "mahya", "damlalık", "alt çerçeve ve çatı kenarları"),
+             ("ALT_CERCEVE_", "SACAK_OMEGASI_", "SACAK_SACI_", "ALIN_SACI_", "BAS_MAKAS_Z_", "C_KAPAMA_", "MAHYA_", "TRAPEZ_MAHYA_", "DAMLALIK_", "VERANDA_SACAK_",
               "VERANDA_ALIN_SACI_", "VERANDA_MAHYA_", "VERANDA_TRAPEZ_MAHYA_"))}
 ELEKTRIK_RENK = {"EL-01": "#c0392b", "EL-02": "#c0392b", "EL-03": "#1e8449", "EL-04": "#1e8449", "EL-05": "#1f4e9c", "EL-06": "#1f4e9c",
                  "EL-07": "#7d3c98", "EL-08": "#ca6f1e", "EL-09": "#111111", "EL-10": "#1f4e9c", "EL-11": "#e67e22"}
 KENAR_RENK = {"AC-01": "#1f4e9c", "AC-02": "#e67e22", "CK-01": "#c0392b", "CK-02": "#85c1e9", "CK-03": "#ca6f1e", "CK-04": "#7d3c98",
-              "CK-05": "#111111", "CK-06": "#1e8449", "CK-07": "#1e8449"}
+              "CK-05": "#111111", "CK-06": "#1e8449", "CK-07": "#1e8449", "CK-08": "#d4006a"}
 ESI_KENAR = {"CK-06", "CK-07"}      # İE-15 K6: metal kiremit ya da trapez sac mahyası; kaplamaya göre biri kurulur, öteki lejantta yazılmaz
+YALNIZ_VARSA = {"CK-08"}            # D-143: damlalık yalnız sundurma panelli (teras paneli) evde; öteki evlerde lejantta yazılmaz
 
 
 def _sayi(x: float, n: int = 2) -> str:
@@ -505,8 +507,53 @@ def _kenar(zemin, cati_, m: dict, plt) -> None:
             cati_.text((x0 + x1) / 2 if dik else (3 * x0 + x1) / 4, (3 * y0 + y1) / 4 if dik else (y0 + y1) / 2,
                        f"{ad} {p['p'].get('HatBoyu_cm', p['p']['Boy_cm']):g}", rotation=90 if dik else 0, fontsize=6.5, ha="center", va="center",
                        color="#1b2631", bbox={"boxstyle": "round,pad=0.1", "fc": "white", "ec": "none", "alpha": 0.8})
+    _damlalik(cati_, m, plt)
     cati_.set_aspect("equal"); cati_.axis("off"); cati_.set_anchor("N")
     cati_.set_title("Çatı · saçak, mahya ve kalkan kenarları (boylar cm)", fontsize=11, loc="left")
+
+
+def _damlalik(ax, m: dict, plt) -> None:
+    """D-143 (Lokman, kart 20 Kasım 2026 20:01:45 "Eskizdeki gibi"): sundurma panelinin yeri soluk kesik çerçeveyle (yalnız yer göstermek
+    için), damlalık duvarın dış yüzünde panelin eni boyunca; hattın başından stok boyuyla parçalar (D1, D2…; son parça kalan boy) ve hattın
+    boyu. Damlalıksız evde sayfa aynen."""
+    R = KENAR_RENK["CK-08"]
+    no = 0
+    for p in sorted(m["k2"].get("CK-08", []), key=lambda p: p["ad"]):
+        b = p["p"]
+        X0, Y0, X1, Y1 = (float(q) for q in str(b["Panel_cm"]).split(";"))
+        ax.add_patch(plt.Rectangle((X0, Y0), X1 - X0, Y1 - Y0, fc="none", ec="#999", lw=0.8, ls="--"))
+        yatay = b["Duvar"] in ("on", "arka")
+        en, derin = (X1 - X0, Y1 - Y0) if yatay else (Y1 - Y0, X1 - X0)
+        d = {"on": -1, "arka": 1, "sol": -1, "sag": 1}[b["Duvar"]]           # dışarı yönü: yazılar panelin üstünde
+        w = (Y1 if d < 0 else Y0) if yatay else (X1 if d < 0 else X0)       # duvarın dış yüzü (panelin duvar kenarı)
+        ax.text((X0 + X1) / 2 if yatay else w + d * (derin + 12), w + d * (derin + 12) if yatay else (Y0 + Y1) / 2,      # çerçevenin dışında
+                f"sundurma paneli {_sayi(en, 1).rstrip('0').rstrip(',')} × {_sayi(derin, 1).rstrip('0').rstrip(',')} (yer göstermek için)",
+                ha="center" if yatay else ("right" if d < 0 else "left"), va=("top" if d < 0 else "bottom") if yatay else "center", fontsize=7,
+                color="#777", rotation=0 if yatay else 90)
+        x0, y0, x1, y1 = _iz(p["v"]).bounds
+        L, hat = float(b["ParcaBoyu_cm"]), float(b["HatBoyu_cm"])
+        a0 = x0 if yatay else y0
+        u = 0.0
+        while u < hat - 1e-6:
+            parca = min(L, hat - u)
+            no += 1
+            q0, q1 = a0 + u, a0 + u + parca
+            # şerit duvarın dış yüzünden dışarı 8 cm (eskizdeki gibi okunur kalınlık; gerçek yeri modelin parçası)
+            c0 = w - 12 if d < 0 else w + 4
+            r = (q0, c0, q1 - q0, 8) if yatay else (c0, q0, 8, q1 - q0)
+            ax.add_patch(plt.Rectangle(r[:2], r[2], r[3], color=R, lw=0, zorder=5))
+            if u > 0:                                                       # parça eki: beyaz çentik
+                ax.plot([q0, q0] if yatay else [w + d * 2, w + d * 22], [w + d * 2, w + d * 22] if yatay else [q0, q0], color="white", lw=1.6, zorder=6)
+            m_ = (q0 + q1) / 2
+            ax.text(m_ if yatay else w + d * 40, w + d * 40 if yatay else m_, f"D{no} · {_sayi(parca, 1).rstrip('0').rstrip(',')}",
+                    ha="center", va="center", fontsize=7, color=R, fontweight="bold", rotation=0 if yatay else 90, zorder=6)
+            u += parca
+        orta = a0 + hat / 2
+        n = math.ceil(hat / L - 1e-9)
+        ax.text(orta if yatay else w + d * 85, w + d * 85 if yatay else orta,
+                f"damlalık {_sayi(hat, 1).rstrip('0').rstrip(',')} (L {L * 10:g} × {n}; son parça kesilir)" if hat % L > 1e-6 else
+                f"damlalık {_sayi(hat, 1).rstrip('0').rstrip(',')} (L {L * 10:g} × {n})",
+                ha="center", va="center", fontsize=7.5, color=R, rotation=0 if yatay else 90, zorder=6)
 
 
 def _kenar_lejanti(fig, say: dict, plt) -> None:
@@ -522,6 +569,8 @@ def _kenar_lejanti(fig, say: dict, plt) -> None:
         kp = kesim.get(k["kod"])
         if k["kod"] in ESI_KENAR and not kp and k["kod"] not in kurulmadi and not liste.get(k["kod"]):
             continue
+        if k["kod"] in YALNIZ_VARSA and not kp and not (isinstance(liste.get(k["kod"]), int) and liste.get(k["kod"])):
+            continue
         model = "kurulmadı" if k["kod"] in kurulmadi else f"{kp['stok']} boy" if kp else f"{_sayi(k.get('metre', 0))} m"
         lst = liste.get(k["kod"])
         lst = ("listede yok" if lst is None else "liste yazılmaz" if lst == LISTE_YAZILMAZ
@@ -530,11 +579,13 @@ def _kenar_lejanti(fig, say: dict, plt) -> None:
         yazi.append(f"{k['kod']} {k['ad']}\nmodel {model} · {lst}")
     fig.legend(tutamak, yazi, loc="upper left", bbox_to_anchor=(0.76, 0.90), fontsize=9, frameon=True, edgecolor="#999",
                title="model (kesim planı) · liste üreteci", title_fontsize=9, labelspacing=0.9)
-    fig.text(0.76, 0.56, "\n".join(textwrap.fill(s, 48) for s in (
+    fig.text(0.76, 0.56 - 0.045 * max(0, len(yazi) - 8), "\n".join(textwrap.fill(s, 48) for s in (
         *([f"Liste üreteci: {say['kenar']['liste_yazilmaz']}."] if "liste_yazilmaz" in say["kenar"] else []),
         "Sayı listenin yöntemiyle, boy modelden (kesim planı); C kapama metreyle sayılır.",
         "Yer montaj rehberinden; teyit bekleyen maddeler varsayım (Lokman, 25 Ekim).",
         "Saçak omegası duvar boyunca, saçağa uzamaz (Lokman, 1 Kasım; D-41); sayı saçak boyundan, gerçek listelerdeki gibi (Lokman, 31 Ekim).",
+        *(["Damlalık sundurma panelinin duvar kenarında: duvarla trapez sacın birleşiminde, ana saçağın altında; duvarla damlalığın arasına "
+           "silikonize mastik (Lokman, 20 Kasım; D-133, D-143)."] if "CK-08" in kesim else []),
         *(["Veranda kalkanında Z ve C kapama var (rehberdeki gibi dört kalkanda; kirişli kalkan betopanlı, liste de sayar)."]
           if any(p.get("bilgi", {}).get("Cati") for p in say.get("yerlesim", {}).get("parcalar", [])) else []))), fontsize=8.5, va="top", ha="left", color="#444")
 

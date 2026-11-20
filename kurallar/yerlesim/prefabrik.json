@@ -466,6 +466,26 @@
    "kaynak": "Liste kuralı O10 (PK-01, PK-02, PK-06, PK-07 listelerinde tuttu); yer ve kanat montaj rehberinden (Lokman'ın 24 Ekim çizimleri: mahyanın iki yanında 26'şar cm kanat).",
    "not": "Modelde mahya başına bir parça; stok boyları kesim planında."
   },
+  "damlalik_yerlesimi": {
+   "kural": "Damlalık (Z) sundurma panelinin (teras paneli, `cati.tip: teras_paneli`) duvar kenarında: duvarın dış yüzünde, duvarla panelin üstündeki trapez sacın birleşiminde, panelin eni boyunca; duvardan süzülen su sacın üstüne akar, duvarla damlalığın arasına mastik. Teras başına bir hat. Sayı ⌈terasların enlerinin toplamı ÷ parça boyu⌉ (liste üretecinin D-57 kuralı); parçalar hattın başından parça boyuyla bölünür, son parça kalan boy.",
+   "parca_boyu": {"okunan": "kurallar/liste/prefabrik.json › kurallar.teras_damlaligi.parca_boyu_m"},
+   "yontem": {
+    "deger": "toplam",
+    "durum": "lokman",
+    "tarih": "2026-11-05",
+    "not": "D-57 (Lokman, 5 Kasım 2026 11:02): \"teras genişliği kadar ama L:2800 alacaksın ön ve arka terasın genişliğin bir hesapla ve 2800'e böl\"; liste üretecinin yolu, boy modelden."
+   },
+   "kesit": {
+    "deger": {"duvar": 12.5, "ust": 4, "uc": 2.5},
+    "durum": "varsayim",
+    "tarih": "2026-11-20",
+    "not": "Yalnız 3B gösterim (cm): duvara yaslanan kanat, sacın üstündeki kanat, uçtaki iniş. Lokman'ın kesitinden (D-133, 20 Kasım 2026 12:53:18 PDF: 10 / 40 / 125 / 25 mm; 130°, 90°, 135°); açılar ve 10 mm'lik dönüş çizilmez. Sayı, boy ve metre bundan çıkmaz."
+   },
+   "durum": "lokman",
+   "tarih": "2026-11-20",
+   "kaynak": "D-143 (Lokman, 20 Kasım 2026 19:47:50: \"damlalık montaj paftasında görünmüyor\"; eskiz kartı 20:01:45 \"Eskizdeki gibi\"). Yer D-133'ten (Lokman, 20 Kasım 2026 12:53:18: \"damlalık bu duvar ile trapez sacın üstüne geliyor ki duvardan süzülen su trapez sacın üstüne aksın\").",
+   "not": "Modelde teras başına bir parça (hattın tamamı); stok boyları kesim planında. Kat planında panelin soluk kesik çerçevesi yalnız yer göstermek içindir."
+  },
   "kenar_gosterim": {
    "kesit_cm": {
     "deger": {

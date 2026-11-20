@@ -957,6 +957,19 @@
    "pafta": [],
    "yerlesim": {"kural": "mahya_yerlesimi", "parca": "trapez_mahya", "sinif": "IfcCovering", "kesim": {"yontem": "trapez_yontem", "parca_boyu": "bilgi:ParcaBoyu_m"}},
    "kaynak": {"durum": "lokman", "tarih": "2026-11-04", "dayanak": "D-50 (Lokman, 4 Kasım 2026 20:49): \"yalnız trapez mahya sac kaç kapatırsa o kadar kapatır yani sac 100 kapatırsa trapez mahyada 100 kapatır\"; 20:47 \"Trapez mahya olacak\"; M-11. Liste satırı \"Trapez sac mahyası\" (her beşiğin mahyası ÷ kapatma, yukarı). Kart İE-15'le anlaşılan sırayla sona eklendi (K6, TK-04 montaj rehberi). D-74 (Lokman, 10 Kasım 2026 04:58): prefabrikte çatı kaplamasının standardı trapez sac, mahyası bu kart; kanat 35 × 35 cm (04:45)"}
+  },
+  {
+   "kod": "CK-08",
+   "ad": "Damlalık L 2800 (Z)",
+   "liste": {"grup": "1002", "satirlar": ["Damlalık"]},
+   "olcu": "L 2800 (`kurallar/liste/prefabrik.json › teras_damlaligi`); Z kesit 10 / 40 / 125 / 25 mm, 130°, 90°, 135° (Lokman'ın kesiti, D-133); hattın boyu parçada",
+   "birim": "adet",
+   "nerede": "Sundurma panelinin (teras paneli) duvar kenarında, duvarla trapez sacın birleşiminde, panelin eni boyunca; duvarla damlalığın arasına mastik (`damlalik_yerlesimi`)",
+   "sayim": "boy_kesim",
+   "ifc": {"sinif": "IfcCoveringType", "alt_tur": "ROOFING"},
+   "pafta": [],
+   "yerlesim": {"kural": "damlalik_yerlesimi", "parca": "damlalik", "sinif": "IfcCovering"},
+   "kaynak": {"durum": "lokman", "tarih": "2026-11-20", "dayanak": "D-143 (Lokman, 20 Kasım 2026 19:47:50: \"damlalık montaj paftasında görünmüyor\"; eskiz kartı 20:01:45 \"Eskizdeki gibi\"). Yer D-133 (12:53:18): \"damlalık bu duvar ile trapez sacın üstüne geliyor ki duvardan süzülen su trapez sacın üstüne aksın\". Liste satırı \"Damlalık\" (D-57, terasların eni ÷ 2,8). Kart sona eklendi"}
   }
  ],
  "gorunum": [
