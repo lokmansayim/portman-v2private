@@ -1316,26 +1316,26 @@
   },
   {
    "kod": "PC-48",
-   "baslik": "Taşan verandanın tek eğimli çatısı (sundurma) ana saçağın altında: yüksek ucu duvar üstünde",
-   "kural": "Taşan verandanın (`verandalar[]`) çatısı tek eğimse (`cati.tip: tek_yon`) yüksek ucu cephede duvar üstündedir (250), çatı `egim_yuzde` ile dışarı iner; saçak dış kenarda ve iki yanda `sacak_cm`. 70 m²'lik onaylı evin (AP-09, M-07) açık mahal çatısı gibi; ana çatının saçağının altında kalır, iki çatının birleşimi yoktur (havuz denetimi HD-02 düşmez). Kirişler (dış ve iki yan) yatay, üstü çatının dış kirişin üstündeki en alçak kotu; kolon kirişin altına (listede kolon boyu da). Görünüşte sundurmanın duvar üstünde saçak altı çizgisi ve topuğu yok. Önce yüksek uç saçak kotundan (duvar üstü + topuk) yukarı çıkıyordu, ana saçağın içinden geçiyordu. Depoda yalnız 80 m² (PA-48): yüksek uç 285,4 → 250, dış uç 260 → 224,6, kiriş üstü 227,6, kolon L 2500 → 2176. Beşik ve teras panelli veranda aynen.",
+   "baslik": "Sundurma paneli: teras paneli gibi, ana çatıdan 20 cm aşağıda (`duvar_alti_cm`)",
+   "kural": "Teras panelli verandada (`cati.tip: teras_paneli`, D-52) İş Emri `duvar_alti_cm` yazarsa panelin üstü duvarda duvar üstünün o kadar altındadır (0'dan büyük, en çok 50); yazmazsa 10 (D-52, M-12 aynen). Panel 8 cm, `egim_yuzde` ile dışarı iner, üstünde evin çatı kaplaması (trapez sac), duvarla sacın birleşiminde damlalık (D-57 satırı); dış kiriş panelin altında, kolon kirişin altına, yan kiriş yok (D-56). Depoda yalnız 80 m² (PA-48): önce tek eğimli çatı (`tek_yon`) saçak kotundan yukarı çıkıyordu (285,4), ana saçağın içinden geçiyordu (havuz denetimi HD-02). Şimdi sundurma paneli: duvarda 230, %5, duvardan 224 (paftanın listesindeki sundurma sacı L 2243), dış uçta 218,8, kiriş üstü 210,8, kolon L 2500 → 2008; listede makas yerine panel, damlalık L 2800 × 3.",
    "karar": "D-133",
    "lokman": {
     "tarih": "2026-11-20",
-    "saat": "07:08",
-    "soz": "kart 07:08:08 \"Önerdiğim gibi\" (soru: \"Dört çatı farkında hangi yolla gidelim?\"; seçenek: \"75, 76 ve 45 m²'de Motor kalır, 45 m²'ye %44 yazılır. 80 m²'de sundurma saçak altına iner, önce/sonra çizimi gelir.\")"
+    "saat": "07:54",
+    "soz": "kart 07:08:08 \"Önerdiğim gibi\"; önce/sonra çizimine not 07:54:25 \"%5 gibi bir eğim vermen lazım verand a/sundurma paneline ayrıca ana çatıdan 20 cm aşağıda alacak panel sırt kalınlığı 8 cm üzerine çatı özelliği ne varsa o gelir örneğin trapez sac ise trapez sac gelir onun üstünede Z şeklinde damlalık gelir\"; 12:53:18 \"damlalık bu duvar ile trapez sacın üstüne geliyor ki duvardan süzülen su trapez sacın üstüne aksın ayrıca araya dyson mastik sıkılıyor\""
    },
    "kod_yeri": [
-    "motor/veranda.py::cati",
-    "motor/veranda.py::gorunus_parcalari",
-    "motor/ifc_uret.py::IfcUretici.baglantilar",
-    "motor/prefabrik_liste.py::_teras_kolon_boylari"
+    "motor/geometry.py::_dis_verandalar",
+    "motor/veranda.py::teras_paneli",
+    "motor/prefabrik_liste.py::_veranda_catilari"
    ],
    "test": [
     "testler/motor/test_d133_sundurma.py::test_sundurma_kotlari",
-    "testler/motor/test_d133_sundurma.py::test_uyari_yok",
-    "testler/motor/test_d133_sundurma.py::test_gorunus_kolon_ve_kiris_catinin_altinda",
-    "testler/motor/test_d133_sundurma.py::test_liste_kolon_boyu",
-    "testler/motor/test_d133_sundurma.py::test_tarama_sundurma_yalniz_80m2"
+    "testler/motor/test_d133_sundurma.py::test_duvar_alti_yazmayan_teras_aynen",
+    "testler/motor/test_d133_sundurma.py::test_duvar_alti_siniri",
+    "testler/motor/test_d133_sundurma.py::test_gorunus_kolon_ve_kiris_panelin_altinda",
+    "testler/motor/test_d133_sundurma.py::test_liste",
+    "testler/motor/test_d133_sundurma.py::test_tarama_duvar_alti_yalniz_80m2"
    ]
   }
  ]

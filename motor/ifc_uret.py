@@ -1396,7 +1396,7 @@ class IfcUretici:
                     return min(kot(m["duzlem"], x, y) for x in (x0, x1) for y in (y0, y1))
             return H0
 
-        teras = [v for v in (self.G.get("dis_verandalar") or []) if "kolon_ustu" in (v["cati"] or {})]   # D-52: kiriş panelin altında (D-133: sundurmada da),
+        teras = [v for v in (self.G.get("dis_verandalar") or []) if (v["cati"] or {}).get("tip") == "teras_paneli"]   # D-52: kiriş panelin altında,
                                                                                                           # dikme dış kirişin altına
         def teras_verandasi(x0, y0, x1, y1):
             return next((v for v in teras for rx0, ry0, rx1, ry1 in [v["rect"]]

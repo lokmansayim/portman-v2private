@@ -1,13 +1,24 @@
 {
- "aciklama": "D-133 (BK-61, PC-48) hedef örneği: 80 m² PA-48 (HD-420) ön verandasının tek eğimli çatısı (sundurma) ve 45 m² PA-45 (HD-596) çatı eğimi. Lokman, kart 20 Kasım 2026 07:08:08 \"Önerdiğim gibi\" (eskiz PF Disk_Arsivi/parti2/cati_farklari/04_80m2_sundurma.png ve 03_45m2_egim.png). Kotlar cm, zeminden.",
+ "aciklama": "D-133 (BK-61, PC-48) hedef örneği: 80 m² PA-48 (HD-420) ön verandasının sundurma paneli ve 45 m² PA-45 (HD-596) çatı eğimi. Lokman: kart 20 Kasım 2026 07:08:08 \"Önerdiğim gibi\"; önce/sonra çizimine not 07:54:25 (panel 8 cm, ana çatıdan 20 cm aşağıda, %5, üstünde evin çatı kaplaması, Z damlalık) ve 12:53:18 (damlalık duvar ile trapez sacın üstüne; eskiz PF Disk_Arsivi/parti2/cati_farklari/08_80m2_sundurma_panel_eskiz.png). Kotlar cm, zeminden.",
  "sundurma_80m2": {
   "is_emri": "testler/havuz/is_emirleri/HD420.json",
-  "mahya_kotu": 250.0,
-  "sacak_kotu": 224.6,
-  "dis_kiris_ustu": 227.6,
-  "kolon_ustu": 217.6,
-  "liste_kolon": {"olcu": "L 2176", "adet": 3},
+  "mahya_kotu": 230.0,
+  "sacak_kotu": 218.8,
+  "dis_kiris_ustu": 210.8,
+  "kolon_ustu": 200.8,
+  "kalinlik": 8.0,
+  "liste": {
+   "Özel kutu profil (kolon) 100 × 100": ["L 2008", 3],
+   "Damlalık": ["L 2800", 3],
+   "Teras paneli (hafif çelik C 80) · veranda çatısı": ["80 × 0,8", 1],
+   "Trapez sac · veranda çatısı": ["L 2300", 7]
+  },
+  "listede_yok": ["Yavru makas · veranda çatısı"],
   "uyari_yok": true
+ },
+ "teras_aynen": {
+  "is_emri": "testler/kor/projeler/AP26/is_emri.json",
+  "mahya_kotu": 240.0
  },
  "egim_45m2": {
   "is_emri": "testler/havuz/is_emirleri/HD596.json",

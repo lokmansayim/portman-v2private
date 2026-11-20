@@ -2174,6 +2174,7 @@ def _gerekli_ara_kolon(en: float, k: float = VERANDA_KOLON_CM) -> int:
 TERAS_PANELI_SACAK_ALTI_CM = 10.0
 TERAS_PANELI_KALINLIK_CM = 8.0
 TERAS_PANELI_EGIM_SINIRI = 20.0      # % (açık hata üstünde; eğimsiz teras paneli yok)
+TERAS_PANELI_DUVAR_ALTI_SINIRI = 50.0   # cm; D-133: `duvar_alti_cm` (panelin üstü duvarda duvar üstünün kaç cm altında; yazılmazsa 10)
 
 
 VERANDA_D109_ANAHTARLARI = {"nis": "mi", "ara_kolon": "mu"}     # anahtar → soru eki (hata yazısında)
@@ -2358,12 +2359,17 @@ def _dis_verandalar(plan: "Plan", is_emri: dict) -> None:
         if tip == "teras_paneli":                   # D-52: panel; saçağı, topuğu yok (K21: yazılırsa yok sayılmaz); D-52 ek: eğimi İş Emri'nden
             cikma, eg = c.get("cikma_cm"), c.get("egim_yuzde")
             sayi = lambda q: isinstance(q, (int, float)) and not isinstance(q, bool)
-            if (set(c) - {"tip", "cikma_cm", "egim_yuzde", "yan_kiris"} or not sayi(cikma) or not d <= float(cikma) <= d + 60
-                    or not sayi(eg) or not 0 < float(eg) <= TERAS_PANELI_EGIM_SINIRI or c.get("yan_kiris", True) is not True):
+            da = c.get("duvar_alti_cm", TERAS_PANELI_SACAK_ALTI_CM)
+            if (set(c) - {"tip", "cikma_cm", "egim_yuzde", "yan_kiris", "duvar_alti_cm"} or not sayi(cikma) or not d <= float(cikma) <= d + 60
+                    or not sayi(eg) or not 0 < float(eg) <= TERAS_PANELI_EGIM_SINIRI or c.get("yan_kiris", True) is not True
+                    or not sayi(da) or not 0 < float(da) <= TERAS_PANELI_DUVAR_ALTI_SINIRI):
                 raise IsEmriHatasi(f"Veranda {ad}: teras_paneli cikma_cm ve egim_yuzde alır (cikma_cm duvardan panelin dış kenarı, derinlikten "
                                    f"{d:g} en çok 60 cm fazla; egim_yuzde duvardan dışarı, 0'dan büyük, en çok "
-                                   f"{TERAS_PANELI_EGIM_SINIRI:g}; yan_kiris yazılırsa true): {c}")
+                                   f"{TERAS_PANELI_EGIM_SINIRI:g}; yan_kiris yazılırsa true; duvar_alti_cm yazılırsa 0'dan büyük, en çok "
+                                   f"{TERAS_PANELI_DUVAR_ALTI_SINIRI:g}): {c}")
             cati = {"tip": tip, "egim_yuzde": float(eg), "sacak_cm": 0.0, "topuk_cm": float(ana.get("topuk_cm", 10)), "cikma_cm": float(cikma)}
+            if "duvar_alti_cm" in c:                # D-133 (BK-61, PC-48; Lokman 20 Kasım 2026 07:54:25): sundurma paneli ana çatıdan 20 cm aşağıda;
+                cati["duvar_alti_cm"] = float(da)   # yazmayan İş Emri 10 (D-52) ile aynen
             if c.get("yan_kiris"):                  # BK-49 (D-116; Lokman, kart 16 Kasım 2026 12:10:16 "Yalnız bu evde"; 92 m² PA-43): listede
                 cati["yan_kiris"] = True            # 2 yan kiriş, evin paftasındaki gibi (`prefabrik_liste`); çizim ve 3B aynı (D-56'nın kirişi)
         elif tip == "cumba":                        # 14 Kasım 2026 (Lokman 08:41–08:42): verandanın çatısı ana çatının cumbası; vadiyle girer

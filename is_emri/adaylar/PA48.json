@@ -247,7 +247,7 @@
  },
  "varsayimlar": [
   "VERANDA: paftada 3 kolon; İş Emri'ne ara_kolon: 1 yazıldı (D-109).",
-  "VERANDA: çatısı paftanın makas planındaki gibi tek eğimli sundurma (tek_yon), duvardan dışarı %10. Eğim paftada yok; varsayım (paftanın listesinde sundurma sacı L 2243). Yüksek ucu cephede duvar üstünde, ana saçağın altında (D-133; Lokman, kart 20 Kasım 2026 07:08:08 \"Önerdiğim gibi\").",
+  "VERANDA: çatısı sundurma paneli (Motor'da teras paneli gibi, makassız): 8 cm panel, üstü duvarda duvar üstünün 20 cm altında, duvardan dışarı %5, üstünde evin çatı kaplaması (trapez sac), duvarla sacın birleşiminde Z damlalık (D-133; Lokman 20 Kasım 2026 07:54:25 \"%5 gibi bir eğim vermen lazım verand a/sundurma paneline ayrıca ana çatıdan 20 cm aşağıda alacak panel sırt kalınlığı 8 cm üzerine çatı özelliği ne varsa o gelir\", 12:53:18 \"damlalık bu duvar ile trapez sacın üstüne geliyor\"). Panel duvardan 224 cm (verandanın derinliği): paftanın listesindeki sundurma sacı L 2243 = 224 × %5 eğimin boyu.",
   "Çatı beşik, %32,9, saçak 30, topuk 10: paftanın makas planındaki gibi 9 makas (2 baş, 7 orta), mahya uzun kenar boyunca. Eğim yazılı değil, prefabrik standardı.",
   "Pano dizilimi paftadan: 444.25 hattında y 135.5'dan 125,5; 632.5 hattında y 72.75'dan 125,5; 261.0 hattında x 67.75'dan 125,5 (dizilim.dis_pano_dayanagi)."
  ],
@@ -260,8 +260,10 @@
    "derinlik_cm": 224.0,
    "ara_kolon": 1,
    "cati": {
-    "tip": "tek_yon",
-    "egim_yuzde": 10
+    "tip": "teras_paneli",
+    "cikma_cm": 224,
+    "egim_yuzde": 5,
+    "duvar_alti_cm": 20
    }
   }
  ]

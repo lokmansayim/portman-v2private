@@ -69,10 +69,8 @@
   "havuz_denetimi": {
    "sonuc": "geçti",
    "karar": "D-112",
-   "uyarilar": [
-    "HD-09: veranda çatısı: listede 6 makas, 3D modelde bu parçanın makası yok"
-   ]
+   "uyarilar": []
   }
  },
- "not": "Çatı paftadaki gibi beşik, 9 makas; ön verandada tek eğimli sundurma %10 (eğim paftada yok, varsayım), yüksek ucu duvar üstünde ana saçağın altında (D-133, Lokman kartı 20 Kasım 2026 07:08:08). Listede sundurmanın makası var, 3B'de yok (HD-09)."
+ "not": "Çatı paftadaki gibi beşik, 9 makas; ön verandada sundurma paneli: 8 cm panel, üstü duvarda duvar üstünün 20 cm altında, %5, üstünde trapez sac, duvarla sacın birleşiminde Z damlalık (D-133; Lokman 20 Kasım 2026 07:54:25 ve 12:53:18)."
 }
