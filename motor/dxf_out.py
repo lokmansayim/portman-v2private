@@ -604,6 +604,8 @@ class Cizici:
                                    dxfattribs={"layer": "VERANDA_PANEL"})
         for (x0, y0, x1, y1) in self._merge_lines(plan.acik_sinir_cizgileri):
             msp.add_line((x0 + ox, y0 + oy), (x1 + ox, y1 + oy), dxfattribs={"layer": "ACIK_SINIR"})
+        if not montaj:
+            self._kiris_profilleri(ox, oy)
         # mahaller
         etiketler, yerlesecek, nis_yazilari, zincir_h = {}, [], {}, set()
         for ad, m in plan.mahaller.items():
@@ -1001,6 +1003,32 @@ class Cizici:
             yer = next((q for q in yerler if not any(self._kesisir(self._yazi_kutusu(s, q, h, rot), o) for o in engel)), yerler[0])
             engel.append(self._yazi_kutusu(s, yer, h, rot))
             self.text(s, (yer[0] + ox, yer[1] + oy), h, "TAVAN_KIRISI", rot=rot)
+
+    KIRIS_KATMANI = ("KIRIS_PROFIL_100", 1, "VERANDA_KESIK")
+
+    def _kiris_profilleri(self, ox: float, oy: float) -> None:
+        """D-140 (Lokman, 20 Kasım 2026: kart 10:50:36 "Eskizdeki gibi, kirişli her evde"; kart 10:54:39 "Evet, iki tür kiriş her evde"):
+        yükleme listesinde kiriş olan iç yerler ana planda ve kopyasında (A4 ön onay sayfasının planı ana plandan) 10 × 10 profil: kesik
+        kırmızı çerçeve, veranda profili gibi; yeni ölçü ve yazı yok. İki tür: tavan kirişi (D-107, D-127; `tavan_kirisi.bul`, kirişin
+        ekseni ve uçları) ve iki kapalı oda arasındaki duvarsız sınırın kirişi (`prefabrik_liste.ic_kiris_hatlari`, aks arası, sınır
+        çizgisine ortalı). Liste ve çizim aynı işlevden okur (D-28 madde 1). Çerçeve BOM bloğu değil (IFC ve kart modeli aynen); katman
+        yalnız kirişli evde açılır. Saha montaj planı aynen (tavan kirişi orada taralı, `_tavan_kirisleri`)."""
+        from . import prefabrik_liste as PL
+        e = 5.0
+        kutular = []
+        for k in self.tavan["kirisler"]:
+            c, (a, b) = k["eksen_cm"], k["uclar_cm"]
+            kutular.append((c - e, a, c + e, b) if k["yon"] == "y" else (a, c - e, b, c + e))
+        for (x0, y0, x1, y1) in PL.ic_kiris_hatlari(self.plan):
+            kutular.append((x0 - e, y0, x1 + e, y1) if abs(x1 - x0) < 1e-6 else (x0, y0 - e, x1, y1 + e))
+        if not kutular:
+            return
+        ad, renk, cizgi = self.KIRIS_KATMANI
+        if ad not in self.doc.layers:
+            self.doc.layers.add(ad, color=renk, linetype=cizgi)
+        for (x0, y0, x1, y1) in kutular:
+            self.msp.add_lwpolyline([(x0 + ox, y0 + oy), (x1 + ox, y0 + oy), (x1 + ox, y1 + oy), (x0 + ox, y1 + oy)], close=True,
+                                    dxfattribs={"layer": ad, "lineweight": 25})
 
     def _kubbe_plani(self, kb: dict, ox: float, oy: float, montaj: bool, olcu: bool) -> None:
         """İE-29 PR-2: kubbe planda (`G._kubbe_geometrisi`): her pano pencere boşluğunun iki yanında iki parça ve pano ortasında pencere bloğu
