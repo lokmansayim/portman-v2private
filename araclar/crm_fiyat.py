@@ -23,8 +23,8 @@ Lokman, 9 Kasım 2026 13:10: "bunu kural olarak al ve mühürle bundan sonra tek
 - **KDV dahil fiyat (D-136; Lokman 20 Kasım 2026 07:58:30 UTC "artık fiyatlara ekli yani yeniden KDV hesabı yapmayacağız ... 120 TL lik
   %20 KDV li bir ürünü ... KDV dahil 120 bin TL (100+20(kdv)", kart 08:03:19 "CRM ve sizin fiyatlarınız"):** görüntünün günü (kendi
   saatiyle) eşlemenin `kdv.fiyata_dahil.baslangic`'ından önce değilse defterin `kdv`'si `fiyata_dahil` taşır: CRM fiyatı ve Lokman'ın
-  fiyatları (sabit karar, ayın istisnası) KDV dahildir. Defterin fiyatları değişmez; `araclar/fiyatla.py` satırın fiyatını kendi oranıyla
-  KDV hariçe çevirir. Başlangıçtan önceki görüntünün defteri bayt bayt eskisi gibidir.
+  fiyatları (sabit karar, ayın istisnası) KDV dahildir. Defterin fiyatları değişmez; `araclar/fiyatla.py` fiyatı CRM'deki gibi yazar,
+  KDV'yi ayırmaz ve eklemez (09:10:13 "sen KDV olayını karıştırma CRM'den ne çektiysen onu gir", kart 09:10:41 "KDV hiç yazılmasın"). Başlangıçtan önceki görüntünün defteri bayt bayt eskisi gibidir.
 - **Çıktı:** `kurallar/fiyat/defter_2026-11.json` ile aynı şemada defter (`portman.fiyat_defteri/1`); `araclar/fiyatla.py` ve
   `araclar/teklif.py` onu okur. Yalnız standart kütüphane: sunucuda sistem python3'üyle koşar.
 """
@@ -398,8 +398,8 @@ def defter_uret(A: dict, E: dict | None = None) -> dict:
         "para_birimi": "TL",
         "kdv": (({"dayanak": K["dayanak"], "not": "CRM fiyatı KDV hariç; kaydın oranı `kdv`, grubu `kdv_grubu` (None: oran yok, uydurulmaz)",
                   "gruplar": K["gruplar"]} if not fiyata_dahil_mi(K, t) else
-                 {"dayanak": K["dayanak"], "not": ("CRM fiyatı ve Lokman'ın fiyatları KDV dahil (D-136); araclar/fiyatla.py satırın fiyatını "
-                                                   "kaydın oranıyla KDV hariçe çevirir; oran `kdv`, grup `kdv_grubu` (None: oran yok, çevrilmez)"),
+                 {"dayanak": K["dayanak"], "not": ("CRM fiyatı ve Lokman'ın fiyatları KDV dahil (D-136); araclar/fiyatla.py fiyatı aynen "
+                                                   "yazar, KDV yazmaz; oran `kdv`, grup `kdv_grubu` yalnız bilgi"),
                   "gruplar": K["gruplar"], "fiyata_dahil": K["fiyata_dahil"]}) if K else "CRM yanıtında KDV yazmıyor"),
         "onay_kurali": ("Tek kaynak CRM (D-72, M-15). onay true: eşleme birebir ya da Lokman'ın onaylı hesap kuralı. onay false: yakın "
                         "ürün ya da birim varsayımı; araclar/fiyatla.py bunları yalnız --oneri ile uygular. Fiyatı 0 olan, CRM'de "
