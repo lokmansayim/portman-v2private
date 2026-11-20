@@ -18,15 +18,32 @@ const fs = require('fs');
     const root = new THREE.Group(); root.name = JSON.parse(document.getElementById('pafta').textContent).kod;
     const adimlar = M.STEPS.map(s => s.name);
     const grup = adimlar.map((ad, i) => { const g = new THREE.Group(); g.name = String(i).padStart(2, '0') + ' ' + ad; root.add(g); return g; });
+    // İE-45 (D-138): rehberin hareketleri (kapı ve kanat açılışı, cam yünü serme) düğümlerin extras'ına; montaj oyunu oynatır.
+    // Değerler kapalı / serilmiş hâle göre: 'don' yerel y çevresinde, 'devir' yerel `ax` çevresinde döner, 'kay' `ax` boyunca kayar (m).
+    const hareket = pt => {
+      const iz = [];
+      if (pt.anim && pt.anim.ackapa) pt.anim.ackapa.forEach(m => { m.el.userData.__ak = { tip: m.tip, ax: m.ax || 'y', max: m.max }; iz.push(m.el); });
+      if (pt.anim && pt.anim.serme) { pt.anim.serme.sr.userData.__serme = { L: pt.anim.serme.L / 100 }; iz.push(pt.anim.serme.sr); }
+      return iz;
+    };
+    const etiket = c => {
+      const u = c.userData || {}, e = {};
+      if (u.__ak) e.ackapa = u.__ak;
+      if (u.__serme) e.serme = u.__serme;
+      return e;
+    };
     M.parts.forEach(pt => {
+      const iz = hareket(pt);
       // parçanın yerindeki yüksekliği (`pt.y`; sahnede düşme animasyonu bunun üstünden oynar). Eskiden 0'a çekiliyordu: kökü yüksekte
       // duran parçalar (TK-01'de veranda kirişleri, tavan omegaları ve H'lar, alçıpan, cam yünü, aşıklar, çatı kaplaması) GLB'de yere düşüyordu.
       const o = pt.obj.clone(true); o.visible = true; o.position.y = pt.y;
+      iz.forEach(c => { delete c.userData.__ak; delete c.userData.__serme; });
+      o.traverse(c => { if (c !== o && c.userData && (c.userData.__ak || c.userData.__serme)) c.userData = etiket(c); });
       const gecici = []; o.traverse(c => { if (c.userData && c.userData.gecici) gecici.push(c); });   // serilirken görünen rulo
       gecici.forEach(c => c.parent && c.parent.remove(c));
       const i = pt.obj.userData.info || {};
       o.name = (i.kod ? i.kod + ' ' : '') + (i.ad || '');
-      o.userData = { kod: i.kod || null, ad: i.ad || null, adim: pt.step, adim_adi: adimlar[pt.step] };
+      o.userData = { kod: i.kod || null, ad: i.ad || null, adim: pt.step, adim_adi: adimlar[pt.step], ...etiket(o) };
       o.traverse(m => { if (m.isMesh) { m.material = m.material.clone(); m.material.emissiveIntensity = 0; } });
       grup[pt.step].add(o);
     });

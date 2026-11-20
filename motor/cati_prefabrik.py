@@ -28,6 +28,9 @@ Tipler:
   Tek uçlu kırma (İE-29, AP-27): `kalkan_ucu` sol | sag (mahya x boyunca) ya da on | arka (mahya y boyunca) → o uçta kalkan (beşikteki
   gibi, dış duvarın dış yüzünde; saçak o uçta da), öteki uçta kırma yüzü; eşit eğim, kırma çizgileri 45° (`_tek_uclu_kirma`). Mahya
   kısa kenar boyunca da olur (AP-27 773 × 1000, mahya 773 boyunca). `kirma_egimleri` ile birlikte yazılmaz.
+  Kenar yöntemi (BK-64, D-139, PC-50; Lokman 20 Kasım 2026): `yontem: "kenar"` → ayak izi gövde + ana çatının örttüğü veranda
+  (`cati_serit.cati_izi`), dik açılı her biçim (girintili gövde dahil); her saçak kenarı aynı eğimle bir yüz, yüzler düz iskeletle
+  (`cati_iskelet`). Anahtarsız İş Emri bugünkü yoldan gider.
 """
 from __future__ import annotations
 
@@ -38,7 +41,8 @@ TIP_ADI = {"besik_cumba": "beşik + cumba", "kirma": "kırma"}
 UST_PAY_CM = 14.0                  # ifc_uret: sac düzlemin 10 cm üstünde, 4 cm (pano Motor'unun beşik IFC'siyle aynı)
 CEPHE_YAN = {"on": "G", "arka": "K", "sol": "B", "sag": "D"}
 ALANLAR = {"tip", "egim_yuzde", "sacak_cm", "topuk_cm", "makas_ekseni", "makas_yonu"}   # her tipte; tanınmayan alan yok sayılmaz
-TIP_ALANI = {"besik_cumba": {"cumbalar"}, "kirma": {"kirma_egimleri", "kalkan_ucu"}}
+TIP_ALANI = {"besik_cumba": {"cumbalar"}, "kirma": {"kirma_egimleri", "kalkan_ucu", "yontem"}}
+YONTEMLER = ("kenar",)            # BK-64 (D-139): `cati.yontem: kenar` → yüzler gövdenin saçak kenarlarından (düz iskelet, `cati_iskelet`)
 KALKAN_UCLARI = {"x": ("sol", "sag"), "y": ("on", "arka")}       # İE-29: tek uçlu kırmada kalkanlı uç (mahya yönüne göre)
 CUMBA_ALANLARI = {"cephe", "bas_cm", "bit_cm", "cikinti_cm", "egim_yuzde", "ana_makas", "yavru_makaslari_cm"}
 VERANDA_CUMBA_ALANLARI = {"cephe", "veranda"}   # ikinci cumba: taşan verandanın çatısı (Lokman, 14 Kasım 2026 08:41)
@@ -308,6 +312,29 @@ def _tek_uclu_kirma(kutu: tuple, mahya: str, uc: str, b: dict, k: dict) -> tuple
     return duz, kal
 
 
+def ana_karkasi(duz: list[dict]) -> list[dict]:
+    """Çapraz cumbada ana çatının aşıkları cumbanın arkasında kesilmez (D-135, BK-62; Lokman, 20 Kasım 2026 07:12: "ana makasdaki aşıklar cumbanın
+    arkasına gelince kesilmez devam eder ... baştan sona kadar devam eder yarım bırakılmaz"). Ana çatının makasları cumbanın altından da
+    geçer (`cati_capraz`); ana yüzün görünen kısmı cumbanın oturduğu yerde kesik olsa da makaslarla taşınan kısmı (`karkas`,
+    `cati_genel.duzlem_kur`) cumbanın altındaki parçayla birlikte tam yüzdür. Karkas = görünen yüz ∪ (yüzün dışbükey zarfı ∩ cumba
+    yüzleri). Aşık sıraları (`cati_genel.asik_siralari`: liste, kart modeli, montaj paftası ve rehber) bu kısmı okur; çizim, kaplama ve
+    kenarlar görünen yüzden aynen."""
+    from shapely.geometry import Polygon
+    from shapely.ops import unary_union
+    cumba = unary_union([Polygon(d["plan"]) for d in duz if not d["ad"].startswith("ana ")])
+    if cumba.is_empty:
+        return duz
+    out = []
+    for d in duz:
+        if d["ad"].startswith("ana ") and not d.get("karkas"):
+            yuz = Polygon(d["plan"])
+            dolu = yuz.union(yuz.convex_hull.intersection(cumba)).buffer(0.01, join_style=2).buffer(-0.01, join_style=2).simplify(0.01)
+            if dolu.geom_type == "Polygon" and dolu.area - yuz.area > 1.0:
+                d = dict(d, karkas=[[round(x, 4), round(y, 4)] for x, y in list(dolu.exterior.coords)[:-1]])
+        out.append(d)
+    return out
+
+
 def cati(plan: G.Plan, ie: dict) -> dict:
     """Beşik dışı ana çatı → genel motorun `cati` biçimi. Dönen sözlük `sunum.cati_tanimi`'nin beşik çatısının anahtarlarında,
     ek olarak `tip_adi`, `ust_pay` ve `kalkanlar` (`cati_genel.cati_kur` ve `cephe_gorunus` okur)."""
@@ -327,6 +354,24 @@ def cati(plan: G.Plan, ie: dict) -> dict:
     H0 = float((ie.get("yapi") or {}).get("duvar_yuksekligi_cm", 250))
     kutu = tuple(float(v) for v in G.govde_kutusu(plan))
     mahya = "y" if c.get("makas_ekseni", "x") == "x" else "x"
+    if "yontem" in c and c["yontem"] not in YONTEMLER:
+        raise PrefabrikCatiHatasi(f"çatı yöntemi '{c['yontem']}' yok ({', '.join(YONTEMLER)})")
+    if tip == "kirma" and c.get("yontem") == "kenar":           # BK-64 (D-139, PC-50): girintili gövdede kırma, düz iskeletle
+        if c.get("kalkan_ucu") is not None or c.get("kirma_egimleri"):
+            raise PrefabrikCatiHatasi("kenar yöntemli kırmada `kalkan_ucu` ve `kirma_egimleri` bu sürümde yok (bütün yüzler aynı eğimde)")
+        from . import cati_iskelet as CI
+        from .cati_serit import cati_izi
+        iz = cati_izi(plan, ie)
+        e = round(float(c["egim_yuzde"]) / 100, 5)
+        try:
+            duz0 = CI.duzlemler(iz, k["sacak_cm"], e, H0 + k["topuk_cm"])
+        except CI.IskeletHatasi as h:
+            raise PrefabrikCatiHatasi(f"kırma (kenar yöntemi): {h}") from None
+        bulgu = CI.denetle(duz0, iz, k["sacak_cm"])
+        if bulgu:
+            raise PrefabrikCatiHatasi(f"kırma (kenar yöntemi) çatı denetimden geçmedi: {'; '.join(bulgu)}")
+        return {"tip": "kirma", "tip_adi": TIP_ADI[tip], "tip_kaynak": "BK-64 düz iskelet (motor/cati_iskelet.py; D-139)", "yontem": "kenar",
+                "sacak": k["sacak_cm"], "topuk": k["topuk_cm"], "duvar_ustu": H0, "ust_pay": UST_PAY_CM, "duzlemler": duz0, "kalkanlar": []}
     if tip == "kirma" and c.get("kalkan_ucu") is not None:   # İE-29: tek uçlu kırma (AP-27); genel motorun üreticisi değişmez
         if c.get("kirma_egimleri"):
             raise PrefabrikCatiHatasi("tek uçlu kırmada uç eğimi (`kirma_egimleri`) bu sürümde yok: kırma yüzü ana yüzlerin eğiminde")
@@ -396,6 +441,8 @@ def cati(plan: G.Plan, ie: dict) -> dict:
         d = dict(d)
         d.pop("ust_pay", None)                       # kaplama payı çatının `ust_pay`'ından (pano Motor'unun sacı), çeliğin paneli değil
         duz.append(d)
+    if tip == "besik_cumba":
+        duz = ana_karkasi(duz)
     return {"tip": u["tip"], "tip_adi": TIP_ADI[tip], "tip_kaynak": "İE-17 prefabrik çatı (motor/cati_prefabrik.py; İE-14 çatı üreticisi)",
             "sacak": k["sacak_cm"], "topuk": k["topuk_cm"], "duvar_ustu": H0, "ust_pay": UST_PAY_CM, "duzlemler": duz,
             "kalkanlar": u["kalkanlar"]}

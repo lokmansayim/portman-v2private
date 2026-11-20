@@ -60,7 +60,7 @@ ISARET_YOLU = KOK / "kurallar" / "liste" / "prefabrik_isaret.json"
 TEK_KAYNAK = "Tek kaynak (zayıf)"
 ISARETLI = ("pencere_u_h_gecen", "omega_kapak")   # satırı `zayif(...)` ile yazılan kurallar (BK-12 PR-2c)
 
-SURUM = "1.20 (19 Kasım 2026; D-129, BK-59, Lokman kartları 21:39:45 \"Eskizdeki gibi, yüzden yüze\" ve 21:45:21 \"Ara kolonlu her eve\": gövdedeki verandanın açık kenarında ara kolon varsa kiriş ara kolonlarda bölünür, her parça kolonun yüzünden yüzüne; ara kolonsuz kenar aynen; D-131 (kart 21:59:00 \"Eskizdeki gibi\"): dörtomuzun duvarsız ucunda ilk ana makas gövdenin duvarında, kısa makaslar karşı uç duvarının eklerinde; 1.19, 19 Kasım 2026; D-126, BK-57, Lokman 19 Kasım 19:00:47 (kart \"Evet, çatı şiltesi çıksın\"): İş Emri çatı izolasyonunu alıcıya ait yazarsa (izocam, şilte, çatı izolasyonu) çatı şiltesi satırı 0 ve \"alıcıya ait\"; yazmayan İş Emri aynen; 1.18, 16 Kasım 2026; D-122, BK-51, Lokman 16 Kasım 21:35:12 ve 21:34:48: şase pul listeden çıktı (çelik dübel aynen); özel pencere karkasının adı \"Pencere kör kasası (EN×BOY)\", ölçü ve adet aynı; 1.17, 10 Kasım 2026; D-74, Lokman 10 Kasım 04:58: prefabrikte çatı kaplamasının standardı trapez sac; İş Emri çatı kaplamasını yazmazsa liste trapez sac ve trapez sac mahyası (L 1000) yazar, önce tek kat panel ve metal kiremit mahyası yazıyordu; yazılı kaplama aynen; 1.16, 6 Kasım 2026; İE-33: iki uçlu (dörtomuz) kırmanın çatı satırları (AP-01; Lokman çizimi 6 Kasım 21:23'te onayladı; makas planı paftadan: ana makaslar mahyaya dik, kesintisiz saçak duvarının pano eklemlerinde, uç duvardan en az bir pano içeride; kırma uçlarında kısa makaslar uç duvarın pano eklemlerinde ve kırma noktalarında; köşelerde çapraz makas; kırma uçlarının altındaki gözler çatı paneli); iki ucu kırmada liste artık yazılır; paftanın dışında kalanda (mahya y boyunca, girintili gövde, taşan veranda, paftadan geniş makas aralığı) yazılmaz; 1.15, 6 Kasım 2026; D-61, Lokman 5 Kasım 22:49 (TK-04 kartı \"Öneriyle düzelt\"): çıkıntısız çapraz cumbanın kısa makası boyu çatı tanımından (\"Yavru makas · cumba\" iki satır, adet aynı); cumba ile ana çatının köşesinde iki dere tek inişte (`ana_makas: cumba_makasindan`); iki ucu kolonlu açık kenarın kirişi kolon yüzünden yüzüne (− 2 × 10; M-05, Lokman 6 Kasım 07:56); 1.14, 6 Kasım 2026; İE-29 PR-2, main'in 1.12 (İE-28) ve 1.13 (İE-30) sürümünün üstüne: D-54 madde 2 (Lokman 5 Kasım 10:41, 12:05): kubbeli İş Emri'nde kitabın kubbe takımı (R6) kubbe başına; kubbenin panoları (yan 79, ön 125,5; 203 boyunda) karkaslı özel pencere panosu, tabanı pano değil ve iki ucunda H yok; kubbenin üç yüzüne standart aşık, kubbe duvarlarına saçak omegası; kubbesiz evin listesi aynen; İE-29 PR-2: girintili gövdede iki saçak duvarının ortak pano eki her zaman makas alır (AP-12 paftası: ana çatıda 13 makas; öteki evlerin makas yeri aynı); İE-29: tek uçlu kırmanın çatı satırları (AP-27; makas planı paftadan: ana makas mahyaya paralel, saçak bantlarında kısa makas, kırma köşesinde çapraz ve köşe kısa makası; kaplama kitabın kırma çatı dizilimiyle); 1.13, 5 Kasım 2026; İE-30, D-52 (M-12, Lokman 5 Kasım 10:17): teras panelli verandanın kolonu dış kirişin altına kadar (Motor), yan kiriş yok, yalnız dış kiriş (D-56, Lokman 10:48), teras panelinde damlalık L 2800, terasların genişliği ÷ 2,8 (D-57, Lokman 11:02), teras başına bir panel (8 cm C, 80 × 0,8), komple cam PVC kapı ayrı satır (900 × 2100); 1.12, 4 Kasım 2026; İE-28, Lokman 4 Kasım 04:35 (D-46): karkaslı kaplama duvar panosu İş Emri'nden (paftadaki tek parça pano), içindeki pencereye üst ve alt panel ile özel pencere karkası yok; 1.11, 4 Kasım 2026; D-50, Lokman 4 Kasım 20:49–21:20 (M-11): trapez sac standart 100 cm kapatır, mahya sacın kapattığı kadar kapatır (L 1000, ÷ 1, bindirme yok); İş Emri'nin çatı kaplaması başka kapatma yazıyorsa o; trapez sac satırında `kapatma_m` (D-51, fiyat m²'den); 1.10, 3 Kasım 2026: İE-27, Lokman 3 Kasım 09:52 (D-45): 3'lü H dış duvarda da (iç duvarın T'si pano ekleminde); çektirme U'su 60 yerinden (eklemsiz T, dış köşe, serbest uç); köşe direği tipsiz (özel köşe 100'lük köşeye katılır); mahya bandı mahya boyundan; temiz su ıslak hacim başına; trapez vida 5,5 × 25 aşık ve omegadan; 1.9, 30 Ekim: K5b TK-01 kıyası (CIO onayı 30 Ekim 14:20): aşık sırası beşikte karar C (Lokman 24 Ekim); baş makas betopanı ve Z'si taşan verandanın kirişli kalkanında da (D-32 madde 2); 1.8, 30 Ekim: asma dizme tavanda da 100'lük iç duvarın üstü 100'lük duvar omegası, ayrı satır yok (Lokman 30 Ekim 07:04, D-32 ek); 1.7, 29 Ekim: baş makas omegası saçak ucundan saçak ucuna, taşan verandanın dış kirişindeki dahil (Lokman 29 Ekim 13:12, D-32); 1.6, 28 Ekim: vitrifiye banyo başına (İE-13 PR-2; Lokman onayı 28 Ekim, PR-3); nişin ağzındaki kiriş (BK-14 ek); taşan verandanın dış kirişi kolonun dış yüzünden dış yüzüne (Lokman, kart 28 Ekim); 1.5, 22 Ekim: kör test üreteci 7.3, kurallar kural kitabında; orta iniş 9 m, kitapla farklı on yedi kalemde kitap; PK-07 hedef örnek; T76 cevapları; 100'lük duvar omegası kirişlerin de üstünde; elektrik oda kuralı)"
+SURUM = "1.21 (20 Kasım 2026; D-130, BK-60, Lokman kart 19 Kasım 21:43:35 \"Her açık kenara kiriş\": verandada aynı yöndeki ikinci açık kenar da (U veranda) kendi kirişini alır, boyu mahalin o kenarından (dış ölçü − 10; iki ucunda kolon varsa − 2 × 10); yönde tek açık kenar aynen; ara kolonlu kenar D-129 gibi parça parça; 1.20, 19 Kasım 2026; D-129, BK-59, Lokman kartları 21:39:45 \"Eskizdeki gibi, yüzden yüze\" ve 21:45:21 \"Ara kolonlu her eve\": gövdedeki verandanın açık kenarında ara kolon varsa kiriş ara kolonlarda bölünür, her parça kolonun yüzünden yüzüne; ara kolonsuz kenar aynen; D-131 (kart 21:59:00 \"Eskizdeki gibi\"): dörtomuzun duvarsız ucunda ilk ana makas gövdenin duvarında, kısa makaslar karşı uç duvarının eklerinde; 1.19, 19 Kasım 2026; D-126, BK-57, Lokman 19 Kasım 19:00:47 (kart \"Evet, çatı şiltesi çıksın\"): İş Emri çatı izolasyonunu alıcıya ait yazarsa (izocam, şilte, çatı izolasyonu) çatı şiltesi satırı 0 ve \"alıcıya ait\"; yazmayan İş Emri aynen; 1.18, 16 Kasım 2026; D-122, BK-51, Lokman 16 Kasım 21:35:12 ve 21:34:48: şase pul listeden çıktı (çelik dübel aynen); özel pencere karkasının adı \"Pencere kör kasası (EN×BOY)\", ölçü ve adet aynı; 1.17, 10 Kasım 2026; D-74, Lokman 10 Kasım 04:58: prefabrikte çatı kaplamasının standardı trapez sac; İş Emri çatı kaplamasını yazmazsa liste trapez sac ve trapez sac mahyası (L 1000) yazar, önce tek kat panel ve metal kiremit mahyası yazıyordu; yazılı kaplama aynen; 1.16, 6 Kasım 2026; İE-33: iki uçlu (dörtomuz) kırmanın çatı satırları (AP-01; Lokman çizimi 6 Kasım 21:23'te onayladı; makas planı paftadan: ana makaslar mahyaya dik, kesintisiz saçak duvarının pano eklemlerinde, uç duvardan en az bir pano içeride; kırma uçlarında kısa makaslar uç duvarın pano eklemlerinde ve kırma noktalarında; köşelerde çapraz makas; kırma uçlarının altındaki gözler çatı paneli); iki ucu kırmada liste artık yazılır; paftanın dışında kalanda (mahya y boyunca, girintili gövde, taşan veranda, paftadan geniş makas aralığı) yazılmaz; 1.15, 6 Kasım 2026; D-61, Lokman 5 Kasım 22:49 (TK-04 kartı \"Öneriyle düzelt\"): çıkıntısız çapraz cumbanın kısa makası boyu çatı tanımından (\"Yavru makas · cumba\" iki satır, adet aynı); cumba ile ana çatının köşesinde iki dere tek inişte (`ana_makas: cumba_makasindan`); iki ucu kolonlu açık kenarın kirişi kolon yüzünden yüzüne (− 2 × 10; M-05, Lokman 6 Kasım 07:56); 1.14, 6 Kasım 2026; İE-29 PR-2, main'in 1.12 (İE-28) ve 1.13 (İE-30) sürümünün üstüne: D-54 madde 2 (Lokman 5 Kasım 10:41, 12:05): kubbeli İş Emri'nde kitabın kubbe takımı (R6) kubbe başına; kubbenin panoları (yan 79, ön 125,5; 203 boyunda) karkaslı özel pencere panosu, tabanı pano değil ve iki ucunda H yok; kubbenin üç yüzüne standart aşık, kubbe duvarlarına saçak omegası; kubbesiz evin listesi aynen; İE-29 PR-2: girintili gövdede iki saçak duvarının ortak pano eki her zaman makas alır (AP-12 paftası: ana çatıda 13 makas; öteki evlerin makas yeri aynı); İE-29: tek uçlu kırmanın çatı satırları (AP-27; makas planı paftadan: ana makas mahyaya paralel, saçak bantlarında kısa makas, kırma köşesinde çapraz ve köşe kısa makası; kaplama kitabın kırma çatı dizilimiyle); 1.13, 5 Kasım 2026; İE-30, D-52 (M-12, Lokman 5 Kasım 10:17): teras panelli verandanın kolonu dış kirişin altına kadar (Motor), yan kiriş yok, yalnız dış kiriş (D-56, Lokman 10:48), teras panelinde damlalık L 2800, terasların genişliği ÷ 2,8 (D-57, Lokman 11:02), teras başına bir panel (8 cm C, 80 × 0,8), komple cam PVC kapı ayrı satır (900 × 2100); 1.12, 4 Kasım 2026; İE-28, Lokman 4 Kasım 04:35 (D-46): karkaslı kaplama duvar panosu İş Emri'nden (paftadaki tek parça pano), içindeki pencereye üst ve alt panel ile özel pencere karkası yok; 1.11, 4 Kasım 2026; D-50, Lokman 4 Kasım 20:49–21:20 (M-11): trapez sac standart 100 cm kapatır, mahya sacın kapattığı kadar kapatır (L 1000, ÷ 1, bindirme yok); İş Emri'nin çatı kaplaması başka kapatma yazıyorsa o; trapez sac satırında `kapatma_m` (D-51, fiyat m²'den); 1.10, 3 Kasım 2026: İE-27, Lokman 3 Kasım 09:52 (D-45): 3'lü H dış duvarda da (iç duvarın T'si pano ekleminde); çektirme U'su 60 yerinden (eklemsiz T, dış köşe, serbest uç); köşe direği tipsiz (özel köşe 100'lük köşeye katılır); mahya bandı mahya boyundan; temiz su ıslak hacim başına; trapez vida 5,5 × 25 aşık ve omegadan; 1.9, 30 Ekim: K5b TK-01 kıyası (CIO onayı 30 Ekim 14:20): aşık sırası beşikte karar C (Lokman 24 Ekim); baş makas betopanı ve Z'si taşan verandanın kirişli kalkanında da (D-32 madde 2); 1.8, 30 Ekim: asma dizme tavanda da 100'lük iç duvarın üstü 100'lük duvar omegası, ayrı satır yok (Lokman 30 Ekim 07:04, D-32 ek); 1.7, 29 Ekim: baş makas omegası saçak ucundan saçak ucuna, taşan verandanın dış kirişindeki dahil (Lokman 29 Ekim 13:12, D-32); 1.6, 28 Ekim: vitrifiye banyo başına (İE-13 PR-2; Lokman onayı 28 Ekim, PR-3); nişin ağzındaki kiriş (BK-14 ek); taşan verandanın dış kirişi kolonun dış yüzünden dış yüzüne (Lokman, kart 28 Ekim); 1.5, 22 Ekim: kör test üreteci 7.3, kurallar kural kitabında; orta iniş 9 m, kitapla farklı on yedi kalemde kitap; PK-07 hedef örnek; T76 cevapları; 100'lük duvar omegası kirişlerin de üstünde; elektrik oda kuralı)"
 GRUPLAR = {"1001": "Panel", "1002": "Metal aksam", "1003": "Kapı ve pencere", "1004": "Tavan", "1005": "Makas", "1006": "Çatı",
            "1007": "Elektrik", "1008": "Vida", "1009": "Depo", "1010": "Sıhhi tesisat", "1011": "Dere", "1012": "Boya"}
 TAVAN = lambda x: int(math.ceil(x - 1e-9))
@@ -324,6 +324,128 @@ def _kenar_parcalari(dikmeler, e: str, hat: float, a0: float, a1: float) -> list
     return [round(b - a, 2) for a, b in zip(uclar[::2], uclar[1::2])]
 
 
+def yan_kenar_araliklari(poly, e: str, c: float, acik: list[tuple[float, float]], ad: str = "",
+                         dikmeler: list | tuple = ()) -> list[tuple[float, float]]:
+    """D-130 (Lokman kartı 19 Kasım 2026 21:43:35 "Her açık kenara kiriş"): aynı yönde birden çok açık kenarı olan mahalde bir çizginin
+    kirişleri. Mahalin dış çizgisinin o çizgi üstündeki bağlı parçaları; açık kenarla (`acik`, çizgideki açık kenarların aralıkları) 1 cm'den
+    çok örtüşen her parça bir kiriştir, boyu parçanın boyu. Çizgiyi dik kesen kenarın izi ve kapalı yan sayılmaz. Kiriş boyu uydurulmaz,
+    `ListeYazilmaz` (K21): açık kenarla örtüşen parça yoksa; parçanın içinde açık kenarlar arasında kolonla örtülmeyen kapalı bir aralık
+    varsa (aynı çizgide iki ayrı açık kenar: kirişlerin ucu mahalin çizgisinden okunmaz)."""
+    from shapely.geometry import LineString
+    ln = LineString([(-1e5, c), (1e5, c)]) if e == "x" else LineString([(c, -1e5), (c, 1e5)])
+    g = poly.exterior.intersection(ln.buffer(1.0))
+    parcalar = []
+    for gg in getattr(g, "geoms", [g]):
+        if gg.is_empty:
+            continue
+        ks = [q[0] if e == "x" else q[1] for q in (gg.exterior.coords if gg.geom_type == "Polygon" else gg.coords)]
+        parcalar.append([min(ks), max(ks)])
+    birlesik: list[list[float]] = []
+    for a, b in sorted(parcalar):
+        if birlesik and a <= birlesik[-1][1] + 0.5:
+            birlesik[-1][1] = max(birlesik[-1][1], b)
+        else:
+            birlesik.append([a, b])
+    tutan = [(a, b) for a, b in birlesik if any(min(b, q1) - max(a, q0) > 1.0 for q0, q1 in acik)]
+    if not tutan:
+        raise ListeYazilmaz(f"{ad}: açık kenar ({e} = {c:g}) mahalin dış çizgisinde bulunamadı; kirişin boyu sorulmalı (D-130, K21)")
+    for a, b in tutan:
+        ic = sorted((max(a, q0), min(b, q1)) for q0, q1 in acik if min(b, q1) - max(a, q0) > 1.0)
+        for (_p0, p1), (r0, _r1) in zip(ic, ic[1:]):
+            kolonlu = any(b0 - 1.0 <= c <= b1 + 1.0 and k0 <= p1 + 1.0 and k1 >= r0 - 1.0
+                          for (kx0, ky0, kx1, ky1) in dikmeler
+                          for (b0, b1, k0, k1) in [((ky0, ky1, kx0, kx1) if e == "x" else (kx0, kx1, ky0, ky1))])
+            if r0 - p1 > 1.0 and not kolonlu:
+                raise ListeYazilmaz(f"{ad}: açık kenarın ({e} = {c:g}) ortasında kapalı aralık var ({p1:g}–{r0:g}); kiriş sayısı ve boyu "
+                                    "sorulmalı (D-130, K21)")
+    return tutan
+
+
+def ic_kiris_hatlari(plan) -> list[tuple]:
+    """İki kapalı oda arasındaki duvarsız sınırın kirişleri (İş Emri `acik_sinirlar`; liste `ic_kirisler_cm`): (x0, y0, x1, y1) hat
+    parçaları, Motor çerçevesinde, aks arası. Liste boyu ve ön onay çizimi (D-140) bu işlevden okur (D-28 madde 1)."""
+    from . import geometry as G
+    from shapely.geometry import Point
+
+    def _hat(h_, u0, u1):
+        yon, c = h_
+        return (c, u0, c, u1) if yon == "y" else (u0, c, u1, c)
+    acik = [m for m in plan.mahaller.values() if (m.acik or m.tur in G.ACIK_MAHAL_TURLERI)]
+    acik_g = [m.poly for m in acik if m.poly is not None]
+    hatlar = {}
+    for x0, y0, x1, y1 in plan.acik_sinir_cizgileri:
+        orta = Point((x0 + x1) / 2, (y0 + y1) / 2)
+        if any(g_.distance(orta) < 0.5 for g_ in acik_g):
+            continue
+        dik = abs(x1 - x0) < 1e-6
+        hatlar.setdefault(("y" if dik else "x", round(x0 if dik else y0, 2)), []).append(tuple(sorted((y0, y1) if dik else (x0, x1))))
+    ic_kirisler = []
+    for h_, parcalar in sorted(hatlar.items()):
+        parcalar.sort()
+        u0, u1 = parcalar[0]
+        for p0, p1 in parcalar[1:]:
+            if p0 <= u1 + 0.5:
+                u1 = max(u1, p1)
+            else:
+                ic_kirisler.append(_hat(h_, u0, u1)); u0, u1 = p0, p1
+        ic_kirisler.append(_hat(h_, u0, u1))
+    return ic_kirisler
+
+
+def kirisli_acik_kenarlar(plan, v) -> list[tuple]:
+    """Gövdedeki açık mahalin (taşan veranda değil) kiriş alan açık kenarları: `plan.acik_kenarlar`'dan mahalin içinde kalanlar (1 cm
+    payla), plandaki sırayla. Kirişin boyu `acik_mahal_kirisleri`'nde. Ön onay çizimi de kiriş profilini buradan okur (D-137,
+    `dxf_out.Cizici._listede_kirisli`; D-28 madde 1: liste ve çizim aynı kenarı gösterir)."""
+    from shapely.geometry import LineString
+    kap = v.poly.buffer(1.0)
+    return [k for k in plan.acik_kenarlar if kap.contains(LineString([(k[0], k[1]), (k[2], k[3])]))]
+
+
+def acik_mahal_kirisleri(plan, v) -> list[tuple[float, int, bool]]:
+    """Dikmeli açık mahalin (taşan veranda ve giriş nişi hariç) açık kenar kirişleri: [(boy cm, uçtaki kolon sayısı, ara kolon parçası mı)],
+    yön sırasıyla (x, sonra y). Yönde tek açık kenar: mahalin o yöndeki dış ölçüsü (BK-14'ten beri). Yönde birden çok açık kenar: her kenar
+    kendi boyuyla (D-130, `yan_kenar_araliklari`). Kenarın ortasında kolon varsa kiriş ara kolonlarda bölünür, parça kolonun yüzünden yüzüne
+    (D-129, `_kenar_parcalari`; boy parçanın kendisi, uç kolon 2); yoksa boy kenarın dış ölçüsü."""
+    from shapely.geometry import Point
+    cik: list[float] = []
+    cik_uc: list[int] = []
+    cik_ara: list[bool] = []
+    ic_kolon = [k for k in plan.dikmeler if v.poly.buffer(1.0).contains(Point((k[0] + k[2]) / 2, (k[1] + k[3]) / 2))]   # kenarın dışından değen dikme sayılmaz
+    vx0, vy0, vx1, vy1 = v.poly.bounds
+    yanlar: dict = {}                                      # yön → açık kenarların çizgileri (ilk görülen önce)
+    acik_ = {}                                             # (yön, çizgi) → o çizgideki açık kenarların aralıkları
+    for (x0, y0, x1, y1, *_r) in kirisli_acik_kenarlar(plan, v):
+        e_ = "x" if abs(y1 - y0) < 1e-6 else "y"
+        c_ = y0 if e_ == "x" else x0
+        c_ = next((k_ for k_ in yanlar.setdefault(e_, []) if abs(k_ - c_) < 1.0), round(c_, 2))   # 1 cm'den yakın iki çizgi tek kenar
+        if c_ not in yanlar[e_]:
+            yanlar[e_].append(c_)
+        acik_.setdefault((e_, c_), []).append(tuple(sorted((x0, x1) if e_ == "x" else (y0, y1))))
+    for e in sorted(yanlar):
+        for c_ in yanlar[e]:
+            if len(yanlar[e]) == 1:                         # yönde tek açık kenar: kiriş mahalin dış ölçüsü (bugünkü yol)
+                araliklar_ = [((vx0, vx1) if e == "x" else (vy0, vy1))]
+            else:                                           # D-130: aynı yönde ikinci açık kenar (U veranda); her kenar kendi boyuyla
+                araliklar_ = yan_kenar_araliklari(v.poly, e, c_, acik_[(e, c_)], v.ad, plan.dikmeler)
+            for (a0_, a1_) in araliklar_:
+                parcalar_ = _kenar_parcalari(ic_kolon, e, c_, a0_, a1_)
+                if parcalar_:                                  # D-129: ara kolonlu açık kenar, parça parça (kolonun yüzünden yüzüne)
+                    cik += parcalar_
+                    cik_uc += [2] * len(parcalar_)
+                    cik_ara += [True] * len(parcalar_)
+                    continue
+                cik.append(a1_ - a0_)
+                cik_ara.append(False)
+                # D-61 madde 3 (Lokman, 5 Kasım 2026 22:49, kart "Öneriyle düzelt"; TK-04 r07'nin salon duvarındaki kolonu, D-58): kenarın
+                # iki ucunda da kolon varsa kiriş iki kolonun arasında, iki yüzünün arasına (dış ölçü − 2 × 10). Uçtaki kolon: kenarın
+                # çizgisinde, ucu kenarın ucunda.
+                uc_kolon = {u for (kx0, ky0, kx1, ky1) in plan.dikmeler
+                            for (b0_, b1_, k0_, k1_) in [((ky0, ky1, kx0, kx1) if e == "x" else (kx0, kx1, ky0, ky1))]
+                            if b0_ - 1.0 <= c_ <= b1_ + 1.0 for u, var in ((0, abs(k0_ - a0_) < 1.0), (1, abs(k1_ - a1_) < 1.0)) if var}
+                cik_uc.append(len(uc_kolon))
+    return list(zip(cik, cik_uc, cik_ara))
+
+
 def model_motor(ie: dict) -> dict:
     from . import geometry as G
     from shapely.geometry import LineString, Point, box
@@ -331,6 +453,13 @@ def model_motor(ie: dict) -> dict:
     plan = G.kur(json.loads(json.dumps(ie)))
     y = ie["yapi"]; c = ie.get("cati") or {}
     mx = c.get("makas_ekseni", "x") == "x"                     # makaslar x'i geçiyorsa saçak duvarları y yönünde koşar
+    if c.get("yontem") == "kenar":                             # BK-64 (D-139): makas yönü çatıdan (mahyaya dik); İş Emri'nin değeri plan kuralı için
+        from . import cati_iskelet as _CI
+        from . import cati_prefabrik as _CP
+        try:
+            mx = _CI.makas_ekseni(_CP.cati(plan, ie)["duzlemler"]) == "x"
+        except (_CP.PrefabrikCatiHatasi, _CI.IskeletHatasi) as e:
+            raise ListeYazilmaz(f"kırma (kenar yöntemi) makas yönü kurulmadı: {e}") from None
     eave_yon = "y" if mx else "x"
     panolar, ekler = [], []
     # İE-27: 3'lü H'lı T'ler ve çektirme U'ları `birlesim_uclari`'nden (montaj rehberi aynı yerleri okur, D-28 madde 1)
@@ -377,24 +506,7 @@ def model_motor(ie: dict) -> dict:
     # duvarsız sınır (İş Emri `acik_sinirlar`, ör. salon–mutfak): üstüne kiriş gelir (Lokman, kart 22 Ekim "Evet, gelir"; E5, TS-01). Sınır
     # çizgileri ızgara gözü başına; aynı hattaki bitişik parçalar tek kiriş, boyu aks arası. Motor iki açık mahalin (ör. iki veranda) arasına da
     # çizgi koyar; o sınır iki oda arası değil, kiriş sayılmaz (geometri hakemi 3. tur)
-    acik_g = [m.poly for m in acik if m.poly is not None]
-    hatlar = {}
-    for x0, y0, x1, y1 in plan.acik_sinir_cizgileri:
-        orta = Point((x0 + x1) / 2, (y0 + y1) / 2)
-        if any(g_.distance(orta) < 0.5 for g_ in acik_g):
-            continue
-        dik = abs(x1 - x0) < 1e-6
-        hatlar.setdefault(("y" if dik else "x", round(x0 if dik else y0, 2)), []).append(tuple(sorted((y0, y1) if dik else (x0, x1))))
-    ic_kirisler = []
-    for _h, parcalar in sorted(hatlar.items()):
-        parcalar.sort()
-        u0, u1 = parcalar[0]
-        for p0, p1 in parcalar[1:]:
-            if p0 <= u1 + 0.5:
-                u1 = max(u1, p1)
-            else:
-                ic_kirisler.append(round(u1 - u0, 2)); u0, u1 = p0, p1
-        ic_kirisler.append(round(u1 - u0, 2))
+    ic_kirisler = [round((x1 - x0) + (y1 - y0), 2) for (x0, y0, x1, y1) in ic_kiris_hatlari(plan)]   # D-140: çizim aynı hatları okur
 
     def oda(m):
         x0, y0, x1, y1 = m.poly.bounds
@@ -416,27 +528,11 @@ def model_motor(ie: dict) -> dict:
             continue
         if not plan.dikmeler:
             continue
-        vx0, vy0, vx1, vy1 = v.poly.bounds
-        yanlar = {}
-        for (x0, y0, x1, y1, *_r) in plan.acik_kenarlar:
-            if v.poly.buffer(1.0).contains(LineString([(x0, y0), (x1, y1)])):
-                yanlar.setdefault("x" if abs(y1 - y0) < 1e-6 else "y", y0 if abs(y1 - y0) < 1e-6 else x0)
-        for e in sorted(yanlar):
-            ic_kolon = [k for k in plan.dikmeler if v.poly.buffer(1.0).contains(Point((k[0] + k[2]) / 2, (k[1] + k[3]) / 2))]   # kenarın dışından değen dikme sayılmaz
-            parcalar_ = _kenar_parcalari(ic_kolon, e, yanlar[e], *((vx0, vx1) if e == "x" else (vy0, vy1)))
-            if parcalar_:                                      # D-129: ara kolonlu açık kenar, parça parça (kolonun yüzünden yüzüne)
-                ara_parca_sira += range(len(kirisler), len(kirisler) + len(parcalar_))
-                kirisler += parcalar_
-                kenar_kolon += [2] * len(parcalar_)
-                continue
-            kirisler.append((vx1 - vx0) if e == "x" else (vy1 - vy0))
-            # D-61 madde 3 (Lokman, 5 Kasım 2026 22:49, kart "Öneriyle düzelt"; TK-04 r07'nin salon duvarındaki kolonu, D-58): kenarın iki ucunda
-            # da kolon varsa kiriş iki kolonun arasında, iki yüzünün arasına (dış ölçü − 2 × 10). Uçtaki kolon: kenarın çizgisinde, ucu kenarın ucunda.
-            a0_, a1_ = (vx0, vx1) if e == "x" else (vy0, vy1)
-            uc_kolon = {u for (kx0, ky0, kx1, ky1) in plan.dikmeler
-                        for (b0_, b1_, k0_, k1_) in [((ky0, ky1, kx0, kx1) if e == "x" else (kx0, kx1, ky0, ky1))]
-                        if b0_ - 1.0 <= yanlar[e] <= b1_ + 1.0 for u, var in ((0, abs(k0_ - a0_) < 1.0), (1, abs(k1_ - a1_) < 1.0)) if var}
-            kenar_kolon.append(len(uc_kolon))
+        for boy_, uc_, ara_ in acik_mahal_kirisleri(plan, v):   # her açık kenar bir kiriş (D-130); boy, uçtaki kolon sayısı (D-61)
+            if ara_:                                           # D-129: ara kolonlu açık kenarın parçası (kolonun yüzünden yüzüne)
+                ara_parca_sira.append(len(kirisler))
+            kirisler.append(boy_)
+            kenar_kolon.append(uc_)
     dis_kenar_sira, dis_parca_sira = [], []                   # taşan verandanın dış kenarının `veranda_kenarlari_cm`'deki sırası
     for v in plan.dis_verandalar:                              # BK-14: dış kenar ve iki yan (TK-01 geçici yolu, PK-03/PK-06 paftası gibi)
         boylar = [max(x1 - x0, y1 - y0) for (x0, y0, x1, y1), _k in zip(v["kenarlar"], v["kirisler"])]   # D-56: teras panelinde yalnız dış
@@ -467,7 +563,8 @@ def model_motor(ie: dict) -> dict:
     from . import cati_serit as _cs
     from . import cati_prefabrik as CP
     if c.get("tip") == "kirma":                                # İE-29: tek uçlu kırma (AP-27); İE-33: iki ucu kırma (AP-01), makas planı paftadan
-        serit = _tek_uclu_kirma_catilari(plan, ie) if c.get("kalkan_ucu") is not None else _iki_uclu_kirma_catilari(plan, ie)
+        serit = (_iskelet_kirma_catilari(plan, ie) if c.get("yontem") == "kenar" else   # BK-64 (D-139): kenar yöntemi, düz iskelet
+                 _tek_uclu_kirma_catilari(plan, ie) if c.get("kalkan_ucu") is not None else _iki_uclu_kirma_catilari(plan, ie))
     elif c.get("tip") == "besik_cumba":                        # İE-17 PR-1b/K7: beşik + çıkıntılı çapraz cumba (AP-22), çizimdeki çatıdan;
         serit = _capraz_cumba_catilari(plan, ie)               # D-109: köşe verandasının cumbası da (ayak izi verandanın taşan dikdörtgeni)
     elif plan.girintili or _cs.mahal_catilari_var(ie):         # İE-24 girintili gövde; İE-17 PR-1b/K7 açık mahalin kendi çatısı (AP-09, AP-03)
@@ -1186,6 +1283,206 @@ def _iki_uclu_kirma_catilari(plan, ie: dict) -> tuple[list[dict], dict]:
             "not": ("Motor (İE-33): iki uçlu kırma; kenarları çatının kenarlarından, makas planı AP-01 paftasından" if i == 0 else
                     "Motor (İE-33, BK-45): iki uçlu kırma, mahya y boyunca; kenarları çatının kenarlarından, makas planı AP-01 paftasının "
                     "kuralı 90° dönmüş")}]
+    return out, t
+
+
+def _iskelet_kirma_catilari(plan, ie: dict) -> tuple[list[dict], dict]:
+    """BK-64 (D-139, PC-50): kenar yöntemli kırma (`cati.yontem: kenar`, düz iskelet; girintili gövde), çizimdeki çatının aynısından
+    (`cati_prefabrik.cati` → `cati_iskelet`). Saçak, mahya, kırma ve vadi çatının kendi kenarlarından (`cati_genel.cati_kur`); alın ve kalkan
+    yok; aşık yüz yüz çatı tanımından (çok düzlemli çatı kuralı, `model_motor` › `cati_tanimi`).
+
+    Makas planı Lokman'ın onayladığı eskizden (kart 20 Kasım 2026 08:45:03 "Doğru, eskizdeki gibi"; 91 m² 3+1): İE-33'ün iki uçlu kırma
+    kuralı (AP-01 paftası) kollara genişletilmiş. Bütün mahyalar aynı yönde olmalı; makaslar mahyaya dik.
+    1. Makas hatları mahyaya paralel kesintisiz saçak duvarının pano eklemlerinde. Hat, gövdenin o hattaki kesitini geçer; kırma ucunun
+       (mahyaya dik dış kenar) iç yüzünden 125,5'ten yakın hatta o ucun genişliği makassızdır (uç bandı). Bant kesiti bölüyorsa makas
+       vadide biter. Gövdenin en geniş kesitini duvardan duvara geçen makas ana makas, ötekiler cumba makası (kanat).
+    2. Her kırma ucunda kısa makaslar mahyaya paralel, uçtan uç yüzünün altındaki ilk makasa: uçtaki yüzün o makastaki iki ucunda (kırma
+       hattıysa kısa makas, vadiyse makas yok) ve aradaki pano eklemlerinde (uç duvarının; uç duvarsızsa banttaki en yakın paralel dış duvarın,
+       125,5 arayla sürer); kırma noktasına yarım panodan yakın eklemde ayrı makas yok.
+    3. Her kırma ucunun dış köşesinde bir çapraz makas, saçak köşesinden kırma hattı boyunca ilk makasa.
+    4. Uçtaki yüzün altında iki ana makasın arasındaki göz çatı paneli (gözün ortası mahyanın ucundan dışarıda; kart 08:57:26).
+    Bu kuralın dışında kalanda liste yazılmaz (K21): taşan veranda, mahyalar iki yönde, makas arası 125,5'ten geniş, uç bandı ya da kısa
+    makas arası 1,5 panodan geniş, bandın böldüğü makasın önünde vadi yok."""
+    from shapely.geometry import LineString, Polygon
+    from shapely.geometry.polygon import orient
+    from . import cati_prefabrik as CP
+    from . import geometry as G
+    from .cati_serit import cati_izi
+    from .genel import cati_genel
+    M_ = G.MOD
+    if plan.dis_verandalar:
+        raise ListeYazilmaz("kırma (kenar yöntemi): taşan veranda; verandanın çatısı bu kuralla kıyaslanmadı, liste yazılmaz")
+    try:
+        t = CP.cati(plan, ie)
+    except CP.PrefabrikCatiHatasi as e:
+        raise ListeYazilmaz(f"kırma (kenar yöntemi) çatı kurulmadı: {e}") from None
+    s, eg = float(t["sacak"]), float((ie.get("cati") or {})["egim_yuzde"])
+    ck = cati_genel.cati_kur(t)
+    kn = {"sacak": [], "mahya": [], "kirma": [], "vadi": []}
+    for e in ck["kenarlar"]:
+        if e["tur"] not in kn:
+            raise ListeYazilmaz(f"kırma (kenar yöntemi): beklenmeyen çatı kenarı {e['tur']}")
+        kn[e["tur"]].append(e)
+    yon_ = {0 if abs(e["p"][1] - e["q"][1]) <= 1e-6 else 1 if abs(e["p"][0] - e["q"][0]) <= 1e-6 else -1 for e in kn["mahya"]}
+    if len(yon_) != 1 or -1 in yon_:
+        raise ListeYazilmaz("kırma (kenar yöntemi): mahyalar tek yönde ve eksenlere paralel değil; makas yönü kuralı yok, liste yazılmaz")
+    i = yon_.pop()                                                      # mahya ekseni (0: x, 1: y); makaslar j eksenini geçer
+    j = 1 - i
+    eks, dik = ("x", "y") if i == 0 else ("y", "x")
+    iz = cati_izi(plan, ie)
+    cz_ = list(orient(iz, 1.0).exterior.coords)[:-1]
+    ic_kose = sum(1 for k in range(len(cz_)) if (lambda a, b, c: (b[0] - a[0]) * (c[1] - b[1]) - (b[1] - a[1]) * (c[0] - b[0]))(
+        cz_[k - 1], cz_[k], cz_[(k + 1) % len(cz_)]) < -1e-6)
+    if ic_kose > 1:                                                     # yalnız dikdörtgen ve L gövde onaylı eskizle kıyaslandı (U, T, Z yok)
+        raise ListeYazilmaz(f"kırma (kenar yöntemi): gövdede {ic_kose} iç köşe; yalnız dikdörtgen ve L gövde kıyaslandı, liste yazılmaz")
+    yuzler = {d["ad"]: Polygon(d["plan"]) for d in t["duzlemler"]}
+    uc_yuz = {d["ad"] for d in t["duzlemler"] if d["yukari"][j] == 0}  # yüzü mahya yönünde yükselen: kırma ucunun yüzü
+    hat = lambda a: LineString([(a, -1e5), (a, 1e5)]) if i == 0 else LineString([(-1e5, a), (1e5, a)])   # mahya ekseninde a'daki dik hat
+
+    def bkes(geo, a):                                                   # dik hattın bir geometriyle kesişimi: j eksenindeki aralıklar
+        g = geo.intersection(hat(a))
+        out = []
+        for p_ in getattr(g, "geoms", [g]):
+            if not p_.is_empty and p_.length > 1e-6:
+                v = [c[j] for c in p_.coords]
+                out.append((min(v), max(v)))
+        return sorted(out)
+
+    def nokta_turu(a, b):
+        pt = [0.0, 0.0]; pt[i] = a; pt[j] = b
+        from shapely.geometry import Point
+        P_ = Point(*pt)
+        for tur in ("kirma", "vadi"):
+            if any(LineString([e["p"], e["q"]]).distance(P_) < 0.05 for e in kn[tur]):
+                return tur
+        return "duvar"
+
+    # 1. kesintisiz saçak duvarı ve makas hatları
+    sd = [d for d in plan.duvarlar if d.tur == "dis" and d.yon == eks and d.panolar]
+    if not sd:
+        raise ListeYazilmaz("kırma (kenar yöntemi): saçak duvarı yok; liste yazılmaz")
+    sd_ = max(sd, key=lambda d: (d.panolar[-1].a1 - d.panolar[0].a0, -d.id))
+    J = [round(p.a1, 2) for p in sorted(sd_.panolar, key=lambda p: p.a0)[:-1]]
+    # kırma uçları: ayak izinin mahyaya dik kenarları (iç yön ile)
+    cz = list(iz.exterior.coords)
+    alan_isareti = 1.0 if iz.exterior.is_ccw else -1.0
+    uclar = []
+    for (x0_, y0_), (x1_, y1_) in zip(cz, cz[1:]):
+        p_, q_ = (x0_, y0_), (x1_, y1_)
+        if abs(p_[i] - q_[i]) > 1e-6 or abs(p_[j] - q_[j]) < 1e-6:
+            continue                                                    # mahyaya dik (j boyunca) kenar değil
+        d_ = (q_[0] - p_[0], q_[1] - p_[1])
+        ic = (-d_[1], d_[0]) if alan_isareti > 0 else (d_[1], -d_[0])  # içe normal
+        uclar.append({"a": p_[i], "b": tuple(sorted((p_[j], q_[j]))), "ic": 1.0 if ic[i] > 0 else -1.0})
+    gen = max(b1 - b0 for b0, b1 in (bkes(iz, a) [0] if len(bkes(iz, a)) == 1 else (0, 0) for a in J)) if J else 0.0
+    makaslar = []
+    for a in J:
+        kes = bkes(iz, a)
+        if len(kes) != 1:
+            raise ListeYazilmaz(f"kırma (kenar yöntemi): {sy(a)}'daki makas hattı gövdeyi iki kez kesiyor (U gövde); liste yazılmaz")
+        b0, b1 = kes[0]
+        bant = [u for u in uclar if 0 <= u["ic"] * (a - u["a"]) < M_ - 1e-6]
+        parca = [(b0, b1)]
+        for u in bant:
+            yeni = []
+            for c0, c1 in parca:
+                if u["b"][1] <= c0 + 1e-6 or u["b"][0] >= c1 - 1e-6:
+                    yeni.append((c0, c1)); continue
+                if u["b"][0] > c0 + 1e-6:
+                    yeni.append((c0, u["b"][0]))
+                if u["b"][1] < c1 - 1e-6:
+                    yeni.append((u["b"][1], c1))
+            parca = yeni
+        for c0, c1 in parca:
+            uc_ = []
+            for kenar, ic_y in ((c0, +1), (c1, -1)):                    # bandın kestiği uç: makas vadide biter
+                if abs(kenar - (b0 if ic_y > 0 else b1)) <= 1e-6:
+                    uc_.append(kenar); continue
+                vb = [v for e in kn["vadi"] for v in bkes(LineString([e["p"], e["q"]]).buffer(1e-3), a)]
+                vb = [(v0 + v1) / 2 for v0, v1 in vb if c0 - 1e-6 <= (v0 + v1) / 2 <= c1 + 1e-6]
+                if not vb:
+                    raise ListeYazilmaz(f"kırma (kenar yöntemi): {sy(a)}'daki makası uç bandı kesiyor, önünde vadi yok; liste yazılmaz")
+                uc_.append(max(vb) if ic_y < 0 else min(vb))
+            m0, m1 = sorted(uc_)
+            tam = abs(m0 - b0) <= 1e-6 and abs(m1 - b1) <= 1e-6
+            makaslar.append({"a": a, "b": [round(m0, 2), round(m1, 2)], "rol": "ana" if tam and b1 - b0 >= gen - 1e-6 else "cumba",
+                             "vadide": not tam})
+    ana_a = sorted(m["a"] for m in makaslar if m["rol"] == "ana")
+    if len(ana_a) < 2:
+        raise ListeYazilmaz("kırma (kenar yöntemi): ikiden az ana makas; liste yazılmaz")
+    tum_a = sorted({m["a"] for m in makaslar})                          # ana ve cumba makasları birlikte (geometri hakemi, 20 Kasım)
+    aralik = max(b_ - a_ for a_, b_ in zip(tum_a, tum_a[1:]))
+    if aralik > M_ + 1e-6:
+        raise ListeYazilmaz(f"kırma (kenar yöntemi): iki makasın arası {sy(aralik)} cm, 125,5'ten geniş; liste yazılmaz")
+    # 2–3. kırma uçları: kısa ve çapraz makas
+    kisa, capraz, uc_ozet = [], [], []
+    for u in uclar:
+        kapsar = [m for m in makaslar if m["b"][0] <= u["b"][0] + 1e-6 and m["b"][1] >= u["b"][1] - 1e-6 and u["ic"] * (m["a"] - u["a"]) > 0]
+        if not kapsar:
+            raise ListeYazilmaz(f"kırma (kenar yöntemi): {sy(u['a'])}'daki ucun önünde onu geçen makas yok; liste yazılmaz")
+        m1 = min(kapsar, key=lambda m: abs(m["a"] - u["a"]))
+        bant_ = abs(m1["a"] - u["a"])
+        if bant_ > 1.5 * M_ + 1e-6:
+            raise ListeYazilmaz(f"kırma (kenar yöntemi): uç bandı {sy(bant_)} cm, 1,5 panodan geniş; liste yazılmaz")
+        sac_a = u["a"] - u["ic"] * s
+        yz = [ad for ad in uc_yuz if bkes(yuzler[ad], sac_a + u["ic"] * 0.5)]
+        yz = [ad for ad in yz if any(c0 < u["b"][1] and c1 > u["b"][0] for c0, c1 in bkes(yuzler[ad], sac_a + u["ic"] * 0.5))]
+        if len(yz) != 1:
+            raise ListeYazilmaz(f"kırma (kenar yöntemi): {sy(u['a'])}'daki ucun yüzü bulunamadı; liste yazılmaz")
+        ar = bkes(yuzler[yz[0]], m1["a"])
+        if len(ar) != 1:
+            raise ListeYazilmaz(f"kırma (kenar yöntemi): {yz[0]} yüzü ilk makasta iki parça; liste yazılmaz")
+        p_lo, p_hi = ar[0]
+        t_lo, t_hi = nokta_turu(m1["a"], p_lo), nokta_turu(m1["a"], p_hi)
+        uc_d = [d for d in plan.duvarlar if d.tur == "dis" and d.yon == dik and abs(abs(d.c - u["a"]) - d.h) < 1e-6]
+        if not uc_d:                                                    # duvarsız uç (veranda): banttaki en yakın paralel dış duvar
+            uc_d = sorted([d for d in plan.duvarlar if d.tur == "dis" and d.yon == dik and d.panolar
+                           and 0 < u["ic"] * (d.c - u["a"]) <= bant_ + 1e-6], key=lambda d: abs(d.c - u["a"]))[:1]
+        Jb = sorted({round(p.a1, 2) for d in uc_d for p in sorted(d.panolar, key=lambda p: p.a0)[:-1]})
+        izg = set(Jb)
+        if Jb:
+            v = Jb[0] - M_
+            while v > p_lo:
+                izg.add(round(v, 2)); v -= M_
+            v = Jb[-1] + M_
+            while v < p_hi:
+                izg.add(round(v, 2)); v += M_
+        ara = sorted(v for v in izg if p_lo + M_ / 2 < v < p_hi - M_ / 2)
+        noktalar = ([p_lo] if t_lo == "kirma" else []) + ara + ([p_hi] if t_hi == "kirma" else [])
+        sira = [p_lo, *ara, p_hi]
+        if max(b_ - a_ for a_, b_ in zip(sira, sira[1:])) > 1.5 * M_ + 1e-6:
+            raise ListeYazilmaz(f"kırma (kenar yöntemi): {sy(u['a'])}'daki uçta kısa makas arası 1,5 panodan geniş; liste yazılmaz")
+        kisa += [{"uc_cm": u["a"], "b": round(v, 2), "boy_cm": round(bant_ + s, 2)} for v in noktalar]
+        for v, tur_ in ((p_lo, t_lo), (p_hi, t_hi)):
+            if tur_ != "kirma":
+                continue
+            kose_b = min((u["b"][0] - s, u["b"][1] + s), key=lambda k_: abs(k_ - v))
+            capraz.append({"uc_cm": u["a"], "boy_cm": round(math.hypot(bant_ + s, v - kose_b), 2)})
+        uc_ozet.append({"uc_cm": u["a"], "aralik_cm": [u["b"][0], u["b"][1]], "ilk_makas_cm": m1["a"], "bant_cm": round(bant_, 2),
+                        "kisa_cm": [round(v, 2) for v in noktalar], "yuz": yz[0]})
+    # 4. çatı paneli: uç yüzünün altında iki ana makasın arası (gözün ortası mahyanın ucundan dışarıda)
+    panel = []
+    for a_, b_ in zip(ana_a, ana_a[1:]):
+        orta = (a_ + b_) / 2
+        if any(bkes(yuzler[ad], orta) for ad in uc_yuz):
+            panel.append([a_, b_])
+    uc_ = Counter((round(v[0], 1), round(v[1], 1)) for e in kn["sacak"] for v in (e["p"], e["q"]))
+    gx0, gy0, gx1, gy1 = (float(v) for v in G.govde_kutusu(plan))
+    boy_, aciklik_ = (gx1 - gx0, gy1 - gy0) if i == 0 else (gy1 - gy0, gx1 - gx0)
+    t_dis = 2 * next(d.h for d in plan.duvarlar if d.tur == "dis")
+    out = [{"ad": "ana çatı", "tip": "kirma", "aciklik_cm": aciklik_, "boy_cm": boy_, "egim_yuzde": eg, "sacak_cm": s, "kalkan": 0,
+            "mahya_boy_cm": round(sum(e["plan_boy"] for e in kn["mahya"]), 2),
+            "sacak_hatlari_m": [round(e["plan_boy"] / 100, 3) for e in kn["sacak"]], "alin_kenarlari_m": [],
+            "kirma_m": [round(e["boy"] / 100, 3) for e in kn["kirma"]], "dere_ici_m": [round(e["boy"] / 100, 3) for e in kn["vadi"]],
+            "makas_kosu_cm": boy_ - t_dis,
+            "kirma_makas": {"tur": "iskelet", "ana": len(ana_a), "cumba": sum(1 for m in makaslar if m["rol"] == "cumba"),
+                            "kisa": len(kisa), "capraz": len(capraz), "kose_kisa": 0, "mod_cm": M_, "mahya": eks,
+                            "makaslar": makaslar, "kisa_makaslar": kisa, "capraz_makaslar": capraz, "uclar": uc_ozet},
+            "cati_paneli": len(panel), "cati_paneli_cm": panel,
+            "kaplama_alani_m2": round(ck["yuzey_m2"], 3), "plan_m2": round(ck["plan_m2"], 3),
+            "dere_serbest_uc": sum(1 for n in uc_.values() if n == 1),
+            "not": "Motor (BK-64, D-139): kenar yöntemli kırma (düz iskelet); kenarları çatının kenarlarından, makas planı Lokman'ın 20 Kasım "
+                   "2026 onaylı eskizinden (İE-33 kuralı kollara genişletilmiş)"}]
     return out, t
 
 
@@ -1920,12 +2217,33 @@ def liste(N: dict, kurallar: dict | None = None, pafta: dict | None = None) -> d
             ekle("1005", f"Çatı paneli (hafif çelik) · {ad}", "—", None, "Kural yok", "makas ve aşık yerine hafif çelik çatı paneli", c.get("not", ""), pafta=("cati_paneli",))
             continue
         km = c.get("kirma_makas")
-        n_m = (km["ana"] + km["kisa"] + km["capraz"] + km["kose_kisa"] if km else
+        n_m = (km["ana"] + km.get("cumba", 0) + km["kisa"] + km["capraz"] + km["kose_kisa"] if km else
                c["makas_adet"] if "makas_adet" in c else TAVAN(c["makas_kosu_cm"] / makas_ara - 1e-6) + 1)
         n_makas_top += n_m
         yer = (f"çatı tanımının makas yerleri ({c.get('makas_yeri')}; en çok {mm(makas_ara)} arayla) = {n_m}" if "makas_adet" in c
                else f"saçak duvarının pano koşusu {mm(c['makas_kosu_cm'])} ÷ {mm(makas_ara)} yukarı + 1 = {n_m}")
-        if km and km.get("tur") == "iki_uclu":                 # İE-33: iki uçlu kırma, makas planı AP-01 paftasından (M01–M29, CP1–CP6)
+        if km and km.get("tur") == "iskelet":                  # BK-64 (D-139): kenar yöntemli kırma, makas planı onaylı eskizden
+            kay_ = "BK-64: Lokman'ın 20 Kasım 2026 kartları (makas planı 08:45:03, aşık ve çatı paneli 08:57:26: \"Doğru, eskizdeki gibi\")"
+            ana_ = [m for m in km["makaslar"] if m["rol"] == "ana"]
+            ekle("1005", f"Makas (ana, mahyaya dik) · {ad}", f"açıklık {mm(c['aciklik_cm'])}", km["ana"], "Kural (BK-64)",
+                 f"kesintisiz saçak duvarının pano eklemlerinde, kırma uçlarından en az {sy(km['mod_cm'])} cm içeride: "
+                 f"{', '.join(sy(m['a']) for m in ana_)} = {km['ana']}; saçaktan saçağa", kay_)
+            for (b0_, b1_), n_ in sorted(Counter(tuple(m["b"]) for m in km["makaslar"] if m["rol"] == "cumba").items()):
+                vd_ = any(m["vadide"] and tuple(m["b"]) == (b0_, b1_) for m in km["makaslar"])
+                ekle("1005", f"Makas (cumba{', vadide biter' if vd_ else ''}) · {ad}", f"açıklık {mm(b1_ - b0_)}", n_, "Kural (BK-64)",
+                     "kanadın makası: saçak duvarının pano ekleminde, kanadın kesitini geçer"
+                     + ("; uç bandının yanında vadide biter (ana çatının üstünde)" if vd_ else ""), kay_)
+            for b_, n_ in sorted(Counter(round(k_["boy_cm"] * 10) for k_ in km["kisa_makaslar"]).items()):
+                ekle("1005", f"Makas (kısa, kırma ucu) · {ad}", f"L {b_}", n_, "Kural (BK-64)",
+                     "kırma ucunda uçtan ilk makasa: kırma noktalarında ve aradaki pano eklemlerinde ("
+                     + "; ".join(f"uç {sy(u['uc_cm'])}: {', '.join(sy(v) for v in u['kisa_cm'])}" for u in km["uclar"]) + ")", kay_)
+            for b_, n_ in sorted(Counter(round(k_["boy_cm"] * 10) for k_ in km["capraz_makaslar"]).items()):
+                ekle("1005", f"Makas (çapraz, kırma) · {ad}", f"L {b_}", n_, "Kural (BK-64)",
+                     "kırma ucunun dış köşesi başına bir, saçak köşesinden kırma hattı boyunca ilk makasa", kay_)
+            ekle("1005", f"Çatı paneli (makas arası) · {ad}", "—", c["cati_paneli"], "Kural (BK-64)",
+                 "kırma ucunun yüzü altında iki ana makasın arasındaki gözler: "
+                 + ", ".join(f"{sy(a_)}–{sy(b_)}" for a_, b_ in c["cati_paneli_cm"]), kay_)
+        elif km and km.get("tur") == "iki_uclu":                 # İE-33: iki uçlu kırma, makas planı AP-01 paftasından (M01–M29, CP1–CP6)
             kay_ = "İE-33: AP-01 paftasının makas ve dere yerleşim planı (M01–M29: 11 ana, 14 kısa, 4 çapraz; CP1–CP6)"
             ekle("1005", f"Makas (ana, mahyaya dik) · {ad}", f"açıklık {mm(c['aciklik_cm'])}", km["ana"], "Kural (İE-33, pafta)",
                  f"kesintisiz saçak duvarının pano eklemlerinde, uç duvarların dış yüzünden en az {sy(km['mod_cm'])} cm içeride: "

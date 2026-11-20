@@ -1,0 +1,198 @@
+{
+ "aciklama": "D-137 (Lokman, 20 Kasım 2026 08:04:02 UTC, kart \"Eskizdeki gibi, iki evde\"; soru \"Listede olan veranda kirişi ön onay çizimine de girsin mi?\"): listede kiriş alan açık kenar ön onay çiziminde de veranda profili. Hedef örnek eskizin taslağıyla piksel piksel aynı çıktıdan (PF Tavan_Kirisi/2026-11-20_veranda_cizim/veranda_kirisi_cizim_once_sonra.png). 'once' main acd709ea'nın çıktısı; 'sonra' bu kararın. Fark yalnız yeni profil: ana planda ve ikinci kopyada VERANDA_PROFIL_100'de birer blok, saha montaj planında MONTAJ_STANDART'ta bir blok.",
+ "evler": {
+  "PA21": {
+   "ad": "80 m² 3+1 (havuz evi; kör ölçümü AP25)",
+   "is_emri": "is_emri/adaylar/PA21.json",
+   "listedeki_kiris": "L 500",
+   "once_toplam": 618,
+   "sonra_toplam": 621,
+   "katman_farki": {
+    "MONTAJ_STANDART": 1,
+    "VERANDA_PROFIL_100": 2
+   },
+   "sonra_katmanlar": {
+    "AKS": 20,
+    "AKS_YAZI": 20,
+    "DIS_DUVAR_100": 62,
+    "DIS_PARCA_OLCU": 12,
+    "IC_DUVAR_60": 56,
+    "IC_UCLU_H_60": 12,
+    "KOSE_PROFIL_100": 12,
+    "KOSE_PROFIL_60": 6,
+    "MONTAJ_OZEL_OLCU": 25,
+    "MONTAJ_OZEL_PANO": 25,
+    "MONTAJ_STANDART": 54,
+    "MONTAJ_YAZI": 19,
+    "NET_ALAN_GEOMETRISI": 9,
+    "ODA_ADLARI": 45,
+    "OLCULER": 42,
+    "ON_CATI": 13,
+    "ON_DERZ": 45,
+    "ON_DOGRAMA": 9,
+    "ON_GORUNUS": 4,
+    "ON_OLCU": 16,
+    "ON_TOPUK": 10,
+    "ON_YAZI": 7,
+    "OZELLIK_TABLOSU": 33,
+    "OZEL_PANEL_OLCU_CM": 50,
+    "PORTMAN_INFO": 5,
+    "VERANDA_DIKME": 4,
+    "VERANDA_PROFIL_100": 6
+   },
+   "eklenen": [
+    {
+     "blok": "BOM_V07_VERANDA_YAN_600p0_GIRINTI",
+     "katman": "VERANDA_PROFIL_100",
+     "nokta": [
+      386.5,
+      0.0
+     ],
+     "cizgiler": [
+      [
+       0.0,
+       0.0,
+       0.0,
+       60.0
+      ],
+      [
+       10.0,
+       10.0,
+       10.0,
+       50.0
+      ]
+     ]
+    },
+    {
+     "blok": "BOM_V07_VERANDA_YAN_600p0_GIRINTI",
+     "katman": "VERANDA_PROFIL_100",
+     "nokta": [
+      1486.5,
+      0.0
+     ],
+     "cizgiler": [
+      [
+       0.0,
+       0.0,
+       0.0,
+       60.0
+      ],
+      [
+       10.0,
+       10.0,
+       10.0,
+       50.0
+      ]
+     ]
+    },
+    {
+     "blok": "MNT_BOM_V07_VERANDA_YAN_600p0_GIRINTI",
+     "katman": "MONTAJ_STANDART",
+     "nokta": [
+      2586.5,
+      0.0
+     ],
+     "cizgiler": []
+    }
+   ]
+  },
+  "PA17": {
+   "ad": "91 m² 3+1 (havuz evi; kör ölçümü AP18)",
+   "is_emri": "is_emri/adaylar/PA17.json",
+   "listedeki_kiris": "L 4920",
+   "d140_notu": "D-140 (Lokman 20 Kasım 2026 kartları 10:50:36, 10:54:39): iki kapalı oda arasındaki duvarsız sınırın kirişi ana planda ve kopyasında KIRIS_PROFIL_100 çerçevesi (2 varlık); sonra_katmanlar bu kararla. D-137 profili ve öteki katmanlar aynen.",
+   "once_toplam": 505,
+   "sonra_toplam": 508,
+   "katman_farki": {
+    "MONTAJ_STANDART": 1,
+    "VERANDA_PROFIL_100": 2
+   },
+   "sonra_katmanlar": {
+    "ACIK_SINIR": 3,
+    "AKS": 20,
+    "AKS_YAZI": 20,
+    "DIS_DUVAR_100": 58,
+    "DIS_PARCA_OLCU": 12,
+    "IC_DUVAR_60": 34,
+    "IC_UCLU_H_60": 6,
+    "KIRIS_PROFIL_100": 2,
+    "KOSE_PROFIL_100": 12,
+    "KOSE_PROFIL_60": 4,
+    "MONTAJ_OZEL_OLCU": 10,
+    "MONTAJ_OZEL_PANO": 10,
+    "MONTAJ_STANDART": 50,
+    "MONTAJ_YAZI": 17,
+    "NET_ALAN_GEOMETRISI": 7,
+    "ODA_ADLARI": 37,
+    "OLCULER": 42,
+    "ON_CATI": 14,
+    "ON_DERZ": 40,
+    "ON_DOGRAMA": 9,
+    "ON_GORUNUS": 4,
+    "ON_OLCU": 16,
+    "ON_TOPUK": 11,
+    "ON_YAZI": 8,
+    "OZELLIK_TABLOSU": 33,
+    "OZEL_PANEL_OLCU_CM": 20,
+    "PORTMAN_INFO": 5,
+    "VERANDA_DIKME": 2,
+    "VERANDA_PROFIL_100": 4
+   },
+   "eklenen": [
+    {
+     "blok": "BOM_V06_VERANDA_ON_5020p0_GIRINTI",
+     "katman": "VERANDA_PROFIL_100",
+     "nokta": [
+      386.5,
+      225.0
+     ],
+     "cizgiler": [
+      [
+       0.0,
+       0.0,
+       502.0,
+       0.0
+      ],
+      [
+       10.0,
+       10.0,
+       492.0,
+       10.0
+      ]
+     ]
+    },
+    {
+     "blok": "BOM_V06_VERANDA_ON_5020p0_GIRINTI",
+     "katman": "VERANDA_PROFIL_100",
+     "nokta": [
+      1575.0,
+      225.0
+     ],
+     "cizgiler": [
+      [
+       0.0,
+       0.0,
+       502.0,
+       0.0
+      ],
+      [
+       10.0,
+       10.0,
+       492.0,
+       10.0
+      ]
+     ]
+    },
+    {
+     "blok": "MNT_BOM_V06_VERANDA_ON_5020p0_GIRINTI",
+     "katman": "MONTAJ_STANDART",
+     "nokta": [
+      2763.5,
+      225.0
+     ],
+     "cizgiler": []
+    }
+   ]
+  }
+ }
+}

@@ -5,6 +5,8 @@
 //   her rehber: belge kipi, adım sayısı, kart satırları sağlam, her adım açılır; görünen bütün yazılarda (üst bilgi, her adımın paneli,
 //   bütün kimlik kartları) iç not yok; evin altındaki ön onay paftası yüklü (pafta: true); parçaya dokununca kart açılır;
 //   her sayfada konsol/sayfa hatası, CSP ihlali, 4xx/5xx ve dış istek yok, yatay taşma yok.
+// İE-45: montaj oyunu (kayıttaki 'oyunlar'): açılışta kartı rehberlerin önünde; model yüklenir, 21 adım doğru kartla oynanır (iki
+//   yanlış seçimle ipucu da denenir), bitiş kartı, "Evi gez", "Kapıları aç"; görünen yazılarda iç not yok. DENE_OYUN=0: oyun atlanır.
 // Ekranlar ve her rehberin görünen metni <ekran klasörü>'ne. DENE_REHBER=<klasör>: yalnız o rehber.
 const { chromium } = require('playwright');
 const fs = require('fs');
@@ -59,9 +61,10 @@ async function acilis(b, cihaz, ayar) {
     kart: [...document.querySelectorAll('a.kart')].map(a => ({ href: a.getAttribute('href'), ad: a.querySelector('h2').textContent,
       img: a.querySelector('img').complete && a.querySelector('img').naturalWidth > 0 })) }));
   console.log(`[${ad}] ${JSON.stringify(o)}`);
-  if (o.kip !== 'CSS1Compat' || o.kart.length !== kayit.rehberler.length) bulgu.push(`${ad}: belge kipi ya da kart sayısı yanlış`);
+  const beklenen = [...(kayit.oyunlar || []).filter(x => x.acilis_karti), ...kayit.rehberler];
+  if (o.kip !== 'CSS1Compat' || o.kart.length !== beklenen.length) bulgu.push(`${ad}: belge kipi ya da kart sayısı yanlış`);
   o.kart.forEach((k, i) => {
-    if (k.href !== kayit.rehberler[i].klasor + '/' || k.ad !== kayit.rehberler[i].ad) bulgu.push(`${ad}: ${i + 1}. kart yanlış (${k.href} ${k.ad})`);
+    if (k.href !== beklenen[i].klasor + '/' || k.ad !== beklenen[i].ad) bulgu.push(`${ad}: ${i + 1}. kart yanlış (${k.href} ${k.ad})`);
     if (!k.img) bulgu.push(`${ad}: kapak görseli yüklenmedi (${k.href})`);
   });
   await p.screenshot({ path: path.join(ekran, `acilis_${cihaz}.png`), fullPage: true });
@@ -126,12 +129,59 @@ async function rehber(b, r, cihaz, ayar) {
   await kapat(s, ad);
 }
 
+async function oyun(b, o, cihaz, ayar) {
+  const ad = `${o.klasor}/${cihaz}`;
+  const s = await ac(b, ayar, o.klasor + '/');
+  const { p } = s;
+  await p.waitForFunction(() => !document.getElementById('basla').disabled, null, { timeout: 120000 });
+  const metin = [await p.evaluate(() => document.body.innerText)];
+  await p.screenshot({ path: path.join(ekran, `${o.klasor}_${cihaz}_acilis.png`) });
+  await p.click('#basla');
+  const durum = () => p.evaluate(() => ({ cur: +(document.getElementById('soruAlt').textContent.split(' ')[1] || 0),
+    acik: [...document.querySelectorAll('#kartlar .kart')].filter(k => !k.disabled).map(k => +k.dataset.i) }));
+  const sec = i => p.evaluate(i => [...document.querySelectorAll('#kartlar .kart')].find(k => +k.dataset.i === i && !k.disabled).click(), i);
+  const N = (await p.evaluate(() => JSON.parse(document.getElementById('veri').textContent).adimlar.length));
+  for (let k = 1; k <= N; k++) {
+    await p.waitForFunction(k => document.getElementById('soruAlt').textContent.startsWith('Adım ' + k + ' ')
+      && [...document.querySelectorAll('#kartlar .kart')].some(b => !b.disabled), k, { timeout: 90000 });
+    const d = await durum();
+    if (d.acik.length !== 4 || !d.acik.includes(k)) bulgu.push(`${ad}: ${k}. adımda kartlar yanlış (${d.acik})`);
+    if (k === 2) {                                  // iki yanlış: ipucu ve işaretli kart
+      for (const y of d.acik.filter(i => i !== k).slice(0, 2)) await sec(y);
+      const ip = await p.evaluate(() => ({ m: document.getElementById('mesaj').className, isaret: !!document.querySelector('.kart.isaret') }));
+      if (!(ip.m.includes('ipucu') && ip.isaret)) bulgu.push(`${ad}: iki yanlıştan sonra ipucu çıkmadı (${JSON.stringify(ip)})`);
+      metin.push(await p.evaluate(() => document.getElementById('tepsi').innerText));
+    }
+    await sec(k);
+    metin.push(await p.evaluate(() => document.getElementById('tepsi').innerText));
+  }
+  await p.waitForFunction(() => !document.getElementById('bitis').hidden, null, { timeout: 90000 });
+  metin.push(await p.evaluate(() => document.getElementById('bitis').innerText));
+  await p.screenshot({ path: path.join(ekran, `${o.klasor}_${cihaz}_bitis.png`) });
+  await p.click('#gezTus');
+  await p.waitForTimeout(1500);
+  if (await p.evaluate(() => document.getElementById('kapiTus').hidden)) bulgu.push(`${ad}: "Kapıları aç" düğmesi yok (modelde açılır kapı yok)`);
+  else {
+    await p.click('#kapiTus'); await p.waitForTimeout(1600);
+    if ((await p.textContent('#kapiTus')).trim() !== 'Kapıları kapat') bulgu.push(`${ad}: kapılar açılmadı`);
+  }
+  await p.screenshot({ path: path.join(ekran, `${o.klasor}_${cihaz}_gez.png`) });
+  const tum = metin.join('\n');
+  fs.writeFileSync(path.join(ekran, `${o.klasor}_${cihaz}_metin.txt`), tum);
+  const k = tum.toLocaleLowerCase('tr');
+  YASAK.forEach(y => k.includes(y) && bulgu.push(`${ad}: görünen yazıda "${y}"`));
+  KELIME.forEach(y => new RegExp(`\\b${y}\\b`).test(k) && bulgu.push(`${ad}: görünen yazıda "${y}"`));
+  console.log(`[${ad}] ${N} adım oynandı`);
+  await kapat(s, ad);
+}
+
 (async () => {
   const b = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });
   const yalniz = process.env.DENE_REHBER;
   for (const [cihaz, ayar] of Object.entries(CIHAZ)) {
     if (!yalniz) await acilis(b, cihaz, ayar);
     for (const r of kayit.rehberler) if (!yalniz || r.klasor === yalniz) await rehber(b, r, cihaz, ayar);
+    if (process.env.DENE_OYUN !== '0') for (const o of kayit.oyunlar || []) if (!yalniz || o.klasor === yalniz) await oyun(b, o, cihaz, ayar);
   }
   await b.close();
   console.log(bulgu.length ? 'BULGU:' : 'SONUÇ: bulgu yok');

@@ -146,8 +146,16 @@ Biçim: karar · gerekçe · reddedilen seçenekler · geri alma yolu · kim ve 
 | [D-126](D-126.md) | İş Emri çatı izolasyonunu alıcıya ait yazarsa (izocam, şilte, çatı izolasyonu) yükleme listesinde çatı şiltesi satırı 0 ve "alıcıya ait"; yazmayan İş Emri aynen; BK-57 | 19.11 (Lokman 19:00:47 kart "Evet, çatı şiltesi çıksın") |
 | [D-127](D-127.md) | Verandada tavan kirişi: D-107 verandaya (açık mahal) da uygulanır; açıklık açık kenarların kirişlerinin arası; 7 m'yi aşarsa kiriş açık kenardaki kolondan makasa dik gövdenin duvarına, makası ortadan taşır; listede L yüzden yüze + 2 × 10 (76 m² L 1982,5), yeni kolon yok; çizim yalnız saha montaj planında; kolon yoksa sorulur (`motor/tavan_kirisi.py`, PC-47; BK-58); depoda yalnız 76 m² teklif evi | 19.11 (Lokman 19:05:44 "verandanın tam ortasınada yani profil koyduğun yerede dikey bir kiriş gelecek …"; kart 19:33:12 "Eskizdeki gibi, L 1982,5") |
 | [D-129](D-129.md) | Gövdedeki verandanın (ana çatının örttüğü açık mahal) açık kenarında ara kolon varsa kiriş ara kolonlarda bölünür, her parça kolonun yüzünden yüzüne; ara kolonlu her eve (110 m² L 9940 → L 3230 × 2 + L 3280; 76 m², 140 m², 142 m², 83 m² yan verandalı ve bir deneme girdisi de değişir); ara kolonsuz kenar aynen (`prefabrik_liste._kenar_parcalari`; BK-59) | 19.11 (Lokman kart 21:39:45 "Eskizdeki gibi, yüzden yüze"; kart 21:45:21 "Ara kolonlu her eve") |
+| [D-130](D-130.md) | Verandada her açık kenara kiriş: aynı yöndeki ikinci yan kenar da (U veranda) kendi kirişini alır, L kenarın dış ölçüsü − 10 (iki ucunda kolon − 2 × 10); yönde tek kenar aynen; 76 m² +L 1782,5, 80 m² 3+1 havuz evi +L 500 (çizimdeki eksik ayrı adımda); sınır geometrisinde boy uydurulmaz (`prefabrik_liste.acik_mahal_kirisleri`; BK-60) | 19.11 (Lokman kart 21:43:35 "Her açık kenara kiriş"; kart 22:16:13 "Listede kalsın, çizim sonra") |
 | [D-131](D-131.md) | Ana çatının örttüğü verandada dörtomuzun (iki uçlu kırma) ucu duvarsızsa ilk ana makas uca en yakın gövde duvarının üstünde (D-114 gibi), kısa makaslar karşı uç duvarının pano eklerinde; 120 m² ana 9, kısa 4 + 4, çapraz 4 (BK-59) | 19.11 (Lokman 21:49:23 "çapraz makasları tam kırılma noktasını geçmiyorsa … bina duvarının üzerine al"; kart 21:59:00 "Eskizdeki gibi") |
 | [D-132](D-132.md) | Disk arşivi Parti 2'nin dört evi (45, 75, 76, 80 m²) Motor'un aks düzeniyle havuzda, PA-45 … PA-48; çatı paftadaki gibi (45 beşik, 75 dörtomuz, 76 ön cumba, 80 verandada sundurma %10); listede üç bilinen fark (75 makas sayısı, 76 cumba baş makası, 45 tepe); 110 ve 120 m² verandayı örten ana çatının Motor bakımını bekler; asıl proje (D-103) | 19.11 (Lokman, kart 21:31:40 "Altı ev girsin"; kart 21:39:32 "Dördü girsin, ikisi beklesin") |
+| [D-134](D-134.md) | Disk arşivi Parti 2'nin bekleyen iki evi (110, 120 m²) havuzda, PA-49, PA-50: paftanın makas planında ana çatı ön verandayı da örter, veranda gövdenin açık mahali (okuyucu `verandayi_govdeye_al`, ara kolonlar paftadaki yerinde); 110 beşik, 120 dörtomuz (D-131); listede bilinen farklar (kiriş boyu, 120 makas sayısı); D-132 kartının koşuluyla (Motor listeler: D-129, D-130, D-131) | 19.11 (Lokman, kart 21:39:32 "Dördü girsin, ikisi beklesin") |
+| [D-135](D-135.md) | Çapraz cumbalı her evde ana çatının aşık sıraları cumbanın arkasında kesilmez, ana yüzün iki saçak ucu arasında baştan sona sürer; liste, kart modeli, montaj paftası ve rehber birlikte (44 evde aşık +2 … +6; `cati_prefabrik.ana_karkasi`; BK-62) | 20.11 (Lokman 07:12:04 "ana makasdaki aşıklar cumbanın arkasına gelince kesilmez devam eder"; kart 07:20:08 "Eskizdeki gibi, çapraz cumbalı her eve") |
+| [D-136](D-136.md) | CRM fiyatı ve Lokman'ın fiyatları (istisna dahil) KDV dahil: fiyatlı listede ve teklifte fiyat CRM'deki gibi, KDV ayrılmaz, eklenmez, yazılmaz; toplam CRM fiyatlarının toplamı (120 TL = 120 TL); 20 Kasım 2026 ve sonraki CRM görüntüsünde (`crm_esleme.json › kdv.fiyata_dahil`), öncekiler aynen | 20.11 (Lokman 07:58:30 "artık fiyatlara ekli …"; kart 08:03:19 "CRM ve sizin fiyatlarınız"; 09:10:13 "sen KDV olayını karıştırma CRM'den ne çektiysen onu gir"; kart 09:10:41 "KDV hiç yazılmasın") |
+| [D-137](D-137.md) | Yükleme listesinde kiriş alan veranda kenarı ön onay çiziminde de profil (kiriş), gövdenin dış çizgisinde olmasa da; liste ve çizim kenarı aynı işlevden okur (`prefabrik_liste.kirisli_acik_kenarlar`); 80 m² 3+1'in 60 cm'lik sol yanı ve 91 m² 3+1'in 502 cm'lik önü; D-58'in aks ve ölçü ekleri yalnız `girinti_kirisi` anahtarıyla (BK-63, PC-49) | 20.11 (Lokman kart 08:04:02 "Eskizdeki gibi, iki evde") |
+| [D-140](D-140.md) | Yükleme listesinde kiriş olan iç yerler ön onay çiziminde de 10 × 10 kesik kırmızı çerçeve: tavan kirişi (D-107, D-127) ve iki kapalı oda arasındaki duvarsız sınırın kirişi; her prefabrik evde; D-107 ve D-127'nin "A4 değişmez" satırının yerine; referans 2026-11-20 (BK-66, PC-51) | 20.11 (Lokman kartları 10:50:36 "Eskizdeki gibi, kirişli her evde", 10:54:39 "Evet, iki tür kiriş her evde") |
+| [D-138](D-138.md) | "Evi kendin kur" montaj oyunu rehber.portatifev.com/oyun/'da, açılış sayfasında oyun kartı; oyun rehberin main'deki sayfasından ve aynı koşunun GLB'sinden (kapı açılışı ve cam yünü serme dahil), ipuçları `oyun_ipuclari.json`'da; altı rehber canlı paketten sabit (İE-45) | 20.11 (Lokman 08:52:07 "bu oyunu çok beğendim VPS 'da yayına alabilir misin?"; kart 08:54:40 "Evet, açılışa kart eklensin") |
+| [D-141](D-141.md) | Montaj rehberinde çapraz cumbanın altında ana çatının aşıkları kalkandan kalkana (D-135 gibi); cumbanın aşıkları dere hattında onların üstüne biner; Motor ve liste aynen; BK-67 | 20.11 (Lokman kart 12:20:39 "Resimdeki gibi") |
 
 ## Numara defteri (14 Ekim 2026, BK-08; CIO planı › Görev 3)
 
@@ -271,10 +279,19 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | D | D-127 | verandada tavan kirişi: kolondan gövdeye, makası ortadan taşır (BK-58, PC-47; Lokman 19.11 19:05:44, kart 19:33:12 "Eskizdeki gibi, L 1982,5") | yazıldı (19.11; tavan kirişi sohbeti, `claude/project-thread-bvls4f`) |
 | D | D-128 | 60 m² katalog fiyat listesinin (P6001 r03) hedef örneği (Lokman 19.11 19:51:44 "onaylıyorum") | alındı (19.11; katalog fiyat sohbeti, `claude/project-thread-di7i2v`) |
 | D | D-129 | gövdedeki verandanın açık kenarı ara kolonlarda bölünür, yüzden yüze (BK-59; Lokman 19.11 kart 21:39:45, 21:45:21) | yazıldı (19.11; `claude/project-thread-61wl66`) |
-| D | D-130 | (tavan kirişi sohbeti: verandada her açık kenara kiriş) | alındı (19.11) |
+| D | D-130 | verandada her açık kenara kiriş, aynı yöndeki ikinci yan kenar da (BK-60; Lokman 19.11 kart 21:43:35 "Her açık kenara kiriş", kart 22:16:13 "Listede kalsın, çizim sonra") | yazıldı (19.11; tavan kirişi sohbeti, `claude/project-thread-bvls4f`) |
 | D | D-131 | dörtomuzun duvarsız ucunda ilk ana makas gövdenin duvarında (BK-59; Lokman 19.11 21:49:23, kart 21:59:00) | yazıldı (19.11; `claude/project-thread-61wl66`) |
 | D | D-132 | disk arşivi Parti 2'nin dört evi havuzda, PA-45 … PA-48 (İE-43 PR-7; Lokman 19.11 kartları 21:31:40, 21:39:32) | yazıldı (19.11; disk arşivi sohbeti, `claude/project-thread-wc6dw0`) |
-| D | **D-133** | — | **sıradaki boş** |
+| D | D-133 | (başka sohbet: disk arşivi Parti 2'nin çatı farkları; BK-61, PC-48) | alındı (20.11) |
+| D | D-134 | disk arşivi Parti 2'nin 110 ve 120 m²'si havuzda, PA-49, PA-50 (İE-43 PR-8; D-132 kartının koşuluyla) | yazıldı (20.11; disk arşivi sohbeti, `claude/project-thread-wc6dw0`) |
+| D | D-135 | çapraz cumbada ana çatının aşıkları cumbanın arkasında kesilmez (BK-62; Lokman 20.11 07:12:04, kart 07:20:08) | yazıldı (20.11; `claude/project-thread-4mjyg0`) |
+| D | D-136 | (başka sohbet: CRM fiyatı KDV dahil; 76 m² teklifi) | yazıldı (20.11; `main`'e girdi, #281) |
+| D | D-137 | listede kirişi olan veranda kenarı ön onay çiziminde de kiriş (BK-63, PC-49; Lokman 20.11 kart 08:04:02 "Eskizdeki gibi, iki evde") | yazıldı (20.11; tavan kirişi sohbeti, `claude/project-thread-bvls4f`) |
+| D | D-138 | "Evi kendin kur" montaj oyunu rehber sitesinde /oyun/, açılışta oyun kartı (İE-45; Lokman 20.11 08:52:07, kart 08:54:40 "Evet, açılışa kart eklensin") | yazıldı (20.11; Higgsfield sohbeti, `claude/project-thread-r57x4r`) |
+| D | D-139 | (başka sohbet: girintili evde kırma çatı; BK-64) | alındı (20.11) |
+| D | D-140 | listede kiriş olan iç yerler (tavan kirişi, iki kapalı oda arasındaki duvarsız sınırın kirişi) ön onay çiziminde de 10 × 10 kesik kırmızı çerçeve, her evde (BK-66, PC-51; Lokman 20.11 kartları 10:50:36, 10:54:39) | yazıldı (20.11; kiriş çizimi sohbeti, `claude/project-thread-qj8vte`) |
+| D | D-141 | montaj rehberinde çapraz cumbanın altında ana çatının aşıkları kalkandan kalkana (BK-67; Lokman 20.11 11:22:05, kart 12:20:39 "Resimdeki gibi") | yazıldı (20.11; `claude/project-thread-xmignz`) |
+| D | **D-142** | — | **sıradaki boş** |
 | İE | İE-01–İE-08 | bu depo (`main`) | yazıldı |
 | İE | İE-09 | model atölyesi: kontrollü model üretimi ve banka hattı (Görev 6e; pano 30; P6001 güncellemesi kapsam dışı) | alındı (16.10; `claude/gorev-6e-model-atolyesi-rnhtcp`; PR-1 banka hattı 29.10, `claude/project-thread-rhjgzv`) |
 | İE | İE-10, İE-11, İE-12 | prefabrik hattı (PR #12, PR #14, `ie-12-prefabrik-bayi-paftasi`) | `main`'e BK-12 ile (PR-1: motor ve bayi paftası; liste ve mühür kıyası sonraki PR'larda) |
@@ -311,7 +328,8 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | İE | İE-42 | çatı plan onayından sonra (D-94; pano 41): onayda çatı seti, seçilen çatıyla r02, çelikte teknik kontrol çatıdan sonra; M-08 yeniden mühürlenir | alındı (14.11; `claude/project-thread-91gav7`) |
 | İE | İE-43 | disk arşivi: adsız dizin ve SHA-256 mührü (`araclar/hdd_dizin.py`, `testler/hdd/`; D-99) | alındı (15.11; `claude/project-thread-wc6dw0`) |
 | İE | İE-44 | havuz evlerine toplu çatı seçenekleri: Motor kuralla çizer (K kırma, C beşik + salonda cumba, B beşik; D-83 ailesi), havuz denetimi süzer (D-112), Lokman tek sayfada onaylar (Lokman 16.11 08:21:45 kartı "Toplu çizilsin, ben onaylayayım") | alındı (16.11; `claude/project-thread-co84co`) |
-| İE | **İE-45** | — | **sıradaki boş** |
+| İE | İE-45 | montaj oyunu "Evi kendin kur" rehber sitesinde: oyun rehberin main'deki sayfasından ve GLB'sinden, açılışta kart (D-138) | alındı (20.11; Higgsfield sohbeti, `claude/project-thread-r57x4r`) |
+| İE | **İE-46** | — | **sıradaki boş** |
 | BK | BK-01–BK-08 | bu depo; BK-08 8a sonrası temizlik (`bk-08-8a-temizlik`) | yazıldı |
 | BK | BK-09 | metin ve çizim düzeltmeleri, G1 (`bk-09-metin-cizim`, `bk-09-cizim-g1`) | alındı (14.10) |
 | BK | BK-10 | 8b sonrası küçük işler (DXF `.txt` notu, geç gelen Excel, panelden Excel, plan değişince kontrol kapanır, D-19 24 saat kuralı, düğmeli mesajda satır sonları, `YENI-` kodu ve ilk çelik planda LLM özeti bayiye gitmez, komut freni metni; pano satır 15; çelikte kapı değişikliği kapsam dışı) | alındı (30.10; `claude/project-thread-h64uz2`) |
@@ -352,8 +370,14 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | BK | BK-57 | Yükleme listesinde alıcıya ait çatı izolasyonu: `prefabrik_liste.silte_alici` (D-126; `claude/project-thread-nngdr4`) | yazıldı (19.11) |
 | BK | BK-58 | Pano Motor'unda verandanın tavan kirişi: açık kenardaki kolondan gövdeye kutu profil, liste satırı ve saha montaj planı (D-127, PC-47; `claude/project-thread-bvls4f`) | yazıldı (19.11; defter 19:25) |
 | BK | BK-59 | Yükleme listesinde gövdedeki verandanın ara kolonlu açık kenarı: `prefabrik_liste._kenar_parcalari` (D-129; `claude/project-thread-61wl66`) | yazıldı (19.11) |
-| BK | BK-60 | (tavan kirişi sohbeti: verandada her açık kenara kiriş, D-130) | alındı (19.11) |
-| BK | **BK-61** | — | **sıradaki boş** |
+| BK | BK-60 | Pano Motor'unun yükleme listesinde verandanın her açık kenarına kiriş (`prefabrik_liste.model_motor`) (D-130; `claude/project-thread-bvls4f`) | yazıldı (19.11; defter 21:45) |
+| BK | BK-61 | (başka sohbet: disk arşivi Parti 2'nin çatı farkları; D-133) | alındı (20.11) |
+| BK | BK-62 | Çapraz cumbada ana çatının aşık sıraları cumbanın arkasında baştan sona: `cati_prefabrik.ana_karkasi` (D-135; `claude/project-thread-4mjyg0`) | yazıldı (20.11) |
+| BK | BK-63 | Pano Motor'unun ön onay çiziminde listede kirişi olan veranda kenarı profil (`dxf_out.Cizici._listede_kirisli`) (D-137, PC-49; `claude/project-thread-bvls4f`) | yazıldı (20.11; defter 08:10) |
+| BK | BK-64, BK-65 | (başka sohbetler: girintili evde kırma çatı; montaj paftasında binen omega yazıları) | alındı (20.11) |
+| BK | BK-66 | Pano Motor'unun ön onay çiziminde listede kiriş olan iç yerler (`dxf_out.Cizici._kiris_profilleri`, `prefabrik_liste.ic_kiris_hatlari`) (D-140, PC-51; `claude/project-thread-qj8vte`) | yazıldı (20.11; defter 11:10) |
+| BK | BK-67 | Montaj rehberinde çapraz cumbanın altında ana çatının aşıkları: `capraz.py` `poly_asik`, `sahne.js` `Y.PA` (D-141; `claude/project-thread-xmignz`) | yazıldı (20.11) |
+| BK | **BK-68** | — | **sıradaki boş** |
 
 ## 27 Eylülde Lokman'ın verdiği kararlar
 

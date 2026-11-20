@@ -206,7 +206,8 @@ def ilk_sayfa(T: dict, ie: dict, sec: dict, form: dict, tarih: str) -> str:
     k.append(_urun(f"{form['urun']} · {sec['ad']}", alan, o["toplam"], "—", o["toplam"]))
     k.append(f"<p class='soluk'>Tutar, Motor'un yükleme listesinde fiyatı olan {o['fiyatli']} satırın toplamıdır ({o['satir']} satır; Ek-1); "
              f"fiyatlar fiyat defterinden ({e(T['defter_surumu'])}). Alan Motor'un brüt alanı (verandalar dahil). "
-             + (kdv_cumlesi(o["kdv"]) if o.get("kdv") else "KDV tutarı yazılmadı: fiyat listelerinde KDV durumu belirtilmiyor.") + "</p>")
+             + (kdv_cumlesi(o["kdv"]) if o.get("kdv") else "" if o.get("fiyat_kdv_dahil")      # D-136: KDV hiç yazılmaz
+                else "KDV tutarı yazılmadı: fiyat listelerinde KDV durumu belirtilmiyor.") + "</p>")
     k.append("<h2>03 &nbsp; ÖDEME</h2><table>")
     for ad, v in T["kosullar"].items():
         k.append(satir(ad, v))
