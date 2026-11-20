@@ -88,9 +88,14 @@ def veri(d: dict, r: dict, o: dict) -> dict:
             'cati_adim': list(d['cati_adim']), 'kapak_adim': o['kapak_adim'], 'adimlar': adimlar}
 
 
-def sayfa(v: dict, o: dict, esbuild: str | None = None) -> str:
-    """Şablon + veri → index.html (CSP'li). `esbuild` verilirse modül betiği yorumsuz (rehber sayfaları gibi)."""
+def sayfa(v: dict, o: dict, esbuild: str | None = None, glb_eki: str = '') -> str:
+    """Şablon + veri → index.html (CSP'li). `esbuild` verilirse modül betiği yorumsuz (rehber sayfaları gibi).
+    `glb_eki`: modelin adres eki (`ortak.surum_eki`); model değişince tarayıcı eskisini göstermesin."""
     s = SABLON.read_text(encoding='utf-8')
+    if glb_eki:
+        if s.count("fetch('ev.glb')") != 1:
+            raise ortak.SiteHatasi("oyun şablonunda fetch('ev.glb') bir kez olmalı")
+        s = s.replace("fetch('ev.glb')", f"fetch('ev.glb{glb_eki}')")
     for yer, deger in (('__BAS__', ortak.bas_etiketleri(f'PortatifEv · {o["ad"]} · {v["ad"]}')), ('__AD__', H.escape(v['ad'])),
                        ('__N__', str(len(v['adimlar']))), ('__REHBER__', v['rehber'])):
         if yer not in s:
@@ -132,16 +137,17 @@ def glb_temizle(glb: bytes, kod: str) -> bytes:
 
 def klasor_yaz(v: dict, o: dict, glb: bytes, kod: str, hedef: Path, npm: Path, esbuild: str | None) -> list[str]:
     hedef.mkdir(parents=True, exist_ok=True)
-    (hedef / 'index.html').write_text(sayfa(v, o, esbuild), encoding='utf-8')
-    (hedef / 'ev.glb').write_bytes(glb_temizle(glb, kod))
+    model = glb_temizle(glb, kod)
+    (hedef / 'index.html').write_text(sayfa(v, o, esbuild, ortak.surum_eki(model)), encoding='utf-8')
+    (hedef / 'ev.glb').write_bytes(model)
     return ortak.yerel_kutuphaneler((hedef / 'index.html').read_text(encoding='utf-8'), hedef, npm)
 
 
-def kart_html(o: dict, v: dict) -> str:
-    """Açılış sayfasındaki oyun kartı (rehber kartlarının önünde)."""
+def kart_html(o: dict, v: dict, ek: str = '') -> str:
+    """Açılış sayfasındaki oyun kartı (rehber kartlarının önünde). `ek`: kapak görselinin adres eki."""
     sp = [f'{len(v["adimlar"])} adım', 'her adımda 4 kart', 'puan ve yıldız']
     return (f'    <a class="kart" href="{o["klasor"]}/">\n'
-            f'      <img src="{o["klasor"]}/gorsel/kapak.jpg" alt="{H.escape(o["ad"])}: yarım kurulmuş evin görünümü" loading="lazy">\n'
+            f'      <img src="{o["klasor"]}/gorsel/kapak.jpg{ek}" alt="{H.escape(o["ad"])}: yarım kurulmuş evin görünümü" loading="lazy">\n'
             f'      <div class="ic"><h2>{H.escape(o["ad"])}</h2>\n'
             f'        <div class="alan">Montaj oyunu · {H.escape(v["ad"])}</div>\n'
             f'        <div class="spec">{"".join(f"<span>{H.escape(x)}</span>" for x in sp)}</div>\n'

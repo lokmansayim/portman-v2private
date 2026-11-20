@@ -113,7 +113,7 @@ def pafta_ayir(html: str, beklenen: bool) -> tuple[str, bytes | None]:
     ImageDraw.Draw(im).rectangle(PAFTA_ORTU, fill=(255, 255, 255))
     b = io.BytesIO()
     im.save(b, 'JPEG', quality=88, optimize=True, progressive=True)
-    return html[:m[0].start()] + 'gorsel/onay_pafta.jpg' + html[m[0].end():], b.getvalue()
+    return html[:m[0].start()] + 'gorsel/onay_pafta.jpg' + ortak.surum_eki(b.getvalue()) + html[m[0].end():], b.getvalue()
 
 
 def _kucult(kod: str, esbuild: str) -> str:

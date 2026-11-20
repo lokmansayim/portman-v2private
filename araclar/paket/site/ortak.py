@@ -39,6 +39,16 @@ def sha(b: bytes) -> str:
     return hashlib.sha256(b).hexdigest()
 
 
+SURUM_EKI = re.compile(r'\?v=[0-9a-f]{10}')
+
+
+def surum_eki(b: bytes) -> str:
+    """Önbellek kırıcı adres eki ('?v=' + içeriğin sha256'sının ilk 10 hanesi). nginx resim ve modeli 7 gün saklatır
+    (`expires 7d`); HTML hiç saklanmaz. Adı aynı kalan resim değişince tarayıcı eskisini gösteriyordu (20 Kasım 2026,
+    85 m² ön onay paftası); ek içerikle değişir, HTML yeni adresi ister."""
+    return '?v=' + sha(b)[:10]
+
+
 def bulgular(metin: str, yasak: list[str] = YASAK) -> list[str]:
     """Herkese açık metinde kalan yasak dizgeler (bağlamıyla) ve telefona benzeyen diziler."""
     k = metin.lower()
