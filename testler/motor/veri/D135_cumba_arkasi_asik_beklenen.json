@@ -1,0 +1,190 @@
+{
+ "karar": "D-135",
+ "is": "BK-62",
+ "kaynak": "Lokman 20 Kasım 2026 07:12:04 UTC (montaj paftası aşık sayfasına yorum); kart 07:20:08 \"Eskizdeki gibi, çapraz cumbalı her eve\"",
+ "eskiz": "PF Portman_Proje_Dosyalari/Asik_Cumba_Arkasi/01_85m2_asik_once_sonra.png, 02_80m2_2+1_asik_once_sonra.png",
+ "aciklama": "Yükleme listesinin Aşık (L 4200) satırının adedi; once = D-135'ten önceki main (8384731), sonra = D-135. Ana çatının aşık sırası cumbanın arkasında kesilmez.",
+ "asik_adedi": {
+  "is_emri/P8501_r03.json": {
+   "once": 45,
+   "sonra": 48
+  },
+  "is_emri/P8501_r04.json": {
+   "once": 49,
+   "sonra": 52
+  },
+  "is_emri/P8501_r05.json": {
+   "once": 46,
+   "sonra": 49
+  },
+  "is_emri/adaylar/PA04.json": {
+   "once": 44,
+   "sonra": 47
+  },
+  "is_emri/adaylar/PA05.json": {
+   "once": 46,
+   "sonra": 52
+  },
+  "is_emri/adaylar/PA06C.json": {
+   "once": 49,
+   "sonra": 51
+  },
+  "is_emri/adaylar/PA08C.json": {
+   "once": 75,
+   "sonra": 81
+  },
+  "is_emri/adaylar/PA11.json": {
+   "once": 53,
+   "sonra": 55
+  },
+  "is_emri/adaylar/PA14.json": {
+   "once": 33,
+   "sonra": 36
+  },
+  "is_emri/adaylar/PA15.json": {
+   "once": 42,
+   "sonra": 44
+  },
+  "is_emri/adaylar/PA16C.json": {
+   "once": 45,
+   "sonra": 48
+  },
+  "is_emri/adaylar/PA17.json": {
+   "once": 53,
+   "sonra": 56
+  },
+  "is_emri/adaylar/PA19C.json": {
+   "once": 44,
+   "sonra": 46
+  },
+  "is_emri/adaylar/PA24C.json": {
+   "once": 42,
+   "sonra": 46
+  },
+  "is_emri/adaylar/PA25C.json": {
+   "once": 33,
+   "sonra": 35
+  },
+  "is_emri/adaylar/PA27.json": {
+   "once": 30,
+   "sonra": 32
+  },
+  "is_emri/adaylar/PA28.json": {
+   "once": 31,
+   "sonra": 33
+  },
+  "is_emri/adaylar/PA29.json": {
+   "once": 28,
+   "sonra": 30
+  },
+  "is_emri/adaylar/PA31.json": {
+   "once": 33,
+   "sonra": 36
+  },
+  "is_emri/adaylar/PA32.json": {
+   "once": 38,
+   "sonra": 40
+  },
+  "is_emri/adaylar/PA33C.json": {
+   "once": 74,
+   "sonra": 80
+  },
+  "is_emri/adaylar/PA34C.json": {
+   "once": 42,
+   "sonra": 46
+  },
+  "is_emri/adaylar/PA37.json": {
+   "once": 53,
+   "sonra": 55
+  },
+  "is_emri/adaylar/PA39.json": {
+   "once": 23,
+   "sonra": 25
+  },
+  "is_emri/adaylar/PA40C.json": {
+   "once": 26,
+   "sonra": 29
+  },
+  "is_emri/adaylar/PA41.json": {
+   "once": 33,
+   "sonra": 35
+  },
+  "is_emri/adaylar/PA42C.json": {
+   "once": 46,
+   "sonra": 49
+  },
+  "is_emri/adaylar/PA47.json": {
+   "once": 43,
+   "sonra": 46
+  },
+  "testler/cizim/evler/AP13.json": {
+   "once": 33,
+   "sonra": 36
+  },
+  "testler/cizim/evler/AP16.json": {
+   "once": 42,
+   "sonra": 44
+  },
+  "testler/cizim/evler/AP22.json": {
+   "once": 46,
+   "sonra": 52
+  },
+  "testler/kor/projeler/AP06/is_emri.json": {
+   "once": 53,
+   "sonra": 55
+  },
+  "testler/kor/projeler/AP13/is_emri.json": {
+   "once": 33,
+   "sonra": 36
+  },
+  "testler/kor/projeler/AP16/is_emri.json": {
+   "once": 42,
+   "sonra": 44
+  },
+  "testler/kor/projeler/AP18/is_emri.json": {
+   "once": 53,
+   "sonra": 56
+  },
+  "testler/kor/projeler/AP22/is_emri.json": {
+   "once": 46,
+   "sonra": 52
+  },
+  "testler/motor/veri/BK40_52m2.json": {
+   "once": 42,
+   "sonra": 48
+  },
+  "testler/motor/veri/BK40_55m2.json": {
+   "once": 36,
+   "sonra": 39
+  },
+  "testler/motor/veri/TK04.json": {
+   "once": 40,
+   "sonra": 43
+  },
+  "testler/motor/veri/TK04_r04.json": {
+   "once": 43,
+   "sonra": 46
+  },
+  "testler/motor/veri/TK04_r05.json": {
+   "once": 43,
+   "sonra": 46
+  },
+  "testler/motor/veri/TK04_r06.json": {
+   "once": 44,
+   "sonra": 47
+  },
+  "testler/motor/veri/TK04_r07.json": {
+   "once": 44,
+   "sonra": 47
+  },
+  "testler/motor/veri/TK04_r08.json": {
+   "once": 44,
+   "sonra": 47
+  }
+ },
+ "P8501_r05": {
+  "asik_m": 192.2,
+  "kart_modeli_parca": 70,
+  "ana_guney_sira": 10
+ }
+}
