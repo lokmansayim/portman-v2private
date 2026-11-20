@@ -1349,6 +1349,62 @@
    ],
    "durum": "mühürlü",
    "gecmis": []
+  },
+  {
+   "kod": "M-20",
+   "konu": "Mihenk taşı: Huma Çelik 45 m² bayi teklifi (TK-09 r04)",
+   "kural": "Bayi tekliflerinin hedef örneği bugünkü hâliyle: İş Emri is_emri/TK09_r04.json (43,69 m² brüt · 40,63 m² net, 29 pano, P8501 gibi çapraz cumba, veranda kirişi ön yüzden 37,5 cm içeride); 20 Kasım 2026 12:03 CRM'i, Kasım istisnası, ters tavan ve önerilerle yükleme listesi 105 satır (102 fiyatlı), taban 219.729,25 TL; kâr %25, bayi birim fiyatı 274.661,56 TL, KDV yok (D-136). Bayiye giden mühürlü dosyalar SON_HALI'de (MUHUR.md, SHA256SUMS.txt). Teklif formunun D-77 düzeni ve A4 çizim düzeni bu mühürde değil (A4 M-02'de).",
+   "kararlar": [
+    "D-142"
+   ],
+   "pr": [],
+   "lokman": [
+    {
+     "tarih": "2026-11-20 12:03",
+     "soz": "Kat planı r04 kartı → \"Onaylıyorum\"",
+     "mesaj": "cmsg_01UAFvcnfVuTR1wfFux5fQPPXBm5fNBgEEnwfUsk6pPoRV"
+    },
+    {
+     "tarih": "2026-11-20 12:05",
+     "soz": "Çatı ve dört görünüş kartı → \"Onaylıyorum\"",
+     "mesaj": "cmsg_01UAFvcnfVuTR1wfFux5fQPPXBm5fNBgEEnwfUsk6pPoRV"
+    },
+    {
+     "tarih": "2026-11-20 12:08",
+     "soz": "Kâr kartı → \"%25\"",
+     "mesaj": "cmsg_01UAFvcnfVuTR1wfFux5fQPPXBm5fNBgEEnwfUsk6pPoRV"
+    },
+    {
+     "tarih": "2026-11-20 12:23",
+     "soz": "çok iyi iş çıkardın tebrik ederim bunu son hali olarak mühürle",
+     "mesaj": "cmsg_01UAFvcnfVuTR1wfFux5fQPPXBm5fNBgEEnwfUsk6pPoRV"
+    },
+    {
+     "tarih": "2026-11-20 14:47",
+     "soz": "burada çok iyi iş çıkardın hatta mühendisin bile hatasını buldun hatta bayi fiyatı ve sunumu çok beğendi tam buradaki yaptığımız iş milat olsun o yüzden buradaki rehber olayını istersen yapalım istersen bu seviyede mühürle bizim mihenk taşımız olsun",
+     "mesaj": "cmsg_01UAFvcnfVuTR1wfFux5fQPPTpPaDW4HdXPnepG6btuNRj"
+    }
+   ],
+   "kilitler": [
+    {
+     "yer": "is_emri/TK09_r04.json",
+     "iz": "e08e950493737a4d"
+    },
+    {
+     "yer": "testler/mihenk/TK09_r04_beklenen.json",
+     "iz": "e95591bd502a4d62"
+    },
+    {
+     "yer": "testler/mihenk/crm_20261120-120347.json",
+     "iz": "206f46e984e255ec"
+    },
+    {
+     "yer": "testler/test_m20_tk09_mihenk.py",
+     "iz": "8055a26326708a45"
+    }
+   ],
+   "durum": "mühürlü",
+   "gecmis": []
   }
  ]
 }
