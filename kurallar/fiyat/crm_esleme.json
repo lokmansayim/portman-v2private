@@ -1,6 +1,6 @@
 {
  "sema": 1,
- "surum": "2026-11-19-r13",
+ "surum": "2026-11-20-r14",
  "karar": "D-72",
  "muhur": "M-15",
  "aciklama": "Fiyat defteri kaleminin CRM stok fiyatları API'sindeki karşılığı ve fiyatın nasıl hesaplandığı (İE-35). Fiyat yazmaz: fiyat her gün CRM'den gelir, `araclar/crm_fiyat.py` bu dosyayla defter üretir. Anahtarlar ve birimler fiyat defterinin (defter_2026-11 r13) kalemleri; Motor'un listesindeki anahtar. D-72'den sonra defter kapandı: Motor'un yeni anahtarı yalnız buraya, hattın kalemlerinin sonuna girer (r05, TK-06); yeni bant aralığı da bantların sonuna (r07, 280 ve 300 cm yükseklik). Eşleme değişikliği (yeni kalem, Lokman'ın birim cevabı, Samet'in CRM'e eklediği ürün) bu dosyaya PR'la girer; `kaynak` bölümü mühürlü (M-15).",
@@ -49,6 +49,7 @@
  },
  "kdv": {
   "dayanak": "D-76",
+  "fiyata_dahil": {"baslangic": "2026-11-20", "karar": "D-136", "dayanak": "Lokman 20 Kasım 2026 07:58:30 UTC: \"ilk başta kural olarak verdiğimiz %20 KDV %10 KDV ve %0 KDV bunlar geçerli ama bir fark var artık fiyatlara ekli yani yeniden KDV hesabı yapmayacağız şöyle örnek verelim 120 TL lik %20 KDV li bir ürünü artık listede KDV dahil 144 bin değil, KDV dahil 120 bin TL (100+20(kdv)  alacağız\"; kart 08:03:19 UTC \"Hangi fiyatlar KDV dahil sayılsın?\" → \"CRM ve sizin fiyatlarınız\". Bu günden (görüntünün kendi saatiyle) sonraki CRM görüntüsünde CRM fiyatı ve Lokman'ın fiyatları (sabit karar, ayın istisnası) KDV dahildir; defter fiyatı kendi oranıyla KDV hariçe çevirir (araclar/crm_fiyat.kdv_ayir). Oranlar aynen D-76. Önceki görüntüler aynen."},
   "aciklama": "KDV oranı (D-76; Lokman 10 Kasım 2026 16:51:25 \"listeye Tam KDV kesilenler var Hiç KDV almayanlar var ve %10 KDV alanlar var\", 16:54 el yazısı liste, 16:55:54 \"Çelik Paneller %20, Shingle %20, Çatı İzolasynonu %20\"; 18:01:47 kart seçimi \"Hepsi %20, form aynen\": listede olmayan 8 kalem (yapıştırma pano, kapı panoları, tek kat panel, tavan H'ı, PVC omega kapak, PVC betopan H'ı, acil müdahale kapağı, baca) %20, CRM fiyatı KDV hariç, bayi formu bugünkü gibi; 18:05:03 \"hepsini kural olarak kayda geç\": çelik sohbetinin Lokman'a yazdığı yerler de kuraldır, `listede_adi_yok`; `okuma` Lokman'a gösterilmemiş eş anlamlılar). CRM fiyatı KDV hariçtir. Kalemin grubu sırayla: kalemin `kdv_grubu`'su, kodun `kodlar` kaydı, CRM satırının kategorisi (`kategoriler`). `kodlar`'da null: grubu bilinmiyor, kategoriden de alınmaz. Grubu bulunmayan ya da kodları iki ayrı orana düşen kalemin oranı yoktur; oran uydurulmaz, fiyatlı listede 'KDV oranı yok' yazar ve KDV dahil toplam eksik sayılır. Bayiye giden formun fiyatı (M-14) bu oranları okumaz.",
   "gruplar": {
    "Metal aksam": 0.2,
