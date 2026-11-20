@@ -163,6 +163,7 @@ def karar_ver(talep: Talep, k: Konusma, bayi: dict | None, katalog: Katalog, met
     k.cati_secimi, k.cati_metni, k.cati_adi = None, "", ""          # İE-42 (D-94): onaydan sonraki çatı setinde bu mesajın seçimi ve plan metninin başı
     k.cati_adimi_secimi, k.cati_adimi_metni = None, None      # İE-42 (hakem tur 1, bulgu 6, 8): onaydan sonraki çatı setinde bu mesajın seçimi
     k.cati_sorusu_notu = ""                         # İE-42: "Hangi çatı olsun?" sorusunda aynı mesajın uygulanmayan isteği
+    k.cati_cevabi_llm = talep.cati_cevabi           # İE-42 (20 Kasım 2026): onaydan önceki prefabrik çatı setinde LLM'in okuması
     k.cati_ek, k.cati_icerik, k.cati_on_not = False, [], ""   # İE-42 (hakem tur 2, 3): çatıyla aynı mesajdaki istek cümleleri; cevabın başı
     k.degismedi_tam = False                         # İE-42 (hakem tur 3, 4): bu mesajın her istek cümlesi D-86 notunda (planda zaten var)
     k.cati_fiyat_sorusu = False                     # İE-42 (hakem tur 4, D-E): çatı setinde seçimle birlikte fiyat, süre ya da teslim sorusu
@@ -6049,6 +6050,20 @@ def _prefabrik_cati_istegi(k: Konusma, katalog: Katalog, aday: dict, ts: dict, b
         adlar[a["kod"]] = {_cati_govdesi(w) for w in CO.norm(tip.replace("_", " ") + " " + str(a.get("cati_adi") or "")).split() if len(w) >= 4}
     tum_ad = set().union(*adlar.values())
     harfler = {c[len(taban["kod"]):].lower(): c for c in adlar if c != taban["kod"]}       # etiket harfi: k → PA06K
+    if set_acik and not bos_ise_yok:
+        # İE-42 (Lokman, kart 20 Kasım 2026 08:04:29 "Evet, LLM okusun"): onaydan önceki açık sette de seçimi LLM'in okuması verir
+        # ("cumbalı olanı istiyorum" → 2). Yalnız açık seçim okunur: ek istek, iptal, yeni talep ya da mesajda yazılı başka set kodu
+        # varsa ve kararsız ya da seçimsiz okumada bugünkü kural yolu (tahmin yok, K21).
+        llm = CC.okuma(getattr(k, "cati_cevabi_llm", None), st)
+        if llm is not None and llm["durum"] == "secti" and llm["kod"] in adlar and not llm["ek_istek"] \
+                and not (_iptal_sozu(metin) or _acik_yeni_talep(metin)) \
+                and not ({c for c in _secim_kodlari(metin, katalog) if c in adlar} - {llm["kod"]}):
+            secilen = llm["kod"]
+            ts["varyantlar"] = [v for v in ts.get("varyantlar") or [] if v.get("tur") != "cati_degistir"]
+            _seti_kapat(k, secilen)
+            _cati_secildi(k, secilen)
+            k.not_dus("kural", f"onaydan önceki çatı setinde LLM okuması: {secilen}")
+            return secilen
     olumsuz, uygulanamaz, cati_cumlesi, kodlar, ad_sozleri, yazili = False, [], False, set(), [], set()
     kalsin_adlari, okunan = [], set()                          # "cumba kalsın" adları yalnız kodla çelişki için; okunan: LLM isteğinin kıyası
     son_sira = str(max([int(a.get("sira") or 0) for a in st.get("adaylar") or []] or [0]))

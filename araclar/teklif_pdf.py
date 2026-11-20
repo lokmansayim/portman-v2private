@@ -186,9 +186,6 @@ def _kimlik(T: dict) -> str:
 def kdv_cumlesi(k: dict) -> str:
     """D-76: iç teklifin ilk sayfasında KDV cümlesi (CRM defteri). Tutar KDV hariçtir; KDV kalem grubunun oranıyla."""
     from araclar.fiyatla import kdv_yazi
-    if k.get("fiyata_dahil"):                                  # D-136: liste fiyatı KDV dahil, KDV içinden ayrıldı
-        return e(f"Tutar KDV hariçtir. Liste fiyatı KDV dahildir; KDV kalem grubunun oranıyla içinden ayrıldı: KDV {tl(k['kdv'])}, "
-                 f"KDV dahil {tl(k['dahil'])} ({kdv_yazi(k)}; D-76, {k['fiyata_dahil']}).")
     return e(f"Tutar KDV hariçtir. Kalem grubunun oranıyla KDV {tl(k['kdv'])}, KDV dahil {tl(k['dahil'])} ({kdv_yazi(k)}; D-76).")
 
 
@@ -209,7 +206,8 @@ def ilk_sayfa(T: dict, ie: dict, sec: dict, form: dict, tarih: str) -> str:
     k.append(_urun(f"{form['urun']} · {sec['ad']}", alan, o["toplam"], "—", o["toplam"]))
     k.append(f"<p class='soluk'>Tutar, Motor'un yükleme listesinde fiyatı olan {o['fiyatli']} satırın toplamıdır ({o['satir']} satır; Ek-1); "
              f"fiyatlar fiyat defterinden ({e(T['defter_surumu'])}). Alan Motor'un brüt alanı (verandalar dahil). "
-             + (kdv_cumlesi(o["kdv"]) if o.get("kdv") else "KDV tutarı yazılmadı: fiyat listelerinde KDV durumu belirtilmiyor.") + "</p>")
+             + (kdv_cumlesi(o["kdv"]) if o.get("kdv") else "" if o.get("fiyat_kdv_dahil")      # D-136: KDV hiç yazılmaz
+                else "KDV tutarı yazılmadı: fiyat listelerinde KDV durumu belirtilmiyor.") + "</p>")
     k.append("<h2>03 &nbsp; ÖDEME</h2><table>")
     for ad, v in T["kosullar"].items():
         k.append(satir(ad, v))
