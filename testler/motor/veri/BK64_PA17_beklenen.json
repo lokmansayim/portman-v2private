@@ -1,0 +1,495 @@
+{
+ "_aciklama": "BK-64 (D-139) hedef örnek: 91 m² 3+1 evde kenar yöntemli kırma (düz iskelet). Girdi testler/motor/veri/BK64_PA17_kirma.json. Yüzler 16 Kasım 2026 onaylı iskelet eskizi (Lokman 11:13:41 '91 m² ve 143 m² doğru'); makas planı kart 20 Kasım 2026 08:45:03 'Doğru, eskizdeki gibi'; aşık dizilimi ve 4 çatı paneli kart 08:57:26 'Doğru, eskizdeki gibi'. Yükleme listesi satırları: Lokman'ın onayını bekliyor (onaydan sonra bu satır karar ve saatle güncellenir).",
+ "yuzler": {
+  "güney": 17.51,
+  "güney 2": 4.98,
+  "kuzey": 22.49,
+  "batı": 29.35,
+  "doğu": 24.44,
+  "doğu 2": 4.91
+ },
+ "cati": {
+  "mahya_boy_cm": 261.0,
+  "kaplama_alani_m2": 109.138,
+  "plan_m2": 103.677,
+  "cati_paneli_cm": [
+   [
+    386.5,
+    512.0
+   ],
+   [
+    512.0,
+    637.5
+   ],
+   [
+    763.0,
+    888.5
+   ],
+   [
+    888.5,
+    1014.0
+   ]
+  ],
+  "dere_serbest_uc": 0
+ },
+ "makas": {
+  "ana": 6,
+  "cumba": 2,
+  "kisa": 12,
+  "capraz": 5,
+  "hatlar": [
+   [
+    135.5,
+    [
+     0.0,
+     386.5
+    ],
+    "cumba",
+    false
+   ],
+   [
+    261.0,
+    [
+     0.0,
+     345.5
+    ],
+    "cumba",
+    true
+   ],
+   [
+    386.5,
+    [
+     0.0,
+     888.5
+    ],
+    "ana",
+    false
+   ],
+   [
+    512.0,
+    [
+     0.0,
+     888.5
+    ],
+    "ana",
+    false
+   ],
+   [
+    637.5,
+    [
+     0.0,
+     888.5
+    ],
+    "ana",
+    false
+   ],
+   [
+    763.0,
+    [
+     0.0,
+     888.5
+    ],
+    "ana",
+    false
+   ],
+   [
+    888.5,
+    [
+     0.0,
+     888.5
+    ],
+    "ana",
+    false
+   ],
+   [
+    1014.0,
+    [
+     0.0,
+     888.5
+    ],
+    "ana",
+    false
+   ]
+  ],
+  "kisa_makaslar": [
+   [
+    220.0,
+    381.5,
+    196.5
+   ],
+   [
+    220.0,
+    507.0,
+    196.5
+   ],
+   [
+    220.0,
+    632.5,
+    196.5
+   ],
+   [
+    220.0,
+    722.0,
+    196.5
+   ],
+   [
+    0.0,
+    135.5,
+    165.5
+   ],
+   [
+    0.0,
+    251.0,
+    165.5
+   ],
+   [
+    1149.5,
+    135.5,
+    165.5
+   ],
+   [
+    1149.5,
+    256.0,
+    165.5
+   ],
+   [
+    1149.5,
+    381.5,
+    165.5
+   ],
+   [
+    1149.5,
+    507.0,
+    165.5
+   ],
+   [
+    1149.5,
+    632.5,
+    165.5
+   ],
+   [
+    1149.5,
+    753.0,
+    165.5
+   ]
+  ],
+  "capraz_makaslar": [
+   [
+    220.0,
+    277.89
+   ],
+   [
+    0.0,
+    234.05
+   ],
+   [
+    0.0,
+    234.05
+   ],
+   [
+    1149.5,
+    234.05
+   ],
+   [
+    1149.5,
+    234.05
+   ]
+  ]
+ },
+ "liste_satirlari": [
+  {
+   "grup": "Metal aksam",
+   "kalem": "10'luk köşe direği 100 × 100",
+   "olcu": "100 × 100 × 2500",
+   "adet": 6
+  },
+  {
+   "grup": "Metal aksam",
+   "kalem": "6'lık köşe direği 60 × 60",
+   "olcu": "60 × 60 × 2500",
+   "adet": 2
+  },
+  {
+   "grup": "Metal aksam",
+   "kalem": "Köşebent",
+   "olcu": "L 2500",
+   "adet": 7
+  },
+  {
+   "grup": "Metal aksam",
+   "kalem": "Özel kutu profil (kolon) 100 × 100",
+   "olcu": "L 2500",
+   "adet": 1
+  },
+  {
+   "grup": "Metal aksam",
+   "kalem": "Kutu profil (kiriş) 100 × 100",
+   "olcu": "L 4920",
+   "adet": 1
+  },
+  {
+   "grup": "Metal aksam",
+   "kalem": "Kutu profil (kiriş) 100 × 100",
+   "olcu": "L 1415",
+   "adet": 1
+  },
+  {
+   "grup": "Metal aksam",
+   "kalem": "Kutu profil (kiriş) 100 × 100",
+   "olcu": "L 1255",
+   "adet": 1
+  },
+  {
+   "grup": "Metal aksam",
+   "kalem": "H 100 (dış pano eki)",
+   "olcu": "100 × 100 × 2500",
+   "adet": 19
+  },
+  {
+   "grup": "Metal aksam",
+   "kalem": "H standart 60 (iç pano eki)",
+   "olcu": "60 × 60 × 2500",
+   "adet": 8
+  },
+  {
+   "grup": "Metal aksam",
+   "kalem": "3'lü H 100 × 100 × 60 (dış duvar T'si)",
+   "olcu": "L 2500",
+   "adet": 4
+  },
+  {
+   "grup": "Metal aksam",
+   "kalem": "3'lü H standart 60 (iç T)",
+   "olcu": "L 2500",
+   "adet": 3
+  },
+  {
+   "grup": "Metal aksam",
+   "kalem": "Pencere kör kasası (120×180)",
+   "olcu": "1200 × 1800",
+   "adet": 4
+  },
+  {
+   "grup": "Metal aksam",
+   "kalem": "Çektirme U'su 100",
+   "olcu": "100 × 2440",
+   "adet": 2
+  },
+  {
+   "grup": "Metal aksam",
+   "kalem": "100'lük pencere U'su H geçen",
+   "olcu": "L 2500",
+   "adet": 1
+  },
+  {
+   "grup": "Metal aksam",
+   "kalem": "Çektirme U'su 60",
+   "olcu": "60 × 2440",
+   "adet": 1
+  },
+  {
+   "grup": "Metal aksam",
+   "kalem": "60'lık duvar omegası (asma dizme tavan)",
+   "olcu": "60 × 3750",
+   "adet": 30
+  },
+  {
+   "grup": "Metal aksam",
+   "kalem": "100'lük duvar omegası",
+   "olcu": "100 × 2500",
+   "adet": 4
+  },
+  {
+   "grup": "Metal aksam",
+   "kalem": "100'lük saçak omegası",
+   "olcu": "100 × 2500",
+   "adet": 18
+  },
+  {
+   "grup": "Metal aksam",
+   "kalem": "Saçak sacı (30'luk, 3'ü menfezli)",
+   "olcu": "300 × 2500",
+   "adet": 19
+  },
+  {
+   "grup": "Metal aksam",
+   "kalem": "Alın sacı (30'luk)",
+   "olcu": "300 × 2500",
+   "adet": 0
+  },
+  {
+   "grup": "Metal aksam",
+   "kalem": "Baş makas omegası",
+   "olcu": "L 2500",
+   "adet": 0
+  },
+  {
+   "grup": "Metal aksam",
+   "kalem": "Baş makas Z'si",
+   "olcu": "L 2800",
+   "adet": 0
+  },
+  {
+   "grup": "Metal aksam",
+   "kalem": "Baş makas betopanı",
+   "olcu": "1250 × 2500",
+   "adet": 0
+  },
+  {
+   "grup": "Metal aksam",
+   "kalem": "100'lük alt çerçeve",
+   "olcu": "100 × 3750",
+   "adet": 11
+  },
+  {
+   "grup": "Metal aksam",
+   "kalem": "60'lık alt çerçeve",
+   "olcu": "60 × 3750",
+   "adet": 6
+  },
+  {
+   "grup": "Makas",
+   "kalem": "Makas (ana, mahyaya dik) · ana çatı",
+   "olcu": "açıklık 8885",
+   "adet": 6
+  },
+  {
+   "grup": "Makas",
+   "kalem": "Makas (cumba, vadide biter) · ana çatı",
+   "olcu": "açıklık 3455",
+   "adet": 1
+  },
+  {
+   "grup": "Makas",
+   "kalem": "Makas (cumba) · ana çatı",
+   "olcu": "açıklık 3865",
+   "adet": 1
+  },
+  {
+   "grup": "Makas",
+   "kalem": "Makas (kısa, kırma ucu) · ana çatı",
+   "olcu": "L 1655",
+   "adet": 8
+  },
+  {
+   "grup": "Makas",
+   "kalem": "Makas (kısa, kırma ucu) · ana çatı",
+   "olcu": "L 1965",
+   "adet": 4
+  },
+  {
+   "grup": "Makas",
+   "kalem": "Makas (çapraz, kırma) · ana çatı",
+   "olcu": "L 2340",
+   "adet": 4
+  },
+  {
+   "grup": "Makas",
+   "kalem": "Makas (çapraz, kırma) · ana çatı",
+   "olcu": "L 2779",
+   "adet": 1
+  },
+  {
+   "grup": "Makas",
+   "kalem": "Çatı paneli (makas arası) · ana çatı",
+   "olcu": "—",
+   "adet": 4
+  },
+  {
+   "grup": "Makas",
+   "kalem": "Aşık",
+   "olcu": "L 4200",
+   "adet": 52
+  },
+  {
+   "grup": "Çatı",
+   "kalem": "Trapez sac · ana çatı",
+   "olcu": "L 5050",
+   "adet": 22
+  },
+  {
+   "grup": "Çatı",
+   "kalem": "Trapez sac · ana çatı",
+   "olcu": "L 2410",
+   "adet": 7
+  },
+  {
+   "grup": "Çatı",
+   "kalem": "Trapez sac mahyası",
+   "olcu": "L 1000",
+   "adet": 36
+  },
+  {
+   "grup": "Çatı",
+   "kalem": "Ters mahya (dere içi)",
+   "olcu": "L 2800",
+   "adet": 2
+  },
+  {
+   "grup": "Çatı",
+   "kalem": "Ters mahya kenar kutusu",
+   "olcu": "L 21 × 40 × 21 × 2800",
+   "adet": 4
+  },
+  {
+   "grup": "Çatı",
+   "kalem": "Mahya bandı",
+   "olcu": "rulo 10 m",
+   "adet": 4
+  },
+  {
+   "grup": "Dere",
+   "kalem": "Metal dere",
+   "olcu": "L 4000",
+   "adet": 12
+  },
+  {
+   "grup": "Dere",
+   "kalem": "Dere kelepçesi",
+   "olcu": "adet",
+   "adet": 96
+  },
+  {
+   "grup": "Dere",
+   "kalem": "Metal dere inişi aparatı",
+   "olcu": "adet",
+   "adet": 7
+  },
+  {
+   "grup": "Dere",
+   "kalem": "70 mm PVC dere iniş borusu",
+   "olcu": "L 2000",
+   "adet": 7
+  },
+  {
+   "grup": "Dere",
+   "kalem": "70 mm PVC dere iniş borusu",
+   "olcu": "L 500",
+   "adet": 7
+  },
+  {
+   "grup": "Dere",
+   "kalem": "Açık dirsek",
+   "olcu": "adet",
+   "adet": 14
+  },
+  {
+   "grup": "Dere",
+   "kalem": "Kapalı dirsek",
+   "olcu": "adet",
+   "adet": 7
+  },
+  {
+   "grup": "Dere",
+   "kalem": "PVC iniş kelepçesi",
+   "olcu": "adet",
+   "adet": 14
+  },
+  {
+   "grup": "Dere",
+   "kalem": "Dere kapağı",
+   "olcu": "adet",
+   "adet": 0
+  }
+ ]
+}
