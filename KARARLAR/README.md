@@ -148,6 +148,7 @@ Biçim: karar · gerekçe · reddedilen seçenekler · geri alma yolu · kim ve 
 | [D-129](D-129.md) | Gövdedeki verandanın (ana çatının örttüğü açık mahal) açık kenarında ara kolon varsa kiriş ara kolonlarda bölünür, her parça kolonun yüzünden yüzüne; ara kolonlu her eve (110 m² L 9940 → L 3230 × 2 + L 3280; 76 m², 140 m², 142 m², 83 m² yan verandalı ve bir deneme girdisi de değişir); ara kolonsuz kenar aynen (`prefabrik_liste._kenar_parcalari`; BK-59) | 19.11 (Lokman kart 21:39:45 "Eskizdeki gibi, yüzden yüze"; kart 21:45:21 "Ara kolonlu her eve") |
 | [D-131](D-131.md) | Ana çatının örttüğü verandada dörtomuzun (iki uçlu kırma) ucu duvarsızsa ilk ana makas uca en yakın gövde duvarının üstünde (D-114 gibi), kısa makaslar karşı uç duvarının pano eklerinde; 120 m² ana 9, kısa 4 + 4, çapraz 4 (BK-59) | 19.11 (Lokman 21:49:23 "çapraz makasları tam kırılma noktasını geçmiyorsa … bina duvarının üzerine al"; kart 21:59:00 "Eskizdeki gibi") |
 | [D-132](D-132.md) | Disk arşivi Parti 2'nin dört evi (45, 75, 76, 80 m²) Motor'un aks düzeniyle havuzda, PA-45 … PA-48; çatı paftadaki gibi (45 beşik, 75 dörtomuz, 76 ön cumba, 80 verandada sundurma %10); listede üç bilinen fark (75 makas sayısı, 76 cumba baş makası, 45 tepe); 110 ve 120 m² verandayı örten ana çatının Motor bakımını bekler; asıl proje (D-103) | 19.11 (Lokman, kart 21:31:40 "Altı ev girsin"; kart 21:39:32 "Dördü girsin, ikisi beklesin") |
+| [D-135](D-135.md) | Çapraz cumbalı her evde ana çatının aşık sıraları cumbanın arkasında kesilmez, ana yüzün iki saçak ucu arasında baştan sona sürer; liste, kart modeli, montaj paftası ve rehber birlikte (44 evde aşık +2 … +6; `cati_prefabrik.ana_karkasi`; BK-62) | 20.11 (Lokman 07:12:04 "ana makasdaki aşıklar cumbanın arkasına gelince kesilmez devam eder"; kart 07:20:08 "Eskizdeki gibi, çapraz cumbalı her eve") |
 
 ## Numara defteri (14 Ekim 2026, BK-08; CIO planı › Görev 3)
 
@@ -274,7 +275,10 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | D | D-130 | (tavan kirişi sohbeti: verandada her açık kenara kiriş) | alındı (19.11) |
 | D | D-131 | dörtomuzun duvarsız ucunda ilk ana makas gövdenin duvarında (BK-59; Lokman 19.11 21:49:23, kart 21:59:00) | yazıldı (19.11; `claude/project-thread-61wl66`) |
 | D | D-132 | disk arşivi Parti 2'nin dört evi havuzda, PA-45 … PA-48 (İE-43 PR-7; Lokman 19.11 kartları 21:31:40, 21:39:32) | yazıldı (19.11; disk arşivi sohbeti, `claude/project-thread-wc6dw0`) |
-| D | **D-133** | — | **sıradaki boş** |
+| D | D-133 | (çatı pafta farkları sohbeti, BK-61, PC-48) | alındı (20.11) |
+| D | D-134 | (disk arşivi sohbeti: PA-49, PA-50) | alındı (20.11) |
+| D | D-135 | çapraz cumbada ana çatının aşıkları cumbanın arkasında kesilmez (BK-62; Lokman 20.11 07:12:04, kart 07:20:08) | yazıldı (20.11; `claude/project-thread-4mjyg0`) |
+| D | **D-136** | — | **sıradaki boş** |
 | İE | İE-01–İE-08 | bu depo (`main`) | yazıldı |
 | İE | İE-09 | model atölyesi: kontrollü model üretimi ve banka hattı (Görev 6e; pano 30; P6001 güncellemesi kapsam dışı) | alındı (16.10; `claude/gorev-6e-model-atolyesi-rnhtcp`; PR-1 banka hattı 29.10, `claude/project-thread-rhjgzv`) |
 | İE | İE-10, İE-11, İE-12 | prefabrik hattı (PR #12, PR #14, `ie-12-prefabrik-bayi-paftasi`) | `main`'e BK-12 ile (PR-1: motor ve bayi paftası; liste ve mühür kıyası sonraki PR'larda) |
@@ -353,7 +357,9 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | BK | BK-58 | Pano Motor'unda verandanın tavan kirişi: açık kenardaki kolondan gövdeye kutu profil, liste satırı ve saha montaj planı (D-127, PC-47; `claude/project-thread-bvls4f`) | yazıldı (19.11; defter 19:25) |
 | BK | BK-59 | Yükleme listesinde gövdedeki verandanın ara kolonlu açık kenarı: `prefabrik_liste._kenar_parcalari` (D-129; `claude/project-thread-61wl66`) | yazıldı (19.11) |
 | BK | BK-60 | (tavan kirişi sohbeti: verandada her açık kenara kiriş, D-130) | alındı (19.11) |
-| BK | **BK-61** | — | **sıradaki boş** |
+| BK | BK-61 | (çatı pafta farkları sohbeti, D-133) | alındı (20.11) |
+| BK | BK-62 | Çapraz cumbada ana çatının aşık sıraları cumbanın arkasında baştan sona: `cati_prefabrik.ana_karkasi` (D-135; `claude/project-thread-4mjyg0`) | yazıldı (20.11) |
+| BK | **BK-63** | — | **sıradaki boş** |
 
 ## 27 Eylülde Lokman'ın verdiği kararlar
 
