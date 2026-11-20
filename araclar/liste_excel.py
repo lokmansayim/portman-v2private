@@ -183,7 +183,9 @@ def liste_sayfasi(ws, R: dict, baslik: str, aciklama: str, renk=None, kaynak_sut
     n = 1 + len(sutun)
     i_bf, i_tut, i_not = (sutun.index(x) + 2 for x in ("Birim fiyat", "Tutar", "Not"))    # sayfadaki sütun (1'den; A Kalem)
     ws.append([baslik]); ws["A1"].font = Font(bold=True, size=13)
-    ws.append([f"{aciklama} {FORMUL_ACIKLAMA}" if formullu else aciklama]); ws["A2"].alignment = Alignment(wrap_text=True, vertical="top")
+    kdvsiz = bool(ozet.get("fiyat_kdv_dahil"))              # D-136: fiyat KDV dahil, KDV hiç yazılmaz
+    acik = FORMUL_ACIKLAMA.replace(" Fiyatı boş satıra fiyat yazarsanız KDV %'sini de yazın.", "") if kdvsiz else FORMUL_ACIKLAMA
+    ws.append([f"{aciklama} {acik}" if formullu else aciklama]); ws["A2"].alignment = Alignment(wrap_text=True, vertical="top")
     ws.merge_cells(start_row=2, start_column=1, end_row=2, end_column=n); ws.row_dimensions[2].height = 48 if formullu else 32
     gruplar: dict[str, list[dict]] = {}                     # grup ilk göründüğü sırada, grup içinde Motor'un sırası
     for s in satirlar:
@@ -270,8 +272,9 @@ def liste_sayfasi(ws, R: dict, baslik: str, aciklama: str, renk=None, kaynak_sut
         g, k = adres["genel"], H(i_tut)
         adres["kar"] = k
         satir = [(KAR, 0, "Kâr marjını bu sarı hücreye yazın (ör. %25). Kâr maliyetin üstüne eklenir."),
-                 ("Kâr (KDV hariç toplam × kâr marjı)", f"=ROUND({g}*{k},2)", ""),
-                 ("TEKLİF TOPLAMI · kâr dahil, KDV hariç", f"={g}+{_hucre(i_tut, ws.max_row + 2)}", "")]
+                 ("Kâr (toplam × kâr marjı)" if kdvsiz else "Kâr (KDV hariç toplam × kâr marjı)", f"=ROUND({g}*{k},2)", ""),
+                 ("TEKLİF TOPLAMI · kâr dahil" if kdvsiz else "TEKLİF TOPLAMI · kâr dahil, KDV hariç",
+                  f"={g}+{_hucre(i_tut, ws.max_row + 2)}", "")]
         if K:
             satir += [("KDV · kâr dahil", f"=ROUND({adres['kdv']}*(1+{k}),2)", "KDV aynı oranla büyür"),
                       ("TEKLİF TOPLAMI · kâr dahil, KDV dahil", f"={_hucre(i_tut, ws.max_row + 3)}+{_hucre(i_tut, ws.max_row + 4)}", "")]
