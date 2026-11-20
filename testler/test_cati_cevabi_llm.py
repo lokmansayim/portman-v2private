@@ -174,3 +174,45 @@ def test_havuz_kahini(pref, celik):
         if not ok:
             kotu.append((x["m"], x["durum"], c))
     assert not kotu, kotu
+
+
+# --- onaydan önceki prefabrik çatı seti (Lokman, kart 20 Kasım 2026 08:04:29 "Evet, LLM okusun"; WhatsApp denetimi v2026.11.20a Ç2) ---
+
+@pytest.fixture(scope="module")
+def on_set(tmp_path_factory):
+    """PA-08 r01 → "çatı cumbalı olsun" → onaydan önce açılan çatı seti (1. PA-08 Kırma, 2. PA-08-C)."""
+    s = Sohbet(tmp_path_factory.mktemp("onset"), kabul={"PA08", "PA08C"})
+    assert s.yaz("PA-08", katalog_kodu="PA-08", yapi_turu="prefabrik").revizyon == 1
+    k = s.yaz("çatı cumbalı olsun", niyet="revizyon")
+    st = s.k.d["secenek_seti"]
+    assert k.eylem == "secenek" and st["tur"] == "cati_varyanti" and not s.k.d.get("cati_adimi"), k.mesaj
+    assert [a["kod"] for a in st["adaylar"]] == ["PA08", "PA08C"]
+    return s
+
+
+def test_on_set_baglam(on_set):
+    b = CC.baglam(on_set.k, "cumbalı olanı istiyorum")
+    assert b.startswith("çatı seti açık: bayiye şu çatılar soruldu: 1. PA-08 (Kırma) — evin kendi çatısı | 2. PA-08-C")
+
+
+def test_on_set_llm_secimi(on_set):
+    assert _yaz(on_set, "cumbalı olanı istiyorum", niyet="revizyon", **_cc("secti", 2))[1] == "R2:PA08C"   # denetim Ç2
+    assert _yaz(on_set, "ikincisi olsun", niyet="revizyon", **_cc("secti", 2))[1] == "R2:PA08C"           # denetim Ç3
+    # evin kendi çatısı: plan zaten o çatıyla, "1" yazılmış gibi (D-86, plan değişmedi)
+    assert _yaz(on_set, "kırma kalsın", niyet="revizyon", **_cc("secti", 1))[1] == _yaz(on_set, "1")[1] == "cevapla:plan değişmedi"
+
+
+def test_on_set_llm_kural_yoluna_doner(on_set):
+    # açık seçim dışındaki her okuma bugünkü kural yolu: soru
+    soru = lambda m, **a: _yaz(on_set, m, niyet="revizyon", **a)[1].startswith(("SORU", "sor:"))   # noqa: E731
+    assert soru("cumbalı olanı istiyorum")                                                    # alan yok (LLM hatası)
+    assert soru("cumbalı mı kırma mı bilemedik", **_cc("kararsiz"))
+    assert soru("cumbalı olanı istiyorum", **_cc("secim_yok"))
+    # mesajda yazılı başka set kodu: LLM'in okuması alınmaz, kural yolu yazılı kodu okur (K18)
+    assert _yaz(on_set, "PA-08 olsun", **_cc("secti", 2))[1] == _yaz(on_set, "PA-08 olsun")[1] == "cevapla:plan değişmedi"
+    assert soru("cumbalı olsun, eğim yüzde 20 olsun", **_cc("secti", 2, ek=True))             # ek istek: kural yolu
+
+
+def test_on_set_celik_bagami_yok(celik):
+    # onaydan sonraki çelik seti aynen; onaydan önceki çelik seti (İE-25) bu işin dışında
+    assert CC.baglam(celik.k, "K olsun").startswith("çatı seti açık")

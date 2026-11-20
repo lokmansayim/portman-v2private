@@ -150,8 +150,9 @@ Biçim: karar · gerekçe · reddedilen seçenekler · geri alma yolu · kim ve 
 | [D-131](D-131.md) | Ana çatının örttüğü verandada dörtomuzun (iki uçlu kırma) ucu duvarsızsa ilk ana makas uca en yakın gövde duvarının üstünde (D-114 gibi), kısa makaslar karşı uç duvarının pano eklerinde; 120 m² ana 9, kısa 4 + 4, çapraz 4 (BK-59) | 19.11 (Lokman 21:49:23 "çapraz makasları tam kırılma noktasını geçmiyorsa … bina duvarının üzerine al"; kart 21:59:00 "Eskizdeki gibi") |
 | [D-132](D-132.md) | Disk arşivi Parti 2'nin dört evi (45, 75, 76, 80 m²) Motor'un aks düzeniyle havuzda, PA-45 … PA-48; çatı paftadaki gibi (45 beşik, 75 dörtomuz, 76 ön cumba, 80 verandada sundurma %10); listede üç bilinen fark (75 makas sayısı, 76 cumba baş makası, 45 tepe); 110 ve 120 m² verandayı örten ana çatının Motor bakımını bekler; asıl proje (D-103) | 19.11 (Lokman, kart 21:31:40 "Altı ev girsin"; kart 21:39:32 "Dördü girsin, ikisi beklesin") |
 | [D-134](D-134.md) | Disk arşivi Parti 2'nin bekleyen iki evi (110, 120 m²) havuzda, PA-49, PA-50: paftanın makas planında ana çatı ön verandayı da örter, veranda gövdenin açık mahali (okuyucu `verandayi_govdeye_al`, ara kolonlar paftadaki yerinde); 110 beşik, 120 dörtomuz (D-131); listede bilinen farklar (kiriş boyu, 120 makas sayısı); D-132 kartının koşuluyla (Motor listeler: D-129, D-130, D-131) | 19.11 (Lokman, kart 21:39:32 "Dördü girsin, ikisi beklesin") |
-| [D-136](D-136.md) | CRM fiyatı ve Lokman'ın fiyatları (istisna dahil) KDV dahil: KDV hariç = fiyat ÷ (1 + oran), KDV dahil toplam listedeki fiyatların toplamı (120 TL = 100 + 20); oranlar D-76 aynen; 20 Kasım 2026 ve sonraki CRM görüntüsünde (`crm_esleme.json › kdv.fiyata_dahil`), öncekiler aynen (`fiyatla`, `crm_fiyat.fiyata_dahil_mi`) | 20.11 (Lokman 07:58:30 "artık fiyatlara ekli yani yeniden KDV hesabı yapmayacağız …"; kart 08:03:19 "CRM ve sizin fiyatlarınız") |
+| [D-136](D-136.md) | CRM fiyatı ve Lokman'ın fiyatları (istisna dahil) KDV dahil: fiyatlı listede ve teklifte fiyat CRM'deki gibi, KDV ayrılmaz, eklenmez, yazılmaz; toplam CRM fiyatlarının toplamı (120 TL = 120 TL); 20 Kasım 2026 ve sonraki CRM görüntüsünde (`crm_esleme.json › kdv.fiyata_dahil`), öncekiler aynen | 20.11 (Lokman 07:58:30 "artık fiyatlara ekli …"; kart 08:03:19 "CRM ve sizin fiyatlarınız"; 09:10:13 "sen KDV olayını karıştırma CRM'den ne çektiysen onu gir"; kart 09:10:41 "KDV hiç yazılmasın") |
 | [D-137](D-137.md) | Yükleme listesinde kiriş alan veranda kenarı ön onay çiziminde de profil (kiriş), gövdenin dış çizgisinde olmasa da; liste ve çizim kenarı aynı işlevden okur (`prefabrik_liste.kirisli_acik_kenarlar`); 80 m² 3+1'in 60 cm'lik sol yanı ve 91 m² 3+1'in 502 cm'lik önü; D-58'in aks ve ölçü ekleri yalnız `girinti_kirisi` anahtarıyla (BK-63, PC-49) | 20.11 (Lokman kart 08:04:02 "Eskizdeki gibi, iki evde") |
+| [D-138](D-138.md) | "Evi kendin kur" montaj oyunu rehber.portatifev.com/oyun/'da, açılış sayfasında oyun kartı; oyun rehberin main'deki sayfasından ve aynı koşunun GLB'sinden (kapı açılışı ve cam yünü serme dahil), ipuçları `oyun_ipuclari.json`'da; altı rehber canlı paketten sabit (İE-45) | 20.11 (Lokman 08:52:07 "bu oyunu çok beğendim VPS 'da yayına alabilir misin?"; kart 08:54:40 "Evet, açılışa kart eklensin") |
 
 ## Numara defteri (14 Ekim 2026, BK-08; CIO planı › Görev 3)
 
@@ -283,7 +284,9 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | D | D-135 | (başka sohbet: çapraz cumbada aşık cumbanın arkasında kesilmez; BK-62, PR #280) | alındı (20.11) |
 | D | D-136 | (başka sohbet: CRM fiyatı KDV dahil; 76 m² teklifi) | yazıldı (20.11; `main`'e girdi, #281) |
 | D | D-137 | listede kirişi olan veranda kenarı ön onay çiziminde de kiriş (BK-63, PC-49; Lokman 20.11 kart 08:04:02 "Eskizdeki gibi, iki evde") | yazıldı (20.11; tavan kirişi sohbeti, `claude/project-thread-bvls4f`) |
-| D | **D-138** | — | **sıradaki boş** |
+| D | D-138 | "Evi kendin kur" montaj oyunu rehber sitesinde /oyun/, açılışta oyun kartı (İE-45; Lokman 20.11 08:52:07, kart 08:54:40 "Evet, açılışa kart eklensin") | yazıldı (20.11; Higgsfield sohbeti, `claude/project-thread-r57x4r`) |
+| D | D-139 | (başka sohbet: girintili evde kırma çatı; BK-64) | alındı (20.11) |
+| D | **D-140** | — | **sıradaki boş** |
 | İE | İE-01–İE-08 | bu depo (`main`) | yazıldı |
 | İE | İE-09 | model atölyesi: kontrollü model üretimi ve banka hattı (Görev 6e; pano 30; P6001 güncellemesi kapsam dışı) | alındı (16.10; `claude/gorev-6e-model-atolyesi-rnhtcp`; PR-1 banka hattı 29.10, `claude/project-thread-rhjgzv`) |
 | İE | İE-10, İE-11, İE-12 | prefabrik hattı (PR #12, PR #14, `ie-12-prefabrik-bayi-paftasi`) | `main`'e BK-12 ile (PR-1: motor ve bayi paftası; liste ve mühür kıyası sonraki PR'larda) |
@@ -320,7 +323,8 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | İE | İE-42 | çatı plan onayından sonra (D-94; pano 41): onayda çatı seti, seçilen çatıyla r02, çelikte teknik kontrol çatıdan sonra; M-08 yeniden mühürlenir | alındı (14.11; `claude/project-thread-91gav7`) |
 | İE | İE-43 | disk arşivi: adsız dizin ve SHA-256 mührü (`araclar/hdd_dizin.py`, `testler/hdd/`; D-99) | alındı (15.11; `claude/project-thread-wc6dw0`) |
 | İE | İE-44 | havuz evlerine toplu çatı seçenekleri: Motor kuralla çizer (K kırma, C beşik + salonda cumba, B beşik; D-83 ailesi), havuz denetimi süzer (D-112), Lokman tek sayfada onaylar (Lokman 16.11 08:21:45 kartı "Toplu çizilsin, ben onaylayayım") | alındı (16.11; `claude/project-thread-co84co`) |
-| İE | **İE-45** | — | **sıradaki boş** |
+| İE | İE-45 | montaj oyunu "Evi kendin kur" rehber sitesinde: oyun rehberin main'deki sayfasından ve GLB'sinden, açılışta kart (D-138) | alındı (20.11; Higgsfield sohbeti, `claude/project-thread-r57x4r`) |
+| İE | **İE-46** | — | **sıradaki boş** |
 | BK | BK-01–BK-08 | bu depo; BK-08 8a sonrası temizlik (`bk-08-8a-temizlik`) | yazıldı |
 | BK | BK-09 | metin ve çizim düzeltmeleri, G1 (`bk-09-metin-cizim`, `bk-09-cizim-g1`) | alındı (14.10) |
 | BK | BK-10 | 8b sonrası küçük işler (DXF `.txt` notu, geç gelen Excel, panelden Excel, plan değişince kontrol kapanır, D-19 24 saat kuralı, düğmeli mesajda satır sonları, `YENI-` kodu ve ilk çelik planda LLM özeti bayiye gitmez, komut freni metni; pano satır 15; çelikte kapı değişikliği kapsam dışı) | alındı (30.10; `claude/project-thread-h64uz2`) |

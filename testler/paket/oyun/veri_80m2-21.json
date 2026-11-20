@@ -1,0 +1,408 @@
+{
+ "ad": "80 m² 2+1",
+ "rehber": "80m2-21",
+ "genel": {
+  "t": [
+   0.0,
+   1.4,
+   0.3
+  ],
+  "az": 0.62,
+  "el": 0.36,
+  "d": 19.5
+ },
+ "cati_adim": [
+  10,
+  11,
+  12,
+  13,
+  14,
+  15,
+  16,
+  17,
+  18,
+  19,
+  20
+ ],
+ "kapak_adim": 13,
+ "adimlar": [
+  {
+   "i": 1,
+   "kart": "Alt çerçeve",
+   "oda": false,
+   "drop": 0.3,
+   "ipucu": "Panolar alt çerçeveye oturur: önce 100'lük ve 60'lık alt çerçeve serilir.",
+   "bilgi": "Panolar alt çerçeveye oturur: önce 100'lük ve 60'lık alt çerçeve serilir.",
+   "kamera": {
+    "t": [
+     0.0,
+     0.0,
+     0.3
+    ],
+    "az": 0.45,
+    "el": 0.95,
+    "d": 18
+   }
+  },
+  {
+   "i": 2,
+   "kart": "Yatak odası 1 duvarları",
+   "oda": true,
+   "drop": 1.4,
+   "ipucu": "Alt çerçeve hazır: duvar panoları dizilir. Dizilim yatak odası 1 ile başlar.",
+   "bilgi": "Dizilim bu odanın arka sol köşesinden başlar.",
+   "kamera": {
+    "t": [
+     -2.8137,
+     0.7,
+     -2.525
+    ],
+    "az": 0.5,
+    "el": 0.9,
+    "d": 14
+   }
+  },
+  {
+   "i": 3,
+   "kart": "Banyo duvarları",
+   "oda": true,
+   "drop": 1.4,
+   "ipucu": "Önce gövdenin duvarları biter: panolar oda oda dikilir.",
+   "bilgi": "Bu odayla 2 dış pano (100'lük, 1 pencereli), 4 iç pano (60'lık) kurulur; 1 pano kapılı.",
+   "kamera": {
+    "t": [
+     -0.3137,
+     0.7,
+     -3.1525
+    ],
+    "az": 0.5,
+    "el": 0.9,
+    "d": 14
+   }
+  },
+  {
+   "i": 4,
+   "kart": "Yatak odası 2 duvarları",
+   "oda": true,
+   "drop": 1.4,
+   "ipucu": "Önce gövdenin duvarları biter: panolar oda oda dikilir.",
+   "bilgi": "Bu odayla 6 dış pano (100'lük, 1 pencereli), 4 iç pano (60'lık) kurulur; 1 pano kapılı.",
+   "kamera": {
+    "t": [
+     2.5,
+     0.7,
+     -2.525
+    ],
+    "az": 0.5,
+    "el": 0.9,
+    "d": 14
+   }
+  },
+  {
+   "i": 5,
+   "kart": "Mutfak duvarları",
+   "oda": true,
+   "drop": 1.4,
+   "ipucu": "Önce gövdenin duvarları biter: panolar oda oda dikilir.",
+   "bilgi": "Bu odayla 6 dış pano (100'lük, 1 pencereli), 3 iç pano (60'lık) kurulur; 1 pano kapılı.",
+   "kamera": {
+    "t": [
+     2.5,
+     0.7,
+     0.9312
+    ],
+    "az": 0.5,
+    "el": 0.9,
+    "d": 14
+   }
+  },
+  {
+   "i": 6,
+   "kart": "Hol duvarları",
+   "oda": true,
+   "drop": 1.4,
+   "ipucu": "Önce gövdenin duvarları biter: panolar oda oda dikilir.",
+   "bilgi": "Bu odayla 1 dış pano (100'lük), 3 iç pano (60'lık) kurulur; 2 pano kapılı.",
+   "kamera": {
+    "t": [
+     -0.1158,
+     0.7,
+     0.1058
+    ],
+    "az": 0.5,
+    "el": 0.9,
+    "d": 14
+   }
+  },
+  {
+   "i": 7,
+   "kart": "Salon duvarları",
+   "oda": true,
+   "drop": 1.4,
+   "ipucu": "Önce gövdenin duvarları biter: panolar oda oda dikilir.",
+   "bilgi": "Bu odayla 9 dış pano (100'lük, 2 pencereli), 1 iç pano (60'lık) kurulur.",
+   "kamera": {
+    "t": [
+     -2.5039,
+     0.7,
+     1.8943
+    ],
+    "az": 0.5,
+    "el": 0.9,
+    "d": 14
+   }
+  },
+  {
+   "i": 8,
+   "kart": "Veranda",
+   "oda": false,
+   "drop": 1.2,
+   "ipucu": "Veranda kolon ve kirişleri duvarın yerini tutar: makaslardan önce dikilir.",
+   "bilgi": "Veranda kolon ve kirişleri duvarın yerini tutar: makaslardan önce dikilir.",
+   "kamera": {
+    "t": [
+     1.9325,
+     1.5,
+     3.3387
+    ],
+    "az": -2.3,
+    "el": 0.5,
+    "d": 11
+   }
+  },
+  {
+   "i": 9,
+   "kart": "Saçak, duvar ve baş makas omegası",
+   "oda": false,
+   "drop": 0.6,
+   "ipucu": "Makaslar duvara doğrudan oturmaz: önce duvar üstüne omega geçirilir.",
+   "bilgi": "Makaslar duvara doğrudan oturmaz: önce duvar üstüne omega geçirilir.",
+   "kamera": {
+    "t": [
+     0.0,
+     2.3,
+     0.3
+    ],
+    "az": 0.62,
+    "el": 0.55,
+    "d": 15.5
+   }
+  },
+  {
+   "i": 10,
+   "kart": "Ana çatı ve cumba makasları",
+   "oda": false,
+   "drop": 1.4,
+   "ipucu": "Omegalar yerinde: sırada ana çatı ve cumba makasları var.",
+   "bilgi": "Omegalar yerinde: sırada ana çatı ve cumba makasları var.",
+   "kamera": {
+    "t": [
+     0.0,
+     2.6,
+     0.0
+    ],
+    "az": 0.95,
+    "el": 0.5,
+    "d": 18
+   }
+  },
+  {
+   "i": 11,
+   "kart": "Baş makas betopanı ve Z",
+   "oda": false,
+   "drop": 0.8,
+   "ipucu": "Kalkanın dış yüzü betopanla kapatılır: makaslardan hemen sonra.",
+   "bilgi": "Kalkanın dış yüzü betopanla kapatılır: makaslardan hemen sonra.",
+   "kamera": {
+    "t": [
+     0.0,
+     3.0,
+     4.4925
+    ],
+    "az": 0.4,
+    "el": 0.2,
+    "d": 15
+   }
+  },
+  {
+   "i": 12,
+   "kart": "Tavan omegaları ve H'lar",
+   "oda": false,
+   "drop": 0.5,
+   "ipucu": "Asma tavan için odalara 60'lık omegalar ve tavan H'ları takılır.",
+   "bilgi": "Asma tavan için odalara 60'lık omegalar ve tavan H'ları takılır.",
+   "kamera": {
+    "t": [
+     0.0,
+     2.3,
+     0.3
+    ],
+    "az": 0.55,
+    "el": 1.28,
+    "d": 15
+   }
+  },
+  {
+   "i": 13,
+   "kart": "Asma tavan alçıpanı",
+   "oda": false,
+   "drop": -0.5,
+   "ipucu": "Tavan profilleri hazır: alçıpan levhalar omega ve H gözlerine dizilir.",
+   "bilgi": "Tavan profilleri hazır: alçıpan levhalar omega ve H gözlerine dizilir.",
+   "kamera": {
+    "t": [
+     0.0,
+     2.3,
+     0.3
+    ],
+    "az": 0.55,
+    "el": 1.28,
+    "d": 15
+   }
+  },
+  {
+   "i": 14,
+   "kart": "Çatı izolasyonu",
+   "oda": false,
+   "drop": 0,
+   "ipucu": "Aşıklardan önce tavanın üstüne 10 cm cam yünü serilir.",
+   "bilgi": "Aşıklardan önce tavanın üstüne 10 cm cam yünü serilir.",
+   "kamera": {
+    "t": [
+     0.0,
+     2.6,
+     0.0
+    ],
+    "az": 2.5,
+    "el": 0.95,
+    "d": 15
+   }
+  },
+  {
+   "i": 15,
+   "kart": "Aşıklar",
+   "oda": false,
+   "drop": 0.7,
+   "ipucu": "Kaplama makasa değil aşıklara vidalanır: önce aşıklar gelir.",
+   "bilgi": "Kaplama makasa değil aşıklara vidalanır: önce aşıklar gelir.",
+   "kamera": {
+    "t": [
+     0.0,
+     3.2,
+     0.0
+    ],
+    "az": 0.95,
+    "el": 0.6,
+    "d": 17.5
+   }
+  },
+  {
+   "i": 16,
+   "kart": "Saçak sacı",
+   "oda": false,
+   "drop": 0.6,
+   "ipucu": "Saçak sacı aşıklardan sonra takılır.",
+   "bilgi": "Saçak sacı aşıklardan sonra takılır.",
+   "kamera": {
+    "t": [
+     4.4425,
+     2.5,
+     4.4925
+    ],
+    "az": 0.7,
+    "el": 0.18,
+    "d": 7
+   }
+  },
+  {
+   "i": 17,
+   "kart": "Dere ve inişler",
+   "oda": false,
+   "drop": 0.6,
+   "ipucu": "Her saçağa metal dere asılır: sırtı saçak sacının alnına.",
+   "bilgi": "Her saçağa metal dere asılır: sırtı saçak sacının alnına.",
+   "kamera": {
+    "t": [
+     0.0,
+     2.0,
+     0.3
+    ],
+    "az": -0.62,
+    "el": 0.28,
+    "d": 17
+   }
+  },
+  {
+   "i": 18,
+   "kart": "Ters mahya",
+   "oda": false,
+   "drop": 0.9,
+   "ipucu": "Kaplamadan önce cumbanın ana çatıyla birleştiği vadiye ters mahya döşenir.",
+   "bilgi": "Kaplamadan önce cumbanın ana çatıyla birleştiği vadiye ters mahya döşenir.",
+   "kamera": {
+    "t": [
+     -2.51,
+     3.4,
+     3.3387
+    ],
+    "az": 0.55,
+    "el": 0.75,
+    "d": 11
+   }
+  },
+  {
+   "i": 19,
+   "kart": "Trapez sac ve mahya",
+   "oda": false,
+   "drop": 0.9,
+   "ipucu": "Trapez sac ters mahyadan sonra aşıkların üstüne serilir.",
+   "bilgi": "Trapez sac ters mahyadan sonra aşıkların üstüne serilir.",
+   "kamera": {
+    "t": [
+     0.0,
+     2.8,
+     0.3
+    ],
+    "az": 0.62,
+    "el": 0.5,
+    "d": 19
+   }
+  },
+  {
+   "i": 20,
+   "kart": "Alın sacları",
+   "oda": false,
+   "drop": 0.6,
+   "ipucu": "Alın sacı kalkanların eğik kenarına, kaplamadan sonra takılır.",
+   "bilgi": "Alın sacı kalkanların eğik kenarına, kaplamadan sonra takılır.",
+   "kamera": {
+    "t": [
+     0.0,
+     2.8,
+     0.3
+    ],
+    "az": -0.62,
+    "el": 0.34,
+    "d": 18
+   }
+  },
+  {
+   "i": 21,
+   "kart": "Kapı ve pencereler",
+   "oda": false,
+   "drop": 0,
+   "ipucu": "Son adım: PVC pencereler ve çelik dış kapı yerine konur.",
+   "bilgi": "Son adım: PVC pencereler ve çelik dış kapı yerine konur.",
+   "kamera": {
+    "t": [
+     0.0,
+     0.8,
+     0.3
+    ],
+    "az": 0.5,
+    "el": 1.0,
+    "d": 15.5
+   }
+  }
+ ]
+}

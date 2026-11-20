@@ -18,9 +18,9 @@ KDV (D-76): CRM'den üretilen defter kayıtlarında KDV oranını taşır (`arac
 fiyatlı her satır `kdv_orani`, `kdv_grubu`, `kdv_tutari` (tutar × oran, kuruşa), özet `kdv` (KDV hariç, oranlara göre KDV, KDV dahil, oranı
 olmayan satırlar) taşır. Oranı olmayan satırın KDV'si boş kalır, KDV dahil toplam eksik sayılır; oran uydurulmaz. Eski defterle
 (`--defter`, KDV'siz) çıktı aynen eskisi gibidir.
-D-136 (Lokman 20 Kasım 2026, kart "CRM ve sizin fiyatlarınız"): 20 Kasım 2026'dan sonraki CRM görüntüsünde fiyatlar KDV dahildir;
-defterin `kdv.fiyata_dahil`'i varsa bu araç satırın fiyatını kaydın oranıyla KDV hariçe çevirir (fiyat ÷ (1 + oran), 6 basamak; özgünü
-`kdv_dahil_birim_fiyat`), KDV'yi aynen ekler (120 TL = 100 + 20). Oranı olmayan satır çevrilmez. Özet `kdv.fiyata_dahil` kararı yazar.
+D-136 (Lokman 20 Kasım 2026, kart "CRM ve sizin fiyatlarınız"; 09:10:13 "sen KDV olayını karıştırma CRM'den ne çektiysen onu gir"):
+defterin `kdv.fiyata_dahil`'i varsa (20 Kasım 2026'dan sonraki CRM görüntüsü) fiyatlar KDV dahildir: satırın fiyatı CRM'deki gibi
+yazılır, KDV ayrılmaz ve eklenmez, satırda ve özette KDV yoktur; özet `fiyat_kdv_dahil` kararı yazar.
 
 Fiyat uydurulmaz: defterde `onay: false` olan fiyat (yedek kaynaktan öneri) yalnız `--oneri` ile uygulanır ve "öneri" diye
 işaretlenir; fiyatı olmayan satır boş kalır, özette sayılır. Uygulanmayan önerinin birim fiyatı satırda `oneri_fiyat` olarak durur
@@ -201,8 +201,8 @@ def fiyatla(L: dict, defter: dict, hat: str | None = None, oneri: bool = False) 
     kalemler, atla = H["kalemler"], set(H.get("atla") or [])
     satirlar, gruplar, fiyatsiz = [], {}, []
     toplam = onayli = oneri_toplam = 0.0
-    kdv_kip = isinstance(defter.get("kdv"), dict)              # D-76: CRM defteri kayıtta oran taşır
-    kdv_dahil = kdv_kip and bool(defter["kdv"].get("fiyata_dahil"))   # D-136: defterin fiyatı KDV dahil
+    kdv_dahil = isinstance(defter.get("kdv"), dict) and bool(defter["kdv"].get("fiyata_dahil"))   # D-136: fiyat KDV dahil, KDV yazılmaz
+    kdv_kip = isinstance(defter.get("kdv"), dict) and not kdv_dahil   # D-76: CRM defteri kayıtta oran taşır
     bekleyen = {"satir": 0, "tutar": 0.0}                       # uygulanmayan öneriler (toplama girmez)
     for i, s in enumerate(L["satirlar"], 1):
         if s.get("kalem") in atla:
@@ -233,9 +233,6 @@ def fiyatla(L: dict, defter: dict, hat: str | None = None, oneri: bool = False) 
                 durum, oneri_fiyat = "öneri makas kuralı, onay bekliyor", mk[1]
         else:
             durum = "defterde yok"
-        dahil_fiyat = None
-        if kdv_dahil and fiyat is not None and (kayit or {}).get("kdv") is not None:   # D-136: 120 TL = 100 + 20 KDV
-            dahil_fiyat, fiyat = fiyat, round(fiyat / (1 + kayit["kdv"]), 6)
         miktar = s.get("kg") if birim == "kg" else s.get("adet")
         if fiyat is not None and miktar is None:                    # fiyat var, miktar yok: satır onaylı görünmesin
             durum = f"{durum}; {'kg' if birim == 'kg' else 'adet'} yok"
@@ -259,7 +256,6 @@ def fiyatla(L: dict, defter: dict, hat: str | None = None, oneri: bool = False) 
                          "birim": birim, "adet": s.get("adet"), "kg": s.get("kg"), "birim_fiyat": fiyat, "tutar": tutar,
                          "durum": durum, "kaynak": kaynak, "kaynak_adi": (defter["kaynaklar"].get(kaynak) or {}).get("kisa") if kaynak else None,
                          **({"oneri_fiyat": oneri_fiyat} if oneri_fiyat is not None else {}),
-                         **({"kdv_dahil_birim_fiyat": dahil_fiyat} if dahil_fiyat is not None else {}),
                          **{a: g[a] for a in YAZILAN if g and g.get(a)}})
         if kdv_kip:                                                # D-76: oran yalnız fiyatı olan satırda; yoksa boş
             oran = (kayit or {}).get("kdv") if tutar is not None else None
@@ -268,10 +264,10 @@ def fiyatla(L: dict, defter: dict, hat: str | None = None, oneri: bool = False) 
     ozet = {"toplam": round(toplam, 2), "onayli_fiyatlarla": round(onayli, 2), "onerilerle": round(oneri_toplam, 2),
             "satir": len(satirlar), "fiyatli": sum(1 for x in satirlar if x["tutar"] is not None),
             "fiyatsiz": fiyatsiz, "oneri_bekleyen": {"satir": bekleyen["satir"], "tutar": round(bekleyen["tutar"], 2)}, "gruplar": gruplar}
+    if kdv_dahil:                                              # D-136: toplam CRM fiyatlarının toplamı, KDV dahil
+        ozet["fiyat_kdv_dahil"] = defter["kdv"]["fiyata_dahil"]["karar"]
     if kdv_kip:
         ozet["kdv"] = kdv_ozeti(satirlar, ozet["toplam"], defter["kdv"].get("dayanak"))
-        if fd := defter["kdv"].get("fiyata_dahil"):             # D-136: liste fiyatı KDV dahil; defter onu KDV hariçe çevirdi
-            ozet["kdv"]["fiyata_dahil"] = fd["karar"]
     return {"hat": hat, "defter_surumu": defter.get("surum"), "oneri_dahil": oneri, "satirlar": satirlar, "ozet": ozet}
 
 

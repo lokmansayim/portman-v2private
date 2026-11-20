@@ -1,7 +1,8 @@
 """D-136 · CRM fiyatı KDV dahil (Lokman 20 Kasım 2026 07:58:30 UTC: "artık fiyatlara ekli yani yeniden KDV hesabı yapmayacağız ...
 120 TL lik %20 KDV li bir ürünü artık listede KDV dahil 144 bin değil, KDV dahil 120 bin TL (100+20(kdv)"; kart 08:03:19 UTC
 "CRM ve sizin fiyatlarınız"). 20 Kasım 2026'dan sonraki CRM görüntüsünde CRM fiyatı ve Lokman'ın fiyatları (ayın istisnası dahil) KDV
-dahildir: fiyatla satırın fiyatını kaydın oranıyla KDV hariçe çevirir, KDV'yi ekler, KDV dahil toplam listedeki fiyatların toplamıdır.
+dahildir. 09:10:13 "sen KDV olayını karıştırma CRM'den ne çektiysen onu gir", kart 09:10:41 "KDV hiç yazılmasın": fiyat CRM'deki gibi,
+KDV ayrılmaz, eklenmez, yazılmaz; toplam CRM fiyatlarının toplamı.
 Önceki görüntülerin defteri ve fiyatlı listesi aynen (D-128 hedef örneği, onaylı teklifler)."""
 from __future__ import annotations
 
@@ -56,44 +57,32 @@ def test_esleme_karari(E):
     f = E["kdv"]["fiyata_dahil"]
     assert (f["baslangic"], f["karar"]) == ("2026-11-20", "D-136")
     assert "KDV dahil 120 bin TL (100+20(kdv)" in f["dayanak"] and "CRM ve sizin fiyatlarınız" in f["dayanak"]
+    assert "KDV olayını karıştırma" in f["dayanak"] and "KDV hiç yazılmasın" in f["dayanak"]
 
 
 def test_baslangictan_onceki_goruntu_aynen(E, A_eski, L):
     D = C.defter_uret(A_eski, E)
     assert "fiyata_dahil" not in D["kdv"] and D["kdv"]["not"].startswith("CRM fiyatı KDV hariç")
     R = F.fiyatla(L, D, "prefabrik")
-    assert "fiyata_dahil" not in R["ozet"]["kdv"] and not any("kdv_dahil_birim_fiyat" in s for s in R["satirlar"])
+    assert "fiyat_kdv_dahil" not in R["ozet"] and all("kdv_orani" in s for s in R["satirlar"])
     k = R["ozet"]["kdv"]
-    assert k["haric"] == R["ozet"]["toplam"] and k["dahil"] == round(k["haric"] + k["kdv"], 2)
+    assert k["haric"] == R["ozet"]["toplam"] and k["dahil"] == round(k["haric"] + k["kdv"], 2) and k["kdv"] > 0
 
 
-def test_baslangictan_sonra_kdv_icinden_ayrilir(E, A_eski, A_yeni, L):
-    """Aynı fiyatlar: eski görüntüde KDV üstüne eklenir, yenide fiyatın içinden ayrılır. Defterin fiyatı değişmez."""
+def test_baslangictan_sonra_crm_fiyati_aynen_kdv_yok(E, A_eski, A_yeni, L):
+    """Aynı fiyatlar: eski görüntüde KDV üstüne eklenir; yenide fiyat ve tutar aynı, KDV hiç yazılmaz. Defterin fiyatı değişmez."""
     De, Dy = C.defter_uret(A_eski, E), C.defter_uret(A_yeni, E)
-    assert Dy["kdv"]["fiyata_dahil"]["karar"] == "D-136"
-    assert Dy["hatlar"] == De["hatlar"]
+    assert Dy["kdv"]["fiyata_dahil"]["karar"] == "D-136" and Dy["hatlar"] == De["hatlar"]
     Re, Ry = F.fiyatla(L, De, "prefabrik"), F.fiyatla(L, Dy, "prefabrik")
-    ky = Ry["ozet"]["kdv"]
-    assert ky["fiyata_dahil"] == "D-136" and (ky["oransiz"]["satir"], ky["eksik"]) == (0, False)
-    n = 0
+    assert "kdv" not in Ry["ozet"] and Ry["ozet"]["fiyat_kdv_dahil"] == "D-136"
+    assert not any(k in s for s in Ry["satirlar"] for k in ("kdv_orani", "kdv_grubu", "kdv_tutari"))
     for e, y in zip(Re["satirlar"], Ry["satirlar"]):
-        assert (e["kalem"], e["adet"]) == (y["kalem"], y["adet"])
-        if y["tutar"] is None:
-            assert e["tutar"] is None
-            continue
-        n += 1
-        assert y["kdv_dahil_birim_fiyat"] == e["birim_fiyat"]
-        assert y["birim_fiyat"] == round(e["birim_fiyat"] / (1 + y["kdv_orani"]), 6)
-        assert y["kdv_tutari"] == round(y["tutar"] * y["kdv_orani"], 2)
-        assert abs(y["tutar"] + y["kdv_tutari"] - e["tutar"]) <= 0.011, y["kalem"]   # satırın KDV dahili listedeki tutar (kuruş)
-    assert n > 50
-    assert ky["haric"] == Ry["ozet"]["toplam"] and ky["dahil"] == round(ky["haric"] + ky["kdv"], 2)
-    assert abs(ky["dahil"] - Re["ozet"]["toplam"]) <= 0.01 * n                 # KDV dahil toplam = listedeki fiyatların toplamı
-    assert ky["dahil"] < Re["ozet"]["kdv"]["dahil"]
+        assert (e["kalem"], e["adet"], e["birim_fiyat"], e["tutar"]) == (y["kalem"], y["adet"], y["birim_fiyat"], y["tutar"])
+    assert Ry["ozet"]["toplam"] == Re["ozet"]["toplam"] == Re["ozet"]["kdv"]["haric"]
 
 
 def test_lokmanin_ornegi_120_tl(E, A_yeni):
-    """120 TL'lik %20 KDV'li ürün: 100 TL + 20 TL KDV = 120 TL (144 değil)."""
+    """120 TL'lik %20 KDV'li ürün listede 120 TL; KDV dahil 120 (144 değil), KDV ayrıca yazılmaz."""
     D = C.defter_uret(A_yeni, E)
     g = D["hatlar"]["prefabrik"]["kalemler"]["100'lük duvar omegası | 100 × 2500"]
     assert g["kdv"] == 0.2
@@ -101,26 +90,34 @@ def test_lokmanin_ornegi_120_tl(E, A_yeni):
     L1 = {"satirlar": [{"grup": "1002", "grup_adi": "Metal aksam", "kalem": "100'lük duvar omegası", "olcu": "100 × 2500",
                         "birim": "adet", "adet": 1}]}
     R = F.fiyatla(L1, D, "prefabrik")
-    s = R["satirlar"][0]
-    assert (s["birim_fiyat"], s["tutar"], s["kdv_tutari"], s["kdv_dahil_birim_fiyat"]) == (100.0, 100.0, 20.0, 120)
-    assert (R["ozet"]["kdv"]["haric"], R["ozet"]["kdv"]["kdv"], R["ozet"]["kdv"]["dahil"]) == (100.0, 20.0, 120.0)
+    assert (R["satirlar"][0]["birim_fiyat"], R["satirlar"][0]["tutar"], R["ozet"]["toplam"]) == (120, 120.0, 120.0)
+    assert "kdv" not in R["ozet"]
 
 
-def test_lokmanin_fiyatlari_da_kdv_dahil(E, A_yeni):
-    """Kart "CRM ve sizin fiyatlarınız": ayın istisnasındaki fiyat da KDV dahil (karkaslı pencere panosu 4.000 TL = 3.333,33 + 666,67)."""
+def test_lokmanin_fiyatlari_da_aynen(E, A_yeni):
+    """Kart "CRM ve sizin fiyatlarınız": ayın istisnasındaki fiyat da KDV dahil, aynen yazılır (karkaslı pencere panosu 4.000 TL)."""
     I = C.istisna_oku(ISTISNA, datetime.date(2026, 11, 20))
     D = C.istisnali_defter(A_yeni, I, E)
     g = D["hatlar"]["prefabrik"]["kalemler"][KARKASLI]
-    assert (g["fiyat"], g["kaynak"], g["kdv"]) == (4000.0, C.ISTISNA_KAYNAK, 0.2)
+    assert (g["fiyat"], g["kaynak"]) == (4000.0, C.ISTISNA_KAYNAK)
     L1 = {"satirlar": [{"grup": "1001", "grup_adi": "Panel", "kalem": KARKASLI.split(" | ")[0], "olcu": KARKASLI.split(" | ")[1],
                         "birim": "adet", "adet": 1}]}
     s = F.fiyatla(L1, D, "prefabrik")["satirlar"][0]
-    assert (s["tutar"], s["kdv_tutari"], s["kdv_dahil_birim_fiyat"]) == (3333.33, 666.67, 4000.0)
+    assert (s["birim_fiyat"], s["tutar"]) == (4000.0, 4000.0) and "kdv_tutari" not in s
 
 
-def test_teklif_pdf_cumlesi():
-    from araclar import teklif_pdf as TP
-    k = {"kdv": 20.0, "dahil": 120.0, "oranlar": {"%20": {"oran": 0.2, "matrah": 100.0, "kdv": 20.0, "satir": 1}},
-         "oransiz": {"satir": 0, "tutar": 0, "satirlar": []}, "eksik": False}
-    assert "Liste fiyatı KDV dahildir" not in TP.kdv_cumlesi(k)
-    assert "Liste fiyatı KDV dahildir" in TP.kdv_cumlesi(k | {"fiyata_dahil": "D-136"})
+def test_teklif_kdv_yazmaz(E, A_yeni, tmp_path):
+    """Teklifin PDF'inde ve Excel'inde KDV yok; toplam CRM fiyatlarının toplamı."""
+    import pymupdf
+    from openpyxl import load_workbook
+
+    from araclar import teklif as TK
+    p = tmp_path / "anlik.json"
+    p.write_text(json.dumps(A_yeni, ensure_ascii=False), encoding="utf-8")
+    assert TK.main([str(IE_TK04), str(tmp_path / "t"), "--tavan", "asma", "--crm", str(p)]) == 0
+    pdf = next((tmp_path / "t").glob("*.pdf"))
+    metin = "".join(s.get_text() for s in pymupdf.open(pdf))
+    assert "KDV tutarı" not in metin and "KDV dahil" not in metin and "Tutar KDV" not in metin
+    hucre = [c for ws in load_workbook(next((tmp_path / "t").glob("*.xlsx"))).worksheets
+             for r in ws.iter_rows(values_only=True) for c in r if isinstance(c, str)]
+    assert not [c for c in hucre if "KDV" in c]
