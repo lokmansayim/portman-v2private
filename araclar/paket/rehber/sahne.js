@@ -1122,6 +1122,15 @@ D.dere.inisler.forEach((p, i) => {
   const ap = mesh(new THREE.BoxGeometry(0.07, 0.05, 0.09), m); ap.position.copy(V(gx, ust - 2.5, zo)); w.add(ap);
   const yatay = Math.hypot(gx - wx, zo - zw), dus = Math.max(26, yatay);   // kaz boynu ~45°
   const A = V(gx, ust - 5, zo), B = V(gx, ust - 14, zo), C = V(wx, ust - 14 - dus, zw), Dd = V(wx, 16, zw);
+  // sundurmanın üstündeki saçakta boru dereden düz iner, sacın üstünde kapalı dirsekle biter (Lokman, 20.11.2026 19:45: "dere iniş borularını
+  // bu panel sundurma modelinde sundurmanın üstünde bitir")
+  const SU = (D.sundurma || []).find(q => Math.abs(p.yuz - q.yw) < 1 && sw >= q.x0 - 20 && sw <= q.x1 + 20);
+  if (SU) {
+    const d = gx - yuzU, ust_ = SU.ust - SU.egim * d + RIBH, E = V(gx, ust_ + 7, zo);
+    boru(A, B); dirsek(B); boru(B, E); dirsek(E); boru(E, V(gx + 10, ust_ + 3, zo));
+    add(AD.dere, w, 4 + i * 0.5, { kod: KB('inis'), ad: MI.ad, satir: [['Bu parça', `${h.ad} hattı · dereden düz iner, sundurmanın sacının üstünde biter`], ['Bitiş', `kapalı dirsekle sacın üstüne boşalır (${fmtc(ust_)} cm)`], ['Kaynak', 'Lokman, 20.11.2026: iniş sundurmanın üstünde biter'], ['Kesit', MI.kesit], ['Liste', MI.liste], ...kartSat(KB('inis'))] });
+    return;
+  }
   boru(A, B); dirsek(B); boru(B, C); dirsek(C); boru(C, Dd); dirsek(Dd); boru(Dd, V(wx + 12, 6, zw));
   [80, 180].forEach(hh => {
     const k = mesh(new THREE.BoxGeometry(0.066, 0.02, 0.088), m); k.position.copy(V(wx, hh, zw)); w.add(k);
