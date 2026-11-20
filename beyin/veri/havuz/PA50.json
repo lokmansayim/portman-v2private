@@ -1,0 +1,83 @@
+{
+ "kod": "PA50",
+ "gosterim": "PA-50",
+ "durum": "gecerli",
+ "sablon": "adaylar/PA50.json",
+ "gorsel": "adaylar/PA50.png",
+ "referans_model": "PA-50",
+ "yapi_turu": "prefabrik",
+ "kat": 1,
+ "oda_programi": "3+1",
+ "katalog_m2": 119.0,
+ "kapali_m2": 96.1,
+ "veranda_m2": 22.75,
+ "ozet": {
+  "grid": {
+   "x_pano": 7.0,
+   "y_pano": 10.5
+  },
+  "dis_olcu_cm": [
+   888.5,
+   1337.75
+  ],
+  "brut_m2": 118.86,
+  "pano": 65,
+  "pencere": 8,
+  "kapi": 7,
+  "odalar": {
+   "YATAK ODASI": 13.75,
+   "ÇOCUK ODASI": 9.03,
+   "SALON": 20.52,
+   "HOL": 10.44,
+   "YATAK ODASI 2": 18.39,
+   "MUTFAK": 13.58,
+   "WC": 4.43,
+   "VERANDA": 22.75
+  }
+ },
+ "kaynak": {
+  "metin": "HD-251 montaj paftasından İş Emri (İE-43, disk arşivi Parti 2; kodla okundu, ad yok). Havuz: D-134 (Lokman 19 Kasım 2026 21:39:32 kartı \"Dördü girsin, ikisi beklesin\": Motor verandayı örten çatıyı listeleyince; Motor'un aks düzeniyle, veranda ana çatının altında, çatı paftadaki gibi). Asıl uygulanmış proje: D-103.",
+  "dosya": "testler/havuz/is_emirleri/HD251.json",
+  "ayna": null,
+  "karar": "D-134",
+  "standart": true,
+  "kart_kiyasi": {
+   "kart": "HD-251",
+   "kart_sha256": "3890cd4c9cab104e802efc5698048eee3fe17bcd77f89aed3aeced23b3e4ccc9",
+   "sonuc": "geçti",
+   "olcum": {
+    "dis_olcu_cm": [
+     888.5,
+     1337.75
+    ],
+    "acikla_olcu_cm": [
+     888.5,
+     1337.75
+    ],
+    "brut_m2": 118.86,
+    "kubbe_m2": 0.0,
+    "yatak_odasi": 3,
+    "pencereler": {
+     "120x120": 5,
+     "180x180": 2,
+     "60x40": 1
+    },
+    "dis_kapi": 1,
+    "ic_kapi": 6,
+    "veranda": 1,
+    "kat": 1
+   }
+  },
+  "havuz_denetimi": {
+   "sonuc": "geçti",
+   "karar": "D-112",
+   "uyarilar": [
+    "HD-02: Dış ölçü 888,5 × 1336,75 → 888,5 × 1337,75 cm: son pano (y: 124,5 cm) 122 ve üzeri olduğu için tam panoya (125,5) tamamlandı (D-30)",
+    "HD-02: Köşe paftadan (yapi.kose_kaynagi: pafta): makas x'i geçiyor ama ön ve arka duvar köşeden geçiyor; İE-17 köşe kuralının istisnası (AP-15)",
+    "HD-02: Pencere SALON 180x180: panodan geniş pencere oda ortasına alınmadı; ızgara panosunda kaldı",
+    "HD-02: Pencere MUTFAK 180x180: panodan geniş pencere oda ortasına alınmadı; ızgara panosunda kaldı"
+   ]
+  }
+ },
+ "not": "Ana çatı dörtomuz, ön verandayı da örter. Makaslar D-131'le: ana 9, kısa 4 + 4, çapraz 2 + 2, çatı paneli 4; paftanın listesinde ana 11, kısa 7 + 7. Ön kiriş 2 × L 4292,5, yan kiriş 2 × L 2460, tavan kirişi L 2660 (D-127); paftada 2 × 4322,5, 2 × 2420, tavan kirişi yok (D-134 › Bilinen farklar)."
+}

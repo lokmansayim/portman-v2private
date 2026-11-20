@@ -1,0 +1,368 @@
+{
+ "is_emri_no": "HDD-HD-251",
+ "revizyon": 1,
+ "talep": {
+  "bayi": {
+   "kod": "HD-251",
+   "ad": "Arşiv HD-251"
+  },
+  "musteri_adi": "HD-251",
+  "metin": "İE-43: HD-251 montaj paftasından okundu (plan_geometri v1). Pafta düzeltilmedi; farklar uyarılarda."
+ },
+ "yapi": {
+  "sistem": "prefabrik",
+  "kat_sayisi": 1,
+  "duvar_yuksekligi_cm": 250,
+  "duvar_kalinligi_cm": {
+   "dis": 10,
+   "ic": 6.0
+  },
+  "olcu_kaynagi": "dis_olcu",
+  "dis_olcu_cm": {
+   "x": 888.5,
+   "y": 1336.75
+  },
+  "referans_model": "HD-251",
+  "grid": {
+   "x_pano": 7.0,
+   "y_pano": 10.5
+  },
+  "kisa_kenar": "y",
+  "giris_cephesi": "on",
+  "dis_dusey_duvar": "cevre_aks_disinda",
+  "dizilim": {
+   "baslangic": "arka-sol",
+   "hiza": "izgara",
+   "dis_duvar_t_bolme": false,
+   "pencere": "oda_ortasi",
+   "kapi": "mantik",
+   "kose": "oda",
+   "son_pano": "son_aks",
+   "kapi_yeri": "ortada",
+   "dis_pano_dayanagi": [
+    {
+     "y": 888.5,
+     "aralik_cm": [
+      888.5,
+      1014.0
+     ],
+     "cephe": "sol"
+    },
+    {
+     "y": 888.5,
+     "aralik_cm": [
+      888.5,
+      1014.0
+     ],
+     "ic_duvarlar": true,
+     "duvar_cm": 381.5
+    },
+    {
+     "y": 574.75,
+     "aralik_cm": [
+      574.75,
+      700.25
+     ],
+     "ic_duvarlar": true,
+     "duvar_cm": 632.5
+    },
+    {
+     "y": 700.25,
+     "aralik_cm": [
+      637.5,
+      1076.75
+     ],
+     "cephe": "sag"
+    },
+    {
+     "x": 193.25,
+     "aralik_cm": [
+      5.0,
+      381.5
+     ],
+     "cephe": "on"
+    },
+    {
+     "x": 381.5,
+     "aralik_cm": [
+      318.75,
+      569.75
+     ],
+     "cephe": "on"
+    },
+    {
+     "x": 569.75,
+     "aralik_cm": [
+      507.0,
+      883.5
+     ],
+     "cephe": "on"
+    }
+   ]
+  },
+  "ek_akslar_cm": {
+   "x": [],
+   "y": []
+  },
+  "kose_kaynagi": "pafta"
+ },
+ "mahaller": [
+  {
+   "ad": "YATAK ODASI",
+   "tur": "yatak_odasi",
+   "konum_cm": [
+    [
+     5.0,
+     10.0,
+     507.0,
+     261.0
+    ],
+    [
+     381.5,
+     261.0,
+     507.0,
+     386.5
+    ]
+   ]
+  },
+  {
+   "ad": "ÇOCUK ODASI",
+   "tur": "yatak_odasi",
+   "konum_cm": [
+    [
+     5.0,
+     261.0,
+     381.5,
+     512.0
+    ]
+   ]
+  },
+  {
+   "ad": "SALON",
+   "tur": "salon",
+   "konum_cm": [
+    [
+     5.0,
+     512.0,
+     381.5,
+     1076.75
+    ]
+   ]
+  },
+  {
+   "ad": "HOL",
+   "tur": "antre_hol",
+   "konum_cm": [
+    [
+     381.5,
+     386.5,
+     507.0,
+     512.0
+    ],
+    [
+     381.5,
+     512.0,
+     632.5,
+     700.25
+    ],
+    [
+     381.5,
+     700.25,
+     507.0,
+     1076.75
+    ]
+   ]
+  },
+  {
+   "ad": "YATAK ODASI 2",
+   "tur": "yatak_odasi",
+   "konum_cm": [
+    [
+     507.0,
+     10.0,
+     883.5,
+     512.0
+    ]
+   ]
+  },
+  {
+   "ad": "MUTFAK",
+   "tur": "mutfak",
+   "konum_cm": [
+    [
+     507.0,
+     700.25,
+     883.5,
+     1076.75
+    ]
+   ]
+  },
+  {
+   "ad": "WC",
+   "tur": "banyo",
+   "konum_cm": [
+    [
+     632.5,
+     512.0,
+     883.5,
+     700.25
+    ]
+   ]
+  },
+  {
+   "ad": "VERANDA",
+   "tur": "veranda",
+   "konum_cm": [
+    [
+     5.0,
+     1076.75,
+     883.5,
+     1326.75
+    ]
+   ]
+  }
+ ],
+ "acik_sinirlar": [],
+ "acikliklar": [
+  {
+   "tur": "ic_kapi",
+   "olcu": 82,
+   "arasi": [
+    "HOL",
+    "YATAK ODASI 2"
+   ],
+   "pano": 1
+  },
+  {
+   "tur": "ic_kapi",
+   "olcu": 82,
+   "arasi": [
+    "HOL",
+    "WC"
+   ],
+   "pano": 0
+  },
+  {
+   "tur": "ic_kapi",
+   "olcu": 82,
+   "arasi": [
+    "HOL",
+    "MUTFAK"
+   ],
+   "pano": 0
+  },
+  {
+   "tur": "ic_kapi",
+   "olcu": 82,
+   "arasi": [
+    "HOL",
+    "SALON"
+   ],
+   "pano": 0
+  },
+  {
+   "tur": "ic_kapi",
+   "olcu": 82,
+   "arasi": [
+    "HOL",
+    "ÇOCUK ODASI"
+   ],
+   "pano": 0
+  },
+  {
+   "tur": "pencere",
+   "olcu": "120x120",
+   "mahal": "SALON",
+   "duvar": "sol",
+   "pano": 2
+  },
+  {
+   "tur": "pencere",
+   "olcu": "120x120",
+   "mahal": "ÇOCUK ODASI",
+   "duvar": "sol"
+  },
+  {
+   "tur": "pencere",
+   "olcu": "120x120",
+   "mahal": "YATAK ODASI",
+   "duvar": "sol"
+  },
+  {
+   "tur": "pencere",
+   "olcu": "120x120",
+   "mahal": "YATAK ODASI",
+   "duvar": "arka"
+  },
+  {
+   "tur": "pencere",
+   "olcu": "120x120",
+   "mahal": "YATAK ODASI 2",
+   "duvar": "sag"
+  },
+  {
+   "tur": "pencere",
+   "olcu": "60x40",
+   "mahal": "WC",
+   "duvar": "sag",
+   "pano": 0
+  },
+  {
+   "tur": "ic_kapi",
+   "olcu": 82,
+   "arasi": [
+    "HOL",
+    "YATAK ODASI"
+   ],
+   "pano": 0
+  },
+  {
+   "tur": "dis_kapi",
+   "olcu": 90,
+   "arasi": [
+    "VERANDA",
+    "HOL"
+   ],
+   "pano": 0
+  },
+  {
+   "tur": "pencere",
+   "olcu": "180x180",
+   "mahal": "SALON",
+   "duvar": "on"
+  },
+  {
+   "tur": "pencere",
+   "olcu": "180x180",
+   "mahal": "MUTFAK",
+   "duvar": "on"
+  }
+ ],
+ "cati": {
+  "tip": "kirma",
+  "egim_yuzde": 32.9,
+  "sacak_cm": 30,
+  "topuk_cm": 10,
+  "makas_yonu": "kisa_kenar",
+  "makas_ekseni": "x"
+ },
+ "cikti": {
+  "pdf": true,
+  "dxf": true,
+  "pafta": "A2",
+  "icerik": [
+   "aksli_plan"
+  ]
+ },
+ "varsayimlar": [
+  "Çatı dörtomuz (kırma), %32,9, saçak 30, topuk 10, mahya uzun kenar (y) boyunca, ana makaslar x yönünde: paftanın makas planındaki gibi; ana çatı ön verandayı da örter. Duvarsız ön uçta ilk ana makas gövdenin ön duvarında, kısa makaslar arka ucun ek yerlerinde (D-131). Paftanın listesinde ana makas 11, kısa 7 + 7; Motor ana 9, kısa 4 + 4, çapraz 2 + 2, çatı paneli 4 (D-131 › Liste). Eğim yazılı değil, prefabrik standardı. Köşe düzeni paftadan (kose_kaynagi: pafta).",
+  "Pano dizilimi paftadan: sol hattında y 888.5'dan 125,5; 381.5 hattında y 888.5'dan 125,5; 632.5 hattında y 574.75'dan 125,5; sag hattında y 700.25'dan 125,5; on hattında x 193.25'dan 125,5; on hattında x 381.5'dan 125,5; on hattında x 569.75'dan 125,5 (dizilim.dis_pano_dayanagi).",
+  "VERANDA: paftanın makas planında ana çatı verandayı da örtüyor; veranda gövdenin açık mahali (gövde 1086.75 + 250 = 1336.75 cm). Paftada 3 kolon; ara kolonlar paftadaki yerinde (444.25 cm), kiriş onlarda bölünür (D-129)."
+ ],
+ "dikmeler": [
+  [
+   439.25,
+   0.0
+  ]
+ ]
+}

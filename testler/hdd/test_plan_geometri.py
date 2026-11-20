@@ -203,3 +203,47 @@ def test_not_cizgisi_veranda_degil(tmp_path):
     on = [(5, 0), (5, -150), (W - 5, -150), (W - 5, 0)]                  # ön cephede kesik dikdörtgen: veranda
     g = _geometri(_cizim(tmp_path / "veranda.dxf", kesikler=[not_, on]))
     assert [(v["cephe"], v["derinlik_cm"]) for v in g["verandalar"]] == [("on", 150.0)]
+
+
+def _tasan_verandali_ie():
+    """Okuyucunun 110 m² (HD-380) gibi İş Emri'si: gövde 1014 × 835,75, ön cephenin tamamında 250 cm taşan veranda, ön duvarda dış kapı."""
+    return {"yapi": {"dis_olcu_cm": {"x": 1014.0, "y": 835.75}, "grid": {"x_pano": 8.0, "y_pano": 6.5}, "kisa_kenar": "y"},
+            "mahaller": [{"ad": "SALON", "tur": "salon", "konum_cm": [[5.0, 400.0, 500.0, 825.75]]}],
+            "acikliklar": [{"tur": "dis_kapi", "olcu": "100x210", "duvar": "on", "arasi": ["SALON", "__DIS__"]},
+                           {"tur": "pencere", "olcu": "120x120", "duvar": "on", "arasi": ["SALON", "__DIS__"]}],
+            "verandalar": [{"ad": "VERANDA", "cephe": "on", "bas_cm": 0.0, "bit_cm": 1014.0, "derinlik_cm": 250.0, "ara_kolon": 2}],
+            "varsayimlar": ["Bölge 6: BANYO sayıldı.", "VERANDA: paftada 4 kolon; İş Emri'ne ara_kolon: 2 yazıldı (D-109).",
+                            "VERANDA: çatısı paftanın planında yok; İş Emri'ne yazılmadı (Motor ana çatının eğimiyle beşik alır, uyarıyla)."]}
+
+
+def test_ana_catinin_verandasi_govdeye_alinir():
+    """İE-43 PR-8 (disk arşivi Parti 2, 110 ve 120 m²; D-129, D-131): paftanın makas planında ana çatı taşan verandayı da örtüyorsa veranda
+    gövdenin açık mahali olur. Ara kolonlar paftadaki yerinde dikme olur (D-129'un kirişi orada bölünür); dış kapı verandaya açılır."""
+    ie = _tasan_verandali_ie()
+    g = {"verandalar": [{"cephe": "on", "bas_cm": 0.0, "bit_cm": 1014.0, "derinlik_cm": 250.0,
+                         "kolonlar": [_kare(0, 1078), _kare(336, 1078), _kare(670, 1078), _kare(1006, 1078)]}]}
+    y = PG.verandayi_govdeye_al(ie, g)
+    assert ie["verandalar"][0]["ad"] == "VERANDA"                                       # girdi değişmez
+    assert "verandalar" not in y and y["yapi"]["dis_olcu_cm"] == {"x": 1014.0, "y": 1085.75}
+    assert y["yapi"]["grid"]["y_pano"] == 8.5                                           # (1085,75 − 2 × 10) / 62,75 → 17 yarım pano
+    assert y["mahaller"][-1] == {"ad": "VERANDA", "tur": "veranda", "konum_cm": [[5.0, 825.75, 1009.0, 1075.75]]}
+    kapi, pen = y["acikliklar"]
+    assert kapi["arasi"] == ["SALON", "VERANDA"] and "duvar" not in kapi                # kapı verandaya açılır
+    assert pen["arasi"] == ["SALON", "__DIS__"] and pen["duvar"] == "on"               # pencere aynen
+    assert y["dikmeler"] == [[335.0, 0.0], [669.0, 0.0]]                                # paftadaki merkez 340 ve 674 (eşit aralık 338, 676 değil)
+    V = y["varsayimlar"]
+    assert V[0] == "Bölge 6: BANYO sayıldı." and len(V) == 2 and "ana çatı verandayı da örtüyor" in V[1] and "340, 674" in V[1]
+
+
+def test_ana_catinin_verandasi_yalniz_on_cephenin_tamami():
+    ie = _tasan_verandali_ie()
+    g = {"verandalar": [{"cephe": "on", "kolonlar": [_kare(0, 1078), _kare(1006, 1078)]}]}
+    assert "dikmeler" not in PG.verandayi_govdeye_al(ie, g)                              # iki köşe kolonu: dikme yok (köşeyi Motor koyar)
+    ie["verandalar"][0]["bit_cm"] = 700.0
+    with pytest.raises(ValueError, match="tamamını"):
+        PG.verandayi_govdeye_al(ie, g)
+    ie["verandalar"][0].update(cephe="sag", bit_cm=835.75)
+    with pytest.raises(ValueError, match="tamamını"):
+        PG.verandayi_govdeye_al(ie, g)
+    with pytest.raises(ValueError, match="taşan veranda yok"):
+        PG.verandayi_govdeye_al(ie, g, "VERANDA 2")
