@@ -308,6 +308,29 @@ def _tek_uclu_kirma(kutu: tuple, mahya: str, uc: str, b: dict, k: dict) -> tuple
     return duz, kal
 
 
+def ana_karkasi(duz: list[dict]) -> list[dict]:
+    """Çapraz cumbada ana çatının aşıkları cumbanın arkasında kesilmez (D-134, BK-62; Lokman, 20 Kasım 2026 07:12: "ana makasdaki aşıklar cumbanın
+    arkasına gelince kesilmez devam eder ... baştan sona kadar devam eder yarım bırakılmaz"). Ana çatının makasları cumbanın altından da
+    geçer (`cati_capraz`); ana yüzün görünen kısmı cumbanın oturduğu yerde kesik olsa da makaslarla taşınan kısmı (`karkas`,
+    `cati_genel.duzlem_kur`) cumbanın altındaki parçayla birlikte tam yüzdür. Karkas = görünen yüz ∪ (yüzün dışbükey zarfı ∩ cumba
+    yüzleri). Aşık sıraları (`cati_genel.asik_siralari`: liste, kart modeli, montaj paftası ve rehber) bu kısmı okur; çizim, kaplama ve
+    kenarlar görünen yüzden aynen."""
+    from shapely.geometry import Polygon
+    from shapely.ops import unary_union
+    cumba = unary_union([Polygon(d["plan"]) for d in duz if not d["ad"].startswith("ana ")])
+    if cumba.is_empty:
+        return duz
+    out = []
+    for d in duz:
+        if d["ad"].startswith("ana ") and not d.get("karkas"):
+            yuz = Polygon(d["plan"])
+            dolu = yuz.union(yuz.convex_hull.intersection(cumba)).buffer(0.01, join_style=2).buffer(-0.01, join_style=2).simplify(0.01)
+            if dolu.geom_type == "Polygon" and dolu.area - yuz.area > 1.0:
+                d = dict(d, karkas=[[round(x, 4), round(y, 4)] for x, y in list(dolu.exterior.coords)[:-1]])
+        out.append(d)
+    return out
+
+
 def cati(plan: G.Plan, ie: dict) -> dict:
     """Beşik dışı ana çatı → genel motorun `cati` biçimi. Dönen sözlük `sunum.cati_tanimi`'nin beşik çatısının anahtarlarında,
     ek olarak `tip_adi`, `ust_pay` ve `kalkanlar` (`cati_genel.cati_kur` ve `cephe_gorunus` okur)."""
@@ -396,6 +419,8 @@ def cati(plan: G.Plan, ie: dict) -> dict:
         d = dict(d)
         d.pop("ust_pay", None)                       # kaplama payı çatının `ust_pay`'ından (pano Motor'unun sacı), çeliğin paneli değil
         duz.append(d)
+    if tip == "besik_cumba":
+        duz = ana_karkasi(duz)
     return {"tip": u["tip"], "tip_adi": TIP_ADI[tip], "tip_kaynak": "İE-17 prefabrik çatı (motor/cati_prefabrik.py; İE-14 çatı üreticisi)",
             "sacak": k["sacak_cm"], "topuk": k["topuk_cm"], "duvar_ustu": H0, "ust_pay": UST_PAY_CM, "duzlemler": duz,
             "kalkanlar": u["kalkanlar"]}
