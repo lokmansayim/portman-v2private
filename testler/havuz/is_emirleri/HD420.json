@@ -247,7 +247,7 @@
  },
  "varsayimlar": [
   "VERANDA: paftada 3 kolon; İş Emri'ne ara_kolon: 1 yazıldı (D-109).",
-  "VERANDA: çatısı paftanın makas planındaki gibi tek eğimli sundurma (tek_yon), duvardan dışarı %10. Eğim paftada yok; varsayım (paftanın listesinde sundurma sacı L 2243).",
+  "VERANDA: çatısı paftanın makas planındaki gibi tek eğimli sundurma (tek_yon), duvardan dışarı %10. Eğim paftada yok; varsayım (paftanın listesinde sundurma sacı L 2243). Yüksek ucu cephede duvar üstünde, ana saçağın altında (D-133; Lokman, kart 20 Kasım 2026 07:08:08 \"Önerdiğim gibi\").",
   "Çatı beşik, %32,9, saçak 30, topuk 10: paftanın makas planındaki gibi 9 makas (2 baş, 7 orta), mahya uzun kenar boyunca. Eğim yazılı değil, prefabrik standardı.",
   "Pano dizilimi paftadan: 444.25 hattında y 135.5'dan 125,5; 632.5 hattında y 72.75'dan 125,5; 261.0 hattında x 67.75'dan 125,5 (dizilim.dis_pano_dayanagi)."
  ],

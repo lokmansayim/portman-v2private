@@ -70,10 +70,9 @@
    "sonuc": "geçti",
    "karar": "D-112",
    "uyarilar": [
-    "HD-02: Veranda VERANDA: çatısı ana çatının saçak yanına dayanıyor, yüksek ucu saçağın üstünde; iki çatının birleşimi çizimde yok, kural kitabında yok",
     "HD-09: veranda çatısı: listede 6 makas, 3D modelde bu parçanın makası yok"
    ]
   }
  },
- "not": "Çatı paftadaki gibi beşik, 9 makas; ön verandada tek eğimli sundurma %10 (eğim paftada yok, varsayım). Havuz denetimi uyarısı: sundurmanın yüksek ucu ana saçağın üstünde, birleşim çizimde yok (HD-02); listede sundurmanın makası var, 3B'de yok (HD-09)."
+ "not": "Çatı paftadaki gibi beşik, 9 makas; ön verandada tek eğimli sundurma %10 (eğim paftada yok, varsayım), yüksek ucu duvar üstünde ana saçağın altında (D-133, Lokman kartı 20 Kasım 2026 07:08:08). Listede sundurmanın makası var, 3B'de yok (HD-09)."
 }

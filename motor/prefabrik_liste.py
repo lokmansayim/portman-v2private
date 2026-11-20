@@ -519,15 +519,18 @@ def kubbe_asigi_cm(c: dict, aralik_cm: float) -> float:
     return top
 def _teras_kolon_boylari(plan, ie: dict) -> dict:
     """D-52 (M-12): teras panelli verandanın kolonu dış kirişin altına kadar (`veranda.teras_paneli` › kolon_ustu; AP-26 210, gerçek listede
-    KUTU PROFİL (KOLON) 2100 × 4); öteki dikmeler duvar boyunda. Teras paneli yoksa boş: anahtarsız İş Emri'nin listesi aynı."""
+    KUTU PROFİL (KOLON) 2100 × 4); öteki dikmeler duvar boyunda. D-133 (BK-61): taşan verandanın sundurmasında (tek eğim) da kolon dış
+    kirişin altına (80 m² PA-48). İkisi de yoksa boş: anahtarsız İş Emri'nin listesi aynı."""
     from . import veranda as VR
     teras = {tuple(round(q, 6) for q in k): VR.cati(v, ie)["kolon_ustu"]
-             for v in plan.dis_verandalar if v["cati"]["tip"] == "teras_paneli" for k in v["kolonlar"]}
+             for v in plan.dis_verandalar if v["cati"]["tip"] in ("teras_paneli", "tek_yon") for k in v["kolonlar"]}
     if not teras:
         return {}
     H0 = float(ie["yapi"].get("duvar_yuksekligi_cm", 250))
     return {"kolon_boylari_cm": [round(teras.get(tuple(round(q, 6) for q in d), H0), 2) for d in plan.dikmeler],
-            "kolon_boyu_notu": "teras panelli verandada dış kirişin altına kadar; Motor, D-52"}
+            "kolon_boyu_notu": ("sundurmalı verandada dış kirişin altına kadar; Motor, D-133"
+                                if any(v["cati"]["tip"] == "tek_yon" for v in plan.dis_verandalar)
+                                else "teras panelli verandada dış kirişin altına kadar; Motor, D-52")}
 
 
 def _kucuk(x) -> str:

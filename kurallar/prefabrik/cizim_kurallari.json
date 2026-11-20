@@ -1313,6 +1313,30 @@
     "testler/motor/test_d127_veranda_kirisi.py::test_mahalsiz_parca_bant_acmaz",
     "testler/motor/test_d107_tavan_kirisi.py::test_tarama_butun_is_emirleri"
    ]
+  },
+  {
+   "kod": "PC-48",
+   "baslik": "Taşan verandanın tek eğimli çatısı (sundurma) ana saçağın altında: yüksek ucu duvar üstünde",
+   "kural": "Taşan verandanın (`verandalar[]`) çatısı tek eğimse (`cati.tip: tek_yon`) yüksek ucu cephede duvar üstündedir (250), çatı `egim_yuzde` ile dışarı iner; saçak dış kenarda ve iki yanda `sacak_cm`. 70 m²'lik onaylı evin (AP-09, M-07) açık mahal çatısı gibi; ana çatının saçağının altında kalır, iki çatının birleşimi yoktur (havuz denetimi HD-02 düşmez). Kirişler (dış ve iki yan) yatay, üstü çatının dış kirişin üstündeki en alçak kotu; kolon kirişin altına (listede kolon boyu da). Görünüşte sundurmanın duvar üstünde saçak altı çizgisi ve topuğu yok. Önce yüksek uç saçak kotundan (duvar üstü + topuk) yukarı çıkıyordu, ana saçağın içinden geçiyordu. Depoda yalnız 80 m² (PA-48): yüksek uç 285,4 → 250, dış uç 260 → 224,6, kiriş üstü 227,6, kolon L 2500 → 2176. Beşik ve teras panelli veranda aynen.",
+   "karar": "D-133",
+   "lokman": {
+    "tarih": "2026-11-20",
+    "saat": "07:08",
+    "soz": "kart 07:08:08 \"Önerdiğim gibi\" (soru: \"Dört çatı farkında hangi yolla gidelim?\"; seçenek: \"75, 76 ve 45 m²'de Motor kalır, 45 m²'ye %44 yazılır. 80 m²'de sundurma saçak altına iner, önce/sonra çizimi gelir.\")"
+   },
+   "kod_yeri": [
+    "motor/veranda.py::cati",
+    "motor/veranda.py::gorunus_parcalari",
+    "motor/ifc_uret.py::IfcUretici.baglantilar",
+    "motor/prefabrik_liste.py::_teras_kolon_boylari"
+   ],
+   "test": [
+    "testler/motor/test_d133_sundurma.py::test_sundurma_kotlari",
+    "testler/motor/test_d133_sundurma.py::test_uyari_yok",
+    "testler/motor/test_d133_sundurma.py::test_gorunus_kolon_ve_kiris_catinin_altinda",
+    "testler/motor/test_d133_sundurma.py::test_liste_kolon_boyu",
+    "testler/motor/test_d133_sundurma.py::test_tarama_sundurma_yalniz_80m2"
+   ]
   }
  ]
 }
