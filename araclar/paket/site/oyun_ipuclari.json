@@ -1,0 +1,22 @@
+{
+  "aciklama": "İE-45 (D-138) · montaj oyununun ipuçları. Oyunda ikinci yanlış seçimden sonra 'İpucu' olarak, doğru seçimden sonra bilgi olarak görünür. Anahtar rehberin adım adıdır (’ yerine '). Oda adımlarında 'oda' ve ilk oda için 'ilk_oda' kullanılır; {oda} odanın adıdır. Rehberde ipucu olmayan oda dışı bir adım varsa oyun kurulmaz (oyun.py durur). Metinler 20 Kasım 2026'da Lokman'a özel sayfada gösterilen oyundaki metinlerdir.",
+  "oda": "Önce gövdenin duvarları biter: panolar oda oda dikilir.",
+  "ilk_oda": "Alt çerçeve hazır: duvar panoları dizilir. Dizilim {oda} ile başlar.",
+  "adim": {
+    "Alt çerçeve": "Panolar alt çerçeveye oturur: önce 100'lük ve 60'lık alt çerçeve serilir.",
+    "Veranda": "Veranda kolon ve kirişleri duvarın yerini tutar: makaslardan önce dikilir.",
+    "Saçak, duvar ve baş makas omegası": "Makaslar duvara doğrudan oturmaz: önce duvar üstüne omega geçirilir.",
+    "Ana çatı ve cumba makasları": "Omegalar yerinde: sırada ana çatı ve cumba makasları var.",
+    "Baş makas betopanı ve Z": "Kalkanın dış yüzü betopanla kapatılır: makaslardan hemen sonra.",
+    "Tavan omegaları ve H'lar": "Asma tavan için odalara 60'lık omegalar ve tavan H'ları takılır.",
+    "Asma tavan alçıpanı": "Tavan profilleri hazır: alçıpan levhalar omega ve H gözlerine dizilir.",
+    "Çatı izolasyonu": "Aşıklardan önce tavanın üstüne 10 cm cam yünü serilir.",
+    "Aşıklar": "Kaplama makasa değil aşıklara vidalanır: önce aşıklar gelir.",
+    "Saçak sacı": "Saçak sacı aşıklardan sonra takılır.",
+    "Dere ve inişler": "Her saçağa metal dere asılır: sırtı saçak sacının alnına.",
+    "Ters mahya": "Kaplamadan önce cumbanın ana çatıyla birleştiği vadiye ters mahya döşenir.",
+    "Trapez sac ve mahya": "Trapez sac ters mahyadan sonra aşıkların üstüne serilir.",
+    "Alın sacları": "Alın sacı kalkanların eğik kenarına, kaplamadan sonra takılır.",
+    "Kapı ve pencereler": "Son adım: PVC pencereler ve çelik dış kapı yerine konur."
+  }
+}

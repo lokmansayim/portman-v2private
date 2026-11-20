@@ -120,6 +120,10 @@ def test_glb_parcalar_yerinde(tmp_path):
     izo = {i for i, m in enumerate(G["materials"]) if m.get("name") == "izocam"}
     serit = sum(1 for me in G["meshes"] for pr in me["primitives"] if pr.get("material") in izo)
     assert serit == 7                             # TK-01'de 7 şerit (rehberin "Modelde 7 şerit"i); rulolar da yazılınca 14'tü
+    serme = [n for n in nodes if "serme" in n.get("extras", {})]          # İE-45 (D-138): montaj oyunu rehberin hareketlerini oynatır
+    ak = [n for n in nodes if "ackapa" in n.get("extras", {})]
+    assert len(serme) == 7 and all(n["extras"]["serme"]["L"] > 0 for n in serme)
+    assert ak and {n["extras"]["ackapa"]["tip"] for n in ak} <= {"don", "devir", "kay"} and all("max" in n["extras"]["ackapa"] for n in ak)
 
 
 @pytest.mark.skipif(not os.environ.get("BLENDER_PY"), reason="Blender (BLENDER_PY) yok; galeri yalnız yerelde üretilir")
