@@ -27,7 +27,7 @@ def _iki_cubuk(aralik: float, dik: bool = True):
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
-    fig, ax = plt.subplots(figsize=(16.54, 11.69))
+    fig, ax = plt.subplots(figsize=(16.54, 11.69), dpi=100)    # öteki testlerin rcParams'ı (dpi) ölçeği değiştirmesin
     ax.set_xlim(0, 1500); ax.set_ylim(0, 1100); ax.set_aspect("equal")
     yazilar = []
     for i, boy in enumerate(("133,25", "138,25")):
@@ -43,7 +43,7 @@ def _iki_cubuk(aralik: float, dik: bool = True):
 
 @pytest.mark.parametrize("dik", [True, False])
 def test_binen_yazilar_ayrilir(dik):
-    fig, yazilar = _iki_cubuk(11, dik)
+    fig, yazilar = _iki_cubuk(4, dik)
     assert YC.cakisanlar(YC.metin_kutulari(fig)), "deney kurulumu: iki yazı başta binmeli"
     cizim._omega_yazilari_ayir(fig, yazilar)
     assert YC.cakisanlar(YC.metin_kutulari(fig)) == []
