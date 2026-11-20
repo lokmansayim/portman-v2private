@@ -186,6 +186,9 @@ def _kimlik(T: dict) -> str:
 def kdv_cumlesi(k: dict) -> str:
     """D-76: iç teklifin ilk sayfasında KDV cümlesi (CRM defteri). Tutar KDV hariçtir; KDV kalem grubunun oranıyla."""
     from araclar.fiyatla import kdv_yazi
+    if k.get("fiyata_dahil"):                                  # D-136: liste fiyatı KDV dahil, KDV içinden ayrıldı
+        return e(f"Tutar KDV hariçtir. Liste fiyatı KDV dahildir; KDV kalem grubunun oranıyla içinden ayrıldı: KDV {tl(k['kdv'])}, "
+                 f"KDV dahil {tl(k['dahil'])} ({kdv_yazi(k)}; D-76, {k['fiyata_dahil']}).")
     return e(f"Tutar KDV hariçtir. Kalem grubunun oranıyla KDV {tl(k['kdv'])}, KDV dahil {tl(k['dahil'])} ({kdv_yazi(k)}; D-76).")
 
 
