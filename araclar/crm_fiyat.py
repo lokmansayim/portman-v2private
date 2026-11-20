@@ -19,7 +19,12 @@ Lokman, 9 Kasım 2026 13:10: "bunu kural olarak al ve mühürle bundan sonra tek
   olsa da yazılmaz (banyo dolabı, D-75); Samet'e giden eksik listesine girmez.
 - **KDV (D-76):** eşlemenin `kdv` bölümü varsa defterin her kaydı KDV oranını ve grubunu taşır (`kdv`, `kdv_grubu`). Grup sırayla:
   kalemin `kdv_grubu`'su, kodun `kdv.kodlar` kaydı, CRM satırının kategorisi (`kdv.kategoriler`). Grubu bulunmayan ya da kodları iki
-  ayrı orana düşen kaydın oranı yoktur (None); oran uydurulmaz. CRM fiyatı KDV hariçtir; KDV'yi `araclar/fiyatla.py` hesaplar.
+  ayrı orana düşen kaydın oranı yoktur (None); oran uydurulmaz. CRM fiyatı KDV hariçtir (20 Kasım 2026'dan önceki görüntüler); KDV'yi `araclar/fiyatla.py` hesaplar.
+- **KDV dahil fiyat (D-136; Lokman 20 Kasım 2026 07:58:30 UTC "artık fiyatlara ekli yani yeniden KDV hesabı yapmayacağız ... 120 TL lik
+  %20 KDV li bir ürünü ... KDV dahil 120 bin TL (100+20(kdv)", kart 08:03:19 "CRM ve sizin fiyatlarınız"):** görüntünün günü (kendi
+  saatiyle) eşlemenin `kdv.fiyata_dahil.baslangic`'ından önce değilse defterin `kdv`'si `fiyata_dahil` taşır: CRM fiyatı ve Lokman'ın
+  fiyatları (sabit karar, ayın istisnası) KDV dahildir. Defterin fiyatları değişmez; `araclar/fiyatla.py` satırın fiyatını kendi oranıyla
+  KDV hariçe çevirir. Başlangıçtan önceki görüntünün defteri bayt bayt eskisi gibidir.
 - **Çıktı:** `kurallar/fiyat/defter_2026-11.json` ile aynı şemada defter (`portman.fiyat_defteri/1`); `araclar/fiyatla.py` ve
   `araclar/teklif.py` onu okur. Yalnız standart kütüphane: sunucuda sistem python3'üyle koşar.
 """
@@ -278,6 +283,12 @@ def esleme_denetle(E: dict) -> list[str]:
 
 # ── defter ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 
+def fiyata_dahil_mi(K: dict | None, t: datetime.datetime) -> bool:
+    """D-136: görüntünün günü eşlemenin `kdv.fiyata_dahil.baslangic`'ından önce değilse fiyatlar KDV dahildir."""
+    F = (K or {}).get("fiyata_dahil")
+    return bool(F) and t.date() >= datetime.date.fromisoformat(F["baslangic"])
+
+
 def _gun(t: datetime.datetime) -> str:
     return t.strftime("%d.%m.%Y")
 
@@ -385,8 +396,11 @@ def defter_uret(A: dict, E: dict | None = None) -> dict:
         "aciklama": ("CRM stok fiyatlarından üretilen defter (İE-35, D-72): `araclar/crm_fiyat.py`, eşleme "
                      f"`kurallar/fiyat/crm_esleme.json` ({E.get('surum')}). Elle düzeltilmez; düzeltme eşlemeye ya da CRM'e girer."),
         "para_birimi": "TL",
-        "kdv": ({"dayanak": K["dayanak"], "not": "CRM fiyatı KDV hariç; kaydın oranı `kdv`, grubu `kdv_grubu` (None: oran yok, uydurulmaz)",
-                 "gruplar": K["gruplar"]} if K else "CRM yanıtında KDV yazmıyor"),
+        "kdv": (({"dayanak": K["dayanak"], "not": "CRM fiyatı KDV hariç; kaydın oranı `kdv`, grubu `kdv_grubu` (None: oran yok, uydurulmaz)",
+                  "gruplar": K["gruplar"]} if not fiyata_dahil_mi(K, t) else
+                 {"dayanak": K["dayanak"], "not": ("CRM fiyatı ve Lokman'ın fiyatları KDV dahil (D-136); araclar/fiyatla.py satırın fiyatını "
+                                                   "kaydın oranıyla KDV hariçe çevirir; oran `kdv`, grup `kdv_grubu` (None: oran yok, çevrilmez)"),
+                  "gruplar": K["gruplar"], "fiyata_dahil": K["fiyata_dahil"]}) if K else "CRM yanıtında KDV yazmıyor"),
         "onay_kurali": ("Tek kaynak CRM (D-72, M-15). onay true: eşleme birebir ya da Lokman'ın onaylı hesap kuralı. onay false: yakın "
                         "ürün ya da birim varsayımı; araclar/fiyatla.py bunları yalnız --oneri ile uygular. Fiyatı 0 olan, CRM'de "
                         "bulunmayan ve birimi anlaşılmayan kalem fiyatsız."),
