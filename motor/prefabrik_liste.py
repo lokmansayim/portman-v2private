@@ -361,6 +361,37 @@ def yan_kenar_araliklari(poly, e: str, c: float, acik: list[tuple[float, float]]
     return tutan
 
 
+def ic_kiris_hatlari(plan) -> list[tuple]:
+    """İki kapalı oda arasındaki duvarsız sınırın kirişleri (İş Emri `acik_sinirlar`; liste `ic_kirisler_cm`): (x0, y0, x1, y1) hat
+    parçaları, Motor çerçevesinde, aks arası. Liste boyu ve ön onay çizimi (D-140) bu işlevden okur (D-28 madde 1)."""
+    from . import geometry as G
+    from shapely.geometry import Point
+
+    def _hat(h_, u0, u1):
+        yon, c = h_
+        return (c, u0, c, u1) if yon == "y" else (u0, c, u1, c)
+    acik = [m for m in plan.mahaller.values() if (m.acik or m.tur in G.ACIK_MAHAL_TURLERI)]
+    acik_g = [m.poly for m in acik if m.poly is not None]
+    hatlar = {}
+    for x0, y0, x1, y1 in plan.acik_sinir_cizgileri:
+        orta = Point((x0 + x1) / 2, (y0 + y1) / 2)
+        if any(g_.distance(orta) < 0.5 for g_ in acik_g):
+            continue
+        dik = abs(x1 - x0) < 1e-6
+        hatlar.setdefault(("y" if dik else "x", round(x0 if dik else y0, 2)), []).append(tuple(sorted((y0, y1) if dik else (x0, x1))))
+    ic_kirisler = []
+    for h_, parcalar in sorted(hatlar.items()):
+        parcalar.sort()
+        u0, u1 = parcalar[0]
+        for p0, p1 in parcalar[1:]:
+            if p0 <= u1 + 0.5:
+                u1 = max(u1, p1)
+            else:
+                ic_kirisler.append(_hat(h_, u0, u1)); u0, u1 = p0, p1
+        ic_kirisler.append(_hat(h_, u0, u1))
+    return ic_kirisler
+
+
 def kirisli_acik_kenarlar(plan, v) -> list[tuple]:
     """Gövdedeki açık mahalin (taşan veranda değil) kiriş alan açık kenarları: `plan.acik_kenarlar`'dan mahalin içinde kalanlar (1 cm
     payla), plandaki sırayla. Kirişin boyu `acik_mahal_kirisleri`'nde. Ön onay çizimi de kiriş profilini buradan okur (D-137,
@@ -468,24 +499,7 @@ def model_motor(ie: dict) -> dict:
     # duvarsız sınır (İş Emri `acik_sinirlar`, ör. salon–mutfak): üstüne kiriş gelir (Lokman, kart 22 Ekim "Evet, gelir"; E5, TS-01). Sınır
     # çizgileri ızgara gözü başına; aynı hattaki bitişik parçalar tek kiriş, boyu aks arası. Motor iki açık mahalin (ör. iki veranda) arasına da
     # çizgi koyar; o sınır iki oda arası değil, kiriş sayılmaz (geometri hakemi 3. tur)
-    acik_g = [m.poly for m in acik if m.poly is not None]
-    hatlar = {}
-    for x0, y0, x1, y1 in plan.acik_sinir_cizgileri:
-        orta = Point((x0 + x1) / 2, (y0 + y1) / 2)
-        if any(g_.distance(orta) < 0.5 for g_ in acik_g):
-            continue
-        dik = abs(x1 - x0) < 1e-6
-        hatlar.setdefault(("y" if dik else "x", round(x0 if dik else y0, 2)), []).append(tuple(sorted((y0, y1) if dik else (x0, x1))))
-    ic_kirisler = []
-    for _h, parcalar in sorted(hatlar.items()):
-        parcalar.sort()
-        u0, u1 = parcalar[0]
-        for p0, p1 in parcalar[1:]:
-            if p0 <= u1 + 0.5:
-                u1 = max(u1, p1)
-            else:
-                ic_kirisler.append(round(u1 - u0, 2)); u0, u1 = p0, p1
-        ic_kirisler.append(round(u1 - u0, 2))
+    ic_kirisler = [round((x1 - x0) + (y1 - y0), 2) for (x0, y0, x1, y1) in ic_kiris_hatlari(plan)]   # D-140: çizim aynı hatları okur
 
     def oda(m):
         x0, y0, x1, y1 = m.poly.bounds
