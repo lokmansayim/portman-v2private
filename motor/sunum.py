@@ -322,6 +322,8 @@ def cati_tanimi(plan: G.Plan, ie: dict) -> dict | None:
     c = ie.get("cati") or {}
     if c.get("tip", "besik") != "besik":
         return None
+    if "yontem" in c:                                          # BK-64 (D-139): kenar yöntemi yalnız kırmada; beşikte sessizce yok sayılmaz
+        raise G.IsEmriHatasi(f"çatı yöntemi '{c['yontem']}' yalnız kırma çatıda (`cati.tip: kirma`); beşikte yok")
     from . import cati_serit
     if plan.girintili or cati_serit.mahal_catilari_var(ie):    # İE-24: girintili gövdede ana çatı + paralel cumbalar (`cati_serit`); İE-17
         return cati_serit.tanim(plan, ie)                      # PR-2: kendi çatısı olan açık mahal ana çatıdan çıkar (AP-09)

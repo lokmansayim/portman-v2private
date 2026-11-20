@@ -114,8 +114,16 @@ def bul(plan: G.Plan, ie: dict) -> dict:
     K = kural()
     c = ie.get("cati") or {}
     e = c.get("makas_ekseni", "x")
-    kyon = "y" if e == "x" else "x"                           # kiriş makasa dik
     sonuc = {"kirisler": [], "disinda": [], "uyarilar": []}
+    if c.get("yontem") == "kenar":                            # BK-64 (D-139): kenar yöntemli kırmada makas mahyaya dik, yön çatıdan
+        from . import cati_iskelet as CI
+        from .cati_prefabrik import PrefabrikCatiHatasi, cati as _cati
+        try:
+            e = CI.makas_ekseni(_cati(plan, ie)["duzlemler"])
+        except (PrefabrikCatiHatasi, CI.IskeletHatasi) as ex:
+            sonuc["uyarilar"].append(f"Tavan kirişi aranmadı: makas yönü kurulamadı ({ex})")
+            return sonuc
+    kyon = "y" if e == "x" else "x"                           # kiriş makasa dik
     try:
         kap = _kapsam(plan, c)
     except G.IsEmriHatasi as ex:                              # çatı kurulamıyorsa kiriş de aranmaz; sessizce gövdeye düşülmez
