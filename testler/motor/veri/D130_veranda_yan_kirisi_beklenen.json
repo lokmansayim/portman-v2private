@@ -20,5 +20,5 @@
    "cizim": "Motor'un çiziminde 60 cm'lik sol yan kenar profilsiz (iç koordinatta, girintiye bakıyor; `dxf_out` profili yalnız gövdenin dış çizgisinde ya da `girinti_kirisi` yazılı kenarda çizer, D-58). Liste 3, çizim 2 kiriş; çizim ayrı adımda (kart 22:16:13)."
   }
  },
- "tarama": ["is_emri/adaylar/PA21.json", "testler/kor/projeler/AP25/is_emri.json", "testler/motor/veri/D127_veranda_76m2.json"]
+ "tarama": ["is_emri/adaylar/PA21.json", "is_emri/adaylar/PA49.json", "is_emri/adaylar/PA50.json", "testler/kor/projeler/AP25/is_emri.json", "testler/motor/veri/D127_veranda_76m2.json"]
 }

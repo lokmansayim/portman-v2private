@@ -86,7 +86,8 @@ def _ayni_yonde_iki_kenar(ie: dict) -> bool:
 
 def test_tarama_butun_is_emirleri():
     """Depodaki bütün prefabrik İş Emri'leri: aynı yönde ikinci açık kenarı olan veranda yalnız 76 m² ve 80 m² 3+1'de (kör ölçümün AP-25'i
-    aynı İş Emri). Öteki evlerin kenar listesi aynı kalır (yönde tek kenar bugünkü yol)."""
+    aynı İş Emri) ve disk arşivinin 110 ve 120 m²'sinde (PA-49, PA-50; D-134, İE-43 PR-8: ana çatının örttüğü ön verandanın iki yanı).
+    Öteki evlerin kenar listesi aynı kalır (yönde tek kenar bugünkü yol)."""
     bulunan = []
     for y in _prefabrik_girdiler() + [KOK / "testler" / "motor" / "veri" / "D127_veranda_76m2.json"]:
         try:
@@ -130,7 +131,8 @@ def test_kenar_kilidi():
     """Öteki evler aynen (BK-60 A3): kenar tablosu kilitle aynı. Kilit D-130'un kodundan yazıldı (124 İş Emri). `main`'le (50aad0bc)
     farkı yalnız 76 m² (+188,25), 80 m² 3+1 (PA21 ve kör AP25, +60) ve 160/100 denemesi (+251; `deneme/` tarama dışında) (geometri
     hakemi, 19 Kasım 2026: 180 İş Emri'nin yükleme listesi `main`'le kıyaslandı). Kilit bilinçli yazılır:
-    `python testler/motor/test_d130_veranda_yan_kirisi.py --kilit`, gerekçesi iş emrine."""
+    `python testler/motor/test_d130_veranda_yan_kirisi.py --kilit`, gerekçesi iş emrine. İE-43 PR-8 (D-134): havuza giren 110 ve 120 m²
+    (PA-49, PA-50) eklendi, 126 İş Emri; var olan 124'ü aynen."""
     assert _kenar_tablosu() == json.loads(KILIT.read_text(encoding="utf-8"))
 
 
