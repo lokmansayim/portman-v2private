@@ -70,3 +70,20 @@ def test_sundurma_adetleri_listeden(pa48):
     assert len(su["damla"]) == _adet(L, "Damlalık") == 3 and su["damla"][-1][1] == 641
     assert len(su["sacak"]) == _adet(L, "Özel büküm saçak sacı") == 3 and su["sacak"][-1][1] == 641
     assert "Silikonize mastik" in su["liste"]["mastik"]
+
+
+@pytest.mark.skipif(__import__("araclar.paket.rehber.iz", fromlist=["iz"]).hazir() is not None, reason="rehber denetimi: node/three yok")
+def test_sundurma_cakismasiz(pa48, tmp_path):
+    """Lokman, 20.11.2026 22:59: "hiç bir zaman kesişme olmasın". Sundurmanın parçaları duvar panosunun H'larına, saçak omegasının dudağına,
+    inişe ve birbirine girmez (`araclar/paket/rehber/cakisma_sundurma.js`)."""
+    import subprocess
+    from araclar.paket.rehber import sayfa
+    d, _ = pa48
+    html = sayfa.yaz(d, tmp_path / "pa48.html")
+    js = KOK / "araclar" / "paket" / "rehber" / "cakisma_sundurma.js"
+    r = subprocess.run(["node", str(js), str(html.resolve()), str(tmp_path / "c.json")], capture_output=True, text=True, timeout=900)
+    assert r.returncode == 0, r.stderr[-2000:]
+    s = json.loads((tmp_path / "c.json").read_text(encoding="utf-8"))
+    assert s["hatalar"] == []
+    assert s["parcalar"].get("Z damlalık") == 3 and s["parcalar"].get("Silikonize mastik") == 1
+    assert s["cakisma"] == [], s["cakisma"][:3]
