@@ -361,12 +361,21 @@ def yan_kenar_araliklari(poly, e: str, c: float, acik: list[tuple[float, float]]
     return tutan
 
 
+def kirisli_acik_kenarlar(plan, v) -> list[tuple]:
+    """Gövdedeki açık mahalin (taşan veranda değil) kiriş alan açık kenarları: `plan.acik_kenarlar`'dan mahalin içinde kalanlar (1 cm
+    payla), plandaki sırayla. Kirişin boyu `acik_mahal_kirisleri`'nde. Ön onay çizimi de kiriş profilini buradan okur (D-137,
+    `dxf_out.Cizici._listede_kirisli`; D-28 madde 1: liste ve çizim aynı kenarı gösterir)."""
+    from shapely.geometry import LineString
+    kap = v.poly.buffer(1.0)
+    return [k for k in plan.acik_kenarlar if kap.contains(LineString([(k[0], k[1]), (k[2], k[3])]))]
+
+
 def acik_mahal_kirisleri(plan, v) -> list[tuple[float, int, bool]]:
     """Dikmeli açık mahalin (taşan veranda ve giriş nişi hariç) açık kenar kirişleri: [(boy cm, uçtaki kolon sayısı, ara kolon parçası mı)],
     yön sırasıyla (x, sonra y). Yönde tek açık kenar: mahalin o yöndeki dış ölçüsü (BK-14'ten beri). Yönde birden çok açık kenar: her kenar
     kendi boyuyla (D-130, `yan_kenar_araliklari`). Kenarın ortasında kolon varsa kiriş ara kolonlarda bölünür, parça kolonun yüzünden yüzüne
     (D-129, `_kenar_parcalari`; boy parçanın kendisi, uç kolon 2); yoksa boy kenarın dış ölçüsü."""
-    from shapely.geometry import LineString, Point
+    from shapely.geometry import Point
     cik: list[float] = []
     cik_uc: list[int] = []
     cik_ara: list[bool] = []
@@ -374,14 +383,13 @@ def acik_mahal_kirisleri(plan, v) -> list[tuple[float, int, bool]]:
     vx0, vy0, vx1, vy1 = v.poly.bounds
     yanlar: dict = {}                                      # yön → açık kenarların çizgileri (ilk görülen önce)
     acik_ = {}                                             # (yön, çizgi) → o çizgideki açık kenarların aralıkları
-    for (x0, y0, x1, y1, *_r) in plan.acik_kenarlar:
-        if v.poly.buffer(1.0).contains(LineString([(x0, y0), (x1, y1)])):
-            e_ = "x" if abs(y1 - y0) < 1e-6 else "y"
-            c_ = y0 if e_ == "x" else x0
-            c_ = next((k_ for k_ in yanlar.setdefault(e_, []) if abs(k_ - c_) < 1.0), round(c_, 2))   # 1 cm'den yakın iki çizgi tek kenar
-            if c_ not in yanlar[e_]:
-                yanlar[e_].append(c_)
-            acik_.setdefault((e_, c_), []).append(tuple(sorted((x0, x1) if e_ == "x" else (y0, y1))))
+    for (x0, y0, x1, y1, *_r) in kirisli_acik_kenarlar(plan, v):
+        e_ = "x" if abs(y1 - y0) < 1e-6 else "y"
+        c_ = y0 if e_ == "x" else x0
+        c_ = next((k_ for k_ in yanlar.setdefault(e_, []) if abs(k_ - c_) < 1.0), round(c_, 2))   # 1 cm'den yakın iki çizgi tek kenar
+        if c_ not in yanlar[e_]:
+            yanlar[e_].append(c_)
+        acik_.setdefault((e_, c_), []).append(tuple(sorted((x0, x1) if e_ == "x" else (y0, y1))))
     for e in sorted(yanlar):
         for c_ in yanlar[e]:
             if len(yanlar[e]) == 1:                         # yönde tek açık kenar: kiriş mahalin dış ölçüsü (bugünkü yol)
