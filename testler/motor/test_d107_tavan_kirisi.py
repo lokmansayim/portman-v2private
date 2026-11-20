@@ -43,6 +43,12 @@ UZUN = {**TEK_ODA, "yapi": {**TEK_ODA["yapi"], "grid": {"x_pano": 12, "y_pano": 
         "acikliklar": [{"tur": "pencere", "olcu": "120x120", "mahal": "SALON", "duvar": "arka"}]}
 # Motor'un sorduğu evler (K21; Lokman'ın sözü değil): katalogdaki 3+1'in (P9401) iki aday kopyası, iki ucu köşede iki eşit yer
 SORULAN = {"is_emri/adaylar/TEST01.json": [323.75, 386.5], "is_emri/adaylar/TEST03.json": [637.5, 700.25]}
+# Hedef örneğin dışında kirişli havuz evi (İE-43 PR-8, D-134): 120 m²'nin (PA-50) ana çatının örttüğü verandasında D-127'nin veranda
+# kirişi, ara kolondan gövdenin duvarına (listede L 2660; D-134 › Bilinen farklar 4). Kiriş bu testin okumasıyla aynen kilitli.
+EK_KIRISLI = {"is_emri/adaylar/PA50.json": [{"oda": "VERANDA", "yon": "y", "eksen_cm": 444.25, "uclar_cm": [10.0, 256.0],
+                                             "yuzden_yuze_cm": 246.0, "iki_ucu_kose": False, "uc": "kolon",
+                                             "kolon_cm": [439.25, 0.0, 449.25, 10.0], "parcalar_cm": [434.25, 434.25],
+                                             "liste_boyu_cm": 266.0, "aciklik_cm": 868.5}]}
 
 
 def _oku(yol: str | Path) -> dict:
@@ -112,8 +118,9 @@ def test_kirissiz_evler(kod):
 
 def test_tarama_butun_is_emirleri():
     """Depodaki bütün prefabrik İş Emri'leri (havuz, adaylar, 6×8, Yan Verandalı, P6001, TK-01…TK-06, PK-01, çizim kıyası, kör ölçüm,
-    harness): kiriş yalnız hedef örnekteki üç evde ve onların kopyalarında (70 m² = AP-09, 65 m² = AP-24, 81 m² = AP-17), aynı kirişle.
-    Uyarı yalnız iki eşit yerin kaldığı iki aday kopyasında (P9401'in 3+1'i; kiriş konmaz, sorulur)."""
+    harness): kiriş yalnız hedef örnekteki üç evde ve onların kopyalarında (70 m² = AP-09, 65 m² = AP-24, 81 m² = AP-17), aynı kirişle;
+    ayrıca 120 m² havuz evinin verandasında D-127'nin kirişi (`EK_KIRISLI`, D-134). Uyarı yalnız iki eşit yerin kaldığı iki aday
+    kopyasında (P9401'in 3+1'i; kiriş konmaz, sorulur)."""
     kopya = {"testler/cizim/evler/AP09.json": "PA03", "testler/kor/projeler/AP09/is_emri.json": "PA03",
              "testler/kor/projeler/AP24/is_emri.json": "PA20", "testler/kor/projeler/AP17/is_emri.json": "PA16"}
     kirisli, uyarili = {}, {}
@@ -132,6 +139,7 @@ def test_tarama_butun_is_emirleri():
             uyarili[ad] = [d.get("adaylar_cm") for d in s["disinda"] if d["neden"] == "iki eşit yer"]
     beklenen = {b["is_emri"]: [b["kiris"]] for b in BEKLENEN["kirisli"].values()}
     beklenen.update({y: [BEKLENEN["kirisli"][k]["kiris"]] for y, k in kopya.items()})
+    beklenen.update(EK_KIRISLI)
     assert kirisli == beklenen
     assert uyarili == {y: [a] for y, a in SORULAN.items()}
 

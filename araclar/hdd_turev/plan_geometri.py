@@ -6,7 +6,8 @@ Paftanın çizgilerinden okunur, pafta düzeltilmez:
 - oda: aks hücrelerinin duvarsız kenarlardan dolgusu, adı `pafta_kart`'ın oda yazısından (yazının noktası hangi bölgedeyse);
 - açıklık: pano blokları (pencere, vasistas, kapı), ölçüsü en yakın açıklık yazısından;
 - taşan veranda: gövdenin dışındaki kesik çizgili dikdörtgen ve kolon kareleri; köşedekilerden fazla kolon `ara_kolon` olur (D-109,
-  `veranda_ara_kolonu`);
+  `veranda_ara_kolonu`); paftanın makas planında ana çatı verandayı da örtüyorsa (elle okunur) veranda gövdenin açık mahali olur
+  (`verandayi_govdeye_al`, `ev.py --ana-cati-verandasi`; D-129, D-131);
 - pano dizilimi: her duvarın pano ekleri (bandı enine kesen, boyu duvar kalınlığı kadar çizgiler).
 Okunamayan ya da emin olunmayan her şey `uyarilar`'a yazılır (K21); İş Emri'ndeki varsayımlar `varsayimlar`'a.
 
@@ -917,6 +918,52 @@ def veranda_ara_kolonu(v: dict, H: float) -> tuple[int | None, str | None]:
     if ara < gerekli:
         return None, f"paftada {ara} ara kolon; Motor kolon ekseni arası 565 cm kuralıyla {gerekli} ara kolon koyar (D-109).{yer}"
     return ara, f"paftada {len(kol)} kolon; İş Emri'ne ara_kolon: {ara} yazıldı (D-109).{yer}"
+
+
+def verandayi_govdeye_al(ie: dict, g: dict, ad: str = "VERANDA") -> dict:
+    """Paftanın makas planında ana çatı taşan verandayı da örtüyorsa (ana makaslar verandanın üstünde; saçağın ölçüsü gövde + veranda +
+    2 × 25) veranda gövdenin açık mahalidir (D-129, D-131; disk arşivi 110 ve 120 m²). Bu okuma makas planından yapılır, kodla değil;
+    araç yalnız dönüşümü yapar (`ev.py --ana-cati-verandasi`). Yalnız ön cephenin tamamını tutan veranda (v1).
+
+    - gövde verandanın derinliği kadar uzar (`dis_olcu_cm.y`, ızgara `y_pano`); veranda `tur: veranda` mahal olur (gövdedeki veranda gibi);
+    - ön cephedeki dış kapı verandaya açılır (`arasi` `__DIS__` → veranda);
+    - paftadaki ara kolonlar dikme olur, paftadaki yerinde (merkez 0,25 cm'ye, gerçek çerçevede sol-alt köşe; köşe kolonlarını Motor koyar,
+      D-38); kenarın kirişi ara kolonlarda bölünür (D-129);
+    - verandanın iki varsayım satırı (D-109 ara kolonu, ayrı çatı) tek satırla değişir.
+    `ie` okuyucunun (uydurulmuş) İş Emri'si, `g` aynı paftanın `geometri`'si. Yeni İş Emri döner; `ie` değişmez."""
+    ie = json.loads(json.dumps(ie))
+    V = ie.get("verandalar") or []
+    k = next((i for i, v in enumerate(V) if v["ad"] == ad), None)
+    if k is None:
+        raise ValueError(f"{ad}: İş Emri'nde taşan veranda yok")
+    v = V.pop(k)
+    if not V:
+        ie.pop("verandalar")
+    y_ = ie["yapi"]
+    X, Yb = y_["dis_olcu_cm"]["x"], y_["dis_olcu_cm"]["y"]
+    if v["cephe"] != "on" or abs(v["bas_cm"]) > 1 or abs(v["bit_cm"] - X) > 1:
+        raise ValueError(f"{ad}: yalnız ön cephenin tamamını tutan veranda gövdeye alınır ({v['cephe']}, {v['bas_cm']:g}–{v['bit_cm']:g})")
+    gv = next(q for q in g["verandalar"] if q["cephe"] == "on")
+    kisa = y_["kisa_kenar"]
+    ilk = {"x": 10.0 if kisa == "x" else 5.0, "y": 10.0 if kisa == "y" else 5.0}
+    Yn = Yb + v["derinlik_cm"]
+    y_["dis_olcu_cm"]["y"] = Yn
+    y_["grid"]["y_pano"] = math.ceil((Yn - 2 * ilk["y"]) / 62.75 - 1e-6) / 2
+    ie["mahaller"].append({"ad": ad, "tur": "veranda", "konum_cm": [[ilk["x"], Yb - ilk["y"], X - ilk["x"], Yn - ilk["y"]]]})
+    for a in ie["acikliklar"]:
+        if a["tur"] == "dis_kapi" and a.get("duvar") == "on" and "__DIS__" in a.get("arasi", []):
+            a["arasi"] = [ad if m == "__DIS__" else m for m in a["arasi"]]
+            a.pop("duvar")
+    orta = sorted(round((q[0] + q[2]) / 2 * 4) / 4 for q in gv["kolonlar"])
+    ara = orta[1:-1]
+    if ara:
+        ie["dikmeler"] = (ie.get("dikmeler") or []) + [[c - 5.0, 0.0] for c in ara]
+    ie["varsayimlar"] = [s for s in ie.get("varsayimlar", []) if not s.startswith(f"{ad}: ")]
+    ie["varsayimlar"].append(
+        f"{ad}: paftanın makas planında ana çatı verandayı da örtüyor; veranda gövdenin açık mahali (gövde {Yb:g} + {v['derinlik_cm']:g} = "
+        f"{Yn:g} cm). Paftada {len(orta)} kolon; ara kolonlar paftadaki yerinde ({', '.join(f'{c:g}' for c in ara) or 'yok'} cm), kiriş "
+        f"onlarda bölünür (D-129).")
+    return ie
 
 
 def aciklik_sayilari(g) -> dict:

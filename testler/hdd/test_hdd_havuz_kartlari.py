@@ -42,9 +42,18 @@ def test_ad_yok(kod):
     assert not re.search(r"PREFABR[İI]K\s+[A-ZÇĞİÖŞÜ]{3,}", metin)                   # pafta başlığındaki "… PREFABRİK <ad>" yazısı yok
 
 
+# Çerçeveli şablonda dış kapının "Çelik" yazısı olmayan pafta (İE-43 PR-8): okuyucu dış ve iç kapıyı ayırmaz, toplam yazar; kartın
+# `varsayim`'ında yazılı.
+YAZISIZ_CERCEVELI = {"HD-380"}
+
+
 def test_kapi_ayrimi_yalniz_yazisi_olan_sablonda():
-    """Bantlı şablonda (2019–2020) dış kapının "Çelik" yazısı yok: dış ve iç kapı ayrılmaz, toplam yazılır (PR-4)."""
-    for k in KARTLAR.values():
+    """Bantlı şablonda (2019–2020) dış kapının "Çelik" yazısı yok: dış ve iç kapı ayrılmaz, toplam yazılır (PR-4). Çerçeveli
+    şablonda yazı yoksa da ayrılmaz (`YAZISIZ_CERCEVELI`, PR-8)."""
+    for kod, k in KARTLAR.items():
         ayrik = k["dis_kapi_adedi"] is not None
-        assert ayrik == (k["kaynak"]["sablon"] == "cerceveli")
+        assert ayrik == (k["kaynak"]["sablon"] == "cerceveli" and kod not in YAZISIZ_CERCEVELI), kod
         assert k["kapi_adedi"] is not None
+    for kod in YAZISIZ_CERCEVELI:
+        assert KARTLAR[kod]["kaynak"]["sablon"] == "cerceveli"
+        assert any("Çelik" in v and "yazısı yok" in v for v in KARTLAR[kod]["varsayim"]), kod

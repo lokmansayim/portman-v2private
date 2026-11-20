@@ -10,6 +10,7 @@ Adımlar (her biri ayrı araç, sırayla):
 `yan_yana.png`. Pafta ve onlardan üretilenler depoya girmez (İE-43); çıktı klasörü depo dışında seçilir.
 
     python3 araclar/hdd_turev/ev.py <dxf|dxf.gz> <kart.json> <plan sırası> <HD kodu> <çıktı> [--baslik "37 m²"]
+                                    [--ana-cati-verandasi VERANDA]   (makas planında ana çatı taşan verandayı da örtüyorsa)
 """
 from __future__ import annotations
 
@@ -51,6 +52,9 @@ def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("dxf"); ap.add_argument("kart"); ap.add_argument("plan", type=int); ap.add_argument("kod"); ap.add_argument("cikti")
     ap.add_argument("--baslik", default="")
+    ap.add_argument("--ana-cati-verandasi", metavar="AD", action="append", default=[],
+                    help="paftanın makas planında ana çatının örttüğü taşan veranda (ör. VERANDA): gövdenin açık mahali olur "
+                         "(`plan_geometri.verandayi_govdeye_al`; okuma makas planından, elle)")
     a = ap.parse_args(argv)
     c = Path(a.cikti); c.mkdir(parents=True, exist_ok=True)
     if _kos([BURA / "plan_geometri.py", a.dxf, a.kart, a.plan, c / "ie.json", "--kod", a.kod, "--geo", c / "geo.json"], c / "okuma.txt"):
@@ -58,6 +62,13 @@ def main(argv: list[str] | None = None) -> int:
     if _kos([BURA / "uydur.py", c / "geo.json", c / "ie.json", c / "ie_uydu.json"], c / "uydurma.txt"):
         print("uydurma hatası:", (c / "uydurma.txt").read_text(encoding="utf-8")[-600:]); return 1
     ie = json.loads((c / "ie_uydu.json").read_text(encoding="utf-8"))
+    if a.ana_cati_verandasi:
+        sys.path.insert(0, str(BURA))
+        from plan_geometri import verandayi_govdeye_al
+        g = json.loads((c / "geo.json").read_text(encoding="utf-8"))
+        for ad in a.ana_cati_verandasi:
+            ie = verandayi_govdeye_al(ie, g, ad)
+        (c / "ie_uydu.json").write_text(json.dumps(ie, ensure_ascii=False, indent=1), encoding="utf-8")
     m = motor_kos(ie, c / "motor")
     print(f"Motor {m['W']:g} × {m['H']:g} cm, doğrulama {'geçti' if m['dogrulama'] else 'KALDI'}")
     for u in m["uyarilar"]:
