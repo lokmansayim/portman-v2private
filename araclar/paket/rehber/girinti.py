@@ -19,7 +19,7 @@ from __future__ import annotations
 import math
 from collections import defaultdict
 
-from shapely.geometry import LineString, Polygon
+from shapely.geometry import LineString, Point, Polygon
 
 BAS = 3.7                   # baş makasın konumu: duvarın dış yüzünden (şablon: dış yüzü omeganın dış kanadıyla aynı hizada)
 ESIK = 1e-6
@@ -62,6 +62,7 @@ def cati(HZ: dict, kitap: dict, IFC: dict, ASIK: dict, H: float, SC: float, TAN:
     from motor.yerlesim.serit import _nokta, _ortulu
 
     T = HZ["cati_serit"]
+    DUZ = bool(T.get("duz_govde"))                                     # dikdörtgen gövde, mahya x yönünde (veri.py)
     if abs(float(T["sacak"]) - SC) > 0.01:
         raise Desteklenmiyor(f"çatı tanımının saçağı {T['sacak']}, İş Emri'nin {SC}")
     for q in T["parcalar"]:
@@ -223,6 +224,13 @@ def cati(HZ: dict, kitap: dict, IFC: dict, ASIK: dict, H: float, SC: float, TAN:
     for n, kt in IFC.items():
         if n.startswith("ASIK"):
             ps = ASIK.get(n) or {}
+            if ps.get("Cati") is None and DUZ:                          # dikdörtgen gövdenin beşiği: kart modeli aşığa çatı adı yazmaz;
+                orta = Point((kt[0] + kt[3]) / 2, (kt[1] + kt[4]) / 2)   # yüz aşığın planda içinde durduğu yüz, sıra saçaktan uzaklığı
+                yk = [k for k, Y in yuz.items() if Polygon(Y["poly"]).contains(orta)]
+                if len(yk) != 1:
+                    raise Desteklenmiyor(f"kart modelinin aşığı {n} çatının yüzlerinden birinde değil")
+                sira[(yk[0], round(abs((kt[1] + kt[4]) / 2 - yuz[yk[0]]["E"][1]), 1))].append(kt)
+                continue
             if ps.get("Cati") not in YK:
                 raise Desteklenmiyor(f"kart modelinin aşığı {n} çatının yüzlerinden birinde değil ({ps.get('Cati')})")
             sira[(YK[ps["Cati"]], int(ps["Sira"]))].append(kt)

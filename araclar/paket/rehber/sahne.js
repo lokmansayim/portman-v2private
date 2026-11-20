@@ -364,10 +364,61 @@ D.ceku.forEach(u => {   // çektirme U'su (iç duvarın kalınlığında): yeri 
 (D.verandalar || []).forEach(v => {
   const m = mat('box', AD.veranda);
   v.kolon.forEach(k => {
-    const [x0, y0, x1, y1] = k.rect, g = new THREE.Group(); g.add(bp(x0, x1, y0, y1, 0.6, H - 10, m)); g.add(bp(x0 - 5, x1 + 5, y0 - 5, y1 + 5, 0, 0.6, m));
+    const [x0, y0, x1, y1] = k.rect, g = new THREE.Group(); g.add(bp(x0, x1, y0, y1, 0.6, k.h1 || H - 10, m)); g.add(bp(x0 - 5, x1 + 5, y0 - 5, y1 + 5, 0, 0.6, m));
     add(AD.veranda, g, k.order, { kod: 'V-01', ad: kart('V-01'), satir: [['Bu parça', k.bu], ['Liste', k.liste], ...kartSat('V-01')] });
   });
-  v.kiris.forEach(k => { const [x0, y0, x1, y1] = k.rect; add(AD.veranda, bp(x0, x1, y0, y1, H - 10, H, m), k.order, { kod: 'V-02', ad: kart('V-02'), satir: [['Bu parça', k.bu], ['Liste', k.liste], ...kartSat('V-02')] }); });
+  v.kiris.forEach(k => { const [x0, y0, x1, y1] = k.rect; add(AD.veranda, bp(x0, x1, y0, y1, k.h0 || H - 10, k.h1 || H, m), k.order, { kod: 'V-02', ad: kart('V-02'), satir: [['Bu parça', k.bu], ['Liste', k.liste], ...kartSat('V-02')] }); });
+});
+
+/* Sundurma paneli (teras panelli veranda; D-52, D-133): panel duvara ve dış kirişe oturur, dışarı eğimli; üstünde trapez sac; duvarla sacın
+   birleşiminde Z damlalık (Lokman'ın kesiti, 20.11.2026: 10 / 40 / 125 / 25 mm, 130°, 90°, 135°), araya silikonize mastik; dış uçta özel büküm
+   saçak sacı, iki yanda sundurma kapama. Kesitler y–h düzleminde, x boyunca uzatılır (profilX). */
+function profilX(pts, x0, x1, m) {   // pts: [[y, h], ...] (cm); x0…x1 boyunca
+  const sh = new THREE.Shape(); pts.forEach(([y, h], i) => i ? sh.lineTo(-Z(y), h / 100) : sh.moveTo(-Z(y), h / 100)); sh.closePath();
+  const o = mesh(new THREE.ExtrudeGeometry(sh, { depth: (x1 - x0) / 100, bevelEnabled: false }), m);
+  o.rotation.y = Math.PI / 2; o.position.x = X(x0); return o;
+}
+(D.sundurma || []).forEach(su => {
+  const st = AD.sundurma, out = su.out, D_ = Math.abs(su.yw - su.yo);
+  const yy = d => su.yw + out * d;                                  // duvardan dışarı d cm
+  const ust = d => su.ust - su.egim * d;                             // panelin üstü
+  const LS = su.liste;
+  let o = 0;
+  // panel: 8 cm, C profil çerçeve (gösterim: dolu kesit)
+  add(st, profilX([[yy(0), ust(0)], [yy(D_), ust(D_)], [yy(D_), ust(D_) - su.kal], [yy(0), ust(0) - su.kal]], su.x0, su.x1, mat('frame', st)), o++,
+    { kod: null, ad: 'Sundurma paneli (8 cm C)', satir: [['Bu parça', `${su.ad} · ${fmtc(su.x1 - su.x0)} × ${fmtc(D_)} cm, 8 cm C profilden panel`], ['Oturma', `duvarda üstü ${fmtc(su.ust)} cm, dış kirişte ${fmtc(su.alt_uc)} cm; eğim %${fmt(su.egim * 100, 0)}`], ['Liste', LS.panel], ['Kaynak', 'Lokman, 20.11.2026 07:54:25: panel sırt kalınlığı 8 cm, ana çatıdan 20 cm aşağıda, %5']] });
+  // trapez sac: 100 cm kapatır; levha sacın ucundan 5 cm taşar; hadveler eğim boyunca (gösterim: 20 cm arayla)
+  const ms = mat('roof', st), SB = 0.06, TS = D_ + 5;
+  su.sac.forEach(([a, b], i) => {
+    const g = new THREE.Group();
+    g.add(profilX([[yy(0), ust(0) + SB], [yy(TS), ust(TS) + SB], [yy(TS), ust(TS)], [yy(0), ust(0)]], a, b, ms));
+    for (let r = a + 2; r < b - 1; r += 20) g.add(profilX([[yy(0), ust(0) + RIBH], [yy(TS), ust(TS) + RIBH], [yy(TS), ust(TS)], [yy(0), ust(0)]], r - RIB_UST / 2, r + RIB_UST / 2, ms));
+    add(st, g, o++ * 0.6, { kod: null, ad: 'Trapez sac (sundurma)', satir: [['Bu parça', `${i + 1}. levha · ${fmtc(b - a)} cm${b - a < 99 ? ' (enine kesilir)' : ''} · L ${fmtc(su.sac_L)} cm`], ['Liste', LS.sac]] });
+  });
+  // Z damlalık: 125 mm kol duvarda, 40 mm kol sacın hadvelerinin üstünde, 10 mm uç sac üstüne kıvrık (130°), 25 mm üst kol duvardan dışa (135°)
+  const hz = ust(0) + RIBH + 0.1, c45 = Math.SQRT1_2, c50 = Math.cos(50 * Math.PI / 180), s50 = Math.sin(50 * Math.PI / 180);
+  const zp = [[2.5 * c45, hz + 12.5 + 2.5 * c45], [0, hz + 12.5], [0, hz], [4, hz], [4 + 1 * c50, hz - 1 * s50]];
+  const zSh = thick(zp.map(([d, h]) => [-Z(yy(d)) * 100, h]), 0.1);
+  su.damla.forEach(([a, b], i) => {
+    const m_ = mesh(new THREE.ExtrudeGeometry(zSh, { depth: (b - a) / 100, bevelEnabled: false }), mat('trim', st));
+    m_.rotation.y = Math.PI / 2; m_.position.x = X(su.x0 + a);
+    add(st, m_, o++ * 0.6 + 6, { kod: null, ad: 'Z damlalık', satir: [['Bu parça', `${i + 1}. parça · ${fmtc(b - a)} cm, duvar boyunca`], ['Kesit', '10 / 40 / 125 / 25 mm; açılar 130°, 90°, 135° (Lokman, 20.11.2026; duvardaki duruşu okuma)'], ['Görev', 'duvardan süzülen suyu sacın üstüne akıtır'], ['Liste', LS.damla]] });
+  });
+  // mastik: duvarla damlalığın arasında, damlalığın üst ucunda
+  add(st, profilX([[yy(0), hz + 12.2], [yy(0.5), hz + 12.2], [yy(0.5), hz + 13], [yy(0), hz + 13]], su.x0, su.x1, mat('dubel', st)), o++ * 0.6 + 7,
+    { kod: null, ad: 'Silikonize mastik', satir: [['Bu parça', 'duvarla Z damlalık arasına sıkılır'], ['Liste', `${LS.mastik} (listedeki mastikten; ayrı satır yok)`], ['Kaynak', 'Lokman, 20.11.2026 12:53:18: araya mastik sıkılıyor']] });
+  // özel büküm saçak sacı: dış uçta panelin alnını örter (gösterim: alın + üstte sacın altına 3 cm tırnak)
+  su.sacak.forEach(([a, b], i) => {
+    const e = D_ + 0.2, g = new THREE.Group();
+    g.add(profilX([[yy(e), ust(D_) - su.kal - 1], [yy(e + 0.1), ust(D_) - su.kal - 1], [yy(e + 0.1), ust(D_)], [yy(e), ust(D_)]], su.x0 + a, su.x0 + b, mat('trim', st)));
+    g.add(profilX([[yy(D_ - 3), ust(D_ - 3)], [yy(e + 0.1), ust(e + 0.1)], [yy(e + 0.1), ust(e + 0.1) - 0.1], [yy(D_ - 3), ust(D_ - 3) - 0.1]], su.x0 + a, su.x0 + b, mat('trim', st)));
+    add(st, g, o++ * 0.6 + 8, { kod: null, ad: 'Özel büküm saçak sacı (sundurma)', satir: [['Bu parça', `${i + 1}. parça · ${fmtc(b - a)} cm, dış uçta`], ['Biçim', 'panelin alnını örter; ölçü gösterim'], ['Liste', LS.sacak]] });
+  });
+  // sundurma kapama: iki yanda panelin yan yüzünü örter
+  [su.x0 - 0.2, su.x1 + 0.1].forEach((x, i) => {
+    add(st, profilX([[yy(0), ust(0) + 1], [yy(D_ + 0.2), ust(D_ + 0.2) + 1], [yy(D_ + 0.2), ust(D_) - su.kal - 1], [yy(0), ust(0) - su.kal - 1]], x, x + 0.1, mat('trim', st)), o++ * 0.6 + 9,
+      { kod: null, ad: 'Sundurma kapama', satir: [['Bu parça', `${i ? 'sağ' : 'sol'} yan · ${fmtc(D_)} cm`], ['Biçim', 'panelin yan yüzünü örter; ölçü gösterim'], ['Liste', LS.kapama]] });
+  });
 });
 
 /* Duvar üstü omegaları: saçak omegası, duvar omegası, baş makas omegası, iç duvar omegası */
