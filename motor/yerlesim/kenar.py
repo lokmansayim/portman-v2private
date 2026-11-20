@@ -230,7 +230,8 @@ def damlalik(g: dict, D: dict, t: float, kaplama: float) -> list[dict]:
     """D-143: damlalık (Z) her teras panelinin (`cati.tip: teras_paneli`, D-52) duvar kenarında, duvarın dış yüzünde, panelin eni boyunca
     (Lokman, D-133: "damlalık bu duvar ile trapez sacın üstüne geliyor"). Teras başına bir parça (hattın tamamı); sayı kesim planında,
     terasların enlerinin toplamından (liste üretecinin D-57 yolu). Kesit yalnız gösterim (`kesit`): duvara yaslanan kanat, sacın üstündeki
-    kanat, uçtaki iniş; sacın üstü panelin duvardaki üstü + kaplama. Parçada panelin plan kutusu (`Panel_cm`; kat planında yer göstermek için)
+    kanat, uçtaki iniş sacın üstüne değer; duvar kanadı duvarın üstünü (ana saçağın altı) aşmaz; sacın üstü panelin duvardaki üstü + kaplama
+    (D-40'ın kalınlaşması değil: teras panelinin sacı trapez). Parçada panelin plan kutusu (`Panel_cm`; kat planında yer göstermek için)
     ve stok boyu (`ParcaBoyu_cm`)."""
     K = D["kesit"]
     L0 = round(D["parca_boyu"] * 100, 6)
@@ -245,9 +246,11 @@ def damlalik(g: dict, D: dict, t: float, kaplama: float) -> list[dict]:
         w, d = {"on": (Y1, -1), "arka": (Y0, 1), "sol": (X1, -1), "sag": (X0, 1)}[cephe]
         a0, a1 = (X0, X1) if cephe in ("on", "arka") else (Y0, Y1)
         zb = c["mahya_kotu"] + kaplama
-        kesitler = [(_dikdortgen(*sorted((w, w + d * t)), zb, zb + K["duvar"]), a0, a1),
-                    (_dikdortgen(*sorted((w, w + d * K["ust"])), zb, zb + t), a0, a1),
-                    (_dikdortgen(*sorted((w + d * (K["ust"] - t), w + d * K["ust"])), zb - K["uc"], zb), a0, a1)]
+        zu = zb + K["uc"]                                               # sacın üstündeki kanat; uçtaki iniş sacın üstüne değer
+        zt = max(zu + t, min(zb + K["duvar"], g["duvar_h"]))           # duvar kanadı duvarın üstünü (ana saçağın altı) aşmaz
+        kesitler = [(_dikdortgen(*sorted((w, w + d * t)), zb, zt), a0, a1),
+                    (_dikdortgen(*sorted((w, w + d * K["ust"])), zu, zu + t), a0, a1),
+                    (_dikdortgen(*sorted((w + d * (K["ust"] - t), w + d * K["ust"])), zb, zu), a0, a1)]
         duzlem = "yz" if cephe in ("on", "arka") else "xz"          # kesit hatta dik düzlemde, hat boyunca
         geo = {"tip": "coklu", "parcalar": [{"tip": "prizma", "duzlem": duzlem, "noktalar": uz, "a0": b0, "a1": b1} for uz, b0, b1 in kesitler]}
         boy = _r(a1 - a0)
@@ -336,6 +339,7 @@ def katman(ie: dict, g: dict, D: dict, kesit: dict, K: dict) -> dict:
     kuralları (`cati_tipleri` kuralın kendisinden okunur, K2'deki gibi: yazılı değilse her çatı)."""
     G_ = D[GOSTERIM]["kesit_cm"]
     from . import kaplama_kalinlasma, kaplama_turu, kaplama_yazisi, trapez_kapatma_m
+    kaplama0 = kesit["kaplama"]                 # D-143: damlalık teras panelinin trapez sacında; sandviç kalınlaşması (D-40) ona girmez
     dk = kaplama_kalinlasma(D["cati_kaplamasi"], kaplama_turu(g, D["cati_kaplamasi"])[0])
     # İE-15 K6: trapez sac kaplamada mahya trapez sac mahyasıdır (CK-07), parçası sacın kapatması kadar (D-50, M-11; liste üreteciyle aynı okuma)
     tm = trapez_kapatma_m(g, D["cati_kaplamasi"]) if D["mahya_yerlesimi"]["trapez_yazisi"] in kaplama_yazisi(g) else None
@@ -384,5 +388,5 @@ def katman(ie: dict, g: dict, D: dict, kesit: dict, K: dict) -> dict:
         if "mahya_yerlesimi" in kurulan:
             vp += mahya(g, G_, kesit, F, trapez_m=tm)
         parcalar += veranda.isaretle(vp, F)
-    parcalar += damlalik(g, D[DAMLALIK], G_["sac"], kesit["kaplama"])     # D-143: sundurma panelinin duvar kenarında (teras panelsiz evde yok)
+    parcalar += damlalik(g, D[DAMLALIK], G_["sac"], kaplama0)     # D-143: sundurma panelinin duvar kenarında (teras panelsiz evde yok)
     return {"parcalar": parcalar, "kural_yok": kural_yok, "uyarilar": uyarilar, "hatlar": hatlar}
