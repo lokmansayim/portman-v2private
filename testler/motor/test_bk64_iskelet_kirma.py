@@ -111,3 +111,29 @@ def test_ince_serit_cizilmez():
 def test_dik_acili_olmayan_iz_reddedilir():
     with pytest.raises(CI.IskeletHatasi, match="dik açılı"):
         CI.yuzler(Polygon([(0, 0), (500, 0), (400, 300), (0, 300)]))
+
+
+def test_liste_makas_yonu_catidan():
+    """Geometri hakemi (20 Kasım): listenin açıklığı ve oda ölçüleri çatının makas yönünden (x), İş Emri'nin plan değerinden (y) değil."""
+    L, plan = PL.model_motor(IE), G.kur(IE)
+    for o in L["kapali"] + L["acik"]:                               # makas x'i geçer: oda eni y'de, derinliği x'te
+        x0, y0, x1, y1 = plan.mahaller[o["ad"]].poly.bounds
+        assert (o["en_cm"], o["derin_cm"]) == (y1 - y0, x1 - x0), o["ad"]
+
+
+def test_besikte_yontem_reddedilir():
+    from motor import sunum
+    ie = copy.deepcopy(ESKI)
+    ie["cati"] = {**ie["cati"], "tip": "besik", "yontem": "kenar"}
+    with pytest.raises(G.IsEmriHatasi, match="yalnız kırma"):
+        sunum.cati_tanimi(G.kur(ie), ie)
+
+
+def test_u_govde_liste_yazilmaz(monkeypatch):
+    """İki iç köşeli gövde (U) onaylı eskizle kıyaslanmadı: liste yazılmaz (K21)."""
+    import motor.cati_serit as CS
+    plan = G.kur(IE)
+    u = box(0, 0, 888.5, 1149.5).difference(box(300, 0, 600, 220))
+    monkeypatch.setattr(CS, "cati_izi", lambda p, ie: u)
+    with pytest.raises(PL.ListeYazilmaz, match="iç köşe"):
+        PL._iskelet_kirma_catilari(plan, IE)

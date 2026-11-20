@@ -422,6 +422,13 @@ def model_motor(ie: dict) -> dict:
     plan = G.kur(json.loads(json.dumps(ie)))
     y = ie["yapi"]; c = ie.get("cati") or {}
     mx = c.get("makas_ekseni", "x") == "x"                     # makaslar x'i geçiyorsa saçak duvarları y yönünde koşar
+    if c.get("yontem") == "kenar":                             # BK-64 (D-139): makas yönü çatıdan (mahyaya dik); İş Emri'nin değeri plan kuralı için
+        from . import cati_iskelet as _CI
+        from . import cati_prefabrik as _CP
+        try:
+            mx = _CI.makas_ekseni(_CP.cati(plan, ie)["duzlemler"]) == "x"
+        except (_CP.PrefabrikCatiHatasi, _CI.IskeletHatasi) as e:
+            raise ListeYazilmaz(f"kırma (kenar yöntemi) makas yönü kurulmadı: {e}") from None
     eave_yon = "y" if mx else "x"
     panolar, ekler = [], []
     # İE-27: 3'lü H'lı T'ler ve çektirme U'ları `birlesim_uclari`'nden (montaj rehberi aynı yerleri okur, D-28 madde 1)
@@ -1283,6 +1290,7 @@ def _iskelet_kirma_catilari(plan, ie: dict) -> tuple[list[dict], dict]:
     Bu kuralın dışında kalanda liste yazılmaz (K21): taşan veranda, mahyalar iki yönde, makas arası 125,5'ten geniş, uç bandı ya da kısa
     makas arası 1,5 panodan geniş, bandın böldüğü makasın önünde vadi yok."""
     from shapely.geometry import LineString, Polygon
+    from shapely.geometry.polygon import orient
     from . import cati_prefabrik as CP
     from . import geometry as G
     from .cati_serit import cati_izi
@@ -1308,6 +1316,11 @@ def _iskelet_kirma_catilari(plan, ie: dict) -> tuple[list[dict], dict]:
     j = 1 - i
     eks, dik = ("x", "y") if i == 0 else ("y", "x")
     iz = cati_izi(plan, ie)
+    cz_ = list(orient(iz, 1.0).exterior.coords)[:-1]
+    ic_kose = sum(1 for k in range(len(cz_)) if (lambda a, b, c: (b[0] - a[0]) * (c[1] - b[1]) - (b[1] - a[1]) * (c[0] - b[0]))(
+        cz_[k - 1], cz_[k], cz_[(k + 1) % len(cz_)]) < -1e-6)
+    if ic_kose > 1:                                                     # yalnız dikdörtgen ve L gövde onaylı eskizle kıyaslandı (U, T, Z yok)
+        raise ListeYazilmaz(f"kırma (kenar yöntemi): gövdede {ic_kose} iç köşe; yalnız dikdörtgen ve L gövde kıyaslandı, liste yazılmaz")
     yuzler = {d["ad"]: Polygon(d["plan"]) for d in t["duzlemler"]}
     uc_yuz = {d["ad"] for d in t["duzlemler"] if d["yukari"][j] == 0}  # yüzü mahya yönünde yükselen: kırma ucunun yüzü
     hat = lambda a: LineString([(a, -1e5), (a, 1e5)]) if i == 0 else LineString([(-1e5, a), (1e5, a)])   # mahya ekseninde a'daki dik hat
@@ -1383,9 +1396,10 @@ def _iskelet_kirma_catilari(plan, ie: dict) -> tuple[list[dict], dict]:
     ana_a = sorted(m["a"] for m in makaslar if m["rol"] == "ana")
     if len(ana_a) < 2:
         raise ListeYazilmaz("kırma (kenar yöntemi): ikiden az ana makas; liste yazılmaz")
-    aralik = max(b_ - a_ for a_, b_ in zip(ana_a, ana_a[1:]))
+    tum_a = sorted({m["a"] for m in makaslar})                          # ana ve cumba makasları birlikte (geometri hakemi, 20 Kasım)
+    aralik = max(b_ - a_ for a_, b_ in zip(tum_a, tum_a[1:]))
     if aralik > M_ + 1e-6:
-        raise ListeYazilmaz(f"kırma (kenar yöntemi): iki ana makasın arası {sy(aralik)} cm, 125,5'ten geniş; liste yazılmaz")
+        raise ListeYazilmaz(f"kırma (kenar yöntemi): iki makasın arası {sy(aralik)} cm, 125,5'ten geniş; liste yazılmaz")
     # 2–3. kırma uçları: kısa ve çapraz makas
     kisa, capraz, uc_ozet = [], [], []
     for u in uclar:

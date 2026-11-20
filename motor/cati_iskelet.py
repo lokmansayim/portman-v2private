@@ -104,7 +104,9 @@ def yuzler(R: Polygon) -> list[dict]:
         for g in getattr(F, "geoms", [F]):                        # aynı doğrudaki iki saçak kenarı birbirine değmiyorsa iki ayrı yüz
             if g.area <= 1e-3:
                 continue
-            e = next(e for e, F_ in ls if F_.intersection(g).area > 1e-3)
+            e = next((e for e, F_ in ls if F_.intersection(g).area > 1e-3), None)
+            if e is None:
+                raise IskeletHatasi(f"{YON_ADI[n]} yüzünün saçak kenarı bulunamadı; iskelet beklenmeyen biçimde")
             p = Polygon([(round(x, 4), round(y, 4)) for x, y in g.exterior.coords]).simplify(0.01)
             if not p.is_valid or list(g.interiors):
                 raise IskeletHatasi(f"{YON_ADI[n]} yüzü geçerli bir çokgen değil; iskelet beklenmeyen biçimde")
@@ -116,7 +118,12 @@ def duzlemler(iz: Polygon, sacak: float, egim: float, sacak_kotu: float) -> list
     """Ayak izinden (gövde + veranda, dik açılı) `cati_genel` biçiminde düzlemler. Adlar yönden (`güney`, `kuzey`, …); aynı yönde
     birden çok yüz varsa büyükten küçüğe `güney`, `güney 2`."""
     R = orient(iz.buffer(sacak, join_style=2, mitre_limit=10), 1.0)
-    yz = yuzler(R)
+    try:
+        yz = yuzler(R)
+    except IskeletHatasi:
+        raise
+    except Exception as e:                                           # noqa: BLE001  (çokgen işleminin hatası: çatı çizilmez, K21)
+        raise IskeletHatasi(f"iskelet kurulamadı ({type(e).__name__}: {e})") from None
     dar = [y for y in yz if y["cokgen"].buffer(-EN_DAR_YUZ_CM / 2, join_style=2).is_empty]
     if dar:
         raise IskeletHatasi("iskelet " + ", ".join(f"{YON_ADI[y['n']]} yönünde {y['cokgen'].area / 1e4:.2f} m²" for y in dar)
