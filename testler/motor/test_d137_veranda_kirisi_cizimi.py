@@ -32,7 +32,7 @@ from test_d107_tavan_kirisi import _prefabrik_girdiler  # noqa: E402
 BEKLENEN = json.loads((KOK / "testler" / "motor" / "veri" / "D137_veranda_kirisi_cizimi_beklenen.json").read_text(encoding="utf-8"))
 
 # Gövdenin dış çizgisinde olmayan profiller: D-58 (`girinti_kirisi` anahtarı) ve D-137 (listede kirişi olan kenar). Depodaki bütün
-# prefabrik İş Emri'leri tarandı (20 Kasım 2026, 179 İş Emri); başka evde iç kenar profili yok.
+# prefabrik İş Emri'leri (`_tum_girdiler`) tarandı (20 Kasım 2026); başka evde iç kenar profili yok.
 IC_PROFILLER = {
     "is_emri/adaylar/PA04.json": [("D-58", (386.5, 37.5, 888.5, 37.5))],
     "testler/motor/veri/TK04_r07.json": [("D-58", (386.5, 37.5, 888.5, 37.5))],
@@ -42,6 +42,27 @@ IC_PROFILLER = {
     "is_emri/adaylar/PA21.json": [("D-137", (386.5, 0.0, 386.5, 60.0))],
     "testler/kor/projeler/AP25/is_emri.json": [("D-137", (386.5, 0.0, 386.5, 60.0))],
 }
+
+
+def _tum_girdiler() -> list[Path]:
+    """`_prefabrik_girdiler()` ve depodaki öteki prefabrik İş Emri'leri (havuz kaynakları, Motor test verisi, teklif, yarım pano, görsel,
+    paket girdisi, denemeler); aynı dosya bir kez."""
+    yollar = list(_prefabrik_girdiler())
+    for kalip in ("testler/havuz/is_emirleri/*.json", "testler/motor/veri/*.json", "testler/teklif/**/*.json", "testler/yarim_pano/**/*.json",
+                  "testler/gorsel/veri/**/*.json", "araclar/paket/girdi/**/*.json", "deneme/**/*.json"):
+        yollar += sorted(KOK.glob(kalip))
+    out, gor = [], set()
+    for y in yollar:
+        if y in gor:
+            continue
+        gor.add(y)
+        try:
+            ie = json.loads(y.read_text(encoding="utf-8"))
+        except (ValueError, UnicodeDecodeError):
+            continue
+        if isinstance(ie, dict) and isinstance(ie.get("yapi"), dict) and ie["yapi"].get("sistem", "prefabrik") == "prefabrik" and "mahaller" in ie:
+            out.append(y)
+    return out
 
 
 def _uret(ie: dict):
@@ -91,9 +112,12 @@ def test_listede_olmayan_kenar_cizilmez():
 
 def test_tarama_butun_is_emirleri():
     """Depodaki bütün prefabrik İş Emri'lerinde gövdenin dış çizgisinde olmayan profiller `IC_PROFILLER` kadar. Kenar seçimi çizimin kendi
-    işlevleriyle (`Cizici._girinti_acik_kenari`, `_kirisli_acik_kenarlar`, `_listede_kirisli`); DXF üretilmez."""
+    işlevleriyle (`Cizici._girinti_acik_kenari`, `_kirisli_acik_kenarlar`, `_listede_kirisli`); döngü `ciz_plan`'ın veranda profili
+    bölümünün kopyası, DXF üretilmez (iki evin DXF'i `test_iki_evde_profil`'de)."""
     bulunan = {}
-    for y in _prefabrik_girdiler():
+    girdiler = _tum_girdiler()
+    assert len(girdiler) >= 190, len(girdiler)
+    for y in girdiler:
         ie = json.loads(y.read_text(encoding="utf-8"))
         try:
             with contextlib.redirect_stdout(io.StringIO()):

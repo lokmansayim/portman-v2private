@@ -909,8 +909,10 @@ class Cizici:
         return out
 
     def _kirisli_acik_kenarlar(self, m) -> list:
-        """D-137: açık mahalin yükleme listesinde kiriş alan açık kenarları (`prefabrik_liste.kirisli_acik_kenarlar`; dikmesiz planda liste
-        açık mahale kiriş saymaz, burada da boş). Liste ve çizim kenarı aynı koddan okur (D-28 madde 1)."""
+        """D-137: açık mahalin yükleme listesinde kiriş alan açık kenarları (`prefabrik_liste.kirisli_acik_kenarlar`). Liste ve çizim kenarı
+        aynı koddan okur (D-28 madde 1). Dikmesiz planda liste açık kenara kiriş saymaz, burada da boş. Giriş nişinin ağzını liste ayrı
+        sayar (`nis_agizlari_cm`); ağız parçası duvar ekseninden başladığı için mahalin içinde kalmaz, burada da çıkmaz (depoda altı niş;
+        dikmesiz planda ağzı dış kutuda olmayan niş, liste sayar, çizim çizmez: depoda yok, BK-63 › Sınırlar)."""
         if not self.plan.dikmeler:
             return []
         from . import prefabrik_liste
