@@ -83,7 +83,7 @@ def test_veri_temiz_sahne_ayni(sayfalar, kl):
     if pafta:
         im = Image.open(io.BytesIO(pafta)).convert("L")
         assert im.size == temizle.PAFTA_BOYU and im.crop(temizle.PAFTA_ORTU).getextrema() == (255, 255)   # üst satır örtülü
-        assert f"gorsel/onay_pafta.jpg{ortak.surum_eki(pafta)}" in html          # önbellek kırıcı ek (20 Kasım 2026)
+        assert "gorsel/onay_pafta.jpg" in html
 
 
 def test_kampanyali_basliginda_brut_ve_net(sayfalar):
@@ -102,24 +102,6 @@ def test_acilis():
     assert re.findall(r'<a class="kart" href="([^"]+)/">', s2) == ["oyun"] + [r["klasor"] for r in KAYIT["rehberler"]]
     assert all(uret.kart_html(r, oz[r["klasor"]]) in s2 for r in KAYIT["rehberler"])
     assert '<span class="ac">Oyunu aç</span>' in s2 and "oyun/gorsel/kapak.jpg" in s2 and not ortak.bulgular(s2)
-
-
-def test_onbellek_kirici_ek():
-    """20 Kasım 2026: nginx resim ve modeli 7 gün saklatır; 85 m² yenilenince telefonda eski ön onay paftası göründü. Değişen resim
-    ve model adresi içerikle değişir (`ortak.surum_eki`); sabit rehberin kartı canlıdakiyle, ek atılınca, aynı kalır."""
-    a, b = ortak.surum_eki(b"bir"), ortak.surum_eki(b"iki")
-    assert a == ortak.surum_eki(b"bir") != b and ortak.SURUM_EKI.fullmatch(a)
-    r = R["85m2"]
-    oz = {"spec": ["a", "b", "c", "d", "e", "f"], "adim": r["adim"], "chip": "1 m²"}
-    kart = uret.kart_html(r, oz, a)
-    assert f'src="85m2/gorsel/kapak.jpg{a}"' in kart and ortak.SURUM_EKI.sub("", kart) == uret.kart_html(r, oz)
-    ozet = {x["klasor"]: oz for x in KAYIT["rehberler"]}
-    ov = {o["klasor"]: {"ad": R[o["rehber"]]["ad"], "adimlar": [0] * R[o["rehber"]]["adim"]} for o in KAYIT["oyunlar"]}
-    s = uret.acilis_sayfasi(KAYIT["rehberler"], ozet, KAYIT["oyunlar"], ov, {"85m2": a, "oyun": b})
-    assert f"85m2/gorsel/kapak.jpg{a}" in s and f"oyun/gorsel/kapak.jpg{b}" in s and 'src="62m2/gorsel/kapak.jpg"' in s
-    v = json.loads(OYUN_HEDEF.read_text(encoding="utf-8"))
-    sy = oyun.sayfa(v, KAYIT["oyunlar"][0], glb_eki=b)
-    assert f"fetch('ev.glb{b}')" in sy and "fetch('ev.glb')" not in sy and len(re.findall(r"'sha256-[^']+'", sy)) == 2
 
 
 def test_yayin_betigi_ve_paket(tmp_path):

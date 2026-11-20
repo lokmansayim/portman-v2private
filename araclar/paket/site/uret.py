@@ -123,12 +123,9 @@ def kart_ozellikleri(r: dict, oz: dict) -> list[str]:
     return [sp[0], sp[3], sp[5], f'{oz["adim"]} adım'] + (['ön onay paftası'] if r['pafta'] else [])
 
 
-def acilis_sayfasi(rehberler: list[dict], ozet: dict, oyunlar: list[dict] = (), oyun_verisi: dict | None = None,
-                   ekler: dict | None = None) -> str:
-    """`ekler`: klasör → kapak görselinin adres eki (`ortak.surum_eki`; kapaksız denemede yok)."""
-    ek = (ekler or {}).get
-    kartlar = [oyun.kart_html(o, oyun_verisi[o['klasor']], ek(o['klasor'], '')) for o in oyunlar if o.get('acilis_karti')]
-    kartlar += [kart_html(r, ozet[r['klasor']], ek(r['klasor'], '')) for r in rehberler]
+def acilis_sayfasi(rehberler: list[dict], ozet: dict, oyunlar: list[dict] = (), oyun_verisi: dict | None = None) -> str:
+    kartlar = [oyun.kart_html(o, oyun_verisi[o['klasor']]) for o in oyunlar if o.get('acilis_karti')]
+    kartlar += [kart_html(r, ozet[r['klasor']]) for r in rehberler]
     s = (ACILIS.replace('__BAS__', ortak.bas_etiketleri('PortatifEv Montaj Rehberleri')).replace('__KARTLAR__', '\n'.join(kartlar))
          .replace('__YAZI__', rehberler[0]['klasor']))
     csp = "default-src 'none'; style-src 'self' 'unsafe-inline'; img-src 'self'; font-src 'self'; base-uri 'none'; form-action 'none'"
@@ -137,9 +134,9 @@ def acilis_sayfasi(rehberler: list[dict], ozet: dict, oyunlar: list[dict] = (), 
     return s
 
 
-def kart_html(r: dict, oz: dict, ek: str = '') -> str:
+def kart_html(r: dict, oz: dict) -> str:
     return (f'    <a class="kart" href="{r["klasor"]}/">\n'
-            f'      <img src="{r["klasor"]}/gorsel/kapak.jpg{ek}" alt="{H.escape(r["ad"])}: bitmiş evin görünümü" loading="lazy">\n'
+            f'      <img src="{r["klasor"]}/gorsel/kapak.jpg" alt="{H.escape(r["ad"])}: bitmiş evin görünümü" loading="lazy">\n'
             f'      <div class="ic"><h2>{H.escape(r["ad"])}</h2>\n'
             f'        <div class="alan">{H.escape(oz["chip"])}</div>\n'
             f'        <div class="spec">{"".join(f"<span>{H.escape(x)}</span>" for x in kart_ozellikleri(r, oz))}</div>\n'
@@ -188,7 +185,7 @@ def kur(cikti: Path, npm: Path, esbuild: str, kapak: bool = True, onceki: Path |
             for p, b in kopya.items():
                 (site / r['klasor'] / p).parent.mkdir(parents=True, exist_ok=True)
                 (site / r['klasor'] / p).write_bytes(b)
-            if kart_html(r, oz) not in ortak.SURUM_EKI.sub('', eski['index.html'].decode('utf-8')):
+            if kart_html(r, oz) not in eski['index.html'].decode('utf-8'):
                 raise ortak.SiteHatasi(f'{r["klasor"]}: açılış kartı canlıdakinden farklı; sabit rehberin kartı değişmez')
             oz['sabit'] = k['sabit_paket']['surum']
             ozet[r['klasor']] = oz
@@ -213,9 +210,7 @@ def kur(cikti: Path, npm: Path, esbuild: str, kapak: bool = True, onceki: Path |
         ozet[o['klasor']] = {'oyun': True, 'rehber': o['rehber'], 'adim': len(v['adimlar']), 'glb': len(glb), 'addon': addon}
         print(f'   {len(v["adimlar"])} adım · GLB {len(glb) / 1e6:.2f} MB', flush=True)
     shutil.rmtree(cikti / 'gecici')
-    ekler = {d.name: ortak.surum_eki((d / 'gorsel' / 'kapak.jpg').read_bytes()) for d in site.iterdir()
-             if (d / 'gorsel' / 'kapak.jpg').is_file()}
-    (site / 'index.html').write_text(acilis_sayfasi(k['rehberler'], ozet, oyunlar, oyun_verisi, ekler), encoding='utf-8')
+    (site / 'index.html').write_text(acilis_sayfasi(k['rehberler'], ozet, oyunlar, oyun_verisi), encoding='utf-8')
     (site / 'robots.txt').write_text('User-agent: *\nDisallow: /\n')
     paket_sha, kur_yolu = ortak.paketle_ve_kur(site, cikti, mtime=k['mtime'])
     sonuc = {'paket_sha256': paket_sha, 'kurulum': str(kur_yolu), 'rehberler': ozet}
