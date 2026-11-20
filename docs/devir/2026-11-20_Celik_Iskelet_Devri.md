@@ -39,8 +39,8 @@ Bu oturum yalnız iskeleti çıkardı. Animasyonu Lokman'ın Mac'indeki yerel ot
 
 Lokman: "bu model istisna olarak prefabrik mantığıyla aşık ve omega olacak"; "60'lık tavan omegasını ters tavana göre ayarla". Lokman önizlemeyi onayladı ("ön izlemede sorun yok").
 
-- **Dosya:** `celik_iskelet_90m2_asik_omega.glb` (1,88 MB). İskelet GLB'si değişmedi.
-  - Yeni gruplar: `Asik` 68 parça, `Tavan_omegasi` 45 parça. Öteki dört grup aynen.
+- **Dosya:** `celik_iskelet_90m2_asik_omega.glb` (1,91 MB). İskelet GLB'si değişmedi.
+  - Yeni gruplar: `Asik` 74 parça, `Tavan_omegasi` 45 parça. Öteki dört grup aynen.
   - Komut: `python asik_omega.py celik_iskelet_90m2.glb celik_iskelet_90m2_asik_omega.glb --plan plan_asik_omega.png --ozet ozet_asik_omega.json`. Proje ortamı yeter (numpy, matplotlib); openskp gerekmez.
 - **Kural değerleri** depodan okunur:
   - aşık `asik_sirasi`, karar C: mahyadan 60 cm, saçak sırası, saçak eşiği 30 cm, tam parça 410;
@@ -57,20 +57,27 @@ Lokman: "bu model istisna olarak prefabrik mantığıyla aşık ve omega olacak"
 
 | | Kuralla (bu dosya) | Projenin paftası | Projenin yükleme listesi |
 |---|---|---|---|
-| Aşık sırası | sol 10, sağ 10, veranda 5 | sol 11, sağ 11, alt bölümde 4 + 4 (paftanın görüntüsünden sayıldı) | — |
-| Aşık boyu | 204,8 m (68 parça) | — | 55 adet L 4200 (Excel'in ara değeri 51,2) |
+| Aşık sırası | sol 10, sağ 10, panelin sağ yüzü 4, veranda 5 | sol 11, sağ 11, panelin sağ yüzü 4, veranda 4 (paftanın görüntüsünden sayıldı) | — |
+| Panelin sağ yüzü, sıra boyu | 216,0 · 216,0 · 185,5 · 103,1 cm | 216 · 216 · 184,4 · 102,3 cm | — |
+| Veranda, sıra boyu | 492,5 – 496,4 cm | 495 cm | — |
+| Aşık boyu | 215,5 m (74 parça) | — | 55 adet L 4200 (Excel'in ara değeri 51,2) |
 | Tavan omegası hattı | 27: odalar 7 + 3 + 6, salon 8, ön sağ oda 3 | 24: 6 + 3 + 5, 8, 2 | — |
 | Tavan omegası boyu | 104,8 m (45 parça) | — | 30 adet L 3750 |
 
 - **Farkın nedeni:**
   - Kural ilk omega hattını duvar yüzüne koyar; pafta ilk hattı yüzden yaklaşık 56 cm içeride çizmiş.
   - Aşıkta pafta saçaktan başlıyor ve 20 cm'de bir mahya sırası koyuyor; karar C mahyadan başlar.
+- **Düzeltme (Lokman, 20 Kasım: "şuan gördüğün yerde de aşık olması gerekiyor"):**
+  - Çatı panelinin sağ yüzü ana çatının ön kalkanının (y = −2,88 m) önünde açıkta; buraya 4 sıra eklendi.
+  - Bu yüz veranda çatısıyla bir derede buluşuyor. Dere (−0,12; −5,04) noktasından (−1,58; −2,87) noktasına gidiyor.
+  - Veranda sıraları soldan bu dereye kadar uzar; paftadaki 495'lik paralelkenar budur.
+  - Önce ve sonra görüntüsü: `once_sonra_asik.png` (`once_sonra.py`).
 - **Çatı paneli:** sol ön köşedeki bölümde omega yok. Paftada da yok; kitapta "çatı panelli ek yapıda omega yok". Salonu bölen kiriş (x = −0,41 m) tavan gözünü böler.
 - **Görseller:**
   - `plan_asik_omega.png`: üstten; mavi omega, turuncu aşık.
   - `kesit_asik_omega.png`: saçak, mahya, tavan ve veranda kesiti.
   - `onizleme_asik_omega.png`: yazdırma önizlemesi.
-- **Kanıt:** Khronos glTF doğrulayıcısı hata 0, uyarı 0 (13.390 üçgen). Yeniden üretilen iskelet GLB'si bayt bayt aynı.
+- **Kanıt:** Khronos glTF doğrulayıcısı hata 0, uyarı 0 (13.654 üçgen). Yeniden üretilen iskelet GLB'si bayt bayt aynı.
 - **Açık soru:** iç duvar ekseninde omega hattı (60'lık duvar omegası).
   - Kural bunu 60'lık iç duvara koyar, 100'lüğe koymaz.
   - Bu evin iç duvarı 80 mm; Motor'un kodu 100 mm'den inceyi 60'lık sayar.

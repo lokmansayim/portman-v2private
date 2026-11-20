@@ -78,6 +78,12 @@ def olc(parcalar):
     ze = float(np.mean([P[np.abs(P[:, 0] - P[:, 0].min()) < 0.03][:, 2].max() for P in tam]))
     on = np.vstack([p['P'] for p in mk if duzlem_ekseni(p['P']) == 'y' and 5 < np.ptp(p['P'][:, 0]) < 9])
     pan = np.vstack([p['P'] for p in parcalar if p['kat'] == 'Cati_paneli'])
+    ust = [(float(p['P'][:, 0].mean()), float(p['P'][:, 2].max())) for p in parcalar
+           if p['kat'] == 'Cati_paneli' and duzlem_ekseni(p['P']) == 'x']           # mahyaya paralel üst parçalar
+    xs = np.array(ust); orta = xs[xs[:, 1].argmax(), 0]
+    sol_, sag_ = xs[xs[:, 0] < orta - 0.1], xs[xs[:, 0] > orta + 0.1]
+    ms, cs = np.polyfit(sol_[:, 0], sol_[:, 1], 1); mg, cg = np.polyfit(sag_[:, 0], sag_[:, 1], 1)
+    pmx = (cg - cs) / (ms - mg)
     ver = [p['P'] for p in mk if duzlem_ekseni(p['P']) == 'x' and np.ptp(p['P'][:, 1]) > 2 and p['P'][:, 1].max() < -2.7]
     V = np.vstack(ver)
     vt_y, ve_y = V[:, 1].max(), V[:, 1].min()
@@ -91,7 +97,8 @@ def olc(parcalar):
     m = (zr - ze) / (xr - xl)
     return {'mahya_x': xr, 'mahya_z': float(zr), 'sacak_z': ze, 'sol_x': float(xl), 'sag_x': float(xg), 'egim': m,
             'arka_y': float(A[:, 1].max()), 'on_makas_x': float(on[:, 0].min()), 'on_makas_y': float(on[:, 1].min()),
-            'panel_on_y': float(pan[:, 1].min()), 'panel_x': float(pan[:, 0].max()), 'panel_arka_y': float(pan[:, 1].max()),
+            'panel_on_y': float(pan[:, 1].min()), 'panel_mahya_x': float(pmx), 'panel_mahya_z': float(ms * pmx + cs),
+            'panel_sag_egim': float(-mg), 'panel_sag_c': float(cg), 'panel_x': float(pan[:, 0].max()), 'panel_arka_y': float(pan[:, 1].max()),
             'ver_ust_y': float(vt_y), 'ver_ust_z': vt_z, 'ver_sacak_y': float(ve_y), 'ver_sacak_z': ve_z, 'ver_sol_x': float(V[:, 0].min()),
             'mahya_kenari': ((float(C[:, 0].min()), float(C[:, 1].max())), (float(C[:, 0].max()), float(C[:, 1].min()))),
             'tavan_z': tavan}
@@ -138,7 +145,10 @@ def parcala(a0, a1, tam, en_kisa, sondan):
 
 
 def asiklar(K, O):
-    """Üç çatı yüzü: ana çatının sol ve sağ yüzü (sıralar y boyunca), veranda çatısı (sıralar x boyunca)."""
+    """Dört açık çatı yüzü: ana çatının sol ve sağ yüzü ve çatı panelinin sağ yüzü (sıralar y boyunca), veranda çatısı
+    (sıralar x boyunca). Panelin sağ yüzü yalnız ana çatının ön kalkanının önünde açıktadır ve veranda çatısıyla derede
+    buluşur (Lokman, 20 Kasım 2026: "şuan gördüğün yerde de aşık olması gerekiyor"; aşık paftasının 216, 216, 184,
+    102'si ve 495'lik paralelkenarı). Veranda sıraları soldan dereye kadar uzanır."""
     out = []; ozet = collections.Counter(); boy = collections.Counter()
     yari = 0.0435
     (hx0, hy0), (hx1, hy1) = O['mahya_kenari']
@@ -165,13 +175,29 @@ def asiklar(K, O):
             ozet[yuz] += 1; boy[yuz] += arka - on
             for a, b in parcala(on, arka, K['asik_parca'], K['asik_en_kisa'], sondan=True):
                 out.append((yuz, profil_mesh(OMEGA_UP, np.array([x, a, z]), np.array([x, b, z]), d, n)))
-    # veranda çatısı: üst kenar y = ver_ust_y, saçak y = ver_sacak_y; sıralar x boyunca, soldan mahya kenarına
+    # veranda çatısı ve çatı panelinin sağ yüzü bir derede buluşur: z_ver(y) = z_panel(x)
     mv = (O['ver_ust_z'] - O['ver_sacak_z']) / (O['ver_ust_y'] - O['ver_sacak_y']); cb = 1 / math.sqrt(1 + mv * mv); sb = mv * cb
+    z_ver = lambda y: O['ver_sacak_z'] + (y - O['ver_sacak_y']) * mv
+    dere_x = lambda y: (O['panel_sag_c'] - z_ver(y)) / O['panel_sag_egim']           # panelin sağ yüzü: z = c − m·x
+    dere_y = lambda x: O['ver_sacak_y'] + (O['panel_sag_c'] - O['panel_sag_egim'] * x - O['ver_sacak_z']) / mv
+    # çatı panelinin sağ yüzü: ana çatının ön kalkanının önünde açıkta; sıralar y boyunca, ön saçaktan kalkana ya da dereye
+    mp = O['panel_sag_egim']; cp_ = 1 / math.sqrt(1 + mp * mp); sp_ = mp * cp_
+    L = (O['panel_x'] - O['panel_mahya_x']) / cp_
+    n = np.array([sp_, 0, cp_]); d = np.array([cp_, 0, -sp_])
+    for s in siralar(L):
+        x = O['panel_mahya_x'] + s * cp_; z = O['panel_mahya_z'] - s * sp_
+        on, son = O['panel_on_y'] - KALKAN_SACAGI, min(O['on_makas_y'], dere_y(x))
+        if son - on < K['asik_en_kisa']:
+            continue                                                    # sıranın tamamı veranda çatısının altında
+        ozet['panel_sag'] += 1; boy['panel_sag'] += son - on
+        for a, b in parcala(on, son, K['asik_parca'], K['asik_en_kisa'], sondan=True):
+            out.append(('panel_sag', profil_mesh(OMEGA_UP, np.array([x, a, z]), np.array([x, b, z]), d, n)))
+    # veranda çatısı: sıralar x boyunca, soldan (dere) mahya kenarına
     L = (O['ver_ust_y'] - O['ver_sacak_y']) / cb
     n = np.array([0, -sb, cb]); d = np.array([0, -cb, -sb])
     for s in siralar(L):
         y = O['ver_ust_y'] - s * cb; z = O['ver_ust_z'] - s * sb
-        x0, x1 = O['ver_sol_x'], hip_x(y)
+        x0, x1 = min(O['ver_sol_x'], dere_x(y)), hip_x(y)
         ozet['veranda'] += 1; boy['veranda'] += x1 - x0
         for a, b in parcala(x0, x1, K['asik_parca'], K['asik_en_kisa'], sondan=False):
             out.append(('veranda', profil_mesh(OMEGA_UP, np.array([a, y, z]), np.array([b, y, z]), np.array([0.0, 1, 0]) * 0 + d, n)))

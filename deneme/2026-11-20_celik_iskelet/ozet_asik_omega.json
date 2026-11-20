@@ -19,6 +19,10 @@
   "on_makas_x": -2.491426944732666,
   "on_makas_y": -2.883591890335083,
   "panel_on_y": -4.743591785430908,
+  "panel_mahya_x": -2.491427143390537,
+  "panel_mahya_z": 3.5991642577583125,
+  "panel_sag_egim": 0.3299999088828262,
+  "panel_sag_c": 2.7769935274512356,
   "panel_x": -0.07142720371484756,
   "panel_arka_y": 0.8371070027351379,
   "ver_ust_y": -2.873540163040161,
@@ -41,15 +45,17 @@
  "asik_sira": {
   "sol": 10,
   "sag": 10,
+  "panel_sag": 4,
   "veranda": 5
  },
  "asik_sira_boyu_m": {
   "sol": 94.6,
   "sag": 89.0,
-  "veranda": 21.16
+  "panel_sag": 7.21,
+  "veranda": 24.73
  },
- "asik_parca": 68,
- "asik_toplam_m": 204.76,
+ "asik_parca": 74,
+ "asik_toplam_m": 215.54,
  "omega_parca": 45,
  "omega_toplam_m": 104.76,
  "gozler": [
@@ -125,6 +131,6 @@
   "Makas": 237,
   "Cati_paneli": 47,
   "Tavan_omegasi": 45,
-  "Asik": 68
+  "Asik": 74
  }
 }
