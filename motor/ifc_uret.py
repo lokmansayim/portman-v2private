@@ -67,7 +67,8 @@ def hazirla(ie: dict) -> dict:
         cumbali = (ie.get("cati") or {}).get("tip") == "besik_cumba"
         capraz = cumbali and cati_prefabrik.ana_geri_cm(ie["cati"], plan) is not None
         girinti = {"govde": [[_r(x), _r(y)] for x, y in list(G.govde_cokgeni(plan).exterior.coords)[:-1]],   # İE-15 K6 (TK-04 r07): ana
-                   "cati_serit": (cati_capraz.tanim if capraz else _cikintili_cumba_tanimi if cumbali else cati_serit.tanim)(plan, ie)}
+                   **({"cati_kirma": _kirma_girdisi(plan, ie)} if (ie.get("cati") or {}).get("yontem") == "kenar" else   # BK-64 (D-139)
+                      {"cati_serit": (cati_capraz.tanim if capraz else _cikintili_cumba_tanimi if cumbali else cati_serit.tanim)(plan, ie)})}
         # makaslar geri çekilen çapraz cumba; BK-46: çıkıntılı çapraz cumba (82, 91 m²) ve iki cumba (45 m²) `_cikintili_cumba_tanimi`
         # (eskiden 3D kurulmuyordu); kurulamazsa PrefabrikCatiHatasi (IsEmriHatasi): yanlış çatı çizilmez
     elif cati_serit.mahal_catilari_var(ie):           # İE-17 PR-2 (AP-09): kendi çatısı olan açık mahal ana çatıdan çıkar; çatı çizimdekinin aynısı
@@ -319,7 +320,9 @@ def _kirma_girdisi(plan, ie: dict) -> dict:
     s = float(t["sacak"])
     gx0, gy0, gx1, gy1 = (float(v) for v in G.govde_kutusu(plan))
     makaslar, uyari = [], []
-    if t["kalkanlar"]:                                               # İE-29: tek uçlu kırma (AP-27)
+    if t.get("yontem") == "kenar":                                   # BK-64 (D-139): düz iskelet; çatı yüzleri 3D'de, makaslar henüz değil
+        uyari.append("makas yeri: kenar yöntemli kırmanın (düz iskelet) makasları 3D'de henüz çizilmiyor; makas planı yükleme listesinde")
+    elif t["kalkanlar"]:                                             # İE-29: tek uçlu kırma (AP-27)
         try:
             km = PL._tek_uclu_kirma_catilari(plan, ie)[0][0]["kirma_makas"]
         except PL.ListeYazilmaz as e:
