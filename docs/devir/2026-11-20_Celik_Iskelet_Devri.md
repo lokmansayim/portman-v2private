@@ -85,12 +85,35 @@ Lokman: "bu model istisna olarak prefabrik mantığıyla aşık ve omega olacak"
 
 ## Mac'teki oturuma yapıştırılacak metin
 
+Lokman öteki oturumu yerelde çalıştırıyor; git ve GitHub kullanılmaz. Dosyalar pakette elle verilir: `celik_iskelet_90m2_paket.zip` (onaylı GLB, bu not, üç kontrol görseli, aşağıdaki metin `OTURUMA_YAPISTIR.txt` olarak).
+
 ```
-portman-v2private deposunda claude/celik-iskelet-90m2 dalını çek; dala geçme, main'e karıştırma:
-  git fetch origin claude/celik-iskelet-90m2
-  git show origin/claude/celik-iskelet-90m2:deneme/2026-11-20_celik_iskelet/celik_iskelet_90m2_asik_omega.glb > ~/Desktop/celik_iskelet_90m2_asik_omega.glb
-Not: docs/devir/2026-11-20_Celik_Iskelet_Devri.md (aynı daldan git show ile oku).
-İş: Blender'da bu GLB'den (iskelet + aşık + tavan omegası; gruplar Duvar, Lento, Makas, Cati_paneli, Tavan_omegasi, Asik) 10 saniyelik tanıtım animasyonu. Çelik karkas 3B yazıcıda basılıyormuş gibi alttan üste oluşsun; yazıcı görünmesin.
-Önerilen yöntem: malzemede dünya Z'sine göre kesit (kesit yüksekliğinin üstü saydam), kesitte 15 cm turuncu ışıklı bant, kesit yüksekliği 0'dan 4,44 m'ye (aşığın tepesi) doğrusal anahtar kare; yavaş dönen kamera; 1920 × 1080, 30 kare/sn.
-Higgsfield ücretlidir: kullanmadan önce Lokman'a tutarı söyle ve onay al.
+Ekteki dosyalar Raif Can 90 m² çelik iskeleti içindir. Lokman 20 Kasım 2026 21:00 UTC'de onayladı.
+Dosyalar bu klasörde; git ya da GitHub kullanma, yerelde çalış.
+
+Dosyalar:
+- celik_iskelet_90m2_asik_omega.glb: 3B model (iskelet, aşık, tavan omegası).
+  - Birim metre. Taban ortası (0, 0, 0). Blender'da içe aktarınca Z yukarı olur.
+  - Gruplar: Duvar, Lento, Makas, Cati_paneli, Tavan_omegasi, Asik.
+  - Her parçanın özel özellikleri: katman, z_alt, z_ust (m), sira (alttan üste sıra numarası).
+  - Tek malzeme: Galvaniz.
+- DEVIR_NOTU.md: ölçüler, kurallar, kanıt.
+- onizleme_asik_omega.png: alttan üste yazdırma fikrinin dört karesi.
+- plan_asik_omega.png ve kesit_asik_omega.png: aşık ve omeganın yeri; kontrol için.
+
+İş: Blender'da bu GLB'den 10 saniyelik tanıtım animasyonu yap.
+- Çelik karkas 3B yazıcıda basılıyormuş gibi alttan üste oluşsun.
+- Yazıcı görünmesin.
+
+Önerilen yöntem:
+1. GLB'yi içe aktar: Dosya › İçe Aktar › glTF 2.0.
+2. Malzemede dünya Z'sine göre kesit kur: kesit yüksekliğinin üstü saydam.
+3. Kesitte 15 cm turuncu ışıklı bant koy.
+4. Kesit yüksekliğine 0'dan 4,44 m'ye doğrusal anahtar kare ver (4,44 m aşığın tepesi).
+5. Kamerayı yavaşça döndür.
+6. 1920 × 1080, 30 kare/sn çıkar.
+
+DİKKAT: Higgsfield ücretlidir. Kullanmadan önce Lokman'a tutarı söyle ve onay al.
+
+Model değişmez. Değişiklik gerekirse Lokman'a sor.
 ```
