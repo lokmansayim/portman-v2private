@@ -37,6 +37,7 @@ IC_PROFILLER = {
     "is_emri/adaylar/PA04.json": [("D-58", (386.5, 37.5, 888.5, 37.5))],
     "testler/motor/veri/TK04_r07.json": [("D-58", (386.5, 37.5, 888.5, 37.5))],
     "testler/motor/veri/TK04_r08.json": [("D-58", (386.5, 37.5, 888.5, 37.5))],
+    "is_emri/P8501_r06.json": [("D-58", (386.5, 37.5, 825.75, 37.5))],          # 85 m² katalog, kampanyalı gibi (20.11.2026)
     "is_emri/adaylar/PA17.json": [("D-137", (386.5, 225.0, 888.5, 225.0))],
     "testler/kor/projeler/AP18/is_emri.json": [("D-137", (386.5, 225.0, 888.5, 225.0))],
     "is_emri/adaylar/PA21.json": [("D-137", (386.5, 0.0, 386.5, 60.0))],
