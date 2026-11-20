@@ -387,7 +387,9 @@ def _k2(f, kartlar: dict, yerlesim: dict, liste_kurallari: dict, is_emri: dict, 
         from motor import prefabrik_liste as PL
         # İE-15 K6: mahyanın kartı kaplamaya göre biri (metal kiremit mahyası CK-06 ya da trapez sac mahyası CK-07); öteki yazılmaz
         mahya_parca = "trapez_mahya" if D["mahya_yerlesimi"]["trapez_yazisi"] in Y.kaplama_yazisi(g) else "mahya"
-        kenar_kartlari = [k for k in kartlar["kartlar"] if k.get("yerlesim", {}).get("kural") in KE.KENAR
+        # D-143: damlalığın kartı yalnız sundurma panelli (teras paneli) evde; öteki evlerin özeti aynen
+        damlalikli = any(p["kural"] == KE.DAMLALIK for p in KN["parcalar"])
+        kenar_kartlari = [k for k in kartlar["kartlar"] if k.get("yerlesim", {}).get("kural") in KE.KENAR + ((KE.DAMLALIK,) if damlalikli else ())
                           and (k["yerlesim"]["kural"] != "mahya_yerlesimi" or k["yerlesim"]["parca"] == mahya_parca)]
         kalem = {k["kod"]: (k["liste"]["satirlar"] or [None])[0] for k in kenar_kartlari}
         satir: dict[str, int] = {}
@@ -405,7 +407,7 @@ def _k2(f, kartlar: dict, yerlesim: dict, liste_kurallari: dict, is_emri: dict, 
                         **({"liste_yazilmaz": yazilmaz} if L is None else {}), **({"kurulmadi": kurulmadi} if kurulmadi else {}),
                         "parcalar": [{"parca": p["ad"], "kart": p["kart"]["kod"], "kural": p["kural"], "boy_cm": p["boy_cm"], "bilgi": p["bilgi"],
                                       "aciklama": p["aciklama"]} for p in kn_eslesen],
-                        "degerler": {ad: D[ad] for ad in KE.KENAR + (KE.GOSTERIM,)}}
+                        "degerler": {ad: D[ad] for ad in KE.KENAR + (KE.GOSTERIM,) + ((KE.DAMLALIK,) if damlalikli else ())}}
     return out
 
 

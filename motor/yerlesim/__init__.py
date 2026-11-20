@@ -30,7 +30,7 @@ PARCA_ADI = {"omega": "OMEGA", "asik": "ASIK", "panel": "KAPLAMA", "levha": "BET
              "priz_cift": "PRIZ_CIFT", "uydu_prizi": "UYDU", "zil": "ZIL", "sigorta_kutusu": "SIGORTA", "kablo_priz": "KABLO_PRIZ",
              "kablo_aydinlatma": "KABLO_AYDINLATMA",
              "alt_cerceve": "ALT_CERCEVE", "sacak_omegasi": "SACAK_OMEGASI", "sacak_saci": "SACAK_SACI", "alin_saci": "ALIN_SACI",
-             "bas_makas_z": "BAS_MAKAS_Z", "c_kapama": "C_KAPAMA", "mahya": "MAHYA", "trapez_mahya": "TRAPEZ_MAHYA", "yavru_makas": "YAVRU_MAKAS",
+             "bas_makas_z": "BAS_MAKAS_Z", "c_kapama": "C_KAPAMA", "mahya": "MAHYA", "trapez_mahya": "TRAPEZ_MAHYA", "damlalik": "DAMLALIK", "yavru_makas": "YAVRU_MAKAS",
              "tavan_h": "TAVAN_H", "goz": "ALCIPAN", "serit": "IZOLASYON"}
 DIS_DUVAR = "DIS_DUVAR_"                                            # K5b-2: açık mahale bakan dış duvarın omegası (rehber tavan omegalarını adıyla okur)
 ELEKTRIK = "elektrik_yerlesimi"                                     # K3 (`elektrik.py`); K2'nin katmanlarından ayrı, istenince kurulur
