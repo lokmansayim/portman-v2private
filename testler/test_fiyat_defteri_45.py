@@ -50,12 +50,14 @@ def test_tk04_r08_toplami(tmp_path):
     """TK-04 r08 (asma tavan): 45. hafta defteriyle 335.467,98 TL (Patron'a 23:10 kartında söylenen önizleme), r10 defteriyle 374.965,01 TL
     (22:49 kartı). 121 satır, onay bekleyen öneri yok. Çırpı ipi r10'da fiyatsız (bilerek boş, D-36); r12'de 0 TL, hediye (D-65, Lokman 6 Kasım
     21:29): satır fiyatlı, toplam aynı."""
-    for ad, ek, toplam, fiyatsiz in (("yeni", ["--defter", str(YENI)], 334147.98, []), ("eski", ["--defter", str(ESKI)], 373645.01, ["Çırpı ipi | adet"])):
+    for ad, ek, toplam, fiyatsiz in (("yeni", ["--defter", str(YENI)], 334736.94, []), ("eski", ["--defter", str(ESKI)], 374371.01, ["Çırpı ipi | adet"])):
         assert TK.main([str(TK04), str(tmp_path / ad), "--tavan", "asma", "--tarih", "05.11.2026", *ek]) == 0
         T = json.loads((tmp_path / ad / "TK04_teklif.json").read_text(encoding="utf-8"))
         oz = T["secenekler"][0]["fiyat"]["ozet"]
         assert (oz["toplam"], oz["satir"], [f["anahtar"] for f in oz["fiyatsiz"]], oz["oneri_bekleyen"]["satir"]) == \
             (toplam, 120, fiyatsiz, 0), ad                                     # D-122: şase pul satırı yok (önce 121; yeni 335.467,98)
+    # D-135 (BK-62, Lokman 20 Kasım 07:20:08): cumba arkasında aşık kesilmez, aşık 44 → 47, vida 900 → 900; yeni 334.147,98 → 334.736,94,
+    # eski 373.645,01 → 374.371,01
     cirpi = [r for r in T["secenekler"][0]["fiyat"]["satirlar"] if r["kalem"] == "Çırpı ipi"]
     assert [(r["birim_fiyat"], r["tutar"]) for r in cirpi] == [(None, None)]                 # eski defter (son koşu)
     T = json.loads((tmp_path / "yeni" / "TK04_teklif.json").read_text(encoding="utf-8"))
