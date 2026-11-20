@@ -150,6 +150,7 @@ Biçim: karar · gerekçe · reddedilen seçenekler · geri alma yolu · kim ve 
 | [D-131](D-131.md) | Ana çatının örttüğü verandada dörtomuzun (iki uçlu kırma) ucu duvarsızsa ilk ana makas uca en yakın gövde duvarının üstünde (D-114 gibi), kısa makaslar karşı uç duvarının pano eklerinde; 120 m² ana 9, kısa 4 + 4, çapraz 4 (BK-59) | 19.11 (Lokman 21:49:23 "çapraz makasları tam kırılma noktasını geçmiyorsa … bina duvarının üzerine al"; kart 21:59:00 "Eskizdeki gibi") |
 | [D-132](D-132.md) | Disk arşivi Parti 2'nin dört evi (45, 75, 76, 80 m²) Motor'un aks düzeniyle havuzda, PA-45 … PA-48; çatı paftadaki gibi (45 beşik, 75 dörtomuz, 76 ön cumba, 80 verandada sundurma %10); listede üç bilinen fark (75 makas sayısı, 76 cumba baş makası, 45 tepe); 110 ve 120 m² verandayı örten ana çatının Motor bakımını bekler; asıl proje (D-103) | 19.11 (Lokman, kart 21:31:40 "Altı ev girsin"; kart 21:39:32 "Dördü girsin, ikisi beklesin") |
 | [D-136](D-136.md) | CRM fiyatı ve Lokman'ın fiyatları (istisna dahil) KDV dahil: fiyatlı listede ve teklifte fiyat CRM'deki gibi, KDV ayrılmaz, eklenmez, yazılmaz; toplam CRM fiyatlarının toplamı (120 TL = 120 TL); 20 Kasım 2026 ve sonraki CRM görüntüsünde (`crm_esleme.json › kdv.fiyata_dahil`), öncekiler aynen | 20.11 (Lokman 07:58:30 "artık fiyatlara ekli …"; kart 08:03:19 "CRM ve sizin fiyatlarınız"; 09:10:13 "sen KDV olayını karıştırma CRM'den ne çektiysen onu gir"; kart 09:10:41 "KDV hiç yazılmasın") |
+| [D-137](D-137.md) | Yükleme listesinde kiriş alan veranda kenarı ön onay çiziminde de profil (kiriş), gövdenin dış çizgisinde olmasa da; liste ve çizim kenarı aynı işlevden okur (`prefabrik_liste.kirisli_acik_kenarlar`); 80 m² 3+1'in 60 cm'lik sol yanı ve 91 m² 3+1'in 502 cm'lik önü; D-58'in aks ve ölçü ekleri yalnız `girinti_kirisi` anahtarıyla (BK-63, PC-49) | 20.11 (Lokman kart 08:04:02 "Eskizdeki gibi, iki evde") |
 
 ## Numara defteri (14 Ekim 2026, BK-08; CIO planı › Görev 3)
 
@@ -276,7 +277,12 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | D | D-130 | verandada her açık kenara kiriş, aynı yöndeki ikinci yan kenar da (BK-60; Lokman 19.11 kart 21:43:35 "Her açık kenara kiriş", kart 22:16:13 "Listede kalsın, çizim sonra") | yazıldı (19.11; tavan kirişi sohbeti, `claude/project-thread-bvls4f`) |
 | D | D-131 | dörtomuzun duvarsız ucunda ilk ana makas gövdenin duvarında (BK-59; Lokman 19.11 21:49:23, kart 21:59:00) | yazıldı (19.11; `claude/project-thread-61wl66`) |
 | D | D-132 | disk arşivi Parti 2'nin dört evi havuzda, PA-45 … PA-48 (İE-43 PR-7; Lokman 19.11 kartları 21:31:40, 21:39:32) | yazıldı (19.11; disk arşivi sohbeti, `claude/project-thread-wc6dw0`) |
-| D | **D-133** | — | **sıradaki boş** |
+| D | D-133 | (başka sohbet: disk arşivi Parti 2'nin çatı farkları; BK-61, PC-48) | alındı (20.11) |
+| D | D-134 | (başka sohbet: disk arşivi 110 ve 120 m², PA-49 ve PA-50) | alındı (20.11) |
+| D | D-135 | (başka sohbet: çapraz cumbada aşık cumbanın arkasında kesilmez; BK-62, PR #280) | alındı (20.11) |
+| D | D-136 | (başka sohbet: CRM fiyatı KDV dahil; 76 m² teklifi) | yazıldı (20.11; `main`'e girdi, #281) |
+| D | D-137 | listede kirişi olan veranda kenarı ön onay çiziminde de kiriş (BK-63, PC-49; Lokman 20.11 kart 08:04:02 "Eskizdeki gibi, iki evde") | yazıldı (20.11; tavan kirişi sohbeti, `claude/project-thread-bvls4f`) |
+| D | **D-138** | — | **sıradaki boş** |
 | İE | İE-01–İE-08 | bu depo (`main`) | yazıldı |
 | İE | İE-09 | model atölyesi: kontrollü model üretimi ve banka hattı (Görev 6e; pano 30; P6001 güncellemesi kapsam dışı) | alındı (16.10; `claude/gorev-6e-model-atolyesi-rnhtcp`; PR-1 banka hattı 29.10, `claude/project-thread-rhjgzv`) |
 | İE | İE-10, İE-11, İE-12 | prefabrik hattı (PR #12, PR #14, `ie-12-prefabrik-bayi-paftasi`) | `main`'e BK-12 ile (PR-1: motor ve bayi paftası; liste ve mühür kıyası sonraki PR'larda) |
@@ -355,7 +361,10 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | BK | BK-58 | Pano Motor'unda verandanın tavan kirişi: açık kenardaki kolondan gövdeye kutu profil, liste satırı ve saha montaj planı (D-127, PC-47; `claude/project-thread-bvls4f`) | yazıldı (19.11; defter 19:25) |
 | BK | BK-59 | Yükleme listesinde gövdedeki verandanın ara kolonlu açık kenarı: `prefabrik_liste._kenar_parcalari` (D-129; `claude/project-thread-61wl66`) | yazıldı (19.11) |
 | BK | BK-60 | Pano Motor'unun yükleme listesinde verandanın her açık kenarına kiriş (`prefabrik_liste.model_motor`) (D-130; `claude/project-thread-bvls4f`) | yazıldı (19.11; defter 21:45) |
-| BK | **BK-61** | — | **sıradaki boş** |
+| BK | BK-61 | (başka sohbet: disk arşivi Parti 2'nin çatı farkları; D-133) | alındı (20.11) |
+| BK | BK-62 | (başka sohbet: çapraz cumbada aşık kesilmez; D-135, PR #280) | alındı (20.11) |
+| BK | BK-63 | Pano Motor'unun ön onay çiziminde listede kirişi olan veranda kenarı profil (`dxf_out.Cizici._listede_kirisli`) (D-137, PC-49; `claude/project-thread-bvls4f`) | yazıldı (20.11; defter 08:10) |
+| BK | **BK-64** | — | **sıradaki boş** |
 
 ## 27 Eylülde Lokman'ın verdiği kararlar
 
