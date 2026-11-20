@@ -78,10 +78,9 @@ Lokman: "bu model istisna olarak prefabrik mantığıyla aşık ve omega olacak"
   - `kesit_asik_omega.png`: saçak, mahya, tavan ve veranda kesiti.
   - `onizleme_asik_omega.png`: yazdırma önizlemesi.
 - **Kanıt:** Khronos glTF doğrulayıcısı hata 0, uyarı 0 (13.654 üçgen). Yeniden üretilen iskelet GLB'si bayt bayt aynı.
-- **Açık soru:** iç duvar ekseninde omega hattı (60'lık duvar omegası).
-  - Kural bunu 60'lık iç duvara koyar, 100'lüğe koymaz.
-  - Bu evin iç duvarı 80 mm; Motor'un kodu 100 mm'den inceyi 60'lık sayar.
-  - Pafta koymamış; bu dosyada da yok.
+- **Onay (Lokman, 2026-11-20 21:00 UTC):** "onaylıyorum iç duvar omegalarını boş ver bu şekilde onaylıyorum".
+  - Onay `celik_iskelet_90m2_asik_omega.glb` için (dal `claude/celik-iskelet-90m2`, commit `81489726`).
+  - İç duvar ekseninde omega hattı (60'lık duvar omegası) konmaz; soru kapandı.
 - **Küçük not:** sol yüzün saçağa yakın sıraları sol ön köşede çatı panelinin 2,5 cm üstünden geçer; panel çatı ana çatının düzleminin 2,5 cm altında.
 
 ## Mac'teki oturuma yapıştırılacak metin
