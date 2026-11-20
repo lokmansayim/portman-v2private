@@ -42,7 +42,7 @@ def _model(ie: dict) -> dict:
 def test_kart_dayanagi():
     """Hedef örnek Lokman'ın kartına dayanır (kelimesi kelimesine)."""
     assert "\"Her açık kenara kiriş\"" in BEKLENEN["kaynak"] and "21:43:35" in BEKLENEN["kaynak"]
-    assert "D-130" in PL.SURUM.split(";")[1] and PL.SURUM.startswith("1.20 ")
+    assert "D-130" in PL.SURUM.split(";")[1] and PL.SURUM.startswith("1.21 ")
 
 
 def test_yan_kirisler_ve_liste_satiri():
@@ -118,7 +118,7 @@ def _kenar_tablosu() -> dict:
             if not m.acik or m.poly is None or ad in dis:
                 continue
             try:
-                d[ad] = [[round(b, 2), u] for b, u in PL.acik_mahal_kirisleri(plan, m)]
+                d[ad] = [[round(b, 2), u] + (["ara"] if a else []) for b, u, a in PL.acik_mahal_kirisleri(plan, m)]
             except PL.ListeYazilmaz as e:
                 d[ad] = f"ListeYazilmaz: {e}"
         if d:
@@ -166,7 +166,7 @@ def test_bir_santimden_yakin_iki_cizgi_tek_kenar():
     """Bulgu D: aynı yan kenarın iki parçası 0,01 cm kayık; tek kenar (çift kiriş yok)."""
     plan = SimpleNamespace(acik_kenarlar=[(0, 0, 800, 0), (800, 0, 800, 100), (800.01, 100, 800.01, 200), (0, 200, 0, 0)], dikmeler=[])
     v = SimpleNamespace(poly=kutu(0, 0, 800, 200), ad="VERANDA")
-    assert PL.acik_mahal_kirisleri(plan, v) == [(800, 0), (200, 0), (200, 0)]
+    assert PL.acik_mahal_kirisleri(plan, v) == [(800, 0, False), (200, 0, False), (200, 0, False)]
 
 
 if __name__ == "__main__" and "--kilit" in sys.argv:

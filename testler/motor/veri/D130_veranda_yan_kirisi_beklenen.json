@@ -4,8 +4,9 @@
  "evler": {
   "76m2": {
    "is_emri": "testler/motor/veri/D127_veranda_76m2.json",
-   "once": {"veranda_kenarlari_cm": [800.0, 313.75], "uc_kolon": [2, 1]},
-   "sonra": {"veranda_kenarlari_cm": [800.0, 313.75, 188.25], "uc_kolon": [2, 1, 1]},
+   "once": {"veranda_kenarlari_cm": [376.5, 393.5, 313.75], "uc_kolon": [2, 2, 1]},
+   "sonra": {"veranda_kenarlari_cm": [376.5, 393.5, 313.75, 188.25], "uc_kolon": [2, 2, 1, 1]},
+   "d129": "ön kenar orta kolonda iki parça (376,5 + 393,5, kolonun yüzünden yüzüne; D-129, PR #279, 20 Kasım main'den); D-130'un eklediği yalnız sağ yan",
    "yeni_satirlar": [{"grup": "1002", "kalem": "Kutu profil (kiriş) 100 × 100", "olcu": "L 1782,5", "adet": 1}],
    "not": "sağ yan: köşe kolonunun yüzünden salonun duvarına 178,25 (açık kenar 188,25 − 10)",
    "cizim": "Üç yan kiriş çizimde de var (gövdenin dış çizgisinde); liste ve çizim aynı."
