@@ -14,6 +14,7 @@ import gzip
 import hashlib
 import io
 import os
+import posixpath
 import re
 import shutil
 import tarfile
@@ -92,10 +93,17 @@ def yerel_kutuphaneler(html: str, paket: Path, npm: Path) -> list[str]:
     addon = sorted(set(re.findall(r"from\s*['\"]three/addons/([^'\"]+)['\"]", html)))
     if not addon:
         raise SiteHatasi('sayfa hiçbir three/addons modülü içe aktarmıyor (desen?)')
-    for imp in addon:
+    kuyruk, kopya = list(addon), set()
+    while kuyruk:   # addon'un göreli içe aktardığı dosyalar da (İE-45: GLTFLoader → ../utils/BufferGeometryUtils.js)
+        imp = kuyruk.pop(0)
+        if imp in kopya:
+            continue
+        kopya.add(imp)
         hedef = paket / 'js' / 'addons' / imp
         hedef.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(three / 'examples' / 'jsm' / imp, hedef)
+        for g in re.findall(r"(?:from|import)\s*['\"](\.{1,2}/[^'\"]+)['\"]", hedef.read_text(encoding='utf-8')):
+            kuyruk.append(posixpath.normpath(posixpath.join(posixpath.dirname(imp), g)))
     shutil.copyfile(three / 'LICENSE', paket / 'js' / 'LICENSE-three.txt')
     (paket / 'yazi').mkdir(parents=True, exist_ok=True)
     css = []
@@ -109,7 +117,7 @@ def yerel_kutuphaneler(html: str, paket: Path, npm: Path) -> list[str]:
                     shutil.copyfile(kok / 'files' / f'{alt}.woff2', paket / 'yazi' / f'{alt}.woff2')
                     css.append(re.sub(r'src: [^;]+;', f"src: url(./{alt}.woff2) format('woff2');", blok))
     (paket / 'yazi' / 'yazi.css').write_text('\n\n'.join(css) + '\n', encoding='utf-8')
-    return addon
+    return sorted(kopya)
 
 
 def paketle_ve_kur(kok: Path, cikti: Path, mtime: int) -> tuple[str, Path]:
