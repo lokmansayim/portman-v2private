@@ -153,6 +153,7 @@ Biçim: karar · gerekçe · reddedilen seçenekler · geri alma yolu · kim ve 
 | [D-136](D-136.md) | CRM fiyatı ve Lokman'ın fiyatları (istisna dahil) KDV dahil: fiyatlı listede ve teklifte fiyat CRM'deki gibi, KDV ayrılmaz, eklenmez, yazılmaz; toplam CRM fiyatlarının toplamı (120 TL = 120 TL); 20 Kasım 2026 ve sonraki CRM görüntüsünde (`crm_esleme.json › kdv.fiyata_dahil`), öncekiler aynen | 20.11 (Lokman 07:58:30 "artık fiyatlara ekli …"; kart 08:03:19 "CRM ve sizin fiyatlarınız"; 09:10:13 "sen KDV olayını karıştırma CRM'den ne çektiysen onu gir"; kart 09:10:41 "KDV hiç yazılmasın") |
 | [D-137](D-137.md) | Yükleme listesinde kiriş alan veranda kenarı ön onay çiziminde de profil (kiriş), gövdenin dış çizgisinde olmasa da; liste ve çizim kenarı aynı işlevden okur (`prefabrik_liste.kirisli_acik_kenarlar`); 80 m² 3+1'in 60 cm'lik sol yanı ve 91 m² 3+1'in 502 cm'lik önü; D-58'in aks ve ölçü ekleri yalnız `girinti_kirisi` anahtarıyla (BK-63, PC-49) | 20.11 (Lokman kart 08:04:02 "Eskizdeki gibi, iki evde") |
 | [D-138](D-138.md) | "Evi kendin kur" montaj oyunu rehber.portatifev.com/oyun/'da, açılış sayfasında oyun kartı; oyun rehberin main'deki sayfasından ve aynı koşunun GLB'sinden (kapı açılışı ve cam yünü serme dahil), ipuçları `oyun_ipuclari.json`'da; altı rehber canlı paketten sabit (İE-45) | 20.11 (Lokman 08:52:07 "bu oyunu çok beğendim VPS 'da yayına alabilir misin?"; kart 08:54:40 "Evet, açılışa kart eklensin") |
+| [D-141](D-141.md) | Montaj rehberinde çapraz cumbanın altında ana çatının aşıkları kalkandan kalkana (D-135 gibi); cumbanın aşıkları dere hattında onların üstüne biner; Motor ve liste aynen; BK-67 | 20.11 (Lokman kart 12:20:39 "Resimdeki gibi") |
 
 ## Numara defteri (14 Ekim 2026, BK-08; CIO planı › Görev 3)
 
@@ -286,7 +287,9 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | D | D-137 | listede kirişi olan veranda kenarı ön onay çiziminde de kiriş (BK-63, PC-49; Lokman 20.11 kart 08:04:02 "Eskizdeki gibi, iki evde") | yazıldı (20.11; tavan kirişi sohbeti, `claude/project-thread-bvls4f`) |
 | D | D-138 | "Evi kendin kur" montaj oyunu rehber sitesinde /oyun/, açılışta oyun kartı (İE-45; Lokman 20.11 08:52:07, kart 08:54:40 "Evet, açılışa kart eklensin") | yazıldı (20.11; Higgsfield sohbeti, `claude/project-thread-r57x4r`) |
 | D | D-139 | (başka sohbet: girintili evde kırma çatı; BK-64) | alındı (20.11) |
-| D | **D-140** | — | **sıradaki boş** |
+| D | D-140 | (başka sohbet: kirişler ön onay çiziminde; BK-66) | alındı (20.11) |
+| D | D-141 | montaj rehberinde çapraz cumbanın altında ana çatının aşıkları kalkandan kalkana (BK-67; Lokman 20.11 11:22:05, kart 12:20:39 "Resimdeki gibi") | yazıldı (20.11; `claude/project-thread-xmignz`) |
+| D | **D-142** | — | **sıradaki boş** |
 | İE | İE-01–İE-08 | bu depo (`main`) | yazıldı |
 | İE | İE-09 | model atölyesi: kontrollü model üretimi ve banka hattı (Görev 6e; pano 30; P6001 güncellemesi kapsam dışı) | alındı (16.10; `claude/gorev-6e-model-atolyesi-rnhtcp`; PR-1 banka hattı 29.10, `claude/project-thread-rhjgzv`) |
 | İE | İE-10, İE-11, İE-12 | prefabrik hattı (PR #12, PR #14, `ie-12-prefabrik-bayi-paftasi`) | `main`'e BK-12 ile (PR-1: motor ve bayi paftası; liste ve mühür kıyası sonraki PR'larda) |
@@ -369,7 +372,9 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | BK | BK-61 | (başka sohbet: disk arşivi Parti 2'nin çatı farkları; D-133) | alındı (20.11) |
 | BK | BK-62 | Çapraz cumbada ana çatının aşık sıraları cumbanın arkasında baştan sona: `cati_prefabrik.ana_karkasi` (D-135; `claude/project-thread-4mjyg0`) | yazıldı (20.11) |
 | BK | BK-63 | Pano Motor'unun ön onay çiziminde listede kirişi olan veranda kenarı profil (`dxf_out.Cizici._listede_kirisli`) (D-137, PC-49; `claude/project-thread-bvls4f`) | yazıldı (20.11; defter 08:10) |
-| BK | **BK-64** | — | **sıradaki boş** |
+| BK | BK-64 … BK-66 | (başka sohbetler; numara defteri) | alındı (20.11) |
+| BK | BK-67 | Montaj rehberinde çapraz cumbanın altında ana çatının aşıkları: `capraz.py` `poly_asik`, `sahne.js` `Y.PA` (D-141; `claude/project-thread-xmignz`) | yazıldı (20.11) |
+| BK | **BK-68** | — | **sıradaki boş** |
 
 ## 27 Eylülde Lokman'ın verdiği kararlar
 

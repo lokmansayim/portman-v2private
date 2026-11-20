@@ -199,6 +199,19 @@ def cati(HZ: dict, plan, kitap: dict, IFC: dict, ASIK: dict, SC: float, TAN: flo
                 return 1.3 if e["tur"] == "sacak" else 0.2 if gorunur else 0.0
         return 0.0
 
+    def pay_ust(a, b):
+        """Kenarın payı, kenar çatının bir kenarıyla aynı doğrudaysa ve onunla örtüşüyorsa: karkasın saçağı cumbanın altından da geçer."""
+        for e, gorunur in kenar_tur:
+            (px, py), (qx, qy) = e["p"], e["q"]
+            L = math.hypot(qx - px, qy - py)
+            if L < 1e-6:
+                continue
+            uzak = [abs((qx - px) * (t[1] - py) - (qy - py) * (t[0] - px)) / L for t in (a, b)]
+            ic_ = [((t[0] - px) * (qx - px) + (t[1] - py) * (qy - py)) / L ** 2 for t in (a, b)]
+            if max(uzak) < 0.02 and (min(max(ic_), 1) - max(min(ic_), 0)) * L > 1.0:
+                return 1.3 if e["tur"] == "sacak" else 0.2 if gorunur else 0.0
+        return 0.0
+
     vadi = [e for e in ck["kenarlar"] if e["tur"] == "vadi"]
     if len(vadi) != 2:
         raise Desteklenmiyor(f"çapraz cumbada {len(vadi)} dere (vadi) kenarı; iki beklenir")
@@ -210,10 +223,17 @@ def cati(HZ: dict, plan, kitap: dict, IFC: dict, ASIK: dict, SC: float, TAN: flo
     dizilim_x = baslangic.get("x", "min")
     dizilim_y = baslangic.get("y", "min")
     yuz, hadve_ar, YK = {}, {}, defaultdict(list)                   # YK: kart modelinin düzlemi → [(anahtar, x sınırı)]
+    # D-135 (BK-62; Lokman, 20 Kasım 2026 11:22 UTC: "ana çatıdaki aşıklar iki baş makas arasında başladığı gibi devam edecek ... iki ana çatı
+    # makası arasında aşık kesintisi yok"): ana çatının cumbalı yüzünün aşıkları cumbanın altında da sürer. Aşığın yüzü Motor'un karkası
+    # (`cati_prefabrik.ana_karkasi`: görünen yüz ∪ dışbükey zarf ∩ cumba; liste, kart modeli ve pafta aynı kaynaktan); kaplama, dere ve
+    # kenarlar görünen yüzden aynen.
+    from motor.cati_prefabrik import ana_karkasi
+    KARKAS = {d_["ad"]: Polygon(d_["karkas"]) for d_ in ana_karkasi([dict(d_) for d_ in ck["duzlemler"]]) if d_.get("karkas")}
     for dz in ck["duzlemler"]:
         P = [tuple(p_) for p_ in dz["plan"]]
         anam = dz["ad"].startswith("ana ")
         on_yuz = dz["yukari"][1] * ic > 0 if anam else None          # ana çatının cumbalı yüzü
+        kk = KARKAS.get(dz["ad"])
         if anam and on_yuz:
             pg = Polygon(P)
             bx = pg.bounds
@@ -249,6 +269,13 @@ def cati(HZ: dict, plan, kitap: dict, IFC: dict, ASIK: dict, SC: float, TAN: flo
                  "_bas": bas_v, "_son": son_v, "_parcalar": parca_ad}
             if dere:
                 Y["dere"], Y["dere_yan"] = dere, dyan
+            if kk is not None and xs is not None:                    # aşığın yüzü: karkasın bu parçası (cumbanın altı dahil)
+                ka = kk.intersection(box(max(xs[0], kk.bounds[0] - 1), kk.bounds[1] - 1, min(xs[1], kk.bounds[2] + 1), kk.bounds[3] + 1))
+                if ka.geom_type == "Polygon" and ka.area - pg.area > 1.0:
+                    K0 = [tuple(round(v, 4) for v in c) for c in ka.exterior.coords[:-1]]
+                    K0 = [q for i_, q in enumerate(K0) if math.hypot(q[0] - K0[i_ - 1][0], q[1] - K0[i_ - 1][1]) > 0.01]
+                    K = _ote(K0, [pay_ust(K0[j], K0[(j + 1) % len(K0)]) for j in range(len(K0))])   # kenar payları görünen yüzdeki gibi
+                    Y["poly_asik"] = [[_r(x), _r(y)] for x, y in K]
             yuz[k] = Y
             YK[dz["ad"]].append((k, xs))
 
