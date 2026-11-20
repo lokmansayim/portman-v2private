@@ -534,6 +534,7 @@ class Cizici:
         girinti_kirisli = {x.get("ad") for x in plan.is_emri.get("mahaller", []) if x.get("girinti_kirisi")}
         for ad, m in plan.mahaller.items():
             if not m.acik or ad in dis_ad: continue         # BK-14: taşan verandanın kenarları aşağıda (gövde çizgisi profil değil)
+            kirisli = self._kirisli_acik_kenarlar(m)          # D-137: listede kiriş alan açık kenarlar
             ring = list(m.poly.simplify(0.0).exterior.coords)
             segs, ic_kenar = [], set()
             for (ax_, ay_), (bx_, by_) in zip(ring, ring[1:]):
@@ -542,10 +543,16 @@ class Cizici:
                 elif ad in girinti_kirisli and plan.girintili and self._girinti_acik_kenari(ax_, ay_, bx_, by_):
                     # D-58 (Lokman, 5 Kasım 2026 11:00, TK-04 r07; BK-24; PC-36): veranda içeri alınınca ağzı girintiye bakar, gövdenin dış
                     # çizgisinde değildir; İş Emri mahalde `girinti_kirisi: true` diyorsa o kenar da profil (kiriş) olarak çizilir. Anahtarsız
-                    # İş Emri eski yoldan (depoda aynı biçimli AP-15, AP-18, AP-22, AP-25 aynen; AP-15 ve AP-22 M-07 ile mühürlü)
+                    # İş Emri eski yoldan (AP-15 ve AP-22 M-07 ile mühürlü, aynen); listede kirişi olan kenar D-137'yle aşağıda profil
                     seg = (min(ax_, bx_), min(ay_, by_), max(ax_, bx_), max(ay_, by_))
                     segs.append(seg); ic_kenar.add(seg)
                     self._girinti_kirisleri = getattr(self, "_girinti_kirisleri", frozenset()) | {seg}
+                elif self._listede_kirisli(kirisli, ax_, ay_, bx_, by_):
+                    # D-137 (Lokman, 20 Kasım 2026 08:04:02, kart "Eskizdeki gibi, iki evde"; BK-63; PC-49): listede kiriş alan açık kenar
+                    # gövdenin dış çizgisinde değilse de profil (kiriş) olarak çizilir, girinti kirişi gibi (80 m² 3+1'in 60 cm'lik sol yanı,
+                    # 91 m² 3+1'in 502 cm'lik önü). Yalnız profil: D-58'in aks ve dış parça ölçüsü ekleri `girinti_kirisi` anahtarıyla kalır
+                    seg = (min(ax_, bx_), min(ay_, by_), max(ax_, bx_), max(ay_, by_))
+                    segs.append(seg); ic_kenar.add(seg)
             segs = [s for s in segs if s not in ic_kenar] + [s for s in segs if s in ic_kenar]   # öteki profillerin kodları r06'daki sırada kalır
             pts_all = [(x0, y0) for (x0, y0, x1, y1) in segs] + [(x1, y1) for (x0, y0, x1, y1) in segs] + [(x0, y1) for (x0, y0, x1, y1) in segs] + [(x1, y0) for (x0, y0, x1, y1) in segs]
             for (x0, y0, x1, y1) in segs:
@@ -900,6 +907,25 @@ class Cizici:
                        (yon == "x" and abs(k[0] - k[2]) < 1e-9 and abs(k[0] - v) < 1e-6):
                         out.add((yon, v))
         return out
+
+    def _kirisli_acik_kenarlar(self, m) -> list:
+        """D-137: açık mahalin yükleme listesinde kiriş alan açık kenarları (`prefabrik_liste.kirisli_acik_kenarlar`). Liste ve çizim kenarı
+        aynı koddan okur (D-28 madde 1). Dikmesiz planda liste açık kenara kiriş saymaz, burada da boş. Giriş nişinin ağzını liste ayrı
+        sayar (`nis_agizlari_cm`); ağız parçası duvar ekseninden başladığı için mahalin içinde kalmaz, burada da çıkmaz (depoda altı niş;
+        dikmesiz planda ağzı dış kutuda olmayan niş, liste sayar, çizim çizmez: depoda yok, BK-63 › Sınırlar)."""
+        if not self.plan.dikmeler:
+            return []
+        from . import prefabrik_liste
+        return prefabrik_liste.kirisli_acik_kenarlar(self.plan, m)
+
+    @staticmethod
+    def _listede_kirisli(kirisli: list, ax: float, ay: float, bx: float, by: float) -> bool:
+        """D-137: halkanın eksene paralel parçası (yüzden yüze ya da dış yüze) listede kiriş alan bir açık kenarı (akstan aksa) üstünde
+        taşıyor mu (0,5 cm payla)."""
+        if (abs(ax - bx) > 1e-9 and abs(ay - by) > 1e-9) or math.hypot(bx - ax, by - ay) <= 1.0 or not kirisli:
+            return False
+        parca = LineString([(ax, ay), (bx, by)]).buffer(0.5)
+        return any(parca.contains(LineString([(k[0], k[1]), (k[2], k[3])])) for k in kirisli)
 
     def _girinti_acik_kenari(self, ax: float, ay: float, bx: float, by: float) -> bool:
         """Açık mahalin halkasındaki bir parça, gövdenin dış çizgisinde olmayan bir açık kenarın (girintiye bakan veranda ağzı) üstünde mi
