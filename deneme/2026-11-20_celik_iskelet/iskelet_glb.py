@@ -11,7 +11,6 @@ Kullanım (openskp 1.3.0 ve numpy): python iskelet_glb.py <çelik model>.skp cel
 """
 import argparse, collections, json, struct
 import numpy as np
-from openskp import _core
 
 INC = 0.0254                                   # SKP içi inç -> m
 KATMAN = {'BCAD_Wall': 'Duvar', 'BCAD_Truss': 'Makas', 'BCAD_Roof': 'Cati_paneli', 'BCAD_Header': 'Lento'}
@@ -19,6 +18,7 @@ KIMLIK = [1.0, 0, 0, 0, 1.0, 0, 0, 0, 1.0, 0, 0, 0, 1.0]
 
 
 def yuzler(yol):
+    from openskp import _core
     p = _core.full_parse(yol); defs = p['defs_dict']; lid = p['layer_id_to_name']
     V = {}; F = []
     def yuru(did, M, ad, kat):
@@ -68,6 +68,7 @@ def parcalar(F):
 
 
 def ucgenle(V, f):
+    from openskp import _core
     P = np.array([V[k] for k in f['halka'][0]])
     n = np.zeros(3)
     for i in range(len(P)):

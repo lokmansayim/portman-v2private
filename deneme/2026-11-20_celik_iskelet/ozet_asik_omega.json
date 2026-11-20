@@ -1,0 +1,130 @@
+{
+ "kural": {
+  "asik_aralik": 0.6,
+  "asik_parca": 4.1,
+  "sacak_esigi": 0.3,
+  "asik_en_kisa": 0.1,
+  "omega_aralik": 0.6,
+  "omega_parca": 3.65,
+  "omega_en_kisa": 0.1
+ },
+ "olcu": {
+  "mahya_x": -0.016427399590611458,
+  "mahya_z": 4.415349960327148,
+  "sacak_z": 2.799999952316284,
+  "sol_x": -4.9114274978637695,
+  "sag_x": 4.878572463989258,
+  "egim": 0.32999999501138355,
+  "arka_y": 5.046408176422119,
+  "on_makas_x": -2.491426944732666,
+  "on_makas_y": -2.883591890335083,
+  "panel_on_y": -4.743591785430908,
+  "panel_x": -0.07142720371484756,
+  "panel_arka_y": 0.8371070027351379,
+  "ver_ust_y": -2.873540163040161,
+  "ver_ust_z": 3.2950000762939453,
+  "ver_sacak_y": -5.0435919761657715,
+  "ver_sacak_z": 2.799999952316284,
+  "ver_sol_x": -0.07142739742994308,
+  "mahya_kenari": [
+   [
+    3.3677783012390137,
+    -2.892543315887451
+   ],
+   [
+    4.9114274978637695,
+    -5.066407680511475
+   ]
+  ],
+  "tavan_z": 2.7
+ },
+ "asik_sira": {
+  "sol": 10,
+  "sag": 10,
+  "veranda": 5
+ },
+ "asik_sira_boyu_m": {
+  "sol": 94.6,
+  "sag": 89.0,
+  "veranda": 21.16
+ },
+ "asik_parca": 68,
+ "asik_toplam_m": 204.76,
+ "omega_parca": 45,
+ "omega_toplam_m": 104.76,
+ "gozler": [
+  {
+   "goz": 2,
+   "alan": 21.92,
+   "merkez": [
+    -2.49,
+    -1.96
+   ],
+   "hat": 0,
+   "not": "çatı paneli altında, omega yok"
+  },
+  {
+   "goz": 3,
+   "alan": 8.13,
+   "merkez": [
+    2.06,
+    -3.82
+   ],
+   "hat": 3,
+   "yon": "x boyunca",
+   "baslangic": -4.66
+  },
+  {
+   "goz": 4,
+   "alan": 18.94,
+   "merkez": [
+    1.92,
+    -0.85
+   ],
+   "hat": 8,
+   "yon": "y boyunca",
+   "baslangic": -0.36
+  },
+  {
+   "goz": 5,
+   "alan": 15.29,
+   "merkez": [
+    -2.66,
+    2.85
+   ],
+   "hat": 7,
+   "yon": "y boyunca",
+   "baslangic": -4.52
+  },
+  {
+   "goz": 6,
+   "alan": 14.19,
+   "merkez": [
+    2.75,
+    2.91
+   ],
+   "hat": 6,
+   "yon": "y boyunca",
+   "baslangic": 1.02
+  },
+  {
+   "goz": 7,
+   "alan": 5.1,
+   "merkez": [
+    0.04,
+    3.51
+   ],
+   "hat": 3,
+   "yon": "y boyunca",
+   "baslangic": -0.84
+  }
+ ],
+ "parca": {
+  "Duvar": 508,
+  "Lento": 32,
+  "Makas": 237,
+  "Cati_paneli": 47,
+  "Tavan_omegasi": 45,
+  "Asik": 68
+ }
+}
