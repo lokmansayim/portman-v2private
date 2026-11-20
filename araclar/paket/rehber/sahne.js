@@ -500,6 +500,7 @@ Object.values(YUZ).forEach(Y => {
   Y.yerel = ([x, y]) => { const px = x - Y.E[0], py = y - Y.E[1]; return [(px * dx + py * dy) / c, px * dy - py * dx]; };
   Y.tOf = (x, y) => Y.yerel([x, y])[1];
   Y.P = ccw(Y.poly.map(Y.yerel));
+  Y.PA = Y.poly_asik ? ccw(Y.poly_asik.map(Y.yerel)) : Y.P;   // aşığın yüzü: Motor'un karkası (D-135; cumbanın altında da sürer)
   Y.grup = () => { const g = new THREE.Group(); g.quaternion.copy(Y.q); g.position.set(X(Y.E[0]), (TB + HEEL) / 100, Z(Y.E[1])); return g; };
 });
 /* Kalkanlar: baş makas betopanı (makas uçlarına artanı), baş makas Z'si (sonra C kapama ve alın sacı) */
@@ -719,7 +720,7 @@ let acO = parts.filter(p => p.step === AD.alcipan).reduce((a, p) => Math.max(a, 
   Object.entries(YUZ).forEach(([k, Y]) => {
     let pr = 0;
     rows[k].forEach((sr, r) => {
-      const iv = aralik(Y.P, 0, sr); if (!iv || iv[1] - iv[0] < 20) return;
+      const iv = aralik(Y.PA, 0, sr); if (!iv || iv[1] - iv[0] < 20) return;
       const kp = [kalkanda(Y, sr, iv[0]) ? 0.2 : 0, kalkanda(Y, sr, iv[1]) ? 0.2 : 0];
       iv[0] += kp[0]; iv[1] -= kp[1];
       // Uçlar yüzün kenarına göre kesilir: dere hattında (eğik kenar) aşığın her noktası kendi yerindeki kenarda biter, öbür yüzün altına
@@ -729,7 +730,7 @@ let acO = parts.filter(p => p.step === AD.alcipan).reduce((a, p) => Math.max(a, 
         for (let i = 0; i < P.count; i++) {
           const z = P.getZ(i) * 100, bas0 = Math.abs(z) < 1e-4, son0 = Math.abs(z - len) < 1e-4;
           if (!(bas0 && ilk) && !(son0 && son)) continue;
-          const q = aralik(Y.P, 0, sr + P.getX(i) * 100 - P.getY(i) * 100 * Y.R.tan); if (!q) continue;
+          const q = aralik(Y.PA, 0, sr + P.getX(i) * 100 - P.getY(i) * 100 * Y.R.tan); if (!q) continue;
           if (bas0) P.setZ(i, (Math.min(q[0] + kp[0], t0 + len - 1) - t0) / 100); else P.setZ(i, (Math.max(q[1] - kp[1], t0 + 1) - t0) / 100);
         }
         P.needsUpdate = true; geo.computeVertexNormals(); return geo;

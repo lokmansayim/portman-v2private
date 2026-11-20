@@ -1577,9 +1577,13 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
                                     "Cumba ana çatının üstünde olduğu için altı da bu şeritlerle örtülür.")
         n_sira = sum(len(a_["sira"]) for a_ in asik.values())
         ak = AD_["Aşıklar"]
-        ak["p"] = (f"Aşıklar kitabın çok düzlemli çatı kuralıyla makasların üst başlıklarına vidalanır: her yüzde saçaktan 60 cm arayla, {len(asik)} yüzde "
-                   f"{n_sira} sıra (ana çatının cumbalı yüzü derelerin birleştiği yerden iki parça); sıranın boyu yüzün o yükseklikteki genişliği, dere "
-                   f"hattında açıyla kesilir. Parçalar dizilimin başladığı uçtan tam boy (motorun kart modeli). Kalkan saçaklarında aşık uçları C kapamayla kapatılır.")
+        # D-141 (BK-67): ana çatının aşıkları cumbanın altında kesilmez (D-135); cumbanın aşıkları dere hattında onların üstüne biner (Lokman,
+        # 20 Kasım 2026 11:22 UTC; kart 12:20:39 "Resimdeki gibi")
+        n_yuz = len(asik) - (1 if {"MFL", "MFR"} <= set(asik) else 0)
+        ak["p"] = (f"Aşıklar kitabın çok düzlemli çatı kuralıyla makasların üst başlıklarına vidalanır: her yüzde saçaktan 60 cm arayla, {n_yuz} yüzde "
+                   f"{n_sira} sıra. Ana çatının aşıkları cumbanın altında kesilmez, kalkandan kalkana sürer. Cumbanın aşıkları dere hattında ana "
+                   f"çatının aşıklarının üstüne biner. Parçalar dizilimin başladığı uçtan tam boy (motorun kart modeli). Kalkan saçaklarında aşık "
+                   f"uçları C kapamayla kapatılır.")
         ak["rows"] = [x for x in (LR("Aşık"), R("AS-01", "Aşık (kart modeli)", f"{sum(1 for n in IFC if n.startswith('ASIK'))} parça", "model"),
                                   I("Kesit", "87 × 30 mm, sac 1 mm"), R(None, "C kapama", f"{2 * len(kalkan)} kalkan kenarı", "model")) if x]
         sa = AD_["Saçak sacı"]
