@@ -100,6 +100,7 @@
    "ad": "91 m² 3+1 (havuz evi; kör ölçümü AP18)",
    "is_emri": "is_emri/adaylar/PA17.json",
    "listedeki_kiris": "L 4920",
+   "d140_notu": "D-140 (Lokman 20 Kasım 2026 kartları 10:50:36, 10:54:39): iki kapalı oda arasındaki duvarsız sınırın kirişi ana planda ve kopyasında KIRIS_PROFIL_100 çerçevesi (2 varlık); sonra_katmanlar bu kararla. D-137 profili ve öteki katmanlar aynen.",
    "once_toplam": 505,
    "sonra_toplam": 508,
    "katman_farki": {
@@ -114,6 +115,7 @@
     "DIS_PARCA_OLCU": 12,
     "IC_DUVAR_60": 34,
     "IC_UCLU_H_60": 6,
+    "KIRIS_PROFIL_100": 2,
     "KOSE_PROFIL_100": 12,
     "KOSE_PROFIL_60": 4,
     "MONTAJ_OZEL_OLCU": 10,
