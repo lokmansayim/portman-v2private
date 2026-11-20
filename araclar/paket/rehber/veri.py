@@ -1298,7 +1298,8 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
     kaplama_txt = f"{kucuk(kap_ad)}{' (' + renk + ')' if renk else ''}"
     ver_ozet = ", ".join([f"{'önde' if v['on'] else 'arkada'} {fmtc(v['rect'][2] - v['rect'][0])} × {fmtc(v['rect'][3] - v['rect'][1])} cm" for v in VR] +
                          ([f"gövdenin içinde {fmtc(GVK['vk'][2] - GVK['vk'][0])} × {fmtc(GVK['vk'][3] - GVK['vk'][1])} cm (ana çatının altında)"]
-                          if GVK and not GVK["nis"] and GVK["ad"] == "veranda" else []))
+                          if GVK and not GVK["nis"] and GVK["ad"] == "veranda" else []) +
+                         [f"{'önde' if q['out'] < 0 else 'arkada'} {fmtc(q['x1'] - q['x0'])} × {fmtc(abs(q['yw'] - q['yo']))} cm (sundurma panelli)" for q in sundurma])
     nis_ozet = (f"; gövdenin içinde {fmtc(GVK['vk'][2] - GVK['vk'][0])} × {fmtc(GVK['vk'][3] - GVK['vk'][1])} cm giriş nişi (ana çatının altında)"
                 if GVK and GVK["nis"] else
                 f"; gövdenin {'köşesinde' if GVK['iki_yan'] else 'içinde'} {fmtc(GVK['vk'][2] - GVK['vk'][0])} × {fmtc(GVK['vk'][3] - GVK['vk'][1])} cm "
