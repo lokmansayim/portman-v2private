@@ -1,5 +1,5 @@
 {
- "_aciklama": "BK-64 (D-139) hedef örnek: 91 m² 3+1 evde kenar yöntemli kırma (düz iskelet). Girdi testler/motor/veri/BK64_PA17_kirma.json. Yüzler 16 Kasım 2026 onaylı iskelet eskizi (Lokman 11:13:41 '91 m² ve 143 m² doğru'); makas planı kart 20 Kasım 2026 08:45:03 'Doğru, eskizdeki gibi'; aşık dizilimi ve 4 çatı paneli kart 08:57:26 'Doğru, eskizdeki gibi'. Yükleme listesi satırları: Lokman'ın onayını bekliyor (onaydan sonra bu satır karar ve saatle güncellenir).",
+ "_aciklama": "BK-64 (D-139) hedef örnek: 91 m² 3+1 evde kenar yöntemli kırma (düz iskelet). Girdi testler/motor/veri/BK64_PA17_kirma.json. Yüzler 16 Kasım 2026 onaylı iskelet eskizi (Lokman 11:13:41 '91 m² ve 143 m² doğru'); makas planı kart 20 Kasım 2026 08:45:03 'Doğru, eskizdeki gibi'; aşık dizilimi ve 4 çatı paneli kart 08:57:26 'Doğru, eskizdeki gibi'. Yükleme listesi satırları ve ön onay çizimi: kart 20 Kasım 2026 10:15:31 \"Onaylıyorum\" (soru: \"91 m2 kırma çatılı liste ve ön onay çizimi doğru mu?\").",
  "yuzler": {
   "güney": 17.51,
   "güney 2": 4.98,
