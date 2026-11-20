@@ -140,7 +140,23 @@
    "tur": "pencere",
    "olcu": "180x180",
    "mahal": "YASAM ALANI",
-   "duvar": "on"
+   "duvar": "on",
+   "bolmeler": [
+    {
+     "tur": "kanat",
+     "mentese": "sag",
+     "en_cm": 46
+    },
+    {
+     "tur": "sabit",
+     "en_cm": 88
+    },
+    {
+     "tur": "kanat",
+     "mentese": "sol",
+     "en_cm": 46
+    }
+   ]
   },
   {
    "tur": "pencere",
@@ -153,7 +169,23 @@
    "tur": "pencere",
    "olcu": "180x180",
    "mahal": "MUTFAK",
-   "duvar": "on"
+   "duvar": "on",
+   "bolmeler": [
+    {
+     "tur": "kanat",
+     "mentese": "sag",
+     "en_cm": 46
+    },
+    {
+     "tur": "sabit",
+     "en_cm": 88
+    },
+    {
+     "tur": "kanat",
+     "mentese": "sol",
+     "en_cm": 46
+    }
+   ]
   },
   {
    "tur": "pencere",
@@ -272,7 +304,8 @@
   "Kat planı (r02) Lokman'ın kartıyla onaylı (17 Kasım 2026 05:45:59 UTC, 'Onaylıyorum'); çatı ve dört görünüş (r03) kartla onaylı (05:48:41 UTC, 'Onaylıyorum'). r04 yalnız köşe yönünü değiştirir (05:57:53 sözü); pano dizilimi aynı. r04 kartla onaylı (17 Kasım 2026 06:03:24 UTC, 'Onaylıyorum'; soru: 'Köşeleri makas yönünde olan 825,75 × 1024 planı onaylıyor musunuz?').",
   "r05: ana çatının makasları cumba makasının arkasında biter (`ana_makas: cumba_makasindan`, kampanyalı ev TK-04 r08 gibi, D-53); plan r04 ile aynı. Lokman 17 Kasım 2026 08:27:29 UTC: \"daha önce 80 m² kampanyalıda buna çalışmıştık yine aynı şekilde yapar mısın yani binanın sol tarafı cumba ile ana makasın birleştiği yerde bir çalışma yapmıştık aynı orası gibi olsun\".",
   "r06: veranda ön kirişi 37,5 cm içeride, kirişin önünde 30 cm saçak kalır; kampanyalı 80 m² 2+1 (TK-04 r08) gibi: verandanın önünde 27,5 cm girinti (`girintiler`), ek aks y 37,5, veranda `konum_cm` + `girinti_kirisi`, dikme [386,5, 37,5]. Lokman 20 Kasım 2026 kart (montaj paftası sohbeti): \"85 m2 evin veranda kirişi kampanyalıdaki gibi 37,5 cm içeri alınsın mı?\" → \"Evet, yeni sohbette\".",
-  "r06 plan Lokman'ın kartıyla onaylı (20 Kasım 2026 12:23:44 UTC, 'Onaylıyorum'; soru: '85 m2 evde veranda kirişi 37,5 cm içeride olan r06 planını onaylıyor musunuz?')."
+  "r06 plan Lokman'ın kartıyla onaylı (20 Kasım 2026 12:23:44 UTC, 'Onaylıyorum'; soru: '85 m2 evde veranda kirişi 37,5 cm içeride olan r06 planını onaylıyor musunuz?').",
+  "r06: iki 180/180 pencere üç bölmeli (kanat 46, sabit 88, kanat 46 cm; AP-27'nin üç bölmeli pencere modeli, kurallar/pencere/pencereler.json 180x210). Lokman 20 Kasım 2026 12:35:38 UTC: \"açıkcası düzeltmişken pencereleride düzelt ... P8501 de bak 180/180 pencereler genellikle 3 bölmeli oluyor\"; kart 12:42:42 UTC \"Böyle olsun\"."
  ],
  "eksikler": [],
  "girintiler": [
