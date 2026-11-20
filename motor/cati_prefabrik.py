@@ -309,7 +309,7 @@ def _tek_uclu_kirma(kutu: tuple, mahya: str, uc: str, b: dict, k: dict) -> tuple
 
 
 def ana_karkasi(duz: list[dict]) -> list[dict]:
-    """Çapraz cumbada ana çatının aşıkları cumbanın arkasında kesilmez (D-134, BK-62; Lokman, 20 Kasım 2026 07:12: "ana makasdaki aşıklar cumbanın
+    """Çapraz cumbada ana çatının aşıkları cumbanın arkasında kesilmez (D-135, BK-62; Lokman, 20 Kasım 2026 07:12: "ana makasdaki aşıklar cumbanın
     arkasına gelince kesilmez devam eder ... baştan sona kadar devam eder yarım bırakılmaz"). Ana çatının makasları cumbanın altından da
     geçer (`cati_capraz`); ana yüzün görünen kısmı cumbanın oturduğu yerde kesik olsa da makaslarla taşınan kısmı (`karkas`,
     `cati_genel.duzlem_kur`) cumbanın altındaki parçayla birlikte tam yüzdür. Karkas = görünen yüz ∪ (yüzün dışbükey zarfı ∩ cumba
