@@ -46,6 +46,14 @@ def test_duvar_alti_yazmayan_teras_aynen():
         assert VR.cati(v, ie)["mahya_kotu"] == pytest.approx(b["mahya_kotu"])
 
 
+def test_teras_panelinde_ozel_mahya_yok():
+    """Kart 20:02:05 "Yalnız damlalık": teras panelinin duvar kenarında özel mahya yazılmaz (AP-26 da)."""
+    from motor import prefabrik_liste as PL
+    L = PL.is_emrinden(_ie(BEK["teras_aynen"]["is_emri"]))
+    assert not [r for r in L["satirlar"] if r["kalem"] == "Özel mahya (geniş)"]
+    assert [r["adet"] for r in L["satirlar"] if r["kalem"] == "Damlalık"] == [4]
+
+
 def test_duvar_alti_siniri():
     from motor import geometry as G
     ie = _ie(BEK["sundurma_80m2"]["is_emri"])
@@ -73,9 +81,9 @@ def test_gorunus_kolon_ve_kiris_panelin_altinda():
         if not p:
             continue
         gordu += 1
-        for tur, bek in (("kolon", b["kolon_ustu"]), ("kiris", b["dis_kiris_ustu"])):
-            ust = [max(z for _, z in q["u"]) for q in p if q["tur"] == tur]
-            assert all(z == pytest.approx(bek, abs=0.01) for z in ust), (taraf, tur, ust)
+        for tur, bek in (("kolon", [b["kolon_ustu"]]), ("kiris", [b["dis_kiris_ustu"], b["yan_kiris"]["ust_duvar"]])):
+            ust = [max(z for _, z in q["u"]) for q in p if q["tur"] == tur]   # yan kiriş (D-133 ek) en üstü duvarda, panelin altında
+            assert all(any(z == pytest.approx(x, abs=0.01) for x in bek) for z in ust), (taraf, tur, ust)
         ust = max(z for q in p if q["tur"] == "cati" for _, z in q["u"])
         assert ust == pytest.approx(b["mahya_kotu"], abs=0.01)
     assert gordu >= 3
@@ -88,6 +96,26 @@ def test_liste():
     for kalem, (olcu, adet) in b["liste"].items():
         assert [(r["olcu"], r["adet"]) for r in L["satirlar"] if r["kalem"] == kalem] == [(olcu, adet)], kalem
     assert not [r for r in L["satirlar"] if r["kalem"] in b["listede_yok"]]
+
+
+def test_egimli_yan_kiris():
+    """D-133 ek (kart 20 Kasım 2026 20:19:34 "Eğimli, panelin altında"): 80 m²'de iki yan kiriş duvardan dış kirişin iç yüzüne, üstü
+    panelin altında (duvarda 222, dışta 211,3); listede açık kenar − 10 (L 2140), dış kiriş aynen. `yan_kiris: true` yazan ev (92 m²) aynen."""
+    from motor import geometry as G, prefabrik_liste as PL, veranda as VR
+    b = BEK["sundurma_80m2"]; y = b["yan_kiris"]
+    ie = _ie(b["is_emri"])
+    v = G.kur(ie).dis_verandalar[0]
+    T = VR.teras_paneli(v, ie)
+    assert len(T["yan_kirisler"]) == y["adet"]
+    for yk in T["yan_kirisler"]:
+        assert (round(yk["ust_duvar"], 1), round(yk["ust_dis"], 1)) == (y["ust_duvar"], y["ust_dis"])
+    rows = [r for r in PL.is_emrinden(ie)["satirlar"] if r["kalem"] == "Kutu profil (kiriş) 100 × 100"]
+    assert sum(r["adet"] for r in rows if r["olcu"] == y["liste"]) == y["adet"]
+    assert sum(r["adet"] for r in rows if r["olcu"] == y["dis_kiris"][0]) == y["dis_kiris"][1]
+    for yol in ("testler/kor/projeler/AP26/is_emri.json",):     # D-56 / M-12: yazmayan teras panelinde yan kiriş yok
+        ie2 = _ie(yol)
+        assert all(VR.teras_paneli(v2, ie2)["yan_kirisler"] == [] for v2 in G.kur(ie2).dis_verandalar
+                   if v2["cati"]["tip"] == "teras_paneli")
 
 
 def test_45m2_egim():

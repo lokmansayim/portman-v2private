@@ -22,6 +22,7 @@ import numpy as np
 import ezdxf
 from ezdxf import bbox as ebbox
 from shapely.ops import polylabel
+from shapely.geometry import box
 import ifcopenshell
 import ifcopenshell.api
 from ifcopenshell.util.shape_builder import ShapeBuilder
@@ -1432,7 +1433,20 @@ class IfcUretici:
                 e = self._urun("IfcBeam", f"VERANDA_PROFIL_{b['kod']}_{i:02d}", predefined="BEAM")
                 z1 = profil_ust(x0, y0, x1, y1)
                 tv = teras_verandasi(x0, y0, x1, y1)
-                if tv is not None:                               # D-52 ek, D-56: yalnız dış kiriş, düz, panelin altında
+                yk = next((y_ for y_ in ((tv["cati"].get("yan_kirisler") or []) if tv is not None else [])
+                           if box(*b["rect"]).intersection(box(*y_["rect"])).area > 1), None)
+                if yk is not None:                               # D-133 ek (kart 20 Kasım 2026 20:19:34): yan kiriş panelin altında, eğimle
+                    d = tv["cati"]["duzlemler"][0]; t_ = tv["cati"]["kalinlik"]
+                    p0 = min(d["plan"], key=lambda q: q[0] * d["yukari"][0] + q[1] * d["yukari"][1])   # saçak çizgisi (dış kenar)
+                    rx0, ry0, rx1, ry1 = yk["rect"]
+                    self._yerlestir(e)
+                    self._temsil(e, self._egik_levha([(rx0, ry0), (rx1, ry0), (rx1, ry1), (rx0, ry1)], tuple(p0), tuple(d["yukari"]), d["egim"],
+                                                      d["sacak_kotu"] - t_ - 10, 10 / math.hypot(1.0, d["egim"])), "profil")
+                    self._pset(e, "PortatifEv_Kapsam", {"BOMKalem": b["kalem"], "BOMKod": b["kod"], "Blok": b.get("blok", ""),
+                                                        "Kot_cm": f"{yk['ust_dis'] - 10:.0f}–{yk['ust_duvar']:.0f}", "KesimBoyuTanimli": False,
+                                                        "Not": "teras panelinin yan kirişi, panelin altında eğimle (D-133 ek)"})
+                    continue
+                if tv is not None:                               # D-52 ek, D-56: dış kiriş, düz, panelin altında
                     z1 = tv["cati"]["dis_kiris_ustu"]
                 z0, z1, malz = z1 - 10, z1, "profil"
             else:

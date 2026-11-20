@@ -1317,7 +1317,7 @@
   {
    "kod": "PC-48",
    "baslik": "Sundurma paneli: teras paneli gibi, ana çatıdan 20 cm aşağıda (`duvar_alti_cm`)",
-   "kural": "Teras panelli verandada (`cati.tip: teras_paneli`, D-52) İş Emri `duvar_alti_cm` yazarsa panelin üstü duvarda duvar üstünün o kadar altındadır (0'dan büyük, en çok 50); yazmazsa 10 (D-52, M-12 aynen). Panel 8 cm, `egim_yuzde` ile dışarı iner, üstünde evin çatı kaplaması (trapez sac), duvarla sacın birleşiminde damlalık (D-57 satırı); dış kiriş panelin altında, kolon kirişin altına, yan kiriş yok (D-56). Depoda yalnız 80 m² (PA-48): önce tek eğimli çatı (`tek_yon`) saçak kotundan yukarı çıkıyordu (285,4), ana saçağın içinden geçiyordu (havuz denetimi HD-02). Şimdi sundurma paneli: duvarda 230, %5, duvardan 224 (paftanın listesindeki sundurma sacı L 2243), dış uçta 218,8, kiriş üstü 210,8, kolon L 2500 → 2008; listede makas yerine panel, damlalık L 2800 × 3.",
+   "kural": "Teras panelli verandada (`cati.tip: teras_paneli`, D-52) İş Emri `duvar_alti_cm` yazarsa panelin üstü duvarda duvar üstünün o kadar altındadır (0'dan büyük, en çok 50); yazmazsa 10 (D-52, M-12 aynen). Panel 8 cm, `egim_yuzde` ile dışarı iner, üstünde evin çatı kaplaması (trapez sac), duvarla sacın birleşiminde damlalık (D-57 satırı); dış kiriş panelin altında, kolon kirişin altına, yan kiriş yok (D-56); İş Emri `yan_kiris: egimli` yazarsa iki yan kiriş duvardan dış kirişin iç yüzüne, üstü panelin altında eğimle (D-133 ek; Lokman kart 20 Kasım 2026 20:19:34 \"Eğimli, panelin altında\"; 80 m²: duvarda 222, dışta 211,3, listede açık kenar − 10 = L 2140 × 2). Depoda yalnız 80 m² (PA-48): önce tek eğimli çatı (`tek_yon`) saçak kotundan yukarı çıkıyordu (285,4), ana saçağın içinden geçiyordu (havuz denetimi HD-02). Şimdi sundurma paneli: duvarda 230, %5, duvardan 224 (paftanın listesindeki sundurma sacı L 2243), dış uçta 218,8, kiriş üstü 210,8, kolon L 2500 → 2008; listede makas yerine panel, damlalık L 2800 × 3.",
    "karar": "D-133",
    "lokman": {
     "tarih": "2026-11-20",
@@ -1330,6 +1330,7 @@
     "motor/prefabrik_liste.py::_veranda_catilari"
    ],
    "test": [
+    "testler/motor/test_d133_sundurma.py::test_egimli_yan_kiris",
     "testler/motor/test_d133_sundurma.py::test_sundurma_kotlari",
     "testler/motor/test_d133_sundurma.py::test_duvar_alti_yazmayan_teras_aynen",
     "testler/motor/test_d133_sundurma.py::test_duvar_alti_siniri",

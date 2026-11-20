@@ -1,5 +1,5 @@
 {
- "aciklama": "D-133 (BK-61, PC-48) hedef örneği: 80 m² PA-48 (HD-420) ön verandasının sundurma paneli ve 45 m² PA-45 (HD-596) çatı eğimi. Lokman: kart 20 Kasım 2026 07:08:08 \"Önerdiğim gibi\"; önce/sonra çizimine not 07:54:25 (panel 8 cm, ana çatıdan 20 cm aşağıda, %5, üstünde evin çatı kaplaması, Z damlalık) ve 12:53:18 (damlalık duvar ile trapez sacın üstüne; eskiz PF Disk_Arsivi/parti2/cati_farklari/08_80m2_sundurma_panel_eskiz.png). Kotlar cm, zeminden.",
+ "aciklama": "D-133 (BK-61, PC-48) hedef örneği: 80 m² PA-48 (HD-420) ön verandasının sundurma paneli ve 45 m² PA-45 (HD-596) çatı eğimi. Lokman: kart 20 Kasım 2026 07:08:08 \"Önerdiğim gibi\"; önce/sonra çizimine not 07:54:25 (panel 8 cm, ana çatıdan 20 cm aşağıda, %5, üstünde evin çatı kaplaması, Z damlalık) ve 12:53:18 (damlalık duvar ile trapez sacın üstüne; eskiz PF Disk_Arsivi/parti2/cati_farklari/08_80m2_sundurma_panel_eskiz.png). Kotlar cm, zeminden. Liste: duvar kenarında yalnız damlalık, özel mahya yok (kart 20:02:05 \"Yalnız damlalık\").",
  "sundurma_80m2": {
   "is_emri": "testler/havuz/is_emirleri/HD420.json",
   "mahya_kotu": 230.0,
@@ -8,17 +8,44 @@
   "kolon_ustu": 200.8,
   "kalinlik": 8.0,
   "liste": {
-   "Özel kutu profil (kolon) 100 × 100": ["L 2008", 3],
-   "Damlalık": ["L 2800", 3],
-   "Teras paneli (hafif çelik C 80) · veranda çatısı": ["80 × 0,8", 1],
-   "Trapez sac · veranda çatısı": ["L 2300", 7]
+   "Özel kutu profil (kolon) 100 × 100": [
+    "L 2008",
+    3
+   ],
+   "Damlalık": [
+    "L 2800",
+    3
+   ],
+   "Teras paneli (hafif çelik C 80) · veranda çatısı": [
+    "80 × 0,8",
+    1
+   ],
+   "Trapez sac · veranda çatısı": [
+    "L 2300",
+    7
+   ]
   },
-  "listede_yok": ["Yavru makas · veranda çatısı"],
-  "uyari_yok": true
+  "listede_yok": [
+   "Yavru makas · veranda çatısı",
+   "Özel mahya (geniş)"
+  ],
+  "uyari_yok": true,
+  "yan_kiris": {
+   "kaynak": "Lokman, kart 20 Kasım 2026 20:19:34 \"Eğimli, panelin altında\"; eskiz 11 Okuma 1 (20:19:32 \"doğrusu bu\")",
+   "adet": 2,
+   "ust_duvar": 222.0,
+   "ust_dis": 211.3,
+   "liste": "L 2140",
+   "dis_kiris": [
+    "L 3205",
+    2
+   ]
+  }
  },
  "teras_aynen": {
   "is_emri": "testler/kor/projeler/AP26/is_emri.json",
-  "mahya_kotu": 240.0
+  "mahya_kotu": 240.0,
+  "listede_ozel_mahya_yok": true
  },
  "egim_45m2": {
   "is_emri": "testler/havuz/is_emirleri/HD596.json",
