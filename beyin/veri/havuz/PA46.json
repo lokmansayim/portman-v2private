@@ -1,0 +1,77 @@
+{
+ "kod": "PA46",
+ "gosterim": "PA-46",
+ "durum": "gecerli",
+ "sablon": "adaylar/PA46.json",
+ "gorsel": "adaylar/PA46.png",
+ "referans_model": "PA-46",
+ "yapi_turu": "prefabrik",
+ "kat": 1,
+ "oda_programi": "3+1",
+ "katalog_m2": 74.0,
+ "kapali_m2": 63.0,
+ "veranda_m2": 11.24,
+ "ozet": {
+  "grid": {
+   "x_pano": 7.0,
+   "y_pano": 6.5
+  },
+  "dis_olcu_cm": [
+   888.5,
+   835.75
+  ],
+  "brut_m2": 74.26,
+  "pano": 50,
+  "pencere": 7,
+  "kapi": 6,
+  "odalar": {
+   "ODA": 9.5,
+   "ODA 2": 7.43,
+   "VERANDA": 11.24,
+   "WC": 3.38,
+   "HOL": 4.4,
+   "ODA 3": 12.2,
+   "SALON +MUTFAK": 21.47
+  }
+ },
+ "kaynak": {
+  "metin": "HD-118 montaj paftasından İş Emri (İE-43, disk arşivi Parti 2; kodla okundu, ad yok). Havuz: D-132 (Lokman 19 Kasım 2026 21:31:40 kartı \"Altı ev girsin\", 21:39:32 kartı \"Dördü girsin, ikisi beklesin\"; Motor'un aks düzeniyle, çatı paftadaki gibi). Asıl uygulanmış proje: D-103.",
+  "dosya": "testler/havuz/is_emirleri/HD118.json",
+  "ayna": null,
+  "karar": "D-132",
+  "standart": true,
+  "kart_kiyasi": {
+   "kart": "HD-118",
+   "kart_sha256": "28540d433259e63ff58e3aa5960b1aed5faf3e5df1b2b2c9b7cbdea557eea315",
+   "sonuc": "geçti",
+   "olcum": {
+    "dis_olcu_cm": [
+     888.5,
+     835.75
+    ],
+    "acikla_olcu_cm": [
+     888.5,
+     835.75
+    ],
+    "brut_m2": 74.26,
+    "kubbe_m2": 0.0,
+    "yatak_odasi": 3,
+    "pencereler": {
+     "120x120": 3,
+     "120x180": 3,
+     "60x40": 1
+    },
+    "dis_kapi": 1,
+    "ic_kapi": 5,
+    "veranda": 1,
+    "kat": 1
+   }
+  },
+  "havuz_denetimi": {
+   "sonuc": "geçti",
+   "karar": "D-112",
+   "uyarilar": []
+  }
+ },
+ "not": "Çatı paftadaki gibi dörtomuz (kırma). Yükleme listesi Motor'un kırma kuralıyla (İE-33): ana makas 7, kısa makas 12, köşe 4; paftanın listesinde ana 6, kısa 14, köşe 4 (D-132 › Bilinen farklar)."
+}

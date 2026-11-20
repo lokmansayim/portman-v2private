@@ -144,16 +144,17 @@ def test_esleme_son_defterin_butun_kalemlerini_kapsar(E):
     D-72'den sonra yeni kalem (Motor'un listesinde olup defterde olmayan anahtar) yalnız eşlemeye girer: kapanmış defter değişmez. Yeni
     anahtarlar defterin kalemlerinden sonra gelir (PR-5, TK-06'nın 15 anahtarı; `test_pr5_tk06_anahtarlari`; r06, metal kiremit vidası;
     `test_r06_mahya_bandi_ve_metal_kiremit_vidasi`; r07, 280 ve 300 cm yükseklik; `test_r07_280_ve_300_yukseklik`; r08, fugalı dış
-    cephe; `test_r08_fugali_duz_desen`). Yeni bant da defterin bantlarından sonra gelir (r07, r08)."""
+    cephe; `test_r08_fugali_duz_desen`; r11, r12: `test_r11_180_pencere`, `test_r12_nimet_dogan_76`). Yeni bant da defterin bantlarından sonra gelir (r07, r08)."""
     S = _oku(SON_DEFTER)
     for hat in ("prefabrik", "celik"):
         H, R = E["hatlar"][hat], S["hatlar"][hat]
         assert list(H["kalemler"])[:len(R["kalemler"])] == list(R["kalemler"]) and H["anahtar"] == R["anahtar"] and H["atla"] == R["atla"]
         assert {k: H["kalemler"][k]["birim"] for k in R["kalemler"]} == {k: g["birim"] for k, g in R["kalemler"].items()}
         assert set(H["kalemler"]) - set(R["kalemler"]) == \
-            (set(PR5_ANAHTARLAR) | set(R06_ANAHTARLAR) | set(R07_ANAHTARLAR) | set(R08_ANAHTARLAR) | set(R11_ANAHTARLAR) if hat == "prefabrik" else set())
+            (set(PR5_ANAHTARLAR) | set(R06_ANAHTARLAR) | set(R07_ANAHTARLAR) | set(R08_ANAHTARLAR) | set(R11_ANAHTARLAR) | set(R12_ANAHTARLAR) | set(R13_ANAHTARLAR) if hat == "prefabrik" else set())
         if hat == "prefabrik":                                              # yeni anahtarlar sürüm sırasıyla, sona
-            assert list(H["kalemler"])[-len(R08_ANAHTARLAR) - len(R11_ANAHTARLAR):] == list(R08_ANAHTARLAR) + list(R11_ANAHTARLAR)
+            assert list(H["kalemler"])[-len(R08_ANAHTARLAR) - len(R11_ANAHTARLAR) - len(R12_ANAHTARLAR) - len(R13_ANAHTARLAR):] == \
+                list(R08_ANAHTARLAR) + list(R11_ANAHTARLAR) + list(R12_ANAHTARLAR) + list(R13_ANAHTARLAR)
         assert [(b["kalem"], b["kalinlik_mm"], b["yukseklik_mm"], [(a["en_mm"], a["alt_haric"]) for a in b["araliklar"]]) for b in H["bantlar"]] == \
                [(b["kalem"], b["kalinlik_mm"], b["yukseklik_mm"], [(a["en_mm"], a.get("alt_haric", False)) for a in b["araliklar"]]) for b in R["bantlar"]] \
                + ([(k, kal, h, [(a[0], a[1]) for a in ar]) for h in (2800, 3000) for k, kal, ar in R07_BANT_ARALIK]
@@ -542,6 +543,38 @@ def test_r11_180_pencere(E):
     K = E["hatlar"]["prefabrik"]["kalemler"]
     for k, grup in R11_ANAHTARLAR.items():
         assert (_kod(K[k]), K[k]["esleme"], K[k]["birim"], K[k]["kdv_grubu"]) == (None, "CRM'de yok", "adet", grup), k
+
+
+R12_ANAHTARLAR = {   # r12 (17 Kasım 2026): 76 m² Nimet Doğan teklifinin üç kalemi
+    "100'lük yapıştırma dolu vasistaslı pano (60/60) | 100 × 1250 × 2500": ("YP1", "kural", "ayni", "09:41:14"),
+    "Özel pencere karkası (120×150) (100'lük çektirme U'su + 100'lük H geçen) | 1200 × 1500": (None, "CRM'de yok", None, "09:39:41"),
+    "Pencere alt panel (120/150) | 100 × 1250 × 500": ("YP1", "kural", "oran", "D-75"),
+}
+
+
+def test_r12_nimet_dogan_76(E):
+    """r12: 60/60 vasistaslı pano tam panonun fiyatı (Lokman 17 Kasım 2026 09:41:14 UTC: "birebir ayın fiyatı sadece isim farkı var");
+    120/150 kör kasası CRM'de yok, Kasım fiyatı istisna dosyasından (120/180'inki, 09:39:41); 120/150 alt paneli öteki alt paneller
+    gibi tam panonun 1/3'ü (D-75). 60/40 vasistaslı pano aynen fiyatsız."""
+    K = E["hatlar"]["prefabrik"]["kalemler"]
+    for k, (kod, tur, hesap, iz) in R12_ANAHTARLAR.items():
+        assert (_kod(K[k]), K[k]["esleme"], K[k]["birim"], K[k].get("hesap")) == (kod, tur, "adet", hesap), k
+        assert iz in K[k]["not"], k
+    assert (K["Pencere alt panel (120/150) | 100 × 1250 × 500"]["pay"], K["Pencere alt panel (120/150) | 100 × 1250 × 500"]["payda"]) == (1, 3)
+    assert _kod(K["100'lük yapıştırma dolu vasistaslı pano (60/40) | 100 × 1250 × 2500"]) is None
+
+
+R13_ANAHTARLAR = {   # r13 (19 Kasım 2026): 76 m² Nimet Doğan teklifi r04
+    "Karkaslı özel pencere panosu (150/140) | 100 × 2500 × 2500": "Yapıştırma pano",
+    "Karkaslı özel pencere panosu (180/150) | 100 × 2500 × 2500": "Yapıştırma pano",
+}
+
+
+def test_r13_nimet_dogan_76_r04(E):
+    """r13: iki karkaslı pencere panosu (Kasım fiyatı istisnadan, tek fiyat 19 Kasım 19:04:33) ; ikisi de CRM'de yok."""
+    K = E["hatlar"]["prefabrik"]["kalemler"]
+    for k, grup in R13_ANAHTARLAR.items():
+        assert (_kod(K[k]), K[k]["esleme"], K[k]["birim"], K[k].get("kdv_grubu")) == (None, "CRM'de yok", "adet", grup), k
 
 
 def test_r08_fugali_duz_desen(E, A):

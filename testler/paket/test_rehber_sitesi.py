@@ -1,10 +1,12 @@
 """İE-41 · rehber.portatifev.com sitesi main'deki koddan (`araclar/paket/site/`; Lokman, 14 Kasım 2026 20:37 UTC kartı "Siteyi main'den kur").
 
 Paketleyici sahneyi değiştirmez, yalnız iç notları çıkarır. CI'da koşan sınamalar (esbuild ve yazı tipi paketleri gerekmez):
-- kayıt: beş rehber, klasörler eşsiz ve yayındaki üç yol korunur, adda kod yok, girdiler depoda;
+- kayıt: altı rehber (85 m² 17 Kasım 2026'da; beşi canlı paketten sabit), klasörler eşsiz ve yayındaki üç yol korunur, adda kod yok, girdiler depoda;
 - 62 m² ve kampanyalı ev (TK-04 r08, main'in komutuyla): veride iç not yok (`ortak.YASAK`), sayılar ve geometri aynı (metin dışındaki her
   değer main'in sayfasındakiyle aynı), başlıkta kod yok, ön onay paftasının üst satırı örtülü;
-- açılış sayfası; `vps/rehber_yayin.sh` ve belirlenimci paket.
+- açılış sayfası; `vps/rehber_yayin.sh` ve belirlenimci paket;
+- montaj oyunu (İE-45, D-138): oyunun verisi kampanyalı evin main'deki sayfasından, hedef örnek `testler/paket/oyun/veri_80m2-21.json`
+  ile aynı; sayfa CSP'li, iç notsuz; GLB'nin kök adından evin kodu çıkar (GLB'nin kendisi CI'da üretilmez: tarayıcıda WebGL gerekir).
 Betik katı (esbuild) ve tam site `REHBER_SITE_ESBUILD` ve `REHBER_SITE_NPM` verilirse koşar; tarayıcı denemesi `araclar/paket/site/dene.js`.
 """
 from __future__ import annotations
@@ -13,12 +15,13 @@ import io
 import json
 import os
 import re
+import struct
 import subprocess
 from pathlib import Path
 
 import pytest
 
-from araclar.paket.site import ortak, temizle, uret
+from araclar.paket.site import oyun, ortak, temizle, uret
 
 KOK = Path(__file__).resolve().parents[2]
 KAYIT = uret.kayit()
@@ -45,12 +48,15 @@ def _yapraklar(x, yol=()):
 
 def test_kayit():
     kl = [r["klasor"] for r in KAYIT["rehberler"]]
-    assert len(kl) == len(set(kl)) == 5 and {"62m2", "80m2", "80m2-21"} <= set(kl)     # yayındaki yollar korunur
+    assert len(kl) == len(set(kl)) == 6 and {"62m2", "80m2", "80m2-21"} <= set(kl)     # yayındaki yollar korunur
     for r in KAYIT["rehberler"]:
         assert re.fullmatch(r"[a-z0-9-]+", r["klasor"]) and not re.search(r"\b(TK|AP|PK)-?\d", r["ad"]), r
         assert (KOK / (r.get("veri") or r["is_emri"])).exists(), r
         assert isinstance(r["adim"], int) and isinstance(r["pafta"], bool)
         assert not ortak.bulgular(r["ad"] + temizle.not_metni(r))
+    for o in KAYIT.get("oyunlar", []):                                       # İE-45: oyun bir İş Emri rehberinden, klasörü eşsiz
+        assert re.fullmatch(r"[a-z0-9-]+", o["klasor"]) and o["klasor"] not in kl and R[o["rehber"]].get("kod")
+        assert 1 <= o["kapak_adim"] <= R[o["rehber"]]["adim"] and not ortak.bulgular(o["ad"])
 
 
 @pytest.fixture(scope="module")
@@ -90,6 +96,12 @@ def test_acilis():
     s = uret.acilis_sayfasi(KAYIT["rehberler"], oz)
     assert re.findall(r'<a class="kart" href="([^"]+)/">', s) == [r["klasor"] for r in KAYIT["rehberler"]]
     assert "Content-Security-Policy" in s and "__" not in s and not ortak.bulgular(s)
+    # oyunun kartı rehber kartlarının önünde; rehber kartları aynen (sabit rehberin kartı canlıdakiyle aynı kalır)
+    ov = {o["klasor"]: {"ad": R[o["rehber"]]["ad"], "adimlar": [0] * R[o["rehber"]]["adim"]} for o in KAYIT["oyunlar"]}
+    s2 = uret.acilis_sayfasi(KAYIT["rehberler"], oz, KAYIT["oyunlar"], ov)
+    assert re.findall(r'<a class="kart" href="([^"]+)/">', s2) == ["oyun"] + [r["klasor"] for r in KAYIT["rehberler"]]
+    assert all(uret.kart_html(r, oz[r["klasor"]]) in s2 for r in KAYIT["rehberler"])
+    assert '<span class="ac">Oyunu aç</span>' in s2 and "oyun/gorsel/kapak.jpg" in s2 and not ortak.bulgular(s2)
 
 
 def test_yayin_betigi_ve_paket(tmp_path):
@@ -117,3 +129,82 @@ def test_sayfa_tam(sayfalar, tmp_path):
         assert "__CSP__" not in html and "Content-Security-Policy" in html
         addon = temizle.klasor_yaz(html, pafta, tmp_path / kl, Path(NPM))
         assert addon and (tmp_path / kl / "js" / "three.module.js").exists() and (tmp_path / kl / "yazi" / "yazi.css").exists()
+    v, o = json.loads(OYUN_HEDEF.read_text(encoding="utf-8")), KAYIT["oyunlar"][0]
+    addon = oyun.klasor_yaz(v, o, _glb("TK-04"), "TK-04", tmp_path / "oyun", Path(NPM), ESBUILD)
+    assert "utils/BufferGeometryUtils.js" in addon and (tmp_path / "oyun" / "js" / "addons" / "utils" / "BufferGeometryUtils.js").exists()
+    assert (tmp_path / "oyun" / "ev.glb").exists() and "Content-Security-Policy" in (tmp_path / "oyun" / "index.html").read_text(encoding="utf-8")
+
+
+OYUN_HEDEF = KOK / "testler" / "paket" / "oyun" / "veri_80m2-21.json"
+
+
+def test_oyun_verisi_hedef(sayfalar):
+    """İE-45 (D-138): oyunun verisi (kartlar, ipuçları, oda bilgisi, kamera) kampanyalı evin main'deki rehberinden; hedef örnekle aynı."""
+    o = next(o for o in KAYIT["oyunlar"] if o["rehber"] == "80m2-21")
+    v = oyun.veri(oyun.rehber_verisi(sayfalar["80m2-21"], R["80m2-21"]), R["80m2-21"], o)
+    assert v == json.loads(OYUN_HEDEF.read_text(encoding="utf-8"))
+    assert [a["i"] for a in v["adimlar"]] == list(range(1, 22)) and sum(a["oda"] for a in v["adimlar"]) == 6
+    assert not ortak.bulgular(json.dumps(v, ensure_ascii=False))
+
+
+def test_oyun_sayfasi():
+    v = json.loads(OYUN_HEDEF.read_text(encoding="utf-8"))
+    o = KAYIT["oyunlar"][0]
+    s = oyun.sayfa(v, o)
+    assert s.startswith("<!doctype html>") and "Content-Security-Policy" in s and "connect-src 'self'" in s
+    assert not re.search(r"__[A-Z]+__", s) and len(re.findall(r"'sha256-[^']+'", s)) == 2
+    gomulu = re.search(r'<script type="application/json" id="veri">(.*?)</script>', s, re.S).group(1)
+    assert json.loads(gomulu.replace("<\\/", "</")) == v
+    assert "fetch('ev.glb')" in s and '"three": "./js/three.module.js"' in s and 'href="../80m2-21/"' in s
+    assert "<title>PortatifEv · Evi kendin kur · 80 m² 2+1</title>" in s
+    v2 = json.loads(json.dumps(v))
+    v2["adimlar"][0]["ipucu"] = "Lokman böyle dedi"
+    with pytest.raises(ortak.SiteHatasi):                                    # son kapı: iç not geçen oyun sayfası pakete girmez
+        oyun.sayfa(v2, o)
+
+
+def _glb(ad: str, ek: str = "") -> bytes:
+    j = json.dumps({"asset": {"version": "2.0"}, "scene": 0, "scenes": [{"nodes": [0]}],
+                    "nodes": [{"name": ad, "children": [1]}, {"name": "01 Alt çerçeve" + ek, "extras": {"ackapa": {"tip": "don", "max": 1.2}}}],
+                    "buffers": [{"byteLength": 8}]}).encode()
+    j += b" " * (-len(j) % 4)
+    b = bytes(range(8))
+    return (b"glTF" + struct.pack("<II", 2, 28 + len(j) + len(b)) + struct.pack("<II", len(j), 0x4E4F534A) + j
+            + struct.pack("<II", len(b), 0x004E4942) + b)
+
+
+def test_glb_kok_adi():
+    g = oyun.glb_temizle(_glb("TK-04"), "TK-04")
+    n = struct.unpack("<I", g[12:16])[0]
+    j = json.loads(g[20:20 + n])
+    assert j["nodes"][0]["name"] == "ev" and j["nodes"][1]["extras"]["ackapa"]["max"] == 1.2
+    assert struct.unpack("<I", g[8:12])[0] == len(g) and n % 4 == 0 and g.endswith(bytes(range(8)))
+    assert "tk-0" not in g[20:20 + n].decode().lower()
+    with pytest.raises(ortak.SiteHatasi):
+        oyun.glb_temizle(_glb("TK-04", " (Lokman)"), "TK-04")
+
+
+def test_sabit_rehber_kaydi():
+    """Sabit rehber (17 Kasım 2026): klasörü canlı paketten bayt bayt gelir; kayıtta paketin sürümü ve sha'sı durur."""
+    sabit = [r for r in KAYIT["rehberler"] if r.get("sabit")]
+    if sabit:
+        sp = KAYIT["sabit_paket"]
+        assert re.fullmatch(r"[0-9a-f]{64}", sp["sha256"]) and re.fullmatch(r"\d{14}", sp["surum"])
+    with pytest.raises(ortak.SiteHatasi, match="--onceki"):
+        uret.sabit_dosyalar({"rehberler": [{"sabit": True}], "sabit_paket": {"sha256": "0" * 64}}, None)
+    assert uret.sabit_dosyalar({"rehberler": [{"klasor": "a"}]}, None) == {}
+
+
+def test_onceki_paket(tmp_path):
+    site = tmp_path / "site"
+    (site / "a" / "gorsel").mkdir(parents=True)
+    (site / "index.html").write_text("<p>açılış</p>\n", encoding="utf-8")
+    (site / "a" / "index.html").write_text("<p>rehber</p>\n", encoding="utf-8")
+    (site / "a" / "gorsel" / "kapak.jpg").write_bytes(bytes(range(256)))
+    sha, kur = ortak.paketle_ve_kur(site, tmp_path, mtime=KAYIT["mtime"])
+    for kaynak in (kur, tmp_path / "rehber_paket.tgz"):
+        d = ortak.onceki_paket(kaynak, sha)
+        assert d["a/gorsel/kapak.jpg"] == bytes(range(256)) and d["index.html"] == "<p>açılış</p>\n".encode()
+        assert set(d) == {"index.html", "a/index.html", "a/gorsel/kapak.jpg", "SHA256SUMS"}
+    with pytest.raises(ortak.SiteHatasi, match="sha256"):
+        ortak.onceki_paket(kur, "0" * 64)

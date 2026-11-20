@@ -149,6 +149,47 @@ def _cati_yazisi(ax, not_: str) -> None:
             bbox={"boxstyle": "round,pad=0.8", "fc": "white", "ec": "#b03a2e", "alpha": 0.95})
 
 
+def _omega_yazilari_ayir(fig, yazilar: list) -> None:
+    """BK-65: tavan omega planında iki omeganın boy yazıları birbirine binerse (D-137'den sonra 80 m² 3+1'in verandası: duvar omegasının
+    133,25'i ile duvar yüzündeki tavan omegasının 138,25'i) yazılardan biri kendi omegasının öteki yanına geçer: yan yana iki paralel
+    omegada soldaki (yatayda alttaki) omeganınki, dik iki omegada uzun omeganınki önce denenir; geçen yazı başka yazıya binerse öteki
+    denenir, ikisi de binerse yazılar yerinde kalır. Yalnız yazının yeri değişir; çakışma yoksa sayfa aynen. Çakışma ölçüsü bayi
+    çizimlerinin denetimiyle aynı: mürekkep kutusu (`motor.genel.yazi_cakisma`). Eksen sınırları oturduktan sonra (`_cerceve`) çağrılır."""
+    from motor.genel import yazi_cakisma as YC
+    if len(yazilar) < 2:
+        return
+    r = YC._renderer(fig)
+    murekkep = lambda t: YC._murekkep(t, r, fig.dpi)[0]                               # noqa: E731
+    orta = lambda k, dik: (k[0] + k[2]) / 2 if dik else (k[1] + k[3]) / 2            # noqa: E731
+    boy = lambda k, dik: k[3] - k[1] if dik else k[2] - k[0]                          # noqa: E731
+    biner = lambda t, u: YC._gercek(murekkep(t).intersection(murekkep(u)), YC.PAY_PX) > 0   # noqa: E731
+    gecti = set()
+
+    def gecir(t, k, dik, geri=False):
+        if dik:
+            t.set_x(orta(k, True) + (6 if geri else -6)); t.set_ha("left" if geri else "right")
+        else:
+            t.set_y(orta(k, False) + (6 if geri else -6)); t.set_va("bottom" if geri else "top")
+
+    for i, (ti, ki, di) in enumerate(yazilar):
+        for tj, kj, dj in yazilar[:i]:
+            if not biner(ti, tj):
+                continue
+            if di == dj:
+                adaylar = [(ti, ki, di), (tj, kj, dj)] if orta(ki, di) < orta(kj, dj) else [(tj, kj, dj), (ti, ki, di)]
+            else:
+                adaylar = [(ti, ki, di), (tj, kj, dj)] if boy(ki, di) >= boy(kj, dj) else [(tj, kj, dj), (ti, ki, di)]
+            for t, k, dik in adaylar:
+                if id(t) in gecti:
+                    continue
+                gecir(t, k, dik)
+                if any(biner(t, u) for u, _, _ in yazilar if u is not t):
+                    gecir(t, k, dik, geri=True)
+                    continue
+                gecti.add(id(t))
+                break
+
+
 def _notlar(fig, say: dict, sayfa: int):
     """Sayımda kural yok varsa sayfanın başında EKSİK; bu sayfanın katmanında kural yok ve uyarı varsa lejantın altında. Çatı tipinden
     kural yokta (K5) satır kısadır: nedeni sayfanın çatı notunda ve sayımdadır."""
@@ -218,6 +259,7 @@ def ciz(model_yolu: Path, say: dict, yol: Path, kod: str, dxf_yolu: Path | None 
             ax.add_patch(plt.Rectangle((x0, y0), x1 - x0, y1 - y0, color=RENK["tavan_h"], lw=0))
         OMK = [kk for kk in ("OM-01", "OM-02") if m["k2"].get(kk)] or ["OM-01"]   # OM-02: 100'lük iç duvarın üstü, 100'lük duvar omegası (D-32 ek)
         yer_ = lambda p: "dis_duvar" if p["p"].get("Duvar") == "dis" else p["p"].get("Yer", "ara")     # noqa: E731  (K5b-2: dış duvar)
+        omega_yazilari = []
         for kk in OMK:
             for p in m["k2"].get(kk, []):
                 v, yer = p["v"], yer_(p)
@@ -225,8 +267,10 @@ def ciz(model_yolu: Path, say: dict, yol: Path, kod: str, dxf_yolu: Path | None 
                 dik = (y1 - y0) > (x1 - x0)
                 ax.add_patch(plt.Rectangle((x0, y0), x1 - x0, y1 - y0, color=RENK["omega"][yer], lw=0))
                 ax.plot([(x0 + x1) / 2] * 2 if dik else [x0, x1], [y0, y1] if dik else [(y0 + y1) / 2] * 2, color=RENK["omega"][yer], lw=2.2)
-                ax.text((x0 + x1) / 2 + (6 if dik else 0), (y0 + y1) / 2 + (0 if dik else 6), _sayi(p["p"]["Boy_cm"], 2).rstrip("0").rstrip(","),
-                        rotation=90 if dik else 0, fontsize=7.5, ha="left" if dik else "center", va="center" if dik else "bottom", color="#222")
+                omega_yazilari.append((ax.text((x0 + x1) / 2 + (6 if dik else 0), (y0 + y1) / 2 + (0 if dik else 6),
+                                               _sayi(p["p"]["Boy_cm"], 2).rstrip("0").rstrip(","), rotation=90 if dik else 0, fontsize=7.5,
+                                               ha="left" if dik else "center", va="center" if dik else "bottom", color="#222"),
+                                       (x0, y0, x1, y1), dik))
         sayac = {}
         for kk in OMK:
             for p in m["k2"].get(kk, []):
@@ -244,6 +288,7 @@ def ciz(model_yolu: Path, say: dict, yol: Path, kod: str, dxf_yolu: Path | None 
                 + _tavan_lejanti(say, kesim))
         _cerceve(ax, f"{kod} · TAVAN OMEGA YERLEŞİM PLANI", alt)
         _notlar(fig, say, 1)
+        _omega_yazilari_ayir(fig, omega_yazilari)               # BK-65: eksen sınırları _cerceve'de oturur; ölçü ondan sonra
         kaydet(fig, pdf, ({"omega": RENK["omega"]}, RENK))
 
         # 2 · makas ve dere

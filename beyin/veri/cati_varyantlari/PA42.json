@@ -1,0 +1,113 @@
+{
+ "taban": "PA42",
+ "cati_adi": "Beşik, kalkan önde",
+ "cati_gorsel": "adaylar/PA42_cati.png",
+ "karar": "D-117",
+ "varyantlar": [
+  {
+   "kod": "PA42K",
+   "gosterim": "PA-42-K",
+   "durum": "gecerli",
+   "taban": "PA42",
+   "sablon": "adaylar/PA42K.json",
+   "gorsel": "adaylar/PA42K.png",
+   "cati_adi": "Kırma",
+   "referans_model": "PA-42-K",
+   "yapi_turu": "prefabrik",
+   "kat": 1,
+   "oda_programi": "3+1",
+   "katalog_m2": 84.0,
+   "kapali_m2": 73.0,
+   "veranda_m2": 10.9,
+   "ozet": {
+    "grid": {
+     "x_pano": 6.5,
+     "y_pano": 8.0
+    },
+    "dis_olcu_cm": [
+     825.75,
+     1014.0
+    ],
+    "brut_m2": 83.94,
+    "pano": 50,
+    "pencere": 6,
+    "kapi": 6,
+    "odalar": {
+     "Y.ODASI": 12.2,
+     "SALON VE MUTFAK": 23.09,
+     "WC": 4.43,
+     "HOL": 5.9,
+     "VERANDA": 10.9,
+     "Y.ODASI 2": 11.08,
+     "Y.ODASI 3": 11.08
+    }
+   },
+   "uyarilar": [],
+   "kaynak": {
+    "metin": "İE-44 toplu çatı seçenekleri (D-117)",
+    "karar": "D-117",
+    "ev": "PA-42",
+    "havuz_denetimi": {
+     "sonuc": "geçti",
+     "karar": "D-112",
+     "uyarilar": []
+    }
+   }
+  },
+  {
+   "kod": "PA42C",
+   "gosterim": "PA-42-C",
+   "durum": "gecerli",
+   "taban": "PA42",
+   "sablon": "adaylar/PA42C.json",
+   "gorsel": "adaylar/PA42C.png",
+   "cati_adi": "Beşik + salonda cumba",
+   "referans_model": "PA-42-C",
+   "yapi_turu": "prefabrik",
+   "kat": 1,
+   "oda_programi": "3+1",
+   "katalog_m2": 84.0,
+   "kapali_m2": 73.0,
+   "veranda_m2": 10.9,
+   "ozet": {
+    "grid": {
+     "x_pano": 6.5,
+     "y_pano": 8.0
+    },
+    "dis_olcu_cm": [
+     825.75,
+     1014.0
+    ],
+    "brut_m2": 83.94,
+    "pano": 50,
+    "pencere": 6,
+    "kapi": 6,
+    "odalar": {
+     "Y.ODASI": 12.2,
+     "SALON VE MUTFAK": 23.09,
+     "WC": 4.43,
+     "HOL": 5.9,
+     "VERANDA": 10.9,
+     "Y.ODASI 2": 11.08,
+     "Y.ODASI 3": 11.08
+    }
+   },
+   "uyarilar": [
+    "Makas y'yi geçiyor ama kisa_kenar x: montaj paftalarında köşe makasın oturduğu duvarlardadır; pano ızgarası iki yönde 5 cm kayık olabilir, kisa_kenar: y doğrulanmalı"
+   ],
+   "kaynak": {
+    "metin": "İE-44 toplu çatı seçenekleri (D-117)",
+    "karar": "D-117",
+    "ev": "PA-42",
+    "havuz_denetimi": {
+     "sonuc": "geçti",
+     "karar": "D-112",
+     "uyarilar": [
+      "HD-02: Makas y'yi geçiyor ama kisa_kenar x: montaj paftalarında köşe makasın oturduğu duvarlardadır; pano ızgarası iki yönde 5 cm kayık olabilir, kisa_kenar: y doğrulanmalı",
+      "HD-06: ['makas yeri (ana çatı): boydan boya kesintisiz saçak duvarı yok; eşit aralıklı 8 makas']"
+     ]
+    }
+   }
+  }
+ ]
+}

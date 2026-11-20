@@ -1,0 +1,58 @@
+{
+ "taban": "PA41",
+ "cati_adi": "Beşik + cumba",
+ "cati_gorsel": "adaylar/PA41_cati.png",
+ "karar": "D-117",
+ "varyantlar": [
+  {
+   "kod": "PA41B",
+   "gosterim": "PA-41-B",
+   "durum": "gecerli",
+   "taban": "PA41",
+   "sablon": "adaylar/PA41B.json",
+   "gorsel": "adaylar/PA41B.png",
+   "cati_adi": "Beşik",
+   "referans_model": "PA-41-B",
+   "yapi_turu": "prefabrik",
+   "kat": 1,
+   "oda_programi": "2+1",
+   "katalog_m2": 59.0,
+   "kapali_m2": 50.5,
+   "veranda_m2": 8.49,
+   "ozet": {
+    "grid": {
+     "x_pano": 6.0,
+     "y_pano": 6.0
+    },
+    "dis_olcu_cm": [
+     763.0,
+     773.0
+    ],
+    "brut_m2": 58.98,
+    "pano": 42,
+    "pencere": 6,
+    "kapi": 5,
+    "odalar": {
+     "Y.ODASI": 9.5,
+     "HOL": 1.54,
+     "SALON": 16.35,
+     "WC": 3.32,
+     "VERANDA": 8.49,
+     "MUTFAK": 8.32,
+     "Y.ODASI 2": 7.43
+    }
+   },
+   "uyarilar": [],
+   "kaynak": {
+    "metin": "İE-44 toplu çatı seçenekleri (D-117)",
+    "karar": "D-117",
+    "ev": "PA-41",
+    "havuz_denetimi": {
+     "sonuc": "geçti",
+     "karar": "D-112",
+     "uyarilar": []
+    }
+   }
+  }
+ ]
+}

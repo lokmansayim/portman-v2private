@@ -1,0 +1,1574 @@
+{
+ "beyin/testler/is_emri_1.json": {
+  "VERANDA": [
+   [
+    439.25,
+    1
+   ],
+   [
+    251.0,
+    1
+   ]
+  ]
+ },
+ "beyin/testler/is_emri_14.json": {
+  "VERANDA": [
+   [
+    439.25,
+    1
+   ],
+   [
+    251.0,
+    1
+   ]
+  ]
+ },
+ "beyin/testler/is_emri_3.json": {
+  "VERANDA": [
+   [
+    439.25,
+    1
+   ],
+   [
+    251.0,
+    1
+   ]
+  ]
+ },
+ "beyin/testler/is_emri_4.json": {
+  "VERANDA": [
+   [
+    381.5,
+    1
+   ],
+   [
+    251.0,
+    1
+   ]
+  ]
+ },
+ "beyin/testler/is_emri_9.json": {
+  "VERANDA": [
+   [
+    439.25,
+    1
+   ],
+   [
+    251.0,
+    1
+   ]
+  ]
+ },
+ "is_emri/ALTIN_2plus1_6x8.json": {
+  "VERANDA": [
+   [
+    381.5,
+    1
+   ],
+   [
+    251.0,
+    1
+   ]
+  ]
+ },
+ "is_emri/P6001_2plus1_6x6.json": {
+  "VERANDA": [
+   [
+    439.25,
+    1
+   ],
+   [
+    251.0,
+    1
+   ]
+  ]
+ },
+ "is_emri/P6001_ayna_x.json": {
+  "VERANDA": [
+   [
+    439.25,
+    1
+   ],
+   [
+    251.0,
+    1
+   ]
+  ]
+ },
+ "is_emri/P6001_ayna_y.json": {
+  "VERANDA": [
+   [
+    439.25,
+    1
+   ],
+   [
+    251.0,
+    1
+   ]
+  ]
+ },
+ "is_emri/P6001_r03.json": {
+  "VERANDA": [
+   [
+    439.25,
+    1
+   ],
+   [
+    251.0,
+    1
+   ]
+  ]
+ },
+ "is_emri/P6501_r03.json": {
+  "VERANDA": [
+   [
+    125.5,
+    1
+   ],
+   [
+    627.5,
+    1
+   ]
+  ]
+ },
+ "is_emri/P8501_r02.json": {
+  "VERANDA": [
+   [
+    439.25,
+    1
+   ],
+   [
+    251.0,
+    1
+   ]
+  ]
+ },
+ "is_emri/P8501_r03.json": {
+  "VERANDA": [
+   [
+    439.25,
+    1
+   ],
+   [
+    251.0,
+    1
+   ]
+  ]
+ },
+ "is_emri/P8501_r04.json": {
+  "VERANDA": [
+   [
+    439.25,
+    1
+   ],
+   [
+    251.0,
+    1
+   ]
+  ]
+ },
+ "is_emri/P8501_r05.json": {
+  "VERANDA": [
+   [
+    439.25,
+    1
+   ],
+   [
+    251.0,
+    1
+   ]
+  ]
+ },
+ "is_emri/YAN_VERANDALI_2plus1_6x8p5.json": {
+  "VERANDA": [
+   [
+    125.5,
+    1
+   ],
+   [
+    236.0,
+    2,
+    "ara"
+   ],
+   [
+    246.0,
+    2,
+    "ara"
+   ]
+  ]
+ },
+ "is_emri/adaylar/PA01.json": {
+  "VERANDA": [
+   [
+    381.5,
+    1
+   ],
+   [
+    221.0,
+    1
+   ]
+  ]
+ },
+ "is_emri/adaylar/PA02.json": {
+  "VERANDA": [
+   [
+    125.5,
+    1
+   ],
+   [
+    444.25,
+    1
+   ]
+  ]
+ },
+ "is_emri/adaylar/PA03.json": {
+  "VERANDA": [
+   [
+    381.5,
+    1
+   ],
+   [
+    244.25,
+    1
+   ]
+  ]
+ },
+ "is_emri/adaylar/PA04.json": {
+  "VERANDA": [
+   [
+    502.0,
+    2
+   ],
+   [
+    155.75,
+    1
+   ]
+  ]
+ },
+ "is_emri/adaylar/PA05.json": {
+  "VERANDA": [
+   [
+    569.75,
+    1
+   ],
+   [
+    125.5,
+    1
+   ]
+  ]
+ },
+ "is_emri/adaylar/PA06.json": {
+  "VERANDA": [
+   [
+    444.25,
+    1
+   ],
+   [
+    325.0,
+    1
+   ]
+  ]
+ },
+ "is_emri/adaylar/PA06C.json": {
+  "VERANDA": [
+   [
+    444.25,
+    1
+   ],
+   [
+    325.0,
+    1
+   ]
+  ]
+ },
+ "is_emri/adaylar/PA06K.json": {
+  "VERANDA": [
+   [
+    444.25,
+    1
+   ],
+   [
+    325.0,
+    1
+   ]
+  ]
+ },
+ "is_emri/adaylar/PA07.json": {
+  "GİRİŞ": []
+ },
+ "is_emri/adaylar/PA08.json": {
+  "VERANDA": [
+   [
+    303.75,
+    2,
+    "ara"
+   ],
+   [
+    438.75,
+    2,
+    "ara"
+   ],
+   [
+    294.75,
+    1
+   ]
+  ]
+ },
+ "is_emri/adaylar/PA08B.json": {
+  "VERANDA": [
+   [
+    303.75,
+    2,
+    "ara"
+   ],
+   [
+    438.75,
+    2,
+    "ara"
+   ],
+   [
+    294.75,
+    1
+   ]
+  ]
+ },
+ "is_emri/adaylar/PA08C.json": {
+  "VERANDA": [
+   [
+    303.75,
+    2,
+    "ara"
+   ],
+   [
+    438.75,
+    2,
+    "ara"
+   ],
+   [
+    294.75,
+    1
+   ]
+  ]
+ },
+ "is_emri/adaylar/PA09.json": {
+  "VERANDA": [
+   [
+    125.5,
+    1
+   ],
+   [
+    444.25,
+    1
+   ]
+  ]
+ },
+ "is_emri/adaylar/PA10.json": {
+  "VERANDA": [
+   [
+    502.0,
+    1
+   ],
+   [
+    381.5,
+    1
+   ]
+  ]
+ },
+ "is_emri/adaylar/PA10K.json": {
+  "VERANDA": [
+   [
+    502.0,
+    1
+   ],
+   [
+    381.5,
+    1
+   ]
+  ]
+ },
+ "is_emri/adaylar/PA11.json": {
+  "VERANDA": [
+   [
+    502.0,
+    1
+   ],
+   [
+    318.75,
+    1
+   ]
+  ]
+ },
+ "is_emri/adaylar/PA11B.json": {
+  "VERANDA": [
+   [
+    502.0,
+    1
+   ],
+   [
+    318.75,
+    1
+   ]
+  ]
+ },
+ "is_emri/adaylar/PA12.json": {
+  "VERANDA": [
+   [
+    627.5,
+    1
+   ],
+   [
+    204.0,
+    1
+   ]
+  ]
+ },
+ "is_emri/adaylar/PA12K.json": {
+  "VERANDA": [
+   [
+    627.5,
+    1
+   ],
+   [
+    204.0,
+    1
+   ]
+  ]
+ },
+ "is_emri/adaylar/PA13.json": {
+  "AÇIK VERANDA": [
+   [
+    376.5,
+    1
+   ],
+   [
+    251.0,
+    1
+   ]
+  ],
+  "VERANDA": []
+ },
+ "is_emri/adaylar/PA14.json": {
+  "VERANDA": [
+   [
+    376.5,
+    1
+   ],
+   [
+    271.0,
+    1
+   ]
+  ]
+ },
+ "is_emri/adaylar/PA14B.json": {
+  "VERANDA": [
+   [
+    376.5,
+    1
+   ],
+   [
+    271.0,
+    1
+   ]
+  ]
+ },
+ "is_emri/adaylar/PA15.json": {
+  "VERANDA": [
+   [
+    376.5,
+    1
+   ],
+   [
+    213.25,
+    1
+   ]
+  ]
+ },
+ "is_emri/adaylar/PA15B.json": {
+  "VERANDA": [
+   [
+    376.5,
+    1
+   ],
+   [
+    213.25,
+    1
+   ]
+  ]
+ },
+ "is_emri/adaylar/PA16.json": {
+  "VERANDA": [
+   [
+    439.25,
+    1
+   ],
+   [
+    188.25,
+    1
+   ]
+  ]
+ },
+ "is_emri/adaylar/PA16C.json": {
+  "VERANDA": [
+   [
+    439.25,
+    1
+   ],
+   [
+    188.25,
+    1
+   ]
+  ]
+ },
+ "is_emri/adaylar/PA17.json": {
+  "VERANDA": [
+   [
+    502.0,
+    1
+   ],
+   [
+    151.5,
+    0
+   ]
+  ]
+ },
+ "is_emri/adaylar/PA18.json": {
+  "VERANDA": [
+   [
+    334.0,
+    1
+   ],
+   [
+    200.0,
+    1
+   ]
+  ]
+ },
+ "is_emri/adaylar/PA19.json": {
+  "VERANDA": [
+   [
+    496.5,
+    1
+   ],
+   [
+    185.25,
+    1
+   ]
+  ]
+ },
+ "is_emri/adaylar/PA19C.json": {
+  "VERANDA": [
+   [
+    496.5,
+    1
+   ],
+   [
+    185.25,
+    1
+   ]
+  ]
+ },
+ "is_emri/adaylar/PA20.json": {
+  "VERANDA": [
+   [
+    125.5,
+    1
+   ],
+   [
+    444.25,
+    1
+   ]
+  ]
+ },
+ "is_emri/adaylar/PA21.json": {
+  "VERANDA": [
+   [
+    413.5,
+    1
+   ],
+   [
+    60.0,
+    1
+   ],
+   [
+    198.25,
+    1
+   ]
+  ]
+ },
+ "is_emri/adaylar/PA25.json": {
+  "VERANDA": [
+   [
+    431.17,
+    1
+   ],
+   [
+    194.0,
+    1
+   ]
+  ]
+ },
+ "is_emri/adaylar/PA25C.json": {
+  "VERANDA": [
+   [
+    431.17,
+    1
+   ],
+   [
+    194.0,
+    1
+   ]
+  ]
+ },
+ "is_emri/adaylar/PA26.json": {
+  "VERANDA": [
+   [
+    393.5,
+    1
+   ],
+   [
+    120.0,
+    1
+   ]
+  ]
+ },
+ "is_emri/adaylar/PA30.json": {
+  "VERANDA": [
+   [
+    627.5,
+    1
+   ],
+   [
+    204.0,
+    1
+   ]
+  ]
+ },
+ "is_emri/adaylar/PA30K.json": {
+  "VERANDA": [
+   [
+    627.5,
+    1
+   ],
+   [
+    204.0,
+    1
+   ]
+  ]
+ },
+ "is_emri/adaylar/PA31.json": {
+  "VERANDA": [
+   [
+    376.5,
+    1
+   ],
+   [
+    256.0,
+    1
+   ]
+  ]
+ },
+ "is_emri/adaylar/PA31B.json": {
+  "VERANDA": [
+   [
+    376.5,
+    1
+   ],
+   [
+    256.0,
+    1
+   ]
+  ]
+ },
+ "is_emri/adaylar/PA32.json": {
+  "VERANDA": [
+   [
+    376.5,
+    1
+   ],
+   [
+    193.25,
+    1
+   ]
+  ]
+ },
+ "is_emri/adaylar/PA32B.json": {
+  "VERANDA": [
+   [
+    376.5,
+    1
+   ],
+   [
+    193.25,
+    1
+   ]
+  ]
+ },
+ "is_emri/adaylar/PA33.json": {
+  "VERANDA": [
+   [
+    303.75,
+    2,
+    "ara"
+   ],
+   [
+    429.25,
+    2,
+    "ara"
+   ],
+   [
+    318.75,
+    1
+   ]
+  ]
+ },
+ "is_emri/adaylar/PA33B.json": {
+  "VERANDA": [
+   [
+    303.75,
+    2,
+    "ara"
+   ],
+   [
+    429.25,
+    2,
+    "ara"
+   ],
+   [
+    318.75,
+    1
+   ]
+  ]
+ },
+ "is_emri/adaylar/PA33C.json": {
+  "VERANDA": [
+   [
+    303.75,
+    2,
+    "ara"
+   ],
+   [
+    429.25,
+    2,
+    "ara"
+   ],
+   [
+    318.75,
+    1
+   ]
+  ]
+ },
+ "is_emri/adaylar/PA35.json": {
+  "VERANDA": [
+   [
+    381.5,
+    1
+   ],
+   [
+    125.5,
+    1
+   ]
+  ]
+ },
+ "is_emri/adaylar/PA36.json": {
+  "VERANDA": [
+   [
+    381.5,
+    1
+   ],
+   [
+    188.25,
+    1
+   ]
+  ]
+ },
+ "is_emri/adaylar/PA37.json": {
+  "VERANDA": [
+   [
+    502.0,
+    1
+   ],
+   [
+    318.75,
+    1
+   ]
+  ]
+ },
+ "is_emri/adaylar/PA37B.json": {
+  "VERANDA": [
+   [
+    502.0,
+    1
+   ],
+   [
+    318.75,
+    1
+   ]
+  ]
+ },
+ "is_emri/adaylar/PA38.json": {
+  "VERANDA": [
+   [
+    502.0,
+    1
+   ],
+   [
+    381.5,
+    1
+   ]
+  ]
+ },
+ "is_emri/adaylar/PA38K.json": {
+  "VERANDA": [
+   [
+    502.0,
+    1
+   ],
+   [
+    381.5,
+    1
+   ]
+  ]
+ },
+ "is_emri/adaylar/PA39.json": {
+  "VERANDA": [
+   [
+    376.5,
+    1
+   ],
+   [
+    130.5,
+    1
+   ]
+  ]
+ },
+ "is_emri/adaylar/PA39B.json": {
+  "VERANDA": [
+   [
+    376.5,
+    1
+   ],
+   [
+    130.5,
+    1
+   ]
+  ]
+ },
+ "is_emri/adaylar/PA40.json": {
+  "VERANDA": [
+   [
+    256.0,
+    0
+   ],
+   [
+    313.75,
+    1
+   ]
+  ]
+ },
+ "is_emri/adaylar/PA40C.json": {
+  "VERANDA": [
+   [
+    256.0,
+    0
+   ],
+   [
+    313.75,
+    1
+   ]
+  ]
+ },
+ "is_emri/adaylar/PA40K.json": {
+  "VERANDA": [
+   [
+    256.0,
+    0
+   ],
+   [
+    313.75,
+    1
+   ]
+  ]
+ },
+ "is_emri/adaylar/PA41.json": {
+  "VERANDA": [
+   [
+    439.25,
+    1
+   ],
+   [
+    193.25,
+    1
+   ]
+  ]
+ },
+ "is_emri/adaylar/PA41B.json": {
+  "VERANDA": [
+   [
+    439.25,
+    1
+   ],
+   [
+    193.25,
+    1
+   ]
+  ]
+ },
+ "is_emri/adaylar/PA42.json": {
+  "VERANDA": [
+   [
+    434.25,
+    0
+   ],
+   [
+    251.0,
+    1
+   ]
+  ]
+ },
+ "is_emri/adaylar/PA42C.json": {
+  "VERANDA": [
+   [
+    434.25,
+    0
+   ],
+   [
+    251.0,
+    1
+   ]
+  ]
+ },
+ "is_emri/adaylar/PA42K.json": {
+  "VERANDA": [
+   [
+    434.25,
+    0
+   ],
+   [
+    251.0,
+    1
+   ]
+  ]
+ },
+ "is_emri/adaylar/PA45.json": {
+  "VERANDA": [
+   [
+    502.0,
+    1
+   ],
+   [
+    130.5,
+    1
+   ]
+  ]
+ },
+ "is_emri/adaylar/PA46.json": {
+  "VERANDA": [
+   [
+    439.25,
+    1
+   ],
+   [
+    256.0,
+    1
+   ]
+  ]
+ },
+ "is_emri/adaylar/PA47.json": {
+  "VERANDA": [
+   [
+    439.25,
+    1
+   ],
+   [
+    130.5,
+    1
+   ]
+  ]
+ },
+ "is_emri/adaylar/PA49.json": {
+  "VERANDA": [
+   [
+    325.0,
+    2,
+    "ara"
+   ],
+   [
+    324.0,
+    2,
+    "ara"
+   ],
+   [
+    325.0,
+    2,
+    "ara"
+   ],
+   [
+    256.0,
+    1
+   ],
+   [
+    256.0,
+    1
+   ]
+  ]
+ },
+ "is_emri/adaylar/PA50.json": {
+  "VERANDA": [
+   [
+    429.25,
+    2,
+    "ara"
+   ],
+   [
+    429.25,
+    2,
+    "ara"
+   ],
+   [
+    256.0,
+    1
+   ],
+   [
+    256.0,
+    1
+   ]
+  ]
+ },
+ "is_emri/adaylar/TEST01.json": {
+  "VERANDA": [
+   [
+    627.5,
+    1
+   ],
+   [
+    125.5,
+    1
+   ]
+  ]
+ },
+ "is_emri/adaylar/TEST02.json": {
+  "VERANDA": [
+   [
+    376.5,
+    1
+   ],
+   [
+    502.0,
+    1
+   ]
+  ]
+ },
+ "is_emri/adaylar/TEST03.json": {
+  "VERANDA": [
+   [
+    627.5,
+    1
+   ],
+   [
+    125.5,
+    1
+   ]
+  ]
+ },
+ "testler/cizim/evler/AP01.json": {
+  "VERANDA": [
+   [
+    303.75,
+    2,
+    "ara"
+   ],
+   [
+    438.75,
+    2,
+    "ara"
+   ],
+   [
+    294.75,
+    1
+   ]
+  ]
+ },
+ "testler/cizim/evler/AP03.json": {
+  "VERANDA": [
+   [
+    125.5,
+    1
+   ],
+   [
+    444.25,
+    1
+   ]
+  ]
+ },
+ "testler/cizim/evler/AP09.json": {
+  "VERANDA": [
+   [
+    381.5,
+    1
+   ],
+   [
+    244.25,
+    1
+   ]
+  ]
+ },
+ "testler/cizim/evler/AP13.json": {
+  "VERANDA": [
+   [
+    376.5,
+    1
+   ],
+   [
+    271.0,
+    1
+   ]
+  ]
+ },
+ "testler/cizim/evler/AP15.json": {
+  "VERANDA": [
+   [
+    381.5,
+    1
+   ],
+   [
+    221.0,
+    1
+   ]
+  ]
+ },
+ "testler/cizim/evler/AP16.json": {
+  "VERANDA": [
+   [
+    376.5,
+    1
+   ],
+   [
+    213.25,
+    1
+   ]
+  ]
+ },
+ "testler/cizim/evler/AP22.json": {
+  "VERANDA": [
+   [
+    569.75,
+    1
+   ],
+   [
+    125.5,
+    1
+   ]
+  ]
+ },
+ "testler/kor/projeler/AP01/is_emri.json": {
+  "VERANDA": [
+   [
+    303.75,
+    2,
+    "ara"
+   ],
+   [
+    438.75,
+    2,
+    "ara"
+   ],
+   [
+    294.75,
+    1
+   ]
+  ]
+ },
+ "testler/kor/projeler/AP02/is_emri.json": {
+  "VERANDA": [
+   [
+    125.5,
+    1
+   ],
+   [
+    444.25,
+    1
+   ]
+  ]
+ },
+ "testler/kor/projeler/AP03/is_emri.json": {
+  "VERANDA": [
+   [
+    125.5,
+    1
+   ],
+   [
+    444.25,
+    1
+   ]
+  ]
+ },
+ "testler/kor/projeler/AP04/is_emri.json": {
+  "VERANDA": [
+   [
+    502.0,
+    1
+   ],
+   [
+    381.5,
+    1
+   ]
+  ]
+ },
+ "testler/kor/projeler/AP06/is_emri.json": {
+  "VERANDA": [
+   [
+    502.0,
+    1
+   ],
+   [
+    318.75,
+    1
+   ]
+  ]
+ },
+ "testler/kor/projeler/AP09/is_emri.json": {
+  "VERANDA": [
+   [
+    381.5,
+    1
+   ],
+   [
+    244.25,
+    1
+   ]
+  ]
+ },
+ "testler/kor/projeler/AP11/is_emri.json": {
+  "VERANDA": [
+   [
+    627.5,
+    1
+   ],
+   [
+    204.0,
+    1
+   ]
+  ]
+ },
+ "testler/kor/projeler/AP12/is_emri.json": {
+  "AÇIK VERANDA": [
+   [
+    376.5,
+    1
+   ],
+   [
+    251.0,
+    1
+   ]
+  ],
+  "VERANDA": []
+ },
+ "testler/kor/projeler/AP13/is_emri.json": {
+  "VERANDA": [
+   [
+    376.5,
+    1
+   ],
+   [
+    271.0,
+    1
+   ]
+  ]
+ },
+ "testler/kor/projeler/AP14/is_emri.json": {
+  "VERANDA": [
+   [
+    431.17,
+    1
+   ],
+   [
+    194.0,
+    1
+   ]
+  ]
+ },
+ "testler/kor/projeler/AP15/is_emri.json": {
+  "VERANDA": [
+   [
+    381.5,
+    1
+   ],
+   [
+    221.0,
+    1
+   ]
+  ]
+ },
+ "testler/kor/projeler/AP16/is_emri.json": {
+  "VERANDA": [
+   [
+    376.5,
+    1
+   ],
+   [
+    213.25,
+    1
+   ]
+  ]
+ },
+ "testler/kor/projeler/AP17/is_emri.json": {
+  "VERANDA": [
+   [
+    439.25,
+    1
+   ],
+   [
+    188.25,
+    1
+   ]
+  ]
+ },
+ "testler/kor/projeler/AP18/is_emri.json": {
+  "VERANDA": [
+   [
+    502.0,
+    1
+   ],
+   [
+    151.5,
+    0
+   ]
+  ]
+ },
+ "testler/kor/projeler/AP21/is_emri.json": {
+  "VERANDA": [
+   [
+    496.5,
+    1
+   ],
+   [
+    185.25,
+    1
+   ]
+  ]
+ },
+ "testler/kor/projeler/AP22/is_emri.json": {
+  "VERANDA": [
+   [
+    569.75,
+    1
+   ],
+   [
+    125.5,
+    1
+   ]
+  ]
+ },
+ "testler/kor/projeler/AP23/is_emri.json": {
+  "VERANDA 1": [
+   [
+    125.5,
+    1
+   ],
+   [
+    444.25,
+    1
+   ]
+  ],
+  "VERANDA 2": [
+   [
+    125.5,
+    1
+   ],
+   [
+    444.25,
+    1
+   ]
+  ]
+ },
+ "testler/kor/projeler/AP24/is_emri.json": {
+  "VERANDA": [
+   [
+    125.5,
+    1
+   ],
+   [
+    444.25,
+    1
+   ]
+  ]
+ },
+ "testler/kor/projeler/AP25/is_emri.json": {
+  "VERANDA": [
+   [
+    413.5,
+    1
+   ],
+   [
+    60.0,
+    1
+   ],
+   [
+    198.25,
+    1
+   ]
+  ]
+ },
+ "testler/kor/projeler/AP28/is_emri.json": {
+  "VERANDA": [
+   [
+    125.5,
+    1
+   ],
+   [
+    371.5,
+    1
+   ]
+  ]
+ },
+ "testler/motor/veri/D127_veranda_76m2.json": {
+  "VERANDA": [
+   [
+    376.5,
+    2,
+    "ara"
+   ],
+   [
+    393.5,
+    2,
+    "ara"
+   ],
+   [
+    313.75,
+    1
+   ],
+   [
+    188.25,
+    1
+   ]
+  ]
+ },
+ "testler/motor/veri/PK01.json": {
+  "VERANDA": [
+   [
+    334.0,
+    1
+   ],
+   [
+    200.0,
+    1
+   ]
+  ]
+ },
+ "testler/motor/veri/TK01_r07.json": {
+  "GİRİŞ": []
+ },
+ "testler/motor/veri/TK01_r08.json": {
+  "GİRİŞ": []
+ },
+ "testler/motor/veri/TK02.json": {
+  "GİRİŞ": []
+ },
+ "testler/motor/veri/TK02_r04.json": {
+  "GİRİŞ": []
+ },
+ "testler/motor/veri/TK03.json": {
+  "BALKON": [
+   [
+    313.75,
+    1
+   ],
+   [
+    193.25,
+    1
+   ]
+  ]
+ },
+ "testler/motor/veri/TK04.json": {
+  "VERANDA": [
+   [
+    439.25,
+    1
+   ],
+   [
+    193.25,
+    1
+   ]
+  ]
+ },
+ "testler/motor/veri/TK04_r04.json": {
+  "VERANDA": [
+   [
+    502.0,
+    1
+   ],
+   [
+    193.25,
+    1
+   ]
+  ]
+ },
+ "testler/motor/veri/TK04_r05.json": {
+  "VERANDA": [
+   [
+    502.0,
+    1
+   ],
+   [
+    193.25,
+    1
+   ]
+  ]
+ },
+ "testler/motor/veri/TK04_r06.json": {
+  "VERANDA": [
+   [
+    502.0,
+    1
+   ],
+   [
+    193.25,
+    1
+   ]
+  ]
+ },
+ "testler/motor/veri/TK04_r07.json": {
+  "VERANDA": [
+   [
+    502.0,
+    2
+   ],
+   [
+    155.75,
+    1
+   ]
+  ]
+ },
+ "testler/motor/veri/TK04_r08.json": {
+  "VERANDA": [
+   [
+    502.0,
+    2
+   ],
+   [
+    155.75,
+    1
+   ]
+  ]
+ },
+ "testler/motor/veri/TK05_r07.json": {
+  "GİRİŞ": [
+   [
+    133.5,
+    1
+   ]
+  ]
+ },
+ "testler/motor/veri/TK06_r02.json": {
+  "VERANDA": [
+   [
+    444.25,
+    1
+   ],
+   [
+    325.0,
+    1
+   ]
+  ]
+ }
+}

@@ -1,0 +1,79 @@
+{
+ "kod": "PA49",
+ "gosterim": "PA-49",
+ "durum": "gecerli",
+ "sablon": "adaylar/PA49.json",
+ "gorsel": "adaylar/PA49.png",
+ "referans_model": "PA-49",
+ "yapi_turu": "prefabrik",
+ "kat": 1,
+ "oda_programi": "3+1",
+ "katalog_m2": 110.0,
+ "kapali_m2": 84.2,
+ "veranda_m2": 25.96,
+ "ozet": {
+  "grid": {
+   "x_pano": 8.0,
+   "y_pano": 8.5
+  },
+  "dis_olcu_cm": [
+   1014.0,
+   1086.75
+  ],
+  "brut_m2": 110.2,
+  "pano": 58,
+  "pencere": 7,
+  "kapi": 7,
+  "odalar": {
+   "Y.ODASI": 14.09,
+   "SALON": 18.2,
+   "Y.ODASI 2": 9.56,
+   "HOL": 9.69,
+   "Y.ODASI 3": 11.45,
+   "MUTFAK": 11.27,
+   "BANYO": 4.43,
+   "VERANDA": 25.96
+  }
+ },
+ "kaynak": {
+  "metin": "HD-380 montaj paftasından İş Emri (İE-43, disk arşivi Parti 2; kodla okundu, ad yok). Havuz: D-134 (Lokman 19 Kasım 2026 21:39:32 kartı \"Dördü girsin, ikisi beklesin\": Motor verandayı örten çatıyı listeleyince; Motor'un aks düzeniyle, veranda ana çatının altında, çatı paftadaki gibi). Asıl uygulanmış proje: D-103.",
+  "dosya": "testler/havuz/is_emirleri/HD380.json",
+  "ayna": null,
+  "karar": "D-134",
+  "standart": true,
+  "kart_kiyasi": {
+   "kart": "HD-380",
+   "kart_sha256": "effeb969d243a3c55293667b63c4cbee38de957fbe7fd4f6ab1bc06475784d3a",
+   "sonuc": "geçti",
+   "olcum": {
+    "dis_olcu_cm": [
+     1014.0,
+     1086.75
+    ],
+    "acikla_olcu_cm": [
+     1014.0,
+     1086.75
+    ],
+    "brut_m2": 110.2,
+    "kubbe_m2": 0.0,
+    "yatak_odasi": 3,
+    "pencereler": {
+     "120x120": 6,
+     "60x40": 1
+    },
+    "dis_kapi": 1,
+    "ic_kapi": 6,
+    "veranda": 1,
+    "kat": 1
+   }
+  },
+  "havuz_denetimi": {
+   "sonuc": "geçti",
+   "karar": "D-112",
+   "uyarilar": [
+    "HD-02: Dış ölçü 1014 × 1085,75 → 1014 × 1086,75 cm: son pano (y: 124,5 cm) 122 ve üzeri olduğu için tam panoya (125,5) tamamlandı (D-30)"
+   ]
+  }
+ },
+ "not": "Ana çatı ön verandayı da örter (paftadaki gibi; veranda gövdenin açık mahali). Ön kiriş ara kolonlarda bölünür: Motor L 3250 + L 3240 + L 3250, yan kiriş 2 × L 2460; paftanın listesinde 3280 × 2 + 3260, 2420 × 2 (paftada 8 cm kolon). Paftanın listesindeki makas boyu L 9485 makas planına uymuyor (D-134 › Bilinen farklar)."
+}

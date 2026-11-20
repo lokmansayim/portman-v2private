@@ -61,8 +61,11 @@ def _dxf(ie: dict, td: str):
 
 
 def test_girinti_kenarinda_profil():
-    """Girintiye bakan ön kenar veranda profilidir (dış yüz 37,5, iç çizgi 47,5, uçta iki kolonun yüzünde biter); girintisiz r06'da ve
-    `girinti_kirisi` anahtarı olmayan r07'de böyle profil yok (anahtarsız İş Emri eski yoldan)."""
+    """Girintiye bakan ön kenar veranda profilidir (dış yüz 37,5, iç çizgi 47,5, uçta iki kolonun yüzünde biter); girintisiz r06'da böyle
+    profil yok. `girinti_kirisi` anahtarı olmayan r07: D-137'den beri (Lokman, 20 Kasım 2026 08:04:02, kart "Eskizdeki gibi, iki evde")
+    listede kirişi olan açık kenar anahtarsız da profildir; D-58'in öteki ekleri (ek aks 1′ çizilmez, dış parça ölçüsü yok) yalnız
+    anahtarla, anahtarsız r07'de 1′ ve dış parça ölçüleri eski yoldan. Bu vaka D-137'yle değişti (eskiden anahtarsız r07'de profil yoktu;
+    gerekçe `docs/is_emirleri/BK-63.md`)."""
     with tempfile.TemporaryDirectory() as td:
         doc = _dxf(_oku("TK04_r07.json"), td)
         ins = [e for e in doc.modelspace().query("INSERT") if e.dxf.layer == "VERANDA_PROFIL_100" and e.dxf.name.endswith("_GIRINTI")
@@ -71,13 +74,22 @@ def test_girinti_kenarinda_profil():
         blk = doc.blocks[ins[0].dxf.name]
         cizgiler = sorted((tuple(round(v, 2) for v in l.dxf.start)[:2], tuple(round(v, 2) for v in l.dxf.end)[:2]) for l in blk.query("LINE"))
         assert cizgiler == [((0.0, 0.0), (502.0, 0.0)), ((10.0, 10.0), (492.0, 10.0))], cizgiler
+    with tempfile.TemporaryDirectory() as td:
+        doc = _dxf(_oku("TK04_r06.json"), td)
+        assert not [e for e in doc.modelspace().query("INSERT") if e.dxf.name.endswith("_GIRINTI")]
     anahtarsiz = _oku("TK04_r07.json")
     for m in anahtarsiz["mahaller"]:
         m.pop("girinti_kirisi", None)
-    for ie in (_oku("TK04_r06.json"), anahtarsiz):
-        with tempfile.TemporaryDirectory() as td:
-            doc = _dxf(ie, td)
-            assert not [e for e in doc.modelspace().query("INSERT") if e.dxf.name.endswith("_GIRINTI")]
+    with tempfile.TemporaryDirectory() as td:
+        doc = _dxf(anahtarsiz, td)
+    msp = doc.modelspace()
+    ins = [e for e in msp.query("INSERT") if e.dxf.layer == "VERANDA_PROFIL_100" and e.dxf.name.endswith("_GIRINTI") and e.dxf.insert.x < 888.5]
+    assert [(round(e.dxf.insert.x, 2), round(e.dxf.insert.y, 2)) for e in ins] == [(386.5, 37.5)], [e.dxf.insert for e in ins]   # D-137
+    blk = doc.blocks[ins[0].dxf.name]
+    cizgiler = sorted((tuple(round(v, 2) for v in l.dxf.start)[:2], tuple(round(v, 2) for v in l.dxf.end)[:2]) for l in blk.query("LINE"))
+    assert cizgiler == [((0.0, 0.0), (502.0, 0.0)), ((10.0, 10.0), (492.0, 10.0))], cizgiler
+    assert "1′" in {e.dxf.text for e in msp.query("TEXT") if e.dxf.layer == "AKS_YAZI"}            # D-58'in aks eki yalnız anahtarla
+    assert msp.query('DIMENSION[layer=="DIS_PARCA_OLCU"]')                                       # dış parça ölçüleri eski yoldan
 
 
 def test_ara_aks_ve_olcu_yok():

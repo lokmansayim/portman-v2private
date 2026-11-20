@@ -21,6 +21,7 @@ Tipler:
   gövdenin beşiğinde (`cati_serit`, AP-15); farklı eğimli cumba (PK-03) kapsam dışı. Çıkıntısız cumbada `ana_makas` "cumba_makasindan"
   (İE-15 K6, D-53 madde 7; TK-04 r06): ana makaslar cumbanın baş makasının arkasına geri çekilir; ana çatının ayak izi o cepheden
   `ana_geri_cm` + saçak geride, cumba o şeridi örter (çıkıntılı cumbanın düzlemleri gibi; gövde girintisiz, girinti denetimi yapılmaz).
+  Çıkıntısız cumbada `yavru_makaslari_cm` (BK-49, D-116): cumbanın makas planı evin paftasından (`pafta_yavrulari`); çatı aynı.
 - `kirma`: dört düzlem, kalkan yok; mahya uzun kenar boyunca (AP-01). Uçtaki iki kırma yüzünün eğimi paftada ana yüzlerden farklıysa
   `kirma_egimleri` {sol, sag} (mahya x boyunca) ya da {on, arka} (mahya y boyunca), yüzde: kırma çizgileri 45° olmaz, mahya o yana kayar
   (AP-01: ana %33, sol %32,5, sağ %36,2). Verilmezse eşit eğim (`genel.cati_kirma`, kırmalar 45°).
@@ -39,7 +40,7 @@ CEPHE_YAN = {"on": "G", "arka": "K", "sol": "B", "sag": "D"}
 ALANLAR = {"tip", "egim_yuzde", "sacak_cm", "topuk_cm", "makas_ekseni", "makas_yonu"}   # her tipte; tanınmayan alan yok sayılmaz
 TIP_ALANI = {"besik_cumba": {"cumbalar"}, "kirma": {"kirma_egimleri", "kalkan_ucu"}}
 KALKAN_UCLARI = {"x": ("sol", "sag"), "y": ("on", "arka")}       # İE-29: tek uçlu kırmada kalkanlı uç (mahya yönüne göre)
-CUMBA_ALANLARI = {"cephe", "bas_cm", "bit_cm", "cikinti_cm", "egim_yuzde", "ana_makas"}
+CUMBA_ALANLARI = {"cephe", "bas_cm", "bit_cm", "cikinti_cm", "egim_yuzde", "ana_makas", "yavru_makaslari_cm"}
 VERANDA_CUMBA_ALANLARI = {"cephe", "veranda"}   # ikinci cumba: taşan verandanın çatısı (Lokman, 14 Kasım 2026 08:41)
 KARSI = {"on": "arka", "arka": "on", "sol": "sag", "sag": "sol"}
 ANA_MAKAS = ("cumba_makasindan",)   # İE-15 K6, D-53 madde 7: ana makaslar cumbanın baş makasının arkasından 10 cm topukla
@@ -68,6 +69,24 @@ def ana_geri_cm(c: dict, plan: G.Plan | None) -> float | None:
     return h + (yavru_kurali()["kalinlik"] / 2 if bitis_kurali() == "yuz" else 0.0)
 
 
+def pafta_yavrulari(u: dict) -> list[float] | None:
+    """BK-49 (D-116; Lokman, kart 16 Kasım 2026 12:08:22 "Her ev kendi paftasındaki gibi"): çıkıntısız cumbanın makas planı evin
+    paftasından. `yavru_makaslari_cm` cumbanın kalkan makasının arkasındaki yavru makasların boyları (cm, paftanın listesinden): makas sayısı
+    1 + bu listenin uzunluğu, yerleri kalkan duvarının ekseninden 125,5 arayla (37 m² PA-39: [192], kalkan makası + yavru 192; 59 m² PA-41:
+    [], yalnız kalkan makası). Yavru makasın yeri paftadaki gibi kalkan makasından 125,5 içeride, boyu paftanın listesinden; AP-06'nın kısa
+    yavru kuralı (D-61) bu cumbada kurulmaz. Boy kalkan makasının boyundan kısa olmalı (`cati_capraz.cumba_makaslari` denetler; K21). Anahtar
+    yoksa None: D-47'nin kuralı (derelerin birleştiği yere kadar 125,5 arayla) ve D-61 aynen; öteki evler değişmez."""
+    if "yavru_makaslari_cm" not in u:
+        return None
+    y = u["yavru_makaslari_cm"]
+    sayi = lambda q: isinstance(q, (int, float)) and not isinstance(q, bool)      # noqa: E731
+    if not isinstance(y, list) or not all(sayi(v) and v > 0 for v in y):
+        raise PrefabrikCatiHatasi(f"cumbanın yavru_makaslari_cm'si boyların listesi olur (cm, 0'dan büyük; boş liste: yalnız kalkan makası): {y!r}")
+    if float(u.get("cikinti_cm", 0)) != 0 or u.get("ana_makas") is not None:
+        raise PrefabrikCatiHatasi("cumbanın yavru_makaslari_cm'si yalnız çıkıntısız cumbada, ana_makas'sız (BK-49'un iki evi gibi)")
+    return [float(v) for v in y]
+
+
 def _cumba(c: dict, kutu: tuple, plan: G.Plan | None = None) -> tuple[list[float], list[float]]:
     """`cumbalar`'ın tek girişi → (ana çatının dikdörtgeni, cumba dikdörtgeni). Çıkıntı 0: ana çatı gövdenin kutusu, cumba onun kenarında
     sıfır derinlikli şerit. Çıkıntılı cumba (İE-17 PR-2, AP-22: veranda ve üstündeki cumba gövdeden 62,75 öne taşar): ana çatı kutunun o
@@ -89,6 +108,7 @@ def _cumba(c: dict, kutu: tuple, plan: G.Plan | None = None) -> tuple[list[float
     cephe = u.get("cephe")
     if cephe not in CEPHE_YAN:
         raise PrefabrikCatiHatasi(f"cumba cephesi on, arka, sol ya da sag olur: {cephe}")
+    pafta_yavrulari(u)                                          # BK-49 (D-116): yazıldıysa biçimi denetlenir
     cik = float(u.get("cikinti_cm", 0))
     yon = "x" if cephe in ("on", "arka") else "y"               # D-30: tam panoya tamamlanan yönde eski köşe yenisine
     a, b = G.tamamla_gercek_cm(u["bas_cm"], yon), G.tamamla_gercek_cm(u["bit_cm"], yon)
@@ -288,6 +308,29 @@ def _tek_uclu_kirma(kutu: tuple, mahya: str, uc: str, b: dict, k: dict) -> tuple
     return duz, kal
 
 
+def ana_karkasi(duz: list[dict]) -> list[dict]:
+    """Çapraz cumbada ana çatının aşıkları cumbanın arkasında kesilmez (D-135, BK-62; Lokman, 20 Kasım 2026 07:12: "ana makasdaki aşıklar cumbanın
+    arkasına gelince kesilmez devam eder ... baştan sona kadar devam eder yarım bırakılmaz"). Ana çatının makasları cumbanın altından da
+    geçer (`cati_capraz`); ana yüzün görünen kısmı cumbanın oturduğu yerde kesik olsa da makaslarla taşınan kısmı (`karkas`,
+    `cati_genel.duzlem_kur`) cumbanın altındaki parçayla birlikte tam yüzdür. Karkas = görünen yüz ∪ (yüzün dışbükey zarfı ∩ cumba
+    yüzleri). Aşık sıraları (`cati_genel.asik_siralari`: liste, kart modeli, montaj paftası ve rehber) bu kısmı okur; çizim, kaplama ve
+    kenarlar görünen yüzden aynen."""
+    from shapely.geometry import Polygon
+    from shapely.ops import unary_union
+    cumba = unary_union([Polygon(d["plan"]) for d in duz if not d["ad"].startswith("ana ")])
+    if cumba.is_empty:
+        return duz
+    out = []
+    for d in duz:
+        if d["ad"].startswith("ana ") and not d.get("karkas"):
+            yuz = Polygon(d["plan"])
+            dolu = yuz.union(yuz.convex_hull.intersection(cumba)).buffer(0.01, join_style=2).buffer(-0.01, join_style=2).simplify(0.01)
+            if dolu.geom_type == "Polygon" and dolu.area - yuz.area > 1.0:
+                d = dict(d, karkas=[[round(x, 4), round(y, 4)] for x, y in list(dolu.exterior.coords)[:-1]])
+        out.append(d)
+    return out
+
+
 def cati(plan: G.Plan, ie: dict) -> dict:
     """Beşik dışı ana çatı → genel motorun `cati` biçimi. Dönen sözlük `sunum.cati_tanimi`'nin beşik çatısının anahtarlarında,
     ek olarak `tip_adi`, `ust_pay` ve `kalkanlar` (`cati_genel.cati_kur` ve `cephe_gorunus` okur)."""
@@ -376,6 +419,8 @@ def cati(plan: G.Plan, ie: dict) -> dict:
         d = dict(d)
         d.pop("ust_pay", None)                       # kaplama payı çatının `ust_pay`'ından (pano Motor'unun sacı), çeliğin paneli değil
         duz.append(d)
+    if tip == "besik_cumba":
+        duz = ana_karkasi(duz)
     return {"tip": u["tip"], "tip_adi": TIP_ADI[tip], "tip_kaynak": "İE-17 prefabrik çatı (motor/cati_prefabrik.py; İE-14 çatı üreticisi)",
             "sacak": k["sacak_cm"], "topuk": k["topuk_cm"], "duvar_ustu": H0, "ust_pay": UST_PAY_CM, "duzlemler": duz,
             "kalkanlar": u["kalkanlar"]}

@@ -1,0 +1,514 @@
+{
+ "is_emri_no": "HDD-HD-380",
+ "revizyon": 1,
+ "talep": {
+  "bayi": {
+   "kod": "HD-380",
+   "ad": "Arşiv HD-380"
+  },
+  "musteri_adi": "HD-380",
+  "metin": "İE-43: HD-380 montaj paftasından okundu (plan_geometri v1). Pafta düzeltilmedi; farklar uyarılarda."
+ },
+ "yapi": {
+  "sistem": "prefabrik",
+  "kat_sayisi": 1,
+  "duvar_yuksekligi_cm": 250,
+  "duvar_kalinligi_cm": {
+   "dis": 10,
+   "ic": 6.0
+  },
+  "olcu_kaynagi": "dis_olcu",
+  "dis_olcu_cm": {
+   "x": 1014.0,
+   "y": 1085.75
+  },
+  "referans_model": "HD-380",
+  "grid": {
+   "x_pano": 8.0,
+   "y_pano": 8.5
+  },
+  "kisa_kenar": "y",
+  "giris_cephesi": "on",
+  "dis_dusey_duvar": "cevre_aks_disinda",
+  "dizilim": {
+   "baslangic": "arka-sol",
+   "hiza": "izgara",
+   "dis_duvar_t_bolme": false,
+   "pencere": "oda_ortasi",
+   "kapi": "mantik",
+   "kose": "oda",
+   "son_pano": "son_aks",
+   "kapi_yeri": "ortada",
+   "dis_pano_dayanagi": [
+    {
+     "y": 637.5,
+     "aralik_cm": [
+      637.5,
+      763.0
+     ],
+     "cephe": "sol"
+    },
+    {
+     "y": 323.75,
+     "aralik_cm": [
+      10.0,
+      323.75
+     ],
+     "ic_duvarlar": true,
+     "duvar_cm": 318.75
+    },
+    {
+     "y": 323.75,
+     "aralik_cm": [
+      10.0,
+      323.75
+     ],
+     "ic_duvarlar": true,
+     "duvar_cm": 632.5
+    },
+    {
+     "y": 637.5,
+     "aralik_cm": [
+      637.5,
+      763.0
+     ],
+     "ic_duvarlar": true,
+     "duvar_cm": 632.5
+    },
+    {
+     "y": 637.5,
+     "aralik_cm": [
+      637.5,
+      763.0
+     ],
+     "cephe": "sag"
+    }
+   ]
+  },
+  "ek_akslar_cm": {
+   "x": [],
+   "y": []
+  }
+ },
+ "mahaller": [
+  {
+   "ad": "Y.ODASI",
+   "tur": "yatak_odasi",
+   "konum_cm": [
+    [
+     5.0,
+     10.0,
+     318.75,
+     323.75
+    ],
+    [
+     5.0,
+     323.75,
+     381.5,
+     449.25
+    ]
+   ]
+  },
+  {
+   "ad": "SALON",
+   "tur": "salon",
+   "konum_cm": [
+    [
+     5.0,
+     449.25,
+     507.0,
+     825.75
+    ]
+   ]
+  },
+  {
+   "ad": "Y.ODASI 2",
+   "tur": "yatak_odasi",
+   "konum_cm": [
+    [
+     318.75,
+     10.0,
+     632.5,
+     323.75
+    ]
+   ]
+  },
+  {
+   "ad": "HOL",
+   "tur": "antre_hol",
+   "konum_cm": [
+    [
+     381.5,
+     323.75,
+     758.0,
+     449.25
+    ],
+    [
+     507.0,
+     449.25,
+     758.0,
+     512.0
+    ],
+    [
+     507.0,
+     512.0,
+     632.5,
+     825.75
+    ]
+   ]
+  },
+  {
+   "ad": "Y.ODASI 3",
+   "tur": "yatak_odasi",
+   "konum_cm": [
+    [
+     632.5,
+     10.0,
+     1009.0,
+     323.75
+    ]
+   ]
+  },
+  {
+   "ad": "MUTFAK",
+   "tur": "mutfak",
+   "konum_cm": [
+    [
+     632.5,
+     512.0,
+     1009.0,
+     825.75
+    ]
+   ]
+  },
+  {
+   "ad": "BANYO",
+   "tur": "banyo",
+   "konum_cm": [
+    [
+     758.0,
+     323.75,
+     1009.0,
+     512.0
+    ]
+   ]
+  },
+  {
+   "ad": "VERANDA",
+   "tur": "veranda",
+   "konum_cm": [
+    [
+     5.0,
+     825.75,
+     1009.0,
+     1075.75
+    ]
+   ]
+  }
+ ],
+ "acik_sinirlar": [],
+ "acikliklar": [
+  {
+   "tur": "ic_kapi",
+   "olcu": 82,
+   "arasi": [
+    "HOL",
+    "Y.ODASI 3"
+   ],
+   "_pafta": [
+    632.5,
+    758.0
+   ],
+   "_hat": [
+    "y",
+    323.75,
+    323.75
+   ],
+   "_kaynak": "blok",
+   "pano": 0,
+   "_aday": 1
+  },
+  {
+   "tur": "ic_kapi",
+   "olcu": 82,
+   "arasi": [
+    "HOL",
+    "Y.ODASI 2"
+   ],
+   "_pafta": [
+    507.0,
+    632.5
+   ],
+   "_hat": [
+    "y",
+    323.75,
+    323.75
+   ],
+   "_kaynak": "blok",
+   "pano": 1,
+   "_aday": 2
+  },
+  {
+   "tur": "ic_kapi",
+   "olcu": 82,
+   "arasi": [
+    "HOL",
+    "BANYO"
+   ],
+   "_pafta": [
+    326.75,
+    452.25
+   ],
+   "_hat": [
+    "x",
+    758.0,
+    758.0
+   ],
+   "_kaynak": "blok",
+   "pano": 0,
+   "_aday": 1
+  },
+  {
+   "tur": "ic_kapi",
+   "olcu": 82,
+   "arasi": [
+    "HOL",
+    "MUTFAK"
+   ],
+   "_pafta": [
+    515.0,
+    640.5
+   ],
+   "_hat": [
+    "x",
+    632.5,
+    632.5
+   ],
+   "_kaynak": "blok",
+   "pano": 0,
+   "_aday": 3
+  },
+  {
+   "tur": "ic_kapi",
+   "olcu": 82,
+   "arasi": [
+    "HOL",
+    "SALON"
+   ],
+   "_pafta": [
+    452.25,
+    577.75
+   ],
+   "_hat": [
+    "x",
+    507.0,
+    507.0
+   ],
+   "_kaynak": "blok",
+   "pano": 1,
+   "_aday": 4
+  },
+  {
+   "tur": "pencere",
+   "olcu": "120x120",
+   "mahal": "Y.ODASI 3",
+   "duvar": "sag",
+   "_pafta": [
+    135.5,
+    261.0
+   ],
+   "_hat": [
+    "x",
+    1009.0,
+    1009.0
+   ],
+   "_kaynak": "blok",
+   "pano": 1,
+   "_aday": 2
+  },
+  {
+   "tur": "pencere",
+   "olcu": "120x120",
+   "mahal": "Y.ODASI",
+   "duvar": "sol",
+   "_pafta": [
+    135.5,
+    261.0
+   ],
+   "_hat": [
+    "x",
+    5.0,
+    5.0
+   ],
+   "_kaynak": "blok",
+   "pano": 1,
+   "_aday": 3
+  },
+  {
+   "tur": "pencere",
+   "olcu": "120x120",
+   "mahal": "SALON",
+   "duvar": "sol",
+   "_pafta": [
+    512.0,
+    637.5
+   ],
+   "_hat": [
+    "x",
+    5.0,
+    5.0
+   ],
+   "_kaynak": "blok",
+   "pano": 0,
+   "_aday": 2
+  },
+  {
+   "tur": "pencere",
+   "olcu": "120x120",
+   "mahal": "SALON",
+   "duvar": "on",
+   "_pafta": [
+    130.5,
+    256.0
+   ],
+   "_hat": [
+    "y",
+    830.75,
+    825.75
+   ],
+   "_kaynak": "blok",
+   "pano": 1,
+   "_aday": 4
+  },
+  {
+   "tur": "pencere",
+   "olcu": "120x120",
+   "mahal": "MUTFAK",
+   "duvar": "on",
+   "_pafta": [
+    758.0,
+    883.5
+   ],
+   "_hat": [
+    "y",
+    830.75,
+    825.75
+   ],
+   "_kaynak": "blok",
+   "_oda_ortasi": true
+  },
+  {
+   "tur": "dis_kapi",
+   "olcu": 90,
+   "arasi": [
+    "VERANDA",
+    "HOL"
+   ],
+   "_pafta": [
+    507.0,
+    632.5
+   ],
+   "_hat": [
+    "y",
+    830.75,
+    825.75
+   ],
+   "_kaynak": "blok",
+   "pano": 0,
+   "_aday": 1
+  },
+  {
+   "tur": "pencere",
+   "olcu": "60x40",
+   "mahal": "BANYO",
+   "duvar": "sag",
+   "_pafta": [
+    386.5,
+    512.0
+   ],
+   "_hat": [
+    "x",
+    1009.0,
+    1009.0
+   ],
+   "_kaynak": "blok",
+   "pano": 0,
+   "_aday": 1
+  },
+  {
+   "tur": "pencere",
+   "olcu": "120x120",
+   "mahal": "Y.ODASI 2",
+   "duvar": "arka",
+   "_pafta": [
+    381.5,
+    507.0
+   ],
+   "_hat": [
+    "y",
+    5.0,
+    10.0
+   ],
+   "_kaynak": "blok",
+   "pano": 0,
+   "_aday": 2
+  },
+  {
+   "tur": "ic_kapi",
+   "olcu": 82,
+   "arasi": [
+    "HOL",
+    "Y.ODASI"
+   ],
+   "_pafta": [
+    346.33,
+    420.47
+   ],
+   "_hat": [
+    "x",
+    381.5,
+    381.5
+   ],
+   "_kaynak": "yay",
+   "pano": 0,
+   "_aday": 1
+  }
+ ],
+ "cati": {
+  "tip": "besik",
+  "egim_yuzde": 32.9,
+  "sacak_cm": 30,
+  "topuk_cm": 10,
+  "makas_yonu": "kisa_kenar",
+  "makas_ekseni": "y"
+ },
+ "cikti": {
+  "pdf": true,
+  "dxf": true,
+  "pafta": "A2",
+  "icerik": [
+   "aksli_plan"
+  ]
+ },
+ "varsayimlar": [
+  "Bölge 6 (4.73 m² aks alanı): paftada oda adı yok; BANYO sayıldı (tefriş: banyo).",
+  "VERANDA: paftada 4 kolon; İş Emri'ne ara_kolon: 2 yazıldı (D-109).",
+  "VERANDA: çatısı paftanın planında yok; İş Emri'ne yazılmadı (Motor ana çatının eğimiyle beşik alır, uyarıyla).",
+  "Çatı beşik, %32,9, saçak 30, topuk 10 (paftanın planında eğim yok; prefabrik standardı).",
+  "Pano dizilimi paftadan: sol hattında y 637.5'dan 125,5; 318.75 hattında y 323.75'dan 125,5; 632.5 hattında y 323.75'dan 125,5; 632.5 hattında y 637.5'dan 125,5; sag hattında y 637.5'dan 125,5 (dizilim.dis_pano_dayanagi)."
+ ],
+ "_uyarilar": [
+  "kapı bloğu AMBLEM (ÖLÇÜLENDİRME katmanında): kapı olarak okundu",
+  "bölge 6: oda yazısı yok (4.73 m² aks alanı)"
+ ],
+ "dikmeler": [
+  [
+   333,
+   0.0
+  ],
+  [
+   671,
+   0.0
+  ]
+ ]
+}

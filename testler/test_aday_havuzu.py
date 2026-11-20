@@ -91,7 +91,24 @@ HDD_EVLERI = {
     "PA42": ("HD-228", "testler/havuz/is_emirleri/HD228.json", "3+1", 84.0),     # 84 m²
     "PA43": ("HD-143", "testler/havuz/is_emirleri/HD143.json", "3+1", 92.0),     # 92 m²; verandada panel çatı, ikinci çatı PA-43-B (D-111)
 }
-HAVUZ_EVLERI = {**EVLER, **STANDART_HAL, **SILME_HAL, **UCLU_H_HAL, **TEK_PANO_HAL, **HDD_EVLERI}
+# İE-43 PR-7 › Disk arşivi Parti 2: dört ev, çatı paftadaki gibi (D-132; 110 ve 120 m² Motor bakımını bekler)
+KARAR_HDD2 = "D-132"
+DHDD2 = (KOK / "KARARLAR" / f"{KARAR_HDD2}.md").read_text(encoding="utf-8")
+HDD2_EVLERI = {
+    "PA45": ("HD-596", "testler/havuz/is_emirleri/HD596.json", "1+1", 45.0),     # 45 m²; beşik
+    "PA46": ("HD-118", "testler/havuz/is_emirleri/HD118.json", "3+1", 74.0),     # başlık 75 m², duvarlar 888,5 × 835,75 cm (74,26 m²); dörtomuz
+    "PA47": ("HD-137", "testler/havuz/is_emirleri/HD137.json", "2+1", 74.0),     # başlık 76 m², duvarlar 888,5 × 835,75 cm; oda adı yok; ön cumba
+    "PA48": ("HD-420", "testler/havuz/is_emirleri/HD420.json", "2+1", 80.0),     # 80 m²; verandada sundurma %10
+}
+# İE-43 PR-8 › Disk arşivi Parti 2'nin beklettiği iki ev: ana çatı ön verandayı da örter, veranda gövdenin açık mahali (D-134;
+# Motor bakımı D-129, D-130, D-131)
+KARAR_HDD3 = "D-134"
+DHDD3 = (KOK / "KARARLAR" / f"{KARAR_HDD3}.md").read_text(encoding="utf-8")
+HDD3_EVLERI = {
+    "PA49": ("HD-380", "testler/havuz/is_emirleri/HD380.json", "3+1", 110.0),    # 110 m²; beşik, ara kolonlar 340 ve 674 cm
+    "PA50": ("HD-251", "testler/havuz/is_emirleri/HD251.json", "3+1", 119.0),    # başlık 120 m², verandayla 888,5 × 1336,75 cm; dörtomuz
+}
+HAVUZ_EVLERI = {**EVLER, **STANDART_HAL, **SILME_HAL, **UCLU_H_HAL, **TEK_PANO_HAL, **HDD_EVLERI, **HDD2_EVLERI, **HDD3_EVLERI}
 # D-92 › Havuz evlerine uygulama: 95 m²'nin (PA-10) tek özel pano anahtarlı kaydı 15 Kasım 21:56:57 kartıyla PA-38'e geçti (TEK_PANO_HAL);
 # PA-10 asıl hâline döndü (D-87, kör İş Emri). Ayrıntı test_havuz_tek_pano.py.
 D92 = (KOK / "KARARLAR" / "D-92.md").read_text(encoding="utf-8")
@@ -102,6 +119,10 @@ def _kayit_kaynagi(kod: str) -> tuple[str, str, str]:
     öteki D-87 evleri."""
     if kod in HDD_EVLERI:
         return HDD_EVLERI[kod][1], KARAR_HDD, DHDD
+    if kod in HDD2_EVLERI:
+        return HDD2_EVLERI[kod][1], KARAR_HDD2, DHDD2
+    if kod in HDD3_EVLERI:
+        return HDD3_EVLERI[kod][1], KARAR_HDD3, DHDD3
     if kod in TEK_PANO_HAL:
         return TEK_PANO_HAL[kod][1], "D-92", D92
     if kod in UCLU_H_YENI:
@@ -329,15 +350,19 @@ def test_kabulsuz_yolda_havuz_gorunmez():
 SETLER = {
     (50, "2+1"): ["PA23", "PA44"],                                                    # bugünkü 49 m² ve tam panolu hâli (PA-44, 49,02 m²)
     (40, "1+1"): ["PA29", "PA39"],                                                    # D-91 kısalt (39,61 m²); PA-39: disk arşivinin 37 m²'si (D-111)
-    (45, "1+1"): ["PA27", "PA40", "PA28"],                                            # eski hâl ve en yakın standart (D-91); PA-40: disk arşivinin 45 m²'si (D-111)
+    (45, "1+1"): ["PA27", "PA40", "PA45", "PA28"],                                    # eski hâl ve en yakın standart (D-91); PA-40, PA-45: disk arşivinin 45 m²'leri (D-111, D-132)
     (60, "2+1"): ["PA01", "PA14", "PA18", "PA25", "PA31", "PA41", "PA36", "PA02", "PA09", "PA20"],  # PA-31 silinmiş hâl (59 m²); PA-36 geniş hâl (62 m²); PA-41 disk arşivi (59 m², D-111)
     (65, "2+1"): ["PA02", "PA09", "PA20", "PA36", "PA25", "PA32", "PA35", "PA01", "PA03", "PA14"],  # PA-36 (62 m²) dördüncü; liste 10, PA-15 düştü
-    (71, "2+1"): ["PA26", "PA03", "PA15", "PA32", "PA35", "PA24", "PA02", "PA04", "PA09", "PA20"],  # PA-35: 71 m²'nin üçlü H'lı hâli (69 m²); PA-34 10 sınırıyla düştü
-    (77, "2+1"): ["PA24", "PA04", "PA34", "PA16", "PA05", "PA26", "PA03", "PA15", "PA19"],  # PA-34: 77 m²'nin büyüyen hâli (D-92)
-    (80, "2+1"): ["PA16", "PA04", "PA05", "PA34", "PA24", "PA19", "PA06"],
-    (80, "3+1"): ["PA21", "PA30", "PA42", "PA12"],                                    # PA-30: 85 m²'nin silinmiş hâli (83 m², D-92); PA-42 disk arşivi (84 m², D-111)
+    (71, "2+1"): ["PA26", "PA03", "PA15", "PA32", "PA35", "PA47", "PA24", "PA02", "PA04", "PA09"],  # PA-35: 71 m²'nin üçlü H'lı hâli (69 m²); PA-47 disk arşivi (74 m², D-132); PA-34, PA-20 10 sınırıyla düştü
+    (77, "2+1"): ["PA24", "PA04", "PA34", "PA16", "PA47", "PA48", "PA05", "PA26", "PA03", "PA15"],  # PA-34: 77 m²'nin büyüyen hâli (D-92); PA-47, PA-48 disk arşivi (D-132); PA-19 10 sınırıyla düştü
+    (80, "2+1"): ["PA16", "PA48", "PA04", "PA05", "PA34", "PA24", "PA19", "PA47", "PA06"],  # PA-48 disk arşivinin 80 m²'si, PA-47 74 m² (D-132)
+    (75, "2+1"): ["PA47", "PA24", "PA04", "PA34", "PA26", "PA03", "PA15", "PA16", "PA48", "PA32"],  # PA-47 disk arşivinin 76 m² başlıklı evi (74 m², D-132)
+    (75, "3+1"): ["PA46", "PA21"],                                                    # PA-46 disk arşivinin 75 m² başlıklı evi (74 m², D-132)
+    (80, "3+1"): ["PA21", "PA30", "PA42", "PA12", "PA46"],                            # PA-30: 85 m²'nin silinmiş hâli (83 m², D-92); PA-42 disk arşivi (84 m², D-111); PA-46 (74 m², D-132)
     (90, "3+1"): ["PA07", "PA11", "PA17", "PA37", "PA43", "PA10", "PA12", "PA38", "PA42", "PA30"],  # PA-37: 91 m² üçlü H'lı hâl (D-96); PA-38: 95 m² 48 panolu; PA-43, PA-42 disk arşivi (D-111)
     (100, "2+1"): ["PA22"],
+    (110, "3+1"): ["PA49", "PA50"],                                                   # disk arşivinin 110 ve 120 m²'si, ana çatı verandayı da örter (D-134)
+    (120, "3+1"): ["PA50", "PA49"],                                                   # PA-50 120 m² başlıklı ev (119 m², D-134)
     (140, "3+1"): ["PA08", "PA33"],                                                   # PA-33: 140 m²'nin büyüyen hâli (142 m², D-92)
     (140, "4+1"): ["PA13"],
 }

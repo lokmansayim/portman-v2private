@@ -1858,6 +1858,20 @@ def _t_noktalari(plan: "Plan", d: "Duvar") -> list:
     return sorted(d2.c for d2 in plan.duvarlar if d2.yon != d.yon and min(d2.a0, d2.a1) - 20 <= d.c <= max(d2.a0, d2.a1) + 20)
 
 
+def _yerinde_kalan_pencere(plan: "Plan"):
+    """D-124 (D-121'in istisnası; Lokman, 17 Kasım 2026 08:35:02): "banyo ebeveyn banyo wc tuvalet yani vasistas pencresi ne varsa onlar
+    kendi konumlarında kalacak ortalamıyacaksın". Pencere iki durumda yerinde kalır: odası ıslak hacimse (türü yükleme listesinin ıslak
+    hacim türlerinden: `kurallar/liste/prefabrik.json › islak_hacim`, Lokman 13 Ekim; WC ve ebeveyn banyosu Motor'da `banyo` türündedir) ya da
+    pencere vasistassa (pencere kataloğunda türü vasistas olan her ölçü, `kurallar/pencere/pencereler.json`: 60x40, 100x60, 50x50, 60x60,
+    30x30; sözdeki "ne varsa"). Sözdeki "yani" iki okumayı eşitler; Motor ikisini birlikte uygular: ıslak hacmin 120'lik penceresi de, kuru
+    odanın vasistası da yerinde kalır. Dönüş: Acilim → bool."""
+    vasistas = {m["olcu"].lower() for m in PENCERE_VT["modeller"] if m.get("tur") == "vasistas"}
+    kitap = json.loads((Path(__file__).resolve().parents[1] / "kurallar" / "liste" / "prefabrik.json").read_text(encoding="utf-8"))
+    islak = set(kitap["kurallar"]["islak_hacim"]["deger"])
+    turu = {ad: m.tur for ad, m in plan.mahaller.items()}
+    return lambda a: (a.olcu or "").lower() in vasistas or turu.get(a.mahal) in islak
+
+
 def _dik_duvar_pencere(plan: "Plan", makas_ekseni: str, cati_tipi=None) -> list:
     """D-121 (BK-52, PC-46): makasa dik dış duvarda pencere odanın duvar parçasının tam ortasında. Lokman, 16 Kasım 2026 20:56:44:
     "makas yönündeki akslar çok önemli makasları o akslara oturtuyoruz ama makas yönüne dik olan akslar kayabilir ama yine kurallı kaysın";
@@ -1874,9 +1888,11 @@ def _dik_duvar_pencere(plan: "Plan", makas_ekseni: str, cati_tipi=None) -> list:
     aşardı, D-69) dokunulmaz. Parçanın içinde panonun ortasına düşen bir T varsa (çektirme U'lu T; parça iki odayı kapsar) dokunulmaz
     (VARSAYIM V6; geometri hakemi, PA-21 banyosu). Kırma çatıda makasa dik duvar da makas taşır (ana ve kısa makas, BK-46): kural
     uygulanmaz, uyarı yazılır (VARSAYIM V7; Lokman'ın sözü "makasları o akslara oturtuyoruz"). Ortalanmayan her pencere için uyarı
-    yazılır (K16). Dış ölçü, odalar, T ekleri ve saçak duvarları değişmez. Dönüş: değişen parçalar ({duvar, once, sonra})."""
+    yazılır (K16). Islak hacmin ve vasistasın penceresi kurala girmez, yerinde kalır (D-124, `_yerinde_kalan_pencere`; uyarı yazılmaz:
+    sapma değil, kuraldır). Dış ölçü, odalar, T ekleri ve saçak duvarları değişmez. Dönüş: değişen parçalar ({duvar, once, sonra})."""
     kisa = lambda d, p: f"Duvar {d.id}: {p.boy} cm'lik çok kısa pano (özel pano kuralı doğrulanmalı)"   # `_kur`'un pano döngüsündeki yazı
     acik = lambda g: not g[0].aciklar and not g[0].karkasli
+    yerinde = _yerinde_kalan_pencere(plan)                   # D-124: ıslak hacim ve vasistas penceresi ortalanmaz
     ortalanmadi = lambda d, w, neden: plan.uyarilar.append(f"Duvar {d.id}: pencere ({w.a0:g}–{w.a1:g}) ortalanmadı; {neden} (D-121)")
     cik = []
     if cati_tipi == "kirma":
@@ -1891,6 +1907,8 @@ def _dik_duvar_pencere(plan: "Plan", makas_ekseni: str, cati_tipi=None) -> list:
         for gi, g in enumerate(gruplar):
             w = g[0]
             if len(g) != 1 or w.acilim is None or w.acilim.tur != "pencere":
+                continue
+            if yerinde(w.acilim) and not w.ek_acilimlar:     # ek açıklıklı pano aşağıda uyarıyla kalır (K16)
                 continue
             if w.ek_acilimlar or w.karkasli or abs(w.boy - MOD) > 1e-6:
                 ortalanmadi(d, w, "pencereli pano tek pano (125,5) değil ya da karkaslı")
@@ -2340,12 +2358,14 @@ def _dis_verandalar(plan: "Plan", is_emri: dict) -> None:
         if tip == "teras_paneli":                   # D-52: panel; saçağı, topuğu yok (K21: yazılırsa yok sayılmaz); D-52 ek: eğimi İş Emri'nden
             cikma, eg = c.get("cikma_cm"), c.get("egim_yuzde")
             sayi = lambda q: isinstance(q, (int, float)) and not isinstance(q, bool)
-            if (set(c) - {"tip", "cikma_cm", "egim_yuzde"} or not sayi(cikma) or not d <= float(cikma) <= d + 60
-                    or not sayi(eg) or not 0 < float(eg) <= TERAS_PANELI_EGIM_SINIRI):
+            if (set(c) - {"tip", "cikma_cm", "egim_yuzde", "yan_kiris"} or not sayi(cikma) or not d <= float(cikma) <= d + 60
+                    or not sayi(eg) or not 0 < float(eg) <= TERAS_PANELI_EGIM_SINIRI or c.get("yan_kiris", True) is not True):
                 raise IsEmriHatasi(f"Veranda {ad}: teras_paneli cikma_cm ve egim_yuzde alır (cikma_cm duvardan panelin dış kenarı, derinlikten "
                                    f"{d:g} en çok 60 cm fazla; egim_yuzde duvardan dışarı, 0'dan büyük, en çok "
-                                   f"{TERAS_PANELI_EGIM_SINIRI:g}): {c}")
+                                   f"{TERAS_PANELI_EGIM_SINIRI:g}; yan_kiris yazılırsa true): {c}")
             cati = {"tip": tip, "egim_yuzde": float(eg), "sacak_cm": 0.0, "topuk_cm": float(ana.get("topuk_cm", 10)), "cikma_cm": float(cikma)}
+            if c.get("yan_kiris"):                  # BK-49 (D-116; Lokman, kart 16 Kasım 2026 12:10:16 "Yalnız bu evde"; 92 m² PA-43): listede
+                cati["yan_kiris"] = True            # 2 yan kiriş, evin paftasındaki gibi (`prefabrik_liste`); çizim ve 3B aynı (D-56'nın kirişi)
         elif tip == "cumba":                        # 14 Kasım 2026 (Lokman 08:41–08:42): verandanın çatısı ana çatının cumbası; vadiyle girer
             if set(c) - {"tip"}:
                 raise IsEmriHatasi(f"Veranda {ad}: cumba çatısında eğim, saçak ve topuk ana çatınındır; yalnız tip yazılır: {c}")

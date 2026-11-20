@@ -1,6 +1,6 @@
 {
- "aciklama": "Disk arşivinin (İE-43, D-99) Parti 1 evlerinin proje kartı: montaj paftasının yazılarından okunan yapı alanları (`araclar/hdd_turev/pafta_kart.py`), `proje_kartlari.json` biçiminde. Ad yok; `kart_sha256` mühürdeki DWG'nin SHA-256'sı (`testler/hdd/muhur.csv`). 2019–2020 bantlı şablonda dış kapının yazısı olmadığı için dış ve iç kapı ayrılmaz, toplam `kapi_adedi` (hakem toplamı kıyaslar). Okuyucunun bulamadığı alan `varsayim`'da yazılı.",
- "kaynak": "Disk arşivi Parti 1 (PR #239 okuyucusu, PR #245 düzeltmesi)",
+ "aciklama": "Disk arşivinin (İE-43, D-99) Parti 1 ve Parti 2 evlerinin proje kartı: montaj paftasının yazılarından okunan yapı alanları (`araclar/hdd_turev/pafta_kart.py`), `proje_kartlari.json` biçiminde. Ad yok; `kart_sha256` mühürdeki DWG'nin SHA-256'sı (`testler/hdd/muhur.csv`). 2019–2020 bantlı şablonda dış kapının yazısı olmadığı için dış ve iç kapı ayrılmaz, toplam `kapi_adedi` (hakem toplamı kıyaslar). Okuyucunun bulamadığı alan `varsayim`'da yazılı.",
+ "kaynak": "Disk arşivi Parti 1 (PR #239 okuyucusu, PR #245 düzeltmesi); Parti 2 (İE-43 PR-7, D-132; PR-8, D-134)",
  "evler": {
   "HD-252": {
    "dis_olcu_cm": [
@@ -165,6 +165,214 @@
     ],
     "okuyucu": "araclar/hdd_turev/pafta_kart.py (İE-43 PR-4)"
    }
+  },
+  "HD-596": {
+   "dis_olcu_cm": [
+    763.0,
+    584.75
+   ],
+   "brut_oturum_m2": 45.0,
+   "baslik_m2": 45.0,
+   "oda_sayisi": "1+1",
+   "yatak_odasi": 1,
+   "kat_adedi": 1,
+   "cati_sekli": null,
+   "acikliklar": {
+    "120/120": 2,
+    "120/180": 2,
+    "60/40": 1
+   },
+   "dis_kapi_adedi": null,
+   "ic_kapi_adedi": null,
+   "kapi_adedi": 5,
+   "veranda_adedi": 1,
+   "kart_sha256": "4dff03a97b998aaceda1667ec20f629488afeb46effa844337ec9a4c55f5195a",
+   "kaynak": {
+    "dosya": "HD-596;11",
+    "plan_sirasi": 78,
+    "sablon": "bantli",
+    "sacak_olcusu_cm": [
+     null,
+     634.75
+    ],
+    "okuyucu": "araclar/hdd_turev/pafta_kart.py (İE-43 PR-7)"
+   }
+  },
+  "HD-118": {
+   "dis_olcu_cm": [
+    888.5,
+    835.75
+   ],
+   "brut_oturum_m2": 74.26,
+   "baslik_m2": 75.0,
+   "oda_sayisi": "3+1",
+   "yatak_odasi": 3,
+   "kat_adedi": 1,
+   "cati_sekli": null,
+   "acikliklar": {
+    "120/120": 3,
+    "120/180": 3,
+    "60/40": 1
+   },
+   "dis_kapi_adedi": null,
+   "ic_kapi_adedi": null,
+   "kapi_adedi": 6,
+   "veranda_adedi": 1,
+   "kart_sha256": "28540d433259e63ff58e3aa5960b1aed5faf3e5df1b2b2c9b7cbdea557eea315",
+   "kaynak": {
+    "dosya": "HD-118;9",
+    "plan_sirasi": 73,
+    "sablon": "bantli",
+    "sacak_olcusu_cm": [
+     null,
+     null
+    ],
+    "okuyucu": "araclar/hdd_turev/pafta_kart.py (İE-43 PR-7)"
+   },
+   "varsayim": [
+    "Paftanın başlığı 75 m²; dış duvarların ölçüsü 888,5 × 835,75 = 74,26 m² (brut_oturum_m2 duvar ölçüsünden, HD-431 gibi)."
+   ]
+  },
+  "HD-137": {
+   "dis_olcu_cm": [
+    888.5,
+    835.75
+   ],
+   "brut_oturum_m2": 74.26,
+   "baslik_m2": 76.0,
+   "oda_sayisi": "2+1",
+   "yatak_odasi": 2,
+   "kat_adedi": 1,
+   "cati_sekli": null,
+   "acikliklar": {
+    "120/120": 3,
+    "120/180": 2,
+    "60/40": 1
+   },
+   "dis_kapi_adedi": null,
+   "ic_kapi_adedi": null,
+   "kapi_adedi": 6,
+   "veranda_adedi": 1,
+   "kart_sha256": "29669ce5b3d079d1a90d06f73a25cc60494f4da489ed5a02c0edf2d0f34aab8b",
+   "kaynak": {
+    "dosya": "HD-137;2",
+    "plan_sirasi": 8,
+    "sablon": "bantli",
+    "sacak_olcusu_cm": [
+     null,
+     null
+    ],
+    "okuyucu": "araclar/hdd_turev/pafta_kart.py (İE-43 PR-7)"
+   },
+   "varsayim": [
+    "Paftanın başlığı 76 m²; dış duvarların ölçüsü 888,5 × 835,75 = 74,26 m² (brut_oturum_m2 duvar ölçüsünden, HD-431 gibi).",
+    "Paftada oda adı yok. Mutfak (eviye) ve banyo (duş, klozet) eşyadan; eşyasız iki oda yatak odası, en büyük oda salon sayıldı (oda_sayisi 2+1, yatak_odasi 2). Veranda gövdenin içinde (paftada kesik çizgi)."
+   ]
+  },
+  "HD-420": {
+   "dis_olcu_cm": [
+    1014.0,
+    871.5
+   ],
+   "brut_oturum_m2": 80.0,
+   "baslik_m2": 80.0,
+   "oda_sayisi": "2+1",
+   "yatak_odasi": 2,
+   "kat_adedi": 1,
+   "cati_sekli": null,
+   "acikliklar": {
+    "120/120": 4,
+    "120/180": 1,
+    "60/40": 1
+   },
+   "dis_kapi_adedi": null,
+   "ic_kapi_adedi": null,
+   "kapi_adedi": 5,
+   "veranda_adedi": 1,
+   "kart_sha256": "ec9a83e980106d3c7dde77c40b9fd41a0bc2bd0bf8a0610f511fd33b38080d79",
+   "kaynak": {
+    "dosya": "HD-420;10",
+    "plan_sirasi": 13,
+    "sablon": "bantli",
+    "sacak_olcusu_cm": [
+     null,
+     null
+    ],
+    "okuyucu": "araclar/hdd_turev/pafta_kart.py (İE-43 PR-7)"
+   },
+   "varsayim": [
+    "Paftanın eski listesinde sağ yatak odasının penceresi 120/120; paftada ve İş Emri'nde 120/180 (pafta esas)."
+   ]
+  },
+  "HD-380": {
+   "dis_olcu_cm": [
+    1014.0,
+    1085.75
+   ],
+   "brut_oturum_m2": 110.0,
+   "baslik_m2": 110.0,
+   "oda_sayisi": "3+1",
+   "yatak_odasi": 3,
+   "kat_adedi": 1,
+   "cati_sekli": "Beşik",
+   "acikliklar": {
+    "120/120": 6,
+    "60/40": 1
+   },
+   "dis_kapi_adedi": null,
+   "ic_kapi_adedi": null,
+   "kapi_adedi": 7,
+   "veranda_adedi": 1,
+   "kart_sha256": "effeb969d243a3c55293667b63c4cbee38de957fbe7fd4f6ab1bc06475784d3a",
+   "kaynak": {
+    "dosya": "HD-380;4",
+    "plan_sirasi": 81,
+    "sablon": "cerceveli",
+    "sacak_olcusu_cm": [
+     null,
+     1135.75
+    ],
+    "okuyucu": "araclar/hdd_turev/pafta_kart.py (İE-43 PR-8)"
+   },
+   "varsayim": [
+    "Dış ölçü ve brüt verandayla (ana çatı verandayı da örter; M-18): 1014 × 1085,75 cm = 110,10 m².",
+    "Çerçeveli şablon, ama paftada dış kapının \"Çelik\" yazısı yok: okuyucu dış ve iç kapıyı ayırmaz, toplam 7 (kapı yayı)."
+   ]
+  },
+  "HD-251": {
+   "dis_olcu_cm": [
+    888.5,
+    1336.75
+   ],
+   "brut_oturum_m2": 118.77,
+   "baslik_m2": 120.0,
+   "oda_sayisi": "3+1",
+   "yatak_odasi": 3,
+   "kat_adedi": 1,
+   "cati_sekli": null,
+   "acikliklar": {
+    "120/120": 5,
+    "180/180": 2,
+    "60/40": 1
+   },
+   "dis_kapi_adedi": null,
+   "ic_kapi_adedi": null,
+   "kapi_adedi": 7,
+   "veranda_adedi": 1,
+   "kart_sha256": "3890cd4c9cab104e802efc5698048eee3fe17bcd77f89aed3aeced23b3e4ccc9",
+   "kaynak": {
+    "dosya": "HD-251;6",
+    "plan_sirasi": 11,
+    "sablon": "bantli",
+    "sacak_olcusu_cm": [
+     null,
+     null
+    ],
+    "okuyucu": "araclar/hdd_turev/pafta_kart.py (İE-43 PR-8)"
+   },
+   "varsayim": [
+    "Paftanın başlığı 120 m²; dış ölçü verandayla 888,5 × 1336,75 cm = 118,77 m² (ana çatı verandayı da örter; M-18; brut_oturum_m2 duvar ölçüsünden, HD-431 gibi)."
+   ]
   }
  }
 }

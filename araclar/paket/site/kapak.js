@@ -1,4 +1,5 @@
-// İE-41 · rehberin genel bakışından 3B sahnenin görüntüsü (açılış sayfasının kartı): node kapak.js <site> <rehber klasörü> <çıktı.png>
+// İE-41 · rehberin genel bakışından 3B sahnenin görüntüsü (açılış sayfasının kartı): node kapak.js <site> <rehber klasörü> <çıktı.png> [oyun]
+// İE-45: 'oyun' kipinde oyunun `#kapak` görünüşü (yarım kurulmuş ev, yazısız; sayfa hazır olunca window.__oyun).
 // Site yerel bir adresten sunulur (http://site.yerel/, dosyalar diskten); dış istek yoktur. Yazılım GPU'su (SwiftShader).
 const { chromium } = require('playwright');
 const fs = require('fs');
@@ -6,7 +7,8 @@ const path = require('path');
 const TUR = { '.html': 'text/html', '.js': 'application/javascript', '.css': 'text/css', '.jpg': 'image/jpeg', '.png': 'image/png',
   '.woff2': 'font/woff2', '.txt': 'text/plain' };
 (async () => {
-  const [site, klasor, cikti] = process.argv.slice(2);
+  const [site, klasor, cikti, kip] = process.argv.slice(2);
+  const oyun = kip === 'oyun';
   const b = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });
   const p = await b.newPage({ viewport: { width: 1400, height: 900 }, deviceScaleFactor: 1 });
   await p.route('**/*', r => {
@@ -17,9 +19,9 @@ const TUR = { '.html': 'text/html', '.js': 'application/javascript', '.css': 'te
     if (!fs.existsSync(f)) return r.fulfill({ status: 404, body: '' });
     r.fulfill({ path: f, contentType: TUR[path.extname(f)] || 'application/octet-stream' });
   });
-  await p.goto(`http://site.yerel/${klasor}/`, { waitUntil: 'networkidle', timeout: 120000 });
-  await p.waitForFunction(() => window.__montaj, null, { timeout: 60000 });
+  await p.goto(`http://site.yerel/${klasor}/${oyun ? '#kapak' : ''}`, { waitUntil: 'networkidle', timeout: 120000 });
+  await p.waitForFunction(oyun ? () => window.__oyun : () => window.__montaj, null, { timeout: 60000 });
   await p.waitForTimeout(4000);
-  await p.locator('#viewport canvas').screenshot({ path: cikti });
+  await p.locator(oyun ? '#c' : '#viewport canvas').screenshot({ path: cikti });
   await b.close();
 })().catch(e => { console.error(e); process.exit(1); });

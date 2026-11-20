@@ -65,9 +65,12 @@ def test_kart_modeli_listeyle_ayni(tk04):
     # Lokman'ın kartı 5 Kasım 22:49; önce "ek çatı parçası başına 2" ile 7)
     assert (adet["DR-02"], _liste(L, "Metal dere inişi aparatı")) == (6, 6)
     assert (_liste(L, "70 mm PVC dere iniş borusu"), _liste(L, "Açık dirsek"), _liste(L, "Kapalı dirsek"), _liste(L, "PVC iniş kelepçesi")) == (12, 12, 6, 12)
-    stok = {k: say["kesim_plani"][k]["stok"] for k in ("AS-01", "CK-02", "CK-03", "CK-04", "CK-07")}
-    boyla = {"AS-01": "Aşık", "CK-02": "Saçak sacı", "CK-03": "Alın sacı", "CK-04": "Baş makas Z'si", "CK-07": "Trapez sac mahyası"}
-    assert stok == {k: _liste(L, on) for k, on in boyla.items()} == {"AS-01": 44, "CK-02": 7, "CK-03": 11, "CK-04": 10, "CK-07": 13}
+    stok = {k: say["kesim_plani"][k]["stok"] for k in ("CK-02", "CK-03", "CK-04", "CK-07")}
+    boyla = {"CK-02": "Saçak sacı", "CK-03": "Alın sacı", "CK-04": "Baş makas Z'si", "CK-07": "Trapez sac mahyası"}
+    assert stok == {k: _liste(L, on) for k, on in boyla.items()} == {"CK-02": 7, "CK-03": 11, "CK-04": 10, "CK-07": 13}
+    # D-135 (BK-62; Lokman 20 Kasım 2026, kart 07:20:08): ana çatının aşıkları cumbanın arkasında kesilmez (önce 44 = 44). Kart modelinin
+    # kesim planı 185,78 m'yi 46 boydan keser; liste 185,78 × 1,05 ÷ 4,2 = 47 yazar (85 m²'de önce de 45 ↔ 46 idi)
+    assert (say["kesim_plani"]["AS-01"]["stok"], _liste(L, "Aşık")) == (46, 47)
     # r06 (ana makaslar cumba makasının arkasında): cumbanın iki yanındaki 37,5 cm'lik kısa saçaklar listede saçak hattı (dere 15,25 m ÷ 3,8
     # = 5; saçak omegası M-01 "adedi saçak boyundan" 15,25 m ÷ 2,5 = 7). Kart modelinde dere hat başına kesilir, iki kısa hattın parçası
     # artandan çıkar (4); kısa saçağın altında duvar boyu yok (duvarın ucu cumbanın baş makas omegasının altında), saçak omegası kurulmaz (6)
@@ -289,8 +292,8 @@ def test_asiklar_kart_modelinden(tk04):
     d, say = tk04["d"], tk04["say"]
     A = d["asik"]["yuzler"]
     bolunen = sum(1 for p in A["MFL"]["pafta"] if p == [410.0])
-    assert bolunen == 5 and all(p[-1] == 410.0 for p in A["MFR"]["pafta"][-bolunen:])
-    assert sum(len(p) for a in A.values() for p in a["pafta"]) - bolunen == say["kesim_plani"]["AS-01"]["parca"] == 63
+    assert bolunen == 9 and all(p[-1] == 410.0 for p in A["MFR"]["pafta"][-bolunen:])                # D-135: 5 → 9, sıralar baştan sona
+    assert sum(len(p) for a in A.values() for p in a["pafta"]) - bolunen == say["kesim_plani"]["AS-01"]["parca"] == 64
 
 
 def test_asma_tavan_mahyaya_paralel(tk04):
@@ -347,8 +350,10 @@ def test_r05_anahtarsiz_eski_yol(tk04_r05):
         "MA-01": 2, "MA-02": 6, "MA-05": 2, "KP-03": 25, "BT-01": 9, "DR-02": 5}
     boyla = {"AS-01": "Aşık", "DR-01": "Metal dere", "CK-01": "100'lük saçak omegası", "CK-02": "Saçak sacı", "CK-03": "Alın sacı",
              "CK-04": "Baş makas Z'si", "CK-07": "Trapez sac mahyası"}
+    assert (say["kesim_plani"]["AS-01"]["stok"], _liste(L, "Aşık")) == (45, 46)               # D-135: önce 43 = 43 (kesim ↔ %5 zayiat)
+    boyla.pop("AS-01")
     assert {k: say["kesim_plani"][k]["stok"] for k in boyla} == {k: _liste(L, on) for k, on in boyla.items()} == {
-        "AS-01": 43, "DR-01": 4, "CK-01": 6, "CK-02": 7, "CK-03": 11, "CK-04": 10, "CK-07": 13}
+        "DR-01": 4, "CK-01": 6, "CK-02": 7, "CK-03": 11, "CK-04": 10, "CK-07": 13}
     assert {s["olcu"] for s in L if s["kalem"].startswith("Makas (")} == {"açıklık 8985"}
     W, DY = d["dis"]
     assert sorted((o["perp"], o["a0"], o["a1"]) for o in d["omega_duvar"] if o["tur"] == "sacak") == [(5, 416.5, W), (DY - 5, 0, W)]

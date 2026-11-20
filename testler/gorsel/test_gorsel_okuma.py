@@ -98,7 +98,10 @@ def test_tk01_okumasi_teklif_r04_geometrisini_verir():
     assert d["sorular"] == [] and d["cizilemez"] == []
     ie = d["cevrim"]["is_emri"]
     assert geometri(ie) == geometri(TK01_BEKLENEN)
-    beklenen_yapi = {**TK01_BEKLENEN["yapi"], "referans_model": "CIZIM"}
+    # BK-53 (D-121 V5; kart 17 Kasım 2026 04:52:24): çizimden okunan ev yeni çizilen evdir; r04'ün yapısına yalnız pencere ortalama
+    # anahtarı eklenir (r04 elle yazılmış onaylı İş Emri'dir, anahtarsız kalır; panoya etkisi `test_bk53_*`).
+    beklenen_yapi = {**TK01_BEKLENEN["yapi"], "referans_model": "CIZIM",
+                     "dizilim": {**TK01_BEKLENEN["yapi"]["dizilim"], "dik_duvar_pencere": "tam_orta"}}
     assert ie["yapi"] == beklenen_yapi
     assert ie["is_emri_no"] == "" and ie["revizyon"] == 0          # numara ve künye `karar._is_emri_uret`te
 
@@ -543,3 +546,114 @@ def test_giris_adli_oda_ve_disari_acilan_giris():
     k["kapilar"][0]["arasinda"] = ["DIŞ", "DIŞARI"]                     # doğrudan çeviri de soru döner
     _, sor, _, _ = GO.is_emri_prefabrik(k, GO.CizimOkumasi.model_validate(o2))
     assert "Giriş kapısının hangi odaya açıldığını bulamadım." in sor
+
+
+# ─── D-125 (BK-55): dış kapı çizimde nasılsa öyle; içerideyse önü açık giriş nişi (Lokman, kart 17 Kasım 2026 08:37:52 UTC) ───
+TK01_R06 = yukle("TK01_r06_okuma.json")
+TK01_R08 = json.loads((KOK / "testler" / "motor" / "veri" / "TK01_r08.json").read_text(encoding="utf-8"))
+
+
+def _pano_izi(ie: dict) -> set:
+    from motor import geometry as G
+    return {tuple(round(v, 2) for v in q.rect()) for q in G.kur(ie).panolar}
+
+
+def test_d125_nisli_okuma_onayli_r06_planini_verir():
+    """Bayi çiziminde holün önünde cephe duvarı yok, kapı 1 pano içeride: okumadan çıkan plan Lokman'ın onayladığı r06 düzeni (GİRİŞ açık
+    niş, dış kapı GİRİŞ–HOL). Mahaller r08'le aynı, pano dizilimi r08'le pano pano aynı (60 pano)."""
+    d = GO.denetle(TK01_R06, bk14=True)
+    assert d["sorular"] == [] and d["cizilemez"] == []
+    ie = d["cevrim"]["is_emri"]
+    assert ie["mahaller"] == TK01_R08["mahaller"]
+    assert {"tur": "dis_kapi", "olcu": 90, "arasi": ["GİRİŞ", "HOL"]} in ie["acikliklar"]
+    assert not any("ANTRE" in (a.get("arasi") or []) for a in ie["acikliklar"])
+    # BK-53 (PR #265) okunan eve pencere ortalama anahtarını yazar; r06 onayı anahtarsız düzenindir: pano kıyası anahtarsız
+    ie = copy.deepcopy(ie)
+    (ie["yapi"].get("dizilim") or {}).pop("dik_duvar_pencere", None)
+    iz = _pano_izi(ie)
+    assert len(iz) == 60 and iz == _pano_izi(TK01_R08)
+
+
+def test_d125_cephedeki_kapi_cephede_kalir():
+    """Kapı cephede çizildiyse (önü duvarlı küçük bölüm) okuma bugünkü gibi: kapalı ANTRE, dış kapı ön cephede (Lokman: "Çizimde nasılsa öyle")."""
+    ie = GO.denetle(TK01, bk14=True)["cevrim"]["is_emri"]
+    assert {"tur": "dis_kapi", "olcu": 90, "arasi": ["__DIS__", "ANTRE"], "duvar": "on"} in ie["acikliklar"]
+    assert next(m for m in ie["mahaller"] if m["ad"] == "ANTRE")["tur"] == "antre_hol"
+
+
+@pytest.mark.parametrize("giris", ["ust", "sol", "sag"])
+def test_d125_dondurulmus_cizimde_ayni_plan(giris):
+    """Aynı çizim döndürülmüş okunsa da aynı plan; giriş kenarı yazılmasa da nişin değdiği kenardan bulunur."""
+    beklenen = GO.denetle(TK01_R06, bk14=True)["cevrim"]["is_emri"]
+    o = dondur(TK01_R06, giris)
+    assert GO.denetle(o, bk14=True)["cevrim"]["is_emri"] == beklenen
+    o2 = {**o, "giris_kenari": None}
+    d = GO.denetle(o2, bk14=True)
+    assert "giriş cephesi giriş nişinden alındı" in d["notlar"]
+    assert geometri(d["cevrim"]["is_emri"]) == geometri(beklenen)
+
+
+def test_d125_teyit_metni_nisi_soyler():
+    d = GO.denetle(TK01_R06, bk14=True)
+    metin, _ = GO.teyit_metni(TK01_R06, d)
+    assert "giriş kapısı önde, içeride; önü açık giriş nişi." in metin
+    assert "antre" not in metin.split("Ölçüsü yazmayanları")[0].lower()
+
+
+def test_d125_nis_sorulari():
+    """Niş tutarsız okunursa bayiye sorulur, sessizce çizilmez (K21)."""
+    o = copy.deepcopy(TK01_R06)                 # niş cepheye değmiyor
+    nis = next(x for x in o["odalar"] if x["islev"] == "giris")
+    nis["islev"] = "hol"
+    hol = next(x for x in o["odalar"] if x["ad"] == "HOL")
+    hol["islev"] = "giris"
+    assert any("gövdenin kenarına değmiyor" in s for s in GO.denetle(o, bk14=True)["sorular"])
+    o = copy.deepcopy(TK01_R06)                 # nişin önünde dış kapı da var
+    o["kapilar"].append({"arasinda": ["DIŞ", "GİRİŞ"], "kenar": "alt"})
+    assert any("önünde dış kapı da var" in s for s in GO.denetle(o, bk14=True)["sorular"])
+    o = copy.deepcopy(TK01_R06)                 # nişin kapısı yok
+    o["kapilar"] = [k for k in o["kapilar"] if "GİRİŞ" not in k["arasinda"]]
+    sor = GO.denetle(o, bk14=True)["sorular"]
+    assert any("içeri açılan kapısını göremedim" in s for s in sor)
+    o = copy.deepcopy(TK01_R06)                 # nişten iki kapı: hangisi giriş, sorulur
+    o["kapilar"].append({"arasinda": ["GİRİŞ", "SALON"]})
+    assert any("2 kapı okudum" in s for s in GO.denetle(o, bk14=True)["sorular"])
+
+
+def test_d125_kose_nis_giris_kenari_yazmazsa_sorulur():
+    """İki cepheye değen niş (köşe) ve yazılmamış giriş kenarı: giriş cephesi sessizce seçilmez (K21)."""
+    o = copy.deepcopy(TK01_R06)
+    o["giris_kenari"] = None
+    nis = next(x for x in o["odalar"] if x["islev"] == "giris")
+    salon = next(x for x in o["odalar"] if x["ad"] == "SALON")
+    nis["dikdortgenler"] = [[0, 758, 130, 888]]
+    salon["dikdortgenler"] = [[0, 382, 387, 758], [130, 758, 387, 888]]
+    o["kapilar"] = [{"arasinda": ["GİRİŞ", "SALON"]}] + [k for k in o["kapilar"] if "GİRİŞ" not in k["arasinda"]]
+    assert any("iki cepheye açılıyor" in s for s in GO.denetle(o, bk14=True)["sorular"])
+    o["giris_kenari"] = "alt"                    # giriş kenarı yazılıysa kapının cephesi o kenar
+    kan = GO.kanonik(o)
+    assert next(k for k in kan["kapilar"] if k.get("nis"))["cephe"] == "on"
+
+
+def test_d125_duzeltmede_nis_soylenir():
+    """Bayi düzeltmesi yalnız kapalı odayı önü açık nişe çevirse de fark bayiye yazılır."""
+    eski = copy.deepcopy(TK01_R06)
+    next(x for x in eski["odalar"] if x["ad"] == "GİRİŞ")["islev"] = "antre"
+    assert GO.degisenler(eski, TK01_R06) == ["Giriş önü açık giriş nişi oldu"]
+
+
+def test_d125_celikte_nis_cizilemez():
+    d = GO.denetle({**TK01_R06, "yapi_turu": "celik"}, bk14=True)
+    assert d["cevrim"] is None and d["cizilemez"] == ["gövdedeki önü açık giriş nişi (çelikte bugün otomatik çizemiyorum)"]
+
+
+def test_d125_nisli_plan_motorda_cizilir(tmp_path):
+    from motor import dxf_out
+    d = GO.denetle(TK01_R06)
+    ie = json.loads(json.dumps(d["cevrim"]["is_emri"]))
+    ie.update(is_emri_no="PM-TEST-TK01N", revizyon=1, talep={"bayi_kodu": "TST", "kaynak": GO.KAYNAK})
+    dxf_out.uret(ie, tmp_path / "plan")
+    v = json.loads((tmp_path / "plan" / "validation.json").read_text(encoding="utf-8"))
+    assert v["passed"] is True, v.get("errors")
+    yol = GO.yerlesim_gorseli(TK01_R06, d, tmp_path / "okunan.png")
+    assert yol.stat().st_size > 5_000

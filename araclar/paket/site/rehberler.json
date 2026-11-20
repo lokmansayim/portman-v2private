@@ -1,12 +1,19 @@
 {
-  "aciklama": "İE-41 · rehber.portatifev.com'daki rehberler. Her rehber main'deki koddan üretilir (D-28): 'veri' 62 m² hedef örneğinin verisinden `araclar.paket.rehber.sayfa.yaz`, 'kod' + 'is_emri' `python -m araclar.paket <kod> <çıktı> --is-emri <is_emri> [--tavan <tavan>]`. 'klasor' sitedeki yol (/<klasor>/; 62m2, 80m2 ve 80m2-21 26 Ekim–6 Kasım'dan beri yayında, bağlantılar korunur), 'ad' başlıkta kod yerine görünen ad (Lokman, 4 Kasım 2026: alan + oda sayısı; alan brüt m², D-95: 80m2 ve 80m2-100'de 90,28 m² brüt → '90 m²', Lokman 15 Kasım 2026 05:26:07 UTC \"yinede '80 m² 3+1' lerde hata var başlıkta 80 m² yazıyor\"; adres aynı kalır), 'adim' sayfanın adım sayısı (dene.py denetler), 'pafta' evin altında ön onay paftası var mı, 'not_ek' alt nota eklenen cümle. Lokman, 14 Kasım 2026 20:37 UTC kartı 'Siteyi main'den kur'; beş rehber (yatak odası + banyo ve 60 m² dışarıda).",
+  "aciklama": "İE-41 · rehber.portatifev.com'daki rehberler. Her rehber main'deki koddan üretilir (D-28): 'veri' 62 m² hedef örneğinin verisinden `araclar.paket.rehber.sayfa.yaz`, 'kod' + 'is_emri' `python -m araclar.paket <kod> <çıktı> --is-emri <is_emri> [--tavan <tavan>]`. 'klasor' sitedeki yol (/<klasor>/; 62m2, 80m2 ve 80m2-21 26 Ekim–6 Kasım'dan beri yayında, bağlantılar korunur), 'ad' başlıkta kod yerine görünen ad (Lokman, 4 Kasım 2026: alan + oda sayısı; alan brüt m², D-95: 80m2 ve 80m2-100'de 90,28 m² brüt → '90 m²', Lokman 15 Kasım 2026 05:26:07 UTC \"yinede '80 m² 3+1' lerde hata var başlıkta 80 m² yazıyor\"; adres aynı kalır), 'adim' sayfanın adım sayısı (dene.py denetler), 'pafta' evin altında ön onay paftası var mı, 'not_ek' alt nota eklenen cümle. Lokman, 14 Kasım 2026 20:37 UTC kartı 'Siteyi main'den kur'; beş rehber (yatak odası + banyo ve 60 m² dışarıda). 85m2: 85 m² katalog evi r05 (D-123); Lokman, 17 Kasım 2026 08:44:37 UTC \"onaylıyorum şimdi bir komut daha yeni sohbette canlıya alalım\".",
   "mtime": 1794700800,
+  "sabit_paket": {"surum": "20261119221013", "sha256": "9be53e8cb05326779dbc9f9535d005cff62970524e1a91514841f24f852bf41c", "kaynak": "main 86b2800 (PR #271); 19 Kasım 2026 22:10 İstanbul'da kuruldu",
+    "aciklama": "'sabit': true olan rehber yeniden üretilmez; klasörü bu canlı paketten bayt bayt gelir (`python -m araclar.paket.site … --onceki <o paketin rehber_kur.sh'si>`). Dayanak: Lokman, 15 Kasım 2026 22:19 UTC \"gerek yok rehberi bozma canlıda kalsın sen sadece depodakileri düzelt\"; 17 Kasım 2026'da 85 m² eklenirken main'in kodu beş rehberin sahnesini değiştiriyordu (D-104, BK-50 sonrası), o yüzden beşi canlıdaki gibi kalır. 20 Kasım 2026'da (İE-45, oyun eklenirken) paket 19 Kasım sürümüne geçti ve 85 m² de sabit oldu. Bir rehberi main'den yenilemek Lokman'ın sözüyle: 'sabit' kalkar."},
   "rehberler": [
-    {"klasor": "62m2", "ad": "62 m² Beşik + Cumba", "veri": "testler/paket/rehber62/veri.json", "adim": 20, "pafta": false,
+    {"klasor": "62m2", "ad": "62 m² Beşik + Cumba", "veri": "testler/paket/rehber62/veri.json", "adim": 20, "pafta": false, "sabit": true,
      "not_ek": "Çatıda OSB ve nem bariyeri yoktur; trapez sac doğrudan aşıkların üstüne gelir."},
-    {"klasor": "80m2", "ad": "90 m² 3+1", "kod": "TK-01", "is_emri": "testler/motor/veri/TK01_r08.json", "tavan": "asma,ters", "adim": 22, "pafta": true},
-    {"klasor": "80m2-100", "ad": "90 m² 3+1 · 100'lük iç duvar", "kod": "TK-02", "is_emri": "testler/motor/veri/TK02_r04.json", "tavan": "asma,ters", "adim": 22, "pafta": true},
-    {"klasor": "80m2-21", "ad": "80 m² 2+1", "kod": "TK-04", "is_emri": "testler/motor/veri/TK04_r08.json", "adim": 21, "pafta": true},
-    {"klasor": "88m2", "ad": "88 m² 3+1", "kod": "TK-03", "is_emri": "testler/motor/veri/TK03.json", "adim": 21, "pafta": true}
+    {"klasor": "80m2", "ad": "90 m² 3+1", "kod": "TK-01", "is_emri": "testler/motor/veri/TK01_r08.json", "tavan": "asma,ters", "adim": 22, "pafta": true, "sabit": true},
+    {"klasor": "80m2-100", "ad": "90 m² 3+1 · 100'lük iç duvar", "kod": "TK-02", "is_emri": "testler/motor/veri/TK02_r04.json", "tavan": "asma,ters", "adim": 22, "pafta": true, "sabit": true},
+    {"klasor": "80m2-21", "ad": "80 m² 2+1", "kod": "TK-04", "is_emri": "testler/motor/veri/TK04_r08.json", "adim": 21, "pafta": true, "sabit": true},
+    {"klasor": "88m2", "ad": "88 m² 3+1", "kod": "TK-03", "is_emri": "testler/motor/veri/TK03.json", "adim": 21, "pafta": true, "sabit": true},
+    {"klasor": "85m2", "ad": "85 m² 2+1", "kod": "KP-85", "is_emri": "is_emri/P8501_r05.json", "adim": 21, "pafta": true, "sabit": true}
+  ],
+  "oyunlar": [
+    {"klasor": "oyun", "ad": "Evi kendin kur", "rehber": "80m2-21", "kapak_adim": 13, "acilis_karti": true,
+     "aciklama": "İE-45 (D-138) · montaj oyunu: rehberin adımları sırayla seçilir, doğru seçimde parçalar yerine iner; cam yünü serilir, kapılar açılıp kapanır. Lokman, 20 Kasım 2026 08:52:07 UTC \"bu oyunu çok beğendim VPS 'da yayına alabilir misin?\"; kart 08:54:40 \"Evet, açılışa kart eklensin\"; 08:56:13 kapı ve cam yünü efekti. 'kapak_adim': açılış kartının görselinde kurulmuş adımlar (13: tavan alçıpanı, çatı açık)."}
   ]
 }

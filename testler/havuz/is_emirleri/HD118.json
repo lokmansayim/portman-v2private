@@ -1,0 +1,376 @@
+{
+ "is_emri_no": "HDD-HD-118",
+ "revizyon": 1,
+ "talep": {
+  "bayi": {
+   "kod": "HD-118",
+   "ad": "Arşiv HD-118"
+  },
+  "musteri_adi": "HD-118",
+  "metin": "İE-43: HD-118 montaj paftasından okundu (plan_geometri v1). Pafta düzeltilmedi; farklar uyarılarda."
+ },
+ "yapi": {
+  "sistem": "prefabrik",
+  "kat_sayisi": 1,
+  "duvar_yuksekligi_cm": 250,
+  "duvar_kalinligi_cm": {
+   "dis": 10,
+   "ic": 6.0
+  },
+  "olcu_kaynagi": "dis_olcu",
+  "dis_olcu_cm": {
+   "x": 888.5,
+   "y": 835.75
+  },
+  "referans_model": "HD-118",
+  "grid": {
+   "x_pano": 7.0,
+   "y_pano": 6.5
+  },
+  "kisa_kenar": "y",
+  "giris_cephesi": "on",
+  "dis_dusey_duvar": "cevre_aks_disinda",
+  "dizilim": {
+   "baslangic": "arka-sol",
+   "hiza": "izgara",
+   "dis_duvar_t_bolme": false,
+   "pencere": "oda_ortasi",
+   "kapi": "mantik",
+   "kose": "oda",
+   "son_pano": "son_aks",
+   "kapi_yeri": "ortada",
+   "dis_pano_dayanagi": [
+    {
+     "y": 135.5,
+     "aralik_cm": [
+      135.5,
+      261.0
+     ],
+     "cephe": "sol"
+    },
+    {
+     "y": 72.75,
+     "aralik_cm": [
+      72.75,
+      198.25
+     ],
+     "ic_duvarlar": true,
+     "duvar_cm": 318.75
+    },
+    {
+     "y": 72.75,
+     "aralik_cm": [
+      72.75,
+      198.25
+     ],
+     "ic_duvarlar": true,
+     "duvar_cm": 507.0
+    },
+    {
+     "y": 10.0,
+     "aralik_cm": [
+      10.0,
+      825.75
+     ],
+     "cephe": "sag"
+    },
+    {
+     "x": 318.75,
+     "aralik_cm": [
+      318.75,
+      444.25
+     ],
+     "cephe": "arka"
+    },
+    {
+     "x": 318.75,
+     "aralik_cm": [
+      5.0,
+      318.75
+     ],
+     "ic_duvarlar": true,
+     "duvar_cm": 323.75
+    },
+    {
+     "x": 695.25,
+     "aralik_cm": [
+      695.25,
+      820.75
+     ],
+     "ic_duvarlar": true,
+     "duvar_cm": 323.75
+    },
+    {
+     "x": 67.75,
+     "aralik_cm": [
+      5.0,
+      444.25
+     ],
+     "ic_duvarlar": true,
+     "duvar_cm": 574.75
+    },
+    {
+     "x": 507.0,
+     "aralik_cm": [
+      507.0,
+      632.5
+     ],
+     "cephe": "on"
+    },
+    {
+     "x": 695.25,
+     "aralik_cm": [
+      695.25,
+      820.75
+     ],
+     "cephe": "on"
+    },
+    {
+     "x": 632.5,
+     "aralik_cm": [
+      444.25,
+      695.25
+     ],
+     "cephe": "on"
+    },
+    {
+     "x": 695.25,
+     "aralik_cm": [
+      632.5,
+      883.5
+     ],
+     "cephe": "on"
+    }
+   ]
+  },
+  "ek_akslar_cm": {
+   "x": [],
+   "y": []
+  }
+ },
+ "mahaller": [
+  {
+   "ad": "ODA",
+   "tur": "yatak_odasi",
+   "konum_cm": [
+    [
+     5.0,
+     10.0,
+     318.75,
+     323.75
+    ]
+   ]
+  },
+  {
+   "ad": "ODA 2",
+   "tur": "yatak_odasi",
+   "konum_cm": [
+    [
+     5.0,
+     323.75,
+     318.75,
+     574.75
+    ]
+   ]
+  },
+  {
+   "ad": "VERANDA",
+   "tur": "veranda",
+   "konum_cm": [
+    [
+     5.0,
+     574.75,
+     444.25,
+     825.75
+    ]
+   ]
+  },
+  {
+   "ad": "WC",
+   "tur": "banyo",
+   "konum_cm": [
+    [
+     318.75,
+     10.0,
+     507.0,
+     198.25
+    ]
+   ]
+  },
+  {
+   "ad": "HOL",
+   "tur": "antre_hol",
+   "konum_cm": [
+    [
+     318.75,
+     198.25,
+     444.25,
+     574.75
+    ]
+   ]
+  },
+  {
+   "ad": "ODA 3",
+   "tur": "yatak_odasi",
+   "konum_cm": [
+    [
+     507.0,
+     10.0,
+     883.5,
+     198.25
+    ],
+    [
+     444.25,
+     198.25,
+     883.5,
+     323.75
+    ]
+   ]
+  },
+  {
+   "ad": "SALON +MUTFAK",
+   "tur": "salon",
+   "konum_cm": [
+    [
+     444.25,
+     323.75,
+     883.5,
+     825.75
+    ]
+   ]
+  }
+ ],
+ "acik_sinirlar": [],
+ "acikliklar": [
+  {
+   "tur": "pencere",
+   "olcu": "120x120",
+   "mahal": "ODA",
+   "duvar": "sol",
+   "pano": 1
+  },
+  {
+   "tur": "pencere",
+   "olcu": "60x40",
+   "mahal": "WC",
+   "duvar": "arka",
+   "pano": 0
+  },
+  {
+   "tur": "pencere",
+   "olcu": "120x180",
+   "mahal": "SALON +MUTFAK",
+   "duvar": "on",
+   "pano": 0
+  },
+  {
+   "tur": "pencere",
+   "olcu": "120x180",
+   "mahal": "SALON +MUTFAK",
+   "duvar": "on",
+   "pano": 2
+  },
+  {
+   "tur": "pencere",
+   "olcu": "120x180",
+   "mahal": "ODA 2",
+   "duvar": "on",
+   "pano": 0
+  },
+  {
+   "tur": "pencere",
+   "olcu": "120x120",
+   "mahal": "SALON +MUTFAK",
+   "duvar": "sag"
+  },
+  {
+   "tur": "pencere",
+   "olcu": "120x120",
+   "mahal": "ODA 3",
+   "duvar": "sag",
+   "pano": 1
+  },
+  {
+   "tur": "ic_kapi",
+   "olcu": 82,
+   "arasi": [
+    "HOL",
+    "ODA"
+   ],
+   "pano": 0
+  },
+  {
+   "tur": "ic_kapi",
+   "olcu": 82,
+   "arasi": [
+    "HOL",
+    "ODA 2"
+   ],
+   "pano": 0
+  },
+  {
+   "tur": "ic_kapi",
+   "olcu": 82,
+   "arasi": [
+    "HOL",
+    "SALON +MUTFAK"
+   ],
+   "pano": 0
+  },
+  {
+   "tur": "dis_kapi",
+   "olcu": 90,
+   "arasi": [
+    "VERANDA",
+    "HOL"
+   ],
+   "pano": 0
+  },
+  {
+   "tur": "ic_kapi",
+   "olcu": 82,
+   "arasi": [
+    "HOL",
+    "ODA 3"
+   ],
+   "pano": 0
+  },
+  {
+   "tur": "ic_kapi",
+   "olcu": 82,
+   "arasi": [
+    "HOL",
+    "WC"
+   ],
+   "pano": 0
+  }
+ ],
+ "cati": {
+  "tip": "kirma",
+  "egim_yuzde": 32.9,
+  "sacak_cm": 30,
+  "topuk_cm": 10,
+  "makas_yonu": "kisa_kenar",
+  "makas_ekseni": "y"
+ },
+ "cikti": {
+  "pdf": true,
+  "dxf": true,
+  "pafta": "A2",
+  "icerik": [
+   "aksli_plan"
+  ]
+ },
+ "varsayimlar": [
+  "VERANDA: gövdenin içinde açık mahal (paftada kolon); 1 dikme yazıldı.",
+  "İç duvar kalınlıkları karışık {6.0: 6, 10.0: 2}; çoğunluk 6 cm yazıldı.",
+  "Çatı dörtomuz (kırma), %32,9, saçak 30, topuk 10, mahya uzun kenar (x) boyunca: paftanın makas planındaki gibi. Paftanın listesinde ana makas 6, uçta kısa makas 14, köşe makası 4; Motor'un kırma kuralı (İE-33) ana 7, kısa 12, köşe 4 sayar (bilinen fark). Eğim yazılı değil, prefabrik standardı.",
+  "Pano dizilimi paftadan: sol hattında y 135.5'dan 125,5; 318.75 hattında y 72.75'dan 125,5; 507.0 hattında y 72.75'dan 125,5; sag hattında y 10'dan 125,5; arka hattında x 318.75'dan 125,5; 323.75 hattında x 318.75'dan 125,5; 323.75 hattında x 695.25'dan 125,5; 574.75 hattında x 67.75'dan 125,5; on hattında x 507'dan 125,5; on hattında x 695.25'dan 125,5; on hattında x 632.5'dan 125,5; on hattında x 695.25'dan 125,5 (dizilim.dis_pano_dayanagi)."
+ ],
+ "dikmeler": [
+  [
+   0.0,
+   -0.0
+  ]
+ ]
+}

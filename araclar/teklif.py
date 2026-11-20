@@ -227,7 +227,8 @@ def excel_yaz(T: dict, defter: dict, yol: Path) -> None:
                 oz.cell(oz.max_row, 5).font = Font(bold=True, color="C00000")
     oz.append([])                                           # kâr marjı her seçeneğin sayfasının en altında (Lokman 11 Kasım 10:55)
     kdvli = any(s["fiyat"]["ozet"].get("kdv") for s in T["secenekler"])
-    oz.append(["Kâr dahil teklif (kâr marjı seçeneğin sayfasının en altında)", "Kâr marjı", "Kâr", "Kâr dahil, KDV hariç"]
+    kdvsiz = all(s["fiyat"]["ozet"].get("fiyat_kdv_dahil") for s in T["secenekler"])   # D-136: KDV hiç yazılmaz
+    oz.append(["Kâr dahil teklif (kâr marjı seçeneğin sayfasının en altında)", "Kâr marjı", "Kâr", "Kâr dahil" if kdvsiz else "Kâr dahil, KDV hariç"]
               + (["Kâr dahil, KDV dahil"] if kdvli else []))
     for c in oz[oz.max_row]: c.font = B
     for sec in T["secenekler"]:

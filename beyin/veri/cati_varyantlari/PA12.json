@@ -1,0 +1,58 @@
+{
+ "taban": "PA12",
+ "cati_adi": "Beşik, kalkan yanda",
+ "cati_gorsel": "adaylar/PA12_cati.png",
+ "karar": "D-117",
+ "varyantlar": [
+  {
+   "kod": "PA12K",
+   "gosterim": "PA-12-K",
+   "durum": "gecerli",
+   "taban": "PA12",
+   "sablon": "adaylar/PA12K.json",
+   "gorsel": "adaylar/PA12K.png",
+   "cati_adi": "Kırma",
+   "referans_model": "PA-12-K",
+   "yapi_turu": "prefabrik",
+   "kat": 1,
+   "oda_programi": "3+1",
+   "katalog_m2": 85.0,
+   "kapali_m2": 71.9,
+   "veranda_m2": 12.8,
+   "ozet": {
+    "grid": {
+     "x_pano": 9.5,
+     "y_pano": 6
+    },
+    "dis_olcu_cm": [
+     1166.0,
+     726.0
+    ],
+    "brut_m2": 84.65,
+    "pano": 54,
+    "pencere": 7,
+    "kapi": 6,
+    "odalar": {
+     "SALON+MUTFAK": 18.5,
+     "YATAK ODASI 1": 9.56,
+     "BANYO": 5.66,
+     "YATAK ODASI 2": 11.84,
+     "HOL": 7.61,
+     "YATAK ODASI 3": 13.53,
+     "VERANDA": 12.8
+    }
+   },
+   "uyarilar": [],
+   "kaynak": {
+    "metin": "İE-44 toplu çatı seçenekleri (D-117)",
+    "karar": "D-117",
+    "ev": "PA-12",
+    "havuz_denetimi": {
+     "sonuc": "geçti",
+     "karar": "D-112",
+     "uyarilar": []
+    }
+   }
+  }
+ ]
+}

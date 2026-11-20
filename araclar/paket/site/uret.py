@@ -4,6 +4,10 @@ Sıra: (1) `rehberler.json`'daki her rehber main'in komutuyla üretilir (D-28); 
 alır; (3) kapak görseli sayfanın kendisinden (`kapak.js`, genel bakış); (4) açılış sayfası; (5) `ortak.paketle_ve_kur`
 belirlenimci tgz ve `rehber_kur.sh`'yi yazar. Çıktı: <çıktı>/site/, <çıktı>/sayfalar/ (main'in ham sayfaları, kıyas için),
 <çıktı>/rehber_paket.tgz, <çıktı>/rehber_kur.sh, <çıktı>/ozet.json. Sunucuya koymak Lokman'ın ayrı onayıyla (canlı değişiklik).
+'sabit' rehber (rehberler.json) yeniden yazılmaz: klasörü `sabit_paket`'teki canlı paketten bayt bayt gelir (--onceki <rehber_kur.sh>),
+açılış kartı canlıdakiyle aynı olmalı. Yeni rehber eklenirken canlıdakiler değişmesin diye (Lokman, 15 Kasım 2026 22:19 UTC).
+'oyunlar' (İE-45, D-138): montaj oyunu bir rehberin main'deki sayfasından ve aynı koşunun GLB'sinden kurulur (`oyun.py`); rehber 'sabit'
+olsa da oyun main'in koduyla üretilir. Açılış sayfasında oyunun kartı rehber kartlarının önünde durur.
 """
 from __future__ import annotations
 
@@ -16,7 +20,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-from . import ortak, temizle
+from . import ortak, oyun, temizle
 
 KAYIT = Path(__file__).with_name('rehberler.json')
 
@@ -25,25 +29,33 @@ def kayit() -> dict:
     return json.loads(KAYIT.read_text(encoding='utf-8'))
 
 
-def ham_sayfa(r: dict, gec: Path) -> Path:
-    """Rehberin main'deki komutla üretilmiş sayfası."""
+def ham_sayfa(r: dict, gec: Path, three: Path | None = None) -> Path:
+    """Rehberin main'deki komutla üretilmiş sayfası. `three` (three.js 0.160.0 klasörü) verilirse aynı koşu GLB'yi de yazar
+    (`--glb`; montaj oyunu için): `<sayfa>.with_name(f'{kod}_model.glb')`."""
     gec.mkdir(parents=True, exist_ok=True)
     if r.get('veri'):
+        if three:
+            raise ortak.SiteHatasi(f'{r["klasor"]}: veriden kurulan rehberde GLB yok; oyun bir İş Emri rehberinden kurulur')
         from araclar.paket.rehber import sayfa
         return Path(sayfa.yaz(json.loads((ortak.DEPO / r['veri']).read_text(encoding='utf-8')), gec / f'{r["klasor"]}.html'))
     komut = [sys.executable, '-m', 'araclar.paket', r['kod'], str(gec), '--is-emri', r['is_emri']] + (['--tavan', r['tavan']] if r.get('tavan') else [])
-    s = subprocess.run(komut, cwd=ortak.DEPO, capture_output=True, text=True)
+    komut += ['--glb'] if three else []
+    s = subprocess.run(komut, cwd=ortak.DEPO, capture_output=True, text=True, env={**os.environ, **({'THREE_DIR': str(three)} if three else {})})
     yol = gec / 'prefabrik' / r['kod'] / f'{r["kod"]}_montaj_rehberi.html'
     if s.returncode or not yol.exists():
         raise ortak.SiteHatasi(f'{r["klasor"]}: rehber üretilemedi ({" ".join(komut[2:])}): {(s.stdout + s.stderr)[-800:]}')
+    if three and not yol.with_name(f'{r["kod"]}_model.glb').exists():
+        raise ortak.SiteHatasi(f'{r["klasor"]}: GLB yazılmadı ({" ".join(komut[2:])}): {(s.stdout + s.stderr)[-800:]}')
     return yol
 
 
-def kapak_al(site: Path, klasor: str, hedef: Path) -> None:
-    """Rehberin genel bakışından 3B sahnenin görüntüsü (`kapak.js`: Node Playwright, yazılım GPU'su), 16:10 orta kesit, 1280 × 800 JPEG."""
+def kapak_al(site: Path, klasor: str, hedef: Path, kip: str = 'rehber') -> None:
+    """Rehberin genel bakışından (ya da oyunun `#kapak` kipinden) 3B sahnenin görüntüsü (`kapak.js`: Node Playwright, yazılım GPU'su),
+    16:10 orta kesit, 1280 × 800 JPEG."""
     from PIL import Image
     png = hedef.with_suffix('.png')
-    s = subprocess.run(['node', str(Path(__file__).with_name('kapak.js')), str(site), klasor, str(png)], capture_output=True, text=True,
+    hedef.parent.mkdir(parents=True, exist_ok=True)
+    s = subprocess.run(['node', str(Path(__file__).with_name('kapak.js')), str(site), klasor, str(png), kip], capture_output=True, text=True,
                        timeout=600)
     if s.returncode or not png.exists():
         raise ortak.SiteHatasi(f'{klasor}: kapak görseli alınamadı: {(s.stdout + s.stderr)[-800:]}')
@@ -111,18 +123,9 @@ def kart_ozellikleri(r: dict, oz: dict) -> list[str]:
     return [sp[0], sp[3], sp[5], f'{oz["adim"]} adım'] + (['ön onay paftası'] if r['pafta'] else [])
 
 
-def acilis_sayfasi(rehberler: list[dict], ozet: dict) -> str:
-    kartlar = []
-    for r in rehberler:
-        oz = ozet[r['klasor']]
-        kartlar.append(
-            f'    <a class="kart" href="{r["klasor"]}/">\n'
-            f'      <img src="{r["klasor"]}/gorsel/kapak.jpg" alt="{H.escape(r["ad"])}: bitmiş evin görünümü" loading="lazy">\n'
-            f'      <div class="ic"><h2>{H.escape(r["ad"])}</h2>\n'
-            f'        <div class="alan">{H.escape(oz["chip"])}</div>\n'
-            f'        <div class="spec">{"".join(f"<span>{H.escape(x)}</span>" for x in kart_ozellikleri(r, oz))}</div>\n'
-            f'        <span class="ac">Rehberi aç</span></div>\n'
-            f'    </a>')
+def acilis_sayfasi(rehberler: list[dict], ozet: dict, oyunlar: list[dict] = (), oyun_verisi: dict | None = None) -> str:
+    kartlar = [oyun.kart_html(o, oyun_verisi[o['klasor']]) for o in oyunlar if o.get('acilis_karti')]
+    kartlar += [kart_html(r, ozet[r['klasor']]) for r in rehberler]
     s = (ACILIS.replace('__BAS__', ortak.bas_etiketleri('PortatifEv Montaj Rehberleri')).replace('__KARTLAR__', '\n'.join(kartlar))
          .replace('__YAZI__', rehberler[0]['klasor']))
     csp = "default-src 'none'; style-src 'self' 'unsafe-inline'; img-src 'self'; font-src 'self'; base-uri 'none'; form-action 'none'"
@@ -131,8 +134,32 @@ def acilis_sayfasi(rehberler: list[dict], ozet: dict) -> str:
     return s
 
 
-def kur(cikti: Path, npm: Path, esbuild: str, kapak: bool = True) -> dict:
+def kart_html(r: dict, oz: dict) -> str:
+    return (f'    <a class="kart" href="{r["klasor"]}/">\n'
+            f'      <img src="{r["klasor"]}/gorsel/kapak.jpg" alt="{H.escape(r["ad"])}: bitmiş evin görünümü" loading="lazy">\n'
+            f'      <div class="ic"><h2>{H.escape(r["ad"])}</h2>\n'
+            f'        <div class="alan">{H.escape(oz["chip"])}</div>\n'
+            f'        <div class="spec">{"".join(f"<span>{H.escape(x)}</span>" for x in kart_ozellikleri(r, oz))}</div>\n'
+            f'        <span class="ac">Rehberi aç</span></div>\n'
+            f'    </a>')
+
+
+def sabit_dosyalar(k: dict, onceki: Path | None) -> dict[str, bytes]:
+    """'sabit' rehberlerin klasörü kayıttaki önceki paketten bayt bayt gelir (`sabit_paket`; canlıdaki sürüm)."""
+    if not any(r.get('sabit') for r in k['rehberler']):
+        return {}
+    if onceki is None:
+        raise ortak.SiteHatasi(f'sabit rehber var; --onceki <rehber_kur.sh> gerekir (paket {k["sabit_paket"]["sha256"]})')
+    return ortak.onceki_paket(onceki, k['sabit_paket']['sha256'])
+
+
+def kur(cikti: Path, npm: Path, esbuild: str, kapak: bool = True, onceki: Path | None = None) -> dict:
     k = kayit()
+    eski = sabit_dosyalar(k, onceki)
+    oyunlar = k.get('oyunlar', [])
+    oyun_rehberi = {o['rehber'] for o in oyunlar}
+    three = ortak.npm_klasoru(npm, 'three-0.160.0') if oyunlar else None
+    oyun_kaynak, oyun_verisi = {}, {}
     cikti = Path(cikti).resolve()
     site, sayfalar = cikti / 'site', cikti / 'sayfalar'
     for p in (site, sayfalar):
@@ -142,19 +169,48 @@ def kur(cikti: Path, npm: Path, esbuild: str, kapak: bool = True) -> dict:
     ozet = {}
     for r in k['rehberler']:
         print(f'== {r["klasor"]} ({r["ad"]})', flush=True)
-        ham = ham_sayfa(r, cikti / 'gecici' / r['klasor'])
+        ham = ham_sayfa(r, cikti / 'gecici' / r['klasor'], three if r['klasor'] in oyun_rehberi else None)
         shutil.copyfile(ham, sayfalar / f'{r["klasor"]}.html')
+        if r['klasor'] in oyun_rehberi:
+            oyun_kaynak[r['klasor']] = (ham.read_text(encoding='utf-8'), ham.with_name(f'{r["kod"]}_model.glb').read_bytes())
         html, pafta, oz = temizle.sayfa(ham.read_text(encoding='utf-8'), r, esbuild)
         if oz['adim'] != r['adim']:
             raise ortak.SiteHatasi(f'{r["klasor"]}: {r["adim"]} adım beklenirdi, sayfada {oz["adim"]}')
-        oz['addon'] = temizle.klasor_yaz(html, pafta, site / r['klasor'], npm)
         oz['ham_sha256'] = ortak.sha(ham.read_bytes())
+        if r.get('sabit'):
+            on = f'{r["klasor"]}/'
+            kopya = {p[len(on):]: b for p, b in eski.items() if p.startswith(on)}
+            if 'index.html' not in kopya:
+                raise ortak.SiteHatasi(f'{r["klasor"]}: önceki pakette bu rehber yok')
+            for p, b in kopya.items():
+                (site / r['klasor'] / p).parent.mkdir(parents=True, exist_ok=True)
+                (site / r['klasor'] / p).write_bytes(b)
+            if kart_html(r, oz) not in eski['index.html'].decode('utf-8'):
+                raise ortak.SiteHatasi(f'{r["klasor"]}: açılış kartı canlıdakinden farklı; sabit rehberin kartı değişmez')
+            oz['sabit'] = k['sabit_paket']['surum']
+            ozet[r['klasor']] = oz
+            print(f'   sabit: {len(kopya)} dosya önceki paketten ({k["sabit_paket"]["surum"]})', flush=True)
+            continue
+        oz['addon'] = temizle.klasor_yaz(html, pafta, site / r['klasor'], npm)
         if kapak:
             kapak_al(site, r['klasor'], site / r['klasor'] / 'gorsel' / 'kapak.jpg')
         ozet[r['klasor']] = oz
         print(f'   {oz["adim"]} adım · betik kuralları {oz["betik"]}', flush=True)
+    R = {r['klasor']: r for r in k['rehberler']}
+    for o in oyunlar:
+        print(f'== {o["klasor"]} ({o["ad"]}, {R[o["rehber"]]["ad"]})', flush=True)
+        r = R[o['rehber']]
+        ham, glb = oyun_kaynak[o['rehber']]
+        v = oyun.veri(oyun.rehber_verisi(ham, r), r, o)
+        (sayfalar / f'{o["klasor"]}.json').write_text(json.dumps(v, ensure_ascii=False, indent=1) + '\n', encoding='utf-8')
+        addon = oyun.klasor_yaz(v, o, glb, r['kod'], site / o['klasor'], npm, esbuild)
+        if kapak:
+            kapak_al(site, o['klasor'], site / o['klasor'] / 'gorsel' / 'kapak.jpg', kip='oyun')
+        oyun_verisi[o['klasor']] = v
+        ozet[o['klasor']] = {'oyun': True, 'rehber': o['rehber'], 'adim': len(v['adimlar']), 'glb': len(glb), 'addon': addon}
+        print(f'   {len(v["adimlar"])} adım · GLB {len(glb) / 1e6:.2f} MB', flush=True)
     shutil.rmtree(cikti / 'gecici')
-    (site / 'index.html').write_text(acilis_sayfasi(k['rehberler'], ozet), encoding='utf-8')
+    (site / 'index.html').write_text(acilis_sayfasi(k['rehberler'], ozet, oyunlar, oyun_verisi), encoding='utf-8')
     (site / 'robots.txt').write_text('User-agent: *\nDisallow: /\n')
     paket_sha, kur_yolu = ortak.paketle_ve_kur(site, cikti, mtime=k['mtime'])
     sonuc = {'paket_sha256': paket_sha, 'kurulum': str(kur_yolu), 'rehberler': ozet}
@@ -168,11 +224,12 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument('--npm', type=Path, required=True, help='npm pack ile açılmış paketler: three-0.160.0, fontsource-*')
     ap.add_argument('--esbuild', required=True, help='esbuild çalıştırılabilir dosyası')
     ap.add_argument('--kapaksiz', action='store_true', help='kapak görseli alınmaz (yalnız deneme; açılış sayfası görselsiz kalır)')
+    ap.add_argument('--onceki', type=Path, help="canlıdaki paketin rehber_kur.sh'si (ya da tgz'si); 'sabit' rehberler oradan bayt bayt")
     a = ap.parse_args(argv)
     if not os.access(a.esbuild, os.X_OK):
         ap.error(f'esbuild çalıştırılamıyor: {a.esbuild}')
     try:
-        s = kur(a.cikti, a.npm, a.esbuild, kapak=not a.kapaksiz)
+        s = kur(a.cikti, a.npm, a.esbuild, kapak=not a.kapaksiz, onceki=a.onceki)
     except ortak.SiteHatasi as e:
         print(f'HATA: {e}', file=sys.stderr)
         return 1

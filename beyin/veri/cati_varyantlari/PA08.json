@@ -59,6 +59,65 @@
      ]
     }
    }
+  },
+  {
+   "kod": "PA08B",
+   "gosterim": "PA-08-B",
+   "durum": "gecerli",
+   "taban": "PA08",
+   "sablon": "adaylar/PA08B.json",
+   "gorsel": "adaylar/PA08B.png",
+   "cati_adi": "Beşik",
+   "referans_model": "PA-08-B",
+   "yapi_turu": "prefabrik",
+   "kat": 1,
+   "oda_programi": "3+1",
+   "katalog_m2": 140.0,
+   "kapali_m2": 117.5,
+   "veranda_m2": 22.47,
+   "ozet": {
+    "grid": {
+     "x_pano": 11.5,
+     "y_pano": 8
+    },
+    "dis_olcu_cm": [
+     1400.0,
+     1000.0
+    ],
+    "brut_m2": 140.0,
+    "pano": 83,
+    "pencere": 8,
+    "kapi": 10,
+    "odalar": {
+     "SALON": 25.79,
+     "VERANDA": 22.47,
+     "HOL VE KORİDOR": 14.97,
+     "MUTFAK": 13.48,
+     "EBV BANYO 1": 2.82,
+     "GENEL BANYO": 3.23,
+     "YATAK ODASI 1": 15.33,
+     "YATAK ODASI 2": 13.84,
+     "EBV BANYO 2": 2.96,
+     "EBV BANYO 3": 2.96,
+     "YATAK ODASI 3": 14.77
+    }
+   },
+   "uyarilar": [],
+   "kaynak": {
+    "metin": "İE-44 toplu çatı seçenekleri (D-117)",
+    "karar": "D-117",
+    "ev": "PA-08",
+    "havuz_denetimi": {
+     "sonuc": "geçti",
+     "karar": "D-112",
+     "uyarilar": [
+      "HD-06: ['makas yeri: saçak duvarının pano ekleri düzensiz (14 makas, listede 12; aralıklar 125.5, 125.5, 125.5, 125.5, 125.5, 125.5, 62.75, 125.5, 125.5, 62.75, 125.5, 62.75, 72.25); eşit aralıklı 12 makas']"
+     ]
+    }
+   }
   }
+ ],
+ "ek_kararlar": [
+  "D-117"
  ]
 }

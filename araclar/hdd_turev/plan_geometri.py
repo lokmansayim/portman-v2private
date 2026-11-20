@@ -6,7 +6,8 @@ Paftanın çizgilerinden okunur, pafta düzeltilmez:
 - oda: aks hücrelerinin duvarsız kenarlardan dolgusu, adı `pafta_kart`'ın oda yazısından (yazının noktası hangi bölgedeyse);
 - açıklık: pano blokları (pencere, vasistas, kapı), ölçüsü en yakın açıklık yazısından;
 - taşan veranda: gövdenin dışındaki kesik çizgili dikdörtgen ve kolon kareleri; köşedekilerden fazla kolon `ara_kolon` olur (D-109,
-  `veranda_ara_kolonu`);
+  `veranda_ara_kolonu`); paftanın makas planında ana çatı verandayı da örtüyorsa (elle okunur) veranda gövdenin açık mahali olur
+  (`verandayi_govdeye_al`, `ev.py --ana-cati-verandasi`; D-129, D-131);
 - pano dizilimi: her duvarın pano ekleri (bandı enine kesen, boyu duvar kalınlığı kadar çizgiler).
 Okunamayan ya da emin olunmayan her şey `uyarilar`'a yazılır (K21); İş Emri'ndeki varsayımlar `varsayimlar`'a.
 
@@ -110,7 +111,29 @@ def _kesik_mi(e, doc) -> bool:
     return any(k in lt for k in ("ISO02", "ISO03", "DASH", "HIDDEN", "KESIK"))
 
 
-TEFRIS = [("EVYE", "mutfak"), ("KLOZET", "banyo"), ("DUS", "banyo"), ("LAVABO", "banyo"), ("BANYO", "banyo")]
+TEFRIS = [("EVYE", "mutfak"), ("KIT SINK", "mutfak"), ("KITCHEN", "mutfak"), ("OCAK", "mutfak"),
+          ("KLOZET", "banyo"), ("DUS", "banyo"), ("LAVABO", "banyo"), ("BANYO", "banyo")]
+
+
+def _tefris_turu(e, doc) -> str | None:
+    """Tefriş bloğunun türü: adından; adı anlamsızsa (2019 şablonunun mutfak tezgâhı "KDJFKLD") içindeki blokların adından
+    (tezgâhın içinde "Faucet - kit sink top"). Bir kat iner."""
+    ad = e.dxf.name.upper()
+    tf = next((v for b, v in TEFRIS if b in ad), None)
+    if tf:
+        return tf
+    try:
+        blok = doc.blocks.get(e.dxf.name)
+    except Exception:
+        blok = None
+    for x in (blok if blok is not None else ()):
+        if x.dxftype() == "INSERT":
+            tf = next((v for b, v in TEFRIS if b in x.dxf.name.upper()), None)
+            if tf:
+                return tf
+    return None
+
+
 OLCU_YAZI = re.compile(r"^\s*(\d{2,3})\s*/\s*(\d{2,3})\s*$")
 OLCU_SATIR = re.compile(r"(?<![\d*/])(\d{2,3})\s*/\s*(\d{2,3})(?![\d*/])")
 YUKSEKLIK_YAZI = re.compile(r"(?:\bH\s*=\s*|Y[ÜU]KSEKL[İI][ĞG][İI]\s*:?\s*)(\d{3})", re.I)
@@ -183,7 +206,7 @@ def topla(doc, kutu):
             lay = e.dxf.layer.upper()
             if any(lay.startswith(k_) for k_ in DISLA_KATMAN) and not _disla(e, 0):
                 KATMAN_KAPI.append(f"{e.dxf.name} ({e.dxf.layer} katmanında)")
-            tf = next((v for b, v in TEFRIS if b in ad), None)
+            tf = _tefris_turu(e, doc)
             if tf:
                 tefris.append({"tur": tf, "m": ((k[0] + k[2]) / 2, (k[1] + k[3]) / 2)})
             tur = next((v for b, v in ACIKLIK_BLOKLARI.items() if b in ad), None)
@@ -650,17 +673,25 @@ def geometri(doc, kutu, plan):
                 pay = 6 if a.get("kaynak") == "yay" else -1
                 d["ekler"] = [e for e in d["ekler"] if not a["bas"] - pay < e < a["bit"] + pay]
     # taşan veranda: gövdenin dışındaki kesik çizgiler
+    # İE-43 PR-7: eğik kesik çizgi (notun gösterme çizgisi, "dışarıya musluk çekilecek") veranda kenarı değildir; bir cephede veranda
+    # ancak o cepheye paralel ve gövdenin tamamen dışında bir kesik çizgi (verandanın dış kenarı) varsa okunur
     kes = []
     for a, b in kesik:
         ax_, ay_, bx_, by_ = mx(a[0]), my(a[1]), mx(b[0]), my(b[1])
+        if abs(ax_ - bx_) > 1 and abs(ay_ - by_) > 1:
+            continue
         if min(ax_, bx_) < -1 or max(ax_, bx_) > Wb + 1 or min(ay_, by_) < -1 or max(ay_, by_) > Hb + 1:
             kes.append((ax_, ay_, bx_, by_))
+    dis_kenar = {"on": lambda q: abs(q[1] - q[3]) <= 1 and min(q[1], q[3]) > Hb + 1,
+                 "arka": lambda q: abs(q[1] - q[3]) <= 1 and max(q[1], q[3]) < -1,
+                 "sol": lambda q: abs(q[0] - q[2]) <= 1 and max(q[0], q[2]) < -1,
+                 "sag": lambda q: abs(q[0] - q[2]) <= 1 and min(q[0], q[2]) > Wb + 1}
     verandalar = []
     if kes:
         for cephe, sec in (("on", lambda q: max(q[1], q[3]) > Hb + 1), ("arka", lambda q: min(q[1], q[3]) < -1),
                            ("sol", lambda q: min(q[0], q[2]) < -1), ("sag", lambda q: max(q[0], q[2]) > Wb + 1)):
             K = [q for q in kes if sec(q)]
-            if not K:
+            if not K or not any(dis_kenar[cephe](q) for q in K):
                 continue
             x0_ = min(min(q[0], q[2]) for q in K); x1_ = max(max(q[0], q[2]) for q in K)
             y0_ = min(min(q[1], q[3]) for q in K); y1_ = max(max(q[1], q[3]) for q in K)
@@ -889,19 +920,90 @@ def veranda_ara_kolonu(v: dict, H: float) -> tuple[int | None, str | None]:
     return ara, f"paftada {len(kol)} kolon; İş Emri'ne ara_kolon: {ara} yazıldı (D-109).{yer}"
 
 
+def verandayi_govdeye_al(ie: dict, g: dict, ad: str = "VERANDA") -> dict:
+    """Paftanın makas planında ana çatı taşan verandayı da örtüyorsa (ana makaslar verandanın üstünde; saçağın ölçüsü gövde + veranda +
+    2 × 25) veranda gövdenin açık mahalidir (D-129, D-131; disk arşivi 110 ve 120 m²). Bu okuma makas planından yapılır, kodla değil;
+    araç yalnız dönüşümü yapar (`ev.py --ana-cati-verandasi`). Yalnız ön cephenin tamamını tutan veranda (v1).
+
+    - gövde verandanın derinliği kadar uzar (`dis_olcu_cm.y`, ızgara `y_pano`); veranda `tur: veranda` mahal olur (gövdedeki veranda gibi);
+    - ön cephedeki dış kapı verandaya açılır (`arasi` `__DIS__` → veranda);
+    - paftadaki ara kolonlar dikme olur, paftadaki yerinde (merkez 0,25 cm'ye, gerçek çerçevede sol-alt köşe; köşe kolonlarını Motor koyar,
+      D-38); kenarın kirişi ara kolonlarda bölünür (D-129);
+    - verandanın iki varsayım satırı (D-109 ara kolonu, ayrı çatı) tek satırla değişir.
+    `ie` okuyucunun (uydurulmuş) İş Emri'si, `g` aynı paftanın `geometri`'si. Yeni İş Emri döner; `ie` değişmez."""
+    ie = json.loads(json.dumps(ie))
+    V = ie.get("verandalar") or []
+    k = next((i for i, v in enumerate(V) if v["ad"] == ad), None)
+    if k is None:
+        raise ValueError(f"{ad}: İş Emri'nde taşan veranda yok")
+    v = V.pop(k)
+    if not V:
+        ie.pop("verandalar")
+    y_ = ie["yapi"]
+    X, Yb = y_["dis_olcu_cm"]["x"], y_["dis_olcu_cm"]["y"]
+    if v["cephe"] != "on" or abs(v["bas_cm"]) > 1 or abs(v["bit_cm"] - X) > 1:
+        raise ValueError(f"{ad}: yalnız ön cephenin tamamını tutan veranda gövdeye alınır ({v['cephe']}, {v['bas_cm']:g}–{v['bit_cm']:g})")
+    gv = next(q for q in g["verandalar"] if q["cephe"] == "on")
+    kisa = y_["kisa_kenar"]
+    ilk = {"x": 10.0 if kisa == "x" else 5.0, "y": 10.0 if kisa == "y" else 5.0}
+    Yn = Yb + v["derinlik_cm"]
+    y_["dis_olcu_cm"]["y"] = Yn
+    y_["grid"]["y_pano"] = math.ceil((Yn - 2 * ilk["y"]) / 62.75 - 1e-6) / 2
+    ie["mahaller"].append({"ad": ad, "tur": "veranda", "konum_cm": [[ilk["x"], Yb - ilk["y"], X - ilk["x"], Yn - ilk["y"]]]})
+    for a in ie["acikliklar"]:
+        if a["tur"] == "dis_kapi" and a.get("duvar") == "on" and "__DIS__" in a.get("arasi", []):
+            a["arasi"] = [ad if m == "__DIS__" else m for m in a["arasi"]]
+            a.pop("duvar")
+    orta = sorted(round((q[0] + q[2]) / 2 * 4) / 4 for q in gv["kolonlar"])
+    ara = orta[1:-1]
+    if ara:
+        ie["dikmeler"] = (ie.get("dikmeler") or []) + [[c - 5.0, 0.0] for c in ara]
+    ie["varsayimlar"] = [s for s in ie.get("varsayimlar", []) if not s.startswith(f"{ad}: ")]
+    ie["varsayimlar"].append(
+        f"{ad}: paftanın makas planında ana çatı verandayı da örtüyor; veranda gövdenin açık mahali (gövde {Yb:g} + {v['derinlik_cm']:g} = "
+        f"{Yn:g} cm). Paftada {len(orta)} kolon; ara kolonlar paftadaki yerinde ({', '.join(f'{c:g}' for c in ara) or 'yok'} cm), kiriş "
+        f"onlarda bölünür (D-129).")
+    return ie
+
+
+def aciklik_sayilari(g) -> dict:
+    """Bölge başına pencere ve kapı sayısı (yazısız odanın adı için). Açıklığın iki yanı `is_emri`'deki gibi duvardan 12 cm öteden;
+    vasistas pencere, kapı ve kapısız geçiş kapı sayılır."""
+    AX, AY = g["AX"], g["AY"]
+    hb = {tuple(h): o["bolge"] for o in g["odalar"] for h in o["hucreler"]}
+
+    def bolge(x, y):
+        i = next((k for k in range(len(AX) - 1) if AX[k] <= x <= AX[k + 1]), None)
+        j = next((k for k in range(len(AY) - 1) if AY[k] <= y <= AY[k + 1]), None)
+        return hb.get((i, j)) if i is not None and j is not None else None
+
+    say = collections.defaultdict(lambda: {"pencere": 0, "kapi": 0})
+    for a in g["acikliklar"]:
+        x, y = (a["c"], a["orta"]) if a["duvar_yon"] == "x" else (a["orta"], a["c"])
+        yanlar = (bolge(x - 12, y), bolge(x + 12, y)) if a["duvar_yon"] == "x" else (bolge(x, y - 12), bolge(x, y + 12))
+        tur = "pencere" if a["tur"] in ("pencere", "vasistas") else "kapi"
+        for b in {b for b in yanlar if b is not None}:
+            say[b][tur] += 1
+    return say
+
+
 def is_emri(g, plan, kod, teknik=None):
     V, U = [], list(g["uyarilar"])
     AX, AY = g["AX"], g["AY"]
     mahaller, ad_bolge, acik_ad, girintiler, dikmeler, acik_sinir = [], {}, set(), [], [], []
     sayac = collections.Counter()
     kapali = [o for o in g["odalar"] if not o["dis"]]
-    # yazısız odalar (2018 şablonu): tefrişten (evye mutfak, klozet / duş banyo); kalan en büyük salon, kalanlar yatak odası
+    # yazısız odalar (2018 şablonu): tefrişten (evye mutfak, klozet / duş banyo); penceresiz ve en az iki kapılı oda hol;
+    # kalan en büyük salon, kalanlar yatak odası
     yazisiz = [o for o in kapali if not o["yazilar"]]
     salon_var = any(mahal_turu(o["yazilar"][0]["ad"]) == "salon" for o in kapali if o["yazilar"])
+    say = aciklik_sayilari(g)
     tahmin = {}
     for o in sorted(yazisiz, key=lambda o: -o["aks_m2"]):
         if "banyo" in o["tefris"]:
             tahmin[o["bolge"]] = "BANYO"
+        elif not o["tefris"] and say[o["bolge"]]["pencere"] == 0 and say[o["bolge"]]["kapi"] >= 2:
+            tahmin[o["bolge"]] = "HOL"
         elif not salon_var and o["aks_m2"] >= 9:
             tahmin[o["bolge"]] = "SALON & MUTFAK" if "mutfak" in o["tefris"] else "SALON"
             salon_var = True
