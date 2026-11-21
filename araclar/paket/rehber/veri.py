@@ -243,6 +243,15 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
     CAP = bool((HZ.get("cati_serit") or {}).get("capraz"))    # İE-15 K6: beşik + çıkıntısız çapraz cumba (TK-04); çatısı `capraz.py`
     if TIP == "besik_cumba" and not CAP:
         raise Desteklenmiyor("beşik + cumba çatı çapraz cumba olarak kurulmadı (`motor/cati_capraz.py`)")
+    TPV = [v for v in HZ.get("dis_verandalar") or [] if (v.get("cati") or {}).get("tip") == "teras_paneli"]   # sundurma paneli (D-52, D-133)
+    DUZ = (TIP == "besik" and cati.get("makas_ekseni", "x") == "y" and not (GIR or CAP) and not HZ.get("cati_serit")
+           and len(TPV) == len(HZ.get("dis_verandalar") or []))
+    if DUZ:                                     # dikdörtgen gövde, mahya x yönünde (80 m², PA-48): çatısı girintili gövdeninki gibi tek şeritli
+        from motor import cati_serit as CS      # çatı tanımından (`cati_serit.tanim`; çizim, liste ve kart modeli aynı makas yerleri). Sundurma
+        ie_ = {k: v for k, v in ie.items() if k != "verandalar"}   # paneli ana çatının parçası değil: tanım verandasız plandan, panel ayrıca
+        HZ["cati_serit"] = dict(CS.tanim(G.kur(ie_), ie_), duz_govde=True)
+        HZ["govde"] = HZ.get("govde") or [[0, 0], [HZ["bina"]["W"], 0], [HZ["bina"]["W"], HZ["bina"]["H"]], [0, HZ["bina"]["H"]]]
+        GIR = True
     if cati.get("makas_ekseni", "x") != "x" and not (GIR or CAP):
         raise Desteklenmiyor("mahya x yönünde (makaslar y'ye paralel); rehber şimdilik mahyası y yönündeki beşiği kurar")
     GV = HZ.get("veranda")                      # gömme veranda: gövdenin içinde, ana çatının altında (AP-19)
@@ -257,7 +266,10 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
     COS = 1 / math.sqrt(1 + TAN * TAN)
     OZ = {kucuk(k): v for k, v in (ie.get("ozellikler") or {}).items()}
     ASMA = "ters" not in kucuk(OZ.get("tavan", OZ.get("tavan şekli", "asma")))      # liste üretecinin okuyuşu: ters değilse asma dizme
-    VER = HZ.get("dis_verandalar") or []
+    VER = [v for v in HZ.get("dis_verandalar") or [] if v not in TPV]
+    for v in TPV:
+        if v["cephe"] not in ("on", "arka"):
+            raise Desteklenmiyor(f"{v['ad']}: sundurma paneli {v['cephe']} cephede; rehber ön ve arka cephedekini kurar")
     for v in VER:
         c = v["cati"]
         if v["cephe"] not in ("on", "arka") or c.get("tip") != "besik" or c["mahya"][0][0] != c["mahya"][1][0]:
@@ -336,8 +348,8 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
 
     # ---------- adımlar ----------
     S = {"alt": 1}
-    sira = ((["veranda"] if VER or GV else []) + ["omega", "makas", "kalkan", "tomega", "alcipan", "izo", "asik", "sacak", "dere"] +
-            (["tersmahya"] if CAP else []) + ["kaplama", "alin", "dograma"])     # çapraz cumbada dere hatlarına ters mahya (62 m²'deki gibi)
+    sira = ((["veranda"] if VER or GV or TPV else []) + ["omega", "makas", "kalkan", "tomega", "alcipan", "izo", "asik", "sacak", "dere"] +
+            (["tersmahya"] if CAP else []) + ["kaplama", "alin"] + (["sundurma"] if TPV else []) + ["dograma"])     # çapraz cumbada dere hatlarına ters mahya (62 m²'deki gibi)
     for i, k in enumerate(sira):
         S[k] = 2 + N_ODA + i
     N = S["dograma"]
@@ -555,6 +567,7 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
                     for u, var in ((0, abs(k[a0] - r[a0]) < 1.0), (1, abs(k[a1] - r[a1]) < 1.0)) if var})
 
     verandalar, VR, GVK = [], [], None          # VR: çatı ve yerleşim için taşan veranda kaydı; GVK: gömme veranda
+    VR_Z = []                                   # sundurmalı verandanın kutusu (zemin)
     for vi, v in enumerate(VER):
         vk = v["rect"]
         kol = [b for b in BAG if b["tur"] == "dikme" and icinde_kutu(b["rect"], vk)]
@@ -594,6 +607,78 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
         VR.append({"ad": ad, "on": on, "rect": vk, "dis_y": dis_y, "kutu": kc, "M": v["cati"]["mahya"][0][0], "R": rk,
                    "kolon": [b["rect"] for b in kol], "bas_k": [b["rect"] for b in bas_k], "yan_k": [r for r in (k["rect"] for k in kirisler[len(bas_k):])],
                    "egim": v["cati"]["egim"]})
+
+    # Sundurma paneli (teras panelli veranda; D-52, D-133): kolon ve dış kiriş Motor'un planından ve kotlarından, panel çatı tanımından
+    # (duvarda üstü `mahya_kotu`, dış uçta `sacak_kotu`, kalınlık, eğim); sac, damlalık, saçak sacı ve kapama adet ve boyu listeden.
+    sundurma = []
+    for v in TPV:
+        vk, c = v["rect"], v["cati"]
+        ad = oda_adi(v["ad"], [])
+        on = v["cephe"] == "on"
+        kol = sorted((b for b in BAG if b["tur"] == "dikme" and icinde_kutu(b["rect"], vk)), key=lambda b: b["rect"][0])
+        boyuna = (lambda r: r[2] - r[0] > r[3] - r[1]) if v["cephe"] in ("on", "arka") else (lambda r: r[3] - r[1] > r[2] - r[0])
+        kir = [b for b in BAG if b["tur"] == "veranda_profil" and icinde_kutu(b["rect"], vk) and boyuna(b["rect"])]   # dış kiriş (cephe boyunca)
+        if len(kol) < 2 or len(kir) != 1:
+            raise Desteklenmiyor(f"{v['ad']}: sundurmanın planında {len(kol)} kolon, {len(kir)} dış kiriş")
+        k0, k1 = c["kolon_ustu"], c["dis_kiris_ustu"]
+        r = kir[0]["rect"]
+        kes = [r[0]] + [(b["rect"][0] + b["rect"][2]) / 2 for b in kol[1:-1]] + [r[2]]     # D-109: ara kolonun ortasında bölünür
+        kirisler = []
+        for i, (a, b) in enumerate(zip(kes, kes[1:])):
+            olcu = f"L {LU.mm(b - a)}"
+            kirisler.append({"rect": [_r(a), _r(r[1]), _r(b), _r(r[3])], "h0": _r(k0), "h1": _r(k1),
+                             "bu": f"{kucuk(ad)} · dış kiriş {i + 1}/{len(kes) - 1} · {olcu}: {'köşe kolonunun dış yüzünden ara kolonun ortasına' if len(kes) > 2 else 'kolonların üstünde'}"
+                                   f"; üstü {fmtc(k1)} cm", "liste": ls("Kutu profil (kiriş)", olcu)})
+        verandalar.append({
+            "kolon": [{"rect": [_r(t) for t in b["rect"]], "h1": _r(k0), "order": len(verandalar) * 10 + i,
+                       "bu": f"{kucuk(ad)} · {'ara' if 0 < i < len(kol) - 1 else 'sol' if i == 0 else 'sağ'} kolon · 100 × 100 × {fmt(k0 * 10)} (dış kirişin altına kadar)",
+                       "liste": ls("Özel kutu profil (kolon)")} for i, b in enumerate(kol)],
+            "kiris": [dict(k, order=len(verandalar) * 10 + len(kol) + i) for i, k in enumerate(kirisler)],
+        })
+        dz = c["duzlemler"][0]
+        yw, yo = (vk[3], vk[1]) if on else (vk[1], vk[3])           # duvar yüzü ve dış uç (y)
+        if v["cephe"] not in ("on", "arka"):
+            raise Desteklenmiyor(f"{v['ad']}: sundurma yalnız ön ya da arka cephede")
+        yan = []                                                     # D-133 ek (BK-61; kart 20 Kasım 2026 20:19:34 "Eğimli, panelin altında"):
+        for i, yk in enumerate(sorted(c.get("yan_kirisler") or [], key=lambda q: q["rect"][0])):   # Motor'un planından, eğimli
+            r_ = yk["rect"]
+            L_ = abs(r_[3] - r_[1])
+            yan.append({"x0": _r(r_[0]), "x1": _r(r_[2]), "L": _r(L_), "ust_duvar": _r(yk["ust_duvar"]), "ust_dis": _r(yk["ust_dis"]),
+                        "bu": f"{kucuk(ad)} · {'sol' if i == 0 else 'sağ'} yan kiriş · L {LU.mm(L_)}: duvardan dış kirişin iç yüzüne, panelin altında eğimli; "
+                              f"üstü duvarda {fmtc(yk['ust_duvar'])} cm, dış kirişte {fmtc(yk['ust_dis'])} cm",
+                        "liste": ls("Kutu profil (kiriş)", f"L {LU.mm(L_)}")})
+        sac = satirlar("Trapez sac · " + kucuk(v["ad"]) + " çatısı") or satirlar("Trapez sac · veranda çatısı")
+        n_sac = sum(q["adet"] or 0 for q in sac)
+        L_sac = float(re.sub(r"[^0-9.]", "", sac[0]["olcu"])) / 10 if sac else abs(yw - yo) / COS
+        GEN = KP_SAC = 100.0                                         # trapez sac 100 cm kapatır (D-50, M-11)
+        x0, x1 = vk[0], vk[2]
+        seritler_ = [[_r(x0 + i * GEN), _r(min(x1, x0 + (i + 1) * GEN))] for i in range(n_sac) if x0 + i * GEN < x1 - 0.5]
+        if len(seritler_) != n_sac:
+            raise Desteklenmiyor(f"{v['ad']}: listede {n_sac} trapez sac, sundurmanın genişliğine {len(seritler_)} sığar")
+        def parcalar(on_, boy_, uz):                                  # listedeki parça boyuyla kenar boyunca dizilim (bindirme 20 cm)
+            ss = satirlar(on_)
+            if not ss:
+                return [], "listede satırı yok"
+            pb = float(re.sub(r"[^0-9.]", "", ss[0]["olcu"])) / 10
+            n = sum(q["adet"] or 0 for q in ss)
+            adim_ = pb - (20 if n * pb > uz + 1 else 0)
+            out, a = [], 0.0
+            while a < uz - 0.5 and len(out) < n:
+                out.append([_r(a), _r(min(uz, a + pb))])
+                a += adim_
+            return out, ls(on_)
+        damla, damla_ls = parcalar("Damlalık", 280, x1 - x0)
+        sacak_, sacak_ls = parcalar("Özel büküm saçak sacı", 250, x1 - x0)
+        kapama_ls = ls("Sundurma kapama")
+        sundurma.append({"ad": ad, "x0": _r(x0), "x1": _r(x1), "yw": _r(yw), "yo": _r(yo), "out": -1 if on else 1, "ust": _r(c["mahya_kotu"]),
+                         "alt_uc": _r(c["sacak_kotu"]), "egim": c["egim"], "kal": _r(c.get("kalinlik", 8.0)), "sac": seritler_, "sac_L": _r(L_sac),
+                         "damla": damla, "sacak": sacak_, "liste": {"panel": ls("Teras paneli"), "sac": ls(sac[0]["kalem"]) if sac else "listede satırı yok",
+                                                                     "damla": damla_ls, "sacak": sacak_ls, "kapama": kapama_ls, "mastik": ls("Silikonize mastik")},
+                         "kolon": len(kol), "kiris": len(kirisler), "k0": _r(k0), "k1": _r(k1), "yan": yan})
+        VR_Z.append(vk)
+    if len(sundurma) > 1:
+        raise Desteklenmiyor(f"{len(sundurma)} sundurma paneli; rehber birini kurar")
+    su = sundurma[0] if sundurma else None
 
     if GV:                                      # gömme veranda: kolon dış köşede, kirişler açık kenarlarda; çatısı ana çatı
         vk = [min(q[0] for q in GV["poligon"]), min(q[1] for q in GV["poligon"]), max(q[0] for q in GV["poligon"]), max(q[1] for q in GV["poligon"])]
@@ -1224,7 +1309,8 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
     kaplama_txt = f"{kucuk(kap_ad)}{' (' + renk + ')' if renk else ''}"
     ver_ozet = ", ".join([f"{'önde' if v['on'] else 'arkada'} {fmtc(v['rect'][2] - v['rect'][0])} × {fmtc(v['rect'][3] - v['rect'][1])} cm" for v in VR] +
                          ([f"gövdenin içinde {fmtc(GVK['vk'][2] - GVK['vk'][0])} × {fmtc(GVK['vk'][3] - GVK['vk'][1])} cm (ana çatının altında)"]
-                          if GVK and not GVK["nis"] and GVK["ad"] == "veranda" else []))
+                          if GVK and not GVK["nis"] and GVK["ad"] == "veranda" else []) +
+                         [f"{'önde' if q['out'] < 0 else 'arkada'} {fmtc(q['x1'] - q['x0'])} × {fmtc(abs(q['yw'] - q['yo']))} cm (sundurma panelli)" for q in sundurma])
     nis_ozet = (f"; gövdenin içinde {fmtc(GVK['vk'][2] - GVK['vk'][0])} × {fmtc(GVK['vk'][3] - GVK['vk'][1])} cm giriş nişi (ana çatının altında)"
                 if GVK and GVK["nis"] else
                 f"; gövdenin {'köşesinde' if GVK['iki_yan'] else 'içinde'} {fmtc(GVK['vk'][2] - GVK['vk'][0])} × {fmtc(GVK['vk'][3] - GVK['vk'][1])} cm "
@@ -1379,6 +1465,16 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
                           "üstü kotunda kolonu gövdeye bağlar ve duvarın yerini tutar: üstlerine saçak ve baş makas omegası, sonra ana çatının makasları gelir."),
                      "kamera": K([(GVK["vk"][0] + GVK["vk"][2]) / 2, 1.5, (GVK["vk"][1] + GVK["vk"][3]) / 2], -2.3, 0.5, 11, True) if GIR else
                      K([0, 1.2, 0], 0.9, 0.45, 15)})
+    if TPV and not VR:
+        adim.append({"ad": "Veranda", "t": "Veranda kolon ve kirişleri",
+                     "p": f"Veranda gövdeden taşar ({fmtc(su['x1'] - su['x0'])} × {fmtc(abs(su['yw'] - su['yo']))} cm); çatısı sundurma panelidir. "
+                          f"{su['kolon']} kolon (100 × 100) dış kenara dikilir: iki köşede ve ortada. Kolon boyu {fmtc(su['k0'])} cm, dış kirişin altına kadar. "
+                          f"Dış kiriş {su['kiris']} parçadır, ara kolonun ortasında birleşir; üstü {fmtc(su['k1'])} cm. "
+                          + (f"{len(su['yan'])} yan kiriş (100 × 100, L {fmtc(su['yan'][0]['L'])} cm) duvardan dış kirişin iç yüzüne eğimli gider: üstü duvarda "
+                             f"{fmtc(su['yan'][0]['ust_duvar'])} cm, dış kirişte {fmtc(su['yan'][0]['ust_dis'])} cm. Panel duvara, dış kirişe ve yan kirişlere oturur. "
+                             if su["yan"] else "Yan kiriş yok: panel duvara ve dış kirişe oturur. ")
+                          + "Sundurma paneli ana çatıdan sonra takılır.",
+                     "kamera": K([(su["x0"] + su["x1"]) / 2, 1.2, (su["yw"] + su["yo"]) / 2], 0.35, 0.3, 12, True)})
     if VR:
         adim.append({"ad": "Verandalar" if len(VR) > 1 else "Veranda", "t": "Veranda kolon ve kirişleri",
                      "p": "Verandalar gövdeden taşar: " + "; ".join(vmetin) + f". Kolonlar (100 × 100) dış köşelere dikilir; üstlerine duvar üstü kotunda "
@@ -1476,6 +1572,15 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
               "topuğunda kesilir; üstte kaplamanın kenar hadvesini kavrar. Alın yüzü dereyi de içine alacak kadar geniştir: köşede saçak sacının alnıyla birleşir ve derenin ucunu kapatır.",
          "kamera": K([0, 2.8, 0.3], -0.62, 0.34, 18),
          "rows": [x for x in (LR("Alın sacı"),) if x]},
+        *([{"ad": "Sundurma paneli", "t": "Sundurma paneli, sac ve damlalık",
+            "p": f"Sundurma ana çatıdan sonra takılır. Panel (8 cm C profil) duvara ve dış kirişe oturur: üstü duvarda {fmtc(su['ust'])} cm "
+                 f"(duvar üstünün {fmtc(H - su['ust'])} cm altı), dışarı %{fmt(su['egim'] * 100)} iner, dış uçta {fmtc(su['alt_uc'])} cm. Panelin üstüne "
+                 f"trapez sac serilir ({len(su['sac'])} levha, L {fmtc(su['sac_L'])} cm). Z damlalık duvara vidalanır; alt kolu sacın üstüne biner, "
+                 "duvardan süzülen su sacın üstüne akar. Duvarla damlalık arasına silikonize mastik sıkılır. Dış uca özel büküm saçak sacı, iki yana "
+                 "sundurma kapama takılır.",
+            "kamera": K([(su["x0"] + su["x1"]) / 2, 2.0, (su["yw"] + su["yo"]) / 2], 0.45, 0.42, 11, True),
+            "rows": [x for x in (LR("Teras paneli"), LR("Trapez sac · veranda çatısı"), LR("Damlalık"), LR("Özel büküm saçak sacı"),
+                                  LR("Sundurma kapama"), I("Silikonize mastik", "duvarla damlalık arasına (listedeki mastikten)")) if x]}] if TPV else []),
         {"ad": "Kapı ve pencereler", "t": "Kapı ve pencereler",
          "p": f"{'Beyaz' if pvc_beyaz else pr_renk.capitalize()} PVC pencereler ({pen_ozet}{', ' + str(vas) + ' × 60/40 vasistas' if vas else ''}) ve "
               f"{'prefabrik çelik dış kapı (90 × 200, ' + dk_yon + ')' if dk else 'dış kapı'} yerine konur. İç kapılar ({ic_say}) Amerikan kapı; yer ve açılış yönü motorun planından. "
@@ -1493,21 +1598,26 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
         def aralik_(ad_):
             return f"{mk_ad[ad_][0]}–{mk_ad[ad_][-1]}"
         g0 = AD_["Genel bakış"]
-        g0["p"] = g0["p"].replace(f"gövde {fmtc(W)} × {fmtc(DY)} cm", f"girintili gövde (dış ölçü {fmtc(W)} × {fmtc(DY)} cm)").replace(
-            "Beşik çatı %", f"Beşik çatı (ana çatı ve {len(cumbalar)} cumba) %")
+        if DUZ:
+            g0["p"] = g0["p"].replace("Beşik çatı %", "Beşik çatı, mahyası uzun kenar boyunca, %")
+        else:
+            g0["p"] = g0["p"].replace(f"gövde {fmtc(W)} × {fmtc(DY)} cm", f"girintili gövde (dış ölçü {fmtc(W)} × {fmtc(DY)} cm)").replace(
+                "Beşik çatı %", f"Beşik çatı (ana çatı ve {len(cumbalar)} cumba) %")
         om = AD_["Saçak, duvar ve baş makas omegası"]
         om["p"] = om["p"].replace("Sol ve sağ duvarın (saçak duvarları)", "Saçak duvarlarının (" + ", ".join(GC["hatlar"]) + ")").replace(
             "ön ve arka duvarın üstüne baş makas omegası", "her baş makasın altına (" + ", ".join(k_["ad"] for k_ in kalkan) +
-            ") baş makas omegası; ana çatının kalkan hattı girintide dış duvarın, cumbanın altında iç duvarın üstünden geçer")
+            ") baş makas omegası" + ("" if DUZ else "; ana çatının kalkan hattı girintide dış duvarın, cumbanın altında iç duvarın üstünden geçer"))
         mk = AD_["Ana çatı makasları"]
-        mk["ad"] = mk["t"] = "Ana çatı ve cumba makasları"
+        mk["ad"] = mk["t"] = "Ana çatı makasları" if DUZ else "Ana çatı ve cumba makasları"
         mk["p"] = (f"Ana çatı: {len(mk_ad[ana_q['ad']])} makas ({aralik_(ana_q['ad'])}); iki uçta baş makas, arada orta makas. Açıklık {fmtc(AA)} cm "
-                   f"(iki yanda {fmtc(SC)} cm saçak), eğim %{fmt(TAN * 100)} ({fmt(EGIM_D, 1)}°), tepe yaklaşık {fmt(tepe)} cm. Cumbalar ana çatıyla aynı yönde "
+                   f"(iki yanda {fmtc(SC)} cm saçak), eğim %{fmt(TAN * 100)} ({fmt(EGIM_D, 1)}°), tepe yaklaşık {fmt(tepe)} cm. " + ("Makaslar saçak duvarlarındaki "
+                   "kulaklı H’ların hizasına oturur; 10 cm topuk, duvar hizasında dikme, Warren zikzak. Yerler çatı tanımından (çizim, liste ve 3B modelle aynı)."
+                   if DUZ else "Cumbalar ana çatıyla aynı yönde "
                    "küçük birer beşiktir: " + "; ".join(f"{kucuk(q['ad'])} {len(mk_ad[q['ad']])} cumba makası ({aralik_(q['ad'])}), açıklık "
                                                          f"{fmtc(q['b'][1] - q['b'][0] + 2 * SC)} cm" for q in cumbalar) +
                    ". Cumbanın dış ucunda baş makas var; iç ucu ana çatının kalkan duvarında biter, orada makas yok. Makaslar saçak duvarlarındaki kulaklı "
                    "H’ların hizasına oturur; 10 cm topuk, duvar hizasında dikme, Warren zikzak. Yerler çatı tanımından (çizim, liste ve 3B modelle aynı); "
-                   "cumba makasının kimlik kartı MA-04.")
+                   "cumba makasının kimlik kartı MA-04."))
         mk["extra"] = [I("Ana çatı", f"açıklık {fmtc(AA)} cm · %{fmt(TAN * 100)} · tepe ≈ {fmt(tepe)} cm"),
                        I("Makas aralığı", " · ".join(fmtc(a_) for a_ in GC["aralik"]) + " cm")] + \
                       [x for x in (LR("Makas (baş)"), LR("Makas (orta)"), *(LR(f"Cumba makası · {q['ad']}") for q in cumbalar)) if x]
@@ -1519,11 +1629,11 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
         ka["kamera"] = K([ana_q["a"][0], 3.0, DY / 2], -0.9, 0.3, 16, True)
         iz_ = AD_["Çatı izolasyonu"]
         iz_["p"] = iz_["p"].replace("rulo sol duvarın üstünden başlar, açılarak sağ duvara kadar serilir", "rulo ön duvarın üstünden başlar, açılarak arka duvara "
-                                    "kadar serilir; cumbalarda da makas aralıklarına (iç uçta ana çatının duvarına kadar)")
+                                    "kadar serilir" + ("" if DUZ else "; cumbalarda da makas aralıklarına (iç uçta ana çatının duvarına kadar)"))
         n_sira = sum(len(a_["sira"]) for a_ in asik.values())
         ak = AD_["Aşıklar"]
         ak["p"] = (f"Aşıklar kitabın çok düzlemli çatı kuralıyla makasların üst başlıklarına vidalanır: her yüzde saçaktan 60 cm arayla, {len(asik)} yüzde "
-                   f"{n_sira} sıra; sıranın boyu yüzün o yükseklikteki genişliği. Aynı düzlemdeki ana çatı ve cumba yüzünde sıra tek parça devam eder; parçalar "
+                   f"{n_sira} sıra; sıranın boyu yüzün o yükseklikteki genişliği." + ("" if DUZ else " Aynı düzlemdeki ana çatı ve cumba yüzünde sıra tek parça devam eder;") + " Parçalar "
                    f"{'sağ' if SAYIM['yerlesim']['baslangic'].get('x') == 'max' else 'sol'} uçtan tam boy (motorun kart modeli). "
                    "Kalkan saçaklarında aşık uçları C kapamayla kapatılır.")
         ak["rows"] = [x for x in (LR("Aşık"), R("AS-01", "Aşık (kart modeli)", f"{sum(1 for n in IFC if n.startswith('ASIK'))} parça", "model"),
@@ -1614,8 +1724,8 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
         metin["makas_profil"] = "kesit kartta yazılı değil (MA-01, MA-02, MA-05); iç çubuklar 62 m² rehberindeki düzende (Warren) gösterildi"
         metin["dere"]["pafta"] = f"motorun kart modeli: {len(dere_hat)} saçak hattı"
         metin["inis"]["pafta"] = f"{len(inisler)} iniş (motorun kart modelinden; saçak hattının uçlarında)"
-    drop = ([0, 0.3] + [1.4] * N_ODA + ([1.2] if VR or GVK else []) + [0.6, 1.4, 0.8, 0.5, -0.5, 0, 0.7, 0.6, 0.6] + ([0.9] if CAP else []) +
-            [0.9, 0.6, 0])
+    drop = ([0, 0.3] + [1.4] * N_ODA + ([1.2] if VR or GVK or TPV else []) + [0.6, 1.4, 0.8, 0.5, -0.5, 0, 0.7, 0.6, 0.6] + ([0.9] if CAP else []) +
+            [0.9, 0.6] + ([0.6] if TPV else []) + [0])
     for x, dr in zip(adim, drop):
         x["drop"] = dr
     assert len(adim) == N + 1 == len(drop), (len(adim), N, len(drop))
@@ -1646,10 +1756,12 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
                  "Yapım ayrıntıları (pano katmanları, köşe direği, omegalar, saçak ve alın sacı, Z, C kapama, dere, iniş) 62 m² rehberindeki Lokman çizimlerinden; "
                  "bu projede aynı sistem varsayıldı. Motorun modelinde olmayanlar kuraldan yerleştirildi ve kartlarında yazar: yavru makasların yeri, " + ("asma tavanın H’ı ve gözleri, " if ASMA else "") + "kalkan betopanının dizilimi, çatı kaplamasının levhaları."),
     }
-    if GIR:
+    if GIR and not DUZ:
         kabuk["spec"][0] = f"girintili, dış ölçü {fmtc(W)} × {fmtc(DY)} cm"
+    if TPV:
+        kabuk["spec"][5] = "veranda · sundurma paneli"
     if GIR and not CAP:
-        kabuk["spec"][3] = f"beşik (ana + {len(cumbalar)} cumba) %{fmt(TAN * 100)} · {fmt(EGIM_D, 1)}°"
+        kabuk["spec"][3] = (f"beşik %{fmt(TAN * 100)} · {fmt(EGIM_D, 1)}°" if DUZ else f"beşik (ana + {len(cumbalar)} cumba) %{fmt(TAN * 100)} · {fmt(EGIM_D, 1)}°")
         kabuk["note"] = kabuk["note"].replace("kirişleri) ve kimlik kartlı modeli (kartlar, H türleri, makas, aşık, iniş ve tavan omegası yerleri)",
                                               "kirişleri), çatı tanımı (ana çatı ve cumbalar, makas yerleri) ve kimlik kartlı modeli (kartlar, H türleri, aşık, iniş "
                                               "ve tavan omegası yerleri)").replace(
@@ -1663,11 +1775,12 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
             "kalkan betopanının dizilimi, çatı kaplamasının levhaları.",
             "kalkan betopanının dizilimi; yavru makasın uçları derenin 10 cm üstünde biter (gösterim, 62 m² rehberindeki ara makas gibi).")
     return {
-        "kod": kod, "dis": [W, DY], "h": H, "N": N, "S": S, "zemin": [-12, W + 12, min([0] + [v["rect"][1] for v in VR]) - 12, max([DY] + [v["rect"][3] for v in VR]) + 12],
+        "kod": kod, "dis": [W, DY], "h": H, "N": N, "S": S, "zemin": [-12, W + 12, min([0] + [v["rect"][1] for v in VR] + [r[1] for r in VR_Z]) - 12, max([DY] + [v["rect"][3] for v in VR] + [r[3] for r in VR_Z]) + 12],
         "renk": {"pvc": 0xF1F1EE} if pvc_beyaz else {}, "R": RF, "sacak": sacak, "kalkan": kalkan, "yuz": yuz, "asik": {"yuzler": asik}, "kaplama": kaplama,
         "izo": izo, "tavan": tavan, "verandalar": verandalar, "rooms": rooms, "panels": panels, "posts": posts, "ceku": ceku, "hs": hs, "alt": alt, "alt_m": alt_m,
         "omega_duvar": omega_duvar, "makas": makas, "omega": omega, "dere": {"hatlar": dere_hat, "inisler": inisler}, "doors": doors, "cards": cards,
-        "pencere": pencere, "metin": metin, "adimlar": adim, "kart_bag": kart_bag, "genel": genel, "cati_adim": list(range(S["makas"], S["alin"] + 1)),
+        "pencere": pencere, "metin": metin, "adimlar": adim, "kart_bag": kart_bag, "genel": genel, "cati_adim": list(range(S["makas"], S["alin"] + 1)) + ([S["sundurma"]] if TPV else []),
+        "sundurma": sundurma,
         "rozet": f"{fmtc(W)} × {fmtc(DY)} · {baslik_alani(plan).split(' · ')[0]}", "kabuk": kabuk,   # D-95: brüt
     }
 
