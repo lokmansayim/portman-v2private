@@ -616,7 +616,8 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
         ad = oda_adi(v["ad"], [])
         on = v["cephe"] == "on"
         kol = sorted((b for b in BAG if b["tur"] == "dikme" and icinde_kutu(b["rect"], vk)), key=lambda b: b["rect"][0])
-        kir = [b for b in BAG if b["tur"] == "veranda_profil" and icinde_kutu(b["rect"], vk)]
+        boyuna = (lambda r: r[2] - r[0] > r[3] - r[1]) if v["cephe"] in ("on", "arka") else (lambda r: r[3] - r[1] > r[2] - r[0])
+        kir = [b for b in BAG if b["tur"] == "veranda_profil" and icinde_kutu(b["rect"], vk) and boyuna(b["rect"])]   # dış kiriş (cephe boyunca)
         if len(kol) < 2 or len(kir) != 1:
             raise Desteklenmiyor(f"{v['ad']}: sundurmanın planında {len(kol)} kolon, {len(kir)} dış kiriş")
         k0, k1 = c["kolon_ustu"], c["dis_kiris_ustu"]
@@ -636,6 +637,16 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
         })
         dz = c["duzlemler"][0]
         yw, yo = (vk[3], vk[1]) if on else (vk[1], vk[3])           # duvar yüzü ve dış uç (y)
+        if v["cephe"] not in ("on", "arka"):
+            raise Desteklenmiyor(f"{v['ad']}: sundurma yalnız ön ya da arka cephede")
+        yan = []                                                     # D-133 ek (BK-61; kart 20 Kasım 2026 20:19:34 "Eğimli, panelin altında"):
+        for i, yk in enumerate(sorted(c.get("yan_kirisler") or [], key=lambda q: q["rect"][0])):   # Motor'un planından, eğimli
+            r_ = yk["rect"]
+            L_ = abs(r_[3] - r_[1])
+            yan.append({"x0": _r(r_[0]), "x1": _r(r_[2]), "L": _r(L_), "ust_duvar": _r(yk["ust_duvar"]), "ust_dis": _r(yk["ust_dis"]),
+                        "bu": f"{kucuk(ad)} · {'sol' if i == 0 else 'sağ'} yan kiriş · L {LU.mm(L_)}: duvardan dış kirişin iç yüzüne, panelin altında eğimli; "
+                              f"üstü duvarda {fmtc(yk['ust_duvar'])} cm, dış kirişte {fmtc(yk['ust_dis'])} cm",
+                        "liste": ls("Kutu profil (kiriş)", f"L {LU.mm(L_)}")})
         sac = satirlar("Trapez sac · " + kucuk(v["ad"]) + " çatısı") or satirlar("Trapez sac · veranda çatısı")
         n_sac = sum(q["adet"] or 0 for q in sac)
         L_sac = float(re.sub(r"[^0-9.]", "", sac[0]["olcu"])) / 10 if sac else abs(yw - yo) / COS
@@ -663,7 +674,7 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
                          "alt_uc": _r(c["sacak_kotu"]), "egim": c["egim"], "kal": _r(c.get("kalinlik", 8.0)), "sac": seritler_, "sac_L": _r(L_sac),
                          "damla": damla, "sacak": sacak_, "liste": {"panel": ls("Teras paneli"), "sac": ls(sac[0]["kalem"]) if sac else "listede satırı yok",
                                                                      "damla": damla_ls, "sacak": sacak_ls, "kapama": kapama_ls, "mastik": ls("Silikonize mastik")},
-                         "kolon": len(kol), "kiris": len(kirisler), "k0": _r(k0), "k1": _r(k1)})
+                         "kolon": len(kol), "kiris": len(kirisler), "k0": _r(k0), "k1": _r(k1), "yan": yan})
         VR_Z.append(vk)
     if len(sundurma) > 1:
         raise Desteklenmiyor(f"{len(sundurma)} sundurma paneli; rehber birini kurar")
@@ -1458,8 +1469,11 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
         adim.append({"ad": "Veranda", "t": "Veranda kolon ve kirişleri",
                      "p": f"Veranda gövdeden taşar ({fmtc(su['x1'] - su['x0'])} × {fmtc(abs(su['yw'] - su['yo']))} cm); çatısı sundurma panelidir. "
                           f"{su['kolon']} kolon (100 × 100) dış kenara dikilir: iki köşede ve ortada. Kolon boyu {fmtc(su['k0'])} cm, dış kirişin altına kadar. "
-                          f"Dış kiriş {su['kiris']} parçadır, ara kolonun ortasında birleşir; üstü {fmtc(su['k1'])} cm. Yan kiriş yok: panel duvara ve "
-                          "dış kirişe oturur. Sundurma paneli ana çatıdan sonra takılır.",
+                          f"Dış kiriş {su['kiris']} parçadır, ara kolonun ortasında birleşir; üstü {fmtc(su['k1'])} cm. "
+                          + (f"{len(su['yan'])} yan kiriş (100 × 100, L {fmtc(su['yan'][0]['L'])} cm) duvardan dış kirişin iç yüzüne eğimli gider: üstü duvarda "
+                             f"{fmtc(su['yan'][0]['ust_duvar'])} cm, dış kirişte {fmtc(su['yan'][0]['ust_dis'])} cm. Panel duvara, dış kirişe ve yan kirişlere oturur. "
+                             if su["yan"] else "Yan kiriş yok: panel duvara ve dış kirişe oturur. ")
+                          + "Sundurma paneli ana çatıdan sonra takılır.",
                      "kamera": K([(su["x0"] + su["x1"]) / 2, 1.2, (su["yw"] + su["yo"]) / 2], 0.35, 0.3, 12, True)})
     if VR:
         adim.append({"ad": "Verandalar" if len(VR) > 1 else "Veranda", "t": "Veranda kolon ve kirişleri",

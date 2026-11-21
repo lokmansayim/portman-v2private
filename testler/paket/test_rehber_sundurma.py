@@ -59,7 +59,10 @@ def test_sundurma_motorun_kotlarinda(pa48):
     assert (su["ust"], su["alt_uc"], su["kal"], su["egim"]) == (230, 218.8, 8, 0.05)
     v = d["verandalar"][-1]
     assert len(v["kolon"]) == 3 == _adet(L, "Özel kutu profil (kolon)") and all(k["h1"] == 200.8 for k in v["kolon"])
-    assert len(v["kiris"]) == 2 == _adet(L, "Kutu profil (kiriş)")
+    assert len(v["kiris"]) + len(su["yan"]) == 4 == _adet(L, "Kutu profil (kiriş)")
+    # D-133 ek (kart 20.11.2026 20:19:34 "Eğimli, panelin altında"): iki yan kiriş Motor'un planından, panelin altında eğimli
+    assert [(y["x0"], y["x1"], y["L"], y["ust_duvar"], y["ust_dis"]) for y in su["yan"]] == [(0, 10, 214, 222, 211.3), (631, 641, 214, 222, 211.3)]
+    assert all("L 2140" in y["liste"] for y in su["yan"])
     assert [k["rect"][2] - k["rect"][0] for k in v["kiris"]] == [320.5, 320.5] and all((k["h0"], k["h1"]) == (200.8, 210.8) for k in v["kiris"])
 
 
@@ -85,5 +88,5 @@ def test_sundurma_cakismasiz(pa48, tmp_path):
     assert r.returncode == 0, r.stderr[-2000:]
     s = json.loads((tmp_path / "c.json").read_text(encoding="utf-8"))
     assert s["hatalar"] == []
-    assert s["parcalar"].get("Z damlalık") == 3 and s["parcalar"].get("Silikonize mastik") == 1
+    assert s["parcalar"].get("Z damlalık") == 3 and s["parcalar"].get("Silikonize mastik") == 1 and s["parcalar"].get("Yan kiriş") == 2
     assert s["cakisma"] == [], s["cakisma"][:3]

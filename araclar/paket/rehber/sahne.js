@@ -389,6 +389,13 @@ function profilX(pts, x0, x1, m) {   // pts: [[y, h], ...] (cm); x0…x1 boyunca
   const sacUst = d => ust(d) + SL;                                   // sacın altı (saçak sacının tırnağı arada)
   const LS = su.liste;
   let o = 0;
+  // yan kiriş (D-133 ek; Lokman, kart 20.11.2026 20:19:34 "Eğimli, panelin altında"): Motor'un planından; duvardan dış kirişin iç yüzüne,
+  // üstü panelin altında. Duvar ucu H kanadının dışından başlar (kesişme yok).
+  (su.yan || []).forEach((k, i) => {
+    const ky = d => k.ust_duvar + (k.ust_dis - k.ust_duvar) * d / k.L;
+    add(AD.veranda, profilX([[yy(DD), ky(DD)], [yy(k.L), ky(k.L)], [yy(k.L), ky(k.L) - 10], [yy(DD), ky(DD) - 10]], k.x0, k.x1, mat('box', AD.veranda)), 50 + i,
+      { kod: 'V-02', ad: kart('V-02'), satir: [['Bu parça', k.bu], ['Liste', k.liste], ...kartSat('V-02')] });
+  });
   // panel: 8 cm, C profil çerçeve (gösterim: dolu kesit)
   add(st, profilX([[yy(DD), ust(DD)], [yy(D_), ust(D_)], [yy(D_), ust(D_) - su.kal], [yy(DD), ust(DD) - su.kal]], su.x0, su.x1, mat('frame', st)), o++,
     { kod: null, ad: 'Sundurma paneli (8 cm C)', satir: [['Bu parça', `${su.ad} · ${fmtc(su.x1 - su.x0)} × ${fmtc(D_)} cm, 8 cm C profilden panel`], ['Oturma', `duvarda üstü ${fmtc(su.ust)} cm, dış kirişte ${fmtc(su.alt_uc)} cm; eğim %${fmt(su.egim * 100, 0)}`], ['Liste', LS.panel], ['Kaynak', 'Lokman, 20.11.2026 07:54:25: panel sırt kalınlığı 8 cm, ana çatıdan 20 cm aşağıda, %5']] });

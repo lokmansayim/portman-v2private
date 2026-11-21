@@ -1,7 +1,7 @@
 // Rehberde sundurmanın parçaları (panel, sac, Z damlalık, mastik, saçak sacı, kapama) başka bir parçanın içine giriyor mu (Lokman,
 // 20.11.2026 22:59: "hiç bir zaman kesişme olmasın"). Sundurma adımındaki her parçanın kenarlarından 2 cm arayla noktalar alınır; nokta başka
 // bir parçanın içindeyse (altı yönde ışın sayımı, yüzden en az 0,5 mm içeride) çakışmadır. Ters yön de bakılır: öteki parçaların noktaları
-// sundurma parçalarının içinde mi. Değen yüzler çakışma sayılmaz.
+// sundurma parçalarının içinde mi. Sundurmanın eğimli yan kirişleri (veranda adımı) de denetlenir. Değen yüzler çakışma sayılmaz.
 //   THREE_DIR=<three@0.160.0 klasörü> node cakisma_sundurma.js <rehber.html> <cakisma.json>
 const { chromium } = require('playwright');
 const fs = require('fs');
@@ -23,7 +23,8 @@ const fs = require('fs');
     if (!z) return { parcalar: [], cakisma: [] };
     const su = z.step, L = [];
     for (const q of M.parts) { q.obj.updateMatrixWorld(true); q.obj.traverse(o => { if (o.isMesh) { o.material.side = T3.DoubleSide; L.push({ o, q, box: new T3.Box3().setFromObject(o) }); } }); }
-    const S = L.filter(e => e.q.step === su);
+    const yanK = q => { const i = q.obj.userData.info; return !!(i && i.satir && i.satir[0] && String(i.satir[0][1]).includes('yan kiriş · L')); };
+    const S = L.filter(e => e.q.step === su || yanK(e.q));
     const ray = new T3.Raycaster(), dirs = [[1,0,0],[-1,0,0],[0,1,0],[0,-1,0],[0,0,1],[0,0,-1]].map(d => new T3.Vector3(...d));
     const icinde = (pt, o) => { let tek = 0, en = 1e9; for (const d of dirs) { ray.set(pt, d); const u = []; ray.intersectObject(o, false).forEach(x => { if (!u.some(y => Math.abs(y - x.distance) < 1e-6)) u.push(x.distance); }); if (u.length % 2) tek++; if (u.length) en = Math.min(en, u[0]); } return tek >= 5 && en > 0.0005; };
     const noktalar = o => { const P = o.geometry.attributes.position, I = o.geometry.index, v = [], out = [];
@@ -35,7 +36,7 @@ const fs = require('fs');
     const bak = (a, c, yon) => { const ib = a.box.clone().intersect(c.box); if (ib.isEmpty()) return; const s = ib.getSize(new T3.Vector3()); if (Math.min(s.x, s.y, s.z) < 0.0005) return;
       let n = 0, ilk = null; for (const pt of noktalar(a.o)) if (ib.containsPoint(pt) && icinde(pt, c.o)) { n++; ilk = ilk || pt; }
       if (n) { const k = `${ad(a.q)} → ${ad(c.q)}${yon}`; cakisma[k] = cakisma[k] || { nokta: 0, yer: [+(ilk.x * 100).toFixed(1), +(ilk.y * 100).toFixed(1), +(ilk.z * 100).toFixed(1)] }; cakisma[k].nokta += n; } };
-    for (const a of S) { say[ad(a.q)] = (say[ad(a.q)] || 0) + 1; for (const c of L) { if (c.q === a.q) continue; bak(a, c, ''); if (c.q.step !== su) bak(c, a, ' (ters)'); } }
+    for (const a of S) { const k_ = yanK(a.q) ? 'Yan kiriş' : ad(a.q); say[k_] = (say[k_] || 0) + 1; for (const c of L) { if (c.q === a.q) continue; bak(a, c, ''); if (c.q.step !== su && !yanK(c.q)) bak(c, a, ' (ters)'); } }
     return { parcalar: say, cakisma: Object.entries(cakisma).map(([k, v]) => ({ cift: k, ...v })) };
   });
   fs.writeFileSync(out, JSON.stringify({ hatalar, ...sonuc }, null, 1));
