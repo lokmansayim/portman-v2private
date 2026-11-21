@@ -29,7 +29,7 @@ def ana_mahya_yonu(ie: dict) -> str:
 
 def teras_paneli(v: dict, ie: dict) -> dict:
     """D-52: teras paneli (`cati.tip: teras_paneli`): 8 cm kalın panel, üst yüzü duvarda duvar üstünün (ana çatının saçak altı çizgisi) 10 cm
-    altında; D-52 ek (Lokman, 5 Kasım 2026 00:36: "teraslara biraz eğim vereceksin") duvardan dışarı `egim_yuzde` ile iner. Planda duvardan
+    altında (D-133: İş Emri `duvar_alti_cm` yazarsa o kadar; 80 m² sundurması 20); D-52 ek (Lokman, 5 Kasım 2026 00:36: "teraslara biraz eğim vereceksin") duvardan dışarı `egim_yuzde` ile iner. Planda duvardan
     `cikma_cm` dışarı, cephe boyunca verandanın eni. `cati` ile aynı biçim (tek düzlem: saçak kotu dış kenarda, mahya kotu duvarda) +
     `kalinlik`, `dis_kiris_ustu` (dış kiriş düz, panelin altında: panelin altının dış kirişin dış yüzündeki kotu) ve `kolon_ustu` (dış kirişin
     altı). Yan kiriş yok (D-56; Lokman, 5 Kasım 2026 10:48): panel duvara ve dış kirişe oturur."""
@@ -37,15 +37,19 @@ def teras_paneli(v: dict, ie: dict) -> dict:
     c = v["cati"]; k = c["cikma_cm"]; cephe = v["cephe"]; e = c["egim_yuzde"] / 100.0
     X0, Y0, X1, Y1 = (x0, y1 - k, x1, y1) if cephe == "on" else (x0, y0, x1, y0 + k) if cephe == "arka" else \
                      (x1 - k, y0, x1, y1) if cephe == "sol" else (x0, y0, x0 + k, y1)
-    z_ic = duvar_ustu(ie) - G.TERAS_PANELI_SACAK_ALTI_CM
+    z_ic = duvar_ustu(ie) - c.get("duvar_alti_cm", G.TERAS_PANELI_SACAK_ALTI_CM)   # D-133: sundurma paneli 20 (`duvar_alti_cm`), yazılmazsa 10
     z_dis = z_ic - e * k
     ux, uy = YON[cephe]
     t = G.TERAS_PANELI_KALINLIK_CM
     dz = {"ad": "panel", "plan": [[X0, Y0], [X1, Y0], [X1, Y1], [X0, Y1]], "yukari": [-ux, -uy], "egim": e, "sacak_kotu": z_dis}
     dis = v["kirisler"][0]                              # `geometry._dis_verandalar`: dış kenar, iki yan
     h = min(kot(dz, x, y) for x in (dis[0], dis[2]) for y in (dis[1], dis[3])) - t
+    yan = []                                            # D-133 ek (kart 20 Kasım 2026 20:19:34 "Eğimli, panelin altında"): yan kiriş duvardan
+    for r in v["kirisler"][1:]:                         # dış kirişin iç yüzüne, üstü panelin altında (duvarda yüksek, dışta alçak)
+        zs = [kot(dz, x, y) - t for x in (r[0], r[2]) for y in (r[1], r[3])]
+        yan.append({"rect": tuple(r), "ust_duvar": max(zs), "ust_dis": min(zs)})
     return {"tip": "teras_paneli", "kutu": (X0, Y0, X1, Y1), "duzlemler": [dz], "mahya": None, "sacak_kotu": z_dis, "mahya_kotu": z_ic,
-            "egim": e, "sacak": 0.0, "kalinlik": t, "dis_kiris_ustu": h, "kolon_ustu": h - KIRIS_CM}
+            "egim": e, "sacak": 0.0, "kalinlik": t, "dis_kiris_ustu": h, "kolon_ustu": h - KIRIS_CM, "yan_kirisler": yan}
 
 
 def cati(v: dict, ie: dict) -> dict:
@@ -215,7 +219,7 @@ def _teras_paneli_parcalari(v: dict, ie: dict, kutu_u) -> list[dict]:
     """D-52: teras panelinin görünüşü (`teras_paneli`). Kolon zeminden dış kirişin altına, dış kiriş (10 × 10) panelin altında; panel 8 cm.
     D-52 ek (eğim): önden ve arkadan bakınca (bakış cepheye dik) panel cephe boyunca bant, dış kenarın alt çizgisinden duvardaki üst kotuna,
     dış kenarın üstü açık çizgi. Yandan bakınca panel duvardan dışarı inen eğik dörtgen, bir kez eğim yazısı; altında dış kirişin ucu ve kolon.
-    Yan kiriş yok (D-56). Saçak ve topuk çizgisi yok (çatı gibi şekilli değil)."""
+    Yan kiriş yok (D-56); `yan_kiris: egimli` yazan evde (D-133 ek, 80 m²) iki yan kiriş panelin altında eğimle. Saçak ve topuk çizgisi yok (çatı gibi şekilli değil)."""
     T = teras_paneli(v, ie)
     t, z_ic, z_dis, h = T["kalinlik"], T["mahya_kotu"], T["sacak_kotu"], T["kolon_ustu"]
     u_of = kutu_u.u
@@ -228,9 +232,17 @@ def _teras_paneli_parcalari(v: dict, ie: dict, kutu_u) -> list[dict]:
         a0, a1, d_ = kutu_u(x0, y0, x1, y1)
         out.append({"tur": "kolon", "u": [(a0, 0.0), (a1, 0.0), (a1, h), (a0, h)], "derinlik": d_, "veranda": v["ad"]})
     z_k = T["dis_kiris_ustu"]
-    for r in v["kirisler"]:                                     # D-56: yalnız dış kiriş (yan kiriş yok), düz, panelin altında
+    for r in v["kirisler"][:1]:                                 # D-56: dış kiriş düz, panelin altında
         a0, a1, d_ = kutu_u(*r)
         out.append({"tur": "kiris", "u": [(a0, z_k - KIRIS_CM), (a1, z_k - KIRIS_CM), (a1, z_k), (a0, z_k)], "derinlik": d_, "veranda": v["ad"]})
+    for yk in T["yan_kirisler"]:                                # D-133 ek: yan kiriş eğimli, panelin altında (yalnız `yan_kiris: egimli`)
+        a0, a1, d_ = kutu_u(*yk["rect"])
+        zw, zd = yk["ust_duvar"], yk["ust_dis"]
+        if yandan:                                              # yandan: duvarda yüksek, dış kirişte alçak eğik dörtgen
+            aw, ad_ = (a0, a1) if abs(u_of(ux, uy) - u_of(0.0, 0.0) - 1.0) < 1e-6 else (a1, a0)
+            out.append({"tur": "kiris", "u": [(aw, zw - KIRIS_CM), (ad_, zd - KIRIS_CM), (ad_, zd), (aw, zw)], "derinlik": d_, "veranda": v["ad"]})
+        else:                                                   # önden: kirişin ucu, en alttan en üste
+            out.append({"tur": "kiris", "u": [(a0, zd - KIRIS_CM), (a1, zd - KIRIS_CM), (a1, zw), (a0, zw)], "derinlik": d_, "veranda": v["ad"]})
     if yandan:
         uw, uo = (u0, u1) if abs(u_of(ux, uy) - u_of(0.0, 0.0) - 1.0) < 1e-6 else (u1, u0)
         out.append({"tur": "cati", "u": [(uw, z_ic - t), (uo, z_dis - t), (uo, z_dis), (uw, z_ic)], "derinlik": dd - 0.1, "veranda": v["ad"],

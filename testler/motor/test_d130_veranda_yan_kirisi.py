@@ -42,7 +42,7 @@ def _model(ie: dict) -> dict:
 def test_kart_dayanagi():
     """Hedef örnek Lokman'ın kartına dayanır (kelimesi kelimesine)."""
     assert "\"Her açık kenara kiriş\"" in BEKLENEN["kaynak"] and "21:43:35" in BEKLENEN["kaynak"]
-    assert "D-130" in PL.SURUM.split(";")[1] and PL.SURUM.startswith("1.21 ")
+    assert "D-130" in PL.SURUM.split("1.21, ")[1].split(";")[1]   # 1.22 (D-133) üstüne geldi; 1.21 geçmişte
 
 
 def test_yan_kirisler_ve_liste_satiri():

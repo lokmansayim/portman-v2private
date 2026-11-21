@@ -240,7 +240,7 @@
  ],
  "cati": {
   "tip": "besik",
-  "egim_yuzde": 32.9,
+  "egim_yuzde": 44.0,
   "sacak_cm": 30,
   "topuk_cm": 10,
   "makas_yonu": "kisa_kenar",
@@ -257,7 +257,7 @@
  "varsayimlar": [
   "VERANDA: gövdenin içinde açık mahal (paftada kolon); 1 dikme yazıldı.",
   "İç duvar kalınlıkları karışık {6.0: 4, 10.0: 2}; çoğunluk 6 cm yazıldı.",
-  "Çatı beşik, %32,9, saçak 30, topuk 10: paftanın makas planındaki gibi 7 makas (2 baş, 5 orta), mahya uzun kenar boyunca. Paftanın makas kesitinde tepe 140 cm; eğim yazılı değil, prefabrik standardı (Motor'da tepe 116,66 cm).",
+  "Çatı beşik, %44, saçak 30, topuk 10: paftanın makas planındaki gibi 7 makas (2 baş, 5 orta), mahya uzun kenar boyunca. Eğim paftanın makas kesitinden: saçak ucundan mahyaya 140 cm / 317,4 cm = %44 (D-133; Lokman, kart 20 Kasım 2026 07:08:08 \"Önerdiğim gibi\"; önce prefabrik standardı %32,9 yazılıydı, Motor'da tepe 116,66 cm).",
   "Pano dizilimi paftadan: 318.75 hattında y 10'dan 125,5; 507.0 hattında y 72.75'dan 125,5; sag hattında y 386.5'dan 125,5; 198.25 hattında x 381.5'dan 125,5 (dizilim.dis_pano_dayanagi)."
  ],
  "dikmeler": [
