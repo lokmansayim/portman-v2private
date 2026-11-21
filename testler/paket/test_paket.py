@@ -26,7 +26,7 @@ from araclar.paket.rehber import iz  # noqa: E402
 
 SAGLAMA = json.loads((Path(__file__).with_name("veri") / "saglama.json").read_text(encoding="utf-8"))
 KODLAR = ["AP-19", "TK-01", "AP-13", "AP-02"]
-KALEM = r"(bilgi\.md|bayi_paftasi\.pdf|plan\.png|gorunusler\.pdf|cizim\.dxf|montaj_paftasi\.pdf|yukleme_listesi(_asma|_ters)?\.xlsx|model\.ifc|" \
+KALEM = r"(bilgi\.md|bayi_paftasi\.pdf|plan\.png|gorunusler\.pdf|cizim\.dxf|montaj_paftasi\.(pdf|dxf)|yukleme_listesi(_asma|_ters)?\.xlsx|model\.ifc|" \
         r"montaj_rehberi\.html|model\.glb|kiyas\.xlsx)"
 
 
@@ -75,7 +75,7 @@ def test_ad_kurali_ve_durum(paketler):
         for p in klasor.iterdir():
             assert re.fullmatch(re.escape(kod) + "_" + KALEM, p.name), p.name
         durum = _bilgi_durum(klasor / f"{kod}_bilgi.md")
-        assert len(durum) == 11 + (kod == "TK-01"), (kod, durum)
+        assert len(durum) == 12 + (kod == "TK-01"), (kod, durum)        # BK-56: montaj_paftasi.dxf
         for ad, d in durum.items():
             assert d == "Var" or re.fullmatch(r"Yok: .{10,}", d), (ad, d)
             assert (d == "Var") == (klasor / ad).exists(), (ad, d)
@@ -85,12 +85,14 @@ def test_ad_kurali_ve_durum(paketler):
 def test_beklenen_dosyalar(paketler):
     _, _, s = paketler
     var = {k: {a.split("_", 1)[1] for a, v in s[k]["dosyalar"].items() if v == "Var"} for k in KODLAR}
-    assert var["AP-19"] == {"bilgi.md", "bayi_paftasi.pdf", "plan.png", "cizim.dxf", "montaj_paftasi.pdf", "yukleme_listesi.xlsx", "model.ifc",
+    # BK-56: montaj paftasının düzenlenebilir DXF'i, PDF'in yanında (aynı sayfalardan)
+    assert var["AP-19"] == {"bilgi.md", "bayi_paftasi.pdf", "plan.png", "cizim.dxf", "montaj_paftasi.pdf", "montaj_paftasi.dxf", "yukleme_listesi.xlsx", "model.ifc",
                             "montaj_rehberi.html", "kiyas.xlsx"}
-    assert var["TK-01"] == {"bilgi.md", "bayi_paftasi.pdf", "plan.png", "cizim.dxf", "montaj_paftasi.pdf", "yukleme_listesi_asma.xlsx",
+    assert var["TK-01"] == {"bilgi.md", "bayi_paftasi.pdf", "plan.png", "cizim.dxf", "montaj_paftasi.pdf", "montaj_paftasi.dxf", "yukleme_listesi_asma.xlsx",
                             "yukleme_listesi_ters.xlsx", "model.ifc", "montaj_rehberi.html"}
     # İE-29: çıkıntısız cumbada liste; İE-15 K6 (D-53): kart modeli ve montaj paftası da (çapraz cumbanın çatısı `motor/cati_capraz.py`)
-    assert var["AP-13"] == {"bilgi.md", "bayi_paftasi.pdf", "plan.png", "cizim.dxf", "yukleme_listesi.xlsx", "model.ifc", "montaj_paftasi.pdf"}
+    assert var["AP-13"] == {"bilgi.md", "bayi_paftasi.pdf", "plan.png", "cizim.dxf", "yukleme_listesi.xlsx", "model.ifc", "montaj_paftasi.pdf",
+                            "montaj_paftasi.dxf"}
     assert var["AP-02"] == {"bilgi.md"}
     d13 = s["AP-13"]["dosyalar"]
     assert "OSB ve nem bariyeri" in d13["AP-13_montaj_rehberi.html"]    # İş Emri'nde OSB + nem bariyeri + trapez sac: rehber o katmanları kurmuyor
@@ -407,8 +409,8 @@ def test_is_emri_ile_paket(paketler, tmp_path):
     a, b = kok / "prefabrik" / "TK-01", cikti / "prefabrik" / "TK-98"
     durum = _bilgi_durum(b / "TK-98_bilgi.md")
     assert {k for k, v in durum.items() if v == "Var"} == {f"TK-98_{x}" for x in (
-        "bilgi.md", "bayi_paftasi.pdf", "plan.png", "cizim.dxf", "montaj_paftasi.pdf", "yukleme_listesi_asma.xlsx", "yukleme_listesi_ters.xlsx",
-        "model.ifc", "montaj_rehberi.html")}
+        "bilgi.md", "bayi_paftasi.pdf", "plan.png", "cizim.dxf", "montaj_paftasi.pdf", "montaj_paftasi.dxf", "yukleme_listesi_asma.xlsx",
+        "yukleme_listesi_ters.xlsx", "model.ifc", "montaj_rehberi.html")}
     assert "teklif projesi" in durum["TK-98_kiyas.xlsx"]
     bilgi = (b / "TK-98_bilgi.md").read_text(encoding="utf-8")
     assert "--is-emri" in bilgi and hashlib.sha256(yol.read_bytes()).hexdigest() in bilgi
@@ -494,5 +496,5 @@ def test_k23_teslim_ciktisi_yok(tmp_path, monkeypatch, hal):
     var = {a.split("_", 1)[1] for a, v in r["dosyalar"].items() if v == "Var"}
     assert var == ({"bilgi.md", "cizim.dxf"} if hal == "dogrulanmadi" else {"bilgi.md"})
     assert sorted(p.name for p in (tmp_path / "M" / "prefabrik" / "TK-95").iterdir()) == sorted(f"TK-95_{x}" for x in var)
-    for a in ("yukleme_listesi.xlsx", "model.ifc", "montaj_paftasi.pdf", "montaj_rehberi.html", "model.glb", "kiyas.xlsx"):
+    for a in ("yukleme_listesi.xlsx", "model.ifc", "montaj_paftasi.pdf", "montaj_paftasi.dxf", "montaj_rehberi.html", "model.glb", "kiyas.xlsx"):
         assert "K23" in r["dosyalar"][f"TK-95_{a}"], a

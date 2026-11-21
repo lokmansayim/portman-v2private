@@ -51,7 +51,8 @@ MUHUR = KOK / "docs" / "notlar" / "2026-10-18_AIPrefabrik_muhur.md"
 REHBER = Path(__file__).with_name("rehber")
 KALEMLER = [("bilgi", "md", "kimlik, kaynaklar ve dosyaların durumu"), ("bayi_paftasi", "pdf", "canlıda bayiye giden ön onay PDF'i"),
             ("plan", "png", "WhatsApp plan görseli"), ("gorunusler", "pdf", "dört görünüş"), ("cizim", "dxf", "düzenlenebilir çizim"),
-            ("montaj_paftasi", "pdf", "yerleşim planları (kart modeli)"), ("yukleme_listesi", "xlsx", "liste üreteci"),
+            ("montaj_paftasi", "pdf", "yerleşim planları (kart modeli)"),
+            ("montaj_paftasi", "dxf", "yerleşim planlarının düzenlenebilir DXF'i (BK-56)"), ("yukleme_listesi", "xlsx", "liste üreteci"),
             ("model", "ifc", "kimlik kartlı model"), ("montaj_rehberi", "html", "adım adım 3B rehber"), ("model", "glb", "rehberin 3B modeli"),
             ("kiyas", "xlsx", "mühendisin paftası ve gerçek listesiyle kıyas")]
 
@@ -195,8 +196,11 @@ def kart_modeli(ie: dict, gec: Path, kart_kodu: str) -> dict:
     tip = (ie.get("cati") or {}).get("tip", "besik")
     if tip not in ("besik", "besik_cumba"):              # İE-15 K6: beşik + çıkıntısız çapraz cumba da (`motor/cati_capraz.py`)
         return {"neden": f"kart modeli {TIP_ADI.get(tip, tip)} çatıyı kurmuyor (yerleşimi beşik ve beşik + çapraz cumba; İE-15 K5, K6)"}
-    say = kart_model.uret(copy.deepcopy(ie), gec / "kart", kart_kodu)
+    say = kart_model.uret(copy.deepcopy(ie), gec / "kart", kart_kodu, dxf=True)     # BK-56: montaj paftasının DXF'i aynı sayfalardan
+    d = say.get("montaj_dxf") or {}
     return {"klasor": gec / "kart", "ifc": gec / "kart" / f"{kart_kodu}_model.ifc", "pdf": gec / "kart" / f"{kart_kodu}_yerlesim_planlari.pdf",
+            "dxf": gec / "kart" / d["dosya"] if d.get("dosya") else None,
+            "dxf_neden": None if d.get("dosya") else f"DXF denetimden geçmedi ({'; '.join(d.get('hatalar', []))}); `.HATALI.dxf` yalnız tanı için",
             "kural_yok": say["kural_yok"], "sema_hatasi": say["sema_hatasi"], "uyarilar": say.get("yerlesim", {}).get("uyarilar", [])}
 
 
@@ -387,7 +391,8 @@ def paket(m: dict, kok: Path, gecici: Path, glb: bool = False, kayit_: dict | No
             teslim_yok = "Motor çizemedi, doğrulama yapılamadı (K23)"
         if teslim_yok:
             # K23 ve canlı akış: doğrulamadan geçmeyen (ya da Motor'un çizemediği) İş Emri'nden teslim çıktısı yok; DXF denetim için
-            for kalem, uz in (("yukleme_listesi", "xlsx"), ("model", "ifc"), ("montaj_paftasi", "pdf"), ("montaj_rehberi", "html"), ("model", "glb")):
+            for kalem, uz in (("yukleme_listesi", "xlsx"), ("model", "ifc"), ("montaj_paftasi", "pdf"), ("montaj_paftasi", "dxf"), ("montaj_rehberi", "html"),
+                             ("model", "glb")):
                 durum[ad(kalem, uz)] = f"Yok: {teslim_yok}"
         else:
             # liste
@@ -409,11 +414,15 @@ def paket(m: dict, kok: Path, gecici: Path, glb: bool = False, kayit_: dict | No
             except Exception as e:                                          # noqa: BLE001 — hata nedenle yazılır, öteki modeller sürer
                 km = {"neden": f"kart modeli hata verdi ({type(e).__name__}: {str(e)[:160]})"}
             if "neden" in km:
-                durum[ad("model", "ifc")] = durum[ad("montaj_paftasi", "pdf")] = f"Yok: {km['neden']}"
+                durum[ad("model", "ifc")] = durum[ad("montaj_paftasi", "pdf")] = durum[ad("montaj_paftasi", "dxf")] = f"Yok: {km['neden']}"
                 km = None
             else:
                 yaz[ad("model", "ifc")] = km["ifc"]
                 yaz[ad("montaj_paftasi", "pdf")] = km["pdf"]
+                if km["dxf"]:
+                    yaz[ad("montaj_paftasi", "dxf")] = km["dxf"]
+                else:
+                    durum[ad("montaj_paftasi", "dxf")] = f"Yok: {km['dxf_neden']}"
                 if km["kural_yok"]:
                     notlar.append(f"Kart modeli: {len(km['kural_yok'])} parça \"kural yok\" (montaj paftası bu parçalarda tam değil): " +
                                   "; ".join(f"{x['parca']}: {x['neden']}" for x in km["kural_yok"]))
