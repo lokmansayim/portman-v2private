@@ -53,7 +53,7 @@ print("anahtar:", "var" if os.environ.get("ANTHROPIC_API_KEY") else "YOK", flush
 from beyin import gorsel_okuma as GO
 liste = json.loads((klasor / "liste.json").read_text(encoding="utf-8"))
 FIYAT = @@FIYAT@@
-ayar = {"model": "@@MODEL@@", "effort": "medium", "timeout_s": 180, "max_tokens": 8000}
+ayar = {"model": "@@MODEL@@", "effort": "medium", "timeout_s": @@SURE@@, "max_tokens": @@TOKEN@@}
 print("ayar:", json.dumps(ayar), "· sürüm:", os.path.realpath(kok), flush=True)
 gt = ct = 0
 for i, x in enumerate(liste, 1):
@@ -70,6 +70,8 @@ print("== bitti")
 
 
 FIYAT = {"claude-opus-5-5": (4, 20), "claude-fable-5-2": (8, 40)}     # USD / milyon token (girdi, çıktı)
+# Canlı ayar (kanal/ayarlar.py: 180 sn, 8000 token) Opus 5.5 içindir; Fable 5.2 her zaman düşünür, çıktı payı ve süre büyür
+SINIR = {"claude-opus-5-5": (180, 8000), "claude-fable-5-2": (300, 16000)}
 
 
 def paketle(liste_yolu: Path, cikti: Path, tarih: str = "2026-11-22", model: str = "claude-opus-5-5") -> Path:
@@ -100,7 +102,7 @@ base64 -d > "$K/girdi.tgz" <<'B64'
 B64
 tar -xzf "$K/girdi.tgz" -C "$K" || {{ echo "== DUR: paket açılamadı"; exit 1; }}
 cat > "$K/oku.py" <<'PY'
-{SUNUCU_PY.strip().replace('@@MODEL@@', model).replace('@@FIYAT@@', repr(FIYAT[model]))}
+{SUNUCU_PY.strip().replace('@@MODEL@@', model).replace('@@FIYAT@@', repr(FIYAT[model])).replace('@@SURE@@', str(SINIR[model][0])).replace('@@TOKEN@@', str(SINIR[model][1]))}
 PY
 cd "$KOK" && "$KOK/venv/bin/python" "$K/oku.py" "$K" "$KOK"
 echo "== çıkış $?"
@@ -245,11 +247,11 @@ def kiyas(txt: Path, esleme_yolu: Path, hedef: Path) -> list[dict]:
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="Bayi çizimi okuma denemesi (pano 83)")
     alt = ap.add_subparsers(dest="komut", required=True)
-    a = alt.add_parser("paketle"); a.add_argument("liste"); a.add_argument("cikti"); a.add_argument("--model", default="claude-opus-5-5", choices=sorted(FIYAT))
+    a = alt.add_parser("paketle"); a.add_argument("liste"); a.add_argument("cikti"); a.add_argument("--model", default="claude-opus-5-5", choices=sorted(FIYAT)); a.add_argument("--etiket", default="2026-11-22")
     k = alt.add_parser("kiyas"); k.add_argument("okuma_cikti"); k.add_argument("esleme"); k.add_argument("hedef")
     a = ap.parse_args(argv)
     if a.komut == "paketle":
-        print(paketle(Path(a.liste), Path(a.cikti), model=a.model))
+        print(paketle(Path(a.liste), Path(a.cikti), tarih=a.etiket, model=a.model))
     else:
         for x in kiyas(Path(a.okuma_cikti), Path(a.esleme), Path(a.hedef)):
             print(json.dumps({k: x[k] for k in ("ad", "durum", "ayni_pano", "varsayim", "kod_sorulari", "cizilemez", "okunan", "onayli")}, ensure_ascii=False))
