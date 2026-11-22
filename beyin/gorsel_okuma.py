@@ -47,14 +47,16 @@ ESIK = {"zincir_cm": 3.0,               # zincir toplamı ile yazılı toplam / 
         "ortu_m2": 1.0,                 # odaların örtmediği gövde alanı
         "cakisma_m2": 0.3,              # iki odanın üst üste bindiği alan
         "pano_cm": 10.0}                # prefabrik: oda sınırı en yakın pano aksına bu kadar uzaksa oturtulur, ötesi sorulur
+OLCU_YAKIN_CM = 3.0                     # BK-70: oda sınırı çizimde yazılı bir ölçü noktasına bu kadar yakınsa ölçülüdür (zincir eşiği gibi)
+OLCUSUZ_ESIT_CM = 5.0                   # BK-70: ölçüsüz sınırda iki pano aksına uzaklık farkı bundan azsa hangisi olduğu sorulur
 KISA_PANO_CM = 20.0                     # Pano Motor'u bundan kısa panoyu uyarıyla, duvar kalınlığından kısasını hatayla çizer (motor/geometry,
                                         # motor/validate): ızgaranın kesilmiş ucu bundan kısaysa dış ölçü sorulur
 KAPI_CM = {"dis": 90, "ic": 82}         # TK-01 teklif çalışmasının çalışma kabulü (dış 90, iç 82)
 PENCERE_VARSAYILAN = {"banyo": "60x40", "wc": "60x40"}     # ölçüsü yazmayan pencere; başka odalarda 120x120 (bayiye yazılır)
 TUR = {"salon": "salon", "mutfak": "mutfak", "yatak_odasi": "yatak_odasi", "banyo": "banyo", "wc": "wc", "hol": "antre_hol",
        "antre": "antre_hol", "depo": "depo", "calisma": "calisma", "giyinme": "giyinme",
-       "giris": "veranda"}                  # D-125: önü cephe duvarsız giriş nişi (Motor'da gövdedeki açık mahal; TK-01 r06'nın GİRİŞ'i)
-CELIK_ISLEV = {"salon": "salon", "mutfak": "mutfak", "yatak_odasi": "yatak_odasi", "banyo": "banyo", "wc": "banyo", "hol": "hol",
+       "giris": "veranda", "veranda": "veranda"}   # BK-70: gövdenin içindeki (gömme) veranda; D-125: önü cephe duvarsız giriş nişi (Motor'da gövdedeki açık mahal; TK-01 r06'nın GİRİŞ'i)
+CELIK_ISLEV = {"veranda": "veranda", "salon": "salon", "mutfak": "mutfak", "yatak_odasi": "yatak_odasi", "banyo": "banyo", "wc": "banyo", "hol": "hol",
                "antre": "hol", "depo": "depo", "calisma": "yatak_odasi", "giyinme": "yatak_odasi"}
 CEPHE_ADI = {"on": "önde", "arka": "arkada", "sol": "solda", "sag": "sağda"}
 VERANDA_ADI = {"on": "ÖN", "arka": "ARKA", "sol": "SOL", "sag": "SAĞ"}
@@ -374,10 +376,203 @@ def kanonik(okuma: dict | CizimOkumasi) -> dict:
         c = cephe[v.kenar]
         bas, bit = (x0, x1) if c in ("on", "arka") else (H - y1, H - y0)
         ver.append({"cephe": c, "bas": bas, "bit": bit, "derinlik": d, "alan_m2": v.alan_m2, "rect": [x0, y0, x1, y1]})
-    return {"W": W, "H": H, "giris": giris, "odalar": odalar,
-            "pencereler": [{"oda": p.oda, "cephe": cephe[p.kenar], "olcu": p.olcu, "adet": p.adet} for p in o.pencereler],
-            "kapilar": [kapi(k) for k in o.kapilar],
-            "verandalar": ver, "notlar": notlar}
+    kan = {"W": W, "H": H, "giris": giris, "odalar": odalar,
+           "pencereler": [{"oda": p.oda, "cephe": cephe[p.kenar], "olcu": p.olcu, "adet": p.adet} for p in o.pencereler],
+           "kapilar": [kapi(k) for k in o.kapilar],
+           "verandalar": ver, "notlar": notlar, "olculu": _olculu_noktalar(o, Wc, Hc, giris),
+           "veranda_dahil": _veranda_dahil_toplamlari(o, giris)}
+    _gomme_veranda(kan)
+    return kan
+
+
+def _olculu_noktalar(o: CizimOkumasi, Wc: float, Hc: float, giris: str) -> dict[str, list[float]]:
+    """BK-70: çizimde ölçüsü yazılı noktalar (kanonik eksenlerde): her zincirin ardışık parçalarının toplamları, iki uçtan da. Oda sınırı
+    bunlardan birine yakınsa ölçülüdür (bayinin yazdığı ölçü); değilse LLM oranla almıştır (`tahminler`)."""
+    yatay, dusey = {0.0, Wc}, {0.0, Hc}
+    for z in o.zincirler:
+        a = z.olculer_cm
+        top = Wc if z.kenar in ("ust", "alt") else Hc
+        hedef = yatay if z.kenar in ("ust", "alt") else dusey
+        for i in range(len(a)):
+            t = 0.0
+            for j in range(i, len(a)):
+                t += a[j]
+                hedef.update((t, top - t))
+    if giris in ("alt", "ust"):
+        return {"x": sorted(yatay), "y": sorted(dusey)}
+    return {"x": sorted(dusey), "y": sorted(yatay)}
+
+
+def _veranda_dahil_toplamlari(o: CizimOkumasi, giris: str) -> dict[str, list[float]]:
+    """BK-70 (hakem): verandayı da kapsayan zincirlerin yazılı toplamları (kanonik eksenlerde). Gömme verandada gövde büyürse yeni ölçü
+    bunlarla tutmalı; tutmazsa okuma aynen kalır, sorulur (K21)."""
+    yatay, dusey = [], []
+    for z in o.zincirler:
+        if z.kapsam == "veranda_dahil":
+            (yatay if z.kenar in ("ust", "alt") else dusey).append(float(z.toplam_cm or sum(z.olculer_cm)))
+    return {"x": yatay, "y": dusey} if giris in ("alt", "ust") else {"x": dusey, "y": yatay}
+
+
+GOMME_TOL = {"m2": 0.6, "oran": 0.15}   # BK-70: boş bölüm ile verandanın içe yansıması bu kadar farklıysa yine de aynı yer sayılır
+
+
+def _gomme_veranda(kan: dict) -> None:
+    """BK-70 (gömme veranda): LLM gövdenin çerçevesi içindeki açık verandayı (TK-06 87 m², TK-08 76 m², TK-09 45 m²) gövdenin dışına
+    yazıyor; odaların örtmediği bölüm "boş alan" sorusu oluyordu. Onaylı üç planda bu veranda gövdenin içinde açık mahaldir (Motor'da
+    `veranda` türü, D-125'in nişi gibi); giriş kapısı veranda ile iç oda arasındadır. İki biçim (kanonik çerçevede, yerinde düzeltilir):
+      A) verandanın gövdeye yansıması odaların boş bıraktığı bölümle örtüşür → veranda o bölümdür, dış ölçü aynı;
+      B) veranda cephenin bütün boyunca uzanır ve boş bölüm o kenara değer → gövde veranda kadar büyür, veranda boş bölüm +
+         dıştaki şerittir (TK-08: L veranda, onaylı 951,25).
+    Başka durumda okuma aynen kalır (boş alan sorulur). Değişiklik bayiye not olarak yazılır."""
+    from shapely.geometry import box
+    from shapely.ops import unary_union
+    if not kan["verandalar"] or not kan["odalar"]:
+        return
+    W, H = kan["W"], kan["H"]
+    dolu = unary_union([box(*r) for x in kan["odalar"] for r in x["rects"] if r[2] > r[0] and r[3] > r[1]])
+    bos = box(0, 0, W, H).difference(dolu)
+    if bos.area / 1e4 <= ESIK["ortu_m2"]:
+        return
+    parcalar = list(getattr(bos, "geoms", [bos]))
+    yeni_ver, gommeler = [], []
+    for v in kan["verandalar"]:
+        x0, y0, x1, y1 = v["rect"]
+        d, c = v["derinlik"], v["cephe"]
+        ic = {"on": (x0, H - d, x1, H), "arka": (x0, 0, x1, d), "sol": (0, y0, d, y1), "sag": (W - d, y0, W, y1)}[c]
+        ic_b = box(*ic)
+        tol = lambda a: max(GOMME_TOL["m2"] * 1e4, GOMME_TOL["oran"] * a)
+        es = next((p for p in parcalar if p.symmetric_difference(ic_b).area <= tol(ic_b.area)), None)
+        if es is not None:                      # A: yansıma boş bölüm
+            gommeler.append((v, [list(r) for r in _dikdortgenlere(es)], None))
+            parcalar.remove(es)
+            continue
+        yeni_ver.append(v)
+    # B: aynı cephedeki bitişik verandalar cephenin bütün boyunca uzanır ve boş bölüm o kenara değer → gövde en sığ veranda kadar
+    # büyür; veranda = boş bölüm + dıştaki şerit (TK-08). L verandayı iki parça okuyan okuma (Fable: 0–264 derinlik 325,51 = 200,01 +
+    # girinti 125,5) de aynı yere varır; derinlikler bu iki değerden başkaysa okuma aynen kalır (boş alan sorulur).
+    kalan = []
+    for c in ("on", "arka", "sol", "sag"):
+        grup = sorted((v for v in yeni_ver if v["cephe"] == c), key=lambda v: v["rect"][0] if c in ("on", "arka") else v["rect"][1])
+        if not grup or any(g[2] for g in gommeler):
+            kalan.extend(grup)
+            continue
+        yatay = c in ("on", "arka")
+        a0 = min(v["rect"][0 if yatay else 1] for v in grup)
+        a1 = max(v["rect"][2 if yatay else 3] for v in grup)
+        bitisik = all(abs(u["rect"][2 if yatay else 3] - w["rect"][0 if yatay else 1]) < 2.0 for u, w in zip(grup, grup[1:])) \
+            and a0 <= NIS_TOL_CM and a1 >= (W if yatay else H) - NIS_TOL_CM      # veranda cephenin bütün boyunca (TK-08)
+        kenar = {"on": box(a0, H - NIS_TOL_CM, a1, H), "arka": box(a0, 0, a1, NIS_TOL_CM),
+                 "sol": box(0, a0, NIS_TOL_CM, a1), "sag": box(W - NIS_TOL_CM, a0, W, a1)}[c]
+        serit = box(a0, -1e6, a1, 1e6) if yatay else box(-1e6, a0, 1e6, a1)
+        es = next((p for p in parcalar if bitisik and p.intersection(kenar).area > 1e2 and p.difference(serit).area < 1e2), None)
+        if es is None:
+            kalan.extend(grup)
+            continue
+        ex0, ey0, ex1, ey1 = es.bounds
+        girinti = {"on": H - ey0, "arka": ey1, "sol": ex1, "sag": W - ex0}[c]
+        d0 = min(v["derinlik"] for v in grup)
+        if not all(abs(v["derinlik"] - d0) < 3.0 or abs(v["derinlik"] - d0 - girinti) < 5.0 for v in grup):
+            kalan.extend(grup)
+            continue
+        eksen, yeni = ("y", H + d0) if yatay else ("x", W + d0)
+        if any(abs(t - yeni) > 5.0 for t in kan.get("veranda_dahil", {}).get(eksen, [])):   # bayinin yazdığı toplamla çelişir
+            kalan.extend(grup)
+            continue
+        dis = {"on": [a0, H, a1, H + d0], "arka": [a0, -d0, a1, 0], "sol": [-d0, a0, 0, a1], "sag": [W, a0, W + d0, a1]}[c]
+        gommeler.append(({**grup[0], "derinlik": d0}, [list(r) for r in _dikdortgenlere(es)] + [dis], c))
+        parcalar.remove(es)
+    yeni_ver = kalan
+    if not gommeler:
+        return
+    dx = dy = 0.0
+    for v, _, c in gommeler:
+        if c == "on":
+            kan["H"] = H + v["derinlik"]
+        elif c == "sag":
+            kan["W"] = W + v["derinlik"]
+        elif c == "arka":
+            dy = v["derinlik"]; kan["H"] = H + dy
+        elif c == "sol":
+            dx = v["derinlik"]; kan["W"] = W + dx
+    if dx or dy:                                # arka / sol: köken veranda kadar kayar
+        kaydir = lambda r: [r[0] + dx, r[1] + dy, r[2] + dx, r[3] + dy]
+        for x in kan["odalar"]:
+            x["rects"] = [kaydir(r) for r in x["rects"]]
+        for v in yeni_ver:
+            v["rect"] = kaydir(v["rect"])
+        for g in gommeler:
+            g[1][:] = [kaydir(r) for r in g[1]]
+        kan["olculu"] = {"x": [t + dx for t in kan["olculu"]["x"]] + [0.0], "y": [t + dy for t in kan["olculu"]["y"]] + [0.0]}
+    kan["olculu"] = {"x": sorted(set(kan["olculu"]["x"]) | {kan["W"]}), "y": sorted(set(kan["olculu"]["y"]) | {kan["H"]})}
+    ad_say = len(gommeler)
+    for i, (v, rects, c) in enumerate(gommeler, 1):
+        ad = "VERANDA" if ad_say == 1 else f"{VERANDA_ADI[v['cephe']]} VERANDA"
+        kan["odalar"].append({"ad": ad, "islev": "veranda", "alan_m2": None, "rects": rects})
+        kan["notlar"].append(f"{CEPHE_ADI[v['cephe']]}ki verandayı gövdenin içinde (ana çatının altında) okudum"
+                             + (f"; gövde {_m(kan['W'])} × {_m(kan['H'])} m" if c else ""))
+    kan["verandalar"] = yeni_ver
+    # giriş kapısı: kapının odası verandaya o cephe yönünde değiyorsa kapı veranda ile oda arasında (D-125'in nişi gibi)
+    vlar = [x for x in kan["odalar"] if x["islev"] == "veranda"]
+    for k in kan["kapilar"]:
+        if not k["dis"] or k.get("nis"):
+            continue
+        adlar = {_norm(x["ad"]): x for x in kan["odalar"]}
+        oda = next((adlar[_norm(a)] for a in k["arasinda"] if _norm(a) in adlar), None)
+        if oda is None:
+            continue
+        for vx in vlar:
+            yonler = _deyen_yonler(oda["rects"], vx["rects"])
+            if (k["cephe"] in yonler) or (k["cephe"] is None and len(yonler) == 1):
+                k["nis"] = vx["ad"]
+                k["arasinda"] = [vx["ad"], oda["ad"]]
+                k["cephe"] = k["cephe"] or next(iter(yonler))
+                break
+
+
+def _dikdortgenlere(p) -> list[tuple[float, float, float, float]]:
+    """Eksene paralel çokgen → dikdörtgenler (yatay şeritler; komşu eşleri birleşir)."""
+    from shapely.geometry import box
+    x0, y0, x1, y1 = p.bounds
+    if abs(p.area - (x1 - x0) * (y1 - y0)) < 1e2:
+        return [(x0, y0, x1, y1)]
+    ys = sorted({round(c[1], 2) for c in p.exterior.coords})
+    xs = sorted({round(c[0], 2) for c in p.exterior.coords})
+    out = []
+    for a, b in zip(ys, ys[1:]):
+        hucre = [(u, w) for u, w in zip(xs, xs[1:]) if p.contains(box(u, a, w, b).centroid)]
+        for u, w in hucre:
+            if out and out[-1][1] == a and out[-1][3] == b and abs(out[-1][2] - u) < 1e-6:
+                out[-1] = (out[-1][0], a, w, b)
+            else:
+                out.append((u, a, w, b))
+    birlesik = []
+    for r in out:                               # aynı x aralığındaki ardışık şeritler birleşir
+        e = next((q for q in birlesik if abs(q[0] - r[0]) < 1e-6 and abs(q[2] - r[2]) < 1e-6 and abs(q[3] - r[1]) < 1e-6), None)
+        if e:
+            birlesik[birlesik.index(e)] = (e[0], e[1], e[2], r[3])
+        else:
+            birlesik.append(r)
+    return birlesik
+
+
+def _deyen_yonler(a: list[list[float]], b: list[list[float]]) -> set[str]:
+    """`b`'nin `a`ya değdiği yönler (kanonik cephe adlarıyla): b, a'nın önündeyse "on" (y büyür), arkasındaysa "arka", solunda "sol"."""
+    out = set()
+    for r in a:
+        for q in b:
+            ox = min(r[2], q[2]) - max(r[0], q[0])
+            oy = min(r[3], q[3]) - max(r[1], q[1])
+            if ox >= KAPI_CM["ic"] - 1e-6:
+                if abs(q[1] - r[3]) < 1.0:
+                    out.add("on")
+                if abs(q[3] - r[1]) < 1.0:
+                    out.add("arka")
+            if oy >= KAPI_CM["ic"] - 1e-6:
+                if abs(q[0] - r[2]) < 1.0:
+                    out.add("sag")
+                if abs(q[2] - r[0]) < 1.0:
+                    out.add("sol")
+    return out
 
 
 def _disari(ad: str, oda_adlari: set[str]) -> bool:
@@ -549,8 +744,35 @@ def denetle(okuma: dict, ayar: dict | None = None, bk14: bool | None = None) -> 
     ie, sr, cz, nt = is_emri_prefabrik(kan, o, bk14=bk14, esik=e)
     sor.extend(sr); sonuc["cizilemez"].extend(cz); notlar.extend(nt)
     if not sr and not cz:
-        sonuc["cevrim"] = {"is_emri": ie}
+        motor_sorusu = _motor_denemesi(ie)
+        if motor_sorusu:
+            sor.append(motor_sorusu)
+        else:
+            sonuc["cevrim"] = {"is_emri": ie}
     return sonuc
+
+
+def _motor_denemesi(ie: dict) -> str | None:
+    """BK-70: şablon bayiye "doğru mu?" diye gitmeden önce Pano Motor'unda kurulur (LLM yok, kayıt yok). Motor kuramazsa (61 m²: "Aynı
+    panoya iki açıklık") bayi teyit ettikten sonra plan hata veriyordu; şimdi bayiye soru olur. Dönüş: soru ya da None."""
+    import copy
+    from motor import geometry as G
+    try:
+        G.kur(copy.deepcopy(ie))
+    except G.IsEmriHatasi as hata:
+        m = re.search(r"'mahal': '([^']+)'.*?'duvar': '([^']+)'", str(hata)) or re.search(r"'arasi': \['([^']+)', '([^']+)'\]", str(hata))
+        if m and "mahal" in m.re.pattern:
+            cephe = {"on": "arka", "arka": "on"}.get(m.group(2), m.group(2))     # Motor açıklığı arka-sol çerçevesinde yazar (ön ↔ arka)
+            yer = f"{_oda_adi(m.group(1))} {CEPHE_ADI.get(cephe, cephe)}ki duvarında"
+        elif m:
+            yer = f"{_oda_adi(m.group(1))} ile {_oda_adi(m.group(2))} arasındaki duvarda"
+        else:
+            yer = "bir duvarda"
+        return (f"Planı panolara yerleştirirken {yer} pencere ve kapıları sığdıramadım. Bu duvardaki pencerelerin ve kapının yerini "
+                "(köşeden cm) yazar mısınız?")
+    except Exception:                           # Motor'un başka hatası: plan adımında bugünkü gibi raporlanır
+        return None
+    return None
 
 
 KENAR_YERI = {"ust": "üstte", "alt": "altta", "sol": "solda", "sag": "sağda"}
@@ -647,6 +869,8 @@ def is_emri_prefabrik(kan: dict, o: CizimOkumasi, bk14: bool | None = None, esik
     if sor:
         return None, sor, cz, nt
     kaymalar = []
+    olcusuz: list[tuple[float, str]] = []
+    olculu = (kan.get("olculu") or {}).get("x") or [], (kan.get("olculu") or {}).get("y") or []
 
     def yasla(v: float, eksen: list[float], uz: float, ad: str) -> float | None:
         """Okunan sınır → yarım pano aksı. Dış duvarın içindeki değer (0–10 cm, uz−10–uz) duvarın kendisidir, kayma sayılmaz."""
@@ -657,6 +881,19 @@ def is_emri_prefabrik(kan: dict, o: CizimOkumasi, bk14: bool | None = None, esik
             kaymalar.append(max(0.0, uz - T_DIS - v))
             return eksen[-1]
         a = min(eksen[1:-1], key=lambda t: abs(t - v)) if len(eksen) > 2 else None
+        if a is not None and abs(a - v) > tol + 1e-9 and not _olculu(v, olculu[0 if eksen is xs else 1]):
+            # BK-70: çizimde ölçüsü yazmayan sınır (LLM oranla aldı) en yakın pano aksına oturur, bayiye notla yazılır; iki aks eşit
+            # yakınsa sorulur (TK-01: banyo derinliği 245 okundu, onaylı plan 256)
+            iki = sorted(eksen[1:-1], key=lambda t: abs(t - v))[:2]
+            if len(iki) == 2 and abs(abs(iki[0] - v) - abs(iki[1] - v)) < OLCUSUZ_ESIT_CM:
+                sor.append(f"{_oda_adi(ad)} sınırının ölçüsü çizimde yazmıyor; {_tr(iki[0], 2)} cm mi, {_tr(iki[1], 2)} cm mi olsun?")
+                return None
+            olcusuz.append((abs(a - v), f"{_oda_adi(ad)} {_tr(v, 1)} → {_tr(a, 2)} cm"))
+            if eksen[-1] - a < KISA_PANO_CM - 1e-9:
+                sor.append(f"{_oda_adi(ad)} sınırı ({_tr(v, 1)} cm) dış duvara {_tr(eksen[-1] - a, 1)} cm kalıyor; pano ızgarasında bu kadar "
+                           "kısa pano olmuyor. Sınır nerede olsun?")
+                return None
+            return a
         if a is None or abs(a - v) > tol + 1e-9:
             sor.append(f"{_oda_adi(ad)} sınırı ({_tr(v, 1)} cm) pano ızgarasına oturmuyor; en yakın pano aksı {_tr(a, 2)} cm. "
                        "Öyle çizebilir miyim?")
@@ -693,6 +930,9 @@ def is_emri_prefabrik(kan: dict, o: CizimOkumasi, bk14: bool | None = None, esik
             degisen.append((abs(sonra - once), f"{_oda_adi(x['ad'])} {_tr(once, 1)} → {_tr(sonra, 1)} m²"))
     if sor:
         return None, sor, cz, nt
+    if olcusuz:
+        nt.append("ölçüsü çizimde yazmayan sınırları en yakın pano aksına oturttum (" + ", ".join(t for _, t in sorted(olcusuz, reverse=True)[:3])
+                  + ")")
     kayma = max(kaymalar or [0.0])
     if kayma > 0.5 or degisen:
         nt.append("oda sınırlarını pano ızgarasına oturttum (en çok " + _tr(kayma, 1) + " cm kayma"
@@ -719,11 +959,18 @@ def is_emri_prefabrik(kan: dict, o: CizimOkumasi, bk14: bool | None = None, esik
     ad_haritasi = {_norm(x["ad"]): tr_buyuk(x["ad"]) for x in kan["odalar"]}
     kenar_degeri = {"sol": ("x", xs[0]), "sag": ("x", xs[-1]), "arka": ("y", ys[0]), "on": ("y", ys[-1])}
 
+    acik_mahal = {m["ad"] for m in mahaller if m["tur"] == "veranda"}
+
     def disa_bakar(ad: str, cephe: str) -> bool:
+        """Oda o cephede dış duvara ya da (BK-70) gövdedeki açık mahale (veranda, giriş nişi) değiyor mu? Motor açık mahale bakan duvarı da
+        dış duvar sayar (TK-06 r02: verandaya bakan mutfak penceresi)."""
         yon, deger = kenar_degeri[cephe]
         for m in mahaller:
             if m["ad"] == ad:
-                return any((q[0] if cephe == "sol" else q[2] if cephe == "sag" else q[1] if cephe == "arka" else q[3]) == deger for q in m["konum_cm"])
+                if any((q[0] if cephe == "sol" else q[2] if cephe == "sag" else q[1] if cephe == "arka" else q[3]) == deger for q in m["konum_cm"]):
+                    return True
+                du, dw = {"sol": (-1, 0), "sag": (1, 0), "arka": (0, -1), "on": (0, 1)}[cephe]
+                return any(sahip.get((u + du, w + dw)) in acik_mahal for (u, w), sa in sahip.items() if sa == ad)
         return False
     acik = []
     varsayilan = []
@@ -759,7 +1006,8 @@ def is_emri_prefabrik(kan: dict, o: CizimOkumasi, bk14: bool | None = None, esik
             if not _komsu(mahaller, nis, ic):
                 sor.append(f"Giriş kapısını {_oda_adi(nis)} ile {_oda_adi(ic)} arasında okudum ama ikisi yan yana değil; kapı nerede?")
                 continue
-            acik.append({"tur": "dis_kapi", "olcu": KAPI_CM["dis"], "arasi": [nis, ic]})
+            acik.append({"tur": "dis_kapi", "olcu": KAPI_CM["dis"], "arasi": [nis, ic]}
+                        | ({"duvar": k["cephe"]} if k["cephe"] and _islev(kan, nis) == "veranda" else {}))   # BK-70: gömme verandanın kapı duvarı
         elif k["dis"]:
             ic = next((ad_haritasi[_norm(a)] for a in k["arasinda"] if _norm(a) in ad_haritasi), None)
             if ic is None:
@@ -847,6 +1095,11 @@ def is_emri_prefabrik(kan: dict, o: CizimOkumasi, bk14: bool | None = None, esik
     if verandalar:
         ie["verandalar"] = verandalar
     return ie, sor, cz, nt
+
+
+def _olculu(v: float, noktalar: list[float]) -> bool:
+    """BK-70: değer çizimde yazılı bir ölçü noktasına (`kanonik › olculu`) yakın mı? Nokta listesi yoksa (eski kayıt) ölçülü sayılır."""
+    return not noktalar or any(abs(v - t) <= OLCU_YAKIN_CM + 1e-9 for t in noktalar)
 
 
 def pencere_gecerli(olcu: str) -> bool:

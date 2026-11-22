@@ -1,0 +1,228 @@
+{
+ "tur": "plan",
+ "yapi_turu": "prefabrik",
+ "kat_sayisi": null,
+ "giris_kenari": "alt",
+ "dis_olcu": {
+  "yatay_cm": 800.05,
+  "dusey_cm": 750.05
+ },
+ "zincirler": [
+  {
+   "kenar": "ust",
+   "olculer_cm": [
+    264.0,
+    188.25,
+    347.8
+   ],
+   "toplam_cm": 800.05,
+   "kapsam": "govde"
+  },
+  {
+   "kenar": "sol",
+   "olculer_cm": [
+    384.5,
+    240.05,
+    325.51
+   ],
+   "toplam_cm": null,
+   "kapsam": "veranda_dahil"
+  },
+  {
+   "kenar": "sag",
+   "olculer_cm": [
+    384.5,
+    365.55,
+    200.01
+   ],
+   "toplam_cm": null,
+   "kapsam": "veranda_dahil"
+  },
+  {
+   "kenar": "alt",
+   "olculer_cm": [
+    391.5,
+    408.55
+   ],
+   "toplam_cm": 800.05,
+   "kapsam": "govde"
+  }
+ ],
+ "odalar": [
+  {
+   "ad": "YATAK ODASI 1",
+   "islev": "yatak_odasi",
+   "alan_m2": 9.13,
+   "dikdortgenler": [
+    [
+     0.0,
+     0.0,
+     264.0,
+     384.5
+    ]
+   ]
+  },
+  {
+   "ad": "BANYO",
+   "islev": "banyo",
+   "alan_m2": 4.42,
+   "dikdortgenler": [
+    [
+     264.0,
+     0.0,
+     452.25,
+     261.0
+    ]
+   ]
+  },
+  {
+   "ad": "YATAK ODASI 2",
+   "islev": "yatak_odasi",
+   "alan_m2": 12.44,
+   "dikdortgenler": [
+    [
+     452.25,
+     0.0,
+     800.05,
+     384.5
+    ]
+   ]
+  },
+  {
+   "ad": "HOL",
+   "islev": "hol",
+   "alan_m2": 2.28,
+   "dikdortgenler": [
+    [
+     264.0,
+     261.0,
+     452.25,
+     384.5
+    ]
+   ]
+  },
+  {
+   "ad": "SALON+MUTFAK",
+   "islev": "salon",
+   "alan_m2": 24.45,
+   "dikdortgenler": [
+    [
+     0.0,
+     384.5,
+     800.05,
+     624.55
+    ],
+    [
+     264.0,
+     624.55,
+     800.05,
+     750.05
+    ]
+   ]
+  }
+ ],
+ "kapilar": [
+  {
+   "arasinda": [
+    "YATAK ODASI 1",
+    "HOL"
+   ],
+   "kenar": null,
+   "genislik_cm": null
+  },
+  {
+   "arasinda": [
+    "YATAK ODASI 2",
+    "HOL"
+   ],
+   "kenar": null,
+   "genislik_cm": null
+  },
+  {
+   "arasinda": [
+    "BANYO",
+    "HOL"
+   ],
+   "kenar": null,
+   "genislik_cm": null
+  },
+  {
+   "arasinda": [
+    "DIŞ",
+    "SALON+MUTFAK"
+   ],
+   "kenar": "sol",
+   "genislik_cm": null
+  }
+ ],
+ "pencereler": [
+  {
+   "oda": "YATAK ODASI 1",
+   "kenar": "ust",
+   "olcu": "150x140",
+   "adet": 1
+  },
+  {
+   "oda": "BANYO",
+   "kenar": "ust",
+   "olcu": "60x40",
+   "adet": 1
+  },
+  {
+   "oda": "YATAK ODASI 2",
+   "kenar": "ust",
+   "olcu": "150x140",
+   "adet": 1
+  },
+  {
+   "oda": "SALON+MUTFAK",
+   "kenar": "sol",
+   "olcu": "120x100",
+   "adet": 1
+  },
+  {
+   "oda": "SALON+MUTFAK",
+   "kenar": "alt",
+   "olcu": "120x150",
+   "adet": 1
+  },
+  {
+   "oda": "SALON+MUTFAK",
+   "kenar": "alt",
+   "olcu": "180x150",
+   "adet": 1
+  }
+ ],
+ "verandalar": [
+  {
+   "kenar": "alt",
+   "bas_cm": 0.0,
+   "bit_cm": 800.05,
+   "derinlik_cm": 200.01,
+   "alan_m2": 19.27
+  }
+ ],
+ "cati": {
+  "tip": "besik",
+  "mahya": "giristen_arkaya",
+  "egim_yuzde": 32.9,
+  "sacak_cm": 30.0
+ },
+ "duvar_yuksekligi_cm": 250.0,
+ "tahminler": [
+  "banyo derinliği 261 cm (oranla), hol 261–384.5 arası",
+  "gövde L biçimli: sol altta 264 x 125.5 cm girinti (salon alt duvarı x=0–264 arasında y=624.55'te), girinti sınırı x=264 oranla",
+  "çatı eğimi 18.2° yazılı, %32.9'a çevrildi",
+  "saçak 30 cm = (860.05 − 800.05) / 2",
+  "duvar yüksekliği: 'Bina Yüksekliği 2500 mm' değerinden alındı"
+ ],
+ "emin_olunamayanlar": [
+  "Veranda L biçimli: alt kenarda 200.01 cm derinlikte olmasının yanında sol alttaki 264 x 125.5 cm girintiyi de kapsıyor gibi görünüyor (sol zincir 624.55 + 325.51), doğru mu?",
+  "Giriş kapısı girintinin sağ duvarında (x=264, sola bakıyor), veranda tarafında; giriş cephesi alt kenar mı?",
+  "Sol/sağ zincirlerdeki 624.55 ve 750.05 toplamları yalnızca gövde kısmı için; verandalı toplam yazılı değil",
+  "Hol ile salon arasında kapı yok, açık geçiş mi?",
+  "Bina yüksekliği 2500 mm duvar yüksekliği mi, toplam yükseklik mi?",
+  "Kat sayısı yazılı değil (tek kat gibi görünüyor)"
+ ],
+ "ozet": "76 m² tek katlı prefabrik konut planı: 2 yatak odası, banyo, hol, L biçimli salon+mutfak; alt kenarda 19.27 m² veranda; beşik çatı."
+}

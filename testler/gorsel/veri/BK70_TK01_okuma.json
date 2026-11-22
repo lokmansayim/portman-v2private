@@ -1,0 +1,368 @@
+{
+ "tur": "plan",
+ "yapi_turu": null,
+ "kat_sayisi": 1,
+ "giris_kenari": "alt",
+ "dis_olcu": {
+  "yatay_cm": 898.0,
+  "dusey_cm": 888.0
+ },
+ "zincirler": [
+  {
+   "kenar": "ust",
+   "olculer_cm": [
+    261.0,
+    126.0,
+    188.0,
+    324.0
+   ],
+   "toplam_cm": 898.0,
+   "kapsam": "govde"
+  },
+  {
+   "kenar": "alt",
+   "olculer_cm": [
+    392.0,
+    116.0,
+    392.0
+   ],
+   "toplam_cm": 898.0,
+   "kapsam": "govde"
+  },
+  {
+   "kenar": "sol",
+   "olculer_cm": [
+    130.0,
+    382.0,
+    507.0,
+    181.0
+   ],
+   "toplam_cm": null,
+   "kapsam": "veranda_dahil"
+  },
+  {
+   "kenar": "sol",
+   "olculer_cm": [
+    130.0,
+    888.0,
+    181.0
+   ],
+   "toplam_cm": 1199.0,
+   "kapsam": "veranda_dahil"
+  },
+  {
+   "kenar": "sag",
+   "olculer_cm": [
+    130.0,
+    382.0,
+    251.0,
+    256.0,
+    181.0
+   ],
+   "toplam_cm": null,
+   "kapsam": "veranda_dahil"
+  },
+  {
+   "kenar": "sag",
+   "olculer_cm": [
+    130.0,
+    888.0,
+    181.0
+   ],
+   "toplam_cm": null,
+   "kapsam": "veranda_dahil"
+  },
+  {
+   "kenar": "sag",
+   "olculer_cm": [
+    130.0,
+    1069.0
+   ],
+   "toplam_cm": null,
+   "kapsam": "veranda_dahil"
+  }
+ ],
+ "odalar": [
+  {
+   "ad": "YATAK ODASI 1",
+   "islev": "yatak_odasi",
+   "alan_m2": 11.5,
+   "dikdortgenler": [
+    [
+     0.0,
+     0.0,
+     261.0,
+     382.0
+    ],
+    [
+     261.0,
+     245.0,
+     392.0,
+     382.0
+    ]
+   ]
+  },
+  {
+   "ad": "BANYO 1",
+   "islev": "banyo",
+   "alan_m2": 3.0,
+   "dikdortgenler": [
+    [
+     261.0,
+     0.0,
+     387.0,
+     245.0
+    ]
+   ]
+  },
+  {
+   "ad": "BANYO 2",
+   "islev": "banyo",
+   "alan_m2": 5.0,
+   "dikdortgenler": [
+    [
+     387.0,
+     0.0,
+     575.0,
+     245.0
+    ]
+   ]
+  },
+  {
+   "ad": "YATAK ODASI 2",
+   "islev": "yatak_odasi",
+   "alan_m2": 13.0,
+   "dikdortgenler": [
+    [
+     575.0,
+     0.0,
+     898.0,
+     382.0
+    ],
+    [
+     508.0,
+     245.0,
+     575.0,
+     382.0
+    ]
+   ]
+  },
+  {
+   "ad": "HOL",
+   "islev": "hol",
+   "alan_m2": 6.0,
+   "dikdortgenler": [
+    [
+     392.0,
+     245.0,
+     508.0,
+     759.0
+    ]
+   ]
+  },
+  {
+   "ad": "SALON",
+   "islev": "salon",
+   "alan_m2": 19.5,
+   "dikdortgenler": [
+    [
+     0.0,
+     382.0,
+     392.0,
+     888.0
+    ]
+   ]
+  },
+  {
+   "ad": "YATAK ODASI 3",
+   "islev": "yatak_odasi",
+   "alan_m2": 9.5,
+   "dikdortgenler": [
+    [
+     508.0,
+     382.0,
+     898.0,
+     633.0
+    ]
+   ]
+  },
+  {
+   "ad": "MUTFAK",
+   "islev": "mutfak",
+   "alan_m2": 9.5,
+   "dikdortgenler": [
+    [
+     508.0,
+     633.0,
+     898.0,
+     888.0
+    ]
+   ]
+  },
+  {
+   "ad": "GİRİŞ",
+   "islev": "giris",
+   "alan_m2": null,
+   "dikdortgenler": [
+    [
+     392.0,
+     759.0,
+     508.0,
+     888.0
+    ]
+   ]
+  }
+ ],
+ "kapilar": [
+  {
+   "arasinda": [
+    "GİRİŞ",
+    "HOL"
+   ],
+   "kenar": null,
+   "genislik_cm": null
+  },
+  {
+   "arasinda": [
+    "HOL",
+    "YATAK ODASI 1"
+   ],
+   "kenar": null,
+   "genislik_cm": null
+  },
+  {
+   "arasinda": [
+    "BANYO 1",
+    "YATAK ODASI 1"
+   ],
+   "kenar": null,
+   "genislik_cm": null
+  },
+  {
+   "arasinda": [
+    "HOL",
+    "BANYO 2"
+   ],
+   "kenar": null,
+   "genislik_cm": null
+  },
+  {
+   "arasinda": [
+    "HOL",
+    "YATAK ODASI 2"
+   ],
+   "kenar": null,
+   "genislik_cm": null
+  },
+  {
+   "arasinda": [
+    "HOL",
+    "YATAK ODASI 3"
+   ],
+   "kenar": null,
+   "genislik_cm": null
+  },
+  {
+   "arasinda": [
+    "HOL",
+    "SALON"
+   ],
+   "kenar": null,
+   "genislik_cm": null
+  },
+  {
+   "arasinda": [
+    "HOL",
+    "MUTFAK"
+   ],
+   "kenar": null,
+   "genislik_cm": null
+  }
+ ],
+ "pencereler": [
+  {
+   "oda": "YATAK ODASI 1",
+   "kenar": "ust",
+   "olcu": "120x180",
+   "adet": 1
+  },
+  {
+   "oda": "BANYO 1",
+   "kenar": "ust",
+   "olcu": "60x40",
+   "adet": 1
+  },
+  {
+   "oda": "BANYO 2",
+   "kenar": "ust",
+   "olcu": "60x40",
+   "adet": 1
+  },
+  {
+   "oda": "YATAK ODASI 2",
+   "kenar": "sag",
+   "olcu": null,
+   "adet": 1
+  },
+  {
+   "oda": "YATAK ODASI 3",
+   "kenar": "sag",
+   "olcu": "120x180",
+   "adet": 1
+  },
+  {
+   "oda": "SALON",
+   "kenar": "sol",
+   "olcu": "120x180",
+   "adet": 1
+  },
+  {
+   "oda": "SALON",
+   "kenar": "alt",
+   "olcu": "120x180",
+   "adet": 1
+  },
+  {
+   "oda": "MUTFAK",
+   "kenar": "alt",
+   "olcu": "120x180",
+   "adet": 1
+  }
+ ],
+ "verandalar": [
+  {
+   "kenar": "ust",
+   "bas_cm": 0.0,
+   "bit_cm": 261.0,
+   "derinlik_cm": 130.0,
+   "alan_m2": 3.0
+  },
+  {
+   "kenar": "alt",
+   "bas_cm": 256.0,
+   "bit_cm": 642.0,
+   "derinlik_cm": 181.0,
+   "alan_m2": 8.0
+  }
+ ],
+ "cati": {
+  "tip": "besik",
+  "mahya": "giristen_arkaya",
+  "egim_yuzde": null,
+  "sacak_cm": null
+ },
+ "duvar_yuksekligi_cm": 250.0,
+ "tahminler": [
+  "banyoların derinliği ~245 cm",
+  "giriş nişi derinliği ~129 cm (iç giriş kapısı y≈759)",
+  "ön veranda 386 cm genişlikte, ortalanmış kabul edildi (256–642 cm)",
+  "hol genişliği alt zincirden 392–508 cm alındı"
+ ],
+ "emin_olunamayanlar": [
+  "Sağ üstteki yatak odasının (13 m²) pencere ölçüsü okunamadı",
+  "Üst zincir toplamı 899, alt zincir toplamı 900 ediyor, yazılı toplam 898; hangisi doğru?",
+  "Salon kapısı holün içinde mi, giriş nişinin yanında mı?",
+  "Çatı eğimi ve saçak taşması yazılı değil (görünüşte çatı yüksekliği 142 cm)"
+ ],
+ "ozet": "Tek katlı, 898x888 cm gövdeli ev: 3 yatak odası, 2 banyo, salon, mutfak, hol; önde (altta) 8 m² veranda ve giriş nişi, arkada (üstte) 3 m² veranda; beşik çatı."
+}

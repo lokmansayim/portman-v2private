@@ -1,0 +1,170 @@
+{
+ "tur": "plan",
+ "yapi_turu": "prefabrik",
+ "kat_sayisi": null,
+ "giris_kenari": "alt",
+ "dis_olcu": {
+  "yatay_cm": 698.25,
+  "dusey_cm": 650.0
+ },
+ "zincirler": [
+  {
+   "kenar": "ust",
+   "olculer_cm": [
+    264.0,
+    434.25
+   ],
+   "toplam_cm": 698.25,
+   "kapsam": "govde"
+  },
+  {
+   "kenar": "alt",
+   "olculer_cm": [
+    266.0,
+    432.25
+   ],
+   "toplam_cm": 698.25,
+   "kapsam": "veranda_dahil"
+  },
+  {
+   "kenar": "sol",
+   "olculer_cm": [
+    190.25,
+    459.75
+   ],
+   "toplam_cm": 650.0,
+   "kapsam": "govde"
+  },
+  {
+   "kenar": "sag",
+   "olculer_cm": [
+    454.25,
+    195.75
+   ],
+   "toplam_cm": 650.0,
+   "kapsam": "veranda_dahil"
+  }
+ ],
+ "odalar": [
+  {
+   "ad": "BANYO",
+   "islev": "banyo",
+   "alan_m2": 4.47,
+   "dikdortgenler": [
+    [
+     0.0,
+     0.0,
+     264.0,
+     190.25
+    ]
+   ]
+  },
+  {
+   "ad": "MUTFAK",
+   "islev": "mutfak",
+   "alan_m2": 10.96,
+   "dikdortgenler": [
+    [
+     0.0,
+     190.25,
+     264.0,
+     650.0
+    ]
+   ]
+  },
+  {
+   "ad": "SALON",
+   "islev": "salon",
+   "alan_m2": 18.42,
+   "dikdortgenler": [
+    [
+     264.0,
+     0.0,
+     698.25,
+     454.25
+    ]
+   ]
+  }
+ ],
+ "kapilar": [
+  {
+   "arasinda": [
+    "BANYO",
+    "SALON"
+   ],
+   "kenar": null,
+   "genislik_cm": null
+  },
+  {
+   "arasinda": [
+    "MUTFAK",
+    "SALON"
+   ],
+   "kenar": null,
+   "genislik_cm": null
+  },
+  {
+   "arasinda": [
+    "DIŞ",
+    "SALON"
+   ],
+   "kenar": "alt",
+   "genislik_cm": null
+  }
+ ],
+ "pencereler": [
+  {
+   "oda": "BANYO",
+   "kenar": "ust",
+   "olcu": "60x40",
+   "adet": 1
+  },
+  {
+   "oda": "SALON",
+   "kenar": "sag",
+   "olcu": "160x180",
+   "adet": 1
+  },
+  {
+   "oda": "SALON",
+   "kenar": "alt",
+   "olcu": "120x180",
+   "adet": 1
+  },
+  {
+   "oda": "MUTFAK",
+   "kenar": "alt",
+   "olcu": "120x180",
+   "adet": 1
+  }
+ ],
+ "verandalar": [
+  {
+   "kenar": "alt",
+   "bas_cm": 266.0,
+   "bit_cm": 698.25,
+   "derinlik_cm": 195.75,
+   "alan_m2": 8.46
+  }
+ ],
+ "cati": {
+  "tip": "besik",
+  "mahya": "girise_paralel",
+  "egim_yuzde": 32.9,
+  "sacak_cm": null
+ },
+ "duvar_yuksekligi_cm": 250.0,
+ "tahminler": [
+  "Çatı eğimi çizimde 18,2° olarak yazıyor; yüzdeye çevrildi: %32,9",
+  "Duvar yüksekliği, teknik tablodaki 'Bina Yüksekliği 2500 mm' değerinden alındı",
+  "Çatı kesitinde 710 cm yazıyor, gövde 650 cm; buna göre saçak her iki yanda yaklaşık 30 cm olabilir (çizimde ayrıca yazmıyor)",
+  "Mahya, sol taraftaki çatı kesitine göre girişe paralel (yatay) kabul edildi"
+ ],
+ "emin_olunamayanlar": [
+  "Mutfak ile salon/veranda arasındaki duvarın yeri: üst zincirde 264 cm, alt zincirde 266 cm yazıyor. Doğru değer hangisi?",
+  "Çatı 'Beşik + Cumba' olarak yazıyor. Alttaki küçük çatı kesiti (326 cm, 18,2°) cumbaya mı yoksa veranda örtüsüne mi ait?",
+  "Giriş kapısının yanındaki 50,75 ölçüsü neyi gösteriyor? Kapı genişliği yazmıyor",
+  "Kat sayısı açıkça yazmıyor (yalnız 'zemin kat' yazıyor). Ev tek katlı mı?"
+ ],
+ "ozet": "45,38 m² tek katlı prefabrik ev: banyo, mutfak ve salon var; salonun önünde, L biçimli gövdenin girintisinde 8,46 m² veranda bulunuyor."
+}
