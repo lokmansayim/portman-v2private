@@ -157,7 +157,7 @@ def kiyas_ev(ad: str, r: dict, es: dict, hedef: Path) -> dict:
     from motor import dizilim_kiyas as DK
 
     sonuc = {"ad": ad, "baslik": es.get("baslik", ""), "durum": r.get("durum"), "token": [r.get("girdi_token"), r.get("cikti_token")],
-             "sorular": [], "cizilemez": [], "notlar": [], "okunan": None, "onayli": None, "ayni_pano": None}
+             "sorular": [], "kod_sorulari": [], "varsayim": None, "cizilemez": [], "notlar": [], "okunan": None, "onayli": None, "ayni_pano": None}
     ie0 = json.loads(Path(es["onayli"]).read_text(encoding="utf-8"))
     p0 = G.kur(copy.deepcopy(ie0))
     sonuc["onayli"] = {"W": p0.W, "H": p0.H, "pano": len(p0.panolar), "odalar": _oda_ozeti(p0), "pencere_kapi": _aciklik_sayisi(ie0)}
@@ -166,6 +166,14 @@ def kiyas_ev(ad: str, r: dict, es: dict, hedef: Path) -> dict:
         den = GO.denetle(r["okuma"])
         sonuc.update(sorular=den["sorular"], cizilemez=den["cizilemez"], notlar=den["notlar"])
         ie1 = ((den.get("cevrim") or {}).get("is_emri"))
+        if not ie1 and den.get("plan_mi") and r["okuma"].get("emin_olunamayanlar"):
+            # bayi okuyucunun kendi sorularına "doğru" derse: aynı okuma, modelin soruları boş; kodun soruları yine durur
+            den2 = GO.denetle({**r["okuma"], "emin_olunamayanlar": []})
+            sonuc["kod_sorulari"] = den2["sorular"]
+            ie1 = ((den2.get("cevrim") or {}).get("is_emri"))
+            if ie1:
+                sonuc["varsayim"] = "bayi okuyucunun sorularına 'doğru' derse"
+                den = {**den, "cevrim": den2["cevrim"]}
         if ie1:
             ie1 = json.loads(json.dumps(ie1))
             try:
@@ -195,7 +203,8 @@ def kiyas_ev(ad: str, r: dict, es: dict, hedef: Path) -> dict:
     ax1 = fig.add_subplot(gs[0, 2])
     Wm, Hm = p0.W, p0.H
     if p1 is not None:
-        DK.ciz(ax1, p1, s1, f"Okuyucunun planı · {DK.tr(p1.W)} × {DK.tr(p1.H)} cm · {len(p1.panolar)} pano")
+        on = "Okuyucunun planı" + (f" ({sonuc['varsayim']})" if sonuc["varsayim"] else "")
+        DK.ciz(ax1, p1, s1, f"{on} · {DK.tr(p1.W)} × {DK.tr(p1.H)} cm · {len(p1.panolar)} pano")
         Wm, Hm = max(p0.W, p1.W), max(p0.H, p1.H)
         ax1.set_xlim(-170, Wm + 90); ax1.set_ylim(-150, Hm + 60)
     elif den is not None and den.get("plan_mi"):
@@ -243,7 +252,7 @@ def main(argv: list[str] | None = None) -> int:
         print(paketle(Path(a.liste), Path(a.cikti), model=a.model))
     else:
         for x in kiyas(Path(a.okuma_cikti), Path(a.esleme), Path(a.hedef)):
-            print(json.dumps({k: x[k] for k in ("ad", "durum", "ayni_pano", "sorular", "cizilemez")}, ensure_ascii=False))
+            print(json.dumps({k: x[k] for k in ("ad", "durum", "ayni_pano", "varsayim", "kod_sorulari", "cizilemez", "okunan", "onayli")}, ensure_ascii=False))
     return 0
 
 
