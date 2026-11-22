@@ -379,7 +379,8 @@ def kanonik(okuma: dict | CizimOkumasi) -> dict:
     kan = {"W": W, "H": H, "giris": giris, "odalar": odalar,
            "pencereler": [{"oda": p.oda, "cephe": cephe[p.kenar], "olcu": p.olcu, "adet": p.adet} for p in o.pencereler],
            "kapilar": [kapi(k) for k in o.kapilar],
-           "verandalar": ver, "notlar": notlar, "olculu": _olculu_noktalar(o, Wc, Hc, giris)}
+           "verandalar": ver, "notlar": notlar, "olculu": _olculu_noktalar(o, Wc, Hc, giris),
+           "veranda_dahil": _veranda_dahil_toplamlari(o, giris)}
     _gomme_veranda(kan)
     return kan
 
@@ -400,6 +401,16 @@ def _olculu_noktalar(o: CizimOkumasi, Wc: float, Hc: float, giris: str) -> dict[
     if giris in ("alt", "ust"):
         return {"x": sorted(yatay), "y": sorted(dusey)}
     return {"x": sorted(dusey), "y": sorted(yatay)}
+
+
+def _veranda_dahil_toplamlari(o: CizimOkumasi, giris: str) -> dict[str, list[float]]:
+    """BK-70 (hakem): verandayı da kapsayan zincirlerin yazılı toplamları (kanonik eksenlerde). Gömme verandada gövde büyürse yeni ölçü
+    bunlarla tutmalı; tutmazsa okuma aynen kalır, sorulur (K21)."""
+    yatay, dusey = [], []
+    for z in o.zincirler:
+        if z.kapsam == "veranda_dahil":
+            (yatay if z.kenar in ("ust", "alt") else dusey).append(float(z.toplam_cm or sum(z.olculer_cm)))
+    return {"x": yatay, "y": dusey} if giris in ("alt", "ust") else {"x": dusey, "y": yatay}
 
 
 GOMME_TOL = {"m2": 0.6, "oran": 0.15}   # BK-70: boş bölüm ile verandanın içe yansıması bu kadar farklıysa yine de aynı yer sayılır
@@ -461,6 +472,10 @@ def _gomme_veranda(kan: dict) -> None:
         girinti = {"on": H - ey0, "arka": ey1, "sol": ex1, "sag": W - ex0}[c]
         d0 = min(v["derinlik"] for v in grup)
         if not all(abs(v["derinlik"] - d0) < 3.0 or abs(v["derinlik"] - d0 - girinti) < 5.0 for v in grup):
+            kalan.extend(grup)
+            continue
+        eksen, yeni = ("y", H + d0) if yatay else ("x", W + d0)
+        if any(abs(t - yeni) > 5.0 for t in kan.get("veranda_dahil", {}).get(eksen, [])):   # bayinin yazdığı toplamla çelişir
             kalan.extend(grup)
             continue
         dis = {"on": [a0, H, a1, H + d0], "arka": [a0, -d0, a1, 0], "sol": [-d0, a0, 0, a1], "sag": [W, a0, W + d0, a1]}[c]

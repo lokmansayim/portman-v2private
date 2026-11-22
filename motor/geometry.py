@@ -1228,8 +1228,14 @@ def _kur(is_emri: dict) -> Plan:
                 continue
             d = next(x for x in duvarlar if x.id == did)
             nlo, nhi = _oda_net_araligi(duvarlar, d, lo, hi)
+            mahal = acikliklar[ii[0]]["mahal"]
+            if (nhi - nlo) / (len(ii) + 1) < MOD:               # pencereli panolar üst üste biner: sessiz özel pano yok (K21)
+                raise IsEmriHatasi(f"Pencere {mahal}: duvarda {len(ii)} pencere için yer yok (net {nhi - nlo:.2f} cm; "
+                                   f"her pencere arası en az {MOD} cm)")
             for k, i in enumerate(sorted(ii), 1):
                 pencere_hedef[i][1] = nlo + (nhi - nlo) * k / (len(ii) + 1)
+            uyarilar.append(f"Pencere {mahal}: aynı duvardaki {len(ii)} pencere duvara eşit aralıkla dağıtıldı "
+                            f"(İş Emri'ndeki sırayla)")
     kapi_hedef = {}             # İE-17 `acikliklar[].duvar_ucu`: açıklık sırası → (duvar id, kapı panosunun aks aralığı q0, q1)
     for i, ac in enumerate(acikliklar):
         if "duvar_ucu" not in ac:

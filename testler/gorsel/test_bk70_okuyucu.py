@@ -156,3 +156,29 @@ def test_motor_kuramazsa_bayiye_soru():
     assert den["cevrim"] is None
     assert den["sorular"] == ["Planı panolara yerleştirirken Salon+mutfak öndeki duvarında pencere ve kapıları sığdıramadım. Bu duvardaki "
                               "pencerelerin ve kapının yerini (köşeden cm) yazar mısınız?"]
+
+
+def test_motor_pencerelere_yer_yoksa_hata():
+    """Hakem bulgusu: bölme aralığı 125,5'ten darsa pencereli panolar üst üste biner; Motor sessizce özel pano kurmaz, hata verir (K21)."""
+    ie = json.loads(json.dumps(GO.denetle(okuma("TK07"))["cevrim"]["is_emri"]))
+    pen = [a for a in ie["acikliklar"] if a["tur"] == "pencere"]
+    ilk = next(a for a in pen if sum(1 for b in pen if (b["mahal"], b["duvar"]) == (a["mahal"], a["duvar"])) == 2)
+    ie["acikliklar"] += [dict(ilk) for _ in range(6)]               # 930 cm'lik duvarda 8 pencere: aralık 103,3 < 125,5
+    try:
+        G.kur(copy.deepcopy(ie))
+        raise AssertionError("yer yokken hata vermeliydi")
+    except G.IsEmriHatasi as e:
+        assert "pencere için yer yok" in str(e)
+    p = G.kur(copy.deepcopy(json.loads(json.dumps(GO.denetle(okuma("TK07"))["cevrim"]["is_emri"]))))
+    assert any("eşit aralıkla dağıtıldı" in u for u in p.uyarilar)
+
+
+def test_gomme_veranda_yazili_toplamla_celisirse_sorulur():
+    """Hakem bulgusu: gövdeyi veranda kadar büyütmek bayinin yazdığı verandalı toplamla çelişiyorsa okuma aynen kalır, sorulur (K21)."""
+    o = okuma("TK08")
+    for z in o["zincirler"]:
+        if z["kapsam"] == "veranda_dahil":
+            z["olculer_cm"] = [900.0]
+            z["toplam_cm"] = 900.0
+    kan = GO.kanonik(o)
+    assert kan["verandalar"] and not any(x["islev"] == "veranda" for x in kan["odalar"]) and abs(kan["H"] - 750.05) < 0.01
