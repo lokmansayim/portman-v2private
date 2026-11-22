@@ -146,7 +146,7 @@ def _oda_ozeti(plan) -> list[str]:
 
 def _aciklik_sayisi(ie: dict) -> tuple[int, int]:
     a = ie.get("acikliklar") or []
-    return sum(1 for x in a if x.get("tur") == "pencere"), sum(1 for x in a if x.get("tur") == "kapi")
+    return sum(1 for x in a if x.get("tur") == "pencere"), sum(1 for x in a if "kapi" in str(x.get("tur")))
 
 
 def kiyas_ev(ad: str, r: dict, es: dict, hedef: Path) -> dict:
