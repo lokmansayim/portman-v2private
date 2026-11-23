@@ -992,3 +992,23 @@ def test_zamanlayici_her_gun_ve_kurulumda_gomulu():
         assert r.returncode == 0 and r.stdout == (KOK / "vps" / "systemd" / b).read_text(encoding="utf-8"), b
     k = (KOK / "vps" / "kurulum.sh").read_text(encoding="utf-8")
     assert re.search(r"enable [^\n]*portman-crm-fiyat\.timer", k) and "portman-crm-fiyat.service portman-crm-fiyat.timer\"" in k
+
+
+def test_d147_paket_fiyati_20_kasimdan_beri(E):
+    """D-147 (Lokman 23 Kasım 2026 11:10:32 "mührü aç ve düzelt"): CRM 16–19 Kasım'da HM45/HM44'ün m² fiyatını (78/85 TL), 20 Kasım'dan
+    beri paket fiyatını (680/716 TL) yazıyor. Paket 20 Kasım'dan beri paket fiyatıdır; önceki görüntüler aynen (× paket m²)."""
+    import datetime
+    p, c = E["hatlar"]["prefabrik"]["kalemler"], E["hatlar"]["celik"]["kalemler"]
+    sil, duvar, sil9 = (p["Çatı şiltesi / izolasyonu (9,6 m²/paket) | paket"], c["Duvar izolasyonu | paket 8,64 m²"],
+                        c["Çatı şiltesi 80 mm | 9,0 m²/adet"])
+    once = {"HM45": [{"urunkodu": "HM45", "fiyat": 78}], "HM44": [{"urunkodu": "HM44", "fiyat": 85}]}
+    sonra = {"HM45": [{"urunkodu": "HM45", "fiyat": 680}], "HM44": [{"urunkodu": "HM44", "fiyat": 716}]}
+    g19, g20 = datetime.date(2026, 11, 19), datetime.date(2026, 11, 20)
+    assert [C.hesapla(g, once, "", g19)["fiyat"] for g in (sil, duvar, sil9)] == [748.8, 734.4, 702.0]
+    assert [C.hesapla(g, sonra, "", g20)["fiyat"] for g in (sil, duvar, sil9)] == [680.0, 716.0, 637.5]
+    assert C.hesapla(sil, sonra, "")["fiyat"] == 6528.0          # gün verilmezse eski hesap (yalnız defter_uret günü verir)
+    for x in (sil, duvar, sil9):
+        assert x["paket_fiyati_baslangic"] == "2026-11-20"
+    bozuk = copy.deepcopy(E)
+    del bozuk["hatlar"]["prefabrik"]["kalemler"]["Çatı şiltesi / izolasyonu (9,6 m²/paket) | paket"]["paket_m2"]
+    assert any("paket_fiyati_baslangic" in s for s in C.esleme_denetle(bozuk))

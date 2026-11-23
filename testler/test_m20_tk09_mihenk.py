@@ -4,7 +4,8 @@ Lokman 20 Kasım 2026 14:47:53 UTC: "... tam buradaki yaptığımız iş milat o
 Kat planı r04 (kart 12:03:54), çatı ve dört görünüş (kart 12:05:35), kâr %25 (kart 12:08:23) onaylı. Girdi depoda: İş Emri,
 20 Kasım 12:03 CRM anlık görüntüsü, Kasım istisnası (D-120), ters tavan, öneriler dahil. Motor'un planı ya da listesi, eşleme,
 fiyat kodu bu teklifi değiştirirse test kırmızıdır. Bilerek yapılan fark yalnız Lokman'ın onayıyla, mühür açılıp yeni kararla
-yeniden dondurulur (D-02); testi geçirmek için hedef değiştirilmez."""
+yeniden dondurulur (D-02); testi geçirmek için hedef değiştirilmez.
+D-147 (23 Kasım 2026): mühür Lokman'ın sözüyle açıldı; çatı şiltesi paket fiyatı (680 TL) düzeltildi, taban 190.489,25, bayi 238.111,56."""
 from __future__ import annotations
 
 import datetime
@@ -46,6 +47,8 @@ def R(H, IE):
 def test_hedef_onayli(H):
     assert H["karar"] == "D-142" and H["muhur"] == "M-20" and (KOK / "KARARLAR" / "D-142.md").exists()
     assert H["onay"]["zaman"] == "2026-11-20T14:47:53Z" and "mihenk taşımız olsun" in H["onay"]["soz"]
+    # D-147: CRM 20 Kasım'dan beri cam yününün paket fiyatını yazıyor; çatı şiltesi 680 TL/paket (Lokman 23 Kasım 11:10:32 "mührü aç ve düzelt")
+    assert H["duzeltme"]["karar"] == "D-147" and (KOK / "KARARLAR" / "D-147.md").exists() and "mührü aç" in H["duzeltme"]["soz"]
 
 
 def test_plan_hedefle_ayni(H, IE):
@@ -67,10 +70,10 @@ def test_satirlar_hedefle_ayni(H, R):
 def test_toplamlar_hedefle_ayni(H, R):
     oz, h = R["ozet"], H["ozet"]
     assert (oz["satir"], oz["fiyatli"], len(oz["fiyatsiz"])) == (h["satir"], h["fiyatli"], len(h["fiyatsiz"])) == (105, 102, 1)
-    assert oz["toplam"] == h["toplam"] == 219729.25
+    assert oz["toplam"] == h["toplam"] == 190489.25
     assert oz["gruplar"] == h["gruplar"]
 
 
 def test_bayi_birim_fiyati(H, R):
-    assert round(R["ozet"]["toplam"] * (1 + H["bayi"]["kar"]), 2) == H["bayi"]["birim"] == 274661.56
+    assert round(R["ozet"]["toplam"] * (1 + H["bayi"]["kar"]), 2) == H["bayi"]["birim"] == 238111.56
     assert H["bayi"]["kdv_orani"] == 0
