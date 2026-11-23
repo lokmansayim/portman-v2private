@@ -168,3 +168,28 @@ def test_kapili_hol_kapali_kalir():
     o = {**o, "emin_olunamayanlar": [], "kapilar": o["kapilar"] + [{"arasinda": ["HOL", "SALON+MUTFAK"], "kenar": None}]}
     den = GO.denetle(o)
     assert den["cevrim"] is None or den["cevrim"]["is_emri"]["acik_sinirlar"] == []
+
+
+def _tk08_uc_okuma() -> tuple[dict, dict]:
+    d = json.loads((VERI / "BK72_TK08_uc_okuma.json").read_text(encoding="utf-8"))
+    return d["ilk"], d["ikinci"]
+
+
+def test_girinti_ve_on_serit_l_veranda():
+    """23 Kasım sunucu okuması (üç okuma, 76 m²): girinti ayrı veranda (125,5) ve önündeki şerit cephe boyu (200,01). Şerit gövdeye
+    oturmuyordu (Motor: "gövdenin dış yüzüne tam oturmuyor"); şimdi L veranda, gövde 9,50 m (onaylı r05: L VERANDA, 951,25)."""
+    _, ikinci = _tk08_uc_okuma()
+    kan = GO.kanonik(ikinci)
+    assert kan["verandalar"] == [] and round(kan["H"], 2) == 950.06
+    v = next(x for x in kan["odalar"] if x["islev"] == "veranda")
+    assert len(v["rects"]) == 2
+
+
+def test_ikinci_bakis_hol_salon_kapisi_eklemez():
+    """İkinci bakış hol–salon açık geçişini kapı diye yazdı (şemada açık geçiş alanı yok); kapı alınmaz, geçiş duvarsız (Lokman 13:14)."""
+    ilk, ikinci = _tk08_uc_okuma()
+    sec, den, secildi = GO.ikinci_bakis_sec(ilk, GO.denetle(ilk), ikinci)
+    assert secildi and den["sorular"] == []
+    assert not any({"HOL", "SALON+MUTFAK"} == set(k["arasinda"]) for k in sec["kapilar"])
+    ie = den["cevrim"]["is_emri"]
+    assert ie["acik_sinirlar"] == [["HOL", "SALON+MUTFAK"]] and ie["yapi"]["dis_olcu_cm"] == {"x": 800, "y": 950}

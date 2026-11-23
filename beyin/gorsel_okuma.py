@@ -349,6 +349,7 @@ def ikinci_bakis_sec(ilk: dict, ilk_den: dict, ikinci: dict | None, ayar: dict |
     Dönüş: (okuma, denetim, ikinci_mi)."""
     if not ikinci:
         return ilk, ilk_den, False
+    ikinci = _eklenen_gecis_kapisi(ilk, ikinci)
     try:
         den2 = denetle(ikinci, ayar=ayar)
     except Exception:
@@ -356,6 +357,24 @@ def ikinci_bakis_sec(ilk: dict, ilk_den: dict, ikinci: dict | None, ayar: dict |
     if not den2["cizilemez"] and len(den2["sorular"]) < len(ilk_den["sorular"]):
         return ikinci, den2, True
     return ilk, ilk_den, False
+
+
+def _eklenen_gecis_kapisi(ilk: dict, ikinci: dict) -> dict:
+    """BK-72 (76 m², Lokman 23 Kasım 13:14 "buraya pano koymuş çok bariz bir hata"): şemada açık geçiş alanı yok; ikinci bakış hol ile
+    salon arasındaki kapısız geçişi kapı diye yazıyordu. İlk okumada olmayan, hol/antre ile ortak bölüm (salon, mutfak) arasına eklenen
+    kapı alınmaz; geçişi kod açar (`_kapisiz_gecisler`)."""
+    islev = lambda o: {_norm(x["ad"]): x.get("islev") for x in o.get("odalar") or []}
+    i1, i2 = islev(ilk), islev(ikinci)
+    ciftler = {frozenset(map(_norm, k.get("arasinda") or [])) for k in ilk.get("kapilar") or []}
+
+    def eklenen(k: dict) -> bool:
+        a = [_norm(x) for x in k.get("arasinda") or []]
+        if len(a) != 2 or frozenset(a) in ciftler or k.get("genislik_cm") or k.get("konum_cm") is not None:
+            return False
+        f = [i2.get(x) or i1.get(x) for x in a]
+        return any(x in GECIS_ISLEV for x in f) and all(x in ORTAK_ISLEV for x in f)
+    kapilar = [k for k in ikinci.get("kapilar") or [] if not eklenen(k)]
+    return ikinci if len(kapilar) == len(ikinci.get("kapilar") or []) else {**ikinci, "kapilar": kapilar}
 
 
 # ───────────────────────── çerçeve ─────────────────────────
@@ -547,6 +566,17 @@ def _gomme_veranda(kan: dict) -> None:
     # B: aynı cephedeki bitişik verandalar cephenin bütün boyunca uzanır ve boş bölüm o kenara değer → gövde en sığ veranda kadar
     # büyür; veranda = boş bölüm + dıştaki şerit (TK-08). L verandayı iki parça okuyan okuma (Fable: 0–264 derinlik 325,51 = 200,01 +
     # girinti 125,5) de aynı yere varır; derinlikler bu iki değerden başkaysa okuma aynen kalır (boş alan sorulur).
+    # BK-72 (76 m², 23 Kasım üç okuma): LLM girintiyi ayrı bir veranda (girinti derinliğinde) ve önündeki şeridi cephenin bütün boyunca
+    # okursa A girintiyi içeri alıyor, şerit gövdeye oturmuyordu (Motor: "gövdenin dış yüzüne tam oturmuyor"). Aynı cephede cephe boyu
+    # bir veranda daha varsa girinti A'dan çıkar, B'ye kalır: L veranda (girinti + şerit), gövde şerit kadar büyür (onaylı 951,25).
+    for g in [g for g in gommeler if g[2] is None]:
+        c = g[0]["cephe"]
+        yatay = c in ("on", "arka")
+        tam = [v for v in yeni_ver if v["cephe"] == c and v["rect"][0 if yatay else 1] <= NIS_TOL_CM
+               and v["rect"][2 if yatay else 3] >= (W if yatay else H) - NIS_TOL_CM]
+        if tam:
+            gommeler.remove(g)
+            parcalar.append(unary_union([box(*r) for r in g[1]]))
     kalan = []
     for c in ("on", "arka", "sol", "sag"):
         grup = sorted((v for v in yeni_ver if v["cephe"] == c), key=lambda v: v["rect"][0] if c in ("on", "arka") else v["rect"][1])
