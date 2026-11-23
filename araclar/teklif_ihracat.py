@@ -4,7 +4,7 @@
 
 Düzen standart çelik teklif formunun 01–05 düzenidir (Drive "ÇELİK - TEKLİF PORTATİFEV - YENİ.xlsx"), Türkçe prefabrik bayi formuyla
 (`araclar/teklif_pdf.py`, M-14) aynı görünüşte; metinler İngilizce, sabitleri `kurallar/teklif/form_ihracat_en.json`'da. Malzeme listesi
-(Ek-1) ve kat planı yoktur (Lokman, 23 Kasım 2026 17:56:49). 06 banka bilgisidir. 07 notlar isteğe bağlıdır. Tek sayfa; sığmazsa küçülür, yarıdan küçükse durur.
+(Ek-1) ve kat planı yoktur (Lokman, 23 Kasım 2026 17:56:49). 06 banka bilgisidir. Notlar ve imza bölümü isteğe bağlıdır; bölüm numaraları sırayla verilir. Tek sayfaya en çok %85 küçülerek sığmazsa bölüm sınırında ikinci sayfaya geçer.
 
 Bütün proje değerleri girdiden gelir: müşteri, ürün, alan, fiyat ve para birimi, koşullar, 04'ün satırları, 05 (yoksa formun listesi),
 satıcı, banka, logo. Girdi proje klasöründe durur, depoya girmez: IBAN ve telefon depoya yazılmaz. Birden çok girdi dosyası sırayla
@@ -20,12 +20,13 @@ Girdi alanları:
   alan_m2        brüt alan, m² (02'de m² ve sq ft)
   miktar         adet (yoksa 1)
   fiyat          {"para_birimi": "USD", "tutar": birim fiyat, "kdv_orani": 0}
-  kosullar       {"Delivery terms", "Delivery time", "Payment method"}
+  kosullar       {"Delivery terms", "Delivery time", "Payment method"}; "Offer validity" isteğe bağlı (yoksa satır yok)
   teknik         [[satır adı, değer], …] (04, sırasıyla)
   kapsam_disi    [madde, …] (05; yoksa formun listesi)
   satici         satıcının unvanı (06'nın başında)
   banka          {"Bank", "Account holder", "Currency", "IBAN"}
-  notlar         [[başlık, metin], …] isteğe bağlı; 07 NOTES numaralı maddeler, başlık kalın; boşsa bölüm yok
+  notlar         [[başlık, metin], …] isteğe bağlı; NOTES numaralı maddeler, başlık kalın; boşsa bölüm yok
+  imza           true ise sonda APPROVAL: satıcı ve alıcı için ad, imza ve kaşe, tarih kutuları (isteğe bağlı)
   logo           logo dosyası (PNG/JPG); göreli yol girdi dosyasının klasörüne göre; yoksa firma adı yazı olarak
 Not alanları (okunmaz): sema, aciklama, dil, *_kaynagi, teknik_acik, sorulacak.
 """
@@ -45,7 +46,7 @@ from araclar.teklif_pdf import A4, CSS, KENAR, e  # noqa: E402  (aynı görünü
 
 FORM = KOK / "kurallar" / "teklif" / "form_ihracat_en.json"
 ALANLAR = {"kod", "musteri", "urun", "alan_m2", "miktar", "fiyat", "kosullar", "teknik", "kapsam_disi", "satici", "banka", "logo",
-           "notlar"}
+           "notlar", "imza"}
 NOT_ALANLARI = {"sema", "aciklama", "dil", "teknik_acik", "sorulacak"}
 FIYAT_ALANLARI = {"para_birimi", "tutar", "kdv_orani"}
 SQFT = 10.763910416709722                      # 1 m² = 10,7639 sq ft (1 ft = 0,3048 m)
@@ -99,7 +100,7 @@ def hazirla(G: dict, form: dict | None = None, taslak: bool = False) -> dict:
     bilinmeyen = sorted(k for k in G if k not in ALANLAR | NOT_ALANLARI and not k.endswith("_kaynagi"))
     musteri, kosul, banka, fiyat = (dict(G.get(k) or {}) for k in ("musteri", "kosullar", "banka", "fiyat"))
     bilinmeyen += [f"musteri.{k}" for k in musteri if k not in form["musteri_satirlari"]]
-    bilinmeyen += [f"kosullar.{k}" for k in kosul if k not in form["kosul_satirlari"]]
+    bilinmeyen += [f"kosullar.{k}" for k in kosul if k not in form["kosul_satirlari"] + form["istege_bagli_kosullar"]]
     bilinmeyen += [f"banka.{k}" for k in banka if k not in form["banka_satirlari"]]
     bilinmeyen += [f"fiyat.{k}" for k in fiyat if k not in FIYAT_ALANLARI]
     if bilinmeyen:
@@ -132,6 +133,9 @@ def hazirla(G: dict, form: dict | None = None, taslak: bool = False) -> dict:
     notlar = G.get("notlar") or []
     if not isinstance(notlar, list) or any(not isinstance(n, list) or len(n) != 2 or any(acik_mi(x) for x in n) for n in notlar):
         raise ValueError("ihracat formu: notlar [[başlık, metin], …] olmalı, boş başlık ya da metin olamaz")
+    imza = G.get("imza", False)
+    if not isinstance(imza, bool):
+        raise ValueError(f"ihracat formu: imza true ya da false olmalı ({imza!r})")
     logo = None if acik_mi(G.get("logo")) else Path(G["logo"])
     if logo is not None and not logo.is_file():
         raise ValueError(f"ihracat formu: logo dosyası yok ({logo.name})")
@@ -144,12 +148,13 @@ def hazirla(G: dict, form: dict | None = None, taslak: bool = False) -> dict:
         "urun": al("urun", G.get("urun")),
         "alan_m2": alan, "miktar": miktar,
         "para_birimi": al("fiyat.para_birimi", fiyat.get("para_birimi")), "tutar": tutar, "kdv_orani": kdv,
-        "kosullar": [(k, al(f"kosullar.{k}", kosul.get(k))) for k in form["kosul_satirlari"]],
+        "kosullar": [(k, al(f"kosullar.{k}", kosul.get(k))) for k in form["kosul_satirlari"]]
+                    + [(k, str(kosul[k])) for k in form["istege_bagli_kosullar"] if not acik_mi(kosul.get(k))],
         "teknik": [(str(a), al(f"teknik.{a}", v)) for a, v in teknik],
         "kapsam_disi": list(G.get("kapsam_disi") or form["kapsam_disi"]),
         "satici": al("satici", G.get("satici")),
         "banka": [(k, al(f"banka.{k}", banka.get(k))) for k in form["banka_satirlari"]],
-        "notlar": [(str(b), str(m)) for b, m in notlar],
+        "notlar": [(str(b), str(m)) for b, m in notlar], "imza": imza,
         "logo": logo,
     }
     if eksik and not taslak:
@@ -189,25 +194,43 @@ def _urun_tablosu(D: dict, form: dict) -> str:
             f"<td class='sag nw'>{f(para(toplam, pb) if hesap else None)}</td></tr></table>")
 
 
-def sayfa_html(D: dict, form: dict, tarih: str, logo_var: bool) -> str:
-    B = form["bolumler"]
+def bas_html(D: dict, form: dict, tarih: str, logo_var: bool) -> str:
     ek = form["taslak_eki"] if D["eksik"] else ""
     marka = "" if logo_var else f"<td class='marka'>{e(form['firma'])}</td>"
-    k = [f"<table class='ust'><tr>{marka}<td class='sag soluk'>{e(form['web'])}</td></tr></table>",
-         f"<table class='bas'><tr><td class='nw'>{e(form['tarih_etiketi'])}: <b>{e(tarih)}</b></td>"
-         f"<td class='baslik'>{e(form['baslik'])}{e(ek)}</td><td class='sag nw'>{_deger(D['kod'], form)}</td></tr></table>"]
-    k.append(f"<h2>{e(B['musteri'])}</h2><table>" + "".join(_satir(a, v, form) for a, v in D["musteri"]) + "</table>")
-    k.append(f"<h2>{e(B['urun'])}</h2>" + _urun_tablosu(D, form) + f"<p class='soluk'>{e(form['fiyat_aciklamasi'])}</p>")
-    k.append(f"<h2>{e(B['kosullar'])}</h2><table>" + "".join(_satir(a, v, form) for a, v in D["kosullar"]) + "</table>")
-    k.append(f"<h2>{e(B['teknik'])}</h2><table>" + "".join(_satir(a, v, form) for a, v in D["teknik"]) + "</table>")
-    k.append(f"<h2>{e(B['kapsam_disi'])}</h2><table>" + "".join(f"<tr><td>• {e(m)}</td></tr>" for m in D["kapsam_disi"]) + "</table>")
-    k.append(f"<h2>{e(B['banka'])}</h2><table>" + _satir(form["satici_etiketi"], D["satici"], form)
-             + "".join(_satir(a, v, form) for a, v in D["banka"]) + "</table>")
+    return (f"<table class='ust'><tr>{marka}<td class='sag soluk'>{e(form['web'])}</td></tr></table>"
+            f"<table class='bas'><tr><td class='nw'>{e(form['tarih_etiketi'])}: <b>{e(tarih)}</b></td>"
+            f"<td class='baslik'>{e(form['baslik'])}{e(ek)}</td><td class='sag nw'>{_deger(D['kod'], form)}</td></tr></table>")
+
+
+def _imza(form: dict) -> str:
+    I = form["imza"]
+    bas = "".join(f"<th style='width:250px'>{e(t)}</th>" for t in I["taraflar"])
+    sat = "".join(f"<tr><td style='width:250px; height:{I['satir_yuksekligi_nk']}px'>{e(a)}:</td>"
+                  f"<td style='width:250px; height:{I['satir_yuksekligi_nk']}px'>{e(a)}:</td></tr>" for a in I["satirlar"])
+    return f"<table><tr>{bas}</tr>{sat}</table>"
+
+
+def bolumler(D: dict, form: dict) -> list[str]:
+    """Bölümlerin HTML'i sırayla; numara sırayla verilir (01, 02, …): notlar ve imza yalnız girdide varsa."""
+    B = form["bolumler"]
+    parca = [("musteri", "<table>" + "".join(_satir(a, v, form) for a, v in D["musteri"]) + "</table>"),
+             ("urun", _urun_tablosu(D, form) + f"<p class='soluk'>{e(form['fiyat_aciklamasi'])}</p>"),
+             ("kosullar", "<table>" + "".join(_satir(a, v, form) for a, v in D["kosullar"]) + "</table>"),
+             ("teknik", "<table>" + "".join(_satir(a, v, form) for a, v in D["teknik"]) + "</table>"),
+             ("kapsam_disi", "<table>" + "".join(f"<tr><td>• {e(m)}</td></tr>" for m in D["kapsam_disi"]) + "</table>"),
+             ("banka", "<table>" + _satir(form["satici_etiketi"], D["satici"], form)
+              + "".join(_satir(a, v, form) for a, v in D["banka"]) + "</table>")]
     if D["notlar"]:
-        k.append(f"<h2>{e(B['notlar'])}</h2><table>" + "".join(
-            f"<tr><td>{i}. <b>{e(b)}</b> {e(m)}</td></tr>"
-            for i, (b, m) in enumerate(D["notlar"], 1)) + "</table>")
-    return "".join(k)
+        parca.append(("notlar", "<table>" + "".join(f"<tr><td>{i}. <b>{e(b)}</b> {e(m)}</td></tr>"
+                                                     for i, (b, m) in enumerate(D["notlar"], 1)) + "</table>"))
+    if D.get("imza"):
+        parca.append(("imza", _imza(form)))
+    return [f"<h2>{n:02d} &nbsp; {e(B[k])}</h2>{h}" for n, (k, h) in enumerate(parca, 1)]
+
+
+def sayfa_html(D: dict, form: dict, tarih: str, logo_var: bool) -> str:
+    """Formun bütün metni tek parça (başlık + bölümler)."""
+    return bas_html(D, form, tarih, logo_var) + "".join(bolumler(D, form))
 
 
 def dosya_adi(D: dict, form: dict) -> str:
@@ -233,25 +256,57 @@ def logo_kirp(yol: Path, esik: int = 245, pay: int = 4) -> bytes:
     return b.getvalue()
 
 
+def sayfalara_bol(bas: str, parca: list[str], sigar) -> list[str]:
+    """Bölümleri sayfalara böler: önce hepsi tek sayfada; sığmazsa her sayfaya sığdığı kadar bölüm, bölüm ortadan bölünmez. Başlık
+    yalnız ilk sayfada. `sigar(html, ilk)` sayfaya en küçük ölçekle sığıyor mu. Tek bölüm boş sayfaya sığmazsa durur."""
+    if sigar(bas + "".join(parca), True):
+        return [bas + "".join(parca)]
+    sayfalar, i = [], 0
+    while i < len(parca):
+        ilk = not sayfalar
+        ust = bas if ilk else ""
+        j = i + 1
+        if not sigar(ust + parca[i], ilk):
+            raise ValueError("ihracat formu: bir bölüm boş sayfaya en küçük ölçekte de sığmadı")
+        while j < len(parca) and sigar(ust + "".join(parca[i:j + 1]), ilk):
+            j += 1
+        sayfalar.append(ust + "".join(parca[i:j]))
+        i = j
+    return sayfalar
+
+
 def pdf_yaz(D: dict, yol: Path, form: dict | None = None, tarih: str | None = None) -> Path:
-    """Formu tek sayfa A4 PDF olarak yazar. Logo varsa beyaz kenarları kırpılır, sol üstte (en çok 170 × 34 nk, oranı korunur), firma adı yazısı yerine."""
+    """Formu A4 PDF olarak yazar: tek sayfaya `en_kucuk_olcek`le sığarsa tek sayfa, sığmazsa bölüm sınırında ikinci sayfa (form.json).
+    Logo yalnız ilk sayfada; beyaz kenarları kırpılır, sol üstte (en çok 170 × 34 nk, oranı korunur), firma adı yazısı yerine."""
     import pymupdf
     form = form or form_oku()
     tarih = tarih or dt.date.today().strftime("%d.%m.%Y")
     logo = D.get("logo")
+    olcek = form["en_kucuk_olcek"]
+    css = CSS + CSS_EK
+    ust_ilk = 28.0 + (38 if logo else 0)
+
+    def alan(ilk: bool):
+        return pymupdf.Rect(KENAR, ust_ilk if ilk else 28.0, A4[0] - KENAR, A4[1] - 34)
+
+    with pymupdf.open() as deneme:
+        def sigar(h: str, ilk: bool) -> bool:
+            sayfa = deneme.new_page(width=A4[0], height=A4[1])
+            sonuc = sayfa.insert_htmlbox(alan(ilk), h, css=css, scale_low=olcek)[0] >= 0
+            deneme.delete_page(-1)
+            return sonuc
+        sayfalar = sayfalara_bol(bas_html(D, form, tarih, bool(logo)), bolumler(D, form), sigar)
     doc = pymupdf.open()
-    s = doc.new_page(width=A4[0], height=A4[1])
-    ust = 28.0
-    if logo:
-        s.insert_image(pymupdf.Rect(KENAR, ust, KENAR + 170, ust + 34), stream=logo_kirp(Path(logo)), keep_proportion=True)
-        ust += 38
-    alan = pymupdf.Rect(KENAR, ust, A4[0] - KENAR, A4[1] - 34)
-    bos, _ = s.insert_htmlbox(alan, sayfa_html(D, form, tarih, bool(logo)), css=CSS + CSS_EK, scale_low=0.5)
-    if bos < 0:
-        raise ValueError("ihracat formu: sayfa yarı ölçekte de sığmadı")
+    for n, h in enumerate(sayfalar):
+        s = doc.new_page(width=A4[0], height=A4[1])
+        if n == 0 and logo:
+            s.insert_image(pymupdf.Rect(KENAR, 28.0, KENAR + 170, 28.0 + 34), stream=logo_kirp(Path(logo)), keep_proportion=True)
+        if s.insert_htmlbox(alan(n == 0), h, css=css, scale_low=olcek)[0] < 0:
+            raise ValueError("ihracat formu: sayfa sığmadı")
     kimlik = str(D["kod"] or "DRAFT")
-    s.insert_htmlbox(pymupdf.Rect(KENAR, A4[1] - 26, A4[0] - KENAR, A4[1] - 12),
-                     f"<p class='alt'>{e(kimlik)} · {e(form['alt_yazi'])} · page 1 / 1</p>", css=CSS)
+    for n, s in enumerate(doc, 1):
+        s.insert_htmlbox(pymupdf.Rect(KENAR, A4[1] - 26, A4[0] - KENAR, A4[1] - 12),
+                         f"<p class='alt'>{e(kimlik)} · {e(form['alt_yazi'])} · page {n} / {doc.page_count}</p>", css=CSS)
     doc.set_metadata({"title": f"{kimlik} {form['alt_yazi']}", "creator": "Portman · araclar/teklif_ihracat.py", "producer": "",
                       "creationDate": "", "modDate": ""})
     yol.parent.mkdir(parents=True, exist_ok=True)

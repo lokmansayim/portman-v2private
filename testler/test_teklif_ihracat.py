@@ -24,7 +24,7 @@ def girdi() -> dict:
 
 def metin(pdf: Path) -> tuple[int, str]:
     with pymupdf.open(pdf) as d:
-        return d.page_count, " ".join(" ".join(s.get_text().split()) for s in d).replace("ﬁ", "fi").replace("ﬂ", "fl")   # bağlı harf
+        return d.page_count, " ".join(" ".join(s.get_text().split()) for s in d).replace("ﬁ", "fi").replace("ﬂ", "fl").replace("ﬀ", "ff")   # bağlı harf
 
 
 def test_tam_form_tek_sayfa_ve_bolumler(tmp_path):
@@ -35,11 +35,12 @@ def test_tam_form_tek_sayfa_ve_bolumler(tmp_path):
     assert pdf.name == "EXTEST01_quotation_en.pdf"
     n, s = metin(pdf)
     assert n == 1
-    bolumler = [b for k, b in form["bolumler"].items() if k != "notlar"]
-    for b in bolumler:                                       # 01–06 sırasıyla; notsuz girdide 07 yok
-        assert " ".join(b.split()) in s
-    assert "07 NOTES" not in s
-    sira = [s.index(" ".join(b.split())) for b in bolumler]
+    bolumler = [f"{n:02d} {form['bolumler'][k]}" for n, k in
+                enumerate(["musteri", "urun", "kosullar", "teknik", "kapsam_disi", "banka"], 1)]
+    for b in bolumler:                                       # 01–06 sırasıyla; notsuz, imzasız girdide 07 yok
+        assert b in s
+    assert "07 " not in s and "NOTES" not in s and "APPROVAL" not in s and "Offer validity" not in s
+    sira = [s.index(b) for b in bolumler]
     assert sira == sorted(sira)
     assert "QUOTATION AND SALES CONFIRMATION FORM" in s and "DRAFT" not in s and "TBD" not in s
     assert "USD 26,500.00" in s and "108 m² (1,162.5 sq ft)" in s and "0%" in s
@@ -150,3 +151,27 @@ def test_notlar_07_numarali(tmp_path):
     for bozuk in ([["Başlık"]], [["Başlık", ""]], "metin"):
         with pytest.raises(ValueError, match="notlar"):
             T.hazirla({**girdi(), "notlar": bozuk})
+
+
+def test_imza_gecerlilik_ve_numara_sirasi(tmp_path):
+    G = {**girdi(), "imza": True}
+    G["kosullar"]["Offer validity"] = "30 days from the date of this form."
+    n, s = metin(T.pdf_yaz(T.hazirla(G), tmp_path / "i.pdf", tarih="23.11.2026"))
+    assert n == 1
+    assert "Offer validity 30 days from the date of this form." in s
+    assert "07 APPROVAL SELLER BUYER Name: Name: Signature and stamp: Signature and stamp: Date: Date:" in s   # notsuz: imza 07
+    with pytest.raises(ValueError, match="imza"):
+        T.hazirla({**girdi(), "imza": "evet"})
+
+
+def test_sigmayan_form_bolum_sinirinda_ikinci_sayfa(tmp_path):
+    G = {**girdi(), "imza": True, "notlar": [[f"Note {i}.", "Long text " * 40] for i in range(6)]}
+    G["teknik"] = [[f"Row {i}", "Value " * 30] for i in range(14)]
+    D = T.hazirla(G)
+    n, s = metin(T.pdf_yaz(D, tmp_path / "u.pdf", tarih="23.11.2026"))
+    assert n == 2 and "page 1 / 2" in s and "page 2 / 2" in s
+    with pymupdf.open(tmp_path / "u.pdf") as d:
+        ikinci = " ".join(d[1].get_text().split())
+    assert ikinci.startswith(tuple(f"{k:02d} " for k in range(2, 9)))  # ikinci sayfa bir bölüm başlığıyla başlar
+    assert "QUOTATION AND SALES CONFIRMATION FORM" not in ikinci
+    assert "08 APPROVAL" in ikinci

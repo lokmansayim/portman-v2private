@@ -11,23 +11,49 @@
  "taslak_eki": " · DRAFT",
  "eksik_yazisi": "TBD",
  "bolumler": {
-  "musteri": "01   CUSTOMER INFORMATION",
-  "urun": "02   PRODUCT DETAILS",
-  "kosullar": "03   DELIVERY AND PAYMENT TERMS",
-  "teknik": "04   PACKAGE CONTENTS AND TECHNICAL SPECIFICATIONS",
-  "kapsam_disi": "05   EXCLUDED FROM SCOPE (BUYER'S RESPONSIBILITY)",
-  "banka": "06   BANK DETAILS",
-  "notlar": "07   NOTES"
+  "musteri": "CUSTOMER INFORMATION",
+  "urun": "PRODUCT DETAILS",
+  "kosullar": "DELIVERY AND PAYMENT TERMS",
+  "teknik": "PACKAGE CONTENTS AND TECHNICAL SPECIFICATIONS",
+  "kapsam_disi": "EXCLUDED FROM SCOPE (BUYER'S RESPONSIBILITY)",
+  "banka": "BANK DETAILS",
+  "notlar": "NOTES",
+  "imza": "APPROVAL"
  },
- "musteri_satirlari": ["Customer", "Project", "Phone", "Address"],
- "zorunlu_musteri": ["Customer"],
+ "musteri_satirlari": [
+  "Customer",
+  "Project",
+  "Phone",
+  "Address"
+ ],
+ "zorunlu_musteri": [
+  "Customer"
+ ],
  "telefon": "maskeli",
  "telefon_dayanagi": "AGENTS.md › Kişisel veri: telefon numarası her yerde maskelenir; açık yazma istisnası (D-64) yalnız bayi formunda bayinin kendi telefonudur. Müşteri satırlarındaki numara son dört hane kalarak yazılır (beyin/numara.py).",
- "kosul_satirlari": ["Delivery terms", "Delivery time", "Payment method"],
- "banka_satirlari": ["Bank", "Account holder", "Currency", "IBAN"],
+ "kosul_satirlari": [
+  "Delivery terms",
+  "Delivery time",
+  "Payment method"
+ ],
+ "banka_satirlari": [
+  "Bank",
+  "Account holder",
+  "Currency",
+  "IBAN"
+ ],
  "satici_etiketi": "Seller",
  "urun_tablosu": {
-  "basliklar": ["No", "Product Description", "Area", "Qty", "Unit Price", "Amount", "VAT", "Total"],
+  "basliklar": [
+   "No",
+   "Product Description",
+   "Area",
+   "Qty",
+   "Unit Price",
+   "Amount",
+   "VAT",
+   "Total"
+  ],
   "genel_toplam": "Grand Total"
  },
  "alan_sqft": true,
@@ -39,5 +65,23 @@
   "Assembly, installation and site labour.",
   "Kitchen cabinets."
  ],
- "kapsam_disi_kaynagi": "Standart formun 05'i (form.json › kapsam_disi), İngilizceye çevrildi. Girdi kendi kapsam_disi listesini verirse bu liste yerine o yazılır."
+ "kapsam_disi_kaynagi": "Standart formun 05'i (form.json › kapsam_disi), İngilizceye çevrildi. Girdi kendi kapsam_disi listesini verirse bu liste yerine o yazılır.",
+ "bolumler_aciklamasi": "Numara koddan sırayla (01, 02, …); notlar ve imza yalnız girdide varsa.",
+ "istege_bagli_kosullar": [
+  "Offer validity"
+ ],
+ "imza": {
+  "taraflar": [
+   "SELLER",
+   "BUYER"
+  ],
+  "satirlar": [
+   "Name",
+   "Signature and stamp",
+   "Date"
+  ],
+  "satir_yuksekligi_nk": 22
+ },
+ "en_kucuk_olcek": 0.85,
+ "en_kucuk_olcek_aciklamasi": "Yazı 8 pt; tek sayfaya 0,85 ölçekten (6,8 pt) daha küçük sığacaksa form bölüm sınırında ikinci sayfaya geçer."
 }
