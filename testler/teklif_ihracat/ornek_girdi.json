@@ -1,0 +1,16 @@
+{
+ "aciklama": "İE-46 testinin uydurma girdisi. Gerçek müşteri, telefon ve IBAN yok; banka satırları yer tutucu.",
+ "kod": "EX-TEST-01",
+ "musteri": {"Customer": "Test Customer", "Project": "Single-storey steel home, test site", "Address": "Test City, USA"},
+ "urun": "Single-Storey Light-Gauge Steel Home Kit",
+ "alan_m2": 108,
+ "fiyat": {"para_birimi": "USD", "tutar": 26500, "kdv_orani": 0},
+ "kosullar": {"Delivery terms": "Ex Works (EXW), factory, Türkiye.", "Delivery time": "60 days", "Payment method": "Bank transfer"},
+ "teknik": [
+  ["Structural Frame", "Cold-formed steel, 1.2 mm"],
+  ["Roof", "11 mm OSB + moisture barrier + metal roof tiles"],
+  ["Fasteners", "Screw set"]
+ ],
+ "satici": "TEST SELLER LTD",
+ "banka": {"Bank": "Test Bank", "Account holder": "TEST SELLER LTD", "Currency": "USD", "IBAN": "YER-TUTUCU"}
+}

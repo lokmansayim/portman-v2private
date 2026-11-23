@@ -1,0 +1,87 @@
+{
+ "sema": "portman.teklif_formu_ihracat/1",
+ "aciklama": "İngilizce ihracat teklif ve satış onay formunun düzeni ve sabit metinleri (İE-46, araclar/teklif_ihracat.py). Türkçe prefabrik bayi formundan (form.json, M-14) ayrıdır; ona dokunmaz. Düzen standart çelik teklif formunun 01–05 düzenidir; malzeme listesi (Ek-1) ve kat planı yoktur; 06 banka bilgisi girdiden; 07 notlar girdide varsa (Hacı Kulu teklif thread'inin isteği, Lokman 23 Kasım 2026 18:05:39 mesajından). Müşteri, ürün, alan, fiyat, koşullar, teknik satırlar, banka ve logo girdiden gelir; girdi proje klasöründe durur, depoya girmez (IBAN ve telefon depoya yazılmaz).",
+ "kaynak": "Lokman, 23 Kasım 2026 17:56:32 UTC: \"sen bizim standart çelik teklif formumuzu prefabrikte yaptığın gibi hazırla ingilizce olarak\"; 17:56:49 \"malzeme listesini kat planını boşver\"; 17:57:46 \"iban vereceğim\"; 17:57:57 \"logo var\". Standart çelik formu: Drive 'ÇELİK - TEKLİF PORTATİFEV - YENİ.xlsx' (sayfa 'PREFABRİK TEKLİF TURKCE': 01 Bayi / firma bilgileri, 02 Ürün detayı, 03 Ödeme, 04 Paket içeriği ve teknik özellikleri, 05 Kapsam dışı işler).",
+ "firma": "PORTATİF EV",
+ "web": "www.portatifev.com",
+ "baslik": "QUOTATION AND SALES CONFIRMATION FORM",
+ "alt_yazi": "quotation and sales confirmation form",
+ "dosya": "{kod}_quotation_en.pdf",
+ "tarih_etiketi": "Date",
+ "taslak_eki": " · DRAFT",
+ "eksik_yazisi": "TBD",
+ "bolumler": {
+  "musteri": "CUSTOMER INFORMATION",
+  "urun": "PRODUCT DETAILS",
+  "kosullar": "DELIVERY AND PAYMENT TERMS",
+  "teknik": "PACKAGE CONTENTS AND TECHNICAL SPECIFICATIONS",
+  "kapsam_disi": "EXCLUDED FROM SCOPE (BUYER'S RESPONSIBILITY)",
+  "banka": "BANK DETAILS",
+  "notlar": "NOTES",
+  "imza": "APPROVAL"
+ },
+ "musteri_satirlari": [
+  "Customer",
+  "Project",
+  "Phone",
+  "Address"
+ ],
+ "zorunlu_musteri": [
+  "Customer"
+ ],
+ "telefon": "acik",
+ "telefon_dayanagi": "İhracat formunda müşterinin telefonu açık yazılır (D-151; Lokman, 23 Kasım 2026 19:29:29 UTC: \"açık yazılsın kural falan yok\"). Numara yalnız proje klasöründeki girdiden gelir; depoya, teste ve teklifin JSON'una girmez. \"maskeli\" verilirse son dört hane kalır (beyin/numara.py).",
+ "kosul_satirlari": [
+  "Delivery terms",
+  "Delivery time",
+  "Payment method"
+ ],
+ "banka_satirlari": [
+  "Bank",
+  "Account holder",
+  "Currency",
+  "IBAN"
+ ],
+ "satici_etiketi": "Seller",
+ "urun_tablosu": {
+  "basliklar": [
+   "No",
+   "Product Description",
+   "Area",
+   "Qty",
+   "Unit Price",
+   "Amount",
+   "VAT",
+   "Total"
+  ],
+  "genel_toplam": "Grand Total"
+ },
+ "alan_sqft": true,
+ "fiyat_aciklamasi": "The unit price is the sale price of the package described in section 04. Delivery and payment terms are in section 03. Area is the gross floor area of the building.",
+ "kapsam_disi": [
+  "Foundation, excavation and landscaping.",
+  "Screed and floor finishes (parquet, tiles, ceramics).",
+  "Freight to the site, freight insurance and unloading (crane, forklift).",
+  "Assembly, installation and site labour.",
+  "Kitchen cabinets."
+ ],
+ "kapsam_disi_kaynagi": "Standart formun 05'i (form.json › kapsam_disi), İngilizceye çevrildi. Girdi kendi kapsam_disi listesini verirse bu liste yerine o yazılır.",
+ "bolumler_aciklamasi": "Numara koddan sırayla (01, 02, …); notlar ve imza yalnız girdide varsa.",
+ "istege_bagli_kosullar": [
+  "Offer validity"
+ ],
+ "imza": {
+  "taraflar": [
+   "SELLER",
+   "BUYER"
+  ],
+  "satirlar": [
+   "Name",
+   "Signature and stamp",
+   "Date"
+  ],
+  "satir_yuksekligi_nk": 22
+ },
+ "en_kucuk_olcek": 0.85,
+ "en_kucuk_olcek_aciklamasi": "Yazı 8 pt; tek sayfaya 0,85 ölçekten (6,8 pt) daha küçük sığacaksa form bölüm sınırında ikinci sayfaya geçer."
+}
