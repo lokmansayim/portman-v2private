@@ -390,13 +390,14 @@ def iki_oda(W: float, H: float, sinir: float) -> dict:
 
 
 def test_pano_izgarasinin_kisa_ucu_sorulur():
-    """9,00 m: yarım adımlı ızgarada sonda 1,5 cm'lik pano kalır, Motor çizemez → teyit yerine soru (en yakın iki ölçüyle)."""
+    """9,00 m: yarım adımlı ızgarada sonda 1,5 cm'lik pano kalır, Motor çizemez. BK-72'den (D-150) beri sorulmaz: kısa uç kesilir,
+    gövde en yakın oturan ölçüyle çizilir, bayiye notla yazılır (onaylı TK-04 9,00 → 8,885, TK-09 6,50 → 6,475)."""
     d = GO.denetle(iki_oda(900, 763, 386.5))
-    assert d["cevrim"] is None
-    assert any("ön cephesi 9,00 m" in s and "sonda 1,5 cm'lik pano" in s and "8,98 m ve 9,61 m" in s for s in d["sorular"]), d["sorular"]
+    assert d["sorular"] == [] and d["cevrim"] is not None
+    assert any("ön cephesi 9,00 m yerine 8,985 m" in n and "1,5 cm'lik pano" in n for n in d["notlar"]), d["notlar"]
     assert GO.denetle(iki_oda(898, 763, 386.5))["cevrim"] is not None
     d = GO.denetle(iki_oda(898, 770, 386.5))
-    assert any("yan cephesi 7,70 m" in s for s in d["sorular"]), d["sorular"]
+    assert d["sorular"] == [] and any("yan cephesi 7,70 m yerine 7,63 m" in n for n in d["notlar"]), d
 
 
 def test_makas_y_ise_kisa_kenar_y_izgara_aynasi_motor_cizer(tmp_path):
@@ -434,14 +435,13 @@ def test_mahya_gorunmuyorsa_makas_izgaraya_oturan_yon_varsayim_bayiye():
     d = mahyasiz(898, 763)                     # ilk yön y (8,98 > 7,63 + 0,50): x ızgarası 5 cm'den, 8,98 oturmaz; x yönünde çizilir
     assert d["sorular"] == [] and d["cevrim"]["is_emri"]["yapi"]["kisa_kenar"] == "x"
     assert d["notlar"] == ["mahya yönü görünmüyordu, girişten arkaya aldım (gövde ölçüleri pano ızgarasına bu yönde oturuyor)"]
-    d = mahyasiz(900, 763)                     # iki yönde de 9,00 m oturmaz
-    assert d["cevrim"] is None and any("ön cephesi 9,00 m" in s and "8,88 m ve 9,51 m" in s for s in d["sorular"]), d["sorular"]
-    assert "mahya yönü görünmüyordu, girişe paralel aldım" in d["notlar"]
-    m, _ = GO.soru_metni(iki_oda(900, 763, 386.5), d)
-    assert "Mahya yönü görünmüyordu, girişe paralel aldım." in m and m.index("Mahya yönü") < m.index("emin olamadım")
+    # iki yönde de 9,00 m oturmaz; BK-72 (D-150): soru yok, en az kesilen yön (x: 1,5 cm; y: 11,5 cm) çizilir, ikisi de notta
+    d = mahyasiz(900, 763)
+    assert d["sorular"] == [] and d["cevrim"]["is_emri"]["yapi"]["kisa_kenar"] == "x", d["sorular"]
+    assert any("9,00 m yerine 8,985 m" in n for n in d["notlar"]) and any(n.startswith("mahya yönü görünmüyordu, girişten arkaya") for n in d["notlar"])
     d = mahyasiz(774, 783)
-    assert any("ön cephesi 7,74 m" in s and "7,73 m ve 8,35 m" in s for s in d["sorular"]), d["sorular"]
-    assert "mahya yönü görünmüyordu, girişten arkaya aldım" in d["notlar"]
+    assert d["sorular"] == [] and any("7,74 m yerine 7,73 m" in n for n in d["notlar"]), d["notlar"]
+    assert any(n.startswith("mahya yönü görünmüyordu, girişten arkaya aldım") for n in d["notlar"])
     for W in (773, 835):                       # önerilen iki ölçü; 8,35 > 7,83 + 0,50 olsa da soru yok
         d = mahyasiz(W, 783)
         assert d["sorular"] == [] and d["cevrim"]["is_emri"]["yapi"]["kisa_kenar"] == "x", (W, d["sorular"])

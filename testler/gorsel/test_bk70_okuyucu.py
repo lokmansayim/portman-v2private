@@ -51,12 +51,12 @@ def test_gomme_veranda_govdenin_icinde_tk06():
 
 
 def test_gomme_veranda_tk09_bos_alan_sorusu_kalkti():
-    """45 m²: okumada boş alan sorusu yok; kalan tek soru dış ölçünün ızgaraya oturmaması (onaylı plan 647,5)."""
+    """45 m²: okumada boş alan sorusu yok. Dış ölçü sorusu BK-72'yle (D-150) kalktı: 6,50 → 6,475 m (onaylı plan 647,5), bayiye not."""
     den = GO.denetle(okuma("TK09"))
     assert not any("hiçbir odaya ait" in s for s in den["sorular"])
     assert any(x["islev"] == "veranda" for x in den["kanonik"]["odalar"]) and not den["kanonik"]["verandalar"]
-    assert den["sorular"] == ["Gövdenin yan cephesi 6,50 m; pano ızgarasında sonda 2,5 cm'lik pano kalıyor, bu ölçü prefabrikte olmuyor. "
-                              "En yakın ölçüler 6,47 m ve 7,10 m; hangisiyle çizeyim?"]
+    assert not any("pano kalıyor" in s for s in den["sorular"])
+    assert any("6,50 m yerine 6,475 m" in n for n in den["notlar"])
 
 
 def test_gomme_veranda_l_biciminde_govde_buyur_tk08():
