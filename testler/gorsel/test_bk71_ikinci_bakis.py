@@ -86,3 +86,22 @@ def test_worker_ikinci_bakis_hata_verirse_ilk_okuma_kalir(tmp_path):
 def test_varsayilan_ayarda_ikinci_bakis_kapali():
     import ayarlar
     assert ayarlar.VARSAYILAN["gorsel_okuma"]["ikinci_bakis"] is False
+
+
+# D-148 (Lokman 23 Kasım 11:54:43, 11:55:43): standartlar sorulmaz; plan onayından sonra formda gider
+def test_d148_standart_sorulari_bayiye_gitmez_not_yazilir():
+    o = {**_okuma("TK06"), "emin_olunamayanlar": ["Kat sayısı ve yapı türü (prefabrik/çelik) belirtilmemiş",
+                                                  "Çatı tipi ve duvar yüksekliği belirtilmemiş (görünüş yok)",
+                                                  "'Bina Yüksekliği 2500 mm' duvar yüksekliği mi, toplam yükseklik mi?"]}
+    den = GO.denetle(o)
+    assert not den["sorular"] and den["cevrim"]["is_emri"]
+    assert any("formda gelecek" in n for n in den["notlar"])
+
+
+def test_d148_pencere_kapi_ve_zincir_sorulari_kalir():
+    for s in ("Pencere yükseklikleri ve banyo penceresinin ölçüsü nedir?", "Giriş kapısının genişliği yazmıyor",
+              "Üst ölçü zinciri 261+126+188+324 = 899 ediyor, toplamda 898 yazıyor; hangisi doğru?"):
+        assert not GO.standart_sorusu(s), s
+    for s in ("Kat sayısı yazmıyor; tek kat mı?", "Çatı eğimi ve saçak taşması yazmıyor (görünüşte mahya yüksekliği 142 cm)",
+              "Yapı türü (prefabrik/çelik) yazmıyor"):
+        assert GO.standart_sorusu(s), s

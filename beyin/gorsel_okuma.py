@@ -86,7 +86,9 @@ Kurallar:
 - `cati`: görünüş varsa çatı tipi; giriş cephesinin görünüşünde üçgen alın görünüyorsa mahya girişten arkaya ("giristen_arkaya"),
   görünmüyorsa "girise_paralel"; eğim (%) ve saçak (cm) yalnız yazılıysa. `duvar_yuksekligi_cm` görünüşte yazıyorsa.
 - `yapi_turu` (prefabrik / çelik) ve `kat_sayisi` yalnız çizimde ya da bayinin mesajında yazıyorsa.
-- Okuyamadığın ve tahmin de edemediğin her şeyi `emin_olunamayanlar`a kısa, bayiye sorulabilecek biçimde yaz. Uydurma."""
+- Okuyamadığın ve tahmin de edemediğin her şeyi `emin_olunamayanlar`a kısa, bayiye sorulabilecek biçimde yaz. Uydurma.
+- Şunları `emin_olunamayanlar`a yazma; çizimde yazmıyorsa sistem standardı alır: yapı türü (prefabrik), kat sayısı (tek kat), duvar ya da
+  bina yüksekliği (2,50 m), çatının tipi, eğimi, saçağı, mahyası ve cumbası (çatı plan onaylandıktan sonra ayrıca sorulur)."""
 
 DUZELTME_PROMPT = PROMPT + """
 
@@ -665,6 +667,17 @@ def _tr(v: float, n: int = 2) -> str:
 
 
 # ───────────────────────── denetim (kod karar verir) ─────────────────────────
+# BK-71: okuyucunun kendi sorularından sistemin standardını bildiği konular (yapı türü, kat, yükseklik, çatı) bayiye gitmez. Soru bu
+# konulardan başka bir şeyi (pencere, kapı, oda, ölçü zinciri) de soruyorsa kalır.
+_STANDART = re.compile(r"yap[ıi] t[üu]r|yap[ıi] tip|prefabrik ?/ ?[çc]elik|kat say[ıi]s|tek kat|ka[çc] kat|bina y[üu]ksekli|duvar y[üu]ksekli|"
+                       r"[çc]at[ıi]|e[ğg]im|sa[çc]ak|mahya|cumba", re.I)
+_STANDART_DISI = re.compile(r"pencere|kap[ıi]|oda|banyo|mutfak|salon|hol|veranda|zincir|toplamda|toplam [öo]l[çc]|duvar[ıi]n yeri|s[ıi]n[ıi]r", re.I)
+
+
+def standart_sorusu(s: str) -> bool:
+    return bool(_STANDART.search(s)) and not _STANDART_DISI.search(s)
+
+
 def denetle(okuma: dict, ayar: dict | None = None, bk14: bool | None = None) -> dict:
     """Okumanın kod denetimi ve plana çevirisi. Dönüş: {plan_mi, yapi_turu, sorular[], cizilemez[], notlar[], tahminler[], odalar[],
     kanonik, cevrim}. `sorular` bayiye sorulur (teyit yok); `cizilemez` Motor'un bugün çizemediği (bayiye söylenir, Patron'a gider);
@@ -681,8 +694,11 @@ def denetle(okuma: dict, ayar: dict | None = None, bk14: bool | None = None) -> 
         notlar.append("yapı tipi yazmıyordu, prefabrik aldım")
     if (o.kat_sayisi or 1) > 1:
         sonuc["cizilemez"].append(f"{o.kat_sayisi} katlı plan (bugün yalnız tek katı otomatik çizebiliyorum)")
+    standart = []
     for s in o.emin_olunamayanlar:
-        sor.append(numara.maskele(str(s))[:160])
+        (standart if standart_sorusu(str(s)) else sor).append(numara.maskele(str(s))[:160])
+    if standart:                                # BK-71 (Lokman kart 23 Kasım 11:54:43 "Standartları sormasın"; 11:55:43 "kat planı onaylandıktan sonra standartlar formda gider")
+        notlar.append("yapı türü, kat, yükseklik ve çatı gibi standartlar kat planı onaylandıktan sonra formda gelecek; değişiklik orada yapılır")
     if not o.odalar:
         sor.append("Odaları ve ölçülerini çizimden okuyamadım.")
         return sonuc
