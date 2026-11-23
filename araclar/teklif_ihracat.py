@@ -205,7 +205,7 @@ def sayfa_html(D: dict, form: dict, tarih: str, logo_var: bool) -> str:
              + "".join(_satir(a, v, form) for a, v in D["banka"]) + "</table>")
     if D["notlar"]:
         k.append(f"<h2>{e(B['notlar'])}</h2><table>" + "".join(
-            f"<tr><td style='width:20px'>{i}.</td><td style='width:480px'><b>{e(b)}</b> {e(m)}</td></tr>"
+            f"<tr><td>{i}. <b>{e(b)}</b> {e(m)}</td></tr>"
             for i, (b, m) in enumerate(D["notlar"], 1)) + "</table>")
     return "".join(k)
 
