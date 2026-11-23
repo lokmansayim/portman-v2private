@@ -1,0 +1,42 @@
+{
+ "sema": "portman.teklif_formu_ihracat/1",
+ "aciklama": "İngilizce ihracat teklif ve satış onay formunun düzeni ve sabit metinleri (İE-46, araclar/teklif_ihracat.py). Türkçe prefabrik bayi formundan (form.json, M-14) ayrıdır; ona dokunmaz. Düzen standart çelik teklif formunun 01–05 düzenidir; malzeme listesi (Ek-1) ve kat planı yoktur; 06 banka bilgisi girdiden. Müşteri, ürün, alan, fiyat, koşullar, teknik satırlar, banka ve logo girdiden gelir; girdi proje klasöründe durur, depoya girmez (IBAN ve telefon depoya yazılmaz).",
+ "kaynak": "Lokman, 23 Kasım 2026 17:56:32 UTC: \"sen bizim standart çelik teklif formumuzu prefabrikte yaptığın gibi hazırla ingilizce olarak\"; 17:56:49 \"malzeme listesini kat planını boşver\"; 17:57:46 \"iban vereceğim\"; 17:57:57 \"logo var\". Standart çelik formu: Drive 'ÇELİK - TEKLİF PORTATİFEV - YENİ.xlsx' (sayfa 'PREFABRİK TEKLİF TURKCE': 01 Bayi / firma bilgileri, 02 Ürün detayı, 03 Ödeme, 04 Paket içeriği ve teknik özellikleri, 05 Kapsam dışı işler).",
+ "firma": "PORTATİF EV",
+ "web": "www.portatifev.com",
+ "baslik": "QUOTATION AND SALES CONFIRMATION FORM",
+ "alt_yazi": "quotation and sales confirmation form",
+ "dosya": "{kod}_quotation_en.pdf",
+ "tarih_etiketi": "Date",
+ "taslak_eki": " · DRAFT",
+ "eksik_yazisi": "TBD",
+ "bolumler": {
+  "musteri": "01   CUSTOMER INFORMATION",
+  "urun": "02   PRODUCT DETAILS",
+  "kosullar": "03   DELIVERY AND PAYMENT TERMS",
+  "teknik": "04   PACKAGE CONTENTS AND TECHNICAL SPECIFICATIONS",
+  "kapsam_disi": "05   EXCLUDED FROM SCOPE (BUYER'S RESPONSIBILITY)",
+  "banka": "06   BANK DETAILS"
+ },
+ "musteri_satirlari": ["Customer", "Project", "Phone", "Address"],
+ "zorunlu_musteri": ["Customer"],
+ "telefon": "maskeli",
+ "telefon_dayanagi": "AGENTS.md › Kişisel veri: telefon numarası her yerde maskelenir; açık yazma istisnası (D-64) yalnız bayi formunda bayinin kendi telefonudur. Müşteri satırlarındaki numara son dört hane kalarak yazılır (beyin/numara.py).",
+ "kosul_satirlari": ["Delivery terms", "Delivery time", "Payment method"],
+ "banka_satirlari": ["Bank", "Account holder", "Currency", "IBAN"],
+ "satici_etiketi": "Seller",
+ "urun_tablosu": {
+  "basliklar": ["No", "Product Description", "Area", "Qty", "Unit Price", "Amount", "VAT", "Total"],
+  "genel_toplam": "Grand Total"
+ },
+ "alan_sqft": true,
+ "fiyat_aciklamasi": "The unit price is the sale price of the package described in section 04. Delivery and payment terms are in section 03. Area is the gross floor area of the building.",
+ "kapsam_disi": [
+  "Foundation, excavation and landscaping.",
+  "Screed and floor finishes (parquet, tiles, ceramics).",
+  "Freight to the site, freight insurance and unloading (crane, forklift).",
+  "Assembly, installation and site labour.",
+  "Kitchen cabinets."
+ ],
+ "kapsam_disi_kaynagi": "Standart formun 05'i (form.json › kapsam_disi), İngilizceye çevrildi. Girdi kendi kapsam_disi listesini verirse bu liste yerine o yazılır."
+}
