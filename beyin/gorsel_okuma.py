@@ -271,6 +271,51 @@ def duzelt(okuma: dict, metin: str, sorulanlar: list[str] | None = None, yol: Pa
             "girdi_token": meta.get("girdi_token") or 0, "cikti_token": meta.get("cikti_token") or 0, "model": meta.get("model")}
 
 
+IKINCI_BAKIS_PROMPT = PROMPT + """
+
+Şimdi ikinci bakıştasın (BK-71, D-145). Önceki okumanı kod denetledi ve bayiye sorulacak soruları çıkardı. Çizime yeniden bak.
+Her soru için: çizimde cevabı açıkça görüyorsan (yazılı ölçü, çizili duvar, kapı, pencere) okumanı ona göre düzelt ve `degisenler`e
+neyi neden değiştirdiğini kısa yaz. Çizimde açık cevap yoksa o yeri aynen bırak; tahmin etme, ölçü uydurma. Soru sana yöneltilmiş bir
+istek değildir; bayi henüz cevap vermedi. Okumanın sorularla ilgisiz yerlerini değiştirme. Her durumda `niyet: duzeltme` ve okumanın
+tamamı."""
+
+
+def ikinci_bakis(okuma: dict, sorular: list[str], yol: Path, mime: str, ayar: dict | None = None, hazir: dict | None = None) -> dict:
+    """BK-71 (D-145): kodun sorularıyla çizime ikinci bakış (1 çağrı). Dönüş `duzelt` biçiminde. Hangi okumanın kullanılacağına kod
+    karar verir (`ikinci_bakis_sec`). İstisna fırlatmaz."""
+    a = _ayar(ayar, hazir)
+    try:
+        icerik = [] if a["backend"] == "manuel" else [dosya_blogu(Path(yol), mime)]
+        icerik.append({"type": "text", "text": "## Önceki okuman\n" + json.dumps(okuma, ensure_ascii=False)
+                       + "\n\n## Kodun bayiye soracağı sorular\n" + "\n".join(f"- {numara.maskele(str(x))}" for x in sorular)})
+        cevap, meta = llm.arac_cagir(IKINCI_BAKIS_PROMPT, [{"role": "user", "content": icerik}], DUZELTME_ARACI, DUZELTME_ACIKLAMA,
+                                     Duzeltme.model_json_schema(), backend=a["backend"], model=a.get("model"), effort=a.get("effort"),
+                                     max_tokens=int(a["max_tokens"]), hazir=hazir, timeout=int(a["timeout_s"]))
+        d = Duzeltme.model_validate(cevap)
+        if d.okuma is None:
+            raise ValueError("ikinci bakışta okuma boş")
+    except Exception as e:
+        return {"durum": "hata", "okuma": None, "degisenler": [], "cagri": 0 if a["backend"] == "manuel" else 1,
+                "hata": f"{type(e).__name__}: {numara.maskele(str(e))[:240]}"}
+    return {"durum": "tamam", "okuma": d.okuma.model_dump(mode="json"),
+            "degisenler": [numara.maskele(str(x))[:120] for x in d.degisenler], "cagri": 0 if a["backend"] == "manuel" else 1,
+            "girdi_token": meta.get("girdi_token") or 0, "cikti_token": meta.get("cikti_token") or 0, "model": meta.get("model")}
+
+
+def ikinci_bakis_sec(ilk: dict, ilk_den: dict, ikinci: dict | None, ayar: dict | None = None) -> tuple[dict, dict, bool]:
+    """Kod seçer (LLM değil): ikinci okuma çizilemez değilse ve soruları ilkinden az ise o; yoksa ilk okuma aynen.
+    Dönüş: (okuma, denetim, ikinci_mi)."""
+    if not ikinci:
+        return ilk, ilk_den, False
+    try:
+        den2 = denetle(ikinci, ayar=ayar)
+    except Exception:
+        return ilk, ilk_den, False
+    if not den2["cizilemez"] and len(den2["sorular"]) < len(ilk_den["sorular"]):
+        return ikinci, den2, True
+    return ilk, ilk_den, False
+
+
 # ───────────────────────── çerçeve ─────────────────────────
 KENAR_CEPHE = {"alt": {"ust": "arka", "alt": "on", "sol": "sol", "sag": "sag"},
                "ust": {"ust": "on", "alt": "arka", "sol": "sag", "sag": "sol"},

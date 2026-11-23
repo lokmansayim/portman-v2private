@@ -979,8 +979,37 @@ def gorsel_oku(gelen: dict, settings: dict, dosya: dict | None) -> dict:
                    hazir=(h.get("okuma", h) if isinstance(h, dict) else None))
     except Exception as e:
         s = {"durum": "hata", "okuma": None, "cagri": 0, "hata": maske_numaralar(f"{type(e).__name__}: {str(e)[:200]}")}
+    if ayar.get("ikinci_bakis") is True and s.get("durum") == "tamam":
+        s = _ikinci_bakis(s, bilgi, settings, ayar, h)
     log("çizim okuma:", s.get("durum"), "çağrı", s.get("cagri"))
     return {**s, "dosya": bilgi}
+
+
+def _ikinci_bakis(s: dict, bilgi: dict, settings: dict, ayar: dict, h) -> dict:
+    """BK-71 (D-145; ayar `gorsel_okuma.ikinci_bakis`, varsayılan kapalı): ilk okumada kod soru çıkarırsa okuyucu çizime soruların
+    listesiyle bir kez daha bakar (1 çağrı daha). Hangi okumanın bayiye gideceğine kod karar verir (`GO.ikinci_bakis_sec`).
+    Çizilemez okumada ve plan olmayan resimde ikinci bakış yok. İstisna fırlatmaz; hata olursa ilk okuma aynen kalır."""
+    from beyin import gorsel_okuma as GO
+    try:
+        okuma = s.get("okuma") or {}
+        if okuma.get("tur") != "plan":
+            return s
+        esik = _esik(settings)
+        den = GO.denetle(okuma, ayar=esik)
+        if den["cizilemez"] or not den["sorular"]:
+            return s
+        b = GO.ikinci_bakis(okuma, list(den["sorular"]), Path(bilgi["yol"]), bilgi["mime"], ayar=_llm_ayari(ayar),
+                            hazir=(h.get("ikinci_bakis") if isinstance(h, dict) else None))
+        yeni, den2, secildi = GO.ikinci_bakis_sec(okuma, den, b.get("okuma") if b.get("durum") == "tamam" else None, ayar=esik)
+        s = {**s, "okuma": yeni, "cagri": int(s.get("cagri") or 0) + int(b.get("cagri") or 0),
+             "girdi_token": int(s.get("girdi_token") or 0) + int(b.get("girdi_token") or 0),
+             "cikti_token": int(s.get("cikti_token") or 0) + int(b.get("cikti_token") or 0),
+             "ikinci_bakis": {"durum": b.get("durum"), "secildi": secildi, "soru_once": len(den["sorular"]),
+                              "soru_sonra": len(den2["sorular"]), "degisenler": b.get("degisenler") or [], "hata": b.get("hata")}}
+        log("çizim ikinci bakış:", b.get("durum"), "soru", len(den["sorular"]), "→", len(den2["sorular"]), "seçildi" if secildi else "ilk okuma")
+    except Exception as e:
+        log("ikinci bakış atlandı:", maske_numaralar(f"{type(e).__name__}: {str(e)[:160]}"))
+    return s
 
 
 def gorsel_duzelt(co: dict, metin: str, settings: dict, revizyon: bool = False) -> dict:
@@ -1013,7 +1042,8 @@ def _cizim_gorseli(gelen: dict, okuma: dict, den: dict, proje_koku: Path | None)
 
 def _okuma_kaydi(g: dict) -> dict:
     """İş sonucuna (kayıt) giden okuma özeti: okumanın kendisi konuşmada; burada çağrı ve sayılar."""
-    return {a: g.get(a) for a in ("durum", "niyet", "cagri", "girdi_token", "cikti_token", "model", "hata") if g.get(a) is not None}
+    return {a: g.get(a) for a in ("durum", "niyet", "cagri", "girdi_token", "cikti_token", "model", "hata", "ikinci_bakis")
+            if g.get(a) is not None}
 
 
 def cizim_karari(gelen: dict, settings: dict, k, talep, etk, medya: bool, cikarim: dict | None, katalog, bayi: dict | None,

@@ -50,7 +50,17 @@ for env in ("/etc/portman/agent.env", "/etc/portman/llm.env"):
     except OSError:
         pass
 print("anahtar:", "var" if os.environ.get("ANTHROPIC_API_KEY") else "YOK", flush=True)
+import importlib.util
+def _ustune(ad, dosya):                    # dalın kodu (BK-70 + BK-71) canlı sürümün üstüne, yalnız bu süreçte
+    sp = importlib.util.spec_from_file_location(ad, dosya); m = importlib.util.module_from_spec(sp)
+    sys.modules[ad] = m; sp.loader.exec_module(m); return m
+if (klasor / "kod").is_dir():
+    import motor, beyin
+    motor.geometry = _ustune("motor.geometry", klasor / "kod" / "motor" / "geometry.py")
+    beyin.gorsel_okuma = _ustune("beyin.gorsel_okuma", klasor / "kod" / "beyin" / "gorsel_okuma.py")
+    print("kod: dal (", (klasor / "kod" / "surum.txt").read_text().strip(), ")", flush=True)
 from beyin import gorsel_okuma as GO
+IKINCI = @@IKINCI@@
 liste = json.loads((klasor / "liste.json").read_text(encoding="utf-8"))
 FIYAT = @@FIYAT@@
 ayar = {"model": "@@MODEL@@", "effort": "medium", "timeout_s": @@SURE@@, "max_tokens": @@TOKEN@@}
@@ -60,21 +70,33 @@ for i, x in enumerate(liste, 1):
     yol = klasor / x["dosya"]
     r = GO.oku(yol, x["mime"], "", ayar=ayar)
     gt += r.get("girdi_token") or 0; ct += r.get("cikti_token") or 0
+    b = None
+    if IKINCI and r["durum"] == "tamam" and (r["okuma"] or {}).get("tur") == "plan":
+        den = GO.denetle(r["okuma"])
+        print(f"   ilk okuma: {len(den['sorular'])} soru, çizilemez {len(den['cizilemez'])}", flush=True)
+        if den["sorular"] and not den["cizilemez"]:
+            b = GO.ikinci_bakis(r["okuma"], list(den["sorular"]), yol, x["mime"], ayar=ayar)
+            gt += b.get("girdi_token") or 0; ct += b.get("cikti_token") or 0
+            print(f"   ikinci bakış: {b['durum']} · girdi {b.get('girdi_token')} · çıktı {b.get('cikti_token')} token"
+                  + (f" · hata {b.get('hata')}" if b["durum"] != "tamam" else ""), flush=True)
     print(f"== {i}/{len(liste)} {x['ad']}: {r['durum']} · girdi {r.get('girdi_token')} · çıktı {r.get('cikti_token')} token · "
           f"{(r.get('sure_ms') or 0) / 1000:.0f} sn" + (f" · hata {r.get('hata')}" if r["durum"] != "tamam" else ""), flush=True)
     print("@@OKUMA " + json.dumps({"ad": x["ad"], **{k: r.get(k) for k in ("durum", "okuma", "girdi_token", "cikti_token", "sure_ms",
-          "model", "hata")}}, ensure_ascii=False), flush=True)
+          "model", "hata")}, "ikinci": b}, ensure_ascii=False), flush=True)
 print(f"== toplam: girdi {gt} · çıktı {ct} token · tahmini {gt * FIYAT[0] / 1e6 + ct * FIYAT[1] / 1e6:.2f} USD")
 print("== bitti")
 '''
 
 
+KOD_DOSYALARI = ("beyin/gorsel_okuma.py", "motor/geometry.py", "kurallar/pencere/pencereler.json", "kurallar/plan/oda_kurallari.json",
+                 "kurallar/liste/prefabrik.json")
 FIYAT = {"claude-opus-5-5": (4, 20), "claude-fable-5-2": (8, 40)}     # USD / milyon token (girdi, çıktı)
 # Canlı ayar (kanal/ayarlar.py: 180 sn, 8000 token) Opus 5.5 içindir; Fable 5.2 her zaman düşünür, çıktı payı ve süre büyür
 SINIR = {"claude-opus-5-5": (180, 8000), "claude-fable-5-2": (300, 16000)}
 
 
-def paketle(liste_yolu: Path, cikti: Path, tarih: str = "2026-11-22", model: str = "claude-opus-5-5") -> Path:
+def paketle(liste_yolu: Path, cikti: Path, tarih: str = "2026-11-22", model: str = "claude-opus-5-5", ikinci: bool = False,
+            onay: str = "22 Kasım 2026 05:15:43 UTC") -> Path:
     liste = json.loads(Path(liste_yolu).read_text(encoding="utf-8"))
     b = io.BytesIO()
     kayit = []
@@ -85,6 +107,12 @@ def paketle(liste_yolu: Path, cikti: Path, tarih: str = "2026-11-22", model: str
             ad = f"{i:02d}{kaynak.suffix.lower()}"
             tar.add(kaynak, arcname=ad)
             kayit.append({"ad": x["ad"], "dosya": ad, "mime": mime})
+        if ikinci:                         # BK-71: dalın okuyucusu ve Motor'u (canlıda henüz yok); sürüm notu git'ten
+            import subprocess
+            for kd in KOD_DOSYALARI:            # dosyaya göre okunan kurallar da dalın hâliyle (kod/kurallar/…)
+                tar.add(KOK / kd, arcname="kod/" + kd)
+            sv = subprocess.run(["git", "-C", str(KOK), "rev-parse", "--short", "HEAD"], capture_output=True, text=True).stdout.strip().encode()
+            ti = tarfile.TarInfo("kod/surum.txt"); ti.size = len(sv); tar.addfile(ti, io.BytesIO(sv))
         veri = json.dumps(kayit, ensure_ascii=False).encode()
         ti = tarfile.TarInfo("liste.json"); ti.size = len(veri)
         tar.addfile(ti, io.BytesIO(veri))
@@ -92,7 +120,7 @@ def paketle(liste_yolu: Path, cikti: Path, tarih: str = "2026-11-22", model: str
     satirlar = "\n".join(b64[i:i + 76] for i in range(0, len(b64), 76))
     klasor = f"/root/portman_cizim_okuma_{tarih}"
     betik = f"""#!/bin/bash
-# Portman · bayi çizimi okuma denemesi ({len(kayit)} okuma, {model}). Lokman'ın onayı: 22 Kasım 2026 05:15:43 UTC.
+# Portman · bayi çizimi okuma denemesi ({len(kayit)} çizim, {model}{', ikinci bakış' if ikinci else ''}). Lokman'ın onayı: {onay}.
 set -u
 KOK=/opt/portman/guncel
 K={klasor}
@@ -102,7 +130,7 @@ base64 -d > "$K/girdi.tgz" <<'B64'
 B64
 tar -xzf "$K/girdi.tgz" -C "$K" || {{ echo "== DUR: paket açılamadı"; exit 1; }}
 cat > "$K/oku.py" <<'PY'
-{SUNUCU_PY.strip().replace('@@MODEL@@', model).replace('@@FIYAT@@', repr(FIYAT[model])).replace('@@SURE@@', str(SINIR[model][0])).replace('@@TOKEN@@', str(SINIR[model][1]))}
+{SUNUCU_PY.strip().replace('@@MODEL@@', model).replace('@@IKINCI@@', repr(ikinci)).replace('@@FIYAT@@', repr(FIYAT[model])).replace('@@SURE@@', str(SINIR[model][0])).replace('@@TOKEN@@', str(SINIR[model][1]))}
 PY
 cd "$KOK" && "$KOK/venv/bin/python" "$K/oku.py" "$K" "$KOK"
 echo "== çıkış $?"
@@ -166,6 +194,13 @@ def kiyas_ev(ad: str, r: dict, es: dict, hedef: Path) -> dict:
     p1 = den = None
     if r.get("durum") == "tamam" and r.get("okuma"):
         den = GO.denetle(r["okuma"])
+        ik = r.get("ikinci") or {}
+        if ik:                                 # BK-71: hangi okuma bayiye gider, kod seçer (canlıdaki gibi)
+            sec, den_s, secildi = GO.ikinci_bakis_sec(r["okuma"], den, ik.get("okuma") if ik.get("durum") == "tamam" else None)
+            sonuc["ikinci_bakis"] = {"durum": ik.get("durum"), "secildi": secildi, "soru_once": len(den["sorular"]),
+                                     "soru_sonra": len(den_s["sorular"]), "degisenler": ik.get("degisenler") or []}
+            r = {**r, "okuma": sec}
+            den = den_s
         sonuc.update(sorular=den["sorular"], cizilemez=den["cizilemez"], notlar=den["notlar"])
         ie1 = ((den.get("cevrim") or {}).get("is_emri"))
         if not ie1 and den.get("plan_mi") and r["okuma"].get("emin_olunamayanlar"):
@@ -247,11 +282,11 @@ def kiyas(txt: Path, esleme_yolu: Path, hedef: Path) -> list[dict]:
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="Bayi çizimi okuma denemesi (pano 83)")
     alt = ap.add_subparsers(dest="komut", required=True)
-    a = alt.add_parser("paketle"); a.add_argument("liste"); a.add_argument("cikti"); a.add_argument("--model", default="claude-opus-5-5", choices=sorted(FIYAT)); a.add_argument("--etiket", default="2026-11-22")
+    a = alt.add_parser("paketle"); a.add_argument("liste"); a.add_argument("cikti"); a.add_argument("--model", default="claude-opus-5-5", choices=sorted(FIYAT)); a.add_argument("--etiket", default="2026-11-22"); a.add_argument("--ikinci-bakis", action="store_true"); a.add_argument("--onay", default="22 Kasım 2026 05:15:43 UTC")
     k = alt.add_parser("kiyas"); k.add_argument("okuma_cikti"); k.add_argument("esleme"); k.add_argument("hedef")
     a = ap.parse_args(argv)
     if a.komut == "paketle":
-        print(paketle(Path(a.liste), Path(a.cikti), tarih=a.etiket, model=a.model))
+        print(paketle(Path(a.liste), Path(a.cikti), tarih=a.etiket, model=a.model, ikinci=a.ikinci_bakis, onay=a.onay))
     else:
         for x in kiyas(Path(a.okuma_cikti), Path(a.esleme), Path(a.hedef)):
             print(json.dumps({k: x[k] for k in ("ad", "durum", "ayni_pano", "varsayim", "kod_sorulari", "cizilemez", "okunan", "onayli")}, ensure_ascii=False))
