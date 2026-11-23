@@ -69,3 +69,38 @@ def test_ayni_soru_bir_kez():
     o = {**o, "emin_olunamayanlar": ["Banyo penceresi kaç cm?", "Banyo penceresi kaç cm?"]}
     den = GO.denetle(o)
     assert den["sorular"].count("Banyo penceresi kaç cm?") == 1
+
+
+def _yerler(ie: dict) -> dict:
+    import copy
+    from motor import geometry as G
+    plan = G.kur(copy.deepcopy(ie))
+    return {(a["tur"], a["mahal"] or "/".join(a["arasi"] or ())): c for a, c, yon in GO._aciklik_merkezleri(plan) if yon == "x"
+            and (a["tur"] == "dis_kapi" or a["mahal"] == "SALON")}
+
+
+def test_kural2_tek_yerlesim_yan_panoya_alinir():
+    """76 m²: salonun öndeki 180'lik penceresine yanında tam pano kalmıyordu; Motor'un kurduğu iki yerleşim aynı yeri veriyor → plan, not."""
+    den = GO.denetle({**_okuma("TK08"), "emin_olunamayanlar": []})
+    assert den["cevrim"] is not None, den["sorular"]
+    assert any("panoya sığmadığı için bir yan panoya alındı" in n for n in den["notlar"])
+    assert all("_konum_cm" not in a for a in den["cevrim"]["is_emri"]["acikliklar"])
+
+
+def test_kural2_okunan_yere_en_yakin_yerlesim():
+    """45 m²: verandaya bakan salon duvarında kapı ve pencere aynı panoya düşüyor. Yerleri okunmadıysa soru (K21); okunduysa kod, Motor'un
+    kurduğu yerleşimlerden okunan yerlere en yakınını seçer (onaylı plan: kapı solda, pencere sağda)."""
+    o = {**_okuma("TK09"), "emin_olunamayanlar": []}
+    assert GO.denetle(o)["cevrim"] is None
+    o["kapilar"] = [k | ({"konum_cm": 330} if k["arasinda"][0] == "DIŞ" else {}) for k in o["kapilar"]]
+    o["pencereler"] = [p | ({"konum_cm": 480} if p["oda"] == "SALON" and p["kenar"] == "alt" else {}) for p in o["pencereler"]]
+    den = GO.denetle(o)
+    assert den["cevrim"] is not None, den["sorular"]
+    y = _yerler(den["cevrim"]["is_emri"])
+    kapi = next(c for (t, ad), c in y.items() if t == "dis_kapi")
+    pencere = next(c for (t, ad), c in y.items() if t == "pencere")
+    assert kapi < pencere and abs(kapi - 330) < 20 and abs(pencere - 480) < 40, y
+    o["kapilar"] = [k | ({"konum_cm": 600} if k["arasinda"][0] == "DIŞ" else {}) for k in o["kapilar"]]
+    o["pencereler"] = [p | ({"konum_cm": 440} if p["oda"] == "SALON" and p["kenar"] == "alt" else {}) for p in o["pencereler"]]
+    y = _yerler(GO.denetle(o)["cevrim"]["is_emri"])
+    assert next(c for (t, _), c in y.items() if t == "dis_kapi") > 500

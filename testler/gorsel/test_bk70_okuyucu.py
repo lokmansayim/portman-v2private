@@ -152,11 +152,14 @@ def test_motor_iki_mahal_arasi_kapida_duvar():
 
 
 def test_motor_kuramazsa_bayiye_soru():
-    """Şablon Motor'da kurulamıyorsa (76 m²: salonun öndeki duvarında 180'lik pencereye yanında tam pano kalmıyor) cevrim yok, soru var."""
-    den = GO.denetle(okuma("TK08"))
+    """Şablon Motor'da kurulamıyorsa (45 m²: verandaya bakan salon duvarında kapı ve pencere aynı panoya düşüyor; iki yerleşim de olur,
+    yerleri çizimde okunmadı) cevrim yok, soru var. 76 m²'nin 180'lik penceresi BK-72'den (D-150) beri yan panoya alınıyor: Motor'un
+    iki yerleşimi aynı yeri veriyor (`test_bk72_okuyucu_kurallari.py`)."""
+    o = okuma("TK09")
+    den = GO.denetle({**o, "emin_olunamayanlar": []})
     assert den["cevrim"] is None
-    assert den["sorular"] == ["Planı panolara yerleştirirken Salon+mutfak öndeki duvarında pencere ve kapıları sığdıramadım. Bu duvardaki "
-                              "pencerelerin ve kapının yerini (köşeden cm) yazar mısınız?"]
+    assert den["sorular"] == ["Planı panolara yerleştirirken Veranda ile Salon arasındaki duvarda pencere ve kapıları sığdıramadım. Bu "
+                              "duvardaki pencerelerin ve kapının yerini (köşeden cm) yazar mısınız?"]
 
 
 def test_motor_pencerelere_yer_yoksa_hata():

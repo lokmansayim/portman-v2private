@@ -20,6 +20,11 @@ def _okuma(ad: str) -> dict:
     return json.loads((VERI / f"BK70_{ad}_okuma.json").read_text(encoding="utf-8"))
 
 
+def _dok(o: dict) -> dict:
+    """Okumanın kalıptan geçmiş hâli (BK-72'den beri kalıpta `konum_cm` alanları da var)."""
+    return GO.CizimOkumasi.model_validate(o).model_dump()
+
+
 def _sorusuz(o: dict) -> dict:
     return {**o, "emin_olunamayanlar": []}
 
@@ -67,7 +72,7 @@ def _gorsel_oku(tmp_path, ikinci_bakis: bool, ikinci: dict | None):
 def test_worker_ayar_kapaliyken_ikinci_bakis_yok(tmp_path):
     s = _gorsel_oku(tmp_path, False, {"niyet": "duzeltme", "okuma": _sorusuz(_okuma("TK06"))})
     assert s["durum"] == "tamam" and "ikinci_bakis" not in s
-    assert s["okuma"] == _okuma("TK06")
+    assert s["okuma"] == _dok(_okuma("TK06"))
 
 
 def test_worker_ayar_acikken_ikinci_okuma_secilir(tmp_path):
@@ -79,7 +84,7 @@ def test_worker_ayar_acikken_ikinci_okuma_secilir(tmp_path):
 
 def test_worker_ikinci_bakis_hata_verirse_ilk_okuma_kalir(tmp_path):
     s = _gorsel_oku(tmp_path, True, None)                              # kayıtlı cevap yok → manuel arka uç hata verir
-    assert s["durum"] == "tamam" and s["okuma"] == _okuma("TK06")
+    assert s["durum"] == "tamam" and s["okuma"] == _dok(_okuma("TK06"))
     assert s["ikinci_bakis"]["durum"] == "hata" and not s["ikinci_bakis"]["secildi"]
 
 
