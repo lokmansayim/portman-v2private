@@ -1127,6 +1127,11 @@ def is_emri_prefabrik(kan: dict, o: CizimOkumasi, bk14: bool | None = None, esik
         makas = "x" if o.cati.mahya == "giristen_arkaya" else "y"
         if kan.get("yan_giris"):                # D-149: mahya giriş kapısının duvarına göre okundu; plan döndürülmediği için eksen döner
             makas = "y" if makas == "x" else "x"
+    if oturt and (abs(W * 4 - round(W * 4)) > 1e-6 or abs(H * 4 - round(H * 4)) > 1e-6):
+        # BK-72: pano ölçüleri 0,25 cm adımlıdır; dış ölçünün 0,25'ten küçük artığı (76 m²: 800,05 → 800; onaylı plan 800) atılır, bayiye not
+        W2, H2 = round(W * 4) / 4, round(H * 4) / 4
+        ie, sr, cz2, nt2 = is_emri_prefabrik({**kan, "W": W2, "H": H2}, o, bk14, esik, makas=makas, oturt=True)
+        return ie, sr, cz2, [f"dış ölçüyü {_tr(W, 2)} × {_tr(H, 2)} cm yerine {_tr(W2, 2)} × {_tr(H2, 2)} cm aldım (pano ölçüleri 0,25 cm adımlı)"] + nt2
     if oturt and (yeni := izgaraya_oturt(W, H, makas)):
         W2, H2, oturan = yeni
         ie, sr, cz2, nt2 = is_emri_prefabrik({**kan, "W": W2, "H": H2}, o, bk14, esik, makas=makas, oturt=False)
@@ -1297,6 +1302,10 @@ def is_emri_prefabrik(kan: dict, o: CizimOkumasi, bk14: bool | None = None, esik
             acik.append({"tur": "ic_kapi", "olcu": KAPI_CM["ic"], "arasi": [a, b]})
     if sor:
         return None, list(dict.fromkeys(sor)), cz, nt
+    acik_sinirlar = _kapisiz_gecisler(mahaller, acik, kan)
+    if acik_sinirlar:
+        nt.append("kapısı çizilmeyen bölümü yanındaki bölüme açık (duvarsız) çizdim: "
+                  + ", ".join(f"{_oda_adi(a)} ile {_oda_adi(b)}" for a, b in acik_sinirlar))
     # duvar yüksekliği ve çatı
     hy = o.duvar_yuksekligi_cm
     if hy is None:
@@ -1350,7 +1359,7 @@ def is_emri_prefabrik(kan: dict, o: CizimOkumasi, bk14: bool | None = None, esik
                              "kose": "oda", "dik_duvar_pencere": DIK_DUVAR_PENCERE},
                  "ek_akslar_cm": {"x": [], "y": []}},
         "mahaller": mahaller,
-        "acik_sinirlar": [],
+        "acik_sinirlar": [list(x) for x in acik_sinirlar],
         "acikliklar": acik,
         "cati": {"tip": "besik", "egim_yuzde": egim, "sacak_cm": sacak, "topuk_cm": 10, "makas_yonu": "kisa_kenar",
                  "makas_ekseni": makas},
@@ -1389,6 +1398,42 @@ def _yuvarla(v: float):
 
 def _islev(kan: dict, ad: str) -> str:
     return next((x["islev"] for x in kan["odalar"] if tr_buyuk(x["ad"]) == ad), "")
+
+
+GECIS_ISLEV = ("hol", "antre")          # BK-72: kapısı çizilmeyen ve eve bağlanmayan bölüm bu işlevdeyse yanındaki ortak alana açıktır
+ORTAK_ISLEV = ("salon", "mutfak", "hol", "antre")
+
+
+def _kapisiz_gecisler(mahaller: list[dict], acik: list[dict], kan: dict) -> list[tuple[str, str]]:
+    """BK-72 (Lokman, 23 Kasım 2026 13:14:12 UTC, 76 m² okuyucu planı: "buraya pano koymuş çok bariz bir hata"): giriş kapısından kapılarla
+    ulaşılamayan hol ya da antre, yanındaki ulaşılan ortak bölüme (salon, mutfak, hol) duvarsız açılır (onaylı 76 m² r05:
+    `acik_sinirlar` [["HOL", "SALON+MUTFAK"]]). Aday bir tane değilse dokunulmaz. Dönüş: [(hol, ortak bölüm), …]."""
+    islev = {m["ad"]: _islev(kan, m["ad"]) for m in mahaller}
+    kenar: dict[str, set] = {m["ad"]: set() for m in mahaller}
+    ulasilan = set()
+    for a in acik:
+        ar = [x for x in (a.get("arasi") or []) if x in kenar]
+        if a["tur"] == "dis_kapi":
+            ulasilan.update(ar)
+        if len(ar) == 2:
+            kenar[ar[0]].add(ar[1]); kenar[ar[1]].add(ar[0])
+    ulasilan |= {ad for ad, i in islev.items() if i == "veranda"}
+    if not ulasilan:
+        return []
+    sonuc: list[tuple[str, str]] = []
+    while True:
+        yigin, gorulen = list(ulasilan), set(ulasilan)
+        while yigin:
+            for b in kenar[yigin.pop()] - gorulen:
+                gorulen.add(b); yigin.append(b)
+        eklenen = False
+        for ad in [m["ad"] for m in mahaller if m["ad"] not in gorulen and islev[m["ad"]] in GECIS_ISLEV]:
+            aday = [b for b in gorulen if islev.get(b) in ORTAK_ISLEV and _komsu(mahaller, ad, b)]
+            if len(aday) == 1:
+                sonuc.append((ad, aday[0])); kenar[ad].add(aday[0]); kenar[aday[0]].add(ad); eklenen = True
+                break
+        if not eklenen:
+            return sonuc
 
 
 def _komsu(mahaller: list[dict], a: str, b: str) -> bool:

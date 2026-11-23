@@ -150,3 +150,21 @@ def test_kural3_worker_uc_okuma(tmp_path):
 def test_kural3_ayar_birken_tek_okuma(tmp_path):
     s = _worker_oku(tmp_path, 1, [{**_okuma("TK06"), "emin_olunamayanlar": []}])
     assert "cok_okuma" not in s and s["okuma"] == GO.CizimOkumasi.model_validate(_okuma("TK06")).model_dump()
+
+
+def test_kapisiz_hol_salona_acik_ve_olcu_ceyrek_cm():
+    """Lokman 23 Kasım 13:14:12 (76 m² okuyucu planı, hol ile salon arası: "buraya pano koymuş çok bariz bir hata"): giriş kapısından
+    kapılarla ulaşılamayan hol yanındaki salona duvarsız açılır (onaylı r05: acik_sinirlar [["HOL", "SALON+MUTFAK"]]); dış ölçünün
+    0,25'ten küçük artığı atılır (800,05 → 800)."""
+    den = GO.denetle({**_okuma("TK08"), "emin_olunamayanlar": []})
+    ie = den["cevrim"]["is_emri"]
+    assert ie["acik_sinirlar"] == [["HOL", "SALON+MUTFAK"]]
+    assert ie["yapi"]["dis_olcu_cm"]["x"] == 800
+    assert any("duvarsız" in n for n in den["notlar"]) and any("800,05" in n for n in den["notlar"])
+
+
+def test_kapili_hol_kapali_kalir():
+    o = _okuma("TK08")
+    o = {**o, "emin_olunamayanlar": [], "kapilar": o["kapilar"] + [{"arasinda": ["HOL", "SALON+MUTFAK"], "kenar": None}]}
+    den = GO.denetle(o)
+    assert den["cevrim"] is None or den["cevrim"]["is_emri"]["acik_sinirlar"] == []
