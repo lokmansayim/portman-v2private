@@ -3,6 +3,13 @@
  "ev": "Huma Çelik 45 m² tek kat prefabrik (TK-09 r04), bayi teklifi",
  "karar": "D-142",
  "muhur": "M-20",
+ "duzeltme": {
+  "karar": "D-147",
+  "soz": "mührü aç ve düzelt başımı belaya soktun şimdi bayiye ne diyeceğim",
+  "zaman": "2026-11-23T11:10:32Z",
+  "mesaj": "cmsg_01UAFvcnfVuTR1wfFux5fQPPWNgyDoDgBooxqcVUfcX93S",
+  "fark": "Çatı şiltesi 5 paket × 6.528,00 = 32.640,00 TL (CRM paket fiyatı 680 × 9,6) → 5 × 680,00 = 3.400,00 TL; taban 219.729,25 → 190.489,25; bayi birim 274.661,56 → 238.111,56 TL"
+ },
  "onay": {
   "soz": "burada çok iyi iş çıkardın hatta mühendisin bile hatasını buldun hatta bayi fiyatı ve sunumu çok beğendi tam buradaki yaptığımız iş milat olsun o yüzden buradaki rehber olayını istersen yapalım istersen bu seviyede mühürle bizim mihenk taşımız olsun",
   "zaman": "2026-11-20T14:47:53Z",
@@ -43,7 +50,7 @@
  "bayi": {
   "kar": 0.25,
   "kdv_orani": 0,
-  "birim": 274661.56
+  "birim": 238111.56
  },
  "ozet": {
   "satir": 105,
@@ -56,12 +63,12 @@
     "durum": "fiyat yok"
    }
   ],
-  "toplam": 219729.25,
+  "toplam": 190489.25,
   "gruplar": {
    "1001 Panel": 53167.81,
    "1002 Metal aksam": 38638.74,
    "1003 Kapı ve pencere": 12300.0,
-   "1004 Tavan": 36660.0,
+   "1004 Tavan": 7420.0,
    "1005 Makas": 23367.0,
    "1006 Çatı": 25498.0,
    "1007 Elektrik": 14020.2,
@@ -529,8 +536,8 @@
    "olcu": "paket",
    "birim": "adet",
    "adet": 5,
-   "birim_fiyat": 6528.0,
-   "tutar": 32640.0,
+   "birim_fiyat": 680.0,
+   "tutar": 3400.0,
    "durum": "öneri",
    "kaynak": "CRM",
    "kdv_orani": null

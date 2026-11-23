@@ -1355,7 +1355,8 @@
    "konu": "Mihenk taşı: Huma Çelik 45 m² bayi teklifi (TK-09 r04)",
    "kural": "Bayi tekliflerinin hedef örneği bugünkü hâliyle: İş Emri is_emri/TK09_r04.json (43,69 m² brüt · 40,63 m² net, 29 pano, P8501 gibi çapraz cumba, veranda kirişi ön yüzden 37,5 cm içeride); 20 Kasım 2026 12:03 CRM'i, Kasım istisnası, ters tavan ve önerilerle yükleme listesi 105 satır (102 fiyatlı), taban 219.729,25 TL; kâr %25, bayi birim fiyatı 274.661,56 TL, KDV yok (D-136). Bayiye giden mühürlü dosyalar SON_HALI'de (MUHUR.md, SHA256SUMS.txt). Teklif formunun D-77 düzeni ve A4 çizim düzeni bu mühürde değil (A4 M-02'de).",
    "kararlar": [
-    "D-142"
+    "D-142",
+    "D-147"
    ],
    "pr": [],
    "lokman": [
@@ -1392,7 +1393,7 @@
     },
     {
      "yer": "testler/mihenk/TK09_r04_beklenen.json",
-     "iz": "e95591bd502a4d62"
+     "iz": "137d68bcfd23ac42"
     },
     {
      "yer": "testler/mihenk/crm_20261120-120347.json",
@@ -1400,11 +1401,19 @@
     },
     {
      "yer": "testler/test_m20_tk09_mihenk.py",
-     "iz": "8055a26326708a45"
+     "iz": "16c5c3de2a9b1b52"
     }
    ],
    "durum": "mühürlü",
-   "gecmis": []
+   "gecmis": [
+    {
+     "tarih": "2026-11-23 11:10",
+     "soz": "mührü aç ve düzelt başımı belaya soktun şimdi bayiye ne diyeceğim",
+     "mesaj": "cmsg_01UAFvcnfVuTR1wfFux5fQPPWNgyDoDgBooxqcVUfcX93S",
+     "kapanis": "2026-11-23T11:18Z",
+     "karar": "D-147"
+    }
+   ]
   }
  ]
 }

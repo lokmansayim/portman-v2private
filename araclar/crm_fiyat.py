@@ -145,8 +145,15 @@ def satir_bul(dizin: dict, kod: str, icerir: str | None = None, crm_olcu: str | 
     return adaylar[0], None
 
 
-def hesapla(g: dict, dizin: dict, anahtar: str = "") -> dict:
-    """Eşleme kaydının o günkü fiyatı: {fiyat, durum, kodlar, adlar, yontem}. Fiyatsızsa fiyat None, durum nedeni."""
+def paket_fiyati_mi(g: dict, gun: datetime.date | None) -> bool:
+    """D-147: CRM paketli ürünün fiyatını bu günden (görüntünün günü) beri paket fiyatı olarak yazar; önceki görüntülerde m² fiyatıydı."""
+    b = g.get("paket_fiyati_baslangic")
+    return bool(b) and gun is not None and gun >= datetime.date.fromisoformat(b)
+
+
+def hesapla(g: dict, dizin: dict, anahtar: str = "", gun: datetime.date | None = None) -> dict:
+    """Eşleme kaydının o günkü fiyatı: {fiyat, durum, kodlar, adlar, yontem}. Fiyatsızsa fiyat None, durum nedeni. `gun` görüntünün
+    günüdür; kaydın `paket_fiyati_baslangic`'ından beri `carp` önce paketin m²'sine bölünür (D-147: CRM fiyatı paket fiyatı)."""
     kodlar = g["kod"] if isinstance(g["kod"], list) else [g["kod"]]
     satirlar, sorun = [], None
     for k in kodlar:
@@ -165,6 +172,8 @@ def hesapla(g: dict, dizin: dict, anahtar: str = "") -> dict:
         x = p[0] * Decimal(str(g["pay"])) / Decimal(str(g["payda"]))
     elif h == "carp":
         x = p[0] * Decimal(str(g["carpan"]))
+        if paket_fiyati_mi(g, gun):                              # D-147: 680 TL bir paketin (9,6 m²) fiyatı, m² fiyatı değil
+            x = x / Decimal(str(g["paket_m2"]))
     elif h == "boy_m":                                           # esas boy: metre (1000) ya da kutu profilde 6 m (6000, D-75)
         boy = _boy(anahtar)
         if "boy_adim_mm" in g:                                   # D-119: kutu profilde boy 1500 mm'nin katına yukarı (çeyrek boy)
@@ -178,6 +187,14 @@ def hesapla(g: dict, dizin: dict, anahtar: str = "") -> dict:
     else:
         raise CrmHatasi(f"bilinmeyen hesap {h!r}: {anahtar}")
     return dict(sonuc, fiyat=_yuvarla(x, g.get("yuvarlama", 0.01)), durum=None)
+
+
+def _tarih_mi(v) -> bool:
+    try:
+        datetime.date.fromisoformat(v)
+        return True
+    except (TypeError, ValueError):
+        return False
 
 
 def kdv_bul(K: dict | None, g: dict, dizin: dict) -> tuple[float | None, str | None]:
@@ -261,6 +278,10 @@ def esleme_denetle(E: dict) -> list[str]:
         if anahtar and "boy_adim_mm" in g and (h != "boy_m" or isinstance(g["boy_adim_mm"], bool) or not isinstance(g["boy_adim_mm"], (int, float))
                                    or g["boy_adim_mm"] <= 0):
             sorun.append(f"{yer}: boy_adim_mm yalnız boy hesabında ve sıfırdan büyük olur")
+        if ("paket_fiyati_baslangic" in g or "paket_m2" in g) and not (
+                h == "carp" and isinstance(g.get("paket_m2"), (int, float)) and not isinstance(g.get("paket_m2"), bool) and g["paket_m2"] > 0
+                and _tarih_mi(g.get("paket_fiyati_baslangic"))):
+            sorun.append(f"{yer}: paket_fiyati_baslangic (YYYY-AA-GG) ve paket_m2 (> 0) birlikte, yalnız carp hesabında olur")
         for a in ("icerir", "crm_olcu"):
             if a in g and (not isinstance(g[a], str) or not g[a].strip()):
                 sorun.append(f"{yer}: {a} boş olmayan yazı olur")
@@ -335,7 +356,7 @@ def defter_uret(A: dict, E: dict | None = None) -> dict:
             d = {"fiyat": None, "birim": g["birim"], "kaynak": None, "kaynak_satir": None, "kaynak_kalem": None,
                  "durum": DURUM[tur], "onay": False, "not": _not(g, None, g["dayanak"])}
         else:
-            h = hesapla(g, dizin, k)
+            h = hesapla(g, dizin, k, t.date())
             fiyatsiz = tur in FIYATSIZ or h["fiyat"] is None
             d = {"fiyat": None if fiyatsiz else h["fiyat"], "birim": g["birim"], "kaynak": None if fiyatsiz else "CRM",
                  "kaynak_satir": h["kodlar"], "kaynak_kalem": " + ".join(h["adlar"]) or None,
@@ -347,7 +368,7 @@ def defter_uret(A: dict, E: dict | None = None) -> dict:
         return d
 
     def kural(yer: str, g: dict, anahtar: str = "") -> dict | None:
-        h = hesapla(g, dizin, anahtar)
+        h = hesapla(g, dizin, anahtar, t.date())
         if h["fiyat"] is None:
             fiyatsiz_kurallar.append({"hat": hat, "yer": yer, "kodlar": h["kodlar"], "durum": h["durum"]})
             return None

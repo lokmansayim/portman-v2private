@@ -72,11 +72,17 @@ def test_baslangictan_onceki_goruntu_aynen(E, A_eski, L):
 def test_baslangictan_sonra_crm_fiyati_aynen_kdv_yok(E, A_eski, A_yeni, L):
     """Aynı fiyatlar: eski görüntüde KDV üstüne eklenir; yenide fiyat ve tutar aynı, KDV hiç yazılmaz. Defterin fiyatı değişmez."""
     De, Dy = C.defter_uret(A_eski, E), C.defter_uret(A_yeni, E)
-    assert Dy["kdv"]["fiyata_dahil"]["karar"] == "D-136" and Dy["hatlar"] == De["hatlar"]
+    # D-147: paketli ürünün (HM44, HM45) CRM fiyatı 20 Kasım'dan beri paket fiyatıdır; aynı sayı yeni görüntüde paketin fiyatı sayılır
+    paket = {(h, k) for h, H in E["hatlar"].items() for k, g in H["kalemler"].items() if "paket_fiyati_baslangic" in g}
+    ayikla = lambda D: {h: {**H, "kalemler": {k: v for k, v in H["kalemler"].items() if (h, k) not in paket}}   # noqa: E731
+                        for h, H in D["hatlar"].items()}
+    assert paket and Dy["kdv"]["fiyata_dahil"]["karar"] == "D-136" and ayikla(Dy) == ayikla(De)
     Re, Ry = F.fiyatla(L, De, "prefabrik"), F.fiyatla(L, Dy, "prefabrik")
     assert "kdv" not in Ry["ozet"] and Ry["ozet"]["fiyat_kdv_dahil"] == "D-136"
     assert not any(k in s for s in Ry["satirlar"] for k in ("kdv_orani", "kdv_grubu", "kdv_tutari"))
     for e, y in zip(Re["satirlar"], Ry["satirlar"]):
+        if ("prefabrik", f"{e['kalem']} | {e['olcu']}") in paket:
+            continue
         assert (e["kalem"], e["adet"], e["birim_fiyat"], e["tutar"]) == (y["kalem"], y["adet"], y["birim_fiyat"], y["tutar"])
     assert Ry["ozet"]["toplam"] == Re["ozet"]["toplam"] == Re["ozet"]["kdv"]["haric"]
 
