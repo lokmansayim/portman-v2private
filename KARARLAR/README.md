@@ -159,6 +159,7 @@ Biçim: karar · gerekçe · reddedilen seçenekler · geri alma yolu · kim ve 
 | [D-145](D-145.md) | Doğruluk > Maliyet > Hız: doğruluk her zaman "mesaj başına tek LLM çağrısı" kuralını (K05) ezer; LLM yalnız daha iyi okur, kararı yine kod verir | 22.11 (Lokman 10:16:34 "bu kuralı her zaman Doğruluk kuralı ezer …") |
 | [D-146](D-146.md) | Bayi çizimi okuyucusunun üç kuralı: gömme veranda gövdenin içinde (cephe boyu verandada gövde büyür), ölçüsü yazmayan sınır en yakın aksa (not), aynı duvardaki pencereler eşit aralıkla; Motor kuramazsa bayiye soru (BK-70) | 22.11 (Lokman kart 10:32:25 "Üçü de görseldeki gibi") |
 | [D-148](D-148.md) | Standartlar (yapı türü, kat, 2,50 m, çatı) çizim okumada bayiye sorulmaz; kat planı onaylandıktan sonra WhatsApp formunda gider, bayi değişikliği formda yapar (BK-71) | 23.11 (Lokman kart 11:54:43 "Standartları sormasın"; 11:55:43 "… kat planı onaylandıktan sonra standartlar formda gider …") |
+| [D-149](D-149.md) | Bayi giriş kapısını yan duvara çizdiyse plan çizimdeki gibi kalır: ön cephe çizimin alt kenarı, kapı yan duvarda (BK-71; 61 m² r01) | 23.11 (Lokman kart 12:22:18 "Çizimdeki gibi kalsın") |
 | [D-142](D-142.md) | Huma Çelik 45 m² bayi teklifi (TK-09 r04) mihenk taşı ve hedef örnek: plan 43,69 brüt / 40,63 net, 29 pano, çapraz cumba; liste 105 satır, taban 219.729,25 TL, kâr %25, bayi birim 274.661,56 TL (KDV yok); mühür M-20 | 20.11 (Lokman 14:47:53 "bu seviyede mühürle bizim mihenk taşımız olsun") |
 
 ## Numara defteri (14 Ekim 2026, BK-08; CIO planı › Görev 3)
@@ -301,6 +302,7 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | D | D-145 | Doğruluk > Maliyet > Hız: doğruluk "mesaj başına tek LLM çağrısı" kuralını (K05) ezer; kararı yine kod verir (Lokman 22.11 10:16:34) | yazıldı (22.11; okuyucu bakım sohbeti, `claude/project-thread-vv36pj`) |
 | D | D-146 | Bayi çizimi okuyucusunun üç kuralı (BK-70; Lokman kart 22.11 10:32:25 "Üçü de görseldeki gibi") | yazıldı (22.11; `claude/project-thread-vv36pj`) |
 | D | D-148 | Standartlar çizim okumada sorulmaz, plan onayından sonra formda (BK-71; Lokman 23.11 11:54:43, 11:55:43) | yazıldı (23.11; `claude/project-thread-hverqo`) |
+| D | D-149 | Yan duvardaki giriş: plan çizimdeki gibi (BK-71; Lokman kart 23.11 12:22:18) | yazıldı (23.11; `claude/project-thread-hverqo`) |
 | D | **D-147** | — | **sıradaki boş** |
 | İE | İE-01–İE-08 | bu depo (`main`) | yazıldı |
 | İE | İE-09 | model atölyesi: kontrollü model üretimi ve banka hattı (Görev 6e; pano 30; P6001 güncellemesi kapsam dışı) | alındı (16.10; `claude/gorev-6e-model-atolyesi-rnhtcp`; PR-1 banka hattı 29.10, `claude/project-thread-rhjgzv`) |

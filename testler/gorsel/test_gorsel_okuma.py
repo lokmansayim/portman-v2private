@@ -16,6 +16,7 @@ import pytest
 KOK = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(KOK))
 from beyin import gorsel_okuma as GO  # noqa: E402
+from motor import geometry as G  # noqa: E402
 
 VERI = Path(__file__).resolve().parent / "veri"
 
@@ -149,9 +150,9 @@ def test_tk01_teyit_metni():
     assert "Okuduğum yerleşim görselde" not in GO.teyit_metni(TK01, d, gorsel_var=False)[0]
 
 
-@pytest.mark.parametrize("giris", ["ust", "sol", "sag"])
+@pytest.mark.parametrize("giris", ["ust"])
 def test_dondurulmus_cizim_ayni_is_emrini_verir(giris):
-    """Çizimin yönü (giriş üstte, solda, sağda) planı değiştirmez: kanonik çerçeve giriş altta."""
+    """Giriş üstte çizilen çizim planı değiştirmez: kanonik çerçeve giriş altta. Yan kenar D-149'da (aşağıda)."""
     o = dondur(TK01, giris)
     assert o != TK01
     d = GO.denetle(o, bk14=True)
@@ -581,7 +582,7 @@ def test_d125_cephedeki_kapi_cephede_kalir():
     assert next(m for m in ie["mahaller"] if m["ad"] == "ANTRE")["tur"] == "antre_hol"
 
 
-@pytest.mark.parametrize("giris", ["ust", "sol", "sag"])
+@pytest.mark.parametrize("giris", ["ust"])
 def test_d125_dondurulmus_cizimde_ayni_plan(giris):
     """Aynı çizim döndürülmüş okunsa da aynı plan; giriş kenarı yazılmasa da nişin değdiği kenardan bulunur."""
     beklenen = GO.denetle(TK01_R06, bk14=True)["cevrim"]["is_emri"]
@@ -657,3 +658,27 @@ def test_d125_nisli_plan_motorda_cizilir(tmp_path):
     assert v["passed"] is True, v.get("errors")
     yol = GO.yerlesim_gorseli(TK01_R06, d, tmp_path / "okunan.png")
     assert yol.stat().st_size > 5_000
+
+
+# D-149 (Lokman kart 23 Kasım 2026 12:22:18 "Çizimdeki gibi kalsın"): giriş kapısı yan duvardaysa plan döndürülmez; ön cephe çizimin
+# alt kenarı, kapı yan duvarda (61 m² r01 onaylı planı gibi). Bu testler eski sol/sağ parametrelerinin yerine (D-125 "aynı plan").
+@pytest.mark.parametrize("giris,duvar", [("sol", "sol"), ("sag", "sag")])
+def test_d149_yan_girisli_cizim_cizimdeki_gibi_kalir(giris, duvar):
+    o = dondur(TK01, giris)
+    d = GO.denetle(o, bk14=True)
+    assert d["sorular"] == [] and d["cizilemez"] == [], (d["sorular"], d["cizilemez"])
+    ie = d["cevrim"]["is_emri"]
+    assert ie["yapi"]["dis_olcu_cm"] == {"x": o["dis_olcu"]["yatay_cm"], "y": o["dis_olcu"]["dusey_cm"]}   # çizimin yatayı plan x
+    assert any(a["tur"] == "dis_kapi" and a["duvar"] == duvar for a in ie["acikliklar"]), ie["acikliklar"]
+    assert any("plan çizimdeki gibi kaldı" in n for n in d["notlar"])
+    G.kur(copy.deepcopy(ie))
+
+
+@pytest.mark.parametrize("giris", ["sol", "sag"])
+def test_d149_yan_nisli_cizim_cizilir(giris):
+    o = dondur(TK01_R06, giris)
+    d = GO.denetle(o, bk14=True)
+    ie = d["cevrim"]["is_emri"]
+    assert ie["yapi"]["dis_olcu_cm"] == {"x": o["dis_olcu"]["yatay_cm"], "y": o["dis_olcu"]["dusey_cm"]}
+    assert any(a["tur"] == "dis_kapi" and "GİRİŞ" in a["arasi"] for a in ie["acikliklar"])
+    G.kur(copy.deepcopy(ie))

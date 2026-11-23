@@ -381,7 +381,7 @@ def _govde_olcusu(o: CizimOkumasi) -> tuple[float | None, float | None, str | No
 
 
 def kanonik(okuma: dict | CizimOkumasi) -> dict:
-    """Okuma → kanonik çerçeve (giriş altta; Pano Motor'unun arka-sol çerçevesi): {W, H, giris, odalar[{ad, islev, alan_m2, rects}],
+    """Okuma → kanonik çerçeve (giriş altta, yan duvardaki giriş çizimdeki gibi (D-149); Pano Motor'unun arka-sol çerçevesi): {W, H, giris, odalar[{ad, islev, alan_m2, rects}],
     pencereler[{oda, cephe, olcu, adet}], kapilar[{arasinda, dis, cephe}], verandalar[{cephe, bas, bit, derinlik, alan_m2, rect}], notlar}.
     Veranda `bas`/`bit` BK-14'ün gerçek çerçevesinde (ön/arka: x sol dış yüzden; sol/sağ: y ön dış yüzden)."""
     o = okuma if isinstance(okuma, CizimOkumasi) else CizimOkumasi.model_validate(okuma)
@@ -398,6 +398,10 @@ def kanonik(okuma: dict | CizimOkumasi) -> dict:
         notlar.append("giriş cephesi " + (kaynak if dk else "yazmadığı için çizimin alt kenarı") + " alındı")
     if nereden:
         notlar.append(f"dış ölçü yazmıyordu: {nereden} alındı")
+    kapi_kenari = giris                         # D-149 (Lokman kart 23 Kasım 12:22:18 "Çizimdeki gibi kalsın"): giriş yan kenardaysa
+    if giris in ("sol", "sag"):                 # çizim döndürülmez; ön cephe çizimin alt kenarı, kapı kendi duvarında (61 m² r01)
+        notlar.append("giriş kapısı yan duvarda; plan çizimdeki gibi kaldı, ön cephe çizimin alt kenarı")
+        giris = "alt"
     if not Wc or not Hc:
         return {"W": None, "H": None, "giris": giris, "odalar": [], "pencereler": [], "kapilar": [], "verandalar": [], "notlar": notlar}
     W, H = (Wc, Hc) if giris in ("alt", "ust") else (Hc, Wc)
@@ -411,7 +415,7 @@ def kanonik(okuma: dict | CizimOkumasi) -> dict:
         kc = cephe[k.kenar] if k.kenar else None
         if nis and kc is None:                      # D-125: kapı nişin dibinde; cephesi nişin ağzının cephesi (köşe nişte giriş kenarı)
             kenarlar = _ham_kenarlar(nisler[_norm(nis)].dikdortgenler, Wc, Hc)
-            kn = giris if giris in kenarlar else (kenarlar[0] if len(kenarlar) == 1 else None)
+            kn = kapi_kenari if kapi_kenari in kenarlar else (kenarlar[0] if len(kenarlar) == 1 else None)
             kc = cephe[kn] if kn else None
         return {"arasinda": list(k.arasinda), "dis": _dis_mi(k, o), "cephe": kc, "nis": nis}
     ver = []
@@ -423,7 +427,7 @@ def kanonik(okuma: dict | CizimOkumasi) -> dict:
         c = cephe[v.kenar]
         bas, bit = (x0, x1) if c in ("on", "arka") else (H - y1, H - y0)
         ver.append({"cephe": c, "bas": bas, "bit": bit, "derinlik": d, "alan_m2": v.alan_m2, "rect": [x0, y0, x1, y1]})
-    kan = {"W": W, "H": H, "giris": giris, "odalar": odalar,
+    kan = {"W": W, "H": H, "giris": giris, "yan_giris": kapi_kenari in ("sol", "sag"), "odalar": odalar,
            "pencereler": [{"oda": p.oda, "cephe": cephe[p.kenar], "olcu": p.olcu, "adet": p.adet} for p in o.pencereler],
            "kapilar": [kapi(k) for k in o.kapilar],
            "verandalar": ver, "notlar": notlar, "olculu": _olculu_noktalar(o, Wc, Hc, giris),
@@ -924,6 +928,8 @@ def is_emri_prefabrik(kan: dict, o: CizimOkumasi, bk14: bool | None = None, esik
     # İE-17 köşe kuralı: makasın oturduğu iki duvar köşeden geçer; kısa kenar makasın geçtiği yöndür (`yapi.kisa_kenar`), köşe 10 cm o yönde
     if o.cati.mahya:
         makas = "x" if o.cati.mahya == "giristen_arkaya" else "y"
+        if kan.get("yan_giris"):                # D-149: mahya giriş kapısının duvarına göre okundu; plan döndürülmediği için eksen döner
+            makas = "y" if makas == "x" else "x"
     nx, xs, ny, ys, sor = _izgara(W, H, makas)
     if nx < 2 or ny < 2:
         return None, [], [f"gövde {_m(W)} × {_m(H)} m pano ızgarası için çok küçük"], []

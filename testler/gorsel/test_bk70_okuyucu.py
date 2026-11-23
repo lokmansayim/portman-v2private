@@ -128,8 +128,9 @@ def test_motor_iki_pencereyi_esit_boler():
     """Motor: oda ortası dizilimde aynı odanın aynı duvarındaki n pencere odanın net duvarının n + 1 eşit bölme noktasına yakın panoda."""
     ie = json.loads(json.dumps(GO.denetle(okuma("TK07"))["cevrim"]["is_emri"]))
     p = G.kur(copy.deepcopy(ie))
-    sag = sorted((q.rect() for q in p.panolar if q.acilim and q.acilim.tur == "pencere" and q.rect()[0] > 600), key=lambda r: r[1])
-    merkez = [(r[1] + r[3]) / 2 for r in sag]
+    # D-149: 61 m² çizimdeki gibi (950 × 640, kapı sağ duvarda); iki pencereli uzun duvar ön cephe (y > 600)
+    on = sorted((q.rect() for q in p.panolar if q.acilim and q.acilim.tur == "pencere" and q.rect()[1] > 600), key=lambda r: r[0])
+    merkez = [(r[0] + r[2]) / 2 for r in on]
     hedef = [10 + 930 / 3, 10 + 2 * 930 / 3]
     assert all(abs(m - h) <= 125.5 / 2 for m, h in zip(merkez, hedef)), merkez
 
