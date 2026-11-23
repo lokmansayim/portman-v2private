@@ -29,8 +29,8 @@
  "zorunlu_musteri": [
   "Customer"
  ],
- "telefon": "maskeli",
- "telefon_dayanagi": "AGENTS.md › Kişisel veri: telefon numarası her yerde maskelenir; açık yazma istisnası (D-64) yalnız bayi formunda bayinin kendi telefonudur. Müşteri satırlarındaki numara son dört hane kalarak yazılır (beyin/numara.py).",
+ "telefon": "acik",
+ "telefon_dayanagi": "İhracat formunda müşterinin telefonu açık yazılır (D-151; Lokman, 23 Kasım 2026 19:29:29 UTC: \"açık yazılsın kural falan yok\"). Numara yalnız proje klasöründeki girdiden gelir; depoya, teste ve teklifin JSON'una girmez. \"maskeli\" verilirse son dört hane kalır (beyin/numara.py).",
  "kosul_satirlari": [
   "Delivery terms",
   "Delivery time",

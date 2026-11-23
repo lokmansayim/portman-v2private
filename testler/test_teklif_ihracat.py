@@ -134,12 +134,17 @@ def test_belirlenimci(tmp_path):
     assert a == b
 
 
-def test_telefon_maskeli():
+def test_telefon_acik_d151():
+    """D-151 (Lokman 23.11.2026 19:29:29 "açık yazılsın"): ihracat formunda müşteri telefonu açık; "maskeli" verilirse son dört hane."""
     G = girdi()
     G["musteri"]["Phone"] = "+1 315 555 0123"                # uydurma numara
-    D = T.hazirla(G)
+    form = T.form_oku()
+    assert form["telefon"] == "acik"
+    D = T.hazirla(G, form)
+    assert dict(D["musteri"])["Phone"] == "+1 315 555 0123"
+    assert "+1 315 555 0123" in T.sayfa_html(D, form, "01.01.2027", False)
+    D = T.hazirla(G, {**form, "telefon": "maskeli"})
     assert dict(D["musteri"])["Phone"] == "…0123"
-    assert "555" not in T.sayfa_html(D, T.form_oku(), "01.01.2027", False)
 
 
 def test_notlar_07_numarali(tmp_path):

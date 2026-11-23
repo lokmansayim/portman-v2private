@@ -139,7 +139,7 @@ def hazirla(G: dict, form: dict | None = None, taslak: bool = False) -> dict:
     logo = None if acik_mi(G.get("logo")) else Path(G["logo"])
     if logo is not None and not logo.is_file():
         raise ValueError(f"ihracat formu: logo dosyası yok ({logo.name})")
-    if form.get("telefon") == "maskeli":                    # AGENTS.md › kişisel veri: telefon maskeli (D-64 istisnası yalnız bayi formu)
+    if form.get("telefon") == "maskeli":                    # D-151: ihracat formunda "acik" (Lokman 23.11.2026 19:29:29)
         from beyin import numara
         musteri = {k: numara.maskele(str(v), son_dort=True) if isinstance(v, str) else v for k, v in musteri.items()}
     D = {
