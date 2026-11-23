@@ -35,9 +35,11 @@ def test_tam_form_tek_sayfa_ve_bolumler(tmp_path):
     assert pdf.name == "EXTEST01_quotation_en.pdf"
     n, s = metin(pdf)
     assert n == 1
-    for b in form["bolumler"].values():                       # 01–06 sırasıyla
+    bolumler = [b for k, b in form["bolumler"].items() if k != "notlar"]
+    for b in bolumler:                                       # 01–06 sırasıyla; notsuz girdide 07 yok
         assert " ".join(b.split()) in s
-    sira = [s.index(" ".join(b.split())) for b in form["bolumler"].values()]
+    assert "07 NOTES" not in s
+    sira = [s.index(" ".join(b.split())) for b in bolumler]
     assert sira == sorted(sira)
     assert "QUOTATION AND SALES CONFIRMATION FORM" in s and "DRAFT" not in s and "TBD" not in s
     assert "USD 26,500.00" in s and "108 m² (1,162.5 sq ft)" in s and "0%" in s
@@ -137,3 +139,14 @@ def test_telefon_maskeli():
     D = T.hazirla(G)
     assert dict(D["musteri"])["Phone"] == "…0123"
     assert "555" not in T.sayfa_html(D, T.form_oku(), "01.01.2027", False)
+
+
+def test_notlar_07_numarali(tmp_path):
+    G = {**girdi(), "notlar": [["Quality.", "Licensed products."], ["Scope.", "Second order complete."]]}
+    D = T.hazirla(G)
+    n, s = metin(T.pdf_yaz(D, tmp_path / "n.pdf", tarih="23.11.2026"))
+    assert n == 1 and "07 NOTES" in s
+    assert s.index("06 BANK DETAILS") < s.index("07 NOTES") < s.index("1. Quality. Licensed products.") < s.index("2. Scope.")
+    for bozuk in ([["Başlık"]], [["Başlık", ""]], "metin"):
+        with pytest.raises(ValueError, match="notlar"):
+            T.hazirla({**girdi(), "notlar": bozuk})

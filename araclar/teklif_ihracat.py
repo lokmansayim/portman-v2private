@@ -4,7 +4,7 @@
 
 Düzen standart çelik teklif formunun 01–05 düzenidir (Drive "ÇELİK - TEKLİF PORTATİFEV - YENİ.xlsx"), Türkçe prefabrik bayi formuyla
 (`araclar/teklif_pdf.py`, M-14) aynı görünüşte; metinler İngilizce, sabitleri `kurallar/teklif/form_ihracat_en.json`'da. Malzeme listesi
-(Ek-1) ve kat planı yoktur (Lokman, 23 Kasım 2026 17:56:49). 06 banka bilgisidir. Tek sayfa; sığmazsa küçülür, yarıdan küçükse durur.
+(Ek-1) ve kat planı yoktur (Lokman, 23 Kasım 2026 17:56:49). 06 banka bilgisidir. 07 notlar isteğe bağlıdır. Tek sayfa; sığmazsa küçülür, yarıdan küçükse durur.
 
 Bütün proje değerleri girdiden gelir: müşteri, ürün, alan, fiyat ve para birimi, koşullar, 04'ün satırları, 05 (yoksa formun listesi),
 satıcı, banka, logo. Girdi proje klasöründe durur, depoya girmez: IBAN ve telefon depoya yazılmaz. Birden çok girdi dosyası sırayla
@@ -25,6 +25,7 @@ Girdi alanları:
   kapsam_disi    [madde, …] (05; yoksa formun listesi)
   satici         satıcının unvanı (06'nın başında)
   banka          {"Bank", "Account holder", "Currency", "IBAN"}
+  notlar         [[başlık, metin], …] isteğe bağlı; 07 NOTES numaralı maddeler, başlık kalın; boşsa bölüm yok
   logo           logo dosyası (PNG/JPG); göreli yol girdi dosyasının klasörüne göre; yoksa firma adı yazı olarak
 Not alanları (okunmaz): sema, aciklama, dil, *_kaynagi, teknik_acik, sorulacak.
 """
@@ -43,7 +44,8 @@ if str(KOK) not in sys.path:
 from araclar.teklif_pdf import A4, CSS, KENAR, e  # noqa: E402  (aynı görünüş; teklif_pdf.py değişmez)
 
 FORM = KOK / "kurallar" / "teklif" / "form_ihracat_en.json"
-ALANLAR = {"kod", "musteri", "urun", "alan_m2", "miktar", "fiyat", "kosullar", "teknik", "kapsam_disi", "satici", "banka", "logo"}
+ALANLAR = {"kod", "musteri", "urun", "alan_m2", "miktar", "fiyat", "kosullar", "teknik", "kapsam_disi", "satici", "banka", "logo",
+           "notlar"}
 NOT_ALANLARI = {"sema", "aciklama", "dil", "teknik_acik", "sorulacak"}
 FIYAT_ALANLARI = {"para_birimi", "tutar", "kdv_orani"}
 SQFT = 10.763910416709722                      # 1 m² = 10,7639 sq ft (1 ft = 0,3048 m)
@@ -127,6 +129,9 @@ def hazirla(G: dict, form: dict | None = None, taslak: bool = False) -> dict:
     miktar = G.get("miktar", 1)
     if not isinstance(miktar, int) or miktar < 1:
         raise ValueError(f"ihracat formu: miktar pozitif tam sayı olmalı ({miktar!r})")
+    notlar = G.get("notlar") or []
+    if not isinstance(notlar, list) or any(not isinstance(n, list) or len(n) != 2 or any(acik_mi(x) for x in n) for n in notlar):
+        raise ValueError("ihracat formu: notlar [[başlık, metin], …] olmalı, boş başlık ya da metin olamaz")
     logo = None if acik_mi(G.get("logo")) else Path(G["logo"])
     if logo is not None and not logo.is_file():
         raise ValueError(f"ihracat formu: logo dosyası yok ({logo.name})")
@@ -144,6 +149,7 @@ def hazirla(G: dict, form: dict | None = None, taslak: bool = False) -> dict:
         "kapsam_disi": list(G.get("kapsam_disi") or form["kapsam_disi"]),
         "satici": al("satici", G.get("satici")),
         "banka": [(k, al(f"banka.{k}", banka.get(k))) for k in form["banka_satirlari"]],
+        "notlar": [(str(b), str(m)) for b, m in notlar],
         "logo": logo,
     }
     if eksik and not taslak:
@@ -197,6 +203,10 @@ def sayfa_html(D: dict, form: dict, tarih: str, logo_var: bool) -> str:
     k.append(f"<h2>{e(B['kapsam_disi'])}</h2><table>" + "".join(f"<tr><td>• {e(m)}</td></tr>" for m in D["kapsam_disi"]) + "</table>")
     k.append(f"<h2>{e(B['banka'])}</h2><table>" + _satir(form["satici_etiketi"], D["satici"], form)
              + "".join(_satir(a, v, form) for a, v in D["banka"]) + "</table>")
+    if D["notlar"]:
+        k.append(f"<h2>{e(B['notlar'])}</h2><table>" + "".join(
+            f"<tr><td style='width:20px'>{i}.</td><td style='width:480px'><b>{e(b)}</b> {e(m)}</td></tr>"
+            for i, (b, m) in enumerate(D["notlar"], 1)) + "</table>")
     return "".join(k)
 
 

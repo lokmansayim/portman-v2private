@@ -1,6 +1,6 @@
 {
  "sema": "portman.teklif_formu_ihracat/1",
- "aciklama": "İngilizce ihracat teklif ve satış onay formunun düzeni ve sabit metinleri (İE-46, araclar/teklif_ihracat.py). Türkçe prefabrik bayi formundan (form.json, M-14) ayrıdır; ona dokunmaz. Düzen standart çelik teklif formunun 01–05 düzenidir; malzeme listesi (Ek-1) ve kat planı yoktur; 06 banka bilgisi girdiden. Müşteri, ürün, alan, fiyat, koşullar, teknik satırlar, banka ve logo girdiden gelir; girdi proje klasöründe durur, depoya girmez (IBAN ve telefon depoya yazılmaz).",
+ "aciklama": "İngilizce ihracat teklif ve satış onay formunun düzeni ve sabit metinleri (İE-46, araclar/teklif_ihracat.py). Türkçe prefabrik bayi formundan (form.json, M-14) ayrıdır; ona dokunmaz. Düzen standart çelik teklif formunun 01–05 düzenidir; malzeme listesi (Ek-1) ve kat planı yoktur; 06 banka bilgisi girdiden; 07 notlar girdide varsa (Hacı Kulu teklif thread'inin isteği, Lokman 23 Kasım 2026 18:05:39 mesajından). Müşteri, ürün, alan, fiyat, koşullar, teknik satırlar, banka ve logo girdiden gelir; girdi proje klasöründe durur, depoya girmez (IBAN ve telefon depoya yazılmaz).",
  "kaynak": "Lokman, 23 Kasım 2026 17:56:32 UTC: \"sen bizim standart çelik teklif formumuzu prefabrikte yaptığın gibi hazırla ingilizce olarak\"; 17:56:49 \"malzeme listesini kat planını boşver\"; 17:57:46 \"iban vereceğim\"; 17:57:57 \"logo var\". Standart çelik formu: Drive 'ÇELİK - TEKLİF PORTATİFEV - YENİ.xlsx' (sayfa 'PREFABRİK TEKLİF TURKCE': 01 Bayi / firma bilgileri, 02 Ürün detayı, 03 Ödeme, 04 Paket içeriği ve teknik özellikleri, 05 Kapsam dışı işler).",
  "firma": "PORTATİF EV",
  "web": "www.portatifev.com",
@@ -16,7 +16,8 @@
   "kosullar": "03   DELIVERY AND PAYMENT TERMS",
   "teknik": "04   PACKAGE CONTENTS AND TECHNICAL SPECIFICATIONS",
   "kapsam_disi": "05   EXCLUDED FROM SCOPE (BUYER'S RESPONSIBILITY)",
-  "banka": "06   BANK DETAILS"
+  "banka": "06   BANK DETAILS",
+  "notlar": "07   NOTES"
  },
  "musteri_satirlari": ["Customer", "Project", "Phone", "Address"],
  "zorunlu_musteri": ["Customer"],
