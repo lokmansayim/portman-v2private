@@ -1,6 +1,6 @@
 {
  "sema": 1,
- "surum": "2026-11-20-r15",
+ "surum": "2026-11-23-r16",
  "karar": "D-72",
  "muhur": "M-15",
  "aciklama": "Fiyat defteri kaleminin CRM stok fiyatları API'sindeki karşılığı ve fiyatın nasıl hesaplandığı (İE-35). Fiyat yazmaz: fiyat her gün CRM'den gelir, `araclar/crm_fiyat.py` bu dosyayla defter üretir. Anahtarlar ve birimler fiyat defterinin (defter_2026-11 r13) kalemleri; Motor'un listesindeki anahtar. D-72'den sonra defter kapandı: Motor'un yeni anahtarı yalnız buraya, hattın kalemlerinin sonuna girer (r05, TK-06); yeni bant aralığı da bantların sonuna (r07, 280 ve 300 cm yükseklik). Eşleme değişikliği (yeni kalem, Lokman'ın birim cevabı, Samet'in CRM'e eklediği ürün) bu dosyaya PR'la girer; `kaynak` bölümü mühürlü (M-15).",
@@ -41,7 +41,7 @@
  "hesaplar": {
   "ayni": "CRM fiyatı",
   "oran": "CRM fiyatı × pay ÷ payda (boyla orantı)",
-  "carp": "CRM fiyatı × carpan",
+  "carp": "CRM fiyatı × carpan; kalemde `paket_fiyati_baslangic` varsa o günden (görüntünün günü) beri CRM fiyatı paket fiyatıdır ve sonuç `paket_m2`'ye bölünür (D-147: HM44, HM45 20 Kasım 2026'dan beri paket fiyatı)",
   "boy_m": "CRM fiyatı × L ÷ esas_boy_mm (anahtardaki L). esas_boy_mm yoksa 1000: m² ya da metre fiyatı; kutu profilde 6000: CRM fiyatı 6 metrelik boyun fiyatı (D-75); kalemde `boy_adim_mm` varsa L önce o adımın katına yukarı tamamlanır (kutu profil 1500: çeyrek boy, D-119)",
   "ort": "kodların fiyatlarının agirlik'la ağırlıklı ortalaması",
   "toplam": "kodların fiyatlarının toplamı",
@@ -696,7 +696,9 @@
      "carpan": 9.6,
      "esleme": "birim varsayımı",
      "birim": "adet",
-     "not": "CRM'de cam yünü 9,6 m² paket; fiyatı m² fiyatı sayıldı (× 9,6)"
+     "paket_m2": 9.6,
+     "paket_fiyati_baslangic": "2026-11-20",
+     "not": "CRM'de cam yünü 9,6 m² paket; fiyatı m² fiyatı sayıldı (× 9,6). D-147: 20 Kasım 2026 görüntüsünden beri CRM paketin fiyatını yazıyor; o günden beri fiyat ÷ paket_m2, önceki görüntüler aynen"
     },
     "Aşık | L 4200": {
      "kod": "MA66",
@@ -2881,7 +2883,9 @@
      "carpan": 8.64,
      "esleme": "birim varsayımı",
      "birim": "adet",
-     "not": "CRM'de Knauf mineral yünü 8,64 m² paket; fiyatı m² fiyatı sayıldı (× 8,64)"
+     "paket_m2": 8.64,
+     "paket_fiyati_baslangic": "2026-11-20",
+     "not": "CRM'de Knauf mineral yünü 8,64 m² paket; fiyatı m² fiyatı sayıldı (× 8,64). D-147: 20 Kasım 2026 görüntüsünden beri CRM paketin fiyatını yazıyor; o günden beri fiyat ÷ paket_m2, önceki görüntüler aynen"
     },
     "Tek kat panel | L 4330 · 100 cm kapatır": {
      "kod": "CG6",
@@ -2916,7 +2920,9 @@
      "carpan": 9.0,
      "esleme": "birim varsayımı",
      "birim": "adet",
-     "not": "CRM'de cam yünü 9,6 m² paket; fiyatı m² fiyatı sayıldı (× 9,0)"
+     "paket_m2": 9.6,
+     "paket_fiyati_baslangic": "2026-11-20",
+     "not": "CRM'de cam yünü 9,6 m² paket; fiyatı m² fiyatı sayıldı (× 9,0). D-147: 20 Kasım 2026 görüntüsünden beri CRM paketin fiyatını yazıyor; o günden beri fiyat ÷ paket_m2, önceki görüntüler aynen"
     },
     "Metal dere | L 4000": {
      "kod": "DR1",
