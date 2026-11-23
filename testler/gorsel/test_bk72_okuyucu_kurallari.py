@@ -10,6 +10,8 @@ from pathlib import Path
 KOK = Path(__file__).resolve().parents[2]
 if str(KOK) not in sys.path:
     sys.path.insert(0, str(KOK))
+if str(KOK / "kanal") not in sys.path:
+    sys.path.insert(0, str(KOK / "kanal"))
 from beyin import gorsel_okuma as GO  # noqa: E402
 
 VERI = Path(__file__).resolve().parent / "veri"
@@ -104,3 +106,47 @@ def test_kural2_okunan_yere_en_yakin_yerlesim():
     o["pencereler"] = [p | ({"konum_cm": 440} if p["oda"] == "SALON" and p["kenar"] == "alt" else {}) for p in o["pencereler"]]
     y = _yerler(GO.denetle(o)["cevrim"]["is_emri"])
     assert next(c for (t, _), c in y.items() if t == "dis_kapi") > 500
+
+
+def test_kural3_cogunluk_secilir():
+    """Üç okumadan ikisi aynı planı okuduysa (imza) çoğunluk odur; aykırı okuma soru az çıkarsa da seçilmez."""
+    a = _okuma("TK06")
+    aykiri = {**a, "emin_olunamayanlar": [], "dis_olcu": {"yatay_cm": 900, "dusey_cm": 1088}}
+    sec, ozet = GO.cogunluk_sec([aykiri, a, a])
+    assert ozet["cogunluk"] == 2 and ozet["secilen"] in (1, 2)
+    assert GO.okuma_imzasi(sec) == GO.okuma_imzasi(a)
+
+
+def test_kural3_cogunluk_yoksa_en_az_soru():
+    a = _okuma("TK06")
+    b = {**a, "emin_olunamayanlar": [], "dis_olcu": {"yatay_cm": 900, "dusey_cm": 1088}}
+    c = {**a, "dis_olcu": {"yatay_cm": 700, "dusey_cm": 1088}}
+    sec, ozet = GO.cogunluk_sec([a, b, c])
+    assert ozet["cogunluk"] == 0
+    n = [len(GO.denetle(x)["sorular"]) for x in (a, b, c)]
+    assert len(GO.denetle(sec)["sorular"]) == min(n)
+
+
+def _worker_oku(tmp_path, n: int, ek: list):
+    import json as _j
+    import worker
+    resim = tmp_path / "cizim.png"
+    resim.write_bytes(b"\x89PNG\r\n\x1a\n" + b"0" * 64)
+    hd = tmp_path / "hazir.json"
+    hd.write_text(_j.dumps({"okuma": _okuma("TK06"), "ek_okumalar": ek}, ensure_ascii=False), encoding="utf-8")
+    settings = {"gorsel_okuma": {"acik": True, "backend": "manuel", "hazir_dosya": str(hd), "max_tokens": 8000, "timeout_s": 10,
+                                 "okuma_sayisi": n}}
+    return worker.gorsel_oku({"text": ""}, settings, {"yol": str(resim), "mime": "image/png", "boyut": 72, "sha256": "x"})
+
+
+def test_kural3_worker_uc_okuma(tmp_path):
+    a = _okuma("TK06")
+    aykiri = {**a, "dis_olcu": {"yatay_cm": 900, "dusey_cm": 1088}}
+    s = _worker_oku(tmp_path, 3, [aykiri, {**a, "emin_olunamayanlar": []}])
+    assert s["durum"] == "tamam" and s["cok_okuma"]["okuma"] == 3 and s["cok_okuma"]["cogunluk"] == 2
+    assert s["okuma"]["emin_olunamayanlar"] == []                     # çoğunluk içinde en az soru çıkaran
+
+
+def test_kural3_ayar_birken_tek_okuma(tmp_path):
+    s = _worker_oku(tmp_path, 1, [{**_okuma("TK06"), "emin_olunamayanlar": []}])
+    assert "cok_okuma" not in s and s["okuma"] == GO.CizimOkumasi.model_validate(_okuma("TK06")).model_dump()

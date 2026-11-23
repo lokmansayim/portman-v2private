@@ -977,12 +977,40 @@ def gorsel_oku(gelen: dict, settings: dict, dosya: dict | None) -> dict:
             soz = TF.ozet(gelen["form"])
         s = GO.oku(Path(bilgi["yol"]), bilgi["mime"], soz, ayar=_llm_ayari(ayar),
                    hazir=(h.get("okuma", h) if isinstance(h, dict) else None))
+        n = int(ayar.get("okuma_sayisi") or 1)
+        if n > 1 and s.get("durum") == "tamam":
+            s = _cok_okuma(s, n, bilgi, soz, settings, ayar, h)
     except Exception as e:
         s = {"durum": "hata", "okuma": None, "cagri": 0, "hata": maske_numaralar(f"{type(e).__name__}: {str(e)[:200]}")}
     if ayar.get("ikinci_bakis") is True and s.get("durum") == "tamam":
         s = _ikinci_bakis(s, bilgi, settings, ayar, h)
     log("çizim okuma:", s.get("durum"), "çağrı", s.get("cagri"))
     return {**s, "dosya": bilgi}
+
+
+def _cok_okuma(s: dict, n: int, bilgi: dict, soz: str, settings: dict, ayar: dict, h) -> dict:
+    """BK-72 kural 3 (D-150; ayar `gorsel_okuma.okuma_sayisi`, varsayılan 1): çizim n kez okunur (n − 1 çağrı daha), çoğunluğu kod seçer
+    (`GO.cogunluk_sec`). Ek okuma hata verirse eldekilerle seçilir. Plan olmayan resimde ek okuma yok. İstisna fırlatmaz."""
+    from beyin import gorsel_okuma as GO
+    try:
+        if (s.get("okuma") or {}).get("tur") != "plan":
+            return s
+        hazirlar = (h.get("ek_okumalar") or []) if isinstance(h, dict) else []
+        okumalar, cagri, gt, ct = [s["okuma"]], int(s.get("cagri") or 0), int(s.get("girdi_token") or 0), int(s.get("cikti_token") or 0)
+        for k in range(n - 1):
+            hz = hazirlar[k] if k < len(hazirlar) else None
+            if isinstance(h, dict) and not hz and str(ayar.get("backend")) == "manuel":
+                break
+            e = GO.oku(Path(bilgi["yol"]), bilgi["mime"], soz, ayar=_llm_ayari(ayar), hazir=hz)
+            cagri += int(e.get("cagri") or 0); gt += int(e.get("girdi_token") or 0); ct += int(e.get("cikti_token") or 0)
+            if e.get("durum") == "tamam" and e.get("okuma"):
+                okumalar.append(e["okuma"])
+        sec, ozet = GO.cogunluk_sec(okumalar, ayar=_esik(settings))
+        s = {**s, "okuma": sec or s["okuma"], "cagri": cagri, "girdi_token": gt, "cikti_token": ct, "cok_okuma": ozet}
+        log("çizim çok okuma:", len(okumalar), "okuma, çoğunluk", ozet.get("cogunluk"), "seçilen", ozet.get("secilen"))
+    except Exception as e:
+        log("çok okuma atlandı:", maske_numaralar(f"{type(e).__name__}: {str(e)[:160]}"))
+    return s
 
 
 def _ikinci_bakis(s: dict, bilgi: dict, settings: dict, ayar: dict, h) -> dict:
@@ -1042,7 +1070,7 @@ def _cizim_gorseli(gelen: dict, okuma: dict, den: dict, proje_koku: Path | None)
 
 def _okuma_kaydi(g: dict) -> dict:
     """İş sonucuna (kayıt) giden okuma özeti: okumanın kendisi konuşmada; burada çağrı ve sayılar."""
-    return {a: g.get(a) for a in ("durum", "niyet", "cagri", "girdi_token", "cikti_token", "model", "hata", "ikinci_bakis")
+    return {a: g.get(a) for a in ("durum", "niyet", "cagri", "girdi_token", "cikti_token", "model", "hata", "ikinci_bakis", "cok_okuma")
             if g.get(a) is not None}
 
 

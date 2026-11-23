@@ -310,6 +310,40 @@ def ikinci_bakis(okuma: dict, sorular: list[str], yol: Path, mime: str, ayar: di
             "girdi_token": meta.get("girdi_token") or 0, "cikti_token": meta.get("cikti_token") or 0, "model": meta.get("model")}
 
 
+def okuma_imzasi(okuma: dict) -> tuple:
+    """BK-72 kural 3: iki okumanın "aynı planı" okuyup okumadığını söyleyen özet: dış ölçü (5 cm'ye yuvarlı), giriş kenarı, odaların adı ve
+    işlevi, pencere ve kapı sayısı."""
+    o = CizimOkumasi.model_validate(okuma)
+    W, H, _ = _govde_olcusu(o)
+    yuv = lambda v: None if v is None else int(round(float(v) / 5.0))
+    return (o.tur, yuv(W), yuv(H), o.giris_kenari, tuple(sorted((_norm(x.ad), x.islev) for x in o.odalar)),
+            sum(p.adet for p in o.pencereler), len(o.kapilar))
+
+
+def cogunluk_sec(okumalar: list[dict], ayar: dict | None = None) -> tuple[dict | None, dict]:
+    """BK-72 kural 3 (D-150; Lokman kart 23 Kasım 2026 12:40:09 "Dördü de, sırayla"): aynı çizim birkaç kez okunur, kod seçer (LLM değil).
+    Okumalar imzalarına göre gruplanır (`okuma_imzasi`); en kalabalık grup en az iki okumaysa çoğunluk odur ve içinden en az soru çıkaran
+    seçilir. Çoğunluk yoksa en az soru çıkaran seçilir ve özetine yazılır (Patron'un kaydı). Dönüş: (okuma | None, özet)."""
+    gecerli = []
+    for i, ok in enumerate(okumalar):
+        try:
+            den = denetle(ok, ayar=ayar)
+            gecerli.append((i, ok, den, okuma_imzasi(ok)))
+        except Exception:
+            continue
+    if not gecerli:
+        return None, {"okuma": len(okumalar), "gecerli": 0, "cogunluk": 0, "secilen": None}
+    gruplar: dict[tuple, list] = {}
+    for g in gecerli:
+        gruplar.setdefault(g[3], []).append(g)
+    en = max(gruplar.values(), key=len)
+    aday = en if len(en) >= 2 else gecerli
+    puan = lambda g: (bool(g[2]["cizilemez"]), g[2]["cevrim"] is None, len(g[2]["sorular"]), g[0])
+    i, ok, den, _ = min(aday, key=puan)
+    return ok, {"okuma": len(okumalar), "gecerli": len(gecerli), "cogunluk": len(en) if len(en) >= 2 else 0, "secilen": i,
+                "soru": [len(g[2]["sorular"]) for g in gecerli]}
+
+
 def ikinci_bakis_sec(ilk: dict, ilk_den: dict, ikinci: dict | None, ayar: dict | None = None) -> tuple[dict, dict, bool]:
     """Kod seçer (LLM değil): ikinci okuma çizilemez değilse ve soruları ilkinden az ise o; yoksa ilk okuma aynen.
     Dönüş: (okuma, denetim, ikinci_mi)."""

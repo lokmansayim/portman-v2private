@@ -61,6 +61,7 @@ if (klasor / "kod").is_dir():
     print("kod: dal (", (klasor / "kod" / "surum.txt").read_text().strip(), ")", flush=True)
 from beyin import gorsel_okuma as GO
 IKINCI = @@IKINCI@@
+OKUMA_SAYISI = @@OKUMA_SAYISI@@
 liste = json.loads((klasor / "liste.json").read_text(encoding="utf-8"))
 FIYAT = @@FIYAT@@
 ayar = {"model": "@@MODEL@@", "effort": "medium", "timeout_s": @@SURE@@, "max_tokens": @@TOKEN@@}
@@ -68,8 +69,17 @@ print("ayar:", json.dumps(ayar), "· sürüm:", os.path.realpath(kok), flush=Tru
 gt = ct = 0
 for i, x in enumerate(liste, 1):
     yol = klasor / x["dosya"]
-    r = GO.oku(yol, x["mime"], "", ayar=ayar)
-    gt += r.get("girdi_token") or 0; ct += r.get("cikti_token") or 0
+    from concurrent.futures import ThreadPoolExecutor
+    with ThreadPoolExecutor(max_workers=OKUMA_SAYISI) as ex:     # BK-72 kural 3: aynı çizim N kez, aynı anda
+        rr = list(ex.map(lambda _: GO.oku(yol, x["mime"], "", ayar=ayar), range(OKUMA_SAYISI)))
+    for e in rr:
+        gt += e.get("girdi_token") or 0; ct += e.get("cikti_token") or 0
+    r, cok = rr[0], None
+    tamam = [e for e in rr if e["durum"] == "tamam" and e.get("okuma")]
+    if OKUMA_SAYISI > 1 and tamam and (tamam[0]["okuma"] or {}).get("tur") == "plan":
+        sec, cok = GO.cogunluk_sec([e["okuma"] for e in tamam])
+        r = tamam[cok["secilen"]] if cok.get("secilen") is not None else tamam[0]
+        print(f"   {len(tamam)} okuma · çoğunluk {cok['cogunluk']} · seçilen {cok['secilen']} · sorular {cok.get('soru')}", flush=True)
     b = None
     if IKINCI and r["durum"] == "tamam" and (r["okuma"] or {}).get("tur") == "plan":
         den = GO.denetle(r["okuma"])
@@ -82,7 +92,8 @@ for i, x in enumerate(liste, 1):
     print(f"== {i}/{len(liste)} {x['ad']}: {r['durum']} · girdi {r.get('girdi_token')} · çıktı {r.get('cikti_token')} token · "
           f"{(r.get('sure_ms') or 0) / 1000:.0f} sn" + (f" · hata {r.get('hata')}" if r["durum"] != "tamam" else ""), flush=True)
     print("@@OKUMA " + json.dumps({"ad": x["ad"], **{k: r.get(k) for k in ("durum", "okuma", "girdi_token", "cikti_token", "sure_ms",
-          "model", "hata")}, "ikinci": b}, ensure_ascii=False), flush=True)
+          "model", "hata")}, "ikinci": b, "cok_okuma": cok, "ek_okumalar": [e.get("okuma") for e in rr if e is not r]},
+          ensure_ascii=False), flush=True)
 print(f"== toplam: girdi {gt} · çıktı {ct} token · tahmini {gt * FIYAT[0] / 1e6 + ct * FIYAT[1] / 1e6:.2f} USD")
 print("== bitti")
 '''
@@ -96,7 +107,7 @@ SINIR = {"claude-opus-5-5": (180, 8000), "claude-fable-5-2": (300, 16000)}
 
 
 def paketle(liste_yolu: Path, cikti: Path, tarih: str = "2026-11-22", model: str = "claude-opus-5-5", ikinci: bool = False,
-            onay: str = "22 Kasım 2026 05:15:43 UTC") -> Path:
+            onay: str = "22 Kasım 2026 05:15:43 UTC", okuma_sayisi: int = 1) -> Path:
     liste = json.loads(Path(liste_yolu).read_text(encoding="utf-8"))
     b = io.BytesIO()
     kayit = []
@@ -107,7 +118,7 @@ def paketle(liste_yolu: Path, cikti: Path, tarih: str = "2026-11-22", model: str
             ad = f"{i:02d}{kaynak.suffix.lower()}"
             tar.add(kaynak, arcname=ad)
             kayit.append({"ad": x["ad"], "dosya": ad, "mime": mime})
-        if ikinci:                         # BK-71: dalın okuyucusu ve Motor'u (canlıda henüz yok); sürüm notu git'ten
+        if ikinci or okuma_sayisi > 1:     # BK-71: dalın okuyucusu ve Motor'u (canlıda henüz yok); sürüm notu git'ten
             import subprocess
             for kd in KOD_DOSYALARI:            # dosyaya göre okunan kurallar da dalın hâliyle (kod/kurallar/…)
                 tar.add(KOK / kd, arcname="kod/" + kd)
@@ -120,7 +131,7 @@ def paketle(liste_yolu: Path, cikti: Path, tarih: str = "2026-11-22", model: str
     satirlar = "\n".join(b64[i:i + 76] for i in range(0, len(b64), 76))
     klasor = f"/root/portman_cizim_okuma_{tarih}"
     betik = f"""#!/bin/bash
-# Portman · bayi çizimi okuma denemesi ({len(kayit)} çizim, {model}{', ikinci bakış' if ikinci else ''}). Lokman'ın onayı: {onay}.
+# Portman · bayi çizimi okuma denemesi ({len(kayit)} çizim, {model}{', ikinci bakış' if ikinci else ''}{f', {okuma_sayisi} okuma' if okuma_sayisi > 1 else ''}). Lokman'ın onayı: {onay}.
 set -u
 KOK=/opt/portman/guncel
 K={klasor}
@@ -130,7 +141,7 @@ base64 -d > "$K/girdi.tgz" <<'B64'
 B64
 tar -xzf "$K/girdi.tgz" -C "$K" || {{ echo "== DUR: paket açılamadı"; exit 1; }}
 cat > "$K/oku.py" <<'PY'
-{SUNUCU_PY.strip().replace('@@MODEL@@', model).replace('@@IKINCI@@', repr(ikinci)).replace('@@FIYAT@@', repr(FIYAT[model])).replace('@@SURE@@', str(SINIR[model][0])).replace('@@TOKEN@@', str(SINIR[model][1]))}
+{SUNUCU_PY.strip().replace('@@MODEL@@', model).replace('@@IKINCI@@', repr(ikinci)).replace('@@OKUMA_SAYISI@@', str(int(okuma_sayisi))).replace('@@FIYAT@@', repr(FIYAT[model])).replace('@@SURE@@', str(SINIR[model][0])).replace('@@TOKEN@@', str(SINIR[model][1]))}
 PY
 cd "$KOK" && "$KOK/venv/bin/python" "$K/oku.py" "$K" "$KOK"
 echo "== çıkış $?"
@@ -282,11 +293,11 @@ def kiyas(txt: Path, esleme_yolu: Path, hedef: Path) -> list[dict]:
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="Bayi çizimi okuma denemesi (pano 83)")
     alt = ap.add_subparsers(dest="komut", required=True)
-    a = alt.add_parser("paketle"); a.add_argument("liste"); a.add_argument("cikti"); a.add_argument("--model", default="claude-opus-5-5", choices=sorted(FIYAT)); a.add_argument("--etiket", default="2026-11-22"); a.add_argument("--ikinci-bakis", action="store_true"); a.add_argument("--onay", default="22 Kasım 2026 05:15:43 UTC")
+    a = alt.add_parser("paketle"); a.add_argument("liste"); a.add_argument("cikti"); a.add_argument("--model", default="claude-opus-5-5", choices=sorted(FIYAT)); a.add_argument("--etiket", default="2026-11-22"); a.add_argument("--ikinci-bakis", action="store_true"); a.add_argument("--onay", default="22 Kasım 2026 05:15:43 UTC"); a.add_argument("--okuma-sayisi", type=int, default=1)
     k = alt.add_parser("kiyas"); k.add_argument("okuma_cikti"); k.add_argument("esleme"); k.add_argument("hedef")
     a = ap.parse_args(argv)
     if a.komut == "paketle":
-        print(paketle(Path(a.liste), Path(a.cikti), tarih=a.etiket, model=a.model, ikinci=a.ikinci_bakis, onay=a.onay))
+        print(paketle(Path(a.liste), Path(a.cikti), tarih=a.etiket, model=a.model, ikinci=a.ikinci_bakis, onay=a.onay, okuma_sayisi=a.okuma_sayisi))
     else:
         for x in kiyas(Path(a.okuma_cikti), Path(a.esleme), Path(a.hedef)):
             print(json.dumps({k: x[k] for k in ("ad", "durum", "ayni_pano", "varsayim", "kod_sorulari", "cizilemez", "okunan", "onayli")}, ensure_ascii=False))
