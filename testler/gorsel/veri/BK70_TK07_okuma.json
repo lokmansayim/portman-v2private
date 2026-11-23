@@ -1,0 +1,112 @@
+{
+ "tur": "plan",
+ "yapi_turu": "prefabrik",
+ "kat_sayisi": null,
+ "giris_kenari": "sag",
+ "dis_olcu": {
+  "yatay_cm": 950.0,
+  "dusey_cm": 640.0
+ },
+ "zincirler": [
+  {
+   "kenar": "ust",
+   "olculer_cm": [
+    950.0
+   ],
+   "toplam_cm": null,
+   "kapsam": "govde"
+  },
+  {
+   "kenar": "alt",
+   "olculer_cm": [
+    950.0
+   ],
+   "toplam_cm": null,
+   "kapsam": "govde"
+  },
+  {
+   "kenar": "sol",
+   "olculer_cm": [
+    640.0
+   ],
+   "toplam_cm": null,
+   "kapsam": "govde"
+  },
+  {
+   "kenar": "sag",
+   "olculer_cm": [
+    640.0
+   ],
+   "toplam_cm": null,
+   "kapsam": "govde"
+  }
+ ],
+ "odalar": [
+  {
+   "ad": "ODA",
+   "islev": "salon",
+   "alan_m2": 57.66,
+   "dikdortgenler": [
+    [
+     0.0,
+     0.0,
+     950.0,
+     640.0
+    ]
+   ]
+  }
+ ],
+ "kapilar": [
+  {
+   "arasinda": [
+    "DIŞ",
+    "ODA"
+   ],
+   "kenar": "sag",
+   "genislik_cm": null
+  }
+ ],
+ "pencereler": [
+  {
+   "oda": "ODA",
+   "kenar": "ust",
+   "olcu": "120x120",
+   "adet": 2
+  },
+  {
+   "oda": "ODA",
+   "kenar": "alt",
+   "olcu": "120x120",
+   "adet": 2
+  },
+  {
+   "oda": "ODA",
+   "kenar": "sol",
+   "olcu": "120x120",
+   "adet": 1
+  }
+ ],
+ "verandalar": [],
+ "cati": {
+  "tip": "besik",
+  "mahya": "giristen_arkaya",
+  "egim_yuzde": 32.9,
+  "sacak_cm": 30.0
+ },
+ "duvar_yuksekligi_cm": 250.0,
+ "tahminler": [
+  "Çatı eğimi çizimde 18,2° yazıyor; yüzdeye çevrildi: ≈%32,9",
+  "Saçak: çatı kesitindeki 700 cm genişlik ile 640 cm gövde farkından her yana ≈30 cm",
+  "Duvar yüksekliği: teknik özelliklerdeki 'Bina Yüksekliği 2500 mm' değerinden 250 cm alındı",
+  "Giriş kapısı sağ duvarın üst ucunda çizili; kapı genişliği yazmıyor (yaklaşık 90-100 cm görünüyor)"
+ ],
+ "emin_olunamayanlar": [
+  "Giriş kapısı sağ duvarın üst köşesinde mi, yoksa üst duvarın sağ ucunda mı? (köşede mavi çizgiyle gösterilmiş)",
+  "Sol ve sağ duvarların alt uçlarındaki mavi işaretli bölümler ne? (ikinci kapı, cam ya da başka bir eleman)",
+  "ODA tek açık hacim mi kalacak, yoksa banyo/WC/mutfak gibi iç bölmeler olacak mı? (iç duvar 60 mm yazıyor ama planda iç duvar çizilmemiş)",
+  "Pencere ölçüsü 120/120 'ENxBOY' mu? (pencere detayında iç ölçü 118 cm yazıyor)",
+  "Kat sayısı: tek katlı mı?",
+  "Bina altına kurulacak platformun ölçüsü ve yüksekliği ne?"
+ ],
+ "ozet": "950x640 cm ölçülerinde, tek odalı (ODA 57,66 m²), 5 pencereli, beşik çatılı tek parça prefabrik konut planı."
+}

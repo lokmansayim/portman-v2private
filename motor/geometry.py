@@ -1217,6 +1217,25 @@ def _kur(is_emri: dict) -> Plan:
             lo, hi = min(lo, hi), max(lo, hi)
             nlo, nhi = _oda_net_araligi(duvarlar, d, lo, hi)
             pencere_hedef[i] = [d.id, (nlo + nhi) / 2.0, lo, hi, None]
+        # BK-70: aynı odanın aynı duvarında birden çok pencere (TK-07 61 m²: arka 2, ön 2): hepsi odanın ortasına gidip "Aynı panoya iki
+        # açıklık" hatası veriyordu. Odanın net duvarı n + 1 eşit parçaya bölünür, k. pencere k. bölme noktasına (soldan / arkadan sırayla).
+        # Tek pencereli duvar aynen; bugün hata veren İş Emri dışında hiçbir planı değiştirmez.
+        gruplar: dict = {}
+        for i, h in pencere_hedef.items():
+            gruplar.setdefault((h[0], h[2], h[3], acikliklar[i]["mahal"]), []).append(i)
+        for (did, lo, hi, _), ii in gruplar.items():
+            if len(ii) < 2:
+                continue
+            d = next(x for x in duvarlar if x.id == did)
+            nlo, nhi = _oda_net_araligi(duvarlar, d, lo, hi)
+            mahal = acikliklar[ii[0]]["mahal"]
+            if (nhi - nlo) / (len(ii) + 1) < MOD:               # pencereli panolar üst üste biner: sessiz özel pano yok (K21)
+                raise IsEmriHatasi(f"Pencere {mahal}: duvarda {len(ii)} pencere için yer yok (net {nhi - nlo:.2f} cm; "
+                                   f"her pencere arası en az {MOD} cm)")
+            for k, i in enumerate(sorted(ii), 1):
+                pencere_hedef[i][1] = nlo + (nhi - nlo) * k / (len(ii) + 1)
+            uyarilar.append(f"Pencere {mahal}: aynı duvardaki {len(ii)} pencere duvara eşit aralıkla dağıtıldı "
+                            f"(İş Emri'ndeki sırayla)")
     kapi_hedef = {}             # İE-17 `acikliklar[].duvar_ucu`: açıklık sırası → (duvar id, kapı panosunun aks aralığı q0, q1)
     for i, ac in enumerate(acikliklar):
         if "duvar_ucu" not in ac:
@@ -1453,6 +1472,12 @@ def _kur(is_emri: dict) -> Plan:
                 if ac.get("duvar") not in NORMAL:
                     raise IsEmriHatasi(f"Dışarı açılan kapıda cephe (duvar) yazılmalı: {ac}")
                 cand = _edges_of_room_side(duvarlar, b if a == OUT else a, NORMAL[ac["duvar"]])
+            elif "duvar" in ac:
+                # BK-70: iki mahal birden çok duvarla değiyorsa (TK-08 76 m²: L verandanın salona iki duvarı) kapının duvarı yazılır:
+                # on | arka ön-arka doğrultusundaki (x boyunca uzanan) duvar, sol | sag yan duvar. Bugün hiçbir İş Emri bunu yazmıyor.
+                if ac["duvar"] not in NORMAL:
+                    raise IsEmriHatasi(f"Kapıda duvar yalnız on | arka | sol | sag olabilir: {ac}")
+                cand = [c for c in cand if c[0].yon == ("x" if ac["duvar"] in ("on", "arka") else "y")]
             if not cand:
                 raise IsEmriHatasi(f"{a}–{b} arasında duvar yok: {ac}")
             if "kapi_yeri" in ac and tur != "ic_kapi":                          # K21: kapı yeri kuralı yalnız oda kapısında çalışır
