@@ -143,7 +143,7 @@ def test_kalin_pdfte(cikti):
 def test_girdi_denetimi(girdi, tmp_path, capsys):
     """Tanımsız pazar, bilinmeyen satır, boş ödeme satırı ve birden çok seçenek durur; hiçbir dosya yazılmaz."""
     ie = _oku(IE)
-    for bozuk, ileti in [(dict(GIRDI, pazar="yurt_ici"), "tanımlı değil"),
+    for bozuk, ileti in [(dict(GIRDI, pazar="tanimsiz_pazar"), "tanımlı değil"),            # D-77'den beri yurt_ici tanımlı
                          (dict(GIRDI, kosullar={**GIRDI["kosullar"], "Teslim şekli": ""}), "boş satır"),
                          (dict(GIRDI, bilgi={**GIRDI["bilgi"], "Vergi no": "1"}), "bilinmeyen satır"),
                          (dict(GIRDI, fiyat=1), "bilinmeyen alan")]:

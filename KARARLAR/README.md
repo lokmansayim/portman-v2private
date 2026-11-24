@@ -161,6 +161,7 @@ Biçim: karar · gerekçe · reddedilen seçenekler · geri alma yolu · kim ve 
 | [D-148](D-148.md) | Standartlar (yapı türü, kat, 2,50 m, çatı) çizim okumada bayiye sorulmaz; kat planı onaylandıktan sonra WhatsApp formunda gider, bayi değişikliği formda yapar (BK-71) | 23.11 (Lokman kart 11:54:43 "Standartları sormasın"; 11:55:43 "… kat planı onaylandıktan sonra standartlar formda gider …") |
 | [D-149](D-149.md) | Bayi giriş kapısını yan duvara çizdiyse plan çizimdeki gibi kalır: ön cephe çizimin alt kenarı, kapı yan duvarda (BK-71; 61 m² r01) | 23.11 (Lokman kart 12:22:18 "Çizimdeki gibi kalsın") |
 | [D-150](D-150.md) | Bayi çizimi okuyucusuna dört kural: dış ölçü ızgaraya oturur (kısa uç kesilir, not), zincir farkı eşik içinde sorulmaz, havuzdan benzer ev, üç okuma (BK-72) | 23.11 (Lokman kart 12:40:09 "Dördü de, sırayla") |
+| [D-152](D-152.md) | İki sayfalık bayi teklif formu ve D-77 ekleri ana koda: `malzeme_listesi: false` → 1. sayfa teklif, 2. sayfa ön onay paftası, Ek-1 yok; hedef örnek Mehmet Kapaklı Tek 63 m² mühürlü formu (`testler/teklif_formu/TK11/`); D-77'nin "kod dalda kalsın"ının yerine | 24.11 (Lokman 06:51:52 "1-5 evet"; form 23.11 09:09:56, 09:10:50, kart 09:12:35 "Onaylıyorum") |
 | [D-142](D-142.md) | Huma Çelik 45 m² bayi teklifi (TK-09 r04) mihenk taşı ve hedef örnek: plan 43,69 brüt / 40,63 net, 29 pano, çapraz cumba; liste 105 satır, taban 219.729,25 TL, kâr %25, bayi birim 274.661,56 TL (KDV yok); mühür M-20 | 20.11 (Lokman 14:47:53 "bu seviyede mühürle bizim mihenk taşımız olsun") |
 
 ## Numara defteri (14 Ekim 2026, BK-08; CIO planı › Görev 3)
@@ -305,6 +306,7 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | D | D-148 | Standartlar çizim okumada sorulmaz, plan onayından sonra formda (BK-71; Lokman 23.11 11:54:43, 11:55:43) | yazıldı (23.11; `claude/project-thread-hverqo`) |
 | D | D-149 | Yan duvardaki giriş: plan çizimdeki gibi (BK-71; Lokman kart 23.11 12:22:18) | yazıldı (23.11; `claude/project-thread-hverqo`) |
 | D | D-150 | Okuyucuya dört kural (BK-72; Lokman kart 23.11 12:40:09) | yazıldı (23.11; `claude/project-thread-hverqo`) |
+| D | D-152 | İki sayfalık bayi teklif formu ve D-77 ekleri ana koda (Lokman 24.11 06:51:52 "1-5 evet") | yazıldı (24.11; `claude/project-thread-ydwlb0`) |
 | D | **D-147** | — | **sıradaki boş** |
 | İE | İE-01–İE-08 | bu depo (`main`) | yazıldı |
 | İE | İE-09 | model atölyesi: kontrollü model üretimi ve banka hattı (Görev 6e; pano 30; P6001 güncellemesi kapsam dışı) | alındı (16.10; `claude/gorev-6e-model-atolyesi-rnhtcp`; PR-1 banka hattı 29.10, `claude/project-thread-rhjgzv`) |

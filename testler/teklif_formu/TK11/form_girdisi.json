@@ -1,0 +1,23 @@
+{
+ "sema": "portman.bayi_formu_girdi/1",
+ "aciklama": "TK-11 Mehmet Kapaklı Tek 63 m² teklif formunun girdisi (mühürlü; Lokman 23 Kasım 2026 09:12:35 UTC kart 'Onaylıyorum', 11:04:45 'aynı şekilde mühürle'). Kâr %25, sabit fiyat 452.301,89 TL, KDV yazılmaz (D-136); Ek-1 yok, 1. sayfa teklif, 2. sayfa ön onay (D-152). Telefon yok. Proje klasöründeki form_girdisi.json'un kopyası; yalnız bu açıklama değişti.",
+ "pazar": "yurt_ici",
+ "bilgi": {
+  "Bayi": "Mehmet Kapaklı",
+  "Müşteri / proje": "Mehmet Kapaklı · Tek 63 m²"
+ },
+ "kosullar": {
+  "Teslim süresi": "10 gün",
+  "Teslim şekli": "Fabrika Teslim",
+  "Ödeme şekli": "Nakit"
+ },
+ "kalin": [
+  "Tavan"
+ ],
+ "on_onay_paftasi": true,
+ "sabit_fiyat": {
+  "birim": 452301.89,
+  "kdv_orani": 0
+ },
+ "malzeme_listesi": false
+}

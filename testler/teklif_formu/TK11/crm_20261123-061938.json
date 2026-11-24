@@ -1,0 +1,4796 @@
+{
+ "success": true,
+ "count": 532,
+ "currency": "TRY",
+ "generated_at": "2026-11-23T06:19:38+03:00",
+ "data": [
+  {
+   "id": 1325,
+   "urunkodu": "B62",
+   "urunadi": "DAYSON MASKELEME BANDI ÜNİVERSAL BEYAZ 36 MM",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Adet",
+   "fiyat": 55,
+   "kategori": null
+  },
+  {
+   "id": 1089,
+   "urunkodu": "DG1",
+   "urunadi": "Tavan H'ı",
+   "olcu": "X",
+   "birim": "Adet",
+   "fiyat": 47,
+   "kategori": "Depo Grubu"
+  },
+  {
+   "id": 1090,
+   "urunkodu": "DG2",
+   "urunadi": "Pvc Omega Kapak",
+   "olcu": "X",
+   "birim": "Adet",
+   "fiyat": 120,
+   "kategori": "Depo Grubu"
+  },
+  {
+   "id": 1091,
+   "urunkodu": "DG3",
+   "urunadi": "Pvc Plastik Betopan  Haşı",
+   "olcu": "X",
+   "birim": "Adet",
+   "fiyat": 27,
+   "kategori": "Depo Grubu"
+  },
+  {
+   "id": 1092,
+   "urunkodu": "DG4",
+   "urunadi": "Çelik Dübel ( Klipsli )",
+   "olcu": "X",
+   "birim": "Adet",
+   "fiyat": 10,
+   "kategori": "Depo Grubu"
+  },
+  {
+   "id": 1093,
+   "urunkodu": "DG5",
+   "urunadi": "8 Lik Trapez Uç",
+   "olcu": "X",
+   "birim": "Adet",
+   "fiyat": 125,
+   "kategori": "Depo Grubu"
+  },
+  {
+   "id": 1094,
+   "urunkodu": "DG6",
+   "urunadi": "Ph2 Uç",
+   "olcu": "X",
+   "birim": "Adet",
+   "fiyat": 11,
+   "kategori": "Depo Grubu"
+  },
+  {
+   "id": 1095,
+   "urunkodu": "DG7",
+   "urunadi": "Ph3 Uç",
+   "olcu": "X",
+   "birim": "Adet",
+   "fiyat": 11,
+   "kategori": "Depo Grubu"
+  },
+  {
+   "id": 1096,
+   "urunkodu": "DG8",
+   "urunadi": "230 Luk Kesme Taşı",
+   "olcu": "X",
+   "birim": "Adet",
+   "fiyat": 155,
+   "kategori": "Depo Grubu"
+  },
+  {
+   "id": 1097,
+   "urunkodu": "DG9",
+   "urunadi": "İnox Taş",
+   "olcu": "X",
+   "birim": "Adet",
+   "fiyat": 115,
+   "kategori": "Depo Grubu"
+  },
+  {
+   "id": 1099,
+   "urunkodu": "DG11",
+   "urunadi": "Acil Müdahele Kapağı",
+   "olcu": "X",
+   "birim": "Adet",
+   "fiyat": 610,
+   "kategori": "Depo Grubu"
+  },
+  {
+   "id": 1100,
+   "urunkodu": "DG12",
+   "urunadi": "Polüretan Köpük",
+   "olcu": "X",
+   "birim": "Adet",
+   "fiyat": 135,
+   "kategori": "Depo Grubu"
+  },
+  {
+   "id": 1101,
+   "urunkodu": "DG13",
+   "urunadi": "Dayson (antrasit)",
+   "olcu": "X",
+   "birim": "Adet",
+   "fiyat": 125,
+   "kategori": "Depo Grubu"
+  },
+  {
+   "id": 1102,
+   "urunkodu": "DG13",
+   "urunadi": "Dayson (beyaz)",
+   "olcu": "X",
+   "birim": "Adet",
+   "fiyat": 125,
+   "kategori": "Depo Grubu"
+  },
+  {
+   "id": 1103,
+   "urunkodu": "DG13",
+   "urunadi": "Dayson (bordo)",
+   "olcu": "X",
+   "birim": "Adet",
+   "fiyat": 125,
+   "kategori": "Depo Grubu"
+  },
+  {
+   "id": 1104,
+   "urunkodu": "DG14",
+   "urunadi": "Mastik (antrasit)",
+   "olcu": "X",
+   "birim": "Adet",
+   "fiyat": 60,
+   "kategori": "Depo Grubu"
+  },
+  {
+   "id": 1105,
+   "urunkodu": "DG14",
+   "urunadi": "Mastik (beyaz)",
+   "olcu": "X",
+   "birim": "Adet",
+   "fiyat": 45,
+   "kategori": "Depo Grubu"
+  },
+  {
+   "id": 1106,
+   "urunkodu": "DG14",
+   "urunadi": "Mastik (altın meşe)",
+   "olcu": "X",
+   "birim": "Adet",
+   "fiyat": 60,
+   "kategori": "Depo Grubu"
+  },
+  {
+   "id": 1107,
+   "urunkodu": "DG15",
+   "urunadi": "Baca Borusu",
+   "olcu": "X",
+   "birim": "Metre",
+   "fiyat": 220,
+   "kategori": "Depo Grubu"
+  },
+  {
+   "id": 1108,
+   "urunkodu": "DG16",
+   "urunadi": "Baca T'si",
+   "olcu": "X",
+   "birim": "Adet",
+   "fiyat": 350,
+   "kategori": "Depo Grubu"
+  },
+  {
+   "id": 1109,
+   "urunkodu": "DG17",
+   "urunadi": "Baca Kör Tapa",
+   "olcu": "X",
+   "birim": "Adet",
+   "fiyat": 100,
+   "kategori": "Depo Grubu"
+  },
+  {
+   "id": 1110,
+   "urunkodu": "DG18",
+   "urunadi": "Baca Maşon",
+   "olcu": "X",
+   "birim": "Adet",
+   "fiyat": 60,
+   "kategori": "Depo Grubu"
+  },
+  {
+   "id": 1111,
+   "urunkodu": "DG19",
+   "urunadi": "Baca Şapka",
+   "olcu": "40x40",
+   "birim": "Adet",
+   "fiyat": 4150,
+   "kategori": "Depo Grubu"
+  },
+  {
+   "id": 1112,
+   "urunkodu": "DG20",
+   "urunadi": "Baca Şapka",
+   "olcu": "X",
+   "birim": "Özel",
+   "fiyat": 4500,
+   "kategori": "Depo Grubu"
+  },
+  {
+   "id": 1113,
+   "urunkodu": "DG21",
+   "urunadi": "Havalandırma Fanı",
+   "olcu": "X",
+   "birim": "Adet",
+   "fiyat": 325,
+   "kategori": "Depo Grubu"
+  },
+  {
+   "id": 1114,
+   "urunkodu": "DG22",
+   "urunadi": "Mekanik Havalandırma 125'lik Borusu",
+   "olcu": "X",
+   "birim": "Metre",
+   "fiyat": 230,
+   "kategori": "Depo Grubu"
+  },
+  {
+   "id": 1115,
+   "urunkodu": "DG23",
+   "urunadi": "Mekanik Havalandırma Kapalı Dirsek",
+   "olcu": "X",
+   "birim": "Adet",
+   "fiyat": 110,
+   "kategori": "Depo Grubu"
+  },
+  {
+   "id": 1116,
+   "urunkodu": "DG24",
+   "urunadi": "Menfez",
+   "olcu": "X",
+   "birim": "Adet",
+   "fiyat": 600,
+   "kategori": "Depo Grubu"
+  },
+  {
+   "id": 1335,
+   "urunkodu": "DG26",
+   "urunadi": "3M CUBİTRON 982c 36 KUM ZIMPARA",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Adet",
+   "fiyat": 106,
+   "kategori": "Depo Grubu"
+  },
+  {
+   "id": 1117,
+   "urunkodu": "DR1",
+   "urunadi": "ANTRASİT Metal Dere",
+   "olcu": "X",
+   "birim": "Metre",
+   "fiyat": 345,
+   "kategori": "Dere Grubu"
+  },
+  {
+   "id": 1118,
+   "urunkodu": "DR2",
+   "urunadi": "BEYAZ Metal Dere",
+   "olcu": "X",
+   "birim": "Metre",
+   "fiyat": 345,
+   "kategori": "Dere Grubu"
+  },
+  {
+   "id": 1119,
+   "urunkodu": "DR3",
+   "urunadi": "Özel Büküm Dere",
+   "olcu": "X",
+   "birim": "Özel",
+   "fiyat": 300,
+   "kategori": "Dere Grubu"
+  },
+  {
+   "id": 1120,
+   "urunkodu": "DR4",
+   "urunadi": "ANTRASİT Dere Kapağı",
+   "olcu": "X",
+   "birim": "Adet",
+   "fiyat": 43,
+   "kategori": "Dere Grubu"
+  },
+  {
+   "id": 1121,
+   "urunkodu": "DR5",
+   "urunadi": "BEYAZ Dere Kapağı",
+   "olcu": "X",
+   "birim": "Adet",
+   "fiyat": 43,
+   "kategori": "Dere Grubu"
+  },
+  {
+   "id": 1122,
+   "urunkodu": "DR6",
+   "urunadi": "Dere Kelepçesi",
+   "olcu": "X",
+   "birim": "Adet",
+   "fiyat": 12,
+   "kategori": "Dere Grubu"
+  },
+  {
+   "id": 1123,
+   "urunkodu": "DR7",
+   "urunadi": "Dere İniş Aparatı (Zıvana)",
+   "olcu": "X",
+   "birim": "Adet",
+   "fiyat": 215,
+   "kategori": "Dere Grubu"
+  },
+  {
+   "id": 1124,
+   "urunkodu": "DR8",
+   "urunadi": "70 Mm Pvc Boru",
+   "olcu": "L:2000",
+   "birim": "Adet",
+   "fiyat": 200,
+   "kategori": "Dere Grubu"
+  },
+  {
+   "id": 1125,
+   "urunkodu": "DR9",
+   "urunadi": "70 Mm Pvc Boru",
+   "olcu": "L:500",
+   "birim": "Adet",
+   "fiyat": 70,
+   "kategori": "Dere Grubu"
+  },
+  {
+   "id": 1126,
+   "urunkodu": "DR10",
+   "urunadi": "Pvc Açık Dirsek",
+   "olcu": "70 Mm",
+   "birim": "Adet",
+   "fiyat": 35,
+   "kategori": "Dere Grubu"
+  },
+  {
+   "id": 1127,
+   "urunkodu": "DR11",
+   "urunadi": "Pvc Kapalı Dirsek",
+   "olcu": "70 Mm",
+   "birim": "Adet",
+   "fiyat": 45,
+   "kategori": "Dere Grubu"
+  },
+  {
+   "id": 1128,
+   "urunkodu": "DR12",
+   "urunadi": "Pvc İniş Kelepçesi",
+   "olcu": "X",
+   "birim": "Adet",
+   "fiyat": 20,
+   "kategori": "Dere Grubu"
+  },
+  {
+   "id": 1129,
+   "urunkodu": "DR13",
+   "urunadi": "ANTRASİT Metal İniş Borusu",
+   "olcu": "L:3000",
+   "birim": "Adet",
+   "fiyat": 310,
+   "kategori": "Dere Grubu"
+  },
+  {
+   "id": 1130,
+   "urunkodu": "DR14",
+   "urunadi": "BEYAZ Metal İniş Borusu",
+   "olcu": "L:3000",
+   "birim": "Adet",
+   "fiyat": 310,
+   "kategori": "Dere Grubu"
+  },
+  {
+   "id": 1131,
+   "urunkodu": "DR15",
+   "urunadi": "ANTRASİT Metal Açık Dirsek",
+   "olcu": "X",
+   "birim": "Adet",
+   "fiyat": 70,
+   "kategori": "Dere Grubu"
+  },
+  {
+   "id": 1132,
+   "urunkodu": "DR16",
+   "urunadi": "BEYAZ Metal Açık Dirsek",
+   "olcu": "X",
+   "birim": "Adet",
+   "fiyat": 70,
+   "kategori": "Dere Grubu"
+  },
+  {
+   "id": 1133,
+   "urunkodu": "DR17",
+   "urunadi": "ANTRASİT Metal Kapalı Dirsek",
+   "olcu": "X",
+   "birim": "Adet",
+   "fiyat": 70,
+   "kategori": "Dere Grubu"
+  },
+  {
+   "id": 1134,
+   "urunkodu": "DR18",
+   "urunadi": "BEYAZ Metal Kapalı Dirsek",
+   "olcu": "X",
+   "birim": "Adet",
+   "fiyat": 70,
+   "kategori": "Dere Grubu"
+  },
+  {
+   "id": 1135,
+   "urunkodu": "DR19",
+   "urunadi": "ANTRASİT Metal İniş Kelepçesi",
+   "olcu": "X",
+   "birim": "Adet",
+   "fiyat": 8,
+   "kategori": "Dere Grubu"
+  },
+  {
+   "id": 1136,
+   "urunkodu": "DR20",
+   "urunadi": "BEYAZ Metal İniş Kelepçesi",
+   "olcu": "X",
+   "birim": "Adet",
+   "fiyat": 8,
+   "kategori": "Dere Grubu"
+  },
+  {
+   "id": 1240,
+   "urunkodu": "DR22",
+   "urunadi": "PVC DİRSEK 125X87",
+   "olcu": "125",
+   "birim": "Adet",
+   "fiyat": 110,
+   "kategori": "Dere Grubu"
+  },
+  {
+   "id": 1306,
+   "urunkodu": "DR23",
+   "urunadi": "125 LİK PVC BORU",
+   "olcu": "Q125",
+   "birim": "Boy",
+   "fiyat": 0,
+   "kategori": "Dere Grubu"
+  },
+  {
+   "id": 1044,
+   "urunkodu": "E1",
+   "urunadi": "Duylu Armatür",
+   "olcu": "X",
+   "birim": "Standart",
+   "fiyat": 18,
+   "kategori": "Elektrik Grubu"
+  },
+  {
+   "id": 1045,
+   "urunkodu": "E2",
+   "urunadi": "Yuvarlak Glop",
+   "olcu": "X",
+   "birim": "Standart",
+   "fiyat": 50,
+   "kategori": "Elektrik Grubu"
+  },
+  {
+   "id": 1046,
+   "urunkodu": "E3",
+   "urunadi": "Led Ampul",
+   "olcu": "X",
+   "birim": "Adet",
+   "fiyat": 10,
+   "kategori": "Elektrik Grubu"
+  },
+  {
+   "id": 1047,
+   "urunkodu": "E4",
+   "urunadi": "Led Spot",
+   "olcu": "X",
+   "birim": "Adet",
+   "fiyat": 60,
+   "kategori": "Elektrik Grubu"
+  },
+  {
+   "id": 1050,
+   "urunkodu": "E7",
+   "urunadi": "Nym Kablo",
+   "olcu": "3 X 2.5",
+   "birim": "Adet",
+   "fiyat": 66.7,
+   "kategori": "Elektrik Grubu"
+  },
+  {
+   "id": 1051,
+   "urunkodu": "E8",
+   "urunadi": "Nym Kablo",
+   "olcu": "2 X 1.5",
+   "birim": "Adet",
+   "fiyat": 31.75,
+   "kategori": "Elektrik Grubu"
+  },
+  {
+   "id": 1052,
+   "urunkodu": "E9",
+   "urunadi": "Nym Kablo",
+   "olcu": "3 X 1.5",
+   "birim": "Adet",
+   "fiyat": 43.54,
+   "kategori": "Elektrik Grubu"
+  },
+  {
+   "id": 1053,
+   "urunkodu": "E10",
+   "urunadi": "Uydu Kablo",
+   "olcu": "X",
+   "birim": "Metre",
+   "fiyat": 6.2,
+   "kategori": "Elektrik Grubu"
+  },
+  {
+   "id": 1054,
+   "urunkodu": "E11",
+   "urunadi": "Data Kablo (Cat6)",
+   "olcu": "X",
+   "birim": "Metre",
+   "fiyat": 24,
+   "kategori": "Elektrik Grubu"
+  },
+  {
+   "id": 1055,
+   "urunkodu": "E12",
+   "urunadi": "Besleme Kablosu",
+   "olcu": "5 X 6",
+   "birim": "Adet",
+   "fiyat": 260,
+   "kategori": "Elektrik Grubu"
+  },
+  {
+   "id": 1056,
+   "urunkodu": "E13",
+   "urunadi": "Tekli Anahtar (Vavien)",
+   "olcu": "X",
+   "birim": "Adet",
+   "fiyat": 80,
+   "kategori": "Elektrik Grubu"
+  },
+  {
+   "id": 1057,
+   "urunkodu": "E14",
+   "urunadi": "Tekli Anahtar",
+   "olcu": "X",
+   "birim": "Adet",
+   "fiyat": 57,
+   "kategori": "Elektrik Grubu"
+  },
+  {
+   "id": 1058,
+   "urunkodu": "E15",
+   "urunadi": "Çiftli Anahtar",
+   "olcu": "X",
+   "birim": "Adet",
+   "fiyat": 75,
+   "kategori": "Elektrik Grubu"
+  },
+  {
+   "id": 1059,
+   "urunkodu": "E16",
+   "urunadi": "Tekli Priz",
+   "olcu": "X",
+   "birim": "Adet",
+   "fiyat": 71,
+   "kategori": "Elektrik Grubu"
+  },
+  {
+   "id": 1060,
+   "urunkodu": "E17",
+   "urunadi": "Çiftli Priz",
+   "olcu": "X",
+   "birim": "Adet",
+   "fiyat": 113,
+   "kategori": "Elektrik Grubu"
+  },
+  {
+   "id": 1061,
+   "urunkodu": "E18",
+   "urunadi": "Uydu Priz",
+   "olcu": "X",
+   "birim": "Adet",
+   "fiyat": 123,
+   "kategori": "Elektrik Grubu"
+  },
+  {
+   "id": 1062,
+   "urunkodu": "E19",
+   "urunadi": "Data Priz",
+   "olcu": "X",
+   "birim": "Adet",
+   "fiyat": 123,
+   "kategori": "Elektrik Grubu"
+  },
+  {
+   "id": 1063,
+   "urunkodu": "E20",
+   "urunadi": "Buat Kasa (Alçıpan İçin)",
+   "olcu": "X",
+   "birim": "Adet",
+   "fiyat": 15,
+   "kategori": "Elektrik Grubu"
+  },
+  {
+   "id": 1064,
+   "urunkodu": "E21",
+   "urunadi": "Sigorta Kutusu",
+   "olcu": "8 Lı",
+   "birim": "Adet",
+   "fiyat": 190,
+   "kategori": "Elektrik Grubu"
+  },
+  {
+   "id": 1065,
+   "urunkodu": "E22",
+   "urunadi": "Sigorta Kutusu",
+   "olcu": "12 Lı",
+   "birim": "Adet",
+   "fiyat": 230,
+   "kategori": "Elektrik Grubu"
+  },
+  {
+   "id": 1066,
+   "urunkodu": "E23",
+   "urunadi": "W Otomat (Sigorta)",
+   "olcu": "16 Amper",
+   "birim": "Adet",
+   "fiyat": 115,
+   "kategori": "Elektrik Grubu"
+  },
+  {
+   "id": 1067,
+   "urunkodu": "E24",
+   "urunadi": "W Otomat (Sigorta)",
+   "olcu": "25 Amper",
+   "birim": "Adet",
+   "fiyat": 156,
+   "kategori": "Elektrik Grubu"
+  },
+  {
+   "id": 1068,
+   "urunkodu": "E25",
+   "urunadi": "W Otomat (Sigorta)",
+   "olcu": "32 Amper",
+   "birim": "Adet",
+   "fiyat": 190,
+   "kategori": "Elektrik Grubu"
+  },
+  {
+   "id": 1069,
+   "urunkodu": "E26",
+   "urunadi": "Kaçak Akım Rölesi",
+   "olcu": "2'lü",
+   "birim": "Adet",
+   "fiyat": 1615,
+   "kategori": "Elektrik Grubu"
+  },
+  {
+   "id": 1070,
+   "urunkodu": "E27",
+   "urunadi": "Kaçak Akım Rölesi",
+   "olcu": "4'lü",
+   "birim": "Adet",
+   "fiyat": 2075,
+   "kategori": "Elektrik Grubu"
+  },
+  {
+   "id": 1071,
+   "urunkodu": "E28",
+   "urunadi": "Elektrik Bandı",
+   "olcu": "X",
+   "birim": "Adet",
+   "fiyat": 20,
+   "kategori": "Elektrik Grubu"
+  },
+  {
+   "id": 1072,
+   "urunkodu": "E29",
+   "urunadi": "Panjur Anahtarı",
+   "olcu": "X",
+   "birim": "Adet",
+   "fiyat": 324,
+   "kategori": "Elektrik Grubu"
+  },
+  {
+   "id": 1074,
+   "urunkodu": "E31",
+   "urunadi": "Mekanik Havalandırma Fanı",
+   "olcu": "X",
+   "birim": "Adet",
+   "fiyat": 270,
+   "kategori": "Elektrik Grubu"
+  },
+  {
+   "id": 1075,
+   "urunkodu": "E32",
+   "urunadi": "Zil",
+   "olcu": "X",
+   "birim": "Adet",
+   "fiyat": 200,
+   "kategori": "Elektrik Grubu"
+  },
+  {
+   "id": 1189,
+   "urunkodu": "E36",
+   "urunadi": "TİJ DUY KABLOLU ",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Adet",
+   "fiyat": 18,
+   "kategori": "Elektrik Grubu"
+  },
+  {
+   "id": 1328,
+   "urunkodu": "E68",
+   "urunadi": "BUAT KAPAĞI BOMBELİ",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Adet",
+   "fiyat": 4,
+   "kategori": "Elektrik Grubu"
+  },
+  {
+   "id": 1357,
+   "urunkodu": "E76",
+   "urunadi": "NYM KABLO ",
+   "olcu": "5X6",
+   "birim": "Metre",
+   "fiyat": 312,
+   "kategori": "Elektrik Grubu"
+  },
+  {
+   "id": 1396,
+   "urunkodu": "E79",
+   "urunadi": "SPİRAL BORU 25 LİK ",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Metre",
+   "fiyat": 7.5,
+   "kategori": "Elektrik Grubu"
+  },
+  {
+   "id": 831,
+   "urunkodu": "HM1",
+   "urunadi": "Düz Betopan L:2500",
+   "olcu": "8*1250*2500",
+   "birim": "Adet",
+   "fiyat": 700,
+   "kategori": "Ham Malzeme Grubu"
+  },
+  {
+   "id": 832,
+   "urunkodu": "HM2",
+   "urunadi": "Düz Betopan L:2800",
+   "olcu": "8*1250*2800",
+   "birim": "Adet",
+   "fiyat": 785,
+   "kategori": "Ham Malzeme Grubu"
+  },
+  {
+   "id": 833,
+   "urunkodu": "HM3",
+   "urunadi": "Düz Betopan L:3000",
+   "olcu": "8*1250*3000",
+   "birim": "Adet",
+   "fiyat": 842,
+   "kategori": "Ham Malzeme Grubu"
+  },
+  {
+   "id": 834,
+   "urunkodu": "HM4",
+   "urunadi": "Düz Betopan 10 mm L:2500",
+   "olcu": "10*1250*2500",
+   "birim": "Adet",
+   "fiyat": 880,
+   "kategori": "Ham Malzeme Grubu"
+  },
+  {
+   "id": 835,
+   "urunkodu": "HM5",
+   "urunadi": "Ahşap Desen Betopan L:2500",
+   "olcu": "8*1250*2500",
+   "birim": "Adet",
+   "fiyat": 788,
+   "kategori": "Ham Malzeme Grubu"
+  },
+  {
+   "id": 836,
+   "urunkodu": "HM6",
+   "urunadi": "Ahşap Desen Betopan L:2800",
+   "olcu": "8*1250*2800",
+   "birim": "Adet",
+   "fiyat": 882,
+   "kategori": "Ham Malzeme Grubu"
+  },
+  {
+   "id": 837,
+   "urunkodu": "HM7",
+   "urunadi": "Ahşap Desen Betopan L:3000",
+   "olcu": "8*1250*3000",
+   "birim": "Adet",
+   "fiyat": 945,
+   "kategori": "Ham Malzeme Grubu"
+  },
+  {
+   "id": 838,
+   "urunkodu": "HM8",
+   "urunadi": "Ahşap Desen Betopan L:2500",
+   "olcu": "10*1250*2500",
+   "birim": "Adet",
+   "fiyat": 955,
+   "kategori": "Ham Malzeme Grubu"
+  },
+  {
+   "id": 839,
+   "urunkodu": "HM9",
+   "urunadi": "Ahşap Desen Betopan L:2800",
+   "olcu": "10*1250*2800",
+   "birim": "Adet",
+   "fiyat": 1070,
+   "kategori": "Ham Malzeme Grubu"
+  },
+  {
+   "id": 840,
+   "urunkodu": "HM10",
+   "urunadi": "Ahşap Desen Betopan L:3000",
+   "olcu": "10*1250*3000",
+   "birim": "Adet",
+   "fiyat": 1145,
+   "kategori": "Ham Malzeme Grubu"
+  },
+  {
+   "id": 841,
+   "urunkodu": "HM11",
+   "urunadi": "Zemin Betopan L:2500",
+   "olcu": "16*1250*2500",
+   "birim": "Adet",
+   "fiyat": 1432,
+   "kategori": "Ham Malzeme Grubu"
+  },
+  {
+   "id": 842,
+   "urunkodu": "HM12",
+   "urunadi": "Zemin Betopan L:2800",
+   "olcu": "16*1250*2800",
+   "birim": "Adet",
+   "fiyat": 1600,
+   "kategori": "Ham Malzeme Grubu"
+  },
+  {
+   "id": 843,
+   "urunkodu": "HM13",
+   "urunadi": "Zemin Betopan L:3000",
+   "olcu": "16*1250*3000",
+   "birim": "Adet",
+   "fiyat": 1718,
+   "kategori": "Ham Malzeme Grubu"
+  },
+  {
+   "id": 844,
+   "urunkodu": "HM14",
+   "urunadi": "Rulo Çelik",
+   "olcu": "0,8*176",
+   "birim": "Adet",
+   "fiyat": 58,
+   "kategori": "Ham Malzeme Grubu"
+  },
+  {
+   "id": 845,
+   "urunkodu": "HM15",
+   "urunadi": "Rulo Çelik",
+   "olcu": "1,0*176",
+   "birim": "Adet",
+   "fiyat": 58,
+   "kategori": "Ham Malzeme Grubu"
+  },
+  {
+   "id": 846,
+   "urunkodu": "HM16",
+   "urunadi": "Rulo Çelik",
+   "olcu": "1,2*176",
+   "birim": "Adet",
+   "fiyat": 58,
+   "kategori": "Ham Malzeme Grubu"
+  },
+  {
+   "id": 847,
+   "urunkodu": "HM17",
+   "urunadi": "Rulo Çelik",
+   "olcu": "1,5*176",
+   "birim": "Adet",
+   "fiyat": 58,
+   "kategori": "Ham Malzeme Grubu"
+  },
+  {
+   "id": 848,
+   "urunkodu": "HM18",
+   "urunadi": "Rulo Çelik",
+   "olcu": "0,8*185",
+   "birim": "Adet",
+   "fiyat": 58,
+   "kategori": "Ham Malzeme Grubu"
+  },
+  {
+   "id": 849,
+   "urunkodu": "HM19",
+   "urunadi": "Rulo Çelik",
+   "olcu": "1,0*185",
+   "birim": "Adet",
+   "fiyat": 58,
+   "kategori": "Ham Malzeme Grubu"
+  },
+  {
+   "id": 850,
+   "urunkodu": "HM20",
+   "urunadi": "Rulo Çelik",
+   "olcu": "1,2*185",
+   "birim": "Adet",
+   "fiyat": 58,
+   "kategori": "Ham Malzeme Grubu"
+  },
+  {
+   "id": 851,
+   "urunkodu": "HM21",
+   "urunadi": "Rulo Çelik",
+   "olcu": "1,5*185",
+   "birim": "Adet",
+   "fiyat": 58,
+   "kategori": "Ham Malzeme Grubu"
+  },
+  {
+   "id": 852,
+   "urunkodu": "HM22",
+   "urunadi": "Rulo Çelik",
+   "olcu": "0,8*236",
+   "birim": "Adet",
+   "fiyat": 58,
+   "kategori": "Ham Malzeme Grubu"
+  },
+  {
+   "id": 853,
+   "urunkodu": "HM23",
+   "urunadi": "Rulo Çelik",
+   "olcu": "1,0*236",
+   "birim": "Adet",
+   "fiyat": 58,
+   "kategori": "Ham Malzeme Grubu"
+  },
+  {
+   "id": 854,
+   "urunkodu": "HM24",
+   "urunadi": "Rulo Çelik",
+   "olcu": "1,2*236",
+   "birim": "Adet",
+   "fiyat": 58,
+   "kategori": "Ham Malzeme Grubu"
+  },
+  {
+   "id": 855,
+   "urunkodu": "HM25",
+   "urunadi": "Rulo Çelik",
+   "olcu": "1,5*236",
+   "birim": "Adet",
+   "fiyat": 58,
+   "kategori": "Ham Malzeme Grubu"
+  },
+  {
+   "id": 856,
+   "urunkodu": "HM26",
+   "urunadi": "Antrasit Plaka Saç",
+   "olcu": "0,5*1250*2500",
+   "birim": "Adet",
+   "fiyat": 66,
+   "kategori": "Ham Malzeme Grubu"
+  },
+  {
+   "id": 857,
+   "urunkodu": "HM27",
+   "urunadi": "Antrasit Plaka Saç",
+   "olcu": "0,5*1000*2800",
+   "birim": "Adet",
+   "fiyat": 66,
+   "kategori": "Ham Malzeme Grubu"
+  },
+  {
+   "id": 858,
+   "urunkodu": "HM28",
+   "urunadi": "Antrasit Plaka Saç",
+   "olcu": "0,6*1250*2500",
+   "birim": "Adet",
+   "fiyat": 66,
+   "kategori": "Ham Malzeme Grubu"
+  },
+  {
+   "id": 859,
+   "urunkodu": "HM29",
+   "urunadi": "Galvaniz Plaka Saç",
+   "olcu": "0,8*1250*2500",
+   "birim": "Adet",
+   "fiyat": 57,
+   "kategori": "Ham Malzeme Grubu"
+  },
+  {
+   "id": 860,
+   "urunkodu": "HM30",
+   "urunadi": "Galvaniz Plaka Saç",
+   "olcu": "0,8*1250*2800",
+   "birim": "Adet",
+   "fiyat": 57,
+   "kategori": "Ham Malzeme Grubu"
+  },
+  {
+   "id": 861,
+   "urunkodu": "HM31",
+   "urunadi": "Galvaniz Plaka Saç",
+   "olcu": "1,2*1250*2500",
+   "birim": "Adet",
+   "fiyat": 57,
+   "kategori": "Ham Malzeme Grubu"
+  },
+  {
+   "id": 862,
+   "urunkodu": "HM32",
+   "urunadi": "Galvaniz Plaka Saç",
+   "olcu": "1,2*1250*2800",
+   "birim": "Adet",
+   "fiyat": 57,
+   "kategori": "Ham Malzeme Grubu"
+  },
+  {
+   "id": 863,
+   "urunkodu": "HM33",
+   "urunadi": "Galvaniz Plaka Saç",
+   "olcu": "1,5*1250*2500",
+   "birim": "Adet",
+   "fiyat": 57,
+   "kategori": "Ham Malzeme Grubu"
+  },
+  {
+   "id": 864,
+   "urunkodu": "HM34",
+   "urunadi": "Galvaniz Plaka Saç",
+   "olcu": "1,5*1250*2800",
+   "birim": "Adet",
+   "fiyat": 57,
+   "kategori": "Ham Malzeme Grubu"
+  },
+  {
+   "id": 865,
+   "urunkodu": "HM35",
+   "urunadi": "Galvaniz Plaka Saç",
+   "olcu": "1,5*1000*3000",
+   "birim": "Adet",
+   "fiyat": 57,
+   "kategori": "Ham Malzeme Grubu"
+  },
+  {
+   "id": 866,
+   "urunkodu": "HM36",
+   "urunadi": "Beyaz Plaka Saç",
+   "olcu": "0,5*1250*2500",
+   "birim": "Adet",
+   "fiyat": 66,
+   "kategori": "Ham Malzeme Grubu"
+  },
+  {
+   "id": 867,
+   "urunkodu": "HM37",
+   "urunadi": "Bordo Plaka Saç",
+   "olcu": "0,5*1000*2800",
+   "birim": "Adet",
+   "fiyat": 66,
+   "kategori": "Ham Malzeme Grubu"
+  },
+  {
+   "id": 868,
+   "urunkodu": "HM38",
+   "urunadi": "Beyaz Alçıpan",
+   "olcu": "12x1200x2500",
+   "birim": "Adet",
+   "fiyat": 235,
+   "kategori": "Ham Malzeme Grubu"
+  },
+  {
+   "id": 869,
+   "urunkodu": "HM39",
+   "urunadi": "Yeşil Alçıpan",
+   "olcu": "12x1200x2500",
+   "birim": "Adet",
+   "fiyat": 300,
+   "kategori": "Ham Malzeme Grubu"
+  },
+  {
+   "id": 870,
+   "urunkodu": "HM40",
+   "urunadi": "Boardex",
+   "olcu": "12x1200x2400",
+   "birim": "Adet",
+   "fiyat": 600,
+   "kategori": "Ham Malzeme Grubu"
+  },
+  {
+   "id": 871,
+   "urunkodu": "HM41",
+   "urunadi": "Osb TAM",
+   "olcu": "11x1220x2440",
+   "birim": "Adet",
+   "fiyat": 600,
+   "kategori": "Ham Malzeme Grubu"
+  },
+  {
+   "id": 872,
+   "urunkodu": "HM42",
+   "urunadi": "Osb YARIM",
+   "olcu": "11x610x2440",
+   "birim": "Adet",
+   "fiyat": 250,
+   "kategori": "Ham Malzeme Grubu"
+  },
+  {
+   "id": 873,
+   "urunkodu": "HM43",
+   "urunadi": "Antrasit Dere Rulo Saç",
+   "olcu": "0.5*300",
+   "birim": "Adet",
+   "fiyat": 70,
+   "kategori": "Ham Malzeme Grubu"
+  },
+  {
+   "id": 874,
+   "urunkodu": "HM44",
+   "urunadi": "Knauf Mineral Yünü",
+   "olcu": "8,64 M2",
+   "birim": "Paket",
+   "fiyat": 716,
+   "kategori": "Ham Malzeme Grubu"
+  },
+  {
+   "id": 875,
+   "urunkodu": "HM45",
+   "urunadi": "Cam Yünü",
+   "olcu": "9,6 M2",
+   "birim": "Paket",
+   "fiyat": 680,
+   "kategori": "Ham Malzeme Grubu"
+  },
+  {
+   "id": 876,
+   "urunkodu": "HM46",
+   "urunadi": "Strafor 4 CM",
+   "olcu": "40*1250*2500",
+   "birim": "Adet",
+   "fiyat": 332.5,
+   "kategori": "Ham Malzeme Grubu"
+  },
+  {
+   "id": 877,
+   "urunkodu": "HM47",
+   "urunadi": "Strafor 8 CM",
+   "olcu": "80*1250*2500",
+   "birim": "Adet",
+   "fiyat": 665,
+   "kategori": "Ham Malzeme Grubu"
+  },
+  {
+   "id": 878,
+   "urunkodu": "HM48",
+   "urunadi": "Alçıpan Destek Straforu",
+   "olcu": "50 M2",
+   "birim": "Paket",
+   "fiyat": 1020,
+   "kategori": "Ham Malzeme Grubu"
+  },
+  {
+   "id": 879,
+   "urunkodu": "HM49",
+   "urunadi": "Nem Bariyeri",
+   "olcu": "1",
+   "birim": "Paket",
+   "fiyat": 4400,
+   "kategori": "Ham Malzeme Grubu"
+  },
+  {
+   "id": 880,
+   "urunkodu": "HM50",
+   "urunadi": "Taş Yünü",
+   "olcu": "3,60m2",
+   "birim": "Paket",
+   "fiyat": 752,
+   "kategori": "Ham Malzeme Grubu"
+  },
+  {
+   "id": 882,
+   "urunkodu": "HM52",
+   "urunadi": "Antrasit Kumlu Membran",
+   "olcu": "9 M2",
+   "birim": "Paket",
+   "fiyat": 1800,
+   "kategori": "Ham Malzeme Grubu"
+  },
+  {
+   "id": 883,
+   "urunkodu": "HM53",
+   "urunadi": "Yeşil Kumlu Membran",
+   "olcu": "9 M2",
+   "birim": "Paket",
+   "fiyat": 1800,
+   "kategori": "Ham Malzeme Grubu"
+  },
+  {
+   "id": 1166,
+   "urunkodu": "HM54",
+   "urunadi": "Beyaz Dere Rulo Sac",
+   "olcu": "0.5*300",
+   "birim": "Boy",
+   "fiyat": 70,
+   "kategori": "Ham Malzeme Grubu"
+  },
+  {
+   "id": 1330,
+   "urunkodu": "HM60",
+   "urunadi": "NAYLON BRANDA BEYAZ ",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Kg",
+   "fiyat": 139,
+   "kategori": "Ham Malzeme Grubu"
+  },
+  {
+   "id": 1334,
+   "urunkodu": "HM61",
+   "urunadi": "MİTREAPEL MARİN DENİZ TUTKALI 600 ML BAL",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Adet",
+   "fiyat": 145,
+   "kategori": "Ham Malzeme Grubu"
+  },
+  {
+   "id": 1350,
+   "urunkodu": "HM63",
+   "urunadi": "MEBRAN",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Adet",
+   "fiyat": 1480,
+   "kategori": "Ham Malzeme Grubu"
+  },
+  {
+   "id": 1351,
+   "urunkodu": "HM64",
+   "urunadi": "YAPRAK DESEN MEBRAN",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Adet",
+   "fiyat": 1750,
+   "kategori": "Ham Malzeme Grubu"
+  },
+  {
+   "id": 1017,
+   "urunkodu": "KG1",
+   "urunadi": "Yalıpan 8mm",
+   "olcu": "0,4",
+   "birim": "Adet",
+   "fiyat": 127,
+   "kategori": "Kaplama Grubu"
+  },
+  {
+   "id": 1018,
+   "urunkodu": "KG2",
+   "urunadi": "Köşe Latası 10mm (150*2500)",
+   "olcu": "150*2500",
+   "birim": "Adet",
+   "fiyat": 145,
+   "kategori": "Kaplama Grubu"
+  },
+  {
+   "id": 1019,
+   "urunkodu": "KG2",
+   "urunadi": "Köşe Latası 10mm (150*2500)",
+   "olcu": "130*2500",
+   "birim": "Adet",
+   "fiyat": 145,
+   "kategori": "Kaplama Grubu"
+  },
+  {
+   "id": 1020,
+   "urunkodu": "KG3",
+   "urunadi": "Pencere Latası 10mm (100*2500)",
+   "olcu": "100*2500",
+   "birim": "Adet",
+   "fiyat": 80,
+   "kategori": "Kaplama Grubu"
+  },
+  {
+   "id": 1013,
+   "urunkodu": "PK2",
+   "urunadi": "Amerikan Panel Kapı",
+   "olcu": "Özel Ölçü (Sağ,Sol)",
+   "birim": "Adet",
+   "fiyat": 2400,
+   "kategori": "Kapı ve Pencere Grubu"
+  },
+  {
+   "id": 1016,
+   "urunkodu": "PK5",
+   "urunadi": "Prefabrik Çelik Kapı",
+   "olcu": "Özel Ölçü",
+   "birim": "Adet",
+   "fiyat": 7500,
+   "kategori": "Kapı ve Pencere Grubu"
+  },
+  {
+   "id": 1348,
+   "urunkodu": "PK9",
+   "urunadi": "KOMPOZİT ÇELİK KAPI ",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Adet",
+   "fiyat": 20000,
+   "kategori": "Kapı ve Pencere Grubu"
+  },
+  {
+   "id": 1393,
+   "urunkodu": "PK10",
+   "urunadi": "MELAMİN KAPI",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Adet",
+   "fiyat": 4750,
+   "kategori": "Kapı ve Pencere Grubu"
+  },
+  {
+   "id": 914,
+   "urunkodu": "KP1",
+   "urunadi": "60'lık Karkaslı İç Kapı Panoları + Kasalı",
+   "olcu": "h:2500",
+   "birim": "Adet",
+   "fiyat": 2100,
+   "kategori": "Karkaslı Kaplamalı Panoları"
+  },
+  {
+   "id": 915,
+   "urunkodu": "KP2",
+   "urunadi": "60'lık Karkaslı İç Kapı Panoları + Kasalı",
+   "olcu": "h:2800",
+   "birim": "Adet",
+   "fiyat": 2350,
+   "kategori": "Karkaslı Kaplamalı Panoları"
+  },
+  {
+   "id": 916,
+   "urunkodu": "KP3",
+   "urunadi": "60'lık Karkaslı İç Kapı Panoları + Kasalı",
+   "olcu": "h:3000",
+   "birim": "Adet",
+   "fiyat": 2550,
+   "kategori": "Karkaslı Kaplamalı Panoları"
+  },
+  {
+   "id": 917,
+   "urunkodu": "KP4",
+   "urunadi": "60'lık Karkaslı İç Kapı Panoları + Kasasız",
+   "olcu": "h:2500",
+   "birim": "Adet",
+   "fiyat": 1570,
+   "kategori": "Karkaslı Kaplamalı Panoları"
+  },
+  {
+   "id": 918,
+   "urunkodu": "KP5",
+   "urunadi": "60'lık Karkaslı İç Kapı Panoları + Kasasız",
+   "olcu": "h:2800",
+   "birim": "Adet",
+   "fiyat": 1750,
+   "kategori": "Karkaslı Kaplamalı Panoları"
+  },
+  {
+   "id": 919,
+   "urunkodu": "KP6",
+   "urunadi": "60'lık Karkaslı İç Kapı Panoları + Kasasız",
+   "olcu": "h:3000",
+   "birim": "Adet",
+   "fiyat": 1900,
+   "kategori": "Karkaslı Kaplamalı Panoları"
+  },
+  {
+   "id": 920,
+   "urunkodu": "KP7",
+   "urunadi": "100'lük KARKASLI KAPLAMALI PANO",
+   "olcu": "Özel Ölçü",
+   "birim": "Adet",
+   "fiyat": 0,
+   "kategori": "Karkaslı Kaplamalı Panoları"
+  },
+  {
+   "id": 921,
+   "urunkodu": "KP8",
+   "urunadi": "100'lük Fugalı Düz Desen KAPLAMALI PANO",
+   "olcu": "Özel Ölçü",
+   "birim": "Adet",
+   "fiyat": 0,
+   "kategori": "Karkaslı Kaplamalı Panoları"
+  },
+  {
+   "id": 922,
+   "urunkodu": "KP9",
+   "urunadi": "100'lük Fugalı Ahşap Desen KAPLAMALI PANO",
+   "olcu": "Özel Ölçü",
+   "birim": "Adet",
+   "fiyat": 0,
+   "kategori": "Karkaslı Kaplamalı Panoları"
+  },
+  {
+   "id": 923,
+   "urunkodu": "KP10",
+   "urunadi": "100'lük Dış Çelik Kapı Panosu h:2500",
+   "olcu": "h:2500",
+   "birim": "Adet",
+   "fiyat": 2260,
+   "kategori": "Karkaslı Kaplamalı Panoları"
+  },
+  {
+   "id": 924,
+   "urunkodu": "KP11",
+   "urunadi": "100'lük Dış Çelik Kapı Panosu h:2800",
+   "olcu": "h:2800",
+   "birim": "Adet",
+   "fiyat": 2530,
+   "kategori": "Karkaslı Kaplamalı Panoları"
+  },
+  {
+   "id": 925,
+   "urunkodu": "KP12",
+   "urunadi": "100'lük Dış Çelik Kapı Panosu h:3000",
+   "olcu": "h:3000",
+   "birim": "Adet",
+   "fiyat": 2710,
+   "kategori": "Karkaslı Kaplamalı Panoları"
+  },
+  {
+   "id": 926,
+   "urunkodu": "KP13",
+   "urunadi": "Karkaslı Özel Pencere Panosu (250/180)",
+   "olcu": "100x3750x2500",
+   "birim": "Adet",
+   "fiyat": 4250,
+   "kategori": "Karkaslı Kaplamalı Panoları"
+  },
+  {
+   "id": 927,
+   "urunkodu": "KP14",
+   "urunadi": "Karkaslı Kubbe Özel Pano (105/170)",
+   "olcu": "100x1250x2030",
+   "birim": "Adet",
+   "fiyat": 2620,
+   "kategori": "Karkaslı Kaplamalı Panoları"
+  },
+  {
+   "id": 928,
+   "urunkodu": "KP15",
+   "urunadi": "Karkaslı Kubbe Özel Pano (59/170)",
+   "olcu": "100x790x2030",
+   "birim": "Adet",
+   "fiyat": 2710,
+   "kategori": "Karkaslı Kaplamalı Panoları"
+  },
+  {
+   "id": 929,
+   "urunkodu": "KP16",
+   "urunadi": "Kubbe Kubbe Özel Pano",
+   "olcu": "100x2500x500",
+   "birim": "Adet",
+   "fiyat": 1450,
+   "kategori": "Karkaslı Kaplamalı Panoları"
+  },
+  {
+   "id": 1137,
+   "urunkodu": "MT1",
+   "urunadi": "Temiz Su Borusu",
+   "olcu": "L : 4000",
+   "birim": "Adet",
+   "fiyat": 315,
+   "kategori": "Mekanik Tesisat"
+  },
+  {
+   "id": 1138,
+   "urunkodu": "MT2",
+   "urunadi": "Normal Dirsek   20mm",
+   "olcu": "X",
+   "birim": "Adet",
+   "fiyat": 25,
+   "kategori": "Mekanik Tesisat"
+  },
+  {
+   "id": 1139,
+   "urunkodu": "MT3",
+   "urunadi": "Kulaklı Dirsek   20mm",
+   "olcu": "X",
+   "birim": "Adet",
+   "fiyat": 70,
+   "kategori": "Mekanik Tesisat"
+  },
+  {
+   "id": 1140,
+   "urunkodu": "MT4",
+   "urunadi": "Düz T   20mm",
+   "olcu": "X",
+   "birim": "Adet",
+   "fiyat": 10,
+   "kategori": "Mekanik Tesisat"
+  },
+  {
+   "id": 1141,
+   "urunkodu": "MT5",
+   "urunadi": "Maşon   20mm",
+   "olcu": "X",
+   "birim": "Adet",
+   "fiyat": 5,
+   "kategori": "Mekanik Tesisat"
+  },
+  {
+   "id": 1142,
+   "urunkodu": "MT6",
+   "urunadi": "Taharet Musluğu 20 Mm",
+   "olcu": "X",
+   "birim": "Adet",
+   "fiyat": 145,
+   "kategori": "Mekanik Tesisat"
+  },
+  {
+   "id": 1143,
+   "urunkodu": "MT7",
+   "urunadi": "İç Dişli T   20mm",
+   "olcu": "X",
+   "birim": "Adet",
+   "fiyat": 60,
+   "kategori": "Mekanik Tesisat"
+  },
+  {
+   "id": 1144,
+   "urunkodu": "MT8",
+   "urunadi": "Atlama Parçası Yarım Parmak",
+   "olcu": "X",
+   "birim": "Adet",
+   "fiyat": 22,
+   "kategori": "Mekanik Tesisat"
+  },
+  {
+   "id": 1308,
+   "urunkodu": "MT12",
+   "urunadi": "PVC BORU 100X500",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Adet",
+   "fiyat": 160,
+   "kategori": "Mekanik Tesisat"
+  },
+  {
+   "id": 1309,
+   "urunkodu": "MT13",
+   "urunadi": "PVC 100X1000",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Adet",
+   "fiyat": 240,
+   "kategori": "Mekanik Tesisat"
+  },
+  {
+   "id": 1310,
+   "urunkodu": "MT14",
+   "urunadi": "PPRC BORU PN 25 20MM",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Adet",
+   "fiyat": 50,
+   "kategori": "Mekanik Tesisat"
+  },
+  {
+   "id": 1311,
+   "urunkodu": "MT15",
+   "urunadi": "PPRC DİRSEK 90 LIK",
+   "olcu": "20MM",
+   "birim": "Adet",
+   "fiyat": 7,
+   "kategori": "Mekanik Tesisat"
+  },
+  {
+   "id": 1312,
+   "urunkodu": "MT16",
+   "urunadi": "PPRC DİRSEK 90 LIK",
+   "olcu": "25 MM",
+   "birim": "Adet",
+   "fiyat": 10,
+   "kategori": "Mekanik Tesisat"
+  },
+  {
+   "id": 1313,
+   "urunkodu": "MT17",
+   "urunadi": "PPRC DİRSEK 90 LIK",
+   "olcu": "32 MM",
+   "birim": "Adet",
+   "fiyat": 16,
+   "kategori": "Mekanik Tesisat"
+  },
+  {
+   "id": 1314,
+   "urunkodu": "MT18",
+   "urunadi": "KÖŞE DÜZELTİCİ",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Adet",
+   "fiyat": 12,
+   "kategori": "Mekanik Tesisat"
+  },
+  {
+   "id": 1315,
+   "urunkodu": "MT19",
+   "urunadi": "YERE TESPİT DÜBELİ",
+   "olcu": "25MM",
+   "birim": "Adet",
+   "fiyat": 2,
+   "kategori": "Mekanik Tesisat"
+  },
+  {
+   "id": 1316,
+   "urunkodu": "MT20",
+   "urunadi": "SPİRAL KILIFLI 0.BARİYERLİ PE-RT BORU",
+   "olcu": "16X2",
+   "birim": "Metre",
+   "fiyat": 80,
+   "kategori": "Mekanik Tesisat"
+  },
+  {
+   "id": 930,
+   "urunkodu": "MA1",
+   "urunadi": "Dış Köşe Direği H:2500",
+   "olcu": "100*100*2500",
+   "birim": "Adet",
+   "fiyat": 802,
+   "kategori": "Metal Aksam Grubu"
+  },
+  {
+   "id": 931,
+   "urunkodu": "MA2",
+   "urunadi": "Dış Köşe Direği H:2800",
+   "olcu": "100*100*2800",
+   "birim": "Adet",
+   "fiyat": 898,
+   "kategori": "Metal Aksam Grubu"
+  },
+  {
+   "id": 932,
+   "urunkodu": "MA3",
+   "urunadi": "Dış Köşe Direği H:3000",
+   "olcu": "100*100*3000",
+   "birim": "Adet",
+   "fiyat": 961,
+   "kategori": "Metal Aksam Grubu"
+  },
+  {
+   "id": 933,
+   "urunkodu": "MA4",
+   "urunadi": "İç Köşe Direği H:2500",
+   "olcu": "60*60*2500",
+   "birim": "Adet",
+   "fiyat": 510,
+   "kategori": "Metal Aksam Grubu"
+  },
+  {
+   "id": 934,
+   "urunkodu": "MA5",
+   "urunadi": "İç Köşe Direği H:2800",
+   "olcu": "60*60*2700",
+   "birim": "Adet",
+   "fiyat": 565,
+   "kategori": "Metal Aksam Grubu"
+  },
+  {
+   "id": 935,
+   "urunkodu": "MA6",
+   "urunadi": "İç Köşe Direği H:3000",
+   "olcu": "60*60*3000",
+   "birim": "Adet",
+   "fiyat": 622,
+   "kategori": "Metal Aksam Grubu"
+  },
+  {
+   "id": 936,
+   "urunkodu": "MA7",
+   "urunadi": "Dıştan İçe Köşe Direği H:2500",
+   "olcu": "100*60*2500",
+   "birim": "Adet",
+   "fiyat": 933,
+   "kategori": "Metal Aksam Grubu"
+  },
+  {
+   "id": 937,
+   "urunkodu": "MA8",
+   "urunadi": "Dıştan İçe Köşe Direği H:2800",
+   "olcu": "100*60*2800",
+   "birim": "Adet",
+   "fiyat": 1045,
+   "kategori": "Metal Aksam Grubu"
+  },
+  {
+   "id": 938,
+   "urunkodu": "MA9",
+   "urunadi": "Dıştan İçe Köşe Direği H:3000",
+   "olcu": "100*60*3000",
+   "birim": "Adet",
+   "fiyat": 1130,
+   "kategori": "Metal Aksam Grubu"
+  },
+  {
+   "id": 939,
+   "urunkodu": "MA10",
+   "urunadi": "Dış Köşe Çektirme U'lu  Kutu Profil (ÇİFT KAT İÇİN)",
+   "olcu": "Özel Ölçü",
+   "birim": "Adet",
+   "fiyat": 0,
+   "kategori": "Metal Aksam Grubu"
+  },
+  {
+   "id": 940,
+   "urunkodu": "MA11",
+   "urunadi": "Kutu Profil  (Kiriş)",
+   "olcu": "Özel Ölçü",
+   "birim": "Adet",
+   "fiyat": 0,
+   "kategori": "Metal Aksam Grubu"
+  },
+  {
+   "id": 943,
+   "urunkodu": "MA14",
+   "urunadi": "Kutu Profil Vidalama Aparatı",
+   "olcu": "90x90",
+   "birim": "Adet",
+   "fiyat": 17,
+   "kategori": "Metal Aksam Grubu"
+  },
+  {
+   "id": 944,
+   "urunkodu": "MA15",
+   "urunadi": "H ( Dübelli&Kulaklı) H:2500",
+   "olcu": "100*100*2500",
+   "birim": "Adet",
+   "fiyat": 321,
+   "kategori": "Metal Aksam Grubu"
+  },
+  {
+   "id": 945,
+   "urunkodu": "MA16",
+   "urunadi": "H ( Dübelli&Kulaklı) H:2800",
+   "olcu": "100*100*2800",
+   "birim": "Adet",
+   "fiyat": 372,
+   "kategori": "Metal Aksam Grubu"
+  },
+  {
+   "id": 946,
+   "urunkodu": "MA17",
+   "urunadi": "H ( Dübelli&Kulaklı) H:3000",
+   "olcu": "100*100*3000",
+   "birim": "Adet",
+   "fiyat": 468,
+   "kategori": "Metal Aksam Grubu"
+  },
+  {
+   "id": 947,
+   "urunkodu": "MA18",
+   "urunadi": "H ( Dübelli ) H:2500",
+   "olcu": "100*100*2500",
+   "birim": "Adet",
+   "fiyat": 310,
+   "kategori": "Metal Aksam Grubu"
+  },
+  {
+   "id": 948,
+   "urunkodu": "MA19",
+   "urunadi": "H ( Dübelli ) H:2800",
+   "olcu": "100*100*2800",
+   "birim": "Adet",
+   "fiyat": 348,
+   "kategori": "Metal Aksam Grubu"
+  },
+  {
+   "id": 949,
+   "urunkodu": "MA20",
+   "urunadi": "H ( Dübelli ) H:3000",
+   "olcu": "100*100*3000",
+   "birim": "Adet",
+   "fiyat": 373,
+   "kategori": "Metal Aksam Grubu"
+  },
+  {
+   "id": 950,
+   "urunkodu": "MA21",
+   "urunadi": "H (  Standart ) H:2500",
+   "olcu": "60*60*2500",
+   "birim": "Adet",
+   "fiyat": 211,
+   "kategori": "Metal Aksam Grubu"
+  },
+  {
+   "id": 951,
+   "urunkodu": "MA22",
+   "urunadi": "H (  Standart ) H:2800",
+   "olcu": "60*60*2800",
+   "birim": "Adet",
+   "fiyat": 288,
+   "kategori": "Metal Aksam Grubu"
+  },
+  {
+   "id": 952,
+   "urunkodu": "MA23",
+   "urunadi": "H (  Standart ) H:3000",
+   "olcu": "60*60*3000",
+   "birim": "Adet",
+   "fiyat": 320,
+   "kategori": "Metal Aksam Grubu"
+  },
+  {
+   "id": 953,
+   "urunkodu": "MA24",
+   "urunadi": "3 Lü H ( Dübelli Ve Kulaklı) H:2500",
+   "olcu": "100*100*60*2500",
+   "birim": "Adet",
+   "fiyat": 460,
+   "kategori": "Metal Aksam Grubu"
+  },
+  {
+   "id": 954,
+   "urunkodu": "MA25",
+   "urunadi": "3 Lü H ( Dübelli Ve Kulaklı) H:2800",
+   "olcu": "100*100*60*2800",
+   "birim": "Adet",
+   "fiyat": 505,
+   "kategori": "Metal Aksam Grubu"
+  },
+  {
+   "id": 955,
+   "urunkodu": "MA26",
+   "urunadi": "3 Lü H ( Dübelli Ve Kulaklı) H:3000",
+   "olcu": "100*100*60*3000",
+   "birim": "Adet",
+   "fiyat": 615,
+   "kategori": "Metal Aksam Grubu"
+  },
+  {
+   "id": 956,
+   "urunkodu": "MA27",
+   "urunadi": "3 Lü H ( Dübelli ) H:2500",
+   "olcu": "100*100*60*2500",
+   "birim": "Adet",
+   "fiyat": 448,
+   "kategori": "Metal Aksam Grubu"
+  },
+  {
+   "id": 957,
+   "urunkodu": "MA28",
+   "urunadi": "3 Lü H ( Dübelli ) H:2800",
+   "olcu": "100*100*60*2800",
+   "birim": "Adet",
+   "fiyat": 512,
+   "kategori": "Metal Aksam Grubu"
+  },
+  {
+   "id": 958,
+   "urunkodu": "MA29",
+   "urunadi": "3 Lü H ( Dübelli ) H:3000",
+   "olcu": "100*100*60*3000",
+   "birim": "Adet",
+   "fiyat": 608,
+   "kategori": "Metal Aksam Grubu"
+  },
+  {
+   "id": 959,
+   "urunkodu": "MA30",
+   "urunadi": "3 Lü H (  Standart ) H:2500",
+   "olcu": "60*60*60*2500",
+   "birim": "Adet",
+   "fiyat": 332,
+   "kategori": "Metal Aksam Grubu"
+  },
+  {
+   "id": 960,
+   "urunkodu": "MA31",
+   "urunadi": "3 Lü H (  Standart ) H:2800",
+   "olcu": "60*60*60*2800",
+   "birim": "Adet",
+   "fiyat": 359,
+   "kategori": "Metal Aksam Grubu"
+  },
+  {
+   "id": 961,
+   "urunkodu": "MA32",
+   "urunadi": "3 Lü H (  Standart ) H:3000",
+   "olcu": "60*60*60*3000",
+   "birim": "Adet",
+   "fiyat": 467,
+   "kategori": "Metal Aksam Grubu"
+  },
+  {
+   "id": 962,
+   "urunkodu": "MA33",
+   "urunadi": "4'lü H Standart H:2500",
+   "olcu": "60*60*60*60*2500",
+   "birim": "Adet",
+   "fiyat": 585,
+   "kategori": "Metal Aksam Grubu"
+  },
+  {
+   "id": 963,
+   "urunkodu": "MA34",
+   "urunadi": "4'lü H Standart H:2800",
+   "olcu": "60*60*60*60*2800",
+   "birim": "Adet",
+   "fiyat": 605,
+   "kategori": "Metal Aksam Grubu"
+  },
+  {
+   "id": 964,
+   "urunkodu": "MA35",
+   "urunadi": "4'lü H Standart H:3000",
+   "olcu": "60*60*60*60*3000",
+   "birim": "Adet",
+   "fiyat": 725,
+   "kategori": "Metal Aksam Grubu"
+  },
+  {
+   "id": 965,
+   "urunkodu": "MA36",
+   "urunadi": "Köşebent",
+   "olcu": "30*30*2500",
+   "birim": "Adet",
+   "fiyat": 57,
+   "kategori": "Metal Aksam Grubu"
+  },
+  {
+   "id": 966,
+   "urunkodu": "MA37",
+   "urunadi": "Kubbe Üstü H",
+   "olcu": "100*100*500",
+   "birim": "Adet",
+   "fiyat": 90,
+   "kategori": "Metal Aksam Grubu"
+  },
+  {
+   "id": 967,
+   "urunkodu": "MA38",
+   "urunadi": "Özel Açılı Köşe Direği + Kapaması",
+   "olcu": "100*100*2030",
+   "birim": "Adet",
+   "fiyat": 507,
+   "kategori": "Metal Aksam Grubu"
+  },
+  {
+   "id": 968,
+   "urunkodu": "MA39",
+   "urunadi": "100'lük Çektirme U'su",
+   "olcu": "100*2440",
+   "birim": "Adet",
+   "fiyat": 166,
+   "kategori": "Metal Aksam Grubu"
+  },
+  {
+   "id": 969,
+   "urunkodu": "MA40",
+   "urunadi": "100'lük Çektirme U'su",
+   "olcu": "100*100*2740",
+   "birim": "Adet",
+   "fiyat": 192,
+   "kategori": "Metal Aksam Grubu"
+  },
+  {
+   "id": 970,
+   "urunkodu": "MA41",
+   "urunadi": "60'lık Çektirme U'su",
+   "olcu": "60*2440",
+   "birim": "Adet",
+   "fiyat": 128,
+   "kategori": "Metal Aksam Grubu"
+  },
+  {
+   "id": 971,
+   "urunkodu": "MA42",
+   "urunadi": "60'lık Çektirme U'su",
+   "olcu": "60*2740",
+   "birim": "Adet",
+   "fiyat": 147,
+   "kategori": "Metal Aksam Grubu"
+  },
+  {
+   "id": 972,
+   "urunkodu": "MA43",
+   "urunadi": "100'lük Duvar Omegası",
+   "olcu": "L:2500",
+   "birim": "Adet",
+   "fiyat": 217,
+   "kategori": "Metal Aksam Grubu"
+  },
+  {
+   "id": 973,
+   "urunkodu": "MA44",
+   "urunadi": "60'lük Duvar Omegası (Tavan)",
+   "olcu": "L:3750",
+   "birim": "Adet",
+   "fiyat": 224,
+   "kategori": "Metal Aksam Grubu"
+  },
+  {
+   "id": 974,
+   "urunkodu": "MA45",
+   "urunadi": "100'lük Saçak Omegası",
+   "olcu": "100*2500",
+   "birim": "Adet",
+   "fiyat": 234,
+   "kategori": "Metal Aksam Grubu"
+  },
+  {
+   "id": 975,
+   "urunkodu": "MA46",
+   "urunadi": "180'lük Saçak Omegası",
+   "olcu": "180*2500",
+   "birim": "Adet",
+   "fiyat": 293,
+   "kategori": "Metal Aksam Grubu"
+  },
+  {
+   "id": 976,
+   "urunkodu": "MA47",
+   "urunadi": "100'lük Sıfır Omega (Arakat)",
+   "olcu": "L:2500",
+   "birim": "Adet",
+   "fiyat": 165,
+   "kategori": "Metal Aksam Grubu"
+  },
+  {
+   "id": 977,
+   "urunkodu": "MA48",
+   "urunadi": "Baş Makas Omegası",
+   "olcu": "L:2500",
+   "birim": "Adet",
+   "fiyat": 228,
+   "kategori": "Metal Aksam Grubu"
+  },
+  {
+   "id": 978,
+   "urunkodu": "MA49",
+   "urunadi": "Sıfır Saçak Saçı L:2500",
+   "olcu": "L:2500",
+   "birim": "Adet",
+   "fiyat": 195,
+   "kategori": "Metal Aksam Grubu"
+  },
+  {
+   "id": 979,
+   "urunkodu": "MA50",
+   "urunadi": "Antrasit Saçak Saçı L:2500",
+   "olcu": "L:2500",
+   "birim": "Adet",
+   "fiyat": 358,
+   "kategori": "Metal Aksam Grubu"
+  },
+  {
+   "id": 980,
+   "urunkodu": "MA51",
+   "urunadi": "Beyaz Saçak Saçı L:2500",
+   "olcu": "L:2500",
+   "birim": "Adet",
+   "fiyat": 360,
+   "kategori": "Metal Aksam Grubu"
+  },
+  {
+   "id": 981,
+   "urunkodu": "MA52",
+   "urunadi": "Bordo Saçak Saçı L:2500",
+   "olcu": "L:2500",
+   "birim": "Adet",
+   "fiyat": 365,
+   "kategori": "Metal Aksam Grubu"
+  },
+  {
+   "id": 982,
+   "urunkodu": "MA53",
+   "urunadi": "Antrasit Kubbe Saçak Saçı",
+   "olcu": "170*1500",
+   "birim": "Adet",
+   "fiyat": 365,
+   "kategori": "Metal Aksam Grubu"
+  },
+  {
+   "id": 983,
+   "urunkodu": "MA54",
+   "urunadi": "Beyaz Kubbe Saçak Saçı",
+   "olcu": "170*1500",
+   "birim": "Adet",
+   "fiyat": 245,
+   "kategori": "Metal Aksam Grubu"
+  },
+  {
+   "id": 984,
+   "urunkodu": "MA55",
+   "urunadi": "Bordo Kubbe Saçak Saçı",
+   "olcu": "170*1500",
+   "birim": "Adet",
+   "fiyat": 245,
+   "kategori": "Metal Aksam Grubu"
+  },
+  {
+   "id": 985,
+   "urunkodu": "MA56",
+   "urunadi": "Antrasit Alın Saçı L:2500",
+   "olcu": "L:2500",
+   "birim": "Adet",
+   "fiyat": 350,
+   "kategori": "Metal Aksam Grubu"
+  },
+  {
+   "id": 986,
+   "urunkodu": "MA57",
+   "urunadi": "Beyaz Alın Saçı L:2500",
+   "olcu": "L:2500",
+   "birim": "Adet",
+   "fiyat": 350,
+   "kategori": "Metal Aksam Grubu"
+  },
+  {
+   "id": 987,
+   "urunkodu": "MA58",
+   "urunadi": "Bordo Alın Saçı L:2500",
+   "olcu": "L:2500",
+   "birim": "Adet",
+   "fiyat": 350,
+   "kategori": "Metal Aksam Grubu"
+  },
+  {
+   "id": 988,
+   "urunkodu": "MA59",
+   "urunadi": "Sıfır Alın Saçı L:2500",
+   "olcu": "L:2500",
+   "birim": "Adet",
+   "fiyat": 170,
+   "kategori": "Metal Aksam Grubu"
+  },
+  {
+   "id": 989,
+   "urunkodu": "MA60",
+   "urunadi": "Baş Makas Z'si",
+   "olcu": "L:2800",
+   "birim": "Adet",
+   "fiyat": 72,
+   "kategori": "Metal Aksam Grubu"
+  },
+  {
+   "id": 990,
+   "urunkodu": "MA61",
+   "urunadi": "Arakat Z'si",
+   "olcu": "L:2500",
+   "birim": "Adet",
+   "fiyat": 430,
+   "kategori": "Metal Aksam Grubu"
+  },
+  {
+   "id": 991,
+   "urunkodu": "MA62",
+   "urunadi": "Saçak Z'si (Panel Saçaklı Çatılarda)",
+   "olcu": "L:2800",
+   "birim": "Adet",
+   "fiyat": 70,
+   "kategori": "Metal Aksam Grubu"
+  },
+  {
+   "id": 992,
+   "urunkodu": "MA63",
+   "urunadi": "100'lük Alt Çerçeve",
+   "olcu": "L:3750",
+   "birim": "Adet",
+   "fiyat": 268,
+   "kategori": "Metal Aksam Grubu"
+  },
+  {
+   "id": 993,
+   "urunkodu": "MA64",
+   "urunadi": "60'lık Alt Çerçeve",
+   "olcu": "L:2500",
+   "birim": "Adet",
+   "fiyat": 140,
+   "kategori": "Metal Aksam Grubu"
+  },
+  {
+   "id": 994,
+   "urunkodu": "MA65",
+   "urunadi": "100'lük Pencere H Geçen",
+   "olcu": "L:2500",
+   "birim": "Adet",
+   "fiyat": 143,
+   "kategori": "Metal Aksam Grubu"
+  },
+  {
+   "id": 995,
+   "urunkodu": "MA66",
+   "urunadi": "Aşık",
+   "olcu": "L:4200",
+   "birim": "Adet",
+   "fiyat": 212,
+   "kategori": "Metal Aksam Grubu"
+  },
+  {
+   "id": 996,
+   "urunkodu": "MA67",
+   "urunadi": "Boy C Profil",
+   "olcu": "Özel Ölçü",
+   "birim": "Adet",
+   "fiyat": 120,
+   "kategori": "Metal Aksam Grubu"
+  },
+  {
+   "id": 997,
+   "urunkodu": "MA68",
+   "urunadi": "Antrasit Mahya Saç L:2800",
+   "olcu": "L:2800",
+   "birim": "Adet",
+   "fiyat": 340,
+   "kategori": "Metal Aksam Grubu"
+  },
+  {
+   "id": 998,
+   "urunkodu": "MA69",
+   "urunadi": "Beyaz Mahya Saç L:2800",
+   "olcu": "L:2800",
+   "birim": "Adet",
+   "fiyat": 340,
+   "kategori": "Metal Aksam Grubu"
+  },
+  {
+   "id": 999,
+   "urunkodu": "MA70",
+   "urunadi": "Bordo Mahya Saç L:2800",
+   "olcu": "L:2800",
+   "birim": "Adet",
+   "fiyat": 340,
+   "kategori": "Metal Aksam Grubu"
+  },
+  {
+   "id": 1000,
+   "urunkodu": "MA71",
+   "urunadi": "Antrasit Vadi Saç (Ters Mahya) L:2800",
+   "olcu": "L:2800",
+   "birim": "Adet",
+   "fiyat": 340,
+   "kategori": "Metal Aksam Grubu"
+  },
+  {
+   "id": 1001,
+   "urunkodu": "MA72",
+   "urunadi": "Beyaz Vadi Saç (Ters Mahya) L:2800",
+   "olcu": "L:2800",
+   "birim": "Adet",
+   "fiyat": 340,
+   "kategori": "Metal Aksam Grubu"
+  },
+  {
+   "id": 1002,
+   "urunkodu": "MA73",
+   "urunadi": "Bordo Vadi Saç (Ters Mahya) L:2800",
+   "olcu": "L:2800",
+   "birim": "Adet",
+   "fiyat": 340,
+   "kategori": "Metal Aksam Grubu"
+  },
+  {
+   "id": 1003,
+   "urunkodu": "MA74",
+   "urunadi": "Osb Mahya Saç L:2800",
+   "olcu": "L:2800",
+   "birim": "Adet",
+   "fiyat": 420,
+   "kategori": "Metal Aksam Grubu"
+  },
+  {
+   "id": 1004,
+   "urunkodu": "MA75",
+   "urunadi": "Tek Kat Panel Ve Sandviç Panel Uç Kapaması L:2800",
+   "olcu": "L:2800",
+   "birim": "Adet",
+   "fiyat": 95,
+   "kategori": "Metal Aksam Grubu"
+  },
+  {
+   "id": 1005,
+   "urunkodu": "MA76",
+   "urunadi": "Antrasit Damlalık L:2800",
+   "olcu": "L:2800",
+   "birim": "Adet",
+   "fiyat": 132,
+   "kategori": "Metal Aksam Grubu"
+  },
+  {
+   "id": 1006,
+   "urunkodu": "MA77",
+   "urunadi": "Beyaz Damlalık L:2800",
+   "olcu": "L:2800",
+   "birim": "Adet",
+   "fiyat": 132,
+   "kategori": "Metal Aksam Grubu"
+  },
+  {
+   "id": 1007,
+   "urunkodu": "MA78",
+   "urunadi": "Bordo Damlalık L:2800",
+   "olcu": "L:2800",
+   "birim": "Adet",
+   "fiyat": 132,
+   "kategori": "Metal Aksam Grubu"
+  },
+  {
+   "id": 1008,
+   "urunkodu": "MA79",
+   "urunadi": "Antrasit Trapez Saç Mahya L:800",
+   "olcu": "L:800",
+   "birim": "Adet",
+   "fiyat": 245,
+   "kategori": "Metal Aksam Grubu"
+  },
+  {
+   "id": 1009,
+   "urunkodu": "MA80",
+   "urunadi": "Beyaz Trapez Saç Mahya  L:800",
+   "olcu": "L:800",
+   "birim": "Adet",
+   "fiyat": 225,
+   "kategori": "Metal Aksam Grubu"
+  },
+  {
+   "id": 1010,
+   "urunkodu": "MA81",
+   "urunadi": "Bordo Trapez Saç Mahya L:800",
+   "olcu": "L:800",
+   "birim": "Adet",
+   "fiyat": 225,
+   "kategori": "Metal Aksam Grubu"
+  },
+  {
+   "id": 1011,
+   "urunkodu": "MA82",
+   "urunadi": "Yeşil Trapez Saç Mahya L:800",
+   "olcu": "L:800",
+   "birim": "Adet",
+   "fiyat": 245,
+   "kategori": "Metal Aksam Grubu"
+  },
+  {
+   "id": 1076,
+   "urunkodu": "V1",
+   "urunadi": "Özel Vida (6.3 X 16)",
+   "olcu": "X",
+   "birim": "Adet",
+   "fiyat": 0.92,
+   "kategori": "Vida Grubu"
+  },
+  {
+   "id": 1077,
+   "urunkodu": "V2",
+   "urunadi": "Rysb Pul Başlı  ( 3.9 X 25 )",
+   "olcu": "X",
+   "birim": "Adet",
+   "fiyat": 0.62,
+   "kategori": "Vida Grubu"
+  },
+  {
+   "id": 1078,
+   "urunkodu": "V3",
+   "urunadi": "Rysb Pul Başlı  ( 3.9 X 32 )",
+   "olcu": "X",
+   "birim": "Adet",
+   "fiyat": 0.7,
+   "kategori": "Vida Grubu"
+  },
+  {
+   "id": 1079,
+   "urunkodu": "V4",
+   "urunadi": "Rysb Pul Başlı  ( 3.9 X 38 )",
+   "olcu": "X",
+   "birim": "Adet",
+   "fiyat": 0.7,
+   "kategori": "Vida Grubu"
+  },
+  {
+   "id": 1080,
+   "urunkodu": "V5",
+   "urunadi": "Alçıpan Vidası  ( 3.5 X 35 ) (Akıllı Uçlu)",
+   "olcu": "X",
+   "birim": "Adet",
+   "fiyat": 0.85,
+   "kategori": "Vida Grubu"
+  },
+  {
+   "id": 1081,
+   "urunkodu": "V6",
+   "urunadi": "Alçıpan Vidası  ( 3.5 X 35 ) (Sivri Uçlu)",
+   "olcu": "X",
+   "birim": "Adet",
+   "fiyat": 0.85,
+   "kategori": "Vida Grubu"
+  },
+  {
+   "id": 1082,
+   "urunkodu": "V7",
+   "urunadi": "16 Mm Betopan Ve Kapı Kolları ( 3.9 X 32)",
+   "olcu": "X",
+   "birim": "Adet",
+   "fiyat": 0.7,
+   "kategori": "Vida Grubu"
+  },
+  {
+   "id": 1083,
+   "urunkodu": "V8",
+   "urunadi": "Osb Ve Yalıpan ( 3.9 X 32)",
+   "olcu": "X",
+   "birim": "Adet",
+   "fiyat": 0.7,
+   "kategori": "Vida Grubu"
+  },
+  {
+   "id": 1084,
+   "urunkodu": "V9",
+   "urunadi": "Prefabrik Pencereler ( 4.8 X 70 )",
+   "olcu": "X",
+   "birim": "Adet",
+   "fiyat": 2.1,
+   "kategori": "Vida Grubu"
+  },
+  {
+   "id": 1085,
+   "urunkodu": "V10",
+   "urunadi": "( 5.5 X 25 ) Trapez Vida (Aşık+Omega+Köşebent)",
+   "olcu": "X",
+   "birim": "Adet",
+   "fiyat": 2.11,
+   "kategori": "Vida Grubu"
+  },
+  {
+   "id": 1086,
+   "urunkodu": "V11",
+   "urunadi": "( 5.5 X 60 ) Trapez Vida (Trapez Sac / Metal Kiremit)",
+   "olcu": "X",
+   "birim": "Adet",
+   "fiyat": 2.44,
+   "kategori": "Vida Grubu"
+  },
+  {
+   "id": 1087,
+   "urunkodu": "V12",
+   "urunadi": "( 5.5 X 76 ) Trapez Vida (Tek Kat Panel)",
+   "olcu": "X",
+   "birim": "Adet",
+   "fiyat": 3.1,
+   "kategori": "Vida Grubu"
+  },
+  {
+   "id": 1088,
+   "urunkodu": "V13",
+   "urunadi": "( 5.5x 110) Trapez Vida ( Sandviç Panel)",
+   "olcu": "X",
+   "birim": "Adet",
+   "fiyat": 4.25,
+   "kategori": "Vida Grubu"
+  },
+  {
+   "id": 1207,
+   "urunkodu": "V15",
+   "urunadi": "Klipsli Dübel",
+   "olcu": "10x90",
+   "birim": "Adet",
+   "fiyat": 8.65,
+   "kategori": "Vida Grubu"
+  },
+  {
+   "id": 1145,
+   "urunkodu": "VG1",
+   "urunadi": "Duşakabin",
+   "olcu": "X",
+   "birim": "Özel",
+   "fiyat": 5000,
+   "kategori": "Vitrifiye Grubu"
+  },
+  {
+   "id": 1146,
+   "urunkodu": "VG2",
+   "urunadi": "Klozet (Duvara Sıfır)",
+   "olcu": "X",
+   "birim": "Adet",
+   "fiyat": 6000,
+   "kategori": "Vitrifiye Grubu"
+  },
+  {
+   "id": 1147,
+   "urunkodu": "VG3",
+   "urunadi": "Gömme Klozet (Taşı)",
+   "olcu": "X",
+   "birim": "Adet",
+   "fiyat": 12500,
+   "kategori": "Vitrifiye Grubu"
+  },
+  {
+   "id": 1149,
+   "urunkodu": "VG5",
+   "urunadi": "Lavabo Bataryası",
+   "olcu": "X",
+   "birim": "Takım",
+   "fiyat": 660,
+   "kategori": "Vitrifiye Grubu"
+  },
+  {
+   "id": 1150,
+   "urunkodu": "VG6",
+   "urunadi": "Evye Bataryası",
+   "olcu": "X",
+   "birim": "Takım",
+   "fiyat": 660,
+   "kategori": "Vitrifiye Grubu"
+  },
+  {
+   "id": 1151,
+   "urunkodu": "VG7",
+   "urunadi": "Banyo Bataryası + Başlığı",
+   "olcu": "X",
+   "birim": "Takım",
+   "fiyat": 900,
+   "kategori": "Vitrifiye Grubu"
+  },
+  {
+   "id": 1152,
+   "urunkodu": "VG8",
+   "urunadi": "Taharet Musluğu (Aynası Dahil)",
+   "olcu": "X",
+   "birim": "Takım",
+   "fiyat": 150,
+   "kategori": "Vitrifiye Grubu"
+  },
+  {
+   "id": 1153,
+   "urunkodu": "VG9",
+   "urunadi": "Ayaklı Lavabo",
+   "olcu": "X",
+   "birim": "Takım",
+   "fiyat": 1750,
+   "kategori": "Vitrifiye Grubu"
+  },
+  {
+   "id": 1154,
+   "urunkodu": "VG10",
+   "urunadi": "Banyo Dolabı",
+   "olcu": "X",
+   "birim": "Takım",
+   "fiyat": 0,
+   "kategori": "Vitrifiye Grubu"
+  },
+  {
+   "id": 1181,
+   "urunkodu": "VG20",
+   "urunadi": "BANYO DOLABI MİMOZA ANTRASİT",
+   "olcu": "80",
+   "birim": "Takım",
+   "fiyat": 0,
+   "kategori": "Vitrifiye Grubu"
+  },
+  {
+   "id": 1182,
+   "urunkodu": "VG21",
+   "urunadi": "BANYO DOLABI MİMOZA ANTRASİT",
+   "olcu": "65 CM",
+   "birim": "Takım",
+   "fiyat": 0,
+   "kategori": "Vitrifiye Grubu"
+  },
+  {
+   "id": 1208,
+   "urunkodu": "VG24",
+   "urunadi": "BAGLANTI FLEX HORTUMU",
+   "olcu": " 70 CM",
+   "birim": "Adet",
+   "fiyat": 0,
+   "kategori": "Vitrifiye Grubu"
+  },
+  {
+   "id": 1242,
+   "urunkodu": "VG32",
+   "urunadi": "GALATA BANYO DOLABI 80 LİK",
+   "olcu": "80 CM ",
+   "birim": "Adet",
+   "fiyat": 5750,
+   "kategori": "Vitrifiye Grubu"
+  },
+  {
+   "id": 1291,
+   "urunkodu": "VG48",
+   "urunadi": "BANYO DOLABI İDEAL ",
+   "olcu": "65 CM",
+   "birim": "Adet",
+   "fiyat": 0,
+   "kategori": "Vitrifiye Grubu"
+  },
+  {
+   "id": 1292,
+   "urunkodu": "VG49",
+   "urunadi": "VİTRA EVYE BATARYASI ",
+   "olcu": "NOVA",
+   "birim": "Adet",
+   "fiyat": 4200,
+   "kategori": "Vitrifiye Grubu"
+  },
+  {
+   "id": 884,
+   "urunkodu": "YP1",
+   "urunadi": "100'lük TAM Yapıştırma Pano h:2500",
+   "olcu": "100*1250*2500",
+   "birim": "Adet",
+   "fiyat": 2115,
+   "kategori": "Yapıştırma Panel Grubu"
+  },
+  {
+   "id": 885,
+   "urunkodu": "YP2",
+   "urunadi": "100'lük TAM Yapıştırma Pano h:2800",
+   "olcu": "100*1250*2800",
+   "birim": "Adet",
+   "fiyat": 2370,
+   "kategori": "Yapıştırma Panel Grubu"
+  },
+  {
+   "id": 886,
+   "urunkodu": "YP3",
+   "urunadi": "100'lük TAM Yapıştırma Pano h:3000",
+   "olcu": "100*1250*3000",
+   "birim": "Adet",
+   "fiyat": 2540,
+   "kategori": "Yapıştırma Panel Grubu"
+  },
+  {
+   "id": 887,
+   "urunkodu": "YP4",
+   "urunadi": "100'lük YARIM Yapıştırma Pano h:2500",
+   "olcu": "100*625*2500",
+   "birim": "Adet",
+   "fiyat": 1058,
+   "kategori": "Yapıştırma Panel Grubu"
+  },
+  {
+   "id": 888,
+   "urunkodu": "YP5",
+   "urunadi": "100'lük YARIM Yapıştırma Pano h:2800",
+   "olcu": "100*625*2800",
+   "birim": "Adet",
+   "fiyat": 1185,
+   "kategori": "Yapıştırma Panel Grubu"
+  },
+  {
+   "id": 889,
+   "urunkodu": "YP6",
+   "urunadi": "100'lük YARIM Yapıştırma Pano h:3000",
+   "olcu": "100*625*3000",
+   "birim": "Adet",
+   "fiyat": 1285,
+   "kategori": "Yapıştırma Panel Grubu"
+  },
+  {
+   "id": 890,
+   "urunkodu": "YP7",
+   "urunadi": "60'lık TAM Yapıştırma Pano h:2500",
+   "olcu": "100*1250*2500",
+   "birim": "Adet",
+   "fiyat": 1783,
+   "kategori": "Yapıştırma Panel Grubu"
+  },
+  {
+   "id": 891,
+   "urunkodu": "YP8",
+   "urunadi": "60'lık TAM Yapıştırma Pano h:2800",
+   "olcu": "100*1250*2800",
+   "birim": "Adet",
+   "fiyat": 1997,
+   "kategori": "Yapıştırma Panel Grubu"
+  },
+  {
+   "id": 892,
+   "urunkodu": "YP9",
+   "urunadi": "60'lık TAM Yapıştırma Pano h:3000",
+   "olcu": "100*1250*3000",
+   "birim": "Adet",
+   "fiyat": 2140,
+   "kategori": "Yapıştırma Panel Grubu"
+  },
+  {
+   "id": 893,
+   "urunkodu": "YP10",
+   "urunadi": "60'lık YARIM ÜYapıştırma Pano h:2500",
+   "olcu": "100*625*2500",
+   "birim": "Adet",
+   "fiyat": 891,
+   "kategori": "Yapıştırma Panel Grubu"
+  },
+  {
+   "id": 894,
+   "urunkodu": "YP11",
+   "urunadi": "60'lık YARIM Yapıştırma Pano h:2800",
+   "olcu": "100*625*2800",
+   "birim": "Adet",
+   "fiyat": 997,
+   "kategori": "Yapıştırma Panel Grubu"
+  },
+  {
+   "id": 895,
+   "urunkodu": "YP12",
+   "urunadi": "60'lık YARIM Yapıştırma Pano h:3000",
+   "olcu": "100*625*3000",
+   "birim": "Adet",
+   "fiyat": 1070,
+   "kategori": "Yapıştırma Panel Grubu"
+  },
+  {
+   "id": 896,
+   "urunkodu": "YP13",
+   "urunadi": "100'lük Pencere Üst Panel",
+   "olcu": "Özel Ölçü",
+   "birim": "Adet",
+   "fiyat": 423,
+   "kategori": "Yapıştırma Panel Grubu"
+  },
+  {
+   "id": 897,
+   "urunkodu": "YP14",
+   "urunadi": "100'lük Fugalı Düz Desen  Pencere Üst Panel",
+   "olcu": "Özel Ölçü",
+   "birim": "Adet",
+   "fiyat": 705,
+   "kategori": "Yapıştırma Panel Grubu"
+  },
+  {
+   "id": 898,
+   "urunkodu": "YP15",
+   "urunadi": "100'lük Fugalı Ahşap Desen Pencere Üst Panel",
+   "olcu": "Özel Ölçü",
+   "birim": "Adet",
+   "fiyat": 0,
+   "kategori": "Yapıştırma Panel Grubu"
+  },
+  {
+   "id": 899,
+   "urunkodu": "YP16",
+   "urunadi": "100'lük Pencere Alt Panel",
+   "olcu": "Özel Ölçü",
+   "birim": "Adet",
+   "fiyat": 0,
+   "kategori": "Yapıştırma Panel Grubu"
+  },
+  {
+   "id": 900,
+   "urunkodu": "YP17",
+   "urunadi": "100'lük Fugalı Düz Desen Pencere Alt Panel",
+   "olcu": "Özel Ölçü",
+   "birim": "Adet",
+   "fiyat": 177,
+   "kategori": "Yapıştırma Panel Grubu"
+  },
+  {
+   "id": 901,
+   "urunkodu": "YP18",
+   "urunadi": "100'lük Fugalı Ahşap Desen Pencere Alt Panel",
+   "olcu": "Özel Ölçü",
+   "birim": "Adet",
+   "fiyat": 177,
+   "kategori": "Yapıştırma Panel Grubu"
+  },
+  {
+   "id": 902,
+   "urunkodu": "YP19",
+   "urunadi": "100'lük TAM Fugalı Düz Desen Yapıştırma Pano h:2500",
+   "olcu": "100*1250*2500",
+   "birim": "Adet",
+   "fiyat": 2350,
+   "kategori": "Yapıştırma Panel Grubu"
+  },
+  {
+   "id": 903,
+   "urunkodu": "YP20",
+   "urunadi": "100'lük TAM Fugalı Düz Desen Yapıştırma Pano h:2800",
+   "olcu": "100*1250*2800",
+   "birim": "Adet",
+   "fiyat": 2550,
+   "kategori": "Yapıştırma Panel Grubu"
+  },
+  {
+   "id": 904,
+   "urunkodu": "YP21",
+   "urunadi": "100'lük TAM Fugalı Düz Desen Yapıştırma Pano h:3000",
+   "olcu": "100*1250*3000",
+   "birim": "Adet",
+   "fiyat": 2750,
+   "kategori": "Yapıştırma Panel Grubu"
+  },
+  {
+   "id": 905,
+   "urunkodu": "YP22",
+   "urunadi": "100'lük YARIM Fugalı Düz Desen Yapıştırma Pano h:2500",
+   "olcu": "100*1250*2500",
+   "birim": "Adet",
+   "fiyat": 1200,
+   "kategori": "Yapıştırma Panel Grubu"
+  },
+  {
+   "id": 906,
+   "urunkodu": "YP23",
+   "urunadi": "100'lük YARIM Fugalı Düz Desen Yapıştırma Pano h:2800",
+   "olcu": "100*1250*2800",
+   "birim": "Adet",
+   "fiyat": 1300,
+   "kategori": "Yapıştırma Panel Grubu"
+  },
+  {
+   "id": 907,
+   "urunkodu": "YP24",
+   "urunadi": "100'lük YARIM Fugalı Düz Desen Yapıştırma Pano h:3000",
+   "olcu": "100*1250*3000",
+   "birim": "Adet",
+   "fiyat": 1400,
+   "kategori": "Yapıştırma Panel Grubu"
+  },
+  {
+   "id": 908,
+   "urunkodu": "YP25",
+   "urunadi": "100'lük TAM  Fugalı Ahşap Desen Yapıştırma Pano h:2500",
+   "olcu": "100*1250*2500",
+   "birim": "Adet",
+   "fiyat": 2250,
+   "kategori": "Yapıştırma Panel Grubu"
+  },
+  {
+   "id": 909,
+   "urunkodu": "YP26",
+   "urunadi": "100'lük TAM  Fugalı Ahşap Desen Yapıştırma Pano h:2800",
+   "olcu": "100*1250*2800",
+   "birim": "Adet",
+   "fiyat": 2450,
+   "kategori": "Yapıştırma Panel Grubu"
+  },
+  {
+   "id": 910,
+   "urunkodu": "YP27",
+   "urunadi": "100'lük TAM  Fugalı Ahşap Desen Yapıştırma Pano h:3000",
+   "olcu": "100*1250*3000",
+   "birim": "Adet",
+   "fiyat": 2700,
+   "kategori": "Yapıştırma Panel Grubu"
+  },
+  {
+   "id": 911,
+   "urunkodu": "YP28",
+   "urunadi": "100'lük YARIM  Fugalı Ahşap Desen Yapıştırma Pano h:2500",
+   "olcu": "100*1250*2500",
+   "birim": "Adet",
+   "fiyat": 1125,
+   "kategori": "Yapıştırma Panel Grubu"
+  },
+  {
+   "id": 912,
+   "urunkodu": "YP29",
+   "urunadi": "100'lük YARIM  Fugalı Ahşap Desen Yapıştırma Pano h:2800",
+   "olcu": "100*1250*2800",
+   "birim": "Adet",
+   "fiyat": 1225,
+   "kategori": "Yapıştırma Panel Grubu"
+  },
+  {
+   "id": 913,
+   "urunkodu": "YP30",
+   "urunadi": "100'lük YARIM  Fugalı Ahşap Desen Yapıştırma Pano h:3000",
+   "olcu": "100*1250*3000",
+   "birim": "Adet",
+   "fiyat": 1350,
+   "kategori": "Yapıştırma Panel Grubu"
+  },
+  {
+   "id": 1168,
+   "urunkodu": "CG23",
+   "urunadi": "MAHYA BANDI",
+   "olcu": "20 CM",
+   "birim": "m2",
+   "fiyat": 960,
+   "kategori": "Çatı Grubu"
+  },
+  {
+   "id": 1156,
+   "urunkodu": "B1",
+   "urunadi": "Boya Grubu (Fiyatlandırma)",
+   "olcu": "X",
+   "birim": "Adet",
+   "fiyat": 0,
+   "kategori": "Özel Boya Grubu"
+  },
+  {
+   "id": 1159,
+   "urunkodu": "B2",
+   "urunadi": "İç Cephe Boyası",
+   "olcu": "1 Litre",
+   "birim": "Boy",
+   "fiyat": 3500,
+   "kategori": "Özel Boya Grubu"
+  },
+  {
+   "id": 1160,
+   "urunkodu": "B3",
+   "urunadi": "Dış Cephe Boyası",
+   "olcu": "1 Litre",
+   "birim": "Boy",
+   "fiyat": 3500,
+   "kategori": "Özel Boya Grubu"
+  },
+  {
+   "id": 1161,
+   "urunkodu": "B4",
+   "urunadi": "Kalekim",
+   "olcu": "25",
+   "birim": "Kg",
+   "fiyat": 390,
+   "kategori": "Özel Boya Grubu"
+  },
+  {
+   "id": 1162,
+   "urunkodu": "B5",
+   "urunadi": "Mineral Sıva",
+   "olcu": "25kg",
+   "birim": "Kg",
+   "fiyat": 408,
+   "kategori": "Özel Boya Grubu"
+  },
+  {
+   "id": 1163,
+   "urunkodu": "B6",
+   "urunadi": "Sıva Alçısı",
+   "olcu": "5kg",
+   "birim": "Kg",
+   "fiyat": 260,
+   "kategori": "Özel Boya Grubu"
+  },
+  {
+   "id": 1164,
+   "urunkodu": "B7",
+   "urunadi": "Sıva Filesi",
+   "olcu": "1 Metre",
+   "birim": "Boy",
+   "fiyat": 40,
+   "kategori": "Özel Boya Grubu"
+  },
+  {
+   "id": 1165,
+   "urunkodu": "B8",
+   "urunadi": "Tavan Boyası",
+   "olcu": "1kg",
+   "birim": "Kg",
+   "fiyat": 0,
+   "kategori": "Özel Boya Grubu"
+  },
+  {
+   "id": 1183,
+   "urunkodu": "B9",
+   "urunadi": "POLİSAN PERLA SİLİKONLU DIŞ CEPHE B BAZ",
+   "olcu": "15",
+   "birim": "Litre",
+   "fiyat": 2650,
+   "kategori": "Özel Boya Grubu"
+  },
+  {
+   "id": 1184,
+   "urunkodu": "B10",
+   "urunadi": "POLİSAN PERLA MAT SİLİKON MAX A BAZ",
+   "olcu": "12,5",
+   "birim": "Litre",
+   "fiyat": 1950,
+   "kategori": "Özel Boya Grubu"
+  },
+  {
+   "id": 1185,
+   "urunkodu": "B11",
+   "urunadi": "FAWORİ EXTRA TAVAN BOYASI",
+   "olcu": "17,5",
+   "birim": "Litre",
+   "fiyat": 880,
+   "kategori": "Özel Boya Grubu"
+  },
+  {
+   "id": 1186,
+   "urunkodu": "B12",
+   "urunadi": "POLİSAN ÜNİVERSAL ASTAR",
+   "olcu": "20",
+   "birim": "Kg",
+   "fiyat": 1750,
+   "kategori": "Özel Boya Grubu"
+  },
+  {
+   "id": 1187,
+   "urunkodu": "B13",
+   "urunadi": "WEBER DRY  SS-8 EXTRA SET 35 (YALITIM MALZEMESİ)",
+   "olcu": "KG",
+   "birim": "Takım",
+   "fiyat": 1850,
+   "kategori": "Özel Boya Grubu"
+  },
+  {
+   "id": 1188,
+   "urunkodu": "B14",
+   "urunadi": "PAH BANDI FİLELİ 15X50MT",
+   "olcu": "12MMX50MT",
+   "birim": "Takım",
+   "fiyat": 1700,
+   "kategori": "Özel Boya Grubu"
+  },
+  {
+   "id": 1190,
+   "urunkodu": "B15",
+   "urunadi": "BEYBİ SARI NİTRİL ELDİVEN ",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Adet",
+   "fiyat": 55,
+   "kategori": "Özel Boya Grubu"
+  },
+  {
+   "id": 1191,
+   "urunkodu": "B16",
+   "urunadi": "EPS KARBONLU 5 CM 16 DNS",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Paket",
+   "fiyat": 912,
+   "kategori": "Özel Boya Grubu"
+  },
+  {
+   "id": 1192,
+   "urunkodu": "B17",
+   "urunadi": "BAUMİT DUOCONTACT SIVA",
+   "olcu": "25",
+   "birim": "Kg",
+   "fiyat": 235,
+   "kategori": "Özel Boya Grubu"
+  },
+  {
+   "id": 1193,
+   "urunkodu": "B18",
+   "urunadi": "BAUMİT CLASSİCO SPECİAL ÇİZGİ DEKORATİF",
+   "olcu": "25",
+   "birim": "Kg",
+   "fiyat": 340,
+   "kategori": "Özel Boya Grubu"
+  },
+  {
+   "id": 1194,
+   "urunkodu": "B19",
+   "urunadi": "JOTUN TOPCOAT SİLK C BASE",
+   "olcu": "13,5",
+   "birim": "Kg",
+   "fiyat": 6250,
+   "kategori": "Özel Boya Grubu"
+  },
+  {
+   "id": 1195,
+   "urunkodu": "B20",
+   "urunadi": "JOTUN TOPCOAT SİLK A BASE",
+   "olcu": "13,5",
+   "birim": "Kg",
+   "fiyat": 4950,
+   "kategori": "Özel Boya Grubu"
+  },
+  {
+   "id": 1196,
+   "urunkodu": "B21",
+   "urunadi": "POLİSAN ELEGANS YARI MAT MİX A BAZ",
+   "olcu": "12,5",
+   "birim": "Kg",
+   "fiyat": 3500,
+   "kategori": "Özel Boya Grubu"
+  },
+  {
+   "id": 1197,
+   "urunkodu": "B22",
+   "urunadi": "EJOT SIVA FİLESİ 160 GR",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Paket",
+   "fiyat": 1550,
+   "kategori": "Özel Boya Grubu"
+  },
+  {
+   "id": 1198,
+   "urunkodu": "B23",
+   "urunadi": "DALSAN SATENTEK",
+   "olcu": "25",
+   "birim": "Kg",
+   "fiyat": 175,
+   "kategori": "Özel Boya Grubu"
+  },
+  {
+   "id": 1199,
+   "urunkodu": "B24",
+   "urunadi": "DALSAN DERZ BANDI 50MMX90 MTR",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Paket",
+   "fiyat": 135,
+   "kategori": "Özel Boya Grubu"
+  },
+  {
+   "id": 1200,
+   "urunkodu": "B25",
+   "urunadi": "DALSAN DERZTEK DERZ ALÇISI",
+   "olcu": "25",
+   "birim": "Kg",
+   "fiyat": 195,
+   "kategori": "Özel Boya Grubu"
+  },
+  {
+   "id": 1201,
+   "urunkodu": "B26",
+   "urunadi": "POLİSAN POLİZONAL",
+   "olcu": "0,75L",
+   "birim": "Litre",
+   "fiyat": 295,
+   "kategori": "Özel Boya Grubu"
+  },
+  {
+   "id": 1202,
+   "urunkodu": "B27",
+   "urunadi": "EJOT FİLELİ KÖŞEBENT",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Boy",
+   "fiyat": 60,
+   "kategori": "Özel Boya Grubu"
+  },
+  {
+   "id": 1203,
+   "urunkodu": "B28",
+   "urunadi": "ALÇI KÖŞE DELİKLİ",
+   "olcu": "2,7",
+   "birim": "Metre",
+   "fiyat": 20,
+   "kategori": "Özel Boya Grubu"
+  },
+  {
+   "id": 1204,
+   "urunkodu": "B29",
+   "urunadi": "BAUMİT DOUFİX",
+   "olcu": "25 ",
+   "birim": "Kg",
+   "fiyat": 210,
+   "kategori": "Özel Boya Grubu"
+  },
+  {
+   "id": 1214,
+   "urunkodu": "B30",
+   "urunadi": "FAYANS YAPIŞTIRMA HARCI ",
+   "olcu": "ÖZEL",
+   "birim": "Kg",
+   "fiyat": 0,
+   "kategori": "Özel Boya Grubu"
+  },
+  {
+   "id": 1239,
+   "urunkodu": "B31",
+   "urunadi": "SELSİL SPREY BOYA  ANTRASİT",
+   "olcu": "400 ML",
+   "birim": "Adet",
+   "fiyat": 180,
+   "kategori": "Özel Boya Grubu"
+  },
+  {
+   "id": 1251,
+   "urunkodu": "B32",
+   "urunadi": "POLİSAN A1 SİLİKONLU MİX B2 BAZ 15 LTR",
+   "olcu": "15",
+   "birim": "Litre",
+   "fiyat": 2900,
+   "kategori": "Özel Boya Grubu"
+  },
+  {
+   "id": 1263,
+   "urunkodu": "B33",
+   "urunadi": "TYTAN STYRO 753 TABANCALI KÖPÜK ",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Adet",
+   "fiyat": 235,
+   "kategori": "Özel Boya Grubu"
+  },
+  {
+   "id": 1264,
+   "urunkodu": "B34",
+   "urunadi": "MASKELEME BANDI WEGE 48MMX30M",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Adet",
+   "fiyat": 60,
+   "kategori": "Özel Boya Grubu"
+  },
+  {
+   "id": 1269,
+   "urunkodu": "B35",
+   "urunadi": "EPS KARBONLU 3 CM 16 DNS",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Adet",
+   "fiyat": 760,
+   "kategori": "Özel Boya Grubu"
+  },
+  {
+   "id": 1270,
+   "urunkodu": "B36",
+   "urunadi": "EPS KARBONLU 2 CM 16 DNS ",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Adet",
+   "fiyat": 760,
+   "kategori": "Özel Boya Grubu"
+  },
+  {
+   "id": 1271,
+   "urunkodu": "B37",
+   "urunadi": "GFB METAL KÖPÜK TABANCASI",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Adet",
+   "fiyat": 430,
+   "kategori": "Özel Boya Grubu"
+  },
+  {
+   "id": 1272,
+   "urunkodu": "B38",
+   "urunadi": "KYK BRÜT BETON ASTARI",
+   "olcu": "12 KG ",
+   "birim": "Adet",
+   "fiyat": 800,
+   "kategori": "Özel Boya Grubu"
+  },
+  {
+   "id": 1273,
+   "urunkodu": "B39",
+   "urunadi": "POLİSAN TRANSFER ASTARI BEYAZ ",
+   "olcu": "15 ",
+   "birim": "Litre",
+   "fiyat": 1950,
+   "kategori": "Özel Boya Grubu"
+  },
+  {
+   "id": 1274,
+   "urunkodu": "B40",
+   "urunadi": "SIVA SÜNGERİ",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Adet",
+   "fiyat": 15,
+   "kategori": "Özel Boya Grubu"
+  },
+  {
+   "id": 1275,
+   "urunkodu": "B41",
+   "urunadi": "ALTUS SU ZIMPARASI 188 KALİTE 120 KUM",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Adet",
+   "fiyat": 50,
+   "kategori": "Özel Boya Grubu"
+  },
+  {
+   "id": 1276,
+   "urunkodu": "B42",
+   "urunadi": "DEKOR PLASDEK RULO 25 CM",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Adet",
+   "fiyat": 2,
+   "kategori": "Özel Boya Grubu"
+  },
+  {
+   "id": 1277,
+   "urunkodu": "B43",
+   "urunadi": "DEKOR KESTİRME ROBOT FIRÇASI NO 4",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Adet",
+   "fiyat": 150,
+   "kategori": "Özel Boya Grubu"
+  },
+  {
+   "id": 1278,
+   "urunkodu": "B44",
+   "urunadi": "DEKOR EKSTRA KALORİFER RULO FIRÇASI 10 CM YEDEK",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Adet",
+   "fiyat": 65,
+   "kategori": "Özel Boya Grubu"
+  },
+  {
+   "id": 1279,
+   "urunkodu": "B45",
+   "urunadi": "POLİSAN A1 EXTRA YARIMAT MİX ABAZ ",
+   "olcu": "12,5",
+   "birim": "Litre",
+   "fiyat": 2900,
+   "kategori": "Özel Boya Grubu"
+  },
+  {
+   "id": 1280,
+   "urunkodu": "B46",
+   "urunadi": "POLİSAN A1 EXTRA DÜZ MİX A BAZ ",
+   "olcu": "15",
+   "birim": "Litre",
+   "fiyat": 3500,
+   "kategori": "Özel Boya Grubu"
+  },
+  {
+   "id": 1284,
+   "urunkodu": "B47",
+   "urunadi": "JOTUN TOPCOAT SİLK B BASE 13.5 LT",
+   "olcu": "13,5",
+   "birim": "Litre",
+   "fiyat": 6100,
+   "kategori": "Özel Boya Grubu"
+  },
+  {
+   "id": 1285,
+   "urunkodu": "B48",
+   "urunadi": "POLİSAN A STAR ",
+   "olcu": "10 KG",
+   "birim": "Kg",
+   "fiyat": 1600,
+   "kategori": "Özel Boya Grubu"
+  },
+  {
+   "id": 1286,
+   "urunkodu": "B49",
+   "urunadi": "ENJOY ENDÜSTRİYEL BOYA RAL 9003 BOYA",
+   "olcu": "3",
+   "birim": "Kg",
+   "fiyat": 1150,
+   "kategori": "Özel Boya Grubu"
+  },
+  {
+   "id": 1287,
+   "urunkodu": "B50",
+   "urunadi": "ENJOY SELÜLOZİK TİNER",
+   "olcu": "1",
+   "birim": "Litre",
+   "fiyat": 300,
+   "kategori": "Özel Boya Grubu"
+  },
+  {
+   "id": 1288,
+   "urunkodu": "B51",
+   "urunadi": "PENCERE SÖVESİ ",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Metre",
+   "fiyat": 55,
+   "kategori": "Özel Boya Grubu"
+  },
+  {
+   "id": 1289,
+   "urunkodu": "B52",
+   "urunadi": "KÖŞE TAŞI SÖVE",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Metre",
+   "fiyat": 150,
+   "kategori": "Özel Boya Grubu"
+  },
+  {
+   "id": 1290,
+   "urunkodu": "B53",
+   "urunadi": "TAVAN U  ",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Adet",
+   "fiyat": 45,
+   "kategori": "Özel Boya Grubu"
+  },
+  {
+   "id": 1307,
+   "urunkodu": "B54",
+   "urunadi": "MOMENTO DÖNÜŞÜM ASTARI",
+   "olcu": "2,5",
+   "birim": "Litre",
+   "fiyat": 750,
+   "kategori": "Özel Boya Grubu"
+  },
+  {
+   "id": 1318,
+   "urunkodu": "B55",
+   "urunadi": "DALSAN GİRO SIVA HARCI",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Adet",
+   "fiyat": 230,
+   "kategori": "Özel Boya Grubu"
+  },
+  {
+   "id": 1319,
+   "urunkodu": "B56",
+   "urunadi": "DALSAN GİRO SIVA HARCI",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Adet",
+   "fiyat": 230,
+   "kategori": "Özel Boya Grubu"
+  },
+  {
+   "id": 1320,
+   "urunkodu": "B57",
+   "urunadi": "DALSAN GİRO SIVA HARCI",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Adet",
+   "fiyat": 230,
+   "kategori": "Özel Boya Grubu"
+  },
+  {
+   "id": 1321,
+   "urunkodu": "B58",
+   "urunadi": "DALSAN GİRO SIVA HARCI",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Adet",
+   "fiyat": 230,
+   "kategori": "Özel Boya Grubu"
+  },
+  {
+   "id": 1322,
+   "urunkodu": "B59",
+   "urunadi": "PERMOLİT TAVAN BOYASI",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Adet",
+   "fiyat": 940,
+   "kategori": "Özel Boya Grubu"
+  },
+  {
+   "id": 1323,
+   "urunkodu": "B60",
+   "urunadi": "EPS KARBONLU 4 CM 16 DNS",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Adet",
+   "fiyat": 790,
+   "kategori": "Özel Boya Grubu"
+  },
+  {
+   "id": 1324,
+   "urunkodu": "B61",
+   "urunadi": "DALSAN GRİO MANTOLAMA YAPİŞTİRİCİ",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Adet",
+   "fiyat": 230,
+   "kategori": "Özel Boya Grubu"
+  },
+  {
+   "id": 1331,
+   "urunkodu": "B63",
+   "urunadi": "JOTUN TOPCOAT SİLK A BASE 2.25 LTR",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Adet",
+   "fiyat": 1650,
+   "kategori": "Özel Boya Grubu"
+  },
+  {
+   "id": 1333,
+   "urunkodu": "B64",
+   "urunadi": "DALSAN PUNTO 0,60 MM 27X27 TAVAN PROFİLİ",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Metre",
+   "fiyat": 23,
+   "kategori": "Özel Boya Grubu"
+  },
+  {
+   "id": 1342,
+   "urunkodu": "B65",
+   "urunadi": "POLİSAN ELEGANS YARIMAT MİX B2 BAZ 7,5 LTR",
+   "olcu": "7,5 LTRE",
+   "birim": "Adet",
+   "fiyat": 2150,
+   "kategori": "Özel Boya Grubu"
+  },
+  {
+   "id": 1343,
+   "urunkodu": "B66",
+   "urunadi": "POLİSAN A1 SİLİKONLU ASTAR 20 KG",
+   "olcu": "20 KG",
+   "birim": "Kg",
+   "fiyat": 1850,
+   "kategori": "Özel Boya Grubu"
+  },
+  {
+   "id": 1364,
+   "urunkodu": "B67",
+   "urunadi": "KARBOSAN FİBER DİSK ZIMPARA 115",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Adet",
+   "fiyat": 30,
+   "kategori": "Özel Boya Grubu"
+  },
+  {
+   "id": 1374,
+   "urunkodu": "B68",
+   "urunadi": "DERZ DOLGU BEJ 5 KG",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Kg",
+   "fiyat": 280,
+   "kategori": "Özel Boya Grubu"
+  },
+  {
+   "id": 1375,
+   "urunkodu": "B69",
+   "urunadi": "ÇİMENTO",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Adet",
+   "fiyat": 270,
+   "kategori": "Özel Boya Grubu"
+  },
+  {
+   "id": 1379,
+   "urunkodu": "B70",
+   "urunadi": "FAWORİ EXTRA TAVAN BOYASI 3.5 LTR",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Adet",
+   "fiyat": 280,
+   "kategori": "Özel Boya Grubu"
+  },
+  {
+   "id": 1390,
+   "urunkodu": "B71",
+   "urunadi": "WEBER MİN DUO  25 KG",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Adet",
+   "fiyat": 340,
+   "kategori": "Özel Boya Grubu"
+  },
+  {
+   "id": 1391,
+   "urunkodu": "B72",
+   "urunadi": "FAWORİ OPTİMİX STRAFOR DÜBELLİ 115 MM",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Adet",
+   "fiyat": 3,
+   "kategori": "Özel Boya Grubu"
+  },
+  {
+   "id": 1392,
+   "urunkodu": "B73",
+   "urunadi": "WEBER MİN P 1,5 MM DEKORATİF 25 KG",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Adet",
+   "fiyat": 415,
+   "kategori": "Özel Boya Grubu"
+  },
+  {
+   "id": 1265,
+   "urunkodu": "DG25",
+   "urunadi": "WEBER DRY SS EXTRA SET",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Adet",
+   "fiyat": 1850,
+   "kategori": "Özel Boya Grubu"
+  },
+  {
+   "id": 1048,
+   "urunkodu": "E5",
+   "urunadi": "Şerit Led",
+   "olcu": "X",
+   "birim": "Metre",
+   "fiyat": 15.51,
+   "kategori": "Özel Elektrik Grubu"
+  },
+  {
+   "id": 1049,
+   "urunkodu": "E6",
+   "urunadi": "Dış Aydınlatma (Aplik)",
+   "olcu": "X",
+   "birim": "Adet",
+   "fiyat": 350,
+   "kategori": "Özel Elektrik Grubu"
+  },
+  {
+   "id": 1073,
+   "urunkodu": "E30",
+   "urunadi": "Panjur Kumandası (Takım)",
+   "olcu": "X",
+   "birim": "Takım",
+   "fiyat": 98.4,
+   "kategori": "Özel Elektrik Grubu"
+  },
+  {
+   "id": 1175,
+   "urunkodu": "E33",
+   "urunadi": "VİKO NOVELLA  PANJUR KUMANDA  DÜGME KAPAK FÜME ",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "m2",
+   "fiyat": 48,
+   "kategori": "Özel Elektrik Grubu"
+  },
+  {
+   "id": 1176,
+   "urunkodu": "E34",
+   "urunadi": "VİKO NOVELLE PANJUR KUMANDA MEKANİZMASI",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "m2",
+   "fiyat": 146,
+   "kategori": "Özel Elektrik Grubu"
+  },
+  {
+   "id": 1177,
+   "urunkodu": "E35",
+   "urunadi": "VİKO NOVELLA FÜME ÇERÇEVE TEKLİ",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "m2",
+   "fiyat": 78,
+   "kategori": "Özel Elektrik Grubu"
+  },
+  {
+   "id": 1219,
+   "urunkodu": "E37",
+   "urunadi": "VİKO NOVELLA FÜME VAVİEN DÜGME /KAPAK ",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Adet",
+   "fiyat": 50,
+   "kategori": "Özel Elektrik Grubu"
+  },
+  {
+   "id": 1220,
+   "urunkodu": "E38",
+   "urunadi": "VİKO NOVELLA VAVİEN MEKANİZMA ",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Adet",
+   "fiyat": 64,
+   "kategori": "Özel Elektrik Grubu"
+  },
+  {
+   "id": 1221,
+   "urunkodu": "E39",
+   "urunadi": "VİKO NOVELLA FÜME ANAHTAR DÜGME /KAPAK ",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Adet",
+   "fiyat": 50,
+   "kategori": "Özel Elektrik Grubu"
+  },
+  {
+   "id": 1222,
+   "urunkodu": "E40",
+   "urunadi": "VİKO NOVELLA ANAHTAR MENAİZMA",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Adet",
+   "fiyat": 50,
+   "kategori": "Özel Elektrik Grubu"
+  },
+  {
+   "id": 1223,
+   "urunkodu": "E41",
+   "urunadi": "VİKO NOVELLA FÜME KOMÜTATÖR DÜGME /KAPAK",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Adet",
+   "fiyat": 77,
+   "kategori": "Özel Elektrik Grubu"
+  },
+  {
+   "id": 1224,
+   "urunkodu": "E42",
+   "urunadi": "VİKO NOVELLA KOMÜTATÖR MEKANİZMA",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Adet",
+   "fiyat": 77,
+   "kategori": "Özel Elektrik Grubu"
+  },
+  {
+   "id": 1225,
+   "urunkodu": "E43",
+   "urunadi": "VİKO NOVELLA FÜME TOPRAKLİ PRİZ Ç.K. DÜGME /KAPAK",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Adet",
+   "fiyat": 80,
+   "kategori": "Özel Elektrik Grubu"
+  },
+  {
+   "id": 1226,
+   "urunkodu": "E44",
+   "urunadi": "VİKO NOVELLA  TOPRAKLI PRİZ MEKANİZMA ",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Adet",
+   "fiyat": 80,
+   "kategori": "Özel Elektrik Grubu"
+  },
+  {
+   "id": 1227,
+   "urunkodu": "E45",
+   "urunadi": "VİKO NOVELLA FÜME 2 Lİ TOPRAKLI PRİZ Ç.K. DÜGME KAPAK",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Adet",
+   "fiyat": 62,
+   "kategori": "Özel Elektrik Grubu"
+  },
+  {
+   "id": 1228,
+   "urunkodu": "E46",
+   "urunadi": "VİKO NOVELLA FÜME 2 Lİ SIVA ALTI ÇERÇEVE ",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Adet",
+   "fiyat": 145,
+   "kategori": "Özel Elektrik Grubu"
+  },
+  {
+   "id": 1229,
+   "urunkodu": "E47",
+   "urunadi": "VİKO NOVELLA 2 Lİ PRİZ MEKANİZMASI ",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Adet",
+   "fiyat": 140,
+   "kategori": "Özel Elektrik Grubu"
+  },
+  {
+   "id": 1230,
+   "urunkodu": "E48",
+   "urunadi": "VİKO NOVELLA FÜME UYDU SAT DÜGME/KAPAK ",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Adet",
+   "fiyat": 50,
+   "kategori": "Özel Elektrik Grubu"
+  },
+  {
+   "id": 1231,
+   "urunkodu": "E49",
+   "urunadi": "VİKO NOVELLA UYDU PRİZ F KONSOLU MEKANİZMA ",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Adet",
+   "fiyat": 245,
+   "kategori": "Özel Elektrik Grubu"
+  },
+  {
+   "id": 1232,
+   "urunkodu": "E50",
+   "urunadi": "VİKO NOVELLA VAVİEN DÜGME KAPAK",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Adet",
+   "fiyat": 65,
+   "kategori": "Özel Elektrik Grubu"
+  },
+  {
+   "id": 1233,
+   "urunkodu": "E51",
+   "urunadi": "VİKO NOVELLA TOPRAKLI PRİZ MEKANİZMA ",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Adet",
+   "fiyat": 80,
+   "kategori": "Özel Elektrik Grubu"
+  },
+  {
+   "id": 1236,
+   "urunkodu": "E52",
+   "urunadi": "CATA CT 5230 PARS KARE SPOT BEYAZ KASA",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Adet",
+   "fiyat": 50,
+   "kategori": "Özel Elektrik Grubu"
+  },
+  {
+   "id": 1237,
+   "urunkodu": "E53",
+   "urunadi": "ERKLED GU 10 DUY",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Adet",
+   "fiyat": 6,
+   "kategori": "Özel Elektrik Grubu"
+  },
+  {
+   "id": 1238,
+   "urunkodu": "E54",
+   "urunadi": "LİGHTSON 5 W GU 10 300K LED AMPÜL",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Adet",
+   "fiyat": 25,
+   "kategori": "Özel Elektrik Grubu"
+  },
+  {
+   "id": 1256,
+   "urunkodu": "E55",
+   "urunadi": "VİKO KARE BEYAZ ANAHTAR",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Adet",
+   "fiyat": 60,
+   "kategori": "Özel Elektrik Grubu"
+  },
+  {
+   "id": 1257,
+   "urunkodu": "E56",
+   "urunadi": "VİKO KARE BEYAZ KOMÜTATÖR İKİLİ",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Adet",
+   "fiyat": 80,
+   "kategori": "Özel Elektrik Grubu"
+  },
+  {
+   "id": 1258,
+   "urunkodu": "E57",
+   "urunadi": "VİKO KARE BEYAZ TOPRAKLI PRİZ ",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Adet",
+   "fiyat": 77,
+   "kategori": "Özel Elektrik Grubu"
+  },
+  {
+   "id": 1259,
+   "urunkodu": "E58",
+   "urunadi": "VİKO KARE BEYAZ 2 Lİ PRİZ",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Adet",
+   "fiyat": 120,
+   "kategori": "Özel Elektrik Grubu"
+  },
+  {
+   "id": 1260,
+   "urunkodu": "E59",
+   "urunadi": "VİKO KARE BEYAZ UYDU PRİZİ",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Adet",
+   "fiyat": 140,
+   "kategori": "Özel Elektrik Grubu"
+  },
+  {
+   "id": 1261,
+   "urunkodu": "E60",
+   "urunadi": "SİEMENS B 1 32V OTOMAT ",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Adet",
+   "fiyat": 2075,
+   "kategori": "Özel Elektrik Grubu"
+  },
+  {
+   "id": 1262,
+   "urunkodu": "E61",
+   "urunadi": "VİKO KARE BEYAZ TOPRAKLI PRİZ KAPAKLI ",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Adet",
+   "fiyat": 107,
+   "kategori": "Özel Elektrik Grubu"
+  },
+  {
+   "id": 1294,
+   "urunkodu": "E62",
+   "urunadi": "MAGNET RAY SIVA ALTI",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Metre",
+   "fiyat": 350,
+   "kategori": "Özel Elektrik Grubu"
+  },
+  {
+   "id": 1295,
+   "urunkodu": "E63",
+   "urunadi": "VİKO NOVELLE FÜME KAPAKLI TOPRAKLI PRİZ",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Adet",
+   "fiyat": 68,
+   "kategori": "Özel Elektrik Grubu"
+  },
+  {
+   "id": 1296,
+   "urunkodu": "E64",
+   "urunadi": "VİKO NOVELLA FÜME JALUZİ KUMANDA DÜGME KAPAK",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Adet",
+   "fiyat": 50,
+   "kategori": "Özel Elektrik Grubu"
+  },
+  {
+   "id": 1297,
+   "urunkodu": "E65",
+   "urunadi": "VİKO NOVELLA JALUZİ KUMANDA MEKANİZMA",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Adet",
+   "fiyat": 145,
+   "kategori": "Özel Elektrik Grubu"
+  },
+  {
+   "id": 1326,
+   "urunkodu": "E66",
+   "urunadi": "VİKO NOVELLA FÜME LİGHT DÜGME KAPAK",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Adet",
+   "fiyat": 50,
+   "kategori": "Özel Elektrik Grubu"
+  },
+  {
+   "id": 1327,
+   "urunkodu": "E67",
+   "urunadi": "VİKO NOVELLA LİGHT MEKANİZMA",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Adet",
+   "fiyat": 90,
+   "kategori": "Özel Elektrik Grubu"
+  },
+  {
+   "id": 1329,
+   "urunkodu": "E69",
+   "urunadi": "VİKO KARE BEYAZ ÇERÇEVE TEKLİ",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Adet",
+   "fiyat": 75,
+   "kategori": "Özel Elektrik Grubu"
+  },
+  {
+   "id": 1336,
+   "urunkodu": "E70",
+   "urunadi": "TEKLİ ANAHTAR  TAKIM FÜME",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Adet",
+   "fiyat": 149.18,
+   "kategori": "Özel Elektrik Grubu"
+  },
+  {
+   "id": 1337,
+   "urunkodu": "E71",
+   "urunadi": "ÇİFTLİ ANAHTAR TAKIM FÜME ",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Adet",
+   "fiyat": 173.38,
+   "kategori": "Özel Elektrik Grubu"
+  },
+  {
+   "id": 1338,
+   "urunkodu": "E72",
+   "urunadi": "TEKLİ KAPAKLI PİRİZ FÜME",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Adet",
+   "fiyat": 189.41,
+   "kategori": "Özel Elektrik Grubu"
+  },
+  {
+   "id": 1339,
+   "urunkodu": "E73",
+   "urunadi": "TEKLİ PİRİZ TAKIM FÜME ",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Takım",
+   "fiyat": 175.26,
+   "kategori": "Özel Elektrik Grubu"
+  },
+  {
+   "id": 1340,
+   "urunkodu": "E74",
+   "urunadi": "İKİLİ PİRİZ TAKIM FÜME ",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Takım",
+   "fiyat": 267.43,
+   "kategori": "Özel Elektrik Grubu"
+  },
+  {
+   "id": 1341,
+   "urunkodu": "E75",
+   "urunadi": "UYDU PRİZ TAKIM FÜME",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Takım",
+   "fiyat": 319.55,
+   "kategori": "Özel Elektrik Grubu"
+  },
+  {
+   "id": 1359,
+   "urunkodu": "E77",
+   "urunadi": "3 LÜ PRİZ KABLOSUZ ",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Adet",
+   "fiyat": 230,
+   "kategori": "Özel Elektrik Grubu"
+  },
+  {
+   "id": 1360,
+   "urunkodu": "E78",
+   "urunadi": "KABLO KANALI 25X25",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Adet",
+   "fiyat": 40,
+   "kategori": "Özel Elektrik Grubu"
+  },
+  {
+   "id": 1215,
+   "urunkodu": "HM55",
+   "urunadi": "EMPİRYE KERESTE",
+   "olcu": "290X3X2",
+   "birim": "Metre",
+   "fiyat": 0,
+   "kategori": "Özel Ham Malzeme Grubu"
+  },
+  {
+   "id": 1216,
+   "urunkodu": "HM56",
+   "urunadi": "EMPİRYE KERESTE",
+   "olcu": "290X20X2",
+   "birim": "m3",
+   "fiyat": 0,
+   "kategori": "Özel Ham Malzeme Grubu"
+  },
+  {
+   "id": 1217,
+   "urunkodu": "HM57",
+   "urunadi": "EMPİRYE KERESTE",
+   "olcu": "345X3X2",
+   "birim": "m3",
+   "fiyat": 0,
+   "kategori": "Özel Ham Malzeme Grubu"
+  },
+  {
+   "id": 1218,
+   "urunkodu": "HM58",
+   "urunadi": "EMPİRYE KERESTE",
+   "olcu": "345X20X2",
+   "birim": "m3",
+   "fiyat": 0,
+   "kategori": "Özel Ham Malzeme Grubu"
+  },
+  {
+   "id": 1317,
+   "urunkodu": "HM59",
+   "urunadi": "TAŞYÜNÜ 50 DNS 5,76 KAPATIR",
+   "olcu": "5 CM",
+   "birim": "m2",
+   "fiyat": 0,
+   "kategori": "Özel Ham Malzeme Grubu"
+  },
+  {
+   "id": 1349,
+   "urunkodu": "HM62",
+   "urunadi": "NAYLON BRANDA SARI",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Kg",
+   "fiyat": 95,
+   "kategori": "Özel Ham Malzeme Grubu"
+  },
+  {
+   "id": 1389,
+   "urunkodu": "HM65",
+   "urunadi": "CAM YÜNÜ FOLYOLU BUHAR KESİCİLİ",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Adet",
+   "fiyat": 950,
+   "kategori": "Özel Ham Malzeme Grubu"
+  },
+  {
+   "id": 941,
+   "urunkodu": "MA12",
+   "urunadi": "Kutu Profil  (Kolon) (Flanşlı)",
+   "olcu": "Özel Ölçü",
+   "birim": "Adet",
+   "fiyat": 0,
+   "kategori": "Özel Ham Malzeme Grubu"
+  },
+  {
+   "id": 942,
+   "urunkodu": "MA13",
+   "urunadi": "Flanş",
+   "olcu": "10*200*200",
+   "birim": "Adet",
+   "fiyat": 0,
+   "kategori": "Özel Ham Malzeme Grubu"
+  },
+  {
+   "id": 1021,
+   "urunkodu": "KG4",
+   "urunadi": "Lambri Grubu",
+   "olcu": "Özel Ölçü",
+   "birim": "Adet",
+   "fiyat": 1550,
+   "kategori": "Özel Kaplama Grubu"
+  },
+  {
+   "id": 1234,
+   "urunkodu": "KG11",
+   "urunadi": "LAMBRİ TÜL KENAR",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Boy",
+   "fiyat": 0,
+   "kategori": "Özel Kaplama Grubu"
+  },
+  {
+   "id": 1301,
+   "urunkodu": "KG12",
+   "urunadi": "KİRİŞ KAPLAMA KERESTE 1. SINIF",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Takım",
+   "fiyat": 1,
+   "kategori": "Özel Kaplama Grubu"
+  },
+  {
+   "id": 1332,
+   "urunkodu": "KG13",
+   "urunadi": "PATLATMA TAŞ",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "m2",
+   "fiyat": 850,
+   "kategori": "Özel Kaplama Grubu"
+  },
+  {
+   "id": 1303,
+   "urunkodu": "MT9",
+   "urunadi": "TRİPLEX MUFLU BORU 100",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Metre",
+   "fiyat": 104,
+   "kategori": "Özel Mekanik Tesisat Grubu"
+  },
+  {
+   "id": 1304,
+   "urunkodu": "MT10",
+   "urunadi": "TRİPLEX MUFLU BORU 200 MM",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Metre",
+   "fiyat": 280.5,
+   "kategori": "Özel Mekanik Tesisat Grubu"
+  },
+  {
+   "id": 1305,
+   "urunkodu": "MT11",
+   "urunadi": "RÖGAR 48X48 KAPAKLI KUTU",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Adet",
+   "fiyat": 1600,
+   "kategori": "Özel Mekanik Tesisat Grubu"
+  },
+  {
+   "id": 1361,
+   "urunkodu": "MT21",
+   "urunadi": "DALGIÇ POMPA DP RM 400",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Adet",
+   "fiyat": 4900,
+   "kategori": "Özel Mekanik Tesisat Grubu"
+  },
+  {
+   "id": 1362,
+   "urunkodu": "MT22",
+   "urunadi": "FIRAT EKO SOFT HORTUM",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Metre",
+   "fiyat": 98.2,
+   "kategori": "Özel Mekanik Tesisat Grubu"
+  },
+  {
+   "id": 1363,
+   "urunkodu": "MT23",
+   "urunadi": "SİLİKON TABANCASA METAL",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Adet",
+   "fiyat": 275,
+   "kategori": "Özel Mekanik Tesisat Grubu"
+  },
+  {
+   "id": 1365,
+   "urunkodu": "MT24",
+   "urunadi": "HIZLI YAPIŞTIRICI",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Adet",
+   "fiyat": 120,
+   "kategori": "Özel Mekanik Tesisat Grubu"
+  },
+  {
+   "id": 1366,
+   "urunkodu": "MT25",
+   "urunadi": "YER SİL PLASTİK 40 CM",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Adet",
+   "fiyat": 60,
+   "kategori": "Özel Mekanik Tesisat Grubu"
+  },
+  {
+   "id": 1367,
+   "urunkodu": "MT26",
+   "urunadi": "YERSİL PLASTİK 50 CM",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Adet",
+   "fiyat": 70,
+   "kategori": "Özel Mekanik Tesisat Grubu"
+  },
+  {
+   "id": 1368,
+   "urunkodu": "MT27",
+   "urunadi": "FIRÇA SAPI 120 CM",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Adet",
+   "fiyat": 60,
+   "kategori": "Özel Mekanik Tesisat Grubu"
+  },
+  {
+   "id": 1369,
+   "urunkodu": "MT28",
+   "urunadi": "SN 8 TRİPLEX MUFLU 100 MM BORU",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Metre",
+   "fiyat": 104.04,
+   "kategori": "Özel Mekanik Tesisat Grubu"
+  },
+  {
+   "id": 1370,
+   "urunkodu": "MT29",
+   "urunadi": "TRİPLEX CONTA 200",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Adet",
+   "fiyat": 30,
+   "kategori": "Özel Mekanik Tesisat Grubu"
+  },
+  {
+   "id": 1371,
+   "urunkodu": "MT30",
+   "urunadi": "TRİPLEX CONTA 100",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Adet",
+   "fiyat": 10,
+   "kategori": "Özel Mekanik Tesisat Grubu"
+  },
+  {
+   "id": 1372,
+   "urunkodu": "MT31",
+   "urunadi": "DUBLEX 200/87 KAPALI DİRSEK",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Adet",
+   "fiyat": 735.24,
+   "kategori": "Özel Mekanik Tesisat Grubu"
+  },
+  {
+   "id": 1373,
+   "urunkodu": "MT32",
+   "urunadi": "PPRC MANŞON 25 MM",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Adet",
+   "fiyat": 4.87,
+   "kategori": "Özel Mekanik Tesisat Grubu"
+  },
+  {
+   "id": 1376,
+   "urunkodu": "MT33",
+   "urunadi": "MERMER KESİCİ 230 MM",
+   "olcu": "230 MM",
+   "birim": "Adet",
+   "fiyat": 105,
+   "kategori": "Özel Mekanik Tesisat Grubu"
+  },
+  {
+   "id": 1377,
+   "urunkodu": "MT34",
+   "urunadi": "ELMAS TESTERE ULTRA HASSAS 180 MM",
+   "olcu": "180 MM",
+   "birim": "Adet",
+   "fiyat": 400,
+   "kategori": "Özel Mekanik Tesisat Grubu"
+  },
+  {
+   "id": 1378,
+   "urunkodu": "MT35",
+   "urunadi": "SAAT REKORU 3/4 ",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Adet",
+   "fiyat": 190,
+   "kategori": "Özel Mekanik Tesisat Grubu"
+  },
+  {
+   "id": 1380,
+   "urunkodu": "MT36",
+   "urunadi": "KÖRÜKLÜ KADA",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Adet",
+   "fiyat": 140,
+   "kategori": "Özel Mekanik Tesisat Grubu"
+  },
+  {
+   "id": 1381,
+   "urunkodu": "MT37",
+   "urunadi": "MAKET BIÇAGI METAL",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Adet",
+   "fiyat": 100,
+   "kategori": "Özel Mekanik Tesisat Grubu"
+  },
+  {
+   "id": 1385,
+   "urunkodu": "OSM1",
+   "urunadi": "STREÇ 3 KG",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Adet",
+   "fiyat": 250,
+   "kategori": "Özel Sarf Malzemeleri"
+  },
+  {
+   "id": 1386,
+   "urunkodu": "OSM2",
+   "urunadi": "KOLİ BANDI ",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Adet",
+   "fiyat": 15,
+   "kategori": "Özel Sarf Malzemeleri"
+  },
+  {
+   "id": 1246,
+   "urunkodu": "V16",
+   "urunadi": "QUA SG HİELO LİGHT FLPPT 60X120",
+   "olcu": "60X120",
+   "birim": "m2",
+   "fiyat": 0,
+   "kategori": "Özel Vida Grubu"
+  },
+  {
+   "id": 1249,
+   "urunkodu": "V17",
+   "urunadi": "BAUMİT PREMIUM FUGA İPEK GRİ",
+   "olcu": "20",
+   "birim": "Kg",
+   "fiyat": 0,
+   "kategori": "Özel Vida Grubu"
+  },
+  {
+   "id": 1250,
+   "urunkodu": "V18",
+   "urunadi": "ALM LÜX11 MM LASTİKLİ MERDİVEN BAS MAT",
+   "olcu": "METRE",
+   "birim": "Metre",
+   "fiyat": 0,
+   "kategori": "Özel Vida Grubu"
+  },
+  {
+   "id": 1155,
+   "urunkodu": "VG11",
+   "urunadi": "Koçtaş Mutfak Dolabı",
+   "olcu": "X",
+   "birim": "Takım",
+   "fiyat": 45000,
+   "kategori": "Özel Vitrifiye Grubu"
+  },
+  {
+   "id": 1209,
+   "urunkodu": "VG25",
+   "urunadi": "BİEN 30X60 DİCLE BEYAZ",
+   "olcu": "30X60",
+   "birim": "m2",
+   "fiyat": 375,
+   "kategori": "Özel Vitrifiye Grubu"
+  },
+  {
+   "id": 1210,
+   "urunkodu": "VG26",
+   "urunadi": "UŞAK MERMER GRİ",
+   "olcu": "30X60",
+   "birim": "m2",
+   "fiyat": 375,
+   "kategori": "Özel Vitrifiye Grubu"
+  },
+  {
+   "id": 1211,
+   "urunkodu": "VG27",
+   "urunadi": "UŞAK MANAVGAT ANTRASİT",
+   "olcu": "30X60",
+   "birim": "m2",
+   "fiyat": 375,
+   "kategori": "Özel Vitrifiye Grubu"
+  },
+  {
+   "id": 1212,
+   "urunkodu": "VG28",
+   "urunadi": "UŞAK MERMER GRİ 60X60",
+   "olcu": "60X60",
+   "birim": "m2",
+   "fiyat": 678,
+   "kategori": "Özel Vitrifiye Grubu"
+  },
+  {
+   "id": 1213,
+   "urunkodu": "VG29",
+   "urunadi": "UŞAK FOÇA 45X45",
+   "olcu": "45X45",
+   "birim": "m2",
+   "fiyat": 415,
+   "kategori": "Özel Vitrifiye Grubu"
+  },
+  {
+   "id": 1244,
+   "urunkodu": "VG34",
+   "urunadi": "GÜRAL 60X60 MISHA ANTRACTİVE",
+   "olcu": "60X60",
+   "birim": "Adet",
+   "fiyat": 545,
+   "kategori": "Özel Vitrifiye Grubu"
+  },
+  {
+   "id": 1245,
+   "urunkodu": "VG35",
+   "urunadi": "UŞAK ARHAN BONE 30X60",
+   "olcu": "30X60",
+   "birim": "m2",
+   "fiyat": 376,
+   "kategori": "Özel Vitrifiye Grubu"
+  },
+  {
+   "id": 1247,
+   "urunkodu": "VG36",
+   "urunadi": "BAUMİT PREMİUM FUGA GRİ",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Kg",
+   "fiyat": 0,
+   "kategori": "Özel Vitrifiye Grubu"
+  },
+  {
+   "id": 1248,
+   "urunkodu": "VG37",
+   "urunadi": "BAUMİT PREMIUM FUGA ANTRACTİVE",
+   "olcu": "20",
+   "birim": "Kg",
+   "fiyat": 0,
+   "kategori": "Özel Vitrifiye Grubu"
+  },
+  {
+   "id": 1252,
+   "urunkodu": "VG38",
+   "urunadi": "TERRA CLİCK KARTEPE 8 MM AC3",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "m2",
+   "fiyat": 0,
+   "kategori": "Özel Vitrifiye Grubu"
+  },
+  {
+   "id": 1253,
+   "urunkodu": "VG39",
+   "urunadi": "STANDART ŞİLTE",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Paket",
+   "fiyat": 0,
+   "kategori": "Özel Vitrifiye Grubu"
+  },
+  {
+   "id": 1254,
+   "urunkodu": "VG40",
+   "urunadi": "LADİX 6 CM SÜPÜRGELİK",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Boy",
+   "fiyat": 0,
+   "kategori": "Özel Vitrifiye Grubu"
+  },
+  {
+   "id": 1255,
+   "urunkodu": "VG41",
+   "urunadi": "DÜZ KAPI AGZI PROFİL",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Boy",
+   "fiyat": 0,
+   "kategori": "Özel Vitrifiye Grubu"
+  },
+  {
+   "id": 1266,
+   "urunkodu": "VG42",
+   "urunadi": "TERRACLİCK BEYDAGI 8 MM",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "m2",
+   "fiyat": 0,
+   "kategori": "Özel Vitrifiye Grubu"
+  },
+  {
+   "id": 1267,
+   "urunkodu": "VG43",
+   "urunadi": "VİTRA S20 ASMA KLOZET KOMPACT 48 CM",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Adet",
+   "fiyat": 13000,
+   "kategori": "Özel Vitrifiye Grubu"
+  },
+  {
+   "id": 1268,
+   "urunkodu": "VG44",
+   "urunadi": "VİTRA S20 SOFT KLOZET KAPAGI",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Adet",
+   "fiyat": 2500,
+   "kategori": "Özel Vitrifiye Grubu"
+  },
+  {
+   "id": 1281,
+   "urunkodu": "VG45",
+   "urunadi": "ÇAMSAN MODERN MAVİ ÖAM 8 MM",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "m2",
+   "fiyat": 0,
+   "kategori": "Özel Vitrifiye Grubu"
+  },
+  {
+   "id": 1282,
+   "urunkodu": "VG46",
+   "urunadi": "SİYAH ŞİLTE",
+   "olcu": "3 MM",
+   "birim": "m2",
+   "fiyat": 0,
+   "kategori": "Özel Vitrifiye Grubu"
+  },
+  {
+   "id": 1283,
+   "urunkodu": "VG47",
+   "urunadi": "8 CM SÜPÜRGELİK",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Metre",
+   "fiyat": 0,
+   "kategori": "Özel Vitrifiye Grubu"
+  },
+  {
+   "id": 1344,
+   "urunkodu": "VG55",
+   "urunadi": "PARKE TERRA SANTORİNİ",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "m2",
+   "fiyat": 226.66,
+   "kategori": "Özel Vitrifiye Grubu"
+  },
+  {
+   "id": 1345,
+   "urunkodu": "VG56",
+   "urunadi": "DUŞA KABİN",
+   "olcu": "90X90 SİYAH KAROLAJ",
+   "birim": "Takım",
+   "fiyat": 3475,
+   "kategori": "Özel Vitrifiye Grubu"
+  },
+  {
+   "id": 1346,
+   "urunkodu": "VG57",
+   "urunadi": "ÇAMSAN MODERN MEŞE ",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "m2",
+   "fiyat": 356,
+   "kategori": "Özel Vitrifiye Grubu"
+  },
+  {
+   "id": 1347,
+   "urunkodu": "VG58",
+   "urunadi": "SÜPÜRGELİK 10 CM LAKE BEYAZ",
+   "olcu": "10 CM ",
+   "birim": "Metre",
+   "fiyat": 75,
+   "kategori": "Özel Vitrifiye Grubu"
+  },
+  {
+   "id": 1352,
+   "urunkodu": "VG59",
+   "urunadi": "PLATİNUM ALBERO MEŞE QUİCK AC 4 PARKE ",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "m2",
+   "fiyat": 398,
+   "kategori": "Özel Vitrifiye Grubu"
+  },
+  {
+   "id": 1353,
+   "urunkodu": "VG60",
+   "urunadi": "ÇAMSAN SİLVER DİDİM MEŞE",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "m2",
+   "fiyat": 275,
+   "kategori": "Özel Vitrifiye Grubu"
+  },
+  {
+   "id": 1354,
+   "urunkodu": "VG61",
+   "urunadi": "DUŞAKABİN ",
+   "olcu": "70X120 SİYAH KAROLAJ",
+   "birim": "Adet",
+   "fiyat": 4140,
+   "kategori": "Özel Vitrifiye Grubu"
+  },
+  {
+   "id": 1355,
+   "urunkodu": "VG62",
+   "urunadi": "DUŞAKABİN",
+   "olcu": "80X120  SİYAH KAROLAJ",
+   "birim": "Adet",
+   "fiyat": 4380,
+   "kategori": "Özel Vitrifiye Grubu"
+  },
+  {
+   "id": 1356,
+   "urunkodu": "VG63",
+   "urunadi": "MONTAJ SETİ",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Adet",
+   "fiyat": 60,
+   "kategori": "Özel Vitrifiye Grubu"
+  },
+  {
+   "id": 1358,
+   "urunkodu": "VG64",
+   "urunadi": "DUŞAKABİN",
+   "olcu": "80X80 GÜMÜŞ DÜZ CAM ",
+   "birim": "Adet",
+   "fiyat": 3600,
+   "kategori": "Özel Vitrifiye Grubu"
+  },
+  {
+   "id": 1382,
+   "urunkodu": "VG65",
+   "urunadi": "İDEAL BANYO DOLABI 65",
+   "olcu": "65 ",
+   "birim": "Adet",
+   "fiyat": 3750,
+   "kategori": "Özel Vitrifiye Grubu"
+  },
+  {
+   "id": 1383,
+   "urunkodu": "VG66",
+   "urunadi": "BANYO DOLABI MİNİ 26X45",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Adet",
+   "fiyat": 4000,
+   "kategori": "Özel Vitrifiye Grubu"
+  },
+  {
+   "id": 1384,
+   "urunkodu": "VG67",
+   "urunadi": "BANYO DOLABI MERCAN 65",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Adet",
+   "fiyat": 5750,
+   "kategori": "Özel Vitrifiye Grubu"
+  },
+  {
+   "id": 1387,
+   "urunkodu": "VG68",
+   "urunadi": "DUŞA KABİN 100X100",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Adet",
+   "fiyat": 4450,
+   "kategori": "Özel Vitrifiye Grubu"
+  },
+  {
+   "id": 1388,
+   "urunkodu": "VG69",
+   "urunadi": "DUŞA KABİN 160 ",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Adet",
+   "fiyat": 3912,
+   "kategori": "Özel Vitrifiye Grubu"
+  },
+  {
+   "id": 1394,
+   "urunkodu": "VG70",
+   "urunadi": "DUŞ TEKNESİ 90X90",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Adet",
+   "fiyat": 3042,
+   "kategori": "Özel Vitrifiye Grubu"
+  },
+  {
+   "id": 1395,
+   "urunkodu": "VG71",
+   "urunadi": "DUŞ SİFONU KAPAKLI",
+   "olcu": "ÖZEL ÖLÇÜ",
+   "birim": "Adet",
+   "fiyat": 100,
+   "kategori": "Özel Vitrifiye Grubu"
+  },
+  {
+   "id": 1023,
+   "urunkodu": "CG2",
+   "urunadi": "Sandviç Panel (ANTRASİT)",
+   "olcu": "Özel Ölçü",
+   "birim": "Adet",
+   "fiyat": 525,
+   "kategori": "Özel Çatı Grubu"
+  },
+  {
+   "id": 1024,
+   "urunkodu": "CG3",
+   "urunadi": "Sandviç Panel (BEYAZ)",
+   "olcu": "Özel Ölçü",
+   "birim": "Adet",
+   "fiyat": 525,
+   "kategori": "Özel Çatı Grubu"
+  },
+  {
+   "id": 1025,
+   "urunkodu": "CG4",
+   "urunadi": "Sandviç Panel (BORDO)",
+   "olcu": "Özel Ölçü",
+   "birim": "Adet",
+   "fiyat": 525,
+   "kategori": "Özel Çatı Grubu"
+  },
+  {
+   "id": 1026,
+   "urunkodu": "CG5",
+   "urunadi": "Sandviç Panel (YEŞİL)",
+   "olcu": "Özel Ölçü",
+   "birim": "Adet",
+   "fiyat": 0,
+   "kategori": "Özel Çatı Grubu"
+  },
+  {
+   "id": 1027,
+   "urunkodu": "CG6",
+   "urunadi": "Tek Kat Panel (ANTRASİT)",
+   "olcu": "Özel Ölçü",
+   "birim": "Adet",
+   "fiyat": 350,
+   "kategori": "Özel Çatı Grubu"
+  },
+  {
+   "id": 1028,
+   "urunkodu": "CG7",
+   "urunadi": "Tek Kat Panel (BEYAZ)",
+   "olcu": "Özel Ölçü",
+   "birim": "Adet",
+   "fiyat": 350,
+   "kategori": "Özel Çatı Grubu"
+  },
+  {
+   "id": 1029,
+   "urunkodu": "CG8",
+   "urunadi": "Tek Kat Panel (BORDO)",
+   "olcu": "Özel Ölçü",
+   "birim": "Adet",
+   "fiyat": 350,
+   "kategori": "Özel Çatı Grubu"
+  },
+  {
+   "id": 1030,
+   "urunkodu": "CG9",
+   "urunadi": "Tek Kat Panel (YEŞİL)",
+   "olcu": "Özel Ölçü",
+   "birim": "Adet",
+   "fiyat": 350,
+   "kategori": "Özel Çatı Grubu"
+  },
+  {
+   "id": 1031,
+   "urunkodu": "CG10",
+   "urunadi": "Metal Kiremit (ANTRASİT)",
+   "olcu": "Özel Ölçü",
+   "birim": "Adet",
+   "fiyat": 345,
+   "kategori": "Özel Çatı Grubu"
+  },
+  {
+   "id": 1032,
+   "urunkodu": "CG11",
+   "urunadi": "Metal Kiremit (BEYAZ)",
+   "olcu": "Özel Ölçü",
+   "birim": "Adet",
+   "fiyat": 345,
+   "kategori": "Özel Çatı Grubu"
+  },
+  {
+   "id": 1033,
+   "urunkodu": "CG12",
+   "urunadi": "Metal Kiremit (BORDO)",
+   "olcu": "Özel Ölçü",
+   "birim": "Adet",
+   "fiyat": 345,
+   "kategori": "Özel Çatı Grubu"
+  },
+  {
+   "id": 1034,
+   "urunkodu": "CG13",
+   "urunadi": "Metal Kiremit (YEŞİL)",
+   "olcu": "Özel Ölçü",
+   "birim": "Adet",
+   "fiyat": 345,
+   "kategori": "Özel Çatı Grubu"
+  },
+  {
+   "id": 1035,
+   "urunkodu": "CG14",
+   "urunadi": "Trapez Saç (ANTRASİT)",
+   "olcu": "Özel Ölçü",
+   "birim": "Adet",
+   "fiyat": 250,
+   "kategori": "Özel Çatı Grubu"
+  },
+  {
+   "id": 1036,
+   "urunkodu": "CG15",
+   "urunadi": "Trapez Saç (BEYAZ)",
+   "olcu": "Özel Ölçü",
+   "birim": "Adet",
+   "fiyat": 250,
+   "kategori": "Özel Çatı Grubu"
+  },
+  {
+   "id": 1037,
+   "urunkodu": "CG16",
+   "urunadi": "Trapez Saç (BORDO)",
+   "olcu": "Özel Ölçü",
+   "birim": "Adet",
+   "fiyat": 250,
+   "kategori": "Özel Çatı Grubu"
+  },
+  {
+   "id": 1038,
+   "urunkodu": "CG17",
+   "urunadi": "Trapez Saç (YEŞİL)",
+   "olcu": "Özel Ölçü",
+   "birim": "Adet",
+   "fiyat": 450,
+   "kategori": "Özel Çatı Grubu"
+  }
+ ]
+}
