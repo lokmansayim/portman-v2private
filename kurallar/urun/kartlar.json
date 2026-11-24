@@ -970,6 +970,32 @@
    "pafta": [],
    "yerlesim": {"kural": "damlalik_yerlesimi", "parca": "damlalik", "sinif": "IfcCovering"},
    "kaynak": {"durum": "lokman", "tarih": "2026-11-20", "dayanak": "D-143 (Lokman, 20 Kasım 2026 19:47:50: \"damlalık montaj paftasında görünmüyor\"; eskiz kartı 20:01:45 \"Eskizdeki gibi\"). Yer D-133 (12:53:18): \"damlalık bu duvar ile trapez sacın üstüne geliyor ki duvardan süzülen su trapez sacın üstüne aksın\". Liste satırı \"Damlalık\" (D-57, terasların eni ÷ 2,8). Kart sona eklendi"}
+  },
+  {
+   "kod": "MA-06",
+   "ad": "Kısa makas (köşe kırması)",
+   "liste": {"grup": "1005", "satirlar": ["Kısa makas"]},
+   "olcu": "Boy parçada (yüksek yandaki duvarın dış yüzünden saçak ucuna; AP-24'te 1555)",
+   "birim": "adet",
+   "nerede": "Köşe kırmalı açık mahalin (veranda) çatısında (İE-17 PR-2): kiriş boyunca eşit aralıkla, yüksek yandaki duvardan saçak ucuna; açık yandaki uçta çapraz makas (MA-07). Yer ve sayı çatı tanımından (`motor/cati_serit.py` › `mahal_catilari`; liste, 3B model ve kart modeli aynı)",
+   "sayim": "yerlesen_adet",
+   "ifc": {"sinif": "IfcElementAssemblyType", "alt_tur": "TRUSS"},
+   "pafta": [],
+   "bugunku_ifc": [{"sinif": "IfcElementAssembly", "kosul": [["PortatifEv_Kapsam", "BOMKalem", "^Kısa makas · "]], "cati_tipleri": ["besik"]}],
+   "kaynak": {"durum": "varsayim", "tarih": "2026-11-24", "dayanak": "Listedeki satır \"Kısa makas · <mahal> çatısı\" (`motor/prefabrik_liste.py`, J8; AP-03 paftası MK9–12: 4 tuttu). Kesit kartta yazılı değil (MA-01, MA-02 gibi). Kart sona eklendi (63 m² montaj rehberi bakımı, 24 Kasım 2026)"}
+  },
+  {
+   "kod": "MA-07",
+   "ad": "Çapraz makas (köşe kırması)",
+   "liste": {"grup": "1005", "satirlar": ["Çapraz makas (kırma)"]},
+   "olcu": "Boy parçada (kırma hattı boyunca saçak köşesinden duvara; AP-24'te 1820)",
+   "birim": "adet",
+   "nerede": "Köşe kırmalı açık mahalin çatısında, açık yandaki uçta kırma hattı boyunca: saçak köşesinden yüksek yandaki duvara. Kırma hattı başına bir; yer çatı tanımının kırma hattından (`motor/cati_serit.py`)",
+   "sayim": "yerlesen_adet",
+   "ifc": {"sinif": "IfcElementAssemblyType", "alt_tur": "TRUSS"},
+   "pafta": [],
+   "bugunku_ifc": [{"sinif": "IfcElementAssembly", "kosul": [["PortatifEv_Kapsam", "BOMKalem", "^Çapraz makas \\(kırma\\) · "]], "cati_tipleri": ["besik"]}],
+   "kaynak": {"durum": "varsayim", "tarih": "2026-11-24", "dayanak": "Listedeki satır \"Çapraz makas (kırma) · <mahal> çatısı\" (`motor/prefabrik_liste.py`; AP-03 paftası MK13: 1 tuttu). Kart sona eklendi (63 m² montaj rehberi bakımı, 24 Kasım 2026)"}
   }
  ],
  "gorunum": [
