@@ -1,0 +1,256 @@
+{
+ "tur": "plan",
+ "yapi_turu": null,
+ "kat_sayisi": null,
+ "giris_kenari": "alt",
+ "dis_olcu": {
+  "yatay_cm": 840.0,
+  "dusey_cm": 900.0
+ },
+ "zincirler": [
+  {
+   "kenar": "ust",
+   "olculer_cm": [
+    840.0
+   ],
+   "toplam_cm": 840.0,
+   "kapsam": "govde"
+  },
+  {
+   "kenar": "sol",
+   "olculer_cm": [
+    900.0
+   ],
+   "toplam_cm": 900.0,
+   "kapsam": "govde"
+  },
+  {
+   "kenar": "alt",
+   "olculer_cm": [
+    410.0,
+    430.0
+   ],
+   "toplam_cm": null,
+   "kapsam": "govde"
+  }
+ ],
+ "odalar": [
+  {
+   "ad": "YATAK ODASI 1",
+   "islev": "yatak_odasi",
+   "alan_m2": null,
+   "dikdortgenler": [
+    [
+     0.0,
+     0.0,
+     310.0,
+     390.0
+    ]
+   ]
+  },
+  {
+   "ad": "BANYO",
+   "islev": "banyo",
+   "alan_m2": null,
+   "dikdortgenler": [
+    [
+     310.0,
+     0.0,
+     530.0,
+     268.0
+    ]
+   ]
+  },
+  {
+   "ad": "YATAK ODASI 2",
+   "islev": "yatak_odasi",
+   "alan_m2": null,
+   "dikdortgenler": [
+    [
+     530.0,
+     0.0,
+     840.0,
+     390.0
+    ]
+   ]
+  },
+  {
+   "ad": "HOL",
+   "islev": "hol",
+   "alan_m2": null,
+   "dikdortgenler": [
+    [
+     310.0,
+     268.0,
+     530.0,
+     390.0
+    ],
+    [
+     410.0,
+     390.0,
+     530.0,
+     710.0
+    ]
+   ]
+  },
+  {
+   "ad": "SALON",
+   "islev": "salon",
+   "alan_m2": null,
+   "dikdortgenler": [
+    [
+     0.0,
+     390.0,
+     410.0,
+     900.0
+    ]
+   ]
+  },
+  {
+   "ad": "MUTFAK",
+   "islev": "mutfak",
+   "alan_m2": null,
+   "dikdortgenler": [
+    [
+     530.0,
+     390.0,
+     840.0,
+     710.0
+    ]
+   ]
+  },
+  {
+   "ad": "GİRİŞ",
+   "islev": "giris",
+   "alan_m2": null,
+   "dikdortgenler": [
+    [
+     410.0,
+     710.0,
+     840.0,
+     900.0
+    ]
+   ]
+  }
+ ],
+ "kapilar": [
+  {
+   "arasinda": [
+    "YATAK ODASI 1",
+    "HOL"
+   ],
+   "kenar": null,
+   "genislik_cm": null,
+   "konum_cm": null
+  },
+  {
+   "arasinda": [
+    "YATAK ODASI 2",
+    "HOL"
+   ],
+   "kenar": null,
+   "genislik_cm": null,
+   "konum_cm": null
+  },
+  {
+   "arasinda": [
+    "BANYO",
+    "HOL"
+   ],
+   "kenar": null,
+   "genislik_cm": null,
+   "konum_cm": null
+  },
+  {
+   "arasinda": [
+    "SALON",
+    "HOL"
+   ],
+   "kenar": null,
+   "genislik_cm": null,
+   "konum_cm": null
+  },
+  {
+   "arasinda": [
+    "MUTFAK",
+    "HOL"
+   ],
+   "kenar": null,
+   "genislik_cm": null,
+   "konum_cm": null
+  },
+  {
+   "arasinda": [
+    "GİRİŞ",
+    "HOL"
+   ],
+   "kenar": null,
+   "genislik_cm": null,
+   "konum_cm": null
+  }
+ ],
+ "pencereler": [
+  {
+   "oda": "YATAK ODASI 1",
+   "kenar": "sol",
+   "olcu": null,
+   "adet": 1,
+   "konum_cm": 199.0
+  },
+  {
+   "oda": "YATAK ODASI 2",
+   "kenar": "sag",
+   "olcu": null,
+   "adet": 1,
+   "konum_cm": 199.0
+  },
+  {
+   "oda": "BANYO",
+   "kenar": "ust",
+   "olcu": null,
+   "adet": 1,
+   "konum_cm": 470.0
+  },
+  {
+   "oda": "SALON",
+   "kenar": "sol",
+   "olcu": null,
+   "adet": 1,
+   "konum_cm": 646.0
+  },
+  {
+   "oda": "SALON",
+   "kenar": "alt",
+   "olcu": null,
+   "adet": 1,
+   "konum_cm": 204.0
+  },
+  {
+   "oda": "MUTFAK",
+   "kenar": "alt",
+   "olcu": null,
+   "adet": 1,
+   "konum_cm": 687.0
+  }
+ ],
+ "verandalar": [],
+ "cati": {
+  "tip": null,
+  "mahya": null,
+  "egim_yuzde": null,
+  "sacak_cm": null
+ },
+ "duvar_yuksekligi_cm": null,
+ "tahminler": [
+  "İç ölçülerden (294/220/294, 380/494) duvar eksenleri x=310, 530 ve y=390 alındı",
+  "banyo derinliği 268 cm (iç 254)",
+  "giriş nişi derinliği 190 cm, hol-mutfak alt duvarı y=710",
+  "pencere genişlikleri 120 cm yazılı, yükseklikleri yazmıyor; banyo penceresi ölçüsü yazmıyor",
+  "pencere konumları çizimdeki yerlerinden ölçüldü"
+ ],
+ "emin_olunamayanlar": [
+  "Sağ alttaki 430x190 cm bölüm (mutfak penceresinin baktığı yer) dışa açık giriş nişi/veranda mı, yoksa kapalı bir bölüm mü? Alt ve sağ kenarı açık mı?",
+  "Odaların adı çizimde yazmıyor: sol üst ve sağ üst yatak odası, sol alt salon, sağdaki mutfak olarak okundu; doğru mu?"
+ ],
+ "ozet": "840x900 cm tek katlı ev: 2 yatak odası, banyo, hol, salon, mutfak; sağ alt köşede 430x190 cm giriş nişi."
+}
