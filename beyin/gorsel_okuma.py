@@ -491,7 +491,17 @@ def kanonik(okuma: dict | CizimOkumasi) -> dict:
         c = cephe[v.kenar]
         bas, bit = (x0, x1) if c in ("on", "arka") else (H - y1, H - y0)
         ver.append({"cephe": c, "bas": bas, "bit": bit, "derinlik": d, "alan_m2": v.alan_m2, "rect": [x0, y0, x1, y1]})
-    kan = {"W": W, "H": H, "giris": giris, "yan_giris": kapi_kenari in ("sol", "sag"), "odalar": odalar,
+    kolon = []                                  # BK-73: verandayı kapsayan zincirin ara noktaları (Motor çerçevesinde duvar boyunca)
+    for z in o.zincirler:
+        if z.kapsam != "veranda_dahil" or len(z.olculer_cm) < 2:
+            continue
+        t = 0.0
+        for a in z.olculer_cm[:-1]:
+            t += float(a)
+            x, y = {"ust": (t, 0.0), "alt": (t, Hc), "sol": (0.0, t), "sag": (Wc, t)}[z.kenar]
+            xk, yk, _, _ = _dortgen([x, y, x, y], Wc, Hc, giris)
+            kolon.append({"cephe": cephe[z.kenar], "konum": round(xk if cephe[z.kenar] in ("on", "arka") else yk, 2)})
+    kan = {"W": W, "H": H, "giris": giris, "yan_giris": kapi_kenari in ("sol", "sag"), "odalar": odalar, "kolon_adaylari": kolon,
            "pencereler": [{"oda": p.oda, "cephe": cephe[p.kenar], "olcu": p.olcu, "adet": p.adet}
                           | ({"konum": konum(p.kenar, p.konum_cm)} if p.konum_cm is not None and p.adet == 1 else {}) for p in o.pencereler],
            "kapilar": [kapi(k) | ({"konum": konum(k.kenar, k.konum_cm)} if k.konum_cm is not None and k.kenar else {}) for k in o.kapilar],
@@ -916,6 +926,7 @@ def _denetle(okuma: dict, ayar: dict | None = None, bk14: bool | None = None) ->
 
 KONUM = "_konum_cm"                     # BK-72: açıklığın çizimdeki yeri (Motor çerçevesi); İş Emri'ne yazılmaz, `_motor_denemesi` alır
 YERLESIM_DENEME = 3                     # BK-72: Motor'un açıklık hatasında en çok bu kadar açıklığın panosu aranır
+BIRLIKTE_DENEME = 512                   # BK-73: yeri okunan açıklıkların birlikte denenen pano sırası (dayanak seçeneği başına)
 
 
 def _aciklik_merkezleri(plan) -> list[tuple[dict, float, str]]:
@@ -933,6 +944,39 @@ def _ayni_aciklik(ac: dict, anahtar: dict) -> bool:
     if ac["tur"] != anahtar["tur"] or str(ac["olcu"]) != anahtar["olcu"]:
         return False
     return ac.get("mahal") == anahtar["mahal"] if ac["tur"] == "pencere" else tuple(ac.get("arasi") or ()) == anahtar["arasi"]
+
+
+def _dayanak_adaylari(ie: dict, acs: list[dict]) -> list[dict]:
+    """BK-73: açıklıkların duvarındaki dış duvar parçası bir iç duvarın aksına dayanabilir mi (D-34 `dis_pano_dayanagi`)? Odanın o cepheye
+    bakan her duvar parçası (Motor çerçevesi, arka-sol) için parçanın içine düşen her iç duvar aksı bir aday. Kod yalnız aday üretir;
+    seçimi `_yerlesim_ara` okunan yerlerle yapar."""
+    mahaller = ie.get("mahaller") or []
+    out = []
+    for ad, cephe in dict.fromkeys((a.get("mahal") or next((m for m in a.get("arasi") or [] if m != "__DIS__"), None), a.get("duvar"))
+                                   for a in acs):
+        rects = [q for m in mahaller if m["ad"] == ad for q in m["konum_cm"]]
+        if not rects or cephe not in ("on", "arka", "sol", "sag"):
+            continue
+        yatay = cephe in ("on", "arka")
+        for q in rects:
+            hat = {"on": q[3], "arka": q[1], "sol": q[0], "sag": q[2]}[cephe]
+            lo, hi = (q[0], q[2]) if yatay else (q[1], q[3])
+            # aynı odanın öteki dikdörtgeninin örttüğü kısım duvar değil (L oda: salonun önü mutfağın arkasında)
+            parcalar = [(lo, hi)]
+            for r in rects:
+                if r is q:
+                    continue
+                karsi = {"on": r[1], "arka": r[3], "sol": r[2], "sag": r[0]}[cephe]
+                if abs(karsi - hat) > 1e-6:
+                    continue
+                a0, a1 = (r[0], r[2]) if yatay else (r[1], r[3])
+                parcalar = [p for x0, x1 in parcalar for p in ((x0, min(x1, a0)), (max(x0, a1), x1)) if p[1] - p[0] > 1e-6]
+            eksen = sorted({v for m in mahaller for r in m["konum_cm"] for v in ((r[0], r[2]) if yatay else (r[1], r[3]))})
+            for x0, x1 in parcalar:
+                for a in eksen:
+                    if x0 + 1e-6 < a < x1 - 1e-6:
+                        out.append({"x" if yatay else "y": a, "aralik_cm": [x0, x1], "duvar_cm": hat})
+    return out
 
 
 def _yerlesim_ara(ie: dict, hata: str, G) -> tuple[dict | None, list[str]]:
@@ -959,42 +1003,72 @@ def _yerlesim_ara(ie: dict, hata: str, G) -> tuple[dict | None, list[str]]:
     komsu = [i for i, a in enumerate(acs) if a["tur"] in ("pencere", "dis_kapi") and a.get("duvar") == acs[j].get("duvar")
              and oda & (set([a.get("mahal")]) | set(a.get("arasi") or []))]
     sonuclar = []
+    tam_yer = all(KONUM in acs[k] for k in komsu)
+
+    def dene(x: dict, i: int, dayanak: int) -> str | None:
+        temiz = copy.deepcopy(x)
+        for a in temiz["acikliklar"]:
+            a.pop(KONUM, None)
+        try:
+            plan = G.kur(temiz)
+        except G.IsEmriHatasi as h:
+            return str(h)
+        merkez = _aciklik_merkezleri(plan)
+        uzak, yerler, en_uzak = 0.0, [], 0.0
+        for a in (x["acikliklar"][k] for k in komsu):
+            yer = next((c for anahtar, c, _ in merkez if _ayni_aciklik(a, anahtar)), None)
+            yerler.append(None if yer is None else round(yer, 1))
+            if KONUM in a and yer is not None:
+                uzak += abs(yer - float(a[KONUM]))
+                en_uzak = max(en_uzak, abs(yer - float(a[KONUM])))
+        sonuclar.append((round(uzak, 1), dayanak, tuple(yerler), i, temiz, en_uzak))
+        return None
+
     for i in komsu[:YERLESIM_DENEME]:
         for p in range(8):
             x = copy.deepcopy(ie)
             x["acikliklar"][i]["pano"] = p
-            temiz = copy.deepcopy(x)
-            for a in temiz["acikliklar"]:
-                a.pop(KONUM, None)
-            try:
-                plan = G.kur(temiz)
-            except G.IsEmriHatasi as h:
-                if "aralık dışı" in str(h):
-                    break
-                continue
-            merkez = _aciklik_merkezleri(plan)
-            uzak, yerler = 0.0, []
-            for a in (x["acikliklar"][k] for k in komsu):
-                yer = next((c for anahtar, c, _ in merkez if _ayni_aciklik(a, anahtar)), None)
-                yerler.append(None if yer is None else round(yer, 1))
-                if KONUM in a and yer is not None:
-                    uzak += abs(yer - float(a[KONUM]))
-            sonuclar.append((round(uzak, 1), tuple(yerler), i, temiz))
+            h = dene(x, i, 0)
+            if h is not None and "aralık dışı" in h:
+                break
+    if tam_yer and len(komsu) > 1:
+        # 76 m² (Nimet Doğan): tek açıklığın panosu değişince Motor geniş pencereyi yan duvara atıyordu (180/150 mutfağın önüne). Yeri okunan
+        # açıklıklar birlikte denenir; duvar bir iç duvarın aksına dayanınca (D-34 `dis_pano_dayanagi`, onaylı r05'teki gibi) okunan yere
+        # daha yakın düşüyorsa o da denenir. Seçim yine okunan yerlere en yakın olandır.
+        import itertools
+        secenekler = [[]] + [[d] for d in _dayanak_adaylari(ie, [acs[k] for k in komsu])]
+        for n, ek in enumerate(secenekler):
+            for pp in itertools.islice(itertools.product(range(8), repeat=min(len(komsu), YERLESIM_DENEME)), BIRLIKTE_DENEME):
+                x = copy.deepcopy(ie)
+                if ek:
+                    x["yapi"]["dizilim"]["dis_pano_dayanagi"] = list(x["yapi"]["dizilim"].get("dis_pano_dayanagi") or []) + ek
+                for k, p in zip(komsu, pp):
+                    x["acikliklar"][k]["pano"] = p
+                dene(x, komsu[0], n)
     if not sonuclar:
         return None, []
-    sonuclar.sort(key=lambda t: t[0])
-    farkli = {t[1] for t in sonuclar}
+    sonuclar.sort(key=lambda t: (t[0], t[1]))
+    farkli = {t[2] for t in sonuclar}
     if len(farkli) > 1:
         # yeri okunmamış açıklık varken birden çok yerleşim: kod yer uydurmaz, soru kalır (K21)
-        if not all(KONUM in acs[k] for k in komsu):
+        if not tam_yer:
             return None, []
-        ikinci = next((t for t in sonuclar[1:] if t[1] != sonuclar[0][1]), None)
+        ikinci = next((t for t in sonuclar[1:] if t[2] != sonuclar[0][2]), None)
         if ikinci is not None and ikinci[0] - sonuclar[0][0] < 1.0:
             return None, []
+    if tam_yer and sonuclar[0][5] > MOD:
+        # okunan yerden bir panodan uzak düşen yerleşim seçilmez (76 m²: 180/150 okunan yerinden 464 cm uzağa düşüyordu); soru kalır (K21)
+        return None, []
+    sonuclar = [(t[0], t[2], t[3], t[4]) for t in sonuclar]
     _, _, i, sec = sonuclar[0]
     a = acs[i]
     ad = _oda_adi(a["mahal"]) + " penceresi" if a["tur"] == "pencere" else "giriş kapısı"
-    return sec, [f"{ad} panoya sığmadığı için bir yan panoya alındı; yeri plandaki gibi"]
+    notlar = [f"{ad} panoya sığmadığı için bir yan panoya alındı; yeri plandaki gibi"]
+    eski = (ie["yapi"].get("dizilim") or {}).get("dis_pano_dayanagi") or []
+    for d in ((sec["yapi"].get("dizilim") or {}).get("dis_pano_dayanagi") or [])[len(eski):]:
+        notlar.append(f"pencerenin çizimdeki yerine gelmesi için {_oda_adi(a.get('mahal') or '')} {CEPHE_ADI.get(a.get('duvar'), '')}ki "
+                      f"duvarın panolarını iç duvarın aksına ({_tr(d.get('x', d.get('y')), 2)} cm) dayadım")
+    return sec, notlar
 
 
 def _motor_denemesi(ie: dict) -> tuple[str | None, list[str]]:
@@ -1019,6 +1093,7 @@ def _motor_denemesi(ie: dict) -> tuple[str | None, list[str]]:
                     raise
                 konumlar = [a.get(KONUM) for a in ie["acikliklar"]]
                 ie["acikliklar"] = [a | ({KONUM: k} if k is not None else {}) for a, k in zip(yeni["acikliklar"], konumlar)]
+                ie["yapi"] = yeni["yapi"]                  # BK-73: dış pano dayanağı da seçilen yerleşimden
                 notlar.extend(nt)
         else:
             G.kur(copy.deepcopy(temiz))
@@ -1379,6 +1454,7 @@ def is_emri_prefabrik(kan: dict, o: CizimOkumasi, bk14: bool | None = None, esik
         cz.append("dört kollu duvar birleşimi (" + ", ".join(" / ".join(_oda_adi(x) for x in k) for k in arti[:2]) + ")")
     if cz:
         return None, sor, cz, nt
+    dikmeler = _ara_kolonlar(kan, mahaller, acik_mahal, xs, ys, W, H, nt)
     ie = {
         "is_emri_no": "", "revizyon": 0,
         "talep": {},
@@ -1400,11 +1476,48 @@ def is_emri_prefabrik(kan: dict, o: CizimOkumasi, bk14: bool | None = None, esik
         "varsayimlar": [f"Ölçüler bayi çiziminden okundu ve bayi teyit etti: gövde {_tr(W, 1)} × {_tr(H, 1)} cm, {nx:g} × {ny:g} pano."]
                        + [_bas_buyuk(n) + "." for n in nt],
         "eksikler": [],
-        "dikmeler": [],
+        "dikmeler": dikmeler,
     }
     if verandalar:
         ie["verandalar"] = verandalar
     return ie, sor, cz, nt
+
+
+KOLON_YAKIN_CM = 15                     # BK-73: zincir noktası bir oda sınırına bu kadar yakınsa duvarın ölçüsüdür, kolon değil
+
+
+def _ara_kolonlar(kan: dict, mahaller: list[dict], acik_mahal: set, xs: list[float], ys: list[float], W: float, H: float,
+                  nt: list[str]) -> list[list[float]]:
+    """BK-73 (76 m², Nimet Doğan: verandanın ön kenarında 391,5 / 408,55 zinciri, onaylı r05'te x 391,5'te 10 × 10 ara kolon): gövdedeki açık
+    mahalin dış kenarında verandayı kapsayan zincirin ara noktası, kenarın içinde ve hiçbir oda sınırına yakın değilse ara kolondur. Kolon
+    zincirdeki ölçüyle konur (dikme 10 × 10, ortası noktada); İş Emri'nde `dikmeler` gerçek çerçevede (sol-ön köşeden). Bayiye not."""
+    out, yazi = [], []
+    for k in kan.get("kolon_adaylari") or []:
+        c, p = k["cephe"], float(k["konum"])
+        yatay = c in ("on", "arka")
+        sinir = {"on": ys[-1], "arka": ys[0], "sol": xs[0], "sag": xs[-1]}[c]
+        ici = False
+        for m in mahaller:
+            if m["ad"] not in acik_mahal:
+                continue
+            for q in m["konum_cm"]:
+                hat = {"on": q[3], "arka": q[1], "sol": q[0], "sag": q[2]}[c]
+                lo, hi = (q[0], q[2]) if yatay else (q[1], q[3])
+                if abs(hat - sinir) < 1e-6 and lo + KOLON_YAKIN_CM < p < hi - KOLON_YAKIN_CM:
+                    ici = True
+        if not ici:
+            continue
+        sinirlar = {v for m in mahaller for q in m["konum_cm"] for v in ((q[0], q[2]) if yatay else (q[1], q[3]))}
+        if any(abs(p - v) < KOLON_YAKIN_CM for v in sinirlar):
+            continue
+        d = {"on": [p - 5, 0.0], "arka": [p - 5, H - 10], "sol": [0.0, H - p - 5], "sag": [W - 10, H - p - 5]}[c]
+        d = [_yuvarla(round(v * 4) / 4) for v in d]
+        if d not in out:
+            out.append(d)
+            yazi.append(f"{CEPHE_ADI[c]} {_tr(p, 2)} cm")
+    if yazi:
+        nt.append("verandanın açık kenarına çizimdeki ölçüyle ara kolon koydum (" + ", ".join(yazi) + ")")
+    return out
 
 
 def _olculu(v: float, noktalar: list[float]) -> bool:
