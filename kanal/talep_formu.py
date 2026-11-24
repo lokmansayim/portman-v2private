@@ -46,11 +46,13 @@ import re
 from pathlib import Path
 
 FORMLAR = Path(__file__).resolve().parent / "formlar"
-EKRAN = {"talep": "TALEP", "revizyon": "REVIZYON", "prefabrik": "TALEP_P", "talep2": "TALEP", "celik": "TALEP_C", "celik2": "TALEP_C"}
+EKRAN = {"talep": "TALEP", "revizyon": "REVIZYON", "prefabrik": "TALEP_P", "talep2": "TALEP", "celik": "TALEP_C", "celik2": "TALEP_C",
+         "standart": "STANDART_P"}
 DUGME = {"talep": "Talep formu", "revizyon": "Revizyon formu", "prefabrik": "Talep formu", "talep2": "Talep formu",
-         "celik": "Talep formu", "celik2": "Talep formu"}                 # flow_cta (≤ 20)
+         "celik": "Talep formu", "celik2": "Talep formu", "standart": "Standartlar"}     # flow_cta (≤ 20)
 # tf:<iz>[:1] talep · pf:<iz>[:1] prefabrik talep formu · cf:<iz>[:1] çelik talep formu · rv:<İş Emri no>:<rev> revizyon
-TOKEN = re.compile(r"^(tf|pf|cf|rv):([^:\s]{1,80})(?::([0-9]{1,3}))?$")
+# sf:<iz> standart formu (D-148, 24 Kasım 2026): çizimle gelen talepte bayiye giden tek ekranlı form; iz çizim mesajının izi
+TOKEN = re.compile(r"^(tf|pf|cf|rv|sf):([^:\s]{1,80})(?::([0-9]{1,3}))?$")
 TOKEN_FORMU = {"pf": "prefabrik", "cf": "celik"}  # token öneki → cevabın `form` alanı (ilk form ve verandasız form: alan yok)
 FLOW_ID = re.compile(r"^[0-9]{1,40}$")
 MEDYA_ID = re.compile(r"^[0-9]{1,40}$")
@@ -132,6 +134,18 @@ def talep_tokeni(iz: str, taslaktan: bool = False) -> str:
     return f"tf:{iz}:1" if taslaktan else f"tf:{iz}"
 
 
+def standart_tokeni(iz: str) -> str:
+    """D-148: çizimle gelen talepte gönderilen standart formunun belirteci; `iz` çizim okumasının `standart_iz`'i."""
+    return f"sf:{iz}"
+
+
+def standart_ozellikleri(oz: dict) -> tuple[dict, dict]:
+    """D-148 standart formunun cevabı → (`bina_ozellikleri`, `musteri`). Prefabrik talep formuyla aynı kural (`_prefabrik_talebi`):
+    seçimlerin hepsi yazılır (standart da; bayi formda gördü), ek istekler tek satır; müşteri adı ve teslim yeri maskeli."""
+    t = _prefabrik_talebi({"alanlar": {a: v for a, v in (oz.get("alanlar") or {}).items() if a not in ("kat", "oda", "alan", "en", "boy", "not")}}, {})
+    return dict(t.get("bina_ozellikleri") or {}), dict(t.get("musteri") or {})
+
+
 def revizyon_tokeni(no: str, rev: int) -> str:
     return f"rv:{no}:{int(rev)}"
 
@@ -169,8 +183,10 @@ def cevap_ozeti(rj) -> dict:
     rj = rj if isinstance(rj, dict) else {}
     token = _dize(rj.get("flow_token"), 120)
     m = TOKEN.match(token)
-    tur = {"tf": "talep", "pf": "talep", "cf": "talep", "rv": "revizyon"}.get(m.group(1)) if m else "bilinmiyor"
+    tur = {"tf": "talep", "pf": "talep", "cf": "talep", "rv": "revizyon", "sf": "standart"}.get(m.group(1)) if m else "bilinmiyor"
     a: dict = {}
+    if tur == "standart":                          # D-148: yalnız prefabrik formun ikinci ekranının alanları (kat, oda, ölçü yok)
+        return {"tur": tur, "form": "standart", "token": token, "alanlar": _form_alanlari(rj, "prefabrik"), "dosyalar": []}
     if tur == "talep" and m.group(1) in TOKEN_FORMU:
         form = TOKEN_FORMU[m.group(1)]
         return {"tur": tur, "form": form, "token": token, "alanlar": _form_alanlari(rj, form), "dosyalar": _dosyalar(rj.get("dosya"))}
@@ -442,6 +458,9 @@ def metin(oz: dict) -> str:
         if a.get("aciklama"):
             return a["aciklama"] + (f" (değişecek: {neyi})" if neyi else "") + dosya
         return "Revizyon formu" + (f": {neyi}." if neyi else ".") + dosya
+    if oz.get("tur") == "standart":
+        sd = standart_disi(oz)
+        return "Standart formu: " + (", ".join(sd) if sd else "standartlar aynen") + "."
     return "Form cevabı."
 
 
