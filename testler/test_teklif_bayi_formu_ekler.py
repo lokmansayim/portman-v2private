@@ -139,7 +139,7 @@ def test_proje_fiyati(tmp_path, capsys):
 
 
 def test_iki_sayfalik_form(tmp_path):
-    """D-152 · `malzeme_listesi: false` (Lokman, 23 Kasım 2026 09:09:56 UTC, TK-10: "teklif formundan malzeme listesini kaldık 1. sayfa
+    """D-153 · `malzeme_listesi: false` (Lokman, 23 Kasım 2026 09:09:56 UTC, TK-10: "teklif formundan malzeme listesini kaldık 1. sayfa
     teklif sayfası 2. sayfa kat planı kalsın sadece"; TK-11'de 09:10:50 "aynısını 63 içinde yap"): form 2 sayfa, 1. sayfa teklif,
     2. sayfa Motor'un ön onay paftası, Ek-1 yok; açıklama Ek-1'e atıf yapmaz. Anahtar yoksa ya da true ise Ek-1 eskisi gibi."""
     g = _yaz(tmp_path / "g.json", dict(GIRDI, sabit_fiyat={"birim": 550000, "kdv_orani": 0}, malzeme_listesi=False))

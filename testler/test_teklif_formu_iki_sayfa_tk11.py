@@ -1,4 +1,4 @@
-"""D-152 · İki sayfalık bayi teklif formu: hedef örnek Mehmet Kapaklı Tek 63 m² (TK-11), mühürlü form (D-28 madde 2 ve 3).
+"""D-153 · İki sayfalık bayi teklif formu: hedef örnek Mehmet Kapaklı Tek 63 m² (TK-11), mühürlü form (D-28 madde 2 ve 3).
 
 Lokman 23 Kasım 2026 09:09:56 UTC (TK-10): "Kar marjını %25 yap teklif formundan malzeme listesini kaldık 1. sayfa teklif sayfası
 2. sayfa kat planı kalsın sadece"; 09:10:50 UTC (TK-11): "aynısını 63 içinde yap"; kart 09:12:35 "Onaylıyorum". Ana koda alma:
