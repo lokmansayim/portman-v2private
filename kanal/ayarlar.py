@@ -40,7 +40,9 @@ VARSAYILAN = {
     # İE-20: bayinin plan resmi, el çizimi ya da PDF'i okunur (LLM yalnız okur; çizim başına 1, her düzeltme 1 ücretli çağrı); okunan
     # bayiye [Doğru] [Düzelt] ile gösterilir. `bekle_sn`: gönderici dosyayı indirene kadar ajanın beklediği en uzun süre. Kapalıyken bugünkü
     # cevap ("yalnız yazılı talepleri işleyebiliyorum").
-    "gorsel_okuma": {"acik": False, "model": "claude-opus-5-5", "effort": "medium", "timeout_s": 180, "max_tokens": 8000, "bekle_sn": 60},
+    "gorsel_okuma": {"acik": False, "model": "claude-opus-5-5", "effort": "medium", "timeout_s": 180, "max_tokens": 8000, "bekle_sn": 60,
+                     "ikinci_bakis": False,    # BK-71 (D-145): kod soru çıkarınca çizime ikinci bakış (+1 çağrı)
+                     "okuma_sayisi": 1},       # BK-72 (D-150): çizim kaç kez okunur; çoğunluğu kod seçer (n − 1 çağrı daha)
     # İE-20 PR-2: talep formu ve revizyon formu (WhatsApp Flow, uç noktasız; kanal/formlar/). Meta'da kurulan formların kimlikleri
     # (`talep_flow_id`, `revizyon_flow_id`; rakam). `taslak`: true iken form yayımlanmamış (taslak) kipte gönderilir, yalnız WhatsApp
     # Manager'daki test numaralarında açılır. Kapalıyken (ya da kimlik yokken) bugünkü metin; gelen form cevabı her durumda LLM'siz işlenir.

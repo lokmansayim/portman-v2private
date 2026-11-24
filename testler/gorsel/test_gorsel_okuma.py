@@ -16,6 +16,7 @@ import pytest
 KOK = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(KOK))
 from beyin import gorsel_okuma as GO  # noqa: E402
+from motor import geometry as G  # noqa: E402
 
 VERI = Path(__file__).resolve().parent / "veri"
 
@@ -149,9 +150,9 @@ def test_tk01_teyit_metni():
     assert "Okuduğum yerleşim görselde" not in GO.teyit_metni(TK01, d, gorsel_var=False)[0]
 
 
-@pytest.mark.parametrize("giris", ["ust", "sol", "sag"])
+@pytest.mark.parametrize("giris", ["ust"])
 def test_dondurulmus_cizim_ayni_is_emrini_verir(giris):
-    """Çizimin yönü (giriş üstte, solda, sağda) planı değiştirmez: kanonik çerçeve giriş altta."""
+    """Giriş üstte çizilen çizim planı değiştirmez: kanonik çerçeve giriş altta. Yan kenar D-149'da (aşağıda)."""
     o = dondur(TK01, giris)
     assert o != TK01
     d = GO.denetle(o, bk14=True)
@@ -389,13 +390,14 @@ def iki_oda(W: float, H: float, sinir: float) -> dict:
 
 
 def test_pano_izgarasinin_kisa_ucu_sorulur():
-    """9,00 m: yarım adımlı ızgarada sonda 1,5 cm'lik pano kalır, Motor çizemez → teyit yerine soru (en yakın iki ölçüyle)."""
+    """9,00 m: yarım adımlı ızgarada sonda 1,5 cm'lik pano kalır, Motor çizemez. BK-72'den (D-150) beri sorulmaz: kısa uç kesilir,
+    gövde en yakın oturan ölçüyle çizilir, bayiye notla yazılır (onaylı TK-04 9,00 → 8,885, TK-09 6,50 → 6,475)."""
     d = GO.denetle(iki_oda(900, 763, 386.5))
-    assert d["cevrim"] is None
-    assert any("ön cephesi 9,00 m" in s and "sonda 1,5 cm'lik pano" in s and "8,98 m ve 9,61 m" in s for s in d["sorular"]), d["sorular"]
+    assert d["sorular"] == [] and d["cevrim"] is not None
+    assert any("ön cephesi 9,00 m yerine 8,985 m" in n and "1,5 cm'lik pano" in n for n in d["notlar"]), d["notlar"]
     assert GO.denetle(iki_oda(898, 763, 386.5))["cevrim"] is not None
     d = GO.denetle(iki_oda(898, 770, 386.5))
-    assert any("yan cephesi 7,70 m" in s for s in d["sorular"]), d["sorular"]
+    assert d["sorular"] == [] and any("yan cephesi 7,70 m yerine 7,63 m" in n for n in d["notlar"]), d
 
 
 def test_makas_y_ise_kisa_kenar_y_izgara_aynasi_motor_cizer(tmp_path):
@@ -433,14 +435,13 @@ def test_mahya_gorunmuyorsa_makas_izgaraya_oturan_yon_varsayim_bayiye():
     d = mahyasiz(898, 763)                     # ilk yön y (8,98 > 7,63 + 0,50): x ızgarası 5 cm'den, 8,98 oturmaz; x yönünde çizilir
     assert d["sorular"] == [] and d["cevrim"]["is_emri"]["yapi"]["kisa_kenar"] == "x"
     assert d["notlar"] == ["mahya yönü görünmüyordu, girişten arkaya aldım (gövde ölçüleri pano ızgarasına bu yönde oturuyor)"]
-    d = mahyasiz(900, 763)                     # iki yönde de 9,00 m oturmaz
-    assert d["cevrim"] is None and any("ön cephesi 9,00 m" in s and "8,88 m ve 9,51 m" in s for s in d["sorular"]), d["sorular"]
-    assert "mahya yönü görünmüyordu, girişe paralel aldım" in d["notlar"]
-    m, _ = GO.soru_metni(iki_oda(900, 763, 386.5), d)
-    assert "Mahya yönü görünmüyordu, girişe paralel aldım." in m and m.index("Mahya yönü") < m.index("emin olamadım")
+    # iki yönde de 9,00 m oturmaz; BK-72 (D-150): soru yok, en az kesilen yön (x: 1,5 cm; y: 11,5 cm) çizilir, ikisi de notta
+    d = mahyasiz(900, 763)
+    assert d["sorular"] == [] and d["cevrim"]["is_emri"]["yapi"]["kisa_kenar"] == "x", d["sorular"]
+    assert any("9,00 m yerine 8,985 m" in n for n in d["notlar"]) and any(n.startswith("mahya yönü görünmüyordu, girişten arkaya") for n in d["notlar"])
     d = mahyasiz(774, 783)
-    assert any("ön cephesi 7,74 m" in s and "7,73 m ve 8,35 m" in s for s in d["sorular"]), d["sorular"]
-    assert "mahya yönü görünmüyordu, girişten arkaya aldım" in d["notlar"]
+    assert d["sorular"] == [] and any("7,74 m yerine 7,73 m" in n for n in d["notlar"]), d["notlar"]
+    assert any(n.startswith("mahya yönü görünmüyordu, girişten arkaya aldım") for n in d["notlar"])
     for W in (773, 835):                       # önerilen iki ölçü; 8,35 > 7,83 + 0,50 olsa da soru yok
         d = mahyasiz(W, 783)
         assert d["sorular"] == [] and d["cevrim"]["is_emri"]["yapi"]["kisa_kenar"] == "x", (W, d["sorular"])
@@ -581,7 +582,7 @@ def test_d125_cephedeki_kapi_cephede_kalir():
     assert next(m for m in ie["mahaller"] if m["ad"] == "ANTRE")["tur"] == "antre_hol"
 
 
-@pytest.mark.parametrize("giris", ["ust", "sol", "sag"])
+@pytest.mark.parametrize("giris", ["ust"])
 def test_d125_dondurulmus_cizimde_ayni_plan(giris):
     """Aynı çizim döndürülmüş okunsa da aynı plan; giriş kenarı yazılmasa da nişin değdiği kenardan bulunur."""
     beklenen = GO.denetle(TK01_R06, bk14=True)["cevrim"]["is_emri"]
@@ -657,3 +658,27 @@ def test_d125_nisli_plan_motorda_cizilir(tmp_path):
     assert v["passed"] is True, v.get("errors")
     yol = GO.yerlesim_gorseli(TK01_R06, d, tmp_path / "okunan.png")
     assert yol.stat().st_size > 5_000
+
+
+# D-149 (Lokman kart 23 Kasım 2026 12:22:18 "Çizimdeki gibi kalsın"): giriş kapısı yan duvardaysa plan döndürülmez; ön cephe çizimin
+# alt kenarı, kapı yan duvarda (61 m² r01 onaylı planı gibi). Bu testler eski sol/sağ parametrelerinin yerine (D-125 "aynı plan").
+@pytest.mark.parametrize("giris,duvar", [("sol", "sol"), ("sag", "sag")])
+def test_d149_yan_girisli_cizim_cizimdeki_gibi_kalir(giris, duvar):
+    o = dondur(TK01, giris)
+    d = GO.denetle(o, bk14=True)
+    assert d["sorular"] == [] and d["cizilemez"] == [], (d["sorular"], d["cizilemez"])
+    ie = d["cevrim"]["is_emri"]
+    assert ie["yapi"]["dis_olcu_cm"] == {"x": o["dis_olcu"]["yatay_cm"], "y": o["dis_olcu"]["dusey_cm"]}   # çizimin yatayı plan x
+    assert any(a["tur"] == "dis_kapi" and a["duvar"] == duvar for a in ie["acikliklar"]), ie["acikliklar"]
+    assert any("plan çizimdeki gibi kaldı" in n for n in d["notlar"])
+    G.kur(copy.deepcopy(ie))
+
+
+@pytest.mark.parametrize("giris", ["sol", "sag"])
+def test_d149_yan_nisli_cizim_cizilir(giris):
+    o = dondur(TK01_R06, giris)
+    d = GO.denetle(o, bk14=True)
+    ie = d["cevrim"]["is_emri"]
+    assert ie["yapi"]["dis_olcu_cm"] == {"x": o["dis_olcu"]["yatay_cm"], "y": o["dis_olcu"]["dusey_cm"]}
+    assert any(a["tur"] == "dis_kapi" and "GİRİŞ" in a["arasi"] for a in ie["acikliklar"])
+    G.kur(copy.deepcopy(ie))
