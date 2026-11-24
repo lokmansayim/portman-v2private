@@ -351,14 +351,18 @@ def isle(gelen: dict, settings: dict, k=None, cikarim: dict | None = None, proje
     fc = None; form_on = ""
     if form is not None:
         fc = (cikarim or {}).get("form") or form_cikarimi(gelen, k.d, giden_bul)
-        if fc is not None and fc.get("durum") != "talep":
+        if fc is not None and fc.get("durum") not in ("talep", "standart"):
             return _form_cevabi(gelen, k, fc, sonuc, satirlar, ekle, patrona, kim)
-        if fc is not None and medya:
+        if fc is not None and fc.get("durum") == "standart":
+            pass                                      # D-148: çizim okumasının standart formu; `cizim_karari` işler (taslağa dokunulmaz)
+        elif fc is not None and medya:
             fc, medya, form_on, cikarim = _form_okumasi(fc, cikarim, gelen, patrona, kim)
             if medya and form.get("form") == "celik":     # İE-20 PR-9: çizim esas; çelik formun standart dışı seçimleri plana işlenmez, söylenir
                 import talep_formu as TF
                 form_on = " ".join(x for x in (form_on.strip(), TF.celik_cizim_notu(form)) if x)
-        if fc is None:                                # revizyon formunun açıklaması okunur; dosyası Patron'a (işaretli plan otomatik okunmaz)
+        if fc is not None and fc.get("durum") == "standart":
+            pass
+        elif fc is None:                              # revizyon formunun açıklaması okunur; dosyası Patron'a (işaretli plan otomatik okunmaz)
             if form.get("dosyalar"):
                 patrona(f"Portman: {kim} revizyon formuna dosya ekledi; panelden bakabilirsiniz.")
         elif not medya:
@@ -402,6 +406,9 @@ def isle(gelen: dict, settings: dict, k=None, cikarim: dict | None = None, proje
         if etk is not None:
             from beyin.sema import Talep
             talep, meta = Talep.model_validate(etk["talep"]), {"backend": "etkilesim", "kimlik": etk["kimlik"], "tur": etk["tur"]}
+        elif fc is not None and fc.get("durum") == "standart":     # D-148: standart formu, LLM'siz (`cizim_karari` → `_cizim_standart`)
+            from beyin.sema import Talep
+            talep, meta = Talep(niyet="diger", guven="yuksek", ozet="standart formu"), {"backend": "form", "tur": "standart"}
         elif fc is not None and not medya:            # İE-20 PR-2: talep formu, LLM'siz
             from beyin.sema import Talep
             talep, meta = Talep.model_validate(fc["talep"]), {"backend": "form", "tur": "talep"}
@@ -607,6 +614,9 @@ def isle(gelen: dict, settings: dict, k=None, cikarim: dict | None = None, proje
         sonuc["form_sunuldu"] = fs[0]
     else:
         ekle(metin)
+    if medya and form is None and katman and (sf := standart_formu_satiri(gelen, k, settings)) is not None:
+        ekle_satir(sf)                            # D-148: çizim gelince standart formu (okumanın cevabından sonra)
+        sonuc["form_sunuldu"] = "standart"
     if cizim_ek.get("patrona"):
         patrona(cizim_ek["patrona"])
     if teknik:
@@ -902,6 +912,8 @@ def form_cikarimi(gelen: dict, d: dict | None, giden_bul=None) -> dict | None:
     d = d or {}
     ctx = gelen.get("context_id")
     satir = giden_bul(ctx) if ctx and giden_bul is not None else None
+    if oz.get("tur") == "standart" and (satir is None or TF.satir_tokeni(satir) == oz.get("token")):
+        return {"durum": "standart"}                 # D-148: çizim okumasının standart formu (`cizim_karari` iz ile denetler)
     if oz.get("tur") not in ("talep", "revizyon") or (satir is not None and TF.satir_tokeni(satir) != oz.get("token")):
         return {"durum": "bilinmiyor", "mesaj": "Bu formu tanıyamadım; isteğinizi yazarak iletirseniz devam ederim."}
     m = TF.TOKEN.match(oz.get("token") or "")
@@ -1084,6 +1096,8 @@ def cizim_karari(gelen: dict, settings: dict, k, talep, etk, medya: bool, cikari
       - okumadan çizilmiş prefabrik planın revizyonu (yazı) → okuma güncellenir, kod denetler, plan yeniden çizilir (değişen bayiye)."""
     from beyin import karar as KR, gorsel_okuma as GO
     co = k.d.get("cizim_okuma")
+    if (gelen.get("form") or {}).get("tur") == "standart":
+        return _cizim_standart(gelen, settings, k, katalog, bayi, proje_koku)
     if medya:
         return _cizim_medya(gelen, settings, k, (cikarim or {}).get("gorsel") or {"durum": "dosya_yok"}, bayi, proje_koku)
     if not gorsel_acik(settings):          # ayar kapandı: açık okuma kapanır, yazı bugünkü yoldan; LLM'le düzeltme ve çizim yok (G7)
@@ -1244,6 +1258,54 @@ def _oda_programi(okuma: dict) -> str | None:
     return f"{y}+{s}" if y or s else None
 
 
+STANDART_FORM_METNI = ("Çiziminizi aldım. Standart özellikler formda seçili: 2,50 m pano, trapez sac, antrasit çatı, 100 mm dış duvar, "
+                      "60 mm iç duvar, asma tavan, beyaz pencere. Değiştirmek isterseniz formu açın.")
+
+
+def standart_formu_satiri(gelen: dict, k, settings: dict) -> dict | None:
+    """D-148 (Lokman, 23 Kasım 2026 11:55:43 UTC; 24 Kasım 06:55:41 UTC "sana elle çizim geldiği anda formu gönder"): bayi çizimi formsuz
+    gönderdiyse okumanın cevabıyla birlikte standart formu gider (tek ekran, standartlar seçili). Yalnız prefabrik okumada (çelik okumada
+    çelik formu ayrı), form kimliği ayarda varsa (`talep_formu.standart_flow_id`) ve mesaj katmanı açıkken; yoksa None (bugünkü yol)."""
+    import talep_formu as TF
+    co = k.d.get("cizim_okuma") or {}
+    if (gelen.get("form") or not co or co.get("revizyon") or co.get("durum") not in ("teyit", "soru")
+            or (co.get("okuma") or {}).get("yapi_turu") == "celik" or not form_kimligi(settings, "standart")):
+        return None
+    iz = satir_id(gelen["id"], 0)[4:16]
+    co["standart_iz"] = iz
+    return giden_form(gelen, STANDART_FORM_METNI, 0, "standart", settings, TF.standart_tokeni(iz), {})
+
+
+def _cizim_standart(gelen: dict, settings: dict, k, katalog, bayi, proje_koku: Path | None) -> tuple:
+    """D-148: standart formunun cevabı (LLM'siz). Plan çizilmeden geldiyse seçimler okumaya yazılır, plan onlarla çizilir. Plan çizildikten
+    sonra geldiyse standart dışı seçim (ya da müşteri adı, teslim yeri) aynı planı yeni revizyonla çizer; seçim değişmediyse plan aynı kalır."""
+    from beyin import karar as KR, gorsel_okuma as GO
+    import talep_formu as TF
+    oz = gelen.get("form") or {}
+    co = k.d.get("cizim_okuma")
+    m = TF.TOKEN.match(oz.get("token") or "")
+    k.not_dus("gelen", "standart formu", {"niyet": "form", "guven": "yuksek"})
+    if not co or not m or m.group(2) != co.get("standart_iz"):
+        return KR._bitir(k, KR.Karar(eylem="cevapla", gerekce="standart formu: eski ya da tanınmayan",
+                                     mesaj="Bu form güncel çiziminize ait değil. Değişikliği yazarak iletirseniz devam ederim.")), {}
+    bo, mus = TF.standart_ozellikleri(oz)
+    sd = TF.standart_disi(oz)
+    eski_bo, eski_mus = co.get("standart") or {}, co.get("standart_musteri") or {}
+    co["standart"], co["standart_musteri"] = bo, mus
+    secim = ("Standart dışı seçimleriniz: " + ", ".join(sd) + ". ") if sd else "Standart özellikler aynen kaldı. "
+    if co.get("durum") != "cizildi":
+        return KR._bitir(k, KR.Karar(eylem="cevapla", gerekce="standart formu: plan öncesi kaydedildi",
+                                     mesaj=secim + "Plan bu seçimlerle çizilecek.")), {"kayit": {"standart": len(sd)}}
+    son = k.d.get("son_is_emri") or {}
+    if (son.get("talep") or {}).get("kaynak") != GO.KAYNAK or (bo == eski_bo and mus == eski_mus) or (not sd and not mus and not eski_bo):
+        no, rev = _form_plani(k.d)
+        return KR._bitir(k, KR.Karar(eylem="cevapla", gerekce="standart formu: plan değişmedi",
+                                     mesaj=secim + (f"Planınız ({no} r{rev:02d}) değişmedi." if no else ""))), {"kayit": {"standart": len(sd)}}
+    co.update(revizyon=True)
+    k.d["cizim_okuma"] = co
+    return _cizim_plani(gelen, settings, k, katalog, bayi, proje_koku, on_not=secim, kayit={"standart": len(sd)})
+
+
 def _cizim_plani(gelen: dict, settings: dict, k, katalog, bayi, proje_koku: Path | None, den: dict | None = None, on_not: str = "",
                  kayit: dict | None = None) -> tuple:
     """Teyit edilmiş okuma → plan. Prefabrik: İş Emri şablonu (`gorsel_okuma.is_emri_prefabrik`) → `karar._is_emri_uret` (numara, künye,
@@ -1277,6 +1339,10 @@ def _cizim_plani(gelen: dict, settings: dict, k, katalog, bayi, proje_koku: Path
         k.d["taslak"] = {**ts, "katalog_kodu": aday["kod"]}
         k.d["asama"] = "topluyor"
         return KR._celik_dali(k, bayi, katalog, aday, k.d["taslak"]), ek
+    if co.get("standart"):                     # D-148: standart formunun seçimleri (İş Emri'ne `form_ozellik` işler)
+        ts.update(form="prefabrik", bina_ozellikleri=dict(co["standart"]))
+        if co.get("standart_musteri"):
+            ts["musteri"] = dict(co["standart_musteri"])
     k.d["taslak"] = {"ozet": ozet, "oda_programi": program, "yapi_turu": "prefabrik"}
     return KR._is_emri_uret(k, bayi, katalog, den["cevrim"]["is_emri"], GO.KAYNAK, ts, on_bilgi=on_not), ek
 
