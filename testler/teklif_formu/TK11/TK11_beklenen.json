@@ -4,7 +4,7 @@
  "onay": "Lokman, 23 Kasım 2026 09:12:35 UTC kart 'Tek 63 m² evin %25 kârlı 2 sayfalık formunu onaylıyor musunuz?' → 'Onaylıyorum'; 11:04:45 'aynı şekilde mühürle'.",
  "muhurlu_pdf_sha256": "c19c643e7753ad3e65eeeae854b7fbb6d6957f82cbb46c5307e47624a628dee6",
  "girdi": {
-  "is_emri": "is_emri/TK11_r01.json",
+  "is_emri": "testler/teklif_formu/TK11/is_emri.json",
   "crm": "testler/teklif_formu/TK11/crm_20261123-061938.json",
   "istisna": "kurallar/fiyat/istisna/2026-11_bayi_listesi.json",
   "proje_fiyat": "testler/teklif_formu/TK11/proje_fiyat.json",
