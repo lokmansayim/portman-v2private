@@ -193,3 +193,60 @@ def test_ikinci_bakis_hol_salon_kapisi_eklemez():
     assert not any({"HOL", "SALON+MUTFAK"} == set(k["arasinda"]) for k in sec["kapilar"])
     ie = den["cevrim"]["is_emri"]
     assert ie["acik_sinirlar"] == [["HOL", "SALON+MUTFAK"]] and ie["yapi"]["dis_olcu_cm"] == {"x": 800, "y": 950}
+
+
+def _tk08_okunan_plan():
+    ilk, ikinci = _tk08_uc_okuma()
+    _, den, _ = GO.ikinci_bakis_sec(ilk, GO.denetle(ilk), ikinci)
+    ie = den["cevrim"]["is_emri"]
+    from motor import geometry as G
+    return ie, G.kur(json.loads(json.dumps(ie)))
+
+
+def test_bk73_salon_on_penceresi_okunan_yerde():
+    """BK-73 (76 m², Nimet Doğan): 180/150 okunan yerinde (600) salonun önünde; Motor onu mutfağın önüne atıyordu (464 cm uzak). Salonun
+    ön duvarı yatak odası 2'nin duvar aksına dayanır: 57,75 + 125,5 + 251 + 89,75 (onaylı r05 ile aynı); 120/150 mutfağın önünde."""
+    ie, plan = _tk08_okunan_plan()
+    assert ie["yapi"]["dizilim"]["dis_pano_dayanagi"] == [{"x": 449.25, "aralik_cm": [261.0, 790.0], "duvar_cm": 758.0}]
+    merkez = {k["olcu"]: round(c, 2) for k, c, _ in GO._aciklik_merkezleri(plan) if k["olcu"] in ("180x150", "120x150")}
+    assert merkez == {"180x150": 574.75, "120x150": 135.5}
+    on = sorted((p.a0, p.a1) for p in plan.panolar if p.duvar.yon == "x" and abs(p.duvar.c - 192.0) < 1e-6)
+    assert [round(b - a, 2) for a, b in on] == [57.75, 125.5, 251.0, 89.75]
+
+
+def test_bk73_veranda_ara_kolonu_zincirden():
+    """BK-73: verandanın ön kenarındaki 391,5 / 408,55 zinciri ara kolondur (onaylı r05: dikme [386,5, 0]); öteki zincir noktaları oda
+    sınırına yakın (624,55 ve 750,05) kolon değildir."""
+    ie, plan = _tk08_okunan_plan()
+    assert ie["dikmeler"] == [[386.5, 0]]
+    assert any("ara kolon" in v and "391,5" in v for v in ie["varsayimlar"])
+    assert (386.5, 0.0, 396.5, 10.0) in plan.dikmeler
+
+
+def test_bk73_uzak_yerlesim_secilmez():
+    """BK-73: yeri okunan açıklık tek yerleşimde bir panodan (125,5 cm) uzak düşüyorsa kod seçmez, soru kalır (K21)."""
+    ilk, ikinci = _tk08_uc_okuma()
+    sec, den, _ = GO.ikinci_bakis_sec(ilk, GO.denetle(ilk), ikinci)
+    ie = json.loads(json.dumps(den["cevrim"]["is_emri"]))
+    ie["yapi"]["dizilim"].pop("dis_pano_dayanagi", None)
+    for a in ie["acikliklar"]:
+        a.pop("pano", None)
+        if a.get("olcu") == "180x150":
+            a[GO.KONUM] = 150.0                       # mutfağın önünde okunmuş gibi; 120/150 salonun önünde
+        if a.get("olcu") == "120x150":
+            a[GO.KONUM] = 700.0
+    from motor import geometry as G
+    import copy
+    t = copy.deepcopy(ie)
+    for a in t["acikliklar"]:
+        a.pop(GO.KONUM, None)
+    try:
+        G.kur(t)
+        hata = None
+    except G.IsEmriHatasi as h:
+        hata = str(h)
+    assert hata
+    yeni, _ = GO._yerlesim_ara(ie, hata, G)
+    if yeni is not None:
+        merkez = {k["olcu"]: c for k, c, _ in GO._aciklik_merkezleri(G.kur(copy.deepcopy(yeni)))}
+        assert abs(merkez["180x150"] - 150.0) <= 125.5 and abs(merkez["120x150"] - 700.0) <= 125.5
