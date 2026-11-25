@@ -91,11 +91,11 @@ def test_beklenen_dosyalar(paketler):
     assert var["TK-01"] == {"bilgi.md", "bayi_paftasi.pdf", "plan.png", "cizim.dxf", "montaj_paftasi.pdf", "montaj_paftasi.dxf", "yukleme_listesi_asma.xlsx",
                             "yukleme_listesi_ters.xlsx", "model.ifc", "montaj_rehberi.html"}
     # İE-29: çıkıntısız cumbada liste; İE-15 K6 (D-53): kart modeli ve montaj paftası da (çapraz cumbanın çatısı `motor/cati_capraz.py`)
+    # BK-77 (63 m² rehber bakımı): rehber OSB + nem bariyeri katmanını kurar; AP-13'ün rehberi artık çıkar
     assert var["AP-13"] == {"bilgi.md", "bayi_paftasi.pdf", "plan.png", "cizim.dxf", "yukleme_listesi.xlsx", "model.ifc", "montaj_paftasi.pdf",
-                            "montaj_paftasi.dxf"}
+                            "montaj_paftasi.dxf", "montaj_rehberi.html"}
     assert var["AP-02"] == {"bilgi.md"}
     d13 = s["AP-13"]["dosyalar"]
-    assert "OSB ve nem bariyeri" in d13["AP-13_montaj_rehberi.html"]    # İş Emri'nde OSB + nem bariyeri + trapez sac: rehber o katmanları kurmuyor
     assert "dört görünüş (ön, arka, sol, sağ)" in d13["AP-13_gorunusler.pdf"]
     assert "kör" in d13["AP-13_kiyas.xlsx"]
     assert "adım 3" in s["AP-02"]["dosyalar"]["AP-02_bayi_paftasi.pdf"]
