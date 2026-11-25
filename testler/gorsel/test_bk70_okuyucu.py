@@ -97,12 +97,15 @@ def test_olcusuz_sinir_en_yakin_aksa_tk01():
     assert len(p1.panolar) == len(p0.panolar) == 60
 
 
-def test_olculu_sinir_yine_sorulur():
-    """Aynı 245 çizimde yazılı bir ölçüyse (zincirde) bugünkü gibi sorulur: bayinin yazdığı ölçü sessizce kaymaz."""
+def test_olculu_sinir_ceyrek_panoya_kadar_notla_oturur():
+    """Aynı 245 çizimde yazılı bir ölçüyse (zincirde) sessizce kaymaz: bayiye notla yazılır. D-146 madde 2'de yazılı ölçü soruluyordu;
+    D-152 (Lokman, kart 24 Kasım 2026 06:56:26 UTC "Çeyrek panoya kadar kaydırsın", BK-74) yazılı ölçüyü çeyrek panoya kadar oturtur.
+    İki aksa eşit uzak yazılı ölçü yine sorulur (`test_bk74_yazili_olcu.py`)."""
     o = okuma("TK01")
     o["zincirler"].append({"kenar": "sol", "olculer_cm": [245.0, 643.0], "toplam_cm": 888.0, "kapsam": "govde"})
     den = GO.denetle(o)
-    assert any("245 cm) pano ızgarasına oturmuyor" in s for s in den["sorular"])
+    assert not any("245 cm) pano ızgarasına oturmuyor" in s for s in den["sorular"]), den["sorular"]
+    assert any("yazılı oda ölçülerini" in n and "245 → 256 cm" in n for n in den["notlar"]), den["notlar"]
 
 
 def test_olcusuz_sinir_iki_aksa_esit_uzaksa_sorulur():
