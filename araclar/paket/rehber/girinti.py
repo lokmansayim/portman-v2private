@@ -54,7 +54,7 @@ def _disbukey(P: list) -> bool:
 
 
 def cati(HZ: dict, kitap: dict, IFC: dict, ASIK: dict, H: float, SC: float, TAN: float, COS: float, baslangic: dict, ls, PI: float,
-         Desteklenmiyor, _r, fmt, fmtc, kucuk, ASMA: bool) -> dict:
+         Desteklenmiyor, _r, fmt, fmtc, kucuk, ASMA: bool, atla: frozenset = frozenset()) -> dict:
     """Rehberin çatı verisi (şablonun anahtarları: `R`, `makas`, `sacak`, `kalkan`, `yuz`, `asik`, kaplama şeridi ve mahya, `izo`, dere ve
     iniş) ve adım yazılarının sayıları. `IFC`: kart modelinin kutuları (makas alt başlığı, aşık, iniş); `ASIK`: aşıkların yüz ve sıra bilgisi."""
     from motor.genel import cati_genel
@@ -70,6 +70,12 @@ def cati(HZ: dict, kitap: dict, IFC: dict, ASIK: dict, H: float, SC: float, TAN:
             raise Desteklenmiyor("girintili gövdede mahya y yönünde; rehber şimdilik mahyası x yönündeki ana çatı + cumba çatısını kurar")
     govde = Polygon(HZ["govde"])
     ck = cati_genel.cati_kur(T, kitap)
+    # İE-17 PR-2 köşe kırması (AP-24, 63 m²): mahalin kendi çatısı ana çatının yüzlerinden ayrı kurulur (`mahal`); ana çatının o çatıyla
+    # kesiştiği kenar (dere, kırma) ana çatı için kesik kenardır
+    MAHAL = {m["ad"] for m in T.get("mahal_catilari", [])}
+    if MAHAL:
+        ck = dict(ck, duzlemler=[dz for dz in ck["duzlemler"] if dz["ad"] not in MAHAL],
+                  kenarlar=[e for e in ck["kenarlar"] if not set(e["duzlemler"]) <= MAHAL])
     adli = {dz["ad"]: dz for dz in ck["duzlemler"]}
 
     # ---------- parçalar ve çerçeveler (şablonun R'si: makas boyunca s = y) ----------
@@ -103,8 +109,9 @@ def cati(HZ: dict, kitap: dict, IFC: dict, ASIK: dict, H: float, SC: float, TAN:
             yer.append((k, q, m["rol"]))
     yer.sort(key=lambda t: t[0])
     n_ifc = sum(1 for n in IFC if n.startswith("MAKAS"))
-    if n_ifc != len(yer):
-        raise Desteklenmiyor(f"kart modelinde {n_ifc} makas, çatı tanımında {len(yer)}")
+    n_mahal = sum(len(m.get("makaslar", [])) for m in T.get("mahal_catilari", []))
+    if n_ifc != len(yer) + n_mahal:
+        raise Desteklenmiyor(f"kart modelinde {n_ifc} makas, çatı tanımında {len(yer)} + mahal çatısında {n_mahal}")
 
     def nb(span):
         return max(2, round((span - 77.8) / 64))
@@ -210,7 +217,10 @@ def cati(HZ: dict, kitap: dict, IFC: dict, ASIK: dict, H: float, SC: float, TAN:
         YK[dz["ad"]] = k
         lo, hi = min(p[0] for p in Q), max(p[0] for p in Q)
         hadve_ar[f"H{k}"] = (lo, hi)
-        h = next(h for h in hatlar if h["dz"] == dz["ad"])
+        h = next((h for h in hatlar if h["dz"] == dz["ad"]), None)
+        if h is None:                                                   # köşe kırması: yüzün alt kenarı mahalin çatısıyla derede biter
+            ic = 1 if dz["yukari"][1] > 0 else -1                       # (saçağı yok); yerel çerçeve beşiğin saçak çizgisinden
+            h = {"ad": f"{q['ad']} {dz['ad'].rsplit(' ', 1)[1]}", "ic": ic, "ys": q["b"][0] - SC if ic > 0 else q["b"][1] + SC}
         bas_x = ilk.get(dz["ad"], lo)
         son_x = hi if abs(bas_x - lo) < abs(bas_x - hi) else lo
         yuz[k] = {"ad": f"{h['ad']} yüzü", "E": [0, _r(h["ys"])], "d": [0, h["ic"]], "R": anahtar[q["ad"]], "poly": [[_r(x), _r(y)] for x, y in Q],
@@ -220,7 +230,7 @@ def cati(HZ: dict, kitap: dict, IFC: dict, ASIK: dict, H: float, SC: float, TAN:
             yuz[k]["icbukey"] = True
 
     # ---------- aşıklar (kart modelinden: yüz ve sıra) ----------
-    sira = defaultdict(list)
+    sira, masik = defaultdict(list), defaultdict(list)
     for n, kt in IFC.items():
         if n.startswith("ASIK"):
             ps = ASIK.get(n) or {}
@@ -230,6 +240,9 @@ def cati(HZ: dict, kitap: dict, IFC: dict, ASIK: dict, H: float, SC: float, TAN:
                 if len(yk) != 1:
                     raise Desteklenmiyor(f"kart modelinin aşığı {n} çatının yüzlerinden birinde değil")
                 sira[(yk[0], round(abs((kt[1] + kt[4]) / 2 - yuz[yk[0]]["E"][1]), 1))].append(kt)
+                continue
+            if ps.get("Cati") in MAHAL:                                 # mahalin çatısının aşıkları (`mahal`)
+                masik[ps["Cati"]].append((n, kt, ps))
                 continue
             if ps.get("Cati") not in YK:
                 raise Desteklenmiyor(f"kart modelinin aşığı {n} çatının yüzlerinden birinde değil ({ps.get('Cati')})")
@@ -277,7 +290,7 @@ def cati(HZ: dict, kitap: dict, IFC: dict, ASIK: dict, H: float, SC: float, TAN:
     # ---------- inişler (kart modelinden): saçağın altındaki duvarın ucunda iner ----------
     inisler = []
     for n, kt in sorted(IFC.items()):
-        if not n.startswith("INIS"):
+        if not n.startswith("INIS") or n in atla:                       # atla: mahalin çatısının inişleri (`ek.mahal`)
             continue
         xc, yc = (kt[0] + kt[3]) / 2, (kt[1] + kt[4]) / 2
         h = min(hatlar, key=lambda h: abs(yc - h["ys"]) + (0 if h["a0"] - 10 <= xc <= h["a1"] + 10 else 1e4))

@@ -127,7 +127,7 @@ def test_catiya_bagli_kartlar():
     çapraz cumbanın yavru makası (MA-05, beşik + cumbada), trapez sac (KP-03) ve trapez sac mahyası (CK-07; trapez çatıda CK-06'nın yerine,
     "kurulmadı" listesine trapez dışında girmez)."""
     assert _catiya_bagli() == {"MA-01", "MA-02", "H-01", "H-02", "H-04", "H-05", "H-08", "H-09", "AS-01", "KP-01", "BT-01", "DR-01", "DR-02",
-                               "KP-02", "MA-03", "IZ-01", "MA-04", "MA-05", "KP-03", "CK-07", *CATI_KENARI}
+                               "KP-02", "MA-03", "IZ-01", "MA-04", "MA-05", "KP-03", "CK-07", "MA-06", "MA-07", *CATI_KENARI}
 
 
 @pytest.mark.parametrize("ev", KIRMA)
