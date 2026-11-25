@@ -499,6 +499,10 @@ def test_izgaraya_oturtunca_alan_cok_degisirse_sorulur_azsa_yazilir():
             r[:] = [395 if v == 387 else 503 if v == 513 else v for v in r]
     next(z for z in o["zincirler"] if z["kenar"] == "ust")["olculer_cm"] = [395, 108, 270]
     d = GO.denetle(o)
+    # D-152 (Lokman, kart 24 Kasım 2026 06:56:26 UTC, BK-74): pano oturunca oda alanı %25'e kadar değişebilir (önce %12): Hol 6,8 → 7,9
+    # (%16) artık sorulmaz, bayiye yazılır; eşik 0,12 verilince yine sorulur
+    assert d["sorular"] == [] and "en çok değişen Hol 6,8 → 7,9 m²" in " ".join(d["notlar"]), (d["sorular"], d["notlar"])
+    d = GO.denetle(o, ayar={"oturtma_alan_oran": 0.12})
     assert d["cevrim"] is None
     assert any(s.startswith("Hol pano ızgarasına oturtunca 6,8 m² yerine 7,9 m² oluyor") for s in d["sorular"]), d["sorular"]
     d = GO.denetle(BASIT)

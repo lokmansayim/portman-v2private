@@ -46,7 +46,10 @@ ESIK = {"zincir_cm": 3.0,               # zincir toplamı ile yazılı toplam / 
         "alan_m2": 0.6, "alan_oran": 0.12,   # yazılı m² ile okunan dikdörtgenlerin alanı: ikisinden büyüğü kadar fark olağan (duvar payı)
         "ortu_m2": 1.0,                 # odaların örtmediği gövde alanı
         "cakisma_m2": 0.3,              # iki odanın üst üste bindiği alan
-        "pano_cm": 10.0}                # prefabrik: oda sınırı en yakın pano aksına bu kadar uzaksa oturtulur, ötesi sorulur
+        "pano_cm": 10.0,                # prefabrik: oda sınırı en yakın pano aksına bu kadar uzaksa oturtulur, ötesi sorulur
+        # BK-74: bayinin yazdığı sınır en yakın aksa çeyrek panoya (31,375 cm) kadar oturur, bayiye not gider; iki aks eşit yakınsa
+        # (`OLCUSUZ_ESIT_CM`) sorulur. Pano oturunca oda alanı en çok %25 değişebilir (TK-04 kroki: salon 410 → 386,5, banyo 5,9 → 4,5)
+        "yazili_pano_cm": 31.375, "oturtma_alan_oran": 0.25}
 OLCU_YAKIN_CM = 3.0                     # BK-70: oda sınırı çizimde yazılı bir ölçü noktasına bu kadar yakınsa ölçülüdür (zincir eşiği gibi)
 OLCUSUZ_ESIT_CM = 5.0                   # BK-70: ölçüsüz sınırda iki pano aksına uzaklık farkı bundan azsa hangisi olduğu sorulur
 KISA_PANO_CM = 20.0                     # Pano Motor'u bundan kısa panoyu uyarıyla, duvar kalınlığından kısasını hatayla çizer (motor/geometry,
@@ -1248,6 +1251,8 @@ def is_emri_prefabrik(kan: dict, o: CizimOkumasi, bk14: bool | None = None, esik
         return None, sor, cz, nt
     kaymalar = []
     olcusuz: list[tuple[float, str]] = []
+    yazili: dict[tuple[bool, float], tuple[float, str]] = {}     # BK-74: sınır başına bir not
+    sorulan: set[tuple[bool, float]] = set()
     olculu = (kan.get("olculu") or {}).get("x") or [], (kan.get("olculu") or {}).get("y") or []
 
     def yasla(v: float, eksen: list[float], uz: float, ad: str) -> float | None:
@@ -1272,7 +1277,16 @@ def is_emri_prefabrik(kan: dict, o: CizimOkumasi, bk14: bool | None = None, esik
                            "kısa pano olmuyor. Sınır nerede olsun?")
                 return None
             return a
+        if a is not None and abs(a - v) > tol + 1e-9 and abs(a - v) <= e["yazili_pano_cm"] + 1e-9:
+            # BK-74: yazılı sınır; ikinci aks belirgin uzaksa en yakın aksa oturur, bayiye notla yazılır
+            iki = sorted(eksen[1:-1], key=lambda t: abs(t - v))[:2]
+            if (len(iki) < 2 or abs(abs(iki[1] - v) - abs(iki[0] - v)) >= OLCUSUZ_ESIT_CM) and eksen[-1] - a >= KISA_PANO_CM - 1e-9:
+                yazili.setdefault((eksen is xs, round(v, 1)), (abs(a - v), f"{_oda_adi(ad)} {_tr(v, 1)} → {_tr(a, 2)} cm"))
+                return a
         if a is None or abs(a - v) > tol + 1e-9:
+            if (eksen is xs, round(v, 1)) in sorulan:     # BK-74: aynı sınır için tek soru (TK-04: hol, salon, giriş üç kez)
+                return None
+            sorulan.add((eksen is xs, round(v, 1)))
             sor.append(f"{_oda_adi(ad)} sınırı ({_tr(v, 1)} cm) pano ızgarasına oturmuyor; en yakın pano aksı {_tr(a, 2)} cm. "
                        "Öyle çizebilir miyim?")
             return None
@@ -1302,12 +1316,15 @@ def is_emri_prefabrik(kan: dict, o: CizimOkumasi, bk14: bool | None = None, esik
         dis = [[0.0 if q[0] == xs[0] else q[0], 0.0 if q[1] == ys[0] else q[1], W if q[2] == xs[-1] else q[2], H if q[3] == ys[-1] else q[3]]
                for q in m["konum_cm"]]
         once, sonra = _alan(x["rects"]), _alan(dis)
-        if abs(sonra - once) > max(e["alan_m2"], e["alan_oran"] * once):
+        if abs(sonra - once) > max(e["alan_m2"], e["oturtma_alan_oran"] * once):
             sor.append(f"{_oda_adi(x['ad'])} pano ızgarasına oturtunca {_tr(once, 1)} m² yerine {_tr(sonra, 1)} m² oluyor; öyle çizebilir miyim?")
         elif abs(sonra - once) >= 0.2:
             degisen.append((abs(sonra - once), f"{_oda_adi(x['ad'])} {_tr(once, 1)} → {_tr(sonra, 1)} m²"))
     if sor:
         return None, sor, cz, nt
+    if yazili:
+        nt.append("çizimde yazılı oda ölçülerini en yakın pano aksına oturttum (" + ", ".join(t for _, t in sorted(yazili.values(), reverse=True)[:3])
+                  + ")")
     if olcusuz:
         nt.append("ölçüsü çizimde yazmayan sınırları en yakın pano aksına oturttum (" + ", ".join(t for _, t in sorted(olcusuz, reverse=True)[:3])
                   + ")")

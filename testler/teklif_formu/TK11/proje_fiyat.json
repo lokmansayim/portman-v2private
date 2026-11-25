@@ -1,0 +1,139 @@
+{
+ "sema": "portman.proje_fiyat/1",
+ "kod": "TK-11",
+ "dayanak": "Lokman, 23 Kasım 2026 07:54:46 UTC (45.HAfta Usta Prefabrik Malzeme Fiyat Listesi.pdf ile): \"olmayan fiyatları buradan çeker misin?\"; kart 07:56:18 UTC \"Evet, hepsi\" (sarı 8 yakın karşılık). CRM'de fiyatı olmayan kalemler; öteki satırlar CRM 23.11.2026. Lokman 08:46:37 UTC çatı şiltesi 6.528 TL için: \"buradaki sorun nedir böyle bir rakam yok\" → CRM paket fiyatı 680 TL. Lokman 08:54:03 UTC: \"özel kubbeli panoya 2000 TL yaz, Ters mahyası (metal kiremit mahyası, çapraz eğim) 150 TL yaz, MAKAS başlığındaki Aşık hariç toplam kg 370 yani şuan çelik ton fiyatı 1450 dolar + KDV olarak hesapla ve orantısal böl mesala kubbe makasları 20 KG geliyor ona göre hesap yap ama bu tek bir taraf için yani ikiz olduğu için 2 ile çarp\". TK-11 (tek ev) kart 08:13:07 'Evet, ikizle aynı'. Makas okuması A: 370 kg (Lokman'ın tek taraf sayısı), kubbe 20 kg, kalan 350 kg tek evin makas boyuna orantılı. Lokman 09:04:30 UTC: makaslara KDV %20 eklendi.",
+ "kaynak": {
+  "kisa": "45. hafta listesi (3.11.2026), Lokman 23.11.2026",
+  "tarih": "2026-11-23",
+  "dosya": "Teklif_Calisma/TK-10_ikiz126/teslim/Mehmet_Kapakli_Ikiz_126m2_19_kalem_45hafta.xlsx"
+ },
+ "fiyatlar": [
+  {
+   "anahtar": "Karkaslı özel pencere panosu (105/170) | 100 × 1250 × 2030",
+   "fiyat": 1738.32,
+   "kdv": 0.2,
+   "not": "45. hafta listesi (yakın): 1 Panel › C) Pencereli pres panel"
+  },
+  {
+   "anahtar": "Karkaslı özel pencere panosu (59/170) | 100 × 785 × 2030",
+   "fiyat": 1738.32,
+   "kdv": 0.2,
+   "not": "45. hafta listesi (yakın): 1 Panel › C) Pencereli pres panel"
+  },
+  {
+   "anahtar": "Kubbe üstü H | 100 × 100 × 500",
+   "fiyat": 54.14,
+   "kdv": 0.2,
+   "not": "45. hafta listesi (yakın): Standart H-4 100×100×2500 (270,71) × 500/2500 boyla"
+  },
+  {
+   "anahtar": "Özel açılı köşe direği + kapaması | 100 × 100 × 2330",
+   "fiyat": 780.8,
+   "kdv": 0.2,
+   "not": "45. hafta listesi (yakın): Köşe direği-4 100×100×2500 (645,55) + Özel açılı H kapaması 120×2500 (135,25)"
+  },
+  {
+   "anahtar": "Kubbe saçak sacı (antrasit) | 170 × 1500",
+   "fiyat": 231.61,
+   "kdv": 0.2,
+   "not": "45. hafta listesi (yakın): 6 Çatı kapamaları › Sundurma alın kapama sacı 170×2800 (beyaz; antrasit yok)"
+  },
+  {
+   "anahtar": "PVC pencere | 105/170",
+   "fiyat": 6006.45,
+   "kdv": 0.2,
+   "not": "45. hafta listesi (yakın): 19 Pencere › PVC beyaz 1050/1800 (listede 1700 boy yok)"
+  },
+  {
+   "anahtar": "PVC pencere | 59/170",
+   "fiyat": 2857.75,
+   "kdv": 0.2,
+   "not": "45. hafta listesi (yakın): 19 Pencere › PVC beyaz 590/1800 (listede 1700 boy yok)"
+  },
+  {
+   "anahtar": "Kırma mahyası (metal kiremit mahyası, çapraz eğim) | L 2800",
+   "fiyat": 420.11,
+   "kdv": 0.2,
+   "not": "45. hafta listesi (tam): 13 Çatı › Mahya metal kiremit-4 (RAL7016 antrasit)"
+  },
+  {
+   "anahtar": "Özel mahya (geniş) | L 2800",
+   "fiyat": 140.04,
+   "kdv": 0.2,
+   "not": "45. hafta listesi (tam): 13 Çatı › Özel mahya-4 (RAL7016 antrasit); listede 'geniş' ayrımı yok"
+  },
+  {
+   "anahtar": "Kubbe OSB 11 mm | 1220 × 2440",
+   "fiyat": 628.95,
+   "kdv": 0.2,
+   "not": "45. hafta listesi (tam): OSB-2 11×1220×2440 mm"
+  },
+  {
+   "anahtar": "Kubbe üstü membran | paket",
+   "fiyat": 934.95,
+   "kdv": 0.2,
+   "not": "45. hafta listesi (yakın): Membran-2 mm, 1 top / 15 m² (listemiz 'paket' yazıyor)"
+  },
+  {
+   "anahtar": "Kubbe antrasit shingle | paket",
+   "fiyat": 792.4,
+   "kdv": 0.2,
+   "not": "45. hafta listesi (tam): Shingle 1 paket / 2,61 m²"
+  },
+  {
+   "anahtar": "Çatı şiltesi / izolasyonu (9,6 m²/paket) | paket",
+   "fiyat": 680.0,
+   "kdv": 0.2,
+   "not": "CRM 23.11.2026 HM45 Cam Yünü 9,6 m² paket 680 TL; eşlemenin × 9,6'sı yanlış (Lokman 08:46:37 'böyle bir rakam yok')"
+  },
+  {
+   "anahtar": "Kubbe özel pano | 100 × 2500 × 500",
+   "fiyat": 2000.0,
+   "kdv": 0.2,
+   "not": "Lokman 23.11.2026 08:54:03"
+  },
+  {
+   "anahtar": "Ters mahya kenar kutusu | L 21 × 40 × 21 × 2800",
+   "fiyat": 150.0,
+   "kdv": 0.2,
+   "not": "Lokman 23.11.2026 08:54:03 'Ters mahyası ... 150 TL' (okuma A: kenar kutusu; kartla soruldu)"
+  },
+  {
+   "anahtar": "Makas (baş) · ana çatı | açıklık 8357,5",
+   "fiyat": 3660.08,
+   "kdv": 0.2,
+   "not": "Makas A: 41.66 kg × 1.450 USD/t × 50,4936 (TCMB 20.11.2026)"
+  },
+  {
+   "anahtar": "Makas (orta) · ana çatı | açıklık 8357,5",
+   "fiyat": 3660.08,
+   "kdv": 0.2,
+   "not": "Makas A: 41.66 kg × 1.450 USD/t × 50,4936 (TCMB 20.11.2026)"
+  },
+  {
+   "anahtar": "Cumba makası · sağ cumba | L 4515",
+   "fiyat": 1844.86,
+   "kdv": 0.2,
+   "not": "Makas A: 21.00 kg × 1.450 USD/t × 50,4936 (TCMB 20.11.2026)"
+  },
+  {
+   "anahtar": "Kısa makas · VERANDA çatısı | L 1555",
+   "fiyat": 635.38,
+   "kdv": 0.2,
+   "not": "Makas A: 7.23 kg × 1.450 USD/t × 50,4936 (TCMB 20.11.2026)"
+  },
+  {
+   "anahtar": "Çapraz makas (kırma) · VERANDA çatısı | L 1820",
+   "fiyat": 743.66,
+   "kdv": 0.2,
+   "not": "Makas A: 8.46 kg × 1.450 USD/t × 50,4936 (TCMB 20.11.2026)"
+  },
+  {
+   "anahtar": "Kubbe makası | 80 × 0,8",
+   "fiyat": 585.72,
+   "kdv": 0.2,
+   "not": "kubbe makasları 20 kg / 3 adet"
+  }
+ ],
+ "adetler": []
+}
