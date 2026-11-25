@@ -10,7 +10,7 @@ import json
 import sys
 from pathlib import Path
 
-from . import bde, mrd
+from . import bde, islem, mrd
 
 
 def _dosyalar(yollar):
@@ -25,6 +25,7 @@ def main(argv=None) -> int:
     ap = argparse.ArgumentParser(prog="python -m araclar.uretim")
     ap.add_argument("yollar", nargs="+")
     ap.add_argument("--json")
+    ap.add_argument("--islem", action="store_true", help="MRD dosyasında işlemleri geometriden üretip dosyadakilerle kıyasla")
     a = ap.parse_args(argv)
     cikti, hata = [], 0
     for y in _dosyalar(a.yollar):
@@ -40,6 +41,9 @@ def main(argv=None) -> int:
             ayni = mrd.yaz(v) == ham
             o = mrd.ozet(v)
             print(f"{'AYNI ' if ayni else 'FARKLI'} {y.name}: {o['cerceve']}, {o['cubuk']} çubuk, {o['toplam_boy_m']} m, {o['islem']}")
+            if a.islem:
+                k = islem.kiyas(v["parcalar"], islem.uret(v["parcalar"]))
+                print("       işlem (tutan/dosyadaki, fazla): " + ", ".join(f"{t} {x[0]}/{x[1]} +{x[2]}" for t, x in sorted(k.items())))
             cikti.append({"dosya": y.name, "bicim": "mrd", "cerceve": v["cerceve"], "ozet": o, "parcalar": v["parcalar"]})
         hata += not ayni
     if a.json:
