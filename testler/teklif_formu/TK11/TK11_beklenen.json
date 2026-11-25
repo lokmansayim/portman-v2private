@@ -1,0 +1,29 @@
+{
+ "sema": "portman.teklif_formu_hedef/1",
+ "aciklama": "D-153 · İki sayfalık bayi teklif formunun hedef örneği: Mehmet Kapaklı Tek 63 m² (TK-11), mühürlü form. Sayfa metinleri mühürlü PDF'ten okundu (PF Teklif_Calisma/TK-11/SON_HALI/Mehmet_Kapakli_Tek_63m2_teklif_formu.pdf). Yalnız Lokman'ın onayıyla ve yeni kararla değişir (D-02).",
+ "onay": "Lokman, 23 Kasım 2026 09:12:35 UTC kart 'Tek 63 m² evin %25 kârlı 2 sayfalık formunu onaylıyor musunuz?' → 'Onaylıyorum'; 11:04:45 'aynı şekilde mühürle'.",
+ "muhurlu_pdf_sha256": "c19c643e7753ad3e65eeeae854b7fbb6d6957f82cbb46c5307e47624a628dee6",
+ "girdi": {
+  "is_emri": "testler/teklif_formu/TK11/is_emri.json",
+  "crm": "testler/teklif_formu/TK11/crm_20261123-061938.json",
+  "istisna": "kurallar/fiyat/istisna/2026-11_bayi_listesi.json",
+  "proje_fiyat": "testler/teklif_formu/TK11/proje_fiyat.json",
+  "bayi": "testler/teklif_formu/TK11/form_girdisi.json",
+  "tavan": "ters",
+  "tarih": "23.11.2026",
+  "oneri": true
+ },
+ "beklenen": {
+  "taban": 361841.51,
+  "fiyatli_satir": 136,
+  "satir": 136,
+  "birim": 452301.89,
+  "toplam": 452301.89,
+  "sayfa": 2,
+  "sayfa_metni": [
+   "PORTATİF EV www.portatifev.com Tarih: 23.11.2026 TEKLİF VE SATIŞ ONAY FORMU PM-TK11-63M2 r01 01 BAYİ / FİRMA BİLGİLERİ Bayi Mehmet Kapaklı Müşteri / proje Mehmet Kapaklı · Tek 63 m² İletişim (GSM) Adres 02 ÜRÜN DETAYI No Ürün Tanımı Alan Mkt Birim Fiyatı Tutar Kdv Toplam 1 Tek Kat Prefabrik Yapı 63,77 m² 1 452.301,89 TL 452.301,89 TL %0 452.301,89 TL Gen. Toplam 452.301,89 TL Birim fiyat; 04'teki teknik özellikler ile paketin satış fiyatıdır, teslim ve ödeme koşulları 03'tedir. Alan, yapının brüt alanıdır (varsa verandalar dahil). 03 ÖDEME Teslim süresi 10 gün Teslim şekli Fabrika Teslim Ödeme şekli Nakit 04 PAKET İÇERİĞİ VE TEKNİK ÖZELLİKLERİ Kat Yüksekliği 2500 mm Yapı Çeliği Yüksek mukavemetli galvanizli sacdan imal edilmiş, özel büküm roll-form taşıyıcı çelik profiller. Dış Cephe Panelleri Kalınlık 100 mm; 8 mm fibercement/betopan + 16 kg/m³ EPS + 8 mm fibercement/betopan İç Cephe Panelleri Kalınlık 60 mm; 8 mm fibercement/betopan + 16 kg/m³ EPS + 8 mm fibercement/betopan Çatı Şekli Beşik + Kubbe Çatı Tavan Arası İzolasyonu Mineral yün (80 mm) Çatı Kaplaması OSB + Nem Bariyeri + Trapez Saç Çatı Kaplama Rengi Antrasit Dış Kapı Çelik İç Kapı Metal Kasalı Amerikan Panel Kapı İç Kapılar Amerikan Panel Pencereler 70 mm profil genişliğinde ve 5 odacıklı yalıtım sistemine sahip, TS EN 12608 standartlarında üretilmiş, iç- dış çift contalı PVC doğrama ve 4+12+4 mm Çift Isıcam. Elektrik Tesisatı ve Donanımları Öznur marka Antigron (NYM) serisi kablolar ile oluşturulmuş sıva altı elektrik tesisatı; VİKO marka anahtar ve priz grupları; Siemens marka otomatik sigorta ve kaçak akım koruma rölesi altyapısı. Su Tesisatı Fırat marka PPRC boru ve orijinal bağlantı elemanları kullanılarak oluşturulmuş; 20 mm (yarım parmak) uç tesisat hatlarına sahip, sıva altı sıcak ve soğuk su tesisatı altyapısı. Boya Polisan silikonlu iç/dış cephe boyası, Permolit tavan boyası ve metal aksam sentetik boyası. Panel birleşimlerinde Dayson poliüretan mastik. Vitrifiye ve Armatür Grubu 50 cm ayaklı lavabo, rezervuar takımlı tam takım klozet ve duş teknesi. Lavabo ve duş bataryaları, sürgülü/mafsallı duş seti (telefonu), taharet muslukları, çelik bağlantı spiralleri, duş tropleni, esnek lavabo sifonu ve yer süzgeci. Dereler, Saçaklar Renkli Metal Tavan Ters Tavan Panel Türü Press Panel Saçak Rengi Antrasit Saçak Çıkması 30 cm Yağmur Oluğu Metal Yağmur Oluğu Rengi Antrasit 05 KAPSAM DIŞI İŞLER (BAYİ/SAHA SORUMLULUKLARI) • Zemin betonu, hafriyat ve çevre düzenlemesi işleri. • Şap atılması ve ıslak/kuru zemin kaplamaları (parke, fayans, seramik). • Ürünlerin şantiye alanına nakliyesi, nakliye sigortası ve araçtan indirilmesi (vinç/forklift vb.). • Montaj, kurulum ve saha işçilikleri. • Mutfak Dolabı AP-24 · teklif ve satış onay formu · sayfa 1 / 2",
+   "AP-24 · teklif ve satış onay formu · sayfa 2 / 2"
+  ],
+  "sayfa2_cizim": 7332
+ }
+}
