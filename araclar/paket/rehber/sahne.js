@@ -28,7 +28,9 @@ const KP = D.kaplama.profil;
 const RIBH = KP.hadve, RIB_UST = KP.tepe, RIB_TABAN = KP.taban, RIB_KENAR = KP.kenar;   // RIB_KENAR: kalkan kenarındaki hadvenin ekseni, levha kenarından
 // Sandviç panel (D-40; Lokman, 1.11.2026): alt sac, yalıtım (verideki `yalitim`), üst sac ve hadveler; tek kat panelde (62 m²) yalıtım yok.
 const YAL = KP.yalitim || 0;
-const AH = 3.0 + SAC, TM0 = AH + 0.02, TM1 = TM0 + 0.1, TR0 = TM1 + 0.02, TR1 = TR0 + 0.05;   // kaplama 0,5 mm
+// OSB + nem bariyeri (İş Emri'nin opsiyonu, D-74; 63 m²): OSB aşıkların üstünde, nem bariyeri onun üstünde; kaplama o kadar yukarıda
+const OSB = D.kaplama.osb || null, OSBK = OSB ? OSB.kal + OSB.nem : 0;
+const AH = 3.0 + SAC, TM0 = AH + OSBK + 0.02, TM1 = TM0 + 0.1, TR0 = TM1 + 0.02, TR1 = TR0 + 0.05;   // kaplama 0,5 mm
 const TU1 = YAL ? TR1 + YAL + 0.05 : TR1, PTOP = TU1 + RIBH + 0.1;   // TU1: hadvelerin tabanı (sandviçte üst sacın üstü)
 // Cephe fugası (62 m² paftası: fugalı duvar detayı): alttan 6 × 38 cm betopan + 2 cm fuga, üstte 10 cm bant; oluk 5 mm derin. Fugasız evde boş.
 const FUGA = D.fuga ? D.fuga.bant : [], FUGA_H = 2, FUGA_D = 0.5;
@@ -111,7 +113,9 @@ const BASE = {
   ridge:    { color: 0x3f464d, roughness: 0.5, metalness: 0.45 },
   trim:     { color: 0x474f57, roughness: 0.55, metalness: 0.4 },
   gutter:   { color: 0x3f464e, roughness: 0.45, metalness: 0.4 },
-  damla:    { color: 0xc8261e, roughness: 0.5, metalness: 0.3 },   // sundurmanın Z damlalığı kırmızı (Lokman, 20.11.2026 23:15: "evet kırmızı olarak görünsün")
+  damla:    { color: 0xc8261e, roughness: 0.5, metalness: 0.3 },
+  osb:      { color: 0xc9a46b, roughness: 0.95 },
+  nem:      { color: 0x5b7fa6, roughness: 0.7 },   // sundurmanın Z damlalığı kırmızı (Lokman, 20.11.2026 23:15: "evet kırmızı olarak görünsün")
 };
 Object.entries(D.renk || {}).forEach(([k, c]) => { BASE[k] = { ...BASE[k], color: c }; });   // eve ait renk (ör. beyaz PVC)
 const HL = new THREE.Color(0xf0a020);
@@ -1273,6 +1277,45 @@ const timing = byStep.map((list, s) => {
   if (list.some(p => p.anim && p.anim.ackapa)) return { stagger: 0.75, dur: 3.2, total: maxO * 0.75 + 3.2 };   // kanatlar ve kapılar: sırayla açılıp kapanır
   const stagger = maxO > 0 ? Math.min(per, (oda ? 4.6 : 2.6) / maxO) : 0;
   return { stagger, dur: 0.6, total: maxO * stagger + 0.6 };
+});
+/* OSB ve nem bariyeri (63 m²): her çatı yüzünde aşıkların üstünde tek levha (levhalar ayrı gösterilmedi) */
+if (OSB && AD.osb) {
+  let oo = 0;
+  Object.values(YUZ).forEach(Y => {
+    const g = Y.grup(); g.add(levha(Y.P, AH, AH + OSB.kal, mat('osb', AD.osb)));
+    add(AD.osb, g, oo++ * 0.3, { kod: null, ad: 'OSB 11 mm', satir: [['Bu parça', `${Y.ad} · 11 mm OSB`], ['Oturma', 'aşıkların üstüne vidalanır'], ['Liste', M.osb_liste || '—']] });
+    const h = Y.grup(); h.add(levha(Y.P, AH + OSB.kal, AH + OSBK, mat('nem', AD.osb)));
+    add(AD.osb, h, 50 + oo * 0.3, { kod: null, ad: 'Nem bariyeri', satir: [['Bu parça', `${Y.ad} · OSB'nin üstünde`], ['Liste', M.nem_liste || '—']] });
+  });
+}
+/* Ek parçalar (D.ek; `ek.py`): köşe kırmasının mahal çatısı kart modelinin üçgenleriyle, kubbe orijinal üretim çizimleriyle.
+   mesh: {v: [x, y, z] cm plan, f: üçgenler}; cubuk: [x0, y0, z0, x1, y1, z1, en, derinlik, nx, ny, nz] (derinlik n yönünde). */
+function ekMesh(M_, m) {
+  const v = M_.v, pos = [];
+  for (let i = 0; i < M_.f.length; i++) { const k = M_.f[i] * 3; pos.push(X(v[k]), v[k + 2] / 100, Z(v[k + 1])); }
+  const geo = new THREE.BufferGeometry(); geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); geo.computeVertexNormals();
+  return mesh(geo, m);
+}
+function ekCubuk(c, m) {
+  const [x0, y0, z0, x1, y1, z1, en, der, nx, ny, nz] = c;
+  const p = new THREE.Vector3(X(x0), z0 / 100, Z(y0)), q = new THREE.Vector3(X(x1), z1 / 100, Z(y1));
+  const d = new THREE.Vector3().subVectors(q, p), L = d.length(); d.normalize();
+  const n = new THREE.Vector3(nx, nz, -ny); n.sub(d.clone().multiplyScalar(n.dot(d))).normalize();
+  const w = new THREE.Vector3().crossVectors(n, d);
+  const o = mesh(new THREE.BoxGeometry(L, en / 100, der / 100), m);
+  o.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(d, w, n));
+  o.position.copy(p).add(q).multiplyScalar(0.5); return o;
+}
+(D.ek || []).forEach(e => {
+  const g = new THREE.Group(), m = mat(e.mat, e.adim);
+  if (e.mesh) g.add(ekMesh(e.mesh, m));
+  (e.cubuk || []).forEach(c => g.add(ekCubuk(c, m)));
+  if (e.osb && OSB && AD.osb) {   // mahalin çatısında OSB ve nem bariyeri, kaplama yüzünün altında
+    const o = ekMesh(e.mesh, mat('osb', AD.osb)); o.position.y = -(OSBK + 0.1) / 100;
+    add(AD.osb, o, 90, { kod: null, ad: 'OSB 11 mm ve nem bariyeri', satir: [['Bu parça', e.satir[0][1]], ['Liste', M.osb_liste || '—']] });
+    g.position.y = 0;
+  }
+  add(e.adim, g, e.sira, { kod: e.kod || null, ad: e.kod && D.cards[e.kod] ? D.cards[e.kod].ad : e.ad, satir: [...e.satir, ...kartSat(e.kod && D.cards[e.kod] ? e.kod : null)] });
 });
 const DROP = D.adimlar.map(a => a.drop);   // parçanın düştüğü yükseklik (m); alçıpan gibi alttan gelenlerde eksi
 
