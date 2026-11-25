@@ -45,12 +45,12 @@ def test_bir_ev_uctan_uca():
 @pytest.mark.parametrize("kod", ["PA09", "PA24"])
 def test_bk46_kubbe_ve_tek_uclu_kirma(kod):
     """BK-46: kubbeli evde (64 m²) kubbe makası listeyle 3D arasında eşlenir; tek uçlu kırmada (77 m²) 3D kırma ve 25 makas. 64 m²'nin
-    veranda çatısının makası 3D'de bugün de yok (HD-09 uyarısı; ayrı iş)."""
+    veranda çatısının (köşe kırması) 5 makası BK-77'den beri 3D'de de var: HD-09 uyarısı kalktı."""
     ie = json.loads((KOK / "is_emri" / "adaylar" / f"{kod}.json").read_text(encoding="utf-8"))
     r = HD.denetle_prefabrik(ie)
     bul = [b for b in r["bulgular"] if b["kalem"] in ("HD-05", "HD-08", "HD-09", "HD-10")]
-    assert [b["metin"] for b in bul] == (["veranda çatısı: listede 5 makas, 3D modelde bu parçanın makası yok"] if kod == "PA09" else [])
-    parca = {"PA09": ["ana çatı", "kubbe"], "PA24": ["ana çatı"]}[kod]
+    assert [b["metin"] for b in bul] == []
+    parca = {"PA09": ["ana çatı", "kubbe", "veranda çatısı"], "PA24": ["ana çatı"]}[kod]
     assert [r["makas_parca"][p] for p in parca] == [r["makas_3d_parca"][p] for p in parca]
     assert r["makas_3d_parca"].get("kubbe") == (3 if kod == "PA09" else None)
 
