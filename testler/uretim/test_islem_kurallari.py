@@ -1,4 +1,4 @@
-"""BK-77: çerçeve geometrisinden makine işlemleri (araclar/uretim/islem.py).
+"""BK-78: çerçeve geometrisinden makine işlemleri (araclar/uretim/islem.py).
 
 Kurallar Diamond 70 m² (17 dosya) ve DUVAR1 örnek panosundan çıktı (Mac `Alpha mini AI/_inceleme/IS-8, IS-9`).
 Kubbe üretim dosyası (7 dosya, BK-76) kural yazılırken hiç kullanılmadı: kör sınama.

@@ -1,4 +1,4 @@
-"""Çerçeve geometrisinden Alpha Mini makine işlemleri (BK-77, deneme).
+"""Çerçeve geometrisinden Alpha Mini makine işlemleri (BK-78, deneme).
 
 Girdi: MRD çerçevesinin parçaları (eksen uçları, boy, LABEL_NRM/INV). Çıktı: her parçanın işlemleri
 (DIMPLE vida, SWAGE köşeleme, NOTCH kertme, LIP_CUT düzleme, CUT kesim). SERVICE_HOLE (servis deliği)
