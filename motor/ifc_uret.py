@@ -307,6 +307,53 @@ def _tek_uclu_makaslar(plan, t: dict, km: dict) -> list[dict]:
     return makaslar + kose
 
 
+def _kirma_mahal_makaslari(m: dict, T: dict) -> list[dict]:
+    """İE-17 PR-2 köşe kırması (AP-03, AP-24): mahalin çatısının makasları 3D'de. Yer ve sayı çatı tanımından (`cati_serit.mahal_catilari`
+    › `makaslar`; yükleme listesi aynı tanımı sayar: "Kısa makas", "Çapraz makas (kırma)"). Kısa makas yüksek yandaki duvarın dış
+    yüzünden saçak ucuna, kirişin ve duvarın üstünde; üstü yalnız mahalin yüzünü izler (dere yanındaki ilk kısa makas derenin altında
+    kalır). Çapraz makas kırma hattı boyunca saçak köşesinden duvara (tanımdaki `plan_boy_cm`), alt başlığı hattın gövde içindeki kısmı
+    (kirişten duvara); üstü mahalin yüzüyle kırmadaki ana çatı yüzünün alçağını izler."""
+    x0, y0, x1, y1 = m["kutu"]
+    yan, s = m["yuksek_yan"], float(m["sacak"])
+    egim_x = yan in ("sol", "sag")
+    # yerel eksen: u eğim boyunca (yüksek yandan saçağa), v yüksek yan boyunca
+    if egim_x:
+        u_yuk, u_dis, yon = (x0, x1, 1.0) if yan == "sol" else (x1, x0, -1.0)
+        P = lambda u, v: (u, v)                                                         # noqa: E731
+        UV = lambda x, y: (x, y)                                                        # noqa: E731
+        v_lo, v_hi = y0, y1
+    else:
+        u_yuk, u_dis, yon = (y0, y1, 1.0) if yan == "on" else (y1, y0, -1.0)
+        P = lambda u, v: (v, u)                                                         # noqa: E731
+        UV = lambda x, y: (y, x)                                                        # noqa: E731
+        v_lo, v_hi = x0, x1
+    ad = m["ad"]
+    kirma = [h for h in T.get("hatlar", []) if h["tur"] == "kirma" and ad in h["duzlemler"]]
+    out = []
+    for mk in m["makaslar"]:
+        v = float(mk["konum"])
+        if mk["rol"] == "kisa":
+            out.append({"rol": "kisa", "kalem": f"Kısa makas · {ad}", "konum": v, "duzlemler": [ad],
+                        "ust": [P(u_dis + yon * s, v), P(u_yuk, v)], "alt": [P(u_dis, v), P(u_yuk, v)]})
+            continue
+        h = min(kirma, key=lambda h_: min(abs(UV(*h_["p"])[1] - v), abs(UV(*h_["q"])[1] - v)), default=None)
+        if h is None:
+            raise ValueError(f"{ad}: çapraz makasın kırma hattı çatı tanımında yok")
+        (pu, pv), (qu, qv) = UV(*h["p"]), UV(*h["q"])
+        if abs((pu - u_yuk)) < abs(qu - u_yuk):
+            (pu, pv), (qu, qv) = (qu, qv), (pu, pv)                                      # p saçak köşesinde
+        e = (qv - pv) / (qu - pu)                                                        # v'nin u'ya oranı (hat boyunca)
+        v_yuk = pv + e * (u_yuk - pu)
+        u_g = u_dis                                                                      # hattın gövdeye girdiği yer: kirişin dış yüzü
+        v_g = pv + e * (u_g - pu)
+        if not v_lo - 1e-6 <= v_g <= v_hi + 1e-6:                                       # yandaki kirişten girer (eğim eşit değilse)
+            v_g = v_hi if v_g > v_hi else v_lo
+            u_g = pu + (v_g - pv) / e
+        out.append({"rol": "capraz", "kalem": f"Çapraz makas (kırma) · {ad}", "konum": v, "duzlemler": list(h["duzlemler"]),
+                    "ust": [P(pu, pv), P(u_yuk, v_yuk)], "alt": [P(u_g, v_g), P(u_yuk, v_yuk)]})
+    return out
+
+
 def _kirma_girdisi(plan, ie: dict) -> dict:
     """BK-46: kırma çatının 3D girdisi (havuz denetimi HD-10, 16 Kasım 2026: kırma çatı 3D'de beşik çiziliyordu). Düzlemler ve tek uçlu
     kırmanın kalkanı çizimdeki çatıdan (`cati_prefabrik.cati`; ön onay çizimi, görünüşler ve liste aynı tanımı okur). Makaslar yükleme
@@ -1115,6 +1162,12 @@ class IfcUretici:
                 else:
                     self._makas(f"MAKAS_{n:02d}", kalem, oz, b0, b1, m["konum"], mahya_x, zs, eg_, s)
                 yerler.append({"parca": q["ad"], "rol": m["rol"], "konum_cm": round(m["konum"], 2)})
+        for m in (m for m in T.get("mahal_catilari", []) if m["tip"] == "kirma"):    # İE-17 PR-2: köşe kırmasının kısa ve çapraz makasları
+            for mk in _kirma_mahal_makaslari(m, T):
+                n += 1
+                self._yuzey_makasi(f"MAKAS_{n:02d}", mk["kalem"], {"Rol": mk["rol"], "CatiParcasi": m["ad"]}, mk["ust"], mk["alt"],
+                                   [D[a] for a in mk["duzlemler"]], kot)
+                yerler.append({"parca": m["ad"], "rol": mk["rol"], "konum_cm": round(mk["konum"], 2)})
         self.cati_ozet = {"mahya_cm": round(mahya, 1), "makas": n, "cati_alan_m2": round(alan, 2), "makaslar": yerler,
                           **({"uyari": T["uyarilar"]} if T["uyarilar"] else {})}
 
