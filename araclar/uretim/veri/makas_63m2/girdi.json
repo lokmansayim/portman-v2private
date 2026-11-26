@@ -1,0 +1,87 @@
+{
+ "aciklama": "63 m² tek ev makasları (TASLAK). Boylar evin özgün montaj paftasının makas yerleşim planından (sayfa 4), eğim, topuk, saçak İş Emri'nden; yerleşim rehber girdisinde. Kalıp: 90 m² çelik evin makas üretim dosyası (Lokman 25 Kasım 2026 21:14:35 UTC).",
+ "cati": {
+  "egim": 0.3288,
+  "topuk_mm": 100.0,
+  "sacak_mm": 300.0
+ },
+ "makaslar": [
+  {
+   "ad": "MK01",
+   "tur": "ana",
+   "alt_baslik_mm": 8957.5
+  },
+  {
+   "ad": "MK02",
+   "tur": "ana",
+   "alt_baslik_mm": 8957.5
+  },
+  {
+   "ad": "MK03",
+   "tur": "ana",
+   "alt_baslik_mm": 8957.5
+  },
+  {
+   "ad": "MK04",
+   "tur": "ana",
+   "alt_baslik_mm": 8957.5
+  },
+  {
+   "ad": "MK05",
+   "tur": "ana",
+   "alt_baslik_mm": 8957.5
+  },
+  {
+   "ad": "MK14",
+   "tur": "ana",
+   "alt_baslik_mm": 8957.5
+  },
+  {
+   "ad": "MK06",
+   "tur": "ana",
+   "alt_baslik_mm": 8957.5
+  },
+  {
+   "ad": "MK13",
+   "tur": "cumba",
+   "alt_baslik_mm": 4515.0
+  },
+  {
+   "ad": "MK07",
+   "tur": "cumba",
+   "alt_baslik_mm": 4515.0
+  },
+  {
+   "ad": "MK12",
+   "tur": "kisa",
+   "alt_baslik_mm": 1555.0,
+   "egim": 0.2
+  },
+  {
+   "ad": "MK11",
+   "tur": "kisa",
+   "alt_baslik_mm": 1555.0,
+   "egim": 0.2
+  },
+  {
+   "ad": "MK10",
+   "tur": "kisa",
+   "alt_baslik_mm": 1555.0,
+   "egim": 0.2
+  },
+  {
+   "ad": "MK08",
+   "tur": "kisa",
+   "alt_baslik_mm": 1555.0,
+   "egim": 0.2
+  },
+  {
+   "ad": "MK09",
+   "tur": "capraz",
+   "alt_baslik_mm": 1820.1,
+   "yuksek_uc_mm": 411.0,
+   "sacak_mm": 351.0,
+   "not": "saçak: çaprazın alt başlığı boyunca saçak köşesinden x=763 duvar çizgisine (30 cm × 182,01 / 155,5); varsayım, Lokman'a sorulacak"
+  }
+ ]
+}
