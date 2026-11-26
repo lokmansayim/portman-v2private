@@ -197,7 +197,9 @@ def mrd_cercevesi(ad, cubuklar, proje="TASLAK"):
 
 
 def girdiden(girdi: dict) -> list[dict]:
-    """Girdi: {"cati": {egim, topuk_mm, sacak_mm}, "makaslar": [{ad, tur, alt_baslik_mm, …}]}. Çıktı MRD çerçeveleri."""
+    """Girdi: {"cati": {egim, topuk_mm, sacak_mm}, "makaslar": [{ad, tur, alt_baslik_mm, …}]}. Çıktı MRD çerçeveleri.
+    Çapraz makasta `uc_payi_mm` (D-157) çerçeveyi değiştirmez: alt başlığın Motor'un plan boyundan yüksek uçta ne kadar kısa
+    bittiğini kaydeder; test ve montaj rehberi okur (alt_baslik_mm + uc_payi_mm = Motor'un plan boyu)."""
     cati = girdi["cati"]
     topuk, sacak = cati["topuk_mm"], cati["sacak_mm"]
     sonuc = []
