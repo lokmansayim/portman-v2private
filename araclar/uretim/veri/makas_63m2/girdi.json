@@ -1,5 +1,5 @@
 {
- "aciklama": "63 m² tek ev makasları (TASLAK). Boylar evin özgün montaj paftasının makas yerleşim planından (sayfa 4), eğim, topuk, saçak İş Emri'nden; yerleşim rehber girdisinde. Kalıp: 90 m² çelik evin makas üretim dosyası (Lokman 25 Kasım 2026 21:14:35 UTC).",
+ "aciklama": "63 m² tek ev makasları (TASLAK). Yerleşim Motor'un (Lokman 26 Kasım 2026 05:50:56 UTC: 'sen motora uy yerleşim yerlerinde eşit aralıklara koymuşsa o şekilde kalsın'): 7 ana, 1 cumba, 4 kısa, 1 çapraz. Boylar Motor'un çatı tanımından (sunum.cati_tanimi), eğim, topuk, saçak İş Emri'nden. Kalıp: 90 m² çelik evin makas üretim dosyası (Lokman 25 Kasım 2026 21:14:35 UTC).",
  "cati": {
   "egim": 0.3288,
   "topuk_mm": 100.0,
@@ -42,11 +42,6 @@
    "alt_baslik_mm": 8957.5
   },
   {
-   "ad": "MK13",
-   "tur": "cumba",
-   "alt_baslik_mm": 4515.0
-  },
-  {
    "ad": "MK07",
    "tur": "cumba",
    "alt_baslik_mm": 4515.0
@@ -80,8 +75,8 @@
    "tur": "capraz",
    "alt_baslik_mm": 1820.1,
    "yuksek_uc_mm": 411.0,
-   "sacak_mm": 351.0,
-   "not": "saçak: çaprazın alt başlığı boyunca saçak köşesinden x=763 duvar çizgisine (30 cm × 182,01 / 155,5); varsayım, Lokman'a sorulacak"
+   "sacak_mm": 577.3,
+   "not": "saçak: Motor'un çapraz makası (ifc_uret._kirma_mahal_makaslari) alt başlığı kırma hattının y=835,75 kiriş çizgisini kestiği yerden başlatır; saçak köşesinden o noktaya"
   }
  ]
 }

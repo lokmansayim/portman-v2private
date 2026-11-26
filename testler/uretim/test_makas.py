@@ -4,7 +4,7 @@
    makas, kendi ölçüleriyle kurulunca çubuk uçları dosyadakine en çok 9 / 16 / 16 mm, boylar 4 / 6 / 8 mm yakın.
    Dosyadaki çubuğun gerçek uçları .bde'nin vida yerlerinden çıkar; o uçlarla islem.uret() vidaları
    dosyayla bire bir verir (138/138, 44/44, 52/52).
-2. 63 m² makasları: depodaki CSV'ler girdiden yeniden üretilince bayt bayt aynı (TASLAK; hedef örnek değil,
+2. 63 m² makasları (Motor'un yerleşimi, 13 makas; Lokman 26 Kasım 05:50:56 "sen motora uy"): depodaki CSV'ler girdiden yeniden üretilince bayt bayt aynı (TASLAK; hedef örnek değil,
    Lokman'ın onayı bekleniyor).
 """
 import math
@@ -76,13 +76,44 @@ def test_kalibi_yeniden_kurar(kalip, pano, kur, uc_mm, boy_mm):
 def test_63m2_makaslari_girdiden_ayni(tmp_path):
     assert makas.main([str(M63 / "girdi.json"), str(tmp_path)]) == 0
     uretilen = sorted(p.name for p in tmp_path.glob("*.csv"))
-    assert len(uretilen) == 14
+    assert len(uretilen) == 13
     for ad in uretilen:
         assert (tmp_path / ad).read_bytes() == (M63 / ad).read_bytes(), ad
 
 
 def test_63m2_sayilar():
     ozet = {y.stem: mrd.ozet(mrd.oku(y)) for y in M63.glob("*.csv")}
-    assert sum(o["cubuk"] for o in ozet.values()) == 7 * 33 + 2 * 21 + 4 * 11 + 11
-    assert ozet["MK01"]["cubuk"] == 33 and ozet["MK13"]["cubuk"] == 21
+    assert sum(o["cubuk"] for o in ozet.values()) == 7 * 33 + 21 + 4 * 11 + 11
+    assert ozet["MK01"]["cubuk"] == 33 and ozet["MK07"]["cubuk"] == 21
     assert ozet["MK12"]["cubuk"] == 11 and ozet["MK09"]["cubuk"] == 11
+
+
+def test_63m2_girdisi_motorun_catisiyla_ayni():
+    """Makas sayısı ve boyları Motor'un çatı tanımından (D-28: sayı tek kaynaktan)."""
+    import json
+
+    from motor import geometry as G
+    from motor import ifc_uret, sunum
+
+    ie = json.loads((KOK / "testler/teklif_formu/TK11/is_emri.json").read_text(encoding="utf-8"))
+    ie = ie.get("is_emri", ie)
+    T = sunum.cati_tanimi(G.kur(ie), ie)
+    s = float(T["sacak"])
+    girdi = json.loads((M63 / "girdi.json").read_text(encoding="utf-8"))
+    tur = {}
+    for m in girdi["makaslar"]:
+        tur.setdefault(m["tur"], []).append(m)
+    for parca in T["parcalar"]:
+        ad = "ana" if parca["rol"] == "ana" else "cumba"
+        assert len(tur[ad]) == len(parca["makaslar"])
+        assert all(abs(m["alt_baslik_mm"] - (parca["aciklik_cm"] + 2 * s) * 10) < 0.1 for m in tur[ad])
+    kirma = [m for m in T["mahal_catilari"] if m["tip"] == "kirma"][0]
+    mk = ifc_uret._kirma_mahal_makaslari(kirma, T)
+    kisa = [q for q in mk if q["rol"] == "kisa"]
+    assert len(tur["kisa"]) == len(kisa)
+    for q in kisa:
+        assert all(abs(m["alt_baslik_mm"] - math.dist(*q["ust"]) * 10) < 0.1 for m in tur["kisa"])
+    (q,) = [q for q in mk if q["rol"] == "capraz"]
+    (c,) = tur["capraz"]
+    assert abs(c["alt_baslik_mm"] - math.dist(*q["ust"]) * 10) < 0.1
+    assert abs(c["sacak_mm"] - math.dist(q["ust"][0], q["alt"][0]) * 10) < 0.1
