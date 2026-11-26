@@ -6,6 +6,8 @@
    dosyayla bire bir verir (138/138, 44/44, 52/52).
 2. 63 m² makasları (Motor'un yerleşimi, Lokman 26 Kasım 05:50:56 "sen motora uy"; cumbada 2 makas, 05:52:33): depodaki CSV'ler girdiden yeniden üretilince bayt bayt aynı. Hedef örnek: Lokman 26 Kasım 2026 05:53:56 UTC
    kartı "A: Evet, böyle üretilsin" (r03 çizimi, 14 makas, 328 çubuk).
+3. Çapraz makas MK09 (D-157, BK-82): Lokman 26 Kasım 2026 13:48:07 UTC kartı "A: 179,9 cm, paftadaki gibi". Alt başlık 1799,0 mm;
+   alçak uç saçak köşesinde, yüksek uç Motor'un plan boyundan (1820,1) `uc_payi_mm` kadar kısa; üst başlık kırma hattında kalır.
 """
 import math
 from pathlib import Path
@@ -88,6 +90,28 @@ def test_63m2_sayilar():
     assert ozet["MK12"]["cubuk"] == 11 and ozet["MK09"]["cubuk"] == 11
 
 
+def test_63m2_json_komutla_ayni(tmp_path):
+    """`makas_63m2.json` (rehber ve 3B görünüm okur) depodaki CSV'lerden `python -m araclar.uretim … --json` ile aynı."""
+    import json
+
+    from araclar.uretim import __main__ as komut
+
+    cikti = tmp_path / "makas_63m2.json"
+    assert komut.main([str(M63), "--json", str(cikti)]) == 0
+    assert json.loads(cikti.read_text(encoding="utf-8")) == json.loads((M63 / "makas_63m2.json").read_text(encoding="utf-8"))
+
+
+def test_63m2_capraz_makas_paftadaki_boyda():
+    """D-157: çapraz makas 179,9 cm (Lokman 26 Kasım 2026 13:48:07 UTC kartı "A: 179,9 cm, paftadaki gibi"); 11 çubuk, alt başlık
+    1799,0 mm, üst başlığın ucu alt başlığın ucundan 6 mm ileride (kalıptaki gibi)."""
+    v = mrd.oku(M63 / "MK09.csv")
+    P = v["parcalar"]
+    assert len(P) == 11
+    (alt,) = [p for p in P if p["y1"] == p["y2"]]
+    assert (alt["x1"], alt["x2"], alt["boy"]) == (0.0, 1799.0, 1799.0)
+    assert max(max(p["x1"], p["x2"]) for p in P) == pytest.approx(1799.0 + 6.02, abs=0.01)
+
+
 def test_63m2_girdisi_motorun_catisiyla_ayni():
     """Makas sayısı ve boyları Motor'un çatı tanımından (D-28: sayı tek kaynaktan)."""
     import json
@@ -116,5 +140,10 @@ def test_63m2_girdisi_motorun_catisiyla_ayni():
         assert all(abs(m["alt_baslik_mm"] - math.dist(*q["ust"]) * 10) < 0.1 for m in tur["kisa"])
     (q,) = [q for q in mk if q["rol"] == "capraz"]
     (c,) = tur["capraz"]
-    assert abs(c["alt_baslik_mm"] - math.dist(*q["ust"]) * 10) < 0.1
+    # D-157: çapraz makas paftadaki boyda (1799,0); yüksek uçta Motor'un plan boyundan `uc_payi_mm` kadar kısa biter
+    assert c["alt_baslik_mm"] == 1799.0
+    assert abs(c["alt_baslik_mm"] + c["uc_payi_mm"] - math.dist(*q["ust"]) * 10) < 0.1
     assert abs(c["sacak_mm"] - math.dist(q["ust"][0], q["alt"][0]) * 10) < 0.1
+    # üst başlık kırma hattında kalır: eğimi (yükselme ÷ plan boyu) Motor'un kırma hattınınkiyle aynı
+    hat_egimi = (kirma["ust_kot"] - kirma["alt_kot"]) / math.dist(*q["ust"])
+    assert abs((c["yuksek_uc_mm"] - girdi["cati"]["topuk_mm"]) / c["alt_baslik_mm"] - hat_egimi) < 1e-5

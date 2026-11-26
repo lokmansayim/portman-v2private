@@ -79,12 +79,13 @@
   {
    "ad": "MK09",
    "tur": "capraz",
-   "alt_baslik_mm": 1820.1,
-   "yuksek_uc_mm": 411.0,
+   "alt_baslik_mm": 1799.0,
+   "yuksek_uc_mm": 407.4,
    "sacak_mm": 577.3,
-   "not": "saçak: Motor'un çapraz makası (ifc_uret._kirma_mahal_makaslari) alt başlığı kırma hattının y=835,75 kiriş çizgisini kestiği yerden başlatır; saçak köşesinden o noktaya"
+   "uc_payi_mm": 21.1,
+   "not": "saçak: Motor'un çapraz makası (ifc_uret._kirma_mahal_makaslari) alt başlığı kırma hattının y=835,75 kiriş çizgisini kestiği yerden başlatır; saçak köşesinden o noktaya. Boy (D-157): Lokman 26 Kasım 2026 13:48:07 UTC kartı \"A: 179,9 cm, paftadaki gibi\"; alçak uç saçak köşesinde kalır, yüksek uç Motor'un plan boyundan (1820,1) uc_payi_mm kadar kısa biter. Üst başlık kırma hattında kalır: yuksek_uc_mm = 100 + 311 × 1799,0 ÷ 1820,1."
   }
  ],
- "onay": "Lokman, 26 Kasım 2026 05:53:56 UTC, proje sohbetindeki kart: \"A: Evet, böyle üretilsin\" (r03 çizimi, 14 makas, 328 çubuk; rehber makasları bu dosyadan okur).",
+ "onay": "Lokman, 26 Kasım 2026 05:53:56 UTC, proje sohbetindeki kart: \"A: Evet, böyle üretilsin\" (r03 çizimi, 14 makas, 328 çubuk; rehber makasları bu dosyadan okur). MK09 (çapraz makas) boyu: Lokman, 26 Kasım 2026 13:48:07 UTC, proje sohbetindeki kart \"Soru 13: 63 m2 evde çapraz makas kaç cm üretilsin?\": \"A: 179,9 cm, paftadaki gibi\" (D-157; 11 çubuk, 14 makas ve 328 çubuk aynı).",
  "proje": "TK11_63M2"
 }
