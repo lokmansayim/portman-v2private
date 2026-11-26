@@ -210,7 +210,7 @@ def kalkan(duzlemler: list[dict], k: dict, duvar_ustu: float, adim: float = 1.0)
 
 
 # ───────────────────────────────────────────────────────────────── aşık ──
-def asik_siralari(dz: dict, aralik: float, ust_esik: float = 30.0) -> list[dict]:
+def asik_siralari(dz: dict, aralik: float, ust_esik: float = 30.0, mahyadan_sacak_esigi: float | None = None) -> list[dict]:
     """Bir yüzdeki aşık sıraları. Sıralar düzlemin saçak çizgisinden (açılımda t = 0) itibaren `aralik` (cm) aralıkla dizilir; ilk sıra saçak
     çizgisinin üstündedir. Sıranın boyu, yüzün o yükseklikteki genişliğidir. Yüzün bir üst yatay kenarının (mahya, duvar dibi) altındaki son
     sıra ile kenar arasında `ust_esik`ten fazla boşluk kalıyorsa kenara, o kenarın boyunda bir sıra daha konur.
@@ -221,8 +221,12 @@ def asik_siralari(dz: dict, aralik: float, ust_esik: float = 30.0) -> list[dict]
     bir sıra daha çizili; 62 m² projede boşluk 13 cm, ek sıra yok. Kör test projesinin paftasında ana yüzlerde ek sıra yok (boşluk 22 ve 33 cm),
     sundurmanın duvar dibinde bir sıra var; cumba mahyasının iki yanında ise boşluk 49 cm olduğu halde sıra yok: bu kural oraya birer sıra koyar
     (2,48 + 2,78 m). Paftadaki, verandanın kırma köşesinde eğim yönünde duran iki parça (2,82 + 1,70 m) bu kuralda yoktur.
-    6 Ekim'de dondurulan listede kural başkaydı: boşluğa bakılmadan her üst kenarın 20 cm altına bir mahya aşığı (commit 0658a1d)."""
+    6 Ekim'de dondurulan listede kural başkaydı: boşluğa bakılmadan her üst kenarın 20 cm altına bir mahya aşığı (commit 0658a1d).
+    `mahyadan_sacak_esigi` (cm) verilirse sıralar saçaktan değil yüzün en üst kenarından sayılır (`_asik_mahyadan`, D-158); verilmezse
+    yukarıdaki kural aynen."""
     ac = dz.get("acilim_karkas") or dz["acilim"]
+    if mahyadan_sacak_esigi is not None:
+        return _asik_mahyadan(ac, aralik, ust_esik, mahyadan_sacak_esigi)
     u0, t0, u1, t1 = ac.bounds
     siralar = []
     k = 0
@@ -243,6 +247,49 @@ def asik_siralari(dz: dict, aralik: float, ust_esik: float = 30.0) -> list[dict]
         if not ac.contains(Point(um, ta - 0.5)) or ac.contains(Point(um, ta + 0.5)):
             continue                                  # alt kenar (saçak) ya da çokgenin içinden geçen çizgi
         alttaki = [s["t"] for s in siralar if s["tur"] == "sira" and s["t"] < ta - TOL and govde.contains(Point(um, s["t"]))]
+        bosluk = ta - max(alttaki) if alttaki else ta - t0
+        if bosluk > ust_esik + TOL:
+            siralar.append({"t": ta, "boy": abs(ub - ua), "tur": "ust_sira"})
+    return siralar
+
+
+def _asik_mahyadan(ac, aralik: float, ust_esik: float, sacak_esigi: float) -> list[dict]:
+    """D-158 · çok yüzlü çatıda aşık sıraları mahyadan (Lokman, 26 Kasım 2026 23:34:15 UTC kartı "Cumbalı ve verandalı çatıda aşık sıraları
+    nereden sayılsın?": "A: Yalnız bu evde mahyadan"; yalnız İş Emri `cati.asik_siralari: mahyadan` yazarsa). Karar C'nin (Lokman, 24 Ekim
+    2026 "Mahyadan 60"; `prefabrik_liste.asik_mesafeleri`) yüz yüz karşılığı: ilk sıra yüzün en üst kenarında (mahya; duvara dayanan yüzde
+    duvar dibi), sonrakiler eğik boyca `aralik` ile aşağı; saçak çizgisinde (t = 0) yüzün eni varsa orada bir sıra; saçak sırası olan yüzde
+    saçağa `sacak_esigi`'nden az kalan sıra konmaz. Sıranın boyu yüzün o yükseklikteki genişliği (alt kenarı dere olan yüzde sıra derede
+    biter). Yüzün daha alçaktaki üst yatay kenarında (aynı düzlemdeki cumbanın mahyası) `asik_siralari`'nın kuralı: altındaki son sıraya
+    boşluk `ust_esik`'i aşarsa o kenara bir sıra.
+    Dayanak: 63 m² evin montaj paftası, aşık yerleşim planı (ana yüzler 0 · 60 … 420 ve saçak; veranda yüzü 0 · 60 · 120 ve saçak; cumbanın
+    arka yüzü 0 · 60 · 120 · 180, saçak sırası yok). `t` yine saçak çizgisinden ölçülür (`serit.asik` aynı alanı okur)."""
+    u0, t0, u1, t1 = ac.bounds
+
+    def boy(t):
+        g = ac.intersection(LineString([(u0 - 1, t), (u1 + 1, t)]))
+        return 0.0 if g.is_empty else g.length
+
+    d, k = [], 0                                       # mahyadan eğik uzaklıklar (karar C)
+    while k * aralik < t1 - TOL:
+        d.append(k * aralik)
+        k += 1
+    sacak = boy(0.01)
+    if len(d) > 1 and sacak > 1.0 and t1 - d[-1] < sacak_esigi - TOL:
+        d.pop()                                        # saçak sırası onun yerini alır
+    siralar = [{"t": 0.0, "boy": sacak, "tur": "sira"}] if sacak > 1.0 else []
+    for m in reversed(d):
+        b = boy(t1 - m - (0.01 if m == 0 else 0.0))
+        if b > 1.0:
+            siralar.append({"t": t1 - m, "boy": b, "tur": "sira"})
+    govde = ac.buffer(0.05)
+    pts = list(ac.exterior.coords)[:-1]
+    for (ua, ta), (ub, tb) in zip(pts, pts[1:] + pts[:1]):
+        if abs(ta - tb) > 0.05 or abs(ub - ua) < 1.0 or t1 - ta < 0.05:
+            continue                                  # eğik ya da kısa kenar; en üst kenarda ilk sıra zaten var
+        um = (ua + ub) / 2
+        if not ac.contains(Point(um, ta - 0.5)) or ac.contains(Point(um, ta + 0.5)):
+            continue                                  # alt kenar (saçak) ya da çokgenin içinden geçen çizgi
+        alttaki = [s["t"] for s in siralar if s["t"] < ta + TOL and govde.contains(Point(um, s["t"]))]
         bosluk = ta - max(alttaki) if alttaki else ta - t0
         if bosluk > ust_esik + TOL:
             siralar.append({"t": ta, "boy": abs(ub - ua), "tur": "ust_sira"})
@@ -452,7 +499,12 @@ def cati_kur(cati: dict, kurallar: dict | None = None) -> dict:
     if kurallar:
         ar = kurallar["asik"]["aralik_m"]["deger"] * 100
         cd = kurallar["cok_duzlemli_cati"]["deger"]
-        cik["asik"] = {d["ad"]: asik_siralari(d, ar, ust_esik=cd["ust_sira_esigi_m"] * 100) for d in dzl}
+        mahyadan = cati.get("asik_siralari")           # D-158: yalnız `cati_serit.tanim` yazar (İş Emri `cati.asik_siralari: mahyadan`)
+        if mahyadan is not None and (mahyadan.get("baslangic") != "mahyadan" or "sacak_esigi_cm" not in mahyadan):
+            raise ValueError(f"çatı tanımında asik_siralari tanınmıyor (yok sayılmaz): {mahyadan!r}")
+        cik["asik"] = {d["ad"]: asik_siralari(d, ar, ust_esik=cd["ust_sira_esigi_m"] * 100,
+                                              mahyadan_sacak_esigi=None if mahyadan is None else float(mahyadan["sacak_esigi_cm"]))
+                       for d in dzl}
         cik["dere"] = dere_hatlari(dzl, kn, kurallar, cati.get("sacak", 30.0))
     return cik
 

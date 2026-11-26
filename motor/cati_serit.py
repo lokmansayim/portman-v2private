@@ -66,6 +66,13 @@ makas arası en az makas kalınlığıdır (8 cm), yerler mahalin yanı içinded
 (geçerse onu keser), iki makas arası (uçlar ve çapraz makas dahil) en çok 125,5'tir; değilse çatı kurulmaz (yok sayılmaz, K21). Yazılan
 yer yuvarlanmaz. Çapraz makas kırma hattında kalır. Anahtar yoksa eşit aralık aynen (AP-03, M-07).
 
+Aşık sıraları mahyadan (D-158; Lokman, 26 Kasım 2026 23:34:15 UTC kartı "Cumbalı ve verandalı çatıda aşık sıraları nereden sayılsın?":
+"A: Yalnız bu evde mahyadan"): bu çatının aşık sıralarını kitabın çok düzlemli kuralı saçaktan sayar (`cati_genel.asik_siralari`); karar
+C ("Mahyadan 60", D-39) yalnız düz beşikte uygulanır. `cati.asik_siralari: "mahyadan"` yalnız yazıldığı evde her yüzün sıralarını yüzün
+en üst kenarından saydırır (`cati_genel._asik_mahyadan`; saçak eşiği karar C'ninki, `kurallar/liste/prefabrik.json ›
+asik_sacak_esigi_m`): 63 m² evde paftanın aşık yerleşim planındaki 26 sıra. Tanım `asik_siralari` {baslangic, sacak_esigi_cm} taşır;
+liste, kart modeli, montaj paftası ve rehber aynı sıraları okur. Anahtar yoksa kural aynen. Başka değer ve düz beşik hata (K21).
+
 Yan yana iki cumba (İE-29, AP-12 paftası s. 5 makas, s. 6 baş makas betopanı, s. 7 aşık planı; Lokman, 4 Kasım 2026 04:33 "Evet, sırayla
 çiz"): `cati.yan_yana_cumbalar` {`cephe` (ana çatının bir ucu: mahya y boyuncaysa on | arka, x boyuncaysa sol | sag), `kalkan_mahali`
 (ana çatının o uçtaki kalkanı bu mahalin o cepheye bakan dış duvarının dış yüzünde), `bolme_cm` (iki cumbayı ayıran duvarın ekseni, cephe
@@ -151,6 +158,14 @@ KIRIS_CM = 10.0      # mahal çatısının kirişi 10 × 10 (dikme gibi; `verand
 _YAN_YON = {"on": (0, -1), "arka": (0, 1), "sol": (-1, 0), "sag": (1, 0)}      # yanın dışarı yönü (gerçek çerçeve: ön y = 0)
 
 
+def _asik_sacak_esigi_cm() -> float:
+    """Karar C'nin saçak eşiği (cm): liste kuralı `asik_sacak_esigi_m` (liste üreteci ve kart modeli aynı değeri okur; D-28 madde 1)."""
+    import json
+    from pathlib import Path
+    yol = Path(__file__).resolve().parents[1] / "kurallar" / "liste" / "prefabrik.json"
+    return float(json.loads(yol.read_text(encoding="utf-8"))["kurallar"]["asik_sacak_esigi_m"]["deger"]) * 100
+
+
 def mahal_catilari_var(ie: dict) -> bool:
     return bool((ie.get("cati") or {}).get("mahal_catilari"))
 
@@ -158,10 +173,15 @@ def mahal_catilari_var(ie: dict) -> bool:
 def ic_makas_denetle(plan: G.Plan, ie: dict) -> None:
     """D-154 · `cati.cumba_ic_makasi` yalnız `tanim`'ın kurduğu paralel cumbalı çatıda anlamlıdır. Düz beşikte (girintisiz gövde, mahal
     çatısı yok) çatı tanımı kurulmaz; anahtar orada sessizce yok sayılmaz (K21): çizim (`sunum.cati_tanimi`), liste
-    (`prefabrik_liste`) ve 3D model (`ifc_uret.hazirla`) aynı hatayı verir. Beşik dışı tipte `cati_prefabrik` tanınmayan alan der."""
+    (`prefabrik_liste`) ve 3D model (`ifc_uret.hazirla`) aynı hatayı verir. Beşik dışı tipte `cati_prefabrik` tanınmayan alan der.
+    D-158 · `cati.asik_siralari` da yalnız `tanim`'ın kurduğu çatıda okunur; düz beşikte aynı yoldan hata."""
     c = ie.get("cati") or {}
-    if c.get("cumba_ic_makasi") is not None and c.get("tip", "besik") == "besik" and not (plan.girintili or mahal_catilari_var(ie)):
+    duz_besik = c.get("tip", "besik") == "besik" and not (plan.girintili or mahal_catilari_var(ie))
+    if c.get("cumba_ic_makasi") is not None and duz_besik:
         raise PrefabrikCatiHatasi("cati.cumba_ic_makasi yalnız girintili gövdenin paralel cumbasında; bu çatıda cumba yok (yok sayılmaz)")
+    if c.get("asik_siralari") is not None and duz_besik:      # D-158: düz beşikte sıralar zaten mahyadan (karar C); anahtar orada anlamsız
+        raise PrefabrikCatiHatasi("cati.asik_siralari yalnız çok yüzlü çatıda (girintili gövde ya da mahal çatısı) yazılır; düz beşikte "
+                                  "aşık sıraları zaten mahyadan sayılır (karar C; yok sayılmaz)")
 
 
 def mahal_catilari(plan: G.Plan, ie: dict) -> list[dict]:
@@ -673,6 +693,9 @@ def tanim(plan: G.Plan, ie: dict) -> dict:
     ikiz, bol = {}, None                                                # İE-29 (AP-12): yan yana iki cumba
     if c.get("yan_yana_cumbalar") is not None:
         sr, k, ikiz, bol, _h_b = _yan_yana(plan, ie, sr, k, eksen, P, _K)
+    asik_sira = c.get("asik_siralari")                                  # D-158: aşık sıraları mahyadan (yalnız yazılırsa)
+    if asik_sira is not None and asik_sira != "mahyadan":
+        raise PrefabrikCatiHatasi(f"cati.asik_siralari yalnız \"mahyadan\" olur (yok sayılmaz): {asik_sira!r}")
     ic_makas = c.get("cumba_ic_makasi")                                 # D-154: cumbanın iç ucunda da makas (yalnız yazılırsa)
     if ic_makas is not None:
         if ic_makas is not True:
@@ -835,4 +858,5 @@ def tanim(plan: G.Plan, ie: dict) -> dict:
     return {"tip": "besik", "tip_adi": "beşik: ana çatı + paralel cumba", "sacak": s, "topuk": top, "duvar_ustu": H0, "duzlemler": duzlemler,
             "kalkanlar": kalkanlar, "parcalar": parcalar, "uyarilar": uyarilar, **({"mahal_catilari": mc} if mc else {}),
             **({"kenar_ozel": ozel} if ozel else {}),
-            **({"hatlar": hatlar} if hatlar else {})}
+            **({"hatlar": hatlar} if hatlar else {}),
+            **({"asik_siralari": {"baslangic": "mahyadan", "sacak_esigi_cm": _asik_sacak_esigi_cm()}} if asik_sira else {})}
