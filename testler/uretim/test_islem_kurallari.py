@@ -64,3 +64,28 @@ def test_islemli_dosya_okunur_ve_kiyaslanir(tmp_path):
     w = mrd.oku(hedef)
     k = islem.kiyas(v["parcalar"], [p["islemler"] for p in w["parcalar"]], haric=())
     assert all(t == d and f == 0 for t, d, f in k.values())
+
+
+DVR1 = KOK / "testler/uretim/veri/dvr1/DVR1.csv"   # 62 m² evin pencereli duvarı (#315 kaynağı); kural yazılırken görülmedi
+
+
+def test_dvr1_kor_sinama():
+    assert _topla([DVR1]) == {"CUT": (21, 21, 0), "DIMPLE": (76, 76, 0), "LIP_CUT": (38, 38, 0),
+                              "SWAGE": (38, 38, 0), "NOTCH": (4, 4, 0)}
+
+
+def _servis(dosya):
+    P = mrd.oku(dosya)["parcalar"]
+    tut = uretilen = dosyada = 0
+    for p, u in zip(P, islem.servis_delikleri(P)):
+        d = [v for k, v in p["islemler"] if k == "SERVICE_HOLE"]
+        uretilen += len(u)
+        dosyada += len(d)
+        tut += sum(1 for _, v in u if any(abs(v - x) < 0.6 for x in d))
+    return tut, uretilen, dosyada
+
+
+def test_servis_deligi_pano_ayari():
+    # ayar yüksekliklerindeki deliklerin hepsi tutar; kalanlar elle eklenmiş (girdi)
+    assert _servis(DVR1) == (8, 8, 12)
+    assert _servis(DUVAR1[0]) == (14, 14, 42)

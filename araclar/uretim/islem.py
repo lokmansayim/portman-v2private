@@ -2,7 +2,7 @@
 
 Girdi: MRD çerçevesinin parçaları (eksen uçları, boy, LABEL_NRM/INV). Çıktı: her parçanın işlemleri
 (DIMPLE vida, SWAGE köşeleme, NOTCH kertme, LIP_CUT düzleme, CUT kesim). SERVICE_HOLE (servis deliği)
-kuralı yok, üretilmez. Kurallar Mac `Alpha mini AI/_inceleme/IS-8, IS-9` (12 Kasım 2026) ve makine
+`uret()` üretmez; pano ayarının yüksekliklerindeki delikleri `servis_delikleri()` verir, elle eklenenler girdidir. Kurallar Mac `Alpha mini AI/_inceleme/IS-8, IS-9` (12 Kasım 2026) ve makine
 ayarı (Unbak U1 2000M: köşeleme kalıbı 68, kertme 50, düzleme 62 mm).
 """
 from __future__ import annotations
@@ -199,6 +199,26 @@ def kiyas(parcalar: list[dict], uretilen, tolerans: float = 0.6, haric=("SERVICE
             s[0] += tut
             s[1] += len(dosya)
             s[2] += len(kalan)
+    return sonuc
+
+
+SERVIS_YUKSEKLIGI = (610.0, 1830.0)   # Frame Builder pano ayarı (DVR1, DUVAR1, Diamond PANEL); döşemeden mm
+
+
+def servis_delikleri(parcalar: list[dict], yukseklikler=SERVIS_YUKSEKLIGI, pay: float = 50.0) -> list[list[tuple[str, float]]]:
+    """Pano ayarındaki yüksekliklerde dikey parçalara servis deliği (çerçeve y'si döşemeden).
+
+    Kaynak deneme/2026-10-25_alpha_mini_csv/duvar_kural.py (#315). Elektrik için elle eklenen delikler
+    geometriden çıkmaz; onlar girdidir (DUVAR1'de 42 deliğin 28'i elle).
+    """
+    sonuc = []
+    for p in parcalar:
+        u = []
+        if abs(p["x1"] - p["x2"]) < 1.0:
+            y0 = min(p["y1"], p["y2"])
+            boy = abs(p["y2"] - p["y1"])
+            u = [("SERVICE_HOLE", h - y0) for h in yukseklikler if y0 + pay < h < y0 + boy - pay]
+        sonuc.append(u)
     return sonuc
 
 
