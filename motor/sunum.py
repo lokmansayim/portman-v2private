@@ -327,6 +327,7 @@ def cati_tanimi(plan: G.Plan, ie: dict) -> dict | None:
     from . import cati_serit
     if plan.girintili or cati_serit.mahal_catilari_var(ie):    # İE-24: girintili gövdede ana çatı + paralel cumbalar (`cati_serit`); İE-17
         return cati_serit.tanim(plan, ie)                      # PR-2: kendi çatısı olan açık mahal ana çatıdan çıkar (AP-09)
+    cati_serit.ic_makas_denetle(plan, ie)                      # D-154: düz beşikte `cati.cumba_ic_makasi` sessizce yok sayılmaz
     s = float(c.get("sacak_cm", 30)); eg = float(c.get("egim_yuzde", 33)) / 100.0; top = float(c.get("topuk_cm", 10))
     H0 = float(ie.get("yapi", {}).get("duvar_yuksekligi_cm", 250))
     zs = H0 + top

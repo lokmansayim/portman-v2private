@@ -1,0 +1,23 @@
+{
+ "sema": "portman.bayi_formu_girdi/1",
+ "aciklama": "TK-11 Mehmet Kapaklı Tek 63 m² teklif formunun girdisi, r02 (26 Kasım 2026): cumbanın iç ucunda 1 makas daha, 14 makas (D-154; Lokman 26 Kasım 2026 05:56:53 UTC kart 'B: Listeye 1 cumba makası ekle'; form onayı 06:14:46 UTC kart 'Onaylıyorum, 454.607,96 TL'). Kâr %25 (Lokman 23 Kasım 2026 09:09:56, 09:10:50 UTC); tutar elle yazılmaz, tabandan hesaplanır (363.686,37 × 1,25 = 454.607,96 TL); KDV yazılmaz (D-136); Ek-1 yok, 1. sayfa teklif, 2. sayfa ön onay (D-153). Telefon yok. Mühürlü r01 formu (452.301,89 TL) aynen durur.",
+ "pazar": "yurt_ici",
+ "bilgi": {
+  "Bayi": "Mehmet Kapaklı",
+  "Müşteri / proje": "Mehmet Kapaklı · Tek 63 m²"
+ },
+ "kosullar": {
+  "Teslim süresi": "10 gün",
+  "Teslim şekli": "Fabrika Teslim",
+  "Ödeme şekli": "Nakit"
+ },
+ "kalin": [
+  "Tavan"
+ ],
+ "on_onay_paftasi": true,
+ "sabit_fiyat": {
+  "kar_orani": 0.25,
+  "kdv_orani": 0
+ },
+ "malzeme_listesi": false
+}

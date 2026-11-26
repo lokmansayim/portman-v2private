@@ -569,6 +569,7 @@ def model_motor(ie: dict) -> dict:
         serit = _capraz_cumba_catilari(plan, ie)               # D-109: köşe verandasının cumbası da (ayak izi verandanın taşan dikdörtgeni)
     elif plan.girintili or _cs.mahal_catilari_var(ie):         # İE-24 girintili gövde; İE-17 PR-1b/K7 açık mahalin kendi çatısı (AP-09, AP-03)
         serit = _serit_catilari(plan, ie)                      # (çatı parçaları, çatı tanımı)
+    _cs.ic_makas_denetle(plan, ie)                             # D-154: düz beşikte `cati.cumba_ic_makasi` sessizce yok sayılmaz
     # kitap `kablo_en_uzak_mesafe`: sigorta kutusu (yeri İş Emri'nde yok) giriş kapısında; kapının ortasından kapalı kısmın en uzak köşesine kuş uçuşu
     kose = [q for g_ in getattr(fp, "geoms", [fp]) for q in g_.exterior.coords]
     giris = next(((d, p, a) for d in plan.duvarlar if d.tur == "dis" for p in d.panolar for a in p.aciklar if a.tur == "dis_kapi"), None)
@@ -827,6 +828,8 @@ def _serit_catilari(plan, ie: dict) -> tuple[list[dict], dict]:
                     "makas_kosu_cm": q["boy_cm"] - 2 * t_dis,          # boy − 2 × t_dis
                     **({"dere_ici_m": hat[q["ad"]]["vadi"]} if hat[q["ad"]]["vadi"] else {}),
                     **({"kirma_m": hat[q["ad"]]["kirma"]} if hat[q["ad"]]["kirma"] else {}),
+                    **({"ic_uc_makas": sum(1 for m in q["makaslar"] if m.get("ic_uc"))}          # D-154: `cati.cumba_ic_makasi`
+                       if any(m.get("ic_uc") for m in q["makaslar"]) else {}),
                     "not": "Motor (İE-24): girintili gövdenin " + ("ana çatısı" if q["rol"] == "ana" else "cumbası, ana çatıya paralel")})
     for ad, m in mahal.items():
         x0, y0, x1, y1 = m["kutu"]
@@ -2288,7 +2291,9 @@ def liste(N: dict, kurallar: dict | None = None, pafta: dict | None = None) -> d
                      "kırma hattı başına bir, kiriş köşesinden duvara (eşit eğim, 45°)", "AP-03 paftası MK13: 1 tuttu")
         elif c.get("cumba"):                                    # İE-24 (Lokman, 30 Ekim 13:49): ana çatı dışındaki makaslar cumba makası
             ekle("1005", f"Cumba makası · {ad}", f"L {round((c['aciklik_cm'] + 2 * c['sacak_cm']) * 10)}", n_m, "Kural (Lokman 30.10 13:49)",
-                 yer + (f", dış uçta {c['kalkan']} baş" if c["kalkan"] else ""), "taşan verandanın makası gibi (TK-01); TK-03 paftası: sol cumba 5, sağ cumba 4",
+                 yer + (f", dış uçta {c['kalkan']} baş" if c["kalkan"] else "") +
+                 (f", iç uçta {c['ic_uc_makas']} (İş Emri `cati.cumba_ic_makasi`: evin montaj paftası, D-154)" if c.get("ic_uc_makas") else ""),
+                 "taşan verandanın makası gibi (TK-01); TK-03 paftası: sol cumba 5, sağ cumba 4",
                  pafta=("makas_cumba",))
         elif c.get("yavru_paftadan"):                           # BK-49 (D-116): çıkıntısız cumbanın makas planı evin paftasından
             kisa_m = c.get("kisa_makaslar_cm") or []

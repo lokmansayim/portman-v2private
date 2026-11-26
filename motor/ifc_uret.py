@@ -63,6 +63,7 @@ def hazirla(ie: dict) -> dict:
     plan = G.kur(ie)
     girinti = {}
     from . import cati_serit
+    cati_serit.ic_makas_denetle(plan, ie)             # D-154: düz beşikte `cati.cumba_ic_makasi` sessizce yok sayılmaz
     if plan.girintili:                                # İE-24: çatı ve makaslar çizimdeki çatıdan (ana çatı + cumba), döşeme gövdenin dış çizgisinden
         from . import cati_capraz, cati_prefabrik
         cumbali = (ie.get("cati") or {}).get("tip") == "besik_cumba"
