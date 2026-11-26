@@ -9,7 +9,7 @@ Eksen: çerçeve düzleminde mm. x alt başlık boyunca, y yukarı; alt başlı�
 Koordinatlar parçanın eksenidir (kanat ortası, sırttan 27 mm). x=0: beşikte saçak ucu, tek eğimde yüksek uç,
 çaprazda alçak uç (saçak köşesi).
 
-Kalıptan ölçülen sabitler (90 m², `testler/uretim/test_makas.py` kalıbı bu kodla yeniden kurar):
+Kalıptan ölçülen sabitler (90 m², `testler/uretim/test_uretim_makas.py` kalıbı bu kodla yeniden kurar):
 - üst başlık ekseni dış uçta topuk − 27 / cos(eğim açısı) yükseklikte;
 - örgü çubuğunun ucu başlık ekseninden öteye geçer: üst başlıkta (21 − 27·cos θ) / sin θ, alt başlıkta 5 + 0,15·θ°;
   düşey çubukta altta 21 mm;
