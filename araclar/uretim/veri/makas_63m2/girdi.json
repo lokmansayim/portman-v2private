@@ -1,0 +1,90 @@
+{
+ "aciklama": "63 m² tek ev makasları . Yerleşim Motor'un (Lokman 26 Kasım 2026 05:50:56 UTC: 'sen motora uy yerleşim yerlerinde eşit aralıklara koymuşsa o şekilde kalsın'): 7 ana, 4 kısa, 1 çapraz ve cumba; cumbaya paftadaki MK13 eklenir (Lokman 05:52:33 UTC): 2 cumba. Boylar Motor'un çatı tanımından (sunum.cati_tanimi), eğim, topuk, saçak İş Emri'nden. Kalıp: 90 m² çelik evin makas üretim dosyası (Lokman 25 Kasım 2026 21:14:35 UTC).",
+ "cati": {
+  "egim": 0.3288,
+  "topuk_mm": 100.0,
+  "sacak_mm": 300.0
+ },
+ "makaslar": [
+  {
+   "ad": "MK01",
+   "tur": "ana",
+   "alt_baslik_mm": 8957.5
+  },
+  {
+   "ad": "MK02",
+   "tur": "ana",
+   "alt_baslik_mm": 8957.5
+  },
+  {
+   "ad": "MK03",
+   "tur": "ana",
+   "alt_baslik_mm": 8957.5
+  },
+  {
+   "ad": "MK04",
+   "tur": "ana",
+   "alt_baslik_mm": 8957.5
+  },
+  {
+   "ad": "MK05",
+   "tur": "ana",
+   "alt_baslik_mm": 8957.5
+  },
+  {
+   "ad": "MK14",
+   "tur": "ana",
+   "alt_baslik_mm": 8957.5
+  },
+  {
+   "ad": "MK06",
+   "tur": "ana",
+   "alt_baslik_mm": 8957.5
+  },
+  {
+   "ad": "MK13",
+   "tur": "cumba",
+   "alt_baslik_mm": 4515.0,
+   "not": "Motor'un listesinde yok; Lokman 26 Kasım 2026 05:52:33 UTC 'cumbada 2 makas gördüm ana makasın tam önünde 1 tane daha makas var' (paftadaki MK13, son ana makasa bitişik)"
+  },
+  {
+   "ad": "MK07",
+   "tur": "cumba",
+   "alt_baslik_mm": 4515.0
+  },
+  {
+   "ad": "MK12",
+   "tur": "kisa",
+   "alt_baslik_mm": 1555.0,
+   "egim": 0.2
+  },
+  {
+   "ad": "MK11",
+   "tur": "kisa",
+   "alt_baslik_mm": 1555.0,
+   "egim": 0.2
+  },
+  {
+   "ad": "MK10",
+   "tur": "kisa",
+   "alt_baslik_mm": 1555.0,
+   "egim": 0.2
+  },
+  {
+   "ad": "MK08",
+   "tur": "kisa",
+   "alt_baslik_mm": 1555.0,
+   "egim": 0.2
+  },
+  {
+   "ad": "MK09",
+   "tur": "capraz",
+   "alt_baslik_mm": 1820.1,
+   "yuksek_uc_mm": 411.0,
+   "sacak_mm": 577.3,
+   "not": "saçak: Motor'un çapraz makası (ifc_uret._kirma_mahal_makaslari) alt başlığı kırma hattının y=835,75 kiriş çizgisini kestiği yerden başlatır; saçak köşesinden o noktaya"
+  }
+ ],
+ "onay": "Lokman, 26 Kasım 2026 05:53:56 UTC, proje sohbetindeki kart: \"A: Evet, böyle üretilsin\" (r03 çizimi, 14 makas, 328 çubuk; rehber makasları bu dosyadan okur).",
+ "proje": "TK11_63M2"
+}
