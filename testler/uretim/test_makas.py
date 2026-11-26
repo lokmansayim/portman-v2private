@@ -1,11 +1,11 @@
-"""BK-78 Parça 2: plandan makas çerçevesi (araclar/uretim/makas.py), taslak.
+"""BK-78 Parça 2: plandan makas çerçevesi (araclar/uretim/makas.py).
 
 1. Kalıbı yeniden kurmak: 90 m² çelik evin makas üretim dosyasındaki ana (M01), kısa (M09) ve çapraz (M13)
    makas, kendi ölçüleriyle kurulunca çubuk uçları dosyadakine en çok 9 / 16 / 16 mm, boylar 4 / 6 / 8 mm yakın.
    Dosyadaki çubuğun gerçek uçları .bde'nin vida yerlerinden çıkar; o uçlarla islem.uret() vidaları
    dosyayla bire bir verir (138/138, 44/44, 52/52).
-2. 63 m² makasları (Motor'un yerleşimi, Lokman 26 Kasım 05:50:56 "sen motora uy"; cumbada 2 makas, 05:52:33): depodaki CSV'ler girdiden yeniden üretilince bayt bayt aynı (TASLAK; hedef örnek değil,
-   Lokman'ın onayı bekleniyor).
+2. 63 m² makasları (Motor'un yerleşimi, Lokman 26 Kasım 05:50:56 "sen motora uy"; cumbada 2 makas, 05:52:33): depodaki CSV'ler girdiden yeniden üretilince bayt bayt aynı. Hedef örnek: Lokman 26 Kasım 2026 05:53:56 UTC
+   kartı "A: Evet, böyle üretilsin" (r03 çizimi, 14 makas, 328 çubuk).
 """
 import math
 from pathlib import Path

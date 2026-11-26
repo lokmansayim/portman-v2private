@@ -1,4 +1,4 @@
-"""Plandan çelik makas çerçevesi (BK-78 Parça 2, taslak): beşik, tek eğim (kısa) ve çapraz makas.
+"""Plandan çelik makas çerçevesi (BK-78 Parça 2): beşik, tek eğim (kısa) ve çapraz makas.
 
 Kalıp 90 m² çelik evin onaylı makas üretim dosyasıdır (`testler/uretim/veri/celik_90m2/80X0,8_MAKAS_PANELLERI.bde`;
 Lokman 25 Kasım 2026 21:14:35 UTC "sadece çatı üretim dosyasın alacaksın 63 m² uyduracaksın"):
@@ -182,7 +182,7 @@ def capraz(L, H, sacak, topuk=100.0, panel=414.5):
     return cub, bilgi
 
 
-def mrd_cercevesi(ad, cubuklar):
+def mrd_cercevesi(ad, cubuklar, proje="TASLAK"):
     """Çubuklardan MRD çerçevesi; işlemler islem.uret()'ten. Boy uçlar arası, 0,01 mm'ye yuvarlı."""
     parcalar = []
     for i, c in enumerate(cubuklar, 1):
@@ -192,7 +192,7 @@ def mrd_cercevesi(ad, cubuklar):
     for p, isl in zip(parcalar, islem.uret(parcalar)):
         sira = {k: i for i, k in enumerate(islem.SIRA)}
         p["islemler"] = sorted(((k, round(v, 2)) for k, v in isl), key=lambda kv: (sira[kv[0]], kv[1]))
-    baslik = [["UNIT", "MILLIMETRE"], ["VERSION", "2"], ["PROFILE", "54.00x80.00", "Standard Profile"], ["FRAMESET", ad, "TASLAK"]]
+    baslik = [["UNIT", "MILLIMETRE"], ["VERSION", "2"], ["PROFILE", "54.00x80.00", "Standard Profile"], ["FRAMESET", ad, proje]]
     return {"baslik": baslik, "cerceve": ad, "parcalar": parcalar, "bom": False, "son_satir_bos": True}
 
 
@@ -211,7 +211,7 @@ def girdiden(girdi: dict) -> list[dict]:
             cub, bilgi = capraz(L, m["yuksek_uc_mm"], m["sacak_mm"], topuk)
         else:
             raise ValueError(f"bilinmeyen makas türü: {m['tur']}")
-        v = mrd_cercevesi(m["ad"], cub)
+        v = mrd_cercevesi(m["ad"], cub, girdi.get("proje", "TASLAK"))
         v["bilgi"] = bilgi
         sonuc.append(v)
     return sonuc
@@ -225,7 +225,7 @@ def main(argv=None) -> int:
     from . import mrd
 
     ap = argparse.ArgumentParser(prog="python -m araclar.uretim.makas",
-                                 description="Makas girdisinden MRD CSV çerçeveleri yazar (taslak).")
+                                 description="Makas girdisinden MRD CSV çerçeveleri yazar.")
     ap.add_argument("girdi")
     ap.add_argument("klasor")
     a = ap.parse_args(argv)
