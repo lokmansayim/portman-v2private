@@ -8,7 +8,9 @@ saçağa uzanan uçları (421,5'e kadar) o makasın içinden geçer. Evin montaj
 Kural:
 - anahtar yoksa çatı tanımı aynen (eşit aralık; AP-03, M-07);
 - anahtar kısa makasları yazılan yerlere koyar; sayı, boy, çapraz makas, yükleme listesi ve çatının düzlemleri aynı kalır;
-- yanlış sayı, sıra, aralık, yan dışı yer, sayı olmayan değer ve köşe kırması olmayan mahal çatısı hata (yok sayılmaz).
+- yerler gerçek çerçevededir (ön y = 0): arka-sol dizilimli bu evde de önden sayılır, `konum_cm` gibi arkadan değil;
+- yanlış sayı, sıra, aralık, yan dışı yer, birbirine 8 cm'den yakın iki kısa makas, çapraz makasın yolundaki kısa makas, sayı olmayan
+  değer ve köşe kırması olmayan mahal çatısı hata (yok sayılmaz); yazılan yer yuvarlanmaz.
 
 Hedef örnek değildir: evin İş Emri'ne anahtar ve rehberin hedef örneği rehber işinde, Lokman'ın onayıyla girer (D-28 madde 2).
 """
@@ -102,6 +104,10 @@ def test_liste_aynen():
     ([425.5, 512.75, 637.75, 835.75], "mahalin yanı içinde"),                       # çapraz makasın ucunda kısa makas olmaz
     ([425.5, 512.75, 600.0, 762.75], "125.5 cm'yi aşıyor"),                         # 600 → 762,75 = 162,75
     ([391.5, 425.5, 512.75, 637.75], "125.5 cm'yi aşıyor"),                         # son kısa makastan çapraz makasa 198
+    ([425.5, 512.75, 518.0, 640.0], "en az 8 cm"),                                  # iki kısa makas 5,25 arayla: birbirinin içinde (hakem)
+    ([500.0, 500.02, 625.0, 750.0], "en az 8 cm"),
+    ([512.75, 637.75, 762.75, 800.0], "çapraz makasın iç ucunu (771.16) geçemez"),  # 800'deki kısa makas çapraz makası keser (hakem)
+    ([512.75, 637.75, 762.75, 835.0], "çapraz makasın iç ucunu (771.16) geçemez"),
 ])
 def test_yanlis_yerler_hata(yerler, parca):
     with pytest.raises(CP.PrefabrikCatiHatasi, match="kisa_makas_yerleri_cm") as e:
@@ -109,11 +115,33 @@ def test_yanlis_yerler_hata(yerler, parca):
     assert parca in str(e.value)
 
 
-@pytest.mark.parametrize("deger", [True, 425.5, "425,5", [], [425.5, "512,75", 637.75, 762.75], [425.5, True, 637.75, 762.75], None])
+@pytest.mark.parametrize("deger", [True, 425.5, "425,5", [], [425.5, "512,75", 637.75, 762.75], [425.5, True, 637.75, 762.75], None,
+                                   [425.5, float("nan"), 637.75, 762.75], [425.5, 512.75, 637.75, float("inf")]])
 def test_sayi_listesi_olmayan_deger_hata(deger):
     """Anahtar yazıldıysa sayı listesidir; null da yok sayılmaz (yazılmayacaksa anahtar yazılmaz)."""
     with pytest.raises(CP.PrefabrikCatiHatasi, match="kisa_makas_yerleri_cm sayı listesi"):
         _tanim(_anahtarli(deger))
+
+
+def test_yerler_gercek_cercevede_onden_sayilir():
+    """Yerler mahalin `kutu`'suyla aynı çerçevededir (ön y = 0). Ev arka-sol dizilimlidir: VERANDA'nın `konum_cm`'si arkadan 10–449,25
+    yazar, Motor'un kutusu önden 391,5–835,75'tir. Arkadan sayılmış yerler (835,75 + 10 − önden yer) bu evde yanın dışına düşer: hata."""
+    ie = _oku()
+    assert ie["yapi"]["dizilim"]["baslangic"] == "arka-sol"
+    (m,) = [q for q in ie["mahaller"] if q["ad"] == "VERANDA"]
+    assert m["konum_cm"] == [[632.5, 10, 758, 449.25]]                           # y arkadan
+    t = _tanim(_anahtarli())                                                     # önden sayılmış yerler yanın içinde: çatı kurulur
+    assert _kisa(t) == PAFTA
+    arkadan = [round(845.75 - v, 2) for v in reversed(PAFTA)]                    # 83 / 208 / 333 / 420,25
+    with pytest.raises(CP.PrefabrikCatiHatasi, match="mahalin yanı içinde"):
+        _tanim(_anahtarli(arkadan))
+
+
+def test_capraz_makasin_ic_ucuna_kadar_yazilir():
+    """Kısa makas çapraz makasın yüksek yandaki ucuna (kırma hattının duvara vardığı yer: 865,75 − 155,5 × 20 ÷ 32,88 = 771,16) kadar
+    yazılabilir; eşit eğimli kırmada kuralın son kısa makası da o uçtadır (AP-03). Yazılan yer yuvarlanmaz."""
+    assert _kisa(_tanim(_anahtarli([425.5, 550.0, 660.0, 771.16]))) == [425.5, 550.0, 660.0, 771.16]
+    assert _kisa(_tanim(_anahtarli([425.555, 512.75, 637.75, 762.75])))[0] == 425.555
 
 
 def test_tek_yon_mahal_catisinda_hata():

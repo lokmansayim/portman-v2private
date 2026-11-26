@@ -59,10 +59,12 @@ birden çok yüz varsa mahala en yakını alınır (öteki ucun cumbası değil)
 Köşe kırmasında kısa makasların yeri paftadan (D-156; Lokman, 26 Kasım 2026 10:19:48 UTC kartı "63 m2 evde 4 veranda makası hangi
 yerlerde dursun?": "A: Paftadaki yerlerde"): eşit aralık kuralı ilk kısa makası kapalı yandaki duvarın hizasına koyar; orada paralel
 cumbanın makaslarının saçağa uzanan uçları kısa makasın içinden geçer (63 m² ev: 391,5'teki kısa makası 642,5 ve 758'deki cumba
-makasları keser). `kisa_makas_yerleri_cm` (yalnız kırmada; evin montaj paftasından; planın çerçevesinde, yüksek yan boyunca, makasın
-ekseni) kısa makasları yazılan yerlere koyar: 63 m² evde 425,5 / 512,75 / 637,75 / 762,75. Sayı kuralın sayısıdır (liste aynı kalır),
-yerler artan sırada ve mahalin yanı içindedir, iki makas arası (uçlar ve çapraz makas dahil) en çok 125,5'tir; değilse çatı kurulmaz
-(yok sayılmaz, K21). Çapraz makas kırma hattında kalır. Anahtar yoksa eşit aralık aynen (AP-03, M-07).
+makasları keser). `kisa_makas_yerleri_cm` (yalnız kırmada; evin montaj paftasından; yüksek yan boyunca makasın ekseni; gerçek çerçevede:
+ön y = 0, sol x = 0, `dizilim.baslangic: arka-sol` olan evde de önden sayılır, `konum_cm` gibi arkadan değil) kısa makasları yazılan
+yerlere koyar: 63 m² evde 425,5 / 512,75 / 637,75 / 762,75. Sayı kuralın sayısıdır (liste aynı kalır); yerler artan sıradadır, iki kısa
+makas arası en az makas kalınlığıdır (8 cm), yerler mahalin yanı içindedir, kısa makas çapraz makasın yüksek yandaki ucunu geçmez
+(geçerse onu keser), iki makas arası (uçlar ve çapraz makas dahil) en çok 125,5'tir; değilse çatı kurulmaz (yok sayılmaz, K21). Yazılan
+yer yuvarlanmaz. Çapraz makas kırma hattında kalır. Anahtar yoksa eşit aralık aynen (AP-03, M-07).
 
 Yan yana iki cumba (İE-29, AP-12 paftası s. 5 makas, s. 6 baş makas betopanı, s. 7 aşık planı; Lokman, 4 Kasım 2026 04:33 "Evet, sırayla
 çiz"): `cati.yan_yana_cumbalar` {`cephe` (ana çatının bir ucu: mahya y boyuncaysa on | arka, x boyuncaysa sol | sag), `kalkan_mahali`
@@ -143,6 +145,7 @@ def cati_izi(plan: G.Plan, ie: dict | None = None):
     return Polygon(en.exterior.coords).simplify(TOL)
 
 
+MAKAS_KALINLIGI = 8.0      # cm · D-156: makas çerçevesi üstten 8 cm (çubuğun sırtı 80 mm, makas düzlemine dik; `araclar/uretim/makas.py` PROFIL)
 MAHAL_CATI_ALANLARI = {"mahal", "tip", "egim_yuzde", "yuksek_yan", "sacak_cm", "yuz_egimi_yuzde", "kisa_makas_yerleri_cm"}
 KIRIS_CM = 10.0      # mahal çatısının kirişi 10 × 10 (dikme gibi; `veranda.KIRIS_CM`)
 _YAN_YON = {"on": (0, -1), "arka": (0, 1), "sol": (-1, 0), "sag": (1, 0)}      # yanın dışarı yönü (gerçek çerçeve: ön y = 0)
@@ -210,7 +213,8 @@ def mahal_catilari(plan: G.Plan, ie: dict) -> list[dict]:
         if "kisa_makas_yerleri_cm" in g:
             if tip != "kirma":
                 raise PrefabrikCatiHatasi(f"mahal çatısı ({ad}): kisa_makas_yerleri_cm yalnız köşe kırmasında yazılır (tek_yon'da makas yok)")
-            if not isinstance(yerler, list) or not yerler or any(isinstance(v, bool) or not isinstance(v, (int, float)) for v in yerler):
+            if not isinstance(yerler, list) or not yerler or any(isinstance(v, bool) or not isinstance(v, (int, float)) or not math.isfinite(v)
+                                                                 for v in yerler):
                 raise PrefabrikCatiHatasi(f"mahal çatısı ({ad}): kisa_makas_yerleri_cm sayı listesi olur (cm; yok sayılmaz): {yerler!r}")
             yerler = [float(v) for v in yerler]
         if tip == "kirma":
@@ -466,21 +470,29 @@ def _kirma(m: dict, duzlemler: list[dict], kalkanlar: list[dict], ana_iz) -> lis
         mk.append({"konum": round(lo_ + (hi_ - lo_) * i / n_, 2), "rol": "capraz" if capraz else "kisa",
                    "plan_boy_cm": round(kosu * (math.hypot(1.0, P["egim"] / ana_eg) if capraz else 1.0), 2)})
     if m.get("kisa_makas_yerleri") is not None:                         # D-156: kısa makaslar evin montaj paftasındaki yerlerde
-        _kisa_makas_yerleri(m["ad"], mk, m["kisa_makas_yerleri"], lo_, hi_)
+        ic = kosu * P["egim"] / ana_eg - s                                # kırma hattı yüksek yana uçtan bu kadar içeride varır
+        _kisa_makas_yerleri(m["ad"], mk, m["kisa_makas_yerleri"], lo_, hi_, {lo_: lo_ + ic, hi_: hi_ - ic})
     m["makaslar"] = mk
     return hatlar
 
 
-def _kisa_makas_yerleri(ad: str, mk: list[dict], yerler: list[float], lo_: float, hi_: float) -> None:
-    """D-156 · kısa makasları İş Emri'nin yazdığı yerlere koyar (`kisa_makas_yerleri_cm`; evin montaj paftası). Sayı kuralın sayısı
-    (liste aynı kalır); yerler artan sırada, mahalin yanı içinde, çapraz makasın ucundan içeride; iki makas arası (yanın iki ucu ve
-    çapraz makas dahil) en çok 125,5. Değilse çatı kurulmaz (yok sayılmaz). Çapraz makasın yeri değişmez."""
+def _kisa_makas_yerleri(ad: str, mk: list[dict], yerler: list[float], lo_: float, hi_: float, capraz_ic: dict) -> None:
+    """D-156 · kısa makasları İş Emri'nin yazdığı yerlere koyar (`kisa_makas_yerleri_cm`; evin montaj paftası). Yerler gerçek çerçevededir
+    (ön y = 0, sol x = 0; mahalin `kutu`'su gibi): `dizilim.baslangic: arka-sol` olan evde de önden sayılır, `konum_cm` gibi arkadan değil.
+    Sayı kuralın sayısı (liste aynı kalır); yerler artan sırada, iki kısa makasın ekseni arası en az makas kalınlığı, mahalin yanı içinde;
+    kısa makas çapraz makasın yüksek yandaki ucunu (`capraz_ic`: yanın ucu → kırma hattının duvara vardığı yer) geçmez; iki makas arası
+    (yanın iki ucu ve çapraz makas dahil) en çok 125,5. Değilse çatı kurulmaz (yok sayılmaz). Çapraz makasın yeri değişmez; yazılan yer
+    yuvarlanmaz."""
     kisa = [q for q in mk if q["rol"] == "kisa"]
     if len(yerler) != len(kisa):
         raise PrefabrikCatiHatasi(f"{ad}: kisa_makas_yerleri_cm {len(yerler)} yer yazıyor, kuralın kısa makas sayısı {len(kisa)} "
                                   "(sayı değişmez; yok sayılmaz)")
     if any(b - a <= TOL for a, b in zip(yerler, yerler[1:])):
         raise PrefabrikCatiHatasi(f"{ad}: kisa_makas_yerleri_cm artan sırada yazılır: {yerler}")
+    yakin = [(a, b) for a, b in zip(yerler, yerler[1:]) if b - a < MAKAS_KALINLIGI - TOL]
+    if yakin:                                                           # geometri hakemi: iki makas birbirinin içine yazılamaz
+        raise PrefabrikCatiHatasi(f"{ad}: kisa_makas_yerleri_cm'de iki kısa makas arası en az {MAKAS_KALINLIGI:g} cm olur (makas kalınlığı): "
+                                  + ", ".join(f"{a:g}–{b:g}" for a, b in yakin))
     capraz = sorted(q["konum"] for q in mk if q["rol"] == "capraz")
     alt = lo_ + TOL if any(abs(c_ - lo_) < TOL for c_ in capraz) else lo_ - TOL        # çapraz makasın ucunda kısa makas olmaz
     ust = hi_ - TOL if any(abs(c_ - hi_) < TOL for c_ in capraz) else hi_ + TOL
@@ -491,8 +503,15 @@ def _kisa_makas_yerleri(ad: str, mk: list[dict], yerler: list[float], lo_: float
     if genis:
         raise PrefabrikCatiHatasi(f"{ad}: kisa_makas_yerleri_cm ile iki makas arası {MOD:g} cm'yi aşıyor: "
                                   + ", ".join(f"{a:g}–{b:g}" for a, b in genis))
+    for c_ in capraz:                                                   # geometri hakemi: çapraz makasın yolundaki kısa makas onu keser
+        uc = lo_ if abs(c_ - lo_) < TOL else hi_
+        sinir = capraz_ic[uc]
+        gecen = [v for v in yerler if (v < sinir - TOL if uc == lo_ else v > sinir + TOL)]
+        if gecen:
+            raise PrefabrikCatiHatasi(f"{ad}: kisa_makas_yerleri_cm'de kısa makas çapraz makasın iç ucunu ({round(sinir, 2):g}) geçemez "
+                                      f"(geçerse çapraz makası keser): {gecen}")
     for q, v in zip(kisa, yerler):
-        q["konum"] = round(v, 2)
+        q["konum"] = v
 
 
 def _mahal_cati_denetle(mc: list[dict], duzlemler: list[dict]) -> None:
