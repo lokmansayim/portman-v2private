@@ -144,6 +144,15 @@ def mahal_catilari_var(ie: dict) -> bool:
     return bool((ie.get("cati") or {}).get("mahal_catilari"))
 
 
+def ic_makas_denetle(plan: G.Plan, ie: dict) -> None:
+    """D-154 · `cati.cumba_ic_makasi` yalnız `tanim`'ın kurduğu paralel cumbalı çatıda anlamlıdır. Düz beşikte (girintisiz gövde, mahal
+    çatısı yok) çatı tanımı kurulmaz; anahtar orada sessizce yok sayılmaz (K21): çizim (`sunum.cati_tanimi`), liste
+    (`prefabrik_liste`) ve 3D model (`ifc_uret.hazirla`) aynı hatayı verir. Beşik dışı tipte `cati_prefabrik` tanınmayan alan der."""
+    c = ie.get("cati") or {}
+    if c.get("cumba_ic_makasi") is not None and c.get("tip", "besik") == "besik" and not (plan.girintili or mahal_catilari_var(ie)):
+        raise PrefabrikCatiHatasi("cati.cumba_ic_makasi yalnız girintili gövdenin paralel cumbasında; bu çatıda cumba yok (yok sayılmaz)")
+
+
 def mahal_catilari(plan: G.Plan, ie: dict) -> list[dict]:
     """`cati.mahal_catilari` → [{"ad", "mahal", "tip" (tek_yon | kirma), "kutu" (mahalin dış kutusu, cm), "yuksek_yan", "duzlem" (genel
     motorun düzlem biçimi), "egim", "ust_kot" (yüksek kenar: duvar üstü), "alt_kot" (alçak kenar, saçak ucunda), "kolonlar" [(x0, y0, x1, y1,

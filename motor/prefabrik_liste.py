@@ -569,6 +569,7 @@ def model_motor(ie: dict) -> dict:
         serit = _capraz_cumba_catilari(plan, ie)               # D-109: köşe verandasının cumbası da (ayak izi verandanın taşan dikdörtgeni)
     elif plan.girintili or _cs.mahal_catilari_var(ie):         # İE-24 girintili gövde; İE-17 PR-1b/K7 açık mahalin kendi çatısı (AP-09, AP-03)
         serit = _serit_catilari(plan, ie)                      # (çatı parçaları, çatı tanımı)
+    _cs.ic_makas_denetle(plan, ie)                             # D-154: düz beşikte `cati.cumba_ic_makasi` sessizce yok sayılmaz
     # kitap `kablo_en_uzak_mesafe`: sigorta kutusu (yeri İş Emri'nde yok) giriş kapısında; kapının ortasından kapalı kısmın en uzak köşesine kuş uçuşu
     kose = [q for g_ in getattr(fp, "geoms", [fp]) for q in g_.exterior.coords]
     giris = next(((d, p, a) for d in plan.duvarlar if d.tur == "dis" for p in d.panolar for a in p.aciklar if a.tur == "dis_kapi"), None)

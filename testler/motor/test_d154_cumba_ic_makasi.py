@@ -111,16 +111,24 @@ def test_baska_deger_hata(deger):
 
 
 def test_cumbasiz_ve_yan_yana_cumbali_cati_hata():
-    """Düz beşikte (cumba yok), yan yana cumbalarda ve beşik dışı çatıda anahtar hata verir (sessizce yok sayılmaz)."""
+    """Düz beşikte (cumba yok), yan yana cumbalarda ve beşik dışı çatıda anahtar hata verir (sessizce yok sayılmaz). Düz beşikte çatı
+    tanımı kurulmaz; çizim, liste ve 3D model aynı hatayı verir (`cati_serit.ic_makas_denetle`)."""
+    from motor import ifc_uret
     duz = _anahtarli(_oku(KOK / "is_emri" / "adaylar" / "PA06.json"))
-    with pytest.raises(G.IsEmriHatasi, match="cumba_ic_makasi"):
-        _tanim(duz)
+    for yol in (_tanim, PL.is_emrinden, ifc_uret.hazirla):
+        with pytest.raises(G.IsEmriHatasi, match="cumba_ic_makasi"):
+            yol(copy.deepcopy(duz))
+    PL.is_emrinden(_anahtarli(_oku(KOK / "is_emri" / "adaylar" / "PA06.json"), None))          # null yazılmamış gibidir
     ikiz = _anahtarli(_oku(KOK / "is_emri" / "adaylar" / "PA13.json"))
     with pytest.raises(CP.PrefabrikCatiHatasi, match="yan yana"):
         _tanim(ikiz)
     kirma = _anahtarli(_oku(KOK / "is_emri" / "adaylar" / "PA08.json"))
     with pytest.raises(CP.PrefabrikCatiHatasi, match="cumba_ic_makasi"):
         CP.cati(G.kur(copy.deepcopy(kirma)), kirma)
+    with pytest.raises(PL.ListeYazilmaz, match="cumba_ic_makasi"):
+        PL.is_emrinden(copy.deepcopy(kirma))
+    with pytest.raises(G.IsEmriHatasi, match="cumba_ic_makasi"):
+        ifc_uret.hazirla(copy.deepcopy(kirma))
 
 
 def test_kart_modeli_ve_3d_model_14_makas(tmp_path):
