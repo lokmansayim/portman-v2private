@@ -267,7 +267,9 @@ def ekleri_denetle(girdi: dict) -> dict:
     true ise 2. sayfa Motor'un ön onay paftası (`motor/dxf_out.uret`'in A4 PDF'i, `araclar/teklif.py` üretir; Lokman 09:17:35 "2. sayfaya
     png yi değil ön onay paftasını koy"); `sabit_fiyat` {"birim": 550000, "kdv_orani": 0} 02'nin fiyatı Lokman'ın verdiği tutar, pazarın
     hesabı JSON'da kalır, açıklamada KDV cümlesi yazmaz (Lokman 09:17:35 "birim fiyatı 550.000 TL yap KDV yi 0 Yap … ürün detayı
-    açıklama kısmına yazdığın KDV detayını sil"). Ek yoksa form eskisiyle aynı. Biçimi bozuk ek durur (ValueError)."""
+    açıklama kısmına yazdığın KDV detayını sil"); `sabit_fiyat` {"kar_orani": 0.25, "kdv_orani": 0} ise tutar elle yazılmaz, birim tabandan
+    hesaplanır: taban × (1 + kâr), kuruşa yuvarlı (D-154; Lokman, 26 Kasım 2026 06:14:46 UTC kart "Onaylıyorum, 454.607,96 TL": "Form
+    kuralın hesabıyla kurulur (363.686,37 × 1,25)"). Ek yoksa form eskisiyle aynı. Biçimi bozuk ek durur (ValueError)."""
     ek = {k: girdi[k] for k in EKLER if k in girdi}
     liste = lambda v: isinstance(v, list) and all(isinstance(x, str) and x.strip() for x in v)    # noqa: E731
     for k in ("urun_ek_satirlari", "kalin", "kapsam_disina"):
@@ -281,15 +283,18 @@ def ekleri_denetle(girdi: dict) -> dict:
     if "sabit_fiyat" in ek:
         sf = ek["sabit_fiyat"]
         sayi_mi = lambda v: isinstance(v, (int, float)) and not isinstance(v, bool)          # noqa: E731
-        if not (isinstance(sf, dict) and set(sf) == {"birim", "kdv_orani"} and sayi_mi(sf["birim"]) and sf["birim"] > 0
-                and sayi_mi(sf["kdv_orani"]) and 0 <= sf["kdv_orani"] <= 1):
-            raise ValueError(f"bayi formu: sabit_fiyat {{\"birim\": > 0, \"kdv_orani\": 0–1}} olmalı: {sf!r}")
+        bicim = (isinstance(sf, dict) and set(sf) in ({"birim", "kdv_orani"}, {"kar_orani", "kdv_orani"}) and all(sayi_mi(v) for v in sf.values())
+                 and 0 <= sf["kdv_orani"] <= 1)
+        if not (bicim and (sf["birim"] > 0 if "birim" in sf else 0 <= sf["kar_orani"] <= 1)):
+            raise ValueError(f"bayi formu: sabit_fiyat {{\"birim\": > 0, \"kdv_orani\": 0–1}} ya da {{\"kar_orani\": 0–1, \"kdv_orani\": 0–1}} "
+                             f"olmalı: {sf!r}")
     return ek
 
 
 def sabit_fiyatla(hesap: dict, sabit: dict) -> dict:
-    """Lokman'ın verdiği fiyat (D-77): birim ve KDV oranı girdiden; taban ve pazarın hesabı (`hesaplanan`) kayıtta kalır."""
-    birim = round(float(sabit["birim"]), 2)
+    """Lokman'ın verdiği fiyat (D-77): birim ve KDV oranı girdiden; taban ve pazarın hesabı (`hesaplanan`) kayıtta kalır. Girdi tutar
+    yerine kâr oranı verirse (D-154) birim = taban × (1 + kâr), kuruşa yuvarlı (`bayi_fiyati`'nin yuvarlaması)."""
+    birim = round(float(sabit["birim"]), 2) if "birim" in sabit else round(hesap["taban"] * (1 + sabit["kar_orani"]), 2)
     kdv = round(birim * sabit["kdv_orani"], 2)
     return {"taban": hesap["taban"], "artis_orani": round(birim / hesap["taban"] - 1, 6) if hesap["taban"] else None, "birim": birim,
             "kdv_orani": sabit["kdv_orani"], "kdv": kdv, "toplam": round(birim + kdv, 2), "sabit": True,

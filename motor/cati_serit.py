@@ -22,6 +22,12 @@ olan yer (iki duvarın H'ı karşı karşıya) her zaman makas alır, aradakiler
 panoların ekinde, ana çatıda 13 makas; İE-29 PR-2); ortak eklerle sınır aşılıyorsa yalnız en uzak ek kuralı. Ekler sınırı aşıyorsa eşit
 aralık, en az sayıyla (ana ⌈eksenler arası ÷ 125,5⌉ + 1, cumba ⌈dış eksenden komşunun eksenine ÷ 125,5⌉) ve uyarı (K16).
 
+Cumbanın iç ucunda makas (D-154; Lokman, 26 Kasım 2026 05:52:33 UTC: "cumbada 2 makas gördüm ana makasın tam önünde 1 tane daha makas
+var"; 63 m² evin montaj paftasında MK13): `cati.cumba_ic_makasi: true` yalnız yazıldığı evde her paralel cumbanın iç ucuna, ana çatının
+kalkan duvarının dış yüzüne bir cumba makası daha koyar (ekseni duvar yüzünden duvarın yarı kalınlığı kadar içeride; rolü orta, `ic_uc`
+işaretli: kalkanı, baş makas omegası ve Z'si yok). Anahtar yoksa kural aynen (iç uçta makas yok, D-44). Başka değer, cumbasız çatı ve yan
+yana cumbalar hata (K21).
+
 Açık mahalin kendi çatısı (İE-17 PR-2, AP-09 paftası, 1 Kasım 2026): `cati.mahal_catilari` [{`mahal` (ızgaradaki açık mahal: veranda),
 `tip` tek_yon, `egim_yuzde` (paftadan; varsayılan yok), `yuksek_yan` on | arka | sol | sag (çatının dayandığı, kapalı gövdeye bitişik yan),
 `sacak_cm` (açık yanlarda, 0)}]. Ana çatı o mahali örtmez: ayak izinden mahalin kutusu çıkar (`cati_izi`), kalan gövdenin şeritleri ana
@@ -597,6 +603,14 @@ def tanim(plan: G.Plan, ie: dict) -> dict:
     ikiz, bol = {}, None                                                # İE-29 (AP-12): yan yana iki cumba
     if c.get("yan_yana_cumbalar") is not None:
         sr, k, ikiz, bol, _h_b = _yan_yana(plan, ie, sr, k, eksen, P, _K)
+    ic_makas = c.get("cumba_ic_makasi")                                 # D-154: cumbanın iç ucunda da makas (yalnız yazılırsa)
+    if ic_makas is not None:
+        if ic_makas is not True:
+            raise PrefabrikCatiHatasi(f"cati.cumba_ic_makasi yalnız true olur (yok sayılmaz): {ic_makas!r}")
+        if ikiz:
+            raise PrefabrikCatiHatasi("cati.cumba_ic_makasi yan yana cumbalarla birlikte tanımlı değil (iç uçları aynı kalkanda)")
+        if len(sr) < 2:
+            raise PrefabrikCatiHatasi("cati.cumba_ic_makasi: çatıda paralel cumba yok (yok sayılmaz)")
     for i in range(len(sr)):                                            # cumba ana çatıya doğru komşusunun açıklığı içinde
         if i == k or i in ikiz:
             continue
@@ -651,13 +665,19 @@ def tanim(plan: G.Plan, ie: dict) -> dict:
             roller = ["bas"] + ["orta"] * (len(yer) - 1)
         if not duzenli:
             uyarilar.append(f"makas yeri ({adlar[i]}): saçak duvarlarının pano ekleri makasları 125,5 arayla vermiyor; eşit aralıklı {len(yer)} makas")
+        mk_l = [{"konum": round(x, 2), "rol": r} for x, r in sorted(zip(yer, roller))]
+        if ic_makas and i != k:                                          # D-154: iç uçta, komşunun kalkan duvarının dış yüzünde
+            ic = round(a1 - h if i < k else a0 + h, 2)
+            if any(abs(m["konum"] - ic) < 2 * h for m in mk_l):
+                raise PrefabrikCatiHatasi(f"cati.cumba_ic_makasi: {adlar[i]} iç ucunda ({ic:g}) zaten makas var")
+            mk_l = sorted(mk_l + [{"konum": ic, "rol": "orta", "ic_uc": True}], key=lambda m: m["konum"])
         gorunen = (A0, A1) if i == k else (A0, a1 - s) if i < k else (a0 + s, A1)      # cumbanın mahyası komşunun saçağına kadar görünür
         egik = (bm - b0 + s) * math.sqrt(1 + eg * eg)
         parcalar.append({"ad": adlar[i], "rol": "ana" if i == k else "cumba", "a": [a0, a1], "b": [b0, b1],
                          "aciklik_cm": round(b1 - b0, 2), "boy_cm": round(a1 - a0, 2),
                          "mahya": [list(P(gorunen[0], bm)), list(P(gorunen[1], bm))], "mahya_kotu": round(zs + eg * (bm - b0 + s), 2),
                          "makas_ust_boy_cm": round(egik, 2), "makas_yuksekligi_cm": round(top + eg * (bm - b0 + s), 2),
-                         "makaslar": [{"konum": round(x, 2), "rol": r} for x, r in sorted(zip(yer, roller))],
+                         "makaslar": mk_l,
                          "makas_yeri": "pano ekleri" if duzenli else "eşit aralık",
                          "komsu": None if i == k else adlar[i + 1 if i < k else i - 1]})
 
