@@ -4,7 +4,7 @@
    makas, kendi ölçüleriyle kurulunca çubuk uçları dosyadakine en çok 9 / 16 / 16 mm, boylar 4 / 6 / 8 mm yakın.
    Dosyadaki çubuğun gerçek uçları .bde'nin vida yerlerinden çıkar; o uçlarla islem.uret() vidaları
    dosyayla bire bir verir (138/138, 44/44, 52/52).
-2. 63 m² makasları (Motor'un yerleşimi, 13 makas; Lokman 26 Kasım 05:50:56 "sen motora uy"): depodaki CSV'ler girdiden yeniden üretilince bayt bayt aynı (TASLAK; hedef örnek değil,
+2. 63 m² makasları (Motor'un yerleşimi, Lokman 26 Kasım 05:50:56 "sen motora uy"; cumbada 2 makas, 05:52:33): depodaki CSV'ler girdiden yeniden üretilince bayt bayt aynı (TASLAK; hedef örnek değil,
    Lokman'ın onayı bekleniyor).
 """
 import math
@@ -76,14 +76,14 @@ def test_kalibi_yeniden_kurar(kalip, pano, kur, uc_mm, boy_mm):
 def test_63m2_makaslari_girdiden_ayni(tmp_path):
     assert makas.main([str(M63 / "girdi.json"), str(tmp_path)]) == 0
     uretilen = sorted(p.name for p in tmp_path.glob("*.csv"))
-    assert len(uretilen) == 13
+    assert len(uretilen) == 14
     for ad in uretilen:
         assert (tmp_path / ad).read_bytes() == (M63 / ad).read_bytes(), ad
 
 
 def test_63m2_sayilar():
     ozet = {y.stem: mrd.ozet(mrd.oku(y)) for y in M63.glob("*.csv")}
-    assert sum(o["cubuk"] for o in ozet.values()) == 7 * 33 + 21 + 4 * 11 + 11
+    assert sum(o["cubuk"] for o in ozet.values()) == 7 * 33 + 2 * 21 + 4 * 11 + 11
     assert ozet["MK01"]["cubuk"] == 33 and ozet["MK07"]["cubuk"] == 21
     assert ozet["MK12"]["cubuk"] == 11 and ozet["MK09"]["cubuk"] == 11
 
@@ -105,7 +105,8 @@ def test_63m2_girdisi_motorun_catisiyla_ayni():
         tur.setdefault(m["tur"], []).append(m)
     for parca in T["parcalar"]:
         ad = "ana" if parca["rol"] == "ana" else "cumba"
-        assert len(tur[ad]) == len(parca["makaslar"])
+        # cumbada Motor'un 1 makasına paftadaki MK13 eklenir (Lokman 26 Kasım 05:52:33 UTC "cumbada 2 makas")
+        assert len(tur[ad]) == len(parca["makaslar"]) + (1 if ad == "cumba" else 0)
         assert all(abs(m["alt_baslik_mm"] - (parca["aciklik_cm"] + 2 * s) * 10) < 0.1 for m in tur[ad])
     kirma = [m for m in T["mahal_catilari"] if m["tip"] == "kirma"][0]
     mk = ifc_uret._kirma_mahal_makaslari(kirma, T)
