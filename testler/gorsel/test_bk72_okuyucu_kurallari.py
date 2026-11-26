@@ -46,10 +46,10 @@ def test_kural4_kucuk_zincir_farki_sorusu_dusur():
     o = _okuma("TK01")
     o = {**o, "zincirler": [{"kenar": "ust", "olculer_cm": [261, 126, 188, 324], "toplam_cm": 898, "kapsam": "govde"}],
          "emin_olunamayanlar": ["Üst ölçü zinciri 261+126+188+324=899 ediyor, toplam 898 yazıyor; hangi parça 1 cm eksik?",
-                                "Salon penceresinin ölçüsü ne?"]}
+                                "Salon penceresi hangi duvarda?"]}  # BK-80: pencere ölçüsü sorusu artık sorulmaz (D-155)
     den = GO.denetle(o)
     assert not any("899" in s for s in den["sorular"])
-    assert "Salon penceresinin ölçüsü ne?" in den["sorular"]
+    assert "Salon penceresi hangi duvarda?" in den["sorular"]
     assert any("küçük farkla" in n for n in den["notlar"])
 
 
@@ -68,9 +68,9 @@ def test_kural4_tek_parcali_olcu_zincir_sayilmaz():
 
 def test_ayni_soru_bir_kez():
     o = _okuma("TK01")
-    o = {**o, "emin_olunamayanlar": ["Banyo penceresi kaç cm?", "Banyo penceresi kaç cm?"]}
+    o = {**o, "emin_olunamayanlar": ["Banyo penceresi hangi duvarda?", "Banyo penceresi hangi duvarda?"]}   # BK-80: ölçü sorusu sorulmaz
     den = GO.denetle(o)
-    assert den["sorular"].count("Banyo penceresi kaç cm?") == 1
+    assert den["sorular"].count("Banyo penceresi hangi duvarda?") == 1
 
 
 def _yerler(ie: dict) -> dict:
@@ -250,3 +250,58 @@ def test_bk73_uzak_yerlesim_secilmez():
     if yeni is not None:
         merkez = {k["olcu"]: c for k, c, _ in GO._aciklik_merkezleri(G.kur(copy.deepcopy(yeni)))}
         assert abs(merkez["180x150"] - 150.0) <= 125.5 and abs(merkez["120x150"] - 700.0) <= 125.5
+
+
+# ───────────── BK-80 (D-155): kapı odanın içine; pencere ölçüsü ve yüksekliği sorulmaz ─────────────
+def test_bk80_pencere_olcu_ve_yukseklik_sorusu_bayiye_gitmez():
+    """26 Kasım canlı denemesi (87 m² kroki): okuyucu banyo penceresinin ölçüsünü ve pencere yüksekliğini sordu. Lokman, kart 06:41:28 UTC
+    "Evet, dördü de bakımda": sorulmasın, standart alınsın. Yeri, duvarı, adedi soran soru kalır."""
+    for s in ("Banyo penceresinin ölçüsü yazmıyor; kaç cm?", "Pencere yüksekliği (denizlik) kaç cm?",
+              "Pencere yükseklikleri ve banyo penceresinin ölçüsü nedir?"):
+        assert GO.pencere_olcu_sorusu(s), s
+    for s in ("Salon penceresi hangi duvarda?", "Banyo penceresinin yeri neresi?", "Mutfakta kaç pencere var?",
+              "Giriş kapısının genişliği yazmıyor", "Üst ölçü zinciri 261+126+188+324 = 899, toplam 898; hangisi doğru?"):
+        assert not GO.pencere_olcu_sorusu(s), s
+    o = {**_okuma("TK01"), "emin_olunamayanlar": ["Banyo penceresinin ölçüsü yazmıyor; kaç cm?", "Pencere yüksekliği kaç cm?"]}
+    den = GO.denetle(o)
+    assert not any("pencere" in q.lower() for q in den["sorular"]), den["sorular"]
+    assert any("pencerenin üstü yerden 200 cm" in n for n in den["notlar"])
+
+
+def test_bk80_oda_kapisi_odanin_icine_acilir_plan_dogrulamadan_gecer(tmp_path):
+    """26 Kasım canlı denemesi: dört oda kapısı 125,5'lik hole açıldı, kanatlar çarpıştı, Motor denetimi planı durdurdu. Lokman, kart
+    26 Kasım 06:47:13 UTC "Odanın içine, eskizdeki gibi". Aynı okuma (BK-74, aynı kroki) artık plan çıkarır; onaylı TK-04 r08 gibi
+    kapılar holden odaya."""
+    import copy, json
+    from motor import dxf_out
+    o = json.loads((Path(__file__).resolve().parent / "veri" / "BK74_TK04_okuma.json").read_text(encoding="utf-8"))
+    ie = GO.denetle({**o, "emin_olunamayanlar": []})["cevrim"]["is_emri"]
+    ic = sorted(a["arasi"] for a in ie["acikliklar"] if a["tur"] == "ic_kapi")
+    assert ic == [["HOL", "BANYO"], ["HOL", "MUTFAK"], ["HOL", "SALON"], ["HOL", "YATAK ODASI 1"], ["HOL", "YATAK ODASI 2"]], ic
+    r = dxf_out.uret(copy.deepcopy(ie), tmp_path)
+    assert r["validation_passed"] is True
+
+
+def test_bk80_iki_oda_arasinda_kapi_kucuk_odaya_acilir():
+    mh = [{"ad": "SALON", "konum_cm": [[0, 0, 400, 400]]}, {"ad": "MUTFAK", "konum_cm": [[400, 0, 650, 400]]},
+          {"ad": "HOL", "konum_cm": [[0, 400, 650, 525.5]]}]
+    kan = {"odalar": [{"ad": "SALON", "islev": "salon"}, {"ad": "MUTFAK", "islev": "mutfak"}, {"ad": "HOL", "islev": "hol"}]}
+    assert GO._kapi_yonu(kan, mh, "MUTFAK", "SALON") == ["SALON", "MUTFAK"]
+    assert GO._kapi_yonu(kan, mh, "SALON", "MUTFAK") == ["SALON", "MUTFAK"]
+    assert GO._kapi_yonu(kan, mh, "MUTFAK", "HOL") == ["HOL", "MUTFAK"]
+
+
+def test_bk80_varsayim_metni_sade_koordinat_yok():
+    """26 Kasım canlı denemesi: "Çiziminizi okurken varsaydıklarım" mesajında "duvar eksenleri x=310, 530 ve y=390" gibi okuyucu notları
+    bayiye gitti. Lokman, kart 06:41:28 UTC: sade yazılsın (D-70). Aynı okuma: koordinat yok, standartlar tek satır, her not yine var."""
+    import json, re
+    o = json.loads((Path(__file__).resolve().parent / "veri" / "BK74_TK04_okuma.json").read_text(encoding="utf-8"))
+    den = GO.denetle({**o, "emin_olunamayanlar": []})
+    m, ek = GO.teyit_metni(o, den)
+    tum = m + (ek or "")
+    assert not re.search(r"\b[xy]\s*=|eksen|ızgara", tum), tum
+    assert "Çizimde yazmayanları standart aldım: prefabrik, duvar 2,50 m, beşik çatı, mahya girişe paralel." in tum
+    assert "Yan cephe 9,00 m yerine 8,985 m oldu." in tum
+    assert "Yazılı oda ölçülerini en yakın pano aksına getirdim: Hol 410 → 381,5 cm." in tum
+    assert "Ölçüsü yazmayan 4 yeri çizimdeki orana göre aldım." in tum
+    assert len(GO.bayi_notlari(den["notlar"])) == len(den["notlar"]) - 3      # dört standart notu tek satır

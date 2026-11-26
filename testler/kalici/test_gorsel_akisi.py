@@ -476,7 +476,8 @@ def test_revizyonda_yeni_varsayim_bayiye_yazilir(depo, wa, tmp_path, hizli_motor
     [r] = isle_hepsi(depo, s)
     assert r["eylem"] == "is_emri", r
     m = [x for x in bayiye(depo) if x["kind"] == "interactive"][0]["govde"]
-    assert m.startswith("Uygulanan: mutfağa öne pencere; pencereler değişti. Varsaydığım: ölçüsü yazmayan pencereler: 120x120 (Mutfak).")
+    assert m.startswith("Uygulanan: mutfağa öne pencere; pencereler değişti. Varsaydıklarım: Ölçüsü yazmayan pencereleri standart ölçüyle "
+                        "çizdim: 120x120 (Mutfak).")                 # BK-80 (D-155): bayiye sade cümle
 
 
 def test_duzelt_dugmesinden_sonra_dogru_dugmesi_plan(depo, wa, tmp_path, hizli_motor):

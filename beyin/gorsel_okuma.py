@@ -771,6 +771,21 @@ def standart_sorusu(s: str) -> bool:
     return bool(_STANDART.search(s)) and not _STANDART_DISI.search(s)
 
 
+# BK-80 (D-155; Lokman, kart 26 Kasım 2026 06:41:28 UTC "Evet, dördü de bakımda": "pencere ölçüsü ve yüksekliği sorulmasın, standart
+# alınsın"): okuyucunun yalnız pencerenin ölçüsünü ya da yüksekliğini soran sorusu bayiye gitmez. Ölçüsü okunmayan pencere standart ölçüyle
+# çizilir (`PENCERE_VARSAYILAN`, öteki odalarda 120x120; bayiye notla yazılır), yüksekliği standarttır (pencerenin üstü yerden 200 cm,
+# D-118). Pencerenin yeri, duvarı, adedi ya da başka bir konuyu da soran soru aynen sorulur (D-148'in pencere soruları bunlar).
+_PENCERE = re.compile(r"pencere", re.I)
+_PENCERE_OLCU = re.compile(r"[öo]l[çc][üu]|boyut|ka[çc] cm|\beni\b|\bboyu\b|y[üu]ksekli|denizlik|\bkot", re.I)
+_PENCERE_OLCU_DISI = re.compile(r"kap[ıi]|\byeri|konum|nerede|hangi (duvar|cephe|kenar|oda)|duvar|cephe|kenar|adet|tane|ka[çc] pencere|zincir|"
+                                r"s[ıi]n[ıi]r|veranda|toplam", re.I)
+
+
+def pencere_olcu_sorusu(s: str) -> bool:
+    """BK-80: soru yalnız pencerenin ölçüsünü ya da yüksekliğini mi soruyor?"""
+    return bool(_PENCERE.search(s)) and bool(_PENCERE_OLCU.search(s)) and not _PENCERE_OLCU_DISI.search(s)
+
+
 def denetle(okuma: dict, ayar: dict | None = None, bk14: bool | None = None) -> dict:
     """`_denetle` + BK-72: aynı soru bayiye bir kez gider (TK-08: modelin ve kodun sorusu aynıydı)."""
     sonuc = _denetle(okuma, ayar=ayar, bk14=bk14)
@@ -798,10 +813,13 @@ def _denetle(okuma: dict, ayar: dict | None = None, bk14: bool | None = None) ->
         notlar.append("yapı tipi yazmıyordu, prefabrik aldım")
     if (o.kat_sayisi or 1) > 1:
         sonuc["cizilemez"].append(f"{o.kat_sayisi} katlı plan (bugün yalnız tek katı otomatik çizebiliyorum)")
-    standart, model_sorulari = [], []
+    standart, pencere_olcusu, model_sorulari = [], [], []
     for s in o.emin_olunamayanlar:
-        (standart if standart_sorusu(str(s)) else model_sorulari).append(numara.maskele(str(s))[:160])
+        (standart if standart_sorusu(str(s)) else pencere_olcusu if pencere_olcu_sorusu(str(s)) else model_sorulari).append(
+            numara.maskele(str(s))[:160])
     sor.extend(model_sorulari)
+    if pencere_olcusu:                          # BK-80 (D-155): ölçüsü yazmayan pencere standart ölçüyle, yüksekliği standart
+        notlar.append("pencerelerin yüksekliği standart: pencerenin üstü yerden 200 cm")
     if standart:                                # BK-71 (Lokman kart 23 Kasım 11:54:43 "Standartları sormasın"; 11:55:43 "kat planı onaylandıktan sonra standartlar formda gider")
         notlar.append("yapı türü, kat, yükseklik ve çatı gibi standartlar kat planı onaylandıktan sonra formda gelecek; değişiklik orada yapılır")
     if not o.odalar:
@@ -1421,7 +1439,7 @@ def is_emri_prefabrik(kan: dict, o: CizimOkumasi, bk14: bool | None = None, esik
             if not _komsu(mahaller, a, b):
                 sor.append(f"{_oda_adi(a)} ile {_oda_adi(b)} arasında kapı okudum ama iki oda yan yana değil; kapı nerede?")
                 continue
-            acik.append({"tur": "ic_kapi", "olcu": KAPI_CM["ic"], "arasi": [a, b]})
+            acik.append({"tur": "ic_kapi", "olcu": KAPI_CM["ic"], "arasi": _kapi_yonu(kan, mahaller, a, b)})
     if sor:
         return None, list(dict.fromkeys(sor)), cz, nt
     acik_sinirlar = _kapisiz_gecisler(mahaller, acik, kan)
@@ -1560,6 +1578,22 @@ def _islev(kan: dict, ad: str) -> str:
     return next((x["islev"] for x in kan["odalar"] if tr_buyuk(x["ad"]) == ad), "")
 
 
+def _kapi_yonu(kan: dict, mahaller: list[dict], a: str, b: str) -> list[str]:
+    """BK-80 (D-155; Lokman, kart 26 Kasım 2026 06:47:13 UTC "Odanın içine, eskizdeki gibi"): oda kapısı odanın içine açılır. Motor kapıyı
+    `arasi`nın ilk mahalinden ikincisine açar (`geometry._normal_from_to`); okuyucu LLM'in yazdığı sırayı kullanıyordu (26 Kasım canlı
+    denemesi: dört kapı 125,5'lik hole açıldı, kanatlar çarpıştı, Motor denetimi planı durdurdu). Kod karar verir: geçiş bölümü (hol,
+    antre, giriş nişi) ile oda arasındaki kapı odaya açılır; iki oda arasındaki kapı küçük odaya açılır (alan eşitse okunan sıra); iki
+    geçiş bölümü arasında okunan sıra kalır. Dönüş: [kapının açıldığı yerden, açıldığı yere]."""
+    gecis = lambda ad: _islev(kan, ad) in KAPI_GECIS_ISLEV
+    if gecis(a) != gecis(b):
+        return [a, b] if gecis(a) else [b, a]
+    if gecis(a):
+        return [a, b]
+    alan = {ad: _alan([q for m in mahaller if m["ad"] == ad for q in m["konum_cm"]]) for ad in (a, b)}
+    return [b, a] if alan[a] < alan[b] - 1e-9 else [a, b]
+
+
+KAPI_GECIS_ISLEV = ("hol", "antre", "giris")   # BK-80: oda kapısı bu bölümlere açılmaz
 GECIS_ISLEV = ("hol", "antre")          # BK-72: kapısı çizilmeyen ve eve bağlanmayan bölüm bu işlevdeyse yanındaki ortak alana açıktır
 ORTAK_ISLEV = ("salon", "mutfak", "hol", "antre")
 
@@ -1728,10 +1762,65 @@ def _ozet(okuma: dict, den: dict) -> tuple[list[str], list[str]]:
         s.append(_bas_buyuk(", ".join(kp) + "."))
     if den.get("zincir_tutuyor") and not any("küçük farkla" in n for n in den.get("notlar") or []) and o.zincirler:
         s.append("Ölçü zincirleri toplamla tutuyor.")
-    v = [_bas_buyuk(n) + "." for n in den.get("notlar") or []]
-    if den.get("tahminler"):
-        v.append("Ölçüsü yazmayanları oranla aldım: " + "; ".join(den["tahminler"]) + ".")
+    v = bayi_notlari(den.get("notlar") or [])
+    v.extend(sade_tahminler(den.get("tahminler") or []))
     return s, v
+
+
+_STANDART_NOTU = [(re.compile(r"^yapı tipi yazmıyordu, prefabrik aldım$"), lambda m: "prefabrik"),
+                  (re.compile(r"^duvar yüksekliği yazmıyordu, ([\d,]+) m aldım$"), lambda m: f"duvar {m[1]} m"),
+                  (re.compile(r"^çatı tipi görünmüyordu, (\S+) aldım$"), lambda m: f"{m[1]} çatı"),
+                  (re.compile(r"^mahya yönü görünmüyordu, (.+?) aldım( \(.*\))?$"), lambda m: f"mahya {m[1]}"),
+                  (re.compile(r"^yapı türü, kat, yükseklik ve çatı gibi standartlar"), lambda m: None)]
+_SADE_NOT = [
+    (re.compile(r"gövdenin (ön|yan) cephesi ([\d,]+) m yerine ([\d,]+) m \(pano ızgarasında sonda ([\d,]+) cm'lik pano kalıyordu, "
+                r"prefabrikte olmuyor\)"),
+     lambda m: f"{m[1].capitalize()} cephe {m[2]} m yerine {m[3]} m oldu. Sonda {m[4]} cm'lik pano kalıyordu; bu boyda pano yapılmaz."),
+    (re.compile(r"^çizimde yazılı oda ölçülerini en yakın pano aksına oturttum \((.+)\)$"),
+     lambda m: f"Yazılı oda ölçülerini en yakın pano aksına getirdim: {m[1]}."),
+    (re.compile(r"^ölçüsü çizimde yazmayan sınırları en yakın pano aksına oturttum \((.+)\)$"),
+     lambda m: f"Ölçüsü yazmayan duvarları en yakın pano aksına getirdim: {m[1]}."),
+    (re.compile(r"^oda sınırlarını pano ızgarasına oturttum \(en çok ([\d,]+) cm kayma(?:; en çok değişen (.+))?\)$"),
+     lambda m: f"Duvarlar pano aksına en çok {m[1]} cm kaydı." + (f" En çok değişen oda: {m[2]}." if m[2] else "")),
+    (re.compile(r"^ölçüsü yazmayan pencereler: (.+)$"), lambda m: f"Ölçüsü yazmayan pencereleri standart ölçüyle çizdim: {m[1]}."),
+    (re.compile(r"^pencerelerin yüksekliği standart: (.+)$"), lambda m: f"Pencere yüksekliği standart: {m[1]}."),
+]
+
+
+def bayi_notlari(notlar: list[str]) -> list[str]:
+    """BK-80 (D-155; 26 Kasım canlı denemesi, Lokman kart 06:41:28 UTC): kodun notları bayiye Sade Teknik Türkçe ile gider (D-70). Çizimde
+    yazmayıp standart alınanlar (yapı türü, yükseklik, çatı, mahya) tek satırda; plan onayından sonra standart formunda değişir (D-148).
+    Pano aksına oturtma notları kısa cümlelerle. Kalıba uymayan not aynen (büyük harfle, noktayla) gider; hiçbiri düşmez (K21). Notların
+    kendisi (`den["notlar"]`) değişmez: kayıtlar ve testler onu okur."""
+    cik, standart, standart_var = [], [], False
+    for n in notlar:
+        for desen, f in _STANDART_NOTU:
+            if (m := desen.search(n)):
+                standart_var = True
+                if (x := f(m)) is not None:
+                    standart.append(x)
+                break
+        else:
+            for desen, f in _SADE_NOT:
+                if (m := desen.search(n)):
+                    cik.append(f(m))
+                    break
+            else:
+                cik.append(_bas_buyuk(n) + ".")
+    if standart_var:
+        cik.insert(0, ("Çizimde yazmayanları standart aldım: " + ", ".join(standart) + ". " if standart else "")
+                   + "Plan onaylanınca standartlar formda gelir; değişikliği orada yapabilirsiniz.")
+    return cik
+
+
+def sade_tahminler(tahminler: list[str]) -> list[str]:
+    """BK-80 (D-155; 26 Kasım canlı denemesi, Lokman kart 06:41:28 UTC): LLM'in oranla aldığı ölçülerin metni bayiye gitmez; okuyucunun
+    kendi notudur ("duvar eksenleri x=310, 530 ve y=390", "saçak = (860,05 − 800,05) / 2"), Sade Teknik Türkçe değildir (D-70). Bayiye
+    tek cümle gider: kaç yer oranla alındı; sonucu yerleşim görselinde ölçüsüyle görür ve düzeltir. Varsayım sessizce düşmez (K21): sayı
+    cümlede, metin kayıtta (`den["tahminler"]`). Yalnız pencerenin ölçüsü ya da yüksekliği üstüne olan tahmin sayılmaz: standart alınır,
+    kodun notu söyler."""
+    n = sum(1 for t in tahminler if str(t).strip() and not all(pencere_olcu_sorusu(p) for p in re.split(r"\s*;\s*", str(t))))
+    return [f"Ölçüsü yazmayan {n} yeri çizimdeki orana göre aldım. Ölçüleri görselde; yanlışsa yazın."] if n else []
 
 
 MESAJ_SINIRI = 1000             # düğmeli mesajın gövdesi ve görsel altyazısı (WhatsApp 1024)
