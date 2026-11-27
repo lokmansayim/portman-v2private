@@ -340,11 +340,25 @@ def cogunluk_sec(okumalar: list[dict], ayar: dict | None = None) -> tuple[dict |
     for g in gecerli:
         gruplar.setdefault(g[3], []).append(g)
     en = max(gruplar.values(), key=len)
+    kod = {g[0]: _kod_sorusu(g[1], ayar) for g in gecerli}
     aday = en if len(en) >= 2 else gecerli
+    # Döngü tur 1 (27 Kasım 2026): çoğunluğun her okuması kodun tutarsızlık sorusunu doğuruyorsa (bayi "doğru" dese de plan çıkmaz)
+    # ve azınlıkta doğurmayan okuma varsa, o seçilir (80 m² 3+1: iki okumada banyo holle değmiyordu, üçüncüde plan çıktı).
+    if all(kod[g[0]] for g in aday) and any(not kod[g[0]] for g in gecerli):
+        aday = [g for g in gecerli if not kod[g[0]]]
     puan = lambda g: (bool(g[2]["cizilemez"]), g[2]["cevrim"] is None, len(g[2]["sorular"]), g[0])
     i, ok, den, _ = min(aday, key=puan)
     return ok, {"okuma": len(okumalar), "gecerli": len(gecerli), "cogunluk": len(en) if len(en) >= 2 else 0, "secilen": i,
-                "soru": [len(g[2]["sorular"]) for g in gecerli]}
+                "soru": [len(g[2]["sorular"]) for g in gecerli], "kod_sorusu": [kod[g[0]] for g in gecerli]}
+
+
+def _kod_sorusu(okuma: dict, ayar: dict | None = None) -> int:
+    """Okumanın kendi sorusu olmadan (bayi okuyucunun sorularına "doğru" derse) kodun sorduğu ya da çizemediği sayısı."""
+    try:
+        den = denetle({**okuma, "emin_olunamayanlar": []}, ayar=ayar)
+    except Exception:
+        return 99
+    return len(den["sorular"]) + len(den["cizilemez"])
 
 
 def ikinci_bakis_sec(ilk: dict, ilk_den: dict, ikinci: dict | None, ayar: dict | None = None) -> tuple[dict, dict, bool]:
