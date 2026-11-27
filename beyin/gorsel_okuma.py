@@ -809,8 +809,13 @@ def kapi_genislik_sorusu(s: str) -> bool:
     return bool(_KAPI.search(s)) and bool(_KAPI_GENISLIK.search(s)) and not _KAPI_GENISLIK_DISI.search(s)
 
 
+# Döngü tur 4 (27 Kasım 2026): pencereyi yeriyle tanıtan sıfat ("üst duvardaki küçük banyo penceresinin ölçüsü") yeri sormaz.
+_PENCERE_TANITIM = re.compile(r"\b\w+ (duvar|cephe|kenar)[ıi]?n?daki\b", re.I)
+
+
 def pencere_olcu_sorusu(s: str) -> bool:
     """BK-80: soru yalnız pencerenin ölçüsünü ya da yüksekliğini mi soruyor?"""
+    s = _PENCERE_TANITIM.sub("", s)
     return bool(_PENCERE.search(s)) and bool(_PENCERE_OLCU.search(s)) and not _PENCERE_OLCU_DISI.search(s)
 
 

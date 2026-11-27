@@ -46,3 +46,9 @@ def test_tur3_kapi_genisligi_notla_duser():
     den = GO.denetle({**ok, "emin_olunamayanlar": ["Giriş kapısının genişliği çizimde yazmıyor"]})
     assert not den["sorular"]
     assert "kapılar standart genişlikte çizildi" in den["notlar"]
+
+
+def test_tur4_yerle_tanitilan_pencerenin_olcusu_sorulmaz():
+    assert GO.pencere_olcu_sorusu("Üst duvardaki küçük banyo penceresinin ölçüsü nedir?")
+    assert not GO.pencere_olcu_sorusu("Banyo penceresi hangi duvarda?")
+    assert not GO.pencere_olcu_sorusu("Pencere ölçüsü sol duvarda mı sağ duvarda mı?")
