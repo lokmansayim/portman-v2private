@@ -1,0 +1,342 @@
+{
+ "sema": "portman.rehber_cati_hedef/1",
+ "ev": "Mehmet Kapaklı Tek 63 m²",
+ "is_emri": "araclar/paket/girdi/TK11_r02_cati.json",
+ "komut": "python -m araclar.paket TK-11 <çıktı> --is-emri araclar/paket/girdi/TK11_r02_cati.json --tavan ters",
+ "kapsam": "Montaj rehberinin çatısı: makasların yeri ve dayanağı, kalkan betopanının kesimleri, aşık sıraları, veranda çatısının yüzü. Rehberin bütünü Lokman'ın rehber onayıyla ayrıca dondurulur.",
+ "onay": [
+  {
+   "soru": "Soru 6: 63 m2 evin montaj rehberinde çatı böyle olsun mu?",
+   "kart": "cmsg_01UAFvcnfVuTR1wfFux5fQPP4mtq4rQrGB9JmveG6cx1Vb",
+   "zaman": "2026-11-27T06:04:25Z",
+   "soz": "A: Onaylıyorum",
+   "sonuc": "Rehber bu çatıyla koda girer; son rehber ondan üretilir."
+  },
+  {
+   "soru": "Soru 16: Veranda makasının üst başlığı son ana makasa 0,9 cm giriyor. Ne yapılsın?",
+   "kart": "cmsg_01UAFvcnfVuTR1wfFux5fQPPUYu92YU5xCpYPf1RN2fGD4",
+   "zaman": "2026-11-27T06:03:53Z",
+   "soz": "A: Üretim dosyası aynı kalsın",
+   "sonuc": "Makas 0,9 cm geride durur; ana makasa üst başlığın ucuyla değer. Alt başlıkta 0,9 cm boşluk kalır."
+  },
+  {
+   "soru": "Soru 14: 63 m2 evde veranda makasları kalkanda neye dayansın?",
+   "kart": "cmsg_01UAFvcnfVuTR1wfFux5fQPPMM33MyAVg3paPfrMBK4da1",
+   "zaman": "2026-11-26T23:33:13Z",
+   "soz": "B: Son ana makasa, paftadaki gibi",
+   "sonuc": "Betopan 5 makasın geçtiği yerde 8 cm kesilir. Üretim dosyası aynı kalır: 155,5 cm ve 179,9 cm."
+  },
+  {
+   "soru": "Soru 12: Cumbalı ve verandalı çatıda aşık sıraları nereden sayılsın?",
+   "kart": "cmsg_01UAFvcnfVuTR1wfFux5fQPP4WVHWsr4VmAJpyQ7EQLQrE",
+   "zaman": "2026-11-26T23:34:15Z",
+   "soz": "A: Yalnız bu evde mahyadan",
+   "sonuc": "63 m2 evin İş Emri'ne anahtar eklenir; rehber paftayla aynı olur. Öteki evler aynı kalır."
+  }
+ ],
+ "makaslar": {
+  "ana_x": [
+   3.7,
+   67.75,
+   193.25,
+   318.75,
+   444.25,
+   569.75,
+   633.8
+  ],
+  "cumba_x": [
+   642.6,
+   759.3
+  ],
+  "kisa_y": [
+   425.5,
+   512.75,
+   637.75,
+   762.75
+  ],
+  "uretim": {
+   "ana": [
+    "MK01",
+    "MK02",
+    "MK03",
+    "MK04",
+    "MK05",
+    "MK14",
+    "MK06"
+   ],
+   "cumba": [
+    "MK13",
+    "MK07"
+   ],
+   "kisa": [
+    "MK12",
+    "MK11",
+    "MK10",
+    "MK08"
+   ],
+   "capraz": [
+    "MK09"
+   ]
+  },
+  "cubuk": 328
+ },
+ "dayanak": {
+  "MK12": {
+   "yuz": 637.8,
+   "yon": 1.0,
+   "kayma": 1.238,
+   "yari": 4.0,
+   "tasma": 0.938
+  },
+  "MK11": {
+   "yuz": 637.8,
+   "yon": 1.0,
+   "kayma": 1.238,
+   "yari": 4.0,
+   "tasma": 0.938
+  },
+  "MK10": {
+   "yuz": 637.8,
+   "yon": 1.0,
+   "kayma": 1.238,
+   "yari": 4.0,
+   "tasma": 0.938
+  },
+  "MK08": {
+   "yuz": 637.8,
+   "yon": 1.0,
+   "kayma": 1.238,
+   "yari": 4.0,
+   "tasma": 0.938
+  },
+  "MK09": {
+   "yuz": 637.8,
+   "yon": 1.0,
+   "kayma": 1.581,
+   "yari": 4.0,
+   "tasma": 0.905
+  }
+ },
+ "kesimler": [
+  [
+   421.5,
+   429.5,
+   291.36,
+   "MK12"
+  ],
+  [
+   508.75,
+   516.75,
+   291.36,
+   "MK11"
+  ],
+  [
+   633.75,
+   641.75,
+   291.36,
+   "MK10"
+  ],
+  [
+   758.75,
+   776.5,
+   291.36,
+   "MK08 + MK09"
+  ]
+ ],
+ "asik": {
+  "Y1": {
+   "sira": [
+    57.64,
+    117.64,
+    177.64,
+    233.06
+   ],
+   "pafta": [
+    [
+     90.02
+    ],
+    [
+     155.5
+    ],
+    [
+     155.5
+    ],
+    [
+     155.5
+    ]
+   ],
+   "bas": "max"
+  },
+  "Y2": {
+   "sira": [
+    4.58,
+    51.46,
+    111.47,
+    171.46,
+    231.46,
+    291.46,
+    351.46,
+    411.47,
+    466.88
+   ],
+   "pafta": [
+    [
+     410.0,
+     410.0
+    ],
+    [
+     410.0,
+     410.0
+    ],
+    [
+     410.0,
+     410.0
+    ],
+    [
+     410.0,
+     410.0
+    ],
+    [
+     410.0,
+     410.0
+    ],
+    [
+     410.0,
+     287.5
+    ],
+    [
+     410.0,
+     287.5
+    ],
+    [
+     410.0,
+     287.5
+    ],
+    [
+     410.0,
+     287.5
+    ]
+   ],
+   "bas": "min"
+  },
+  "Y3": {
+   "sira": [
+    4.58,
+    51.46,
+    111.47,
+    171.46,
+    231.46,
+    291.46,
+    351.46,
+    411.47,
+    466.88
+   ],
+   "pafta": [
+    [
+     410.0,
+     410.0
+    ],
+    [
+     410.0,
+     332.63
+    ],
+    [
+     410.0,
+     287.5
+    ],
+    [
+     410.0,
+     287.5
+    ],
+    [
+     410.0,
+     287.5
+    ],
+    [
+     410.0,
+     287.5
+    ],
+    [
+     410.0,
+     287.5
+    ],
+    [
+     410.0,
+     287.5
+    ],
+    [
+     410.0,
+     287.5
+    ]
+   ],
+   "bas": "max"
+  },
+  "M1": {
+   "sira": [
+    4.44,
+    38.58,
+    98.58,
+    154.14
+   ],
+   "pafta": [
+    [
+     410.0,
+     34.25
+    ],
+    [
+     410.0,
+     34.25
+    ],
+    [
+     410.0,
+     34.25
+    ],
+    [
+     410.0,
+     34.25
+    ]
+   ],
+   "bas": "max"
+  }
+ },
+ "veranda_yuzu": {
+  "E": [
+   794.24,
+   0
+  ],
+  "poly": [
+   [
+    638.6,
+    771.08
+   ],
+   [
+    795.54,
+    866.54
+   ],
+   [
+    795.54,
+    422.29
+   ],
+   [
+    638.6,
+    326.83
+   ]
+  ],
+  "serit": {
+   "ad": "L 1690 (veranda çatısı)",
+   "bas": 865.75,
+   "son": 326.83,
+   "yon": -1
+  },
+  "R": {
+   "L": 0,
+   "R": 311.28,
+   "M": 155.64,
+   "tan": 0.2
+  },
+  "dere_x": [
+   794.24,
+   809.24
+  ]
+ }
+}

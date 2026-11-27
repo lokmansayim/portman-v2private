@@ -556,6 +556,7 @@ function araMakas(R, s0, s1, zb, nps, m) {   // cumba ara makası: alt başlığ
   return g;
 }
 D.makas.forEach((mk, i) => {
+  if (mk.uretim) return;   // makas orijinal üretim çiziminden (D.ek; `ek.py` › uretim_makaslari); yeri ve adı öteki parçalar için veride kalır
   const ara = mk.aile === 'ara', step = AD.makas, m = mat('truss', step), R = RF[mk.R];
   let g, P = 0;
   if (!ara) { const r = makasKur(R, mk.bas, mk.son, mk.wl, mk.NB, mk.T0, m, mk.rol === 'bas' ? SAC : 0); g = r.g; P = r.P; }
@@ -681,17 +682,51 @@ function hex(c) {
   geo.userData.k8 = v.map(p => p.toArray());
   return geo;
 }
+// Yarıklı betopan levhası (Soru 14, B: veranda makasları kalkan betopanından geçer). lo–hi: levhanın iki ucu (cm), alt: alt kot (m),
+// yt(s): üst kot (m; lo–hi arasında doğrusal), yar: [[c0, c1, z (cm)]] sıralı, kesişmeyen. Yarık alttan açıktır, üstü makasın üst kotu;
+// üst kot levhanın üstüne çıkıyorsa levha orada ikiye ayrılır. Dönen: çokgenler [[s (cm), y (m)], …].
+function yarikliLevha(lo, hi, alt, yt, yar) {
+  const EPS = 1e-4, cikan = [];
+  const temiz = P => P.filter((p, i) => { const q = P[(i + P.length - 1) % P.length]; return Math.abs(p[0] - q[0]) > EPS || Math.abs(p[1] - q[1]) > 1e-6; });
+  const ekle = P => { const T = temiz(P); if (T.length >= 3) cikan.push(T); };
+  let bas = lo, cur = [[lo, alt]];
+  const kapat = sag => { if (sag - bas > EPS) ekle([...cur, [sag, alt], [sag, yt(sag)], [bas, yt(bas)]]); };
+  yar.forEach(([r0, r1, zc]) => {
+    const c0 = Math.max(r0, lo), c1 = Math.min(r1, hi), z = zc / 100, y0 = yt(c0), y1 = yt(c1);
+    if (z < y0 - 1e-6 && z < y1 - 1e-6) { cur.push([c0, alt], [c0, z], [c1, z], [c1, alt]); return; }   // çentik: üstte levha kalır
+    if (z >= y0 - 1e-6 && z >= y1 - 1e-6) { kapat(c0); bas = c1; cur = [[c1, alt]]; return; }            // boydan boya kesik
+    const sx = c0 + (c1 - c0) * (z - y0) / (y1 - y0);                                                     // üst kenar yarığın içinde z'yi keser
+    if (y0 > z) { if (sx - bas > EPS) ekle([...cur, [c0, alt], [c0, z], [sx, z], [bas, yt(bas)]]); bas = c1; cur = [[c1, alt]]; }
+    else { kapat(c0); bas = sx; cur = [[sx, z], [c1, z], [c1, alt]]; }
+  });
+  kapat(hi);
+  return cikan;
+}
 {
   let bo = 0;
   KALKAN.forEach((G, gi) => {
     [...G.parca.map(p => [p, false]), ...G.dolgu.map(p => [p, true])].forEach(([[a, b], dolgu]) => {
-      const sh = new THREE.Shape(), yt = s => (G.h(s) - 0.2) / 100;
+      const yt = s => (G.h(s) - 0.2) / 100;
       const alt = (H - BAS_KANAT) / 100;   // alt ucu baş makas omegasının dış kanalında
-      sh.moveTo(a / 100, alt); sh.lineTo(b / 100, alt); sh.lineTo(b / 100, yt(b)); sh.lineTo(a / 100, yt(a)); sh.closePath();
-      const o = mesh(new THREE.ExtrudeGeometry(sh, { depth: BET_T / 100, bevelEnabled: false }), mat('betopan', AD.kalkan));
-      o.position.z = G.oT / 100;
-      const w = cerceve(G.r, ...G.O); w.add(o);
-      add(AD.kalkan, w, bo++ * 0.5, { kod: dolgu ? null : KB('betopan'), ad: dolgu ? 'Baş makas betopanı · makas ucu' : 'Baş makas betopanı', satir: dolgu ? [['Bu parça', `${fmtc(Math.abs(b - a))} cm · ${G.ad}, ${M.betopan.dolgu}`], ['Malzeme', '125 × 250 betopanların eğimle kesilen artanından'], ['Oturma', 'alt ucu baş makas omegasının dış U yanağında; 8 mm'], ['Kaynak', 'Lokman, 25.10.2026: makas uçlarına artan betopan döşenir']] : [['Bu parça', `${M.betopan.levha} · ${G.ad}`], ['Pafta', M.betopan.pafta], ['Oturma', 'makasa dayanır, alt ucu baş makas omegasının dış U yanağına girer; aralığa silikon mastik (Lokman, 25.10.2026)'], ['Not', 'fabrikada hazırlanır; eğimle kesilen artanı makas uçlarına döşenir'], ...kartSat(KB('betopan'))] });
+      const w = cerceve(G.r, ...G.O);
+      const yar = (G.yarik || []).filter(([c0, c1]) => c1 > Math.min(a, b) + 0.01 && c0 < Math.max(a, b) - 0.01);
+      const sekiller = [];
+      if (!yar.length) {
+        const sh = new THREE.Shape();
+        sh.moveTo(a / 100, alt); sh.lineTo(b / 100, alt); sh.lineTo(b / 100, yt(b)); sh.lineTo(a / 100, yt(a)); sh.closePath();
+        sekiller.push(sh);
+      } else yarikliLevha(Math.min(a, b), Math.max(a, b), alt, yt, yar).forEach(P => {
+        const sh = new THREE.Shape();
+        P.forEach(([s, y], i) => i ? sh.lineTo(s / 100, y) : sh.moveTo(s / 100, y)); sh.closePath();
+        sekiller.push(sh);
+      });
+      sekiller.forEach(sh => {
+        const o = mesh(new THREE.ExtrudeGeometry(sh, { depth: BET_T / 100, bevelEnabled: false }), mat('betopan', AD.kalkan));
+        o.position.z = G.oT / 100;
+        w.add(o);
+      });
+      const yarSat = yar.length ? [['Kesim', yar.map(([c0, c1, z, ad]) => `${fmtc(Math.max(c0, Math.min(a, b)))}–${fmtc(Math.min(c1, Math.max(a, b)))} cm arası alttan ${fmtc(z - (H - BAS_KANAT))} cm (${ad})`).join('; ') + ': veranda makasının geçtiği yer']] : [];
+      add(AD.kalkan, w, bo++ * 0.5, { kod: dolgu ? null : KB('betopan'), ad: dolgu ? 'Baş makas betopanı · makas ucu' : 'Baş makas betopanı', satir: dolgu ? [['Bu parça', `${fmtc(Math.abs(b - a))} cm · ${G.ad}, ${M.betopan.dolgu}`], ['Malzeme', '125 × 250 betopanların eğimle kesilen artanından'], ['Oturma', 'alt ucu baş makas omegasının dış U yanağında; 8 mm'], ['Kaynak', 'Lokman, 25.10.2026: makas uçlarına artan betopan döşenir']] : [['Bu parça', `${M.betopan.levha} · ${G.ad}`], ['Pafta', M.betopan.pafta], ['Oturma', 'makasa dayanır, alt ucu baş makas omegasının dış U yanağına girer; aralığa silikon mastik (Lokman, 25.10.2026)'], ['Not', 'fabrikada hazırlanır; eğimle kesilen artanı makas uçlarına döşenir'], ...yarSat, ...kartSat(KB('betopan'))] });
     });
     // Makasın duvar dışında kalan ucu (saçak tarafı, ~30 cm): saçak altından makasın üstüne artan betopan (Lokman, 26.10.2026:
     // "baş makasların uçlarında hâlâ kaplanmamış alan var; saçak sacı ile alın sacının birleştiği yerin boş kalmasının sebebi o")
@@ -1289,7 +1324,8 @@ if (OSB && AD.osb) {
   });
 }
 /* Ek parçalar (D.ek; `ek.py`): köşe kırmasının mahal çatısı kart modelinin üçgenleriyle, kubbe orijinal üretim çizimleriyle.
-   mesh: {v: [x, y, z] cm plan, f: üçgenler}; cubuk: [x0, y0, z0, x1, y1, z1, en, derinlik, nx, ny, nz] (derinlik n yönünde). */
+   mesh: {v: [x, y, z] cm plan, f: üçgenler}; cubuk: [x0, y0, z0, x1, y1, z1, en, derinlik, nx, ny, nz] (derinlik n yönünde);
+   üretim makasının çubuğunda ayrıca [ağız yönü, sac, sırttan eksene uzaklık, dudak]: dudaklı C kesit. */
 function ekMesh(M_, m) {
   const v = M_.v, pos = [];
   for (let i = 0; i < M_.f.length; i++) { const k = M_.f[i] * 3; pos.push(X(v[k]), v[k + 2] / 100, Z(v[k + 1])); }
@@ -1302,6 +1338,14 @@ function ekCubuk(c, m) {
   const d = new THREE.Vector3().subVectors(q, p), L = d.length(); d.normalize();
   const n = new THREE.Vector3(nx, nz, -ny); n.sub(d.clone().multiplyScalar(n.dot(d))).normalize();
   const w = new THREE.Vector3().crossVectors(n, d);
+  if (c[11]) {   // üretim makasının çubuğu: dudaklı C. Sırt `der` düzleme dik, iki kanat `en` düzlemde; ağız w boyunca c[11] yönünde; sac c[12];
+    // eksen (vida hattı) sırttan c[13]; dudak c[14], kanat ucundan içe (cm). Sırt eksenin ağzın tersindeki yanında.
+    const s = c[11], et = c[12], h = (der - et) / 2, b = -s * (c[13] - et / 2), a = s * (en - c[13] - et / 2), l = c[14] - et / 2;
+    const orta = [[a, -h], [b, -h], [b, h], [a, h]];
+    if (l > 0) { orta.unshift([a, -h + l]); orta.push([a, h - l]); }
+    const k = mesh(new THREE.ExtrudeGeometry(thick(orta, et), { depth: L, bevelEnabled: false }), m);
+    k.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(w, n, d)); k.position.copy(p); return k;
+  }
   const o = mesh(new THREE.BoxGeometry(L, en / 100, der / 100), m);
   o.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(d, w, n));
   o.position.copy(p).add(q).multiplyScalar(0.5); return o;

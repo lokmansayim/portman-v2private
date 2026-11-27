@@ -1,0 +1,49 @@
+{
+ "sema": "portman.rehber_uretim_makaslari/1",
+ "aciklama": "Montaj rehberinde çatı makasları orijinal üretim çizimlerinden (Lokman, 24 Kasım 2026 07:35:17 UTC: \"Montaj Rehberlerinde bundan sonra orjinal üretim çizimleri dursun\"; 26 Kasım 2026 05:38:00 UTC: \"… makasları yeniden üret doğru yerleşimde gerçek üretilecek makaslar olacak\"). Anahtar İş Emri numarasıdır. Her evde üretim dosyası (`araclar/uretim/` çıktısı) ve çerçeve adlarının Motor'un makas yerlerine eşlemesi durur: ana ve cumba makasları dizildikleri eksende konum sırasıyla, kısa makaslar konum sırasıyla, çapraz makaslar tanımdaki sırayla. Makasın yeri ve sayısı Motor'un çatı tanımındandır; sayı ya da boy tutmazsa rehber kurulmaz.",
+ "kesit": {
+  "aciklama": "Makas çubuğunun gerçek kesiti (Lokman, 26 Kasım 2026 08:14:15 UTC, kart: \"A: Evet, 80 × 45, dudak 10\"; kartın sonucu: \"Rehber çubukları dudaklı C 80 × 45 çizer; makas çiziminin dipnotu düzelir. Makine dosyasındaki 54 satırına dokunulmaz.\"). Üretim dosyası kanadı 54 yazar (makine biçimi, PROFILE 54.00x80.00) ve çubuğun eksenini o kanadın ortasında verir: vida hattı, sırttan 27 mm. Rehber çubuğu gerçek kesitle çizer; sırt ve sac kalınlığı üretim dosyasından, kanat ve dudak buradan. Anahtar: kesit harfi + sırt (mm).",
+  "C80": {
+   "kanat_mm": 45.0,
+   "dudak_mm": 10.0
+  }
+ },
+ "evler": {
+  "PM-TK11-63M2": {
+   "ev": "Mehmet Kapaklı Tek 63 m²",
+   "uretim": "araclar/uretim/veri/makas_63m2/makas_63m2.json",
+   "onay": "Lokman, 26 Kasım 2026 05:53:56 UTC, kart: \"A: Evet, böyle üretilsin\" (14 makas, 328 çubuk; rehber makasları bu dosyadan okur). Yerleşim: 05:50:56 \"sen motora uy yerleşim yerlerinde eşit aralıklara koymuşsa o şekilde kalsın\"; 05:52:33 \"cumbada 2 makas gördüm ana makasın tam önünde 1 tane daha makas var\".",
+   "cati_anahtarlari": {
+    "aciklama": "Rehber yalnız bu çatı anahtarlarını yazan İş Emri'nden kurulur (Lokman, 26 Kasım 2026 10:19:48 UTC, kart: \"A: Paftadaki yerlerde\"; 23:34:15 UTC, kart: \"A: Yalnız bu evde mahyadan\"). Aynı numaralı onaylı teklif İş Emri (r02) bu anahtarları yazmaz: kısa makaslar eşit aralıkta kalır, ilk veranda makası cumba makaslarını keser (Lokman, 26 Kasım 2026 10:01:13 UTC: \"burada bir kesişim sorunu var nasıl otutturdun makasları\"). O İş Emri'nde rehber kurulmaz.",
+    "cati": [
+     "asik_siralari"
+    ],
+    "mahal_catilari": [
+     "kisa_makas_yerleri_cm"
+    ]
+   },
+   "ana": [
+    "MK01",
+    "MK02",
+    "MK03",
+    "MK04",
+    "MK05",
+    "MK14",
+    "MK06"
+   ],
+   "cumba": [
+    "MK13",
+    "MK07"
+   ],
+   "kisa": [
+    "MK12",
+    "MK11",
+    "MK10",
+    "MK08"
+   ],
+   "capraz": [
+    "MK09"
+   ]
+  }
+ }
+}
