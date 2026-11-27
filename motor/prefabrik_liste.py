@@ -2356,7 +2356,7 @@ def liste(N: dict, kurallar: dict | None = None, pafta: dict | None = None) -> d
                 raise ListeYazilmaz(f"aşık sıraları mahyadan: çatı tanımının saçak eşiği ({mahyadan_['sacak_esigi_cm']:g} cm) liste kuralının "
                                     f"`asik_sacak_esigi_m`'siyle ({sy(asik_esik)} m) aynı değil")
             sira_notu = (f"çok düzlemli çatı: {len(ck_['asik'])} yüzde {len(sr_)} sıra, her yüzde ilk sıra yüzün üst kenarında (mahya), "
-                         f"{sy(_ortak(k, 'asik', 'aralik_m'))} arayla, saçakta bir sıra, saçağa {sy(asik_esik)} m'den az kalan sıra konmaz "
+                         f"{sy(_ortak(k, 'asik', 'aralik_m'))} arayla, saçak çizgisinde eni olan yüzde saçakta bir sıra, o yüzde saçağa {sy(asik_esik)} m'den az kalan sıra konmaz "
                          "(karar C; İş Emri `cati.asik_siralari`: evin montaj paftası, D-158); sıranın boyu yüzün o yükseklikteki "
                          "genişliği; aynı düzlemdeki ana çatı ve cumba tek yüz")
             asik_dayanak = "Kural (karar C)"

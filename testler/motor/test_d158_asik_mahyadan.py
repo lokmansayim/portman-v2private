@@ -112,6 +112,20 @@ def test_alt_kenari_dere_olan_yuzde_sacak_sirasi_yok_sira_dusmez():
     assert r == pytest.approx([0.0, 60.0, 120.0, 180.0])                      # 180: saçağa 20 cm; saçak sırası yok, sıra düşmez
 
 
+def test_ayni_duzlemdeki_cumba_mahyasina_sira_yalniz_bosluk_30dan_fazlaysa():
+    """Kuralın 6. maddesi: aynı düzlemdeki cumbanın mahyasına ayrı sıra, yalnız altındaki sıraya 30 cm'den fazla boşluk kalırsa (kitabın
+    `ust_sira_esigi_m`'si aynen); sıra tam mahyaya denk gelirse tek sıra iki yüzü geçer."""
+    def siralar(kenar):                                                       # ana yüz 500 × 400; cumba 200 geniş, mahyası `kenar`da
+        dz = {"acilim": Polygon([(0, 0), (700, 0), (700, kenar), (500, kenar), (500, 400), (0, 400)])}
+        r = cati_genel.asik_siralari(dz, 60.0, 30.0, mahyadan_sacak_esigi=30.0)
+        return sorted((round(400 - s["t"], 2), round(s["boy"], 2), s["tur"]) for s in r)
+    ana = [(m, 500.0, "sira") for m in (0.0, 60.0, 120.0, 180.0)]
+    alt = [(m, 700.0, "sira") for m in (240.0, 300.0, 360.0, 400.0)]
+    assert siralar(175) == ana + alt                                          # mahya 225'te, altındaki sıra 240'ta: 15 cm, ayrı sıra yok
+    assert siralar(215) == ana + [(185.0, 200.0, "ust_sira")] + alt           # mahya 185'te, altındaki sıra 240'ta: 55 cm, cumba eninde sıra
+    assert siralar(220) == ana[:3] + [(180.0, 700.0, "sira")] + alt           # sıra tam mahyada: tek sıra iki yüzü geçer
+
+
 def test_liste_asik_adedi_ayni():
     """Liste: 136 satır; yalnız aşık satırının dayanağı ve hesap yazısı değişir, adet ve aday aynı (41); özet aynı."""
     a, b = PL.is_emrinden(_oku()), PL.is_emrinden(_anahtarli())
@@ -125,6 +139,7 @@ def test_liste_asik_adedi_ayni():
     assert {k for k in x if x[k] != y[k]} == {"dayanak", "formul"}
     assert "saçaktan" in x["formul"].split("kubbe")[0] and "27 sıra" in x["formul"]
     assert "26 sıra" in y["formul"] and "D-158" in y["formul"] and y["dayanak"] == "Kural (karar C)"
+    assert "saçak çizgisinde eni olan yüzde saçakta bir sıra" in y["formul"]  # alt kenarı dere olan yüzde saçak sırası yok
 
 
 @pytest.fixture(scope="module")
