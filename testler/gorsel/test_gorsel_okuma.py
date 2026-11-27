@@ -145,7 +145,9 @@ def test_tk01_teyit_metni():
     for parca in ("Tek katlı prefabrik, gövde 8,98 × 8,88 m, duvar 2,50 m, beşik çatı.",
                   "salon 19,5 m²", "mutfak 9,5 m²", "3 yatak odası (11,5 / 13 / 9,5 m²)", "e. banyo 3 m²", "banyo 5 m²",
                   "Veranda: önde 3,86 × 1,81 m, arkada 2,61 × 1,30 m.", "8 pencere, giriş kapısı önde.",
-                  "Yapı tipi yazmıyordu, prefabrik aldım.", "banyoların derinliği 256 cm", "Okuduğum yerleşim görselde. Doğru mu?"):
+                  # BK-80 (D-155): standart alınanlar tek satırda; LLM'in oranla aldıkları sayıyla (metni koordinatlı olabilir, bayiye gitmez)
+                  "Çizimde yazmayanları standart aldım: prefabrik", "Ölçüsü yazmayan 2 yeri çizimdeki orana göre aldım.",
+                  "Okuduğum yerleşim görselde. Doğru mu?"):
         assert parca in m, parca
     assert "Okuduğum yerleşim görselde" not in GO.teyit_metni(TK01, d, gorsel_var=False)[0]
 
@@ -219,10 +221,10 @@ def test_bos_kalan_bolum_ve_cakisma_sorulur():
 
 def test_emin_olunamayan_ve_giris_kapisi_sorulur():
     o = copy.deepcopy(BASIT)
-    o["emin_olunamayanlar"] = ["Mutfak penceresinin ölçüsü okunmuyor."]
+    o["emin_olunamayanlar"] = ["Mutfak penceresi hangi duvarda okunmuyor."]   # BK-80 (D-155): yalnız ölçü sorusu artık sorulmaz
     o["kapilar"] = [k for k in o["kapilar"] if "DIŞ" not in k["arasinda"]]
     d = GO.denetle(o)
-    assert "Mutfak penceresinin ölçüsü okunmuyor." in d["sorular"]
+    assert "Mutfak penceresi hangi duvarda okunmuyor." in d["sorular"]
     assert any("Giriş kapısını çizimde göremedim" in s for s in d["sorular"])
 
 
@@ -481,14 +483,16 @@ def test_sigmayan_varsayimlar_ayri_mesajda_gider():
         p["olcu"] = None
     o["tahminler"] += [f"{i}. tahmin: bu ölçü çizimde yazmıyordu, komşu odanın ölçüsünden ve çizimin oranından aldım" for i in range(1, 5)]
     d = GO.denetle(o, bk14=True)
+    # BK-80: tahminlerin metni artık tek cümledir; sığmama durumu uzun notlarla kurulur
+    d["notlar"] += [f"{i}. not: bu bölümün ölçüsü çizimde yazmıyordu, komşu odanın ölçüsünden ve çizimin oranından aldım" for i in range(1, 7)]
     m, ek = GO.teyit_metni(o, d)
     assert ek is not None and len(m) <= 1000 and "Varsaydıklarımı bir önceki mesajda yazdım." in m and m.endswith("yazmanız yeterli.")
-    for n in d["notlar"]:
-        assert GO._bas_buyuk(n) in ek, n
-    for t in d["tahminler"]:
-        assert t in ek, t
-    assert "Ölçüsü yazmayan pencereler: 120x120 (Yatak Odası 1, Yatak Odası 2, Yatak Odası 3, Salon 2, Mutfak), 60x40 (E. Banyo, Banyo)." in ek
-    assert "4. tahmin" in ek
+    for n in GO.bayi_notlari(d["notlar"]):                   # BK-80 (D-155): notlar bayiye sade cümlelerle; hiçbiri düşmez (K21)
+        assert n in ek, n
+    assert len(GO.bayi_notlari(d["notlar"])) >= 1 and "Ölçüsü yazmayan 6 yeri çizimdeki orana göre aldım." in ek
+    assert ("Ölçüsü yazmayan pencereleri standart ölçüyle çizdim: 120x120 (Yatak Odası 1, Yatak Odası 2, Yatak Odası 3, Salon 2, Mutfak), "
+            "60x40 (E. Banyo, Banyo).") in ek
+    assert "6. not" in ek and "4. tahmin" not in ek          # BK-80: tahminin metni bayiye gitmez, sayısı gider
 
 
 def test_izgaraya_oturtunca_alan_cok_degisirse_sorulur_azsa_yazilir():

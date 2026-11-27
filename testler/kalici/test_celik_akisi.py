@@ -595,4 +595,17 @@ def test_prefabrik_cizim_dusunce_bugunku_davranis(depo, wa, monkeypatch):
     [r] = isle_hepsi(depo)
     assert r["eylem"] == "is_emri"
     assert sorgu(depo, "SELECT durum FROM revizyonlar")[0]["durum"] == "dogrulanmadi"
-    assert any("doğrulamadan geçmedi" in s["govde"] for s in sorgu(depo, "SELECT govde FROM giden WHERE alici = %s", NUMARA_A))
+    giden = [s["govde"] for s in sorgu(depo, "SELECT govde FROM giden WHERE alici = %s", NUMARA_A)]
+    assert any("doğrulamadan geçmedi" in g for g in giden)
+    # BK-80 (D-155; 26 Kasım canlı denemesi): plan gitmiyorsa "Ön onay planınız hazır; plan görseli ve PDF ektedir." de gitmez
+    assert not any("planınız hazır" in g or "ektedir" in g for g in giden), giden
+    assert all(g.strip() for g in giden)
+
+
+def test_bk80_plan_hazir_sozu_cikar():
+    """BK-80: karar metninin üç kalıbı (yeni plan, revizyon, çatı seçimi r02) "plan hazır" sözünden arınır; öteki cümleler kalır."""
+    assert W.plan_hazir_sozsuz("2+1, 75 m². Ön onay planınız hazır; plan görseli ve PDF ektedir.") == "2+1, 75 m²."
+    assert W.plan_hazir_sozsuz("Kırma çatı. Plan aynı. Ön onay planınız hazır (r02).") == "Kırma çatı. Plan aynı."
+    assert W.plan_hazir_sozsuz("Kırma çatı. Plan aynı. Ön onay planınız hazır (r02); PDF'teki 4 görünüş kırma çatıyı gösterir.") == \
+        "Kırma çatı. Plan aynı."
+    assert W.plan_hazir_sozsuz("Ön onay planınız hazır; plan görseli ve PDF ektedir.") == ""

@@ -546,6 +546,8 @@ def isle(gelen: dict, settings: dict, k=None, cikarim: dict | None = None, proje
     if karar.is_emri and ((karar.is_emri.get("yapi") or {}).get("bu_revizyon") or (karar.is_emri.get("talep") or {}).get("metin_koddan")):
         # BK-09 M1: çelikte değişiklik uygulandıysa; İE-14: yeni planda istek uygulanamadı ya da zaten vardı (bilgiyle yeniden çizim)
         ozet_baslik = (karar.is_emri.get("talep") or {}).get("metin") or ""          # LLM özeti değil, kodun okuması ("Uygulanan: …")
+    if cizim and not cizim["passed"]:
+        metin = plan_hazir_sozsuz(metin)          # BK-80: plan gitmiyorsa "plan hazır, ektedir" sözü de gitmez
     if patron_mu:
         metin = metin.replace("Bu konuyu Lokman Bey'e iletiyorum; en kısa sürede dönüş yapılacak.", "Bu talep şu an otomatik karşılanamıyor (Patron modu: ayrıca bildirim gönderilmez).")
     teknik = teknik_not(karar, talep, meta, cizim) if (patron_mu and settings.get("patron_teknik_not", True)) else ""
@@ -590,6 +592,8 @@ def isle(gelen: dict, settings: dict, k=None, cikarim: dict | None = None, proje
             ekle_satir(giden_etkilesim(gelen, S.ucb_metni(no, rev), 0, baglanti={"metin": S.UCB_DUGME, "url": ucb["url"]},
                                        tur="cevap", is_emri_no=no, revizyon=rev))
         # ucb_taban_url boşsa ya da yayın dizini yoksa 3D sayfası yalnız kayıtta (revizyonlar.ekler) durur; bayiye söz veren mesaj gönderilmez
+    elif cizim and not metin:                                   # BK-80: plan geçmedi, karar metninde "hazır" sözünden başka bir şey yok
+        pass
     elif butonlar and karar.soru_alani == "okuma" and len((k.d.get("okuma_bekleyen") or {}).get("adaylar") or []) == 2:
         # İE-08 A4: "1 / 2 / Hiçbiri" — iki okuma tek görselde numaralı (görsel üretilemezse düğmeler metinle gider; akış durmaz).
         # "Görselde işaretledim" cümlesi yalnız görsel gerçekten giderse (kapanış incelemesi 13.10)
@@ -1239,9 +1243,10 @@ def _cizim_duzeltme(gelen: dict, settings: dict, k, talep, cikarim: dict | None,
         if den.get("cevrim") and not den["sorular"] and not den["cizilemez"]:
             # planın kendisi teyittir; ama bu değişiklikle gelen yeni varsayımlar (ızgara kayması, ölçüsüz pencere …) bayiye yazılır (K21)
             eski = GO.denetle(co["okuma"], ayar=esik)
-            yeni_var = [n for n in den["notlar"] + den["tahminler"] if n not in eski["notlar"] + eski["tahminler"]]
+            yeni_var = (GO.bayi_notlari([n for n in den["notlar"] if n not in eski["notlar"]])          # BK-80: Sade Teknik Türkçe (D-70)
+                        + GO.sade_tahminler([t for t in den["tahminler"] if t not in eski["tahminler"]]))
             co.update(okuma=yeni, sorular=[], revizyon=True)
-            var = "Varsaydığım: " + "; ".join(yeni_var) + ". " if yeni_var else ""
+            var = "Varsaydıklarım: " + " ".join(yeni_var) + " " if yeni_var else ""     # BK-80: her biri kendi cümlesi, noktalı
             uzun = len(var) > 300                                   # düğmeli mesajın gövdesine sığmayacaksa önden ayrı metin
             karar, ek = _cizim_plani(gelen, settings, k, katalog, bayi, proje_koku, den=den,
                                      on_not="Uygulanan: " + "; ".join(fark[:4]) + ". " + ("" if uzun else var), kayit=kayit)
@@ -1571,6 +1576,17 @@ def cizim_genel(ie: dict, hedef: Path) -> dict:
     no, rev = ie.get("is_emri_no"), int(ie.get("revizyon") or 1)
     return U.uret(calisma, hedef, is_emri_no=no, revizyon=rev, set_yolu=None, yontem=y.get("yontem") or "panel", perspektif=True, bayi=True,
                   kaynak=f"İş Emri {no} r{rev:02d} ({y.get('referans_model') or y.get('kod')})", bilgi=ie.get("bilgi"))
+
+
+_PLAN_HAZIR = re.compile(r"\s*Ön onay planınız hazır[^.]*\.")
+
+
+def plan_hazir_sozsuz(metin: str) -> str:
+    """BK-80 (D-155; 26 Kasım canlı denemesi, Lokman kart 06:41:28 UTC "Evet, dördü de bakımda"): plan Motor'un doğrulamasından geçmezse
+    PDF ve görsel gitmez; bayiye önce "Ön onay planınız hazır; plan görseli ve PDF ektedir.", sonra "doğrulamadan geçmedi" gidiyordu. Karar
+    metninden "planınız hazır" cümlesi (ve aynı cümledeki ek sözü, r02'nin görünüş notu) çıkar; özet ve uyarılar kalır. Metin bundan başka
+    bir şey söylemiyorsa boş döner; o zaman bayiye yalnız "doğrulamadan geçmedi" cümlesi gider."""
+    return _PLAN_HAZIR.sub("", metin).strip()
 
 
 def ek_sozu(metin: str, gorsel_var: bool) -> str:
