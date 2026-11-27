@@ -10,8 +10,12 @@ makasları son ana makasa üst başlığın ucuyla değer (Soru 14 "B: Son ana m
 kalsın"), kalkan betopanı makasın geçtiği yerde kesilir; aşık sıraları mahyadan (D-158); verandanın köşe kırması şablonun yüzü.
 
 Hedef örnek (D-28 madde 2): çatı `testler/paket/veri/TK11_rehber_cati_beklenen.json`; Lokman, 27 Kasım 2026 06:04:25 UTC, kart "Soru 6:
-63 m2 evin montaj rehberinde çatı böyle olsun mu?": "A: Onaylıyorum". Rehberin bütünü Lokman'ın rehber onayıyla ayrıca dondurulur.
+63 m2 evin montaj rehberinde çatı böyle olsun mu?": "A: Onaylıyorum".
 Girdi `araclar/paket/girdi/TK11_r02_cati.json`: onaylı teklifin İş Emri (r02) ve iki çatı anahtarı; liste ve teklif aynı kalır.
+
+Rehberin bütünü (BK-85, D-160): `testler/paket/rehber_tk11_63/iz.json`, onaylanan sayfanın izi. Lokman, 27 Kasım 2026 21:42:26 UTC, kart
+"Soru 18: 63 m2 evin montaj rehberi bu çatıyla son hâli olsun mu?": "A: Onaylıyorum". `test_rehberin_butunu_onayli_ornek` komutun
+çıkardığı sayfanın izini bu dosyayla kıyaslar.
 """
 from __future__ import annotations
 
@@ -31,6 +35,7 @@ from araclar.paket.rehber import iz  # noqa: E402
 IE = KOK / "araclar" / "paket" / "girdi" / "TK11_r02_cati.json"             # evin İş Emri: r02 + kısa makas yerleri (D-156) + aşık (D-158)
 IE_R02 = KOK / "testler" / "teklif_formu" / "TK11_r02" / "is_emri.json"      # onaylı teklifin girdisi: 14 makas (D-154); değişmez
 HEDEF = json.loads((KOK / "testler" / "paket" / "veri" / "TK11_rehber_cati_beklenen.json").read_text(encoding="utf-8"))
+REHBER_IZI = KOK / "testler" / "paket" / "rehber_tk11_63" / "iz.json"         # rehberin bütünü (D-160): onaylanan sayfanın izi
 IE_R01 = KOK / "testler" / "teklif_formu" / "TK11" / "is_emri.json"         # mühürlü r01: 13 makas
 URETIM = KOK / "araclar" / "uretim" / "veri" / "kubbe.json"
 MAKAS = KOK / "araclar" / "uretim" / "veri" / "makas_63m2" / "makas_63m2.json"
@@ -270,3 +275,32 @@ def test_sahnede_makaslar_ve_veranda(d, tmp_path):
     assert len(kesim) == 3 and all(k.endswith(": veranda makasının geçtiği yer") for k in kesim)
     assert kesim[0].startswith("421,5–429,5 cm arası alttan 44,36 cm (MK12); 508,75–516,75 cm arası alttan 44,36 cm (MK11)")
     assert kesim[2].startswith("758,75–776,5 cm arası alttan 44,36 cm (MK08 + MK09)")
+
+
+@pytest.mark.skipif(iz.hazir() is not None, reason=f"rehber izi: {iz.hazir()}")
+def test_rehberin_butunu_onayli_ornek(tmp_path):
+    """D-160 (D-28 madde 2 ve 3): rehberin bütünü Lokman'ın onayladığı sayfadır (27 Kasım 2026 21:42:26 UTC, kart "Soru 18: 63 m2 evin
+    montaj rehberi bu çatıyla son hâli olsun mu?": "A: Onaylıyorum"). Komut (`python -m araclar.paket TK-11 <çıktı> --is-emri
+    araclar/paket/girdi/TK11_r02_cati.json --tavan ters`) sayfayı yazar; sayfanın izi (her parçanın adımı, sırası, kartı, yazısı ve
+    köşeleri; adımların metni, satırları ve kamerası) onaylanan sayfanın iziyle aynıdır. İz yalnız Lokman'ın onayıyla yeniden alınır
+    (D-02; `testler/paket/rehber_tk11_63/README.md`)."""
+    from motor import geometry as G
+    from araclar.paket import uret
+    try:
+        assert uret.main(["TK-11", str(tmp_path / "Modeller"), "--is-emri", str(IE), "--tavan", "ters", "--gecici", str(tmp_path / "gecici")]) == 0
+    finally:
+        G.lento_ayarla({})                               # lento modül durumudur (BK-23): öteki testlere sızmaz
+    klasor = tmp_path / "Modeller" / "prefabrik" / "TK-11"
+    html = klasor / "TK-11_montaj_rehberi.html"
+    assert html.is_file(), (klasor / "TK-11_bilgi.md").read_text(encoding="utf-8")
+    a = json.loads(REHBER_IZI.read_text(encoding="utf-8"))
+    b = iz.al(html, tmp_path / "iz.json")
+    assert a["hatalar"] == [] and b["hatalar"] == []
+    assert (a["N"], a["parca"], len(a["adimlar"])) == (20, 429, 21)        # 20 adım ve bitmiş bina; 429 parça
+    for k in ("N", "liste", "ilerleme", "parca"):
+        assert a[k] == b[k], k
+    fark = [(i, {k: (x[k], y.get(k)) for k in x if x[k] != y.get(k)}) for i, (x, y) in enumerate(zip(a["parts"], b["parts"])) if x != y]
+    assert not fark, f"{len(fark)} parça farklı; ilk: {fark[:3]}"
+    fark = [(x["i"], k) for x, y in zip(a["adimlar"], b["adimlar"]) for k in x if x[k] != y.get(k)]
+    assert not fark, f"adımlarda fark: {fark[:10]}"
+    assert a == b                                        # izin bütünü
