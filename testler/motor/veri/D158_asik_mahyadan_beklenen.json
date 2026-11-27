@@ -1,0 +1,35 @@
+{
+ "aciklama": "D-158 · Mehmet Kapaklı Tek 63 m² (TK-11) evin aşık sıraları, evin montaj paftasının aşık yerleşim planından (5. sayfa; vektörden ölçüm, 26 Kasım 2026). Uzaklıklar her yüzün üst kenarından (mahya; veranda yüzünde ana çatının kalkan yüzü) eğik boyca, cm. Pafta depoda değildir (antette müşteri adı).",
+ "kaynak": "Lokman, 26 Kasım 2026 23:34:15 UTC kartı \"Cumbalı ve verandalı çatıda aşık sıraları nereden sayılsın?\": \"A: Yalnız bu evde mahyadan\". Karar C: Lokman, 24 Ekim 2026 kartı \"Mahyadan 60\" (D-39).",
+ "aralik_cm": 60,
+ "tolerans_cm": 0.5,
+ "yuzler": {
+  "ana çatı ön": {
+   "mahyadan_cm": [0, 60, 120, 180, 240, 300, 360, 420],
+   "sacak_sirasi": true,
+   "boy_cm": [697.5, 697.5, 697.5, 697.5, 823.0, 823.0, 823.0, 823.0, 823.0],
+   "not": "Cumbanın ön yüzü aynı düzlemdedir: alttaki 5 sıra cumbanın üstünden geçer (410 + 410). Cumba mahyasında ayrı sıra yok."
+  },
+  "ana çatı arka": {
+   "mahyadan_cm": [0, 60, 120, 180, 240, 300, 360, 420],
+   "sacak_sirasi": true,
+   "boy_cm": [697.5, 697.5, 697.5, 697.5, 697.5, 697.5, 697.5, 742.98, 823.0],
+   "not": "420'deki sıra kırma hattında biter."
+  },
+  "VERANDA çatısı": {
+   "mahyadan_cm": [0, 60, 120],
+   "sacak_sirasi": true,
+   "boy_cm": [444.25, 444.25, 444.25, 444.25],
+   "not": "Üst kenar ana çatının kalkan yüzündedir; saçak sırası 158,7'de."
+  },
+  "sağ cumba arka": {
+   "mahyadan_cm": [0, 60, 120, 180],
+   "sacak_sirasi": false,
+   "boy_cm": [155.5, 155.5, 155.5, 89.6],
+   "not": "Alt kenar deredir; 180'deki sıra derede biter, saçak sırası yok."
+  }
+ },
+ "toplam": {"sira": 26, "parca": 48, "metre": 156.7},
+ "anahtarsiz": {"sira": 27, "parca": 49},
+ "liste": {"satir": 136, "asik_adedi": 41, "asik_olcu": "L 4200"}
+}

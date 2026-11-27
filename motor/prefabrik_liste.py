@@ -2350,6 +2350,16 @@ def liste(N: dict, kurallar: dict | None = None, pafta: dict | None = None) -> d
         sira_notu = (f"çok düzlemli çatı: {len(ck_['asik'])} yüzde {len(sr_)} sıra, saçaktan {sy(_ortak(k, 'asik', 'aralik_m'))} aralıkla, sıranın "
                      "boyu yüzün o yükseklikteki genişliği; aynı düzlemdeki ana çatı ve cumba tek yüz")
         asik_dayanak, asik_kaynak = "Kural (P2)", "PK-01 36 (elle), PK-02 35"
+        mahyadan_ = N["cati_tanimi"].get("asik_siralari")       # D-158: yalnız İş Emri `cati.asik_siralari: mahyadan` yazarsa (63 m² ev)
+        if mahyadan_:
+            if abs(mahyadan_["sacak_esigi_cm"] - asik_esik * 100) > 1e-9:
+                raise ListeYazilmaz(f"aşık sıraları mahyadan: çatı tanımının saçak eşiği ({mahyadan_['sacak_esigi_cm']:g} cm) liste kuralının "
+                                    f"`asik_sacak_esigi_m`'siyle ({sy(asik_esik)} m) aynı değil")
+            sira_notu = (f"çok düzlemli çatı: {len(ck_['asik'])} yüzde {len(sr_)} sıra, her yüzde ilk sıra yüzün üst kenarında (mahya), "
+                         f"{sy(_ortak(k, 'asik', 'aralik_m'))} arayla, saçak çizgisinde eni olan yüzde saçakta bir sıra, o yüzde saçağa {sy(asik_esik)} m'den az kalan sıra konmaz "
+                         "(karar C; İş Emri `cati.asik_siralari`: evin montaj paftası, D-158); sıranın boyu yüzün o yükseklikteki "
+                         "genişliği; aynı düzlemdeki ana çatı ve cumba tek yüz")
+            asik_dayanak = "Kural (karar C)"
     kb_y = [c for c in kubbeler if "yuzler" in c]               # D-54 madde 2 (Lokman, 5 Kasım 2026 10:41): Motor'un kubbesine standart çatı aşığı
     if kb_y:                                                    # (paftadan okunan kubbe girişinde yüz yok: PK-08 aynen)
         kb_asik = sum(kubbe_asigi_cm(c, asik_ara * 100) for c in kb_y) / 100
