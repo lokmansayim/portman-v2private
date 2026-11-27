@@ -31,3 +31,18 @@ def test_cogunluk_temizse_kural_ayni():
     ok = _tk01()
     sec, ozet = GO.cogunluk_sec([ok[2], ok[2], ok[0]])
     assert ozet["cogunluk"] == 2 and ozet["secilen"] in (0, 1)
+
+
+def test_tur3_yalniz_kapi_genisligi_sorusu_gitmez():
+    assert GO.kapi_genislik_sorusu("Giriş kapısının genişliği çizimde yazmıyor")
+    assert GO.kapi_genislik_sorusu("Giriş kapısı kaç cm?")
+    assert not GO.kapi_genislik_sorusu("Verandadan salona açılan giriş kapısının genişliği ve tam yeri nedir?")
+    assert not GO.kapi_genislik_sorusu("Banyo kapısı hangi odaya açılıyor?")
+    assert not GO.kapi_genislik_sorusu("Hol ile salon arasında kapı var mı?")
+
+
+def test_tur3_kapi_genisligi_notla_duser():
+    ok = _tk01()[2]
+    den = GO.denetle({**ok, "emin_olunamayanlar": ["Giriş kapısının genişliği çizimde yazmıyor"]})
+    assert not den["sorular"]
+    assert "kapılar standart genişlikte çizildi" in den["notlar"]

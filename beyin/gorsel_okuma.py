@@ -82,7 +82,8 @@ Kurallar:
   yazma. Kapıyı çizimde nerede görüyorsan orada oku: cephede çiziliyse cephede, içeride çiziliyse içeride. `alan_m2` yalnız çizimde yazıyorsa. `dikdortgenler` oda sınırları (duvar ekseni); sınırları zincirlerin noktalarından al
   (zincir parçalarının birikimli toplamı); L biçimli oda birden çok dikdörtgen. Ölçüsü yazmayan bir sınırı oranla tahmin ettiysen
   `tahminler`e kısa yaz (ör. "banyo derinliği 256 cm").
-- `kapilar`: iki oda arasındaki her kapı (`arasinda` iki oda adı); giriş kapısı `["DIŞ", "<oda>"]` ve `kenar`; genişliği yazılıysa
+- `kapilar`: iki oda arasındaki her kapı (`arasinda` iki oda adı). Kapı yalnız kanadı (çeyrek daire yayı) ya da kapı simgesi çiziliyse
+  kapıdır; iki bölüm arasındaki yaysız boşluk kapısız geçiştir, kapı yazma. Giriş kapısı `["DIŞ", "<oda>"]` ve `kenar`; genişliği yazılıysa
   `genislik_cm`. `pencereler`: oda, çizimin hangi kenarında, yazılıysa ölçü ("ENxBOY", cm; ör. 120x180). Dış duvardaki her pencerenin
   (adet 1 iken) ve giriş kapısının ortasının kenar boyunca yerini `konum_cm`e yaz (üst/alt kenarda gövdenin sol dış yüzünden, sol/sağ
   kenarda üst dış yüzünden, cm; zincirden ya da çizimdeki yerinden).
@@ -795,6 +796,19 @@ _PENCERE_OLCU_DISI = re.compile(r"kap[ıi]|\byeri|konum|nerede|hangi (duvar|ceph
                                 r"s[ıi]n[ıi]r|veranda|toplam", re.I)
 
 
+# Döngü tur 3 (27 Kasım 2026): kapılar prefabrik standardında çizilir (`KAPI_CM`; çizimde yazan genişlik de standarda çekilir, notla).
+# Yalnız kapının genişliğini soran soru bayiye gitmez; kapının yerini, duvarını, varlığını ya da başka bir konuyu da soran soru aynen sorulur.
+_KAPI = re.compile(r"kap[ıi]", re.I)
+_KAPI_GENISLIK = re.compile(r"geni[şs]li[ğg]|ka[çc] cm|ölçüsü|olcusu", re.I)
+_KAPI_GENISLIK_DISI = re.compile(r"\byeri|tam yer|konum|nerede|hangi|duvar|cephe|kenar|aras[ıi]nda|var m[ıi]|yok|pencere|veranda|zincir|"
+                                 r"a[çc][ıi]l|odaya|holden|salondan|mi\b|m[ıi]\?", re.I)
+
+
+def kapi_genislik_sorusu(s: str) -> bool:
+    """Döngü tur 3: soru yalnız kapının genişliğini mi soruyor?"""
+    return bool(_KAPI.search(s)) and bool(_KAPI_GENISLIK.search(s)) and not _KAPI_GENISLIK_DISI.search(s)
+
+
 def pencere_olcu_sorusu(s: str) -> bool:
     """BK-80: soru yalnız pencerenin ölçüsünü ya da yüksekliğini mi soruyor?"""
     return bool(_PENCERE.search(s)) and bool(_PENCERE_OLCU.search(s)) and not _PENCERE_OLCU_DISI.search(s)
@@ -827,11 +841,13 @@ def _denetle(okuma: dict, ayar: dict | None = None, bk14: bool | None = None) ->
         notlar.append("yapı tipi yazmıyordu, prefabrik aldım")
     if (o.kat_sayisi or 1) > 1:
         sonuc["cizilemez"].append(f"{o.kat_sayisi} katlı plan (bugün yalnız tek katı otomatik çizebiliyorum)")
-    standart, pencere_olcusu, model_sorulari = [], [], []
+    standart, pencere_olcusu, kapi_genisligi, model_sorulari = [], [], [], []
     for s in o.emin_olunamayanlar:
-        (standart if standart_sorusu(str(s)) else pencere_olcusu if pencere_olcu_sorusu(str(s)) else model_sorulari).append(
-            numara.maskele(str(s))[:160])
+        (standart if standart_sorusu(str(s)) else pencere_olcusu if pencere_olcu_sorusu(str(s))
+         else kapi_genisligi if kapi_genislik_sorusu(str(s)) else model_sorulari).append(numara.maskele(str(s))[:160])
     sor.extend(model_sorulari)
+    if kapi_genisligi:                          # döngü tur 3: kapı standart genişlikte
+        notlar.append("kapılar standart genişlikte çizildi")
     if pencere_olcusu:                          # BK-80 (D-155): ölçüsü yazmayan pencere standart ölçüyle, yüksekliği standart
         notlar.append("pencerelerin yüksekliği standart: pencerenin üstü yerden 200 cm")
     if standart:                                # BK-71 (Lokman kart 23 Kasım 11:54:43 "Standartları sormasın"; 11:55:43 "kat planı onaylandıktan sonra standartlar formda gider")
