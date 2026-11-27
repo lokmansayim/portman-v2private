@@ -11,7 +11,7 @@ kalsın"), kalkan betopanı makasın geçtiği yerde kesilir; aşık sıraları 
 
 Hedef örnek (D-28 madde 2): çatı `testler/paket/veri/TK11_rehber_cati_beklenen.json`; Lokman, 27 Kasım 2026 06:04:25 UTC, kart "Soru 6:
 63 m2 evin montaj rehberinde çatı böyle olsun mu?": "A: Onaylıyorum". Rehberin bütünü Lokman'ın rehber onayıyla ayrıca dondurulur.
-Girdi `is_emri/TK11_r02_cati.json`: onaylı teklifin İş Emri (r02) ve iki çatı anahtarı; liste ve teklif aynı kalır.
+Girdi `araclar/paket/girdi/TK11_r02_cati.json`: onaylı teklifin İş Emri (r02) ve iki çatı anahtarı; liste ve teklif aynı kalır.
 """
 from __future__ import annotations
 
@@ -28,7 +28,7 @@ KOK = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(KOK))
 from araclar.paket.rehber import iz  # noqa: E402
 
-IE = KOK / "is_emri" / "TK11_r02_cati.json"                                  # evin İş Emri: r02 + kısa makas yerleri (D-156) + aşık (D-158)
+IE = KOK / "araclar" / "paket" / "girdi" / "TK11_r02_cati.json"             # evin İş Emri: r02 + kısa makas yerleri (D-156) + aşık (D-158)
 IE_R02 = KOK / "testler" / "teklif_formu" / "TK11_r02" / "is_emri.json"      # onaylı teklifin girdisi: 14 makas (D-154); değişmez
 HEDEF = json.loads((KOK / "testler" / "paket" / "veri" / "TK11_rehber_cati_beklenen.json").read_text(encoding="utf-8"))
 IE_R01 = KOK / "testler" / "teklif_formu" / "TK11" / "is_emri.json"         # mühürlü r01: 13 makas
@@ -79,7 +79,7 @@ def test_is_emri_onayli_r02_ve_iki_cati_anahtari():
     bek = copy.deepcopy(r02)
     bek["cati"]["mahal_catilari"][0]["kisa_makas_yerleri_cm"] = [425.5, 512.75, 637.75, 762.75]
     bek["cati"]["asik_siralari"] = "mahyadan"
-    assert yeni == bek and HEDEF["is_emri"] == "is_emri/TK11_r02_cati.json"
+    assert yeni == bek and HEDEF["is_emri"] == "araclar/paket/girdi/TK11_r02_cati.json"
     ozet = lambda ie: [(r["grup"], r["kalem"], r["olcu"], r["adet"], r["birim"]) for r in uret.listeler(ie, ["ters"])["ters"]["satirlar"]]   # noqa: E731
     a, b = ozet(yeni), ozet(r02)
     assert a == b and len(a) == 136
@@ -235,6 +235,17 @@ def test_13_makasli_is_emri_rehber_kurmaz(tmp_path):
     from araclar.paket.rehber import veri
     with pytest.raises(veri.Desteklenmiyor, match="üretim dosyasında 2 cumba makası, çatı tanımında 1"):
         _kur(IE_R01, tmp_path)
+
+
+def test_cati_anahtarsiz_r02_rehber_kurmaz(tmp_path):
+    """Onaylı teklifin İş Emri (r02) aynı numarayı taşır ama iki çatı anahtarını yazmaz: kısa makaslar eşit aralıkta kalır, ilk veranda
+    makası cumba makaslarını keser (Lokman'ın reddettiği yerleşim). Evin kaydı anahtarları ister; rehber kurulmaz (yanlış çatıyla
+    çıkmaz): rehber `araclar/paket/girdi/TK11_r02_cati.json`'dan üretilir."""
+    from araclar.paket.rehber import ek, veri
+    kayit = json.loads(ek.MAKAS_KAYDI.read_text(encoding="utf-8"))["evler"]["PM-TK11-63M2"]["cati_anahtarlari"]
+    assert (kayit["cati"], kayit["mahal_catilari"]) == (["asik_siralari"], ["kisa_makas_yerleri_cm"])
+    with pytest.raises(veri.Desteklenmiyor, match="asik_siralari, kisa_makas_yerleri_cm yazan İş Emri'nden kurulur"):
+        _kur(IE_R02, tmp_path)
 
 
 @pytest.mark.skipif(iz.hazir() is not None, reason=f"rehber denetimi: {iz.hazir()}")

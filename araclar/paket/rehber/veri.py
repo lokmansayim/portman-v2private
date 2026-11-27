@@ -778,6 +778,7 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
             T_ = HZ["cati_serit"]
             _ek_m = EKM.uretim_makaslari(UM, makas, [mk for mc in T_.get("mahal_catilari", []) for mk in ifc_uret._kirma_mahal_makaslari(mc, T_)],
                                          _r(H + 0.25), ls, Desteklenmiyor, kaymalar=MKAY)
+            EKM.cati_anahtarlari(UM, ie, Desteklenmiyor)         # onaylı yerleşim: çatı anahtarsız İş Emri'nde (r02) rehber kurulmaz
             for e in _ek_m:
                 e["adim"] = S[e["adim"]]
             EK += _ek_m

@@ -155,6 +155,18 @@ def uretim_esleme(ie: dict) -> dict | None:
                 uc_payi={m["ad"]: float(m.get("uc_payi_mm", 0.0)) / 10 for m in girdi["makaslar"]})
 
 
+def cati_anahtarlari(UM: dict, ie: dict, Hata=ValueError) -> None:
+    """Evin kaydı çatı anahtarı istiyorsa (`cati_anahtarlari`) İş Emri onları yazmalıdır: üretim makaslarının onaylı yerleşimi o
+    anahtarlarla kurulur (63 m²: kısa makaslar paftadaki yerlerde, aşık sıraları mahyadan). Aynı numaralı ama anahtarsız İş Emri'nde
+    (onaylı teklifin r02'si) kısa makaslar eşit aralıkta kalır ve cumba makaslarını keser; rehber kurulmaz (`Hata`)."""
+    k, c = UM.get("cati_anahtarlari") or {}, ie.get("cati") or {}
+    mc = c.get("mahal_catilari") or []
+    eksik = [a for a in k.get("cati", []) if a not in c] + [a for a in k.get("mahal_catilari", []) if not mc or any(a not in m for m in mc)]
+    if eksik:
+        raise Hata(f"bu evin rehberi çatı tanımında {', '.join(eksik)} yazan İş Emri'nden kurulur (üretim makaslarının onaylı "
+                   "yerleşimi); bu İş Emri yazmıyor")
+
+
 def _alt_baslik(fr: dict) -> float:
     """Çerçevenin alt başlığının boyu (cm): x = 0'dan başlayan, ekseni 27 mm'de yatay çubuk (`dis_olcu_mm` dış ölçüdür, boy değil)."""
     alt = [p for p in fr["parcalar"] if p["x1"] == 0 and p["y1"] == p["y2"] and abs(p["y1"] - p["kanat"] / 2) < 0.01]

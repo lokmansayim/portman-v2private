@@ -1,8 +1,8 @@
 {
  "sema": "portman.rehber_cati_hedef/1",
  "ev": "Mehmet Kapaklı Tek 63 m²",
- "is_emri": "is_emri/TK11_r02_cati.json",
- "komut": "python -m araclar.paket TK-11 <çıktı> --is-emri is_emri/TK11_r02_cati.json --tavan ters",
+ "is_emri": "araclar/paket/girdi/TK11_r02_cati.json",
+ "komut": "python -m araclar.paket TK-11 <çıktı> --is-emri araclar/paket/girdi/TK11_r02_cati.json --tavan ters",
  "kapsam": "Montaj rehberinin çatısı: makasların yeri ve dayanağı, kalkan betopanının kesimleri, aşık sıraları, veranda çatısının yüzü. Rehberin bütünü Lokman'ın rehber onayıyla ayrıca dondurulur.",
  "onay": [
   {

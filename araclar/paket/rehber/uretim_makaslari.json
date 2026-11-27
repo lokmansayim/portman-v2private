@@ -13,6 +13,15 @@
    "ev": "Mehmet Kapaklı Tek 63 m²",
    "uretim": "araclar/uretim/veri/makas_63m2/makas_63m2.json",
    "onay": "Lokman, 26 Kasım 2026 05:53:56 UTC, kart: \"A: Evet, böyle üretilsin\" (14 makas, 328 çubuk; rehber makasları bu dosyadan okur). Yerleşim: 05:50:56 \"sen motora uy yerleşim yerlerinde eşit aralıklara koymuşsa o şekilde kalsın\"; 05:52:33 \"cumbada 2 makas gördüm ana makasın tam önünde 1 tane daha makas var\".",
+   "cati_anahtarlari": {
+    "aciklama": "Rehber yalnız bu çatı anahtarlarını yazan İş Emri'nden kurulur (Lokman, 26 Kasım 2026 10:19:48 UTC, kart: \"A: Paftadaki yerlerde\"; 23:34:15 UTC, kart: \"A: Yalnız bu evde mahyadan\"). Aynı numaralı onaylı teklif İş Emri (r02) bu anahtarları yazmaz: kısa makaslar eşit aralıkta kalır, ilk veranda makası cumba makaslarını keser (Lokman, 26 Kasım 2026 10:01:13 UTC: \"burada bir kesişim sorunu var nasıl otutturdun makasları\"). O İş Emri'nde rehber kurulmaz.",
+    "cati": [
+     "asik_siralari"
+    ],
+    "mahal_catilari": [
+     "kisa_makas_yerleri_cm"
+    ]
+   },
    "ana": [
     "MK01",
     "MK02",
