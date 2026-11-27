@@ -22,6 +22,8 @@ from collections import defaultdict
 from shapely.geometry import LineString, Point, Polygon
 
 BAS = 3.7                   # baş makasın konumu: duvarın dış yüzünden (şablon: dış yüzü omeganın dış kanadıyla aynı hizada)
+IC_UC = 0.3 + 0.8 + 4.0     # cumbanın iç ucundaki makasın (D-154) konumu, ana çatının kalkan duvarının dış yüzünden: betopanın duvardan
+                            # payı + betopan 8 mm + makasın yarı sırtı (C 80). Motor'un ekseni duvar yüzü + 5; fark 1 mm, çakışma olmasın diye
 ESIK = 1e-6
 
 
@@ -53,10 +55,66 @@ def _disbukey(P: list) -> bool:
     return abs(pg.convex_hull.area - pg.area) < 1.0
 
 
+KALKAN_PAY = 0.3 + 0.8      # ana çatının kalkan betopanının dış yüzü, duvarın dış yüzünden (şablon: BAS_DIS + betopan 8 mm)
+
+
+def _mahal_yuzleri(T: dict, masik: dict, RF: dict, yuz: dict, hadve_ar: dict, asik: dict, Desteklenmiyor, _r, kucuk, kay: dict) -> None:
+    """Köşe kırmasının (mahalin tek eğimli çatısı; İE-17 PR-2, 63 m²) yüzü şablonun yüzü olarak: çatı `V<n>` (yalnız eğim ve eğik boy), yüz
+    `M<n>`. Yüzün çokgeni çatı tanımındaki düzlemden (dere ve kırma hattında kırpılmış); saçakta 1,3 cm taşar, yüksek kenarı ana çatının
+    kalkan betopanının dış yüzünde biter. Aşık sıraları kart modelinden (`masik`: sıra ve parça boyları), levhalar kırma köşesinden dizilir.
+    Yüzün saçak kotu ana çatınınkiyle aynı olmalı (şablonun yüzü saçakta duvar üstü + 0,25 + topukta başlar). `kay`: mahal adı → x boyunca
+    kayma (`ek.mahal_kaymalari`): yüz üretim makaslarıyla birlikte saçağa doğru kayar (aşık makasın üst başlığına oturur); yüksek kenarı
+    yine kalkan betopanının dış yüzünde biter, aşık sıralarının saçaktan uzaklığı değişmez."""
+    for j, m in enumerate(T.get("mahal_catilari", []), 1):
+        dz = next(d for d in T["duzlemler"] if d["ad"] == m["ad"])
+        (ux, uy), xs = dz["yukari"], dz["sacak"].get("x")
+        if uy != 0 or xs is None:
+            raise Desteklenmiyor(f"{m['ad']}: rehber köşe kırmasını yalnız x boyunca eğimli (saçağı sağda ya da solda) kurar")
+        if abs(dz["sacak_kotu"] - (T["duvar_ustu"] + T["topuk"])) > 0.01:
+            raise Desteklenmiyor(f"{m['ad']}: saçak kotu {dz['sacak_kotu']}, ana çatınınki {T['duvar_ustu'] + T['topuk']}")
+        kx = float(kay.get(m["ad"], 0.0))                               # işaretli; saçağa doğru (yukarı yönünün tersi)
+        if kx * ux > 1e-9:
+            raise Desteklenmiyor(f"{m['ad']}: çatının kayması ({kx}) saçağa doğru değil")
+        xs0, xs = xs, xs + kx
+        P = [(p[0] + kx, p[1]) for p in dz["plan"]]
+        x_yuk = min(p[0] for p in P) if ux < 0 else max(p[0] for p in P)
+        pay = []
+        for a, b in zip(P, P[1:] + P[:1]):
+            pay.append(1.3 if abs(a[0] - xs) < ESIK and abs(b[0] - xs) < ESIK else
+                       abs(kx) - KALKAN_PAY if abs(a[0] - x_yuk) < ESIK and abs(b[0] - x_yuk) < ESIK else 0.0)
+        Q = _ote(P, pay)
+        k, rk, ad = f"M{j}", f"V{j}", kucuk(m["ad"])
+        M_ = abs(xs - x_yuk) + max(0.0, abs(kx) - KALKAN_PAY)           # saçak çizgisinden yüzün yüksek kenarına
+        RF[rk] = {"L": 0, "R": _r(2 * M_), "M": _r(M_), "tan": dz["egim"]}
+        lo, hi = min(p[1] for p in Q), max(p[1] for p in Q)
+        hadve_ar[f"H{k}"] = (lo, hi)
+        p_lo, p_hi = min(p[1] for p in P), max(p[1] for p in P)          # levhalar yüzün kendi köşesinden (taşma payı dizilime girmez)
+        kirma = [h for h in T.get("hatlar", []) if h["tur"] == "kirma" and m["ad"] in h["duzlemler"]]
+        bastan = bool(kirma) and max(kirma[0]["p"][1], kirma[0]["q"][1]) < (lo + hi) / 2      # kırma köşesi küçük y'de
+        yuz[k] = {"ad": f"{ad} yüzü", "E": [_r(xs), 0], "d": [ux, 0], "R": rk, "poly": [[_r(x), _r(y)] for x, y in Q], "eksen": "y",
+                  "hadve": f"H{k}", "_bas": p_lo if bastan else p_hi, "_son": hi if bastan else lo, "_parcalar": [ad]}
+        rows = defaultdict(list)
+        for _n, kt, ps in masik.get(m["ad"], []):
+            rows[int(ps["Sira"])].append(kt)
+        if not rows:
+            raise Desteklenmiyor(f"{m['ad']}: kart modelinde bu çatının aşığı yok")
+        cos = 1 / math.hypot(1, dz["egim"])
+        sr, pf, uzun_sonda = [], [], []
+        for _s, kts in sorted(rows.items()):
+            kts = sorted(kts, key=lambda b: b[1])
+            sr.append(round(abs(xs0 - (kts[0][0] + kts[0][3]) / 2) / cos, 2))       # kart modeli Motor'un saçak çizgisinden sayar
+            pf.append([round(b[4] - b[1], 2) for b in kts])
+            uzun_sonda.append(pf[-1][-1] > pf[-1][0] + 0.01)
+        sondan = any(uzun_sonda)                                        # ilk (tam) parça büyük y ucundan başlar
+        asik[k] = {"sira": sr, "pafta": [list(reversed(q)) if sondan else q for q in pf], "bas": "max" if sondan else "min"}
+
+
 def cati(HZ: dict, kitap: dict, IFC: dict, ASIK: dict, H: float, SC: float, TAN: float, COS: float, baslangic: dict, ls, PI: float,
-         Desteklenmiyor, _r, fmt, fmtc, kucuk, ASMA: bool, atla: frozenset = frozenset()) -> dict:
+         Desteklenmiyor, _r, fmt, fmtc, kucuk, ASMA: bool, atla: frozenset = frozenset(), mahal_yuz: bool = False,
+         mahal_kay: dict | None = None) -> dict:
     """Rehberin çatı verisi (şablonun anahtarları: `R`, `makas`, `sacak`, `kalkan`, `yuz`, `asik`, kaplama şeridi ve mahya, `izo`, dere ve
-    iniş) ve adım yazılarının sayıları. `IFC`: kart modelinin kutuları (makas alt başlığı, aşık, iniş); `ASIK`: aşıkların yüz ve sıra bilgisi."""
+    iniş) ve adım yazılarının sayıları. `IFC`: kart modelinin kutuları (makas alt başlığı, aşık, iniş); `ASIK`: aşıkların yüz ve sıra bilgisi.
+    `mahal_yuz`: köşe kırmasının (mahalin çatısı) yüzü de şablonun yüzü olur (`_mahal_yuzleri`): aşığı, OSB'si ve kaplaması şablondan."""
     from motor.genel import cati_genel
     from motor.genel.girdi_genel import _dizilim
     from motor.yerlesim.serit import _nokta, _ortulu
@@ -99,13 +157,16 @@ def cati(HZ: dict, kitap: dict, IFC: dict, ASIK: dict, H: float, SC: float, TAN:
         return f"{kucuk(q['ad'])} beşiği · eğim %{fmt(TAN * 100)} ({fmt(EGIM_D, 1)}°) · açıklık {fmtc(b1 - b0 + 2 * SC)} cm"
 
     # ---------- makaslar: soldan sağa ----------
-    yer = []
+    yer, ic_uclar = [], set()
     for q in T["parcalar"]:
         a0, a1 = q["a"]
         for m in q["makaslar"]:
             k = m["konum"]
             if m["rol"] == "bas":
                 k = a0 + BAS if abs(k - a0) < abs(k - a1) else a1 - BAS
+            elif m.get("ic_uc"):                                        # D-154: cumbanın iç ucundaki makas ana çatının kalkan betopanına dayanır
+                k = a0 + IC_UC if abs(k - a0) < abs(k - a1) else a1 - IC_UC
+                ic_uclar.add((_r(k), q["ad"]))
             yer.append((k, q, m["rol"]))
     yer.sort(key=lambda t: t[0])
     n_ifc = sum(1 for n in IFC if n.startswith("MAKAS"))
@@ -122,6 +183,8 @@ def cati(HZ: dict, kitap: dict, IFC: dict, ASIK: dict, H: float, SC: float, TAN:
         MAD[q["ad"]].append(ad)
         mk = {"ad": ad, "aile": "ana" if q["rol"] == "ana" else "cumba", "rol": rol, "konum": _r(k), "bas": _r(b0 - SC), "son": _r(b1 + SC),
               "R": anahtar[q["ad"]], "yon": "y", "wl": [_r(b0 + 2.7), _r(b1 - 2.7)], "NB": nb(b1 - b0 + 2 * SC), "T0": 38.9, "cati": cati_yazi(q)}
+        if (mk["konum"], q["ad"]) in ic_uclar:
+            mk["ic_uc"] = True
         if q["rol"] != "ana":
             mk.update(kod="MA-04",                     # kartı kart modelinden (İE-24; sayısı `veri.py`'de kart modeliyle denetlenir)
                       kaynak=f"yer ve açıklık çatı tanımından (çizim, liste ve 3B modelle aynı); {ls('Cumba makası · ' + q['ad'])}")
@@ -260,6 +323,9 @@ def cati(HZ: dict, kitap: dict, IFC: dict, ASIK: dict, H: float, SC: float, TAN:
         artan = (Y["d"][1] > 0) != sondan                               # yerel t x ile artıyor (ön yüz) ve dizilim küçük x'ten
         asik[k] = {"sira": sr, "pafta": pf, "bas": "min" if artan else "max"}
 
+    if mahal_yuz:
+        _mahal_yuzleri(T, masik, RF, yuz, hadve_ar, asik, Desteklenmiyor, _r, kucuk, mahal_kay or {})
+
     # ---------- mahya ----------
     mahya = []
     for e in (e for e in ck["kenarlar"] if e["tur"] == "mahya"):
@@ -282,6 +348,8 @@ def cati(HZ: dict, kitap: dict, IFC: dict, ASIK: dict, H: float, SC: float, TAN:
         uclar = sorted(ks + [(ic_uc, None)])
         for (u, ua), (v, va) in zip(uclar, uclar[1:]):
             x0, x1 = (u + 4.2 if ua else u + 1), (v - 4.2 if va else v - 1)
+            if x1 - x0 < 1:                                             # iç uç makası (D-154) kalkan duvarına dayalı: arada şerit yok
+                continue
             arasi = f"{ua}–{va} arası" if ua and va else f"{ua or va} ile ana çatının duvarı arası"
             izo["ek"].append({"yon": "y", "y": _r(q["b"][0] + 10), "x0": _r(x0), "x1": _r(x1), "L": _r(q["b"][1] - q["b"][0] - 20),
                               "ad": f"Çatı izolasyonu · 10 cm rulo cam yünü ({kucuk(q['ad'])})", "bu": f"{kucuk(q['ad'])} · {arasi} · {{w}} × {{L}} cm",

@@ -361,7 +361,15 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
 
     # ---------- ek parçalar: köşe kırmasının mahal çatısı (kart modelinden) ve kubbe (orijinal üretim çizimleri; `ek.py`) ----------
     from . import ek as EKM
-    EK, EK_ATLA = EKM.mahal(kart / f"{kart_kodu}_model.ifc", MAHAL_AD, ls)
+    UM = EKM.uretim_esleme(ie)                # çatı makasları orijinal üretim çizimlerinden (evin kaydı varsa; Lokman, 26 Kasım 2026)
+    MKAY = {}                                 # köşe kırmasının çatısı üretim makaslarıyla birlikte kayar (Soru 14 ve Soru 16; `ek.mahal_kaymalari`)
+    if UM and MAHAL_AD:
+        from . import girinti as _gir
+        _T = HZ["cati_serit"]
+        MKAY = EKM.mahal_kaymalari(UM, _T, {mc["ad"]: [m_ for m_ in ifc_uret._kirma_mahal_makaslari(mc, _T) if m_["rol"] == "kisa"]
+                                            for mc in _T.get("mahal_catilari", [])}, _gir.BAS, Desteklenmiyor)
+    EK, EK_ATLA = EKM.mahal(kart / f"{kart_kodu}_model.ifc", MAHAL_AD, ls, makassiz=bool(UM), dz=EKM.MAHAL_DZ if UM else 0.0, yuzsuz=bool(UM),
+                            dx=MKAY)
     _ek_k, _ = EKM.kubbe(HZ, kart / f"{kart_kodu}_model.ifc", ls)
     EK += _ek_k
     if HZ.get("kubbeler"):                    # kubbenin duvarları kubbenin mahalinin (oda) adımında
@@ -759,12 +767,20 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
         if VR:                                    # cumbanın L gövdesi (İE-15 K6, TK-04 r07) aşağıda `capraz.py`'de
             raise Desteklenmiyor("girintili gövdede gövdeden taşan veranda; rehber ikisini birlikte kurmuyor")
         GC = girinti.cati(HZ, kurallari_oku()["ortak"], IFC, ifc_parcalar(kart / f"{kart_kodu}_model.ifc", r"^ASIK_\d+$"), H, SC, TAN, COS,
-                          SAYIM["yerlesim"]["baslangic"], ls, PI, Desteklenmiyor, _r, fmt, fmtc, kucuk, ASMA, frozenset(EK_ATLA))
+                          SAYIM["yerlesim"]["baslangic"], ls, PI, Desteklenmiyor, _r, fmt, fmtc, kucuk, ASMA, frozenset(EK_ATLA), mahal_yuz=bool(UM),
+                          mahal_kay=MKAY)
         RF, makas, omega_duvar, tepe = GC["RF"], GC["makas"], GC["omega_duvar"], GC["tepe"]
         n_ma04 = sum(k["adet"] for k in SAYIM["kartlar"] if k["kod"] == "MA-04")      # cumba makasının kartı (MA-04) kart modelinden
         if n_ma04 != sum(m["aile"] == "cumba" for m in makas):
             raise Desteklenmiyor(f"kart modelinde {n_ma04} cumba makası (MA-04), çatı tanımında {sum(m['aile'] == 'cumba' for m in makas)}")
         konum = alt_bas = [m["konum"] for m in makas if m["aile"] == "ana"]
+        if UM:                                    # üretim makasları Motor'un yerinde (`ek.uretim_makaslari`); şablon makası çizilmez
+            T_ = HZ["cati_serit"]
+            _ek_m = EKM.uretim_makaslari(UM, makas, [mk for mc in T_.get("mahal_catilari", []) for mk in ifc_uret._kirma_mahal_makaslari(mc, T_)],
+                                         _r(H + 0.25), ls, Desteklenmiyor, kaymalar=MKAY)
+            for e in _ek_m:
+                e["adim"] = S[e["adim"]]
+            EK += _ek_m
     elif CAP:                                     # İE-15 K6: beşik + çapraz cumba; çatı çatı tanımından (ana çatı + cumba, `capraz.py`)
         if VR:
             raise Desteklenmiyor("çapraz cumbada gövdeden taşan veranda; rehber ikisini birlikte kurmuyor")
@@ -996,6 +1012,23 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
     # ---------- saçak sacı, kalkan, çatı yüzleri ----------
     if GIR or CAP:                                # saçak hatları, kalkanlar ve yüzler çatının kendi kenar ve yüzlerinden (`girinti.py`, `capraz.py`)
         sacak, kalkan, yuz, dere_hat, hadve_ar = GC["sacak"], GC["kalkan"], GC["yuz"], GC["dere_hat"], GC["hadve_ar"]
+        if GIR and UM:
+            # Soru 14 (Lokman, 26 Kasım 2026 23:33:13 UTC kartı "B: Son ana makasa, paftadaki gibi"): veranda makasları kalkan betopanından
+            # geçer; betopan o yerlerde kesilir. Yarık makasın çubuklarının plandaki izinden (`ek.kalkan_yariklari`), alttan açık.
+            for yr in EKM.kalkan_yariklari(_ek_m, 0.0, 0.8):
+                kk = [k_ for k_ in kalkan if abs(k_["r"] - math.pi / 2) < 1e-3 and k_["p"] == 1 and abs(k_["O"][0] + 0.3 - yr["x"]) < 0.05]
+                if len(kk) != 1:
+                    raise Desteklenmiyor(f"veranda makası {yr['uretim']}: geçtiği kalkan bulunamadı (yüz {yr['x']:g}); betopan yarığı yalnız sağ kalkanda kuruldu")
+                kk[0].setdefault("yarik", []).append([_r(yr["s"][0] - kk[0]["O"][1]), _r(yr["s"][1] - kk[0]["O"][1]), yr["z"], yr["uretim"]])
+            for k_ in kalkan:                     # arada makasın eninden dar şerit kalacaksa tek kesim (`ek.YARIK_ARASI`; 63 m²: 5,9 cm)
+                bir = []
+                for y_ in sorted(k_.get("yarik", [])):
+                    if bir and y_[0] - bir[-1][1] < EKM.YARIK_ARASI:
+                        bir[-1] = [bir[-1][0], max(bir[-1][1], y_[1]), max(bir[-1][2], y_[2]), bir[-1][3] + " + " + y_[3]]
+                    else:
+                        bir.append(list(y_))
+                if bir:
+                    k_["yarik"] = bir
     else:
         E0, E1 = -SC - 0.2, DY + SC + 0.2              # ana çatının kalkan kenarları (alın sacı yüzü)
         sacak = [{"ad": "sol saçak", "o": "v", "face": 0, "out": -1, "a0": E0, "a1": E1, "f0": E0, "f1": E1, "t0": -1.1, "t1": _r(DY + 1.1), "R": "AN"},
@@ -1653,6 +1686,22 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
         mk["extra"] = [I("Ana çatı", f"açıklık {fmtc(AA)} cm · %{fmt(TAN * 100)} · tepe ≈ {fmt(tepe)} cm"),
                        I("Makas aralığı", " · ".join(fmtc(a_) for a_ in GC["aralik"]) + " cm")] + \
                       [x for x in (LR("Makas (baş)"), LR("Makas (orta)"), *(LR(f"Cumba makası · {q['ad']}") for q in cumbalar)) if x]
+        if UM:                                    # üretim makasları (`ek.uretim_makaslari`): yazı çerçeveleri, iç uç makasını ve köşe kırmasını da sayar
+            uad = sorted(e["uretim"] for e in _ek_m)
+            cumba_soz = []
+            for q in cumbalar:
+                qm = [m for m in makas if m["R"] == GC["anahtar"][q["ad"]]]
+                cumba_soz.append(f"{kucuk(q['ad']).capitalize()}: {len(qm)} cumba makası, açıklık {fmtc(q['b'][1] - q['b'][0] + 2 * SC)} cm. Dış uçta baş makas var." +
+                                 (" İç uçtaki makas son ana makasın önündedir, kalkan betopanına dayanır." if any(m.get("ic_uc") for m in qm) else ""))
+            kirma_soz = [f"{kucuk(mc['ad']).capitalize()}: {sum(1 for x in mc['makaslar'] if x['rol'] == 'kisa')} kısa makas ve kırma hattında "
+                         f"{sum(1 for x in mc['makaslar'] if x['rol'] != 'kisa')} çapraz makas. Kısa makas duvardan saçak ucuna uzanır."
+                         for mc in HZ["cati_serit"].get("mahal_catilari", [])]
+            mk["ad"] = mk["t"] = "Çatı makasları"
+            mk["p"] = (f"Çatıda {len(_ek_m)} makas var. Makaslar çelik üretim dosyasındaki çerçevelerdir ({uad[0]}–{uad[-1]}); makasın adı kimlik kartında yazar. "
+                       f"Ana çatı: {len(mk_ad[ana_q['ad']])} makas; iki uçta baş makas, arada orta makas. Açıklık {fmtc(AA)} cm (iki yanda {fmtc(SC)} cm saçak), "
+                       f"eğim %{fmt(TAN * 100)} ({fmt(EGIM_D, 1)}°), tepe yaklaşık {fmt(tepe)} cm. " + " ".join(cumba_soz + kirma_soz) +
+                       " Makasın alt başlığı duvarın üstündeki omegaya oturur. Yer ve sayı çatı tanımından (çizim, liste ve 3B modelle aynı).")
+            mk["extra"] += [x for x in (LR("Kısa makas"), LR("Çapraz makas (kırma)")) if x] + [I("Üretim dosyası", f"{len(uad)} çerçeve: " + ", ".join(uad))]
         ka = AD_["Baş makas betopanı ve Z"]
         ka["p"] = (f"{len(kalkan)} kalkan var: " + ", ".join(k_["ad"] for k_ in kalkan) + ". " + ka["p"].split(". ", 1)[1].split(" Üstüne baş makas")[0] +
                    " Üstüne baş makas Z’si gelir; alın sacının tırnağı buna girer." + ZM +
@@ -1664,7 +1713,10 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
                                     "kadar serilir" + ("" if DUZ else "; cumbalarda da makas aralıklarına (iç uçta ana çatının duvarına kadar)"))
         n_sira = sum(len(a_["sira"]) for a_ in asik.values())
         ak = AD_["Aşıklar"]
-        ak["p"] = (f"Aşıklar kitabın çok düzlemli çatı kuralıyla makasların üst başlıklarına vidalanır: her yüzde saçaktan 60 cm arayla, {len(asik)} yüzde "
+        # D-158: İş Emri `cati.asik_siralari: "mahyadan"` yazıyorsa sıralar her yüzün üst kenarından sayılır (çatı tanımı taşır)
+        asik_bas = ("her yüzde ilk sıra yüzün üst kenarında (mahya), sonra 60 cm arayla aşağı, saçakta bir sıra" if HZ["cati_serit"].get("asik_siralari")
+                    else "her yüzde saçaktan 60 cm arayla")
+        ak["p"] = (f"Aşıklar kitabın çok düzlemli çatı kuralıyla makasların üst başlıklarına vidalanır: {asik_bas}, {len(asik)} yüzde "
                    f"{n_sira} sıra; sıranın boyu yüzün o yükseklikteki genişliği." + ("" if DUZ else " Aynı düzlemdeki ana çatı ve cumba yüzünde sıra tek parça devam eder;") + " Parçalar "
                    f"{'sağ' if SAYIM['yerlesim']['baslangic'].get('x') == 'max' else 'sol'} uçtan tam boy (motorun kart modeli). "
                    "Kalkan saçaklarında aşık uçları C kapamayla kapatılır.")
