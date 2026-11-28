@@ -1607,7 +1607,10 @@ _NASIL_CSS = ("body{font-family:sans-serif;font-size:9.5pt} h1{font-size:16pt} h
               "table{border-collapse:collapse} td,th{border:0.5pt solid #999;padding:2pt;font-size:8.5pt}")
 
 
-_NASIL_SOZU = re.compile(r"^(portman |bu |sistem |bu sistem |burasi |siz )?nasil (calisir|calisiyor|calisiyorsunuz|kullanilir|kullanirim|kullanacagim)$")
+_NASIL_SOZU = re.compile(r"^(portman |bu |sistem |bu sistem |burasi |siz )?nasil (calisir|calisiyor|calisiyorsunuz|kullanilir|kullanirim|kullanacagim)$"
+                         # bayi deneyimi tur 1 (28 Kasım 2026, S15): "ne yapabiliyorsun" fiyat cevabı alıyordu; aynı soru, aynı yol
+                         r"|^(portman |sen |siz |bu sistem |sistem )?(ne|neler) (yapabiliyorsun|yapabiliyorsunuz|yapabilirsin|yapabilirsiniz"
+                         r"|yapiyorsun|yapiyorsunuz)$|^(bu )?(sistem|portman) (ne|nedir|ne ise yarar|ne yapar)$")
 
 
 def nasil_calisir_sozu(metin: str | None) -> bool:

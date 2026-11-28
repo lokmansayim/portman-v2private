@@ -26,6 +26,8 @@ BAYI_JSON = Path(__file__).resolve().parent / "veri" / "bayiler.json"
 GRID_SABLON = {(6.0, 8.0, "2+1"): "ALTIN_2plus1_6x8.json", (6.0, 8.5, "2+1"): "YAN_VERANDALI_2plus1_6x8p5.json",
                (6.0, 6.0, "2+1"): "P6001_2plus1_6x6.json"}
 YONLENDIRME = "Bu konuyu Lokman Bey'e iletiyorum; en kısa sürede dönüş yapılacak."
+# bayi deneyimi tur 1 (28 Kasım 2026, S07, S08): prefabrik planda yönlendirilen isteğin ardından yazıyla hemen yapılabilen iş söylenir
+PREFABRIK_YAPILABILEN = "Pencere ölçüsünü yazıyla hemen değiştirebilirim (örn. \"mutfak penceresi 120x120 olsun\")."
 # BK-28 (pano 196): bayiye giden örnek talepler. İkisi de canlıdaki modellerle seçenek setine gider (hedef: testler/bayi_metinleri/);
 # eski "7x4 m, 2+1, ön verandalı" örneği hazır plana gitmiyordu (yönlendirme).
 ORNEK_PREFABRIK = "Tek kat prefabrik, 2+1, 85 m²"
@@ -167,6 +169,7 @@ def karar_ver(talep: Talep, k: Konusma, bayi: dict | None, katalog: Katalog, met
     k.cati_ek, k.cati_icerik, k.cati_on_not = False, [], ""   # İE-42 (hakem tur 2, 3): çatıyla aynı mesajdaki istek cümleleri; cevabın başı
     k.degismedi_tam = False                         # İE-42 (hakem tur 3, 4): bu mesajın her istek cümlesi D-86 notunda (planda zaten var)
     k.cati_fiyat_sorusu = False                     # İE-42 (hakem tur 4, D-E): çatı setinde seçimle birlikte fiyat, süre ya da teslim sorusu
+    k.fiyat_notu = False                            # bayi deneyimi tur 1 (S02): fiyat sorusuyla gelen talep; cevabın sonunda fiyat cümlesi
     d0 = json.loads(json.dumps(k.d))                # BK-29 (pano 200): geri çevrilen istek açık planı kapatmaz; konuşma buna döner
     karar = _karar_ver(talep, k, bayi, katalog, metin)
     secim, ca0 = k.cati_adimi_secimi, d0.get("cati_adimi") or {}
@@ -192,6 +195,8 @@ def karar_ver(talep: Talep, k: Konusma, bayi: dict | None, katalog: Katalog, met
         no0, rev0 = ca0.get("is_emri_no"), int(ca0.get("rev") or 1)
         if no0 and (not (k.d.get("son_is_emri") or {}).get("is_emri_no") or (karar.eylem == "is_emri" and int(karar.revizyon or 0) <= 1)):
             karar.mesaj = f"Önceki planınızın ({no0} r{rev0:02d}) onayı kaydedilmedi; çatısı seçilmemişti. " + (karar.mesaj or "")
+    if k.fiyat_notu and FIYAT_SORUSU_CEVABI not in (karar.mesaj or "") and "teklifle gelir" not in (karar.mesaj or ""):
+        karar.mesaj = f"{(karar.mesaj or '').rstrip()} {FIYAT_SORUSU_CEVABI}".strip()   # bayi deneyimi tur 1 (S02): soru cevapsız kalmaz
     if k.cati_fiyat_sorusu and secim and FIYAT_SORUSU_CEVABI not in (karar.mesaj or ""):
         karar.mesaj = f"{(karar.mesaj or '').rstrip()} {FIYAT_SORUSU_CEVABI}".strip()   # hakem tur 4, D-E: soru cevapsız kalmaz
     if k.kullanilan_talep is not None:
@@ -476,6 +481,18 @@ def _karar_ver(talep: Talep, k: Konusma, bayi: dict | None, katalog: Katalog, me
     if getattr(k, "cati_adimi_metni", None):          # onay ya da soru sözüyle çatı seçimi: revizyon yalnız çatıyı okur
         metin = k.cati_adimi_metni
 
+    # WhatsApp bayi deneyimi tur 1 (28 Kasım 2026, S13): yalnız teşekkür ya da veda ("teşekkürler", "sağolun hocam", "kolay gelsin")
+    # "Anlayamadım" alıyordu. Nezaketle cevaplanır; planı olan bayiye planın durumu söylenir, konuşma değişmez (K18: bayinin sözü).
+    if _yalniz_tesekkur(metin):
+        durum = _plan_durumu_cevabi(k)
+        return _bitir(k, Karar(eylem="cevapla", gerekce="teşekkür",
+                                mesaj="Rica ederim. " + (durum or "Yeni plan için model kodu ya da ölçü yazmanız yeterli.")))
+    # S02: "8x10 prefabrik ev ne kadar" niyet "soru" okunuyor, bayinin yazdığı ölçü düşüyordu. Fiyat sorusuyla gelen talep bilgisi
+    # (bu mesajda yazılı ölçü, m² ya da oda programı; açık plan yokken) talep sayılır; cevabın sonuna fiyat cümlesi eklenir.
+    if t.niyet == "soru" and not k.d.get("son_is_emri") and _fiyat_sorusu(metin) and _mesajda_talep_bilgisi(t, metin):
+        t = t.model_copy(update={"niyet": "yeni_talep"})
+        k.fiyat_notu = True
+
     # 1) niyete göre
     if t.niyet == "selam":
         return _bitir(k, Karar(eylem="cevapla", gerekce="selam",
@@ -500,6 +517,8 @@ def _karar_ver(talep: Talep, k: Konusma, bayi: dict | None, katalog: Katalog, me
                                 mesaj=f"Anlayamadım. Ön onay planı için model kodu (örn. P6001) ya da ölçü ve oda programı (örn. \"{ORNEK_PREFABRIK}\") yazabilirsiniz."))
     if t.niyet == "onay":
         if k.d["asama"] == "onay_bekliyor" and k.d.get("son_is_emri"):
+            if _zayif_onay(metin):                             # bayi deneyimi tur 1 (S10): yalnız "tamam" onay sayılmaz, düğmeyle sorulur
+                return _onay_sorusu(k)
             cati = _onay_cati_seti(k, katalog)                 # İE-42 (D-94): çatı seçenekli evde onaydan sonra çatı seti
             if cati is not None:
                 return cati
@@ -7294,7 +7313,8 @@ def _is_emri_uret(k: Konusma, bayi: dict, katalog: Katalog, sablon: dict, kaynak
                 ts["varyantlar"] = [x for x in ts.get("varyantlar") or [] if x is not v]
             else:
                 return _bitir(k, Karar(eylem="yonlendir", gerekce=f"varyant desteklenmiyor: {tur}",
-                                        mesaj=f"\"{v.get('aciklama','')}\" değişikliği otomatik yapılamıyor. " + YONLENDIRME))
+                                        mesaj=f"\"{v.get('aciklama','')}\" değişikliği otomatik yapılamıyor. " + YONLENDIRME
+                                              + " " + PREFABRIK_YAPILABILEN))   # bayi deneyimi tur 1 (S07, S08): ne yapılabildiği söylenir
         except varyant.VaryantHatasi as e:
             return _bitir(k, Karar(eylem="yonlendir", gerekce=f"varyant hatası: {e}", mesaj=f"Değişiklik uygulanamadı ({e}). " + YONLENDIRME))
     if ts.get("yarim_pano"):                          # İE-39 PR-2 (D-90): bayinin yarım pano komutları, şablondan sırayla
@@ -8415,6 +8435,84 @@ def _cati_disi_ozu(ie: dict) -> str:
 
 
 ACIK_PLAN_ASAMALARI = ("onay_bekliyor", "revizyon", "topluyor", "onaylandi")
+
+
+# ───────────────────────── WhatsApp bayi deneyimi tur 1 (28 Kasım 2026; canlı v2026.11.25, 15 muhtemel bayi talebi) ─────────────────────────
+_TR_SADE = str.maketrans("ıİçÇğĞöÖşŞüÜâîû", "iiccggoossuuaiu")
+# yalnız teşekkür ve veda: en az bir teşekkür ya da veda kökü, geri kalanı hitap ve dolgu. "tamam", "olur", "evet" yok (onay ya da cevap olabilir)
+_TESEKKUR_KOKU = ("tesekkur", "tesekur", "tsk", "sagol", "saol", "eyvallah", "eyv", "eyw", "allaha emanet")
+_TESEKKUR_SOZU = {"tesekkurler", "tesekkur", "tesekurler", "tesekkurlr", "ederim", "ederiz", "cok", "sagolun", "sagol", "saol",
+                  "saolun", "sagolasin", "saolasin", "tsk", "tskler", "tsklr", "eyvallah", "eyv", "eyw", "kolay", "gelsin", "iyi", "calismalar",
+                  "hayirli", "isler", "gorusuruz", "gorusmek", "uzere", "hocam", "hoca", "abi", "abim", "abla", "usta", "ustam", "bey", "hanim",
+                  "kardesim", "reis", "efendim", "lokman", "size", "de", "da", "hepinize", "ilginiz", "icin", "yardiminiz", "emeginize",
+                  "emeginiz", "ellerinize", "eline", "saglik", "rica", "allah", "razi", "olsun", "selametle", "simdilik", "hosca", "kalin"}
+_TESEKKUR_KOK_SOZ = {"tesekkurler", "tesekkur", "tesekurler", "tesekkurlr", "sagolun", "sagol", "saol", "saolun", "sagolasin", "saolasin",
+                     "tsk", "tskler", "tsklr", "eyvallah", "eyv", "eyw", "gorusuruz", "calismalar", "gelsin", "saglik", "razi"}
+
+
+def _sade_sozler(metin: str | None) -> list[str]:
+    s = str(metin or "").translate(_TR_SADE).lower()
+    return re.sub(r"[^a-z0-9 ]", " ", s).split()
+
+
+def _yalniz_tesekkur(metin: str | None) -> bool:
+    """Mesaj yalnız teşekkür ya da veda mı ("teşekkürler", "sağolun hocam", "kolay gelsin, iyi çalışmalar"; tur 1 S13). Sayı, kod, oda ya da
+    başka söz varsa değil ("teşekkürler, 1 olsun" seçimdir). "kolay gelsin" tek başına selam da sayılabilir; ikisinde de istek yok."""
+    ws = _sade_sozler(metin)
+    return bool(ws) and len(ws) <= 8 and all(w in _TESEKKUR_SOZU for w in ws) and any(w in _TESEKKUR_KOK_SOZ for w in ws)
+
+
+def _fiyat_sorusu(metin: str | None) -> bool:
+    """Bayinin sözünde fiyat sorusu var mı ("ne kadar", "kaça", "fiyatı", "kaç para"; tur 1 S02)."""
+    ws = _sade_sozler(metin)
+    s = " ".join(ws)
+    return any(_soru_konusu(w) for w in ws) or bool(re.search(r"\bne kadar\b|\bkaca\b|\bkac (?:para|lira|tl)\b|\bkac olur\b", s))
+
+
+def _mesajda_talep_bilgisi(t: Talep, metin: str | None) -> bool:
+    """LLM'in okuduğu ölçü, m² ya da oda programı bayinin bu mesajında yazılı mı (K18; bağlamdan yinelenen değer sayılmaz)."""
+    s = " ".join(_sade_sozler(metin))
+    op = re.fullmatch(r"(\d+)\+(\d+)", str(t.oda_programi or "").strip())
+    if op and re.search(rf"\b{op.group(1)}\s*{op.group(2)}\b", s):
+        return True
+    sayilar = re.findall(r"\d+(?:[.,]\d+)?", str(metin or ""))
+    if not sayilar:
+        return False
+    if t.alan_m2 and any(abs(float(x.replace(",", ".")) - float(t.alan_m2)) < 0.01 for x in sayilar):
+        return True
+    d = t.dis_olcu
+    if d is not None:
+        en, boy = getattr(d, "en_m", None), getattr(d, "boy_m", None)
+        vals = [float(x.replace(",", ".")) for x in sayilar]
+        return bool(en and boy and any(abs(v - en) < 0.01 for v in vals) and any(abs(v - boy) < 0.01 for v in vals))
+    return False
+
+
+# S10 (28 Kasım 2026): açık planda yalnız "tamam" onay sayılıyordu (PA-03 r01 deneme onayı). Onay açık sözdür ("onaylıyorum", "onay",
+# "Onayla" düğmesi); yalnız kabul ya da anlama sözünden kurulan mesaj onay değildir, bot planı düğmeyle sorar. "tamam onaylıyorum" onaydır.
+_ZAYIF_ONAY_SOZU = {"tamam", "tamamdir", "tmm", "tm", "ok", "okey", "okay", "peki", "olur", "anladim", "anlasildi", "anlastik",
+                    "guzel", "super", "harika", "iyi", "hocam", "hoca", "abi", "abim", "abla", "usta", "bey", "hanim", "kardesim",
+                    "reis", "efendim", "o", "zaman", "de", "da", "cok", "gayet", "olmus"}
+
+
+def _zayif_onay(metin: str | None) -> bool:
+    """Mesaj yalnız "tamam", "ok", "peki", "olur", "güzel" ve hitaptan mı kuruldu (onay kökü, "evet", seçim ya da istek yok)."""
+    ws = _sade_sozler(metin)
+    return bool(ws) and all(w in _ZAYIF_ONAY_SOZU for w in ws) and any(
+        w in ("tamam", "tamamdir", "tmm", "tm", "ok", "okey", "okay", "peki", "olur", "anladim", "anlasildi", "anlastik", "guzel", "super",
+              "harika", "olmus") for w in ws)
+
+
+def _onay_sorusu(k: Konusma) -> Karar:
+    """Onay bekleyen plan düğmeyle sorulur; onay kaydedilmez, plan ve aşama aynen."""
+    ie = k.d.get("son_is_emri") or {}
+    no, rev = ie.get("is_emri_no"), int(ie.get("revizyon") or 1)
+    k.not_dus("kural", "yalnız kabul sözü: onay sayılmadı, düğmeyle soruldu")
+    karar = _bitir(k, Karar(eylem="cevapla", gerekce="onay soruldu",
+                             mesaj=f"Planı ({no} r{rev:02d}) onaylıyor musunuz? Onaylamak için \"Onayla\" düğmesine basın ya da "
+                                   "\"onaylıyorum\" yazın. Değişiklik için \"Revize et\" düğmesine basın."))
+    karar.butonlar = [{"id": f"o:{no}:{rev}", "baslik": "Onayla"}, {"id": f"r:{no}:{rev}", "baslik": "Revize et"}]
+    return karar
 
 
 def _plan_durumu_cevabi(k: Konusma) -> str:
