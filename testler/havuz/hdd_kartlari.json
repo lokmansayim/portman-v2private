@@ -409,6 +409,44 @@
     "Dış ölçü verandayla 710,25 × 940,25 cm (taşan veranda çatının altında; M-18): brüt 66,78 m², paftanın başlığı 67 m².",
     "Çatı: paftanın makas planında dörtomuz, ana çatı verandayı da örter. Havuzdaki bu kayıt beşik ana çatı ve veranda beşiğiyle (Lokman kartı 28 Kasım 2026 10:40:38 \"İkisi de girsin\", D-165); dörtomuz ikinci çatı seçeneği olarak Motor bakımından sonra eklenir."
    ]
+  },
+  "HD-058": {
+   "dis_olcu_cm": [
+    825.75,
+    835.75
+   ],
+   "brut_oturum_m2": 69.01,
+   "baslik_m2": 70.0,
+   "oda_sayisi": "3+1",
+   "yatak_odasi": 3,
+   "kat_adedi": 1,
+   "cati_sekli": null,
+   "acikliklar": {
+    "120/120": 3,
+    "120/180": 2,
+    "60/40": 1
+   },
+   "dis_kapi_adedi": null,
+   "ic_kapi_adedi": null,
+   "kapi_adedi": 5,
+   "veranda_adedi": 1,
+   "kart_sha256": "e9d55a2b1616b6f481608f46b13d210aa0cacc696c31fb012aab3199165d2aaf",
+   "kaynak": {
+    "dosya": "HD-058;17",
+    "uzanti": "pdf",
+    "plan_sirasi": null,
+    "sablon": "montaj_pdf",
+    "sacak_olcusu_cm": [
+     25,
+     25
+    ],
+    "okuyucu": "elle, montaj paftası PDF'i (İE-43 PR-9)"
+   },
+   "varsayim": [
+    "DWG yok; kart ev 2'nin montaj paftası PDF'inin yazılarından elle (dış ölçü 825,75 × 835,75, başlık 70 m², oda yazıları, açıklık yazıları). 60/40 ev 1'in paftasında yazılı, ev 2'de aynı yerde simge.",
+    "Dış ölçü gövdenin içindeki veranda nişiyle (M-18): brüt 69,01 m², paftanın başlığı 70 m².",
+    "Kapı: 4 oda kapısı + verandadan 1 dış kapı (PDF'te kapı yazısı yok, kanat yaylarından)."
+   ]
   }
  }
 }
