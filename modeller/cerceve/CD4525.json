@@ -1,0 +1,579 @@
+{
+ "sema": "portman.yapi_tanimi/0.5-taslak",
+ "kod": "CD-4525",
+ "ad": "Tek kat çelik karkas, 5 bağımsız dükkân (şimdilik açık), 45 × 25 m, 4,00 m",
+ "aile": "tek_kat_celik",
+ "paket": "proje",
+ "birim": "cm",
+ "kat": "zemin",
+ "kaynak": {
+  "koordinat": "Köken güneybatı dış köşe (kaplama dahil); dış ölçü kaplamayla tam 4500 × 2500; karkas 3 cm içeride (4494 × 2494).",
+  "cizim": "Lokman, 28 Kasım 2026 11:22 ve 11:24 UTC (thread): 45 × 25 m, 4 m; sağda ve solda 3er 120/180 pencere; ön cephe cam giydirme, her boşluğun iki yanında en az 60 cm çerçeve; arka kapalı; 5 dükkân, araları şimdilik açık. 11:25 makas 9 m açıklık geçer; 11:31 el çizimi (ön görünüş 5 beşik, 45) ve yan pencereler 180/180. 11:33 eğim en çok %33; ara karkas 120 cm (60 sol + 60 sağ), uçlarda 60 cm. 13:51 dış ölçü tam 45.000 × 25.000 (6 cm silinsin). 13:51 saçaklar 30 cm."
+ },
+ "kat_yuksekligi": 400,
+ "teknik_ozellikler": {
+  "Bina yüksekliği": "4000 mm",
+  "Dış duvarlar": "140 × 45",
+  "Taşıyıcı": "çelik karkas kolon-kiriş (profil mühendis hesabından)"
+ },
+ "aciklama_notlari": [
+  "TASLAK: kat planı onayı için."
+ ],
+ "kapsam": {
+  "dis_kapi": true,
+  "ic_kapi": false,
+  "pencere": false,
+  "dis_cephe_boyasi": false,
+  "ic_cephe_boyasi": false,
+  "vitrifiye": false,
+  "sihhi_tesisat": false,
+  "kaynak": "teknik özellikler (dış kapı çelik standart: bizden; iç kapılar, dış ve iç cephe boyası, pencere rengi ve pencere detayı alıcıya ait) ve açıklama 3–4 (tesisat grubu ve vitrifiye alıcıya ait: tesisat sıhhi tesisat sayıldı). Elektrik için 1. sayfada not yok: varsayılan (listede)"
+ },
+ "renk": {
+  "cati": "antrasit gri",
+  "sacak_alin": "antrasit gri",
+  "kaynak": "teknik özellikler (çatı kaplama rengi; saçak ve alın rengi)"
+ },
+ "yuz_kaplamalari": {
+  "dis": {
+   "kalinlik": 3.0,
+   "malzeme": [
+    "boardex"
+   ],
+   "not": "kaplamalı dış ölçü karkasın iki yanında 3 cm (sayfada 3,0 çizili); açıklama 1: Boardex, nem bariyeri yazmıyor"
+  },
+  "ic": {
+   "kalinlik": 2.35,
+   "malzeme": [
+    "osb",
+    "alcipan"
+   ],
+   "not": "OSB 11 mm + alçıpan 12,5 mm (açıklama 1 ve 2)"
+  }
+ },
+ "duvar_siniflari": {
+  "dis": {
+   "ad": "bina dış duvarı",
+   "profil": "140x45x0,8",
+   "yalitim": true,
+   "yuz": {
+    "ic": "ic",
+    "dis": "dis",
+    "veranda": "dis"
+   },
+   "not": "teknik özellikler: dış duvarlar 140X45X08 (sayfada 14 çizili)"
+  }
+ },
+ "duvarlar": [
+  {
+   "ad": "W01",
+   "sinif": "dis",
+   "kutu": [
+    3,
+    3,
+    4497,
+    17
+   ],
+   "yukseklik": 400,
+   "not": "ön (güney), cam giydirme"
+  },
+  {
+   "ad": "W02",
+   "sinif": "dis",
+   "kutu": [
+    4483,
+    17,
+    4497,
+    2483
+   ],
+   "yukseklik": 400,
+   "not": "sağ (doğu)"
+  },
+  {
+   "ad": "W03",
+   "sinif": "dis",
+   "kutu": [
+    3,
+    2483,
+    4497,
+    2497
+   ],
+   "yukseklik": 400,
+   "not": "arka (kuzey), kapalı"
+  },
+  {
+   "ad": "W04",
+   "sinif": "dis",
+   "kutu": [
+    3,
+    17,
+    17,
+    2483
+   ],
+   "yukseklik": 400,
+   "not": "sol (batı)"
+  }
+ ],
+ "mahaller": [
+  {
+   "ad": "Dükkân alanı (5 bölüm)",
+   "nokta": [
+    2250.0,
+    1250.0
+   ],
+   "sinif": "ic",
+   "islev": [
+    "diger"
+   ]
+  }
+ ],
+ "acikliklar": [
+  {
+   "ad": "C1",
+   "tur": "pencere",
+   "duvar": "W01",
+   "bas": 57,
+   "en": 780,
+   "yuk": 340,
+   "alt": 0,
+   "mahal": "Dükkân alanı (5 bölüm)",
+   "etiket": "780/340"
+  },
+  {
+   "ad": "C2",
+   "tur": "pencere",
+   "duvar": "W01",
+   "bas": 957,
+   "en": 780,
+   "yuk": 340,
+   "alt": 0,
+   "mahal": "Dükkân alanı (5 bölüm)",
+   "etiket": "780/340"
+  },
+  {
+   "ad": "C3",
+   "tur": "pencere",
+   "duvar": "W01",
+   "bas": 1857,
+   "en": 780,
+   "yuk": 340,
+   "alt": 0,
+   "mahal": "Dükkân alanı (5 bölüm)",
+   "etiket": "780/340"
+  },
+  {
+   "ad": "C4",
+   "tur": "pencere",
+   "duvar": "W01",
+   "bas": 2757,
+   "en": 780,
+   "yuk": 340,
+   "alt": 0,
+   "mahal": "Dükkân alanı (5 bölüm)",
+   "etiket": "780/340"
+  },
+  {
+   "ad": "C5",
+   "tur": "pencere",
+   "duvar": "W01",
+   "bas": 3657,
+   "en": 780,
+   "yuk": 340,
+   "alt": 0,
+   "mahal": "Dükkân alanı (5 bölüm)",
+   "etiket": "780/340"
+  },
+  {
+   "ad": "S1",
+   "tur": "pencere",
+   "duvar": "W02",
+   "bas": 518,
+   "en": 180,
+   "yuk": 180,
+   "alt": 20,
+   "mahal": "Dükkân alanı (5 bölüm)",
+   "etiket": "180/180"
+  },
+  {
+   "ad": "S2",
+   "tur": "pencere",
+   "duvar": "W02",
+   "bas": 1143,
+   "en": 180,
+   "yuk": 180,
+   "alt": 20,
+   "mahal": "Dükkân alanı (5 bölüm)",
+   "etiket": "180/180"
+  },
+  {
+   "ad": "S3",
+   "tur": "pencere",
+   "duvar": "W02",
+   "bas": 1768,
+   "en": 180,
+   "yuk": 180,
+   "alt": 20,
+   "mahal": "Dükkân alanı (5 bölüm)",
+   "etiket": "180/180"
+  },
+  {
+   "ad": "L1",
+   "tur": "pencere",
+   "duvar": "W04",
+   "bas": 518,
+   "en": 180,
+   "yuk": 180,
+   "alt": 20,
+   "mahal": "Dükkân alanı (5 bölüm)",
+   "etiket": "180/180"
+  },
+  {
+   "ad": "L2",
+   "tur": "pencere",
+   "duvar": "W04",
+   "bas": 1143,
+   "en": 180,
+   "yuk": 180,
+   "alt": 20,
+   "mahal": "Dükkân alanı (5 bölüm)",
+   "etiket": "180/180"
+  },
+  {
+   "ad": "L3",
+   "tur": "pencere",
+   "duvar": "W04",
+   "bas": 1768,
+   "en": 180,
+   "yuk": 180,
+   "alt": 20,
+   "mahal": "Dükkân alanı (5 bölüm)",
+   "etiket": "180/180"
+  }
+ ],
+ "kirisler": [],
+ "lento": 70,
+ "cati": {
+  "tip": "besik",
+  "tip_adi": "5 yan yana beşik, her biri 9 m açıklık, mahya önden arkaya, %33",
+  "sacak": 30,
+  "topuk": 10,
+  "duvar_ustu": 400,
+  "panel_kalinligi": 8,
+  "duzlemler": [
+   {
+    "ad": "B1 batı",
+    "plan": [
+     [
+      -30,
+      -30
+     ],
+     [
+      450,
+      -30
+     ],
+     [
+      450,
+      2530
+     ],
+     [
+      -30,
+      2530
+     ]
+    ],
+    "yukari": [
+     1,
+     0
+    ],
+    "egim": 0.33,
+    "sacak_kotu": 410,
+    "sacak": {
+     "x": 0.0
+    },
+    "ust_pay": 8.04
+   },
+   {
+    "ad": "B1 doğu",
+    "plan": [
+     [
+      450,
+      -30
+     ],
+     [
+      900,
+      -30
+     ],
+     [
+      900,
+      2530
+     ],
+     [
+      450,
+      2530
+     ]
+    ],
+    "yukari": [
+     -1,
+     0
+    ],
+    "egim": 0.33,
+    "sacak_kotu": 410,
+    "sacak": {
+     "x": 900.0
+    },
+    "ust_pay": 8.04
+   },
+   {
+    "ad": "B2 batı",
+    "plan": [
+     [
+      900,
+      -30
+     ],
+     [
+      1350,
+      -30
+     ],
+     [
+      1350,
+      2530
+     ],
+     [
+      900,
+      2530
+     ]
+    ],
+    "yukari": [
+     1,
+     0
+    ],
+    "egim": 0.33,
+    "sacak_kotu": 410,
+    "sacak": {
+     "x": 900.0
+    },
+    "ust_pay": 8.04
+   },
+   {
+    "ad": "B2 doğu",
+    "plan": [
+     [
+      1350,
+      -30
+     ],
+     [
+      1800,
+      -30
+     ],
+     [
+      1800,
+      2530
+     ],
+     [
+      1350,
+      2530
+     ]
+    ],
+    "yukari": [
+     -1,
+     0
+    ],
+    "egim": 0.33,
+    "sacak_kotu": 410,
+    "sacak": {
+     "x": 1800.0
+    },
+    "ust_pay": 8.04
+   },
+   {
+    "ad": "B3 batı",
+    "plan": [
+     [
+      1800,
+      -30
+     ],
+     [
+      2250,
+      -30
+     ],
+     [
+      2250,
+      2530
+     ],
+     [
+      1800,
+      2530
+     ]
+    ],
+    "yukari": [
+     1,
+     0
+    ],
+    "egim": 0.33,
+    "sacak_kotu": 410,
+    "sacak": {
+     "x": 1800.0
+    },
+    "ust_pay": 8.04
+   },
+   {
+    "ad": "B3 doğu",
+    "plan": [
+     [
+      2250,
+      -30
+     ],
+     [
+      2700,
+      -30
+     ],
+     [
+      2700,
+      2530
+     ],
+     [
+      2250,
+      2530
+     ]
+    ],
+    "yukari": [
+     -1,
+     0
+    ],
+    "egim": 0.33,
+    "sacak_kotu": 410,
+    "sacak": {
+     "x": 2700.0
+    },
+    "ust_pay": 8.04
+   },
+   {
+    "ad": "B4 batı",
+    "plan": [
+     [
+      2700,
+      -30
+     ],
+     [
+      3150,
+      -30
+     ],
+     [
+      3150,
+      2530
+     ],
+     [
+      2700,
+      2530
+     ]
+    ],
+    "yukari": [
+     1,
+     0
+    ],
+    "egim": 0.33,
+    "sacak_kotu": 410,
+    "sacak": {
+     "x": 2700.0
+    },
+    "ust_pay": 8.04
+   },
+   {
+    "ad": "B4 doğu",
+    "plan": [
+     [
+      3150,
+      -30
+     ],
+     [
+      3600,
+      -30
+     ],
+     [
+      3600,
+      2530
+     ],
+     [
+      3150,
+      2530
+     ]
+    ],
+    "yukari": [
+     -1,
+     0
+    ],
+    "egim": 0.33,
+    "sacak_kotu": 410,
+    "sacak": {
+     "x": 3600.0
+    },
+    "ust_pay": 8.04
+   },
+   {
+    "ad": "B5 batı",
+    "plan": [
+     [
+      3600,
+      -30
+     ],
+     [
+      4050,
+      -30
+     ],
+     [
+      4050,
+      2530
+     ],
+     [
+      3600,
+      2530
+     ]
+    ],
+    "yukari": [
+     1,
+     0
+    ],
+    "egim": 0.33,
+    "sacak_kotu": 410,
+    "sacak": {
+     "x": 3600.0
+    },
+    "ust_pay": 8.04
+   },
+   {
+    "ad": "B5 doğu",
+    "plan": [
+     [
+      4050,
+      -30
+     ],
+     [
+      4530,
+      -30
+     ],
+     [
+      4530,
+      2530
+     ],
+     [
+      4050,
+      2530
+     ]
+    ],
+    "yukari": [
+     -1,
+     0
+    ],
+    "egim": 0.33,
+    "sacak_kotu": 410,
+    "sacak": {
+     "x": 4500.0
+    },
+    "ust_pay": 8.04
+   }
+  ]
+ },
+ "bilinen_sinirlar": [
+  "Çatı yer tutucu: plan onayından sonra sorulacak.",
+  "Kolon-kiriş iskeleti tanımda yok: profil ve aralık mühendis hesabından."
+ ]
+}

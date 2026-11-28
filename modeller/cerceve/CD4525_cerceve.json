@@ -1,0 +1,28 @@
+{
+ "sema": "portman.celik_cerceve/0.1",
+ "kod": "CD-4525",
+ "ad": "Tek kat çelik karkas, 5 bağımsız dükkân, 45,00 × 25,00 m, 4,00 m",
+ "yapi_tanimi": "modeller/cerceve/CD4525.json",
+ "birim": "cm",
+ "dis_olcu": {"x": 4500, "y": 2500},
+ "kolon_yuksekligi": 400,
+ "x_akslari": [0, 900, 1800, 2700, 3600, 4500],
+ "y_aks_sayisi": 4,
+ "kolon": {"uc_cm": 60, "ara_cm": 120, "orgu_adimi": "genislik"},
+ "makas": {"egim": 0.33, "aciklik_en_cok_cm": 900, "topuk_mm": 100, "kaynak": "araclar.uretim.makas.besik"},
+ "sacak_cm": 30,
+ "kaynak": [
+  "Lokman, 28 Kasım 2026 11:22 UTC: \"bina genişli 45 metre derinliği 25 metre yüksekliği 4 metre ... çelik karkas kolon kiriş yapacağımız için en az 60'ar cm çerçeve olması gerekiyor\"",
+  "11:25: \"bizim makaslarım 25 metre açıklık geçemez ama 9 metre açıklık geçer\"; 11:25:51 \"o yüzden makasları 9 metre tarafına işletmek zorundayız\"",
+  "11:33: \"çatı eğimini düşür yani %33 eğimi geçmesin ve çelik karkas çizimi için ortadaki karkas sistemi 60cm sol 60 cm sağ 120 cm olacak şekilde olmalı\"",
+  "11:36: \"bir çiz bakalım 25 metrelik tarafada aynı standardı uygula\" (25 m, 9 m'yi aşmayan 3 eşit açıklık: 833,3 cm)",
+  "13:51: \"6'şar cmler niye var onları sil tam 45.000 - 25.000 al\"; \"ayrıca saçaklar 30'ar cm\"",
+  "13:54: \"tamam çelik çizimine başla\""
+ ],
+ "bilinen_sinirlar": [
+  "Profil kesitleri, örgü aralığı ve bağlantılar mühendis hesabından gelecek; çizim taslaktır.",
+  "Kafes kolonun örgü adımı kolon genişliği kadar (45°) alındı: Lokman'ın sözünde yok.",
+  "Makas üyeleri 90 m² çelik evin onaylı makas kalıbından (araclar.uretim.makas.besik), alt başlık aks ile aks arası 900 cm, mesnet kolonun iç yüzünde.",
+  "Çerçeveler arası aşık ve çapraz bağlantı çizilmedi."
+ ]
+}
