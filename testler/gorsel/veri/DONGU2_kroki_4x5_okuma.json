@@ -1,0 +1,113 @@
+{
+ "tur": "plan",
+ "yapi_turu": null,
+ "kat_sayisi": null,
+ "giris_kenari": "alt",
+ "dis_olcu": {
+  "yatay_cm": 500.0,
+  "dusey_cm": 400.0
+ },
+ "zincirler": [
+  {
+   "kenar": "ust",
+   "olculer_cm": [
+    500.0
+   ],
+   "toplam_cm": 500.0,
+   "kapsam": "govde"
+  },
+  {
+   "kenar": "sol",
+   "olculer_cm": [
+    400.0
+   ],
+   "toplam_cm": 400.0,
+   "kapsam": "govde"
+  }
+ ],
+ "odalar": [
+  {
+   "ad": "MUTFAK",
+   "islev": "mutfak",
+   "alan_m2": null,
+   "dikdortgenler": [
+    [
+     0.0,
+     0.0,
+     225.0,
+     190.0
+    ]
+   ]
+  },
+  {
+   "ad": "WC",
+   "islev": "wc",
+   "alan_m2": null,
+   "dikdortgenler": [
+    [
+     300.0,
+     0.0,
+     500.0,
+     100.0
+    ]
+   ]
+  },
+  {
+   "ad": "SALON",
+   "islev": "salon",
+   "alan_m2": null,
+   "dikdortgenler": [
+    [
+     225.0,
+     0.0,
+     300.0,
+     100.0
+    ],
+    [
+     225.0,
+     100.0,
+     500.0,
+     190.0
+    ],
+    [
+     0.0,
+     190.0,
+     500.0,
+     400.0
+    ]
+   ]
+  }
+ ],
+ "kapilar": [
+  {
+   "arasinda": [
+    "DIŞ",
+    "SALON"
+   ],
+   "kenar": "alt",
+   "genislik_cm": 300.0,
+   "konum_cm": 250.0
+  }
+ ],
+ "pencereler": [],
+ "verandalar": [],
+ "cati": {
+  "tip": null,
+  "mahya": null,
+  "egim_yuzde": null,
+  "sacak_cm": null
+ },
+ "duvar_yuksekligi_cm": 250.0,
+ "tahminler": [
+  "Açık mutfak alanı kesik çizgiden oranla: genişlik 225 cm, derinlik 190 cm (salona kapısız açık)",
+  "Giriş sürgülü doğramasının ortası alt kenarda yaklaşık 250 cm",
+  "h:2500 mm olarak okundu, duvar yüksekliği 250 cm"
+ ],
+ "emin_olunamayanlar": [
+  "WC kapısı çizilmemiş: kapı WC'nin hangi duvarında, hangi tarafa açılacak?",
+  "Alt cephedeki 300/200 doğrama tek parça mı (300 en x 200 boy, bir kısmı sabit pencere, bir kısmı sürgülü giriş)? Bölümlerin genişlikleri ne?",
+  "Giriş kapısı olarak yalnız bu sürgülü doğrama mı kullanılacak, ayrıca kapı istemiyor musunuz?",
+  "Başka pencere çizilmemiş: WC ya da mutfak için pencere istiyor musunuz?"
+ ],
+ "ozet": "5x4 m tek hacimli ev: içinde sol üstte L tezgahlı açık mutfak, sağ üstte 2x1 m WC var; giriş alt cephede 300/200 sürgülü (volkswagen) cam doğramadan; çatı gizli dereli parapetli."
+}
