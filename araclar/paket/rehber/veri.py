@@ -84,6 +84,61 @@ def icinde(pt, poly) -> bool:
     return c
 
 
+REHBER_ANAHTARLARI = {"oda_sirasi": None, "kubbe": ("karkasli_pano",)}      # İş Emri › `rehber`: yalnız montaj rehberi okur (BK-89, D-164)
+
+
+def rehber_anahtarlari(ie: dict, sira: list[str], kubbe_var: bool) -> dict:
+    """İş Emri'nin `rehber` anahtarı (BK-89, D-164; Lokman, 28 Kasım 2026): evin montaj rehberine özgü seçimler. Motor, yükleme listesi
+    ve teklif bu anahtarı okumaz; anahtarsız İş Emri'nin rehberi aynen kalır.
+
+    - `oda_sirasi`: oda adımlarının sırası, evin kapalı odalarının ana adlarıyla, her biri bir kez (yazılmazsa `oda_sirasi()`).
+    - `kubbe: "karkasli_pano"`: kubbenin parçaları karkaslı pano, odanın diziliminde art arda (`ek._kubbe_karkasli`).
+
+    Bilinmeyen anahtar ya da değer, eksik ya da fazla oda, kubbesiz evde `kubbe` rehberi kurdurmaz (`Desteklenmiyor`; K21)."""
+    r = ie.get("rehber")
+    if r is None:
+        return {}
+    if not isinstance(r, dict) or not r:
+        raise Desteklenmiyor("İş Emri'nde `rehber` boş ya da sözlük değil")
+    yabanci = sorted(set(r) - set(REHBER_ANAHTARLARI))
+    if yabanci:
+        raise Desteklenmiyor(f"İş Emri'nde `rehber` altında bilinmeyen anahtar: {', '.join(yabanci)}")
+    if "oda_sirasi" in r:
+        o = r["oda_sirasi"]
+        if not isinstance(o, list) or not all(isinstance(a, str) for a in o) or sorted(o) != sorted(sira):
+            raise Desteklenmiyor(f"`rehber.oda_sirasi` evin odalarını birer kez yazmalı ({', '.join(sira)}); yazılan: {o}")
+    if "kubbe" in r:
+        if r["kubbe"] not in REHBER_ANAHTARLARI["kubbe"]:
+            raise Desteklenmiyor(f"`rehber.kubbe` {r['kubbe']!r}; bilinen değer: {', '.join(REHBER_ANAHTARLARI['kubbe'])}")
+        if not kubbe_var:
+            raise Desteklenmiyor("`rehber.kubbe` yazılı ama evde kubbe yok")
+    return r
+
+
+def kubbe_dizilimi(lst: list[tuple], KE: dict[str, list[dict]], kose: tuple[float, float]) -> list[tuple]:
+    """Karkaslı kubbenin parçalarını odanın sıralı dizilimine (`lst`: [(merkez, tür, kayıt)]) art arda yerleştirir (BK-89, D-164).
+
+    Lokman, 28 Kasım 2026 05:45:38 UTC: "salonun duvar panolarını nereden dizmeye başlıyorsan o taraftan doğru dizmeye başlayacaksın …
+    sonra sırayla sağdaki kubbe panosunu karşıdaki panoyu soldaki panoyu en son üstteki 50 cm lik parça geliyor …". Kubbe, dizilimin
+    geldiği yandaki açılı panodan başlar (odanın başlangıç köşesine yakın olan); o panonun sırası geldiği yerde bütün kubbe gelir:
+    düz duvarın ucundaki direk, açılı pano, köşe direği, karşıdaki pano, köşe direği, öteki açılı pano, öteki uçtaki direk, kubbe üstü
+    H, üstteki 50 cm'lik pano, öteki H, pencereler. Pano 0'ın yanı: direk 3, direk 1, h0; pano 2'nin yanı: direk 4, direk 2, h2
+    (kart modelinin adları; `ifc_uret`)."""
+    uz = lambda m: math.hypot(m[0] - kose[0], m[1] - kose[1])                  # noqa: E731
+    sira = ["direk3", "pano0", "direk1", "pano1", "direk2", "pano2", "direk4", "h0", "bant", "h2"]
+    eksik = [k for k in sira + ["pencere"] if not KE.get(k)]
+    if eksik:
+        raise Desteklenmiyor(f"kubbenin parçası eksik: {', '.join(eksik)}")
+    ilk0 = uz(KE["pano0"][0]["merkez"]) < uz(KE["pano2"][0]["merkez"])
+    if not ilk0:
+        sira = ["direk4", "pano2", "direk2", "pano1", "direk1", "pano0", "direk3", "h2", "bant", "h0"]
+    sira.append("pencere")
+    d0 = round(uz(KE["pano0" if ilk0 else "pano2"][0]["merkez"]), 1)
+    yer = sum(1 for t in lst if round(uz(t[0]), 1) <= d0)                       # ilk açılı panonun dizilimdeki yeri
+    blok = [(e["merkez"], 1, e) for k in sira for e in sorted(KE[k], key=lambda e: uz(e["merkez"]))]
+    return lst[:yer] + blok + lst[yer:]
+
+
 def oda_sirasi(odalar: list[dict], baslangic: dict) -> tuple[list[str], dict[str, str]]:
     """Kapalı odaların dizilim sırası (arka-sol köşeden) ve birleşen mahaller (ANTRE → HOL). Dönen: (sıralı ana adlar, {birleşen: ana}).
 
@@ -332,6 +387,10 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
     # ---------- odalar ----------
     odalar = [dict(o, acik=False) for o in HZ["odalar"]]
     SIRA, BIRLES = oda_sirasi(odalar, SAYIM["yerlesim"]["baslangic"])
+    RH = rehber_anahtarlari(ie, SIRA, bool(HZ.get("kubbeler")))                 # evin rehbere özgü seçimleri (BK-89, D-164)
+    if "oda_sirasi" in RH:
+        SIRA = list(RH["oda_sirasi"])
+    KARKASLI_KUBBE = RH.get("kubbe") == "karkasli_pano"
     POLY = {o["ad"]: o for o in odalar}
     ODA = []                                   # (ana ad, kimlik, rehberdeki ad, adım)
     for i, ad in enumerate(SIRA):
@@ -370,7 +429,7 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
                                             for mc in _T.get("mahal_catilari", [])}, _gir.BAS, Desteklenmiyor)
     EK, EK_ATLA = EKM.mahal(kart / f"{kart_kodu}_model.ifc", MAHAL_AD, ls, makassiz=bool(UM), dz=EKM.MAHAL_DZ if UM else 0.0, yuzsuz=bool(UM),
                             dx=MKAY)
-    _ek_k, _ = EKM.kubbe(HZ, kart / f"{kart_kodu}_model.ifc", ls)
+    _ek_k, _ = EKM.kubbe(HZ, kart / f"{kart_kodu}_model.ifc", ls, karkasli=KARKASLI_KUBBE)
     EK += _ek_k
     if HZ.get("kubbeler"):                    # kubbenin duvarları kubbenin mahalinin (oda) adımında
         kb_ = HZ["kubbeler"][0]
@@ -523,13 +582,26 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
         raise Desteklenmiyor(f"kartı ve adı olmayan parça: {', '.join(map(str, adsiz))}")
 
     # Oda içinde sıra: dizilimin başladığı köşeden (odanın arka-sol köşesi) uzaklık; köşe direği aynı yerdeki panodan önce
+    KUBBE_EK = defaultdict(list)
+    for e in EK:
+        if "kubbe_anahtar" in e:
+            KUBBE_EK[e.pop("kubbe_anahtar")].append(e)
     for ad, lst in oge.items():
         pol = [q for a in [ad] + [b for b, h in BIRLES.items() if h == ad] for q in POLY[a]["poligon"]]
         bx = min(q[0] for q in pol)
         by = min(q[1] for q in pol) if SAYIM["yerlesim"]["baslangic"].get("y") == "min" else max(q[1] for q in pol)
         lst.sort(key=lambda t: (round(math.hypot(t[0][0] - bx, t[0][1] - by), 1), t[1]))
+        if KUBBE_EK and ADIM_ODA[ad] == kubbe_adim:                             # karkaslı kubbe odanın diziliminde art arda (BK-89, D-164)
+            lst = kubbe_dizilimi(lst, KUBBE_EK, (bx, by))
         for j, (_, tur, k) in enumerate(lst):
             k["order"] = j + 0.4 if tur == 0 else j
+    KUBBE_OLCU = {}
+    if any("order" not in e for es in KUBBE_EK.values() for e in es):
+        raise Desteklenmiyor("karkaslı kubbe hiçbir odanın dizilimine girmedi (kubbenin odasında pano, direk ya da H yok)")
+    for e in (e for es in KUBBE_EK.values() for e in es):                       # ek parçanın sırası `sira`; yardımcı anahtarlar veriye girmez
+        e["sira"] = e.pop("order")
+        del e["merkez"]
+        KUBBE_OLCU.update(e.pop("kubbe_olcu", {}))
 
     # Çektirme U'su: yeri ve sayısı yükleme listesinin kaynağından (`LU.birlesim_uclari`; D-28 madde 1). İç duvarın bir duvara panonun
     # ortasında T ile girdiği yer, dış köşeye geldiği yer (100'lük köşede 60'lığa geçiş, D-104) ve kapısız serbest biten bölmenin ucu
@@ -1415,6 +1487,13 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
         r = {"id": kim, "ad": tad, "m2": round(sum(POLY[a]["net_m2"] for a in adlar), 2),
              "rects": [[_r(t) for t in q] for a in adlar for q in dikdortgenler(POLY[a]["poligon"])], "step": st,
              "metin": oda_metni(kim, i == 0, i == len(ODA) - 1)}
+        if KUBBE_EK and st == kubbe_adim:                                       # karkaslı kubbe (BK-89, D-164): uyarı adımın başında (D-70 madde 13)
+            n_pano, n_direk, n_h = (sum(len(v) for k, v in KUBBE_EK.items() if k.startswith(on)) for on in ("pano", "direk", "h"))
+            pano_cm, kesim, ust = (fmtc(KUBBE_OLCU[k]) for k in ("pano", "kesim", "ust"))
+            r["metin"] = (f"DİKKAT: Kubbenin üstündeki {pano_cm} cm'lik panonun iki alt köşesini sahada açılı kesin. Pano {kesim} cm aşağı oturur; "
+                          f"üstü {ust} cm'de kalır. Açılı köşe direklerini ve açılı panoları kesmeyin. " + r["metin"] +
+                          f" Kubbeyi bu odanın diziliminde, sırası gelince kurun. Kubbenin parçaları: {n_pano} karkaslı pano, {n_direk} özel açılı "
+                          f"köşe direği, üstteki {pano_cm} cm'lik pano ve {n_h} kubbe üstü H.")
         r["kamera"] = round(min(12.5, max(8, 5 + 1.6 * math.sqrt(r["m2"]))), 1)
         if any(w in ad for w in ("BANYO", "WC")):
             r["yesil"] = True
@@ -1550,11 +1629,14 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
               ("; verandaların dış kirişlerine de baş makas omegası, veranda saçağının ucundan ucuna" if VR else "") +
               (f"; {GVK['e']} bakan gövde duvarlarına 100’lük duvar omegası" if GVK else "") +
               (f". 100’lük iç duvarların üstüne de 100’lük duvar omegası geçirilir (sırtı {fmt(SIRT)} cm, öteki ölçüleri 60’lık omeganın); kapı üstlerinden kesintisiz geçer." if SIRT else
-               ". İç duvarların üstüne 60’lık omega geçirilir; kapı üstlerinden kesintisiz geçer."),
+               ". İç duvarların üstüne 60’lık omega geçirilir; kapı üstlerinden kesintisiz geçer.") +
+              (" Kubbenin panolarının üstüne de saçak omegası geçirin. Kubbe saçağı bu omegaya oturur." if KUBBE_EK else ""),
          "kamera": K([0, 2.3, 0.3], 0.62, 0.55, 15.5),
          "rows": [x for x in (LR("100'lük saçak omegası"), LR("100'lük duvar omegası"), LR("Baş makas omegası"),
                               R(None, "100’lük duvar omegası (iç duvar üstü)" if SIRT else "60’lık omega (iç duvar üstü)",
-                                "{omega_ic_n} parça · {omega_ic_m} m", "model"), I("Sac", "1 mm")) if x]},
+                                "{omega_ic_n} parça · {omega_ic_m} m", "model"),
+                              R(None, "Saçak omegası · kubbe", f"{sum(1 for e in EK if e['ad'] == 'Saçak omegası · kubbe')} parça", "model") if KUBBE_EK else None,
+                              I("Sac", "1 mm")) if x]},
         {"ad": "Ana çatı" + (" ve veranda makasları" if VR else " makasları"), "t": "Ana çatı" + (" ve veranda makasları" if VR else " makasları"),
          "p": f"Ana çatı: {n_ana} makas (MKS01–{n_ana:02d}) {fmtc(SAYIM['makas_aralik_cm'])} cm aralıkla; iki uçta baş makas, arada {n_ana - 2} orta makas. "
               f"Açıklık {fmtc(W + 2 * SC)} cm (iki yanda {fmtc(SC)} cm saçak), eğim %{fmt(TAN * 100)} ({fmt(EGIM_D, 1)}°), tepe yaklaşık {fmt(tepe)} cm. "
@@ -1591,7 +1673,8 @@ def kur(ie: dict, kart: Path, kart_kodu: str, L: list[dict], kod: str) -> dict:
               (f" {sirala([a_['ad'] if i_ == 0 else kucuk(a_['ad']) for i_, a_ in enumerate(tavan['acik'])])} tavanı ters tavan: tavan omegalarının altına yeşil alçıpan, kolon ve kirişlerin "
                "arasında (listede yeşil alçıpan satırında, veranda tavanı)." if tavan.get("acik") else "") +
               (" Taşan verandaların tavanı da yeşil alçıpan (listede sayılı); tavan omegaları kart modelinde yok, modelde gösterilmedi."
-               if any(v["ad"] not in VR_TAVAN for v in VR) else ""),
+               if any(v["ad"] not in VR_TAVAN for v in VR) else "") +
+              (" Kubbenin tavanına alttan alçıpan takın. İçeriden bakınca çatı görünmez." if KUBBE_EK else ""),
          "kamera": K([0, 2.3, 0.3], 0.55, 1.28, 15),
          "extra": [x for x in (LR("Tavan beyaz alçıpan"), LR("Tavan yeşil alçıpan"), LR("Alçıpan vidası"), I("Modelde göz", f"{len(tavan.get('goz', []))} adet") if ASMA else None) if x]},
         {"ad": "Çatı izolasyonu", "t": "Çatı izolasyonu (10 cm rulo cam yünü)",

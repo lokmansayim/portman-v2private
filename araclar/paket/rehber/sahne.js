@@ -1353,6 +1353,7 @@ function ekCubuk(c, m) {
 (D.ek || []).forEach(e => {
   const g = new THREE.Group(), m = mat(e.mat, e.adim);
   if (e.mesh) g.add(ekMesh(e.mesh, m));
+  if (e.kap) g.add(ekMesh(e.kap, mat('pdis', e.adim)));   // karkaslı panonun kaplaması: iki yüzde 8 mm fibercement, dış duvar panosunun rengi (BK-89)
   (e.cubuk || []).forEach(c => g.add(ekCubuk(c, m)));
   if (e.osb && OSB && AD.osb) {   // mahalin çatısında OSB ve nem bariyeri, kaplama yüzünün altında
     const o = ekMesh(e.mesh, mat('osb', AD.osb)); o.position.y = -(OSBK + 0.1) / 100;
