@@ -1,0 +1,62 @@
+{
+ "aciklama": "BK-92 (D-169) · Portman WhatsApp kullanma kılavuzunun (etkileşimli ekran) metni. Açıklama, ipucu ve bayinin yazdıkları burada; Portman'ın her mesajı, düğmesi, resmi ve PDF adı 'kaynak' anahtarıyla `senaryo.py`'nin main'deki karar koduyla yürüttüğü sohbetten gelir (D-28). Saatler örnek. Lokman, 28 Kasım 2026 14:23:42 UTC \"sadece portman whatsapp kulavuzunu canlıya alalım çünkü bazı eklemeler yapabiliriz klavuz ve videoya gerek yok\"; kart 14:25:25 UTC \"Önce yeni sürüm, sonra kılavuz\".",
+ "bolumler": [
+  {"baslik": "Portman'la WhatsApp'ta ilk plan", "adimlar": [
+   {"baslik": "Talebi tek mesajda yazın", "metin": "Yapı tipini, oda sayısını ve alanı aynı mesaja yazın. Eksik bilgi varsa Portman sorar.",
+    "ipucu": ["İpucu", "Ölçüyle de yazabilirsiniz: \"Tek kat prefabrik, 2+1, 8x10\"."],
+    "ogeler": [{"tur": "out", "metin": "Tek kat prefabrik, 2+1, 85 m²", "saat": "09:30"}]},
+   {"baslik": "Portman önceliği sorar", "metin": "Birden çok plan uyuyorsa Portman sıralamayı sorar. Düğmeye basın.",
+    "ogeler": [{"tur": "in", "kaynak": "b1.talep", "saat": "09:30"}, {"tur": "btns", "kaynak": "b1.talep"}]},
+   {"baslik": "Düğmeye basın", "metin": "Düğme yazmaktan daha az hata verir. Bu örnekte bayi \"Yaşam alanı önce\"ye bastı.",
+    "ogeler": [{"tur": "sec", "kaynak": "b1.talep", "dugme": "q:oncelik:yasam"}, {"tur": "out", "dugme_metni": "b1.talep", "dugme": "q:oncelik:yasam", "saat": "09:31"}, {"tur": "yaziyor"}]},
+   {"baslik": "En çok 3 plan gelir", "metin": "Her planın resmi ve alanı vardır. Alanınızdan en çok %10 küçük ya da büyük planlar gelir.",
+    "ogeler": [{"tur": "in", "kaynak": "b1.set", "img": "set", "saat": "09:31"}, {"tur": "btns", "kaynak": "b1.set"}]},
+   {"baslik": "Planı seçin", "metin": "Planın düğmesine basın ya da numarasını yazın. Portman plan resmini ve TASLAK yazılı PDF'i gönderir.",
+    "ogeler": [{"tur": "sec", "kaynak": "b1.set", "sira": 0}, {"tur": "out", "dugme_metni": "b1.set", "sira": 0, "saat": "09:32"},
+               {"tur": "in", "kaynak": "b1.plan", "img": "plan", "saat": "09:32"}, {"tur": "doc", "kaynak": "b1.plan", "saat": "09:32"}, {"tur": "btns", "kaynak": "b1.plan"}]},
+   {"baslik": "\"Tamam\" onay değildir", "metin": "\"Tamam\", \"olur\", \"ok\" anladım demektir. Portman bunu onay saymaz ve düğmeyle sorar.",
+    "ogeler": [{"tur": "out", "metin": "tamam", "saat": "09:34"}, {"tur": "in", "kaynak": "b1.tamam", "saat": "09:34"}, {"tur": "btns", "kaynak": "b1.tamam"}]},
+   {"baslik": "Onaylayın, sonra çatıyı seçin", "metin": "\"Onayla\"ya basın ya da \"onaylıyorum\" yazın. Evin birden çok çatısı varsa Portman çatıyı sorar. Plan aynı kalır; yalnız çatı değişir.",
+    "ogeler": [{"tur": "sec", "kaynak": "b1.tamam", "sira": 0}, {"tur": "out", "dugme_metni": "b1.tamam", "sira": 0, "saat": "09:35"},
+               {"tur": "in", "kaynak": "b1.onayla", "img": "cati", "saat": "09:35"}, {"tur": "btns", "kaynak": "b1.onayla"}]},
+   {"baslik": "Onayınız kaydedildi", "metin": "Evin kendi çatısını seçince onay kaydedilir. Teklifi PortatifEv hazırlar ve bu sohbete gönderir.",
+    "ipucu": ["Unutmayın", "Onay planı onaylar, siparişi değil. Fiyat, süre ve teslim bilgisi teklifle gelir."],
+    "ogeler": [{"tur": "sec", "kaynak": "b1.onayla", "sira": 0}, {"tur": "out", "dugme_metni": "b1.onayla", "sira": 0, "saat": "09:36"},
+               {"tur": "in", "kaynak": "b1.cati", "saat": "09:36"}]}
+  ]},
+  {"baslik": "Planı düzeltmek", "adimlar": [
+   {"baslik": "Planınız elinizde", "metin": "Bu bölüm planın geldiği andan başlar. Bayi kodu yazdı: \"PA-06\". Plan resmi, PDF ve iki düğme geldi.",
+    "ipucu": ["İpucu", "Katalogdaki bir modeli istiyorsanız yalnız kodunu yazın."],
+    "ogeler": [{"tur": "out", "metin": "PA-06", "saat": "10:02"}, {"tur": "in", "kaynak": "b2.kod", "img": "plan", "saat": "10:02"},
+               {"tur": "doc", "kaynak": "b2.kod", "saat": "10:02"}, {"tur": "btns", "kaynak": "b2.kod"}]},
+   {"baslik": "\"Revize et\"e basın", "metin": "Portman neyi değiştireceğinizi sorar ve bugün yapabildiği işin örneğini verir.",
+    "ogeler": [{"tur": "sec", "kaynak": "b2.kod", "sira": 1}, {"tur": "out", "dugme_metni": "b2.kod", "sira": 1, "saat": "10:03"},
+               {"tur": "in", "kaynak": "b2.revize", "saat": "10:03"}]},
+   {"baslik": "Odayı ve ölçüyü yazın", "metin": "Odayı plandaki adıyla, ölçüyü \"en x yükseklik\" sırasıyla yazın. Odada iki pencere varsa Portman hangisi olduğunu düğmeyle sorar.",
+    "ogeler": [{"tur": "out", "metin": "mutfak penceresi 120x120 olsun", "saat": "10:04"}, {"tur": "in", "kaynak": "b2.pencere", "saat": "10:04"}, {"tur": "btns", "kaynak": "b2.pencere"}]},
+   {"baslik": "Yeni revizyon gelir (r02)", "metin": "Portman değişikliği uygular ve planı yeniden çizer. Mesaj neyin değiştiğini yazar. Dört revizyon hakkınız vardır.",
+    "ipucu": ["Bir mesaj, bir değişiklik", "İkinci değişikliği yeni plan geldikten sonra yazın."],
+    "ogeler": [{"tur": "sec", "kaynak": "b2.pencere", "sira": 0}, {"tur": "out", "dugme_metni": "b2.pencere", "sira": 0, "saat": "10:04"},
+               {"tur": "in", "kaynak": "b2.r02", "img": "r02", "saat": "10:05"}, {"tur": "doc", "kaynak": "b2.r02", "saat": "10:05"}, {"tur": "btns", "kaynak": "b2.r02"}]},
+   {"baslik": "Otomatik yapılamayan istek", "metin": "Veranda kaldırma ve oda büyütme bugün otomatik yapılmaz. Portman isteği PortatifEv'e iletir; planınız değişmez ve onaylanabilir kalır.",
+    "ogeler": [{"tur": "out", "metin": "verandayı kaldır", "saat": "10:07"}, {"tur": "in", "kaynak": "b2.veranda", "saat": "10:07"}, {"tur": "btns", "kaynak": "b2.veranda"}]},
+   {"baslik": "Teşekkür edince", "metin": "Portman nezaketle cevap verir ve planınızın durumunu hatırlatır. Yeni talep açılmaz.",
+    "ogeler": [{"tur": "out", "metin": "teşekkürler", "saat": "10:09"}, {"tur": "in", "kaynak": "b2.tesekkur", "saat": "10:09"}]},
+   {"baslik": "Hazır olunca onaylayın", "metin": "\"onaylıyorum\" yazın ya da \"Onayla\"ya basın. Çatısı seçenekli evde çatı sorulur; sonrası bölüm 1'deki gibidir.",
+    "ogeler": [{"tur": "out", "metin": "onaylıyorum", "saat": "10:15"}, {"tur": "in", "kaynak": "b2.onay", "img": "cati", "saat": "10:15"}, {"tur": "btns", "kaynak": "b2.onay"}]}
+  ]},
+  {"baslik": "Çizimden plan", "adimlar": [
+   {"baslik": "Çizimin resmini gönderin", "metin": "Müşterinin çizimini fotoğraf ya da PDF olarak gönderin. Yazı eklemeniz gerekmez.",
+    "ipucu": ["İyi bir çizimde", "Her duvarın ölçüsü cm ile yazılı, dış ölçü zinciri toplamla tutuyor, her odanın adı içinde yazılı. Fotoğrafı yukarıdan, gölgesiz çekin."],
+    "ogeler": [{"tur": "out", "img": "kaynak", "metin": "", "saat": "11:10"}, {"tur": "yaziyor"}]},
+   {"baslik": "Portman okuduğunu gösterir", "metin": "Portman çizimi okur, okuduğu yerleşimi resimle gösterir ve ölçüleri yazar. Okuma 1–2 dakika sürer.",
+    "ipucu": ["Yanlış okunduysa", "\"Düzelt\"e basın ve yanlışı yazın; örneğin \"salon 20 m²\" ya da \"veranda solda\"."],
+    "ogeler": [{"tur": "in", "kaynak": "b3.okuma", "img": "yerlesim", "saat": "11:12"}, {"tur": "btns", "kaynak": "b3.okuma"}]},
+   {"baslik": "Standartlar formda seçili gelir", "metin": "Çizimde yazmayan özellikleri Portman standarttan alır. Değiştirmek isterseniz \"Standartlar\" düğmesiyle formu açın.",
+    "ogeler": [{"tur": "in", "kaynak": "b3.form", "saat": "11:12"}, {"tur": "btns", "kaynak": "b3.form"}]},
+   {"baslik": "\"Doğru\"ya basın, plan gelir", "metin": "Okuma doğruysa \"Doğru\"ya basın. Portman planı çizer ve plan resmini, PDF'i gönderir. Sonrası bölüm 1 ve 2'deki gibidir: düzeltme, onay, çatı.",
+    "ogeler": [{"tur": "sec", "kaynak": "b3.okuma", "sira": 0}, {"tur": "out", "dugme_metni": "b3.okuma", "sira": 0, "saat": "11:14"},
+               {"tur": "in", "kaynak": "b3.plan", "img": "plan3", "saat": "11:15"}, {"tur": "doc", "kaynak": "b3.plan", "saat": "11:15"}, {"tur": "btns", "kaynak": "b3.plan"}]}
+  ]}
+ ]
+}
