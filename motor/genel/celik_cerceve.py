@@ -74,26 +74,28 @@ def kur(t: dict) -> dict:
             kolonlar.append({"ad": f"K{j + 1}{i + 1:02d}", "aks": [_r(a), _r(b)], "x": [_r(x0), _r(x1)], "y": [_r(y0), _r(y1)]})
     egim = t["makas"]["egim"]
     makaslar = []
+    # Saçak makasın kendi parçasıdır (Lokman 28.11 14:16:00 "saçaklar olmadı makas şeklinde yeniden çiz"): her makas iki uçta
+    # `sacak_cm` saçaklı kurulur (mesnet kolonun iç yüzünde); dış uçta saçak kalır, iç birleşimde makas aksa `ic_kesim_cm` kala kesilir
+    # (14:14:11 "içteki birleştiği yerdekiler kaç geliyorsa kes", 14:16:12 "15'er cm kesince oturdu"); kesilen uçta düşey kapama.
+    sacak = float(t.get("sacak_cm", 0))
+    kes = float(t["makas"].get("ic_kesim_cm", 0))
     for i, (a, b) in enumerate(zip(xa, xa[1:])):
         sol, sag = aralik(a, W)[1], aralik(b, W)[0]
         mesnet = _r(sol - a)
         if abs((b - sag) - mesnet) > 1e-6:
             raise CerceveHatasi(f"açıklık {i + 1}: iki mesnet aksa eşit uzaklıkta değil")
-        cub, bilgi = uretim_makas.besik((b - a) * 10, egim, topuk=t["makas"]["topuk_mm"], sacak=mesnet * 10)
+        cub, bilgi = uretim_makas.besik((b - a + 2 * sacak) * 10, egim, topuk=t["makas"]["topuk_mm"], sacak=(mesnet + sacak) * 10)
+        lo = -sacak if i == 0 else kes                                   # yerel cm, aks a'dan
+        hi = (b - a) + (sacak if i == len(xa) - 2 else -kes)
+        cub = _kirp([dict(c, x1=c["x1"] - sacak * 10, x2=c["x2"] - sacak * 10) for c in cub], lo * 10, hi * 10)
         makaslar.append({"ad": f"M{i + 1:02d}", "aks": [_r(a), _r(b)], "mesnet_cm": mesnet, "egim": egim,
+                         "uclar_cm": [_r(a + lo), _r(a + hi)],
                          "tepe_cm": _r(H + egim * (b - a) / 2), "cubuk": len(cub), "panel": bilgi["panel"],
                          "cubuklar": [{k: (round(v, 1) if isinstance(v, float) else v) for k, v in c.items()} for c in cub]})
-    sacak = float(t.get("sacak_cm", 0))
-    for m, yon, uc in ((makaslar[0], -1, xa[0]), (makaslar[-1], 1, xa[-1])):
-        if sacak <= 0:
-            break
-        pd = next(c for c in m["cubuklar"] if c["ad"] == "PD")          # sol üst başlık (yerel mm)
-        y_uc = pd["y1"] + egim * (0 - pd["x1"])                          # üst başlık ekseni dış uçta (yerel x = 0)
-        m.setdefault("sacak", []).append({"yon": yon, "uc_cm": _r(uc), "boy_cm": sacak,
-                                          "ust_cm": _r(H + y_uc / 10), "uc_ust_cm": _r(H + (y_uc - egim * sacak * 10) / 10)})
-    # İç akslarda iki makas aksta kesilir; birleşim vadidir, üstüne ters mahya gelir (Lokman 28.11 14:14:11 "içteki birleştiği yerdekiler
-    # kaç geliyorsa kes", 14:14:23 "oraya özel ters mahya gelecek"). Boy: derinlik + iki kalkan saçağı. Kesitinin ölçüsü yazılı değil.
-    vadi_kotu = makaslar[0]["sacak"][0]["ust_cm"] if makaslar and makaslar[0].get("sacak") else None
+    # İç akslarda vadi; üstüne ters mahya gelir (14:14:23 "oraya özel ters mahya gelecek", 14:16:06 "mahya tamam").
+    # Boy: derinlik + iki kalkan saçağı. Kot: üst başlık ekseninin aks hizasındaki uzantısı. Kesitinin ölçüsü yazılı değil.
+    y0 = uretim_makas._ust_ekseni(t["makas"]["topuk_mm"], egim)          # saçak ucunda (yerel 0) üst başlık ekseni, mm
+    vadi_kotu = _r(H + (y0 + egim * sacak * 10) / 10)
     ters_mahya = [{"aks": _r(a), "boy_cm": _r(D + 2 * sacak), "kot_cm": vadi_kotu} for a in xa[1:-1]]
     return {"kod": t["kod"], "dis_olcu": [W, D], "kolon_yuksekligi": H, "x_akslari": [_r(a) for a in xa], "ters_mahya": ters_mahya,
             "y_akslari": [_r(b) for b in ya], "kolonlar": kolonlar, "makaslar": makaslar, "sacak_cm": sacak,
@@ -113,14 +115,35 @@ def _kafes(dikme0, dikme1, h, adim):
     return cizgi
 
 
+def _kirp(cubuklar, lo, hi):
+    """Çubukları yerel x aralığına [lo, hi] (mm) kırpar; dışarıda kalanı atar. Kesilen her uçta üst ve alt başlık arasına düşey kapama."""
+    sonuc = []
+    for c in cubuklar:
+        x1, y1, x2, y2 = c["x1"], c["y1"], c["x2"], c["y2"]
+        if max(x1, x2) <= lo or min(x1, x2) >= hi:
+            continue
+        def at(x):
+            return y1 + (y2 - y1) * (x - x1) / (x2 - x1) if x2 != x1 else y1
+        if x1 != x2:
+            a, b = sorted((x1, x2))
+            a2, b2 = max(a, lo), min(b, hi)
+            p, q = (a2, at(a2)), (b2, at(b2))
+            if x1 > x2:
+                p, q = q, p
+            c = dict(c, x1=p[0], y1=p[1], x2=q[0], y2=q[1])
+        sonuc.append(c)
+    for x in (lo, hi):
+        ust = [c for c in sonuc if c["ad"] == "PD" and (abs(c["x1"] - x) < 1e-6 or abs(c["x2"] - x) < 1e-6)]
+        alt = [c for c in sonuc if c["ad"] == "PU"]
+        if ust and alt:
+            yu = ust[0]["y1"] if abs(ust[0]["x1"] - x) < 1e-6 else ust[0]["y2"]
+            sonuc.append({"ad": "KES", "yon": "LABEL_NRM", "x1": x, "y1": alt[0]["y1"], "x2": x, "y2": yu})
+    return sonuc
+
+
 def _makas_cizgileri(m, H):
     a = m["aks"][0]
-    cizgi = [((a + c["x1"] / 10, H + c["y1"] / 10), (a + c["x2"] / 10, H + c["y2"] / 10)) for c in m["cubuklar"]]
-    for s in m.get("sacak", []):                     # saçak payı: üst başlık dış uçtan saçak boyunca uzar, uçta düşey kapama
-        x0, x1 = s["uc_cm"], s["uc_cm"] + s["yon"] * s["boy_cm"]
-        cizgi.append(((x0, s["ust_cm"]), (x1, s["uc_ust_cm"])))
-        cizgi.append(((x1, s["uc_ust_cm"]), (x1, min(s["uc_ust_cm"], H))))
-    return cizgi
+    return [((a + c["x1"] / 10, H + c["y1"] / 10), (a + c["x2"] / 10, H + c["y2"] / 10)) for c in m["cubuklar"]]
 
 
 def cizim_ogeleri(k: dict) -> dict:

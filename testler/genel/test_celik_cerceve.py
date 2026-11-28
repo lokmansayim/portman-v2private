@@ -69,15 +69,16 @@ def test_yapi_tanimi_dis_olcu():
     assert (min(xs) - kap, max(xs) + kap, min(ys) - kap, max(ys) + kap) == (0, 4500, 0, 2500)
 
 
-def test_sacak_payi_30():
-    # Lokman 28.11 13:51 "saçaklar 30'ar cm"; 14:11 "saçak paylarını vermeyi unutmuşsun"
+def test_sacak_makasin_parcasi_ic_kesim_15():
+    # Lokman 28.11 14:16 "saçaklar olmadı makas şeklinde yeniden çiz", "15'er cm kesince oturdu"
     k = C.kur(_t())
     assert k["sacak_cm"] == 30
-    ilk, son = k["makaslar"][0]["sacak"], k["makaslar"][-1]["sacak"]
-    assert [(s["yon"], s["uc_cm"], s["boy_cm"]) for s in ilk + son] == [(-1, 0, 30), (1, 4500, 30)]
-    assert all(m.get("sacak") is None for m in k["makaslar"][1:-1])
-    s = ilk[0]
-    assert abs((s["ust_cm"] - s["uc_ust_cm"]) - 0.33 * 30) < 0.01
+    assert [m["uclar_cm"] for m in k["makaslar"]] == [[-30, 885], [915, 1785], [1815, 2685], [2715, 3585], [3615, 4530]]
+    for m in k["makaslar"]:
+        xs = [x / 10 + m["aks"][0] for c in m["cubuklar"] for x in (c["x1"], c["x2"])]
+        assert min(xs) >= m["uclar_cm"][0] - 1e-6 and max(xs) <= m["uclar_cm"][1] + 1e-6
+    ic = [c for m in k["makaslar"] for c in m["cubuklar"] if c["ad"] == "KES"]
+    assert len(ic) == 8                                   # dört iç birleşim × iki makas
     og = C.cizim_ogeleri(k)
     xs = [p[0] for cz in og["on"]["makas"] for p in cz]
     assert min(xs) == -30 and max(xs) == 4530
