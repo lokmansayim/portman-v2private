@@ -1,0 +1,115 @@
+{
+ "aciklama": "BK-92 (D-169) · Portman WhatsApp kılavuzunun hedef örneği: kılavuzdaki Portman mesajları ve düğmeleri (main'deki karar koduyla, araclar/kilavuz/senaryo.py). Talep numarası <NO>. Onay: Lokman, 28 Kasım 2026 14:23:42 UTC \"sadece portman whatsapp kulavuzunu canlıya alalım çünkü bazı eklemeler yapabiliriz klavuz ve videoya gerek yok\"; kart 14:25:25 UTC \"Önce yeni sürüm, sonra kılavuz\". Bir mesaj bilerek değişirse kılavuz yeniden bakılır ve bu dosya Lokman'ın onayıyla yeniden yazılır (D-02).",
+ "mesajlar": {
+  "b1.cati": {
+   "metin": "Çatı: Beşik, kalkan önde (PA-06). Plan r01 aynen kalır. Onayınız kaydedildi (<NO>, revizyon 1). Teklif aşamasına geçiliyor.",
+   "butonlar": []
+  },
+  "b1.onayla": {
+   "metin": "Planınız onaylandı (r01). Şimdi çatıyı seçin. Bu eve 3 çatı uygulanır. Plan aynı kalır; yalnız çatı değişir.\n\n1. PA-06 · evin çatısı (Beşik, kalkan önde)\n2. PA-06-K · çatı K (Kırma)\n3. PA-06-C · çatı C (Beşik + salonda cumba)\n\nBirini seçin ya da yazın (örn. \"PA-06-K olsun\").",
+   "butonlar": [
+    "1. PA-06",
+    "2. PA-06-K",
+    "3. PA-06-C"
+   ]
+  },
+  "b1.plan": {
+   "metin": "PA-06 seçildi. Ön onay planınız hazır; plan görseli ve PDF ektedir.",
+   "butonlar": [
+    "Onayla",
+    "Revize et"
+   ],
+   "pdf": "Portman_<NO>_r01.pdf"
+  },
+  "b1.set": {
+   "metin": "85 m² civarı 2+1 için seçenekler. Öncelik: yaşam alanı. Kurallardan geçen 3 seçenek var.\n\n1. PA-06 · 87 m² katalog, kapalı 72.6, veranda 14.44 · puan 100 (alan farkı %2 → −5; yaşam alanı önceliği → +10)\n2. PA-05 · 82 m² katalog, kapalı 74.8, veranda 7.12 · puan 93 (alan farkı %4 → −7)\n3. PA-04 · 78 m² katalog, kapalı 70.1, veranda 7.82 · puan 84 (alan farkı %8 → −16)\n\nBirini seçin ya da yazın (örn. \"PA-06 olsun\"); ölçü değişikliği de yazabilirsiniz.",
+   "butonlar": [
+    "1. PA-06",
+    "2. PA-05",
+    "3. PA-04"
+   ]
+  },
+  "b1.talep": {
+   "metin": "Sıralamada ne öne çıksın: bütçe mi, yaşam alanı mı, kısa montaj mı? Fark etmezse \"fark etmez\" yazın.",
+   "butonlar": [
+    "Bütçe önce",
+    "Yaşam alanı önce",
+    "Kısa montaj"
+   ]
+  },
+  "b1.tamam": {
+   "metin": "Planı (<NO> r01) onaylıyor musunuz? Onaylamak için \"Onayla\" düğmesine basın ya da \"onaylıyorum\" yazın. Değişiklik için \"Revize et\" düğmesine basın.",
+   "butonlar": [
+    "Onayla",
+    "Revize et"
+   ]
+  },
+  "b2.kod": {
+   "metin": "PA-06 seçildi. Ön onay planınız hazır; plan görseli ve PDF ektedir.",
+   "butonlar": [
+    "Onayla",
+    "Revize et"
+   ],
+   "pdf": "Portman_<NO>_r01.pdf"
+  },
+  "b2.onay": {
+   "metin": "Planınız onaylandı (r02). Şimdi çatıyı seçin. Bu eve 3 çatı uygulanır. Plan aynı kalır; yalnız çatı değişir.\n\n1. PA-06 · evin çatısı (Beşik, kalkan önde)\n2. PA-06-K · çatı K (Kırma)\n3. PA-06-C · çatı C (Beşik + salonda cumba)\n\nBirini seçin ya da yazın (örn. \"PA-06-K olsun\").",
+   "butonlar": [
+    "1. PA-06",
+    "2. PA-06-K",
+    "3. PA-06-C"
+   ]
+  },
+  "b2.pencere": {
+   "metin": "MUTFAK odasında 2 pencere var. Hangisini 120x120 yapalım? 1) 120x100, sol duvar; 2) 160x180, ön duvar.",
+   "butonlar": [
+    "120x100 sol",
+    "160x180 ön"
+   ]
+  },
+  "b2.r02": {
+   "metin": "PA-06 r02. Değişiklik: MUTFAK 120x100 sol penceresi 120x120. Ön onay planınız hazır; plan görseli ve PDF ektedir.",
+   "butonlar": [
+    "Onayla",
+    "Revize et"
+   ],
+   "pdf": "Portman_<NO>_r02.pdf"
+  },
+  "b2.revize": {
+   "metin": "Anladım. Neyi değiştirelim? Odayı ve pencere ölçüsünü yazın (örn. \"mutfak penceresi 120x120 olsun\").",
+   "butonlar": []
+  },
+  "b2.tesekkur": {
+   "metin": "Rica ederim. Planınız (<NO> r02) onayınızı bekliyor. Teklifi PortatifEv, planı onayladıktan sonra hazırlar. Fiyat ve teslim süresi teklifte yazar.",
+   "butonlar": []
+  },
+  "b2.veranda": {
+   "metin": "\"verandayı kaldır\" değişikliği otomatik yapılamıyor. Bu konuyu Lokman Bey'e iletiyorum; en kısa sürede dönüş yapılacak. Pencere ölçüsünü yazıyla hemen değiştirebilirim (örn. \"mutfak penceresi 120x120 olsun\"). Planınız (<NO> r02) değişmedi. Onaylayabilir ya da başka bir değişiklik yazabilirsiniz.",
+   "butonlar": [
+    "Onayla",
+    "Revize et"
+   ]
+  },
+  "b3.form": {
+   "metin": "Çiziminizi aldım. Standart özellikler formda seçili: 2,50 m pano, trapez sac, antrasit çatı, 100 mm dış duvar, 60 mm iç duvar, asma tavan, beyaz pencere. Değiştirmek isterseniz formu açın.",
+   "butonlar": [
+    "Standartlar"
+   ]
+  },
+  "b3.okuma": {
+   "metin": "Çiziminizden şunları okudum:\n• Tek katlı prefabrik, gövde 8,98 × 8,88 m, duvar 2,50 m, beşik çatı.\n• Odalar: salon 19,5 m², mutfak 9,5 m², 3 yatak odası (11,5 / 13 / 9,5 m²), e. banyo 3 m², banyo 5 m², hol 6 m², antre.\n• Veranda: önde 3,86 × 1,81 m, arkada 2,61 × 1,30 m.\n• 8 pencere, giriş kapısı önde.\n• Çizimde yazmayanları standart aldım: prefabrik. Plan onaylanınca standartlar formda gelir; değişikliği orada yapabilirsiniz.\n• Ölçü zincirleri toplamla küçük farkla tutuyor (üstte 1 cm, solda 1 cm, sağda 1 cm, altta 2 cm).\n• Duvarlar pano aksına en çok 4 cm kaydı. En çok değişen oda: Hol 6,1 → 6,3 m².\n• Ölçüsü yazmayan 2 yeri çizimdeki orana göre aldım. Ölçüleri görselde; yanlışsa yazın.\n\nOkuduğum yerleşim görselde. Doğru mu? Düzeltme varsa yazmanız yeterli.",
+   "butonlar": [
+    "Doğru",
+    "Düzelt"
+   ]
+  },
+  "b3.plan": {
+   "metin": "Çiziminizdeki plan (8,98 × 8,88 m, 3+1). Ön onay planınız hazır; plan görseli ve PDF ektedir.",
+   "butonlar": [
+    "Onayla",
+    "Revize et"
+   ],
+   "pdf": "Portman_<NO>_r01.pdf"
+  }
+ }
+}
