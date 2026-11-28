@@ -295,15 +295,15 @@ def test_kart_modeli_tek_basina_yuklenir(pk01, tmp_path):
 
 
 def test_komut_kirma_catida_1_doner(tmp_path):
-    """Kırma çatıda komut 1 döner. BK-46'dan beri 3D kırmayı kırma çizer: PK-01'in kırması (mahya y boyunca) listede yazılmaz, 3D'de makas
-    yok (eskiden 9 beşik makası "kural yok" sayılıyordu); makasları olan kırmada (140 m², 29 makas) makas "kural yok" ve kartsız birleşimdir."""
+    """Kırma çatıda komut 1 döner. BK-46'dan beri 3D kırmayı kırma çizer: PK-01'in kırması (mahya y boyunca) D-166'dan beri listede
+    (ön uçta uçtan 125,5 içeride ana makas), 3D'de 20 makas, her biri "kural yok" (eskiden liste yazılmaz, 3D'de makas yoktu); makasları olan kırmada (140 m², 29 makas) makas "kural yok" ve kartsız birleşimdir."""
     ie = _oku(MOTOR_VERI / "PK01.json")
     ie["cati"]["tip"] = "kirma"
     (tmp_path / "PK01_kirma.json").write_text(json.dumps(ie, ensure_ascii=False), encoding="utf-8")
     assert KM.main([str(tmp_path / "PK01_kirma.json"), str(tmp_path / "cikti")]) == 1
     say = _oku(tmp_path / "cikti" / "PK01_kirma_kart_sayim.json")
     n_makas = sum(ue.get_predefined_type(e) == "TRUSS" for e in ifcopenshell.open(str(tmp_path / "cikti" / "PK01_kirma.ifc")).by_type("IfcElementAssembly"))
-    assert n_makas == 0
+    assert n_makas == 20                                            # D-166 (BK-90): PK-01'in kırması artık listede (ana 7, kısa 9, çapraz 4)
     # makasa bağlı 24 dış H; K2: dört çatı katmanı (aşık, kaplama, betopan, dere ve iniş); K3b: altı çatı kenarı; K5b-2: çatı izolasyonu
     assert say["cati_tipi"] == "kirma" and len(say["kural_yok"]) == n_makas + 24 + 4 + 6 + 1
     assert {x.get("cati") for x in say["kural_yok"]} == {"kirma"}
