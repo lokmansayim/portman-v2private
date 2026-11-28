@@ -132,6 +132,11 @@ def test_depodaki_evlerde_kural_bir_sey_degistirmez(oge, monkeypatch):
         with pytest.raises(G.IsEmriHatasi):
             _kuralsiz(ie, monkeypatch)
         pytest.skip(f"Motor bu İş Emri'ni kuralsız da kurmuyor: {e}")
+    # D-108'in tek örnek evi disk arşivi 67 m² 2+1 (BK-41: banyonun iki yan duvarı); D-166'dan (BK-90) beri dörtomuz hâli depoda. Kuralın
+    # o evdeki değişikliği tam olarak bilinen: `ic y 261` 64,75 + 120,5 → 125,5 + 59,75 (öteki aralıklar aynen)
+    if oge[0] == KOK / "testler/motor/veri/D166_dortomuz_67m2.json":
+        assert p.ic_duvar_dis_ucu == [{"duvar": "ic y 261", "once": [64.75, 120.5], "sonra": [125.5, 59.75]}]
+        return
     assert p.ic_duvar_dis_ucu == []
 
 

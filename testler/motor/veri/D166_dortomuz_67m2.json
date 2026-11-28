@@ -1,0 +1,393 @@
+{
+ "is_emri_no": "D166-67M2-DORTOMUZ",
+ "revizyon": 1,
+ "talep": {
+  "bayi": {
+   "kod": "D166",
+   "ad": "Disk arşivi 67 m² 2+1"
+  },
+  "musteri_adi": "67 m² 2+1",
+  "metin": "D-166 hedef örneği: disk arşivi 67 m² 2+1 dörtomuz (verandayı da örter); İş Emri disk arşivi sohbetinden (28 Kasım 2026)."
+ },
+ "yapi": {
+  "sistem": "prefabrik",
+  "kat_sayisi": 1,
+  "duvar_yuksekligi_cm": 250,
+  "duvar_kalinligi_cm": {
+   "dis": 10,
+   "ic": 6.0
+  },
+  "olcu_kaynagi": "dis_olcu",
+  "dis_olcu_cm": {
+   "x": 710.25,
+   "y": 940.25
+  },
+  "referans_model": "D166",
+  "grid": {
+   "x_pano": 5.5,
+   "y_pano": 7.5
+  },
+  "kisa_kenar": "x",
+  "giris_cephesi": "on",
+  "dis_dusey_duvar": "cevre_aks_disinda",
+  "dizilim": {
+   "baslangic": "arka-sol",
+   "hiza": "izgara",
+   "dis_duvar_t_bolme": false,
+   "pencere": "oda_ortasi",
+   "kapi": "mantik",
+   "kose": "oda",
+   "son_pano": "son_aks",
+   "kapi_yeri": "ortada",
+   "dis_pano_dayanagi": [
+    {
+     "y": 67.75,
+     "aralik_cm": [
+      67.75,
+      193.25
+     ],
+     "cephe": "sol"
+    },
+    {
+     "y": 507.0,
+     "aralik_cm": [
+      507.0,
+      632.5
+     ],
+     "cephe": "sol"
+    },
+    {
+     "y": 193.25,
+     "aralik_cm": [
+      5.0,
+      256.0
+     ],
+     "cephe": "sol"
+    },
+    {
+     "y": 256.0,
+     "aralik_cm": [
+      193.25,
+      695.25
+     ],
+     "cephe": "sol"
+    },
+    {
+     "y": 195.25,
+     "aralik_cm": [
+      195.25,
+      318.75
+     ],
+     "ic_duvarlar": true,
+     "duvar_cm": 320.75
+    },
+    {
+     "y": 318.75,
+     "aralik_cm": [
+      130.5,
+      318.75
+     ],
+     "ic_duvarlar": true,
+     "duvar_cm": 449.25
+    },
+    {
+     "y": 67.75,
+     "aralik_cm": [
+      67.75,
+      193.25
+     ],
+     "cephe": "sag"
+    },
+    {
+     "y": 507.0,
+     "aralik_cm": [
+      507.0,
+      632.5
+     ],
+     "cephe": "sag"
+    },
+    {
+     "y": 193.25,
+     "aralik_cm": [
+      5.0,
+      256.0
+     ],
+     "cephe": "sag"
+    },
+    {
+     "y": 256.0,
+     "aralik_cm": [
+      193.25,
+      695.25
+     ],
+     "cephe": "sag"
+    },
+    {
+     "x": 449.25,
+     "aralik_cm": [
+      261.0,
+      700.25
+     ],
+     "cephe": "arka"
+    },
+    {
+     "x": 320.75,
+     "aralik_cm": [
+      320.75,
+      449.25
+     ],
+     "ic_duvarlar": true,
+     "duvar_cm": 195.25
+    },
+    {
+     "x": 320.75,
+     "aralik_cm": [
+      10.0,
+      320.75
+     ],
+     "ic_duvarlar": true,
+     "duvar_cm": 318.75
+    },
+    {
+     "x": 135.5,
+     "aralik_cm": [
+      135.5,
+      261.0
+     ],
+     "cephe": "on"
+    },
+    {
+     "x": 261.0,
+     "aralik_cm": [
+      261.0,
+      323.75
+     ],
+     "cephe": "on"
+    },
+    {
+     "x": 323.75,
+     "aralik_cm": [
+      323.75,
+      449.25
+     ],
+     "cephe": "on"
+    },
+    {
+     "x": 512.0,
+     "aralik_cm": [
+      512.0,
+      637.5
+     ],
+     "cephe": "on"
+    },
+    {
+     "x": 10.0,
+     "aralik_cm": [
+      10.0,
+      323.75
+     ],
+     "cephe": "on"
+    },
+    {
+     "x": 449.25,
+     "aralik_cm": [
+      261.0,
+      512.0
+     ],
+     "cephe": "on"
+    },
+    {
+     "x": 512.0,
+     "aralik_cm": [
+      449.25,
+      700.25
+     ],
+     "cephe": "on"
+    }
+   ]
+  },
+  "ek_akslar_cm": {
+   "x": [
+    320.75
+   ],
+   "y": [
+    195.25
+   ]
+  }
+ },
+ "mahaller": [
+  {
+   "ad": "Y.ODASI",
+   "tur": "yatak_odasi",
+   "konum_cm": [
+    [
+     10.0,
+     5.0,
+     261.0,
+     195.25
+    ],
+    [
+     10.0,
+     195.25,
+     320.75,
+     318.75
+    ]
+   ]
+  },
+  {
+   "ad": "SALON + MUTFAK",
+   "tur": "salon",
+   "konum_cm": [
+    [
+     320.75,
+     195.25,
+     449.25,
+     318.75
+    ],
+    [
+     10.0,
+     318.75,
+     700.25,
+     695.25
+    ]
+   ]
+  },
+  {
+   "ad": "WC",
+   "tur": "banyo",
+   "konum_cm": [
+    [
+     261.0,
+     5.0,
+     449.25,
+     195.25
+    ]
+   ]
+  },
+  {
+   "ad": "Y.ODASI 2",
+   "tur": "yatak_odasi",
+   "konum_cm": [
+    [
+     449.25,
+     5.0,
+     700.25,
+     318.75
+    ]
+   ]
+  },
+  {
+   "ad": "VERANDA",
+   "tur": "veranda",
+   "konum_cm": [
+    [
+     10.0,
+     695.25,
+     700.25,
+     935.25
+    ]
+   ]
+  }
+ ],
+ "acik_sinirlar": [],
+ "acikliklar": [
+  {
+   "tur": "pencere",
+   "olcu": "60x40",
+   "mahal": "WC",
+   "duvar": "arka",
+   "pano": 1
+  },
+  {
+   "tur": "ic_kapi",
+   "olcu": 82,
+   "arasi": [
+    "SALON + MUTFAK",
+    "WC"
+   ],
+   "pano": 0
+  },
+  {
+   "tur": "dis_kapi",
+   "olcu": 90,
+   "arasi": [
+    "VERANDA",
+    "SALON + MUTFAK"
+   ],
+   "pano": 3
+  },
+  {
+   "tur": "pencere",
+   "olcu": "120x180",
+   "mahal": "SALON + MUTFAK",
+   "duvar": "on",
+   "pano": 1
+  },
+  {
+   "tur": "pencere",
+   "olcu": "120x180",
+   "mahal": "SALON + MUTFAK",
+   "duvar": "on",
+   "pano": 5
+  },
+  {
+   "tur": "pencere",
+   "olcu": "120x120",
+   "mahal": "Y.ODASI",
+   "duvar": "sol",
+   "pano": 0
+  },
+  {
+   "tur": "pencere",
+   "olcu": "120x120",
+   "mahal": "Y.ODASI 2",
+   "duvar": "sag",
+   "pano": 0
+  },
+  {
+   "tur": "ic_kapi",
+   "olcu": 82,
+   "arasi": [
+    "SALON + MUTFAK",
+    "Y.ODASI 2"
+   ],
+   "pano": 0
+  },
+  {
+   "tur": "ic_kapi",
+   "olcu": 82,
+   "arasi": [
+    "SALON + MUTFAK",
+    "Y.ODASI"
+   ],
+   "pano": 2
+  }
+ ],
+ "cati": {
+  "tip": "kirma",
+  "egim_yuzde": 32.9,
+  "sacak_cm": 30,
+  "topuk_cm": 10,
+  "makas_yonu": "kisa_kenar",
+  "makas_ekseni": "x"
+ },
+ "cikti": {
+  "pdf": true,
+  "dxf": true,
+  "pafta": "A2",
+  "icerik": [
+   "aksli_plan"
+  ]
+ },
+ "varsayimlar": [
+  "Çatı beşik, %32,9, saçak 30, topuk 10 (paftanın planında eğim yok; prefabrik standardı).",
+  "Pano dizilimi paftadan: sol hattında y 67.75'dan 125,5; sol hattında y 507'dan 125,5; sol hattında y 193.25'dan 125,5; sol hattında y 256'dan 125,5; 320.75 hattında y 195.25'dan 125,5; 449.25 hattında y 318.75'dan 125,5; sag hattında y 67.75'dan 125,5; sag hattında y 507'dan 125,5; sag hattında y 193.25'dan 125,5; sag hattında y 256'dan 125,5; arka hattında x 449.25'dan 125,5; 195.25 hattında x 320.75'dan 125,5; 318.75 hattında x 320.75'dan 125,5; on hattında x 135.5'dan 125,5; on hattında x 261'dan 125,5; on hattında x 323.75'dan 125,5; on hattında x 512'dan 125,5; on hattında x 10'dan 125,5; on hattında x 449.25'dan 125,5; on hattında x 512'dan 125,5 (dizilim.dis_pano_dayanagi).",
+  "VERANDA: paftanın makas planında ana çatı verandayı da örtüyor; veranda gövdenin açık mahali (gövde 700.25 + 240 = 940.25 cm). Paftada 3 kolon; ara kolonlar paftadaki yerinde (355 cm), kiriş onlarda bölünür (D-129)."
+ ],
+ "dikmeler": [
+  [
+   350.0,
+   0.0
+  ]
+ ]
+}

@@ -23,7 +23,7 @@
 - İE-33 PR-2 (6 Kasım 2026; Lokman AP-01'in çizimini 21:23'te onayladı): iki ucu kırmada (AP-01) liste yazılır, makas planı paftadan
   (`testler/motor/test_ie33_kirma_liste.py`). Kart modelinin liste sütunu üretecin sayısı (nedeni yok), çatı kenarı kartları modelde yine
   "kurulmadı" (kırmanın kartları kart modelinin işi, ayrı). Bu dosyanın üç vakası buna göre değişti (`test_kirmada_liste_yazilir`,
-  `test_komut_cizim`, `test_komut_excel`); "liste yazılmaz" çiziminin örneği `test_k3b.py`'de (PK-01 kırma: mahya y boyunca, liste yazılmaz).
+  `test_komut_cizim`, `test_komut_excel`); "liste yazılmaz" çiziminin örneği `test_k3b.py`'deydi (PK-01 kırma; D-166'dan beri liste yazılır).
 - D-74 (Lokman, 10 Kasım 2026 04:58: "Trapez Sac bizim Prefabrik evlerde Standardımız"): çatı kaplaması yazılmamış prefabrik ev artık trapez
   sac sayılır. Üç evin İş Emri'si kaplamayı yazmaz; K5 tek kat panelle kabul edildi: evler kaplamayı açıkça "Tek Kat Panel" yazarak koşar
   (`_ev`), sayılar aynen.
