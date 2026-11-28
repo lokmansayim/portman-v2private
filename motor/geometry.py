@@ -136,7 +136,7 @@ def geometri_anahtari_var(is_emri: dict) -> bool:
         or any("konum_cm" in m for m in is_emri.get("mahaller", [])) \
         or any(("konum_cm" in a) or ("hizalama" in a) or ("duvar_ucu" in a) for a in is_emri.get("acikliklar", [])) \
         or bool(is_emri.get("verandalar")) or bool(is_emri.get("girintiler")) or bool(is_emri.get("duvarli_sinirlar")) \
-        or bool(is_emri.get("kubbeler")) or bool(is_emri.get("ortak_duvarlar"))
+        or bool(is_emri.get("kubbeler")) or bool(is_emri.get("ortak_duvarlar")) or bool(is_emri.get("ucu_bos_duvarlar"))
     # `acikliklar[].dograma` geometri anahtarı değildir (kod incelemesi D1): yalnız BOM işaretini etkiler, kendi varlığıyla çalışır
 
 
@@ -564,6 +564,7 @@ class Plan:
     kubbeler: list = field(default_factory=list)           # İE-29: kubbeler (`_kubbeler`; gerçek çerçevede plan geometrisi)
     tek_ozel_pano: list = field(default_factory=list)      # D-92: kuralın yeniden dizdiği aralıklar ({duvar, once, sonra}; anahtarsız boş)
     dik_duvar_pencere: list = field(default_factory=list)  # D-121: makasa dik duvarda ortalanan pencereler ({duvar, once, sonra}; anahtarsız boş)
+    ucu_bos_duvarlar: list = field(default_factory=list)   # D-167: ucu boşta iç duvarların duvar no'ları (`ucu_bos_duvarlar` girişi)
     ic_duvar_dis_ucu: list = field(default_factory=list)   # D-108: iç duvarın dış duvar ucunda yeniden dizilen aralıklar ({duvar, once, sonra})
 
     @property
@@ -651,7 +652,8 @@ def _kur(is_emri: dict) -> Plan:
     dis_t_bolme = bool(dizilim.get("dis_duvar_t_bolme", False))   # İE-11: dış duvar iç T'de bölünür, oraya dış üçlü H
     konum_cm_var = any("konum_cm" in m for m in is_emri["mahaller"]) or bool(is_emri.get("girintiler")) \
         or any(isinstance(s, dict) and s.get("parca_cm") for s in is_emri.get("acik_sinirlar", [])) \
-        or any(isinstance(s, dict) and s.get("parca_cm") for s in is_emri.get("duvarli_sinirlar") or [])   # girinti ve sınır parçası cm
+        or any(isinstance(s, dict) and s.get("parca_cm") for s in is_emri.get("duvarli_sinirlar") or []) \
+        or bool(is_emri.get("ucu_bos_duvarlar"))   # girinti, sınır parçası ve ucu boşta iç duvar cm
     nx2, ny2 = aks_tablosu_kur(yapi.get("ek_akslar_cm"), nx2, ny2, zorunlu=ayna_y or konum_cm_var)
     tablo = _AKS["x"] is not None
     grid_nx, grid_ny = nx, ny                                 # İş Emri ızgarası (Plan.nx/ny, pafta yazısı, bayi görseli): ek akslarla değişmez
@@ -925,6 +927,40 @@ def _kur(is_emri: dict) -> Plan:
                 return True
         return False
 
+    # Ucu boşta iç duvar (Lokman, 28 Kasım 2026 10:55 UTC, disk arşivi 52 m² ve 58 m² paftaları: "yarım pano ekle"): bir duvardan dik
+    # çıkan, öteki ucu serbest iç duvar. Motor duvarı mahal sınırından kurar; bu duvar tek mahalin içindedir, sınırı yoktur.
+    # `ucu_bos_duvarlar` [{"x": hat, "y": [bağlı uç, serbest uç]} | {"y": hat, "x": [...]}] (Motor çerçevesinde, cm): hat ve bağlı uç aks
+    # üstünde (bağlı uç bir duvarın aksı), serbest uç panonun fiziksel ucu (aks üstünde olmak zorunda değil). Duvar iç duvardır (T_IC),
+    # hücre kenarları bağlı uçtan serbest uca en yakın, onu aşmayan aksa kadar; aynı hatta bir iç duvar sürüyorsa onunla tek koşu olur.
+    ucu_bos: list = []
+    ucu_bos_kenar: list = []
+    if is_emri.get("ucu_bos_duvarlar") and hiza == "tam_izgara":   # K21: tam ızgarada iç duvar T'de bölünmez; ucu boşta duvarla kuralı yok
+        raise IsEmriHatasi("ucu_bos_duvarlar dizilim.hiza: tam_izgara ile yazılmaz (kural yok, D-167)")
+    for s in is_emri.get("ucu_bos_duvarlar") or []:
+        hat_yon = [k for k in ("x", "y") if isinstance(s, dict) and k in s and not isinstance(s[k], list)]
+        if not isinstance(s, dict) or sorted(s) != ["x", "y"] or len(hat_yon) != 1 \
+                or not isinstance(s["y" if hat_yon[0] == "x" else "x"], list) or len(s["y" if hat_yon[0] == "x" else "x"]) != 2:
+            raise IsEmriHatasi(f"ucu_bos_duvarlar girişi bir hat ve [bağlı uç, serbest uç] ister (ör. {{\"x\": 381.5, \"y\": [198.25, 261]}}): {s}")
+        hy = hat_yon[0]; by = "x" if hy == "y" else "y"
+        hat_ = aks_dizini(s[hy], hy)
+        bagli, serbest = float(s[by][0]), float(s[by][1])
+        kb = aks_dizini(bagli, by)
+        yon_ = 1 if serbest > bagli else -1
+        n_son = len(_AKS[by]) - 1
+        kf = kb
+        while 0 <= kf + yon_ <= n_son and (_AKS[by][kf + yon_] - serbest) * yon_ <= 1e-6:
+            kf += yon_
+        if kf == kb:
+            raise IsEmriHatasi(f"ucu_bos_duvarlar: serbest uç bağlı uçtan sonraki aksa ulaşmıyor (en az yarım hücre): {s}")
+        for k in range(min(kb, kf), max(kb, kf)):
+            u, v = (hat_, k) if hy == "x" else (k, hat_)
+            a_ = owner(u - 1, v) if hy == "x" else owner(u, v - 1)
+            b_ = owner(u, v)
+            if a_ != b_ or a_ == OUT or mahaller[a_].acik:
+                raise IsEmriHatasi(f"ucu_bos_duvarlar: duvar tek kapalı mahalin içinde olmalı ({a_} | {b_}, hücre {k}): {s}")
+            ucu_bos_kenar.append(("y" if hy == "x" else "x", hat_, k, a_, a_, "ic"))
+        ucu_bos.append(("y" if hy == "x" else "x", hat_, kb, kf, serbest, s))
+
     edges = []
     for u in range(0, nx2 + 1):
         for v in range(0, ny2):
@@ -938,6 +974,7 @@ def _kur(is_emri: dict) -> Plan:
             if s == "ic" and parca_acik("x", v, u, a, b): s = "acik_sinir"
             if s in ("acik_profil", "acik_sinir") and duvarli("x", v, u, a, b): s = "dis"
             if s: edges.append(("x", v, u, a, b, s))
+    edges += ucu_bos_kenar
     for pair, ps in acik_parcalar.items():
         for p in ps:
             if p[4] != p[3] - p[2]:
@@ -1184,6 +1221,32 @@ def _kur(is_emri: dict) -> Plan:
             ends[0][0].uc_notu[ends[0][1]] = "serbest"
         else:
             uyarilar.append(f"Aks noktası {P}: çözümsüz birleşim {[(d.id, uc) for d, uc in ends]}")
+    ucu_bos_duvar_idleri: list = []
+    for yon_, hat_, kb, kf, serbest, s_ in ucu_bos:                # ucu boşta iç duvar: serbest uç panonun fiziksel ucunda
+        d = next((d for d in duvarlar if d.yon == yon_ and d.hat == hat_ and d.tur == "ic" and d.n0 <= min(kb, kf) and max(kb, kf) <= d.n1), None)
+        uc_b, uc_s = (0, 1) if kf > kb else (1, 0)
+        if d is None or (d.n1 if uc_s else d.n0) != kf:
+            raise IsEmriHatasi(f"ucu_bos_duvarlar: serbest uçta başka duvar var: {s_}")
+        if d.uc_notu.get(uc_s) != "serbest":
+            raise IsEmriHatasi(f"ucu_bos_duvarlar: serbest uç boşta değil ({d.uc_notu.get(uc_s)}): {s_}")
+        if (d.n0 if uc_s else d.n1) == kb and str(d.uc_notu.get(uc_b) or "serbest").startswith("serbest"):
+            raise IsEmriHatasi(f"ucu_bos_duvarlar: bağlı uç bir duvara değmiyor: {s_}")
+        if uc_s: d.p1 = serbest
+        else:    d.p0 = serbest
+        ax_f = _AKS[yon_][kf]                                 # K21 (geometri hakemi): son aksla serbest uç arasında başka duvara değmez
+        lo_, hi_ = sorted((ax_f, serbest))
+        for o in duvarlar:
+            if o is d:
+                continue
+            if o.yon != yon_:
+                carpar = o.p0 - 1e-6 <= d.c <= o.p1 + 1e-6 and o.c - o.h <= hi_ + 1e-6 and o.c + o.h >= lo_ - 1e-6 \
+                    and not (abs(o.c - ax_f) < 1e-6 and abs(serbest - ax_f) < 1e-6)
+            else:
+                carpar = abs(o.c - d.c) < o.h + d.h - 1e-6 and o.p0 <= hi_ + 1e-6 and o.p1 >= lo_ - 1e-6 \
+                    and not (o.p1 <= min(d.p0, d.p1) + 1e-6 or o.p0 >= max(d.p0, d.p1) - 1e-6)
+            if carpar:
+                raise IsEmriHatasi(f"ucu_bos_duvarlar: serbest uç başka bir duvara değiyor ya da giriyor (duvar {o.id}): {s_}")
+        ucu_bos_duvar_idleri.append(d.id)                     # uç notu "serbest" kalır: liste orada çektirme U'su sayar (İE-27)
     bos_kose = sorted(set(kose_uzayan) - kose_uzayan_kullanilan)
     if bos_kose:                                              # K21: L köşesine düşmeyen giriş sessizce yutulmaz
         raise IsEmriHatasi(f"dizilim.kose_uzayan L köşesine düşmüyor: {', '.join(f'({x:g}, {y:g})' for x, y in bos_kose)}")
@@ -1371,6 +1434,13 @@ def _kur(is_emri: dict) -> Plan:
             n_ = int((hi_ - lo_) // MOD) + 1
             sinirlar = [s for s in sinirlar if not lo_ + 1e-9 < s < hi_ - 1e-9] + [lo_, hi_] \
                 + [round(aks_ + MOD * k, 6) for k in range(-n_, n_ + 1) if lo_ - 1e-9 <= aks_ + MOD * k <= hi_ + 1e-9]
+        for yon_, hat_, kb, kf, serbest, _s in ucu_bos:       # ucu boşta iç duvar: bağlı uçtan 125,5 arayla, kalan serbest uçta
+            if d.yon == yon_ and d.hat == hat_:
+                bagli = _AKS["y" if yon_ == "y" else "x"][kb]
+                lo_, hi_ = sorted((bagli, serbest))
+                n_ = int(abs(serbest - bagli) / MOD - 1e-9)
+                sinirlar = [q for q in sinirlar if not lo_ + 1e-9 < q < hi_ - 1e-9] + [bagli] \
+                    + [bagli + MOD * k * (1 if serbest > bagli else -1) for k in range(1, n_ + 1)]
         pts = [d.p0] + sorted(s for s in set(sinirlar) if d.p0 + 1e-9 < s < d.p1 - 1e-9) + [d.p1]
         for did, q0, q1 in kapi_hedef.values():               # İE-17: kapı panosu ortak duvarın ucundaki kavşaktan tam pano; içindeki derzler kalkar
             if did == d.id:
@@ -1627,6 +1697,7 @@ def _kur(is_emri: dict) -> Plan:
     profil = [(x0, y0, x1, y1) for (x0, y0, x1, y1, *_r) in acik_kenarlar]
     plan = Plan(grid_nx, grid_ny, W, H, mahaller, duvarlar, koseler, h_bag, dikmeler, profil, acik_sinir_cizgileri, uyarilar, is_emri,
                 arti_birlesimler=arti_noktalari, girintili=bool(dis_hucreler))
+    plan.ucu_bos_duvarlar = ucu_bos_duvar_idleri
     if ayna_y:
         _aynala_y(plan, ny2)
     if kapi_kurali == "mantik":

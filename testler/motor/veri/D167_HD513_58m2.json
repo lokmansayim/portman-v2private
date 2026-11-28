@@ -1,0 +1,285 @@
+{
+  "is_emri_no": "HDD-HD-513",
+  "revizyon": 1,
+  "talep": {
+    "bayi": {
+      "kod": "HD-513",
+      "ad": "Arşiv HD-513"
+    },
+    "musteri_adi": "HD-513",
+    "metin": "İE-43: HD-513 montaj paftasından okundu (plan_geometri v1). Pafta düzeltilmedi; farklar uyarılarda."
+  },
+  "yapi": {
+    "sistem": "prefabrik",
+    "kat_sayisi": 1,
+    "duvar_yuksekligi_cm": 280,
+    "duvar_kalinligi_cm": {
+      "dis": 10,
+      "ic": 6.0
+    },
+    "olcu_kaynagi": "dis_olcu",
+    "dis_olcu_cm": {
+      "x": 980.0,
+      "y": 600.0
+    },
+    "referans_model": "HD-513",
+    "grid": {
+      "x_pano": 8.0,
+      "y_pano": 5.0
+    },
+    "kisa_kenar": "y",
+    "giris_cephesi": "on",
+    "dis_dusey_duvar": "cevre_aks_disinda",
+    "dizilim": {
+      "baslangic": "arka-sol",
+      "hiza": "izgara",
+      "dis_duvar_t_bolme": false,
+      "pencere": "oda_ortasi",
+      "kapi": "mantik",
+      "kose": "oda",
+      "son_pano": "son_aks",
+      "kapi_yeri": "ortada",
+      "dis_pano_dayanagi": [
+        {
+          "y": 339.0,
+          "aralik_cm": [
+            261.0,
+            590.0
+          ],
+          "cephe": "sol"
+        },
+        {
+          "y": 213.5,
+          "aralik_cm": [
+            10.0,
+            590.0
+          ],
+          "ic_duvarlar": true,
+          "duvar_cm": 364.5
+        },
+        {
+          "y": 213.5,
+          "aralik_cm": [
+            213.5,
+            590.0
+          ],
+          "cephe": "sag"
+        },
+        {
+          "x": 444.25,
+          "aralik_cm": [
+            444.25,
+            569.75
+          ],
+          "cephe": "arka"
+        },
+        {
+          "x": 364.5,
+          "aralik_cm": [
+            364.5,
+            577.49
+          ],
+          "ic_duvarlar": true,
+          "duvar_cm": 213.5
+        },
+        {
+          "x": 364.5,
+          "aralik_cm": [
+            5.0,
+            364.5
+          ],
+          "ic_duvarlar": true,
+          "duvar_cm": 339.0
+        },
+        {
+          "x": 5.0,
+          "aralik_cm": [
+            5.0,
+            364.5
+          ],
+          "cephe": "on"
+        }
+      ]
+    },
+    "ek_akslar_cm": {
+      "x": [
+        364.5,
+        577.49
+      ],
+      "y": [
+        213.5,
+        339.0
+      ]
+    }
+  },
+  "mahaller": [
+    {
+      "ad": "Y.ODASI",
+      "tur": "yatak_odasi",
+      "konum_cm": [
+        [
+          5.0,
+          10.0,
+          364.5,
+          339.0
+        ]
+      ]
+    },
+    {
+      "ad": "Y.ODASI 2",
+      "tur": "yatak_odasi",
+      "konum_cm": [
+        [
+          5.0,
+          339.0,
+          364.5,
+          590.0
+        ]
+      ]
+    },
+    {
+      "ad": "WC",
+      "tur": "banyo",
+      "konum_cm": [
+        [
+          364.5,
+          10.0,
+          577.49,
+          213.5
+        ]
+      ]
+    },
+    {
+      "ad": "SALON+MUTFAK",
+      "tur": "salon",
+      "konum_cm": [
+        [
+          577.49,
+          10.0,
+          975.0,
+          213.5
+        ],
+        [
+          364.5,
+          213.5,
+          975.0,
+          590.0
+        ]
+      ]
+    }
+  ],
+  "acik_sinirlar": [],
+  "acikliklar": [
+    {
+      "tur": "ic_kapi",
+      "olcu": 82,
+      "arasi": [
+        "SALON+MUTFAK",
+        "Y.ODASI 2"
+      ],
+      "pano": 0
+    },
+    {
+      "tur": "ic_kapi",
+      "olcu": 82,
+      "arasi": [
+        "SALON+MUTFAK",
+        "Y.ODASI"
+      ],
+      "pano": 0
+    },
+    {
+      "tur": "pencere",
+      "olcu": "120x120",
+      "mahal": "SALON+MUTFAK",
+      "duvar": "sag",
+      "pano": 0
+    },
+    {
+      "tur": "pencere",
+      "olcu": "120x120",
+      "mahal": "SALON+MUTFAK",
+      "duvar": "on",
+      "pano": 2
+    },
+    {
+      "tur": "dis_kapi",
+      "olcu": 90,
+      "arasi": [
+        "__DIS__",
+        "SALON+MUTFAK"
+      ],
+      "duvar": "on",
+      "pano": 0
+    },
+    {
+      "tur": "pencere",
+      "olcu": "60x40",
+      "mahal": "WC",
+      "duvar": "arka",
+      "pano": 1
+    },
+    {
+      "tur": "pencere",
+      "olcu": "120x120",
+      "mahal": "Y.ODASI 2",
+      "duvar": "on",
+      "pano": 1
+    },
+    {
+      "tur": "pencere",
+      "olcu": "120x120",
+      "mahal": "Y.ODASI",
+      "duvar": "arka",
+      "pano": 1
+    },
+    {
+      "tur": "ic_kapi",
+      "olcu": 82,
+      "arasi": [
+        "SALON+MUTFAK",
+        "WC"
+      ],
+      "pano": 1
+    },
+    {
+      "tur": "pencere",
+      "olcu": "180x200",
+      "mahal": "SALON+MUTFAK",
+      "duvar": "sag",
+      "acilis": "surgulu",
+      "pano": 2
+    }
+  ],
+  "cati": {
+    "tip": "besik",
+    "egim_yuzde": 32.9,
+    "sacak_cm": 30,
+    "topuk_cm": 10,
+    "makas_yonu": "kisa_kenar",
+    "makas_ekseni": "y"
+  },
+  "cikti": {
+    "pdf": true,
+    "dxf": true,
+    "pafta": "A2",
+    "icerik": [
+      "aksli_plan"
+    ]
+  },
+  "varsayimlar": [
+    "VERANDA: çatısı paftanın planında yok; İş Emri'ne yazılmadı (Motor ana çatının eğimiyle beşik alır, uyarıyla).",
+    "Duvar yüksekliği paftadaki yazıdan: 280 cm.",
+    "Çatı beşik, %32,9, saçak 30, topuk 10 (paftanın planında eğim yok; prefabrik standardı).",
+    "Pano dizilimi paftadan: sol hattında y 339'dan 125,5; 364.5 hattında y 213.5'dan 125,5; sag hattında y 213.5'dan 125,5; arka hattında x 444.25'dan 125,5; 213.5 hattında x 364.5'dan 125,5; 339.0 hattında x 364.5'dan 125,5; on hattında x 5'dan 125,5 (dizilim.dis_pano_dayanagi)."
+  ],
+  "verandalar": [
+    {
+      "ad": "VERANDA",
+      "cephe": "on",
+      "bas_cm": 423.3,
+      "bit_cm": 556.8,
+      "derinlik_cm": 125.0
+    }
+  ]
+}
