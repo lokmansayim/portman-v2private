@@ -378,7 +378,7 @@
    "not": "Modelde saçak hattı başına bir parça (duvar ya da kiriş boyunca); betopanda ya da veranda omegasında kesilen hat birkaç parça. Her parça `Hat` ve `HatBoyu_cm` (saçak hattının boyu) ile hattın parçası; stok boyları kesim planında."
   },
   "sacak_saci_yerlesimi": {
-   "kural": "Saçak sacı iki saçak kenarı boyunca, saçak ucundan ucuna (mahya boyu: bina boyu + iki saçak); tırnağı saçak omegasının üstüne girer ve makasın altında sıkışır, saçağın altını kapatır, alnı saçak ucunda. Sayı ⌈iki kenarın toplamı ÷ (parça boyu − bindirme)⌉ (liste üretecinin kuralı).",
+   "kural": "Saçak sacı iki saçak kenarı boyunca, saçak ucundan ucuna (mahya boyu: bina boyu + iki saçak). Tırnağı 3 cm aşağı kıvrıktır: saçak omegasının dış kanadının dış yüzünde, kanadın ucundaki dudağın içine iner; omeganın üstüne yatmaz. Saçak altı tırnağın üst ucundan başlar, makasın altında alına kadar gider (saçak altı tırnaktan alına ölçülür); alın saçak ucunda, kıvrım son aşığın üstünde. Sayı ⌈iki kenarın toplamı ÷ (parça boyu − bindirme)⌉ (liste üretecinin kuralı).",
    "parca_boyu": {"okunan": "kitap › parca_boyu_m.sacak_saci"},
    "bindirme": {"okunan": "kitap › bindirme_m.sacak_saci"},
    "yontem": {
@@ -387,11 +387,21 @@
     "tarih": "2026-10-25",
     "not": "K3b planı §2 (Lokman, 25 Ekim 17:47 \"Uygula\"): liste üretecinin sayma yolu, boy modelden."
    },
+   "tirnak": {
+    "deger": {"boy_cm": 3, "yon": "asagi", "yer": "saçak omegasının dış kanadının dış yüzü, dudağın içi"},
+    "durum": "lokman",
+    "tarih": "2026-11-28",
+    "kaynak": "Lokman çizimi 28 Kasım 2026 15:38:25 UTC (18:38 İstanbul; PF Teklif_Calisma/TK-11/rehber_bakim/2026-11-28_Lokman_sacak_cizimi_1838.pdf), sözü: \"saçak omegasını ve saçağı çizdim yeniden yani anlamıyorum nasıl şimdiye kadar montaj rehberi olsun github olsun hep hatalı çizdin\"; eskiz r07 (TK11_sacak_kesiti_eskiz_r07_TASLAK_20261128.png) kartında 28 Kasım 2026 16:05:32 UTC seçimi: \"Doğru; uç alınla aynı hizada\"",
+    "cizen": "araclar/paket/rehber/sahne.js › Saçak sacı (SACAK_TIRNAK, SACAK_TIRNAK_X)",
+    "test": "testler/paket/test_rehber_sacak_tirnagi.py",
+    "not": "Kuralın tarihi kaydın açıldığı gün (25 Ekim 2026) kalır; durum 28 Kasım 2026'da bu kesitle lokman oldu (alın sacındaki D-73 gibi)."
+   },
+   "kivrim": {"durum": "lokman", "tarih": "2026-11-11", "kaynak": "D-78: Lokman 11 Kasım 2026 15:34 \"saçak sacı son koyulan aşığın üzerine gelecek\", eskiz kartı 15:59 \"Doğru, böyle yap\""},
    "cati_tipleri": ["besik", "besik_cumba"],
-   "durum": "varsayim",
+   "durum": "lokman",
    "tarih": "2026-10-25",
-   "kaynak": "Montaj rehberi (Lokman'ın 24 Ekim çizimleri): profil tırnak 3 → saçak altı 30 → alın 13 → kıvrım 10 cm (açınım ≈ 56 cm), sac 1 mm; kıvrımın ölçüsü teyit bekliyor (Lokman, 25 Ekim 09:10: \"Varsayım kalsın\"). Sayı liste kuralından (PK-01 ve PK-02 tuttu).",
-   "not": "Modelde saçak kenarı başına bir parça; stok boyları kesim planında. Saçak altının genişliği çatının saçağıdır (İş Emri; rehberde 30)."
+   "kaynak": "Kesit: Lokman çizimi 28 Kasım 2026 15:38:25 UTC (18:38 İstanbul; PF Teklif_Calisma/TK-11/rehber_bakim/2026-11-28_Lokman_sacak_cizimi_1838.pdf), sözü: \"saçak omegasını ve saçağı çizdim yeniden yani anlamıyorum nasıl şimdiye kadar montaj rehberi olsun github olsun hep hatalı çizdin\"; eskiz r07 (TK11_sacak_kesiti_eskiz_r07_TASLAK_20261128.png) kartında 28 Kasım 2026 16:05:32 UTC seçimi: \"Doğru; uç alınla aynı hizada\". Alın 13 cm ve kıvrım 10 cm bugünkü rehberin ölçüsüdür, Lokman çizimde değiştirmedi (eskiz r07 › Ölçülerin kaynağı). Önceki kayıt (25 Ekim 2026, varsayım): tırnak omeganın üstünde yatay; Lokman 28 Kasım çizimiyle düzeltti. Sayı liste kuralından (PK-01 ve PK-02 tuttu).",
+   "not": "Modelde saçak kenarı başına bir parça; stok boyları kesim planında. Saçak altının genişliği çatının saçağıdır (İş Emri; rehberde 30). Rehberin makas tabanı (TB = duvar üstü + 0,25 cm) eski yatay tırnağın kalınlığını taşır; tırnak inince makasla omega arasında 1,5 mm gösterim aralığı kalır (makasın omegaya oturması ayrı soru, Lokman'da)."
   },
   "alin_saci_yerlesimi": {
    "kural": "Alın sacı kalkanların iki eğik kenarında (her baş makasın iki kenarı), saçak ucundan mahyaya; tırnağı baş makas Z'sine girer (taşan verandanın kirişli dış kalkanında da Z var: kalkan betopanlı, D-32 madde 2; K5b TK-01 kıyası, 30 Ekim), 3 cm tırnağı Z'nin gövdesi boyunca iner ve Z'nin tırnağının iç yüzüne değer; saçak altı tırnağın üst ucunda (makas üstünün 3,6 cm altı), kalkan saçağının altını kapatır, alnı aşık uçlarının (C kapamanın) önünde; alın sacı abkantta tek biçimde bükülür (250 ve 280 boyda aynı): kenar boyunca saçak altının 6 cm altına iner; saçak sacıyla birleştiği köşede derenin ucunu örter, ucu derenin biçiminde kesilir (Lokman, 9 Kasım 2026, D-73). Sayı ⌈kenarların toplamı ÷ (parça boyu − bindirme)⌉ (liste üretecinin kuralı).",

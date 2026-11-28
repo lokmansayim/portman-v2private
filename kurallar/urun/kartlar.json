@@ -793,14 +793,14 @@
    "kod": "CK-02",
    "ad": "Saçak sacı (30'luk) L 2500",
    "liste": {"grup": "1002", "satirlar": ["Saçak sacı (30'luk, 3'ü menfezli)"]},
-   "olcu": "300 × 2500; profil tırnak 3 → saçak altı 30 → alın 13 → kıvrım 10 cm (açınım ≈ 56 cm), sac 1 mm (montaj rehberi; kıvrım varsayım); kenarın boyu parçada",
+   "olcu": "300 × 2500; profil tırnak 3 (aşağı) → saçak altı 30 → alın 13 → kıvrım 10 cm (açınım ≈ 56 cm), sac 1 mm; kenarın boyu parçada",
    "birim": "adet",
-   "nerede": "İki saçak kenarı boyunca (taşan verandanın çatısında da), saçak ucundan ucuna; tırnağı saçak omegasının üstüne girer, makasın altında sıkışır (`sacak_saci_yerlesimi`)",
+   "nerede": "İki saçak kenarı boyunca (taşan verandanın çatısında da), saçak ucundan ucuna; tırnağı 3 cm aşağı kıvrık, saçak omegasının dış kanadındaki dudağın içine iner, omeganın üstüne yatmaz (`sacak_saci_yerlesimi`)",
    "sayim": "boy_kesim",
    "ifc": {"sinif": "IfcCoveringType", "alt_tur": "CLADDING"},
    "pafta": [],
    "yerlesim": {"kural": "sacak_saci_yerlesimi", "parca": "sacak_saci", "sinif": "IfcCovering"},
-   "kaynak": {"durum": "varsayim", "tarih": "2026-10-25", "dayanak": "Montaj rehberi (Lokman, 24 Ekim çizimleri; teyitler 25 Ekim 09:10 \"Varsayım kalsın\"): yer ve profil. Sayı liste kuralından (parça boyu ve bindirme kitaptan; PK-01 ve PK-02 tuttu)"}
+   "kaynak": {"durum": "lokman", "tarih": "2026-11-28", "dayanak": "Kesit: Lokman çizimi 28 Kasım 2026 15:38:25 UTC (18:38 İstanbul; PF Teklif_Calisma/TK-11/rehber_bakim/2026-11-28_Lokman_sacak_cizimi_1838.pdf), sözü: \"saçak omegasını ve saçağı çizdim yeniden yani anlamıyorum nasıl şimdiye kadar montaj rehberi olsun github olsun hep hatalı çizdin\"; eskiz r07 (TK11_sacak_kesiti_eskiz_r07_TASLAK_20261128.png) kartında 28 Kasım 2026 16:05:32 UTC seçimi: \"Doğru; uç alınla aynı hizada\". Kıvrım D-78 (Lokman, 11 Kasım 2026). Sayı liste kuralından (parça boyu ve bindirme kitaptan; PK-01 ve PK-02 tuttu)"}
   },
   {
    "kod": "CK-03",

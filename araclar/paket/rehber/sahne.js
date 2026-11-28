@@ -495,6 +495,10 @@ function serit(o, perp, out) {   // hat çerçevesi: yerel x hattan dışa, yere
 }
 
 /* Saçak sacı: tırnak 3 → saçak altı 30 → alın 13 → makasa doğru kıvrım 10. Saçaklar veriden (D.sacak; R çatının anahtarı). */
+/* Tırnak (Lokman, 28.11.2026; kayıt `kurallar/yerlesim/prefabrik.json › sacak_saci_yerlesimi.tirnak`): yatay değil, 3 cm aşağı kıvrık;
+   saçak omegasının dış kanadının dış yüzünde (duvar dış yüzünden 0,3 cm), dış kanadın ucundaki dudağın içine iner. Omeganın üstüne yatmaz.
+   Saçak altı tırnağın üst ucundan başlar, alına kadar (tırnaktan alına ölçülür). Test: testler/paket/test_rehber_sacak_tirnagi.py. */
+const SACAK_TIRNAK = 3, SACAK_TIRNAK_X = 5 + HS + SAC - 5;   // omega çerçevesinde dış kanat uD = 5 + HS, kalınlığı SAC; duvar dış yüzü eksenden 5 cm
 const SACAK = D.sacak.map(e => ({ ...e, R: RF[e.R] }));
 {
   let to = 0;
@@ -512,7 +516,11 @@ const SACAK = D.sacak.map(e => ({ ...e, R: RF[e.R] }));
       const a0 = e.a0 + k * 250, a1 = Math.min(e.a1, a0 + 250), [z0, z1] = [S.zOf(a0), S.zOf(a1)].sort((p, q) => p - q);
       const g = S.yeni(), m = mat('trim', AD.sacak);
       const t0 = Math.max(a0, e.t0), t1 = Math.min(a1, e.t1);         // saçak altı baş makasın betopanına dayanır, orada kesilir (Lokman, 26.10.2026)
-      if (t1 > t0) { const [u0, u1] = [S.zOf(t0), S.zOf(t1)].sort((p, q) => p - q); g.add(lb(-2.8, 30.2, hs - SAC, hs, u0, u1, m)); }   // tırnak + saçak altı
+      if (t1 > t0) {   // saçak altı + tırnak: Lokman çizimi (28.11.2026 18:38 İstanbul) ve kartı (16:05 UTC, "Doğru; uç alınla aynı hizada", eskiz r07)
+        const [u0, u1] = [S.zOf(t0), S.zOf(t1)].sort((p, q) => p - q);
+        g.add(lb(SACAK_TIRNAK_X, 30.2, hs - SAC, hs, u0, u1, m));                                     // saçak altı: tırnağın üst ucundan alına
+        g.add(lb(SACAK_TIRNAK_X, SACAK_TIRNAK_X + SAC, hs - SACAK_TIRNAK, hs - SAC, u0, u1, m));      // tırnak 3 cm aşağı kıvrık, omeganın dudağının içinde
+      }
       const f0 = Math.max(a0, e.f0), f1 = Math.min(a1, e.f1);
       if (f1 > f0) {
         const kes = [f0, f1];
@@ -526,7 +534,7 @@ const SACAK = D.sacak.map(e => ({ ...e, R: RF[e.R] }));
           fl.position.x = (30.2 - 5 * e.R.cos) / 100; fl.position.y = (h + 5 * e.R.sin) / 100; fl.rotation.z = -e.R.th; g.add(fl);
         }
       }
-      add(AD.sacak, g, to++ * 0.5, { kod: KB('sacak'), ad: 'Saçak sacı', satir: [['Bu parça', `${e.ad} · L ${fmtc(a1 - a0)} cm`], ['Profil', 'tırnak 3 → saçak altı 30 → alın 13 → makasa doğru kıvrım 10; açınım ≈ 56 cm'], ['Kıvrım', 'son aşığın üstünde, trapez sacın altında kalır; alt yüzü aşığın üst kanadı hizasında; kalkan köşesinde C kapamanın üstüne biner (Lokman, 11.11.2026)'], ['Sıra', 'aşıklardan sonra, dereden önce (Lokman, 26.10.2026)'], ['Uçta', 'saçak altı baş makasın (betopanının) hizasında kesilir; alın ve kıvrım köşeye, alın sacına kadar devam eder (Lokman, 26.10.2026)'], ...(e.not ? [['Bu çatıda', e.not]] : []), ['Liste', M.sacak_liste], ...kartSat(KB('sacak'))] });
+      add(AD.sacak, g, to++ * 0.5, { kod: KB('sacak'), ad: 'Saçak sacı', satir: [['Bu parça', `${e.ad} · L ${fmtc(a1 - a0)} cm`], ['Profil', 'tırnak 3 → saçak altı 30 → alın 13 → makasa doğru kıvrım 10; açınım ≈ 56 cm'], ['Tırnak', 'aşağı kıvrık, saçak omegasının dış kanadındaki dudağın içine iner; omeganın üstüne yatmaz; saçak altı tırnaktan alına ölçülür (Lokman çizimi, 28.11.2026)'], ['Kıvrım', 'son aşığın üstünde, trapez sacın altında kalır; alt yüzü aşığın üst kanadı hizasında; kalkan köşesinde C kapamanın üstüne biner (Lokman, 11.11.2026)'], ['Sıra', 'aşıklardan sonra, dereden önce (Lokman, 26.10.2026)'], ['Uçta', 'saçak altı baş makasın (betopanının) hizasında kesilir; alın ve kıvrım köşeye, alın sacına kadar devam eder (Lokman, 26.10.2026)'], ...(e.not ? [['Bu çatıda', e.not]] : []), ['Liste', M.sacak_liste], ...kartSat(KB('sacak'))] });
     }
   });
 }
