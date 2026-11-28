@@ -39,6 +39,18 @@ def _akslar(yon: str) -> list[float]:
     return [x for i, x in enumerate(v) if i in (0, len(v) - 1) or (x - v[0] >= YAKIN_CM and v[-1] - x >= YAKIN_CM)]
 
 
+def _olcu_yazisi(a, ust_kot: float) -> str:
+    """Açıklığın ölçüsü görselde "en/boy" (Lokman, kart 28 Kasım 2026 06:25:25 UTC "Etiketin yanında ölçü"): pencere "120/120",
+    kapı "82/200" (kapının boyu Motor'un üst kotu)."""
+    o = a.olcu
+    if isinstance(o, str) and "x" in o:
+        return o.replace("x", "/")
+    try:
+        return f"{float(o):g}/{ust_kot:g}"
+    except (TypeError, ValueError):
+        return str(o)
+
+
 def etiketler(plan) -> dict:
     """`G.kur`'dan hemen sonra: Motor'un `Plan`'ı → {aks_x: [{ad, cm}], aks_y: [{ad, cm}], odalar: [{etiket, ad, alan_m2, x, y}],
     acikliklar: [{etiket, tur, mahal, olcu, x, y}]}. Aks `cm` İş Emri çerçevesinde (y arkadan; aks 1 arka); oda ve açıklık x, y
@@ -62,12 +74,14 @@ def etiketler(plan) -> dict:
             cx, cy = (g[0] + g[2]) / 2, (g[1] + g[3]) / 2
             a = pn.acilim
             ac.append((-round(cy, 1), round(cx, 1), a, pn.duvar.yon))
+    from motor import geometry as G
+    ust_kot = float(G.UST_KOT_CM)
     acikliklar, n = [], {"P": 0, "K": 0}
     for ny, x, a, yon in sorted(ac, key=lambda t: (t[0], t[1])):
         on = "P" if a.tur == "pencere" else "K"
         n[on] += 1
         acikliklar.append({"etiket": f"{on}{n[on]}", "tur": a.tur, "mahal": a.mahal, "arasi": list(a.arasi or []) or None,
-                           "olcu": a.olcu, "x": x, "y": -ny, "duvar_yonu": yon})
+                           "olcu": a.olcu, "olcu_yazi": _olcu_yazisi(a, ust_kot), "x": x, "y": -ny, "duvar_yonu": yon})
     return {"aks_x": aks_x, "aks_y": aks_y, "odalar": odalar, "acikliklar": acikliklar}
 
 
@@ -99,8 +113,13 @@ def ciz(ie: dict, hedef: Path, baslik: str = "") -> tuple[Path, dict]:
                 bbox=dict(boxstyle="round,pad=0.25", fc="#7a3db8", ec="none"), zorder=9)
     for a in et["acikliklar"]:
         x, y = a["x"], a["y"]
-        dx, dy = (0, (-30 if y < plan.H / 2 else 30)) if a["duvar_yonu"] == "x" else ((-34 if x < plan.W / 2 else 34), 0)
-        ax.text(x + dx, y + dy, a["etiket"], ha="center", va="center", fontsize=9.5, color="white", fontweight="bold",
+        pen = a["tur"] == "pencere"
+        if a["duvar_yonu"] == "x":
+            dx, dy = 0, (-30 if y < plan.H / 2 else 30)
+        else:   # pencere dış duvarın iç yanına (aks baloncuklarına binmez), kapı eskisi gibi plan ortasından uzağa
+            dx, dy = ((62 if x < plan.W / 2 else -62) if pen else (-34 if x < plan.W / 2 else 34)), 0
+        yazi = f'{a["etiket"]} {a["olcu_yazi"]}' if pen else a["etiket"]   # kapı ölçüsü yazılmaz (Lokman 06:25:31)
+        ax.text(x + dx, y + dy, yazi, ha="center", va="center", fontsize=9.5, color="white", fontweight="bold",
                 bbox=dict(boxstyle="round,pad=0.2", fc="#d40000" if a["etiket"][0] == "P" else "#0a7d2c", ec="none"), zorder=9)
     ax.set_xlim(-150, plan.W + 80)
     ax.set_ylim(-150, plan.H + 70)

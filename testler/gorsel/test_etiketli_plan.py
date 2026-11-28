@@ -19,3 +19,11 @@ def test_4x5_etiketleri(tmp_path):
     assert [(a["etiket"], a["tur"]) for a in et["acikliklar"]] == [("P1", "pencere"), ("K1", "ic_kapi"), ("P2", "pencere")]
     _, et2 = E.ciz(ie, tmp_path / "f.png")
     assert et2 == et
+
+
+def test_pencere_olcusu_yazilir_kapi_yazilmaz():
+    """Lokman kart 28 Kasım 2026 06:25:25 UTC "Etiketin yanında ölçü"; 06:25:31 "kapıyı yazma"."""
+    ie = g.denetle(OKUMA)["cevrim"]["is_emri"]
+    et = E.etiketler(__import__("motor.geometry", fromlist=["kur"]).kur(ie))
+    p = {a["etiket"]: a["olcu_yazi"] for a in et["acikliklar"]}
+    assert p["P1"] == "60/40" and p["P2"] == "300/200"
