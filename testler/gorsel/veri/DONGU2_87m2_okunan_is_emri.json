@@ -1,0 +1,257 @@
+{
+ "is_emri_no": "",
+ "revizyon": 0,
+ "talep": {},
+ "yapi": {
+  "sistem": "prefabrik",
+  "kat_sayisi": 1,
+  "duvar_yuksekligi_cm": 250,
+  "duvar_kalinligi_cm": {
+   "dis": 10,
+   "ic": 6
+  },
+  "olcu_kaynagi": "dis_olcu",
+  "dis_olcu_cm": {
+   "x": 800,
+   "y": 1088
+  },
+  "referans_model": "CIZIM",
+  "grid": {
+   "x_pano": 6.5,
+   "y_pano": 9
+  },
+  "kisa_kenar": "x",
+  "giris_cephesi": "on",
+  "dis_dusey_duvar": "cevre_aks_disinda",
+  "dizilim": {
+   "baslangic": "arka-sol",
+   "hiza": "izgara",
+   "dis_duvar_t_bolme": true,
+   "pencere": "oda_ortasi",
+   "kapi": "mantik",
+   "kose": "oda",
+   "dik_duvar_pencere": "tam_orta"
+  },
+  "ek_akslar_cm": {
+   "x": [],
+   "y": []
+  }
+ },
+ "mahaller": [
+  {
+   "ad": "YATAK ODASI 1",
+   "tur": "yatak_odasi",
+   "konum_cm": [
+    [
+     10.0,
+     5.0,
+     323.75,
+     444.25
+    ]
+   ]
+  },
+  {
+   "ad": "YATAK ODASI 2",
+   "tur": "yatak_odasi",
+   "konum_cm": [
+    [
+     323.75,
+     5.0,
+     790.0,
+     318.75
+    ]
+   ]
+  },
+  {
+   "ad": "BANYO",
+   "tur": "banyo",
+   "konum_cm": [
+    [
+     449.25,
+     318.75,
+     790.0,
+     507.0
+    ]
+   ]
+  },
+  {
+   "ad": "HOL",
+   "tur": "antre_hol",
+   "konum_cm": [
+    [
+     323.75,
+     318.75,
+     449.25,
+     758.0
+    ]
+   ]
+  },
+  {
+   "ad": "MUTFAK",
+   "tur": "mutfak",
+   "konum_cm": [
+    [
+     10.0,
+     444.25,
+     323.75,
+     758.0
+    ]
+   ]
+  },
+  {
+   "ad": "SALON",
+   "tur": "salon",
+   "konum_cm": [
+    [
+     449.25,
+     507.0,
+     790.0,
+     1083.0
+    ]
+   ]
+  },
+  {
+   "ad": "VERANDA",
+   "tur": "veranda",
+   "konum_cm": [
+    [
+     10.0,
+     758.0,
+     449.25,
+     1083.0
+    ]
+   ]
+  }
+ ],
+ "acik_sinirlar": [],
+ "acikliklar": [
+  {
+   "tur": "pencere",
+   "olcu": "120x120",
+   "mahal": "YATAK ODASI 1",
+   "duvar": "arka"
+  },
+  {
+   "tur": "pencere",
+   "olcu": "120x120",
+   "mahal": "YATAK ODASI 2",
+   "duvar": "arka"
+  },
+  {
+   "tur": "pencere",
+   "olcu": "120x100",
+   "mahal": "MUTFAK",
+   "duvar": "sol"
+  },
+  {
+   "tur": "pencere",
+   "olcu": "160x180",
+   "mahal": "MUTFAK",
+   "duvar": "on"
+  },
+  {
+   "tur": "pencere",
+   "olcu": "60x40",
+   "mahal": "BANYO",
+   "duvar": "sag"
+  },
+  {
+   "tur": "pencere",
+   "olcu": "120x120",
+   "mahal": "SALON",
+   "duvar": "sag"
+  },
+  {
+   "tur": "pencere",
+   "olcu": "120x160",
+   "mahal": "SALON",
+   "duvar": "on"
+  },
+  {
+   "tur": "dis_kapi",
+   "olcu": 90,
+   "arasi": [
+    "VERANDA",
+    "HOL"
+   ],
+   "duvar": "on"
+  },
+  {
+   "tur": "ic_kapi",
+   "olcu": 82,
+   "arasi": [
+    "HOL",
+    "YATAK ODASI 1"
+   ]
+  },
+  {
+   "tur": "ic_kapi",
+   "olcu": 82,
+   "arasi": [
+    "HOL",
+    "YATAK ODASI 2"
+   ]
+  },
+  {
+   "tur": "ic_kapi",
+   "olcu": 82,
+   "arasi": [
+    "HOL",
+    "MUTFAK"
+   ]
+  },
+  {
+   "tur": "ic_kapi",
+   "olcu": 82,
+   "arasi": [
+    "HOL",
+    "BANYO"
+   ]
+  },
+  {
+   "tur": "ic_kapi",
+   "olcu": 82,
+   "arasi": [
+    "HOL",
+    "SALON"
+   ]
+  }
+ ],
+ "cati": {
+  "tip": "besik",
+  "egim_yuzde": 33,
+  "sacak_cm": 30,
+  "topuk_cm": 10,
+  "makas_yonu": "kisa_kenar",
+  "makas_ekseni": "x"
+ },
+ "cikti": {
+  "pdf": true,
+  "dxf": true,
+  "pafta": "A2",
+  "icerik": [
+   "aksli_plan",
+   "alanli_kopya",
+   "montaj_kopyasi",
+   "on_gorunus",
+   "cati_profili",
+   "ozellik_tablosu"
+  ]
+ },
+ "ozellikler": {
+  "Çatı Şekli": "Beşik"
+ },
+ "alici_ait": {
+  "kalemler": [],
+  "kaynak": "bayi çizimi"
+ },
+ "varsayimlar": [
+  "Ölçüler bayi çiziminden okundu ve bayi teyit etti: gövde 800 × 1088 cm, 6.5 × 9 pano.",
+  "Oda sınırlarını pano ızgarasına oturttum (en çok 5 cm kayma; en çok değişen Mutfak 10,4 → 10,2 m²).",
+  "Duvar yüksekliği yazmıyordu, 2,50 m aldım.",
+  "Çatı tipi görünmüyordu, beşik aldım.",
+  "Mahya yönü görünmüyordu, girişten arkaya aldım."
+ ],
+ "eksikler": [],
+ "dikmeler": []
+}

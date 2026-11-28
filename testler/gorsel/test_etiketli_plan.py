@@ -12,8 +12,9 @@ def test_4x5_etiketleri(tmp_path):
     ie = g.denetle(OKUMA)["cevrim"]["is_emri"]
     yol, et = E.ciz(ie, tmp_path / "e.png")
     assert yol.is_file() and yol.stat().st_size > 10_000
-    assert [a["ad"] for a in et["aks_x"]] == list("ABCDEFG")
-    assert [a["ad"] for a in et["aks_y"]] == ["1", "2", "3", "4"]
+    # her yarım pano aksı (iç duvarın oturabildiği her yer), Motor'un aks tablosundan
+    assert [(a["ad"], a["cm"]) for a in et["aks_x"]] == list(zip("ABCDEFGHI", [5, 67.75, 130.5, 193.25, 256, 318.75, 381.5, 444.25, 495]))
+    assert [a["cm"] for a in et["aks_y"]] == [10, 72.75, 135.5, 198.25, 261, 323.75, 386.5]
     assert [(o["etiket"], o["ad"]) for o in et["odalar"]] == [("O1", "SALON+MUTFAK"), ("O2", "WC")]
     assert [(a["etiket"], a["tur"]) for a in et["acikliklar"]] == [("P1", "pencere"), ("K1", "ic_kapi"), ("P2", "pencere")]
     _, et2 = E.ciz(ie, tmp_path / "f.png")

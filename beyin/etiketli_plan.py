@@ -1,6 +1,6 @@
 """Etiketli plan (çizim okuma ikinci döngüsü; Lokman, kart 28 Kasım 2026 05:55:38 UTC "Doğru, böyle kodla").
 
-Bayiye giden plan görselinin yanında ayrı bir görsel: her dış duvar pano ekinde aks (üstte harf, solda rakam), odalar O1, O2 …,
+Bayiye giden plan görselinin yanında ayrı bir görsel: iç duvarın oturabildiği her yarım pano aksında aks (üstte harf, solda rakam), odalar O1, O2 …,
 pencereler P1 …, kapılar K1 …. Bayi düzeltmeyi bu adlarla yazar ya da görselin üstüne telefon kalemiyle çizer; kod adları komuta çevirir.
 Mühürlü ön onay çizimi (M-02, `motor/dxf_out.py`, `motor/bayi_gorseli.py`) değişmez; bu görsel ondan ayrıdır.
 
@@ -21,7 +21,7 @@ ROOT = Path(__file__).resolve().parent.parent
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-AKS_BIRLESIK_CM = 40.0                  # bu kadar yakın iki ek tek aks sayılır (görselde üst üste binmesin)
+YAKIN_CM = 35.0
 
 
 def _harf(i: int) -> str:
@@ -29,20 +29,22 @@ def _harf(i: int) -> str:
     return h[i] if i < len(h) else h[i // len(h) - 1] + h[i % len(h)]
 
 
-def _ekler(plan, yon: str) -> list[float]:
-    vs = sorted({round(v, 2) for pn in plan.panolar if pn.duvar.yon == yon and pn.duvar.tur == "dis" for v in (pn.a0, pn.a1)})
-    out: list[float] = []
-    for v in vs:
-        if not out or v - out[-1] > AKS_BIRLESIK_CM:
-            out.append(v)
-    return out
+def _akslar(yon: str) -> list[float]:
+    """Motor'un aks tablosu (yarım pano aksları ve ek akslar; iç duvarın oturabildiği her yer), İş Emri çerçevesinde (y arkadan)."""
+    from motor import geometry as G
+    v = sorted(round(float(x), 2) for x in (G._AKS[yon] or []))
+    if len(v) < 3:
+        return v
+    # dış duvarın hemen yanındaki ikinci aks (ör. 5 ve 10) baloncukları üst üste bindirir: uçtaki kalır
+    return [x for i, x in enumerate(v) if i in (0, len(v) - 1) or (x - v[0] >= YAKIN_CM and v[-1] - x >= YAKIN_CM)]
 
 
 def etiketler(plan) -> dict:
-    """Motor'un `Plan`'ı → {aks_x: [{ad, cm}], aks_y: [{ad, cm}], odalar: [{etiket, ad, alan_m2}], acikliklar: [{etiket, tur, mahal,
-    olcu, x, y}]}. Plan çerçevesinde y önden arkaya büyür; aks 1 arka duvardır."""
-    aks_x = [{"ad": _harf(i), "cm": x} for i, x in enumerate(_ekler(plan, "x"))]
-    aks_y = [{"ad": str(j + 1), "cm": y} for j, y in enumerate(sorted(_ekler(plan, "y"), reverse=True))]
+    """`G.kur`'dan hemen sonra: Motor'un `Plan`'ı → {aks_x: [{ad, cm}], aks_y: [{ad, cm}], odalar: [{etiket, ad, alan_m2, x, y}],
+    acikliklar: [{etiket, tur, mahal, olcu, x, y}]}. Aks `cm` İş Emri çerçevesinde (y arkadan; aks 1 arka); oda ve açıklık x, y
+    Plan çerçevesinde (y önden, görsel için)."""
+    aks_x = [{"ad": _harf(i), "cm": x} for i, x in enumerate(_akslar("x"))]
+    aks_y = [{"ad": str(j + 1), "cm": y} for j, y in enumerate(_akslar("y"))]      # 1 arka duvar
     oda = []
     for m in plan.mahaller.values():
         if m.poly is None:
@@ -88,6 +90,7 @@ def ciz(ie: dict, hedef: Path, baslik: str = "") -> tuple[Path, dict]:
         ax.add_patch(Circle((a["cm"], -110), 17, fc="white", ec=mavi, lw=1.2, zorder=7))
         ax.text(a["cm"], -110, a["ad"], ha="center", va="center", fontsize=10, color=mavi, fontweight="bold", zorder=8)
     for a in et["aks_y"]:
+        a = {**a, "cm": plan.H - a["cm"]}
         ax.plot([-95, plan.W + 20], [a["cm"], a["cm"]], color=mavi, lw=0.6, ls=(0, (4, 4)), zorder=1)
         ax.add_patch(Circle((-110, a["cm"]), 17, fc="white", ec=mavi, lw=1.2, zorder=7))
         ax.text(-110, a["cm"], a["ad"], ha="center", va="center", fontsize=10, color=mavi, fontweight="bold", zorder=8)
