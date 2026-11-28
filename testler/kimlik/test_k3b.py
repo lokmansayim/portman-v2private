@@ -479,6 +479,7 @@ def test_kirma_yedinci_sayfa_kurulmadi_yazar(tmp_path):
     import pymupdf
     metin = " ".join(pymupdf.open(tmp_path / "c" / "K_yerlesim_planlari.pdf")[6].get_text().split())
     assert "EKSİK" in metin and all(f"Kurulmadı: {ad}:" in metin for ad in ("saçak omegası", "saçak sacı", "alın sacı", "mahya"))
-    # K5: liste üreteci kırma çatıda liste yazmaz (eski "liste 9" beşik kuralının sayısıydı); çatı kenarı kartları "kurulmadı"
-    assert "AC-01 100'lük alt çerçeve L 3750 model 9 boy · liste yazılmaz" in metin
-    assert metin.count("model kurulmadı · liste yazılmaz") == 6 and "≠" not in metin
+    # K5: D-166'dan (BK-90) beri liste üreteci PK-01'in kırmasını yazar (önce "liste yazılmaz"); model çatı kenarı kartlarını kurmaz:
+    # "kurulmadı" ve listenin sayısı yan yana, farklıysa "≠"
+    assert "AC-01 100'lük alt çerçeve L 3750 model 9 boy · liste 9" in metin and "liste yazılmaz" not in metin
+    assert metin.count("model kurulmadı · liste") == 6 and metin.count("≠") == 5 and "CK-05 C kapama model kurulmadı · listede yok" in metin

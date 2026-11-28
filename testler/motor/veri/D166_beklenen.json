@@ -1,0 +1,318 @@
+{
+ "kaynak": "D-166 (BK-90): Lokman kartı 28 Kasım 2026 10:46:26 UTC \"Eskizdeki gibi, aynı durumdaki her evde\"; eskiz PF Portman_Proje_Dosyalari/Disk_Arsivi/kalan_evler/dortomuz_liste/67m2_dortomuz_makas_once_sonra.png",
+ "67m2_2+1": {
+  "ana_x_cm": [
+   245.0,
+   307.75,
+   433.25,
+   558.75,
+   684.25,
+   747.0,
+   814.75
+  ],
+  "uclar": [
+   {
+    "uc": "ön",
+    "bant_cm": 245.0,
+    "kisa_y_cm": [
+     245.0,
+     323.75,
+     465.24
+    ],
+    "kisa_boy_cm": 275.0,
+    "capraz_boy_cm": [
+     388.91,
+     388.91
+    ]
+   },
+   {
+    "uc": "arka",
+    "bant_cm": 125.5,
+    "kisa_y_cm": [
+     125.5,
+     261.0,
+     323.75,
+     449.25,
+     584.75
+    ],
+    "kisa_boy_cm": 155.5,
+    "capraz_boy_cm": [
+     219.91,
+     219.91
+    ]
+   }
+  ],
+  "satirlar": [
+   [
+    "Makas (ana, mahyaya dik) · ana çatı",
+    "açıklık 7102,5",
+    7
+   ],
+   [
+    "Makas (kısa, ön uç) · ana çatı",
+    "L 2750",
+    3
+   ],
+   [
+    "Makas (kısa, arka uç) · ana çatı",
+    "L 1555",
+    5
+   ],
+   [
+    "Makas (çapraz, kırma, ön uç) · ana çatı",
+    "L 3889",
+    2
+   ],
+   [
+    "Makas (çapraz, kırma, arka uç) · ana çatı",
+    "L 2199",
+    2
+   ],
+   [
+    "Çatı paneli (makas arası) · ana çatı",
+    "—",
+    4
+   ]
+  ]
+ },
+ "havuz_kirma_secenekleri": {
+  "PA18": {
+   "sablon": "is_emri/adaylar/PA18.json",
+   "m2": 60.0,
+   "ana_x_cm": [
+    125.5,
+    242.0,
+    367.5,
+    493.0,
+    618.5,
+    744.0,
+    869.5
+   ],
+   "uclar": [
+    {
+     "uc": "ön",
+     "bant_cm": 125.5,
+     "kisa_y_cm": [
+      125.5,
+      195.75,
+      321.25,
+      474.5
+     ],
+     "kisa_boy_cm": 155.5,
+     "capraz_boy_cm": [
+      219.91,
+      219.91
+     ]
+    },
+    {
+     "uc": "arka",
+     "bant_cm": 130.5,
+     "kisa_y_cm": [
+      130.5,
+      198.25,
+      323.75,
+      386.5,
+      469.5
+     ],
+     "kisa_boy_cm": 160.5,
+     "capraz_boy_cm": [
+      226.98,
+      226.98
+     ]
+    }
+   ],
+   "satirlar": [
+    [
+     "Makas (ana, mahyaya dik) · ana çatı",
+     "açıklık 6000",
+     7
+    ],
+    [
+     "Makas (kısa, ön uç) · ana çatı",
+     "L 1555",
+     4
+    ],
+    [
+     "Makas (kısa, arka uç) · ana çatı",
+     "L 1605",
+     5
+    ],
+    [
+     "Makas (çapraz, kırma, ön uç) · ana çatı",
+     "L 2199",
+     2
+    ],
+    [
+     "Makas (çapraz, kırma, arka uç) · ana çatı",
+     "L 2270",
+     2
+    ],
+    [
+     "Çatı paneli (makas arası) · ana çatı",
+     "—",
+     2
+    ]
+   ]
+  },
+  "PA19": {
+   "sablon": "is_emri/adaylar/PA19.json",
+   "m2": 84.0,
+   "ana_x_cm": [
+    125.5,
+    190.25,
+    315.75,
+    441.25,
+    566.75,
+    692.25,
+    817.75
+   ],
+   "uclar": [
+    {
+     "uc": "ön",
+     "bant_cm": 125.5,
+     "kisa_y_cm": [
+      125.5,
+      261.0,
+      386.5,
+      512.0,
+      637.5,
+      762.5
+     ],
+     "kisa_boy_cm": 150.5,
+     "capraz_boy_cm": [
+      212.84,
+      212.84
+     ]
+    },
+    {
+     "uc": "arka",
+     "bant_cm": 130.5,
+     "kisa_y_cm": [
+      130.5,
+      261.0,
+      386.5,
+      512.0,
+      637.5,
+      757.5
+     ],
+     "kisa_boy_cm": 155.5,
+     "capraz_boy_cm": [
+      219.91,
+      219.91
+     ]
+    }
+   ],
+   "satirlar": [
+    [
+     "Makas (ana, mahyaya dik) · ana çatı",
+     "açıklık 8880",
+     7
+    ],
+    [
+     "Makas (kısa, ön uç) · ana çatı",
+     "L 1505",
+     6
+    ],
+    [
+     "Makas (kısa, arka uç) · ana çatı",
+     "L 1555",
+     6
+    ],
+    [
+     "Makas (çapraz, kırma, ön uç) · ana çatı",
+     "L 2128",
+     2
+    ],
+    [
+     "Makas (çapraz, kırma, arka uç) · ana çatı",
+     "L 2199",
+     2
+    ],
+    [
+     "Çatı paneli (makas arası) · ana çatı",
+     "—",
+     5
+    ]
+   ]
+  },
+  "PA36": {
+   "sablon": "is_emri/adaylar/PA36.json",
+   "m2": 62.0,
+   "ana_x_cm": [
+    125.5,
+    193.25,
+    318.75,
+    444.25,
+    569.75,
+    695.25,
+    820.75
+   ],
+   "uclar": [
+    {
+     "uc": "ön",
+     "bant_cm": 125.5,
+     "kisa_y_cm": [
+      125.5,
+      195.75,
+      321.25,
+      446.75,
+      522.0
+     ],
+     "kisa_boy_cm": 155.5,
+     "capraz_boy_cm": [
+      219.91,
+      219.91
+     ]
+    },
+    {
+     "uc": "arka",
+     "bant_cm": 130.5,
+     "kisa_y_cm": [
+      130.5,
+      198.25,
+      323.75,
+      386.5,
+      517.0
+     ],
+     "kisa_boy_cm": 160.5,
+     "capraz_boy_cm": [
+      226.98,
+      226.98
+     ]
+    }
+   ],
+   "satirlar": [
+    [
+     "Makas (ana, mahyaya dik) · ana çatı",
+     "açıklık 6475",
+     7
+    ],
+    [
+     "Makas (kısa, ön uç) · ana çatı",
+     "L 1555",
+     5
+    ],
+    [
+     "Makas (kısa, arka uç) · ana çatı",
+     "L 1605",
+     5
+    ],
+    [
+     "Makas (çapraz, kırma, ön uç) · ana çatı",
+     "L 2199",
+     2
+    ],
+    [
+     "Makas (çapraz, kırma, arka uç) · ana çatı",
+     "L 2270",
+     2
+    ],
+    [
+     "Çatı paneli (makas arası) · ana çatı",
+     "—",
+     4
+    ]
+   ]
+  }
+ }
+}
