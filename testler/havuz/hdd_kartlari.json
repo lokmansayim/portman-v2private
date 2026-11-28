@@ -447,6 +447,42 @@
     "Dış ölçü gövdenin içindeki veranda nişiyle (M-18): brüt 69,01 m², paftanın başlığı 70 m².",
     "Kapı: 4 oda kapısı + verandadan 1 dış kapı (PDF'te kapı yazısı yok, kanat yaylarından)."
    ]
+  },
+  "HD-390": {
+   "dis_olcu_cm": [
+    825.75,
+    835.75
+   ],
+   "brut_oturum_m2": 69.01,
+   "baslik_m2": 70.0,
+   "oda_sayisi": "2+1",
+   "yatak_odasi": 2,
+   "kat_adedi": 1,
+   "cati_sekli": null,
+   "acikliklar": {
+    "120/120": 3,
+    "120/160": 2,
+    "60/40": 1
+   },
+   "dis_kapi_adedi": null,
+   "ic_kapi_adedi": null,
+   "kapi_adedi": 6,
+   "veranda_adedi": 1,
+   "kart_sha256": "7faac941cd338447922474dc2df05b4a3de18720711f801e73875db5a19a4df7",
+   "kaynak": {
+    "dosya": "HD-390;10",
+    "plan_sirasi": 63,
+    "sablon": "bantli",
+    "sacak_olcusu_cm": [
+     null,
+     885.75
+    ],
+    "okuyucu": "araclar/hdd_turev/pafta_kart.py (İE-43 PR-9)"
+   },
+   "varsayim": [
+    "Dış ölçü 825,75 × 835,75 cm, veranda gövdede (niş): brüt 69,01 m², paftanın başlığı 70 m².",
+    "Çatı: paftanın makas ve dere planında beşik (8 makas) + verandanın önünde cumba (1 baş makas); Motor cumbada 2 makas sayar (Lokman kartı 28 Kasım 2026 14:22:26 \"Onaylıyorum, Motor'daki gibi\", D-169)."
+   ]
   }
  }
 }
