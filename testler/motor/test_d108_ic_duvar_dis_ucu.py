@@ -132,7 +132,13 @@ def test_depodaki_evlerde_kural_bir_sey_degistirmez(oge, monkeypatch):
         with pytest.raises(G.IsEmriHatasi):
             _kuralsiz(ie, monkeypatch)
         pytest.skip(f"Motor bu İş Emri'ni kuralsız da kurmuyor: {e}")
-    assert p.ic_duvar_dis_ucu == []
+    assert p.ic_duvar_dis_ucu == KURALIN_EVLERI.get(str(oge[0].relative_to(KOK)), [])
+
+
+# Kuralın yazıldığı gerçek ev: 67 m² 2+1 (disk arşivi, D-165 / PA-51). Lokman kat planını bu hâliyle onayladı (kart 28 Kasım 2026
+# 09:25:26 UTC "Onaylıyorum, kat planı böyle"; banyo duvarı 59,75 başta, kart 15 Kasım 22:28:26). Değer uydurma evdekiyle aynı.
+_D108_67M2 = [{"duvar": "ic y 261", "once": [64.75, 120.5], "sonra": [125.5, 59.75]}]
+KURALIN_EVLERI = {"is_emri/adaylar/PA51.json": _D108_67M2, "testler/havuz/is_emirleri/HD259.json": _D108_67M2}
 
 
 def _varyant(ek: float, t: bool = False) -> dict:
