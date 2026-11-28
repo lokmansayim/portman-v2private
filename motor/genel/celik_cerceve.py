@@ -91,7 +91,11 @@ def kur(t: dict) -> dict:
         y_uc = pd["y1"] + egim * (0 - pd["x1"])                          # üst başlık ekseni dış uçta (yerel x = 0)
         m.setdefault("sacak", []).append({"yon": yon, "uc_cm": _r(uc), "boy_cm": sacak,
                                           "ust_cm": _r(H + y_uc / 10), "uc_ust_cm": _r(H + (y_uc - egim * sacak * 10) / 10)})
-    return {"kod": t["kod"], "dis_olcu": [W, D], "kolon_yuksekligi": H, "x_akslari": [_r(a) for a in xa],
+    # İç akslarda iki makas aksta kesilir; birleşim vadidir, üstüne ters mahya gelir (Lokman 28.11 14:14:11 "içteki birleştiği yerdekiler
+    # kaç geliyorsa kes", 14:14:23 "oraya özel ters mahya gelecek"). Boy: derinlik + iki kalkan saçağı. Kesitinin ölçüsü yazılı değil.
+    vadi_kotu = makaslar[0]["sacak"][0]["ust_cm"] if makaslar and makaslar[0].get("sacak") else None
+    ters_mahya = [{"aks": _r(a), "boy_cm": _r(D + 2 * sacak), "kot_cm": vadi_kotu} for a in xa[1:-1]]
+    return {"kod": t["kod"], "dis_olcu": [W, D], "kolon_yuksekligi": H, "x_akslari": [_r(a) for a in xa], "ters_mahya": ters_mahya,
             "y_akslari": [_r(b) for b in ya], "kolonlar": kolonlar, "makaslar": makaslar, "sacak_cm": sacak,
             "ozet": {"kolon": len(kolonlar), "makas_cercevesi": len(makaslar), "cerceve_hatti": len(ya),
                      "makas_toplam": len(makaslar) * len(ya), "mahya_kotu_cm": max(m["tepe_cm"] for m in makaslar)}}
@@ -130,6 +134,10 @@ def cizim_ogeleri(k: dict) -> dict:
         on["kolon"] += _kafes(x0, x1, H, x1 - x0)
     for m in k["makaslar"]:
         on["makas"] += _makas_cizgileri(m, H)
+    on["ters_mahya"] = []
+    for tm in k["ters_mahya"]:                       # şematik V: vadiden iki yana 30 cm (kesit ölçüsü yazılı değil)
+        a, z, e = tm["aks"], tm["kot_cm"], k["makaslar"][0]["egim"]
+        on["ters_mahya"] += [((a, z), (a - 30, z + 30 * e)), ((a, z), (a + 30, z + 30 * e))]
     yan = {"kolon": [], "makas": []}
     ilk_sutun = [c for c in k["kolonlar"] if c["aks"][0] == k["x_akslari"][0]]
     for c in ilk_sutun:
@@ -169,6 +177,9 @@ def _png_pdf(k, og, t, cikti: Path):
     ax.set_title("1 · ÇERÇEVE GÖRÜNÜŞÜ (önden)", fontsize=10, loc="left")
     cizgiler(ax, og["on"]["kolon"], KOL, 0.6)
     cizgiler(ax, og["on"]["makas"], MAK, 0.5)
+    cizgiler(ax, og["on"].get("ters_mahya", []), "#2e7d32", 2.4)
+    for tm in k["ters_mahya"]:
+        ax.text(tm["aks"], tm["kot_cm"] + 40, "ters mahya", ha="center", fontsize=7, color="#2e7d32")
     xa = k["x_akslari"]
     for c in [c for c in k["kolonlar"] if c["aks"][1] == k["y_akslari"][0]]:
         ax.text(sum(c["x"]) / 2, -35, f"{c['x'][1] - c['x'][0]:g}", ha="center", fontsize=8, color=KOL)
@@ -195,6 +206,9 @@ def _png_pdf(k, og, t, cikti: Path):
     p, q = og["yan"]["makas"][1]
     ax.plot([p[0], q[0]], [p[1], q[1]], color=MAK, lw=0.8, ls="--")
     ax.text(D / 2, tepe + 12, "mahya (makas tepesi)", ha="center", fontsize=8, color=MAK)
+    if k["ters_mahya"]:
+        ax.text(D / 2, H + 20, f"vadi: ters mahya {len(k['ters_mahya'])} hat × {k['ters_mahya'][0]['boy_cm']:g} cm", ha="center",
+                fontsize=8, color="#2e7d32")
     ya = k["y_akslari"]
     for c in [c for c in k["kolonlar"] if c["aks"][0] == xa[0]]:
         ax.text(sum(c["y"]) / 2, -35, f"{c['y'][1] - c['y'][0]:g}", ha="center", fontsize=8, color=KOL)
@@ -235,14 +249,14 @@ def _dxf(k, og, cikti: Path):
 
     doc = ezdxf.new("R2018", setup=True)
     doc.header["$INSUNITS"] = 5  # cm
-    for ad, renk in (("KOLON", 5), ("MAKAS", 1), ("AKS", 8), ("YAZI", 7)):
+    for ad, renk in (("KOLON", 5), ("MAKAS", 1), ("TERS_MAHYA", 3), ("AKS", 8), ("YAZI", 7)):
         doc.layers.add(ad, color=renk)
     msp = doc.modelspace()
     W, D = k["dis_olcu"]
     tepe = k["ozet"]["mahya_kotu_cm"]
     dy_yan = -(tepe + 600)
     dy_plan = dy_yan - (tepe + 600) - D
-    for ad, liste in (("KOLON", og["on"]["kolon"]), ("MAKAS", og["on"]["makas"])):
+    for ad, liste in (("KOLON", og["on"]["kolon"]), ("MAKAS", og["on"]["makas"]), ("TERS_MAHYA", og["on"]["ters_mahya"])):
         for p, q in liste:
             msp.add_line(p, q, dxfattribs={"layer": ad})
     for ad, liste in (("KOLON", og["yan"]["kolon"]), ("MAKAS", og["yan"]["makas"])):

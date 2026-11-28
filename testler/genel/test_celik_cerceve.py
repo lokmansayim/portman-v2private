@@ -83,3 +83,11 @@ def test_sacak_payi_30():
     assert min(xs) == -30 and max(xs) == 4530
     ys = [p[0] for cz in og["yan"]["makas"] for p in cz]
     assert min(ys) == -30 and max(ys) == 2530
+
+
+def test_ters_mahya_ic_akslarda():
+    # Lokman 28.11 14:14:23 "oraya özel ters mahya gelecek": dört iç aks, boy 2500 + 2 × 30
+    k = C.kur(_t())
+    assert [(tm["aks"], tm["boy_cm"]) for tm in k["ters_mahya"]] == [(900, 2560), (1800, 2560), (2700, 2560), (3600, 2560)]
+    og = C.cizim_ogeleri(k)
+    assert len(og["on"]["ters_mahya"]) == 8
