@@ -1147,9 +1147,9 @@ def _iki_uclu_kirma_catilari(plan, ie: dict) -> tuple[list[dict], dict]:
     makasın arasındaki göz çatı paneli (CP1–CP6; gözün ortası mahyanın ucundan dışarıda). Kural tek paftayla kıyaslandı (29 makas, 6
     panel). Mahya y boyunca (BK-45, 87 m² kırma) aynı kural 90° dönmüş; `kirma_makas › mahya` "y" (yoksa x), `ana_x_cm` mahya ekseninde.
     Uç bandı 1,5 panodan genişse ilk ana makas mahyanın ucuyla uç arasındaki en yakın duvarın üstünde (D-114; Lokman 16 Kasım 2026: 87 m²'de
-    ön uç 330'daki duvar). Paftanın dışında kalanda liste yazılmaz (geometri hakemi, 6 Kasım): girintili gövde; taşan veranda (verandanın
-    çatısı kırmayla kıyaslanmadı); iki ana makasın arası 125,5'ten geniş (saçak duvarında geniş pano); uç bandı (D-114 duvarı yoksa) ya da
-    iki kısa makasın arası 1,5 panodan (188,25) geniş."""
+    ön uç 330'daki duvar); duvar da yoksa uç duvarın dış yüzünden 125,5 içeride bir ana makas daha (D-166; 67 m² 2+1, arka uç). Paftanın
+    dışında kalanda liste yazılmaz (geometri hakemi, 6 Kasım): girintili gövde; taşan veranda (verandanın çatısı kırmayla kıyaslanmadı); iki
+    ana makasın arası 125,5'ten geniş (saçak duvarında geniş pano); iki kısa makasın arası 1,5 panodan (188,25) geniş."""
     from . import cati_prefabrik as CP
     from . import geometry as G
     from .genel import cati_genel
@@ -1232,6 +1232,14 @@ def _iki_uclu_kirma_catilari(plan, ie: dict) -> tuple[list[dict], dict]:
         duvarda[k_uc] = adaylar[0]
     for k_uc, x in acik_uc.items():                                     # D-131: duvarsız uçta ilk ana makas gövdenin duvarında
         duvarda[k_uc] = round(x, 2)
+    # D-166 (BK-90; Lokman kartı 28 Kasım 2026 10:46:26 "Eskizdeki gibi, aynı durumdaki her evde"; 67 m² 2+1): uç bandı 1,5 panodan geniş
+    # kalır ve uçta D-114/D-131 duvarı yoksa (uca bir panodan yakın pano eki makas almaz) uç duvarın dış yüzünden 125,5 içeride bir ana makas
+    # daha; kısa makaslar o makasa kadar. Bugün listesi yazılan kırmalar aynen (bant zaten 1,5 panodan dar).
+    for k_uc, kenar_x in enumerate((g0, g1)):
+        xf = ana_x[0] if k_uc == 0 else ana_x[-1]
+        if k_uc in duvarda or abs(xf - kenar_x) <= 1.5 * MOD_CM + 1e-6:
+            continue
+        ana_x = sorted(set(ana_x) | {round(kenar_x + MOD_CM if k_uc == 0 else kenar_x - MOD_CM, 2)})
     if duvarda:
         ana_x = [x for x in ana_x if (0 not in duvarda or x >= duvarda[0] - 1e-6) and (1 not in duvarda or x <= duvarda[1] + 1e-6)]
 
