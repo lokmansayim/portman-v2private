@@ -83,8 +83,16 @@ def kur(t: dict) -> dict:
         makaslar.append({"ad": f"M{i + 1:02d}", "aks": [_r(a), _r(b)], "mesnet_cm": mesnet, "egim": egim,
                          "tepe_cm": _r(H + egim * (b - a) / 2), "cubuk": len(cub), "panel": bilgi["panel"],
                          "cubuklar": [{k: (round(v, 1) if isinstance(v, float) else v) for k, v in c.items()} for c in cub]})
+    sacak = float(t.get("sacak_cm", 0))
+    for m, yon, uc in ((makaslar[0], -1, xa[0]), (makaslar[-1], 1, xa[-1])):
+        if sacak <= 0:
+            break
+        pd = next(c for c in m["cubuklar"] if c["ad"] == "PD")          # sol üst başlık (yerel mm)
+        y_uc = pd["y1"] + egim * (0 - pd["x1"])                          # üst başlık ekseni dış uçta (yerel x = 0)
+        m.setdefault("sacak", []).append({"yon": yon, "uc_cm": _r(uc), "boy_cm": sacak,
+                                          "ust_cm": _r(H + y_uc / 10), "uc_ust_cm": _r(H + (y_uc - egim * sacak * 10) / 10)})
     return {"kod": t["kod"], "dis_olcu": [W, D], "kolon_yuksekligi": H, "x_akslari": [_r(a) for a in xa],
-            "y_akslari": [_r(b) for b in ya], "kolonlar": kolonlar, "makaslar": makaslar,
+            "y_akslari": [_r(b) for b in ya], "kolonlar": kolonlar, "makaslar": makaslar, "sacak_cm": sacak,
             "ozet": {"kolon": len(kolonlar), "makas_cercevesi": len(makaslar), "cerceve_hatti": len(ya),
                      "makas_toplam": len(makaslar) * len(ya), "mahya_kotu_cm": max(m["tepe_cm"] for m in makaslar)}}
 
@@ -103,7 +111,12 @@ def _kafes(dikme0, dikme1, h, adim):
 
 def _makas_cizgileri(m, H):
     a = m["aks"][0]
-    return [((a + c["x1"] / 10, H + c["y1"] / 10), (a + c["x2"] / 10, H + c["y2"] / 10)) for c in m["cubuklar"]]
+    cizgi = [((a + c["x1"] / 10, H + c["y1"] / 10), (a + c["x2"] / 10, H + c["y2"] / 10)) for c in m["cubuklar"]]
+    for s in m.get("sacak", []):                     # saçak payı: üst başlık dış uçtan saçak boyunca uzar, uçta düşey kapama
+        x0, x1 = s["uc_cm"], s["uc_cm"] + s["yon"] * s["boy_cm"]
+        cizgi.append(((x0, s["ust_cm"]), (x1, s["uc_ust_cm"])))
+        cizgi.append(((x1, s["uc_ust_cm"]), (x1, min(s["uc_ust_cm"], H))))
+    return cizgi
 
 
 def cizim_ogeleri(k: dict) -> dict:
@@ -122,7 +135,8 @@ def cizim_ogeleri(k: dict) -> dict:
     for c in ilk_sutun:
         y0, y1 = c["y"]
         yan["kolon"] += _kafes(y0, y1, H, y1 - y0)
-    yan["makas"] = [((0, H), (D, H)), ((0, k["ozet"]["mahya_kotu_cm"]), (D, k["ozet"]["mahya_kotu_cm"]))]
+    sc = k["sacak_cm"]                               # kalkan saçağı: aşık ve mahya iki uçta saçak kadar dışarı
+    yan["makas"] = [((0, H), (D, H)), ((-sc, k["ozet"]["mahya_kotu_cm"]), (D + sc, k["ozet"]["mahya_kotu_cm"]))]
     plan = [(c["x"][0], c["y"][0], c["x"][1] - c["x"][0], c["y"][1] - c["y"][0], c["ad"]) for c in k["kolonlar"]]
     return {"on": on, "yan": yan, "plan": plan}
 
@@ -161,12 +175,16 @@ def _png_pdf(k, og, t, cikti: Path):
     for a, b in zip(xa, xa[1:]):
         olcu(ax, a, b, -95, f"{b - a:g}")
     olcu(ax, 0, W, -165, f"{W:g}")
+    sc = k["sacak_cm"]
+    if sc:
+        olcu(ax, -sc, 0, H + 60, f"{sc:g}")
+        olcu(ax, W, W + sc, H + 60, f"{sc:g}")
     ax.annotate("", (W + 70, 0), (W + 70, H), arrowprops=dict(arrowstyle="<->", lw=0.6))
     ax.text(W + 85, H / 2, f"{H:g}", rotation=90, va="center", fontsize=8)
     ax.annotate("", (W + 70, H), (W + 70, tepe), arrowprops=dict(arrowstyle="<->", lw=0.6))
     ax.text(W + 85, (H + tepe) / 2, f"{tepe - H:.1f}", rotation=90, va="center", fontsize=8)
     ax.set_aspect("equal")
-    ax.set_xlim(-60, W + 140)
+    ax.set_xlim(-80, W + 140)
     ax.set_ylim(-200, tepe + 40)
     ax.axis("off")
 
@@ -183,6 +201,9 @@ def _png_pdf(k, og, t, cikti: Path):
     for a, b in zip(ya, ya[1:]):
         olcu(ax, a, b, -95, f"{b - a:.1f}")
     olcu(ax, 0, D, -165, f"{D:g}")
+    if sc:
+        olcu(ax, -sc, 0, tepe + 30, f"{sc:g}")
+        olcu(ax, D, D + sc, tepe + 30, f"{sc:g}")
     ax.set_aspect("equal")
     ax.set_xlim(-60, D + 60)
     ax.set_ylim(-200, tepe + 60)

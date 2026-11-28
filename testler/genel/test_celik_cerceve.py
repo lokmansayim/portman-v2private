@@ -67,3 +67,19 @@ def test_yapi_tanimi_dis_olcu():
     ys = [v for d in t["duvarlar"] for v in (d["kutu"][1], d["kutu"][3])]
     kap = t["yuz_kaplamalari"]["dis"]["kalinlik"]
     assert (min(xs) - kap, max(xs) + kap, min(ys) - kap, max(ys) + kap) == (0, 4500, 0, 2500)
+
+
+def test_sacak_payi_30():
+    # Lokman 28.11 13:51 "saçaklar 30'ar cm"; 14:11 "saçak paylarını vermeyi unutmuşsun"
+    k = C.kur(_t())
+    assert k["sacak_cm"] == 30
+    ilk, son = k["makaslar"][0]["sacak"], k["makaslar"][-1]["sacak"]
+    assert [(s["yon"], s["uc_cm"], s["boy_cm"]) for s in ilk + son] == [(-1, 0, 30), (1, 4500, 30)]
+    assert all(m.get("sacak") is None for m in k["makaslar"][1:-1])
+    s = ilk[0]
+    assert abs((s["ust_cm"] - s["uc_ust_cm"]) - 0.33 * 30) < 0.01
+    og = C.cizim_ogeleri(k)
+    xs = [p[0] for cz in og["on"]["makas"] for p in cz]
+    assert min(xs) == -30 and max(xs) == 4530
+    ys = [p[0] for cz in og["yan"]["makas"] for p in cz]
+    assert min(ys) == -30 and max(ys) == 2530
