@@ -126,16 +126,19 @@ def test_87m2_liste_hedef_ornek():
     assert bulunan == [[(h["olcu"], h["motor"])] for h in H["satirlar"]]
 
 
-def test_87m2_duvar_yoksa_yazilmaz():
-    """D-114 yalnız mahyanın ucuyla uç arasında duvar varsa: 330'daki duvar olmasa ön uç bandı (204,5) 1,5 panodan geniş kalır, liste
-    sessizce yazılmaz (K21; D-66 › Sınır aynen)."""
+def test_87m2_duvar_yoksa_uctan_bir_pano():
+    """D-114 yalnız mahyanın ucuyla uç arasında duvar varsa. 330'daki duvar olmasa ön uç bandı (204,5) 1,5 panodan geniş kalır: D-166'dan
+    beri (BK-90; Lokman kartı 28 Kasım 2026 10:46:26 "Eskizdeki gibi, aynı durumdaki her evde") uç duvarın dış yüzünden 125,5 içeride bir ana
+    makas daha (önce liste yazılmazdı, K21)."""
     from motor import geometry as G
     ie = _ie(PA06K)
     plan = G.kur(json.loads(json.dumps(ie)))
     assert [round(d.c, 2) for d in plan.duvarlar if d.yon == "x" and 204.5 < d.c < 400] == [330.0]
     plan.duvarlar = [d for d in plan.duvarlar if not (d.yon == "x" and abs(d.c - 330.0) < 1e-6)]
-    with pytest.raises(PL.ListeYazilmaz, match="1,5 panodan geniş"):
-        PL._iki_uclu_kirma_catilari(plan, ie)
+    out, _ = PL._iki_uclu_kirma_catilari(plan, ie)
+    km = out[0]["kirma_makas"]
+    g0 = float(G.govde_kutusu(plan)[1])
+    assert km["ana_x_cm"][0] == round(g0 + 125.5, 2) and km["uclar"][0]["bant_cm"] == 125.5 and "ilk_ana_duvarda_cm" not in km["uclar"][0]
 
 
 def test_tek_uclu_kirma_aynen():
