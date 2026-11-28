@@ -121,7 +121,7 @@ DHDD5 = (KOK / "KARARLAR" / f"{KARAR_HDD5}.md").read_text(encoding="utf-8")
 HDD5_EVLERI = {
     "PA52": ("HD-058", "testler/havuz/is_emirleri/HD058.json", "3+1", 69.0),     # paftanın başlığı 70 m², brüt 69,01; veranda gövdede (niş)
 }
-KARAR_HDD6 = "D-169"
+KARAR_HDD6 = "D-170"
 DHDD6 = (KOK / "KARARLAR" / f"{KARAR_HDD6}.md").read_text(encoding="utf-8")
 HDD6_EVLERI = {
     "PA53": ("HD-390", "testler/havuz/is_emirleri/HD390.json", "2+1", 69.0),     # Parti 2'nin 70 m²'si (brüt 69,01); veranda gövdede (niş), köşe kolonu sağ önde
@@ -377,8 +377,8 @@ SETLER = {
     (40, "1+1"): ["PA29", "PA39"],                                                    # D-91 kısalt (39,61 m²); PA-39: disk arşivinin 37 m²'si (D-111)
     (45, "1+1"): ["PA27", "PA40", "PA45", "PA28"],                                    # eski hâl ve en yakın standart (D-91); PA-40, PA-45: disk arşivinin 45 m²'leri (D-111, D-132)
     (60, "2+1"): ["PA01", "PA14", "PA18", "PA25", "PA31", "PA41", "PA36", "PA02", "PA09", "PA20"],  # PA-31 silinmiş hâl (59 m²); PA-36 geniş hâl (62 m²); PA-41 disk arşivi (59 m², D-111)
-    (65, "2+1"): ["PA02", "PA09", "PA20", "PA51", "PA36", "PA25", "PA32", "PA35", "PA53", "PA01"],  # PA-51 disk arşivinin 67 m²'si (D-165) dördüncü; PA-36 (62 m²) beşinci; PA-53 (70 m², D-169) dokuzuncu, PA-03 düştü; liste 10
-    (71, "2+1"): ["PA26", "PA03", "PA15", "PA32", "PA35", "PA53", "PA47", "PA51", "PA24", "PA02"],  # PA-35: 71 m²'nin üçlü H'lı hâli (69 m²); PA-53 disk arşivi (70 m², D-169) altıncı; PA-47 disk arşivi (74 m², D-132); PA-51 disk arşivi (67 m², D-165); PA-04, PA-34, PA-20, PA-09 10 sınırıyla düştü
+    (65, "2+1"): ["PA02", "PA09", "PA20", "PA51", "PA36", "PA25", "PA32", "PA35", "PA53", "PA01"],  # PA-51 disk arşivinin 67 m²'si (D-165) dördüncü; PA-36 (62 m²) beşinci; PA-53 (70 m², D-170) dokuzuncu, PA-03 düştü; liste 10
+    (71, "2+1"): ["PA26", "PA03", "PA15", "PA32", "PA35", "PA53", "PA47", "PA51", "PA24", "PA02"],  # PA-35: 71 m²'nin üçlü H'lı hâli (69 m²); PA-53 disk arşivi (70 m², D-170) altıncı; PA-47 disk arşivi (74 m², D-132); PA-51 disk arşivi (67 m², D-165); PA-04, PA-34, PA-20, PA-09 10 sınırıyla düştü
     (77, "2+1"): ["PA24", "PA04", "PA34", "PA16", "PA47", "PA48", "PA05", "PA26", "PA03", "PA15"],  # PA-34: 77 m²'nin büyüyen hâli (D-92); PA-47, PA-48 disk arşivi (D-132); PA-19 10 sınırıyla düştü
     (80, "2+1"): ["PA16", "PA48", "PA04", "PA05", "PA34", "PA24", "PA19", "PA47", "PA06"],  # PA-48 disk arşivinin 80 m²'si, PA-47 74 m² (D-132)
     (75, "2+1"): ["PA47", "PA24", "PA04", "PA34", "PA26", "PA03", "PA15", "PA16", "PA48", "PA32"],  # PA-47 disk arşivinin 76 m² başlıklı evi (74 m², D-132)

@@ -174,7 +174,7 @@ Biçim: karar · gerekçe · reddedilen seçenekler · geri alma yolu · kim ve 
 | [D-165](D-165.md) | Disk arşivi Parti 1'in 67 m² 2+1'i (HD-259) havuzda, PA-51: kat planı Motor'un aks düzeniyle (taşan veranda, 1 ara kolon); çatı beşik ve verandanın beşiği (BK-40 kartları); paftadaki dörtomuz (verandayı da örter) Motor listeyi yazınca ikinci çatı seçeneği olur | 28.11 (Lokman kart 09:25:26 "Onaylıyorum, kat planı böyle"; kart 10:40:38 "İkisi de girsin") |
 | [D-166](D-166.md) | Dörtomuzda (iki uçlu kırma) uç bandı 1,5 panodan geniş kalır ve uçta duvar yoksa (D-114, D-131) uç duvarın dış yüzünden 125,5 içeride bir ana makas daha; kısa makaslar o makasa kadar. Anahtarsız, aynı durumdaki her evde: disk arşivi 67 m² 2+1 dörtomuz (ana 7, kısa 3 + 5, çapraz 4) ve 60, 84, 62 m² havuz evlerinin kırma seçeneği yazılır; bugün listesi yazılan kırmalar aynen (BK-90) | 28.11 (Lokman kart 28.11 10:46:26 "Eskizdeki gibi, aynı durumdaki her evde") |
 | [D-168](D-168.md) | Disk arşivi Parti 1'in 70 m² 3+1'i (HD-058, DWG yok, montaj paftası PDF'inden) havuzda, PA-52: kat planı Motor'un aks düzeniyle (iki dizilim farkı "böyle kalsın"); çatı beşik + salonun önünde cumba, saçak 30 | 28.11 (Lokman kart 11:20:24 "Onaylıyorum, böyle kalsın"; kart 11:25:08 "Onaylıyorum, saçak 30 cm") |
-| [D-169](D-169.md) | Disk arşivi Parti 2'nin 70 m² 2+1'i (HD-390) havuzda, PA-53: kat planı Motor'un aks düzeniyle (salonun veranda yanı duvarı "böyle kalsın"); çatı beşik + verandanın önünde cumba, saçak 30 | 28.11 (Lokman kart 14:10:31 "Onaylıyorum, böyle kalsın"; kart 14:22:26 "Onaylıyorum, Motor'daki gibi") |
+| [D-170](D-170.md) | Disk arşivi Parti 2'nin 70 m² 2+1'i (HD-390) havuzda, PA-53: kat planı Motor'un aks düzeniyle (salonun veranda yanı duvarı "böyle kalsın"); çatı beşik + verandanın önünde cumba, saçak 30 | 28.11 (Lokman kart 14:10:31 "Onaylıyorum, böyle kalsın"; kart 14:22:26 "Onaylıyorum, Motor'daki gibi") |
 | [D-142](D-142.md) | Huma Çelik 45 m² bayi teklifi (TK-09 r04) mihenk taşı ve hedef örnek: plan 43,69 brüt / 40,63 net, 29 pano, çapraz cumba; liste 105 satır, taban 219.729,25 TL, kâr %25, bayi birim 274.661,56 TL (KDV yok); mühür M-20 | 20.11 (Lokman 14:47:53 "bu seviyede mühürle bizim mihenk taşımız olsun") |
 
 ## Numara defteri (14 Ekim 2026, BK-08; CIO planı › Görev 3)
@@ -331,7 +331,7 @@ Karar (D) ve iş emri (İE, BK) numaraları dallar arasında çakışmasın diye
 | D | D-165 | disk arşivi 67 m² 2+1 havuzda, PA-51; beşik şimdi, dörtomuz bakımdan sonra (İE-43 PR-9) | yazıldı (28.11; `claude/project-thread-j395y0`) |
 | D | D-166 | Dörtomuzda geniş uç bandına uçtan 125,5 içeride ana makas, aynı durumdaki her evde (BK-90; Lokman kart 28.11 10:46:26 "Eskizdeki gibi, aynı durumdaki her evde") | yazıldı (28.11; `claude/project-thread-cob70z`) |
 | D | D-168 | disk arşivi 70 m² 3+1 (yalnız PDF) havuzda, PA-52 (İE-43 PR-9) | yazıldı (28.11; `claude/project-thread-j395y0`) |
-| D | D-169 | disk arşivi 70 m² 2+1 (HD-390) havuzda, PA-53 (İE-43 PR-9) | yazıldı (28.11; `claude/project-thread-j395y0`) |
+| D | D-170 | disk arşivi 70 m² 2+1 (HD-390) havuzda, PA-53 (İE-43 PR-9) | yazıldı (28.11; `claude/project-thread-j395y0`) |
 | D | **D-161** | — | **sıradaki boş** |
 | İE | İE-01–İE-08 | bu depo (`main`) | yazıldı |
 | İE | İE-09 | model atölyesi: kontrollü model üretimi ve banka hattı (Görev 6e; pano 30; P6001 güncellemesi kapsam dışı) | alındı (16.10; `claude/gorev-6e-model-atolyesi-rnhtcp`; PR-1 banka hattı 29.10, `claude/project-thread-rhjgzv`) |

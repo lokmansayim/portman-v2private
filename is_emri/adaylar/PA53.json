@@ -7,7 +7,7 @@
    "ad": "Aday kaydı"
   },
   "musteri_adi": "ADAY PA53",
-  "metin": "HD-390 montaj paftasından (DWG HD-390;10, plan 63) İş Emri (İE-43, disk arşivi Parti 2; ad yok; paftanın başlığı 70 m², brüt 69,01). Havuz: D-169 (Lokman 28 Kasım 2026 14:10:31 kartı \"Onaylıyorum, böyle kalsın\"; 14:22:26 kartı \"Onaylıyorum, Motor'daki gibi\": beşik + verandanın önünde cumba). Asıl uygulanmış proje: D-103."
+  "metin": "HD-390 montaj paftasından (DWG HD-390;10, plan 63) İş Emri (İE-43, disk arşivi Parti 2; ad yok; paftanın başlığı 70 m², brüt 69,01). Havuz: D-170 (Lokman 28 Kasım 2026 14:10:31 kartı \"Onaylıyorum, böyle kalsın\"; 14:22:26 kartı \"Onaylıyorum, Motor'daki gibi\": beşik + verandanın önünde cumba). Asıl uygulanmış proje: D-103."
  },
  "yapi": {
   "sistem": "prefabrik",
@@ -438,7 +438,7 @@
   "Bölge 2 (4.73 m² aks alanı): paftada oda adı yok; BANYO sayıldı (tefriş: banyo).",
   "VERANDA: gövdenin içinde açık mahal (paftada kolon); köşe kolonu verandanın sağ ön köşesinde (dikme 815,75; okuyucu 817,8 yazmıştı, duvarın 2,05 cm dışına taşıyordu).",
   "İç duvar kalınlıkları karışık {6.0: 6, 10.0: 2}; çoğunluk 6 cm yazıldı.",
-  "Çatı paftanın makas ve dere planından: ana beşik (8 makas, paftada 2 baş + 6 orta) + verandanın önünde çıkıntısız cumba (paftada 1 cumba baş makası, Motor'da 2); eğim %32,9 (paftada 18°), saçak 30 (paftada 25). Lokman kartı 28 Kasım 2026 14:22:26 \"Onaylıyorum, Motor'daki gibi\" (D-169).",
+  "Çatı paftanın makas ve dere planından: ana beşik (8 makas, paftada 2 baş + 6 orta) + verandanın önünde çıkıntısız cumba (paftada 1 cumba baş makası, Motor'da 2); eğim %32,9 (paftada 18°), saçak 30 (paftada 25). Lokman kartı 28 Kasım 2026 14:22:26 \"Onaylıyorum, Motor'daki gibi\" (D-170).",
   "Pano dizilimi paftadan: sol hattında y 637.5'dan 125,5; 381.5 hattında y 637.5'dan 125,5; arka hattında x 632.5'dan 125,5; 386.5 hattında x 632.5'dan 125,5; 637.5 hattında x 569.75'dan 125,5 (dizilim.dis_pano_dayanagi).",
   "Motor'un dizilimi paftadan bir yerde farklı (Lokman kartı 28 Kasım 2026 14:10:31 \"Onaylıyorum, böyle kalsın\"): salonun veranda yanı duvarı Motor'da 120,5 + 62,75, paftada alttan 52,75."
  ],

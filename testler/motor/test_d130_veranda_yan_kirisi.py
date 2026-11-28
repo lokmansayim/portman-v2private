@@ -133,7 +133,7 @@ def test_kenar_kilidi():
     hakemi, 19 Kasım 2026: 180 İş Emri'nin yükleme listesi `main`'le kıyaslandı). Kilit bilinçli yazılır:
     `python testler/motor/test_d130_veranda_yan_kirisi.py --kilit`, gerekçesi iş emrine. İE-43 PR-8 (D-134): havuza giren 110 ve 120 m²
     (PA-49, PA-50) eklendi, 126 İş Emri; var olan 124'ü aynen. İE-43 PR-9 (D-168): havuza giren 70 m² 3+1 (PA-52; veranda nişi, köşe
-    kolonu) eklendi; var olanlar aynen. İE-43 PR-9 (D-169): 70 m² 2+1 (PA-53; köşe kolonu sağ önde) eklendi."""
+    kolonu) eklendi; var olanlar aynen. İE-43 PR-9 (D-170): 70 m² 2+1 (PA-53; köşe kolonu sağ önde) eklendi."""
     assert _kenar_tablosu() == json.loads(KILIT.read_text(encoding="utf-8"))
 
 
