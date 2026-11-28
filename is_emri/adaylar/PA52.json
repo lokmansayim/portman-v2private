@@ -1,0 +1,269 @@
+{
+ "is_emri_no": "PM-ADAY-PA52",
+ "revizyon": 1,
+ "talep": {
+  "bayi": {
+   "kod": "ADAY",
+   "ad": "Aday kaydı"
+  },
+  "musteri_adi": "ADAY PA52",
+  "metin": "HD-058 montaj paftasından (PDF, ev 2) İş Emri (İE-43, disk arşivi Parti 1; elle okundu, ad yok; paftanın başlığı 70 m², brüt 69,01). Havuz: D-168 (Lokman 28 Kasım 2026 11:20:24 kartı \"Onaylıyorum, böyle kalsın\"; 11:25:08 kartı \"Onaylıyorum, saçak 30 cm\": beşik + salonun önünde cumba). Asıl uygulanmış proje: D-103."
+ },
+ "yapi": {
+  "sistem": "prefabrik",
+  "kat_sayisi": 1,
+  "duvar_yuksekligi_cm": 250,
+  "duvar_kalinligi_cm": {
+   "dis": 10,
+   "ic": 6.0
+  },
+  "olcu_kaynagi": "dis_olcu",
+  "dis_olcu_cm": {
+   "x": 825.75,
+   "y": 835.75
+  },
+  "referans_model": "PA-52",
+  "grid": {
+   "x_pano": 6.5,
+   "y_pano": 6.5
+  },
+  "kisa_kenar": "y",
+  "giris_cephesi": "on",
+  "dis_dusey_duvar": "cevre_aks_disinda",
+  "dizilim": {
+   "baslangic": "arka-sol",
+   "hiza": "izgara",
+   "dis_duvar_t_bolme": false,
+   "pencere": "oda_ortasi",
+   "kapi": "mantik",
+   "kose": "oda",
+   "son_pano": "son_aks",
+   "kapi_yeri": "ortada",
+   "dis_pano_dayanagi": [
+    {
+     "x": 318.75,
+     "aralik_cm": [
+      318.75,
+      444.25
+     ],
+     "ic_duvarlar": true,
+     "duvar_cm": 637.5
+    }
+   ]
+  },
+  "ek_akslar_cm": {
+   "x": [],
+   "y": []
+  }
+ },
+ "mahaller": [
+  {
+   "ad": "Y.ODASI",
+   "tur": "yatak_odasi",
+   "konum_cm": [
+    [
+     5,
+     10,
+     256,
+     198.25
+    ],
+    [
+     5,
+     198.25,
+     318.75,
+     323.75
+    ]
+   ]
+  },
+  {
+   "ad": "BANYO",
+   "tur": "banyo",
+   "konum_cm": [
+    [
+     256,
+     10,
+     444.25,
+     198.25
+    ]
+   ]
+  },
+  {
+   "ad": "Y.ODASI 2",
+   "tur": "yatak_odasi",
+   "konum_cm": [
+    [
+     444.25,
+     10,
+     820.75,
+     323.75
+    ]
+   ]
+  },
+  {
+   "ad": "Y.ODASI 3",
+   "tur": "yatak_odasi",
+   "konum_cm": [
+    [
+     5,
+     323.75,
+     318.75,
+     637.5
+    ]
+   ]
+  },
+  {
+   "ad": "SALON + MUTFAK",
+   "tur": "salon",
+   "konum_cm": [
+    [
+     318.75,
+     198.25,
+     444.25,
+     323.75
+    ],
+    [
+     318.75,
+     323.75,
+     820.75,
+     637.5
+    ],
+    [
+     444.25,
+     637.5,
+     820.75,
+     825.75
+    ]
+   ]
+  },
+  {
+   "ad": "VERANDA",
+   "tur": "veranda",
+   "konum_cm": [
+    [
+     5,
+     637.5,
+     444.25,
+     825.75
+    ]
+   ]
+  }
+ ],
+ "acik_sinirlar": [],
+ "acikliklar": [
+  {
+   "tur": "ic_kapi",
+   "olcu": 82,
+   "arasi": [
+    "SALON + MUTFAK",
+    "Y.ODASI"
+   ]
+  },
+  {
+   "tur": "ic_kapi",
+   "olcu": 82,
+   "arasi": [
+    "SALON + MUTFAK",
+    "Y.ODASI 3"
+   ]
+  },
+  {
+   "tur": "ic_kapi",
+   "olcu": 82,
+   "arasi": [
+    "SALON + MUTFAK",
+    "Y.ODASI 2"
+   ],
+   "duvar": "sol"
+  },
+  {
+   "tur": "ic_kapi",
+   "olcu": 82,
+   "arasi": [
+    "SALON + MUTFAK",
+    "BANYO"
+   ]
+  },
+  {
+   "tur": "dis_kapi",
+   "olcu": 90,
+   "arasi": [
+    "VERANDA",
+    "SALON + MUTFAK"
+   ],
+   "duvar": "on"
+  },
+  {
+   "tur": "pencere",
+   "olcu": "60x40",
+   "mahal": "BANYO",
+   "duvar": "arka"
+  },
+  {
+   "tur": "pencere",
+   "olcu": "120x120",
+   "mahal": "Y.ODASI",
+   "duvar": "sol"
+  },
+  {
+   "tur": "pencere",
+   "olcu": "120x120",
+   "mahal": "Y.ODASI 2",
+   "duvar": "sag"
+  },
+  {
+   "tur": "pencere",
+   "olcu": "120x120",
+   "mahal": "SALON + MUTFAK",
+   "duvar": "sag"
+  },
+  {
+   "tur": "pencere",
+   "olcu": "120x180",
+   "mahal": "Y.ODASI 3",
+   "duvar": "on"
+  },
+  {
+   "tur": "pencere",
+   "olcu": "120x180",
+   "mahal": "SALON + MUTFAK",
+   "duvar": "on"
+  }
+ ],
+ "cati": {
+  "tip": "besik_cumba",
+  "egim_yuzde": 32.9,
+  "sacak_cm": 30,
+  "topuk_cm": 10,
+  "makas_yonu": "kisa_kenar",
+  "makas_ekseni": "y",
+  "cumbalar": [
+   {
+    "cephe": "on",
+    "bas_cm": 439.25,
+    "bit_cm": 825.75,
+    "cikinti_cm": 0
+   }
+  ]
+ },
+ "cikti": {
+  "pdf": true,
+  "dxf": true,
+  "pafta": "A2",
+  "icerik": [
+   "aksli_plan"
+  ]
+ },
+ "varsayimlar": [
+  "DWG yok: kat planı ev 2'nin montaj paftası PDF'inden elle okundu (ölçü yazıları ve duvarların vektör çizgileri). Ev 1 bu planın sağ–sol aynası.",
+  "WC alt duvarı y 198,25 (PDF'te ekseni ~196, 1,5 pano).",
+  "Ana kapı verandadan salonun koridoruna (duvar y 637,5; pano dayanağı x 318,75). Y.Odası 2 kapısı yan duvarda (paftadaki gibi).",
+  "Motor'un dizilimi paftadan iki yerde farklı (Lokman kartı 28 Kasım 2026 11:20:24 \"Onaylıyorum, böyle kalsın\"): arka duvarın 62,75'lik panosu Y.Odası 2'de (paftada sol başta); Y.Odası 3'ün veranda penceresi bir pano sağda.",
+  "Çatı paftanın makas planından: ana beşik + salonun önünde çıkıntısız cumba; saçak 30 (paftada 25; Lokman kartı 11:25:08 \"Onaylıyorum, saçak 30 cm\")."
+ ],
+ "dikmeler": [
+  [
+   0.0,
+   0.0
+  ]
+ ]
+}

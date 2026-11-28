@@ -1,0 +1,78 @@
+{
+ "kod": "PA52",
+ "gosterim": "PA-52",
+ "durum": "gecerli",
+ "sablon": "adaylar/PA52.json",
+ "gorsel": "adaylar/PA52.png",
+ "referans_model": "PA-52",
+ "yapi_turu": "prefabrik",
+ "kat": 1,
+ "oda_programi": "3+1",
+ "katalog_m2": 69.0,
+ "kapali_m2": 60.5,
+ "veranda_m2": 8.49,
+ "ozet": {
+  "grid": {
+   "x_pano": 6.5,
+   "y_pano": 6.5
+  },
+  "dis_olcu_cm": [
+   825.75,
+   835.75
+  ],
+  "brut_m2": 69.01,
+  "pano": 47,
+  "pencere": 6,
+  "kapi": 5,
+  "odalar": {
+   "Y.ODASI": 8.3,
+   "BANYO": 3.38,
+   "Y.ODASI 2": 11.45,
+   "Y.ODASI 3": 9.35,
+   "SALON + MUTFAK": 23.69,
+   "VERANDA": 8.49
+  }
+ },
+ "kaynak": {
+  "metin": "HD-058 montaj paftasından (PDF, ev 2) İş Emri (İE-43, disk arşivi Parti 1; elle okundu, ad yok; paftanın başlığı 70 m², brüt 69,01). Havuz: D-168 (Lokman 28 Kasım 2026 11:20:24 kartı \"Onaylıyorum, böyle kalsın\"; 11:25:08 kartı \"Onaylıyorum, saçak 30 cm\": beşik + salonun önünde cumba). Asıl uygulanmış proje: D-103.",
+  "dosya": "testler/havuz/is_emirleri/HD058.json",
+  "ayna": null,
+  "karar": "D-168",
+  "standart": true,
+  "kart_kiyasi": {
+   "kart": "HD-058",
+   "kart_sha256": "e9d55a2b1616b6f481608f46b13d210aa0cacc696c31fb012aab3199165d2aaf",
+   "sonuc": "geçti",
+   "olcum": {
+    "dis_olcu_cm": [
+     825.75,
+     835.75
+    ],
+    "acikla_olcu_cm": [
+     825.75,
+     835.75
+    ],
+    "brut_m2": 69.01,
+    "kubbe_m2": 0.0,
+    "yatak_odasi": 3,
+    "pencereler": {
+     "120x120": 3,
+     "120x180": 2,
+     "60x40": 1
+    },
+    "dis_kapi": 1,
+    "ic_kapi": 4,
+    "veranda": 1,
+    "kat": 1
+   }
+  },
+  "havuz_denetimi": {
+   "sonuc": "geçti",
+   "karar": "D-112",
+   "uyarilar": [
+    "HD-06: ['makas yeri (ana çatı): saçak duvarının pano ekleri düzensiz (8 makas, listede 8; aralıklar 125.5, 125.5, 125.5, 125.5, 125.5, 62.75, 125.5); eşit aralıklı 8 makas']"
+   ]
+  }
+ },
+ "not": "Kat planında iki dizilim farkı (arka duvarın 62,75'lik panosu Y.Odası 2'de, Y.Odası 3'ün veranda penceresi bir pano sağda; Lokman \"böyle kalsın\"); saçak paftada 25, kayıtta 30."
+}

@@ -31,7 +31,12 @@ def test_kart_muhurdeki_dwg(kod):
     k = KARTLAR[kod]
     ad, sira = k["kaynak"]["dosya"].split(";")
     r = MUHUR[(ad, int(sira))]
-    assert ad == kod and r["uzanti"] == "dwg" and r["sha256"] == k["kart_sha256"]
+    assert ad == kod and r["uzanti"] == ("pdf" if kod in YALNIZ_PDF else "dwg") and r["sha256"] == k["kart_sha256"]
+    assert k["kaynak"].get("uzanti", "dwg") == r["uzanti"]
+
+
+# DWG'si olmayan ev (İE-43 PR-9, D-168): kart ve İş Emri mühürdeki montaj paftası PDF'inden elle okundu; kaynak `uzanti: pdf` yazar.
+YALNIZ_PDF = {"HD-058"}
 
 
 @pytest.mark.parametrize("kod", sorted(KARTLAR))

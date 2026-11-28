@@ -1,0 +1,77 @@
+{
+ "kod": "PA53",
+ "gosterim": "PA-53",
+ "durum": "gecerli",
+ "sablon": "adaylar/PA53.json",
+ "gorsel": "adaylar/PA53.png",
+ "referans_model": "PA-53",
+ "yapi_turu": "prefabrik",
+ "kat": 1,
+ "oda_programi": "2+1",
+ "katalog_m2": 69.0,
+ "kapali_m2": 60.5,
+ "veranda_m2": 8.49,
+ "ozet": {
+  "grid": {
+   "x_pano": 6.5,
+   "y_pano": 6.5
+  },
+  "dis_olcu_cm": [
+   825.75,
+   835.75
+  ],
+  "brut_m2": 69.01,
+  "pano": 46,
+  "pencere": 6,
+  "kapi": 6,
+  "odalar": {
+   "Y.ODASI": 12.17,
+   "SALON": 16.04,
+   "BANYO": 4.52,
+   "HOL": 4.4,
+   "VERANDA": 8.49,
+   "Y.ODASI 2": 11.42,
+   "MUTFAK": 7.43
+  }
+ },
+ "kaynak": {
+  "metin": "HD-390 montaj paftasından (DWG HD-390;10, plan 63) İş Emri (İE-43, disk arşivi Parti 2; ad yok; paftanın başlığı 70 m², brüt 69,01). Havuz: D-170 (Lokman 28 Kasım 2026 14:10:31 kartı \"Onaylıyorum, böyle kalsın\"; 14:22:26 kartı \"Onaylıyorum, Motor'daki gibi\": beşik + verandanın önünde cumba). Asıl uygulanmış proje: D-103.",
+  "dosya": "testler/havuz/is_emirleri/HD390.json",
+  "ayna": null,
+  "karar": "D-170",
+  "standart": true,
+  "kart_kiyasi": {
+   "kart": "HD-390",
+   "kart_sha256": "7faac941cd338447922474dc2df05b4a3de18720711f801e73875db5a19a4df7",
+   "sonuc": "geçti",
+   "olcum": {
+    "dis_olcu_cm": [
+     825.75,
+     835.75
+    ],
+    "acikla_olcu_cm": [
+     825.75,
+     835.75
+    ],
+    "brut_m2": 69.01,
+    "kubbe_m2": 0.0,
+    "yatak_odasi": 2,
+    "pencereler": {
+     "120x120": 3,
+     "120x160": 2,
+     "60x40": 1
+    },
+    "dis_kapi": 1,
+    "ic_kapi": 5,
+    "veranda": 1,
+    "kat": 1
+   }
+  },
+  "havuz_denetimi": {
+   "sonuc": "geçti",
+   "karar": "D-112",
+   "uyarilar": []
+  }
+ },
+ "not": ""
+}
