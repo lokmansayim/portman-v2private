@@ -165,7 +165,7 @@ def test_kartlar():
     beklenen = {"AC-01": ("alt_cerceve_yerlesimi", "IfcMemberType", "boy_kesim", "varsayim"),
                 "AC-02": ("alt_cerceve_yerlesimi", "IfcMemberType", "boy_kesim", "varsayim"),
                 "CK-01": ("sacak_omegasi_yerlesimi", "IfcMemberType", "boy_kesim", "varsayim"),
-                "CK-02": ("sacak_saci_yerlesimi", "IfcCoveringType", "boy_kesim", "varsayim"),
+                "CK-02": ("sacak_saci_yerlesimi", "IfcCoveringType", "boy_kesim", "lokman"),   # Lokman çizimi 28.11.2026 (tırnak aşağı)
                 "CK-03": ("alin_saci_yerlesimi", "IfcCoveringType", "boy_kesim", "varsayim"),
                 "CK-04": ("bas_makas_z_yerlesimi", "IfcMemberType", "boy_kesim", "varsayim"),
                 "CK-05": ("c_kapama_yerlesimi", "IfcCoveringType", "metre", "varsayim"),

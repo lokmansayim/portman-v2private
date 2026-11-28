@@ -393,12 +393,13 @@
     "tarih": "2026-11-28",
     "kaynak": "Lokman çizimi 28 Kasım 2026 15:38:25 UTC (18:38 İstanbul; PF Teklif_Calisma/TK-11/rehber_bakim/2026-11-28_Lokman_sacak_cizimi_1838.pdf), sözü: \"saçak omegasını ve saçağı çizdim yeniden yani anlamıyorum nasıl şimdiye kadar montaj rehberi olsun github olsun hep hatalı çizdin\"; eskiz r07 (TK11_sacak_kesiti_eskiz_r07_TASLAK_20261128.png) kartında 28 Kasım 2026 16:05:32 UTC seçimi: \"Doğru; uç alınla aynı hizada\"",
     "cizen": "araclar/paket/rehber/sahne.js › Saçak sacı (SACAK_TIRNAK, SACAK_TIRNAK_X)",
-    "test": "testler/paket/test_rehber_sacak_tirnagi.py"
+    "test": "testler/paket/test_rehber_sacak_tirnagi.py",
+    "not": "Kuralın tarihi kaydın açıldığı gün (25 Ekim 2026) kalır; durum 28 Kasım 2026'da bu kesitle lokman oldu (alın sacındaki D-73 gibi)."
    },
    "kivrim": {"durum": "lokman", "tarih": "2026-11-11", "kaynak": "D-78: Lokman 11 Kasım 2026 15:34 \"saçak sacı son koyulan aşığın üzerine gelecek\", eskiz kartı 15:59 \"Doğru, böyle yap\""},
    "cati_tipleri": ["besik", "besik_cumba"],
    "durum": "lokman",
-   "tarih": "2026-11-28",
+   "tarih": "2026-10-25",
    "kaynak": "Kesit: Lokman çizimi 28 Kasım 2026 15:38:25 UTC (18:38 İstanbul; PF Teklif_Calisma/TK-11/rehber_bakim/2026-11-28_Lokman_sacak_cizimi_1838.pdf), sözü: \"saçak omegasını ve saçağı çizdim yeniden yani anlamıyorum nasıl şimdiye kadar montaj rehberi olsun github olsun hep hatalı çizdin\"; eskiz r07 (TK11_sacak_kesiti_eskiz_r07_TASLAK_20261128.png) kartında 28 Kasım 2026 16:05:32 UTC seçimi: \"Doğru; uç alınla aynı hizada\". Alın 13 cm ve kıvrım 10 cm bugünkü rehberin ölçüsüdür, Lokman çizimde değiştirmedi (eskiz r07 › Ölçülerin kaynağı). Önceki kayıt (25 Ekim 2026, varsayım): tırnak omeganın üstünde yatay; Lokman 28 Kasım çizimiyle düzeltti. Sayı liste kuralından (PK-01 ve PK-02 tuttu).",
    "not": "Modelde saçak kenarı başına bir parça; stok boyları kesim planında. Saçak altının genişliği çatının saçağıdır (İş Emri; rehberde 30). Rehberin makas tabanı (TB = duvar üstü + 0,25 cm) eski yatay tırnağın kalınlığını taşır; tırnak inince makasla omega arasında 1,5 mm gösterim aralığı kalır (makasın omegaya oturması ayrı soru, Lokman'da)."
   },
