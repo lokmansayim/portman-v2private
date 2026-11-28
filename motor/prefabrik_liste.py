@@ -1240,6 +1240,9 @@ def _iki_uclu_kirma_catilari(plan, ie: dict) -> tuple[list[dict], dict]:
         if k_uc in duvarda or abs(xf - kenar_x) <= 1.5 * MOD_CM + 1e-6:
             continue
         ana_x = sorted(set(ana_x) | {round(kenar_x + MOD_CM if k_uc == 0 else kenar_x - MOD_CM, 2)})
+        aralik = max(b - a for a, b in zip(ana_x, ana_x[1:]))       # bant 251'den genişse yeni makasla öncekinin arası da geniş (K21)
+        if aralik > MOD_CM + 1e-6:
+            raise ListeYazilmaz(f"iki uçlu kırma: uçtaki yeni ana makasla öncekinin arası {sy(aralik)} cm, 125,5'ten geniş; liste yazılmaz")
     if duvarda:
         ana_x = [x for x in ana_x if (0 not in duvarda or x >= duvarda[0] - 1e-6) and (1 not in duvarda or x <= duvarda[1] + 1e-6)]
 

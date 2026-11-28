@@ -50,3 +50,28 @@ def test_havuz_kirma_secenegi(kod):
     o = _ozet(v)
     assert o == {k: h[k] for k in ("ana_x_cm", "uclar", "satirlar")}
     assert 125.5 in [u["bant_cm"] for u in o["uclar"]]
+
+
+def _plan_67():
+    ie = json.loads((KOK / "testler" / "motor" / "veri" / "D166_dortomuz_67m2.json").read_text(encoding="utf-8"))
+    return ie, G.kur(copy.deepcopy(ie))
+
+
+def _eki_kaldir(plan, ek):
+    """Saçak duvarlarında (mahyaya paralel dış duvar) `ek`teki pano ekini kaldırır: iki pano tek geniş pano olur (uydurma durum)."""
+    for d in plan.duvarlar:
+        if d.tur == "dis" and d.yon == "y":
+            ps = sorted(d.panolar, key=lambda p: p.a0)
+            k = next(i for i, p in enumerate(ps) if abs(p.a1 - ek) < 1e-6)
+            ps[k].a1 = ps[k + 1].a1
+            d.panolar = [p for i, p in enumerate(ps) if i != k + 1]
+
+
+def test_bant_251den_genis_yazilmaz():
+    """Geometri hakemi (28.11): bant 251'den genişse yeni makasla öncekinin arası 125,5'i geçer; liste yazılmaz (K21). 67 m²'de 747'deki ek
+    kaldırılınca son ana makas 684,25, bant 256: yeni makas 814,75, ara 130,5."""
+    ie, plan = _plan_67()
+    _eki_kaldir(plan, 747.0)
+    with pytest.raises(PL.ListeYazilmaz, match="yeni ana makasla öncekinin arası 130,5"):
+        PL._iki_uclu_kirma_catilari(plan, ie)
+
