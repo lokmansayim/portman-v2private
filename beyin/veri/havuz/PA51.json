@@ -1,0 +1,78 @@
+{
+ "kod": "PA51",
+ "gosterim": "PA-51",
+ "durum": "gecerli",
+ "sablon": "adaylar/PA51.json",
+ "gorsel": "adaylar/PA51.png",
+ "referans_model": "PA-51",
+ "yapi_turu": "prefabrik",
+ "kat": 1,
+ "oda_programi": "2+1",
+ "katalog_m2": 67.0,
+ "kapali_m2": 49.7,
+ "veranda_m2": 17.04,
+ "ozet": {
+  "grid": {
+   "x_pano": 5.5,
+   "y_pano": 5.5
+  },
+  "dis_olcu_cm": [
+   710.25,
+   700.25
+  ],
+  "brut_m2": 66.78,
+  "pano": 40,
+  "pencere": 5,
+  "kapi": 4,
+  "odalar": {
+   "Y.ODASI": 8.28,
+   "SALON + MUTFAK": 26.95,
+   "WC": 3.32,
+   "Y.ODASI 2": 7.58,
+   "VERANDA": 17.04
+  }
+ },
+ "kaynak": {
+  "metin": "HD-259 montaj paftasından İş Emri (İE-43, disk arşivi Parti 1; kodla okundu, ad yok). Havuz: D-165 (Lokman 28 Kasım 2026 09:25:26 kartı \"Onaylıyorum, kat planı böyle\"; 10:40:38 kartı \"İkisi de girsin\": önce beşik hâli). Asıl uygulanmış proje: D-103.",
+  "dosya": "testler/havuz/is_emirleri/HD259.json",
+  "ayna": null,
+  "karar": "D-165",
+  "standart": true,
+  "kart_kiyasi": {
+   "kart": "HD-259",
+   "kart_sha256": "3f2d8e9833f1b93410677d2bf7d1fbefe70eb97f42d59195b1add2b2828ec4c5",
+   "sonuc": "geçti",
+   "olcum": {
+    "dis_olcu_cm": [
+     710.25,
+     700.25
+    ],
+    "acikla_olcu_cm": [
+     710.25,
+     940.25
+    ],
+    "brut_m2": 66.78,
+    "kubbe_m2": 0.0,
+    "yatak_odasi": 2,
+    "pencereler": {
+     "120x120": 2,
+     "120x180": 2,
+     "60x40": 1
+    },
+    "dis_kapi": 1,
+    "ic_kapi": 3,
+    "veranda": 1,
+    "kat": 1
+   }
+  },
+  "havuz_denetimi": {
+   "sonuc": "geçti",
+   "karar": "D-112",
+   "uyarilar": [
+    "HD-06: ['makas yeri: saçak duvarının pano ekleri düzensiz (8 makas, listede 7; aralıklar 62.75, 125.5, 125.5, 125.5, 62.75, 125.5, 62.75); eşit aralıklı 7 makas']",
+    "HD-09: veranda çatısı: listede 3 makas, 3D modelde bu parçanın makası yok"
+   ]
+  }
+ },
+ "not": "Çatı paftadan farklı: paftada dörtomuz, ana çatı verandayı da örter. Bu kayıt beşik ana çatı ve veranda beşiğiyle (BK-40 kartları 16 Kasım 08:05:51, 08:39:21). Dörtomuz Motor bakımından sonra ikinci çatı seçeneği olarak eklenir (D-165 madde 3)."
+}
