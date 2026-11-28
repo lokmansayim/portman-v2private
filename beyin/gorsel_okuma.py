@@ -1484,6 +1484,41 @@ def is_emri_prefabrik(kan: dict, o: CizimOkumasi, bk14: bool | None = None, esik
         dis = [[0.0 if q[0] == xs[0] else q[0], 0.0 if q[1] == ys[0] else q[1], W if q[2] == xs[-1] else q[2], H if q[3] == ys[-1] else q[3]]
                for q in m["konum_cm"]]
         once, sonra = _alan(x["rects"]), _alan(dis)
+        if x["islev"] in ISLAK_ISLEV and once - sonra > max(e["alan_m2"], e["oturtma_alan_oran"] * once) and not kan.get("_islak_buyudu"):
+            # İkinci döngü (Lokman, kart 28 Kasım 2026 05:50:20 UTC "Bir sonraki aksa büyüsün (B)": "WC ve banyo yazılı ölçüden küçük
+            # çıkacaksa bir sonraki pano aksına oturur; bayiye notla yazılır, soru gitmez"): ıslak hacmin içe kayan sınırı dışa doğru bir
+            # sonraki aksa taşınır; aynı sınırı paylaşan bölümler de o aksa oturur. 4×5 kroki: WC derinliği 1 m → 0,63 değil 1,26 m.
+            aday: list[tuple[float, tuple[int, float], float]] = []    # (içe kayma, (eksen, okunan), dıştaki aks)
+            for r, q in zip(x["rects"], m["konum_cm"]):
+                for i in range(4):
+                    eksen = xs if i % 2 == 0 else ys
+                    if q[i] in (eksen[0], eksen[-1]):
+                        continue
+                    if i < 2 and q[i] > r[i] + 1e-6:
+                        yeni = max((t for t in eksen if t <= r[i] + 1e-6), default=None)
+                    elif i >= 2 and q[i] < r[i] - 1e-6:
+                        yeni = min((t for t in eksen if t >= r[i] - 1e-6), default=None)
+                    else:
+                        continue
+                    if yeni is not None and yeni not in (eksen[0], eksen[-1]):
+                        aday.append((abs(q[i] - r[i]), (i % 2, round(r[i], 2)), yeni))
+            aday.sort(key=lambda t: -t[0])                       # en çok içe kayan sınırdan başlayarak, küçülme bitene kadar
+            for k in range(1, len(aday) + 1):
+                degis = {a[1]: a[2] for a in aday[:k]}
+                odalar2 = [{**y, "rects": [[degis.get((i % 2, round(c, 2)), c) for i, c in enumerate(r)] for r in y["rects"]]}
+                           for y in kan["odalar"]]
+                ie2, sr2, cz2, nt2 = is_emri_prefabrik({**kan, "odalar": odalar2, "_islak_buyudu": True}, o, bk14, esik, makas=makas,
+                                                       oturt=False)
+                if ie2 is None:
+                    continue
+                yeni_alan = _alan([[0.0 if q[0] == xs[0] else q[0], 0.0 if q[1] == ys[0] else q[1], W if q[2] == xs[-1] else q[2],
+                                    H if q[3] == ys[-1] else q[3]] for y in ie2["mahaller"] if y["ad"] == m["ad"] for q in y["konum_cm"]])
+                if once - yeni_alan > max(e["alan_m2"], e["oturtma_alan_oran"] * once):
+                    continue
+                not_ = (f"{_oda_adi(x['ad'])} pano ızgarasında küçülmesin diye bir sonraki pano aksına oturdu: "
+                        f"{_tr(once, 1)} m² yerine {_tr(yeni_alan, 1)} m²")
+                ie2["varsayimlar"].append(_bas_buyuk(not_) + ".")
+                return ie2, sr2, cz2, [not_] + nt2
         if abs(sonra - once) > max(e["alan_m2"], e["oturtma_alan_oran"] * once):
             sor.append(f"{_oda_adi(x['ad'])} pano ızgarasına oturtunca {_tr(once, 1)} m² yerine {_tr(sonra, 1)} m² oluyor; öyle çizebilir miyim?")
         elif abs(sonra - once) >= 0.2:

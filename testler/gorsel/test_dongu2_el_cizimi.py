@@ -17,7 +17,8 @@ def test_cizilmemis_kapi_pencere_dograma_sorulmaz():
 
 
 def test_tamamlanan_plan():
-    den = g.denetle(OKUMA, ayar={"alan_m2": 5, "alan_oran": 1})     # ızgara sorusuna "evet" (WC) denmiş gibi
+    den = g.denetle(OKUMA)
+    assert den["sorular"] == []
     ie = den["cevrim"]["is_emri"]
     assert [m["ad"] for m in ie["mahaller"]] == ["WC", "SALON+MUTFAK"]
     ac = ie["acikliklar"]
@@ -40,3 +41,11 @@ def test_soru_suzgeci_yalniz_tamamlanana():
     assert g.cizilmemis_sorusu("WC kapısı çizilmemiş: kapı WC'nin hangi duvarında?", yap)
     assert not g.cizilmemis_sorusu("Salon ile mutfak arasında kapı var mı?", yap)
     assert not g.cizilmemis_sorusu("Alt cephedeki doğrama tek parça mı?", yap)
+
+
+def test_islak_hacim_bir_sonraki_aksa_buyur():
+    """Lokman kart 28 Kasım 2026 05:50:20 UTC "Bir sonraki aksa büyüsün (B)": WC derinliği 1 m → 0,63 değil 1,26 m (bir pano)."""
+    den = g.denetle(OKUMA)
+    wc = next(m for m in den["cevrim"]["is_emri"]["mahaller"] if m["ad"] == "WC")
+    assert wc["konum_cm"] == [[318.75, 10.0, 495.0, 135.5]]
+    assert any("bir sonraki pano aksına oturdu" in n for n in den["notlar"])
