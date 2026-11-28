@@ -92,3 +92,22 @@ def test_ters_mahya_ic_akslarda():
     assert [(tm["aks"], tm["boy_cm"]) for tm in k["ters_mahya"]] == [(900, 2560), (1800, 2560), (2700, 2560), (3600, 2560)]
     og = C.cizim_ogeleri(k)
     assert len(og["on"]["ters_mahya"]) == 8
+
+
+def test_uc_boyut_ciktilar(tmp_path):
+    """3B görünüm (Lokman 28.11 14:19:59 "3 boyutlu verebilir misin?"): iki boyutlu çizimin hesabından, yeni parça yok."""
+    import ezdxf
+    from motor.genel import celik_cerceve, celik_cerceve_3b
+
+    k = celik_cerceve.uret(TANIM, tmp_path)
+    for uz in ("png", "dxf", "html"):
+        assert (tmp_path / f"CD4525_iskelet_3b.{uz}").stat().st_size > 1000
+    og = celik_cerceve_3b.ogeler(k)
+    s = celik_cerceve_3b.sayim(og)
+    assert s["MAKAS"] == 4 * sum(m["cubuk"] for m in k["makaslar"])
+    assert s["KUSAK"] == 6 and s["MAHYA"] == 5 and s["TERS_MAHYA"] == 4 * 7
+    zs = [p[2] for _, p, q in og] + [q[2] for _, p, q in og]
+    tepe = k["kolon_yuksekligi"] + max(max(c["y1"], c["y2"]) for m in k["makaslar"] for c in m["cubuklar"]) / 10
+    assert min(zs) == 0 and max(zs) == pytest.approx(tepe, abs=0.1)
+    doc = ezdxf.readfile(tmp_path / "CD4525_iskelet_3b.dxf")
+    assert len(doc.modelspace().query("LINE")) == len(og)

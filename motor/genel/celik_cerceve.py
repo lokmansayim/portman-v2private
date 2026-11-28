@@ -16,7 +16,7 @@ Girdi çerçeve tanımıdır (`portman.celik_cerceve/0.1`, ör. `modeller/cercev
     python -m motor.genel.celik_cerceve modeller/cerceve/CD4525_cerceve.json <çıktı klasörü>
 
 Çıktılar: `<kod>_iskelet.png`, `<kod>_iskelet.pdf`, `<kod>_iskelet.dxf` (katmanlar KOLON, MAKAS, AKS, OLCU, YAZI; cm) ve
-`<kod>_iskelet.json` (akslar, kolonlar, makaslar, çubuk sayıları). Hesapta LLM yoktur; aynı tanım aynı çizimi verir.
+`<kod>_iskelet.json` (akslar, kolonlar, makaslar, çubuk sayıları); 3B görünüm `celik_cerceve_3b` (PNG, 3B DXF, HTML). Hesapta LLM yoktur; aynı tanım aynı çizimi verir.
 """
 from __future__ import annotations
 
@@ -306,6 +306,8 @@ def uret(tanim_yolu: Path, cikti: Path) -> dict:
     cikti.mkdir(parents=True, exist_ok=True)
     _png_pdf(k, og, t, cikti)
     _dxf(k, og, cikti)
+    from . import celik_cerceve_3b
+    celik_cerceve_3b.uret(k, cikti, _dosya(k))
     (cikti / f"{_dosya(k)}_iskelet.json").write_text(json.dumps(k, ensure_ascii=False, indent=1), encoding="utf-8")
     return k
 
