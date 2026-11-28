@@ -8,6 +8,10 @@ kaynaktan, kendi geometrileriyle gelir; rehber kendi geometrisini kurmaz (D-28 m
 - **Orijinal üretim çizimlerinden** (Lokman, 24 Kasım 2026 07:35:17: "Montaj Rehberlerinde bundan sonra orjinal üretim çizimleri
   dursun"): kubbenin çelik karkas duvarları, üst bandı ve makasları FrameBuilder dosyalarından (`araclar/uretim/veri/kubbe.json`, BK-76).
   Her çerçeve motorun kubbesindeki yerine (pano, bant, makas) oturtulur; çerçevenin kendi ölçüsü değişmez.
+- **Kubbede duvar duvardır** (BK-89, D-164; Lokman, 28 Kasım 2026 05:16–06:23 UTC): İş Emri `rehber.kubbe: "karkasli_pano"` yazarsa
+  kubbenin dört parçası karkaslı panodur (üretim karkası, iki yüzünde 8 mm fibercement); aralarında kart modelinin dört özel açılı köşe
+  direği ve listedeki iki kubbe üstü H; üstteki 50 cm'lik panonun iki alt köşesi sahada açılı kesilir; kubbe panolarının üstünde saçak
+  omegası, tavanında alttan alçıpan; pencere üretim karkasının boşluğunda (alt kenar 13 cm). Anahtarsız İş Emri eski yoldan gider.
 - **Çatı makasları da üretim çizimlerinden** (Lokman, 26 Kasım 2026 05:38:00 UTC: "… makasları yeniden üret doğru yerleşimde gerçek
   üretilecek makaslar olacak"): evin üretim dosyası `uretim_makaslari.json`'da kayıtlıysa ana, cumba, kısa ve çapraz makaslar
   `araclar/uretim/` çerçevelerinden çizilir; şablon makası ve kart modelinin makas üçgenleri çizilmez. Makasın yeri ve sayısı Motor'un
@@ -386,9 +390,182 @@ def _cerceve_cubuklari(fr: dict, A, B, z0: float, nrm, merkez: bool = True) -> l
     return out
 
 
-def kubbe(HZ: dict, ifc_yolu: Path, ls) -> tuple[list[dict], set[str]]:
+KAPLAMA, OMEGA_SAC = 0.8, 0.1                      # cm: karkaslı panonun iki yüzünde 8 mm fibercement (Lokman, 28.11.2026); omega sacı 1 mm
+H_SIRT, H_KANAT = 2.5, 0.2                         # cm: H'nın görünen sırtı ekin iki yanına 2,5, kanat 2 mm (`sahne.js` › D.hs çizimindeki `fl`, `HS`)
+PENCERE_PAYI = 1.0                                 # cm: İş Emri'ndeki kubbe penceresi ile üretim karkasının boşluğu arasında izin verilen fark
+
+
+def _prizma(M: dict, q, z0: float, z1: float) -> None:
+    """Dört köşeli tabanı `q` (plan, sırayla) z0–z1 arasında yükseltir; üçgenleri `M`'ye ekler. Yüzler dışa bakar: taban saat yönünün
+    tersine yazıldıysa köşe sırası çevrilir (`sahne.js` tek yüzlü malzeme kullanır; içe bakan yüz çizilmez)."""
+    if sum(q[i][0] * q[(i + 1) % 4][1] - q[(i + 1) % 4][0] * q[i][1] for i in range(4)) > 0:
+        q = q[::-1]
+    n0 = len(M["v"]) // 3
+    for z in (z0, z1):
+        for x, y in q:
+            M["v"] += [round(x, 2), round(y, 2), round(z, 2)]
+    for a, b, c, d in ((0, 1, 2, 3), (7, 6, 5, 4), (0, 4, 5, 1), (1, 5, 6, 2), (2, 6, 7, 3), (3, 7, 4, 0)):
+        M["f"] += [n0 + a, n0 + b, n0 + c, n0 + a, n0 + c, n0 + d]
+
+
+def _cerceve_dis_olcusu(fr: dict) -> tuple[float, float, float, float]:
+    """Üretim çerçevesinin gerçek dış ölçüsü (cm; x0, x1, y0, y1): yatay ve düşey çubukların dış kenarı (eksen ± çubuğun yarı eni).
+    Dosyanın `dis_olcu_mm`'si çubuk payını iki kez sayar (KUBBE-DUVAR-1: 862 × 2074; gerçek 808 × 2030)."""
+    xs, ys = [], []
+    for p in fr["parcalar"]:
+        x1, y1, x2, y2 = (p[k] / 10 for k in ("x1", "y1", "x2", "y2"))
+        if abs(y1 - y2) < 0.01:                                                 # yatay çubuk: boyu x'te, eni y'de
+            xs += [x1, x2]
+            ys += [y1 - EN / 2, y1 + EN / 2]
+        elif abs(x1 - x2) < 0.01:                                               # düşey çubuk
+            xs += [x1 - EN / 2, x1 + EN / 2]
+            ys += [y1, y2]
+    return min(xs), max(xs), min(ys), max(ys)
+
+
+def _pencere_boslugu(fr: dict) -> tuple[float, float, float, float]:
+    """Üretim çerçevesindeki pencere boşluğu (cm; x0, x1, alt, üst): içteki iki boy dikmesinin ve alt/üst kaydın iç kenarları."""
+    dik = sorted({p["x1"] / 10 for p in fr["parcalar"] if abs(p["x1"] - p["x2"]) < 0.1 and abs(p["y2"] - p["y1"]) > 1500})
+    yat = sorted({p["y1"] / 10 for p in fr["parcalar"] if abs(p["y1"] - p["y2"]) < 0.1 and 50 < p["y1"] < 1950 and abs(p["x2"] - p["x1"]) > 500})
+    if len(dik) < 4 or len(yat) < 2:
+        raise ValueError(f"{fr['dosya']}: pencere boşluğu okunamadı (boy dikmesi {len(dik)}, kayıt {len(yat)})")
+    return dik[1] + EN / 2, dik[-2] - EN / 2, yat[0] + EN / 2, yat[-1] - EN / 2
+
+
+def _kubbe_karkasli(HZ: dict, kb: dict, FR: dict, ls) -> tuple[list[dict], list[tuple]]:
+    """Kubbenin duvar parçaları, karkaslı pano olarak (BK-89, D-164). Lokman, 28 Kasım 2026 (UTC): 05:16:18 "… bunların hepsi kaplı gelir
+    yani çıplak çelik bırakılmaz bunlara karkaslı pano denir …"; 05:16:56 "… kubbede duvar duvardır"; 05:18:47 "çelik karkasları aynı
+    duvar mantığındaki gibi 8 mm iç dış fibercement ile kaplıyoruz"; 05:45:38 "… KUBBE ÜSTÜ H 100*100*500 2 / ÖZEL AÇILI KÖŞE DİREĞİ +
+    KAPAMASI 100*100*2330 aynı H'lar gibi kullanılıyor"; 05:48:38–05:53:37 saha kesimi (üstteki 251/50 parçanın köşeleri açılı kesilir,
+    parça 3 cm iner, toplam 250; direkler ve açılı panolar kesilmez; alttan alçıpan); 06:08:55 "burada saçak omegası var …"; eskiz
+    onayı 06:23:20 (kart "Onaylıyorum").
+
+    Panonun yeri motorun kubbesinden (`panolar[].dis_kenar`: pano gövdesinin dış kenarı, direkten direğe); köşe direkleri kart
+    modelinde aynı çokgenlerle kurulduğu için (`ifc_uret`) kaplama direğe tam değer. Üretim karkası gövdenin ortasına oturur ve
+    gövdeden geniştir (63 m²: 80,8 ve 127,0 cm; gövde 79 ve 125,5 cm): karkasın uçları direğin içine 0,9 ve 0,75 cm girer (bilinen
+    sınır, BK-89). Dönen: (ek parçalar, [(boşluğun alt kotu, pano ekseninin ortası)] pencereler için).
+
+    Yalnız sağ dış duvardaki kubbe için (63 m²): üstteki panonun kesimi ve omeganın uçları o duvara göre kurulur; başka cephede açık
+    hata. İş Emri'ndeki kubbe penceresi karkasın boşluğuna uymuyorsa da açık hata (`PENCERE_PAYI`).
+
+    Her parça `kubbe_anahtar` (pano0…2, bant, h0, h2) ve `merkez` taşır, üstteki pano `kubbe_olcu` da (oda adımının yazısı için):
+    `veri.kur` kubbeyi odanın diziliminde art arda sıralar ve bu anahtarları veriden çıkarır."""
+    if kb.get("cephe") != "sag":
+        raise ValueError(f"karkaslı kubbe yalnız sağ dış duvardaki kubbe için kurulur; bu evde kubbenin cephesi: {kb.get('cephe')}")
+    ek, pen_yeri = [], []
+    Hk, Hd = kb["duvar_cm"], HZ["bina"]["duvar_h"]
+    x0, y0, x1, y1 = kb["taban"]
+    T = x1 - x0                                                                 # kubbe duvarının kalınlığı, motorun kubbesinden
+    mm = lambda v: f"{v * 10:g}".replace(".", ",")                             # noqa: E731
+    tam = lambda v: f"{round(v * 10):d}"                                       # noqa: E731  karkasın dış ölçüsü tam mm
+    duvar_ad = {0: "KUBBE-DUVAR1", 1: "KUBBE-DUVAR2", 2: "KUBBE-DUVAR3"}       # yan 1, ön 2, yan 3 (`_kubbe_girdisi`)
+    on = next(q for q in kb["panolar"] if q["tur"] == "on")
+    sag = (-on["disari"][1], on["disari"][0])                                  # dışarıdan kubbeye bakanın sağı (plan)
+    orta_ = lambda q: ((q["dis_kenar"][0][0] + q["dis_kenar"][1][0]) / 2, (q["dis_kenar"][0][1] + q["dis_kenar"][1][1]) / 2)   # noqa: E731
+    yan = lambda q: ("karşıdaki" if q["tur"] == "on" else                      # noqa: E731  Lokman'ın adlarıyla: sağdaki, karşıdaki, soldaki
+                     "sağdaki açılı" if (orta_(q)[0] - orta_(on)[0]) * sag[0] + (orta_(q)[1] - orta_(on)[1]) * sag[1] > 0 else "soldaki açılı")
+    for i, q in enumerate(kb["panolar"]):
+        fr = FR[duvar_ad[i]]
+        (ax, ay), (bx, by) = q["dis_kenar"]
+        dx, dy = q["disari"]
+        L = math.hypot(bx - ax, by - ay)
+        ux, uy = (bx - ax) / L, (by - ay) / L
+        gx0, gx1, gy0, gy1 = _cerceve_dis_olcusu(fr)
+        b0, b1, s0, s1 = _pencere_boslugu(fr)
+        if abs((gy1 - gy0) - Hk) > 0.05:
+            raise ValueError(f"{fr['dosya']}: karkas {mm(gy1 - gy0)} mm yüksek, motorun kubbe duvarı {mm(Hk)} mm")
+        pw = re.fullmatch(r"(\d+(?:\.\d+)?)x(\d+(?:\.\d+)?)", q["pencere"])
+        if not pw or abs(float(pw[1]) - (b1 - b0)) > PENCERE_PAYI or abs(float(pw[2]) - (s1 - s0)) > PENCERE_PAYI:
+            raise ValueError(f"{fr['dosya']}: karkasın pencere boşluğu {mm(b1 - b0)} × {mm(s1 - s0)} mm, İş Emri'ndeki kubbe penceresi {q['pencere']} cm")
+        kay = L / 2 - (gx0 + gx1) / 2                                           # karkas pano gövdesinin (direkten direğe) ortasında
+        D = lambda s_: (ax + ux * s_, ay + uy * s_)                             # noqa: E731  dış yüzde kenar boyunca nokta
+        A = (ax - dx * T / 2 + ux * kay, ay - dy * T / 2 + uy * kay)             # karkasın ekseni: duvarın ortası
+        # kaplama: dış ve iç yüzde 8 mm levha, pano gövdesinin boyunca; pencere boşluğu karkastan
+        M = {"v": [], "f": []}
+        for t0, t1 in ((0.0, KAPLAMA), (T - KAPLAMA, T)):
+            dort = lambda sa, sb: [(D(s_)[0] - dx * t, D(s_)[1] - dy * t) for s_, t in ((sa, t0), (sb, t0), (sb, t1), (sa, t1))]   # noqa: E731
+            _prizma(M, dort(0.0, b0 + kay), 0, Hk)
+            _prizma(M, dort(b1 + kay, L), 0, Hk)
+            _prizma(M, dort(b0 + kay, b1 + kay), 0, s0)
+            _prizma(M, dort(b0 + kay, b1 + kay), s1, Hk)
+        orta = [round(D(L / 2)[0] - dx * T / 2, 2), round(D(L / 2)[1] - dy * T / 2, 2)]
+        pen_yeri.append((s0, orta))
+        pen = q["pencere"].replace("x", "/")
+        ek.append({"adim": "kubbe_duvar", "sira": i, "ad": f"Karkaslı özel pencere panosu ({pen}) · kubbe, {yan(q)}",
+                   "kod": None, "mat": "steel", "cubuk": _cerceve_cubuklari(fr, A, (A[0] + ux, A[1] + uy), 0.0, [dx, dy, 0], merkez=False),
+                   "kap": M, "kubbe_anahtar": f"pano{i}", "merkez": orta,
+                   "satir": [["Bu parça", f"karkaslı pano · {fr['dosya'].removesuffix('.csv')} · karkas {tam(gx1 - gx0)} × {tam(gy1 - gy0)} mm"],
+                             ["Yer", f"kubbede, dışarıdan bakınca {yan(q)} pano"],
+                             ["Yapı", "çelik karkas, iki yüzünde 8 mm fibercement"],
+                             ["Açıklık", f"pencere {pen}" + ("" if q["tur"] == "on" else " · tek kanat") + f" · alt kenar {mm(s0 / 10)} cm"],
+                             ["Liste", ls(f"Karkaslı özel pencere panosu ({pen})")],
+                             ["Kaynak", "karkas orijinal üretim çiziminden (FrameBuilder); yer motorun kubbesinden"]]})
+    # üstteki 50 cm'lik pano: düz duvarda kubbenin tabanının üstünde. Kubbe panoları ve açılı köşe direkleri 203 cm, pano 50 cm (253):
+    # usta panonun iki alt köşesini açılı keser, pano 3 cm iner, üstü duvar üstünde (250) kalır. Kesim planda açılı panonun iç yüzü boyunca.
+    fr = FR["KUBBE-DUVAR4"]
+    xm, ym = (x0 + x1) / 2, (y0 + y1) / 2
+    gx0, gx1, gy0, gy1 = _cerceve_dis_olcusu(fr)
+    z_bant = Hd - (gy1 - gy0)
+    KES = Hk - z_bant
+    if not 0 < KES < 10:
+        raise ValueError(f"kubbenin üst panosu {mm(z_bant)} mm'den başlar, kubbe duvarı {mm(Hk)} mm; saha kesimi {mm(KES)} mm çıkar")
+    k_ic = kb["ic"][0][1] - y0                                                  # kesimin boyu iç yüzde (açılı panonun iç yüzü düz duvarın iç yüzünde)
+    M = {"v": [], "f": []}
+    for a, b in ((x0, x0 + KAPLAMA), (x1 - KAPLAMA, x1)):
+        _prizma(M, [(a, y0), (b, y0), (b, y1), (a, y1)], Hk, Hd)
+        _prizma(M, [(a, y0 + k_ic + a - x0), (b, y0 + k_ic + b - x0), (b, y1 - k_ic - (b - x0)), (a, y1 - k_ic - (a - x0))], z_bant, Hk)
+    yb0 = ym - (gx0 + gx1) / 2                                                  # karkas tabanın ortasında
+    ek.append({"adim": "kubbe_duvar", "sira": 3, "ad": "Kubbe özel pano 100 × 2500 × 500 · karkaslı", "kod": None, "mat": "steel",
+               "cubuk": _cerceve_cubuklari(fr, (xm, yb0), (xm, yb0 + 1), z_bant, [1, 0, 0], merkez=False), "kap": M,
+               "kubbe_anahtar": "bant", "merkez": [xm, ym], "kubbe_olcu": {"kesim": KES, "pano": gy1 - gy0, "ust": Hd},
+               "satir": [["Bu parça", f"karkaslı pano · KUBBE-DUVAR-4 · karkas {tam(gx1 - gx0)} × {tam(gy1 - gy0)} mm"],
+                         ["Yapı", "çelik karkas, iki yüzünde 8 mm fibercement"],
+                         ["Yer", f"düz duvarda kubbenin üstü; alt kenar {mm(z_bant / 10)} cm, üst kenar {mm(Hd / 10)} cm"],
+                         ["Saha kesimi", f"iki alt köşe açılı kesilir: {mm(KES / 10)} cm yüksek, açılı panonun iç yüzü boyunca; "
+                                         f"pano {mm(KES / 10)} cm aşağı oturur. Açılı köşe direği ve açılı pano kesilmez"],
+                         ["Liste", ls("Kubbe özel pano")],
+                         ["Kaynak", "karkas orijinal üretim çiziminden (FrameBuilder); karkas çizimde kesilmeden durur"]]})
+    # kubbe üstü H: üstteki panonun iki ucunda, H gibi (ekin iki yanına sırt, iki yüzde kanat)
+    for anahtar, yj in (("h0", y0), ("h2", y1)):
+        Mh = {"v": [], "f": []}
+        for a, b in ((x0 - H_KANAT, x0), (x1, x1 + H_KANAT)):
+            _prizma(Mh, [(a, yj - H_SIRT), (b, yj - H_SIRT), (b, yj + H_SIRT), (a, yj + H_SIRT)], z_bant, Hd)
+        ek.append({"adim": "kubbe_duvar", "sira": 3, "ad": "Kubbe üstü H 100 × 100 × 500", "kod": None, "mat": "steel", "mesh": Mh,
+                   "kubbe_anahtar": anahtar, "merkez": [xm, yj],
+                   "satir": [["Bu parça", f"üstteki {mm((gy1 - gy0) / 10)} cm'lik panonun ucunda; H gibi kullanılır"], ["Liste", ls("Kubbe üstü H")]]})
+    # kubbe saçak omegası: üç kubbe panosunun üstünde, kubbe saçağı buna oturur. Kesit evin saçak omegasının ölçüleriyle (`sahne.js` ›
+    # omega_duvar, `sacak`): üst duvar kalınlığınca, iki yanda 3 cm kanat, içte 3 cm ayak (tavan alçıpanı ayağa alttan gelir); dış
+    # kanadın eğik dudağı çizilmez. Uçları düz duvarın dış yüzünde biter; köşelerde gönyeli.
+    Od, Oi = [tuple(p) for p in kb["dis"]], [tuple(p) for p in kb["ic"]]
+    for uc, kom in ((0, 1), (3, 2)):
+        k_ = (x1 - Oi[uc][0]) / (Oi[kom][0] - Oi[uc][0])
+        Oi[uc] = (x1, Oi[uc][1] + (Oi[kom][1] - Oi[uc][1]) * k_)
+    Pn = lambda j, t: (Od[j][0] + (Oi[j][0] - Od[j][0]) * t / T, Od[j][1] + (Oi[j][1] - Od[j][1]) * t / T)   # noqa: E731
+    for j, q in enumerate(kb["panolar"]):
+        Mo = {"v": [], "f": []}
+        for t0, t1, za, zb in ((-OMEGA_SAC, T + OMEGA_SAC, Hk, Hk + OMEGA_SAC), (-OMEGA_SAC, 0.0, Hk - 3, Hk),
+                               (T, T + OMEGA_SAC, Hk - 3, Hk), (T, T + 3, Hk - 3 - OMEGA_SAC, Hk - 3)):
+            _prizma(Mo, [Pn(j, t0), Pn(j + 1, t0), Pn(j + 1, t1), Pn(j, t1)], za, zb)
+        ek.append({"adim": "omega", "sira": 200 + j, "ad": "Saçak omegası · kubbe", "kod": None, "mat": "frame", "mesh": Mo,
+                   "satir": [["Bu parça", f"kubbede {yan(q)} panonun üstünde; kubbe saçağı buna oturur"],
+                             ["Kesit", f"üst {mm(T / 10)} cm, iki yanda 3 cm kanat, içte 3 cm ayak; sac 1 mm"],
+                             ["Liste", ls("Kubbe saçak omegası")]]})
+    # kubbe tavanı: alttan alçıpan, üstteki panonun alt kenarında (saçak omegasının iç ayağının altı)
+    Ma = {"v": [], "f": []}
+    _prizma(Ma, [tuple(p) for p in kb["ic"]], z_bant - 1.35, z_bant - 0.1)
+    ek.append({"adim": "alcipan", "sira": 300, "ad": "Kubbe tavanı alçıpanı", "kod": None, "mat": "alcipan", "mesh": Ma,
+               "satir": [["Bu parça", "kubbenin içinde, alttan takılır; içeriden bakınca çatı görünmez"],
+                         ["Yer", f"üstteki panonun alt kenarında ({mm(z_bant / 10)} cm); saçak omegasının iç ayağına alttan"],
+                         ["Liste", ls("Kubbe tavanı alçıpanı")]]})
+    return ek, pen_yeri
+
+
+def kubbe(HZ: dict, ifc_yolu: Path, ls, karkasli: bool = False) -> tuple[list[dict], set[str]]:
     """Kubbenin parçaları: duvar, bant ve makas üretim çizimlerinden; pencere ve çatı kart modelinden. Dönen: (ek parçalar, motorun
-    kubbe parçalarından şablonun çizmediği adlar (bilgi))."""
+    kubbe parçalarından şablonun çizmediği adlar (bilgi)).
+
+    `karkasli` (İş Emri `rehber.kubbe: "karkasli_pano"`; BK-89, D-164): duvar parçaları karkaslı pano, aralarında özel açılı köşe
+    direği ve kubbe üstü H, üstte saçak omegası, tavanda alçıpan (`_kubbe_karkasli`); pencere karkasın boşluğunda. Yazılmazsa eski yol."""
     KB = HZ.get("kubbeler") or []
     if not KB:
         return [], set()
@@ -397,31 +574,34 @@ def kubbe(HZ: dict, ifc_yolu: Path, ls) -> tuple[list[dict], set[str]]:
     kb = KB[0]
     FR = {f["cerceve"]: f for f in json.loads(URETIM.read_text(encoding="utf-8"))}
     ek = []
-    H_DUVAR = FR["KUBBE-DUVAR1"]["ozet"]["dis_olcu_mm"][1] / 10
-    # duvarlar: yan 1, ön 2, yan 3 — motorun kubbesindeki pano sırası (yan, ön, yan; `_kubbe_girdisi`)
-    duvar_ad = {0: "KUBBE-DUVAR1", 1: "KUBBE-DUVAR2", 2: "KUBBE-DUVAR3"}
-    for i, q in enumerate(kb["panolar"]):
-        fr = FR[duvar_ad[i]]
-        (ax, ay), (bx, by) = q["dis_kenar"]
-        dx, dy = q["disari"]
-        A, B = (ax - dx * 5, ay - dy * 5), (bx - dx * 5, by - dy * 5)          # duvarın ekseni: dış yüzden 5 cm içeride
-        ek.append({"adim": "kubbe_duvar", "sira": i, "ad": f"Kubbe duvarı · {fr['dosya'].removesuffix('.csv')}", "kod": None, "mat": "steel",
-                   "cubuk": _cerceve_cubuklari(fr, A, B, 0.0, [dx, dy, 0]),
-                   "satir": [["Bu parça", f"{fr['dosya'].removesuffix('.csv')} · {fr['ozet']['dis_olcu_mm'][0]:g} × {fr['ozet']['dis_olcu_mm'][1]:g} mm · "
-                                          f"{fr['ozet']['cubuk']} çubuk"],
-                             ["Profil", "C 80 × 54, 0,8 mm (üretim dosyası)"],
-                             ["Yer", f"kubbenin {'ön' if q['tur'] == 'on' else 'yan'} duvarı ({q['boy']:g} cm pano yerine)"],
-                             ["Kaynak", "orijinal üretim çizimi (FrameBuilder); yerleşim motorun kubbesinden"]]})
-    # üst bant: düz duvarda kubbenin tabanının üstünde (motorun "Kubbe özel pano 100 × 2500 × 500" yeri)
-    fr = FR["KUBBE-DUVAR4"]
-    x0, y0, x1, y1 = kb["taban"]
-    xm = (x0 + x1) / 2
-    z_bant = HZ["bina"]["duvar_h"] - fr["ozet"]["dis_olcu_mm"][1] / 10
-    ek.append({"adim": "kubbe_duvar", "sira": 3, "ad": "Kubbe üst bandı · KUBBE-DUVAR-4", "kod": None, "mat": "steel",
-               "cubuk": _cerceve_cubuklari(fr, (xm, y0), (xm, y1), z_bant, [1, 0, 0]),
-               "satir": [["Bu parça", f"KUBBE-DUVAR-4 · {fr['ozet']['dis_olcu_mm'][0]:g} × {fr['ozet']['dis_olcu_mm'][1]:g} mm"],
-                         ["Yer", "düz duvarda kubbenin üstü; üstü duvar üstü kotunda (yer varsayım)"], ["Liste", ls("Kubbe özel pano")],
-                         ["Kaynak", "orijinal üretim çizimi (FrameBuilder)"]]})
+    if karkasli:
+        ek, PEN_YERI = _kubbe_karkasli(HZ, kb, FR, ls)
+    else:
+        H_DUVAR = FR["KUBBE-DUVAR1"]["ozet"]["dis_olcu_mm"][1] / 10
+        # duvarlar: yan 1, ön 2, yan 3 — motorun kubbesindeki pano sırası (yan, ön, yan; `_kubbe_girdisi`)
+        duvar_ad = {0: "KUBBE-DUVAR1", 1: "KUBBE-DUVAR2", 2: "KUBBE-DUVAR3"}
+        for i, q in enumerate(kb["panolar"]):
+            fr = FR[duvar_ad[i]]
+            (ax, ay), (bx, by) = q["dis_kenar"]
+            dx, dy = q["disari"]
+            A, B = (ax - dx * 5, ay - dy * 5), (bx - dx * 5, by - dy * 5)          # duvarın ekseni: dış yüzden 5 cm içeride
+            ek.append({"adim": "kubbe_duvar", "sira": i, "ad": f"Kubbe duvarı · {fr['dosya'].removesuffix('.csv')}", "kod": None, "mat": "steel",
+                       "cubuk": _cerceve_cubuklari(fr, A, B, 0.0, [dx, dy, 0]),
+                       "satir": [["Bu parça", f"{fr['dosya'].removesuffix('.csv')} · {fr['ozet']['dis_olcu_mm'][0]:g} × {fr['ozet']['dis_olcu_mm'][1]:g} mm · "
+                                              f"{fr['ozet']['cubuk']} çubuk"],
+                                 ["Profil", "C 80 × 54, 0,8 mm (üretim dosyası)"],
+                                 ["Yer", f"kubbenin {'ön' if q['tur'] == 'on' else 'yan'} duvarı ({q['boy']:g} cm pano yerine)"],
+                                 ["Kaynak", "orijinal üretim çizimi (FrameBuilder); yerleşim motorun kubbesinden"]]})
+        # üst bant: düz duvarda kubbenin tabanının üstünde (motorun "Kubbe özel pano 100 × 2500 × 500" yeri)
+        fr = FR["KUBBE-DUVAR4"]
+        x0, y0, x1, y1 = kb["taban"]
+        xm = (x0 + x1) / 2
+        z_bant = HZ["bina"]["duvar_h"] - fr["ozet"]["dis_olcu_mm"][1] / 10
+        ek.append({"adim": "kubbe_duvar", "sira": 3, "ad": "Kubbe üst bandı · KUBBE-DUVAR-4", "kod": None, "mat": "steel",
+                   "cubuk": _cerceve_cubuklari(fr, (xm, y0), (xm, y1), z_bant, [1, 0, 0]),
+                   "satir": [["Bu parça", f"KUBBE-DUVAR-4 · {fr['ozet']['dis_olcu_mm'][0]:g} × {fr['ozet']['dis_olcu_mm'][1]:g} mm"],
+                             ["Yer", "düz duvarda kubbenin üstü; üstü duvar üstü kotunda (yer varsayım)"], ["Liste", ls("Kubbe özel pano")],
+                             ["Kaynak", "orijinal üretim çizimi (FrameBuilder)"]]})
     # makaslar: biri düz duvar boyunca (KMK14), ikisi tepeden ön köşelere (KMK15, KMK16)
     tx, ty = kb["tepe"]
     z_m = kb["sacak_kotu"] - 2.7
@@ -446,12 +626,30 @@ def kubbe(HZ: dict, ifc_yolu: Path, ls) -> tuple[list[dict], set[str]]:
                              ["Yer", "tepeden kubbenin ön köşesine (yer varsayım)"], ["Liste", ls("Kubbe makası")],
                              ["Kaynak", "orijinal üretim çizimi (FrameBuilder)"]]})
     # kart modelinden: pencereler ve kubbenin çatısı (OSB + membran + shingle)
-    OZ = ifc_ozellik(ifc_yolu, r"^(CATI_KUBBE_\d+_\d+|PENCERE_.*)$")
+    OZ = ifc_ozellik(ifc_yolu, r"^(CATI_KUBBE_\d+_\d+|PENCERE_.*" + (r"|KUBBE_\d+_KOSE_DIREGI_\d+" if karkasli else "") + r")$")
     pen = {n for n in OZ if n.startswith("PENCERE_") and _kubbede(ifc_yolu, n, kb)}
-    U = ifc_ucgen(ifc_yolu, pen | {n for n in OZ if n.startswith("CATI_KUBBE")})
+    kd = sorted(n for n in OZ if "_KOSE_DIREGI_" in n)
+    U = ifc_ucgen(ifc_yolu, pen | {n for n in OZ if n.startswith("CATI_KUBBE")} | set(kd))
+    for n in kd:                                                                # özel açılı köşe direği + kapaması: panoların arasında (1, 2) ve düz duvarın ucunda (3, 4)
+        xs, ys = U[n]["v"][0::3], U[n]["v"][1::3]
+        arada = int(n.rsplit("_", 1)[1]) <= len(kb["panolar"]) - 1
+        ek.append({"adim": "kubbe_duvar", "sira": 3, "ad": "Özel açılı köşe direği + kapaması", "kod": None, "mat": "post", "mesh": U[n],
+                   "kubbe_anahtar": f"direk{int(n.rsplit('_', 1)[1])}", "merkez": [round(sum(xs) / len(xs), 2), round(sum(ys) / len(ys), 2)],
+                   "satir": [["Bu parça", ("iki kubbe panosunun arasında" if arada else "açılı pano ile düz duvarın arasında") + "; H gibi kullanılır"],
+                             ["Boy", f"{max(U[n]['v'][2::3]) - min(U[n]['v'][2::3]):g} cm; sahada kesilmez".replace(".", ",")],
+                             ["Liste", ls("Özel açılı köşe direği")], ["Kaynak", "kart modeli (yer motorun kubbesinden)"]]})
     for n in sorted(pen):
-        ek.append({"adim": "kubbe_duvar", "sira": 10, "ad": f"PVC pencere {n.split('_')[1].replace('x', '/')} (kubbe)", "kod": None, "mat": "pvc",
-                   "mesh": U[n], "satir": [["Bu parça", n], ["Kaynak", "kart modeli (yer motorun kubbesinden)"]]})
+        e = {"adim": "kubbe_duvar", "sira": 10, "ad": f"PVC pencere {n.split('_')[1].replace('x', '/')} (kubbe)", "kod": None, "mat": "pvc",
+             "mesh": U[n], "satir": [["Bu parça", n], ["Kaynak", "kart modeli (yer motorun kubbesinden)"]]}
+        if karkasli:                                                            # pencere karkasın boşluğunda: kart modeli eşiği 30 cm çizer, üretim karkası 13 cm
+            zs = U[n]["v"][2::3]
+            cx, cy = sum(U[n]["v"][0::3]) / len(zs), sum(U[n]["v"][1::3]) / len(zs)
+            alt, orta = min(PEN_YERI, key=lambda t: math.hypot(t[1][0] - cx, t[1][1] - cy))
+            dz = alt - min(zs)
+            U[n]["v"] = [round(v + dz, 2) if k % 3 == 2 else v for k, v in enumerate(U[n]["v"])]
+            e.update(kubbe_anahtar="pencere", merkez=orta,
+                     satir=[["Bu parça", f"{n} · alt kenar {alt:g} cm".replace(".", ",")], ["Kaynak", "kart modeli; yükseklik üretim karkasının boşluğundan"]])
+        ek.append(e)
     for n in sorted(x for x in U if x.startswith("CATI_KUBBE")):
         ek.append({"adim": "kaplama", "sira": 400, "ad": "Kubbe çatısı (OSB + membran + shingle)", "kod": None, "mat": "roof", "mesh": U[n],
                    "satir": [["Bu parça", n], ["Liste", f"{ls('Kubbe OSB 11 mm')}; {ls('Kubbe üstü membran')}; {ls('Kubbe antrasit shingle')}"],
