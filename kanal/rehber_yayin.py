@@ -12,6 +12,9 @@ Denetim (biri düşerse yayın yok):
 - dış adresler yalnız nginx'in CSP'sinin izin verdiği üç ad: cdn.jsdelivr.net, fonts.googleapis.com, fonts.gstatic.com;
 - telefon numarasına benzeyen dizge yok (`beyin/numara.py`'nin deseni; gömülü görseller ve ondalık sayılar denetimden önce çıkarılır,
   çünkü base64 ve 0.8791666… ya da 0,8791666… gibi uzun ondalıklar numara sanılır).
+BK-92 (D-169): aynı yoldan Portman'ın WhatsApp kullanma kılavuzu da yayımlanır (`python -m araclar.kilavuz`, main'deki koddan). Kılavuz
+`<meta name="portman-belge" content="whatsapp-kilavuzu">` imini taşır; rehber imleri yerine başlığı "Portman WhatsApp Kılavuzu" ve telefon
+ayarı aranır; dış adres, yer tutucu ve telefon denetimi aynıdır.
 Ayar yok: her yayın Lokman'ın kendi komutudur; bağlantıyı bayiye Lokman panelden yollar.
 
     python kanal/rehber_yayin.py --veri /opt/portman/data --taban https://<alan>/rehber < rehber.html
@@ -42,6 +45,8 @@ IMLER = {
     "three.js 0.160.0": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
 }
 YER_TUTUCU = ("__DATA__", "__SCRIPT__", "__GORSELLER__", "__KAGIT__", "__CHIP__", "__SPEC__", "__NOTE__", "__KISA__", "__PROJE__")
+KILAVUZ_IMI = '<meta name="portman-belge" content="whatsapp-kilavuzu">'
+KILAVUZ_BASLIGI = "<title>Portman WhatsApp Kılavuzu</title>"
 _BASLIK = re.compile(r"<title>([^<]{1,200}) Montaj Rehberi</title>")
 _ADRES = re.compile(r"(?:https?:)?//([A-Za-z0-9.-]+\.[A-Za-z]{2,})(?=[/:?\"'\s)>]|$)")
 _GOMULU = re.compile(r"data:[a-z0-9/+.-]+;base64,[A-Za-z0-9+/=]+", re.I)
@@ -60,12 +65,20 @@ def denetle(veri: bytes) -> tuple[list[str], dict]:
     except UnicodeDecodeError as e:
         return [f"UTF-8 değil ({e.start}. bayt)"], bilgi
     sorun = []
-    m = _BASLIK.search(s)
-    if m:
-        bilgi["baslik"] = f"{m.group(1)} Montaj Rehberi"
+    if KILAVUZ_IMI in s:
+        if KILAVUZ_BASLIGI in s:
+            bilgi["baslik"] = "Portman WhatsApp Kılavuzu"
+        else:
+            sorun.append("başlık \"Portman WhatsApp Kılavuzu\" yok")
+        if IMLER["telefon ayarı"] not in s:
+            sorun.append("kılavuz imi yok: telefon ayarı")
     else:
-        sorun.append("başlık \"… Montaj Rehberi\" yok")
-    sorun += [f"rehber imi yok: {ad}" for ad, im in IMLER.items() if im not in s]
+        m = _BASLIK.search(s)
+        if m:
+            bilgi["baslik"] = f"{m.group(1)} Montaj Rehberi"
+        else:
+            sorun.append("başlık \"… Montaj Rehberi\" yok")
+        sorun += [f"rehber imi yok: {ad}" for ad, im in IMLER.items() if im not in s]
     sorun += [f"doldurulmamış yer tutucu: {y}" for y in YER_TUTUCU if y in s]
     temiz = _GOMULU.sub("", s)
     dis = sorted({h.lower() for h in _ADRES.findall(temiz)} - set(IZINLI))
